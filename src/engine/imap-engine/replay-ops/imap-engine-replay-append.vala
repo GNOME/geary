@@ -49,26 +49,12 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
         // DON'T update remote_count, it is intended to report the remote count at the time the
         // appended messages arrived
     }
-    
-    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
-    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
-    public override async ReplayOperation.Status replay_local_async() throws Error {
-        return ReplayOperation.Status.CONTINUE;
-    }
-    
-    public override async void backout_local_async() throws Error {
-    }
 
-    public override async ReplayOperation.Status replay_remote_async()
-        throws Error {
-        if (this.positions.size > 0)
-            yield do_replay_appended_messages();
-
-        return ReplayOperation.Status.COMPLETED;
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
+        if (this.positions.size > 0) {
+            yield do_replay_appended_messages(remote);
+        }
     }
 
     public override string describe_state() {
@@ -80,7 +66,7 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
     // properly relative to the end of the message list; once this is done, notify user of new
     // messages.  If duplicates, create_email_async() will fall through to an updated merge,
     // which is exactly what we want.
-    private async void do_replay_appended_messages()
+    private async void do_replay_appended_messages(Imap.FolderSession remote)
         throws Error {
         StringBuilder positions_builder = new StringBuilder("( ");
         foreach (Imap.SequenceNumber remote_position in this.positions)
@@ -93,8 +79,6 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
         Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>();
         Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>();
         Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.sparse(this.positions);
-        Imap.FolderSession remote =
-            yield this.owner.claim_remote_session(this.cancellable);
         foreach (Imap.MessageSet msg_set in msg_sets) {
             Gee.List<Geary.Email>? list = yield remote.list_email_async(
                 msg_set, ImapDB.Folder.REQUIRED_FIELDS, this.cancellable

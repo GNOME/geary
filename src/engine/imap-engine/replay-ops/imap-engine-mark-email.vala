@@ -30,10 +30,7 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         if (original_flags != null)
             Collection.map_unset_all_keys<EmailIdentifier, Geary.EmailFlags>(original_flags, ids);
     }
-    
-    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
+
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (to_mark.size == 0)
             return ReplayOperation.Status.COMPLETED;
@@ -57,24 +54,19 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         
         return ReplayOperation.Status.CONTINUE;
     }
-    
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
+
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
         // potentially empty due to writebehind operation
-        if (original_flags.size == 0)
-            return ReplayOperation.Status.COMPLETED;
-
-        Imap.FolderSession remote =
-            yield this.engine.claim_remote_session(cancellable);
-
-        Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
-            ImapDB.EmailIdentifier.to_uids(original_flags.keys));
-        yield remote.mark_email_async(
-            msg_sets, flags_to_add, flags_to_remove, cancellable
-        );
-
-        return ReplayOperation.Status.COMPLETED;
+        if (original_flags.size > 0) {
+            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
+                ImapDB.EmailIdentifier.to_uids(original_flags.keys));
+            yield remote.mark_email_async(
+                msg_sets, flags_to_add, flags_to_remove, cancellable
+            );
+        }
     }
-    
+
     public override async void backout_local_async() throws Error {
         // Restore original flags (if fetched, which may not have occurred if an error happened
         // during transaction)

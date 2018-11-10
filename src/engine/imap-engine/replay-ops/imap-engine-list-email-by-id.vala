@@ -81,31 +81,27 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
             // an initial_id
             finished = (get_unfulfilled_count() == 0 && fulfilled_count >= count);
         } else {
-            // count == int.MAX
-            // This sentinel means "get everything from this point", so this has different meanings
-            // depending on direction
-            if (flags.is_newest_to_oldest()) {
-                // only finished if the folder is entirely normalized
-                Trillian is_fully_expanded = yield is_fully_expanded_async();
-                finished = (is_fully_expanded == Trillian.TRUE);
-            } else {
-                // for oldest-to-newest, finished if no unfulfilled items
-                finished = (get_unfulfilled_count() == 0);
-            }
+            // Here, count == int.MAX, but this sentinel means "get
+            // everything from this point", so this has different
+            // meanings depending on direction. If
+            // flags.is_newest_to_oldest(), only finished if the
+            // folder is entirely normalized, but we don't know here
+            // since we don't have a remote. Else for
+            // oldest-to-newest, finished if no unfulfilled items
+            finished = (
+                !flags.is_newest_to_oldest() && get_unfulfilled_count() == 0
+            );
         }
-        
-        // local-only operations stop here; also, since the local store is normalized from the top
-        // of the vector on down, if enough items came back fulfilled, then done
-        if (finished)
-            return ReplayOperation.Status.COMPLETED;
-        
-        return ReplayOperation.Status.CONTINUE;
+
+        return finished
+            ? ReplayOperation.Status.COMPLETED
+            : ReplayOperation.Status.CONTINUE;
     }
-    
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
+
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
         bool expansion_required = false;
-        Trillian is_fully_expanded = yield is_fully_expanded_async();
-        if (is_fully_expanded == Trillian.FALSE) {
+        if (!(yield is_fully_expanded_async(remote))) {
             if (flags.is_oldest_to_newest()) {
                 if (initial_id != null) {
                     // expand vector if not initial_id not discovered
@@ -130,27 +126,48 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
                 }
             }
         }
-        
+
         // If the vector is too short, expand it now
         if (expansion_required) {
-            Gee.Set<Imap.UID>? uids = yield expand_vector_async(initial_uid, count);
+            Gee.Set<Imap.UID>? uids = yield expand_vector_async(
+                remote, initial_uid, count
+            );
             if (uids != null) {
                 // add required_fields as well as basic required fields for new email
                 add_many_unfulfilled_fields(uids, required_fields);
             }
         }
-        
+
         // Even after expansion it's possible for the local_list_count + unfulfilled to be less
         // than count if the folder has fewer messages or the user is requesting a span near
         // either end of the vector, so don't do that kind of sanity checking here
-        
-        return yield base.replay_remote_async();
+
+        yield base.replay_remote_async(remote);
     }
-    
+
     public override string describe_state() {
         return "%s initial_id=%s count=%u incl=%s newest_to_oldest=%s".printf(base.describe_state(),
             (initial_id != null) ? initial_id.to_string() : "(null)", count,
             flags.is_including_id().to_string(), flags.is_newest_to_oldest().to_string());
     }
-}
 
+    /**
+     * Determines if the owning folder's vector is fully expanded.
+     */
+    private async bool is_fully_expanded_async(Imap.FolderSession remote)
+        throws GLib.Error {
+        int remote_count = remote.folder.properties.email_total;
+
+        // include marked for removed in the count in case this is
+        // being called while a removal is in process, in which case
+        // don't want to expand vector this moment because the vector
+        // is in flux
+        int local_count_with_marked =
+            yield this.owner.local_folder.get_email_count_async(
+                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable
+            );
+
+        return local_count_with_marked >= remote_count;
+    }
+
+}

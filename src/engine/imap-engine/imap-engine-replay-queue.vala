@@ -21,36 +21,32 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         CLOSING,
         CLOSED
     }
-    
+
     private class CloseReplayQueue : ReplayOperation {
+
+        bool local_closed = false;
+        bool remote_closed = false;
+
         public CloseReplayQueue() {
             // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe
             base ("CloseReplayQueue", ReplayOperation.Scope.LOCAL_AND_REMOTE, OnError.IGNORE);
         }
-        
-        public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
-        }
-        
-        public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-        }
-        
-        public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-        }
-        
-        public override async ReplayOperation.Status replay_local_async() throws Error {
+
+        public override async ReplayOperation.Status replay_local_async()
+            throws GLib.Error {
+            this.local_closed = true;
             return Status.CONTINUE;
         }
-        
-        public override async ReplayOperation.Status replay_remote_async() throws Error {
-            return Status.COMPLETED;
+
+        public override async void replay_remote_async(Imap.FolderSession remote)
+            throws GLib.Error {
+            this.remote_closed = true;
         }
-        
-        public override async void backout_local_async() throws Error {
-            // nothing to backout (and should never be called, to boot)
-        }
-        
+
         public override string describe_state() {
-            return "";
+            return "local_closed: %s, remote_closed: %s".printf(
+                this.local_closed.to_string(), this.remote_closed.to_string()
+            );
         }
     }
     
@@ -492,9 +488,13 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 queue_running = false;
             
             // wait until the remote folder is opened (or throws an exception, in which case closed)
+            Imap.FolderSession? remote = null;
             try {
-                if (!is_close_op && folder_opened && state == State.OPEN)
-                    yield owner.claim_remote_session(this.remote_wait_cancellable);
+                if (!is_close_op && folder_opened && state == State.OPEN) {
+                    remote = yield owner.claim_remote_session(
+                        this.remote_wait_cancellable
+                    );
+                }
             } catch (Error remote_err) {
                 debug("Folder %s closed or failed to open, remote replay queue closing: %s",
                       to_string(), remote_err.message);
@@ -511,9 +511,9 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             if (folder_opened || is_close_op) {
                 if (op.remote_retry_count > 0)
                     debug("Retrying op %s on %s", op.to_string(), to_string());
-                
+
                 try {
-                    yield op.replay_remote_async();
+                    yield op.replay_remote_async(remote);
                 } catch (Error replay_err) {
                     debug("Replay remote error for %s on %s: %s (%s)", op.to_string(), to_string(),
                         replay_err.message, op.on_remote_error.to_string());

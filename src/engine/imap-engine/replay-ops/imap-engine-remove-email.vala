@@ -53,20 +53,17 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
             ids.add_all(removed_ids);
     }
 
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (removed_ids.size == 0)
-            return ReplayOperation.Status.COMPLETED;
-
-        // Remove from server. Note that this causes the receive replay queue to kick into
-        // action, removing the e-mail but *NOT* firing a signal; the "remove marker" indicates
-        // that the signal has already been fired.
-        Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
-            ImapDB.EmailIdentifier.to_uids(removed_ids));
-        Imap.FolderSession remote =
-            yield this.engine.claim_remote_session(cancellable);
-        yield remote.remove_email_async(msg_sets, cancellable);
-
-        return ReplayOperation.Status.COMPLETED;
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
+        if (removed_ids.size > 0) {
+            // Remove from server. Note that this causes the receive
+            // replay queue to kick into action, removing the e-mail
+            // but *NOT* firing a signal; the "remove marker"
+            // indicates that the signal has already been fired.
+            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
+                ImapDB.EmailIdentifier.to_uids(removed_ids));
+            yield remote.remove_email_async(msg_sets, cancellable);
+        }
     }
 
     public override async void backout_local_async() throws Error {
