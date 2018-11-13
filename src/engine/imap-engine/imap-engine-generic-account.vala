@@ -365,6 +365,17 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         account.close();
 
+        Imap.FolderSession? folder_session = null;
+        if (folder_err == null) {
+            try {
+                folder_session = yield new Imap.FolderSession(
+                    this.information.id, client, folder, cancellable
+                );
+            } catch (Error err) {
+                folder_err = err;
+            }
+        }
+
         if (folder_err != null) {
             try {
                 yield this.session_pool.release_session_async(client);
@@ -375,9 +386,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             throw folder_err;
         }
 
-        return yield new Imap.FolderSession(
-            this.information.id, client, folder, cancellable
-        );
+        return folder_session;
     }
 
     /**
