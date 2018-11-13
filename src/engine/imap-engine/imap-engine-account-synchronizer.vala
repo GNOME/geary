@@ -94,7 +94,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
  */
 private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
 
-
     internal RefreshFolderSync(GenericAccount account,
                                MinimalFolder folder) {
         base(account, folder);
@@ -103,10 +102,16 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
     public override async void execute(GLib.Cancellable cancellable)
         throws GLib.Error {
         bool was_opened = false;
+        MinimalFolder minimal = (MinimalFolder) this.folder;
         try {
-            yield this.folder.open_async(Folder.OpenFlags.NONE, cancellable);
+            // Open the folder on no delay since there's no point just
+            // waiting around for it. Then claim a remote session so
+            // we know that a remote connection has been made and the
+            // folder has had a chance to normalise itself.
+            yield minimal.open_async(Folder.OpenFlags.NO_DELAY, cancellable);
+            yield minimal.claim_remote_session(cancellable);
             was_opened = true;
-            debug("Synchronising %s", this.folder.to_string());
+            debug("Synchronising %s", minimal.to_string());
             yield sync_folder(cancellable);
         } catch (GLib.IOError.CANCELLED err) {
             // All good
@@ -116,7 +121,7 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
             // away. Either way don't bother reporting it.
             debug(
                 "Folder failed to open %s: %s",
-                this.folder.to_string(),
+                minimal.to_string(),
                 err.message
             );
         } catch (GLib.Error err) {
@@ -135,7 +140,7 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
                 // don't pass in the Cancellable; really need this
                 // to complete in all cases
                 if (yield this.folder.close_async(null)) {
-                    // If the folder was actually closing, wait
+                    // The folder was actually closing, so wait
                     // for it here to completely close so that its
                     // session has a chance to exit IMAP Selected
                     // state when released, allowing the next sync
@@ -245,7 +250,11 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
                 next_epoch = prefetch_max_epoch;
             }
 
-            debug("Synchronising %s to: %s", this.account.to_string(), next_epoch.to_string());
+            debug(
+                "Synchronising %s to: %s",
+                folder.to_string(),
+                next_epoch.to_string()
+            );
 
             if (local_count < this.folder.properties.email_total &&
                 next_epoch.compare(prefetch_max_epoch) >= 0) {
