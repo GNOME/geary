@@ -368,6 +368,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         } catch (Error err) {
             debug("[%s] Error adding new session to the pool: %s",
                   this.id, err.message);
+            this.close_pool.begin();
         }
     }
 
