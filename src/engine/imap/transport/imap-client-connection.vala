@@ -8,12 +8,6 @@
 
 public class Geary.Imap.ClientConnection : BaseObject {
 
-    /** Default clear-text IMAP network port */
-    public const uint16 IMAP_PORT = 143;
-
-    /** Default transport-layer-encrypted IMAP network port */
-    public const uint16 IMAP_TLS_PORT = 993;
-
     /**
      * Default socket timeout duration.
      *

@@ -33,6 +33,30 @@ public enum Geary.Protocol {
 
 }
 
+namespace Geary.Smtp {
+
+    /** Default clear-text SMTP network port */
+    public const uint16 SMTP_PORT = 25;
+
+    /** Default clear-text SMTP submission network port */
+    public const uint16 SUBMISSION_PORT = 587;
+
+    /** Default transport-layer-encrypted SMTP submission network port */
+    public const uint16 SUBMISSION_TLS_PORT = 465;
+
+}
+
+
+namespace Geary.Imap {
+
+    /** Default clear-text IMAP network port */
+    public const uint16 IMAP_PORT = 143;
+
+    /** Default transport-layer-encrypted IMAP network port */
+    public const uint16 IMAP_TLS_PORT = 993;
+
+}
+
 
 /** The method used to negotiate a TLS session, if any. */
 public enum Geary.TlsNegotiationMethod {

@@ -11,6 +11,8 @@ errordomain CommandException {
     STATE
 }
 
+const int IMAP_TIMEOUT_SEC = 60 * 15;
+
 class ImapConsole : Gtk.Window {
     private const int KEEPALIVE_SEC = 60 * 10;
 
@@ -310,9 +312,9 @@ class ImapConsole : Gtk.Window {
         cx = new Geary.Imap.ClientConnection(
             new Geary.Endpoint(
                 args[0],
-                Geary.Imap.ClientConnection.IMAP_TLS_PORT,
+                Geary.Imap.IMAP_TLS_PORT,
                 method,
-                Geary.Imap.ClientConnection.DEFAULT_TIMEOUT_SEC
+                IMAP_TIMEOUT_SEC
             )
         );
 

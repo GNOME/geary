@@ -99,6 +99,8 @@ const OptionEntry[] options = {
     { null }
 };
 
+const int SMTP_TIMEOUT_SEC = 30;
+
 bool verify_required(string? arg, string name) {
     if (!Geary.String.is_empty(arg))
         return true;
@@ -139,17 +141,18 @@ int main(string[] args) {
     if (arg_gmail) {
         endpoint = new Geary.Endpoint(
             "smtp.gmail.com",
-            Geary.Smtp.ClientConnection.SUBMISSION_PORT,
+            Geary.Smtp.SUBMISSION_PORT,
             Geary.TlsNegotiationMethod.START_TLS,
-            Geary.Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC
+            SMTP_TIMEOUT_SEC
         );
     } else {
         Geary.TlsNegotiationMethod method = Geary.TlsNegotiationMethod.TRANSPORT;
         if (arg_no_tls) {
             method = Geary.TlsNegotiationMethod.START_TLS;
         }
-        endpoint = new Geary.Endpoint(arg_hostname, (uint16) arg_port, method,
-            Geary.Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
+        endpoint = new Geary.Endpoint(
+            arg_hostname, (uint16) arg_port, method, SMTP_TIMEOUT_SEC
+        );
     }
 
     stdout.printf("Enabling debug: %s\n", arg_debug.to_string());

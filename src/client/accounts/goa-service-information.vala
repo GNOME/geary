@@ -31,8 +31,8 @@ public class GoaServiceInformation : Geary.ServiceInformation {
 
                 if (this.port == 0) {
                     this.port = this.use_ssl
-                        ? Geary.Imap.ClientConnection.IMAP_TLS_PORT
-                        : Geary.Imap.ClientConnection.IMAP_PORT;
+                        ? Geary.Imap.IMAP_TLS_PORT
+                        : Geary.Imap.IMAP_PORT;
                 }
 
                 this.credentials = new Geary.Credentials(
@@ -50,11 +50,11 @@ public class GoaServiceInformation : Geary.ServiceInformation {
 
                 if (this.port == 0) {
                     if (this.use_ssl) {
-                        this.port = Geary.Smtp.ClientConnection.SUBMISSION_TLS_PORT;
+                        this.port = Geary.Smtp.SUBMISSION_TLS_PORT;
                     } else if (this.smtp_noauth) {
-                        this.port = Geary.Smtp.ClientConnection.SMTP_PORT;
+                        this.port = Geary.Smtp.SMTP_PORT;
                     } else {
-                        this.port = Geary.Smtp.ClientConnection.SUBMISSION_PORT;
+                        this.port = Geary.Smtp.SUBMISSION_PORT;
                     }
                 }
 

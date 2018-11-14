@@ -305,22 +305,22 @@ private class Accounts.ServiceHostRow :
         Geary.TlsNegotiationMethod security = this.service.transport_security;
         switch (this.service.protocol) {
         case Geary.Protocol.IMAP:
-            if (!(port == Geary.Imap.ClientConnection.IMAP_PORT &&
+            if (!(port == Geary.Imap.IMAP_PORT &&
                   (security == Geary.TlsNegotiationMethod.NONE ||
                    security == Geary.TlsNegotiationMethod.START_TLS)) &&
-                !(port == Geary.Imap.ClientConnection.IMAP_TLS_PORT &&
+                !(port == Geary.Imap.IMAP_TLS_PORT &&
                   security == Geary.TlsNegotiationMethod.TRANSPORT)) {
                 custom_port = true;
             }
             break;
         case Geary.Protocol.SMTP:
-            if (!(port == Geary.Smtp.ClientConnection.SMTP_PORT &&
+            if (!(port == Geary.Smtp.SMTP_PORT &&
                   (security == Geary.TlsNegotiationMethod.NONE ||
                    security == Geary.TlsNegotiationMethod.START_TLS)) &&
-                !(port == Geary.Smtp.ClientConnection.SUBMISSION_PORT &&
+                !(port == Geary.Smtp.SUBMISSION_PORT &&
                   (security == Geary.TlsNegotiationMethod.NONE ||
                    security == Geary.TlsNegotiationMethod.START_TLS)) &&
-                !(port == Geary.Smtp.ClientConnection.SUBMISSION_TLS_PORT &&
+                !(port == Geary.Smtp.SUBMISSION_TLS_PORT &&
                   security == Geary.TlsNegotiationMethod.TRANSPORT)) {
                 custom_port = true;
             }
