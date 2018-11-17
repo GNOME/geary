@@ -303,7 +303,28 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
     }
 
     public override void activated(EditorListPane pane) {
-        pane.show_existing_account(this.account);
+        Manager manager = pane.accounts;
+        if (manager.is_goa_account(this.account) &&
+            manager.get_status(this.account) != Manager.Status.ENABLED) {
+            // GOA account but it's disabled, so just take people
+            // directly to the GOA panel
+            manager.show_goa_account.begin(
+                account, null,
+                (obj, res) => {
+                    try {
+                        manager.show_goa_account.end(res);
+                    } catch (GLib.Error err) {
+                        // XXX display an error to the user
+                        debug(
+                            "Failed to show GOA account \"%s\": %s",
+                            account.id,
+                            err.message
+                        );
+                    }
+                });
+        } else {
+            pane.show_existing_account(this.account);
+        }
     }
 
     public void update_nickname() {
