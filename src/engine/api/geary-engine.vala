@@ -229,12 +229,13 @@ public class Geary.Engine : BaseObject {
      * Determines if an account's IMAP service can be connected to.
      */
     public async void validate_imap(AccountInformation account,
+                                    ServiceInformation service,
                                     GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_opened();
 
-        if (account.imap.port == 0) {
-            account.imap.port = account.imap.use_ssl
+        if (service.port == 0) {
+            service.port = service.use_ssl
                 ? Imap.IMAP_TLS_PORT
                 : Imap.IMAP_PORT;
         }
@@ -247,7 +248,7 @@ public class Geary.Engine : BaseObject {
         // validate IMAP, which requires logging in and establishing
         // an AUTHORIZED cx state
         Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(
-            account.imap.endpoint
+            service.endpoint
         );
 
         // XXX initiate_session_async doesn't seem to actually throw
@@ -261,7 +262,7 @@ public class Geary.Engine : BaseObject {
         try {
             yield imap_session.connect_async(cancellable);
             yield imap_session.initiate_session_async(
-                account.imap.credentials, cancellable
+                service.credentials, cancellable
             );
         } catch (GLib.Error err) {
             login_err = err;
@@ -290,17 +291,18 @@ public class Geary.Engine : BaseObject {
      * Determines if an account's SMTP service can be connected to.
      */
     public async void validate_smtp(AccountInformation account,
+                                    ServiceInformation service,
                                     GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_opened();
 
-        if (account.smtp.port == 0) {
-            if (account.smtp.use_ssl) {
-                account.smtp.port = Smtp.SUBMISSION_TLS_PORT;
-            } else if (account.smtp.smtp_noauth) {
-                account.smtp.port = Smtp.SMTP_PORT;
+        if (service.port == 0) {
+            if (service.use_ssl) {
+                service.port = Smtp.SUBMISSION_TLS_PORT;
+            } else if (service.smtp_noauth) {
+                service.port = Smtp.SMTP_PORT;
             } else {
-                account.smtp.port = Smtp.SUBMISSION_PORT;
+                service.port = Smtp.SUBMISSION_PORT;
             }
         }
 
@@ -310,7 +312,7 @@ public class Geary.Engine : BaseObject {
         );
 
         Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(
-            account.smtp.endpoint
+            service.endpoint
         );
 
         GLib.Error? login_err = null;

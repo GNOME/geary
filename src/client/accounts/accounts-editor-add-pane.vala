@@ -184,7 +184,9 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             bool smtp_valid = false;
 
             try {
-                yield this.engine.validate_imap(account, cancellable);
+                yield this.engine.validate_imap(
+                    account, account.imap, cancellable
+                );
                 imap_valid = true;
             } catch (Geary.ImapError.UNAUTHENTICATED err) {
                 debug("Error authenticating IMAP service: %s", err.message);
@@ -202,7 +204,9 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             if (imap_valid) {
                 debug("Validating SMTP...");
                 try {
-                    yield this.engine.validate_smtp(account, cancellable);
+                    yield this.engine.validate_smtp(
+                        account, account.smtp, cancellable
+                    );
                     smtp_valid = true;
                 } catch (Geary.SmtpError.AUTHENTICATION_FAILED err) {
                     debug("Error authenticating SMTP service: %s", err.message);
@@ -225,7 +229,9 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             is_valid = imap_valid && smtp_valid;
         } else {
             try {
-                yield this.engine.validate_imap(account, cancellable);
+                yield this.engine.validate_imap(
+                    account, account.imap, cancellable
+                );
                 is_valid = true;
             } catch (Geary.ImapError.UNAUTHENTICATED err) {
                 debug("Error authenticating provider: %s", err.message);
