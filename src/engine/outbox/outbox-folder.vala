@@ -9,7 +9,7 @@
 /**
  * Local folder for storing outgoing mail.
  */
-private class Geary.SmtpOutboxFolder :
+private class Geary.Outbox.Folder :
     Geary.AbstractLocalFolder,
     Geary.FolderSupport.Create,
     Geary.FolderSupport.Mark,
@@ -22,7 +22,7 @@ private class Geary.SmtpOutboxFolder :
         public int64 ordering;
         public bool sent;
         public Memory.Buffer? message;
-        public SmtpOutboxEmailIdentifier outbox_id;
+        public EmailIdentifier outbox_id;
 
         public OutboxRow(int64 id, int position, int64 ordering, bool sent, Memory.Buffer? message) {
             assert(position >= 1);
@@ -33,16 +33,18 @@ private class Geary.SmtpOutboxFolder :
             this.sent = sent;
             this.message = message;
 
-            outbox_id = new SmtpOutboxEmailIdentifier(id, ordering);
+            outbox_id = new EmailIdentifier(id, ordering);
         }
     }
 
 
     public override Account account { get { return this._account; } }
 
-    public override FolderProperties properties { get { return _properties; } }
+    public override Geary.FolderProperties properties {
+        get { return _properties; }
+    }
 
-    private SmtpOutboxFolderRoot _path = new SmtpOutboxFolderRoot();
+    private FolderRoot _path = new FolderRoot();
     public override FolderPath path {
         get {
             return _path;
@@ -58,13 +60,13 @@ private class Geary.SmtpOutboxFolder :
     private weak Account _account;
     private weak ImapDB.Account local;
     private Db.Database? db = null;
-    private SmtpOutboxFolderProperties _properties = new SmtpOutboxFolderProperties(0, 0);
+    private FolderProperties _properties = new FolderProperties(0, 0);
     private int64 next_ordering = 0;
 
 
     // Requires the Database from the get-go because it runs a background task that access it
     // whether open or not
-    public SmtpOutboxFolder(Account account, ImapDB.Account local) {
+    public Folder(Account account, ImapDB.Account local) {
         this._account = account;
         this.local = local;
     }
@@ -88,11 +90,11 @@ private class Geary.SmtpOutboxFolder :
         return closed;
     }
 
-    public virtual async EmailIdentifier?
+    public virtual async Geary.EmailIdentifier?
         create_email_async(RFC822.Message rfc822,
-                           EmailFlags? flags,
-                           DateTime? date_received,
-                           EmailIdentifier? id = null,
+                           Geary.EmailFlags? flags,
+                           GLib.DateTime? date_received,
+                           Geary.EmailIdentifier? id = null,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_open();
@@ -120,7 +122,7 @@ private class Geary.SmtpOutboxFolder :
         // update properties
         _properties.set_total(yield get_email_count_async(cancellable));
 
-        Gee.List<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
+        Gee.List<EmailIdentifier> list = new Gee.ArrayList<EmailIdentifier>();
         list.add(row.outbox_id);
 
         notify_email_appended(list);
@@ -131,17 +133,17 @@ private class Geary.SmtpOutboxFolder :
     }
 
     public virtual async void
-        mark_email_async(Gee.Collection<EmailIdentifier> to_mark,
-                                 EmailFlags? flags_to_add,
-                                 EmailFlags? flags_to_remove,
-                                 GLib.Cancellable? cancellable = null)
+        mark_email_async(Gee.Collection<Geary.EmailIdentifier> to_mark,
+                         EmailFlags? flags_to_add,
+                         EmailFlags? flags_to_remove,
+                         GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_open();
-        Gee.Map<EmailIdentifier,EmailFlags> changed =
-            new Gee.HashMap<EmailIdentifier,EmailFlags>();
+        Gee.Map<Geary.EmailIdentifier,EmailFlags> changed =
+            new Gee.HashMap<Geary.EmailIdentifier,EmailFlags>();
 
-        foreach (EmailIdentifier id in to_mark) {
-            SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+        foreach (Geary.EmailIdentifier id in to_mark) {
+            EmailIdentifier? outbox_id = id as EmailIdentifier;
             if (outbox_id != null) {
                 yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
                         do_mark_email_as_sent(cx, outbox_id, cancellable);
@@ -167,7 +169,7 @@ private class Geary.SmtpOutboxFolder :
             foreach (Geary.EmailIdentifier id in email_ids) {
                 // ignore anything not belonging to the outbox, but also don't report it as removed
                 // either
-                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+                EmailIdentifier? outbox_id = id as EmailIdentifier;
                 if (outbox_id == null)
                     continue;
 
@@ -193,12 +195,16 @@ private class Geary.SmtpOutboxFolder :
         }
     }
 
-    public override async Gee.List<Geary.Email>? list_email_by_id_async(
-        Geary.EmailIdentifier? _initial_id, int count, Geary.Email.Field required_fields,
-        Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
+    public override async Gee.List<Email>?
+        list_email_by_id_async(Geary.EmailIdentifier? _initial_id,
+                               int count,
+                               Geary.Email.Field required_fields,
+                               Geary.Folder.ListFlags flags,
+                               GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open();
 
-        SmtpOutboxEmailIdentifier? initial_id = _initial_id as SmtpOutboxEmailIdentifier;
+        EmailIdentifier? initial_id = _initial_id as EmailIdentifier;
         if (_initial_id != null && initial_id == null) {
             throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not for Outbox",
                 initial_id.to_string());
@@ -276,15 +282,18 @@ private class Geary.SmtpOutboxFolder :
         return list;
     }
 
-    public override async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
-        Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields,
-        Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
+    public override async Gee.List<Geary.Email>?
+        list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
+                                      Geary.Email.Field required_fields,
+                                      Geary.Folder.ListFlags flags,
+                                      GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open();
 
         Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             foreach (Geary.EmailIdentifier id in ids) {
-                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+                EmailIdentifier? outbox_id = id as EmailIdentifier;
                 if (outbox_id == null)
                     throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
 
@@ -303,7 +312,8 @@ private class Geary.SmtpOutboxFolder :
 
     public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>?
         list_local_email_fields_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        Cancellable? cancellable = null) throws Error {
+                                      GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open();
 
         Gee.Map<Geary.EmailIdentifier, Geary.Email.Field> map = new Gee.HashMap<
@@ -312,7 +322,7 @@ private class Geary.SmtpOutboxFolder :
             Db.Statement stmt = cx.prepare(
                 "SELECT id FROM SmtpOutboxTable WHERE ordering=?");
             foreach (Geary.EmailIdentifier id in ids) {
-                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+                EmailIdentifier? outbox_id = id as EmailIdentifier;
                 if (outbox_id == null)
                     throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
 
@@ -331,12 +341,15 @@ private class Geary.SmtpOutboxFolder :
         return (map.size > 0) ? map : null;
     }
 
-    public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
-        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
-        Cancellable? cancellable = null) throws Error {
+    public override async Email
+        fetch_email_async(Geary.EmailIdentifier id,
+                          Geary.Email.Field required_fields,
+                          Geary.Folder.ListFlags flags,
+                          GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open();
 
-        SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+        EmailIdentifier? outbox_id = id as EmailIdentifier;
         if (outbox_id == null)
             throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
 
@@ -354,14 +367,14 @@ private class Geary.SmtpOutboxFolder :
     }
 
     internal async void
-        add_to_containing_folders_async(Gee.Collection<EmailIdentifier> ids,
-                                        Gee.MultiMap<EmailIdentifier,FolderPath> map,
+        add_to_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
+                                        Gee.MultiMap<Geary.EmailIdentifier,FolderPath> map,
                                         GLib.Cancellable? cancellable)
         throws GLib.Error {
         check_open();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
             foreach (Geary.EmailIdentifier id in ids) {
-                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+                EmailIdentifier? outbox_id = id as EmailIdentifier;
                 if (outbox_id == null)
                     continue;
 
@@ -387,8 +400,11 @@ private class Geary.SmtpOutboxFolder :
             RFC822.Message message = new RFC822.Message.from_buffer(row.message);
             email = message.get_email(row.outbox_id);
 
-            // TODO: Determine message's total size (header + body) to store in Properties.
-            email.set_email_properties(new SmtpOutboxEmailProperties(new DateTime.now_local(), -1));
+            // TODO: Determine message's total size (header + body) to
+            // store in Properties.
+            email.set_email_properties(
+                new EmailProperties(new DateTime.now_local(), -1)
+            );
             Geary.EmailFlags flags = new Geary.EmailFlags();
             if (row.sent)
                 flags.add(Geary.EmailFlags.OUTBOX_SENT);
@@ -476,7 +492,7 @@ private class Geary.SmtpOutboxFolder :
     }
 
     private void do_mark_email_as_sent(Db.Connection cx,
-                                       SmtpOutboxEmailIdentifier id,
+                                       EmailIdentifier id,
                                        Cancellable? cancellable)
         throws Error {
         Db.Statement stmt = cx.prepare("UPDATE SmtpOutboxTable SET sent = 1 WHERE ordering = ?");
@@ -485,7 +501,7 @@ private class Geary.SmtpOutboxFolder :
         stmt.exec(cancellable);
     }
 
-    private bool do_remove_email(Db.Connection cx, SmtpOutboxEmailIdentifier id, Cancellable? cancellable)
+    private bool do_remove_email(Db.Connection cx, EmailIdentifier id, Cancellable? cancellable)
         throws Error {
         Db.Statement stmt = cx.prepare("DELETE FROM SmtpOutboxTable WHERE ordering=?");
         stmt.bind_int64(0, id.ordering);

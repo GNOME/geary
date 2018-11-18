@@ -74,7 +74,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.imap.login_failed.connect(on_pool_login_failed);
 
         this.smtp = new Smtp.ClientService(
-            config, config.smtp, new SmtpOutboxFolder(this, this.local)
+            config, config.smtp, new Outbox.Folder(this, this.local)
         );
         this.smtp.email_sent.connect(on_email_sent);
         this.smtp.report_problem.connect(notify_report_problem);
@@ -138,9 +138,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         // Create/load local folders
 
-        local_only.set(
-            new SmtpOutboxFolderRoot(), this.smtp.outbox
-        );
+        local_only.set(new Outbox.FolderRoot(), this.smtp.outbox);
 
         this.search_folder = new_search_folder();
         local_only.set(new ImapDB.SearchFolderRoot(), this.search_folder);
