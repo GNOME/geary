@@ -34,16 +34,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public override ClientService outgoing { get { return this.smtp; } }
 
     /** Service for incoming IMAP connections. */
-    public ClientService imap  { get; private set; }
+    public Imap.ClientService imap  { get; private set; }
 
     /** Service for outgoing SMTP connections. */
     public ClientService smtp { get; private set; }
 
     /** Local database for the account. */
     public ImapDB.Account local { get; private set; }
-
-    /** This account's IMAP session pool. */
-    public Imap.ClientSessionManager session_pool { get; private set; }
 
     private bool open = false;
     private Cancellable? open_cancellable = null;
@@ -70,16 +67,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                           Geary.AccountInformation information,
                           ImapDB.Account local) {
         base(name, information);
-
-        this.session_pool = new Imap.ClientSessionManager(
-            this.information.id,
-            null, //this.information.imap.endpoint,
-            this.information.imap.credentials
-        );
-        this.session_pool.min_pool_size = IMAP_MIN_POOL_SIZE;
-        this.session_pool.ready.connect(on_pool_session_ready);
-        this.session_pool.connection_failed.connect(on_pool_connection_failed);
-        this.session_pool.login_failed.connect(on_pool_login_failed);
+        this.imap = new Imap.ClientService(information, information.imap);
+        this.imap.min_pool_size = IMAP_MIN_POOL_SIZE;
+        this.imap.ready.connect(on_pool_session_ready);
+        this.imap.connection_failed.connect(on_pool_connection_failed);
+        this.imap.login_failed.connect(on_pool_login_failed);
 
         this.local = local;
         this.local.contacts_loaded.connect(() => { contacts_loaded(); });
@@ -121,18 +113,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // Reset this so we start trying to authenticate again
         this.authentication_failures = 0;
 
-        // To prevent spurious connection failures, we make sure we
-        // have the IMAP password before attempting a connection.
-        if (yield this.information.load_imap_credentials(cancellable)) {
-            this.session_pool.credentials_updated(
-                this.information.imap.credentials
-            );
-        }
-
-        // This will cause the session manager to open at least one
-        // connection if we are online
-        yield this.session_pool.open_async(cancellable);
-
         this.processor = new AccountProcessor(this.to_string());
         this.processor.operation_error.connect(on_operation_error);
 
@@ -166,6 +146,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.queue_operation(
             new LoadFolders(this, this.local, get_supported_special_folders())
         );
+
+        // To prevent spurious connection failures, we make sure we
+        // have passwords before attempting a connection.
+        yield this.information.load_imap_credentials(cancellable);
+        yield this.imap.start(cancellable);
     }
 
     public override async void close_async(Cancellable? cancellable = null) throws Error {
@@ -174,7 +159,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         // Block obtaining and reusing IMAP server connections
         this.remote_ready_lock.reset();
-        this.session_pool.discard_returned_sessions = true;
+        this.imap.discard_returned_sessions = true;
 
         // Halt internal tasks early so they stop using local and
         // remote connections.
@@ -202,14 +187,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             yield folder.wait_for_close_async();
         }
 
-        // Close remote infrastructure
+        // Close IMAP service manager
 
         try {
-            yield this.session_pool.close_async(cancellable);
+            yield this.imap.stop();
         } catch (Error err) {
-            debug("%s: Error closing IMAP session pool: %s",
-                  to_string(),
-                  this.session_pool.to_string()
+            debug(
+                "%s: Error stopping IMAP service: %s", to_string(), err.message
             );
         }
         this.remote_ready_lock = null;
@@ -295,7 +279,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         debug("%s: Acquiring account session", this.to_string());
         yield this.remote_ready_lock.wait_async(cancellable);
         Imap.ClientSession client =
-            yield this.session_pool.claim_authorized_session_async(cancellable);
+            yield this.imap.claim_authorized_session_async(cancellable);
         return new Imap.AccountSession(this.information.id, client);
     }
 
@@ -306,11 +290,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         debug("%s: Releasing account session", this.to_string());
         Imap.ClientSession? old_session = session.close();
         if (old_session != null) {
-            this.session_pool.release_session_async.begin(
+            this.imap.release_session_async.begin(
                 old_session,
                 (obj, res) => {
                     try {
-                        this.session_pool.release_session_async.end(res);
+                        this.imap.release_session_async.end(res);
                     } catch (Error err) {
                         debug("%s: Error releasing account session: %s",
                               to_string(),
@@ -344,7 +328,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // single session from the pool, not two.
 
         Imap.ClientSession? client =
-            yield this.session_pool.claim_authorized_session_async(cancellable);
+            yield this.imap.claim_authorized_session_async(cancellable);
         Imap.AccountSession account = new Imap.AccountSession(
             this.information.id, client
         );
@@ -372,7 +356,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         if (folder_err != null) {
             try {
-                yield this.session_pool.release_session_async(client);
+                yield this.imap.release_session_async(client);
             } catch (Error release_err) {
                 debug("Error releasing folder session: %s", release_err.message);
             }
@@ -391,7 +375,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Imap.ClientSession? old_session = session.close();
         if (old_session != null) {
             try {
-                yield this.session_pool.release_session_async(old_session);
+                yield this.imap.release_session_async(old_session);
             } catch (Error err) {
                 debug("%s: Error releasing %s session: %s",
                       to_string(),
@@ -969,6 +953,26 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             throw new EngineError.OPEN_REQUIRED("Account %s not opened", to_string());
     }
 
+    private async void restart_incoming_service() {
+        if (this.incoming.is_running) {
+            try {
+                yield this.incoming.stop(this.open_cancellable);
+            } catch (GLib.Error err) {
+                debug("%s: Failed to stop incoming mail service: %s",
+                      to_string(), err.message
+                );
+            }
+        }
+        try {
+            yield this.incoming.start(this.open_cancellable);
+        } catch (GLib.Error err) {
+            debug("%s: Failed to start incoming mail service: %s",
+                  to_string(), err.message
+            );
+        }
+
+    }
+
     private void on_operation_error(AccountOperation op, Error error) {
         if (error is ImapError) {
             notify_service_problem(
@@ -1046,9 +1050,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                         try {
                             if (this.information.prompt_imap_credentials.end(ret)) {
                                 // Have a new password, so try that
-                                this.session_pool.credentials_updated(
-                                    this.information.imap.credentials
-                                );
+                                this.restart_incoming_service.begin();
                             } else {
                                 // User cancelled, so indicate a login problem
                                 notify_imap_problem(ProblemType.LOGIN_FAILED, null);
