@@ -171,13 +171,10 @@ public class Geary.AccountInformation : BaseObject {
 
 
     /**
-     * Indicates the supplied {@link Endpoint} has reported TLS certificate warnings during
-     * connection.
+     * Emitted when a service has reported TLS certificate warnings.
      *
-     * Since this {@link Endpoint} persists for the lifetime of the {@link AccountInformation},
-     * marking it as trusted once will survive the application session.  It is up to the caller to
-     * pin the certificate appropriately if the user does not want to receive these warnings in
-     * the future.
+     * It is up to the caller to pin the certificate appropriately if
+     * the user does not want to receive these warnings in the future.
      */
     public signal void untrusted_host(ServiceInformation service,
                                       TlsNegotiationMethod method,
@@ -222,10 +219,6 @@ public class Geary.AccountInformation : BaseObject {
         );
         copy_from(from);
         this.is_copy = true;
-    }
-
-    ~AccountInformation() {
-        disconnect_service_endpoints();
     }
 
 
@@ -561,39 +554,6 @@ public class Geary.AccountInformation : BaseObject {
         );
     }
 
-    internal void connect_imap_service(Endpoint service) {
-        if (this.imap.endpoint == null) {
-            this.imap.endpoint = service;
-            this.imap.endpoint.untrusted_host.connect(
-                on_imap_untrusted_host
-            );
-        }
-    }
-
-    internal void connect_smtp_service(Endpoint service) {
-        if (this.smtp.endpoint == null) {
-            this.smtp.endpoint = service;
-            this.smtp.endpoint.untrusted_host.connect(
-                on_smtp_untrusted_host
-            );
-        }
-    }
-
-    internal void disconnect_service_endpoints() {
-        if (this.imap.endpoint != null) {
-            this.imap.endpoint.untrusted_host.disconnect(
-                on_imap_untrusted_host
-            );
-            this.imap.endpoint = null;
-        }
-        if (this.smtp.endpoint != null) {
-            this.smtp.endpoint.untrusted_host.disconnect(
-                on_smtp_untrusted_host
-            );
-            this.smtp.endpoint = null;
-        }
-    }
-
     public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
         if (parts == null || parts.size == 0)
             return null;
@@ -602,16 +562,6 @@ public class Geary.AccountInformation : BaseObject {
         for (int i = 1; i < parts.size; i++)
             path = path.get_child(parts.get(i));
         return path;
-    }
-
-    private void on_imap_untrusted_host(TlsNegotiationMethod method,
-                                        GLib.TlsConnection cx) {
-        untrusted_host(this.imap, method, cx);
-    }
-
-    private void on_smtp_untrusted_host(TlsNegotiationMethod method,
-                                        GLib.TlsConnection cx) {
-        untrusted_host(this.smtp, method, cx);
     }
 
 }

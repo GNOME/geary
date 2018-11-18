@@ -44,9 +44,8 @@ public class MainWindowInfoBar : Gtk.InfoBar {
 
         if (report is Geary.ServiceProblemReport) {
             Geary.ServiceProblemReport service_report = (Geary.ServiceProblemReport) report;
-            Geary.Endpoint endpoint = service_report.service.endpoint;
             string account = service_report.account.display_name;
-            string server = endpoint.remote_address.hostname;
+            string server = service_report.service.host;
 
             if (report.problem_type == Geary.ProblemType.CONNECTION_ERROR &&
                 service_report.service.protocol == Geary.Protocol.IMAP) {
@@ -216,8 +215,8 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 service_report.service.protocol.to_string()
             );
             details.append_printf(
-                "Endpoint: %s\n",
-                service_report.service.endpoint.to_string()
+                "Service host: %s\n",
+                service_report.service.host
             );
         }
         if (this.report.error == null) {

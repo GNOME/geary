@@ -233,7 +233,19 @@ public class Geary.Endpoint : BaseObject {
         }
     }
 
+    public bool equal_to(Geary.Endpoint other) {
+        if (this == other) {
+            return true;
+        }
+
+        return (
+            this.remote_address.hostname == other.remote_address.hostname &&
+            this.remote_address.port == other.remote_address.port
+        );
+    }
+
     public string to_string() {
         return "%s/default:%u".printf(remote_address.hostname, remote_address.port);
     }
+
 }

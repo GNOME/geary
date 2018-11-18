@@ -27,10 +27,23 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     public override bool is_online { get; protected set; default = false; }
 
+    /** Returns the IMAP client service. */
+    public override ClientService incoming { get { return this.imap; } }
+
+    /** Returns the SMTP client service. */
+    public override ClientService outgoing { get { return this.smtp; } }
+
+    /** Service for incoming IMAP connections. */
+    public ClientService imap  { get; private set; }
+
+    /** Service for outgoing SMTP connections. */
+    public ClientService smtp { get; private set; }
+
+    /** Local database for the account. */
+    public ImapDB.Account local { get; private set; }
+
     /** This account's IMAP session pool. */
     public Imap.ClientSessionManager session_pool { get; private set; }
-
-    internal ImapDB.Account local { get; private set; }
 
     private bool open = false;
     private Cancellable? open_cancellable = null;
@@ -60,7 +73,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         this.session_pool = new Imap.ClientSessionManager(
             this.information.id,
-            this.information.imap.endpoint,
+            null, //this.information.imap.endpoint,
             this.information.imap.credentials
         );
         this.session_pool.min_pool_size = IMAP_MIN_POOL_SIZE;
@@ -249,33 +262,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
 
         message("%s: Rebuild complete", to_string());
-    }
-
-    /**
-     * Starts the outbox postman running.
-     */
-    public override async void start_outgoing_client()
-        throws Error {
-        check_open();
-        this.local.outbox.start_postman_async.begin();
-    }
-
-    /**
-     * Closes then reopens the IMAP account if it is not ready.
-     */
-    public override async void start_incoming_client()
-        throws Error {
-        check_open();
-        if (!this.session_pool.is_ready) {
-            try {
-                yield this.session_pool.close_async(this.open_cancellable);
-            } catch (Error err) {
-                debug("Ignoring error closing IMAP session pool for restart: %s",
-                      err.message);
-            }
-
-            yield this.session_pool.open_async(this.open_cancellable);
-        }
     }
 
     /**
@@ -498,7 +484,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // that's supposed to be globally unique...
         Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(
             composed, GMime.utils_generate_message_id(
-                information.smtp.endpoint.remote_address.hostname
+                null //information.smtp.endpoint.remote_address.hostname
             ));
 
         // don't use create_email_async() as that requires the folder be open to use
@@ -561,6 +547,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public override async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         return yield local.get_containing_folders_async(ids, cancellable);
+    }
+
+    internal override void set_endpoints(Endpoint incoming, Endpoint outgoing) {
+        this.imap.set_endpoint_restart.begin(incoming, this.open_cancellable);
+        this.smtp.set_endpoint_restart.begin(outgoing, this.open_cancellable);
     }
 
     /**

@@ -73,7 +73,7 @@ private class Geary.SmtpOutboxFolder :
     }
 
     private Endpoint smtp_endpoint {
-        get { return this._account.information.smtp.endpoint; }
+        get { return null; }
     }
 
     private weak Account _account;

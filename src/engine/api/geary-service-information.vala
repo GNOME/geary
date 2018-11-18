@@ -226,14 +226,6 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      */
     public bool smtp_use_imap_credentials { get; set; default = true; }
 
-    /**
-     * The network endpoint for this service.
-     *
-     * This will be null until the service's account has been added to
-     * the engine, and after it has been removed from the engine.
-     */
-    public Endpoint? endpoint { get; internal set; }
-
 
     protected ServiceInformation(Protocol proto, CredentialsMediator mediator) {
         this.protocol = proto;

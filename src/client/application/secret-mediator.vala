@@ -66,10 +66,10 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                 loaded = true;
             } else {
                 debug(
-                    "Unable to fetch password in liqbsecret keyring for %s: %s %s",
+                    "Unable to fetch libsecret password for %s: %s %s",
+                    account.id,
                     service.protocol.to_string(),
-                    service.credentials.user,
-                    service.endpoint.remote_address.get_hostname()
+                    service.credentials.user
                 );
             }
         } else {
@@ -123,10 +123,10 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                 yield do_store(service, service.credentials.token, cancellable);
             } catch (Error e) {
                 debug(
-                    "Unable to store password in libsecret keyring for %s: %s %s",
+                    "Unable to store libsecret password for %s: %s %s",
+                    account.id,
                     service.protocol.to_string(),
-                    service.credentials.user,
-                    service.endpoint.remote_address.get_hostname()
+                    service.credentials.user
                 );
             }
         } else {

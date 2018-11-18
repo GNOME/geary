@@ -27,7 +27,10 @@ public abstract class Geary.Account : BaseObject {
     internal const uint AUTH_ATTEMPTS_MAX = 3;
 
 
-    public Geary.AccountInformation information { get; protected set; }
+    /**
+     * The account's current configuration.
+     */
+    public AccountInformation information { get; protected set; }
 
     /**
      * Determines if this account appears to be online.
@@ -40,6 +43,16 @@ public abstract class Geary.Account : BaseObject {
      * should be treated as a heuristic.
      */
     public abstract bool is_online { get; protected set; }
+
+    /**
+     * The service manager for the incoming email service.
+     */
+    public abstract ClientService incoming { get; }
+
+    /**
+     * The service manager for the outgoing email service.
+     */
+    public abstract ClientService outgoing { get; }
 
     public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
@@ -222,26 +235,6 @@ public abstract class Geary.Account : BaseObject {
     public abstract async void rebuild_async(Cancellable? cancellable = null) throws Error;
 
     /**
-     * Starts delivery of messages to the outgoing server.
-     *
-     * Outgoing delivery will be started by default when the account
-     * is opened. This method is mostly useful when re-starting it
-     * after an error has occurred.
-     */
-    public abstract async void start_outgoing_client()
-        throws Error;
-
-    /**
-     * Starts receiving messages from the incoming server.
-     *
-     * The incoming client will be started by default when the account
-     * is opened. This method is mostly useful when re-starting it
-     * after an error has occurred.
-     */
-    public abstract async void start_incoming_client()
-        throws Error;
-
-    /**
      * Lists all the currently-available folders found under the parent path
      * unless it's null, in which case it lists all the root folders.  If the
      * parent path cannot be found, EngineError.NOT_FOUND is thrown.  If no
@@ -391,6 +384,16 @@ public abstract class Geary.Account : BaseObject {
     public virtual string to_string() {
         return name;
     }
+
+    /**
+     * Sets network endpoints for incoming and outgoing client services.
+     *
+     * This is called by {@link Engine} after creating the account and
+     * if the network configuration changes. Implementations should
+     * pass these to their incoming and outgoing client services and
+     * restart them as required.
+     */
+    internal abstract void set_endpoints(Endpoint incoming, Endpoint outgoing);
 
     /** Fires a {@link opened} signal. */
     protected virtual void notify_opened() {

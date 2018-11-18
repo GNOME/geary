@@ -109,11 +109,13 @@ public class Geary.Engine : BaseObject {
     public signal void account_unavailable(AccountInformation account);
 
     /**
-     * Fired when an {@link Endpoint} associated with the {@link AccountInformation} reports
-     * TLS certificate warnings during connection.
+     * Emitted when a service has reported TLS certificate warnings.
      *
-     * This may be fired during normal operation or while validating the AccountInformation, in
-     * which case there is no {@link Account} associated with it.
+     * This may be fired during normal operation or while validating
+     * the account information, in which case there is no {@link
+     * Account} associated with it.
+     *
+     * @see AccountInformation.untrusted_host
      */
     public signal void untrusted_host(AccountInformation account,
                                       ServiceInformation service,
@@ -240,42 +242,52 @@ public class Geary.Engine : BaseObject {
                 : Imap.IMAP_PORT;
         }
 
-        account.untrusted_host.connect(on_untrusted_host);
-        account.connect_imap_service(
-            get_shared_endpoint(account.service_provider, account.imap)
+        Endpoint endpoint = get_shared_endpoint(
+            account.service_provider, service
+        );
+        ulong untrusted_id = endpoint.untrusted_host.connect(
+            (security, cx) => account.untrusted_host(service, security, cx)
         );
 
-        // validate IMAP, which requires logging in and establishing
-        // an AUTHORIZED cx state
-        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(
-            service.endpoint
-        );
-
-        // XXX initiate_session_async doesn't seem to actually throw
-        // an imap error on login failed. This is not worth fixing
-        // until wip/26-proton-mail-bridge lands though, so use
-        // signals as a workaround instead.
-        bool login_failed = false;
-        imap_session.login_failed.connect(() => login_failed = true);
-
-        GLib.Error? login_err = null;
+        Geary.Imap.ClientSession client = new Imap.ClientSession(endpoint);
+        GLib.Error? connect_err = null;
         try {
-            yield imap_session.connect_async(cancellable);
-            yield imap_session.initiate_session_async(
-                service.credentials, cancellable
-            );
+            yield client.connect_async(cancellable);
         } catch (GLib.Error err) {
-            login_err = err;
+            connect_err = err;
         }
 
-        try {
-            yield imap_session.disconnect_async(cancellable);
-        } catch {
-            // Oh well
+        bool login_failed = false;
+        GLib.Error? login_err = null;
+        if (connect_err == null) {
+            // XXX initiate_session_async doesn't seem to actually
+            // throw an imap error on login failed. This is not worth
+            // fixing until wip/26-proton-mail-bridge lands though, so
+            // use signals as a workaround instead.
+            client.login_failed.connect(() => login_failed = true);
+
+            try {
+                yield client.initiate_session_async(
+                    service.credentials, cancellable
+                );
+            } catch (GLib.Error err) {
+                login_err = err;
+            }
+
+            try {
+                yield client.disconnect_async(cancellable);
+            } catch {
+                // Oh well
+            }
         }
 
-        account.disconnect_service_endpoints();
-        account.untrusted_host.disconnect(on_untrusted_host);
+        // This always needs to be disconnected, even when there's an
+        // error
+        endpoint.disconnect(untrusted_id);
+
+        if (connect_err != null) {
+            throw connect_err;
+        }
 
         if (login_failed) {
             // XXX This should be a LOGIN_FAILED error or something
@@ -306,18 +318,17 @@ public class Geary.Engine : BaseObject {
             }
         }
 
-        account.untrusted_host.connect(on_untrusted_host);
-        account.connect_smtp_service(
-            get_shared_endpoint(account.service_provider, account.smtp)
+        Endpoint endpoint = get_shared_endpoint(
+            account.service_provider, service
+        );
+        ulong untrusted_id = endpoint.untrusted_host.connect(
+            (security, cx) => account.untrusted_host(service, security, cx)
         );
 
-        Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(
-            service.endpoint
-        );
-
+        Geary.Smtp.ClientSession client = new Geary.Smtp.ClientSession(endpoint);
         GLib.Error? login_err = null;
         try {
-            yield smtp_session.login_async(
+            yield client.login_async(
                 account.get_smtp_credentials(), cancellable
             );
         } catch (GLib.Error err) {
@@ -325,13 +336,14 @@ public class Geary.Engine : BaseObject {
         }
 
         try {
-            yield smtp_session.logout_async(true, cancellable);
+            yield client.logout_async(true, cancellable);
         } catch {
             // Oh well
         }
 
-        account.disconnect_service_endpoints();
-        account.untrusted_host.disconnect(on_untrusted_host);
+        // This always needs to be disconnected, even when there's an
+        // error
+        endpoint.disconnect(untrusted_id);
 
         if (login_err != null) {
             throw login_err;
@@ -388,6 +400,13 @@ public class Geary.Engine : BaseObject {
                 assert_not_reached();
         }
 
+        Endpoint imap = get_shared_endpoint(
+            account_information.service_provider, account_information.imap
+        );
+        Endpoint smtp = get_shared_endpoint(
+            account_information.service_provider, account_information.smtp);
+        account.set_endpoints(imap, smtp);
+
         account_instances.set(account_information.id, account);
         return account;
     }
@@ -405,13 +424,6 @@ public class Geary.Engine : BaseObject {
         }
 
         accounts.set(account.id, account);
-
-        account.connect_imap_service(
-            get_shared_endpoint(account.service_provider, account.imap)
-        );
-        account.connect_smtp_service(
-            get_shared_endpoint(account.service_provider, account.smtp)
-        );
         account.untrusted_host.connect(on_untrusted_host);
         account_available(account);
     }
@@ -433,7 +445,6 @@ public class Geary.Engine : BaseObject {
 
         if (this.accounts.has_key(account.id)) {
             account.untrusted_host.disconnect(on_untrusted_host);
-            account.disconnect_service_endpoints();
 
             // Removal *MUST* be done in the following order:
             // 1. Send the account-unavailable signal.
