@@ -37,7 +37,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public Imap.ClientService imap  { get; private set; }
 
     /** Service for outgoing SMTP connections. */
-    public ClientService smtp { get; private set; }
+    public Smtp.ClientService smtp { get; private set; }
 
     /** Local database for the account. */
     public ImapDB.Account local { get; private set; }
@@ -75,20 +75,25 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         this.local = local;
         this.local.contacts_loaded.connect(() => { contacts_loaded(); });
-        this.local.email_sent.connect(on_email_sent);
+
+        this.smtp = new Smtp.ClientService(
+            information, information.smtp, new SmtpOutboxFolder(this, this.local)
+        );
+        this.smtp.email_sent.connect(on_email_sent);
+        this.smtp.report_problem.connect(notify_report_problem);
+
+        this.sync = new AccountSynchronizer(this);
 
         this.refresh_folder_timer = new TimeoutManager.seconds(
             REFRESH_FOLDER_LIST_SEC,
             () => { this.update_remote_folders(); }
          );
 
-        search_upgrade_monitor = local.search_index_monitor;
-        db_upgrade_monitor = local.upgrade_monitor;
-        db_vacuum_monitor = local.vacuum_monitor;
-        opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
-        sending_monitor = local.sending_monitor;
-
-        this.sync = new AccountSynchronizer(this);
+        this.opening_monitor = new ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
+        this.sending_monitor = this.smtp.sending_monitor;
+        this.search_upgrade_monitor = local.search_index_monitor;
+        this.db_upgrade_monitor = local.upgrade_monitor;
+        this.db_vacuum_monitor = local.vacuum_monitor;
 
         compile_special_search_names();
     }
@@ -131,10 +136,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 throw err;
         }
 
-        // Local folders
+        // Create/load local folders
 
-        local.outbox.report_problem.connect(notify_report_problem);
-        local_only.set(new SmtpOutboxFolderRoot(), local.outbox);
+        local_only.set(
+            new SmtpOutboxFolderRoot(), this.smtp.outbox
+        );
 
         this.search_folder = new_search_folder();
         local_only.set(new ImapDB.SearchFolderRoot(), this.search_folder);
@@ -150,14 +156,30 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // To prevent spurious connection failures, we make sure we
         // have passwords before attempting a connection.
         yield this.information.load_imap_credentials(cancellable);
+        yield this.information.load_smtp_credentials(cancellable);
+
+        // Start the mail services. Start incoming directly, but queue
+        // outgoing so local folders can be loaded first in case
+        // queued mail gets sent and needs to get saved somewhere.
         yield this.imap.start(cancellable);
+        this.queue_operation(new StartPostie(this));
+
     }
 
     public override async void close_async(Cancellable? cancellable = null) throws Error {
         if (!open)
             return;
 
-        // Block obtaining and reusing IMAP server connections
+        // Stop attempting to send any outgoing messages
+        try {
+            yield this.smtp.stop();
+        } catch (Error err) {
+            debug(
+                "%s: Error stopping SMTP service: %s", to_string(), err.message
+            );
+        }
+
+        // Block obtaining and reusing IMAP connections
         this.remote_ready_lock.reset();
         this.imap.discard_returned_sessions = true;
 
@@ -201,7 +223,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // Close local infrastructure
 
         this.search_folder = null;
-        this.local.outbox.report_problem.disconnect(notify_report_problem);
         try {
             yield local.close_async(cancellable);
         } finally {
@@ -461,18 +482,18 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     public override async void send_email_async(Geary.ComposedEmail composed,
-        Cancellable? cancellable = null) throws Error {
+                                                GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open();
 
         // TODO: we should probably not use someone else's FQDN in something
         // that's supposed to be globally unique...
         Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(
             composed, GMime.utils_generate_message_id(
-                null //information.smtp.endpoint.remote_address.hostname
+                this.smtp.endpoint.remote_address.hostname
             ));
 
-        // don't use create_email_async() as that requires the folder be open to use
-        yield local.outbox.enqueue_email_async(rfc822, cancellable);
+        yield this.smtp.queue_email(rfc822, cancellable);
     }
 
     private void on_email_sent(Geary.RFC822.Message rfc822) {
@@ -527,10 +548,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         return yield local.get_search_matches_async(query, check_ids(ids), cancellable);
     }
-    
-    public override async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
-        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
-        return yield local.get_containing_folders_async(ids, cancellable);
+
+    public override async Gee.MultiMap<EmailIdentifier,FolderPath>?
+        get_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
+                                     GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Gee.MultiMap<EmailIdentifier,FolderPath> map =
+            new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
+        yield this.local.get_containing_folders_async(ids, map, cancellable);
+        yield this.smtp.outbox.add_to_containing_folders_async(ids, map, cancellable);
+        return (map.size == 0) ? null : map;
     }
 
     internal override void set_endpoints(Endpoint incoming, Endpoint outgoing) {
@@ -1141,6 +1168,24 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
         }
 
         generic.promote_folders(specials);
+    }
+
+}
+
+
+/**
+ * Account operation for starting the outgoing service.
+ */
+internal class Geary.ImapEngine.StartPostie : AccountOperation {
+
+
+    internal StartPostie(Account account) {
+        base(account);
+    }
+
+    public override async void execute(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        yield this.account.outgoing.start(cancellable);
     }
 
 }

@@ -280,6 +280,7 @@ geary_engine_vala_sources = files(
   'smtp/smtp-authenticator.vala',
   'smtp/smtp-capabilities.vala',
   'smtp/smtp-client-connection.vala',
+  'smtp/smtp-client-service.vala',
   'smtp/smtp-client-session.vala',
   'smtp/smtp-command.vala',
   'smtp/smtp-data-format.vala',

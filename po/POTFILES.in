@@ -373,6 +373,7 @@ src/engine/rfc822/rfc822.vala
 src/engine/smtp/smtp-authenticator.vala
 src/engine/smtp/smtp-capabilities.vala
 src/engine/smtp/smtp-client-connection.vala
+src/engine/smtp/smtp-client-service.vala
 src/engine/smtp/smtp-client-session.vala
 src/engine/smtp/smtp-command.vala
 src/engine/smtp/smtp-data-format.vala

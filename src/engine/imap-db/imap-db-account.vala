@@ -51,7 +51,6 @@ private class Geary.ImapDB.Account : BaseObject {
         attachments_dir = user_data_dir.get_child(ATTACHMENTS_DIR);
     }
 
-
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
         
@@ -73,12 +72,9 @@ private class Geary.ImapDB.Account : BaseObject {
     private static Gee.HashMap<string, string> search_op_is_values =
         new Gee.HashMap<string, string>();
 
-    public signal void email_sent(Geary.RFC822.Message rfc822);
-
     public signal void contacts_loaded();
-    
+
     // Only available when the Account is opened
-    public SmtpOutboxFolder? outbox { get; private set; default = null; }
     public ImapEngine.ContactStore contact_store { get; private set; }
     public IntervalProgressMonitor search_index_monitor { get; private set; 
         default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
@@ -86,12 +82,12 @@ private class Geary.ImapDB.Account : BaseObject {
         ProgressType.DB_UPGRADE); }
     public SimpleProgressMonitor vacuum_monitor { get; private set; default = new SimpleProgressMonitor(
         ProgressType.DB_VACUUM); }
-    public SimpleProgressMonitor sending_monitor { get; private set;
-        default = new SimpleProgressMonitor(ProgressType.ACTIVITY); }
-    
+
+    /** The backing database for the account. */
+    public ImapDB.Database? db { get; private set; default = null; }
+
     private string name;
     private AccountInformation account_information;
-    private ImapDB.Database? db = null;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>();
     private Cancellable? background_cancellable = null;
@@ -244,10 +240,10 @@ private class Geary.ImapDB.Account : BaseObject {
         search_op_is_values.set(SEARCH_OP_VALUE_UNREAD, SEARCH_OP_VALUE_UNREAD);
     }
 
-    public Account(Geary.AccountInformation account_information) {
-        this.account_information = account_information;
+    public Account(AccountInformation config) {
+        this.account_information = config;
         this.contact_store = new ImapEngine.ContactStore(this);
-        this.name = account_information.id + ":db";
+        this.name = config.id + ":db";
     }
 
     private void check_open() throws Error {
@@ -355,10 +351,6 @@ private class Geary.ImapDB.Account : BaseObject {
         });
         
         initialize_contacts(cancellable);
-        
-        // ImapDB.Account holds the Outbox, which is tied to the database it maintains
-        outbox = new SmtpOutboxFolder(db, account, sending_monitor);
-        outbox.email_sent.connect(on_outbox_email_sent);
     }
 
     public async void close_async(Cancellable? cancellable) throws Error {
@@ -376,13 +368,6 @@ private class Geary.ImapDB.Account : BaseObject {
         this.background_cancellable = null;
 
         this.folder_refs.clear();
-
-        this.outbox.email_sent.disconnect(on_outbox_email_sent);
-        this.outbox = null;
-    }
-
-    private void on_outbox_email_sent(Geary.RFC822.Message rfc822) {
-        email_sent(rfc822);
     }
 
     public async Folder clone_folder_async(Geary.Imap.Folder imap_folder,
@@ -1411,18 +1396,18 @@ private class Geary.ImapDB.Account : BaseObject {
      * would be empty.  Only throw database errors et al., not errors due to
      * the email id not being found.
      */
-    public async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
-        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+    public async void
+        get_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
+                                     Gee.MultiMap<Geary.EmailIdentifier,FolderPath>? map,
+                                     GLib.Cancellable? cancellable)
+        throws GLib.Error {
         check_open();
-        
-        Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath> map
-            = new Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
             foreach (Geary.EmailIdentifier id in ids) {
                 ImapDB.EmailIdentifier? imap_db_id = id as ImapDB.EmailIdentifier;
                 if (imap_db_id == null)
                     continue;
-                
+
                 Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(
                     cx, imap_db_id.message_id, false, cancellable);
                 if (folders != null) {
@@ -1430,15 +1415,11 @@ private class Geary.ImapDB.Account : BaseObject {
                         Geary.FolderPath>(map, id, folders);
                 }
             }
-            
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
-        yield outbox.add_to_containing_folders_async(ids, map, cancellable);
-        
-        return (map.size == 0 ? null : map);
     }
-    
+
     private async void populate_search_table_async(Cancellable? cancellable) {
         debug("%s: Populating search table", account_information.id);
         try {
