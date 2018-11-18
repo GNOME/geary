@@ -354,46 +354,29 @@ public class Geary.Engine : BaseObject {
      * Creates a Geary.Account from a Geary.AccountInformation (which is what
      * other methods in this interface deal in).
      */
-    public Geary.Account get_account_instance(AccountInformation account_information)
+    public Geary.Account get_account_instance(AccountInformation config)
         throws Error {
         check_opened();
 
-        if (account_instances.has_key(account_information.id))
-            return account_instances.get(account_information.id);
+        if (account_instances.has_key(config.id))
+            return account_instances.get(config.id);
 
-        ImapDB.Account local_account = new ImapDB.Account(account_information);
         Geary.Account account;
-        switch (account_information.service_provider) {
+        switch (config.service_provider) {
             case ServiceProvider.GMAIL:
-                account = new ImapEngine.GmailAccount(
-                    "Gmail:%s".printf(account_information.id),
-                    account_information,
-                    local_account
-                );
+                account = new ImapEngine.GmailAccount(config);
             break;
 
             case ServiceProvider.YAHOO:
-                account = new ImapEngine.YahooAccount(
-                    "Yahoo:%s".printf(account_information.id),
-                    account_information,
-                    local_account
-                );
+                account = new ImapEngine.YahooAccount(config);
             break;
 
             case ServiceProvider.OUTLOOK:
-                account = new ImapEngine.OutlookAccount(
-                    "Outlook:%s".printf(account_information.id),
-                    account_information,
-                    local_account
-                );
+                account = new ImapEngine.OutlookAccount(config);
             break;
 
             case ServiceProvider.OTHER:
-                account = new ImapEngine.OtherAccount(
-                    "Other:%s".printf(account_information.id),
-                    account_information,
-                    local_account
-                );
+                account = new ImapEngine.OtherAccount(config);
             break;
 
             default:
@@ -401,13 +384,14 @@ public class Geary.Engine : BaseObject {
         }
 
         Endpoint imap = get_shared_endpoint(
-            account_information.service_provider, account_information.imap
+            config.service_provider, config.imap
         );
         Endpoint smtp = get_shared_endpoint(
-            account_information.service_provider, account_information.smtp);
+            config.service_provider, config.smtp
+        );
         account.set_endpoints(imap, smtp);
 
-        account_instances.set(account_information.id, account);
+        account_instances.set(config.id, account);
         return account;
     }
 
@@ -446,12 +430,11 @@ public class Geary.Engine : BaseObject {
         if (this.accounts.has_key(account.id)) {
             account.untrusted_host.disconnect(on_untrusted_host);
 
-            // Removal *MUST* be done in the following order:
-            // 1. Send the account-unavailable signal.
-            // Account will be removed client side.
+            // Send the account-unavailable signal, account will be
+            // removed client side.
             account_unavailable(account);
 
-            // 2. Remove the account data from the engine.
+            // Then remove the account data from the engine.
             this.accounts.unset(account.id);
             this.account_instances.unset(account.id);
         }

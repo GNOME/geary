@@ -34,7 +34,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             new MockServiceInformation(),
             new MockServiceInformation()
         );
-        this.account = new MockAccount("test", this.account_info);
+        this.account = new MockAccount(this.account_info);
         this.base_folder = new MockFolder(
             this.account,
             null,

@@ -75,7 +75,7 @@ public class Geary.ImapEngine.AccountProcessorTest : TestCase {
             new MockServiceInformation(),
             new MockServiceInformation()
         );
-        this.account = new Geary.MockAccount("test-account", this.info);
+        this.account = new Geary.MockAccount(this.info);
 
         this.succeeded = 0;
         this.failed = 0;

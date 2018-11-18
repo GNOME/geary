@@ -58,26 +58,23 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     private uint authentication_failures = 0;
 
-
     private Gee.Map<Geary.SpecialFolderType, Gee.List<string>> special_search_names =
         new Gee.HashMap<Geary.SpecialFolderType, Gee.List<string>>();
 
 
-    public GenericAccount(string name,
-                          Geary.AccountInformation information,
-                          ImapDB.Account local) {
-        base(name, information);
-        this.imap = new Imap.ClientService(information, information.imap);
+    public GenericAccount(AccountInformation config) {
+        base(config);
+        this.local = new ImapDB.Account(config);
+        this.local.contacts_loaded.connect(() => { contacts_loaded(); });
+
+        this.imap = new Imap.ClientService(config, config.imap);
         this.imap.min_pool_size = IMAP_MIN_POOL_SIZE;
         this.imap.ready.connect(on_pool_session_ready);
         this.imap.connection_failed.connect(on_pool_connection_failed);
         this.imap.login_failed.connect(on_pool_login_failed);
 
-        this.local = local;
-        this.local.contacts_loaded.connect(() => { contacts_loaded(); });
-
         this.smtp = new Smtp.ClientService(
-            information, information.smtp, new SmtpOutboxFolder(this, this.local)
+            config, config.smtp, new SmtpOutboxFolder(this, this.local)
         );
         this.smtp.email_sent.connect(on_email_sent);
         this.smtp.report_problem.connect(notify_report_problem);
@@ -122,8 +119,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.processor.operation_error.connect(on_operation_error);
 
         try {
-            yield local.open_async(information.data_dir, Engine.instance.resource_dir.get_child("sql"),
-                cancellable);
+            yield this.local.open_async(
+                information.data_dir,
+                Engine.instance.resource_dir.get_child("sql"),
+                cancellable
+            );
         } catch (Error err) {
             // convert database-open errors
             if (err is DatabaseError.CORRUPT)

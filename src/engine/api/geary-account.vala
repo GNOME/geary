@@ -60,6 +60,9 @@ public abstract class Geary.Account : BaseObject {
     public Geary.ProgressMonitor opening_monitor { get; protected set; }
     public Geary.ProgressMonitor sending_monitor { get; protected set; }
 
+    protected string id { get; private set; }
+
+
     public signal void opened();
     
     public signal void closed();
@@ -169,12 +172,13 @@ public abstract class Geary.Account : BaseObject {
      */
     public signal void email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
-    
-    private string name;
-    
-    protected Account(string name, AccountInformation information) {
-        this.name = name;
+
+
+    protected Account(AccountInformation information) {
         this.information = information;
+        this.id = "%s[%s]".printf(
+            information.id, information.service_provider.to_value()
+        );
     }
 
     /**
@@ -382,7 +386,7 @@ public abstract class Geary.Account : BaseObject {
      * Used only for debugging.  Should not be used for user-visible strings.
      */
     public virtual string to_string() {
-        return name;
+        return this.id;
     }
 
     /**
