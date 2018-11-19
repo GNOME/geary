@@ -26,10 +26,7 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         to_copy.remove_all(ids);
     }
-    
-    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
+
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (to_copy.size == 0)
             return ReplayOperation.Status.COMPLETED;
@@ -38,35 +35,30 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
         // existing there.
         return ReplayOperation.Status.CONTINUE;
     }
-    
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (to_copy.size == 0)
-            return ReplayOperation.Status.COMPLETED;
-        
-        Gee.Set<Imap.UID>? uids = yield engine.local_folder.get_uids_async(to_copy,
-            ImapDB.Folder.ListFlags.NONE, cancellable);
 
-        if (uids != null && uids.size > 0) {
-            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(uids);
-            Imap.FolderSession remote =
-                yield this.engine.claim_remote_session(cancellable);
-            foreach (Imap.MessageSet msg_set in msg_sets) {
-                Gee.Map<Imap.UID, Imap.UID>? src_dst_uids =
-                    yield remote.copy_email_async(msg_set, destination, cancellable);
-                if (src_dst_uids != null)
-                    destination_uids.add_all(src_dst_uids.values);
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
+        if (to_copy.size > 0) {
+            Gee.Set<Imap.UID>? uids = yield engine.local_folder.get_uids_async(
+                to_copy, ImapDB.Folder.ListFlags.NONE, cancellable
+            );
+
+            if (uids != null && uids.size > 0) {
+                Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(uids);
+                foreach (Imap.MessageSet msg_set in msg_sets) {
+                    Gee.Map<Imap.UID, Imap.UID>? src_dst_uids =
+                        yield remote.copy_email_async(
+                            msg_set, destination, cancellable
+                        );
+                    if (src_dst_uids != null)
+                        destination_uids.add_all(src_dst_uids.values);
+                }
             }
         }
-
-        return ReplayOperation.Status.COMPLETED;
-    }
-
-    public override async void backout_local_async() throws Error {
-        // Nothing to undo.
     }
 
     public override string describe_state() {
         return "%d email IDs to %s".printf(to_copy.size, destination.to_string());
     }
-}
 
+}

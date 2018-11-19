@@ -54,19 +54,8 @@ private class Geary.ImapEngine.MoveEmailPrepare : Geary.ImapEngine.SendReplayOpe
         
         return ReplayOperation.Status.COMPLETED;
     }
-    
-    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        return ReplayOperation.Status.COMPLETED;
-    }
-    
-    public override async void backout_local_async() throws Error {
-    }
-    
+
     public override string describe_state() {
         return "%d email IDs".printf(prepared_for_move != null ? prepared_for_move.size : 0);
     }
 }
-

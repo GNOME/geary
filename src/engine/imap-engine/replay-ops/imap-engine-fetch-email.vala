@@ -38,10 +38,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         remote_removed = ids.contains(id);
     }
-    
-    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
+
     public override async ReplayOperation.Status replay_local_async() throws Error {
         // If forcing an update, skip local operation and go direct to replay_remote()
         if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
@@ -84,15 +81,13 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         
         return ReplayOperation.Status.CONTINUE;
     }
-    
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
+
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
         if (remote_removed) {
             throw new EngineError.NOT_FOUND("Unable to fetch %s in %s (removed from remote)",
                 id.to_string(), engine.to_string());
         }
-
-        Imap.FolderSession remote =
-            yield this.engine.claim_remote_session(cancellable);
 
         // fetch only the remaining fields from the remote folder (if only pulling partial information,
         // will merge at end of this method)
@@ -124,17 +119,10 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
                 ImapDB.Folder.ListFlags.NONE, cancellable);
             assert(email != null);
         }
-        
-        return ReplayOperation.Status.COMPLETED;
     }
-    
-    public override async void backout_local_async() throws Error {
-        // read-only
-    }
-    
+
     public override string describe_state() {
         return "id=%s required_fields=%Xh remaining_fields=%Xh flags=%Xh".printf(id.to_string(),
             required_fields, remaining_fields, flags);
     }
 }
-

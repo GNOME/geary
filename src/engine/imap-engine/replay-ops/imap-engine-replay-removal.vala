@@ -42,11 +42,9 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
         // processed in-order with ReplayAppend operations
         return ReplayOperation.Status.CONTINUE;
     }
-    
-    public override async void backout_local_async() throws Error {
-    }
 
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
         debug("%s: ReplayRemoval this.position=%s reported_remote_count=%d",
               this.owner.to_string(), this.position.value.to_string(), this.remote_count);
 
@@ -56,7 +54,6 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
             debug("%s do_replay_removed_message: ignoring, invalid remote position or count",
                 to_string());
         }
-        return ReplayOperation.Status.COMPLETED;
     }
 
     public override string describe_state() {

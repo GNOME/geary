@@ -25,6 +25,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Geary.SpecialFolderType.ARCHIVE,
     };
 
+    public override bool is_online { get; protected set; default = false; }
+
     /** This account's IMAP session pool. */
     public Imap.ClientSessionManager session_pool { get; private set; }
 
@@ -363,6 +365,17 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         account.close();
 
+        Imap.FolderSession? folder_session = null;
+        if (folder_err == null) {
+            try {
+                folder_session = yield new Imap.FolderSession(
+                    this.information.id, client, folder, cancellable
+                );
+            } catch (Error err) {
+                folder_err = err;
+            }
+        }
+
         if (folder_err != null) {
             try {
                 yield this.session_pool.release_session_async(client);
@@ -373,9 +386,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             throw folder_err;
         }
 
-        return yield new Imap.FolderSession(
-            this.information.id, client, folder, cancellable
-        );
+        return folder_session;
     }
 
     /**
@@ -975,6 +986,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     private void on_pool_session_ready(bool is_ready) {
+        this.is_online = is_ready;
         if (is_ready) {
             // Now have a valid session, so credentials must be good
             this.authentication_failures = 0;

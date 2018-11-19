@@ -28,7 +28,19 @@ public abstract class Geary.Account : BaseObject {
 
 
     public Geary.AccountInformation information { get; protected set; }
-    
+
+    /**
+     * Determines if this account appears to be online.
+     *
+     * This property is true if the account is to the best of the
+     * engine's knowledge is online, i.e. it is enabled, has been able
+     * to connect to the remote incoming mail server, and so on. Some
+     * network problems are not immediately obvious however, and so at
+     * times the value of this property may be inaccurate. At best it
+     * should be treated as a heuristic.
+     */
+    public abstract bool is_online { get; protected set; }
+
     public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_vacuum_monitor { get; protected set; }

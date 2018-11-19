@@ -24,27 +24,28 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
         
         this.criteria = criteria;
     }
-    
-    public override async ReplayOperation.Status replay_local_async() throws Error {
-        // accumulate nothing, nothing unfulfilled (yet)
+
+    // XXX Shouldn't need to override this, but AbstractListEmail
+    // won't let us declare it as remote-only
+    public override async ReplayOperation.Status replay_local_async()
+        throws GLib.Error {
         return ReplayOperation.Status.CONTINUE;
     }
 
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        Imap.FolderSession remote =
-            yield this.owner.claim_remote_session(this.cancellable);
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
         Gee.SortedSet<Imap.UID>? uids = yield remote.search_async(
             criteria, this.cancellable
         );
         if (uids == null || uids.size == 0)
-            return ReplayOperation.Status.COMPLETED;
+            return;
 
         // if the earliest UID is not in the local store, then need to expand vector to it
         Geary.EmailIdentifier? first_id = yield owner.local_folder.get_id_async(uids.first(),
             ImapDB.Folder.ListFlags.NONE, cancellable);
         if (first_id == null)
-            yield expand_vector_async(uids.first(), 1);
-        
+            yield expand_vector_async(remote, uids.first(), 1);
+
         // Convert UIDs into EmailIdentifiers for lookup
         Gee.HashSet<ImapDB.EmailIdentifier> local_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         foreach (Imap.UID uid in uids) {
@@ -78,12 +79,12 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
             else
                 accumulator.add(email);
         }
-        
-        // with unfufilled set and fulfilled added to accumulator, let base class do the rest of the
-        // work
-        return yield base.replay_remote_async();
+
+        // with unfufilled set and fulfilled added to accumulator, let
+        // base class do the rest of the work
+        yield base.replay_remote_async(remote);
     }
-    
+
     public override string describe_state() {
         return "criteria=%s".printf(criteria.to_string());
     }

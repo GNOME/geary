@@ -498,7 +498,7 @@ public abstract class Geary.Folder : BaseObject {
      * possible for some methods to return early without waiting,
      * depending on prior information of the folder. See {@link
      * list_email_by_id_async} for special notes on its
-     * operation. Also see {@link wait_for_remote_async}.
+     * operation.
      *
      * In some cases, establishing a remote connection may be
      * performed lazily, that is only when first needed. If however
@@ -536,16 +536,6 @@ public abstract class Geary.Folder : BaseObject {
         throws Error;
 
     /**
-     * Blocks waiting for the folder to establish a remote session.
-     *
-     * @throws EngineError.OPEN_REQUIRED if the folder has not already
-     * been opened.
-     * @throws EngineError.ALREADY_CLOSED if not opened due to error.
-     */
-    public abstract async void wait_for_remote_async(Cancellable? cancellable = null)
-        throws Error;
-
-    /**
      * Marks one use of the folder's operations as being completed.
      *
      * The folder must be closed when operations on it are concluded.
@@ -572,8 +562,8 @@ public abstract class Geary.Folder : BaseObject {
     /**
      * Wait for the {@link Folder} to fully close.
      *
-     * Unlike {@link wait_for_remote_async}, this will ''always'' block until a {@link Folder} is
-     * closed, even if it's not open.
+     * This will ''always'' block until the folder is closed, even if
+     * it's not open.
      */
     public abstract async void wait_for_close_async(Cancellable? cancellable = null) throws Error;
 

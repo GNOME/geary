@@ -127,16 +127,14 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                 unfulfilled.unset(id.uid);
         }
     }
-    
-    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
+
     // Child class should execute its own calls *before* calling this base method
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
         // only deal with unfulfilled email, child class must deal with everything else
         if (unfulfilled.size == 0)
-            return ReplayOperation.Status.COMPLETED;
-        
+           return;
+
         // since list and search commands ahead of this one in the queue may have fulfilled some of
         // the emails thought to be unfulfilled when first checked locally, look for them now
         int fetches_avoided = yield remove_fulfilled_uids_async();
@@ -145,21 +143,18 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             
             debug("[%s] %d previously-fulfilled fetches avoided in list operation, %d total",
                 owner.to_string(), fetches_avoided, total_fetches_avoided);
-            
+
             // if all fulfilled, emails were added to accumulator in remove call, so done
             if (unfulfilled.size == 0)
-                return ReplayOperation.Status.COMPLETED;
+                return;
         }
-        
+
         // convert UID -> needed fields mapping to needed fields -> UIDs, as they can be grouped
         // and submitted at same time
         Gee.HashMultiMap<Geary.Email.Field, Imap.UID> reverse_unfulfilled = new Gee.HashMultiMap<
             Geary.Email.Field, Imap.UID>();
         foreach (Imap.UID uid in unfulfilled.keys)
             reverse_unfulfilled.set(unfulfilled.get(uid), uid);
-
-        Imap.FolderSession remote =
-            yield this.owner.claim_remote_session(cancellable);
 
         // schedule operations to remote for each set of email with unfulfilled fields and merge
         // in results, pulling out the entire email
@@ -206,34 +201,6 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             owner.replay_notify_email_inserted(created_ids);
             owner.replay_notify_email_locally_inserted(created_ids);
         }
-        
-        return ReplayOperation.Status.COMPLETED;
-    }
-
-    /**
-     * Determines if the owning folder's vector is fully expanded.
-     */
-    protected async Trillian is_fully_expanded_async() throws Error {
-        Trillian is_fully_expanded = Trillian.UNKNOWN;
-        if (this.owner.is_remote_available) {
-            Imap.FolderSession remote =
-                yield this.owner.claim_remote_session(this.cancellable);
-            int remote_count = remote.folder.properties.email_total;
-
-            // include marked for removed in the count in case this is
-            // being called while a removal is in process, in which
-            // case don't want to expand vector this moment because
-            // the vector is in flux
-            int local_count_with_marked =
-                yield owner.local_folder.get_email_count_async(
-                    ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable
-                );
-
-            is_fully_expanded = Trillian.from_boolean(
-                local_count_with_marked >= remote_count
-            );
-        }
-        return is_fully_expanded;
     }
 
     /**
@@ -250,10 +217,11 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
      * be examined and added to the messages to be fulfilled if
      * needed.
      */
-    protected async Gee.Set<Imap.UID>? expand_vector_async(Imap.UID? initial_uid, int count) throws Error {
+    protected async Gee.Set<Imap.UID>? expand_vector_async(Imap.FolderSession remote,
+                                                           Imap.UID? initial_uid,
+                                                           int count)
+        throws GLib.Error {
         debug("%s: expanding vector...", owner.to_string());
-        Imap.FolderSession remote =
-            yield this.owner.claim_remote_session(cancellable);
         int remote_count = remote.folder.properties.email_total;
 
         // include marked for removed in the count in case this is being called while a removal
@@ -401,14 +369,9 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         
         return fetch_avoided;
     }
-    
-    public override async void backout_local_async() throws Error {
-        // R/O, no backout
-    }
-    
+
     public override string describe_state() {
         return "required_fields=%Xh local_only=%s force_update=%s".printf(required_fields,
             flags.is_local_only().to_string(), flags.is_force_update().to_string());
     }
 }
-
