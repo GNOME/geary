@@ -11,14 +11,14 @@
 # Necdet Yücel <necdetyucel@gmail.com>, 2015.
 # Simge Sezgin <simgesezgin88@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2014, 2016.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2016, 2017, 2018.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2016-2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-10-15 10:04+0000\n"
-"PO-Revision-Date: 2018-10-21 22:41+0300\n"
+"POT-Creation-Date: 2018-10-24 11:36+0000\n"
+"PO-Revision-Date: 2018-11-22 15:44+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Gtranslator 2.91.7\n"
+"X-Generator: Gtranslator 3.30.0\n"
 "X-POOTLE-MTIME: 1423290848.000000\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
@@ -142,115 +142,99 @@ msgid "Compose Message"
 msgstr "İleti Oluştur"
 
 #: desktop/org.gnome.Geary.gschema.xml:8
-msgid "Default attachments directory"
-msgstr "Öntanımlı ek dizini"
-
-#: desktop/org.gnome.Geary.gschema.xml:9
-msgid "Location used when opening and saving attachments."
-msgstr "Ekleri açarken veya kaydederken kullanılan konum."
-
-#: desktop/org.gnome.Geary.gschema.xml:14
-msgid "Default print output directory"
-msgstr "Öntanımlı yazdırma çıktı dizini"
-
-#: desktop/org.gnome.Geary.gschema.xml:15
-msgid "Location used when printing to a file."
-msgstr "Dosyaya yazdırılırken kullanılacak konum."
-
-#: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Maximize window"
 msgstr "Pencereyi büyüt"
 
-#: desktop/org.gnome.Geary.gschema.xml:21
+#: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
 msgstr "Eğer uygulama penceresi büyütüldüyse doğru, değilse yanlış."
 
-#: desktop/org.gnome.Geary.gschema.xml:26
+#: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
 msgstr "Pencerenin genişliği"
 
-#: desktop/org.gnome.Geary.gschema.xml:27
+#: desktop/org.gnome.Geary.gschema.xml:15
 msgid "The last recorded width of the application window."
 msgstr "Uygulama penceresinin kaydedilen son genişliği."
 
-#: desktop/org.gnome.Geary.gschema.xml:32
+#: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Height of window"
 msgstr "Pencerenin yüksekliği"
 
-#: desktop/org.gnome.Geary.gschema.xml:33
+#: desktop/org.gnome.Geary.gschema.xml:21
 msgid "The last recorded height of the application window."
 msgstr "Uygulama penceresinin kaydedilen son yüksekliği."
 
-#: desktop/org.gnome.Geary.gschema.xml:38
+#: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Position of folder list pane"
 msgstr "Klasör listesi bölmesinin konumu"
 
-#: desktop/org.gnome.Geary.gschema.xml:39
+#: desktop/org.gnome.Geary.gschema.xml:27
 msgid "Position of the folder list Paned grabber."
 msgstr "Klasör listesi bölmesi yakalayıcının konumu."
 
-#: desktop/org.gnome.Geary.gschema.xml:44
+#: desktop/org.gnome.Geary.gschema.xml:32
 msgid "Position of folder list pane when horizontal"
 msgstr "Klasör listesi bölmesinin yataykenki konumu"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:33
 msgid ""
 "Position of the folder list Paned grabber in the horizontal orientation."
 msgstr "Yatay yönelimde klasör listesi bölmesi yakalayıcının konumu."
 
-#: desktop/org.gnome.Geary.gschema.xml:50
+#: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Position of folder list pane when vertical"
 msgstr "Klasör listesi bölmesinin dikeykenki konumu"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:39
 msgid "Position of the folder list Paned grabber in the vertical orientation."
 msgstr "Dikey yönelimde klasör listesi bölmesi yakalayıcının konumu."
 
-#: desktop/org.gnome.Geary.gschema.xml:56
+#: desktop/org.gnome.Geary.gschema.xml:44
 msgid "Orientation of the folder list pane"
 msgstr "Klasör listesi bölmesinin konumlandırması"
 
-#: desktop/org.gnome.Geary.gschema.xml:57
+#: desktop/org.gnome.Geary.gschema.xml:45
 msgid "True if the folder list Paned is in the horizontal orientation."
 msgstr "Eğer klasör listesi bölmesi yatay yönelimdeyse doğru."
 
-#: desktop/org.gnome.Geary.gschema.xml:62
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Position of message list pane"
 msgstr "İleti listesi bölmesinin konumu"
 
-#: desktop/org.gnome.Geary.gschema.xml:63
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "Position of the message list Paned grabber."
 msgstr "İleti listesi bölmesi yakalayıcının konumu."
 
-#: desktop/org.gnome.Geary.gschema.xml:68
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Autoselect next message"
 msgstr "Sonraki iletiyi kendiliğinden seç"
 
-#: desktop/org.gnome.Geary.gschema.xml:69
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid "True if we should autoselect the next available conversation."
 msgstr "Eğer sonraki uygun konuşmayı kendiliğinden seçmemiz gerekiyorsa doğru."
 
-#: desktop/org.gnome.Geary.gschema.xml:74
+#: desktop/org.gnome.Geary.gschema.xml:62
 msgid "Display message previews"
 msgstr "İleti ön izlemelerini göster"
 
-#: desktop/org.gnome.Geary.gschema.xml:75
+#: desktop/org.gnome.Geary.gschema.xml:63
 msgid "True if we should display a short preview of each message."
 msgstr "Her iletinin kısa bir ön izlemesini göstermemiz gerekiyorsa doğru."
 
-#: desktop/org.gnome.Geary.gschema.xml:80
+#: desktop/org.gnome.Geary.gschema.xml:68
 msgid "Languages that shall be used in the spell checker"
 msgstr "Yazım denetleyicide kullanılacak diller"
 
-#: desktop/org.gnome.Geary.gschema.xml:81
+#: desktop/org.gnome.Geary.gschema.xml:69
 msgid "List of the languages to use in the spell checker."
 msgstr "Yazım denetleyicide kullanılacak dillerin listesi."
 
-#: desktop/org.gnome.Geary.gschema.xml:86
+#: desktop/org.gnome.Geary.gschema.xml:74
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Yazım denetleyici açılır penceresinde gösterilecek diller"
 
-#: desktop/org.gnome.Geary.gschema.xml:87
+#: desktop/org.gnome.Geary.gschema.xml:75
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -258,89 +242,89 @@ msgstr ""
 "Yazım denetleyicinin açılır penceresinde her zaman gösterilecek dillerin "
 "listesi."
 
-#: desktop/org.gnome.Geary.gschema.xml:92
+#: desktop/org.gnome.Geary.gschema.xml:80
 msgid "Enable notification sounds"
 msgstr "Bildirim seslerini etkinleştir"
 
-#: desktop/org.gnome.Geary.gschema.xml:93
+#: desktop/org.gnome.Geary.gschema.xml:81
 msgid "True to play sounds for notifications and sending."
 msgstr "Gönderimler ve bildirimler için ses oynatılacaksa doğru."
 
-#: desktop/org.gnome.Geary.gschema.xml:98
+#: desktop/org.gnome.Geary.gschema.xml:86
 msgid "Show notifications for new mail"
 msgstr "Yeni posta için bildirimleri göster"
 
-#: desktop/org.gnome.Geary.gschema.xml:99
+#: desktop/org.gnome.Geary.gschema.xml:87
 msgid "True to show notification bubbles."
 msgstr "Bildirim balonlarını göstermek için doğru."
 
-#: desktop/org.gnome.Geary.gschema.xml:104
+#: desktop/org.gnome.Geary.gschema.xml:92
 msgid "Notify of new mail at startup"
 msgstr "Başlangıçta yeni postanın bildirilmesi"
 
-#: desktop/org.gnome.Geary.gschema.xml:105
+#: desktop/org.gnome.Geary.gschema.xml:93
 msgid "True to notify of new mail at startup."
 msgstr "Başlangıçta yeni postaların bildirilmesi için doğru."
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:98
 msgid "Ask when opening an attachment"
 msgstr "Ek açarken sor"
 
-#: desktop/org.gnome.Geary.gschema.xml:111
+#: desktop/org.gnome.Geary.gschema.xml:99
 msgid "True to ask when opening an attachment."
 msgstr "Eki açarken sormak için doğru."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:104
 msgid "Whether to compose emails in HTML"
 msgstr "E-postaların HTML’de oluşturulup oluşturulmayacağı"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:105
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "E-postaları HTML’de oluşturmak için doğru, düz metin için yanlış."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:110
 msgid "Advisory strategy for full-text searching"
 msgstr "Tam metin arama için tavsiye niteliğinde izlem"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:111
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Kabul edilebilir değerler şunlardır: “exact” (birebir), "
 "“conservative” (ılımlı), “aggressive” (sert) ve “horizon”."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Zoom of conversation viewer"
 msgstr "Konuşma göstericisinin yakınlaşması"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:117
 msgid "The zoom to apply on the conservation view."
 msgstr "Konuşma görünümünde uygulanacak yakınlaşma."
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "Size of detached composer window"
 msgstr "Ayrılan oluşturucu penceresinin boyutu"
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "The last recorded size of the detached composer window."
 msgstr "Ayrılmış oluşturucu penceresinin kaydedilen son boyutu."
 
-#: desktop/org.gnome.Geary.gschema.xml:140
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Base URL to look up contact avatars"
 msgstr "Kişi avatarlarının aranıp bulunacağı temel URL"
 
-#: desktop/org.gnome.Geary.gschema.xml:141
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "A Gravatar or Libravatar compatible URL, set to the empty string to disable."
 msgstr ""
 "Gravatar veya Libravatar uyumlu URL, devre dışı bırakmak için dizgeyi boş "
 "bırakın."
 
-#: desktop/org.gnome.Geary.gschema.xml:146
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "Eski ayarları taşıyıp taşımayacağımız"
 
-#: desktop/org.gnome.Geary.gschema.xml:147
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -583,15 +567,21 @@ msgstr "Komut satırı seçenekleri ayrıştırılamadı: %s\n"
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Tanınmayan komut satırı seçeneği “%s”\n"
 
-#: src/client/application/geary-controller.vala:711
+#. Translators: File name used in save chooser when saving
+#. attachments that do not otherwise have a name.
+#: src/client/application/geary-controller.vala:68
+msgid "Untitled"
+msgstr "Başlıksız"
+
+#: src/client/application/geary-controller.vala:721
 msgid "Unable to store server trust exception"
 msgstr "Sunucu güven ayrıcalığı depolanamadı"
 
-#: src/client/application/geary-controller.vala:962
+#: src/client/application/geary-controller.vala:972
 msgid "Your settings are insecure"
 msgstr "Ayarlarınız güvensiz"
 
-#: src/client/application/geary-controller.vala:963
+#: src/client/application/geary-controller.vala:973
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -601,17 +591,17 @@ msgstr ""
 "kullanıcı adınız ve parolanız ağdaki başka biri tarafından okunabilir "
 "demektir. Bunu yapmak istediğinize emin misiniz?"
 
-#: src/client/application/geary-controller.vala:964
+#: src/client/application/geary-controller.vala:974
 msgid "Co_ntinue"
 msgstr "Devam _et"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/application/geary-controller.vala:1068
+#: src/client/application/geary-controller.vala:1078
 #: src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "E-posta gönderme hatası"
 
-#: src/client/application/geary-controller.vala:1069
+#: src/client/application/geary-controller.vala:1079
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -621,12 +611,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: src/client/application/geary-controller.vala:1073
+#: src/client/application/geary-controller.vala:1083
 #: src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Gönderilmiş posta kaydedilirken hata"
 
-#: src/client/application/geary-controller.vala:1074
+#: src/client/application/geary-controller.vala:1084
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -634,19 +624,19 @@ msgstr ""
 "Geary, Gönderilmiş Postaya gönderilmiş iletiyi kaydederken bir hata ile "
 "karşılaştı.  İleti, siz silene kadar Giden klasörünüzde kalacak."
 
-#: src/client/application/geary-controller.vala:1141
+#: src/client/application/geary-controller.vala:1151
 msgid "Labels"
 msgstr "Etiketler"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:1153
+#: src/client/application/geary-controller.vala:1163
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "%s için veri tabanı açılamadı"
 
-#: src/client/application/geary-controller.vala:1154
+#: src/client/application/geary-controller.vala:1164
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -670,20 +660,20 @@ msgstr ""
 "Veri tabanının yeniden inşa edilmesi tüm yerel e-postaları ve eklerini yok "
 "edecektir.<b>Sizin sunucunuzdaki postalar etkilenmeyecektir.</b>"
 
-#: src/client/application/geary-controller.vala:1156
+#: src/client/application/geary-controller.vala:1166
 msgid "_Rebuild"
 msgstr "_Yeniden oluştur"
 
-#: src/client/application/geary-controller.vala:1156
+#: src/client/application/geary-controller.vala:1166
 msgid "E_xit"
 msgstr "Ç_ık"
 
-#: src/client/application/geary-controller.vala:1165
+#: src/client/application/geary-controller.vala:1175
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "“%s” için veri tabanı yeniden oluşturulamadı"
 
-#: src/client/application/geary-controller.vala:1166
+#: src/client/application/geary-controller.vala:1176
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -696,14 +686,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: src/client/application/geary-controller.vala:1188
 #: src/client/application/geary-controller.vala:1198
-#: src/client/application/geary-controller.vala:1209
+#: src/client/application/geary-controller.vala:1208
+#: src/client/application/geary-controller.vala:1219
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "%s için yerel posta kutusu açılamadı"
 
-#: src/client/application/geary-controller.vala:1189
+#: src/client/application/geary-controller.vala:1199
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -722,7 +712,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1199
+#: src/client/application/geary-controller.vala:1209
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be “rolled back” to "
@@ -736,7 +726,7 @@ msgstr ""
 "\n"
 "Lütfen Geary uygulamasının son sürümünü kurun ve yeniden deneyin."
 
-#: src/client/application/geary-controller.vala:1210
+#: src/client/application/geary-controller.vala:1220
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -748,15 +738,15 @@ msgstr ""
 "\n"
 "Lütfen ağ bağlantılarınızı denetleyin ve Geary uygulamasını yeniden başlatın."
 
-#: src/client/application/geary-controller.vala:2028
+#: src/client/application/geary-controller.vala:2038
 msgid "Undo move (Ctrl+Z)"
 msgstr "Taşımayı geri al (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2038
+#: src/client/application/geary-controller.vala:2048
 msgid "Are you sure you want to open these attachments?"
 msgstr "Bu ekleri açmak istediğinize emin misiniz?"
 
-#: src/client/application/geary-controller.vala:2039
+#: src/client/application/geary-controller.vala:2049
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -764,16 +754,22 @@ msgstr ""
 "Eklerin açılması sisteminizin zarar görmesine neden olabilir.  Yalnızca "
 "güvendiğiniz kaynaklardan gelen dosyaları açın."
 
-#: src/client/application/geary-controller.vala:2040
+#: src/client/application/geary-controller.vala:2050
 msgid "Don’t _ask me again"
 msgstr "Yeniden _sorma"
 
-#: src/client/application/geary-controller.vala:2136
+#. Translators: Dialog primary label when prompting to
+#. overwrite a file. The string substitution is the file'sx
+#. name.
+#: src/client/application/geary-controller.vala:2179
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "“%s” adlı dosya zaten var.  Değiştirmek istiyor musunuz?"
 
-#: src/client/application/geary-controller.vala:2138
+#. Translators: Dialog secondary label when prompting to
+#. overwrite a file. The string substitution is the parent
+#. folder's name.
+#: src/client/application/geary-controller.vala:2186
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -781,67 +777,67 @@ msgstr ""
 "Dosya “%s”’in içinde zaten var.  Bunu var olanla değiştirmek, içeriğini "
 "üzerine yazacak."
 
-#: src/client/application/geary-controller.vala:2141
+#: src/client/application/geary-controller.vala:2190
 msgid "_Replace"
 msgstr "_Değiştir"
 
-#: src/client/application/geary-controller.vala:2381
+#: src/client/application/geary-controller.vala:2460
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Tüm taslak iletiyi kapat?"
 
-#: src/client/application/geary-controller.vala:2507
+#: src/client/application/geary-controller.vala:2586
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s klasörünüzdeki tüm e-postaları boşalt?"
 
-#: src/client/application/geary-controller.vala:2508
+#: src/client/application/geary-controller.vala:2587
 msgid "This removes the email from Geary and your email server."
 msgstr "Bu işlem e-postayı Geary’den ve e-posta sunucunuzdan kaldırır."
 
-#: src/client/application/geary-controller.vala:2509
+#: src/client/application/geary-controller.vala:2588
 msgid "This cannot be undone."
 msgstr "Bu geri alınamaz."
 
-#: src/client/application/geary-controller.vala:2510
+#: src/client/application/geary-controller.vala:2589
 #, c-format
 msgid "Empty %s"
 msgstr "%s boşalt"
 
-#: src/client/application/geary-controller.vala:2527
+#: src/client/application/geary-controller.vala:2606
 #, c-format
 msgid "Error emptying %s"
 msgstr "%s boşaltılırken hata"
 
-#: src/client/application/geary-controller.vala:2559
+#: src/client/application/geary-controller.vala:2638
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Bu ileti(ler)i kalıcı olarak silmek istiyor musunuz?"
 
-#: src/client/application/geary-controller.vala:2561
+#: src/client/application/geary-controller.vala:2640
 msgid "Delete"
 msgstr "Sil"
 
-#: src/client/application/geary-controller.vala:2575
+#: src/client/application/geary-controller.vala:2654
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Çöpten geri al (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2625
+#: src/client/application/geary-controller.vala:2704
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Arşivden geri al (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2670
+#: src/client/application/geary-controller.vala:2749
 msgid "Undo (Ctrl+Z)"
 msgstr "Geri al (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2747
+#: src/client/application/geary-controller.vala:2826
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Posta, %s adresine başarıyla gönderildi."
 
-#: src/client/application/geary-controller.vala:2828
+#: src/client/application/geary-controller.vala:2907
 msgid "Failed to open default text editor."
 msgstr "Öntanımlı metin düzenleyici açılamadı."
 
@@ -1408,7 +1404,6 @@ msgid "Date:"
 msgstr "Tarih:"
 
 #: src/client/conversation-viewer/conversation-email.vala:831
-#| msgid "Subject"
 msgid "Subject:"
 msgstr "Konu:"
 
@@ -3110,6 +3105,18 @@ msgstr "E-posta adresi:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary güncellemesi sürüyor…"
+
+#~ msgid "Default attachments directory"
+#~ msgstr "Öntanımlı ek dizini"
+
+#~ msgid "Location used when opening and saving attachments."
+#~ msgstr "Ekleri açarken veya kaydederken kullanılan konum."
+
+#~ msgid "Default print output directory"
+#~ msgstr "Öntanımlı yazdırma çıktı dizini"
+
+#~ msgid "Location used when printing to a file."
+#~ msgstr "Dosyaya yazdırılırken kullanılacak konum."
 
 #~ msgid "Geary will run in the background and notify of new mail"
 #~ msgstr "Geary arka planda çalışacak ve yeni postayı bildirecek"
