@@ -64,7 +64,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         throws GLib.Error {
         this.is_running = true;
         yield this.outbox.open_async(Folder.OpenFlags.NONE, cancellable);
-        this.fill_outbox_queue.begin();
+        yield this.fill_outbox_queue(cancellable);
         this.endpoint.connectivity.notify["is-reachable"].connect(
             on_reachable_changed
         );
@@ -86,6 +86,13 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
             on_connectivity_error
         );
         this.stop_postie();
+        // Wait for the postie to actually stop before closing the
+        // folder so w don't interrupt e.g. sending/saving/deleting
+        // mail
+        while (this.queue_cancellable != null) {
+            GLib.Idle.add(this.stop.callback);
+            yield;
+        }
         yield this.outbox.close_async(cancellable);
         this.is_running = false;
     }
@@ -102,28 +109,6 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
             rfc822, null, null, null, cancellable
         );
         this.outbox_queue.send(id);
-    }
-
-    /**
-     * Loads any email in the outbox and adds them to the queue.
-     */
-    private async void fill_outbox_queue() {
-        try {
-            Gee.List<Email>? queued = yield this.outbox.list_email_by_id_async(
-                null,
-                int.MAX, // fetch all
-                Email.Field.NONE, // ids only
-                Folder.ListFlags.OLDEST_TO_NEWEST,
-                this.queue_cancellable
-            );
-            if (queued != null) {
-                foreach (Email email in queued) {
-                    this.outbox_queue.send(email.id);
-                }
-            }
-        } catch (Error err) {
-            warning("Error filling queue: %s", err.message);
-        }
     }
 
     /**
@@ -198,7 +183,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         }
 
         this.queue_cancellable = null;
-        debug("Exiting outbox postie");
+        debug("Outbox postie exited");
     }
 
     /**
@@ -206,9 +191,31 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
      */
     private void stop_postie() {
         debug("Stopping outbox postie");
-        Cancellable? old_cancellable = this.queue_cancellable;
-        if (old_cancellable != null) {
-            old_cancellable.cancel();
+        if (this.queue_cancellable != null) {
+            this.queue_cancellable.cancel();
+        }
+    }
+
+    /**
+     * Loads any email in the outbox and adds them to the queue.
+     */
+    private async void fill_outbox_queue(GLib.Cancellable cancellable) {
+        debug("Filling queue");
+        try {
+            Gee.List<Email>? queued = yield this.outbox.list_email_by_id_async(
+                null,
+                int.MAX, // fetch all
+                Email.Field.NONE, // ids only
+                Folder.ListFlags.OLDEST_TO_NEWEST,
+                cancellable
+            );
+            if (queued != null) {
+                foreach (Email email in queued) {
+                    this.outbox_queue.send(email.id);
+                }
+            }
+        } catch (Error err) {
+            warning("Error filling queue: %s", err.message);
         }
     }
 
