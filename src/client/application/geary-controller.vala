@@ -2520,7 +2520,7 @@ public class GearyController : Geary.BaseObject {
             yield do_empty_folder_async(emptyable, cancellable);
         } catch (Error err) {
             // don't report to user if cancelled
-            if (cancellable is IOError.CANCELLED)
+            if (err is IOError.CANCELLED)
                 return;
             
             ErrorDialog dialog = new ErrorDialog(main_window,
