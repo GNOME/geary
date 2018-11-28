@@ -205,7 +205,7 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     /** The HTML content's current preferred height in window pixels. */
     public int preferred_height {
         get {
-            return (int) GLib.Math.ceil(
+            return (int) GLib.Math.round(
                 this.webkit_reported_height * this.zoom_level
             );
         }
