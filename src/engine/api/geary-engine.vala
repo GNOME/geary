@@ -368,10 +368,12 @@ public class Geary.Engine : BaseObject {
         Endpoint imap = get_shared_endpoint(
             config.service_provider, config.imap
         );
+        account.set_endpoint(account.incoming, imap);
+
         Endpoint smtp = get_shared_endpoint(
             config.service_provider, config.smtp
         );
-        account.set_endpoints(imap, smtp);
+        account.set_endpoint(account.outgoing, smtp);
 
         account_instances.set(config.id, account);
         return account;

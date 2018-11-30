@@ -390,14 +390,18 @@ public abstract class Geary.Account : BaseObject {
     }
 
     /**
-     * Sets network endpoints for incoming and outgoing client services.
+     * Sets network endpoints for the incoming or outgoing service.
      *
      * This is called by {@link Engine} after creating the account and
      * if the network configuration changes. Implementations should
      * pass these to their incoming and outgoing client services and
      * restart them as required.
+     *
+     * The service parameter is one of {@link incoming} or {@link
+     * outgoing}.
      */
-    internal abstract void set_endpoints(Endpoint incoming, Endpoint outgoing);
+    internal abstract void set_endpoint(ClientService service,
+                                        Endpoint endpoint);
 
     /** Fires a {@link opened} signal. */
     protected virtual void notify_opened() {
