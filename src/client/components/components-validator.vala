@@ -105,6 +105,9 @@ public class Components.Validator : GLib.Object {
     /** Fired when the validation state changes. */
     public signal void state_changed(Trigger reason, Validity prev_state);
 
+    /** Fired when target entry is activated and validation completes. */
+    public signal void activated();
+
 
     public Validator(Gtk.Entry target) {
         this.target = target;
@@ -203,6 +206,10 @@ public class Components.Validator : GLib.Object {
                 // it.
                 this.ui_update_timer.start();
             }
+        }
+
+        if (reason == Trigger.ACTIVATED && new_state != Validity.IN_PROGRESS) {
+            activated();
         }
     }
 
@@ -340,7 +347,7 @@ public class Components.NetworkAddressValidator : Validator {
     private GLib.Cancellable? cancellable = null;
 
 
-    public NetworkAddressValidator(Gtk.Entry target, uint16 default_port) {
+    public NetworkAddressValidator(Gtk.Entry target, uint16 default_port = 0) {
         base(target);
         this.default_port = default_port;
 
