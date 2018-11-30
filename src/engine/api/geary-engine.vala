@@ -297,6 +297,7 @@ public class Geary.Engine : BaseObject {
      */
     public async void validate_smtp(AccountInformation account,
                                     ServiceInformation service,
+                                    Credentials? imap_credentials,
                                     GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_opened();
@@ -307,12 +308,20 @@ public class Geary.Engine : BaseObject {
             (security, cx) => account.untrusted_host(service, security, cx)
         );
 
+        Credentials? credentials = null;
+        switch (service.smtp_credentials_source) {
+        case IMAP:
+            credentials = imap_credentials;
+            break;
+        case CUSTOM:
+            credentials = service.credentials;
+            break;
+        }
+
         Geary.Smtp.ClientSession client = new Geary.Smtp.ClientSession(endpoint);
         GLib.Error? login_err = null;
         try {
-            yield client.login_async(
-                account.get_smtp_credentials(), cancellable
-            );
+            yield client.login_async(credentials, cancellable);
         } catch (GLib.Error err) {
             login_err = err;
         }

@@ -205,7 +205,10 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                 debug("Validating SMTP...");
                 try {
                     yield this.engine.validate_smtp(
-                        account, account.smtp, cancellable
+                        account,
+                        account.smtp,
+                        account.imap.credentials,
+                        cancellable
                     );
                     smtp_valid = true;
                 } catch (Geary.SmtpError.AUTHENTICATION_FAILED err) {
