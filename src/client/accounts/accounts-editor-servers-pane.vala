@@ -17,6 +17,8 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     protected weak Accounts.Editor editor { get; set; }
 
+    private Geary.Engine engine;
+
     // These are copies of the originals that can be updated before
     // validating on apply, without breaking anything.
     private Geary.ServiceInformation imap_mutable;
@@ -25,6 +27,9 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     [GtkChild]
     private Gtk.HeaderBar header;
+
+    [GtkChild]
+    private Gtk.Overlay osd_overlay;
 
     [GtkChild]
     private Gtk.Grid pane_content;
@@ -41,6 +46,13 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
     [GtkChild]
     private Gtk.ListBox sending_list;
 
+    [GtkChild]
+    private Gtk.Button apply_button;
+
+    [GtkChild]
+    private Gtk.Spinner apply_spinner;
+
+    private SaveDraftsRow save_drafts;
     private ServiceSmtpAuthRow smtp_auth;
     private ServiceLoginRow smtp_login;
 
@@ -48,11 +60,11 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
     public EditorServersPane(Editor editor, Geary.AccountInformation account) {
         this.editor = editor;
         this.account = account;
-
-        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
-
+        this.engine = ((GearyApplication) editor.application).engine;
         this.imap_mutable = account.imap.temp_copy();
         this.smtp_mutable = account.smtp.temp_copy();
+
+        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
         this.details_list.set_header_func(Editor.seperator_headers);
         // Only add an account provider if it is esoteric enough.
@@ -69,20 +81,23 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         service_provider.set_dim_label(true);
         service_provider.activatable = false;
         this.details_list.add(service_provider);
-        this.details_list.add(new SaveDraftsRow(this.account));
+        this.save_drafts = new SaveDraftsRow(this.account);
+        this.details_list.add(this.save_drafts);
 
         this.receiving_list.set_header_func(Editor.seperator_headers);
-        this.receiving_list.add(new ServiceHostRow(account, account.imap));
-        this.receiving_list.add(new ServiceSecurityRow(account, account.imap));
-        this.receiving_list.add(new ServiceLoginRow(account, account.imap));
+        this.receiving_list.add(new ServiceHostRow(account, this.imap_mutable));
+        this.receiving_list.add(new ServiceSecurityRow(account, this.imap_mutable));
+        this.receiving_list.add(new ServiceLoginRow(account, this.imap_mutable));
 
         this.sending_list.set_header_func(Editor.seperator_headers);
-        this.sending_list.add(new ServiceHostRow(account, account.smtp));
-        this.sending_list.add(new ServiceSecurityRow(account, account.smtp));
-        this.smtp_auth = new ServiceSmtpAuthRow(account, account.smtp);
+        this.sending_list.add(new ServiceHostRow(account, this.smtp_mutable));
+        this.sending_list.add(new ServiceSecurityRow(account, this.smtp_mutable));
+        this.smtp_auth = new ServiceSmtpAuthRow(
+            account, this.smtp_mutable, this.imap_mutable
+        );
         this.smtp_auth.value.changed.connect(on_smtp_auth_changed);
         this.sending_list.add(this.smtp_auth);
-        this.smtp_login = new ServiceLoginRow(account, account.smtp);
+        this.smtp_login = new ServiceLoginRow(account, this.smtp_mutable);
         this.sending_list.add(this.smtp_login);
 
         this.account.information_changed.connect(on_account_changed);
@@ -99,11 +114,114 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         return this.header;
     }
 
+    private async void save(GLib.Cancellable? cancellable) {
+        this.apply_button.set_sensitive(false);
+        this.apply_spinner.show();
+        this.apply_spinner.start();
+
+        // Only need to validate if a generic account
+        bool is_valid = true;
+        bool has_changed = false;
+        if (this.account.service_provider == Geary.ServiceProvider.OTHER) {
+            is_valid = yield validate(cancellable);
+
+            if (is_valid) {
+                has_changed = this.engine.update_account_service(
+                    this.account, imap_mutable
+                );
+                has_changed = this.engine.update_account_service(
+                    this.account, smtp_mutable
+                );
+            }
+        }
+
+        if (is_valid) {
+            if (this.save_drafts.value_changed) {
+                this.account.save_drafts = this.save_drafts.value.state;
+                has_changed = true;
+            }
+
+            if (has_changed) {
+                this.account.information_changed();
+            }
+
+            this.editor.pop();
+        }
+
+        this.apply_button.set_sensitive(true);
+        this.apply_spinner.stop();
+        this.apply_spinner.hide();
+    }
+
+    private async bool validate(GLib.Cancellable? cancellable) {
+        string message = "";
+        bool imap_valid = false;
+        try {
+            yield this.engine.validate_imap(
+                this.account, this.imap_mutable, cancellable
+            );
+            imap_valid = true;
+        } catch (Geary.ImapError.UNAUTHENTICATED err) {
+            debug("Error authenticating IMAP service: %s", err.message);
+            // Translators: In-app notification label
+            message = _("Check your receiving login and password");
+        } catch (GLib.Error err) {
+            debug("Error validating IMAP service: %s", err.message);
+            // Translators: In-app notification label
+            message = _("Check your receiving server details");
+        }
+
+        bool smtp_valid = false;
+        if (imap_valid) {
+            debug("Validating SMTP...");
+            try {
+                yield this.engine.validate_smtp(
+                    this.account,
+                    this.smtp_mutable,
+                    this.imap_mutable.credentials,
+                    cancellable
+                );
+                smtp_valid = true;
+            } catch (Geary.SmtpError.AUTHENTICATION_FAILED err) {
+                debug("Error authenticating SMTP service: %s", err.message);
+                // There was an SMTP auth error, but IMAP already
+                // succeeded, so the user probably needs to
+                // specify custom creds here
+                this.smtp_auth.value.source = Geary.SmtpCredentials.CUSTOM;
+                // Translators: In-app notification label
+                message = _("Check your sending login and password");
+            } catch (GLib.Error err) {
+                debug("Error validating SMTP service: %s", err.message);
+                    // Translators: In-app notification label
+                    message = _("Check your sending server details");
+            }
+        }
+
+        bool is_valid = imap_valid && smtp_valid;
+        debug("Validation complete, is valid: %s", is_valid.to_string());
+
+        if (!is_valid) {
+            add_notification(
+                new InAppNotification(
+                    // Translators: In-app notification label, the
+                    // string substitution is a more detailed reason.
+                    _("Account not updated: %s").printf(message)
+                )
+            );
+        }
+
+        return is_valid;
+    }
+
+    private void add_notification(InAppNotification notification) {
+        this.osd_overlay.add_overlay(notification);
+        notification.show();
+    }
+
     private void update_smtp_auth() {
         this.smtp_login.set_visible(
             this.smtp_auth.value.source == Geary.SmtpCredentials.CUSTOM
         );
-        this.smtp_login.update();
     }
 
     [GtkCallback]
@@ -113,6 +231,7 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     [GtkCallback]
     private void on_apply_button_clicked() {
+        this.save.begin(null);
     }
 
     [GtkCallback]
@@ -178,7 +297,6 @@ private class Accounts.AccountProviderRow :
         );
 
         this.accounts = accounts;
-
         update();
     }
 
@@ -228,21 +346,34 @@ private class Accounts.SaveDraftsRow :
     AccountRow<EditorServersPane,Gtk.Switch> {
 
 
+    public bool value_changed {
+        get { return this.initial_value != this.value.state; }
+    }
+
+    private bool initial_value;
+
+
     public SaveDraftsRow(Geary.AccountInformation account) {
+        Gtk.Switch value = new Gtk.Switch();
         base(
             account,
             // Translators: This label describes an account
             // preference.
             _("Save drafts on server"),
-            new Gtk.Switch()
+            value
         );
         set_activatable(false);
-
         update();
+        value.notify["active"].connect(on_activate);
     }
 
     public override void update() {
-        this.value.state = this.account.save_drafts;
+        this.initial_value = this.account.save_drafts;
+        this.value.state = this.initial_value;
+    }
+
+    private void on_activate() {
+        this.account.save_drafts = this.value.state;
     }
 
 }
@@ -279,58 +410,56 @@ private class Accounts.ServiceHostRow :
     }
 
     public override void activated(EditorServersPane pane) {
-        EditorPopover popover = new EditorPopover();
-
-        string? value = this.service.host;
+        string? text = get_host_text() ?? "";
         Gtk.Entry entry = new Gtk.Entry();
-        entry.set_text(value ?? "");
-        entry.set_placeholder_text(value ?? "");
+        entry.set_text(text);
+        entry.set_placeholder_text(text);
         entry.set_width_chars(20);
         entry.show();
 
+        EditorPopover popover = new EditorPopover();
         popover.set_relative_to(this.value);
         popover.layout.add(entry);
+        popover.add_validator(new Components.NetworkAddressValidator(entry));
+        popover.valid_activated.connect(on_popover_activate);
         popover.popup();
     }
 
     public override void update() {
-        string value = this.service.host;
+        string value = get_host_text();
         if (Geary.String.is_empty(value)) {
             value = _("None");
         }
-
-        // Only show the port if it not the appropriate default port
-        bool custom_port = false;
-        int port = this.service.port;
-        Geary.TlsNegotiationMethod security = this.service.transport_security;
-        switch (this.service.protocol) {
-        case Geary.Protocol.IMAP:
-            if (!(port == Geary.Imap.IMAP_PORT &&
-                  (security == Geary.TlsNegotiationMethod.NONE ||
-                   security == Geary.TlsNegotiationMethod.START_TLS)) &&
-                !(port == Geary.Imap.IMAP_TLS_PORT &&
-                  security == Geary.TlsNegotiationMethod.TRANSPORT)) {
-                custom_port = true;
-            }
-            break;
-        case Geary.Protocol.SMTP:
-            if (!(port == Geary.Smtp.SMTP_PORT &&
-                  (security == Geary.TlsNegotiationMethod.NONE ||
-                   security == Geary.TlsNegotiationMethod.START_TLS)) &&
-                !(port == Geary.Smtp.SUBMISSION_PORT &&
-                  (security == Geary.TlsNegotiationMethod.NONE ||
-                   security == Geary.TlsNegotiationMethod.START_TLS)) &&
-                !(port == Geary.Smtp.SUBMISSION_TLS_PORT &&
-                  security == Geary.TlsNegotiationMethod.TRANSPORT)) {
-                custom_port = true;
-            }
-            break;
-        }
-        if (custom_port) {
-            value = "%s:%d".printf(value, this.service.port);
-        }
-
         this.value.set_text(value);
+    }
+
+    private string? get_host_text() {
+        string? value = this.service.host ?? "";
+        if (!Geary.String.is_empty(value)) {
+            // Only show the port if it not the appropriate default port
+            uint16 port = this.service.port;
+            if (port != this.service.get_default_port()) {
+                value = "%s:%d".printf(value, this.service.port);
+            }
+        }
+        return value;
+    }
+
+    private void on_popover_activate(EditorPopover popover) {
+        Components.NetworkAddressValidator validator =
+            (Components.NetworkAddressValidator) Geary.traverse(
+                popover.validators
+            ).first();
+
+        GLib.NetworkAddress? address = validator.validated_address;
+        if (address != null) {
+            this.service.host = address.hostname;
+            this.service.port = address.port != 0
+                ? (uint16) address.port
+                : this.service.get_default_port();
+        }
+
+        popover.popdown();
     }
 
 }
@@ -343,8 +472,9 @@ private class Accounts.ServiceSecurityRow :
                               Geary.ServiceInformation service) {
         TlsComboBox value = new TlsComboBox();
         base(account, service, value.label, value);
-        update();
+        set_activatable(false);
         value.changed.connect(on_value_changed);
+        update();
     }
 
     public override void update() {
@@ -352,7 +482,17 @@ private class Accounts.ServiceSecurityRow :
     }
 
     private void on_value_changed() {
-        this.service.transport_security = this.value.method;
+        if (this.service.transport_security != this.value.method) {
+            // Update the port if we're currently using the default,
+            // otherwise keep the custom port as-is.
+            bool update_port = (
+                this.service.port == this.service.get_default_port()
+            );
+            this.service.transport_security = this.value.method;
+            if (update_port) {
+                this.service.port = this.service.get_default_port();
+            }
+        }
     }
 
 }
@@ -377,8 +517,6 @@ private class Accounts.ServiceLoginRow :
     }
 
     public override void activated(EditorServersPane pane) {
-        EditorPopover popover = new EditorPopover();
-
         string? value = null;
         if (this.service.credentials != null) {
             value = this.service.credentials.user;
@@ -389,12 +527,19 @@ private class Accounts.ServiceLoginRow :
         entry.set_width_chars(20);
         entry.show();
 
+        EditorPopover popover = new EditorPopover();
         popover.set_relative_to(this.value);
         popover.layout.add(entry);
+        popover.add_validator(new Components.Validator(entry));
+        popover.valid_activated.connect(on_popover_activate);
         popover.popup();
     }
 
     public override void update() {
+        this.value.set_text(get_login_text());
+    }
+
+    private string? get_login_text() {
         string? label = null;
         if (this.service.credentials != null) {
             string method = "%s";
@@ -433,7 +578,15 @@ private class Accounts.ServiceLoginRow :
             // by an account's IMAP or SMTP service.
             label = _("None");
         }
-        this.value.set_text(label);
+        return label;
+    }
+
+    private void on_popover_activate(EditorPopover popover) {
+        Components.Validator validator =
+            Geary.traverse(popover.validators).first();
+       this.service.credentials =
+           this.service.credentials.copy_with_user(validator.target.text);
+        popover.popdown();
     }
 
 }
@@ -441,13 +594,19 @@ private class Accounts.ServiceLoginRow :
 private class Accounts.ServiceSmtpAuthRow :
     ServiceRow<EditorServersPane,SmtpAuthComboBox> {
 
+
+    Geary.ServiceInformation imap_service;
+
+
     public ServiceSmtpAuthRow(Geary.AccountInformation account,
-                              Geary.ServiceInformation service) {
+                              Geary.ServiceInformation smtp_service,
+                              Geary.ServiceInformation imap_service) {
         SmtpAuthComboBox value = new SmtpAuthComboBox();
-        base(account, service, value.label, value);
+        base(account, smtp_service, value.label, value);
+        this.imap_service = imap_service;
         this.activatable = false;
-        update();
         value.changed.connect(on_value_changed);
+        update();
     }
 
     public override void update() {
@@ -455,7 +614,23 @@ private class Accounts.ServiceSmtpAuthRow :
     }
 
     private void on_value_changed() {
-        this.service.smtp_credentials_source = this.value.source;
+        if (this.service.smtp_credentials_source != this.value.source) {
+            // The default SMTP port also depends on the auth method
+            // used, so also update the port here if we're currently
+            // using the default, otherwise keep the custom port
+            // as-is.
+            bool update_port = (
+                this.service.port == this.service.get_default_port()
+            );
+            this.service.smtp_credentials_source = this.value.source;
+            this.service.credentials =
+                (this.service.smtp_credentials_source != CUSTOM)
+                ? null
+                : new Geary.Credentials(Geary.Credentials.Method.PASSWORD, "");
+            if (update_port) {
+                this.service.port = this.service.get_default_port();
+            }
+        }
     }
 
 }

@@ -233,6 +233,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
     }
 
 
+    /** Returns a temporary copy of this service for editing. */
     public abstract ServiceInformation temp_copy();
 
     /**
@@ -260,6 +261,25 @@ public abstract class Geary.ServiceInformation : GLib.Object {
         }
 
         return port;
+    }
+
+    /**
+     * Returns true if another object is equal to this one.
+     */
+    public bool equal_to(Geary.ServiceInformation other) {
+        return (
+            this == other ||
+            (this.host == other.host &&
+             this.port == other.port &&
+             this.use_starttls == other.use_starttls &&
+             this.use_ssl == other.use_ssl &&
+             (this.credentials == null && other.credentials != null ||
+              this.credentials != null && this.credentials.equal_to(other.credentials)) &&
+             this.mediator == other.mediator &&
+             this.remember_password == other.remember_password &&
+             this.smtp_noauth == other.smtp_noauth &&
+             this.smtp_use_imap_credentials == other.smtp_use_imap_credentials)
+        );
     }
 
     public void copy_from(Geary.ServiceInformation from) {

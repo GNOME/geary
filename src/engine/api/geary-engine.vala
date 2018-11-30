@@ -433,6 +433,59 @@ public class Geary.Engine : BaseObject {
         }
     }
 
+    /**
+     * Changes the service configuration for an account.
+     *
+     * This updates an account's service configuration with the given
+     * configuration, by copying it over the account's existing
+     * configuration for that service. The corresponding {@link
+     * Account.incoming} or {@link Account.outgoing} client service
+     * will also be updated so that the new configuration will start
+     * taking effect immediately.
+     *
+     * Returns true if the account's service was updated, or false if
+     * the configuration was the same.
+     */
+    public bool update_account_service(AccountInformation account,
+                                       ServiceInformation updated) {
+        // Ensure account is closed.
+        Account? impl = this.account_instances.get(account.id);
+        if (impl == null) {
+            throw new EngineError.BAD_PARAMETERS(
+                "Account has not been added to the engine: %s", account.id
+            );
+        }
+
+        ServiceInformation? existing = null;
+        ClientService? service = null;
+        switch (updated.protocol) {
+        case Protocol.IMAP:
+            existing = account.imap;
+            service = impl.incoming;
+            break;
+        case Protocol.SMTP:
+            existing = account.smtp;
+            service = impl.outgoing;
+            break;
+        }
+
+        bool was_updated = false;
+        if (service != null) {
+            if (!existing.equal_to(updated)) {
+                existing.copy_from(updated);
+                was_updated = true;
+
+                Endpoint endpoint = get_shared_endpoint(
+                    account.service_provider, existing
+                );
+                impl.set_endpoint(service, endpoint);
+                account.information_changed();
+            }
+        }
+
+        return was_updated;
+    }
+
     private Geary.Endpoint get_shared_endpoint(ServiceProvider provider,
                                                ServiceInformation service) {
         string key = "%s/%s:%u".printf(

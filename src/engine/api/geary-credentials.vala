@@ -84,6 +84,10 @@ public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
         return this.token != null;
     }
 
+    public Credentials copy_with_user(string user) {
+        return new Credentials(this.supported_method, user, this.token);
+    }
+
     public Credentials copy_with_token(string? token) {
         return new Credentials(this.supported_method, this.user, token);
     }

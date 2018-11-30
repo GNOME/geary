@@ -172,6 +172,7 @@ private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> 
                       V value) {
         base(account, label, value);
         this.service = service;
+        this.service.notify.connect(on_notify);
 
         bool is_editable = this.is_value_editable;
         set_activatable(is_editable);
@@ -184,6 +185,14 @@ private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> 
                 widget.set_sensitive(false);
             }
         }
+    }
+
+    ~ServiceRow() {
+        this.service.notify.disconnect(on_notify);
+    }
+
+    private void on_notify() {
+        update();
     }
 
 }
@@ -302,12 +311,39 @@ internal class Accounts.SmtpAuthComboBox : Gtk.ComboBoxText {
 }
 
 
+/**
+ * Displaying and manages validation of popover-based forms.
+ */
 internal class Accounts.EditorPopover : Gtk.Popover {
 
 
-    internal Gtk.Grid layout { get; private set; default = new Gtk.Grid(); }
+    internal Gtk.Grid layout {
+        get; private set; default = new Gtk.Grid();
+    }
+
+    internal Gee.Collection<Components.Validator> validators {
+        owned get { return this.validator_backing.read_only_view; }
+    }
 
     protected Gtk.Widget popup_focus = null;
+
+    private Gee.Collection<Components.Validator> validator_backing =
+        new Gee.LinkedList<Components.Validator>();
+
+
+    /**
+     * Emitted when a validated widget is activated all are valid.
+     *
+     * This signal will be emitted when all of the following are true:
+     *
+     * 1. At least one validator has been added to the popover
+     * 2. The user activates an entry that is being monitored by a
+     *    validator
+     * 3. The validation for the has completed (i.e. is not in
+     *    progress)
+     * 4. All validators are in the valid state
+     */
+    public override signal void valid_activated();
 
 
     public EditorPopover() {
@@ -352,6 +388,11 @@ internal class Accounts.EditorPopover : Gtk.Popover {
         }
     }
 
+    public void add_validator(Components.Validator validator) {
+        validator.activated.connect(on_validator_activated);
+        this.validator_backing.add(validator);
+    }
+
     public void add_labelled_row(string label, Gtk.Widget value) {
         Gtk.Label label_widget = new Gtk.Label(label);
         label_widget.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
@@ -364,6 +405,13 @@ internal class Accounts.EditorPopover : Gtk.Popover {
 
     private void on_closed() {
         destroy();
+    }
+
+    private void on_validator_activated() {
+        if (Geary.traverse(this.validator_backing).all(
+                (v) => v.state == Components.Validator.Validity.VALID)) {
+            valid_activated();
+        }
     }
 
 }
