@@ -235,13 +235,6 @@ public class Geary.Engine : BaseObject {
                                     GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_opened();
-
-        if (service.port == 0) {
-            service.port = service.use_ssl
-                ? Imap.IMAP_TLS_PORT
-                : Imap.IMAP_PORT;
-        }
-
         Endpoint endpoint = get_shared_endpoint(
             account.service_provider, service
         );
@@ -307,17 +300,6 @@ public class Geary.Engine : BaseObject {
                                     GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_opened();
-
-        if (service.port == 0) {
-            if (service.use_ssl) {
-                service.port = Smtp.SUBMISSION_TLS_PORT;
-            } else if (service.smtp_noauth) {
-                service.port = Smtp.SMTP_PORT;
-            } else {
-                service.port = Smtp.SUBMISSION_PORT;
-            }
-        }
-
         Endpoint endpoint = get_shared_endpoint(
             account.service_provider, service
         );

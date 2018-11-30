@@ -235,6 +235,33 @@ public abstract class Geary.ServiceInformation : GLib.Object {
 
     public abstract ServiceInformation temp_copy();
 
+    /**
+     * Returns the default port for this service type and settings.
+     */
+    public uint16 get_default_port() {
+        uint16 port = 0;
+
+        switch (this.protocol) {
+        case IMAP:
+            port = this.use_ssl
+                ? Imap.IMAP_TLS_PORT
+                : Imap.IMAP_PORT;
+            break;
+
+        case SMTP:
+            if (this.use_ssl) {
+                port = Smtp.SUBMISSION_TLS_PORT;
+            } else if (this.smtp_noauth) {
+                port = Smtp.SMTP_PORT;
+            } else {
+                port = Smtp.SUBMISSION_PORT;
+            }
+            break;
+        }
+
+        return port;
+    }
+
     public void copy_from(Geary.ServiceInformation from) {
         this.host = from.host;
         this.port = from.port;

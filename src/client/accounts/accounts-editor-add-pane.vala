@@ -298,6 +298,10 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             service.host = address.hostname;
             service.port = (uint16) address.port;
             service.transport_security = this.imap_tls.value.method;
+
+            if (service.port == 0) {
+                service.port = service.get_default_port();
+            }
         } else {
             this.provider.setup_service(service);
             service.credentials = new Geary.Credentials(
@@ -345,6 +349,10 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             service.host = address.hostname;
             service.port = (uint16) address.port;
             service.transport_security = this.smtp_tls.value.method;
+
+            if (service.port == 0) {
+                service.port = service.get_default_port();
+            }
 
             debug("SMTP service: TLS: %s, STARTTLS: %s",
                   service.use_ssl.to_string(), service.use_starttls.to_string());
