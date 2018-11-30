@@ -198,7 +198,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
             switch (value) {
             case SmtpCredentials.NONE:
                 this.smtp_use_imap_credentials = false;
-                this.smtp_noauth = false;
+                this.smtp_noauth = true;
                 break;
             case SmtpCredentials.IMAP:
                 this.smtp_use_imap_credentials = true;
