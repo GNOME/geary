@@ -71,6 +71,8 @@ public class Accounts.Editor : Gtk.Dialog {
     public override bool key_press_event(Gdk.EventKey event) {
         bool ret = Gdk.EVENT_PROPAGATE;
 
+        // Allow the user to use Esc, Back and Alt+arrow keys to
+        // navigate between panes.
         if (get_current_pane() != this.editor_list_pane) {
             Gdk.ModifierType state = (
                 event.state & Gtk.accelerator_get_default_mod_mask()

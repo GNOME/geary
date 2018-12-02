@@ -21,6 +21,7 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
     private bool drag_entered = false;
 
 
+    public signal void move_to(int new_position);
     public signal void dropped(EditorRow target);
 
 
@@ -53,6 +54,36 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
     public virtual void activated(PaneType pane) {
         // No-op by default
+    }
+
+    public override bool key_press_event(Gdk.EventKey event) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+
+        if (event.state == Gdk.ModifierType.CONTROL_MASK) {
+            int index = get_index();
+            if (event.keyval == Gdk.Key.Up) {
+                index -= 1;
+                if (index >= 0) {
+                    move_to(index);
+                    ret = Gdk.EVENT_STOP;
+                }
+            } else if (event.keyval == Gdk.Key.Down) {
+                index += 1;
+                Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
+                if (parent != null &&
+                    index < parent.get_children().length() &&
+                    !(parent.get_row_at_index(index) is AddRow)) {
+                    move_to(index);
+                    ret = Gdk.EVENT_STOP;
+                }
+            }
+        }
+
+        if (ret != Gdk.EVENT_STOP) {
+            ret = base.key_press_event(event);
+        }
+
+        return ret;
     }
 
     /** Adds a drag handle to the row and enables drag signals. */

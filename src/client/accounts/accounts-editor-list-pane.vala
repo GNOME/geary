@@ -159,6 +159,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     private void add_account(Geary.AccountInformation account,
                              Manager.Status status) {
         AccountListRow row = new AccountListRow(account, status);
+        row.move_to.connect(on_editor_row_moved);
         row.dropped.connect(on_editor_row_dropped);
         this.accounts_list.add(row);
     }
@@ -218,10 +219,19 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
         }
     }
 
+    private void on_editor_row_moved(EditorRow source, int new_position) {
+        this.commands.execute.begin(
+            new ReorderAccountCommand(
+                (AccountListRow) source, new_position, this.accounts
+            ),
+            null
+        );
+    }
+
     private void on_editor_row_dropped(EditorRow source, EditorRow target) {
         this.commands.execute.begin(
             new ReorderAccountCommand(
-                (AccountListRow) source, (AccountListRow) target, this.accounts
+                (AccountListRow) source, target.get_index(), this.accounts
             ),
             null
         );
@@ -473,11 +483,11 @@ internal class Accounts.ReorderAccountCommand : Application.Command {
 
 
     public ReorderAccountCommand(AccountListRow source,
-                                 AccountListRow target,
+                                 int target_index,
                                  Manager manager) {
         this.source = source;
         this.source_index = source.get_index();
-        this.target_index = target.get_index();
+        this.target_index = target_index;
 
         this.manager = manager;
     }
@@ -507,6 +517,8 @@ internal class Accounts.ReorderAccountCommand : Application.Command {
             }
             ord++;
         }
+
+        this.source.grab_focus();
     }
 
 }

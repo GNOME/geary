@@ -175,6 +175,7 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
 
     internal MailboxRow new_mailbox_row(Geary.RFC822.MailboxAddress sender) {
         MailboxRow row = new MailboxRow(this.account, sender);
+        row.move_to.connect(on_sender_row_moved);
         row.dropped.connect(on_sender_row_dropped);
         return row;
     }
@@ -187,11 +188,23 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
         update_actions();
     }
 
+    private void on_sender_row_moved(EditorRow source, int new_position) {
+        this.commands.execute.begin(
+            new ReorderMailboxCommand(
+                (MailboxRow) source,
+                new_position,
+                this.account,
+                this.senders_list
+            ),
+            null
+        );
+    }
+
     private void on_sender_row_dropped(EditorRow source, EditorRow target) {
         this.commands.execute.begin(
             new ReorderMailboxCommand(
                 (MailboxRow) source,
-                (MailboxRow) target,
+                target.get_index(),
                 this.account,
                 this.senders_list
             ),
@@ -614,12 +627,12 @@ internal class Accounts.ReorderMailboxCommand : Application.Command {
 
 
     public ReorderMailboxCommand(MailboxRow source,
-                                 MailboxRow target,
+                                 int target_index,
                                  Geary.AccountInformation account,
                                  Gtk.ListBox list) {
         this.source = source;
         this.source_index = source.get_index();
-        this.target_index = target.get_index();
+        this.target_index = target_index;
 
         this.account = account;
         this.list = list;
@@ -641,6 +654,8 @@ internal class Accounts.ReorderMailboxCommand : Application.Command {
 
         this.list.remove(this.source);
         this.list.insert(this.source, destination);
+
+        this.source.grab_focus();
     }
 
 }
