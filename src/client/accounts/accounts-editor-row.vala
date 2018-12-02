@@ -17,6 +17,8 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
     protected Gtk.Grid layout { get; private set; default = new Gtk.Grid(); }
 
     private Gtk.Container drag_handle;
+    private bool drag_picked_up = false;
+    private bool drag_entered = false;
 
 
     public signal void dropped(EditorRow target);
@@ -64,19 +66,87 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
         Gtk.drag_dest_set(
             this,
-            Gtk.DestDefaults.ALL,
+            // No highlight, we'll take care of that ourselves so we
+            // can avoid highlighting the row that was picked up
+            Gtk.DestDefaults.MOTION | Gtk.DestDefaults.DROP,
             DRAG_ENTRIES,
             Gdk.DragAction.MOVE
         );
 
+        this.drag_handle.drag_begin.connect(on_drag_begin);
+        this.drag_handle.drag_end.connect(on_drag_end);
         this.drag_handle.drag_data_get.connect(on_drag_data_get);
+
+        this.drag_motion.connect(on_drag_motion);
+        this.drag_leave.connect(on_drag_leave);
         this.drag_data_received.connect(on_drag_data_received);
+
         this.drag_handle.get_style_context().add_class("geary-drag-handle");
         this.drag_handle.show();
 
         get_style_context().add_class("geary-draggable");
     }
 
+
+    private void on_drag_begin(Gdk.DragContext context) {
+        // Draw a nice drag icon
+        Gtk.Allocation alloc = Gtk.Allocation();
+        this.get_allocation(out alloc);
+
+        Cairo.ImageSurface surface = new Cairo.ImageSurface(
+            Cairo.Format.ARGB32, alloc.width, alloc.height
+        );
+        Cairo.Context paint = new Cairo.Context(surface);
+
+
+        Gtk.StyleContext style = get_style_context();
+        style.add_class("geary-drag-icon");
+        draw(paint);
+        style.remove_class("geary-drag-icon");
+
+        int x, y;
+        this.drag_handle.translate_coordinates(this, 0, 0, out x, out y);
+        surface.set_device_offset(-x, -y);
+        Gtk.drag_set_icon_surface(context, surface);
+
+        // Set a visual hint that the row is being dragged
+        style.add_class("geary-drag-source");
+        this.drag_picked_up = true;
+    }
+
+    private void on_drag_end(Gdk.DragContext context) {
+        get_style_context().remove_class("geary-drag-source");
+        this.drag_picked_up = false;
+    }
+
+    private bool on_drag_motion(Gdk.DragContext context,
+                                int x, int y,
+                                uint time_) {
+        if (!this.drag_entered) {
+            this.drag_entered = true;
+
+            // Don't highlight the same row that was picked up
+            if (!this.drag_picked_up) {
+                Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
+                if (parent != null) {
+                    parent.drag_highlight_row(this);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private void on_drag_leave(Gdk.DragContext context,
+                               uint time_) {
+        if (!this.drag_picked_up) {
+            Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
+            if (parent != null) {
+                parent.drag_unhighlight_row();
+            }
+        }
+        this.drag_entered = false;
+    }
 
     private void on_drag_data_get(Gdk.DragContext context,
                                   Gtk.SelectionData selection_data,

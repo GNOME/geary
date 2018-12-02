@@ -212,6 +212,16 @@ row.geary-settings image {
   padding: 0px 6px;
 }
 
+row.geary-settings.geary-drag-source {
+  color: @insensitive_fg_color;
+  background-color: @insensitive_bg_color;
+}
+
+row.geary-settings.geary-drag-icon {
+  background-color: @theme_base_color;
+  border: 1px solid @borders;
+}
+
 row.geary-settings > grid > * {
   margin: 18px 6px;
 }
