@@ -158,7 +158,9 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
 
     private void add_account(Geary.AccountInformation account,
                              Manager.Status status) {
-        this.accounts_list.add(new AccountListRow(account, status));
+        AccountListRow row = new AccountListRow(account, status);
+        row.dropped.connect(on_editor_row_dropped);
+        this.accounts_list.add(row);
     }
 
     private void add_notification(InAppNotification notification) {
@@ -216,6 +218,15 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
         }
     }
 
+    private void on_editor_row_dropped(EditorRow source, EditorRow target) {
+        this.commands.execute.begin(
+            new ReorderAccountCommand(
+                (AccountListRow) source, (AccountListRow) target, this.accounts
+            ),
+            null
+        );
+    }
+
     private void on_account_removed(Geary.AccountInformation account) {
         AccountListRow? row = get_account_row(account);
         if (row != null) {
@@ -225,17 +236,21 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     }
 
     private void on_execute(Application.Command command) {
-        InAppNotification ian = new InAppNotification(command.executed_label);
-        ian.set_button(_("Undo"), "win." + GearyController.ACTION_UNDO);
-        add_notification(ian);
+        if (command.executed_label != null) {
+            InAppNotification ian = new InAppNotification(command.executed_label);
+            ian.set_button(_("Undo"), "win." + GearyController.ACTION_UNDO);
+            add_notification(ian);
+        }
 
         update_actions();
     }
 
     private void on_undo(Application.Command command) {
-        InAppNotification ian = new InAppNotification(command.undone_label);
-        ian.set_button(_("Redo"), "win." + GearyController.ACTION_REDO);
-        add_notification(ian);
+        if (command.undone_label != null) {
+            InAppNotification ian = new InAppNotification(command.undone_label);
+            ian.set_button(_("Redo"), "win." + GearyController.ACTION_REDO);
+            add_notification(ian);
+        }
 
         update_actions();
     }
@@ -267,34 +282,26 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
 }
 
 
-private class Accounts.AccountListRow : EditorRow<EditorListPane> {
+private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
 
 
-    internal Geary.AccountInformation account;
-
+    private Gtk.Label service_label = new Gtk.Label("");
     private Gtk.Image unavailable_icon = new Gtk.Image.from_icon_name(
         "dialog-warning-symbolic", Gtk.IconSize.BUTTON
     );
-    private Gtk.Label account_name = new Gtk.Label("");
-    private Gtk.Label account_details = new Gtk.Label("");
-
 
     public AccountListRow(Geary.AccountInformation account,
                           Manager.Status status) {
-        this.account = account;
+        base(account, "", new Gtk.Grid());
+        enable_drag();
 
-        this.account_name.show();
-        this.account_name.set_hexpand(true);
-        this.account_name.halign = Gtk.Align.START;
+        this.value.add(this.unavailable_icon);
+        this.value.add(this.service_label);
 
-        this.account_details.show();
-
-        this.layout.add(this.unavailable_icon);
-        this.layout.add(this.account_name);
-        this.layout.add(this.account_details);
+        this.service_label.show();
 
         this.account.information_changed.connect(on_account_changed);
-        update_nickname();
+        update();
         update_status(status);
     }
 
@@ -327,24 +334,12 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
         }
     }
 
-    public void update_nickname() {
+    public override void update() {
         string name = this.account.nickname;
         if (Geary.String.is_empty(name)) {
             name = account.primary_mailbox.to_address_display("", "");
         }
-        this.account_name.set_text(name);
-    }
-
-    public void update_status(Manager.Status status) {
-        if (status != Manager.Status.UNAVAILABLE) {
-            this.unavailable_icon.hide();
-            this.set_tooltip_text("");
-        } else {
-            this.unavailable_icon.show();
-            this.set_tooltip_text(
-                _("This account has encountered a problem and is unavailable")
-            );
-        }
+        this.label.set_text(name);
 
         string? details = this.account.service_label;
         switch (account.service_provider) {
@@ -360,27 +355,43 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
             details = _("Yahoo");
             break;
         }
-        this.account_details.set_text(details);
+        this.service_label.set_text(details);
+    }
+
+    public void update_status(Manager.Status status) {
+        if (status != Manager.Status.UNAVAILABLE) {
+            this.unavailable_icon.hide();
+            this.set_tooltip_text("");
+        } else {
+            this.unavailable_icon.show();
+            this.set_tooltip_text(
+                _("This account has encountered a problem and is unavailable")
+            );
+        }
 
         if (status == Manager.Status.ENABLED) {
-            this.account_name.get_style_context().remove_class(
+            this.label.get_style_context().remove_class(
                 Gtk.STYLE_CLASS_DIM_LABEL
             );
-            this.account_details.get_style_context().remove_class(
+            this.service_label.get_style_context().remove_class(
                 Gtk.STYLE_CLASS_DIM_LABEL
             );
         } else {
-            this.account_name.get_style_context().add_class(
+            this.label.get_style_context().add_class(
                 Gtk.STYLE_CLASS_DIM_LABEL
             );
-            this.account_details.get_style_context().add_class(
+            this.service_label.get_style_context().add_class(
                 Gtk.STYLE_CLASS_DIM_LABEL
             );
         }
     }
 
     private void on_account_changed() {
-        update_nickname();
+        update();
+        Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
+        if (parent != null) {
+            parent.invalidate_sort();
+        }
     }
 
 }
@@ -446,6 +457,56 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
                     pane.show_add_account(this.provider);
                 }
             });
+    }
+
+}
+
+
+internal class Accounts.ReorderAccountCommand : Application.Command {
+
+
+    private AccountListRow source;
+    private int source_index;
+    private int target_index;
+
+    private Manager manager;
+
+
+    public ReorderAccountCommand(AccountListRow source,
+                                 AccountListRow target,
+                                 Manager manager) {
+        this.source = source;
+        this.source_index = source.get_index();
+        this.target_index = target.get_index();
+
+        this.manager = manager;
+    }
+
+    public async override void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        move_source(this.target_index);
+    }
+
+    public async override void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        move_source(this.source_index);
+    }
+
+    private void move_source(int destination) {
+        Gee.List<Geary.AccountInformation> accounts =
+            this.manager.iterable().to_linked_list();
+        accounts.sort(Geary.AccountInformation.compare_ascending);
+        accounts.remove(this.source.account);
+        accounts.insert(destination, this.source.account);
+
+        int ord = 0;
+        foreach (Geary.AccountInformation account in accounts) {
+            if (account.ordinal != ord) {
+                account.ordinal = ord;
+                account.information_changed();
+            }
+            ord++;
+        }
     }
 
 }

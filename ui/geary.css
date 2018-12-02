@@ -208,6 +208,10 @@ row.geary-settings {
   padding: 0px;
 }
 
+row.geary-settings image {
+  padding: 0px 6px;
+}
+
 row.geary-settings > grid > * {
   margin: 18px 6px;
 }
@@ -222,11 +226,20 @@ row.geary-settings > grid > *:first-child:dir(rtl) {
   margin-right: 18px;
 }
 
-row.geary-settings > grid > image:dir(ltr) {
-  margin-right: 6px;
+/* dir pseudo-class used here for required additional specificity */
+row.geary-settings > grid > grid.geary-drag-handle:dir(ltr),
+row.geary-settings > grid > grid.geary-drag-handle:dir(rtl) {
+  margin: 0;
 }
-row.geary-settings > grid > image:dir(rtl) {
-  margin-left: 6px;
+
+row.geary-settings > grid > grid.geary-drag-handle image:dir(ltr) {
+  padding: 12px;
+  padding-right: 6px;
+}
+
+row.geary-settings > grid > grid.geary-drag-handle image:dir(rtl) {
+  padding: 12px;
+  padding-left: 6px;
 }
 
 frame.geary-settings.geary-signature {

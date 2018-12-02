@@ -8,8 +8,18 @@
 
 internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
+    private const string DND_ATOM = "geary-editor-row";
+    private const Gtk.TargetEntry[] DRAG_ENTRIES = {
+        { DND_ATOM, Gtk.TargetFlags.SAME_APP, 0 }
+    };
+
 
     protected Gtk.Grid layout { get; private set; default = new Gtk.Grid(); }
+
+    private Gtk.Container drag_handle;
+
+
+    public signal void dropped(EditorRow target);
 
 
     public EditorRow() {
@@ -19,11 +29,76 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
         this.layout.show();
         add(this.layout);
 
+        // We'd like to add the drag handle only when needed, but
+        // GNOME/gtk#1495 prevents us from doing so.
+        Gtk.EventBox drag_box = new Gtk.EventBox();
+        drag_box.add(
+            new Gtk.Image.from_icon_name(
+                "open-menu-symbolic", Gtk.IconSize.BUTTON
+            )
+        );
+        this.drag_handle = new Gtk.Grid();
+        this.drag_handle.valign = Gtk.Align.CENTER;
+        this.drag_handle.add(drag_box);
+        this.drag_handle.show_all();
+        this.drag_handle.hide();
+        // Translators: Tooltip for dragging list items
+        this.drag_handle.set_tooltip_text(_("Drag to move this item"));
+        this.layout.add(drag_handle);
+
         this.show();
     }
 
     public virtual void activated(PaneType pane) {
         // No-op by default
+    }
+
+    /** Adds a drag handle to the row and enables drag signals. */
+    protected void enable_drag() {
+        Gtk.drag_source_set(
+            this.drag_handle,
+            Gdk.ModifierType.BUTTON1_MASK,
+            DRAG_ENTRIES,
+            Gdk.DragAction.MOVE
+        );
+
+        Gtk.drag_dest_set(
+            this,
+            Gtk.DestDefaults.ALL,
+            DRAG_ENTRIES,
+            Gdk.DragAction.MOVE
+        );
+
+        this.drag_handle.drag_data_get.connect(on_drag_data_get);
+        this.drag_data_received.connect(on_drag_data_received);
+        this.drag_handle.get_style_context().add_class("geary-drag-handle");
+        this.drag_handle.show();
+
+        get_style_context().add_class("geary-draggable");
+    }
+
+
+    private void on_drag_data_get(Gdk.DragContext context,
+                                  Gtk.SelectionData selection_data,
+                                  uint info, uint time_) {
+        selection_data.set(
+            Gdk.Atom.intern_static_string(DND_ATOM), 8,
+            get_index().to_string().data
+        );
+    }
+
+    private void on_drag_data_received(Gdk.DragContext context,
+                                       int x, int y,
+                                       Gtk.SelectionData selection_data,
+                                       uint info, uint time_) {
+        int drag_index = int.parse((string) selection_data.get_data());
+        Gtk.ListBox? parent = this.get_parent() as Gtk.ListBox;
+        if (parent != null) {
+            EditorRow? drag_row = parent.get_row_at_index(drag_index) as EditorRow;
+            if (drag_row != null && drag_row != this) {
+                drag_row.dropped(this);
+            }
+        }
     }
 
 }
