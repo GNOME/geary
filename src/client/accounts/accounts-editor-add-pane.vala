@@ -98,7 +98,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             this.sending_panel.hide();
         }
 
-        this.real_name = new NameRow(get_default_name());
+        this.real_name = new NameRow(this.accounts.get_account_name());
 
         this.details_list.add(this.real_name);
         this.details_list.add(this.email);
@@ -147,14 +147,6 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     private void add_notification(InAppNotification notification) {
         this.osd_overlay.add_overlay(notification);
         notification.show();
-    }
-
-    private string? get_default_name() {
-        string? name = Environment.get_real_name();
-        if (Geary.String.is_empty(name) || name == "Unknown") {
-            name = null;
-        }
-        return name;
     }
 
     private async void validate_account(GLib.Cancellable? cancellable) {

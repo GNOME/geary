@@ -226,6 +226,17 @@ public class Accounts.Manager : GLib.Object {
     }
 
     /**
+     * Returns the display name for the current desktop login session.
+     */
+    public string? get_account_name() {
+        string? name = Environment.get_real_name();
+        if (Geary.String.is_empty(name) || name == "Unknown") {
+            name = null;
+        }
+        return name;
+    }
+
+    /**
      * Returns a new account, not yet stored on disk.
      */
     public Geary.AccountInformation
@@ -883,9 +894,14 @@ public class Accounts.Manager : GLib.Object {
         Goa.Mail? mail = account.get_mail();
         if (mail != null) {
             info.ordinal = Geary.AccountInformation.next_ordinal++;
-            info.primary_mailbox = new Geary.RFC822.MailboxAddress(
-                mail.name, mail.email_address
-            );
+
+            string? name = mail.name;
+            if (Geary.String.is_empty_or_whitespace(name)) {
+                name = get_account_name();
+            }
+            info.append_sender(new Geary.RFC822.MailboxAddress(
+                name, mail.email_address
+            ));
             info.nickname = account.get_account().presentation_identity;
 
             try {
