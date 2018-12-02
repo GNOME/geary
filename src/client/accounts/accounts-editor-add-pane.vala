@@ -165,10 +165,10 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         Geary.AccountInformation account =
             this.accounts.new_orphan_account(this.provider, imap, smtp);
 
-        account.primary_mailbox = new Geary.RFC822.MailboxAddress(
+        account.append_sender(new Geary.RFC822.MailboxAddress(
             this.real_name.value.text.strip(),
             this.email.value.text.strip()
-        );
+        ));
         account.nickname = account.primary_mailbox.address;
 
         if (this.provider == Geary.ServiceProvider.OTHER) {

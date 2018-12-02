@@ -716,9 +716,9 @@ public class AddEditPage : Gtk.Box {
         }
 
         if (info != null) {
-            info.primary_mailbox = new Geary.RFC822.MailboxAddress(
-                this.real_name.strip(), this.email_address.strip()
-            );
+            //info.primary_mailbox = new Geary.RFC822.MailboxAddress(
+            //    this.real_name.strip(), this.email_address.strip()
+            //);
             info.nickname = this.nickname.strip();
             info.imap.credentials = imap_credentials;
             info.smtp.credentials = smtp_credentials;

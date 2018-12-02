@@ -336,7 +336,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
                 // that is accountured for this account.
                 if (rfc822.from != null) {
                     foreach (RFC822.MailboxAddress from in rfc822.from) {
-                        if (this.account.has_email_address(from)) {
+                        if (this.account.has_sender_mailbox(from)) {
                             reverse_path = from;
                             break;
                         }

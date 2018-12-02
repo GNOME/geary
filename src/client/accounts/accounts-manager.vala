@@ -551,9 +551,9 @@ public class Accounts.Manager : GLib.Object {
         if (info.ordinal >= Geary.AccountInformation.next_ordinal)
             Geary.AccountInformation.next_ordinal = info.ordinal + 1;
 
-        info.primary_mailbox = new Geary.RFC822.MailboxAddress(
+        info.append_sender(new Geary.RFC822.MailboxAddress(
             config.get_string(REAL_NAME_KEY), primary_email
-        );
+        ));
 
         info.nickname = config.get_string(NICKNAME_KEY);
 
@@ -565,7 +565,7 @@ public class Accounts.Manager : GLib.Object {
             foreach (string alt_email in alt_email_list) {
                 Geary.RFC822.MailboxAddresses mailboxes = new Geary.RFC822.MailboxAddresses.from_rfc822_string(alt_email);
                 foreach (Geary.RFC822.MailboxAddress mailbox in mailboxes.get_all())
-                info.add_alternate_mailbox(mailbox);
+                info.append_sender(mailbox);
             }
         }
 
@@ -680,14 +680,16 @@ public class Accounts.Manager : GLib.Object {
         config.set_bool(SAVE_SENT_MAIL_KEY, info.save_sent_mail);
         config.set_bool(USE_EMAIL_SIGNATURE_KEY, info.use_email_signature);
         config.set_escaped_string(EMAIL_SIGNATURE_KEY, info.email_signature);
-        if (info.alternate_mailboxes != null && info.alternate_mailboxes.size > 0) {
-            string[] list = new string[info.alternate_mailboxes.size];
-            for (int ctr = 0; ctr < info.alternate_mailboxes.size; ctr++)
-                list[ctr] = info.alternate_mailboxes[ctr].to_rfc822_string();
+        if (info.has_sender_aliases) {
+            Gee.List<Geary.RFC822.MailboxAddress> alts = info.sender_mailboxes;
+            alts.remove_at(0);
 
-            config.set_string_list(
-                ALTERNATE_EMAILS_KEY, Geary.Collection.array_list_wrap<string>(list)
-            );
+            Gee.List<string> values = new Gee.LinkedList<string>();
+            foreach (Geary.RFC822.MailboxAddress alt in alts) {
+                values.add(alt.to_rfc822_string());
+            }
+
+            config.set_string_list(ALTERNATE_EMAILS_KEY, values);
         }
 
         Gee.LinkedList<string> empty = new Gee.LinkedList<string>();

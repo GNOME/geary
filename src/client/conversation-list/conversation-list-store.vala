@@ -280,7 +280,7 @@ public class ConversationListStore : Gtk.ListStore {
             conversation,
             preview,
             this.conversations.base_folder,
-            this.conversations.base_folder.account.information.get_all_mailboxes()
+            this.conversations.base_folder.account.information.sender_mailboxes
         );
 
         Gtk.TreePath? path = get_path(iter);

@@ -346,7 +346,7 @@ private class Accounts.MailboxRow : AccountRow<EditorEditPane,Gtk.Label> {
         MailboxEditorPopover popover = new MailboxEditorPopover(
             this.mailbox.name ?? "",
             this.mailbox.address,
-            this.account.get_sender_mailboxes().size > 1
+            this.account.has_sender_aliases
         );
         popover.activated.connect(() => {
                 pane.commands.execute.begin(
@@ -517,7 +517,7 @@ internal class Accounts.AppendMailboxCommand : Application.Command {
         this.senders_list = senders_list;
         this.new_row = new_row;
 
-        this.mailbox_index = new_row.account.get_sender_mailboxes().size;
+        this.mailbox_index = new_row.account.sender_mailboxes.size;
 
         // Translators: Label used as the undo tooltip after adding an
         // new sender email address to an account. The string
@@ -527,13 +527,13 @@ internal class Accounts.AppendMailboxCommand : Application.Command {
 
     public async override void execute(GLib.Cancellable? cancellable) {
         this.senders_list.insert(this.new_row, this.mailbox_index);
-        this.new_row.account.append_sender_mailbox(this.new_row.mailbox);
+        this.new_row.account.append_sender(this.new_row.mailbox);
         this.new_row.account.information_changed();
     }
 
     public async override void undo(GLib.Cancellable? cancellable) {
         this.senders_list.remove(this.new_row);
-        this.new_row.account.remove_sender_mailbox(this.new_row.mailbox);
+        this.new_row.account.remove_sender(this.new_row.mailbox);
         this.new_row.account.information_changed();
     }
 
@@ -557,7 +557,7 @@ internal class Accounts.UpdateMailboxCommand : Application.Command {
 
         this.old_mailbox = row.mailbox;
         this.mailbox_index =
-            row.account.get_sender_mailboxes().index_of(this.old_mailbox);
+            row.account.sender_mailboxes.index_of(this.old_mailbox);
 
         // Translators: Label used as the undo tooltip after editing a
         // sender address for an account. The string substitution is
@@ -569,15 +569,15 @@ internal class Accounts.UpdateMailboxCommand : Application.Command {
 
     public async override void execute(GLib.Cancellable? cancellable) {
         this.row.mailbox = this.new_mailbox;
-        this.row.account.remove_sender_mailbox(this.old_mailbox);
-        this.row.account.insert_sender_mailbox(this.mailbox_index, this.new_mailbox);
+        this.row.account.remove_sender(this.old_mailbox);
+        this.row.account.insert_sender(this.mailbox_index, this.new_mailbox);
         this.row.account.information_changed();
     }
 
     public async override void undo(GLib.Cancellable? cancellable) {
         this.row.mailbox = this.old_mailbox;
-        this.row.account.remove_sender_mailbox(this.new_mailbox);
-        this.row.account.insert_sender_mailbox(this.mailbox_index, this.old_mailbox);
+        this.row.account.remove_sender(this.new_mailbox);
+        this.row.account.insert_sender(this.mailbox_index, this.old_mailbox);
         this.row.account.information_changed();
     }
 
@@ -599,7 +599,7 @@ internal class Accounts.RemoveMailboxCommand : Application.Command {
 
         this.mailbox = row.mailbox;
         this.mailbox_index =
-            row.account.get_sender_mailboxes().index_of(mailbox);
+            row.account.sender_mailboxes.index_of(mailbox);
         this.list = (Gtk.ListBox) row.get_parent();
 
         // Translators: Label used as the undo tooltip after removing
@@ -610,13 +610,13 @@ internal class Accounts.RemoveMailboxCommand : Application.Command {
 
     public async override void execute(GLib.Cancellable? cancellable) {
         this.list.remove(this.row);
-        this.row.account.remove_sender_mailbox(this.mailbox);
+        this.row.account.remove_sender(this.mailbox);
         this.row.account.information_changed();
     }
 
     public async override void undo(GLib.Cancellable? cancellable) {
         this.list.insert(this.row, this.mailbox_index);
-        this.row.account.insert_sender_mailbox(this.mailbox_index, this.mailbox);
+        this.row.account.insert_sender(this.mailbox_index, this.mailbox);
         this.row.account.information_changed();
     }
 

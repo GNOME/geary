@@ -125,8 +125,8 @@ public class AccountDialogEditAlternateEmailsPane : AccountDialogPane {
             address_listbox.remove(widget);
         
         // Add all email addresses; add_email_address() silently drops the primary address
-        foreach (Geary.RFC822.MailboxAddress mailbox in account_info.get_all_mailboxes())
-            add_mailbox(mailbox, false);
+        //foreach (Geary.RFC822.MailboxAddress mailbox in account_info.get_all_mailboxes())
+        //    add_mailbox(mailbox, false);
     }
     
     public override void present() {
@@ -193,7 +193,7 @@ public class AccountDialogEditAlternateEmailsPane : AccountDialogPane {
     }
     
     private void on_update_clicked() {
-        account_info.replace_alternate_mailboxes(mailboxes);
+        //account_info.replace_alternate_mailboxes(mailboxes);
         
         done();
     }

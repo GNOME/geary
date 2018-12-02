@@ -777,7 +777,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         bool is_sent = false;
         if (email.from != null) {
             foreach (Geary.RFC822.MailboxAddress from in email.from) {
-                if (this.account_info.has_email_address(from)) {
+                if (this.account_info.has_sender_mailbox(from)) {
                     is_sent = true;
                     break;
                 }
