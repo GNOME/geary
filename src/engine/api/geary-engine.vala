@@ -447,8 +447,8 @@ public class Geary.Engine : BaseObject {
      * the configuration was the same.
      */
     public bool update_account_service(AccountInformation account,
-                                       ServiceInformation updated) {
-        // Ensure account is closed.
+                                       ServiceInformation updated)
+        throws EngineError {
         Account? impl = this.account_instances.get(account.id);
         if (impl == null) {
             throw new EngineError.BAD_PARAMETERS(

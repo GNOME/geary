@@ -126,12 +126,16 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
             is_valid = yield validate(cancellable);
 
             if (is_valid) {
-                has_changed = this.engine.update_account_service(
-                    this.account, imap_mutable
-                );
-                has_changed = this.engine.update_account_service(
-                    this.account, smtp_mutable
-                );
+                try {
+                    has_changed = this.engine.update_account_service(
+                        this.account, imap_mutable
+                    );
+                    has_changed = this.engine.update_account_service(
+                        this.account, smtp_mutable
+                    );
+                } catch (Geary.EngineError err) {
+                    warning("Could not update account services: %s", err.message);
+                }
             }
         }
 
