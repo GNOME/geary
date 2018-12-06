@@ -454,7 +454,7 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
                 bool add_local = false;
                 try {
                     pane.accounts.add_goa_account.end(res);
-                } catch (Error.INVALID err) {
+                } catch (GLib.IOError.NOT_SUPPORTED err) {
                     // Not a supported type, so don't bother logging the error
                     add_local = true;
                 } catch (GLib.Error err) {

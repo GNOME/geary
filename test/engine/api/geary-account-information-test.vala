@@ -17,19 +17,19 @@ class Geary.AccountInformationTest : TestCase {
         AccountInformation test = new AccountInformation(
             "test",
             ServiceProvider.OTHER,
-            new MockServiceInformation(),
-            new MockServiceInformation()
+            new RFC822.MailboxAddress(null, "test1@example.com")
         );
-
-        test.append_sender(new RFC822.MailboxAddress(null, "test1@example.com"));
-        assert_false(test.has_sender_aliases);
-
-        test.append_sender(new RFC822.MailboxAddress(null, "test2@example.com"));
-        test.append_sender(new RFC822.MailboxAddress(null, "test3@example.com"));
-        assert_true(test.has_sender_aliases);
 
         assert_true(test.primary_mailbox.equal_to(
                         new RFC822.MailboxAddress(null, "test1@example.com")));
+        assert_false(test.has_sender_aliases);
+
+        test.append_sender(new RFC822.MailboxAddress(null, "test2@example.com"));
+        assert_true(test.has_sender_aliases);
+
+        test.append_sender(new RFC822.MailboxAddress(null, "test3@example.com"));
+        assert_true(test.has_sender_aliases);
+
         assert_true(
             test.has_sender_mailbox(new RFC822.MailboxAddress(null, "test1@example.com")),
             "Primary address not found"

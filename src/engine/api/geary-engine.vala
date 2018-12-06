@@ -437,7 +437,7 @@ public class Geary.Engine : BaseObject {
      * Changes the service configuration for an account.
      *
      * This updates an account's service configuration with the given
-     * configuration, by copying it over the account's existing
+     * configuration, by replacing the account's existing
      * configuration for that service. The corresponding {@link
      * Account.incoming} or {@link Account.outgoing} client service
      * will also be updated so that the new configuration will start
@@ -456,31 +456,31 @@ public class Geary.Engine : BaseObject {
             );
         }
 
-        ServiceInformation? existing = null;
         ClientService? service = null;
+        bool was_updated = false;
         switch (updated.protocol) {
         case Protocol.IMAP:
-            existing = account.imap;
+            if (!account.imap.equal_to(updated)) {
+                was_updated = true;
+                account.imap = updated;
+            }
             service = impl.incoming;
             break;
         case Protocol.SMTP:
-            existing = account.smtp;
+            if (!account.smtp.equal_to(updated)) {
+                was_updated = true;
+                account.smtp = updated;
+            }
             service = impl.outgoing;
             break;
         }
 
-        bool was_updated = false;
-        if (service != null) {
-            if (!existing.equal_to(updated)) {
-                existing.copy_from(updated);
-                was_updated = true;
-
-                Endpoint endpoint = get_shared_endpoint(
-                    account.service_provider, existing
-                );
-                impl.set_endpoint(service, endpoint);
-                account.information_changed();
-            }
+        if (was_updated) {
+            Endpoint endpoint = get_shared_endpoint(
+                account.service_provider, updated
+            );
+            impl.set_endpoint(service, endpoint);
+            account.information_changed();
         }
 
         return was_updated;

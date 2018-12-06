@@ -690,20 +690,23 @@ public class AddEditPage : Gtk.Box {
             }
         }
 
+        Geary.ServiceInformation? imap = null;
+        Geary.ServiceInformation? smtp = null;
         if (info == null) {
             // New account
-            Geary.ServiceInformation imap =
-                this.application.controller.account_manager.new_libsecret_service(
-                    Geary.Protocol.IMAP
-                );
-            Geary.ServiceInformation smtp =
-                this.application.controller.account_manager.new_libsecret_service(
-                    Geary.Protocol.SMTP
-                );
+            imap = this.application.controller.account_manager.new_libsecret_service(
+                Geary.Protocol.IMAP
+            );
+            smtp = this.application.controller.account_manager.new_libsecret_service(
+                Geary.Protocol.SMTP
+            );
 
             try {
                 info = this.application.controller.account_manager.new_orphan_account(
-                    this.get_service_provider(), imap, smtp
+                    this.get_service_provider(),
+                    new Geary.RFC822.MailboxAddress(
+                        this.real_name.strip(), this.email_address.strip()
+                    )
                 );
             } catch (Error err) {
                 debug("Unable to create account %s for %s: %s",
@@ -712,13 +715,10 @@ public class AddEditPage : Gtk.Box {
         } else {
             // Existing account: create a copy so we don't mess up the
             // original.
-            info = new Geary.AccountInformation.temp_copy(info);
+            //info = new Geary.AccountInformation.temp_copy(info);
         }
 
         if (info != null) {
-            //info.primary_mailbox = new Geary.RFC822.MailboxAddress(
-            //    this.real_name.strip(), this.email_address.strip()
-            //);
             info.nickname = this.nickname.strip();
             info.imap.credentials = imap_credentials;
             info.smtp.credentials = smtp_credentials;
@@ -739,6 +739,9 @@ public class AddEditPage : Gtk.Box {
             info.save_drafts = this.save_drafts;
             info.use_email_signature = this.use_email_signature;
             info.email_signature = this.email_signature;
+
+            info.imap = imap;
+            info.smtp = smtp;
 
             on_changed();
         }

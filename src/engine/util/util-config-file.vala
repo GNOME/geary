@@ -77,27 +77,8 @@ public class Geary.ConfigFile {
             }
         }
 
-        public string get_string(string key, string def = "") {
-            string ret = def;
-            foreach (GroupLookup lookup in this.lookups) {
-                try {
-                    ret = this.backing.get_value(
-                        lookup.group, lookup.prefix + key
-                    );
-                    break;
-                } catch (GLib.KeyFileError err) {
-                    // continue
-                }
-            }
-            return ret;
-        }
-
-        public void set_string(string key, string value) {
-            this.backing.set_value(this.name, key, value);
-        }
-
-        public string get_escaped_string(string key, string def = "") {
-            string ret = def;
+        public string? get_string(string key, string? def = null) {
+            string? ret = def;
             foreach (GroupLookup lookup in this.lookups) {
                 try {
                     ret = this.backing.get_string(
@@ -111,7 +92,32 @@ public class Geary.ConfigFile {
             return ret;
         }
 
-        public void set_escaped_string(string key, string value) {
+        public string get_required_string(string key)
+            throws GLib.KeyFileError {
+            string? ret = null;
+            GLib.KeyFileError? key_err = null;
+            foreach (GroupLookup lookup in this.lookups) {
+                try {
+                    ret = this.backing.get_string(
+                        lookup.group, lookup.prefix + key
+                    );
+                    break;
+                } catch (GLib.KeyFileError err) {
+                    if (key_err == null) {
+                        key_err = err;
+                    }
+                    // continue
+                }
+            }
+
+            if (key_err != null) {
+                throw key_err;
+            }
+
+            return ret;
+        }
+
+        public void set_string(string key, string value) {
             this.backing.set_string(this.name, key, value);
         }
 
@@ -124,6 +130,12 @@ public class Geary.ConfigFile {
                 // Oh well
             }
             return new Gee.ArrayList<string>();
+        }
+
+        public Gee.List<string> get_required_string_list(string key)
+            throws GLib.KeyFileError {
+            string[] list = this.backing.get_string_list(this.name, key);
+            return Geary.Collection.array_list_wrap<string>(list);
         }
 
         public void set_string_list(string key, Gee.List<string> value) {
@@ -177,12 +189,12 @@ public class Geary.ConfigFile {
         }
 
         /** Removes a key from this group. */
-        public void remove_key(string name) throws GLib.Error {
+        public void remove_key(string name) throws GLib.KeyFileError {
             this.backing.remove_key(this.name, name);
         }
 
         /** Removes this group from the config file. */
-        public void remove() throws GLib.Error {
+        public void remove() throws GLib.KeyFileError {
             this.backing.remove_group(this.name);
         }
 
@@ -208,7 +220,7 @@ public class Geary.ConfigFile {
      * accessed from it before doing so. Use {@link Group.exists} to
      * determine if the group has previously been created.
      */
-    public Group get_group(string name) throws GLib.Error {
+    public Group get_group(string name) {
         return new Group(this, name, this.backing);
     }
 

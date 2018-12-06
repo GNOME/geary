@@ -47,10 +47,49 @@ public enum Accounts.CredentialsProvider {
     }
 }
 
-public errordomain Accounts.Error {
-    INVALID,
-    LOCAL_REMOVED,
-    GOA_REMOVED;
+
+/** Objects that can be used load/save account configuration. */
+public interface Accounts.AccountConfig : GLib.Object {
+
+    /** Loads a supported account from a config file. */
+    public abstract Geary.AccountInformation
+        load(Geary.ConfigFile config,
+             string id,
+             Geary.ServiceProvider? default_provider,
+             string? default_name)
+        throws ConfigError, GLib.KeyFileError;
+
+    /** Saves an account to a config file. */
+    public abstract void save(Geary.AccountInformation account,
+                              Geary.ConfigFile config);
+
+}
+
+
+/** Objects that can be used load/save service configuration. */
+public interface Accounts.ServiceConfig : GLib.Object {
+
+    /** Loads a service from a config file. */
+    public abstract Geary.ServiceInformation
+        load(Geary.ConfigFile config,
+             Geary.AccountInformation account,
+             Geary.Protocol protocol,
+             Geary.CredentialsMediator mediator)
+        throws ConfigError, GLib.KeyFileError;
+
+    /** Saves a service to a config file. */
+    public abstract void save(Geary.AccountInformation account,
+                              Geary.ServiceInformation service,
+                              Geary.ConfigFile config);
+
+}
+
+public errordomain Accounts.ConfigError {
+    IO,
+    SYNTAX,
+    UNSUPPORTED_VERSION,
+    UNAVAILABLE,
+    REMOVED;
 }
 
 
@@ -61,7 +100,8 @@ public errordomain Accounts.Error {
  * removing accounts and their persisted data (configuration,
  * databases, caches, authentication tokens). The manager supports
  * both locally-specified accounts (i.e. those created by the user in
- * the app) and from SSO systems such as GOA.
+ * the app) and from SSO systems such as GOA via the Accounts.Provider
+ * interface.
  *
  * Newly loaded and newly created accounts are first added to the
  * manager with a particular status (enabled, disabled, etc). Accounts
@@ -74,30 +114,13 @@ public class Accounts.Manager : GLib.Object {
     private const string LOCAL_ID_FORMAT = "account_%02u";
     private const string GOA_ID_PREFIX = "goa_";
 
-    private const string ACCOUNT_CONFIG_GROUP = "AccountInformation";
-    private const string ACCOUNT_MANAGER_GROUP = "AccountManager";
-    private const string IMAP_CONFIG_GROUP = "IMAP";
-    private const string SMTP_CONFIG_GROUP = "SMTP";
+    private const int CONFIG_VERSION = 1;
 
-    private const string ALTERNATE_EMAILS_KEY = "alternate_emails";
-    private const string ARCHIVE_FOLDER_KEY = "archive_folder";
-    private const string CREDENTIALS_METHOD_KEY = "credentials_method";
-    private const string CREDENTIALS_PROVIDER_KEY = "credentials_provider";
-    private const string DRAFTS_FOLDER_KEY = "drafts_folder";
-    private const string EMAIL_SIGNATURE_KEY = "email_signature";
-    private const string NICKNAME_KEY = "nickname";
-    private const string ORDINAL_KEY = "ordinal";
-    private const string PREFETCH_PERIOD_DAYS_KEY = "prefetch_period_days";
-    private const string PRIMARY_EMAIL_KEY = "primary_email";
-    private const string REMOVED_KEY = "removed";
-    private const string REAL_NAME_KEY = "real_name";
-    private const string SAVE_DRAFTS_KEY = "save_drafts";
-    private const string SAVE_SENT_MAIL_KEY = "save_sent_mail";
-    private const string SENT_MAIL_FOLDER_KEY = "sent_mail_folder";
-    private const string SERVICE_PROVIDER_KEY = "service_provider";
-    private const string SPAM_FOLDER_KEY = "spam_folder";
-    private const string TRASH_FOLDER_KEY = "trash_folder";
-    private const string USE_EMAIL_SIGNATURE_KEY = "use_email_signature";
+    private const string GROUP_METADATA = "Metadata";
+
+    private const string METADATA_STATUS = "status";
+    private const string METADATA_VERSION = "version";
+    private const string METADATA_GOA = "goa_id";
 
 
     /**
@@ -110,8 +133,24 @@ public class Accounts.Manager : GLib.Object {
         /** The account was disabled by the user. */
         DISABLED,
 
-        /** The account is unavailable to be used, by may come back. */
-        UNAVAILABLE;
+        /** The account is unavailable to be used, but may come back. */
+        UNAVAILABLE,
+
+        /** The account has been removed and is scheduled for deletion. */
+        REMOVED;
+
+        public static Status for_value(string value)
+        throws Geary.EngineError {
+            return Geary.ObjectUtils.from_enum_nick<Status>(
+                typeof(Status), value.ascii_down()
+            );
+        }
+
+        public string to_value() {
+            return Geary.ObjectUtils.to_enum_nick<Status>(
+                typeof(Status), this
+            );
+        }
     }
 
 
@@ -241,8 +280,7 @@ public class Accounts.Manager : GLib.Object {
      */
     public Geary.AccountInformation
         new_orphan_account(Geary.ServiceProvider provider,
-                           Geary.ServiceInformation imap,
-                           Geary.ServiceInformation smtp) {
+                           Geary.RFC822.MailboxAddress primary_mailbox) {
         string? last_account = this.accounts.keys.fold<string?>((next, last) => {
                 string? result = last;
                 if (next.has_prefix(LOCAL_ID_PREFIX)) {
@@ -257,11 +295,11 @@ public class Accounts.Manager : GLib.Object {
         }
         string id = LOCAL_ID_FORMAT.printf(next_id);
 
-        return new Geary.AccountInformation(id, provider, imap, smtp);
+        return new Geary.AccountInformation(id, provider, primary_mailbox);
     }
 
-    public LocalServiceInformation new_libsecret_service(Geary.Protocol service) {
-        return new LocalServiceInformation(service, libsecret);
+    public Geary.ServiceInformation new_libsecret_service(Geary.Protocol service) {
+        return new Geary.ServiceInformation(service, libsecret);
     }
 
     /**
@@ -432,7 +470,7 @@ public class Accounts.Manager : GLib.Object {
      * Determines if an account is a GOA account or not.
      */
     public bool is_goa_account(Geary.AccountInformation account) {
-        return (account.imap is GoaServiceInformation);
+        return (account.imap.mediator is GoaMediator);
     }
 
     /**
@@ -454,7 +492,7 @@ public class Accounts.Manager : GLib.Object {
             break;
 
         default:
-            throw new Error.INVALID("Not supported for GOA");
+            throw new GLib.IOError.NOT_SUPPORTED("Not supported for GOA");
         }
     }
 
@@ -467,14 +505,12 @@ public class Accounts.Manager : GLib.Object {
     public async void show_goa_account(Geary.AccountInformation account,
                                        GLib.Cancellable? cancellable)
         throws GLib.Error {
-        GoaServiceInformation? goa_service =
-           account.imap as GoaServiceInformation;
-        if (goa_service == null) {
-            throw new Error.INVALID("Not a GOA Account");
+        if (!is_goa_account(account)) {
+            throw new GLib.IOError.NOT_SUPPORTED("Not a GOA Account");
         }
 
         yield open_goa_settings(
-            goa_service.account.account.id, null, cancellable
+            to_goa_id(account.id), null, cancellable
         );
     }
 
@@ -486,228 +522,182 @@ public class Accounts.Manager : GLib.Object {
      */
     private async Geary.AccountInformation
         load_account(string id, GLib.Cancellable? cancellable)
-        throws GLib.Error {
+        throws ConfigError {
         GLib.File config_dir = this.user_config_dir.get_child(id);
         GLib.File data_dir = this.user_data_dir.get_child(id);
 
-        Geary.ConfigFile config_file = new Geary.ConfigFile(
+        Geary.ConfigFile config = new Geary.ConfigFile(
             config_dir.get_child(Geary.AccountInformation.SETTINGS_FILENAME)
         );
 
-        yield config_file.load(cancellable);
+        try {
+            yield config.load(cancellable);
+        } catch (GLib.KeyFileError err) {
+            throw new ConfigError.SYNTAX(err.message);
+        } catch (GLib.Error err) {
+            throw new ConfigError.IO(err.message);
+        }
 
-        Geary.ConfigFile.Group config = config_file.get_group(ACCOUNT_CONFIG_GROUP);
-        CredentialsProvider provider = CredentialsProvider.from_string(
-            config.get_string(
-                CREDENTIALS_PROVIDER_KEY,
-                CredentialsProvider.LIBSECRET.to_string()
-            )
-        );
+        Geary.ConfigFile.Group metadata_config =
+            config.get_group(GROUP_METADATA);
+        int version = metadata_config.get_int(METADATA_VERSION, 0);
+        Status status = Status.ENABLED;
+        try {
+            status = Status.for_value(
+                metadata_config.get_string(
+                    METADATA_STATUS, status.to_value()
+                ));
+        } catch (Geary.EngineError err) {
+            throw new ConfigError.SYNTAX("%s: Invalid status value", id);
+        }
 
-        string primary_email = config.get_string(PRIMARY_EMAIL_KEY);
+        string? goa_id = metadata_config.get_string(METADATA_GOA, null);
+        bool is_goa = (goa_id != null);
+        GoaMediator? goa_mediator = null;
+        Geary.ServiceProvider? default_provider = null;
+        Geary.CredentialsMediator mediator = this.libsecret;
 
-        Geary.AccountInformation? info = null;
-        switch (provider) {
-        case CredentialsProvider.LIBSECRET:
-            info = new_libsecret_account(id, config, primary_email);
+        if (is_goa) {
+            if (this.goa_service == null) {
+                throw new ConfigError.UNAVAILABLE("GOA service not available");
+            }
+
+            Goa.Object? goa_handle = this.goa_service.lookup_by_id(goa_id);
+            if (goa_handle != null) {
+                mediator = goa_mediator = new GoaMediator(goa_handle);
+                default_provider = goa_mediator.get_service_provider();
+            } else {
+                // The GOA account has gone away, so there's nothing
+                // we can do except to remove it locally as well
+                info(
+                    "%s: GOA account %s has been removed, removing local data",
+                    id, goa_id
+                );
+                status = Status.REMOVED;
+                // Use the default mediator since we can't create a
+                // GOA equiv, but set a dummy default provider so we
+                // don't get an error loading the config
+                default_provider = Geary.ServiceProvider.OTHER;
+            }
+        }
+
+        AccountConfig? accounts = null;
+        ServiceConfig? services = null;
+        switch (version) {
+        case 0:
+            accounts = new AccountConfigLegacy();
+            services = new ServiceConfigLegacy();
             break;
 
-        case CredentialsProvider.GOA:
-            if (this.goa_service != null) {
-                Goa.Object? object = this.goa_service.lookup_by_id(to_goa_id(id));
-                if (object != null) {
-                    info = new_goa_account(id, object);
-                    GoaMediator mediator = (GoaMediator) info.imap.mediator;
-                    try {
-                        yield mediator.update(info, cancellable);
-                    } catch (GLib.Error err) {
-                        report_problem(
-                            new Geary.ProblemReport(
-                                Geary.ProblemType.GENERIC_ERROR,
-                                err
-                            ));
-                    }
-                } else {
-                    // Could not find the GOA object for this account,
-                    // but have a working GOA connection, so it must
-                    // have been removed. Not much else that we can do
-                    // except remove it.
-                    throw new Error.GOA_REMOVED("GOA account not found");
-                }
-            }
-
-            if (info == null) {
-                // We have a GOA account, but either GOA is
-                // unavailable or the account has changed. Keep it
-                // around in case GOA comes back.
-                throw new Error.INVALID("GOA not available");
-            }
+        case 1:
+            accounts = new AccountConfigV1(is_goa);
+            services = new ServiceConfigV1();
             break;
-        }
 
-        info.set_account_directories(config_dir, data_dir);
-
-        info.ordinal = config.get_int(ORDINAL_KEY, info.ordinal);
-        if (info.ordinal >= Geary.AccountInformation.next_ordinal)
-            Geary.AccountInformation.next_ordinal = info.ordinal + 1;
-
-        info.append_sender(new Geary.RFC822.MailboxAddress(
-            config.get_string(REAL_NAME_KEY), primary_email
-        ));
-
-        info.nickname = config.get_string(NICKNAME_KEY);
-
-        // Store alternate emails in a list of case-insensitive strings
-        Gee.List<string> alt_email_list = config.get_string_list(
-            ALTERNATE_EMAILS_KEY
-        );
-        if (alt_email_list.size != 0) {
-            foreach (string alt_email in alt_email_list) {
-                Geary.RFC822.MailboxAddresses mailboxes = new Geary.RFC822.MailboxAddresses.from_rfc822_string(alt_email);
-                foreach (Geary.RFC822.MailboxAddress mailbox in mailboxes.get_all())
-                info.append_sender(mailbox);
-            }
-        }
-
-        info.prefetch_period_days = config.get_int(
-            PREFETCH_PERIOD_DAYS_KEY, info.prefetch_period_days
-        );
-        info.save_sent_mail = config.get_bool(
-            SAVE_SENT_MAIL_KEY, info.save_sent_mail
-        );
-        info.use_email_signature = config.get_bool(
-            USE_EMAIL_SIGNATURE_KEY, info.use_email_signature
-        );
-        info.email_signature = config.get_escaped_string(
-            EMAIL_SIGNATURE_KEY, info.email_signature
-        );
-
-        info.drafts_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(DRAFTS_FOLDER_KEY)
-        );
-        info.sent_mail_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(SENT_MAIL_FOLDER_KEY)
-        );
-        info.spam_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(SPAM_FOLDER_KEY)
-        );
-        info.trash_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(TRASH_FOLDER_KEY)
-        );
-        info.archive_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(ARCHIVE_FOLDER_KEY)
-        );
-
-        info.save_drafts = config.get_bool(SAVE_DRAFTS_KEY, true);
-
-        // If the account has been removed, add it to the removed list
-        // and bail out
-        Geary.ConfigFile.Group manager_config =
-            config_file.get_group(ACCOUNT_MANAGER_GROUP);
-        if (manager_config.exists &&
-            manager_config.get_bool(REMOVED_KEY, false)) {
-            this.removed.add(info);
-            throw new Error.LOCAL_REMOVED("Account marked for removal");
-        }
-
-        return info;
-    }
-
-    private async void save_account_locked(Geary.AccountInformation info,
-                                           GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        File? file = info.settings_file;
-        if (file == null) {
-            throw new Error.INVALID(
-                "Account information does not have a settings file"
+        default:
+            throw new ConfigError.UNSUPPORTED_VERSION(
+                "Unsupported config version: %d", version
             );
         }
 
-        Geary.ConfigFile config_file = new Geary.ConfigFile(file);
+        Geary.AccountInformation? account = null;
+        try {
+            account = accounts.load(
+                config,
+                id,
+                default_provider,
+                get_account_name()
+            );
+            account.set_account_directories(config_dir, data_dir);
+        } catch (GLib.KeyFileError err) {
+            throw new ConfigError.SYNTAX(err.message);
+        }
+
+        // If the account has been marked as removed, now that we have
+        // an account object and its dirs have been set up we can add
+        // it to the removed list and just bail out.
+        if (status == Status.REMOVED) {
+            this.removed.add(account);
+            throw new ConfigError.REMOVED("Account marked for removal");
+        }
+
+        if (!is_goa) {
+            try {
+                account.imap = services.load(
+                    config, account, Geary.Protocol.IMAP, mediator
+                );
+                account.smtp = services.load(
+                    config, account, Geary.Protocol.SMTP, mediator
+                );
+            } catch (GLib.KeyFileError err) {
+                throw new ConfigError.SYNTAX(err.message);
+            }
+        } else {
+            account.service_label = goa_mediator.get_service_label();
+            account.imap = new Geary.ServiceInformation(Geary.Protocol.IMAP, mediator);
+            account.smtp = new Geary.ServiceInformation(Geary.Protocol.SMTP, mediator);
+
+            try {
+                // This updates the service configs as well
+                yield goa_mediator.update(account, cancellable);
+            } catch (GLib.Error err) {
+                // If we get an error here, there might have been a
+                // problem loading the GOA data, or the OAuth token
+                // has expired. XXX Need to distinguish between the
+                // two.
+                set_available(account, false);
+                throw new ConfigError.UNAVAILABLE(err.message);
+            }
+        }
+
+        return account;
+    }
+
+    private async void save_account_locked(Geary.AccountInformation account,
+                                           GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        File? file = account.settings_file;
+        if (file == null) {
+            throw new GLib.IOError.NOT_SUPPORTED(
+                "Account %s does not have a settings file", account.id
+            );
+        }
+
+        Geary.ConfigFile config = new Geary.ConfigFile(file);
 
         // Load the file first so we maintain old settings
         try {
-            yield config_file.load(cancellable);
+            yield config.load(cancellable);
         } catch (GLib.Error err) {
             // Oh well, just create a new one when saving
             debug("Could not load existing config file: %s", err.message);
         }
 
-        // If the account has been removed, set it as such. Otherwise
-        // ensure it is not set as such.
-        Geary.ConfigFile.Group manager_config =
-            config_file.get_group(ACCOUNT_MANAGER_GROUP);
-        if (this.removed.contains(info)) {
-            manager_config.set_bool(REMOVED_KEY, true);
-        } else if (manager_config.exists) {
-            manager_config.remove();
+        Geary.ConfigFile.Group metadata_config =
+            config.get_group(GROUP_METADATA);
+        metadata_config.set_int(
+            METADATA_VERSION, CONFIG_VERSION
+        );
+        metadata_config.set_string(
+            METADATA_STATUS, get_status(account).to_value()
+        );
+
+        bool is_goa = is_goa_account(account);
+        if (is_goa) {
+            metadata_config.set_string(METADATA_GOA, to_goa_id(account.id));
         }
 
-        Geary.ConfigFile.Group config = config_file.get_group(ACCOUNT_CONFIG_GROUP);
-        if (info.imap is LocalServiceInformation) {
-            config.set_string(
-                CREDENTIALS_PROVIDER_KEY,
-                CredentialsProvider.LIBSECRET.to_string()
-            );
-            config.set_string(
-                CREDENTIALS_METHOD_KEY,
-                info.imap.credentials.supported_method.to_string()
-            );
+        AccountConfig accounts = new AccountConfigV1(is_goa);
+        accounts.save(account, config);
 
-            if (info.service_provider == Geary.ServiceProvider.OTHER) {
-                Geary.ConfigFile.Group imap_config = config_file.get_group(
-                    IMAP_CONFIG_GROUP
-                );
-                ((LocalServiceInformation) info.imap).save_settings(imap_config);
-
-                Geary.ConfigFile.Group smtp_config = config_file.get_group(
-                    SMTP_CONFIG_GROUP
-                );
-                ((LocalServiceInformation) info.smtp).save_settings(smtp_config);
-            }
-        } else if (info.imap is GoaServiceInformation) {
-            config.set_string(
-                CREDENTIALS_PROVIDER_KEY, CredentialsProvider.GOA.to_string()
-            );
+        if (!is_goa) {
+            ServiceConfig services = new ServiceConfigV1();
+            services.save(account, account.imap, config);
+            services.save(account, account.smtp, config);
         }
-
-        config.set_string(REAL_NAME_KEY, info.primary_mailbox.name);
-        config.set_string(PRIMARY_EMAIL_KEY, info.primary_mailbox.address);
-        config.set_string(NICKNAME_KEY, info.nickname);
-        config.set_string(SERVICE_PROVIDER_KEY, info.service_provider.to_value());
-        config.set_int(ORDINAL_KEY, info.ordinal);
-        config.set_int(PREFETCH_PERIOD_DAYS_KEY, info.prefetch_period_days);
-        config.set_bool(SAVE_SENT_MAIL_KEY, info.save_sent_mail);
-        config.set_bool(USE_EMAIL_SIGNATURE_KEY, info.use_email_signature);
-        config.set_escaped_string(EMAIL_SIGNATURE_KEY, info.email_signature);
-        if (info.has_sender_aliases) {
-            Gee.List<Geary.RFC822.MailboxAddress> alts = info.sender_mailboxes;
-            alts.remove_at(0);
-
-            Gee.List<string> values = new Gee.LinkedList<string>();
-            foreach (Geary.RFC822.MailboxAddress alt in alts) {
-                values.add(alt.to_rfc822_string());
-            }
-
-            config.set_string_list(ALTERNATE_EMAILS_KEY, values);
-        }
-
-        Gee.LinkedList<string> empty = new Gee.LinkedList<string>();
-        config.set_string_list(DRAFTS_FOLDER_KEY, (info.drafts_folder_path != null
-            ? info.drafts_folder_path.as_list() : empty));
-        config.set_string_list(SENT_MAIL_FOLDER_KEY, (info.sent_mail_folder_path != null
-            ? info.sent_mail_folder_path.as_list() : empty));
-        config.set_string_list(SPAM_FOLDER_KEY, (info.spam_folder_path != null
-            ? info.spam_folder_path.as_list() : empty));
-        config.set_string_list(TRASH_FOLDER_KEY, (info.trash_folder_path != null
-            ? info.trash_folder_path.as_list() : empty));
-        config.set_string_list(ARCHIVE_FOLDER_KEY, (info.archive_folder_path != null
-            ? info.archive_folder_path.as_list() : empty));
-
-        config.set_bool(SAVE_DRAFTS_KEY, info.save_drafts);
 
         debug("Writing config to: %s", file.get_path());
-        yield config_file.save(cancellable);
+        yield config.save(cancellable);
     }
 
     private async void delete_account(Geary.AccountInformation info,
@@ -811,99 +801,26 @@ public class Accounts.Manager : GLib.Object {
             : id;
     }
 
-    private Geary.AccountInformation
-        new_libsecret_account(string id,
-                              Geary.ConfigFile.Group config,
-                              string fallback_login)
-        throws GLib.Error {
-
-        Geary.ServiceProvider provider = Geary.ServiceProvider.for_value(
-            config.get_string(SERVICE_PROVIDER_KEY,
-                              Geary.ServiceProvider.GMAIL.to_string())
-        );
-        Geary.Credentials.Method method = Geary.Credentials.Method.from_string(
-            config.get_string(CREDENTIALS_METHOD_KEY,
-                              Geary.Credentials.Method.PASSWORD.to_string())
-        );
-
-        Geary.ConfigFile.Group imap_config =
-        config.file.get_group(IMAP_CONFIG_GROUP);
-        LocalServiceInformation imap = new_libsecret_service(
-            Geary.Protocol.IMAP
-        );
-        imap_config.set_fallback(config.name, "imap_");
-        imap.load_credentials(imap_config, method, fallback_login);
-
-        Geary.ConfigFile.Group smtp_config =
-        config.file.get_group(SMTP_CONFIG_GROUP);
-        LocalServiceInformation smtp = new_libsecret_service(
-            Geary.Protocol.SMTP
-        );
-        smtp_config.set_fallback(config.name, "smtp_");
-        smtp.load_credentials(smtp_config, method, fallback_login);
-
-        // Generic IMAP accounts must load their settings from their
-        // config, GMail and others have it hard-coded hence don't
-        // need to load it.
-        if (provider == Geary.ServiceProvider.OTHER) {
-            imap.load_settings(imap_config);
-            smtp.load_settings(smtp_config);
-        } else {
-            provider.setup_service(imap);
-            provider.setup_service(smtp);
-        }
-
-        return new Geary.AccountInformation(
-            id, provider, imap, smtp
-        );
-    }
-
-    private Geary.AccountInformation new_goa_account(string id,
-                                                     Goa.Object account) {
-        GoaMediator mediator = new GoaMediator(account);
-
-        Geary.ServiceProvider provider = Geary.ServiceProvider.OTHER;
-        switch (account.get_account().provider_type) {
-        case "google":
-            provider = Geary.ServiceProvider.GMAIL;
-            break;
-
-        case "windows_live":
-            provider = Geary.ServiceProvider.OUTLOOK;
-            break;
-        }
-
-        Geary.AccountInformation info = new Geary.AccountInformation(
-            id,
-            provider,
-            new GoaServiceInformation(Geary.Protocol.IMAP, mediator, account),
-            new GoaServiceInformation(Geary.Protocol.SMTP, mediator, account)
-        );
-        info.service_label = account.get_account().provider_name;
-
-        return info;
-    }
-
     private async void create_goa_account(Goa.Object account,
                                           GLib.Cancellable? cancellable) {
-        Geary.AccountInformation info = new_goa_account(
-            to_geary_id(account), account
-        );
-
-        GoaMediator mediator = (GoaMediator) info.imap.mediator;
         // Goa.Account.mail_disabled doesn't seem to reflect if we get
         // get a valid mail object here, so just rely on that instead.
         Goa.Mail? mail = account.get_mail();
         if (mail != null) {
-            info.ordinal = Geary.AccountInformation.next_ordinal++;
-
             string? name = mail.name;
             if (Geary.String.is_empty_or_whitespace(name)) {
                 name = get_account_name();
             }
-            info.append_sender(new Geary.RFC822.MailboxAddress(
-                name, mail.email_address
-            ));
+
+            GoaMediator mediator = new GoaMediator(account);
+            Geary.AccountInformation info = new Geary.AccountInformation(
+                to_geary_id(account),
+                mediator.get_service_provider(),
+                new Geary.RFC822.MailboxAddress(name, mail.email_address)
+            );
+
+            info.ordinal = Geary.AccountInformation.next_ordinal++;
+            info.service_label = mediator.get_service_label();
             info.nickname = account.get_account().presentation_identity;
 
             try {
@@ -1033,6 +950,580 @@ public class Accounts.Manager : GLib.Object {
 
         if (state != null) {
             set_available(state.account, false);
+        }
+    }
+
+}
+
+/**
+ * Manages persistence for version 1 config files.
+ */
+public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
+
+
+    private const string GROUP_ACCOUNT = "Account";
+    private const string GROUP_FOLDERS = "Folders";
+
+    private const string ACCOUNT_LABEL = "label";
+    private const string ACCOUNT_ORDINAL = "ordinal";
+    private const string ACCOUNT_PREFETCH = "prefetch_days";
+    private const string ACCOUNT_PROVIDER = "service_provider";
+    private const string ACCOUNT_SAVE_DRAFTS = "save_drafts";
+    private const string ACCOUNT_SAVE_SENT = "save_sent";
+    private const string ACCOUNT_SENDERS = "sender_mailboxes";
+    private const string ACCOUNT_SIG = "signature";
+    private const string ACCOUNT_USE_SIG = "use_signature";
+
+    private const string FOLDER_ARCHIVE = "archive_folder";
+    private const string FOLDER_DRAFTS = "drafts_folder";
+    private const string FOLDER_SENT = "sent_mail_folder";
+    private const string FOLDER_SPAM = "spam_folder";
+    private const string FOLDER_TRASH = "trash_folder";
+
+
+    private bool is_managed;
+
+    public AccountConfigV1(bool is_managed) {
+        this.is_managed = is_managed;
+    }
+
+    public  Geary.AccountInformation load(Geary.ConfigFile config,
+                                          string id,
+                                          Geary.ServiceProvider? default_provider,
+                                          string? default_name)
+        throws ConfigError, GLib.KeyFileError {
+        Geary.ConfigFile.Group account_config =
+            config.get_group(GROUP_ACCOUNT);
+
+        Gee.List<Geary.RFC822.MailboxAddress> senders =
+            new Gee.LinkedList<Geary.RFC822.MailboxAddress>();
+        foreach (string sender in
+                 account_config.get_required_string_list(ACCOUNT_SENDERS)) {
+            try {
+                senders.add(
+                    new Geary.RFC822.MailboxAddress.from_rfc822_string(sender)
+                );
+            } catch (Geary.RFC822Error err) {
+                throw new ConfigError.SYNTAX(
+                    "%s: Invalid sender address: %s", id, sender
+                );
+            }
+        }
+
+        if (senders.is_empty) {
+            throw new ConfigError.SYNTAX("%s: No sender addresses found", id);
+        }
+
+        Geary.ServiceProvider? provider = null;
+        try {
+            provider = default_provider ??
+                Geary.ServiceProvider.for_value(
+                    account_config.get_required_string(ACCOUNT_PROVIDER)
+                );
+        } catch (Geary.EngineError err) {
+            throw new ConfigError.SYNTAX("%s: No/bad service provider", id);
+        }
+
+        Geary.AccountInformation account = new Geary.AccountInformation(
+            id, provider, senders.remove_at(0)
+        );
+
+        account.ordinal = account_config.get_int(
+            ACCOUNT_ORDINAL, Geary.AccountInformation.next_ordinal++
+        );
+        account.nickname = account_config.get_string(
+            ACCOUNT_LABEL, account.nickname
+        );
+        account.prefetch_period_days = account_config.get_int(
+            ACCOUNT_PREFETCH, account.prefetch_period_days
+        );
+        account.save_drafts = account_config.get_bool(
+            ACCOUNT_SAVE_DRAFTS, account.save_drafts
+        );
+        account.save_sent_mail = account_config.get_bool(
+            ACCOUNT_SAVE_SENT, account.save_sent_mail
+        );
+        account.use_email_signature = account_config.get_bool(
+            ACCOUNT_USE_SIG, account.use_email_signature
+        );
+        account.email_signature = account_config.get_string(
+            ACCOUNT_SIG, account.email_signature
+        );
+        foreach (Geary.RFC822.MailboxAddress sender in senders) {
+            account.append_sender(sender);
+        }
+
+        Geary.ConfigFile.Group folder_config =
+            config.get_group(GROUP_FOLDERS);
+        account.archive_folder_path = load_folder(folder_config, FOLDER_ARCHIVE);
+        account.drafts_folder_path = load_folder(folder_config, FOLDER_DRAFTS);
+        account.sent_mail_folder_path = load_folder(folder_config, FOLDER_SENT);
+        account.spam_folder_path = load_folder(folder_config, FOLDER_SPAM);
+        account.trash_folder_path = load_folder(folder_config, FOLDER_TRASH);
+
+        return account;
+    }
+
+    /** Saves an account to a config file. */
+    public void save(Geary.AccountInformation account,
+                     Geary.ConfigFile config) {
+        Geary.ConfigFile.Group account_config =
+            config.get_group(GROUP_ACCOUNT);
+        account_config.set_int(ACCOUNT_ORDINAL, account.ordinal);
+        account_config.set_string(ACCOUNT_LABEL, account.nickname);
+        account_config.set_int(ACCOUNT_PREFETCH, account.prefetch_period_days);
+        account_config.set_bool(ACCOUNT_SAVE_DRAFTS, account.save_drafts);
+        account_config.set_bool(ACCOUNT_SAVE_SENT, account.save_sent_mail);
+        account_config.set_bool(ACCOUNT_USE_SIG, account.use_email_signature);
+        account_config.set_string(ACCOUNT_SIG, account.email_signature);
+        account_config.set_string_list(
+            ACCOUNT_SENDERS,
+            Geary.traverse(account.sender_mailboxes)
+            .map<string>((sender) => sender.to_rfc822_string())
+            .to_array_list()
+        );
+
+        if (!is_managed) {
+            account_config.set_string(
+                ACCOUNT_PROVIDER, account.service_provider.to_value()
+            );
+        }
+
+        Geary.ConfigFile.Group folder_config =
+            config.get_group(GROUP_FOLDERS);
+        save_folder(folder_config, FOLDER_ARCHIVE, account.archive_folder_path);
+        save_folder(folder_config, FOLDER_DRAFTS, account.drafts_folder_path);
+        save_folder(folder_config, FOLDER_SENT, account.sent_mail_folder_path);
+        save_folder(folder_config, FOLDER_SPAM, account.spam_folder_path);
+        save_folder(folder_config, FOLDER_TRASH, account.trash_folder_path);
+    }
+
+    private void save_folder(Geary.ConfigFile.Group config,
+                             string key,
+                             Geary.FolderPath? path) {
+        if (path != null) {
+            config.set_string_list(key, path.as_list());
+        }
+    }
+
+    private Geary.FolderPath? load_folder(Geary.ConfigFile.Group config,
+                                          string key) {
+        Geary.FolderPath? path = null;
+        Gee.List<string> parts = config.get_string_list(key);
+        if (!parts.is_empty) {
+            path = Geary.AccountInformation.build_folder_path(parts);
+        }
+        return path;
+    }
+
+}
+
+
+/**
+ * Manages persistence for un-versioned account configuration.
+ */
+public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
+
+    internal const string GROUP = "AccountInformation";
+
+    private const string ALTERNATE_EMAILS_KEY = "alternate_emails";
+    private const string ARCHIVE_FOLDER_KEY = "archive_folder";
+    private const string CREDENTIALS_METHOD_KEY = "credentials_method";
+    private const string CREDENTIALS_PROVIDER_KEY = "credentials_provider";
+    private const string DRAFTS_FOLDER_KEY = "drafts_folder";
+    private const string EMAIL_SIGNATURE_KEY = "email_signature";
+    private const string NICKNAME_KEY = "nickname";
+    private const string ORDINAL_KEY = "ordinal";
+    private const string PREFETCH_PERIOD_DAYS_KEY = "prefetch_period_days";
+    private const string PRIMARY_EMAIL_KEY = "primary_email";
+    private const string REAL_NAME_KEY = "real_name";
+    private const string SAVE_DRAFTS_KEY = "save_drafts";
+    private const string SAVE_SENT_MAIL_KEY = "save_sent_mail";
+    private const string SENT_MAIL_FOLDER_KEY = "sent_mail_folder";
+    private const string SERVICE_PROVIDER_KEY = "service_provider";
+    private const string SPAM_FOLDER_KEY = "spam_folder";
+    private const string TRASH_FOLDER_KEY = "trash_folder";
+    private const string USE_EMAIL_SIGNATURE_KEY = "use_email_signature";
+
+
+    public Geary.AccountInformation
+        load(Geary.ConfigFile config_file,
+             string id,
+             Geary.ServiceProvider? default_provider,
+             string? default_name)
+        throws ConfigError, GLib.KeyFileError {
+        Geary.ConfigFile.Group config = config_file.get_group(GROUP);
+
+        string primary_email = config.get_required_string(PRIMARY_EMAIL_KEY);
+        string real_name = config.get_string(REAL_NAME_KEY, default_name);
+
+        Geary.ServiceProvider? provider = null;
+        try {
+            provider = default_provider ??
+                Geary.ServiceProvider.for_value(
+                    config.get_required_string(SERVICE_PROVIDER_KEY)
+                );
+        } catch (Geary.EngineError err) {
+            throw new ConfigError.SYNTAX("%s: No/bad service provider", id);
+        }
+
+        Geary.AccountInformation info = new Geary.AccountInformation(
+            id, provider,
+            new Geary.RFC822.MailboxAddress(real_name, primary_email)
+        );
+
+        info.ordinal = config.get_int(ORDINAL_KEY, info.ordinal);
+        if (info.ordinal >= Geary.AccountInformation.next_ordinal) {
+            Geary.AccountInformation.next_ordinal = info.ordinal + 1;
+        }
+
+        info.append_sender(new Geary.RFC822.MailboxAddress(
+            config.get_string(REAL_NAME_KEY), primary_email
+        ));
+
+        info.nickname = config.get_string(NICKNAME_KEY);
+
+        // Store alternate emails in a list of case-insensitive strings
+        Gee.List<string> alt_email_list = config.get_string_list(
+            ALTERNATE_EMAILS_KEY
+        );
+        foreach (string alt_email in alt_email_list) {
+            Geary.RFC822.MailboxAddresses mailboxes =
+                new Geary.RFC822.MailboxAddresses.from_rfc822_string(alt_email);
+            foreach (Geary.RFC822.MailboxAddress mailbox in mailboxes.get_all()) {
+                info.append_sender(mailbox);
+            }
+        }
+
+        info.prefetch_period_days = config.get_int(
+            PREFETCH_PERIOD_DAYS_KEY, info.prefetch_period_days
+        );
+        info.save_sent_mail = config.get_bool(
+            SAVE_SENT_MAIL_KEY, info.save_sent_mail
+        );
+        info.use_email_signature = config.get_bool(
+            USE_EMAIL_SIGNATURE_KEY, info.use_email_signature
+        );
+        info.email_signature = config.get_string(
+            EMAIL_SIGNATURE_KEY, info.email_signature
+        );
+
+        info.drafts_folder_path = Geary.AccountInformation.build_folder_path(
+            config.get_string_list(DRAFTS_FOLDER_KEY)
+        );
+        info.sent_mail_folder_path = Geary.AccountInformation.build_folder_path(
+            config.get_string_list(SENT_MAIL_FOLDER_KEY)
+        );
+        info.spam_folder_path = Geary.AccountInformation.build_folder_path(
+            config.get_string_list(SPAM_FOLDER_KEY)
+        );
+        info.trash_folder_path = Geary.AccountInformation.build_folder_path(
+            config.get_string_list(TRASH_FOLDER_KEY)
+        );
+        info.archive_folder_path = Geary.AccountInformation.build_folder_path(
+            config.get_string_list(ARCHIVE_FOLDER_KEY)
+        );
+
+        info.save_drafts = config.get_bool(SAVE_DRAFTS_KEY, true);
+
+        return info;
+    }
+
+    public void save(Geary.AccountInformation info,
+                     Geary.ConfigFile config_file) {
+
+        Geary.ConfigFile.Group config = config_file.get_group(GROUP);
+
+        config.set_string(REAL_NAME_KEY, info.primary_mailbox.name ?? "");
+        config.set_string(PRIMARY_EMAIL_KEY, info.primary_mailbox.address);
+        config.set_string(NICKNAME_KEY, info.nickname);
+        config.set_string(SERVICE_PROVIDER_KEY, info.service_provider.to_value());
+        config.set_int(ORDINAL_KEY, info.ordinal);
+        config.set_int(PREFETCH_PERIOD_DAYS_KEY, info.prefetch_period_days);
+        config.set_bool(SAVE_SENT_MAIL_KEY, info.save_sent_mail);
+        config.set_bool(USE_EMAIL_SIGNATURE_KEY, info.use_email_signature);
+        config.set_string(EMAIL_SIGNATURE_KEY, info.email_signature);
+        if (info.has_sender_aliases) {
+            Gee.List<Geary.RFC822.MailboxAddress> alts = info.sender_mailboxes;
+            // Don't include the primary in the list
+            alts.remove_at(0);
+
+            config.set_string_list(
+                ALTERNATE_EMAILS_KEY,
+                Geary.traverse(alts)
+                .map<string>((alt) => alt.to_rfc822_string())
+                .to_array_list()
+            );
+        }
+
+        Gee.LinkedList<string> empty = new Gee.LinkedList<string>();
+        config.set_string_list(DRAFTS_FOLDER_KEY, (info.drafts_folder_path != null
+            ? info.drafts_folder_path.as_list() : empty));
+        config.set_string_list(SENT_MAIL_FOLDER_KEY, (info.sent_mail_folder_path != null
+            ? info.sent_mail_folder_path.as_list() : empty));
+        config.set_string_list(SPAM_FOLDER_KEY, (info.spam_folder_path != null
+            ? info.spam_folder_path.as_list() : empty));
+        config.set_string_list(TRASH_FOLDER_KEY, (info.trash_folder_path != null
+            ? info.trash_folder_path.as_list() : empty));
+        config.set_string_list(ARCHIVE_FOLDER_KEY, (info.archive_folder_path != null
+            ? info.archive_folder_path.as_list() : empty));
+
+        config.set_bool(SAVE_DRAFTS_KEY, info.save_drafts);
+    }
+
+}
+
+
+/**
+ * Manages persistence for version 1 service configuration.
+ */
+public class Accounts.ServiceConfigV1 : ServiceConfig, GLib.Object {
+
+    private const string GROUP_INCOMING = "Incoming";
+    private const string GROUP_OUTGOING = "Outgoing";
+
+    private const string CREDENTIALS = "credentials";
+    private const string HOST = "host";
+    private const string LOGIN = "login";
+    private const string PORT = "port";
+    private const string REMEMBER_PASSWORD = "remember_password";
+    private const string SECURITY = "transport_security";
+
+
+    /** Loads a supported service from a config file. */
+    public Geary.ServiceInformation load(Geary.ConfigFile config,
+                                         Geary.AccountInformation account,
+                                         Geary.Protocol protocol,
+                                         Geary.CredentialsMediator mediator)
+        throws ConfigError, GLib.KeyFileError {
+        Geary.ConfigFile.Group service_config = config.get_group(
+            protocol == IMAP ? GROUP_INCOMING : GROUP_OUTGOING
+        );
+
+        Geary.ServiceInformation service = new Geary.ServiceInformation(
+            protocol, mediator
+        );
+
+        string? login = service_config.get_string(LOGIN, null);
+        if (login != null) {
+            service.credentials = new Geary.Credentials(
+                Credentials.PASSWORD, login
+            );
+        }
+        service.remember_password = service_config.get_bool(
+            REMEMBER_PASSWORD, service.remember_password
+        );
+
+
+        if (account.service_provider == Geary.ServiceProvider.OTHER) {
+            service.host = service_config.get_required_string(HOST);
+            service.port = (uint16) service_config.get_int(PORT, service.port);
+
+            try {
+                service.transport_security =
+                Geary.TlsNegotiationMethod.for_value(
+                    service_config.get_string(SECURITY, null)
+                );
+            } catch (GLib.Error err) {
+                // Oh well
+                debug("%s: No/invalid transport security config for %s",
+                      account.id, protocol.to_value());
+            }
+
+            if (service.protocol == Geary.Protocol.SMTP) {
+                try {
+                    service.smtp_credentials_source =
+                    Geary.SmtpCredentials.for_value(
+                        service_config.get_required_string(CREDENTIALS)
+                    );
+                } catch (Geary.EngineError err) {
+                    debug("%s: No/invalid SMTP auth config", account.id);
+                }
+            }
+
+            if (service.port == 0) {
+                service.port = service.get_default_port();
+            }
+        }
+
+        return service;
+    }
+
+    /** Saves an service to a config file. */
+    public void save(Geary.AccountInformation account,
+                     Geary.ServiceInformation service,
+                     Geary.ConfigFile config) {
+        Geary.ConfigFile.Group service_config = config.get_group(
+            service.protocol == IMAP ? GROUP_INCOMING : GROUP_OUTGOING
+        );
+
+        if (service.credentials != null) {
+            service_config.set_string(LOGIN, service.credentials.user);
+        }
+        service_config.set_bool(REMEMBER_PASSWORD, service.remember_password);
+
+        if (account.service_provider == Geary.ServiceProvider.OTHER) {
+            service_config.set_string(HOST, service.host);
+            service_config.set_int(PORT, service.port);
+            service_config.set_string(
+                SECURITY, service.transport_security.to_value()
+            );
+
+            if (service.protocol == Geary.Protocol.SMTP) {
+                service_config.set_string(
+                    CREDENTIALS, service.smtp_credentials_source.to_value()
+                );
+            }
+        }
+    }
+
+}
+
+
+/**
+ * Manages persistence for un-versioned service configuration.
+ */
+public class Accounts.ServiceConfigLegacy : ServiceConfig, GLib.Object {
+
+
+    private const string HOST = "host";
+    private const string PORT = "port";
+    private const string REMEMBER_PASSWORD = "remember_password";
+    private const string SSL = "ssl";
+    private const string STARTTLS = "starttls";
+    private const string USERNAME = "username";
+
+    private const string SMTP_NOAUTH = "smtp_noauth";
+    private const string SMTP_USE_IMAP_CREDENTIALS = "smtp_use_imap_credentials";
+
+
+    /** Loads a supported service from a config file. */
+    public Geary.ServiceInformation load(Geary.ConfigFile config,
+                                         Geary.AccountInformation account,
+                                         Geary.Protocol protocol,
+                                         Geary.CredentialsMediator mediator)
+        throws ConfigError, GLib.KeyFileError {
+        Geary.ServiceInformation service = new Geary.ServiceInformation(
+            protocol, mediator
+        );
+
+        Geary.ConfigFile.Group service_config =
+            config.get_group(AccountConfigLegacy.GROUP);
+
+        string prefix = service.protocol.to_value() + "_";
+
+        string? login = service_config.get_string(
+            prefix + USERNAME, account.primary_mailbox.address
+        );
+        if (login != null) {
+            service.credentials = new Geary.Credentials(
+                Credentials.PASSWORD, login
+            );
+        }
+        service.remember_password = service_config.get_bool(
+            prefix + REMEMBER_PASSWORD, service.remember_password
+        );
+
+        if (account.service_provider == Geary.ServiceProvider.OTHER) {
+            service.host = service_config.get_string(prefix + HOST, service.host);
+            service.port = (uint16) service_config.get_int(
+                prefix + PORT, service.port
+            );
+
+            bool use_tls = service_config.get_bool(
+                prefix + SSL, protocol == Geary.Protocol.IMAP
+            );
+            bool use_starttls = service_config.get_bool(
+                prefix + STARTTLS, true
+            );
+            if (use_tls) {
+                service.transport_security = Geary.TlsNegotiationMethod.TRANSPORT;
+            } else if (use_starttls) {
+                service.transport_security = Geary.TlsNegotiationMethod.START_TLS;
+            } else {
+                service.transport_security = Geary.TlsNegotiationMethod.NONE;
+            }
+
+            if (service.protocol == Geary.Protocol.SMTP) {
+                bool use_imap = service_config.get_bool(
+                    SMTP_USE_IMAP_CREDENTIALS, service.credentials != null
+                );
+                bool no_auth = service_config.get_bool(
+                    SMTP_NOAUTH, false
+                );
+                if (use_imap) {
+                    service.smtp_credentials_source =
+                        Geary.SmtpCredentials.IMAP;
+                } else if (!no_auth) {
+                    service.smtp_credentials_source =
+                        Geary.SmtpCredentials.CUSTOM;
+                } else {
+                    service.smtp_credentials_source =
+                        Geary.SmtpCredentials.NONE;
+                }
+            }
+        }
+
+        return service;
+    }
+
+    /** Saves an service to a config file. */
+    public void save(Geary.AccountInformation account,
+                     Geary.ServiceInformation service,
+                     Geary.ConfigFile config) {
+        Geary.ConfigFile.Group service_config =
+            config.get_group(AccountConfigLegacy.GROUP);
+
+        string prefix = service.protocol.to_value() + "_";
+
+        if (service.credentials != null) {
+            service_config.set_string(
+                prefix + USERNAME, service.credentials.user
+            );
+        }
+        service_config.set_bool(
+            prefix + REMEMBER_PASSWORD, service.remember_password
+        );
+
+        if (account.service_provider == Geary.ServiceProvider.OTHER) {
+            service_config.set_string(prefix + HOST, service.host);
+            service_config.set_int(prefix + PORT, service.port);
+
+            switch (service.transport_security) {
+            case NONE:
+                service_config.set_bool(prefix + SSL, false);
+                service_config.set_bool(prefix + STARTTLS, false);
+                break;
+
+            case START_TLS:
+                service_config.set_bool(prefix + SSL, false);
+                service_config.set_bool(prefix + STARTTLS, true);
+                break;
+
+            case TRANSPORT:
+                service_config.set_bool(prefix + SSL, true);
+                service_config.set_bool(prefix + STARTTLS, false);
+                break;
+            }
+
+            if (service.protocol == Geary.Protocol.SMTP) {
+                switch (service.smtp_credentials_source) {
+                case NONE:
+                    service_config.set_bool(SMTP_USE_IMAP_CREDENTIALS, false);
+                    service_config.set_bool(SMTP_NOAUTH, true);
+                    break;
+
+                case IMAP:
+                    service_config.set_bool(SMTP_USE_IMAP_CREDENTIALS, true);
+                    service_config.set_bool(SMTP_NOAUTH, false);
+                    break;
+
+                case CUSTOM:
+                    service_config.set_bool(SMTP_USE_IMAP_CREDENTIALS, false);
+                    service_config.set_bool(SMTP_NOAUTH, false);
+                    break;
+                }
+            }
         }
     }
 

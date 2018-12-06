@@ -66,8 +66,7 @@ class Geary.EngineTest : TestCase {
         AccountInformation info = new AccountInformation(
             "test",
             ServiceProvider.OTHER,
-            new MockServiceInformation(),
-            new MockServiceInformation()
+            new RFC822.MailboxAddress(null, "test1@example.com")
         );
         assert_false(this.engine.has_account(info.id));
 
@@ -86,8 +85,7 @@ class Geary.EngineTest : TestCase {
         AccountInformation info = new AccountInformation(
             "test",
             ServiceProvider.OTHER,
-            new MockServiceInformation(),
-            new MockServiceInformation()
+            new RFC822.MailboxAddress(null, "test1@example.com")
         );
         this.engine.add_account(info);
         assert_true(this.engine.has_account(info.id));
@@ -103,8 +101,7 @@ class Geary.EngineTest : TestCase {
         AccountInformation info = new AccountInformation(
             "test",
             ServiceProvider.OTHER,
-            new MockServiceInformation(),
-            new MockServiceInformation()
+            new RFC822.MailboxAddress(null, "test1@example.com")
         );
         assert_false(this.engine.has_account(info.id));
 

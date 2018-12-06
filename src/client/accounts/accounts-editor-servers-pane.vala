@@ -61,8 +61,8 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         this.editor = editor;
         this.account = account;
         this.engine = ((GearyApplication) editor.application).engine;
-        this.imap_mutable = account.imap.temp_copy();
-        this.smtp_mutable = account.smtp.temp_copy();
+        this.imap_mutable = new Geary.ServiceInformation.copy(account.imap);
+        this.smtp_mutable = new Geary.ServiceInformation.copy(account.smtp);
 
         this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 

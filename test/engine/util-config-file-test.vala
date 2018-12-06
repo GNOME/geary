@@ -19,7 +19,6 @@ class Geary.ConfigFileTest : TestCase {
         base("Geary.ConfigFileTest");
         add_test("test_string", test_string);
         add_test("test_string_fallback", test_string_fallback);
-        add_test("test_escaped_string", test_escaped_string);
         add_test("test_string_list", test_string_list);
         add_test("test_string_list", test_string_list);
         add_test("test_bool", test_bool);
@@ -53,12 +52,6 @@ class Geary.ConfigFileTest : TestCase {
 
         this.test_group.set_fallback("fallback", "fallback-");
         assert_string("a string", this.test_group.get_string(TEST_KEY));
-    }
-
-    public void test_escaped_string() throws Error {
-        this.test_group.set_escaped_string(TEST_KEY, "a\nstring");
-        assert_string("a\nstring", this.test_group.get_escaped_string(TEST_KEY));
-        assert_string("=default", this.test_group.get_escaped_string(TEST_KEY_MISSING, "=default"));
     }
 
     public void test_string_list() throws Error {

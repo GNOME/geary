@@ -24,8 +24,6 @@ src/client/accounts/accounts-editor-row.vala
 src/client/accounts/accounts-editor-servers-pane.vala
 src/client/accounts/accounts-manager.vala
 src/client/accounts/add-edit-page.vala
-src/client/accounts/goa-service-information.vala
-src/client/accounts/local-service-information.vala
 src/client/accounts/login-dialog.vala
 src/client/application/application-avatar-store.vala
 src/client/application/autostart-manager.vala

@@ -55,10 +55,6 @@ public class Geary.AccountInformation : BaseObject {
      */
     public File? data_dir { get; private set; default = null; }
 
-    //
-    // IMPORTANT: When adding new properties, be sure to add them to the copy method.
-    //
-
     /**
      * A unique, immutable, machine-readable identifier for this account.
      *
@@ -72,10 +68,31 @@ public class Geary.AccountInformation : BaseObject {
     /** Specifies the email provider for this account. */
     public Geary.ServiceProvider service_provider { get; private set; }
 
-    /** A human-readable label describing the email service provider. */
+    /**
+     * A human-readable label describing the email service provider.
+     *
+     * Known providers such as Gmail will have a label specified by
+     * clients, but other accounts can only really be identified by
+     * their server names. This attempts to extract a 'nice' value for
+     * label based on the service's host names.
+     */
     public string service_label {
-        get; public set;
+        owned get {
+            string? value = this._service_label;
+            if (value == null) {
+                string[] host_parts = this.imap.host.split(".");
+                if (host_parts.length > 1) {
+                    host_parts = host_parts[1:host_parts.length];
+                }
+                // don't stash this in _service_label since we want it
+                // updated if the service host names change
+                value = string.joinv(".", host_parts);
+            }
+            return value;
+        }
+        set { this._service_label = value; }
     }
+    private string? _service_label = null;
 
     /**
      * A unique human-readable display name for this account.
@@ -148,10 +165,17 @@ public class Geary.AccountInformation : BaseObject {
         get; set; default = AccountInformation.next_ordinal++;
     }
 
-    /* Information related to the account's server-side authentication
-     * and configuration. */
-    public ServiceInformation imap { get; private set; }
-    public ServiceInformation smtp { get; private set; }
+    /* Incoming email service configuration. */
+    public ServiceInformation imap {
+        get; set;
+        default = new ServiceInformation(Protocol.IMAP, null);
+    }
+
+    /* Outgoing email service configuration. */
+    public ServiceInformation smtp {
+        get; set;
+        default = new ServiceInformation(Protocol.SMTP, null);
+    }
 
     /** A lock that can be used to ensure saving is serialised. */
     public Nonblocking.Mutex write_lock {
@@ -200,59 +224,10 @@ public class Geary.AccountInformation : BaseObject {
      */
     public AccountInformation(string id,
                               ServiceProvider provider,
-                              ServiceInformation imap,
-                              ServiceInformation smtp) {
+                              RFC822.MailboxAddress primary_mailbox) {
         this.id = id;
         this.service_provider = provider;
-        this.imap = imap;
-        this.smtp = smtp;
-
-        // Known providers such as Gmail will have a label specified
-        // by clients, but other accounts can only really be
-        // identified by their server names. Try to extract a 'nice'
-        // value for label based on service host names.
-        string imap_host = imap.host;
-        string[] host_parts = imap_host.split(".");
-        if (host_parts.length > 1) {
-            host_parts = host_parts[1:host_parts.length];
-        }
-        this.service_label = string.joinv(".", host_parts);
-    }
-
-    /**
-     * Creates a copy of an instance.
-     */
-    public AccountInformation.temp_copy(AccountInformation from) {
-        this(
-            from.id,
-            from.service_provider,
-            from.imap.temp_copy(),
-            from.smtp.temp_copy()
-        );
-        copy_from(from);
-        this.is_copy = true;
-    }
-
-
-    /** Copies all properties from an instance into this one. */
-    public void copy_from(AccountInformation from) {
-        this.id = from.id;
-        this.nickname = from.nickname;
-        this.mailboxes.clear();
-        this.mailboxes.add_all(from.sender_mailboxes);
-        this.prefetch_period_days = from.prefetch_period_days;
-        this.save_sent_mail = from.save_sent_mail;
-        this.ordinal = from.ordinal;
-        this.imap.copy_from(from.imap);
-        this.smtp.copy_from(from.smtp);
-        this.drafts_folder_path = from.drafts_folder_path;
-        this.sent_mail_folder_path = from.sent_mail_folder_path;
-        this.spam_folder_path = from.spam_folder_path;
-        this.trash_folder_path = from.trash_folder_path;
-        this.archive_folder_path = from.archive_folder_path;
-        this.save_drafts = from.save_drafts;
-        this.use_email_signature = from.use_email_signature;
-        this.email_signature = from.email_signature;
+        append_sender(primary_mailbox);
     }
 
     /** Sets the location of the account's storage directories. */
@@ -405,10 +380,13 @@ public class Geary.AccountInformation : BaseObject {
      */
     public Credentials? get_smtp_credentials() {
         Credentials? smtp = null;
-        if (!this.smtp.smtp_noauth) {
-            smtp = this.smtp.smtp_use_imap_credentials
-                ? this.imap.credentials
-                : this.smtp.credentials;
+        switch (this.smtp.smtp_credentials_source) {
+        case IMAP:
+            smtp = this.imap.credentials;
+            break;
+        case CUSTOM:
+            smtp = this.smtp.credentials;
+            break;
         }
         return smtp;
     }
@@ -495,6 +473,38 @@ public class Geary.AccountInformation : BaseObject {
         for (int i = 1; i < parts.size; i++)
             path = path.get_child(parts.get(i));
         return path;
+    }
+
+    public bool equal_to(AccountInformation other) {
+        return (
+            this == other || (
+                this.id == other.id &&
+                this.ordinal == other.ordinal &&
+                this.service_provider == other.service_provider &&
+                this.service_label == other.service_label &&
+                this.nickname == other.nickname &&
+                this.primary_mailbox.equal_to(other.primary_mailbox) &&
+                this.has_sender_aliases == other.has_sender_aliases &&
+                this.sender_mailboxes.size == other.sender_mailboxes.size &&
+                traverse(this.sender_mailboxes).all(
+                    addr => other.sender_mailboxes.contains(addr)
+                ) &&
+                this.prefetch_period_days == other.prefetch_period_days &&
+                this.save_sent_mail == other.save_sent_mail &&
+                this.imap.equal_to(other.imap) &&
+                this.smtp.equal_to(other.smtp) &&
+                this.use_email_signature == other.use_email_signature &&
+                this.email_signature == other.email_signature &&
+                this.save_drafts == other.save_drafts &&
+                this.drafts_folder_path == other.drafts_folder_path &&
+                this.sent_mail_folder_path == other.sent_mail_folder_path &&
+                this.spam_folder_path == other.spam_folder_path &&
+                this.trash_folder_path == other.trash_folder_path &&
+                this.archive_folder_path == other.archive_folder_path &&
+                this.config_dir == other.config_dir &&
+                this.data_dir == other.data_dir
+            )
+        );
     }
 
 }

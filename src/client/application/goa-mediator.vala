@@ -43,6 +43,24 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         this.account = account;
     }
 
+    public Geary.ServiceProvider get_service_provider() {
+        Geary.ServiceProvider provider = Geary.ServiceProvider.OTHER;
+        switch (this.account.get_account().provider_type) {
+        case "google":
+            provider = Geary.ServiceProvider.GMAIL;
+            break;
+
+        case "windows_live":
+            provider = Geary.ServiceProvider.OUTLOOK;
+            break;
+        }
+        return provider;
+    }
+
+    public string get_service_label() {
+        return this.account.get_account().provider_name;
+    }
+
     public async void update(Geary.AccountInformation geary_account,
                              GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -54,11 +72,8 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         this.oauth2 = this.account.get_oauth2_based();
         this.password = this.account.get_password_based();
 
-        GoaServiceInformation imap = (GoaServiceInformation) geary_account.imap;
-        imap.update();
-
-        GoaServiceInformation smtp = (GoaServiceInformation) geary_account.smtp;
-        smtp.update();
+        update_imap_config(geary_account.imap);
+        update_smtp_config(geary_account.smtp);
     }
 
     public virtual async bool load_token(Geary.AccountInformation account,
@@ -116,6 +131,86 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         // hear that needs attention is no longer true.
 
         return this.is_valid;
+    }
+
+    private void update_imap_config(Geary.ServiceInformation service) {
+        Goa.Mail? mail = this.account.get_mail();
+        if (mail != null) {
+            parse_host_name(service, mail.imap_host);
+
+            if (mail.imap_use_ssl) {
+                service.transport_security = Geary.TlsNegotiationMethod.TRANSPORT;
+            } else if (mail.imap_use_tls) {
+                service.transport_security = Geary.TlsNegotiationMethod.START_TLS;
+            } else {
+                service.transport_security = Geary.TlsNegotiationMethod.NONE;
+            }
+
+            service.credentials = new Geary.Credentials(
+                this.method, mail.imap_user_name
+            );
+
+            if (service.port == 0) {
+                service.port = service.get_default_port();
+            }
+        }
+    }
+
+    private void update_smtp_config(Geary.ServiceInformation service) {
+        Goa.Mail? mail = this.account.get_mail();
+        if (mail != null) {
+            parse_host_name(service, mail.smtp_host);
+
+            if (mail.imap_use_ssl) {
+                service.transport_security = Geary.TlsNegotiationMethod.TRANSPORT;
+            } else if (mail.imap_use_tls) {
+                service.transport_security = Geary.TlsNegotiationMethod.START_TLS;
+            } else {
+                service.transport_security = Geary.TlsNegotiationMethod.NONE;
+            }
+
+            if (mail.smtp_use_auth) {
+                service.smtp_credentials_source = Geary.SmtpCredentials.CUSTOM;
+            } else {
+                service.smtp_credentials_source = Geary.SmtpCredentials.NONE;
+            }
+
+            if (mail.smtp_use_auth) {
+                service.credentials = new Geary.Credentials(
+                    this.method, mail.smtp_user_name
+                );
+            }
+
+            if (service.port == 0) {
+                service.port = service.get_default_port();
+            }
+        }
+    }
+
+    private void parse_host_name(Geary.ServiceInformation service,
+                                 string host_name) {
+        // Fall back to trying to use the host name as-is.
+        // At least the user can see it in the settings if
+        // they look.
+        service.host = host_name;
+        service.port = 0;
+
+        try {
+            GLib.NetworkAddress address = GLib.NetworkAddress.parse(
+                host_name, service.port
+            );
+
+            service.host = address.hostname;
+            service.port = (uint16) address.port;
+        } catch (GLib.Error err) {
+            warning(
+                "GOA account \"%s\" %s hostname \"%s\": %",
+                this.account.get_account().id,
+                service.protocol.to_value(),
+                host_name,
+                err.message
+            );
+        }
     }
 
 }

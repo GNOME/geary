@@ -110,12 +110,9 @@ public enum Geary.SmtpCredentials {
 
 
 /**
- * This class encloses all the information used when connecting with the server,
- * how to authenticate with it and which credentials to use. Derived classes
- * implement specific ways of doing that. For now, the only known implementation
- * resides in Geary.LocalServiceInformation.
+ * Encapsulates configuration information for a network service.
  */
-public abstract class Geary.ServiceInformation : GLib.Object {
+public class Geary.ServiceInformation : GLib.Object {
 
 
     /** Specifies if this service is for IMAP or SMTP. */
@@ -125,7 +122,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
     public string host { get; set; default = ""; }
 
     /** The server's port. */
-    public uint16 port { get; set; }
+    public uint16 port { get; set; default = 0; }
 
     /** The transport security method to use */
     public TlsNegotiationMethod transport_security {
@@ -169,7 +166,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      * The credentials mediator used with this service.
      *
      * It is responsible for fetching and storing the credentials if
-     * applicable.
+     * as needed.
      */
     public CredentialsMediator mediator { get; private set; }
 
@@ -227,14 +224,32 @@ public abstract class Geary.ServiceInformation : GLib.Object {
     public bool smtp_use_imap_credentials { get; set; default = true; }
 
 
-    protected ServiceInformation(Protocol proto, CredentialsMediator mediator) {
+    /**
+     * Constructs a new configuration for a specific service.
+     */
+    public ServiceInformation(Protocol proto, CredentialsMediator mediator) {
         this.protocol = proto;
         this.mediator = mediator;
     }
 
+    /**
+     * Constructs a copy of the given service configuration.
+     */
+    public ServiceInformation.copy(ServiceInformation other) {
+        this(other.protocol, other.mediator);
+        this.host = other.host;
+        this.port = other.port;
+        this.use_starttls = other.use_starttls;
+        this.use_ssl = other.use_ssl;
+        this.credentials = (
+            other.credentials != null ? other.credentials.copy() : null
+        );
+        this.mediator = other.mediator;
+        this.remember_password = other.remember_password;
+        this.smtp_noauth = other.smtp_noauth;
+        this.smtp_use_imap_credentials = other.smtp_use_imap_credentials;
+    }
 
-    /** Returns a temporary copy of this service for editing. */
-    public abstract ServiceInformation temp_copy();
 
     /**
      * Returns the default port for this service type and settings.
@@ -273,27 +288,13 @@ public abstract class Geary.ServiceInformation : GLib.Object {
              this.port == other.port &&
              this.use_starttls == other.use_starttls &&
              this.use_ssl == other.use_ssl &&
-             (this.credentials == null && other.credentials != null ||
+             (this.credentials == null && other.credentials == null ||
               this.credentials != null && this.credentials.equal_to(other.credentials)) &&
              this.mediator == other.mediator &&
              this.remember_password == other.remember_password &&
              this.smtp_noauth == other.smtp_noauth &&
              this.smtp_use_imap_credentials == other.smtp_use_imap_credentials)
         );
-    }
-
-    public void copy_from(Geary.ServiceInformation from) {
-        this.host = from.host;
-        this.port = from.port;
-        this.use_starttls = from.use_starttls;
-        this.use_ssl = from.use_ssl;
-        this.credentials = (
-            from.credentials != null ? from.credentials.copy() : null
-        );
-        this.mediator = from.mediator;
-        this.remember_password = from.remember_password;
-        this.smtp_noauth = from.smtp_noauth;
-        this.smtp_use_imap_credentials = from.smtp_use_imap_credentials;
     }
 
 }

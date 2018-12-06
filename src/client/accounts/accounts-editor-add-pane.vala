@@ -159,16 +159,18 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         string message = "";
         Gtk.Widget? to_focus = null;
 
-        Geary.ServiceInformation imap = new_imap_service();
-        Geary.ServiceInformation smtp = new_smtp_service();
-
         Geary.AccountInformation account =
-            this.accounts.new_orphan_account(this.provider, imap, smtp);
+            this.accounts.new_orphan_account(
+                this.provider,
+                new Geary.RFC822.MailboxAddress(
+                    this.real_name.value.text.strip(),
+                    this.email.value.text.strip()
+                )
+            );
 
-        account.append_sender(new Geary.RFC822.MailboxAddress(
-            this.real_name.value.text.strip(),
-            this.email.value.text.strip()
-        ));
+        account.imap = new_imap_service();
+        account.imap = new_smtp_service();
+
         account.nickname = account.primary_mailbox.address;
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
@@ -275,8 +277,8 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         }
     }
 
-    private LocalServiceInformation new_imap_service() {
-        LocalServiceInformation service =
+    private Geary.ServiceInformation new_imap_service() {
+        Geary.ServiceInformation service =
            this.accounts.new_libsecret_service(Geary.Protocol.IMAP);
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
@@ -309,8 +311,8 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         return service;
     }
 
-    private LocalServiceInformation new_smtp_service() {
-        LocalServiceInformation service =
+    private Geary.ServiceInformation new_smtp_service() {
+        Geary.ServiceInformation service =
            this.accounts.new_libsecret_service(Geary.Protocol.SMTP);
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
