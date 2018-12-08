@@ -98,10 +98,8 @@ public class GearyController : Geary.BaseObject {
     public MainWindow? main_window { get; private set; default = null; }
 
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
-    
+
     public AutostartManager? autostart_manager { get; private set; default = null; }
-    
-    public LoginDialog? login_dialog { get; private set; default = null; }
 
     public Application.AvatarStore? avatar_store {
         get; private set; default = null;
@@ -493,11 +491,6 @@ public class GearyController : Geary.BaseObject {
 
         this.upgrade_dialog = null;
 
-        if (login_dialog != null) {
-            this.login_dialog.destroy();
-            this.login_dialog = null;
-        }
-
         this.current_account = null;
         this.current_folder = null;
 
@@ -768,9 +761,9 @@ public class GearyController : Geary.BaseObject {
 
         // use LoginDialog for parent only if available and visible
         Gtk.Window? parent;
-        if (login_dialog != null && login_dialog.visible)
-            parent = login_dialog;
-        else
+        //if (login_dialog != null && login_dialog.visible)
+        //    parent = login_dialog;
+        //else
             parent = main_window;
 
         Geary.Endpoint endpoint = get_endpoint(account, service);

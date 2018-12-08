@@ -205,21 +205,9 @@ public class GearyApplication : Gtk.Application {
         if (!present())
             create_async.begin();
     }
-    
+
     public bool present() {
-        if (controller == null)
-            return false;
-        
-        // if LoginDialog (i.e. the opening dialog for creating the initial account) is present
-        // and visible, bring that to top (to prevent opening the hidden main window, which is
-        // empty)
-        if (controller.login_dialog != null && controller.login_dialog.visible) {
-            controller.login_dialog.present_with_time(Gdk.CURRENT_TIME);
-            
-            return true;
-        }
-        
-        if (controller.main_window == null)
+        if (controller == null || controller.main_window == null)
             return false;
 
         // Use present_with_time and a synthesised time so the present
@@ -234,7 +222,7 @@ public class GearyApplication : Gtk.Application {
 
         return true;
     }
-    
+
     private async void create_async() {
         // Manually keep the main loop around for the duration of this call.
         // Without this, the main loop will exit as soon as we hit the yield

@@ -6,15 +6,6 @@ desktop/org.gnome.Geary.appdata.xml.in
 desktop/org.gnome.Geary.desktop.in
 desktop/org.gnome.Geary.gschema.xml
 src/geary-version.vala.in
-src/client/accounts/account-dialog-account-list-pane.vala
-src/client/accounts/account-dialog-add-edit-pane.vala
-src/client/accounts/account-dialog-edit-alternate-emails-pane.vala
-src/client/accounts/account-dialog-pane.vala
-src/client/accounts/account-dialog-remove-confirm-pane.vala
-src/client/accounts/account-dialog-remove-fail-pane.vala
-src/client/accounts/account-dialog-spinner-pane.vala
-src/client/accounts/account-dialog.vala
-src/client/accounts/account-spinner-page.vala
 src/client/accounts/accounts-editor.vala
 src/client/accounts/accounts-editor-add-pane.vala
 src/client/accounts/accounts-editor-edit-pane.vala
@@ -23,8 +14,6 @@ src/client/accounts/accounts-editor-remove-pane.vala
 src/client/accounts/accounts-editor-row.vala
 src/client/accounts/accounts-editor-servers-pane.vala
 src/client/accounts/accounts-manager.vala
-src/client/accounts/add-edit-page.vala
-src/client/accounts/login-dialog.vala
 src/client/application/application-avatar-store.vala
 src/client/application/autostart-manager.vala
 src/client/application/application-command.vala
