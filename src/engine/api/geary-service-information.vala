@@ -84,38 +84,13 @@ public enum Geary.TlsNegotiationMethod {
 }
 
 
-/** The credential source used to negotiate SMTP authentication, if any. */
-public enum Geary.SmtpCredentials {
-    /** No SMTP credentials are required. */
-    NONE,
-    /** The account's IMAP credentials should be used. */
-    IMAP,
-    /** Custom credentials are required for SMTP. */
-    CUSTOM;
-
-    public static SmtpCredentials for_value(string value)
-        throws EngineError {
-        return ObjectUtils.from_enum_nick<SmtpCredentials>(
-            typeof(SmtpCredentials), value.ascii_down()
-        );
-    }
-
-    public string to_value() {
-        return ObjectUtils.to_enum_nick<SmtpCredentials>(
-            typeof(SmtpCredentials), this
-        );
-    }
-
-}
-
-
 /**
  * Encapsulates configuration information for a network service.
  */
 public class Geary.ServiceInformation : GLib.Object {
 
 
-    /** Specifies if this service is for IMAP or SMTP. */
+    /** Specifies the network protocol for this service. */
     public Protocol protocol { get; private set; }
 
     /** The server's address. */
@@ -125,39 +100,12 @@ public class Geary.ServiceInformation : GLib.Object {
     public uint16 port { get; set; default = 0; }
 
     /** The transport security method to use */
-    public TlsNegotiationMethod transport_security {
-        get {
-            if (this.use_ssl) {
-                return TlsNegotiationMethod.TRANSPORT;
-            } else if (this.use_starttls) {
-                return TlsNegotiationMethod.START_TLS;
-            } else {
-                return TlsNegotiationMethod.NONE;
-            }
-        }
-        set {
-            switch (value) {
-            case TlsNegotiationMethod.NONE:
-                this.use_starttls = false;
-                this.use_ssl = false;
-                break;
-            case TlsNegotiationMethod.START_TLS:
-                this.use_starttls = true;
-                this.use_ssl = false;
-                break;
-            case TlsNegotiationMethod.TRANSPORT:
-                this.use_starttls = false;
-                this.use_ssl = true;
-                break;
-            }
-        }
-    }
+    public TlsNegotiationMethod transport_security { get; set; }
 
-    /** Whether STARTTLS is used when connecting to the server. */
-    public bool use_starttls { get; set; default = false; }
-
-    /** Whether SSL is used when connecting to the server. */
-    public bool use_ssl { get; set; default = true; }
+    /**
+     * Determines the source of auth credentials for SMTP services.
+     */
+    public Credentials.Requirement credentials_requirement { get; set; }
 
     /** The credentials used for authenticating. */
     public Credentials? credentials { get; set; default = null; }
@@ -171,56 +119,18 @@ public class Geary.ServiceInformation : GLib.Object {
     public bool remember_password { get; set; default = true; }
 
     /**
-     * Determines the source of auth credentials for SMTP services.
-     */
-    public SmtpCredentials smtp_credentials_source {
-        get {
-            if (this.smtp_use_imap_credentials) {
-                return SmtpCredentials.IMAP;
-            } else if (this.smtp_noauth) {
-                return SmtpCredentials.NONE;
-            } else {
-                return SmtpCredentials.CUSTOM;
-            }
-        }
-        set {
-            switch (value) {
-            case SmtpCredentials.NONE:
-                this.smtp_use_imap_credentials = false;
-                this.smtp_noauth = true;
-                break;
-            case SmtpCredentials.IMAP:
-                this.smtp_use_imap_credentials = true;
-                this.smtp_noauth = false;
-                break;
-            case SmtpCredentials.CUSTOM:
-                this.smtp_use_imap_credentials = false;
-                this.smtp_noauth = false;
-                break;
-            }
-        }
-    }
-
-    /**
-     * Whether we should NOT authenticate with the server.
-     *
-     * Only valid if this instance represents an SMTP server.
-     */
-    public bool smtp_noauth { get; set; default = false; }
-
-    /**
-     * Specifies if we should use IMAP credentials.
-     *
-     * Only valid if this instance represents an SMTP server.
-     */
-    public bool smtp_use_imap_credentials { get; set; default = true; }
-
-
-    /**
      * Constructs a new configuration for a specific service.
      */
     public ServiceInformation(Protocol proto) {
         this.protocol = proto;
+        // Prefer TLS by RFC 8314, but use START_TLS for SMTP for the
+        // moment while its still more widely deployed.
+        this.transport_security = (proto == Protocol.SMTP)
+            ? TlsNegotiationMethod.START_TLS
+            : TlsNegotiationMethod.TRANSPORT;
+        this.credentials_requirement = (proto == Protocol.SMTP)
+            ? Credentials.Requirement.USE_INCOMING
+            : Credentials.Requirement.CUSTOM;
     }
 
     /**
@@ -230,14 +140,12 @@ public class Geary.ServiceInformation : GLib.Object {
         this(other.protocol);
         this.host = other.host;
         this.port = other.port;
-        this.use_starttls = other.use_starttls;
-        this.use_ssl = other.use_ssl;
+        this.transport_security = other.transport_security;
         this.credentials = (
             other.credentials != null ? other.credentials.copy() : null
         );
+        this.credentials_requirement = other.credentials_requirement;
         this.remember_password = other.remember_password;
-        this.smtp_noauth = other.smtp_noauth;
-        this.smtp_use_imap_credentials = other.smtp_use_imap_credentials;
     }
 
 
@@ -249,15 +157,16 @@ public class Geary.ServiceInformation : GLib.Object {
 
         switch (this.protocol) {
         case IMAP:
-            port = this.use_ssl
+            port = (this.transport_security == TlsNegotiationMethod.TRANSPORT)
                 ? Imap.IMAP_TLS_PORT
                 : Imap.IMAP_PORT;
             break;
 
         case SMTP:
-            if (this.use_ssl) {
+            if (this.transport_security == TlsNegotiationMethod.TRANSPORT) {
                 port = Smtp.SUBMISSION_TLS_PORT;
-            } else if (this.smtp_noauth) {
+            } else if (this.credentials_requirement ==
+                       Credentials.Requirement.NONE) {
                 port = Smtp.SMTP_PORT;
             } else {
                 port = Smtp.SUBMISSION_PORT;
@@ -276,13 +185,11 @@ public class Geary.ServiceInformation : GLib.Object {
             this == other ||
             (this.host == other.host &&
              this.port == other.port &&
-             this.use_starttls == other.use_starttls &&
-             this.use_ssl == other.use_ssl &&
+             this.transport_security == other.transport_security &&
              (this.credentials == null && other.credentials == null ||
               this.credentials != null && this.credentials.equal_to(other.credentials)) &&
-             this.remember_password == other.remember_password &&
-             this.smtp_noauth == other.smtp_noauth &&
-             this.smtp_use_imap_credentials == other.smtp_use_imap_credentials)
+             this.credentials_requirement == other.credentials_requirement &&
+             this.remember_password == other.remember_password)
         );
     }
 

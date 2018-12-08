@@ -297,7 +297,7 @@ public class Geary.Engine : BaseObject {
      */
     public async void validate_smtp(AccountInformation account,
                                     ServiceInformation service,
-                                    Credentials? imap_credentials,
+                                    Credentials? incoming_credentials,
                                     GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_opened();
@@ -309,9 +309,9 @@ public class Geary.Engine : BaseObject {
         );
 
         Credentials? credentials = null;
-        switch (service.smtp_credentials_source) {
-        case IMAP:
-            credentials = imap_credentials;
+        switch (service.credentials_requirement) {
+        case USE_INCOMING:
+            credentials = incoming_credentials;
             break;
         case CUSTOM:
             credentials = service.credentials;
@@ -374,15 +374,15 @@ public class Geary.Engine : BaseObject {
                 assert_not_reached();
         }
 
-        Endpoint imap = get_shared_endpoint(
-            config.service_provider, config.imap
+        Endpoint incoming = get_shared_endpoint(
+            config.service_provider, config.incoming
         );
-        account.set_endpoint(account.incoming, imap);
+        account.set_endpoint(account.incoming, incoming);
 
-        Endpoint smtp = get_shared_endpoint(
-            config.service_provider, config.smtp
+        Endpoint outgoing = get_shared_endpoint(
+            config.service_provider, config.outgoing
         );
-        account.set_endpoint(account.outgoing, smtp);
+        account.set_endpoint(account.outgoing, outgoing);
 
         account_instances.set(config.id, account);
         return account;
@@ -460,16 +460,16 @@ public class Geary.Engine : BaseObject {
         bool was_updated = false;
         switch (updated.protocol) {
         case Protocol.IMAP:
-            if (!account.imap.equal_to(updated)) {
+            if (!account.incoming.equal_to(updated)) {
                 was_updated = true;
-                account.imap = updated;
+                account.incoming = updated;
             }
             service = impl.incoming;
             break;
         case Protocol.SMTP:
-            if (!account.smtp.equal_to(updated)) {
+            if (!account.outgoing.equal_to(updated)) {
                 was_updated = true;
-                account.smtp = updated;
+                account.outgoing = updated;
             }
             service = impl.outgoing;
             break;
@@ -480,7 +480,7 @@ public class Geary.Engine : BaseObject {
                 account.service_provider, updated
             );
             impl.set_endpoint(service, endpoint);
-            account.information_changed();
+            account.changed();
         }
 
         return was_updated;
@@ -500,14 +500,6 @@ public class Geary.Engine : BaseObject {
             shared = cached.get() as Endpoint;
         }
         if (shared == null) {
-            // Prefer SSL by RFC 8314
-            TlsNegotiationMethod method = TlsNegotiationMethod.NONE;
-            if (service.use_ssl) {
-                method = TlsNegotiationMethod.TRANSPORT;
-            } else if (service.use_starttls) {
-                method = TlsNegotiationMethod.START_TLS;
-            }
-
             uint timeout = service.protocol == Protocol.IMAP
                 ? Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC
                 : Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC;
@@ -515,7 +507,7 @@ public class Geary.Engine : BaseObject {
             shared = new Endpoint(
                 service.host,
                 service.port,
-                method,
+                service.transport_security,
                 timeout
             );
 

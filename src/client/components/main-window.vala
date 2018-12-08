@@ -420,7 +420,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             return;
         }
 
-        this.main_toolbar.account = this.current_folder.account.information.nickname;
+        this.main_toolbar.account =
+            this.current_folder.account.information.display_name;
 
         /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
         // except for Drafts and Outbox, where we show total count

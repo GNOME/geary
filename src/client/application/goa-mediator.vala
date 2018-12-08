@@ -72,8 +72,8 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         this.oauth2 = this.account.get_oauth2_based();
         this.password = this.account.get_password_based();
 
-        update_imap_config(geary_account.imap);
-        update_smtp_config(geary_account.smtp);
+        update_imap_config(geary_account.incoming);
+        update_smtp_config(geary_account.outgoing);
     }
 
     public virtual async bool load_token(Geary.AccountInformation account,
@@ -170,9 +170,9 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
             }
 
             if (mail.smtp_use_auth) {
-                service.smtp_credentials_source = Geary.SmtpCredentials.CUSTOM;
+                service.credentials_requirement = Geary.Credentials.Requirement.CUSTOM;
             } else {
-                service.smtp_credentials_source = Geary.SmtpCredentials.NONE;
+                service.credentials_requirement = Geary.Credentials.Requirement.NONE;
             }
 
             if (mail.smtp_use_auth) {

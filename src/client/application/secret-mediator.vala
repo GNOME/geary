@@ -109,7 +109,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
 
             yield update_token(account, service, cancellable);
 
-            account.information_changed();
+            account.changed();
         }
         return true;
     }

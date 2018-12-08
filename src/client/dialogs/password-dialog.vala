@@ -46,7 +46,7 @@ public class PasswordDialog {
         bool is_smtp = service.protocol == Geary.Protocol.SMTP;
 
         Geary.Credentials? credentials = (is_smtp)
-            ? account.get_smtp_credentials() : account.imap.credentials;
+            ? account.get_outgoing_credentials() : account.incoming.credentials;
 
         if (credentials != null) {
             label_username.set_text(credentials.user);

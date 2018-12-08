@@ -70,8 +70,8 @@ public class Geary.MockAccount : Account, MockObject {
 
     public MockAccount(AccountInformation config) {
         base(config);
-        this._incoming = new MockClientService(config, config.imap);
-        this._outgoing = new MockClientService(config, config.smtp);
+        this._incoming = new MockClientService(config, config.incoming);
+        this._outgoing = new MockClientService(config, config.outgoing);
     }
 
     public override async void open_async(Cancellable? cancellable = null) throws Error {

@@ -28,15 +28,15 @@ internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
         this.account = account;
 
         this.warning_label.set_text(
-            this.warning_label.get_text().printf(account.nickname)
+            this.warning_label.get_text().printf(account.display_name)
         );
 
-        this.account.information_changed.connect(on_account_changed);
+        this.account.changed.connect(on_account_changed);
         update_header();
     }
 
     ~EditorRemovePane() {
-        this.account.information_changed.disconnect(on_account_changed);
+        this.account.changed.disconnect(on_account_changed);
     }
 
     internal Gtk.HeaderBar get_header() {

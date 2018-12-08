@@ -70,6 +70,33 @@ public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
     }
 
 
+    /** The requirements for a service's credentials. */
+    public enum Requirement {
+        /** No credentials are required. */
+        NONE,
+
+        /** The incoming service's credentials should be used. */
+        USE_INCOMING,
+
+        /** Custom credentials are required. */
+        CUSTOM;
+
+        public static Requirement for_value(string value)
+            throws EngineError {
+            return ObjectUtils.from_enum_nick<Requirement>(
+                typeof(Requirement), value.ascii_down()
+            );
+        }
+
+        public string to_value() {
+            return ObjectUtils.to_enum_nick<Requirement>(
+                typeof(Requirement), this
+            );
+        }
+
+    }
+
+
     public Method supported_method { get; private set; }
     public string user { get; private set; }
     public string? token { get; private set; }

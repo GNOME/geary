@@ -15,13 +15,13 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
         case Protocol.IMAP:
             service.host = "imap.mail.yahoo.com";
             service.port = Imap.IMAP_TLS_PORT;
-            service.use_ssl = true;
+            service.transport_security = TlsNegotiationMethod.TRANSPORT;
             break;
 
         case Protocol.SMTP:
             service.host = "smtp.mail.yahoo.com";
             service.port = Smtp.SUBMISSION_TLS_PORT;
-            service.use_ssl = true;
+            service.transport_security = TlsNegotiationMethod.TRANSPORT;
             break;
         }
     }

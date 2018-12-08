@@ -808,7 +808,7 @@ public class GearyController : Geary.BaseObject {
         bool imap_prompted, imap_retry_required;
         validation_result = validation_check_endpoint_for_tls_warnings(
             config,
-            config.imap,
+            config.incoming,
             validation_result,
             out imap_prompted,
             out imap_retry_required
@@ -817,7 +817,7 @@ public class GearyController : Geary.BaseObject {
         bool smtp_prompted, smtp_retry_required;
         validation_result = validation_check_endpoint_for_tls_warnings(
             config,
-            config.smtp,
+            config.outgoing,
             validation_result,
             out smtp_prompted,
             out smtp_retry_required
@@ -838,20 +838,6 @@ public class GearyController : Geary.BaseObject {
         }
 
         return validation_result;
-    }
-
-    // Returns the "real" account info associated with a copy.  If it's not a copy, null is returned.
-    public Geary.AccountInformation? get_real_account_information(
-        Geary.AccountInformation account_information) {
-        if (account_information.is_copy) {
-            try {
-                 return Geary.Engine.instance.get_accounts().get(account_information.id);
-            } catch (Error e) {
-                error("Account information is out of sync: %s", e.message);
-            }
-        }
-        
-        return null;
     }
 
     private void report_problem(Geary.ProblemReport report) {
@@ -3044,7 +3030,7 @@ public class GearyController : Geary.BaseObject {
             new Geary.ServiceProblemReport(
                 Geary.ProblemType.GENERIC_ERROR,
                 account,
-                account.imap,
+                account.incoming,
                 err
             )
         );

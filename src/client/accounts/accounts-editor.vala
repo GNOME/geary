@@ -216,7 +216,7 @@ internal interface Accounts.AccountPane : Gtk.Grid, EditorPane {
 
 
     protected void update_header() {
-        get_header().subtitle = this.account.nickname;
+        get_header().subtitle = this.account.display_name;
     }
 
 }

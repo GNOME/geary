@@ -59,7 +59,7 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
         this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
         this.details_list.set_header_func(Editor.seperator_headers);
-        this.details_list.add(new NicknameRow(account));
+        this.details_list.add(new DisplayNameRow(account));
 
         this.senders_list.set_header_func(Editor.seperator_headers);
         foreach (Geary.RFC822.MailboxAddress sender in
@@ -101,7 +101,7 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
 
         this.signature_preview.show();
         this.signature_preview.load_html(
-            Geary.HTML.smart_escape(account.email_signature)
+            Geary.HTML.smart_escape(account.signature)
         );
 
         this.signature_frame.add(this.signature_preview);
@@ -113,7 +113,7 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
             !this.editor.accounts.is_goa_account(account)
         );
 
-        this.account.information_changed.connect(on_account_changed);
+        this.account.changed.connect(on_account_changed);
         update_header();
 
         this.commands.executed.connect(on_command);
@@ -122,7 +122,7 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
     }
 
     ~EditorEditPane() {
-        this.account.information_changed.disconnect(on_account_changed);
+        this.account.changed.disconnect(on_account_changed);
 
         this.commands.executed.disconnect(on_command);
         this.commands.undone.disconnect(on_command);
@@ -270,10 +270,10 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
 }
 
 
-private class Accounts.NicknameRow : AccountRow<EditorEditPane,Gtk.Label> {
+private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Label> {
 
 
-    public NicknameRow(Geary.AccountInformation account) {
+    public DisplayNameRow(Geary.AccountInformation account) {
         base(
             account,
             // Translators: Label in the account editor for the user's
@@ -287,7 +287,7 @@ private class Accounts.NicknameRow : AccountRow<EditorEditPane,Gtk.Label> {
     public override void activated(EditorEditPane pane) {
         EditorPopover popover = new EditorPopover();
 
-        string? value = this.account.nickname;
+        string? value = this.account.display_name;
         Gtk.Entry entry = new Gtk.Entry();
         entry.set_text(value ?? "");
         entry.set_placeholder_text(value ?? "");
@@ -297,7 +297,7 @@ private class Accounts.NicknameRow : AccountRow<EditorEditPane,Gtk.Label> {
                     new PropertyCommand<string>(
                         this.account,
                         this.account,
-                        Geary.AccountInformation.PROP_NICKNAME,
+                        "label",
                         entry.get_text(),
                         // Translators: Tooltip used to undo changing
                         // the name of an account. The string
@@ -317,7 +317,7 @@ private class Accounts.NicknameRow : AccountRow<EditorEditPane,Gtk.Label> {
     }
 
     public override void update() {
-        this.value.set_text(this.account.nickname);
+        this.value.set_text(this.account.display_name);
     }
 
 }
@@ -559,13 +559,13 @@ internal class Accounts.AppendMailboxCommand : Application.Command {
     public async override void execute(GLib.Cancellable? cancellable) {
         this.senders_list.insert(this.new_row, this.mailbox_index);
         this.new_row.account.append_sender(this.new_row.mailbox);
-        this.new_row.account.information_changed();
+        this.new_row.account.changed();
     }
 
     public async override void undo(GLib.Cancellable? cancellable) {
         this.senders_list.remove(this.new_row);
         this.new_row.account.remove_sender(this.new_row.mailbox);
-        this.new_row.account.information_changed();
+        this.new_row.account.changed();
     }
 
 }
@@ -602,14 +602,14 @@ internal class Accounts.UpdateMailboxCommand : Application.Command {
         this.row.mailbox = this.new_mailbox;
         this.row.account.remove_sender(this.old_mailbox);
         this.row.account.insert_sender(this.mailbox_index, this.new_mailbox);
-        this.row.account.information_changed();
+        this.row.account.changed();
     }
 
     public async override void undo(GLib.Cancellable? cancellable) {
         this.row.mailbox = this.old_mailbox;
         this.row.account.remove_sender(this.new_mailbox);
         this.row.account.insert_sender(this.mailbox_index, this.old_mailbox);
-        this.row.account.information_changed();
+        this.row.account.changed();
     }
 
 }
@@ -688,13 +688,13 @@ internal class Accounts.RemoveMailboxCommand : Application.Command {
     public async override void execute(GLib.Cancellable? cancellable) {
         this.list.remove(this.row);
         this.row.account.remove_sender(this.mailbox);
-        this.row.account.information_changed();
+        this.row.account.changed();
     }
 
     public async override void undo(GLib.Cancellable? cancellable) {
         this.list.insert(this.row, this.mailbox_index);
         this.row.account.insert_sender(this.mailbox_index, this.mailbox);
-        this.row.account.information_changed();
+        this.row.account.changed();
     }
 
 }
@@ -715,7 +715,7 @@ internal class Accounts.SignatureChangedCommand : Application.Command {
         this.signature_view = signature_view;
         this.account = account;
 
-        this.old_value = Geary.HTML.smart_escape(account.email_signature);
+        this.old_value = Geary.HTML.smart_escape(account.signature);
 
         // Translators: Label used as the undo tooltip after removing
         // a sender address from an account. The string substitution
@@ -740,8 +740,8 @@ internal class Accounts.SignatureChangedCommand : Application.Command {
     }
 
     private inline void update_account_signature(string value) {
-        this.account.email_signature = value;
-        this.account.information_changed();
+        this.account.signature = value;
+        this.account.changed();
     }
 
 }

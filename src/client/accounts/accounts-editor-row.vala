@@ -304,13 +304,13 @@ internal abstract class Accounts.AccountRow<PaneType,V> :
     public AccountRow(Geary.AccountInformation account, string label, V value) {
         base(label, value);
         this.account = account;
-        this.account.information_changed.connect(on_account_changed);
+        this.account.changed.connect(on_account_changed);
 
         set_dim_label(true);
     }
 
     ~AccountRow() {
-        this.account.information_changed.disconnect(on_account_changed);
+        this.account.changed.disconnect(on_account_changed);
     }
 
     public abstract void update();
@@ -449,12 +449,12 @@ internal class Accounts.SmtpAuthComboBox : Gtk.ComboBoxText {
 
     public string label { get; private set; }
 
-    public Geary.SmtpCredentials source {
+    public Geary.Credentials.Requirement source {
         get {
             try {
-                return Geary.SmtpCredentials.for_value(this.active_id);
+                return Geary.Credentials.Requirement.for_value(this.active_id);
             } catch {
-                return Geary.SmtpCredentials.IMAP;
+                return Geary.Credentials.Requirement.USE_INCOMING;
             }
         }
         set {
@@ -469,19 +469,29 @@ internal class Accounts.SmtpAuthComboBox : Gtk.ComboBoxText {
         // account
         this.label = _("Login");
 
-        // Translators: ComboBox value for source of SMTP
-        // authentication credentials (none) when adding a new account
-        append(Geary.SmtpCredentials.NONE.to_value(), _("No login needed"));
+        append(
+            Geary.Credentials.Requirement.NONE.to_value(),
+            // Translators: ComboBox value for source of SMTP
+            // authentication credentials (none) when adding a new
+            // account
+            _("No login needed")
+        );
 
-        // Translators: ComboBox value for source of SMTP
-        // authentication credentials (use IMAP) when adding a new
-        // account
-        append(Geary.SmtpCredentials.IMAP.to_value(), _("Use IMAP login"));
+        append(
+            Geary.Credentials.Requirement.USE_INCOMING.to_value(),
+            // Translators: ComboBox value for source of SMTP
+            // authentication credentials (use IMAP) when adding a new
+            // account
+            _("Use incoming server login")
+        );
 
-        // Translators: ComboBox value for source of SMTP
-        // authentication credentials (custom) when adding a new
-        // account
-        append(Geary.SmtpCredentials.CUSTOM.to_value(), _("Use different login"));
+        append(
+            Geary.Credentials.Requirement.CUSTOM.to_value(),
+            // Translators: ComboBox value for source of SMTP
+            // authentication credentials (custom) when adding a new
+            // account
+            _("Use different login")
+        );
     }
 
 }
@@ -626,12 +636,12 @@ internal class PropertyCommand<T> : Application.Command {
 
     public async override void execute(GLib.Cancellable? cancellable) {
         this.object.set(this.property_name, this.new_value);
-        this.account.information_changed();
+        this.account.changed();
     }
 
     public async override void undo(GLib.Cancellable? cancellable) {
         this.object.set(this.property_name, this.old_value);
-        this.account.information_changed();
+        this.account.changed();
     }
 
 }

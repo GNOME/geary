@@ -2140,8 +2140,8 @@ public class ComposerWidget : Gtk.EventBox {
     private async string load_signature(Cancellable? cancellable = null) {
         string account_sig = "";
 
-        if (this.account.information.use_email_signature) {
-            account_sig = account.information.email_signature ?? "";
+        if (this.account.information.use_signature) {
+            account_sig = account.information.signature;
             if (Geary.String.is_empty_or_whitespace(account_sig)) {
                 // No signature is specified in the settings, so use
                 // ~/.signature

@@ -7,7 +7,7 @@
 namespace Migrate {
     private const string GROUP = "AccountInformation";
     private const string PRIMARY_EMAIL_KEY = "primary_email";
-    private const string SETTINGS_FILENAME = Geary.AccountInformation.SETTINGS_FILENAME;
+    private const string SETTINGS_FILENAME = Accounts.Manager.SETTINGS_FILENAME;
     private const string MIGRATED_FILENAME = ".config_migrated";
 
     /**

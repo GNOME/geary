@@ -20,13 +20,13 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         case Protocol.IMAP:
             service.host = "imap.gmail.com";
             service.port = Imap.IMAP_TLS_PORT;
-            service.use_ssl = true;
+            service.transport_security = TlsNegotiationMethod.TRANSPORT;
             break;
 
         case Protocol.SMTP:
             service.host = "smtp.gmail.com";
             service.port = Smtp.SUBMISSION_TLS_PORT;
-            service.use_ssl = true;
+            service.transport_security = TlsNegotiationMethod.TRANSPORT;
             break;
         }
     }

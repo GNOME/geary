@@ -201,6 +201,9 @@ public class Geary.ConfigFile {
     }
 
 
+    /** The file this config will be read from and written to. */
+    public GLib.File file { get { return this.config_file; } }
+
     private GLib.File config_file;
     private GLib.KeyFile backing = new KeyFile();
 

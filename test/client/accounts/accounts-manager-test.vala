@@ -126,13 +126,13 @@ class Accounts.ManagerTest : TestCase {
     }
 
     public void account_config_v1() throws GLib.Error {
-        this.account.email_signature = "blarg";
-        this.account.nickname = "test-name";
+        this.account.label = "test-name";
         this.account.ordinal = 100;
         this.account.prefetch_period_days = 42;
         this.account.save_drafts = false;
-        this.account.save_sent_mail = false;
-        this.account.use_email_signature = false;
+        this.account.save_sent = false;
+        this.account.signature = "blarg";
+        this.account.use_signature = false;
         Accounts.AccountConfigV1 config = new Accounts.AccountConfigV1(false);
 
         Geary.ConfigFile file =
@@ -147,13 +147,13 @@ class Accounts.ManagerTest : TestCase {
     }
 
     public void account_config_legacy() throws GLib.Error {
-        this.account.email_signature = "blarg";
-        this.account.nickname = "test-name";
+        this.account.label = "test-name";
         this.account.ordinal = 100;
         this.account.prefetch_period_days = 42;
         this.account.save_drafts = false;
-        this.account.save_sent_mail = false;
-        this.account.use_email_signature = false;
+        this.account.save_sent = false;
+        this.account.signature = "blarg";
+        this.account.use_signature = false;
         Accounts.AccountConfigLegacy config =
             new Accounts.AccountConfigLegacy();
 
@@ -175,21 +175,22 @@ class Accounts.ManagerTest : TestCase {
             this.account
         );
 
-        this.account.smtp.host = "blarg";
-        this.account.smtp.port = 1234;
-        this.account.smtp.transport_security = Geary.TlsNegotiationMethod.NONE;
-        this.account.smtp.smtp_credentials_source = Geary.SmtpCredentials.CUSTOM;
-        this.account.smtp.credentials = new Geary.Credentials(
+        this.account.outgoing.host = "blarg";
+        this.account.outgoing.port = 1234;
+        this.account.outgoing.transport_security = Geary.TlsNegotiationMethod.NONE;
+        this.account.outgoing.credentials = new Geary.Credentials(
             Geary.Credentials.Method.PASSWORD, "testerson"
         );
+        this.account.outgoing.credentials_requirement =
+            Geary.Credentials.Requirement.NONE;
         Accounts.ServiceConfigV1 config = new Accounts.ServiceConfigV1();
         Geary.ConfigFile file =
             new Geary.ConfigFile(this.tmp.get_child("config"));
 
-        config.save(this.account, this.account.smtp, file);
-        config.load(file, copy, copy.smtp);
+        config.save(this.account, this.account.outgoing, file);
+        config.load(file, copy, copy.outgoing);
 
-        assert_true(this.account.smtp.equal_to(copy.smtp));
+        assert_true(this.account.outgoing.equal_to(copy.outgoing));
     }
 
     public void service_config_legacy() throws GLib.Error {
@@ -199,21 +200,22 @@ class Accounts.ManagerTest : TestCase {
             this.account
         );
 
-        this.account.smtp.host = "blarg";
-        this.account.smtp.port = 1234;
-        this.account.smtp.transport_security = Geary.TlsNegotiationMethod.NONE;
-        this.account.smtp.smtp_credentials_source = Geary.SmtpCredentials.CUSTOM;
-        this.account.smtp.credentials = new Geary.Credentials(
+        this.account.outgoing.host = "blarg";
+        this.account.outgoing.port = 1234;
+        this.account.outgoing.transport_security = Geary.TlsNegotiationMethod.NONE;
+        this.account.outgoing.credentials = new Geary.Credentials(
             Geary.Credentials.Method.PASSWORD, "testerson"
         );
+        this.account.outgoing.credentials_requirement =
+            Geary.Credentials.Requirement.NONE;
         Accounts.ServiceConfigLegacy config = new Accounts.ServiceConfigLegacy();
         Geary.ConfigFile file =
             new Geary.ConfigFile(this.tmp.get_child("config"));
 
-        config.save(this.account, this.account.smtp, file);
-        config.load(file, copy, copy.smtp);
+        config.save(this.account, this.account.outgoing, file);
+        config.load(file, copy, copy.outgoing);
 
-        assert_true(this.account.smtp.equal_to(copy.smtp));
+        assert_true(this.account.outgoing.equal_to(copy.outgoing));
     }
 
     private void delete(File parent) throws GLib.Error {

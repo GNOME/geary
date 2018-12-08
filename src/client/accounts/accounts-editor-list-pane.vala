@@ -310,13 +310,13 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
 
         this.service_label.show();
 
-        this.account.information_changed.connect(on_account_changed);
+        this.account.changed.connect(on_account_changed);
         update();
         update_status(status);
     }
 
     ~AccountListRow() {
-        this.account.information_changed.disconnect(on_account_changed);
+        this.account.changed.disconnect(on_account_changed);
     }
 
     public override void activated(EditorListPane pane) {
@@ -345,7 +345,7 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
     }
 
     public override void update() {
-        string name = this.account.nickname;
+        string name = this.account.display_name;
         if (Geary.String.is_empty(name)) {
             name = account.primary_mailbox.to_address_display("", "");
         }
@@ -513,7 +513,7 @@ internal class Accounts.ReorderAccountCommand : Application.Command {
         foreach (Geary.AccountInformation account in accounts) {
             if (account.ordinal != ord) {
                 account.ordinal = ord;
-                account.information_changed();
+                account.changed();
             }
             ord++;
         }
@@ -539,12 +539,16 @@ internal class Accounts.RemoveAccountCommand : Application.Command {
         // Translators: Notification shown after removing an
         // account. The string substitution is the name of the
         // account.
-        this.executed_label = _("Account “%s” removed").printf(account.nickname);
+        this.executed_label = _("Account “%s” removed").printf(
+            account.display_name
+        );
 
         // Translators: Notification shown after removing an account
         // is undone. The string substitution is the name of the
         // account.
-        this.undone_label = _("Account “%s” restored").printf(account.nickname);
+        this.undone_label = _("Account “%s” restored").printf(
+            account.display_name
+        );
     }
 
     public async override void execute(GLib.Cancellable? cancellable)

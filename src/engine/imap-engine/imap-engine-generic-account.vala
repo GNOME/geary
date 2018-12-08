@@ -67,14 +67,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.local = new ImapDB.Account(config);
         this.local.contacts_loaded.connect(() => { contacts_loaded(); });
 
-        this.imap = new Imap.ClientService(config, config.imap);
+        this.imap = new Imap.ClientService(config, config.incoming);
         this.imap.min_pool_size = IMAP_MIN_POOL_SIZE;
         this.imap.ready.connect(on_pool_session_ready);
         this.imap.connection_failed.connect(on_pool_connection_failed);
         this.imap.login_failed.connect(on_pool_login_failed);
 
         this.smtp = new Smtp.ClientService(
-            config, config.smtp, new Outbox.Folder(this, this.local)
+            config, config.outgoing, new Outbox.Folder(this, this.local)
         );
         this.smtp.email_sent.connect(on_email_sent);
         this.smtp.report_problem.connect(notify_report_problem);
@@ -153,8 +153,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         // To prevent spurious connection failures, we make sure we
         // have passwords before attempting a connection.
-        yield this.information.load_imap_credentials(cancellable);
-        yield this.information.load_smtp_credentials(cancellable);
+        yield this.information.load_incoming_credentials(cancellable);
+        yield this.information.load_outgoing_credentials(cancellable);
 
         // Start the mail services. Start incoming directly, but queue
         // outgoing so local folders can be loaded first in case
@@ -843,7 +843,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     /** Fires a {@link Account.report_problem} signal for an IMAP service. */
     protected void notify_imap_problem(Geary.ProblemType type, Error? err) {
-        notify_service_problem(type, this.information.imap, err);
+        notify_service_problem(type, this.information.incoming, err);
     }
 
     /**
@@ -1009,7 +1009,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private void on_operation_error(AccountOperation op, Error error) {
         if (error is ImapError) {
             notify_service_problem(
-                ProblemType.SERVER_ERROR, this.information.imap, error
+                ProblemType.SERVER_ERROR, this.information.incoming, error
             );
         } else if (error is IOError) {
             // IOErrors could be network related or disk related, need
@@ -1077,11 +1077,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 notify_imap_problem(ProblemType.SERVER_ERROR, login_error);
             } else {
                 // Now, we should ask the user for their password
-                this.information.prompt_imap_credentials.begin(
+                this.information.prompt_incoming_credentials.begin(
                     this.open_cancellable,
                     (obj, ret) => {
                         try {
-                            if (this.information.prompt_imap_credentials.end(ret)) {
+                            if (this.information
+                                .prompt_incoming_credentials.end(ret)) {
                                 // Have a new password, so try that
                                 this.restart_incoming_service.begin();
                             } else {

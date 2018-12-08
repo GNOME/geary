@@ -255,7 +255,8 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
                         // At this point we may already have a
                         // password in memory -- but it's incorrect.
-                        if (!yield this.account.prompt_smtp_credentials(cancellable)) {
+                        if (!yield this.account
+                            .prompt_outgoing_credentials(cancellable)) {
                             // The user cancelled and hence they don't
                             // want to be prompted again, so bail out.
                             throw send_err;
@@ -289,8 +290,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         // If we get to this point, the message has either been just
         // sent, or previously sent but not saved. So now try flagging
         // as such and saving it.
-        if (this.account.allow_save_sent_mail() &&
-            this.account.save_sent_mail) {
+        if (this.account.save_sent) {
             try {
                 debug("Outbox postie: Saving %s to sent mail", email.id.to_string());
                 yield save_sent_mail_async(email, cancellable);
@@ -318,7 +318,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         Error? smtp_err = null;
         try {
             yield smtp.login_async(
-                this.account.get_smtp_credentials(), cancellable
+                this.account.get_outgoing_credentials(), cancellable
             );
         } catch (Error login_err) {
             debug("SMTP login error: %s", login_err.message);

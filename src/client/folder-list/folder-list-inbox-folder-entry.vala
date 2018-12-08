@@ -6,25 +6,33 @@
 
 // A FolderEntry for inboxes in the Inboxes branch.
 public class FolderList.InboxFolderEntry : FolderList.FolderEntry {
+
+
+    private string display_name = "";
+
+
     public InboxFolderEntry(Geary.Folder folder) {
         base(folder);
-        folder.account.information.notify["nickname"].connect(on_nicknamed_changed);
+        this.display_name = folder.account.information.display_name;
+        folder.account.information.changed.connect(on_information_changed);
     }
-    
+
     ~InboxFolderEntry() {
-        folder.account.information.notify["nickname"].disconnect(on_nicknamed_changed);
+        folder.account.information.changed.disconnect(on_information_changed);
     }
-    
+
     public override string get_sidebar_name() {
-        return folder.account.information.nickname;
+        return this.display_name;
     }
-    
+
     public Geary.AccountInformation get_account_information() {
         return folder.account.information;
     }
-    
-    private void on_nicknamed_changed() {
-        sidebar_name_changed(folder.account.information.nickname);
+
+    private void on_information_changed(Geary.AccountInformation config) {
+        if (this.display_name != config.display_name) {
+            this.display_name = config.display_name;
+            sidebar_name_changed(this.display_name);
+        }
     }
 }
-

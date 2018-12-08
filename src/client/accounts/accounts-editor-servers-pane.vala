@@ -3,7 +3,7 @@
  * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -21,8 +21,8 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     // These are copies of the originals that can be updated before
     // validating on apply, without breaking anything.
-    private Geary.ServiceInformation imap_mutable;
-    private Geary.ServiceInformation smtp_mutable;
+    private Geary.ServiceInformation incoming_mutable;
+    private Geary.ServiceInformation outgoing_mutable;
 
 
     [GtkChild]
@@ -61,8 +61,8 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         this.editor = editor;
         this.account = account;
         this.engine = ((GearyApplication) editor.application).engine;
-        this.imap_mutable = new Geary.ServiceInformation.copy(account.imap);
-        this.smtp_mutable = new Geary.ServiceInformation.copy(account.smtp);
+        this.incoming_mutable = new Geary.ServiceInformation.copy(account.incoming);
+        this.outgoing_mutable = new Geary.ServiceInformation.copy(account.outgoing);
 
         this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
@@ -85,29 +85,29 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         this.details_list.add(this.save_drafts);
 
         this.receiving_list.set_header_func(Editor.seperator_headers);
-        this.receiving_list.add(new ServiceHostRow(account, this.imap_mutable));
-        this.receiving_list.add(new ServiceSecurityRow(account, this.imap_mutable));
-        this.receiving_list.add(new ServiceLoginRow(account, this.imap_mutable));
+        this.receiving_list.add(new ServiceHostRow(account, this.incoming_mutable));
+        this.receiving_list.add(new ServiceSecurityRow(account, this.incoming_mutable));
+        this.receiving_list.add(new ServiceLoginRow(account, this.incoming_mutable));
 
         this.sending_list.set_header_func(Editor.seperator_headers);
-        this.sending_list.add(new ServiceHostRow(account, this.smtp_mutable));
-        this.sending_list.add(new ServiceSecurityRow(account, this.smtp_mutable));
+        this.sending_list.add(new ServiceHostRow(account, this.outgoing_mutable));
+        this.sending_list.add(new ServiceSecurityRow(account, this.outgoing_mutable));
         this.smtp_auth = new ServiceSmtpAuthRow(
-            account, this.smtp_mutable, this.imap_mutable
+            account, this.outgoing_mutable, this.incoming_mutable
         );
         this.smtp_auth.value.changed.connect(on_smtp_auth_changed);
         this.sending_list.add(this.smtp_auth);
-        this.smtp_login = new ServiceLoginRow(account, this.smtp_mutable);
+        this.smtp_login = new ServiceLoginRow(account, this.outgoing_mutable);
         this.sending_list.add(this.smtp_login);
 
-        this.account.information_changed.connect(on_account_changed);
+        this.account.changed.connect(on_account_changed);
 
         update_header();
         update_smtp_auth();
     }
 
     ~EditorServersPane() {
-        this.account.information_changed.disconnect(on_account_changed);
+        this.account.changed.disconnect(on_account_changed);
     }
 
     internal Gtk.HeaderBar get_header() {
@@ -128,10 +128,10 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
             if (is_valid) {
                 try {
                     has_changed = this.engine.update_account_service(
-                        this.account, imap_mutable
+                        this.account, incoming_mutable
                     );
                     has_changed = this.engine.update_account_service(
-                        this.account, smtp_mutable
+                        this.account, outgoing_mutable
                     );
                 } catch (Geary.EngineError err) {
                     warning("Could not update account services: %s", err.message);
@@ -146,7 +146,7 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
             }
 
             if (has_changed) {
-                this.account.information_changed();
+                this.account.changed();
             }
 
             this.editor.pop();
@@ -162,7 +162,7 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         bool imap_valid = false;
         try {
             yield this.engine.validate_imap(
-                this.account, this.imap_mutable, cancellable
+                this.account, this.incoming_mutable, cancellable
             );
             imap_valid = true;
         } catch (Geary.ImapError.UNAUTHENTICATED err) {
@@ -181,8 +181,8 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
             try {
                 yield this.engine.validate_smtp(
                     this.account,
-                    this.smtp_mutable,
-                    this.imap_mutable.credentials,
+                    this.outgoing_mutable,
+                    this.incoming_mutable.credentials,
                     cancellable
                 );
                 smtp_valid = true;
@@ -191,7 +191,7 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
                 // There was an SMTP auth error, but IMAP already
                 // succeeded, so the user probably needs to
                 // specify custom creds here
-                this.smtp_auth.value.source = Geary.SmtpCredentials.CUSTOM;
+                this.smtp_auth.value.source = Geary.Credentials.Requirement.CUSTOM;
                 // Translators: In-app notification label
                 message = _("Check your sending login and password");
             } catch (GLib.Error err) {
@@ -224,7 +224,7 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     private void update_smtp_auth() {
         this.smtp_login.set_visible(
-            this.smtp_auth.value.source == Geary.SmtpCredentials.CUSTOM
+            this.smtp_auth.value.source == Geary.Credentials.Requirement.CUSTOM
         );
     }
 
@@ -575,8 +575,9 @@ private class Accounts.ServiceLoginRow :
 
             label = method.printf(login);
         } else if (this.service.protocol == Geary.Protocol.SMTP &&
-                   this.service.smtp_use_imap_credentials) {
-            label = _("Use IMAP login");
+                   this.service.credentials_requirement ==
+                   Geary.Credentials.Requirement.USE_INCOMING) {
+            label = _("Use incoming server login");
         } else {
             // Translators: Label used when no auth scheme is used
             // by an account's IMAP or SMTP service.
@@ -614,11 +615,11 @@ private class Accounts.ServiceSmtpAuthRow :
     }
 
     public override void update() {
-        this.value.source = this.service.smtp_credentials_source;
+        this.value.source = this.service.credentials_requirement;
     }
 
     private void on_value_changed() {
-        if (this.service.smtp_credentials_source != this.value.source) {
+        if (this.service.credentials_requirement != this.value.source) {
             // The default SMTP port also depends on the auth method
             // used, so also update the port here if we're currently
             // using the default, otherwise keep the custom port
@@ -626,9 +627,9 @@ private class Accounts.ServiceSmtpAuthRow :
             bool update_port = (
                 this.service.port == this.service.get_default_port()
             );
-            this.service.smtp_credentials_source = this.value.source;
+            this.service.credentials_requirement = this.value.source;
             this.service.credentials =
-                (this.service.smtp_credentials_source != CUSTOM)
+                (this.service.credentials_requirement != CUSTOM)
                 ? null
                 : new Geary.Credentials(Geary.Credentials.Method.PASSWORD, "");
             if (update_port) {
