@@ -370,7 +370,7 @@ public class AddEditPage : Gtk.Box {
     
     // Sets the account information to display on this page.
     public void set_account_information(Geary.AccountInformation info, Geary.Engine.ValidationResult result) {
-        this.is_sso_account = (info.imap.mediator is GoaMediator);
+        this.is_sso_account = (info.mediator is GoaMediator);
         set_all_info(
             info.id,
             info.primary_mailbox.name,
@@ -694,13 +694,6 @@ public class AddEditPage : Gtk.Box {
         Geary.ServiceInformation? smtp = null;
         if (info == null) {
             // New account
-            imap = this.application.controller.account_manager.new_libsecret_service(
-                Geary.Protocol.IMAP
-            );
-            smtp = this.application.controller.account_manager.new_libsecret_service(
-                Geary.Protocol.SMTP
-            );
-
             try {
                 info = this.application.controller.account_manager.new_orphan_account(
                     this.get_service_provider(),
@@ -712,6 +705,8 @@ public class AddEditPage : Gtk.Box {
                 debug("Unable to create account %s for %s: %s",
                       this.id, this.email_address, err.message);
             }
+            imap = info.imap;
+            smtp = info.smtp;
         } else {
             // Existing account: create a copy so we don't mess up the
             // original.

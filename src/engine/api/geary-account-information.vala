@@ -1,8 +1,9 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 public class Geary.AccountInformation : BaseObject {
@@ -165,16 +166,21 @@ public class Geary.AccountInformation : BaseObject {
         get; set; default = AccountInformation.next_ordinal++;
     }
 
+    /**
+     * The source of authentication credentials for this account.
+     */
+    public CredentialsMediator mediator { get; private set; }
+
     /* Incoming email service configuration. */
     public ServiceInformation imap {
         get; set;
-        default = new ServiceInformation(Protocol.IMAP, null);
+        default = new ServiceInformation(Protocol.IMAP);
     }
 
     /* Outgoing email service configuration. */
     public ServiceInformation smtp {
         get; set;
-        default = new ServiceInformation(Protocol.SMTP, null);
+        default = new ServiceInformation(Protocol.SMTP);
     }
 
     /** A lock that can be used to ensure saving is serialised. */
@@ -220,14 +226,52 @@ public class Geary.AccountInformation : BaseObject {
     public signal void information_changed();
 
     /**
-     * Creates a new, empty account info file.
+     * Creates a new account with default settings.
      */
     public AccountInformation(string id,
                               ServiceProvider provider,
+                              CredentialsMediator mediator,
                               RFC822.MailboxAddress primary_mailbox) {
         this.id = id;
+        this.mediator = mediator;
         this.service_provider = provider;
         append_sender(primary_mailbox);
+    }
+
+    /**
+     * Creates a copy of an existing config.
+     */
+    public AccountInformation.copy(AccountInformation other) {
+        this(
+            other.id,
+            other.service_provider,
+            other.mediator,
+            other.primary_mailbox
+        );
+        this.service_label = other.service_label;
+        this.nickname = other.nickname;
+        if (other.mailboxes.size > 1) {
+            this.mailboxes.add_all(
+                other.mailboxes.slice(1, other.mailboxes.size)
+            );
+        }
+        this.prefetch_period_days = other.prefetch_period_days;
+        this.save_sent_mail = other.save_sent_mail;
+        this.use_email_signature = other.use_email_signature;
+        this.email_signature = other.email_signature;
+        this.save_drafts = other.save_drafts;
+
+        this.imap = new ServiceInformation.copy(other.imap);
+        this.smtp = new ServiceInformation.copy(other.smtp);
+
+        this.drafts_folder_path = other.drafts_folder_path;
+        this.sent_mail_folder_path = other.sent_mail_folder_path;
+        this.spam_folder_path = other.spam_folder_path;
+        this.trash_folder_path = other.trash_folder_path;
+        this.archive_folder_path = other.archive_folder_path;
+
+        this.config_dir = other.config_dir;
+        this.data_dir = other.data_dir;
     }
 
     /** Sets the location of the account's storage directories. */
@@ -392,7 +436,7 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     /**
-     * Loads this account's SMTP credentials from its mediator, if needed.
+     * Loads this account's SMTP credentials from the mediator, if needed.
      *
      * This method may cause the user to be prompted for their
      * secrets, thus it may yield for some time.
@@ -410,7 +454,7 @@ public class Geary.AccountInformation : BaseObject {
             if (this.smtp.smtp_use_imap_credentials) {
                 service = this.imap;
             }
-            loaded = yield service.mediator.load_token(
+            loaded = yield this.mediator.load_token(
                 this, service, cancellable
             );
         }
@@ -425,13 +469,13 @@ public class Geary.AccountInformation : BaseObject {
      */
     public async bool prompt_smtp_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        return yield this.smtp.mediator.prompt_token(
+        return yield this.mediator.prompt_token(
             this, this.smtp, cancellable
         );
     }
 
     /**
-     * Loads this account's IMAP credentials from its mediator, if needed.
+     * Loads this account's IMAP credentials from the mediator, if needed.
      *
      * This method may cause the user to be prompted for their
      * secrets, thus it may yield for some time.
@@ -445,7 +489,7 @@ public class Geary.AccountInformation : BaseObject {
         Credentials? creds = this.imap.credentials;
         bool loaded = creds.is_complete();
         if (!loaded) {
-            loaded = yield this.imap.mediator.load_token(
+            loaded = yield this.mediator.load_token(
                 this, this.imap, cancellable
             );
         }
@@ -460,7 +504,7 @@ public class Geary.AccountInformation : BaseObject {
      */
     public async bool prompt_imap_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        return yield this.imap.mediator.prompt_token(
+        return yield this.mediator.prompt_token(
             this, this.imap, cancellable
         );
     }
@@ -478,8 +522,10 @@ public class Geary.AccountInformation : BaseObject {
     public bool equal_to(AccountInformation other) {
         return (
             this == other || (
+                // This is probably overkill, but handy for testing.
                 this.id == other.id &&
                 this.ordinal == other.ordinal &&
+                this.mediator == other.mediator &&
                 this.service_provider == other.service_provider &&
                 this.service_label == other.service_label &&
                 this.nickname == other.nickname &&

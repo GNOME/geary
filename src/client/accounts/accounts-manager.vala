@@ -48,13 +48,14 @@ public enum Accounts.CredentialsProvider {
 }
 
 
-/** Objects that can be used load/save account configuration. */
+/** Objects that can be used to load/save account configuration. */
 public interface Accounts.AccountConfig : GLib.Object {
 
     /** Loads a supported account from a config file. */
     public abstract Geary.AccountInformation
         load(Geary.ConfigFile config,
              string id,
+             Geary.CredentialsMediator mediator,
              Geary.ServiceProvider? default_provider,
              string? default_name)
         throws ConfigError, GLib.KeyFileError;
@@ -66,15 +67,13 @@ public interface Accounts.AccountConfig : GLib.Object {
 }
 
 
-/** Objects that can be used load/save service configuration. */
+/** Objects that can be used to load/save service configuration. */
 public interface Accounts.ServiceConfig : GLib.Object {
 
     /** Loads a service from a config file. */
-    public abstract Geary.ServiceInformation
-        load(Geary.ConfigFile config,
-             Geary.AccountInformation account,
-             Geary.Protocol protocol,
-             Geary.CredentialsMediator mediator)
+    public abstract void load(Geary.ConfigFile config,
+                              Geary.AccountInformation account,
+                              Geary.ServiceInformation service)
         throws ConfigError, GLib.KeyFileError;
 
     /** Saves a service to a config file. */
@@ -295,11 +294,9 @@ public class Accounts.Manager : GLib.Object {
         }
         string id = LOCAL_ID_FORMAT.printf(next_id);
 
-        return new Geary.AccountInformation(id, provider, primary_mailbox);
-    }
-
-    public Geary.ServiceInformation new_libsecret_service(Geary.Protocol service) {
-        return new Geary.ServiceInformation(service, libsecret);
+        return new Geary.AccountInformation(
+            id, provider, this.libsecret, primary_mailbox
+        );
     }
 
     /**
@@ -312,24 +309,11 @@ public class Accounts.Manager : GLib.Object {
         yield save_account(account, cancellable);
         set_enabled(account, true);
 
-        SecretMediator? mediator = account.imap.mediator as SecretMediator;
+        // if it's a local account, save the passwords now
+        SecretMediator? mediator = account.mediator as SecretMediator;
         if (mediator != null) {
-            try {
-                yield mediator.update_token(account, account.imap, cancellable);
-            } catch (Error e) {
-                debug("Error saving IMAP password: %s", e.message);
-            }
-        }
-
-        if (account.smtp.credentials != null) {
-            mediator = account.smtp.mediator as SecretMediator;
-            if (mediator != null) {
-                try {
-                    yield mediator.update_token(account, account.smtp, cancellable);
-                } catch (Error e) {
-                    debug("Error saving IMAP password: %s", e.message);
-                }
-            }
+            yield mediator.update_token(account, account.imap, cancellable);
+            yield mediator.update_token(account, account.smtp, cancellable);
         }
     }
 
@@ -364,7 +348,7 @@ public class Accounts.Manager : GLib.Object {
                             file.get_name(), cancellable
                         );
 
-                        GoaMediator? mediator = info.imap.mediator as GoaMediator;
+                        GoaMediator? mediator = info.mediator as GoaMediator;
                         if (mediator == null || mediator.is_valid) {
                             set_enabled(info, true);
                         } else {
@@ -470,7 +454,7 @@ public class Accounts.Manager : GLib.Object {
      * Determines if an account is a GOA account or not.
      */
     public bool is_goa_account(Geary.AccountInformation account) {
-        return (account.imap.mediator is GoaMediator);
+        return (account.mediator is GoaMediator);
     }
 
     /**
@@ -605,6 +589,7 @@ public class Accounts.Manager : GLib.Object {
             account = accounts.load(
                 config,
                 id,
+                mediator,
                 default_provider,
                 get_account_name()
             );
@@ -623,19 +608,13 @@ public class Accounts.Manager : GLib.Object {
 
         if (!is_goa) {
             try {
-                account.imap = services.load(
-                    config, account, Geary.Protocol.IMAP, mediator
-                );
-                account.smtp = services.load(
-                    config, account, Geary.Protocol.SMTP, mediator
-                );
+                services.load(config, account, account.imap);
+                services.load(config, account, account.smtp);
             } catch (GLib.KeyFileError err) {
                 throw new ConfigError.SYNTAX(err.message);
             }
         } else {
             account.service_label = goa_mediator.get_service_label();
-            account.imap = new Geary.ServiceInformation(Geary.Protocol.IMAP, mediator);
-            account.smtp = new Geary.ServiceInformation(Geary.Protocol.SMTP, mediator);
 
             try {
                 // This updates the service configs as well
@@ -703,17 +682,17 @@ public class Accounts.Manager : GLib.Object {
     private async void delete_account(Geary.AccountInformation info,
                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
-        SecretMediator? mediator = info.imap.mediator as SecretMediator;
+        // If it's a local account, try clearing the passwords. Keep
+        // going if there's an error though since we really want to
+        // delete the account dirs.
+        SecretMediator? mediator = info.mediator as SecretMediator;
         if (mediator != null) {
             try {
                 yield mediator.clear_token(info, info.imap, cancellable);
             } catch (Error e) {
                 debug("Error clearing IMAP password: %s", e.message);
             }
-        }
 
-        mediator = info.smtp.mediator as SecretMediator;
-        if (mediator != null) {
             try {
                 yield mediator.clear_token(info, info.smtp, cancellable);
             } catch (Error e) {
@@ -816,6 +795,7 @@ public class Accounts.Manager : GLib.Object {
             Geary.AccountInformation info = new Geary.AccountInformation(
                 to_geary_id(account),
                 mediator.get_service_provider(),
+                mediator,
                 new Geary.RFC822.MailboxAddress(name, mail.email_address)
             );
 
@@ -915,7 +895,7 @@ public class Accounts.Manager : GLib.Object {
             // We already know about this account, so check that it is
             // still valid. If not, the account should be disabled,
             // not deleted, since it may be re-enabled at some point.
-            GoaMediator mediator = (GoaMediator) state.account.imap.mediator;
+            GoaMediator mediator = (GoaMediator) state.account.mediator;
             mediator.update.begin(
                 state.account,
                 null, // XXX Get a cancellable to this somehow
@@ -989,6 +969,7 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
 
     public  Geary.AccountInformation load(Geary.ConfigFile config,
                                           string id,
+                                          Geary.CredentialsMediator mediator,
                                           Geary.ServiceProvider? default_provider,
                                           string? default_name)
         throws ConfigError, GLib.KeyFileError {
@@ -1025,7 +1006,7 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
         }
 
         Geary.AccountInformation account = new Geary.AccountInformation(
-            id, provider, senders.remove_at(0)
+            id, provider, mediator, senders.remove_at(0)
         );
 
         account.ordinal = account_config.get_int(
@@ -1146,11 +1127,11 @@ public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
     private const string USE_EMAIL_SIGNATURE_KEY = "use_email_signature";
 
 
-    public Geary.AccountInformation
-        load(Geary.ConfigFile config_file,
-             string id,
-             Geary.ServiceProvider? default_provider,
-             string? default_name)
+    public Geary.AccountInformation load(Geary.ConfigFile config_file,
+                                         string id,
+                                         Geary.CredentialsMediator mediator,
+                                         Geary.ServiceProvider? default_provider,
+                                         string? default_name)
         throws ConfigError, GLib.KeyFileError {
         Geary.ConfigFile.Group config = config_file.get_group(GROUP);
 
@@ -1168,7 +1149,7 @@ public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
         }
 
         Geary.AccountInformation info = new Geary.AccountInformation(
-            id, provider,
+            id, provider, mediator,
             new Geary.RFC822.MailboxAddress(real_name, primary_email)
         );
 
@@ -1291,17 +1272,12 @@ public class Accounts.ServiceConfigV1 : ServiceConfig, GLib.Object {
 
 
     /** Loads a supported service from a config file. */
-    public Geary.ServiceInformation load(Geary.ConfigFile config,
-                                         Geary.AccountInformation account,
-                                         Geary.Protocol protocol,
-                                         Geary.CredentialsMediator mediator)
+    public void load(Geary.ConfigFile config,
+                     Geary.AccountInformation account,
+                     Geary.ServiceInformation service)
         throws ConfigError, GLib.KeyFileError {
         Geary.ConfigFile.Group service_config = config.get_group(
-            protocol == IMAP ? GROUP_INCOMING : GROUP_OUTGOING
-        );
-
-        Geary.ServiceInformation service = new Geary.ServiceInformation(
-            protocol, mediator
+            service.protocol == IMAP ? GROUP_INCOMING : GROUP_OUTGOING
         );
 
         string? login = service_config.get_string(LOGIN, null);
@@ -1327,7 +1303,7 @@ public class Accounts.ServiceConfigV1 : ServiceConfig, GLib.Object {
             } catch (GLib.Error err) {
                 // Oh well
                 debug("%s: No/invalid transport security config for %s",
-                      account.id, protocol.to_value());
+                      account.id, service.protocol.to_value());
             }
 
             if (service.protocol == Geary.Protocol.SMTP) {
@@ -1345,8 +1321,6 @@ public class Accounts.ServiceConfigV1 : ServiceConfig, GLib.Object {
                 service.port = service.get_default_port();
             }
         }
-
-        return service;
     }
 
     /** Saves an service to a config file. */
@@ -1398,15 +1372,10 @@ public class Accounts.ServiceConfigLegacy : ServiceConfig, GLib.Object {
 
 
     /** Loads a supported service from a config file. */
-    public Geary.ServiceInformation load(Geary.ConfigFile config,
-                                         Geary.AccountInformation account,
-                                         Geary.Protocol protocol,
-                                         Geary.CredentialsMediator mediator)
+    public void load(Geary.ConfigFile config,
+                     Geary.AccountInformation account,
+                     Geary.ServiceInformation service)
         throws ConfigError, GLib.KeyFileError {
-        Geary.ServiceInformation service = new Geary.ServiceInformation(
-            protocol, mediator
-        );
-
         Geary.ConfigFile.Group service_config =
             config.get_group(AccountConfigLegacy.GROUP);
 
@@ -1431,7 +1400,7 @@ public class Accounts.ServiceConfigLegacy : ServiceConfig, GLib.Object {
             );
 
             bool use_tls = service_config.get_bool(
-                prefix + SSL, protocol == Geary.Protocol.IMAP
+                prefix + SSL, service.protocol == Geary.Protocol.IMAP
             );
             bool use_starttls = service_config.get_bool(
                 prefix + STARTTLS, true
@@ -1463,8 +1432,6 @@ public class Accounts.ServiceConfigLegacy : ServiceConfig, GLib.Object {
                 }
             }
         }
-
-        return service;
     }
 
     /** Saves an service to a config file. */

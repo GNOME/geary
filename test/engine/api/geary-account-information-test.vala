@@ -17,6 +17,7 @@ class Geary.AccountInformationTest : TestCase {
         AccountInformation test = new AccountInformation(
             "test",
             ServiceProvider.OTHER,
+            new MockCredentialsMediator(),
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
 

@@ -11,8 +11,8 @@ class Accounts.ManagerTest : TestCase {
     private const string TEST_ID = "test";
 
     private Manager? test = null;
+    private Geary.CredentialsMediator? mediator = null;
     private Geary.AccountInformation? account = null;
-    private Geary.ServiceInformation? service = null;
     private File? tmp = null;
 
 
@@ -42,20 +42,19 @@ class Accounts.ManagerTest : TestCase {
         data.make_directory();
 
         this.test = new Manager(new GearyApplication(), config, data);
-
+        this.mediator = new Geary.MockCredentialsMediator();
         this.account = new Geary.AccountInformation(
             TEST_ID,
             Geary.ServiceProvider.OTHER,
+            this.mediator,
             new Geary.RFC822.MailboxAddress(null, "test1@example.com")
         );
-
-        this.service = new Geary.ServiceInformation(Geary.Protocol.SMTP, null);
     }
 
 	public override void tear_down() throws GLib.Error {
-        this.test = null;
         this.account = null;
-        this.service = null;
+        this.mediator = null;
+        this.test = null;
         @delete(this.tmp);
 	}
 
@@ -140,7 +139,9 @@ class Accounts.ManagerTest : TestCase {
             new Geary.ConfigFile(this.tmp.get_child("config"));
 
         config.save(this.account, file);
-        Geary.AccountInformation copy = config.load(file, TEST_ID, null, null);
+        Geary.AccountInformation copy = config.load(
+            file, TEST_ID, this.mediator, null, null
+        );
 
         assert_true(this.account.equal_to(copy));
     }
@@ -160,49 +161,59 @@ class Accounts.ManagerTest : TestCase {
             new Geary.ConfigFile(this.tmp.get_child("config"));
 
         config.save(this.account, file);
-        Geary.AccountInformation copy = config.load(file, TEST_ID, null, null);
+        Geary.AccountInformation copy = config.load(
+            file, TEST_ID, this.mediator, null, null
+        );
 
         assert_true(this.account.equal_to(copy));
     }
 
     public void service_config_v1() throws GLib.Error {
-        this.service.host = "blarg";
-        this.service.port = 1234;
-        this.service.transport_security = Geary.TlsNegotiationMethod.NONE;
-        this.service.smtp_credentials_source = Geary.SmtpCredentials.CUSTOM;
-        this.service.credentials = new Geary.Credentials(
+        // take a copy before updating the service info so we don't
+        // also copy the test data
+        Geary.AccountInformation copy = new Geary.AccountInformation.copy(
+            this.account
+        );
+
+        this.account.smtp.host = "blarg";
+        this.account.smtp.port = 1234;
+        this.account.smtp.transport_security = Geary.TlsNegotiationMethod.NONE;
+        this.account.smtp.smtp_credentials_source = Geary.SmtpCredentials.CUSTOM;
+        this.account.smtp.credentials = new Geary.Credentials(
             Geary.Credentials.Method.PASSWORD, "testerson"
         );
         Accounts.ServiceConfigV1 config = new Accounts.ServiceConfigV1();
         Geary.ConfigFile file =
             new Geary.ConfigFile(this.tmp.get_child("config"));
 
-        config.save(this.account, this.service, file);
-        Geary.ServiceInformation copy = config.load(
-            file, this.account, this.service.protocol, null
-        );
+        config.save(this.account, this.account.smtp, file);
+        config.load(file, copy, copy.smtp);
 
-        assert_true(this.service.equal_to(copy));
+        assert_true(this.account.smtp.equal_to(copy.smtp));
     }
 
     public void service_config_legacy() throws GLib.Error {
-        this.service.host = "blarg";
-        this.service.port = 1234;
-        this.service.transport_security = Geary.TlsNegotiationMethod.NONE;
-        this.service.smtp_credentials_source = Geary.SmtpCredentials.CUSTOM;
-        this.service.credentials = new Geary.Credentials(
+        // take a copy before updating the service info so we don't
+        // also copy the test data
+        Geary.AccountInformation copy = new Geary.AccountInformation.copy(
+            this.account
+        );
+
+        this.account.smtp.host = "blarg";
+        this.account.smtp.port = 1234;
+        this.account.smtp.transport_security = Geary.TlsNegotiationMethod.NONE;
+        this.account.smtp.smtp_credentials_source = Geary.SmtpCredentials.CUSTOM;
+        this.account.smtp.credentials = new Geary.Credentials(
             Geary.Credentials.Method.PASSWORD, "testerson"
         );
         Accounts.ServiceConfigLegacy config = new Accounts.ServiceConfigLegacy();
         Geary.ConfigFile file =
             new Geary.ConfigFile(this.tmp.get_child("config"));
 
-        config.save(this.account, this.service, file);
-        Geary.ServiceInformation copy = config.load(
-            file, this.account, this.service.protocol, null
-        );
+        config.save(this.account, this.account.smtp, file);
+        config.load(file, copy, copy.smtp);
 
-        assert_true(this.service.equal_to(copy));
+        assert_true(this.account.smtp.equal_to(copy.smtp));
     }
 
     private void delete(File parent) throws GLib.Error {

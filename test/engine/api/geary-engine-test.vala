@@ -11,6 +11,7 @@ class Geary.EngineTest : TestCase {
     private Engine? engine = null;
     private File? tmp = null;
     private File? res = null;
+    private Geary.AccountInformation? account = null;
 
 
     public EngineTest() {
@@ -50,9 +51,17 @@ class Geary.EngineTest : TestCase {
                 async_complete(res);
             });
         this.engine.open_async.end(async_result());
+
+        this.account = new AccountInformation(
+            "test",
+            ServiceProvider.OTHER,
+            new MockCredentialsMediator(),
+            new RFC822.MailboxAddress(null, "test1@example.com")
+        );
     }
 
 	public override void tear_down () {
+        this.account = null;
         try {
             this.res.delete();
             this.tmp.delete();
@@ -63,18 +72,13 @@ class Geary.EngineTest : TestCase {
 	}
 
     public void add_account() throws GLib.Error {
-        AccountInformation info = new AccountInformation(
-            "test",
-            ServiceProvider.OTHER,
-            new RFC822.MailboxAddress(null, "test1@example.com")
-        );
-        assert_false(this.engine.has_account(info.id));
+        assert_false(this.engine.has_account(this.account.id));
 
-        this.engine.add_account(info);
-        assert_true(this.engine.has_account(info.id), "Account not added");
+        this.engine.add_account(this.account);
+        assert_true(this.engine.has_account(this.account.id), "Account not added");
 
         try {
-            this.engine.add_account(info);
+            this.engine.add_account(this.account);
             assert_not_reached();
         } catch (GLib.Error err) {
             // expected
@@ -82,34 +86,24 @@ class Geary.EngineTest : TestCase {
     }
 
     public void remove_account() throws GLib.Error {
-        AccountInformation info = new AccountInformation(
-            "test",
-            ServiceProvider.OTHER,
-            new RFC822.MailboxAddress(null, "test1@example.com")
-        );
-        this.engine.add_account(info);
-        assert_true(this.engine.has_account(info.id));
+        this.engine.add_account(this.account);
+        assert_true(this.engine.has_account(this.account.id));
 
-        this.engine.remove_account(info);
-        assert_false(this.engine.has_account(info.id), "Account not rmoeved");
+        this.engine.remove_account(this.account);
+        assert_false(this.engine.has_account(this.account.id), "Account not rmoeved");
 
         // Should not throw an error
-        this.engine.remove_account(info);
+        this.engine.remove_account(this.account);
     }
 
     public void re_add_account() throws GLib.Error {
-        AccountInformation info = new AccountInformation(
-            "test",
-            ServiceProvider.OTHER,
-            new RFC822.MailboxAddress(null, "test1@example.com")
-        );
-        assert_false(this.engine.has_account(info.id));
+        assert_false(this.engine.has_account(this.account.id));
 
-        this.engine.add_account(info);
-        this.engine.remove_account(info);
-        this.engine.add_account(info);
+        this.engine.add_account(this.account);
+        this.engine.remove_account(this.account);
+        this.engine.add_account(this.account);
 
-        assert_true(this.engine.has_account(info.id));
+        assert_true(this.engine.has_account(this.account.id));
     }
 
    private void delete(File parent) throws Error {

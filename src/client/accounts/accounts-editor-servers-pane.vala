@@ -68,7 +68,7 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
         this.details_list.set_header_func(Editor.seperator_headers);
         // Only add an account provider if it is esoteric enough.
-        if (this.account.imap.mediator is GoaMediator) {
+        if (this.account.mediator is GoaMediator) {
             this.details_list.add(
                 new AccountProviderRow(editor.accounts, this.account)
             );
@@ -307,7 +307,7 @@ private class Accounts.AccountProviderRow :
     public override void update() {
         string? source = null;
         bool enabled = false;
-        if (this.account.imap.mediator is GoaMediator) {
+        if (this.account.mediator is GoaMediator) {
             source = _("GNOME Online Accounts");
             enabled = true;
         } else {

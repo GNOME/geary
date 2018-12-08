@@ -338,7 +338,7 @@ private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> 
 
     // XXX convenience method until we get a better way of doing this.
     protected bool is_goa_account {
-        get { return (this.service.mediator is GoaMediator); }
+        get { return (this.account.mediator is GoaMediator); }
     }
 
 

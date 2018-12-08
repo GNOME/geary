@@ -31,6 +31,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         this.account_info = new AccountInformation(
             "account_01",
             ServiceProvider.OTHER,
+            new MockCredentialsMediator(),
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
         this.account = new MockAccount(this.account_info);

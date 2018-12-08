@@ -279,7 +279,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
     private Geary.ServiceInformation new_imap_service() {
         Geary.ServiceInformation service =
-           this.accounts.new_libsecret_service(Geary.Protocol.IMAP);
+            new Geary.ServiceInformation(Geary.Protocol.IMAP);
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
             service.credentials = new Geary.Credentials(
@@ -313,7 +313,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
     private Geary.ServiceInformation new_smtp_service() {
         Geary.ServiceInformation service =
-           this.accounts.new_libsecret_service(Geary.Protocol.SMTP);
+            new Geary.ServiceInformation(Geary.Protocol.SMTP);
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
             switch (this.smtp_auth.value.source) {

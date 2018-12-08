@@ -163,14 +163,6 @@ public class Geary.ServiceInformation : GLib.Object {
     public Credentials? credentials { get; set; default = null; }
 
     /**
-     * The credentials mediator used with this service.
-     *
-     * It is responsible for fetching and storing the credentials if
-     * as needed.
-     */
-    public CredentialsMediator mediator { get; private set; }
-
-    /**
      * Whether the password should be remembered.
      *
      * This only makes sense with providers that support saving the
@@ -227,16 +219,15 @@ public class Geary.ServiceInformation : GLib.Object {
     /**
      * Constructs a new configuration for a specific service.
      */
-    public ServiceInformation(Protocol proto, CredentialsMediator mediator) {
+    public ServiceInformation(Protocol proto) {
         this.protocol = proto;
-        this.mediator = mediator;
     }
 
     /**
      * Constructs a copy of the given service configuration.
      */
     public ServiceInformation.copy(ServiceInformation other) {
-        this(other.protocol, other.mediator);
+        this(other.protocol);
         this.host = other.host;
         this.port = other.port;
         this.use_starttls = other.use_starttls;
@@ -244,7 +235,6 @@ public class Geary.ServiceInformation : GLib.Object {
         this.credentials = (
             other.credentials != null ? other.credentials.copy() : null
         );
-        this.mediator = other.mediator;
         this.remember_password = other.remember_password;
         this.smtp_noauth = other.smtp_noauth;
         this.smtp_use_imap_credentials = other.smtp_use_imap_credentials;
@@ -290,7 +280,6 @@ public class Geary.ServiceInformation : GLib.Object {
              this.use_ssl == other.use_ssl &&
              (this.credentials == null && other.credentials == null ||
               this.credentials != null && this.credentials.equal_to(other.credentials)) &&
-             this.mediator == other.mediator &&
              this.remember_password == other.remember_password &&
              this.smtp_noauth == other.smtp_noauth &&
              this.smtp_use_imap_credentials == other.smtp_use_imap_credentials)
