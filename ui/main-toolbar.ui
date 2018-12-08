@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.2 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkImage" id="archive_image">
@@ -15,31 +15,22 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkButton" id="compose_new_message_button">
+          <object class="GtkMenuButton" id="empty_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
-            <property name="action_name">win.new-message</property>
-            <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Empty Spam or Trash folders</property>
             <child>
-              <object class="GtkImage" id="compose_new_message_image">
+              <object class="GtkImage" id="empty_menu_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">text-editor-symbolic</property>
+                <property name="icon_name">edit-clear-all-symbolic</property>
               </object>
             </child>
           </object>
-        </child>
-        <child>
-          <object class="GtkSeparator" id="header_separator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-          </object>
           <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -63,27 +54,6 @@
             <property name="position">2</property>
           </packing>
         </child>
-        <child>
-          <object class="GtkMenuButton" id="empty_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Empty Spam or Trash folders</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="empty_menu_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">edit-clear-all-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
         <style>
           <class name="geary-titlebar"/>
           <class name="geary-titlebar-left"/>
@@ -96,9 +66,35 @@
       </packing>
     </child>
     <child>
+      <object class="GtkSeparator" id="header_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkHeaderBar" id="conversation_header">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <child>
+          <object class="GtkButton" id="compose_new_message_button">
+            <property name="label" translatable="yes">New e-mail</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">False</property>
+            <property name="action_name">win.new-message</property>
+            <property name="always_show_image">True</property>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
+        </child>
         <child>
           <object class="GtkBox" id="reply_forward_buttons">
             <property name="visible">True</property>
@@ -177,6 +173,9 @@
               <class name="linked"/>
             </style>
           </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
         </child>
         <child>
           <object class="GtkBox" id="mark_copy_move_buttons">
@@ -252,7 +251,23 @@
             </style>
           </object>
           <packing>
-            <property name="position">1</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="archive_button">
+            <property name="label" translatable="yes">_Archive</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">False</property>
+            <property name="action_name">win.archive-conv</property>
+            <property name="image">archive_image</property>
+            <property name="use_underline">True</property>
+            <property name="always_show_image">True</property>
+          </object>
+          <packing>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -273,82 +288,91 @@
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">2</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="undo_button">
+          <object class="GtkButton" id="trash_delete_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
-            <property name="action_name">win.undo</property>
+            <property name="action_name">win.trash-conv</property>
             <property name="always_show_image">True</property>
             <child>
-              <object class="GtkImage" id="undo_image">
+              <object class="GtkImage" id="trash_delete_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">edit-undo-symbolic</property>
+                <property name="icon_name">user-trash-symbolic</property>
               </object>
             </child>
+            <style>
+              <class name="destructive-action"/>
+            </style>
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">3</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="archive_trash_delete_buttons">
+          <object class="GtkButtonBox" id="undo_redo">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="halign">end</property>
+            <property name="homogeneous">True</property>
+            <property name="layout_style">expand</property>
             <child>
-              <object class="GtkButton" id="archive_button">
-                <property name="label" translatable="yes">_Archive</property>
+              <object class="GtkButton" id="undo_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
-                <property name="action_name">win.archive-conv</property>
-                <property name="image">archive_image</property>
-                <property name="use_underline">True</property>
+                <property name="action_name">win.undo</property>
                 <property name="always_show_image">True</property>
+                <child>
+                  <object class="GtkImage" id="undo_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">edit-undo-symbolic</property>
+                  </object>
+                </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="trash_delete_button">
+              <object class="GtkButton" id="redo_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
-                <property name="action_name">win.trash-conv</property>
+                <property name="action_name">win.redo</property>
                 <property name="always_show_image">True</property>
                 <child>
-                  <object class="GtkImage" id="trash_delete_image">
+                  <object class="GtkImage" id="redo_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">user-trash-symbolic</property>
+                    <property name="icon_name">edit-redo-symbolic</property>
                   </object>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
             </child>
             <style>
-              <class name="raised"/>
               <class name="linked"/>
             </style>
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">4</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <style>
@@ -359,7 +383,7 @@
       <packing>
         <property name="expand">True</property>
         <property name="fill">True</property>
-        <property name="position">1</property>
+        <property name="position">2</property>
       </packing>
     </child>
   </template>
