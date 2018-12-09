@@ -5,17 +5,17 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-/* GNOME Online Accounts token adapter. */
+/** GNOME Online Accounts token adapter. */
 public class GoaMediator : Geary.CredentialsMediator, Object {
 
 
     public bool is_valid {
         get {
-            Goa.Account account = this.account.get_account();
+            Goa.Account account = this.handle.get_account();
             // Goa.Account.mail_disabled doesn't seem to reflect if we
             // get can get a valid mail object or not, so just rely on
             // actually getting one instead.
-            Goa.Mail? mail = this.account.get_mail();
+            Goa.Mail? mail = this.handle.get_mail();
             return (
                 mail != null &&
                 !account.attention_needed &&
@@ -34,18 +34,18 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         }
     }
 
-    private Goa.Object account;
+    private Goa.Object handle;
     private Goa.OAuth2Based? oauth2 = null;
     private Goa.PasswordBased? password = null;
 
 
-    public GoaMediator(Goa.Object account) {
-        this.account = account;
+    public GoaMediator(Goa.Object handle) {
+        this.handle = handle;
     }
 
     public Geary.ServiceProvider get_service_provider() {
         Geary.ServiceProvider provider = Geary.ServiceProvider.OTHER;
-        switch (this.account.get_account().provider_type) {
+        switch (this.handle.get_account().provider_type) {
         case "google":
             provider = Geary.ServiceProvider.GMAIL;
             break;
@@ -58,7 +58,7 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
     }
 
     public string get_service_label() {
-        return this.account.get_account().provider_name;
+        return this.handle.get_account().provider_name;
     }
 
     public async void update(Geary.AccountInformation geary_account,
@@ -66,11 +66,11 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         throws GLib.Error {
         // XXX have to call the sync version of this since the async
         // version seems to be broken
-        this.account.get_account().call_ensure_credentials_sync(
+        this.handle.get_account().call_ensure_credentials_sync(
             null, cancellable
         );
-        this.oauth2 = this.account.get_oauth2_based();
-        this.password = this.account.get_password_based();
+        this.oauth2 = this.handle.get_oauth2_based();
+        this.password = this.handle.get_password_based();
 
         update_imap_config(geary_account.incoming);
         update_smtp_config(geary_account.outgoing);
@@ -134,7 +134,7 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
     }
 
     private void update_imap_config(Geary.ServiceInformation service) {
-        Goa.Mail? mail = this.account.get_mail();
+        Goa.Mail? mail = this.handle.get_mail();
         if (mail != null) {
             parse_host_name(service, mail.imap_host);
 
@@ -157,7 +157,7 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
     }
 
     private void update_smtp_config(Geary.ServiceInformation service) {
-        Goa.Mail? mail = this.account.get_mail();
+        Goa.Mail? mail = this.handle.get_mail();
         if (mail != null) {
             parse_host_name(service, mail.smtp_host);
 
@@ -205,7 +205,7 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         } catch (GLib.Error err) {
             warning(
                 "GOA account \"%s\" %s hostname \"%s\": %",
-                this.account.get_account().id,
+                this.handle.get_account().id,
                 service.protocol.to_value(),
                 host_name,
                 err.message
