@@ -53,6 +53,9 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     private Gtk.ListBox accounts_list;
 
     [GtkChild]
+    private Gtk.Frame accounts_list_frame;
+
+    [GtkChild]
     private Gtk.Label add_service_label;
 
     [GtkChild]
@@ -183,13 +186,13 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
             // No accounts are available, so show only the welcome
             // pane and service list.
             this.welcome_panel.show();
-            this.accounts_list.hide();
+            this.accounts_list_frame.hide();
             this.add_service_label.hide();
         } else {
             // There are some accounts available, so show them and
             // the full add service UI.
             this.welcome_panel.hide();
-            this.accounts_list.show();
+            this.accounts_list_frame.show();
             this.add_service_label.show();
         }
     }

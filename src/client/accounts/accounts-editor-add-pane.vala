@@ -91,7 +91,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                     provider,
                     // Translators: Label for adding an email account
                     // account for a generic IMAP service provider.
-                    _("Other email provider")
+                    _("All others")
                 )
             );
             this.receiving_panel.hide();
