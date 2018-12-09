@@ -372,17 +372,34 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
     }
 
     public void update_status(Manager.Status status) {
-        if (status != Manager.Status.UNAVAILABLE) {
-            this.unavailable_icon.hide();
+        bool enabled = false;
+        switch (status) {
+        case ENABLED:
+            enabled = true;
             this.set_tooltip_text("");
-        } else {
-            this.unavailable_icon.show();
+            break;
+
+        case DISABLED:
             this.set_tooltip_text(
+                // Translators: Tooltip for accounts that have been
+                // loaded by disabled by the user.
+                _("This account has been disabled")
+            );
+            break;
+
+        case UNAVAILABLE:
+            this.set_tooltip_text(
+                // Translators: Tooltip for accounts that have been
+                // loaded but because of some error are not able to be
+                // used.
                 _("This account has encountered a problem and is unavailable")
             );
+            break;
         }
 
-        if (status == Manager.Status.ENABLED) {
+        this.unavailable_icon.set_visible(!enabled);
+
+        if (enabled) {
             this.label.get_style_context().remove_class(
                 Gtk.STYLE_CLASS_DIM_LABEL
             );

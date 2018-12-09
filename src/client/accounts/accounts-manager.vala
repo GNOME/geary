@@ -656,6 +656,13 @@ public class Accounts.Manager : GLib.Object {
             }
         }
 
+        // If the account has been marked as disabled, mark it as such
+        // and bail out.
+        if (status == Status.DISABLED) {
+            set_enabled(account, false);
+            throw new ConfigError.UNAVAILABLE("Account disabled");
+        }
+
         return account;
     }
 
