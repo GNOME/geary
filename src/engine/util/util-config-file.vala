@@ -14,6 +14,10 @@
 public class Geary.ConfigFile {
 
 
+    /** A string parser that can be used to extract custom values. */
+    public delegate T Parser<T>(string value) throws GLib.KeyFileError;
+
+
     /**
      * A set of configuration keys grouped under a "[Name]" heading.
      */
@@ -186,6 +190,33 @@ public class Geary.ConfigFile {
 
         public void set_uint16(string key, uint16 value) {
             this.backing.set_integer(this.name, key, (int) value);
+        }
+
+        public T? parse_value<T>(string key, Parser<T> parser, T? def = null) {
+            T value = def;
+            string? str = get_string(key);
+            if (str != null) {
+                try {
+                    value = parser(str);
+                } catch (GLib.KeyFileError err) {
+                    debug(
+                        "%s:%s value is invalid: %s", this.name, key, err.message
+                    );
+                }
+            }
+            return value;
+        }
+
+        public T parse_required_value<T>(string key, Parser<T> parser)
+            throws GLib.KeyFileError {
+            string? str = get_required_string(key);
+            try {
+                return parser(str);
+            } catch (GLib.KeyFileError err) {
+                throw new GLib.KeyFileError.INVALID_VALUE(
+                    "%s:%s value is invalid: %s", this.name, key, err.message
+                );
+            }
         }
 
         /** Removes a key from this group. */

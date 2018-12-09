@@ -346,9 +346,10 @@ public class Accounts.Manager : GLib.Object {
             for (uint i = 0; i < len && !cancellable.is_cancelled(); i++) {
                 GLib.FileInfo file = info_list.nth_data(i);
                 if (file.get_file_type() == FileType.DIRECTORY) {
+                    string id = file.get_name();
                     try {
                         Geary.AccountInformation info = yield load_account(
-                            file.get_name(), cancellable
+                            id, cancellable
                         );
 
                         GoaMediator? mediator = info.mediator as GoaMediator;
@@ -357,7 +358,11 @@ public class Accounts.Manager : GLib.Object {
                         } else {
                             set_available(info, false);
                         }
+                    } catch (ConfigError.REMOVED err) {
+                        // All good, this was handled properly by
+                        // load_account.
                     } catch (GLib.Error err) {
+                        debug("Error loading account %s", id);
                         report_problem(
                             new Geary.ProblemReport(
                                 Geary.ProblemType.GENERIC_ERROR,
@@ -1011,15 +1016,20 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
             throw new ConfigError.SYNTAX("%s: No sender addresses found", id);
         }
 
-        Geary.ServiceProvider? provider = null;
-        try {
-            provider = default_provider ??
-                Geary.ServiceProvider.for_value(
-                    account_config.get_required_string(ACCOUNT_PROVIDER)
-                );
-        } catch (Geary.EngineError err) {
-            throw new ConfigError.SYNTAX("%s: No/bad service provider", id);
-        }
+        Geary.ServiceProvider provider = (
+            default_provider != null
+            ? default_provider
+            : account_config.parse_required_value<Geary.ServiceProvider>(
+                ACCOUNT_PROVIDER,
+                (value) => {
+                    try {
+                        return Geary.ServiceProvider.for_value(value);
+                    } catch (Geary.EngineError err) {
+                        throw new GLib.KeyFileError.INVALID_VALUE(err.message);
+                    }
+                }
+            )
+        );
 
         Geary.AccountInformation account = new Geary.AccountInformation(
             id, provider, mediator, senders.remove_at(0)
@@ -1154,15 +1164,20 @@ public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
         string primary_email = config.get_required_string(PRIMARY_EMAIL_KEY);
         string real_name = config.get_string(REAL_NAME_KEY, default_name);
 
-        Geary.ServiceProvider? provider = null;
-        try {
-            provider = default_provider ??
-                Geary.ServiceProvider.for_value(
-                    config.get_required_string(SERVICE_PROVIDER_KEY)
-                );
-        } catch (Geary.EngineError err) {
-            throw new ConfigError.SYNTAX("%s: No/bad service provider", id);
-        }
+        Geary.ServiceProvider provider = (
+            default_provider != null
+            ? default_provider
+            : config.parse_required_value<Geary.ServiceProvider>(
+                SERVICE_PROVIDER_KEY,
+                (value) => {
+                    try {
+                        return Geary.ServiceProvider.for_value(value);
+                    } catch (Geary.EngineError err) {
+                        throw new GLib.KeyFileError.INVALID_VALUE(err.message);
+                    }
+                }
+            )
+        );
 
         Geary.AccountInformation info = new Geary.AccountInformation(
             id, provider, mediator,
@@ -1311,25 +1326,29 @@ public class Accounts.ServiceConfigV1 : ServiceConfig, GLib.Object {
             service.host = service_config.get_required_string(HOST);
             service.port = (uint16) service_config.get_int(PORT, service.port);
 
-            try {
-                service.transport_security =
-                Geary.TlsNegotiationMethod.for_value(
-                    service_config.get_string(SECURITY, null)
-                );
-            } catch (GLib.Error err) {
-                // Oh well
-                debug("%s: No/invalid transport security config for %s",
-                      account.id, service.protocol.to_value());
-            }
+            service.transport_security = service_config.parse_required_value
+            <Geary.TlsNegotiationMethod>(
+                SECURITY,
+                (value) => {
+                    try {
+                        return Geary.TlsNegotiationMethod.for_value(value);
+                    } catch (GLib.Error err) {
+                        throw new GLib.KeyFileError.INVALID_VALUE(err.message);
+                    }
+                }
+            );
 
-            try {
-                service.credentials_requirement =
-                    Geary.Credentials.Requirement.for_value(
-                        service_config.get_required_string(CREDENTIALS)
-                    );
-            } catch (Geary.EngineError err) {
-                debug("%s: No/invalid SMTP auth config", account.id);
-            }
+            service.credentials_requirement = service_config.parse_required_value
+            <Geary.Credentials.Requirement>(
+                CREDENTIALS,
+                (value) => {
+                    try {
+                        return Geary.Credentials.Requirement.for_value(value);
+                    } catch (GLib.Error err) {
+                        throw new GLib.KeyFileError.INVALID_VALUE(err.message);
+                    }
+                }
+            );
 
             if (service.port == 0) {
                 service.port = service.get_default_port();

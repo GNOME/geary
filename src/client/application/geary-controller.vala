@@ -319,6 +319,9 @@ public class GearyController : Geary.BaseObject {
         this.account_manager.account_removed.connect(
             on_account_removed
         );
+        this.account_manager.report_problem.connect(
+            on_report_problem
+        );
 
         try {
             yield this.account_manager.connect_libsecret(cancellable);
@@ -944,7 +947,7 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_report_problem(Geary.Account account, Geary.ProblemReport problem) {
+    private void on_report_problem(Geary.ProblemReport problem) {
         report_problem(problem);
     }
 
