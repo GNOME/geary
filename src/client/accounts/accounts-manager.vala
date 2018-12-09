@@ -85,8 +85,9 @@ public interface Accounts.ServiceConfig : GLib.Object {
 
 public errordomain Accounts.ConfigError {
     IO,
+    MANAGEMENT,
     SYNTAX,
-    UNSUPPORTED_VERSION,
+    VERSION,
     UNAVAILABLE,
     REMOVED;
 }
@@ -351,13 +352,10 @@ public class Accounts.Manager : GLib.Object {
                         Geary.AccountInformation info = yield load_account(
                             id, cancellable
                         );
-
-                        GoaMediator? mediator = info.mediator as GoaMediator;
-                        if (mediator == null || mediator.is_valid) {
-                            set_enabled(info, true);
-                        } else {
-                            set_available(info, false);
-                        }
+                        set_enabled(info, true);
+                    } catch (ConfigError.UNAVAILABLE err) {
+                        // All good, this was handled properly by
+                        // load_account.
                     } catch (ConfigError.REMOVED err) {
                         // All good, this was handled properly by
                         // load_account.
@@ -554,16 +552,17 @@ public class Accounts.Manager : GLib.Object {
             is_goa = true;
         }
 
+        Goa.Object? goa_handle = null;
         GoaMediator? goa_mediator = null;
         Geary.ServiceProvider? default_provider = null;
         Geary.CredentialsMediator mediator = this.libsecret;
 
         if (is_goa) {
             if (this.goa_service == null) {
-                throw new ConfigError.UNAVAILABLE("GOA service not available");
+                throw new ConfigError.MANAGEMENT("GOA service not available");
             }
 
-            Goa.Object? goa_handle = this.goa_service.lookup_by_id(goa_id);
+            goa_handle = this.goa_service.lookup_by_id(goa_id);
             if (goa_handle != null) {
                 mediator = goa_mediator = new GoaMediator(goa_handle);
                 default_provider = goa_mediator.get_service_provider();
@@ -596,7 +595,7 @@ public class Accounts.Manager : GLib.Object {
             break;
 
         default:
-            throw new ConfigError.UNSUPPORTED_VERSION(
+            throw new ConfigError.VERSION(
                 "Unsupported config version: %d", version
             );
         }
@@ -635,17 +634,21 @@ public class Accounts.Manager : GLib.Object {
             }
         } else {
             account.service_label = goa_mediator.get_service_label();
-
             try {
-                // This updates the service configs as well
                 yield goa_mediator.update(account, cancellable);
             } catch (GLib.Error err) {
-                // If we get an error here, there might have been a
-                // problem loading the GOA data, or the OAuth token
-                // has expired. XXX Need to distinguish between the
-                // two.
+                throw new ConfigError.MANAGEMENT(err.message);
+            }
+
+            if (goa_handle.get_mail() == null) {
+                // If we get here, the GOA account's mail service used
+                // to exist (we just loaded Geary's config for it) but
+                // no longer does. This indicates the mail service has
+                // been disabled, so set it as disabled.
                 set_available(account, false);
-                throw new ConfigError.UNAVAILABLE(err.message);
+                throw new ConfigError.UNAVAILABLE(
+                    "GOA Mail service not available"
+                );
             }
         }
 
@@ -836,11 +839,7 @@ public class Accounts.Manager : GLib.Object {
                     ));
             }
 
-            if (mediator.is_valid) {
-                set_enabled(info, true);
-            } else {
-                set_available(info, false);
-            }
+            set_enabled(info, true);
         } else {
             debug(
                 "Ignoring GOA %s account %s, mail service not enabled",
@@ -932,7 +931,7 @@ public class Accounts.Manager : GLib.Object {
                             ));
                     }
 
-                    set_available(state.account, mediator.is_valid);
+                    set_available(state.account, mediator.is_available);
                 }
             );
         } else {
