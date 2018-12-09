@@ -403,6 +403,7 @@ public class Accounts.Manager : GLib.Object {
         throws GLib.Error {
         this.accounts.unset(account.id);
         this.removed.add(account);
+        account.changed.disconnect(on_account_changed);
         yield save_account(account, cancellable);
         account_removed(account);
     }
@@ -434,6 +435,9 @@ public class Accounts.Manager : GLib.Object {
         }
     }
 
+    /**
+     * Saves an account's configuration data to disk.
+     */
     public async void save_account(Geary.AccountInformation info,
                                    GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -757,6 +761,7 @@ public class Accounts.Manager : GLib.Object {
         bool ret = false;
         if (was_added) {
             account_added(state.account, state.status);
+            account.changed.connect(on_account_changed);
             ret = true;
         } else if (state.status != existing_status) {
             account_status_changed(state.account, state.status);
@@ -774,6 +779,7 @@ public class Accounts.Manager : GLib.Object {
         bool ret = false;
         if (was_added) {
             account_added(state.account, state.status);
+            account.changed.connect(on_account_changed);
             ret = true;
         } else if (state.status != existing_status) {
             account_status_changed(state.account, state.status);
@@ -951,6 +957,25 @@ public class Accounts.Manager : GLib.Object {
         if (state != null) {
             set_available(state.account, false);
         }
+    }
+
+    private void on_account_changed(Geary.AccountInformation account) {
+        this.save_account.begin(
+            account, null,
+            (obj, res) => {
+                try {
+                    this.save_account.end(res);
+                } catch (GLib.Error err) {
+                    report_problem(
+                        new Geary.AccountProblemReport(
+                            Geary.ProblemType.GENERIC_ERROR,
+                            account,
+                            err
+                        )
+                    );
+                }
+            }
+        );
     }
 
 }

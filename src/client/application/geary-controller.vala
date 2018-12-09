@@ -1461,23 +1461,6 @@ public class GearyController : Geary.BaseObject {
                 folder, this.accounts.get(info).cancellable
             );
         }
-
-        this.account_manager.save_account.begin(
-            info, null,
-            (obj, res) => {
-                try {
-                    this.account_manager.save_account.end(res);
-                } catch (GLib.Error err) {
-                    report_problem(
-                        new Geary.AccountProblemReport(
-                            Geary.ProblemType.GENERIC_ERROR,
-                            info,
-                            err
-                        )
-                    );
-                }
-            }
-        );
     }
 
     private void on_folders_available_unavailable(Geary.Account account,
