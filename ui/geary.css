@@ -212,6 +212,10 @@ row.geary-settings image {
   padding: 0px 6px;
 }
 
+row.geary-settings entry {
+  border-width: 0px;
+}
+
 row.geary-settings.geary-drag-source {
   color: @insensitive_fg_color;
   background-color: @insensitive_bg_color;

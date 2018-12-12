@@ -213,20 +213,29 @@ internal class Accounts.LabelledEditorRow<PaneType,V> : EditorRow<PaneType> {
 
 
     public LabelledEditorRow(string label, V value) {
-        this.label.hexpand = true;
         this.label.halign = Gtk.Align.START;
         this.label.valign = Gtk.Align.CENTER;
         this.label.set_text(label);
         this.label.show();
         this.layout.add(this.label);
 
+        bool expand_label = true;
         this.value = value;
         Gtk.Widget? widget = value as Gtk.Widget;
         if (widget != null) {
+            Gtk.Entry? entry = value as Gtk.Entry;
+            if (entry != null) {
+                expand_label = false;
+                entry.xalign = 1;
+                entry.hexpand = true;
+            }
+
             widget.valign = Gtk.Align.CENTER;
             widget.show();
             this.layout.add(widget);
         }
+
+        this.label.hexpand = expand_label;
     }
 
     public void set_dim_label(bool is_dim) {
