@@ -384,11 +384,15 @@ private class Accounts.SaveDraftsRow :
 
 
 private class Accounts.ServiceHostRow :
-    ServiceRow<EditorServersPane,Gtk.Label> {
+    ServiceRow<EditorServersPane,Gtk.Entry> {
+
+
+    private Components.NetworkAddressValidator validator;
+
 
     public ServiceHostRow(Geary.AccountInformation account,
                           Geary.ServiceInformation service) {
-        string label = _("Unknown");
+        string label = "";
         switch (service.protocol) {
         case Geary.Protocol.IMAP:
             // Translators: This label describes the host name or IP
@@ -403,30 +407,11 @@ private class Accounts.ServiceHostRow :
             break;
         }
 
-        base(
-            account,
-            service,
-            label,
-            new Gtk.Label("")
-        );
-
+        base(account, service, label, new Gtk.Entry());
         update();
-    }
-
-    public override void activated(EditorServersPane pane) {
-        string? text = get_host_text() ?? "";
-        Gtk.Entry entry = new Gtk.Entry();
-        entry.set_text(text);
-        entry.set_placeholder_text(text);
-        entry.set_width_chars(20);
-        entry.show();
-
-        EditorPopover popover = new EditorPopover();
-        popover.set_relative_to(this.value);
-        popover.layout.add(entry);
-        popover.add_validator(new Components.NetworkAddressValidator(entry));
-        popover.valid_activated.connect(on_popover_activate);
-        popover.popup();
+        this.activatable = false;
+        this.validator = new Components.NetworkAddressValidator(this.value);
+        this.validator.state_changed.connect(on_validation_changed);
     }
 
     public override void update() {
@@ -434,7 +419,7 @@ private class Accounts.ServiceHostRow :
         if (Geary.String.is_empty(value)) {
             value = _("None");
         }
-        this.value.set_text(value);
+        this.value.text = value;
     }
 
     private string? get_host_text() {
@@ -449,21 +434,16 @@ private class Accounts.ServiceHostRow :
         return value;
     }
 
-    private void on_popover_activate(EditorPopover popover) {
-        Components.NetworkAddressValidator validator =
-            (Components.NetworkAddressValidator) Geary.traverse(
-                popover.validators
-            ).first();
-
-        GLib.NetworkAddress? address = validator.validated_address;
-        if (address != null) {
-            this.service.host = address.hostname;
-            this.service.port = address.port != 0
-                ? (uint16) address.port
-                : this.service.get_default_port();
+    private void on_validation_changed() {
+        if (this.validator.state == Components.Validator.Validity.VALID) {
+            GLib.NetworkAddress? address = this.validator.validated_address;
+            if (address != null) {
+                this.service.host = address.hostname;
+                this.service.port = address.port != 0
+                    ? (uint16) address.port
+                    : this.service.get_default_port();
+            }
         }
-
-        popover.popdown();
     }
 
 }
@@ -503,44 +483,31 @@ private class Accounts.ServiceSecurityRow :
 
 
 private class Accounts.ServiceLoginRow :
-    ServiceRow<EditorServersPane,Gtk.Label> {
+    ServiceRow<EditorServersPane,Gtk.Entry> {
+
+
+    public Components.Validator validator;
+
 
     public ServiceLoginRow(Geary.AccountInformation account,
                            Geary.ServiceInformation service) {
         base(
             account,
             service,
-            // Translators: This label describes the authentication
-            // scheme used by an account's IMAP or SMTP service.
+            // Translators: Label for the user's login name for an
+            // IMAP, SMTP, etc service
             _("Login name"),
-            new Gtk.Label("")
+            new Gtk.Entry()
         );
 
-        this.value.ellipsize = Pango.EllipsizeMode.MIDDLE;
         update();
-    }
-
-    public override void activated(EditorServersPane pane) {
-        string? value = null;
-        if (this.service.credentials != null) {
-            value = this.service.credentials.user;
-        }
-        Gtk.Entry entry = new Gtk.Entry();
-        entry.set_text(value ?? "");
-        entry.set_placeholder_text(value ?? "");
-        entry.set_width_chars(20);
-        entry.show();
-
-        EditorPopover popover = new EditorPopover();
-        popover.set_relative_to(this.value);
-        popover.layout.add(entry);
-        popover.add_validator(new Components.Validator(entry));
-        popover.valid_activated.connect(on_popover_activate);
-        popover.popup();
+        this.activatable = false;
+        this.validator = new Components.Validator(this.value);
+        this.validator.state_changed.connect(on_validation_changed);
     }
 
     public override void update() {
-        this.value.set_text(get_login_text());
+        this.value.text = get_login_text();
     }
 
     private string? get_login_text() {
@@ -550,7 +517,6 @@ private class Accounts.ServiceLoginRow :
             Gtk.StyleContext value_style = this.value.get_style_context();
             switch (this.service.credentials.supported_method) {
             case Geary.Credentials.Method.PASSWORD:
-                this.activatable = true;
                 value_style.remove_class(Gtk.STYLE_CLASS_DIM_LABEL);
                 break;
 
@@ -563,7 +529,6 @@ private class Accounts.ServiceLoginRow :
                 // the service's login name.
                 method = _("%s using OAuth2");
 
-                this.activatable = false;
                 value_style.add_class(Gtk.STYLE_CLASS_DIM_LABEL);
                 break;
             }
@@ -577,7 +542,7 @@ private class Accounts.ServiceLoginRow :
         } else if (this.service.protocol == Geary.Protocol.SMTP &&
                    this.service.credentials_requirement ==
                    Geary.Credentials.Requirement.USE_INCOMING) {
-            label = _("Use incoming server login");
+            label = _("Use receiving server login");
         } else {
             // Translators: Label used when no auth scheme is used
             // by an account's IMAP or SMTP service.
@@ -586,12 +551,11 @@ private class Accounts.ServiceLoginRow :
         return label;
     }
 
-    private void on_popover_activate(EditorPopover popover) {
-        Components.Validator validator =
-            Geary.traverse(popover.validators).first();
-       this.service.credentials =
-           this.service.credentials.copy_with_user(validator.target.text);
-        popover.popdown();
+    private void on_validation_changed() {
+        if (this.validator.state == Components.Validator.Validity.VALID) {
+            this.service.credentials =
+                this.service.credentials.copy_with_user(this.value.text);
+        }
     }
 
 }

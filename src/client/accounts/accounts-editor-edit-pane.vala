@@ -59,7 +59,7 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
         this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
         this.details_list.set_header_func(Editor.seperator_headers);
-        this.details_list.add(new DisplayNameRow(account));
+        this.details_list.add(new DisplayNameRow(account, this.commands));
 
         this.senders_list.set_header_func(Editor.seperator_headers);
         foreach (Geary.RFC822.MailboxAddress sender in
@@ -270,54 +270,64 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
 }
 
 
-private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Label> {
+private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
 
 
-    public DisplayNameRow(Geary.AccountInformation account) {
+    private Application.CommandStack commands;
+
+    public DisplayNameRow(Geary.AccountInformation account,
+                          Application.CommandStack commands) {
         base(
             account,
             // Translators: Label in the account editor for the user's
             // custom name for an account.
             _("Account name"),
-            new Gtk.Label("")
+            new Gtk.Entry()
         );
+        this.activatable = false;
+        this.commands = commands;
+
         update();
-    }
 
-    public override void activated(EditorEditPane pane) {
-        EditorPopover popover = new EditorPopover();
-
-        string? value = this.account.display_name;
-        Gtk.Entry entry = new Gtk.Entry();
-        entry.set_text(value ?? "");
-        entry.set_placeholder_text(value ?? "");
-        entry.set_width_chars(20);
-        entry.activate.connect(() => {
-                pane.commands.execute.begin(
-                    new PropertyCommand<string>(
-                        this.account,
-                        this.account,
-                        "label",
-                        entry.get_text(),
-                        // Translators: Tooltip used to undo changing
-                        // the name of an account. The string
-                        // substitution is the old name of the
-                        // account.
-                        _("Change account name back to “%s”")
-                    ),
-                    null
-                );
-                popover.popdown();
-            });
-        entry.show();
-
-        popover.set_relative_to(this.value);
-        popover.layout.add(entry);
-        popover.popup();
+        this.value.focus_out_event.connect(on_focus_out);
     }
 
     public override void update() {
+        this.value.set_placeholder_text(this.account.primary_mailbox.address);
         this.value.set_text(this.account.display_name);
+    }
+
+    private void commit() {
+        string value = this.value.text.strip();
+        if (value == "") {
+            value = this.account.primary_mailbox.address;
+            this.value.text = this.account.primary_mailbox.address;
+        }
+
+        if (value != this.account.display_name) {
+            this.commands.execute.begin(
+                new PropertyCommand<string>(
+                    this.account,
+                    this.account,
+                    "label",
+                    value,
+                    // Translators: Tooltip used to undo changing
+                    // the name of an account. The string
+                    // substitution is the old name of the
+                    // account.
+                    _("Change account name back to “%s”")
+                ),
+                null
+            );
+        }
+
+        if (Geary.String.is_empty(value)) {
+        }
+    }
+
+    private bool on_focus_out() {
+        commit();
+        return Gdk.EVENT_PROPAGATE;
     }
 
 }
