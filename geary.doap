@@ -15,7 +15,7 @@ interface.</description>
 
   <homepage rdf:resource="https://wiki.gnome.org/Apps/Geary" />
   <mailing-list rdf:resource="https://mail.gnome.org/mailman/listinfo/geary-list" />
-  <bug-database rdf:resource="https://bugzilla.gnome.org/browse.cgi?product=geary" />
+  <bug-database rdf:resource="https://gitlab.gnome.org/GNOME/geary/issues/" />
   <download-page rdf:resource="https://download.gnome.org/sources/geary/"/>
   <category rdf:resource="http://api.gnome.org/doap-extensions#apps" />
   <programming-language>Vala</programming-language>
