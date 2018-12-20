@@ -51,7 +51,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                          Cancellable? cancellable)
         throws GLib.Error {
         bool loaded = false;
-        if (service.remember_password) {
+        if (service.credentials != null && service.remember_password) {
             string? password = yield Secret.password_lookupv(
                 SecretMediator.schema, new_attrs(service), cancellable
             );
@@ -82,34 +82,36 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                            Geary.ServiceInformation service,
                                            GLib.Cancellable? cancellable)
         throws GLib.Error {
-        // to prevent multiple dialogs from popping up at the same
-        // time, use a nonblocking mutex to serialize the code
-        int token = yield dialog_mutex.claim_async(null);
+        if (service.credentials != null) {
+            // to prevent multiple dialogs from popping up at the same
+            // time, use a nonblocking mutex to serialize the code
+            int token = yield dialog_mutex.claim_async(null);
 
-        // Ensure main window present to the window
-        this.application.present();
+            // Ensure main window present to the window
+            this.application.present();
 
-        PasswordDialog password_dialog = new PasswordDialog(
-            this.application.get_active_window(),
-            account,
-            service
-        );
-        bool result = password_dialog.run();
-
-        dialog_mutex.release(ref token);
-
-        if (result) {
-            // password_dialog.password should never be null at this
-            // point. It will only be null when password_dialog.run()
-            // returns false, in which case we have already returned.
-            service.credentials = service.credentials.copy_with_token(
-                password_dialog.password
+            PasswordDialog password_dialog = new PasswordDialog(
+                this.application.get_active_window(),
+                account,
+                service
             );
-            service.remember_password = password_dialog.remember_password;
+            bool result = password_dialog.run();
 
-            yield update_token(account, service, cancellable);
+            dialog_mutex.release(ref token);
 
-            account.changed();
+            if (result) {
+                // password_dialog.password should never be null at this
+                // point. It will only be null when password_dialog.run()
+                // returns false, in which case we have already returned.
+                service.credentials = service.credentials.copy_with_token(
+                    password_dialog.password
+                );
+                service.remember_password = password_dialog.remember_password;
+
+                yield update_token(account, service, cancellable);
+
+                account.changed();
+            }
         }
         return true;
     }
@@ -118,7 +120,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                    Geary.ServiceInformation service,
                                    Cancellable? cancellable)
         throws Error {
-        if (service.remember_password) {
+        if (service.credentials != null && service.remember_password) {
             try {
                 yield do_store(service, service.credentials.token, cancellable);
             } catch (Error e) {
@@ -194,7 +196,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     private async void do_store(Geary.ServiceInformation service,
                                 string password,
                                 Cancellable? cancellable)
-    throws Error {
+        throws Error {
         yield Secret.password_storev(
             SecretMediator.schema,
             new_attrs(service),
