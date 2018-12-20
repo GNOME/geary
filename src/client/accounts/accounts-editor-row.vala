@@ -545,7 +545,7 @@ internal class Accounts.OutgoingAuthComboBox : Gtk.ComboBoxText {
             // Translators: ComboBox value for source of SMTP
             // authentication credentials (use IMAP) when adding a new
             // account
-            _("Use incoming server login")
+            _("Use same login as receiving")
         );
 
         append(
@@ -553,7 +553,7 @@ internal class Accounts.OutgoingAuthComboBox : Gtk.ComboBoxText {
             // Translators: ComboBox value for source of SMTP
             // authentication credentials (custom) when adding a new
             // account
-            _("Use different login")
+            _("Use a different login")
         );
     }
 
