@@ -186,8 +186,9 @@ public class Geary.ServiceInformation : GLib.Object {
             (this.host == other.host &&
              this.port == other.port &&
              this.transport_security == other.transport_security &&
-             (this.credentials == null && other.credentials == null ||
-              this.credentials != null && this.credentials.equal_to(other.credentials)) &&
+             ((this.credentials == null && other.credentials == null) ||
+              (this.credentials != null && other.credentials != null &&
+               this.credentials.equal_to(other.credentials))) &&
              this.credentials_requirement == other.credentials_requirement &&
              this.remember_password == other.remember_password)
         );
