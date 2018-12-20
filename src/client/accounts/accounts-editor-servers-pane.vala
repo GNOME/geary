@@ -15,6 +15,11 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     internal Geary.AccountInformation account { get ; protected set; }
 
+    /** Command stack for pane user commands. */
+    internal Application.CommandStack commands {
+        get; private set; default = new Application.CommandStack();
+    }
+
     protected weak Accounts.Editor editor { get; set; }
 
     private Geary.Engine engine;
@@ -23,6 +28,9 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
     // validating on apply, without breaking anything.
     private Geary.ServiceInformation incoming_mutable;
     private Geary.ServiceInformation outgoing_mutable;
+
+    private Gee.List<Components.Validator> validators =
+        new Gee.LinkedList<Components.Validator>();
 
 
     [GtkChild]
@@ -52,6 +60,8 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
     [GtkChild]
     private Gtk.Spinner apply_spinner;
 
+    private ServiceLoginRow incoming_login;
+
     private SaveDraftsRow save_drafts;
     private ServiceSmtpAuthRow smtp_auth;
     private ServiceLoginRow smtp_login;
@@ -65,6 +75,8 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         this.outgoing_mutable = new Geary.ServiceInformation.copy(account.outgoing);
 
         this.pane_content.set_focus_vadjustment(this.pane_adjustment);
+
+        // Details
 
         this.details_list.set_header_func(Editor.seperator_headers);
         // Only add an account provider if it is esoteric enough.
@@ -80,27 +92,57 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
             );
         service_provider.set_dim_label(true);
         service_provider.activatable = false;
-        this.details_list.add(service_provider);
-        this.save_drafts = new SaveDraftsRow(this.account);
-        this.details_list.add(this.save_drafts);
+        add_row(this.details_list, service_provider);
+
+        this.save_drafts = new SaveDraftsRow(this.account, this.commands);
+        add_row(this.details_list, this.save_drafts);
+
+        // Receiving
 
         this.receiving_list.set_header_func(Editor.seperator_headers);
-        this.receiving_list.add(new ServiceHostRow(account, this.incoming_mutable));
-        this.receiving_list.add(new ServiceSecurityRow(account, this.incoming_mutable));
-        this.receiving_list.add(new ServiceLoginRow(account, this.incoming_mutable));
+        add_row(
+            this.receiving_list,
+            new ServiceHostRow(account, this.incoming_mutable, this.commands)
+        );
+        add_row(
+            this.receiving_list,
+            new ServiceSecurityRow(account, this.incoming_mutable, this.commands)
+        );
+
+        this.incoming_login = new ServiceLoginRow(
+            account, this.incoming_mutable, this.commands
+        );
+        add_row(this.receiving_list, this.incoming_login);
+
+        // Sending
 
         this.sending_list.set_header_func(Editor.seperator_headers);
-        this.sending_list.add(new ServiceHostRow(account, this.outgoing_mutable));
-        this.sending_list.add(new ServiceSecurityRow(account, this.outgoing_mutable));
+        add_row(
+            this.sending_list,
+            new ServiceHostRow(account, this.outgoing_mutable, this.commands)
+        );
+        add_row(
+            this.sending_list,
+            new ServiceSecurityRow(account, this.outgoing_mutable, this.commands)
+        );
         this.smtp_auth = new ServiceSmtpAuthRow(
-            account, this.outgoing_mutable, this.incoming_mutable
+            account, this.outgoing_mutable, this.incoming_mutable, this.commands
         );
         this.smtp_auth.value.changed.connect(on_smtp_auth_changed);
-        this.sending_list.add(this.smtp_auth);
-        this.smtp_login = new ServiceLoginRow(account, this.outgoing_mutable);
-        this.sending_list.add(this.smtp_login);
+        add_row(this.sending_list, this.smtp_auth);
+
+        this.smtp_login = new ServiceLoginRow(
+            account, this.outgoing_mutable, this.commands
+        );
+        add_row(this.sending_list, this.smtp_login);
+
+        // Misc plumbing
 
         this.account.changed.connect(on_account_changed);
+
+        this.commands.executed.connect(on_command);
+        this.commands.undone.connect(on_command);
+        this.commands.redone.connect(on_command);
 
         update_header();
         update_smtp_auth();
@@ -108,16 +150,33 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     ~EditorServersPane() {
         this.account.changed.disconnect(on_account_changed);
+
+        this.commands.executed.disconnect(on_command);
+        this.commands.undone.disconnect(on_command);
+        this.commands.redone.disconnect(on_command);
     }
 
     internal Gtk.HeaderBar get_header() {
         return this.header;
     }
 
+    internal void undo() {
+        this.commands.undo.begin(null);
+    }
+
+    internal void redo() {
+        this.commands.redo.begin(null);
+    }
+
+    private bool is_valid() {
+        return Geary.traverse(this.validators).all((v) => v.is_valid);
+    }
+
     private async void save(GLib.Cancellable? cancellable) {
         this.apply_button.set_sensitive(false);
         this.apply_spinner.show();
         this.apply_spinner.start();
+        this.set_sensitive(false);
 
         // Only need to validate if a generic account
         bool is_valid = true;
@@ -141,7 +200,6 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
         if (is_valid) {
             if (this.save_drafts.value_changed) {
-                this.account.save_drafts = this.save_drafts.value.state;
                 has_changed = true;
             }
 
@@ -150,11 +208,20 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
             }
 
             this.editor.pop();
+        } else {
+            // Re-enable apply so that the same config can be re-tried
+            // in the face of transient errors, without having to
+            // change something to re-enable it
+            this.apply_button.set_sensitive(true);
+
+            // Undo save_drafts manually since it would have been
+            // updated already by the command
+            this.account.save_drafts = this.save_drafts.initial_value;
         }
 
-        this.apply_button.set_sensitive(true);
         this.apply_spinner.stop();
         this.apply_spinner.hide();
+        this.set_sensitive(true);
     }
 
     private async bool validate(GLib.Cancellable? cancellable) {
@@ -222,10 +289,41 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         notification.show();
     }
 
+    private void add_row(Gtk.ListBox list, EditorRow<EditorServersPane> row) {
+        list.add(row);
+        ValidatingRow? validating = row as ValidatingRow;
+        if (validating != null) {
+            validating.changed.connect(on_validator_changed);
+            validating.validator.activated.connect_after(on_validator_activated);
+            this.validators.add(validating.validator);
+        }
+    }
+
+    private void update_actions() {
+        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
+            this.commands.can_undo
+        );
+        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
+            this.commands.can_redo
+        );
+
+        this.apply_button.set_sensitive(this.commands.can_undo);
+    }
+
     private void update_smtp_auth() {
         this.smtp_login.set_visible(
-            this.smtp_auth.value.source == Geary.Credentials.Requirement.CUSTOM
+            this.smtp_auth.value.source == CUSTOM
         );
+    }
+
+    private void on_validator_changed() {
+        this.apply_button.set_sensitive(is_valid());
+    }
+
+    private void on_validator_activated() {
+        if (is_valid()) {
+            this.apply_button.clicked();
+        }
     }
 
     [GtkCallback]
@@ -266,6 +364,10 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     private void on_account_changed() {
         update_header();
+    }
+
+    private void on_command() {
+        update_actions();
     }
 
     private void on_smtp_auth_changed() {
@@ -353,11 +455,12 @@ private class Accounts.SaveDraftsRow :
     public bool value_changed {
         get { return this.initial_value != this.value.state; }
     }
+    public bool initial_value { get; private set; }
 
-    private bool initial_value;
+    private Application.CommandStack commands;
 
-
-    public SaveDraftsRow(Geary.AccountInformation account) {
+    public SaveDraftsRow(Geary.AccountInformation account,
+                         Application.CommandStack commands) {
         Gtk.Switch value = new Gtk.Switch();
         base(
             account,
@@ -366,32 +469,56 @@ private class Accounts.SaveDraftsRow :
             _("Save drafts on server"),
             value
         );
-        set_activatable(false);
         update();
-        value.notify["active"].connect(on_activate);
+        this.commands = commands;
+        this.activatable = false;
+        this.initial_value = this.account.save_drafts;
+        this.account.notify["save-drafts"].connect(on_account_changed);
+        this.value.notify["active"].connect(on_activate);
     }
 
     public override void update() {
-        this.initial_value = this.account.save_drafts;
-        this.value.state = this.initial_value;
+        this.value.state = this.account.save_drafts;
     }
 
     private void on_activate() {
-        this.account.save_drafts = this.value.state;
+        if (this.value.state != this.account.save_drafts) {
+            this.commands.execute.begin(
+                new Application.PropertyCommand<bool>(
+                    this.account, "save_drafts", this.value.state
+                ),
+                null
+            );
+        }
+    }
+
+    private void on_account_changed() {
+        update();
     }
 
 }
 
 
 private class Accounts.ServiceHostRow :
-    ServiceRow<EditorServersPane,Gtk.Entry> {
+    ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow {
 
 
-    private Components.NetworkAddressValidator validator;
+    public Components.Validator validator {
+        get; protected set;
+    }
+
+    public bool has_changed {
+        get {
+            return this.value.text.strip() != get_entry_text();
+        }
+    }
+
+    private Application.CommandStack commands;
 
 
     public ServiceHostRow(Geary.AccountInformation account,
-                          Geary.ServiceInformation service) {
+                          Geary.ServiceInformation service,
+                          Application.CommandStack commands) {
         string label = "";
         switch (service.protocol) {
         case Geary.Protocol.IMAP:
@@ -408,21 +535,47 @@ private class Accounts.ServiceHostRow :
         }
 
         base(account, service, label, new Gtk.Entry());
-        update();
+        this.commands = commands;
         this.activatable = false;
         this.validator = new Components.NetworkAddressValidator(this.value);
-        this.validator.state_changed.connect(on_validation_changed);
+
+        // Update after the validator is wired up to ensure the value
+        // is validated
+        setup_validator();
+        update();
     }
 
     public override void update() {
-        string value = get_host_text();
+        string value = get_entry_text();
         if (Geary.String.is_empty(value)) {
             value = _("None");
         }
         this.value.text = value;
     }
 
-    private string? get_host_text() {
+    protected void commit() {
+        GLib.NetworkAddress? address =
+            ((Components.NetworkAddressValidator) this.validator)
+            .validated_address;
+        if (address != null) {
+            uint16 port = address.port != 0
+            ? (uint16) address.port
+            : this.service.get_default_port();
+            this.commands.execute.begin(
+                new Application.CommandSequence({
+                        new Application.PropertyCommand<string>(
+                            this.service, "host", address.hostname
+                        ),
+                        new Application.PropertyCommand<uint16>(
+                            this.service, "port", port
+                        )
+                }),
+                null
+                );
+        }
+    }
+
+    private string? get_entry_text() {
         string? value = this.service.host ?? "";
         if (!Geary.String.is_empty(value)) {
             // Only show the port if it not the appropriate default port
@@ -434,31 +587,26 @@ private class Accounts.ServiceHostRow :
         return value;
     }
 
-    private void on_validation_changed() {
-        if (this.validator.state == Components.Validator.Validity.VALID) {
-            GLib.NetworkAddress? address = this.validator.validated_address;
-            if (address != null) {
-                this.service.host = address.hostname;
-                this.service.port = address.port != 0
-                    ? (uint16) address.port
-                    : this.service.get_default_port();
-            }
-        }
-    }
-
 }
 
 
 private class Accounts.ServiceSecurityRow :
     ServiceRow<EditorServersPane,TlsComboBox> {
 
+
+    private Application.CommandStack commands;
+
+
     public ServiceSecurityRow(Geary.AccountInformation account,
-                              Geary.ServiceInformation service) {
+                              Geary.ServiceInformation service,
+                              Application.CommandStack commands) {
         TlsComboBox value = new TlsComboBox();
         base(account, service, value.label, value);
-        set_activatable(false);
-        value.changed.connect(on_value_changed);
         update();
+
+        this.commands = commands;
+        this.activatable = false;
+        value.changed.connect(on_value_changed);
     }
 
     public override void update() {
@@ -467,15 +615,29 @@ private class Accounts.ServiceSecurityRow :
 
     private void on_value_changed() {
         if (this.service.transport_security != this.value.method) {
+            Application.Command cmd = new Application.PropertyCommand<uint>(
+                this.service, "transport-security", this.value.method
+            );
+
+            debug("Security port: %u", this.service.port);
+
             // Update the port if we're currently using the default,
             // otherwise keep the custom port as-is.
-            bool update_port = (
-                this.service.port == this.service.get_default_port()
-            );
-            this.service.transport_security = this.value.method;
-            if (update_port) {
-                this.service.port = this.service.get_default_port();
+            if (this.service.port == this.service.get_default_port()) {
+                // Work out what the new port would be by copying the
+                // service and applying the new security param up
+                // front
+                Geary.ServiceInformation copy =
+                    new Geary.ServiceInformation.copy(this.service);
+                copy.transport_security = this.value.method;
+                cmd = new Application.CommandSequence(
+                    {cmd,
+                     new Application.PropertyCommand<uint>(
+                         this.service, "port", copy.get_default_port()
+                     )
+                    });
             }
+            this.commands.execute.begin(cmd, null);
         }
     }
 
@@ -483,14 +645,25 @@ private class Accounts.ServiceSecurityRow :
 
 
 private class Accounts.ServiceLoginRow :
-    ServiceRow<EditorServersPane,Gtk.Entry> {
+    ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow {
 
 
-    public Components.Validator validator;
+    public Components.Validator validator {
+        get; protected set;
+    }
+
+    public bool has_changed {
+        get {
+            return this.value.text.strip() != get_entry_text();
+        }
+    }
+
+    private Application.CommandStack commands;
 
 
     public ServiceLoginRow(Geary.AccountInformation account,
-                           Geary.ServiceInformation service) {
+                           Geary.ServiceInformation service,
+                           Application.CommandStack commands) {
         base(
             account,
             service,
@@ -500,17 +673,37 @@ private class Accounts.ServiceLoginRow :
             new Gtk.Entry()
         );
 
-        update();
+        this.commands = commands;
         this.activatable = false;
         this.validator = new Components.Validator(this.value);
-        this.validator.state_changed.connect(on_validation_changed);
+
+        // Update after the validator is wired up to ensure the value
+        // is validated
+        update();
+        setup_validator();
     }
 
     public override void update() {
-        this.value.text = get_login_text();
+        this.value.text = get_entry_text();
     }
 
-    private string? get_login_text() {
+    protected void commit() {
+        if (this.service.credentials != null) {
+            this.commands.execute.begin(
+                new Application.PropertyCommand<Geary.Credentials?>(
+                    this.service,
+                    "credentials",
+                    new Geary.Credentials(
+                        this.service.credentials.supported_method,
+                        this.value.text
+                    )
+                ),
+                null
+            );
+        }
+    }
+
+    private string? get_entry_text() {
         string? label = null;
         if (this.service.credentials != null) {
             string method = "%s";
@@ -551,31 +744,29 @@ private class Accounts.ServiceLoginRow :
         return label;
     }
 
-    private void on_validation_changed() {
-        if (this.validator.state == Components.Validator.Validity.VALID) {
-            this.service.credentials =
-                this.service.credentials.copy_with_user(this.value.text);
-        }
-    }
-
 }
+
 
 private class Accounts.ServiceSmtpAuthRow :
     ServiceRow<EditorServersPane,SmtpAuthComboBox> {
 
 
-    Geary.ServiceInformation imap_service;
+    private Application.CommandStack commands;
+    private Geary.ServiceInformation imap_service;
 
 
     public ServiceSmtpAuthRow(Geary.AccountInformation account,
                               Geary.ServiceInformation smtp_service,
-                              Geary.ServiceInformation imap_service) {
+                              Geary.ServiceInformation imap_service,
+                              Application.CommandStack commands) {
         SmtpAuthComboBox value = new SmtpAuthComboBox();
         base(account, smtp_service, value.label, value);
+        update();
+
+        this.commands = commands;
         this.imap_service = imap_service;
         this.activatable = false;
         value.changed.connect(on_value_changed);
-        update();
     }
 
     public override void update() {
@@ -584,21 +775,43 @@ private class Accounts.ServiceSmtpAuthRow :
 
     private void on_value_changed() {
         if (this.service.credentials_requirement != this.value.source) {
+            // Need to update the credentials given the new
+            // requirements, too
+            Geary.Credentials? new_creds = null;
+            if (this.value.source == CUSTOM) {
+                new_creds = new Geary.Credentials(
+                    Geary.Credentials.Method.PASSWORD, ""
+                );
+            }
+
+            Application.CommandSequence seq = new Application.CommandSequence({
+                    new Application.PropertyCommand<Geary.Credentials?>(
+                        this.service, "credentials", new_creds
+                    ),
+                    new Application.PropertyCommand<uint>(
+                        this.service, "credentials-requirement", this.value.source
+                    )
+                });
+
             // The default SMTP port also depends on the auth method
             // used, so also update the port here if we're currently
             // using the default, otherwise keep the custom port
             // as-is.
-            bool update_port = (
-                this.service.port == this.service.get_default_port()
-            );
-            this.service.credentials_requirement = this.value.source;
-            this.service.credentials =
-                (this.service.credentials_requirement != CUSTOM)
-                ? null
-                : new Geary.Credentials(Geary.Credentials.Method.PASSWORD, "");
-            if (update_port) {
-                this.service.port = this.service.get_default_port();
+            if (this.service.port == this.service.get_default_port()) {
+                // Work out what the new port would be by copying the
+                // service and applying the new security param up
+                // front
+                Geary.ServiceInformation copy =
+                    new Geary.ServiceInformation.copy(this.service);
+                copy.credentials_requirement = this.value.source;
+                seq.commands.add(
+                    new Application.PropertyCommand<uint>(
+                        this.service, "port", copy.get_default_port()
+                    )
+                );
             }
+
+            this.commands.execute.begin(seq, null);
         }
     }
 

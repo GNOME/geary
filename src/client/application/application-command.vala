@@ -109,6 +109,60 @@ public abstract class Application.Command : GLib.Object {
 
 
 /**
+ * A command that executes a sequence of other commands.
+ */
+public class Application.CommandSequence : Command {
+
+
+    public Gee.List<Command> commands {
+        get; private set; default = new Gee.LinkedList<Command>();
+    }
+
+    public CommandSequence(Command[]? commands = null) {
+        if (commands != null) {
+            this.commands.add_all_array(commands);
+        }
+    }
+
+
+    /**
+     * Executes all commands in the sequence, sequentially.
+     */
+    public override async void execute(GLib.Cancellable? cancellable)
+       throws GLib.Error {
+       foreach (Command command in this.commands) {
+           yield command.execute(cancellable);
+       }
+    }
+
+    /**
+     * Un-does all commands in the sequence, in reverse order.
+     */
+    public override async void undo(GLib.Cancellable? cancellable)
+       throws GLib.Error {
+       Gee.LinkedList<Command> reversed = new Gee.LinkedList<Command>();
+       foreach (Command command in this.commands) {
+           reversed.insert(0, command);
+       }
+       foreach (Command command in this.commands) {
+           yield command.undo(cancellable);
+       }
+    }
+
+    /**
+     * Re-does all commands in the sequence, sequentially.
+     */
+    public override async void redo(GLib.Cancellable? cancellable)
+       throws GLib.Error {
+       foreach (Command command in this.commands) {
+           yield command.redo(cancellable);
+       }
+    }
+
+}
+
+
+/**
  * A command that updates a GObject instance property.
  *
  * This command will save the existing property value on execution

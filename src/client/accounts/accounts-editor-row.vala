@@ -357,7 +357,7 @@ private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> 
                       V value) {
         base(account, label, value);
         this.service = service;
-        this.service.notify.connect(on_notify);
+        this.service.notify.connect_after(on_notify);
 
         bool is_editable = this.is_value_editable;
         set_activatable(is_editable);
@@ -378,6 +378,60 @@ private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> 
 
     private void on_notify() {
         update();
+    }
+
+}
+
+
+/** Interface for rows that use a validator for editable values. */
+internal interface Accounts.ValidatingRow : EditorRow {
+
+
+    /** The row's validator */
+    public abstract Components.Validator validator { get; protected set; }
+
+    /** Determines if the row's value has actually changed. */
+    public abstract bool has_changed { get; }
+
+    /** Fired when validated and the value has actually changed. */
+    public signal void changed();
+
+    /** Fired when validated and the value has actually changed. */
+    public signal void committed();
+
+    /**
+     * Hooks up signals to the validator.
+     *
+     * Implementing classes should call this in their constructor
+     * after having constructed a validator
+     */
+    protected void setup_validator() {
+        this.validator.changed.connect(on_validator_changed);
+        this.validator.activated.connect(on_validator_check_commit);
+        this.validator.focus_lost.connect(on_validator_check_commit);
+    }
+
+    /**
+     * Called when the row's value should be stored.
+     *
+     * This is only called when the row's value has changed, is
+     * valid, and the user has activated or changed to a different
+     * row. */
+    protected virtual void commit() {
+        // noop
+    }
+
+    private void on_validator_changed() {
+        if (this.has_changed) {
+            changed();
+        }
+    }
+
+    private void on_validator_check_commit() {
+        if (this.has_changed) {
+            commit();
+            committed();
+        }
     }
 
 }
