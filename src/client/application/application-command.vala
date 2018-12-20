@@ -99,7 +99,64 @@ public abstract class Application.Command : GLib.Object {
         throws GLib.Error {
         yield execute(cancellable);
     }
-        
+
+    /** Returns a string representation of the command for debugging. */
+    public virtual string to_string() {
+        return get_type().name();
+    }
+
+}
+
+
+/**
+ * A command that updates a GObject instance property.
+ *
+ * This command will save the existing property value on execution
+ * before updating it with the new given property, restore it on undo,
+ * and re-execute on redo. The type parameter T must be the same type
+ * as the property being updated and must be nullable if the property
+ * is nullable.
+ */
+public class Application.PropertyCommand<T> : Application.Command {
+
+
+    private GLib.Object object;
+    private string property_name;
+    private T new_value;
+    private T old_value;
+
+
+    public PropertyCommand(GLib.Object object,
+                           string property_name,
+                           T new_value,
+                           string? undo_label = null,
+                           string? redo_label = null,
+                           string? executed_label = null,
+                           string? undone_label = null) {
+        this.object = object;
+        this.property_name = property_name;
+        this.new_value = new_value;
+
+        this.object.get(this.property_name, ref this.old_value);
+
+        this.undo_label = undo_label.printf(this.old_value);
+        this.redo_label = redo_label.printf(this.new_value);
+        this.executed_label = executed_label.printf(this.new_value);
+        this.undone_label = undone_label.printf(this.old_value);
+    }
+
+    public async override void execute(GLib.Cancellable? cancellable) {
+        this.object.set(this.property_name, this.new_value);
+    }
+
+    public async override void undo(GLib.Cancellable? cancellable) {
+        this.object.set(this.property_name, this.old_value);
+    }
+
+    public override string to_string() {
+        return "%s(%s)".printf(base.to_string(), this.property_name);
+    }
+
 }
 
 
@@ -157,6 +214,7 @@ public class Application.CommandStack : GLib.Object {
      */
     public async void execute(Command target, GLib.Cancellable? cancellable)
         throws GLib.Error {
+        debug("Executing: %s", target.to_string());
         yield target.execute(cancellable);
 
         this.undo_stack.insert(0, target);
@@ -185,6 +243,7 @@ public class Application.CommandStack : GLib.Object {
                 this.can_undo = false;
             }
 
+            debug("Undoing: %s", target.to_string());
             try {
                 yield target.undo(cancellable);
             } catch (Error err) {
@@ -216,6 +275,7 @@ public class Application.CommandStack : GLib.Object {
                 this.can_redo = false;
             }
 
+            debug("Redoing: %s", target.to_string());
             try {
                 yield target.redo(cancellable);
             } catch (Error err) {

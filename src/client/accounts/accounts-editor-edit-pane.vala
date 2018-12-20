@@ -186,6 +186,7 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
 
     private void on_command() {
         update_actions();
+        this.account.changed();
     }
 
     private void on_sender_row_moved(EditorRow source, int new_position) {
@@ -306,8 +307,7 @@ private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
 
         if (value != this.account.display_name) {
             this.commands.execute.begin(
-                new PropertyCommand<string>(
-                    this.account,
+                new Application.PropertyCommand<string?>(
                     this.account,
                     "label",
                     value,
@@ -797,8 +797,7 @@ private class Accounts.EmailPrefetchRow :
 
         this.value.changed.connect(() => {
                 pane.commands.execute.begin(
-                    new PropertyCommand<int>(
-                        this.account,
+                    new Application.PropertyCommand<int>(
                         this.account,
                         "prefetch-period-days",
                         int.parse(this.value.get_active_id()),
