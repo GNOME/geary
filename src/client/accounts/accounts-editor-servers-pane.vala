@@ -63,9 +63,11 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
     private SaveDraftsRow save_drafts;
 
     private ServiceLoginRow incoming_login;
+    private ServicePasswordRow incoming_password;
 
     private ServiceOutgoingAuthRow outgoing_auth;
     private ServiceLoginRow outgoing_login;
+    private ServicePasswordRow outgoing_password;
 
 
     public EditorServersPane(Editor editor, Geary.AccountInformation account) {
@@ -110,10 +112,16 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
             new ServiceSecurityRow(account, this.incoming_mutable, this.commands)
         );
 
-        this.incoming_login = new ServiceLoginRow(
+        this.incoming_password = new ServicePasswordRow(
             account, this.incoming_mutable, this.commands
         );
+
+        this.incoming_login = new ServiceLoginRow(
+            account, this.incoming_mutable, this.commands, this.incoming_password
+        );
+
         add_row(this.receiving_list, this.incoming_login);
+        add_row(this.receiving_list, this.incoming_password);
 
         // Sending
 
@@ -132,10 +140,16 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         this.outgoing_auth.value.changed.connect(on_outgoing_auth_changed);
         add_row(this.sending_list, this.outgoing_auth);
 
-        this.outgoing_login = new ServiceLoginRow(
+        this.outgoing_password = new ServicePasswordRow(
             account, this.outgoing_mutable, this.commands
         );
+
+        this.outgoing_login = new ServiceLoginRow(
+            account, this.outgoing_mutable, this.commands, this.outgoing_password
+        );
+
         add_row(this.sending_list, this.outgoing_login);
+        add_row(this.sending_list, this.outgoing_password);
 
         // Misc plumbing
 
@@ -660,11 +674,13 @@ private class Accounts.ServiceLoginRow :
     }
 
     private Application.CommandStack commands;
+    private ServicePasswordRow? password_row;
 
 
     public ServiceLoginRow(Geary.AccountInformation account,
                            Geary.ServiceInformation service,
-                           Application.CommandStack commands) {
+                           Application.CommandStack commands,
+                           ServicePasswordRow? password_row = null) {
         base(
             account,
             service,
@@ -677,6 +693,13 @@ private class Accounts.ServiceLoginRow :
         this.commands = commands;
         this.activatable = false;
         this.validator = new Components.Validator(this.value);
+        this.password_row = password_row;
+
+        // If provided, only show the password row when the login has
+        // changed
+        if (password_row != null) {
+            password_row.hide();
+        }
 
         // Update after the validator is wired up to ensure the value
         // is validated
@@ -690,7 +713,7 @@ private class Accounts.ServiceLoginRow :
 
     protected void commit() {
         if (this.service.credentials != null) {
-            this.commands.execute.begin(
+            Application.Command cmd =
                 new Application.PropertyCommand<Geary.Credentials?>(
                     this.service,
                     "credentials",
@@ -698,9 +721,20 @@ private class Accounts.ServiceLoginRow :
                         this.service.credentials.supported_method,
                         this.value.text
                     )
-                ),
-                null
-            );
+                );
+
+            if (this.password_row != null) {
+                cmd = new Application.CommandSequence({
+                        cmd,
+                        new Application.PropertyCommand<bool>(
+                            this.password_row,
+                            "visible",
+                            true
+                        )
+                    });
+            }
+
+            this.commands.execute.begin(cmd, null);
         }
     }
 
@@ -727,12 +761,7 @@ private class Accounts.ServiceLoginRow :
                 break;
             }
 
-            string? login = this.service.credentials.user;
-            if (Geary.String.is_empty(login)) {
-                login = _("Unknown");
-            }
-
-            label = method.printf(login);
+            label = method.printf(this.service.credentials.user ?? "");
         } else if (this.service.protocol == Geary.Protocol.SMTP &&
                    this.service.credentials_requirement ==
                    Geary.Credentials.Requirement.USE_INCOMING) {
@@ -743,6 +772,73 @@ private class Accounts.ServiceLoginRow :
             label = _("None");
         }
         return label;
+    }
+
+}
+
+
+private class Accounts.ServicePasswordRow :
+    ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow {
+
+
+    public Components.Validator validator {
+        get; protected set;
+    }
+
+    public bool has_changed {
+        get {
+            return this.value.text.strip() != get_entry_text();
+        }
+    }
+
+    private Application.CommandStack commands;
+
+
+    public ServicePasswordRow(Geary.AccountInformation account,
+                              Geary.ServiceInformation service,
+                              Application.CommandStack commands) {
+        base(
+            account,
+            service,
+            // Translators: Label for the user's password for an IMAP,
+            // SMTP, etc service
+            _("Password"),
+            new Gtk.Entry()
+        );
+
+        this.commands = commands;
+        this.activatable = false;
+        this.value.visibility = false;
+        this.value.input_purpose = Gtk.InputPurpose.PASSWORD;
+        this.validator = new Components.Validator(this.value);
+
+        // Update after the validator is wired up to ensure the value
+        // is validated
+        update();
+        setup_validator();
+    }
+
+    public override void update() {
+        this.value.text = get_entry_text();
+    }
+
+    protected void commit() {
+        if (this.service.credentials != null) {
+            this.commands.execute.begin(
+                new Application.PropertyCommand<Geary.Credentials?>(
+                    this.service,
+                    "credentials",
+                    this.service.credentials.copy_with_token(this.value.text)
+                ),
+                null
+            );
+        }
+    }
+
+    private string get_entry_text() {
+        return (this.service.credentials != null)
+            ? this.service.credentials.token ?? ""
+            : "";
     }
 
 }
