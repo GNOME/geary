@@ -55,7 +55,7 @@ public class Accounts.Editor : Gtk.Dialog {
         this.editor_panes.set_transition_type(
             Gtk.StackTransitionType.SLIDE_LEFT_RIGHT
         );
-        this.editor_panes.notify["visible-child"].connect(on_pane_changed);
+        this.editor_panes.notify["visible-child"].connect_after(on_pane_changed);
         this.editor_panes.show();
 
         this.actions.add_action_entries(ACTION_ENTRIES, this);
@@ -118,8 +118,6 @@ public class Accounts.Editor : Gtk.Dialog {
         this.editor_pane_stack.add(pane);
         this.editor_panes.add(pane);
         this.editor_panes.set_visible_child(pane);
-
-        pane.pane_shown();
     }
 
     internal void pop() {
@@ -156,7 +154,23 @@ public class Accounts.Editor : Gtk.Dialog {
 
     private void on_pane_changed() {
         EditorPane? visible = get_current_pane();
-        set_titlebar(visible != null ? visible.get_header() : null);
+        Gtk.Widget? header = null;
+        debug(
+            "Have pane: %s, transitions running: %s",
+            (visible != null).to_string(),
+            this.editor_panes.transition_running.to_string()
+        );
+        if (visible != null) {
+            visible.pane_shown();
+            // Do this in an idle callback since it's not 100%
+            // reliable to just call it here for some reason :(
+            GLib.Idle.add(() => {
+                    visible.initial_widget.grab_focus();
+                    return GLib.Source.REMOVE;
+                });
+            header = visible.get_header();
+        }
+        set_titlebar(header);
     }
 
 }
@@ -181,8 +195,10 @@ internal interface Accounts.EditorPane : Gtk.Grid {
 
 
     /** The editor displaying this pane. */
-    protected abstract weak Accounts.Editor editor { get; set; }
+    internal abstract Gtk.Widget initial_widget { get; }
 
+    /** The editor displaying this pane. */
+    protected abstract weak Accounts.Editor editor { get; set; }
 
     /** The GTK header bar to display for this pane. */
     internal abstract Gtk.HeaderBar get_header();

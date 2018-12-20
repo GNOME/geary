@@ -12,6 +12,10 @@
 internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
 
+    internal Gtk.Widget initial_widget {
+        get { return this.real_name.value; }
+    }
+
     protected weak Accounts.Editor editor { get; set; }
 
     private Geary.ServiceProvider provider;

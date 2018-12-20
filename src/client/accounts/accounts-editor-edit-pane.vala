@@ -12,6 +12,10 @@
 internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
 
 
+    internal Gtk.Widget initial_widget {
+        get { return this.details_list.get_row_at_index(0); }
+    }
+
     internal Geary.AccountInformation account { get ; protected set; }
 
     /** Command stack for edit pane user commands. */

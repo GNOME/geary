@@ -12,6 +12,10 @@
 internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
 
 
+    internal Gtk.Widget initial_widget {
+        get { return this.remove_button; }
+    }
+
     internal Geary.AccountInformation account { get ; protected set; }
 
     protected weak Accounts.Editor editor { get; set; }
@@ -21,6 +25,9 @@ internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
 
     [GtkChild]
     private Gtk.Label warning_label;
+
+    [GtkChild]
+    private Gtk.Button remove_button;
 
 
     public EditorRemovePane(Editor editor, Geary.AccountInformation account) {

@@ -28,9 +28,21 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     }
 
 
+    internal Gtk.Widget initial_widget {
+        get {
+            return this.show_welcome ? this.service_list : this.accounts_list;
+        }
+    }
+
     internal Manager accounts { get; private set; }
 
     protected weak Accounts.Editor editor { get; set; }
+
+    private bool show_welcome {
+        get {
+            return (this.accounts_list.get_row_at_index(0) == null);
+        }
+    }
 
     private Application.CommandStack commands = new Application.CommandStack();
 
@@ -143,10 +155,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
         }
     }
 
-    internal void pane_shown() {
-        update_actions();
-    }
-
     internal void undo() {
         this.commands.undo.begin(null);
     }
@@ -182,7 +190,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     }
 
     private void update_welcome_panel() {
-        if (this.accounts_list.get_row_at_index(0) == null) {
+        if (this.show_welcome) {
             // No accounts are available, so show only the welcome
             // pane and service list.
             this.welcome_panel.show();
