@@ -99,14 +99,23 @@ public class Components.Validator : GLib.Object {
     /** The UI state to use when invalid. */
     public UiState invalid_state;
 
+    // Determines if the value has changed since last validation
+    private bool target_changed = false;
+
     private Geary.TimeoutManager ui_update_timer;
 
 
     /** Fired when the validation state changes. */
     public signal void state_changed(Trigger reason, Validity prev_state);
 
-    /** Fired when target entry is activated and validation completes. */
+    /** Fired when validation completes after the target has changed. */
+    public signal void changed();
+
+    /** Fired when validation completes after the target was activated. */
     public signal void activated();
+
+    /** Fired when validation completes after the target lost focus. */
+    public signal void focus_lost();
 
 
     public Validator(Gtk.Entry target) {
@@ -208,8 +217,22 @@ public class Components.Validator : GLib.Object {
             }
         }
 
-        if (reason == Trigger.ACTIVATED && new_state != Validity.IN_PROGRESS) {
-            activated();
+        if (new_state != Validity.IN_PROGRESS) {
+            this.target_changed = false;
+
+            switch (reason) {
+            case Trigger.CHANGED:
+                changed();
+                break;
+
+            case Trigger.ACTIVATED:
+                activated();
+                break;
+
+            case Trigger.LOST_FOCUS:
+                focus_lost();
+                break;
+            }
         }
     }
 
@@ -269,7 +292,11 @@ public class Components.Validator : GLib.Object {
     }
 
     private void on_activate() {
-        validate_entry(Trigger.ACTIVATED);
+        if (this.target_changed) {
+             validate_entry(Trigger.ACTIVATED);
+        } else {
+            activated();
+        }
     }
 
     private void on_update_ui() {
@@ -277,6 +304,7 @@ public class Components.Validator : GLib.Object {
     }
 
     private void on_changed() {
+        this.target_changed = true;
         validate_entry(Trigger.CHANGED);
         // Restart the UI timer if running to give the user some
         // breathing room while they are still editing.
@@ -284,11 +312,15 @@ public class Components.Validator : GLib.Object {
     }
 
     private bool on_focus_out() {
-        // Only update if the widget has lost focus due to not being
-        // the focused widget any more, rather than the whole window
-        // having lost focus.
-        if (!this.target.is_focus) {
-            validate_entry(Trigger.LOST_FOCUS);
+        if (this.target_changed) {
+            // Only update if the widget has lost focus due to not being
+            // the focused widget any more, rather than the whole window
+            // having lost focus.
+            if (!this.target.is_focus) {
+                validate_entry(Trigger.LOST_FOCUS);
+            }
+        } else {
+            focus_lost();
         }
         return Gdk.EVENT_PROPAGATE;
     }
@@ -384,12 +416,11 @@ public class Components.NetworkAddressValidator : Validator {
             debug("Error parsing host name \"%s\": %s", value, err.message);
         }
 
-        // Only re-validate if changed
+        // Only re-validate if previously invalid or the host has
+        // changed
         if (address != null && (
                 this.validated_address == null ||
-                this.validated_address.hostname != address.hostname ||
-                this.validated_address.port != address.port ||
-                this.validated_address.scheme != address.scheme)) {
+                this.validated_address.hostname != address.hostname)) {
             this.cancellable = new GLib.Cancellable();
             this.resolver.lookup_by_name_async.begin(
                 address.hostname, this.cancellable,
