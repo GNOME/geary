@@ -64,7 +64,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
     private HostnameRow smtp_hostname = new HostnameRow(Geary.Protocol.SMTP);
     private TransportSecurityRow smtp_tls = new TransportSecurityRow();
-    private SmtpAuthRow smtp_auth = new SmtpAuthRow();
+    private OutgoingAuthRow smtp_auth = new OutgoingAuthRow();
     private LoginRow smtp_login = new LoginRow();
     private PasswordRow smtp_password = new PasswordRow();
 
@@ -597,11 +597,11 @@ private class Accounts.TransportSecurityRow :
 }
 
 
-private class Accounts.SmtpAuthRow :
-    LabelledEditorRow<EditorAddPane,SmtpAuthComboBox> {
+private class Accounts.OutgoingAuthRow :
+    LabelledEditorRow<EditorAddPane,OutgoingAuthComboBox> {
 
-    public SmtpAuthRow() {
-        SmtpAuthComboBox value = new SmtpAuthComboBox();
+    public OutgoingAuthRow() {
+        OutgoingAuthComboBox value = new OutgoingAuthComboBox();
         base(value.label, value);
 
         this.activatable = false;

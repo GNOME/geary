@@ -507,7 +507,7 @@ internal class Accounts.TlsComboBox : Gtk.ComboBox {
 }
 
 
-internal class Accounts.SmtpAuthComboBox : Gtk.ComboBoxText {
+internal class Accounts.OutgoingAuthComboBox : Gtk.ComboBoxText {
 
 
     public string label { get; private set; }
@@ -526,7 +526,7 @@ internal class Accounts.SmtpAuthComboBox : Gtk.ComboBoxText {
     }
 
 
-    public SmtpAuthComboBox() {
+    public OutgoingAuthComboBox() {
         // Translators: Label for source of SMTP authentication
         // credentials (none, use IMAP, custom) when adding a new
         // account

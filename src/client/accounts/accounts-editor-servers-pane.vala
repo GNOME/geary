@@ -60,11 +60,12 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
     [GtkChild]
     private Gtk.Spinner apply_spinner;
 
+    private SaveDraftsRow save_drafts;
+
     private ServiceLoginRow incoming_login;
 
-    private SaveDraftsRow save_drafts;
-    private ServiceSmtpAuthRow smtp_auth;
-    private ServiceLoginRow smtp_login;
+    private ServiceOutgoingAuthRow outgoing_auth;
+    private ServiceLoginRow outgoing_login;
 
 
     public EditorServersPane(Editor editor, Geary.AccountInformation account) {
@@ -125,16 +126,16 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
             this.sending_list,
             new ServiceSecurityRow(account, this.outgoing_mutable, this.commands)
         );
-        this.smtp_auth = new ServiceSmtpAuthRow(
+        this.outgoing_auth = new ServiceOutgoingAuthRow(
             account, this.outgoing_mutable, this.incoming_mutable, this.commands
         );
-        this.smtp_auth.value.changed.connect(on_smtp_auth_changed);
-        add_row(this.sending_list, this.smtp_auth);
+        this.outgoing_auth.value.changed.connect(on_outgoing_auth_changed);
+        add_row(this.sending_list, this.outgoing_auth);
 
-        this.smtp_login = new ServiceLoginRow(
+        this.outgoing_login = new ServiceLoginRow(
             account, this.outgoing_mutable, this.commands
         );
-        add_row(this.sending_list, this.smtp_login);
+        add_row(this.sending_list, this.outgoing_login);
 
         // Misc plumbing
 
@@ -145,7 +146,7 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         this.commands.redone.connect(on_command);
 
         update_header();
-        update_smtp_auth();
+        update_outgoing_auth();
     }
 
     ~EditorServersPane() {
@@ -258,7 +259,7 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
                 // There was an SMTP auth error, but IMAP already
                 // succeeded, so the user probably needs to
                 // specify custom creds here
-                this.smtp_auth.value.source = Geary.Credentials.Requirement.CUSTOM;
+                this.outgoing_auth.value.source = Geary.Credentials.Requirement.CUSTOM;
                 // Translators: In-app notification label
                 message = _("Check your sending login and password");
             } catch (GLib.Error err) {
@@ -310,9 +311,9 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         this.apply_button.set_sensitive(this.commands.can_undo);
     }
 
-    private void update_smtp_auth() {
-        this.smtp_login.set_visible(
-            this.smtp_auth.value.source == CUSTOM
+    private void update_outgoing_auth() {
+        this.outgoing_login.set_visible(
+            this.outgoing_auth.value.source == CUSTOM
         );
     }
 
@@ -370,8 +371,8 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         update_actions();
     }
 
-    private void on_smtp_auth_changed() {
-        update_smtp_auth();
+    private void on_outgoing_auth_changed() {
+        update_outgoing_auth();
     }
 
     [GtkCallback]
@@ -747,19 +748,19 @@ private class Accounts.ServiceLoginRow :
 }
 
 
-private class Accounts.ServiceSmtpAuthRow :
-    ServiceRow<EditorServersPane,SmtpAuthComboBox> {
+private class Accounts.ServiceOutgoingAuthRow :
+    ServiceRow<EditorServersPane,OutgoingAuthComboBox> {
 
 
     private Application.CommandStack commands;
     private Geary.ServiceInformation imap_service;
 
 
-    public ServiceSmtpAuthRow(Geary.AccountInformation account,
-                              Geary.ServiceInformation smtp_service,
-                              Geary.ServiceInformation imap_service,
-                              Application.CommandStack commands) {
-        SmtpAuthComboBox value = new SmtpAuthComboBox();
+    public ServiceOutgoingAuthRow(Geary.AccountInformation account,
+                                  Geary.ServiceInformation smtp_service,
+                                  Geary.ServiceInformation imap_service,
+                                  Application.CommandStack commands) {
+        OutgoingAuthComboBox value = new OutgoingAuthComboBox();
         base(account, smtp_service, value.label, value);
         update();
 
