@@ -78,9 +78,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     [GtkChild]
     private Gtk.ListBox service_list;
 
-    private Gee.Map<Geary.ServiceProvider,EditorAddPane> add_pane_cache =
-        new Gee.HashMap<Geary.ServiceProvider,EditorAddPane>();
-
     private Gee.Map<Geary.AccountInformation,EditorEditPane> edit_pane_cache =
         new Gee.HashMap<Geary.AccountInformation,EditorEditPane>();
 
@@ -126,18 +123,12 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         this.accounts.account_status_changed.disconnect(on_account_status_changed);
         this.accounts.account_removed.disconnect(on_account_removed);
 
-        this.add_pane_cache.clear();
         this.edit_pane_cache.clear();
         base.destroy();
     }
 
-    internal void show_add_account(Geary.ServiceProvider provider) {
-        EditorAddPane? add_pane = this.add_pane_cache.get(provider);
-        if (add_pane == null) {
-            add_pane = new EditorAddPane(this.editor, provider);
-            this.add_pane_cache.set(provider, add_pane);
-        }
-        this.editor.push(add_pane);
+    internal void show_new_account(Geary.ServiceProvider provider) {
+        this.editor.push(new EditorAddPane(this.editor, provider));
     }
 
     internal void show_existing_account(Geary.AccountInformation account) {
@@ -490,7 +481,7 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
                 }
 
                 if (add_local) {
-                    pane.show_add_account(this.provider);
+                    pane.show_new_account(this.provider);
                 }
             });
     }
