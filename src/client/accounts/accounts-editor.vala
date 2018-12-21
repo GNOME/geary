@@ -145,25 +145,25 @@ public class Accounts.Editor : Gtk.Dialog {
     }
 
     private void on_undo() {
-        get_current_pane().undo();
+        CommandPane? pane = get_current_pane() as CommandPane;
+        if (pane != null) {
+            pane.undo();
+        }
     }
 
     private void on_redo() {
-        get_current_pane().redo();
+        CommandPane? pane = get_current_pane() as CommandPane;
+        if (pane != null) {
+            pane.redo();
+        }
     }
 
     private void on_pane_changed() {
         EditorPane? visible = get_current_pane();
         Gtk.Widget? header = null;
-        debug(
-            "Have pane: %s, transitions running: %s",
-            (visible != null).to_string(),
-            this.editor_panes.transition_running.to_string()
-        );
         if (visible != null) {
-            visible.pane_shown();
             // Do this in an idle callback since it's not 100%
-            // reliable to just call it here for some reason :(
+            // reliable to just call it here for some reason. :(
             GLib.Idle.add(() => {
                     visible.initial_widget.grab_focus();
                     return GLib.Source.REMOVE;
@@ -171,6 +171,11 @@ public class Accounts.Editor : Gtk.Dialog {
             header = visible.get_header();
         }
         set_titlebar(header);
+
+        CommandPane? commands = visible as CommandPane;
+        if (commands != null) {
+            commands.update_command_actions();
+        }
     }
 
 }
@@ -195,44 +200,130 @@ internal interface Accounts.EditorPane : Gtk.Grid {
 
 
     /** The editor displaying this pane. */
-    internal abstract Gtk.Widget initial_widget { get; }
+    internal abstract weak Accounts.Editor editor { get; set; }
 
     /** The editor displaying this pane. */
-    protected abstract weak Accounts.Editor editor { get; set; }
+    internal abstract Gtk.Widget initial_widget { get; }
 
     /** The GTK header bar to display for this pane. */
     internal abstract Gtk.HeaderBar get_header();
-
-    /** Notifies the pane that it has been displayed in the dialog. */
-    internal virtual void pane_shown() {
-        // no-op by default
-    }
-
-    /** Un-does the last user action, if enabled and supported. */
-    internal virtual void undo() {
-        // no-op by default
-    }
-
-    /** Re-does the last user action, if enabled and supported. */
-    internal virtual void redo() {
-        // no-op by default
-    }
 
 }
 
 
 /**
- * Base class for editor panes that display a specific account
+ * Interface for editor panes that display a specific account.
  */
-internal interface Accounts.AccountPane : Gtk.Grid, EditorPane {
+internal interface Accounts.AccountPane : EditorPane {
 
 
     /** Account being displayed by this pane. */
     internal abstract Geary.AccountInformation account { get; protected set; }
 
 
-    protected void update_header() {
+    /**
+     * Connects to account signals.
+     *
+     * Implementing classes should call this in their constructor.
+     */
+    protected void connect_account_signals() {
+        this.account.changed.connect(on_account_changed);
+        update_header();
+    }
+
+    /**
+     * Disconnects from account signals.
+     *
+     * Implementing classes should call this in their destructor.
+     */
+    protected void disconnect_account_signals() {
+        this.account.changed.disconnect(on_account_changed);
+    }
+
+    /**
+     * Called when an account has changed.
+     *
+     * By default, updates the editor's header subtitle.
+     */
+    private void account_changed() {
+        update_header();
+    }
+
+    private inline void update_header() {
         get_header().subtitle = this.account.display_name;
+    }
+
+    private void on_account_changed() {
+        account_changed();
+    }
+
+}
+
+/**
+ * Interface for editor panes that support undoing/redoing user actions.
+ */
+internal interface Accounts.CommandPane : EditorPane {
+
+
+    /** Stack for the user's commands. */
+    internal abstract Application.CommandStack commands { get; protected set; }
+
+
+    /** Un-does the last user action, if enabled. */
+    internal virtual void undo() {
+        this.commands.undo.begin(null);
+    }
+
+    /** Re-does the last user action, if enabled. */
+    internal virtual void redo() {
+        this.commands.redo.begin(null);
+    }
+
+    /**
+     * Updates the state of the editor's undo and redo actions.
+     */
+    internal virtual void update_command_actions() {
+        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
+            this.commands.can_undo
+        );
+        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
+            this.commands.can_redo
+        );
+    }
+
+    /**
+     * Connects to command stack signals.
+     *
+     * Implementing classes should call this in their constructor.
+     */
+    protected void connect_command_signals() {
+        this.commands.executed.connect(on_command);
+        this.commands.undone.connect(on_command);
+        this.commands.redone.connect(on_command);
+    }
+
+    /**
+     * Disconnects from command stack signals.
+     *
+     * Implementing classes should call this in their destructor.
+     */
+    protected void disconnect_command_signals() {
+        this.commands.executed.disconnect(on_command);
+        this.commands.undone.disconnect(on_command);
+        this.commands.redone.disconnect(on_command);
+    }
+
+    /**
+     * Called when a command is executed, undone or redone.
+     *
+     * By default, calls {@link update_command_actions}.
+     */
+    protected virtual void command_executed() {
+        update_command_actions();
+    }
+
+    private void on_command() {
+        command_executed();
     }
 
 }

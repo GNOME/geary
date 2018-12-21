@@ -10,21 +10,25 @@
  * An account editor pane for editing server details for an account.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_servers_pane.ui")]
-internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
+internal class Accounts.EditorServersPane :
+    Gtk.Grid, EditorPane, AccountPane, CommandPane {
 
 
+    /** {@inheritDoc} */
+    internal weak Accounts.Editor editor { get; set; }
+
+    /** {@inheritDoc} */
+    internal Geary.AccountInformation account { get ; protected set; }
+
+    /** {@inheritDoc} */
+    internal Application.CommandStack commands {
+        get; protected set; default = new Application.CommandStack();
+    }
+
+    /** {@inheritDoc} */
     internal Gtk.Widget initial_widget {
         get { return this.details_list; }
     }
-
-    internal Geary.AccountInformation account { get ; protected set; }
-
-    /** Command stack for pane user commands. */
-    internal Application.CommandStack commands {
-        get; private set; default = new Application.CommandStack();
-    }
-
-    protected weak Accounts.Editor editor { get; set; }
 
     private Geary.Engine engine;
 
@@ -157,34 +161,26 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
         // Misc plumbing
 
-        this.account.changed.connect(on_account_changed);
+        connect_account_signals();
+        connect_command_signals();
 
-        this.commands.executed.connect(on_command);
-        this.commands.undone.connect(on_command);
-        this.commands.redone.connect(on_command);
-
-        update_header();
         update_outgoing_auth();
     }
 
     ~EditorServersPane() {
-        this.account.changed.disconnect(on_account_changed);
-
-        this.commands.executed.disconnect(on_command);
-        this.commands.undone.disconnect(on_command);
-        this.commands.redone.disconnect(on_command);
+        disconnect_account_signals();
+        disconnect_command_signals();
     }
 
+    /** {@inheritDoc} */
     internal Gtk.HeaderBar get_header() {
         return this.header;
     }
 
-    internal void undo() {
-        this.commands.undo.begin(null);
-    }
-
-    internal void redo() {
-        this.commands.redo.begin(null);
+    /** {@inheritDoc} */
+    protected void command_executed() {
+        update_command_actions();
+        this.apply_button.set_sensitive(this.commands.can_undo);
     }
 
     private bool is_valid() {
@@ -318,17 +314,6 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         }
     }
 
-    private void update_actions() {
-        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
-            this.commands.can_undo
-        );
-        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
-            this.commands.can_redo
-        );
-
-        this.apply_button.set_sensitive(this.commands.can_undo);
-    }
-
     private void update_outgoing_auth() {
         this.outgoing_login.set_visible(
             this.outgoing_auth.value.source == CUSTOM
@@ -379,14 +364,6 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
             ret = Gdk.EVENT_STOP;
         }
         return ret;
-    }
-
-    private void on_account_changed() {
-        update_header();
-    }
-
-    private void on_command() {
-        update_actions();
     }
 
     private void on_outgoing_auth_changed() {

@@ -9,20 +9,24 @@
  * An account editor pane for editing a specific account's preferences.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_edit_pane.ui")]
-internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
+internal class Accounts.EditorEditPane :
+    Gtk.Grid, EditorPane, AccountPane, CommandPane {
 
 
+    /** {@inheritDoc} */
     internal Gtk.Widget initial_widget {
         get { return this.details_list.get_row_at_index(0); }
     }
 
+    /** {@inheritDoc} */
     internal Geary.AccountInformation account { get ; protected set; }
 
-    /** Command stack for edit pane user commands. */
+    /** {@inheritDoc} */
     internal Application.CommandStack commands {
-        get; private set; default = new Application.CommandStack();
+        get; protected set; default = new Application.CommandStack();
     }
 
+    /** {@inheritDoc} */
     protected weak Accounts.Editor editor { get; set; }
 
     [GtkChild]
@@ -117,64 +121,28 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
             !this.editor.accounts.is_goa_account(account)
         );
 
-        this.account.changed.connect(on_account_changed);
-        update_header();
-
-        this.commands.executed.connect(on_command);
-        this.commands.undone.connect(on_command);
-        this.commands.redone.connect(on_command);
+        connect_account_signals();
+        connect_command_signals();
     }
 
     ~EditorEditPane() {
-        this.account.changed.disconnect(on_account_changed);
-
-        this.commands.executed.disconnect(on_command);
-        this.commands.undone.disconnect(on_command);
-        this.commands.redone.disconnect(on_command);
+        disconnect_account_signals();
+        disconnect_command_signals();
     }
 
     internal string? get_default_name() {
         string? name = account.primary_mailbox.name;
 
         if (Geary.String.is_empty_or_whitespace(name)) {
-            name = Environment.get_real_name();
-            if (Geary.String.is_empty(name) || name == "Unknown") {
-                name = null;
-            }
+            name = this.editor.accounts.get_account_name();
         }
 
         return name;
     }
 
+    /** {@inheritDoc} */
     internal Gtk.HeaderBar get_header() {
         return this.header;
-    }
-
-    internal void pane_shown() {
-        update_actions();
-    }
-
-    internal void undo() {
-        this.commands.undo.begin(null);
-    }
-
-    internal void redo() {
-        this.commands.redo.begin(null);
-    }
-
-    private void update_actions() {
-        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
-            this.commands.can_undo
-        );
-        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
-            this.commands.can_redo
-        );
-
-        Application.Command next_undo = this.commands.peek_undo();
-        this.undo_button.set_tooltip_text(
-            (next_undo != null && next_undo.undo_label != null)
-            ? next_undo.undo_label : ""
-        );
     }
 
     internal MailboxRow new_mailbox_row(Geary.RFC822.MailboxAddress sender) {
@@ -184,12 +152,18 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
         return row;
     }
 
-    private void on_account_changed() {
-        update_header();
-    }
+    /** {@inheritDoc} */
+    protected void command_executed() {
+        update_command_actions();
 
-    private void on_command() {
-        update_actions();
+        Application.Command next_undo = this.commands.peek_undo();
+        this.undo_button.set_tooltip_text(
+            (next_undo != null && next_undo.undo_label != null)
+            ? next_undo.undo_label : ""
+        );
+
+        // Ensure the account is notified that is has changed. This
+        // might not be 100% correct, but it's close enough.
         this.account.changed();
     }
 

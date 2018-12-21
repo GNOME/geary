@@ -9,7 +9,7 @@
  * An account editor pane for listing all known accounts.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_list_pane.ui")]
-internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
+internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
 
     private static int ordinal_sort(Gtk.ListBoxRow a, Gtk.ListBoxRow b) {
@@ -28,14 +28,21 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     }
 
 
+    /** {@iinheritDoc} */
     internal Gtk.Widget initial_widget {
         get {
             return this.show_welcome ? this.service_list : this.accounts_list;
         }
     }
 
+    /** {@iinheritDoc} */
+    internal Application.CommandStack commands {
+        get; protected set; default = new Application.CommandStack();
+    }
+
     internal Manager accounts { get; private set; }
 
+    /** {@iinheritDoc} */
     protected weak Accounts.Editor editor { get; set; }
 
     private bool show_welcome {
@@ -43,8 +50,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
             return (this.accounts_list.get_row_at_index(0) == null);
         }
     }
-
-    private Application.CommandStack commands = new Application.CommandStack();
 
     [GtkChild]
     private Gtk.HeaderBar header;
@@ -155,14 +160,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
         }
     }
 
-    internal void undo() {
-        this.commands.undo.begin(null);
-    }
-
-    internal void redo() {
-        this.commands.redo.begin(null);
-    }
-
+    /** {@inheritDoc} */
     internal Gtk.HeaderBar get_header() {
         return this.header;
     }

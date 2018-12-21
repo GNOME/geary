@@ -12,13 +12,16 @@
 internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
 
 
+    /** {@inheritDoc} */
+    internal weak Accounts.Editor editor { get; set; }
+
+    /** {@inheritDoc} */
+    internal Geary.AccountInformation account { get ; protected set; }
+
+    /** {@inheritDoc} */
     internal Gtk.Widget initial_widget {
         get { return this.remove_button; }
     }
-
-    internal Geary.AccountInformation account { get ; protected set; }
-
-    protected weak Accounts.Editor editor { get; set; }
 
     [GtkChild]
     private Gtk.HeaderBar header;
@@ -38,20 +41,16 @@ internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
             this.warning_label.get_text().printf(account.display_name)
         );
 
-        this.account.changed.connect(on_account_changed);
-        update_header();
+        connect_account_signals();
     }
 
     ~EditorRemovePane() {
-        this.account.changed.disconnect(on_account_changed);
+        disconnect_account_signals();
     }
 
+    /** {@inheritDoc} */
     internal Gtk.HeaderBar get_header() {
         return this.header;
-    }
-
-    private void on_account_changed() {
-        update_header();
     }
 
     [GtkCallback]
