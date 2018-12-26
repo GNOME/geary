@@ -192,23 +192,11 @@ public class Accounts.Manager : GLib.Object {
     /**
      * Returns a new account, not yet stored on disk.
      */
-    public Geary.AccountInformation
+    public async Geary.AccountInformation
         new_orphan_account(Geary.ServiceProvider provider,
-                           Geary.RFC822.MailboxAddress primary_mailbox) {
-        string? last_account = this.accounts.keys.fold<string?>((next, last) => {
-                string? result = last;
-                if (next.has_prefix(LOCAL_ID_PREFIX)) {
-                    result = (last == null || strcmp(last, next) < 0) ? next : last;
-                }
-                return result;
-            },
-            null);
-        uint next_id = 1;
-        if (last_account != null) {
-            next_id = int.parse(last_account.substring(LOCAL_ID_PREFIX.length)) + 1;
-        }
-        string id = LOCAL_ID_FORMAT.printf(next_id);
-
+                           Geary.RFC822.MailboxAddress primary_mailbox,
+                           GLib.Cancellable? cancellable) {
+        string id = yield next_id(cancellable);
         return new Geary.AccountInformation(
             id, provider, this.local_mediator, primary_mailbox
         );
@@ -417,6 +405,43 @@ public class Accounts.Manager : GLib.Object {
         yield open_goa_settings(
             to_goa_id(account.id), null, cancellable
         );
+    }
+
+    /** Returns the next id for a new local account. */
+    private async string next_id(GLib.Cancellable? cancellable) {
+        // Get the next known free id
+        string? last_account = this.accounts.keys.fold<string?>((next, last) => {
+                string? result = last;
+                if (next.has_prefix(LOCAL_ID_PREFIX)) {
+                    result = (last == null || strcmp(last, next) < 0) ? next : last;
+                }
+                return result;
+            },
+            null);
+
+        uint next_id = 1;
+        if (last_account != null) {
+            next_id = int.parse(
+                last_account.substring(LOCAL_ID_PREFIX.length)
+            ) + 1;
+        }
+
+        // Check for existing directories that might conflict
+        string id = LOCAL_ID_FORMAT.printf(next_id);
+        try {
+            while ((yield Geary.Files.query_exists_async(
+                        this.config_dir.get_child(id), cancellable)) ||
+                   (yield Geary.Files.query_exists_async(
+                       this.data_dir.get_child(id), cancellable))) {
+                next_id++;
+                id = LOCAL_ID_FORMAT.printf(next_id);
+            }
+        } catch (GLib.Error err) {
+            // Not much we can do here except keep going anyway?
+            debug("Error checking for a free id on disk: %s", err.message);
+        }
+
+        return id;
     }
 
     /**

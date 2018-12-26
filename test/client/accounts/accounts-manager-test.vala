@@ -21,7 +21,14 @@ class Accounts.ManagerTest : TestCase {
         base("AccountManagerTest");
         add_test("create_account", create_account);
         add_test("create_orphan_account", create_orphan_account);
-        add_test("create_orphan_account_with_legacy", create_orphan_account_with_legacy);
+        add_test(
+            "create_orphan_account_with_legacy",
+            create_orphan_account_with_legacy
+        );
+        add_test(
+            "create_orphan_account_with_existing_dirs",
+            create_orphan_account_with_existing_dirs
+        );
         add_test("account_config_v1", account_config_v1);
         add_test("account_config_legacy", account_config_legacy);
         add_test("service_config_v1", service_config_v1);
@@ -86,10 +93,12 @@ class Accounts.ManagerTest : TestCase {
     }
 
     public void create_orphan_account() throws GLib.Error {
-        Geary.AccountInformation account1 = this.test.new_orphan_account(
-            Geary.ServiceProvider.OTHER,
-            new Geary.RFC822.MailboxAddress(null, "test1@example.com")
+        this.test.new_orphan_account.begin(
+            Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
+            (obj, res) => { async_complete(res); }
         );
+        Geary.AccountInformation account1 =
+            this.test.new_orphan_account.end(async_result());
         assert(account1.id == "account_01");
 
         this.test.create_account.begin(
@@ -98,24 +107,28 @@ class Accounts.ManagerTest : TestCase {
         );
         this.test.create_account.end(async_result());
 
-        Geary.AccountInformation account2 = this.test.new_orphan_account(
-            Geary.ServiceProvider.OTHER,
-            new Geary.RFC822.MailboxAddress(null, "test1@example.com")
+        this.test.new_orphan_account.begin(
+            Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
+            (obj, res) => { async_complete(res); }
         );
+        Geary.AccountInformation account2 =
+            this.test.new_orphan_account.end(async_result());
         assert(account2.id == "account_02");
     }
 
     public void create_orphan_account_with_legacy() throws GLib.Error {
         this.test.create_account.begin(
             account, new GLib.Cancellable(),
-             (obj, res) => { async_complete(res); }
+            (obj, res) => { async_complete(res); }
         );
         this.test.create_account.end(async_result());
 
-        Geary.AccountInformation account1 = this.test.new_orphan_account(
-            Geary.ServiceProvider.OTHER,
-            new Geary.RFC822.MailboxAddress(null, "test1@example.com")
+        this.test.new_orphan_account.begin(
+            Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
+            (obj, res) => { async_complete(res); }
         );
+        Geary.AccountInformation account1 =
+            this.test.new_orphan_account.end(async_result());
         assert(account1.id == "account_01");
 
         this.test.create_account.begin(
@@ -124,11 +137,28 @@ class Accounts.ManagerTest : TestCase {
         );
         this.test.create_account.end(async_result());
 
-        Geary.AccountInformation account2 = this.test.new_orphan_account(
-            Geary.ServiceProvider.OTHER,
-            new Geary.RFC822.MailboxAddress(null, "test1@example.com")
+        this.test.new_orphan_account.begin(
+            Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
+            (obj, res) => { async_complete(res); }
         );
+        Geary.AccountInformation account2 =
+            this.test.new_orphan_account.end(async_result());
         assert(account2.id == "account_02");
+    }
+
+    public void create_orphan_account_with_existing_dirs() throws GLib.Error {
+        GLib.File existing = this.test.config_dir.get_child("account_01");
+        existing.make_directory();
+        existing = this.test.data_dir.get_child("account_02");
+        existing.make_directory();
+
+        this.test.new_orphan_account.begin(
+            Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
+            (obj, res) => { async_complete(res); }
+        );
+        Geary.AccountInformation account =
+            this.test.new_orphan_account.end(async_result());
+        assert(account.id == "account_03");
     }
 
     public void account_config_v1() throws GLib.Error {

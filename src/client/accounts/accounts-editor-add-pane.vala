@@ -164,12 +164,13 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         Gtk.Widget? to_focus = null;
 
         Geary.AccountInformation account =
-            this.accounts.new_orphan_account(
+            yield this.accounts.new_orphan_account(
                 this.provider,
                 new Geary.RFC822.MailboxAddress(
                     this.real_name.value.text.strip(),
                     this.email.value.text.strip()
-                )
+                ),
+                cancellable
             );
 
         account.incoming = new_imap_service();
