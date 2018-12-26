@@ -32,8 +32,11 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
     }
 
 
-    public GmailAccount(Geary.AccountInformation config) {
-        base(config);
+    public GmailAccount(Geary.AccountInformation config,
+                        ImapDB.Account local,
+                        Endpoint incoming_remote,
+                        Endpoint outgoing_remote) {
+        base(config, local, incoming_remote, outgoing_remote);
     }
 
     protected override Geary.SpecialFolderType[] get_supported_special_folders() {

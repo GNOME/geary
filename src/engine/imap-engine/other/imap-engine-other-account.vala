@@ -7,8 +7,11 @@
 
 private class Geary.ImapEngine.OtherAccount : Geary.ImapEngine.GenericAccount {
 
-    public OtherAccount(AccountInformation config) {
-        base(config);
+    public OtherAccount(AccountInformation config,
+                        ImapDB.Account local,
+                        Endpoint incoming_remote,
+                        Endpoint outgoing_remote) {
+        base(config, local, incoming_remote, outgoing_remote);
     }
 
     protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {

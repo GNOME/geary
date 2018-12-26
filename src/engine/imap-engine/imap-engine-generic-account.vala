@@ -62,19 +62,27 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         new Gee.HashMap<Geary.SpecialFolderType, Gee.List<string>>();
 
 
-    public GenericAccount(AccountInformation config) {
+    public GenericAccount(AccountInformation config,
+                          ImapDB.Account local,
+                          Endpoint incoming_remote,
+                          Endpoint outgoing_remote) {
         base(config);
-        this.local = new ImapDB.Account(config);
+        this.local = local;
         this.local.contacts_loaded.connect(() => { contacts_loaded(); });
 
-        this.imap = new Imap.ClientService(config, config.incoming);
+        this.imap = new Imap.ClientService(
+            config, config.incoming, incoming_remote
+        );
         this.imap.min_pool_size = IMAP_MIN_POOL_SIZE;
         this.imap.ready.connect(on_pool_session_ready);
         this.imap.connection_failed.connect(on_pool_connection_failed);
         this.imap.login_failed.connect(on_pool_login_failed);
 
         this.smtp = new Smtp.ClientService(
-            config, config.outgoing, new Outbox.Folder(this, this.local)
+            config,
+            config.outgoing,
+            outgoing_remote,
+            new Outbox.Folder(this, this.local)
         );
         this.smtp.email_sent.connect(on_email_sent);
         this.smtp.report_problem.connect(notify_report_problem);
@@ -488,7 +496,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // that's supposed to be globally unique...
         Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(
             composed, GMime.utils_generate_message_id(
-                this.smtp.endpoint.remote_address.hostname
+                this.smtp.remote.remote_address.hostname
             ));
 
         yield this.smtp.queue_email(rfc822, cancellable);

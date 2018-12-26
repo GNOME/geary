@@ -18,28 +18,30 @@ public abstract class Geary.ClientService : BaseObject {
 
 
     /**
-     * The configuration for the account the service belongs to.
+     * The service's account.
      */
     public AccountInformation account { get; private set; }
 
     /**
      * The configuration for the service.
      */
-    public ServiceInformation service { get; private set; }
+    public ServiceInformation configuration { get; private set; }
 
     /**
      * The network endpoint the service will connect to.
      */
-    public Endpoint? endpoint { get; private set; default = null; }
+    public Endpoint remote { get; private set; }
 
     /** Determines if this manager has been started. */
     public bool is_running { get; protected set; default = false; }
 
 
     protected ClientService(AccountInformation account,
-                            ServiceInformation service) {
+                            ServiceInformation configuration,
+                            Endpoint remote) {
         this.account = account;
-        this.service = service;
+        this.configuration = configuration;
+        this.remote = remote;
     }
 
     /**
@@ -52,23 +54,20 @@ public abstract class Geary.ClientService : BaseObject {
     public async void set_endpoint_restart(Endpoint endpoint,
                                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        if ((this.endpoint == null && endpoint != null) ||
-            (this.endpoint != null && this.endpoint.equal_to(endpoint))) {
-            if (this.endpoint != null) {
-                this.endpoint.untrusted_host.disconnect(on_untrusted_host);
-            }
+        if (this.remote != null) {
+            this.remote.untrusted_host.disconnect(on_untrusted_host);
+        }
 
-            bool do_restart = this.is_running;
-            if (do_restart) {
-                yield stop(cancellable);
-            }
+        bool do_restart = this.is_running;
+        if (do_restart) {
+            yield stop(cancellable);
+        }
 
-            this.endpoint = endpoint;
-            this.endpoint.untrusted_host.connect(on_untrusted_host);
+        this.remote = remote;
+        this.remote.untrusted_host.connect(on_untrusted_host);
 
-            if (do_restart) {
-                yield start(cancellable);
-            }
+        if (do_restart) {
+            yield start(cancellable);
         }
     }
 
@@ -92,7 +91,7 @@ public abstract class Geary.ClientService : BaseObject {
 
     private void on_untrusted_host(TlsNegotiationMethod method,
                                    GLib.TlsConnection cx) {
-        this.account.untrusted_host(this.service, method, cx);
+        this.account.untrusted_host(this.configuration, method, cx);
     }
 
 }

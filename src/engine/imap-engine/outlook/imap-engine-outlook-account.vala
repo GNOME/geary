@@ -24,8 +24,11 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
     }
 
 
-    public OutlookAccount(AccountInformation config) {
-        base(config);
+    public OutlookAccount(AccountInformation config,
+                          ImapDB.Account local,
+                          Endpoint incoming_remote,
+                          Endpoint outgoing_remote) {
+        base(config, local, incoming_remote, outgoing_remote);
     }
 
     protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {

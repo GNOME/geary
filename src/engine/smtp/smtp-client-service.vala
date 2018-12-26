@@ -52,8 +52,9 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
     public ClientService(AccountInformation account,
                          ServiceInformation service,
+                         Endpoint remote,
                          Outbox.Folder outbox) {
-        base(account, service);
+        base(account, service, remote);
         this.outbox = outbox;
     }
 
@@ -65,13 +66,13 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         this.is_running = true;
         yield this.outbox.open_async(Folder.OpenFlags.NONE, cancellable);
         yield this.fill_outbox_queue(cancellable);
-        this.endpoint.connectivity.notify["is-reachable"].connect(
+        this.remote.connectivity.notify["is-reachable"].connect(
             on_reachable_changed
         );
-        this.endpoint.connectivity.address_error_reported.connect(
+        this.remote.connectivity.address_error_reported.connect(
             on_connectivity_error
         );
-        this.endpoint.connectivity.check_reachable.begin();
+        this.remote.connectivity.check_reachable.begin();
     }
 
     /**
@@ -79,10 +80,10 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
      */
     public override async void stop(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        this.endpoint.connectivity.notify["is-reachable"].disconnect(
+        this.remote.connectivity.notify["is-reachable"].disconnect(
             on_reachable_changed
         );
-        this.endpoint.connectivity.address_error_reported.disconnect(
+        this.remote.connectivity.address_error_reported.disconnect(
             on_connectivity_error
         );
         this.stop_postie();
@@ -311,7 +312,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
     private async void send_email(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
-        Smtp.ClientSession smtp = new Geary.Smtp.ClientSession(this.endpoint);
+        Smtp.ClientSession smtp = new Geary.Smtp.ClientSession(this.remote);
 
         sending_monitor.notify_start();
 
@@ -408,12 +409,12 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
     private void notify_report_problem(ProblemType problem, Error? err) {
         report_problem(
-            new ServiceProblemReport(problem, this.account, this.service, err)
+            new ServiceProblemReport(problem, this.account, this.configuration, err)
         );
     }
 
     private void on_reachable_changed() {
-        if (this.endpoint.connectivity.is_reachable.is_certain()) {
+        if (this.remote.connectivity.is_reachable.is_certain()) {
             start_postie.begin();
         } else {
             stop_postie();

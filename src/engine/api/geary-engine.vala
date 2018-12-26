@@ -352,37 +352,43 @@ public class Geary.Engine : BaseObject {
         if (account_instances.has_key(config.id))
             return account_instances.get(config.id);
 
+        ImapDB.Account local = new ImapDB.Account(config);
+        Endpoint incoming_remote = get_shared_endpoint(
+            config.service_provider, config.incoming
+        );
+        Endpoint outgoing_remote = get_shared_endpoint(
+            config.service_provider, config.outgoing
+        );
+
         Geary.Account account;
         switch (config.service_provider) {
             case ServiceProvider.GMAIL:
-                account = new ImapEngine.GmailAccount(config);
+                account = new ImapEngine.GmailAccount(
+                    config, local, incoming_remote, outgoing_remote
+                );
             break;
 
             case ServiceProvider.YAHOO:
-                account = new ImapEngine.YahooAccount(config);
+                account = new ImapEngine.YahooAccount(
+                    config, local, incoming_remote, outgoing_remote
+                );
             break;
 
             case ServiceProvider.OUTLOOK:
-                account = new ImapEngine.OutlookAccount(config);
+                account = new ImapEngine.OutlookAccount(
+                    config, local, incoming_remote, outgoing_remote
+                );
             break;
 
             case ServiceProvider.OTHER:
-                account = new ImapEngine.OtherAccount(config);
+                account = new ImapEngine.OtherAccount(
+                    config, local, incoming_remote, outgoing_remote
+                );
             break;
 
             default:
                 assert_not_reached();
         }
-
-        Endpoint incoming = get_shared_endpoint(
-            config.service_provider, config.incoming
-        );
-        account.set_endpoint(account.incoming, incoming);
-
-        Endpoint outgoing = get_shared_endpoint(
-            config.service_provider, config.outgoing
-        );
-        account.set_endpoint(account.outgoing, outgoing);
 
         account_instances.set(config.id, account);
         return account;

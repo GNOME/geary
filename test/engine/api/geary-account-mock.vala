@@ -34,8 +34,9 @@ public class Geary.MockAccount : Account, MockObject {
     public class MockClientService : ClientService {
 
         public MockClientService(AccountInformation account,
-                                 ServiceInformation service) {
-            base(account, service);
+                                 ServiceInformation configuration,
+                                 Endpoint remote) {
+            base(account, configuration, remote);
         }
 
         public override async void start(GLib.Cancellable? cancellable = null)
@@ -70,8 +71,16 @@ public class Geary.MockAccount : Account, MockObject {
 
     public MockAccount(AccountInformation config) {
         base(config);
-        this._incoming = new MockClientService(config, config.incoming);
-        this._outgoing = new MockClientService(config, config.outgoing);
+        this._incoming = new MockClientService(
+            config,
+            config.incoming,
+            new Endpoint(config.incoming.host, config.incoming.port, 0, 0)
+        );
+        this._outgoing = new MockClientService(
+            config,
+            config.outgoing,
+            new Endpoint(config.outgoing.host, config.outgoing.port, 0, 0)
+        );
     }
 
     public override async void open_async(Cancellable? cancellable = null) throws Error {

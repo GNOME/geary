@@ -831,8 +831,8 @@ public class GearyController : Geary.BaseObject {
         // they agreed to both, try again
         Geary.Account account = this.accounts.get(config).account;
         if (imap_prompted && smtp_prompted
-            && account.incoming.endpoint.is_trusted_or_never_connected
-            && account.outgoing.endpoint.is_trusted_or_never_connected) {
+            && account.incoming.remote.is_trusted_or_never_connected
+            && account.outgoing.remote.is_trusted_or_never_connected) {
             retry_required = true;
         } else if (validation_result == Geary.Engine.ValidationResult.OK) {
             retry_required = true;
@@ -2893,10 +2893,10 @@ public class GearyController : Geary.BaseObject {
         Geary.Endpoint? endpoint = null;
         switch (service.protocol) {
         case Geary.Protocol.IMAP:
-            endpoint = account.incoming.endpoint;
+            endpoint = account.incoming.remote;
             break;
         case Geary.Protocol.SMTP:
-            endpoint = account.outgoing.endpoint;
+            endpoint = account.outgoing.remote;
             break;
         }
         return endpoint;
