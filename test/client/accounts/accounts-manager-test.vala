@@ -13,6 +13,7 @@ class Accounts.ManagerTest : TestCase {
     private Manager? test = null;
     private Geary.CredentialsMediator? mediator = null;
     private Geary.AccountInformation? account = null;
+    private Geary.RFC822.MailboxAddress primary_mailbox;
     private File? tmp = null;
 
 
@@ -41,20 +42,25 @@ class Accounts.ManagerTest : TestCase {
         GLib.File data = this.tmp.get_child("data");
         data.make_directory();
 
-        this.test = new Manager(new GearyApplication(), config, data);
+        this.primary_mailbox = new Geary.RFC822.MailboxAddress(
+            null, "test1@example.com"
+        );
+
         this.mediator = new Geary.MockCredentialsMediator();
         this.account = new Geary.AccountInformation(
             TEST_ID,
             Geary.ServiceProvider.OTHER,
             this.mediator,
-            new Geary.RFC822.MailboxAddress(null, "test1@example.com")
+            this.primary_mailbox
         );
+        this.test = new Manager(this.mediator, config, data);
     }
 
 	public override void tear_down() throws GLib.Error {
         this.account = null;
         this.mediator = null;
         this.test = null;
+        this.primary_mailbox = null;
         @delete(this.tmp);
 	}
 

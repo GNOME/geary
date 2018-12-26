@@ -203,12 +203,11 @@ public class Accounts.Manager : GLib.Object {
         new Gee.LinkedList<Geary.AccountInformation>();
 
 
-    private GearyApplication application;
+    private Geary.CredentialsMediator local_mediator;
+    private Goa.Client? goa_service = null;
+
     private GLib.File user_config_dir;
     private GLib.File user_data_dir;
-
-    private Geary.CredentialsMediator? libsecret = null;
-    private Goa.Client? goa_service = null;
 
 
     /** Fired when a new account is created. */
@@ -225,10 +224,10 @@ public class Accounts.Manager : GLib.Object {
     public signal void report_problem(Geary.ProblemReport problem);
 
 
-    public Manager(GearyApplication application,
+    public Manager(Geary.CredentialsMediator local_mediator,
                    GLib.File user_config_dir,
                    GLib.File user_data_dir) {
-        this.application = application;
+        this.local_mediator = local_mediator;
         this.user_config_dir = user_config_dir;
         this.user_data_dir = user_data_dir;
     }
@@ -252,11 +251,6 @@ public class Accounts.Manager : GLib.Object {
         ).map<Geary.AccountInformation>(
             ((state) => { return state.account; })
         );
-    }
-
-    public async void connect_libsecret(GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        this.libsecret = yield new SecretMediator(this.application, cancellable);
     }
 
     public async void connect_goa(GLib.Cancellable? cancellable)
@@ -299,7 +293,7 @@ public class Accounts.Manager : GLib.Object {
         string id = LOCAL_ID_FORMAT.printf(next_id);
 
         return new Geary.AccountInformation(
-            id, provider, this.libsecret, primary_mailbox
+            id, provider, this.local_mediator, primary_mailbox
         );
     }
 
@@ -559,7 +553,7 @@ public class Accounts.Manager : GLib.Object {
         Goa.Object? goa_handle = null;
         GoaMediator? goa_mediator = null;
         Geary.ServiceProvider? default_provider = null;
-        Geary.CredentialsMediator mediator = this.libsecret;
+        Geary.CredentialsMediator mediator = this.local_mediator;
 
         if (is_goa) {
             if (this.goa_service == null) {
@@ -1508,7 +1502,7 @@ public class Accounts.ServiceConfigLegacy : ServiceConfig, GLib.Object {
         Geary.ConfigFile.Group service_config =
             config.get_group(AccountConfigLegacy.GROUP);
 
-        string prefix = service.protocol.to_value() + "_";
+        string prefix = service.protocol.to_value().ascii_down() + "_";
 
         if (service.credentials != null) {
             service_config.set_string(

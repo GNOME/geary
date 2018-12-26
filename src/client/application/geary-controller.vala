@@ -305,8 +305,15 @@ public class GearyController : Geary.BaseObject {
         }
 
         // Hook up accounts and credentials machinery
+        SecretMediator? libsecret = null;
+        try {
+            libsecret = yield new SecretMediator(this.application, cancellable);
+        } catch (GLib.Error err) {
+            error("Error opening libsecret: %s", err.message);
+        }
+
         this.account_manager = new Accounts.Manager(
-            this.application,
+            libsecret,
             this.application.get_user_config_directory(),
             this.application.get_user_data_directory()
         );
@@ -322,12 +329,6 @@ public class GearyController : Geary.BaseObject {
         this.account_manager.report_problem.connect(
             on_report_problem
         );
-
-        try {
-            yield this.account_manager.connect_libsecret(cancellable);
-        } catch (GLib.Error err) {
-            warning("Error opening libsecret: %s", err.message);
-        }
 
         try {
             yield this.account_manager.connect_goa(cancellable);
