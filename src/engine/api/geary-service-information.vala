@@ -15,20 +15,15 @@ public enum Geary.Protocol {
 
     public static Protocol for_value(string value)
         throws EngineError {
-        switch (value.ascii_up()) {
-        case "IMAP":
-            return IMAP;
-        case "SMTP":
-            return SMTP;
-        }
-        throw new EngineError.BAD_PARAMETERS(
-            "Unknown Protocol value: %s", value
+        return ObjectUtils.from_enum_nick<Protocol>(
+            typeof(Protocol), value.ascii_down()
         );
     }
 
     public string to_value() {
-        string value = to_string();
-        return value.substring(value.last_index_of("_") + 1);
+        return ObjectUtils.to_enum_nick<Protocol>(
+            typeof(Protocol), this
+        );
     }
 
 }

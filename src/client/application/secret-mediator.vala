@@ -68,7 +68,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                 debug(
                     "Unable to fetch libsecret password for %s: %s %s",
                     account.id,
-                    service.protocol.to_string(),
+                    to_proto_value(service.protocol),
                     service.credentials.user
                 );
             }
@@ -127,7 +127,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                 debug(
                     "Unable to store libsecret password for %s: %s %s",
                     account.id,
-                    service.protocol.to_string(),
+                    to_proto_value(service.protocol),
                     service.credentials.user
                 );
             }
@@ -201,7 +201,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             SecretMediator.schema,
             new_attrs(service),
             Secret.COLLECTION_DEFAULT,
-            "Geary %s password".printf(service.protocol.to_value()),
+            "Geary %s password".printf(to_proto_value(service.protocol)),
             password,
             cancellable
         );
@@ -211,10 +211,14 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         HashTable<string,string> table = new HashTable<string,string>(
             str_hash, str_equal
         );
-        table.insert(ATTR_PROTO, service.protocol.to_value());
+        table.insert(ATTR_PROTO, to_proto_value(service.protocol));
         table.insert(ATTR_HOST, service.host);
         table.insert(ATTR_LOGIN, service.credentials.user);
         return table;
+    }
+
+    private inline string to_proto_value(Geary.Protocol protocol) {
+        return protocol.to_value().ascii_up();
     }
 
     private async string? migrate_old_password(Geary.ServiceInformation service,
