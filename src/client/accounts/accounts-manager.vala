@@ -8,92 +8,6 @@
 
 
 /**
- * Current supported credential providers.
- */
-public enum Accounts.CredentialsProvider {
-    /** Credentials are provided and stored by libsecret. */
-    LIBSECRET,
-
-    /** Credentials are provided and stored by gnome-online-accounts. */
-    GOA;
-
-    public string to_string() {
-        switch (this) {
-            case LIBSECRET:
-                return "libsecret";
-
-            case GOA:
-                return "goa";
-
-            default:
-                assert_not_reached();
-        }
-    }
-
-    public static CredentialsProvider from_string(string str)
-        throws GLib.Error {
-        switch (str.ascii_down()) {
-            case "libsecret":
-                return LIBSECRET;
-
-            case "goa":
-                return GOA;
-
-            default:
-                throw new KeyFileError.INVALID_VALUE(
-                    "Unknown credentials provider type: %s", str
-                );
-        }
-    }
-}
-
-
-/** Objects that can be used to load/save account configuration. */
-public interface Accounts.AccountConfig : GLib.Object {
-
-    /** Loads a supported account from a config file. */
-    public abstract Geary.AccountInformation
-        load(Geary.ConfigFile config,
-             string id,
-             Geary.CredentialsMediator mediator,
-             Geary.ServiceProvider? default_provider,
-             string? default_name)
-        throws ConfigError, GLib.KeyFileError;
-
-    /** Saves an account to a config file. */
-    public abstract void save(Geary.AccountInformation account,
-                              Geary.ConfigFile config);
-
-}
-
-
-/** Objects that can be used to load/save service configuration. */
-public interface Accounts.ServiceConfig : GLib.Object {
-
-    /** Loads a service from a config file. */
-    public abstract void load(Geary.ConfigFile config,
-                              Geary.AccountInformation account,
-                              Geary.ServiceInformation service)
-        throws ConfigError, GLib.KeyFileError;
-
-    /** Saves a service to a config file. */
-    public abstract void save(Geary.AccountInformation account,
-                              Geary.ServiceInformation service,
-                              Geary.ConfigFile config);
-
-}
-
-public errordomain Accounts.ConfigError {
-    IO,
-    MANAGEMENT,
-    SYNTAX,
-    VERSION,
-    UNAVAILABLE,
-    REMOVED;
-}
-
-
-/**
  * Manages email account lifecycle for Geary.
  *
  * This class is responsible for creating, loading, saving and
@@ -195,6 +109,12 @@ public class Accounts.Manager : GLib.Object {
     /** Returns the number of currently known accounts. */
     public int size { get { return this.accounts.size; } }
 
+    /** Returns the base directory for account configuration. */
+    public GLib.File config_dir { get; private set; }
+
+    /** Returns the base directory for account data. */
+    public GLib.File data_dir { get; private set; }
+
 
     private Gee.Map<string,AccountState> accounts =
         new Gee.HashMap<string,AccountState>();
@@ -205,9 +125,6 @@ public class Accounts.Manager : GLib.Object {
 
     private Geary.CredentialsMediator local_mediator;
     private Goa.Client? goa_service = null;
-
-    private GLib.File user_config_dir;
-    private GLib.File user_data_dir;
 
 
     /** Fired when a new account is created. */
@@ -225,11 +142,19 @@ public class Accounts.Manager : GLib.Object {
 
 
     public Manager(Geary.CredentialsMediator local_mediator,
-                   GLib.File user_config_dir,
-                   GLib.File user_data_dir) {
+                   GLib.File config_dir,
+                   GLib.File data_dir) {
         this.local_mediator = local_mediator;
-        this.user_config_dir = user_config_dir;
-        this.user_data_dir = user_data_dir;
+        this.config_dir = config_dir;
+        this.data_dir = data_dir;
+    }
+
+    public async void connect_goa(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.goa_service = yield new Goa.Client(cancellable);
+        this.goa_service.account_added.connect(on_goa_account_added);
+        this.goa_service.account_changed.connect(on_goa_account_changed);
+        this.goa_service.account_removed.connect(on_goa_account_removed);
     }
 
     /** Returns the account with the given id. */
@@ -251,14 +176,6 @@ public class Accounts.Manager : GLib.Object {
         ).map<Geary.AccountInformation>(
             ((state) => { return state.account; })
         );
-    }
-
-    public async void connect_goa(GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        this.goa_service = yield new Goa.Client(cancellable);
-        this.goa_service.account_added.connect(on_goa_account_added);
-        this.goa_service.account_changed.connect(on_goa_account_changed);
-        this.goa_service.account_removed.connect(on_goa_account_removed);
     }
 
     /**
@@ -320,7 +237,7 @@ public class Accounts.Manager : GLib.Object {
         // Step 1. Load existing accounts from the user config dir
         GLib.FileEnumerator? enumerator = null;
         try {
-            enumerator = yield this.user_config_dir.enumerate_children_async(
+            enumerator = yield this.config_dir.enumerate_children_async(
                 "standard::*",
                 FileQueryInfoFlags.NONE,
                 Priority.DEFAULT,
@@ -511,8 +428,8 @@ public class Accounts.Manager : GLib.Object {
     private async Geary.AccountInformation
         load_account(string id, GLib.Cancellable? cancellable)
         throws ConfigError {
-        GLib.File config_dir = this.user_config_dir.get_child(id);
-        GLib.File data_dir = this.user_data_dir.get_child(id);
+        GLib.File config_dir = this.config_dir.get_child(id);
+        GLib.File data_dir = this.data_dir.get_child(id);
 
         Geary.ConfigFile config = new Geary.ConfigFile(
             config_dir.get_child(SETTINGS_FILENAME)
@@ -792,8 +709,8 @@ public class Accounts.Manager : GLib.Object {
     private async void create_account_dirs(Geary.AccountInformation info,
                                           Cancellable? cancellable)
         throws GLib.Error {
-        GLib.File config = this.user_config_dir.get_child(info.id);
-        GLib.File data = this.user_data_dir.get_child(info.id);
+        GLib.File config = this.config_dir.get_child(info.id);
+        GLib.File data = this.data_dir.get_child(info.id);
 
         yield Geary.Files.make_directory_with_parents(config, cancellable);
         yield Geary.Files.make_directory_with_parents(data, cancellable);
@@ -980,6 +897,52 @@ public class Accounts.Manager : GLib.Object {
     }
 
 }
+
+/** Objects that can be used to load/save account configuration. */
+public interface Accounts.AccountConfig : GLib.Object {
+
+    /** Loads a supported account from a config file. */
+    public abstract Geary.AccountInformation
+        load(Geary.ConfigFile config,
+             string id,
+             Geary.CredentialsMediator mediator,
+             Geary.ServiceProvider? default_provider,
+             string? default_name)
+        throws ConfigError, GLib.KeyFileError;
+
+    /** Saves an account to a config file. */
+    public abstract void save(Geary.AccountInformation account,
+                              Geary.ConfigFile config);
+
+}
+
+
+/** Objects that can be used to load/save service configuration. */
+public interface Accounts.ServiceConfig : GLib.Object {
+
+    /** Loads a service from a config file. */
+    public abstract void load(Geary.ConfigFile config,
+                              Geary.AccountInformation account,
+                              Geary.ServiceInformation service)
+        throws ConfigError, GLib.KeyFileError;
+
+    /** Saves a service to a config file. */
+    public abstract void save(Geary.AccountInformation account,
+                              Geary.ServiceInformation service,
+                              Geary.ConfigFile config);
+
+}
+
+
+public errordomain Accounts.ConfigError {
+    IO,
+    MANAGEMENT,
+    SYNTAX,
+    VERSION,
+    UNAVAILABLE,
+    REMOVED;
+}
+
 
 /**
  * Manages persistence for version 1 config files.
