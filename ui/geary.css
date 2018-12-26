@@ -214,6 +214,7 @@ row.geary-settings image {
 
 row.geary-settings entry {
   border-width: 0px;
+  background-color: transparent;
 }
 
 row.geary-settings.geary-drag-source {
