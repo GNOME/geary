@@ -239,13 +239,4 @@ public class Geary.MockAccount : Account, MockObject {
         );
     }
 
-    internal override void set_endpoint(ClientService service,
-                                        Endpoint endpoint) {
-        try {
-            void_call("set_endpoint", {service, endpoint});
-        } catch (GLib.Error err) {
-            // oh well
-        }
-    }
-
 }

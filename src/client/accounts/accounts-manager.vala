@@ -359,6 +359,27 @@ public class Accounts.Manager : GLib.Object {
         }
     }
 
+    /** Updates a local account service's credentials. */
+    public async void update_local_credentials(Geary.AccountInformation account,
+                                               Geary.ServiceInformation old_service,
+                                               Geary.ServiceInformation new_service,
+                                               GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        SecretMediator? mediator = account.mediator as SecretMediator;
+        if (mediator != null) {
+            if (new_service.credentials != null) {
+                yield mediator.update_token(account, new_service, cancellable);
+            }
+
+            if (old_service.credentials != null &&
+                (new_service.credentials == null ||
+                 (new_service.credentials != null &&
+                  old_service.credentials.user != old_service.credentials.user))) {
+                yield mediator.clear_token(account, old_service, cancellable);
+            }
+        }
+    }
+
     /**
      * Determines if an account is a GOA account or not.
      */

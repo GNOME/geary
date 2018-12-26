@@ -200,16 +200,12 @@ internal class Accounts.EditorServersPane :
             is_valid = yield validate(cancellable);
 
             if (is_valid) {
-                try {
-                    has_changed = this.engine.update_account_service(
-                        this.account, incoming_mutable
-                    );
-                    has_changed = this.engine.update_account_service(
-                        this.account, outgoing_mutable
-                    );
-                } catch (Geary.EngineError err) {
-                    warning("Could not update account services: %s", err.message);
-                }
+                has_changed |= yield update_service(
+                    this.account.incoming, this.incoming_mutable, cancellable
+                );
+                has_changed |= yield update_service(
+                    this.account.outgoing, this.outgoing_mutable, cancellable
+                );
             }
         }
 
@@ -297,6 +293,40 @@ internal class Accounts.EditorServersPane :
         }
 
         return is_valid;
+    }
+
+    private async bool update_service(Geary.ServiceInformation existing,
+                                      Geary.ServiceInformation copy,
+                                      GLib.Cancellable cancellable) {
+        bool has_changed = !existing.equal_to(copy);
+        if (has_changed) {
+            try {
+                yield this.editor.accounts.update_local_credentials(
+                    this.account, existing, copy, cancellable
+                );
+            } catch (GLib.Error err) {
+                warning(
+                    "Could not update %s %s credentials: %s",
+                    this.account.id,
+                    existing.protocol.to_value(),
+                    err.message
+                );
+            }
+
+            try {
+                yield this.engine.update_account_service(
+                    this.account, copy, cancellable
+                );
+            } catch (GLib.Error err) {
+                warning(
+                    "Could not update %s %s service: %s",
+                    this.account.id,
+                    existing.protocol.to_value(),
+                    err.message
+                );
+            }
+        }
+        return has_changed;
     }
 
     private void add_notification(InAppNotification notification) {

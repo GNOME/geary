@@ -45,14 +45,15 @@ public abstract class Geary.ClientService : BaseObject {
     }
 
     /**
-     * Updates the service's network endpoint and restarts if needed.
+     * Updates the configuration for the service.
      *
      * The service will be restarted if it is already running, and if
-     * so will be stopped before the old endpoint is replaced by the
-     * new one, then started again.
+     * so will be stopped before the old configuration and endpoint is
+     * replaced by the new one, then started again.
      */
-    public async void set_endpoint_restart(Endpoint endpoint,
-                                           GLib.Cancellable? cancellable = null)
+    public async void update_configuration(ServiceInformation configuration,
+                                           Endpoint remote,
+                                           GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (this.remote != null) {
             this.remote.untrusted_host.disconnect(on_untrusted_host);
@@ -63,6 +64,7 @@ public abstract class Geary.ClientService : BaseObject {
             yield stop(cancellable);
         }
 
+        this.configuration = configuration;
         this.remote = remote;
         this.remote.untrusted_host.connect(on_untrusted_host);
 

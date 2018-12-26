@@ -448,13 +448,11 @@ public class Geary.Engine : BaseObject {
      * Account.incoming} or {@link Account.outgoing} client service
      * will also be updated so that the new configuration will start
      * taking effect immediately.
-     *
-     * Returns true if the account's service was updated, or false if
-     * the configuration was the same.
      */
-    public bool update_account_service(AccountInformation account,
-                                       ServiceInformation updated)
-        throws EngineError {
+    public async void update_account_service(AccountInformation account,
+                                             ServiceInformation updated,
+                                             GLib.Cancellable? cancellable)
+        throws GLib.Error {
         Account? impl = this.account_instances.get(account.id);
         if (impl == null) {
             throw new EngineError.BAD_PARAMETERS(
@@ -463,33 +461,21 @@ public class Geary.Engine : BaseObject {
         }
 
         ClientService? service = null;
-        bool was_updated = false;
         switch (updated.protocol) {
         case Protocol.IMAP:
-            if (!account.incoming.equal_to(updated)) {
-                was_updated = true;
-                account.incoming = updated;
-            }
+            account.incoming = updated;
             service = impl.incoming;
             break;
+
         case Protocol.SMTP:
-            if (!account.outgoing.equal_to(updated)) {
-                was_updated = true;
-                account.outgoing = updated;
-            }
+            account.outgoing = updated;
             service = impl.outgoing;
             break;
         }
 
-        if (was_updated) {
-            Endpoint endpoint = get_shared_endpoint(
-                account.service_provider, updated
-            );
-            impl.set_endpoint(service, endpoint);
-            account.changed();
-        }
-
-        return was_updated;
+        Endpoint remote = get_shared_endpoint(account.service_provider, updated);
+        yield service.update_configuration(updated, remote, cancellable);
+        account.changed();
     }
 
     private Geary.Endpoint get_shared_endpoint(ServiceProvider provider,

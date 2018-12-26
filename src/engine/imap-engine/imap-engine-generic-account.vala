@@ -566,19 +566,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return (map.size == 0) ? null : map;
     }
 
-    internal override void set_endpoint(ClientService service,
-                                        Endpoint endpoint) {
-        if (service == this.incoming) {
-            this.imap.set_endpoint_restart.begin(
-                endpoint, this.open_cancellable
-            );
-        } else if (service == this.outgoing) {
-            this.smtp.set_endpoint_restart.begin(
-                endpoint, this.open_cancellable
-            );
-        }
-    }
-
     /**
      * Constructs a set of folders and adds them to the account.
      *
