@@ -439,7 +439,7 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
         this.provider = provider;
 
         // Translators: Label for adding a generic email account
-        string? name = _("Other email provider");
+        string? name = _("Other email providers");
         switch (provider) {
         case Geary.ServiceProvider.GMAIL:
             name = _("Gmail");
