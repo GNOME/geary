@@ -7,49 +7,24 @@
  */
 
 /**
- * The Geary email engine initial entry points.
+ * Manages email account instances and their life-cycle.
  *
- * Engine represents and contains interfaces into the rest of the email library.  It's a singleton
- * class (see {@link instance}) with various signals for event notification.  Engine is initialized
- * by calling {@link open_async} and closed with {@link close_async}.
- *
- * Engine can list existing {@link Account} objects and create/delete them.  It can also validate
- * changes to Accounts prior to saving those changes.
+ * An engine represents and contains interfaces into the rest of the
+ * email library. Instances are initialized by calling {@link
+ * open_async} and closed with {@link close_async}. Use this class for
+ * verifying and adding {@link AccountInformation} objects to check
+ * and start using email accounts.
  */
 public class Geary.Engine : BaseObject {
 
-    [Flags]
-    public enum ValidationOption {
-        NONE = 0,
-        CHECK_CONNECTIONS,
-        UPDATING_EXISTING;
-        
-        public inline bool is_all_set(ValidationOption options) {
-            return (options & this) == options;
-        }
-    }
-    
-    [Flags]
-    public enum ValidationResult {
-        OK = 0,
-        INVALID_NICKNAME,
-        EMAIL_EXISTS,
-        IMAP_CONNECTION_FAILED,
-        IMAP_CREDENTIALS_INVALID,
-        SMTP_CONNECTION_FAILED,
-        SMTP_CREDENTIALS_INVALID;
-        
-        public inline bool is_all_set(ValidationResult result) {
-            return (result & this) == result;
-        }
-    }
-    
-    private static Engine? _instance = null;
+
     public static Engine instance {
         get {
             return (_instance != null) ? _instance : (_instance = new Engine());
         }
     }
+    private static Engine? _instance = null;
+
 
     // Workaround for Vala issue #659. See shared_endpoints below.
     private class EndpointWeakRef {
