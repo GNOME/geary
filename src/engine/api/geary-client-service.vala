@@ -388,7 +388,7 @@ public abstract class Geary.ClientService : BaseObject {
 		this.remote.connectivity.notify["is-reachable"].connect(
             on_connectivity_change
         );
-        this.remote.connectivity.address_error_reported.connect(
+        this.remote.connectivity.remote_error_reported.connect(
             on_connectivity_error
         );
         this.remote.untrusted_host.connect(on_untrusted_host);
@@ -398,7 +398,7 @@ public abstract class Geary.ClientService : BaseObject {
 		this.remote.connectivity.notify["is-reachable"].disconnect(
             on_connectivity_change
         );
-        this.remote.connectivity.address_error_reported.disconnect(
+        this.remote.connectivity.remote_error_reported.disconnect(
             on_connectivity_error
         );
         this.remote.untrusted_host.disconnect(on_untrusted_host);

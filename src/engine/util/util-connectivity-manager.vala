@@ -6,13 +6,13 @@
  */
 
 /**
- * Keeps track of network connectivity changes for a network address.
+ * Keeps track of network connectivity changes for a network endpoint.
  *
  * This class is a convenience API for the GIO NetworkMonitor. Since
  * when connecting and disconnecting from a network, multiple
  * network-changed signals may be sent, this class coalesces these as
  * best as possible so the rest of the engine is only notified once
- * when an address becomes reachable, and once when it becomes
+ * when a remote becomes reachable, and once when it becomes
  * unreachable.
  *
  * Note this class is not thread safe and should only be invoked from
@@ -23,19 +23,23 @@ public class Geary.ConnectivityManager : BaseObject {
     private const uint CHECK_QUIESCENCE_MS = 60 * 1000;
 
 
-    /** The address being monitored. */
-    public NetworkAddress address { get; private set; default = null; }
+    /** The endpoint being monitored. */
+    public GLib.SocketConnectable remote { get; private set; default = null; }
 
-	/** Determines if the managed address is currently reachable. */
-	public Trillian is_reachable { get; private set; default = Geary.Trillian.UNKNOWN; }
+	/** Determines if the managed endpoint is currently reachable. */
+	public Trillian is_reachable {
+        get; private set; default = Geary.Trillian.UNKNOWN;
+    }
 
 	/**
-     * Determines if a the address's network address name is valid.
+     * Determines if the remote endpoint could be resolved.
      *
-     * This will become certain if the address becomes reachable, and
-     * will become impossible if a fatal address error is reported.
+     * This will become certain if the remote becomes reachable, and
+     * will become impossible if a fatal error is reported.
      */
-	public Trillian is_valid { get; private set; default = Geary.Trillian.UNKNOWN; }
+	public Trillian is_valid {
+        get; private set; default = Geary.Trillian.UNKNOWN;
+    }
 
     private NetworkMonitor monitor;
 
@@ -48,21 +52,21 @@ public class Geary.ConnectivityManager : BaseObject {
 
 
     /**
-     * Fired when a fatal error was reported checking the address.
+     * Fired when a fatal error was reported checking the remote.
      *
      * This is typically caused by an an authoritative DNS name not
      * found error, but may be anything else that indicates that the
-     * address will be unusable as-is without some kind of user or
+     * remote will be unusable as-is without some kind of user or
      * server administrator intervention.
      */
-    public signal void address_error_reported(Error error);
+    public signal void remote_error_reported(Error error);
 
 
     /**
-     * Constructs a new manager for a specific address.
+     * Constructs a new manager for a specific remote.
      */
-    public ConnectivityManager(NetworkAddress address) {
-		this.address = address;
+    public ConnectivityManager(GLib.SocketConnectable remote) {
+		this.remote = remote;
 
         this.monitor = NetworkMonitor.get_default();
         this.monitor.network_changed.connect(on_network_changed);
@@ -80,7 +84,7 @@ public class Geary.ConnectivityManager : BaseObject {
     }
 
 	/**
-     * Starts checking if the manager's address is reachable.
+     * Starts checking if the manager's remote is reachable.
      *
      * This will cancel any existing check, and start a new one
      * running, updating the `is_reachable` property on completion.
@@ -97,14 +101,14 @@ public class Geary.ConnectivityManager : BaseObject {
 		Cancellable cancellable = new Cancellable();
 		this.existing_check = cancellable;
 
-        string endpoint = to_address_string();
+        string endpoint = this.remote.to_string();
 		bool is_reachable = false;
         try {
             // Check first, and ask questions only if an error occurs,
             // because if we can connect, then we can connect.
 			debug("Checking if %s reachable...", endpoint);
             is_reachable = yield this.monitor.can_reach_async(
-				this.address, cancellable
+				this.remote, cancellable
 			);
             this.next_check = get_real_time() + CHECK_QUIESCENCE_MS;
         } catch (GLib.IOError.CANCELLED err) {
@@ -140,7 +144,7 @@ public class Geary.ConnectivityManager : BaseObject {
                     debug("Error checking %s [%s] reachable, treating unreachable: %s",
                           endpoint, connectivity.to_string(), err.message);
                     set_invalid();
-                    address_error_reported(err);
+                    remote_error_reported(err);
                 } else {
                     debug("Error checking %s [%s] reachable, retrying: %s",
                           endpoint, connectivity.to_string(), err.message);
@@ -202,13 +206,13 @@ public class Geary.ConnectivityManager : BaseObject {
 		// depend on that as a minimum.
 		if ((reachable && !this.is_reachable.is_certain()) ||
             (!reachable && !this.is_reachable.is_impossible())) {
-            debug("Host %s became %s",
-                  this.address.to_string(), reachable ? "reachable" : "unreachable");
+            debug("Remote %s became %s",
+                  this.remote.to_string(), reachable ? "reachable" : "unreachable");
 			this.is_reachable = reachable ? Trillian.TRUE : Trillian.FALSE;
 		}
 
         // We only work out if the name is valid (or becomes valid
-        // again) if the address becomes reachable.
+        // again) if the remote becomes reachable.
         if (reachable && this.is_valid.is_uncertain()) {
             this.is_valid = Trillian.TRUE;
         }
@@ -223,13 +227,6 @@ public class Geary.ConnectivityManager : BaseObject {
         if (this.is_valid != Trillian.FALSE) {
             this.is_valid = Trillian.FALSE;
         }
-    }
-
-    private inline string to_address_string() {
-        // Unlikely to be the case, but if IPv6 format it nicely
-        return (this.address.hostname.index_of(":") == -1)
-            ? "%s:%u".printf(this.address.hostname, this.address.port)
-            : "[%s]:%u".printf(this.address.hostname, this.address.port);
     }
 
 }
