@@ -485,12 +485,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         throws GLib.Error {
         check_open();
 
-        // TODO: we should probably not use someone else's FQDN in something
-        // that's supposed to be globally unique...
+        // XXX work out what our public IP adddress is somehow and use
+        // that in preference to the sender's domain
+        string domain = composed.sender != null
+            ? composed.sender.domain
+            : this.information.primary_mailbox.domain;
         Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(
-            composed, GMime.utils_generate_message_id(
-                this.smtp.remote.remote_address.hostname
-            ));
+            composed, GMime.utils_generate_message_id(domain)
+        );
 
         yield this.smtp.queue_email(rfc822, cancellable);
     }

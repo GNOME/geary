@@ -140,8 +140,7 @@ int main(string[] args) {
     
     if (arg_gmail) {
         endpoint = new Geary.Endpoint(
-            "smtp.gmail.com",
-            Geary.Smtp.SUBMISSION_PORT,
+            new GLib.NetworkAddress("smtp.gmail.com", Geary.Smtp.SUBMISSION_PORT),
             Geary.TlsNegotiationMethod.START_TLS,
             SMTP_TIMEOUT_SEC
         );
@@ -151,7 +150,9 @@ int main(string[] args) {
             method = Geary.TlsNegotiationMethod.START_TLS;
         }
         endpoint = new Geary.Endpoint(
-            arg_hostname, (uint16) arg_port, method, SMTP_TIMEOUT_SEC
+            new GLib.NetworkAddress(arg_hostname, (uint16) arg_port),
+            method,
+            SMTP_TIMEOUT_SEC
         );
     }
 

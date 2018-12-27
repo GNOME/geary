@@ -70,10 +70,14 @@ public class GearyController : Geary.BaseObject {
         GearyController.untitled_file_name = _("Untitled");
     }
 
-    private static void get_gcr_params(Geary.Endpoint endpoint, out Gcr.Certificate cert,
-        out string peer) {
-        cert = new Gcr.SimpleCertificate(endpoint.untrusted_certificate.certificate.data);
-        peer = "%s:%u".printf(endpoint.remote_address.hostname, endpoint.remote_address.port);
+    private static void get_gcr_params(Geary.ServiceInformation service,
+                                       Geary.Endpoint endpoint,
+                                       out Gcr.Certificate cert,
+                                       out string peer) {
+        cert = new Gcr.SimpleCertificate(
+            endpoint.untrusted_certificate.certificate.data
+        );
+        peer = service.host;
     }
 
 
@@ -725,7 +729,7 @@ public class GearyController : Geary.BaseObject {
         // get GCR parameters
         Gcr.Certificate cert;
         string peer;
-        get_gcr_params(endpoint, out cert, out peer);
+        get_gcr_params(service, endpoint, out cert, out peer);
 
         // Geary allows for user to auto-revoke all questionable server certificates without
         // digging around in a keyring/pk manager
@@ -777,8 +781,8 @@ public class GearyController : Geary.BaseObject {
                 // get GCR parameters for pinning
                 Gcr.Certificate cert;
                 string peer;
-                get_gcr_params(endpoint, out cert, out peer);
-                
+                get_gcr_params(service, endpoint, out cert, out peer);
+
                 // pinning the certificate creates an exception for the next time a connection
                 // is attempted
                 debug("Pinning certificate for %s...", peer);

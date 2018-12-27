@@ -36,7 +36,7 @@ public class CertificateWarningDialog {
         title_label.label = _("Untrusted Connection: %s").printf(account.display_name);
 
         top_label.label = _("The identity of the %s mail server at %s:%u could not be verified.").printf(
-            service.protocol.to_value(), endpoint.remote_address.hostname, endpoint.remote_address.port);
+            service.protocol.to_value(), service.host, service.port);
 
         warnings_label.label = generate_warning_list(
             endpoint.tls_validation_warnings
@@ -61,8 +61,7 @@ public class CertificateWarningDialog {
             dont_trust_label.label =
                 "<b>"
                 + _("Selecting “Don’t Trust This Server” will cause Geary to stop accessing this account.")
-                + "</b> "
-                + _("Geary will exit if you have no other open email accounts.");
+                + "</b> ";
         }
         dont_trust_label.use_markup = true;
         

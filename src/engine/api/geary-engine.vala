@@ -463,10 +463,12 @@ public class Geary.Engine : BaseObject {
 
     private Geary.Endpoint get_shared_endpoint(ServiceProvider provider,
                                                ServiceInformation service) {
-        string key = "%s/%s:%u".printf(
-            service.protocol.to_value(),
+        // Key includes TLS method since endpoints encapsulate
+        // TLS-specific state
+        string key = "%s:%u/%s".printf(
             service.host,
-            service.port
+            service.port,
+            service.transport_security.to_value()
         );
 
         Endpoint? shared = null;
@@ -480,8 +482,7 @@ public class Geary.Engine : BaseObject {
                 : Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC;
 
             shared = new Endpoint(
-                service.host,
-                service.port,
+                new NetworkAddress(service.host, service.port),
                 service.transport_security,
                 timeout
             );
