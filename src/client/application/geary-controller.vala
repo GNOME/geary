@@ -32,6 +32,7 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_EMPTY_SPAM = "empty-spam";
     public const string ACTION_EMPTY_TRASH = "empty-trash";
     public const string ACTION_UNDO = "undo";
+    public const string ACTION_REDO = "redo";
     public const string ACTION_FIND_IN_CONVERSATION = "conv-find";
     public const string ACTION_ZOOM = "zoom";
     public const string ACTION_SHOW_MARK_MENU = "mark-message-menu";
@@ -68,6 +69,12 @@ public class GearyController : Geary.BaseObject {
         GearyController.untitled_file_name = _("Untitled");
     }
 
+    private static void get_gcr_params(Geary.Endpoint endpoint, out Gcr.Certificate cert,
+        out string peer) {
+        cert = new Gcr.SimpleCertificate(endpoint.untrusted_certificate.certificate.data);
+        peer = "%s:%u".printf(endpoint.remote_address.hostname, endpoint.remote_address.port);
+    }
+
 
     internal class AccountContext : Geary.BaseObject {
 
@@ -86,15 +93,13 @@ public class GearyController : Geary.BaseObject {
 
     public weak GearyApplication application { get; private set; } // circular ref
 
-    public AccountManager? account_manager { get; private set; default = null; }
+    public Accounts.Manager? account_manager { get; private set; default = null; }
 
     public MainWindow? main_window { get; private set; default = null; }
 
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
-    
+
     public AutostartManager? autostart_manager { get; private set; default = null; }
-    
-    public LoginDialog? login_dialog { get; private set; default = null; }
 
     public Application.AvatarStore? avatar_store {
         get; private set; default = null;
@@ -103,6 +108,10 @@ public class GearyController : Geary.BaseObject {
     private Geary.Account? current_account = null;
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
+
+    // Created when controller is opened, cancelled and nulled out
+    // when closed.
+    private GLib.Cancellable? open_cancellable = null;
 
     private Geary.Folder? current_folder = null;
     private Cancellable cancellable_folder = new Cancellable();
@@ -124,7 +133,6 @@ public class GearyController : Geary.BaseObject {
     private UpgradeDialog upgrade_dialog;
     private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
     private Geary.Nonblocking.Mutex untrusted_host_prompt_mutex = new Geary.Nonblocking.Mutex();
-    private Gee.HashSet<Geary.Endpoint> validating_endpoints = new Gee.HashSet<Geary.Endpoint>();
 
     private uint operation_count = 0;
     private Geary.Revokable? revokable = null;
@@ -206,6 +214,8 @@ public class GearyController : Geary.BaseObject {
 
         apply_app_menu_fix();
 
+        this.open_cancellable = new GLib.Cancellable();
+
         // Listen for attempts to close the application.
         this.application.exiting.connect(on_application_exiting);
 
@@ -245,7 +255,6 @@ public class GearyController : Geary.BaseObject {
         enable_message_buttons(false);
 
         engine.account_available.connect(on_account_available);
-        engine.account_unavailable.connect(on_account_unavailable);
         engine.untrusted_host.connect(on_untrusted_host);
 
         // Connect to various UI signals.
@@ -295,9 +304,16 @@ public class GearyController : Geary.BaseObject {
             error("Error migrating configuration directories: %s", e.message);
         }
 
-        // Start Geary.
-        this.account_manager = new AccountManager(
-            this.application,
+        // Hook up accounts and credentials machinery
+        SecretMediator? libsecret = null;
+        try {
+            libsecret = yield new SecretMediator(this.application, cancellable);
+        } catch (GLib.Error err) {
+            error("Error opening libsecret: %s", err.message);
+        }
+
+        this.account_manager = new Accounts.Manager(
+            libsecret,
             this.application.get_user_config_directory(),
             this.application.get_user_data_directory()
         );
@@ -307,12 +323,12 @@ public class GearyController : Geary.BaseObject {
         this.account_manager.account_status_changed.connect(
             on_account_status_changed
         );
-
-        try {
-            yield this.account_manager.connect_libsecret(cancellable);
-        } catch (GLib.Error err) {
-            warning("Error opening libsecret: %s", err.message);
-        }
+        this.account_manager.account_removed.connect(
+            on_account_removed
+        );
+        this.account_manager.report_problem.connect(
+            on_report_problem
+        );
 
         try {
             yield this.account_manager.connect_goa(cancellable);
@@ -320,17 +336,27 @@ public class GearyController : Geary.BaseObject {
             warning("Error opening GOA: %s", err.message);
         }
 
+        // Start the engine and load our accounts
         try {
             yield engine.open_async(
                 this.application.get_resource_directory(), cancellable
             );
             yield this.account_manager.load_accounts(cancellable);
             if (engine.get_accounts().size == 0) {
-                create_account();
+                this.application.show_accounts();
+                if (engine.get_accounts().size == 0) {
+                    // User cancelled without creating an account, so
+                    // nothing else to do but exit.
+                    this.application.quit();
+                }
             }
         } catch (Error e) {
             warning("Error opening Geary.Engine instance: %s", e.message);
         }
+
+        // Expunge any deleted accounts in the background, so we're
+        // not blocking the app continuing to open.
+        this.expunge_accounts.begin();
     }
 
     /**
@@ -338,8 +364,12 @@ public class GearyController : Geary.BaseObject {
      * re-opened.
      */
     public async void close_async() {
+        // Cancel internal processes early so they don't block
+        // shutdown
+        this.open_cancellable.cancel();
+        this.open_cancellable = null;
+
         Geary.Engine.instance.account_available.disconnect(on_account_available);
-        Geary.Engine.instance.account_unavailable.disconnect(on_account_unavailable);
         Geary.Engine.instance.untrusted_host.disconnect(on_untrusted_host);
 
         // Release folder and conversations in the main window
@@ -454,6 +484,9 @@ public class GearyController : Geary.BaseObject {
         this.account_manager.account_status_changed.disconnect(
             on_account_status_changed
         );
+        this.account_manager.account_removed.disconnect(
+            on_account_removed
+        );
         this.account_manager = null;
 
         this.application.remove_window(this.main_window);
@@ -462,16 +495,10 @@ public class GearyController : Geary.BaseObject {
 
         this.upgrade_dialog = null;
 
-        if (login_dialog != null) {
-            this.login_dialog.destroy();
-            this.login_dialog = null;
-        }
-
         this.current_account = null;
         this.current_folder = null;
 
         this.previous_non_search_folder = null;
-        this.validating_endpoints.clear();
 
         this.selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
         this.last_deleted_conversation = null;
@@ -508,16 +535,11 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    /**
-     * Closes an account and deletes it from disk.
-     */
-    public async void remove_account_async(Geary.AccountInformation info,
-                                           Cancellable? cancellable = null) {
+    /** Expunges removed accounts while the controller remains open. */
+    internal async void expunge_accounts() {
         try {
-            yield close_account(info);
-            this.application.engine.remove_account(info);
-            yield this.account_manager.remove_account(info, cancellable);
-        } catch (Error err) {
+            yield this.account_manager.expunge_accounts(this.open_cancellable);
+        } catch (GLib.Error err) {
             report_problem(
                 new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
             );
@@ -566,6 +588,7 @@ public class GearyController : Geary.BaseObject {
         add_window_accelerators(ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" });
         add_window_accelerators(ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" });
         add_window_accelerators(ACTION_UNDO, { "<Ctrl>Z" });
+        add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>Z" });
         add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "equal" });
         add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus", "minus" });
         add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0", "0" });
@@ -613,15 +636,15 @@ public class GearyController : Geary.BaseObject {
 
     private void on_untrusted_host(Geary.AccountInformation account,
                                    Geary.ServiceInformation service,
-                                   Geary.Endpoint.SecurityType security,
+                                   Geary.TlsNegotiationMethod method,
                                    TlsConnection cx) {
-        this.prompt_untrusted_host_async.begin(account, service, security, cx);
+        this.prompt_untrusted_host_async.begin(account, service, method, cx);
     }
 
     private async void
         prompt_untrusted_host_async(Geary.AccountInformation account,
                                     Geary.ServiceInformation service,
-                                    Geary.Endpoint.SecurityType security,
+                                    Geary.TlsNegotiationMethod method,
                                     TlsConnection cx) {
         // use a mutex to prevent multiple dialogs popping up at the same time
         int token = Geary.Nonblocking.Mutex.INVALID_TOKEN;
@@ -632,7 +655,7 @@ public class GearyController : Geary.BaseObject {
             return;
         }
 
-        yield locked_prompt_untrusted_host_async(account, service, security, cx);
+        yield locked_prompt_untrusted_host_async(account, service, method, cx);
 
         try {
             untrusted_host_prompt_mutex.release(ref token);
@@ -645,16 +668,20 @@ public class GearyController : Geary.BaseObject {
     private async void
         locked_prompt_untrusted_host_async(Geary.AccountInformation account,
                                            Geary.ServiceInformation service,
-                                           Geary.Endpoint.SecurityType security,
-                                           TlsConnection cx) {
+                                           Geary.TlsNegotiationMethod method,
+                                           GLib.TlsConnection cx) {
+        Geary.Endpoint endpoint = get_endpoint(account, service);
+
         // possible while waiting on mutex that this endpoint became trusted or untrusted
-        if (service.endpoint.trust_untrusted_host != Geary.Trillian.UNKNOWN)
+        if (endpoint == null ||
+            endpoint.trust_untrusted_host != Geary.Trillian.UNKNOWN) {
             return;
+        }
 
         // get GCR parameters
         Gcr.Certificate cert;
         string peer;
-        get_gcr_params(service.endpoint, out cert, out peer);
+        get_gcr_params(endpoint, out cert, out peer);
 
         // Geary allows for user to auto-revoke all questionable server certificates without
         // digging around in a keyring/pk manager
@@ -676,7 +703,7 @@ public class GearyController : Geary.BaseObject {
         try {
             if (gcr_trust_is_certificate_pinned(cert, GCR_PURPOSE_SERVER_AUTH, peer, null)) {
                 debug("Certificate for %s is pinned, accepting connection...", peer);
-                service.endpoint.trust_untrusted_host = Geary.Trillian.TRUE;
+                endpoint.trust_untrusted_host = Geary.Trillian.TRUE;
                 return;
             }
         } catch (Error err) {
@@ -684,20 +711,17 @@ public class GearyController : Geary.BaseObject {
                 peer, err.message);
         }
 
-        // if these are in validation, there are complex GTK and workflow issues from simply
-        // presenting the prompt now, so caller who connected will need to do it on their own dime
-        if (!this.validating_endpoints.contains(service.endpoint))
-            prompt_for_untrusted_host(main_window, account, service, false);
+        prompt_for_untrusted_host(main_window, account, service, false);
     }
 
     private void prompt_for_untrusted_host(Gtk.Window? parent,
                                            Geary.AccountInformation account,
                                            Geary.ServiceInformation service,
                                            bool is_validation) {
+        Geary.Endpoint endpoint = get_endpoint(account, service);
         CertificateWarningDialog dialog = new CertificateWarningDialog(
-            parent, account, service, is_validation
+            parent, account, service, endpoint, is_validation
         );
-        Geary.Endpoint endpoint = service.endpoint;
         switch (dialog.run()) {
             case CertificateWarningDialog.Result.TRUST:
                 endpoint.trust_untrusted_host = Geary.Trillian.TRUE;
@@ -731,23 +755,6 @@ public class GearyController : Geary.BaseObject {
             break;
         }
     }
-    
-    private void create_account() {
-        Geary.AccountInformation? account_information = request_account_information(null);
-        if (account_information != null)
-            do_validate_until_successful_async.begin(account_information);
-    }
-    
-    private async void do_validate_until_successful_async(Geary.AccountInformation account_information,
-        Cancellable? cancellable = null) {
-        Geary.AccountInformation? result = account_information;
-        do {
-            result = yield validate_or_retry_async(result, cancellable);
-        } while (result != null);
-        
-        if (login_dialog != null)
-            login_dialog.hide();
-    }
 
     // Returns possibly modified validation results
     private Geary.Engine.ValidationResult validation_check_endpoint_for_tls_warnings(
@@ -758,12 +765,12 @@ public class GearyController : Geary.BaseObject {
 
         // use LoginDialog for parent only if available and visible
         Gtk.Window? parent;
-        if (login_dialog != null && login_dialog.visible)
-            parent = login_dialog;
-        else
+        //if (login_dialog != null && login_dialog.visible)
+        //    parent = login_dialog;
+        //else
             parent = main_window;
 
-        Geary.Endpoint endpoint = service.endpoint;
+        Geary.Endpoint endpoint = get_endpoint(account, service);
 
         // If Endpoint had unresolved TLS issues, prompt user about them
         if (endpoint.tls_validation_warnings != 0 && endpoint.trust_untrusted_host != Geary.Trillian.TRUE) {
@@ -792,7 +799,7 @@ public class GearyController : Geary.BaseObject {
     //
     // Returns possibly modified validation results
     public async Geary.Engine.ValidationResult validation_check_for_tls_warnings_async(
-        Geary.AccountInformation account, Geary.Engine.ValidationResult validation_result,
+        Geary.AccountInformation config, Geary.Engine.ValidationResult validation_result,
         out bool retry_required) {
         retry_required = false;
 
@@ -804,8 +811,8 @@ public class GearyController : Geary.BaseObject {
         // check each service for problems, prompting user each time for verification
         bool imap_prompted, imap_retry_required;
         validation_result = validation_check_endpoint_for_tls_warnings(
-            account,
-            account.imap,
+            config,
+            config.incoming,
             validation_result,
             out imap_prompted,
             out imap_retry_required
@@ -813,17 +820,19 @@ public class GearyController : Geary.BaseObject {
 
         bool smtp_prompted, smtp_retry_required;
         validation_result = validation_check_endpoint_for_tls_warnings(
-            account,
-            account.smtp,
+            config,
+            config.outgoing,
             validation_result,
             out smtp_prompted,
             out smtp_retry_required
         );
 
-        // if prompted for user acceptance of bad certificates and they agreed to both, try again
+        // if prompted for user acceptance of bad certificates and
+        // they agreed to both, try again
+        Geary.Account account = this.accounts.get(config).account;
         if (imap_prompted && smtp_prompted
-            && account.imap.endpoint.is_trusted_or_never_connected
-            && account.smtp.endpoint.is_trusted_or_never_connected) {
+            && account.incoming.remote.is_trusted_or_never_connected
+            && account.outgoing.remote.is_trusted_or_never_connected) {
             retry_required = true;
         } else if (validation_result == Geary.Engine.ValidationResult.OK) {
             retry_required = true;
@@ -831,155 +840,8 @@ public class GearyController : Geary.BaseObject {
             // if prompt requires retry or otherwise detected it, retry
             retry_required = imap_retry_required && smtp_retry_required;
         }
-        
+
         return validation_result;
-    }
-    
-    // Returns null if we are done validating, or the revised account information if we should retry.
-    private async Geary.AccountInformation? validate_or_retry_async(Geary.AccountInformation account_information,
-        Cancellable? cancellable = null) {
-        Geary.Engine.ValidationResult result = yield validate_async(account_information,
-            Geary.Engine.ValidationOption.CHECK_CONNECTIONS, cancellable);
-        if (result == Geary.Engine.ValidationResult.OK)
-            return null;
-        
-        // check Endpoints for trust (TLS) issues
-        bool retry_required;
-        result = yield validation_check_for_tls_warnings_async(account_information, result,
-            out retry_required);
-        
-        // return for retry if required; check can also change validation results, in which case
-        // revalidate entirely to have them written out
-        if (retry_required)
-            return account_information;
-        
-        debug("Validation failed. Prompting user for revised account information");
-        Geary.AccountInformation? new_account_information =
-            request_account_information(account_information, result);
-        
-        // If the user refused to enter account information. There is currently no way that we
-        // could see this--we exit in request_account_information, and the only way that an
-        // exit could be canceled is if there are unsaved composer windows open (which won't
-        // happen before an account is created). However, best to include this check for the
-        // future.
-        if (new_account_information == null)
-            return null;
-        
-        debug("User entered revised account information, retrying validation");
-        return new_account_information;
-    }
-    
-    // Attempts to validate and add an account.  Returns a result code indicating
-    // success or one or more errors.
-    public async Geary.Engine.ValidationResult validate_async(
-        Geary.AccountInformation account_information, Geary.Engine.ValidationOption options,
-        Cancellable? cancellable = null) {
-        // add Endpoints to set of validating endpoints to prevent the prompt from appearing
-        validating_endpoints.add(account_information.imap.endpoint);
-        validating_endpoints.add(account_information.smtp.endpoint);
-
-        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK;
-        try {
-            result = yield Geary.Engine.instance.validate_account_information_async(account_information,
-                options, cancellable);
-        } catch (Error err) {
-            debug("Error validating account: %s", err.message);
-            this.application.exit(-1); // Fatal error
-
-            return result;
-        }
-
-        validating_endpoints.remove(account_information.imap.endpoint);
-        validating_endpoints.remove(account_information.smtp.endpoint);
-
-        if (result == Geary.Engine.ValidationResult.OK) {
-            Geary.AccountInformation real_account_information = account_information;
-            if (account_information.is_copy) {
-                // We have a temporary copy of the account.  Find the "real" acct info object and
-                // copy the new data into it.
-                real_account_information = get_real_account_information(account_information);
-                real_account_information.copy_from(account_information);
-            }
-
-            try {
-                if (real_account_information.settings_file == null) {
-                    yield this.account_manager.create_account(
-                        real_account_information, cancellable
-                    );
-                } else {
-                    yield this.account_manager.save_account(
-                        real_account_information, cancellable
-                    );
-                }
-                debug("Successfully validated account information");
-            } catch (GLib.Error err) {
-                report_problem(
-                    new Geary.ProblemReport(
-                        Geary.ProblemType.GENERIC_ERROR, err
-                    )
-                );
-            }
-        }
-
-        return result;
-    }
-    
-    // Returns the "real" account info associated with a copy.  If it's not a copy, null is returned.
-    public Geary.AccountInformation? get_real_account_information(
-        Geary.AccountInformation account_information) {
-        if (account_information.is_copy) {
-            try {
-                 return Geary.Engine.instance.get_accounts().get(account_information.id);
-            } catch (Error e) {
-                error("Account information is out of sync: %s", e.message);
-            }
-        }
-        
-        return null;
-    }
-    
-    // Prompt the user for a service, real name, username, and password, and try to start Geary.
-    private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info,
-        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
-        Geary.AccountInformation? new_info = old_info;
-        if (login_dialog == null) {
-            // Create here so we know GTK is initialized.
-            login_dialog = new LoginDialog(this.application);
-        } else if (!login_dialog.get_visible()) {
-            // If the dialog has been dismissed, exit here.
-            this.application.exit();
-            return null;
-        }
-        
-        if (new_info != null)
-            login_dialog.set_account_information(new_info, result);
-        
-        login_dialog.present();
-        for (;;) {
-            login_dialog.show_spinner(false);
-            if (login_dialog.run() != Gtk.ResponseType.OK) {
-                debug("User refused to enter account information. Exiting...");
-                this.application.exit(1);
-                return null;
-            }
-            
-            login_dialog.show_spinner(true);
-            new_info = login_dialog.get_account_information();
-            
-            if ((!new_info.imap.use_ssl && !new_info.imap.use_starttls)
-                || (!new_info.smtp.use_ssl && !new_info.smtp.use_starttls)) {
-                ConfirmationDialog security_dialog = new ConfirmationDialog(main_window,
-                    _("Your settings are insecure"),
-                    _("Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your username and password could be read by another person on the network.  Are you sure you want to do this?"),
-                    _("Co_ntinue"));
-                if (security_dialog.run() != Gtk.ResponseType.OK)
-                    continue;
-            }
-            
-            break;
-        }
-        
-        return new_info;
     }
 
     private void report_problem(Geary.ProblemReport report) {
@@ -1001,21 +863,15 @@ public class GearyController : Geary.BaseObject {
             info_bar.report as Geary.ServiceProblemReport;
         Error retry_err = null;
         if (service_report != null) {
-            Geary.Account? account = null;
-            try {
-                account = this.application.engine.get_account_instance(
-                    service_report.account
-                );
-            } catch (Error err) {
-                debug("Error getting account for error retry: %s", err.message);
-            }
-
-            if (account != null && account.is_open()) {
+            AccountContext? context = this.accounts.get(service_report.account);
+            if (context != null && context.account.is_open()) {
                 switch (service_report.service.protocol) {
                 case Geary.Protocol.IMAP:
-                    account.start_incoming_client.begin((obj, ret) => {
+                    context.account.incoming.start.begin(
+                        context.cancellable,
+                        (obj, ret) => {
                             try {
-                                account.start_incoming_client.end(ret);
+                                context.account.incoming.start.end(ret);
                             } catch (Error err) {
                                 retry_err = err;
                             }
@@ -1023,9 +879,11 @@ public class GearyController : Geary.BaseObject {
                     break;
 
                 case Geary.Protocol.SMTP:
-                    account.start_outgoing_client.begin((obj, ret) => {
+                    context.account.outgoing.start.begin(
+                        context.cancellable,
+                        (obj, ret) => {
                             try {
-                                account.start_outgoing_client.end(ret);
+                                context.account.outgoing.start.end(ret);
                             } catch (Error err) {
                                 retry_err = err;
                             }
@@ -1090,7 +948,7 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_report_problem(Geary.Account account, Geary.ProblemReport problem) {
+    private void on_report_problem(Geary.ProblemReport problem) {
         report_problem(problem);
     }
 
@@ -1604,23 +1462,6 @@ public class GearyController : Geary.BaseObject {
                 folder, this.accounts.get(info).cancellable
             );
         }
-
-        this.account_manager.save_account.begin(
-            info, null,
-            (obj, res) => {
-                try {
-                    this.account_manager.save_account.end(res);
-                } catch (GLib.Error err) {
-                    report_problem(
-                        new Geary.AccountProblemReport(
-                            Geary.ProblemType.GENERIC_ERROR,
-                            info,
-                            err
-                        )
-                    );
-                }
-            }
-        );
     }
 
     private void on_folders_available_unavailable(Geary.Account account,
@@ -3046,10 +2887,19 @@ public class GearyController : Geary.BaseObject {
         return selected_conversations.read_only_view;
     }
 
-    private static void get_gcr_params(Geary.Endpoint endpoint, out Gcr.Certificate cert,
-        out string peer) {
-        cert = new Gcr.SimpleCertificate(endpoint.untrusted_certificate.certificate.data);
-        peer = "%s:%u".printf(endpoint.remote_address.hostname, endpoint.remote_address.port);
+    private inline Geary.Endpoint? get_endpoint(Geary.AccountInformation config,
+                                               Geary.ServiceInformation service) {
+        Geary.Account account = this.accounts.get(config).account;
+        Geary.Endpoint? endpoint = null;
+        switch (service.protocol) {
+        case Geary.Protocol.IMAP:
+            endpoint = account.incoming.remote;
+            break;
+        case Geary.Protocol.SMTP:
+            endpoint = account.outgoing.remote;
+            break;
+        }
+        return endpoint;
     }
 
     private inline Geary.App.EmailStore get_store_for_folder(Geary.Folder target) {
@@ -3071,8 +2921,8 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_account_added(Geary.AccountInformation added,
-                                  AccountManager.Status status) {
-        if (status == AccountManager.Status.ENABLED) {
+                                  Accounts.Manager.Status status) {
+        if (status == Accounts.Manager.Status.ENABLED) {
             try {
                 this.application.engine.add_account(added);
             } catch (GLib.Error err) {
@@ -3086,9 +2936,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_account_status_changed(Geary.AccountInformation changed,
-                                           AccountManager.Status status) {
+                                           Accounts.Manager.Status status) {
         switch (status) {
-        case AccountManager.Status.ENABLED:
+        case Accounts.Manager.Status.ENABLED:
             if (!this.application.engine.has_account(changed.id)) {
                 try {
                     this.application.engine.add_account(changed);
@@ -3102,8 +2952,8 @@ public class GearyController : Geary.BaseObject {
             }
             break;
 
-        case AccountManager.Status.UNAVAILABLE:
-        case AccountManager.Status.DISABLED:
+        case Accounts.Manager.Status.UNAVAILABLE:
+        case Accounts.Manager.Status.DISABLED:
             if (this.application.engine.has_account(changed.id)) {
                 this.close_account.begin(
                     changed,
@@ -3127,6 +2977,29 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
+    private void on_account_removed(Geary.AccountInformation removed) {
+        debug("%s: Closing account for removal", removed.id);
+        this.close_account.begin(
+            removed,
+            (obj, res) => {
+                this.close_account.end(res);
+                debug("%s: Account closed", removed.id);
+                try {
+                    this.application.engine.remove_account(removed);
+                    debug("%s: Account removed from engine", removed.id);
+                } catch (GLib.Error err) {
+                    report_problem(
+                        new Geary.AccountProblemReport(
+                            Geary.ProblemType.GENERIC_ERROR,
+                            removed,
+                            err
+                        )
+                    );
+                }
+            }
+        );
+    }
+
     private void on_scan_completed() {
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
@@ -3144,14 +3017,10 @@ public class GearyController : Geary.BaseObject {
             new Geary.ServiceProblemReport(
                 Geary.ProblemType.GENERIC_ERROR,
                 account,
-                account.imap,
+                account.incoming,
                 err
             )
         );
-    }
-
-    private void on_account_unavailable(Geary.AccountInformation info) {
-        this.close_account.begin(info);
     }
 
     private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {

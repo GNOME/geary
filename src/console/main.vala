@@ -11,6 +11,8 @@ errordomain CommandException {
     STATE
 }
 
+const int IMAP_TIMEOUT_SEC = 60 * 15;
+
 class ImapConsole : Gtk.Window {
     private const int KEEPALIVE_SEC = 60 * 10;
 
@@ -302,15 +304,19 @@ class ImapConsole : Gtk.Window {
 
         check_args(cmd, args, 1, "hostname[:port]");
 
-        Geary.Endpoint.Flags flags = Geary.Endpoint.Flags.NONE;
-        if (cmd != "unsecure")
-            flags |= Geary.Endpoint.Flags.SSL;
+        Geary.TlsNegotiationMethod method = Geary.TlsNegotiationMethod.TRANSPORT;
+        if (cmd == "unsecure") {
+            method = Geary.TlsNegotiationMethod.START_TLS;
+        }
 
         cx = new Geary.Imap.ClientConnection(
-            new Geary.Endpoint(args[0], Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
-                flags, Geary.Imap.ClientConnection.DEFAULT_TIMEOUT_SEC));
-
-        cx.received_status_response.connect(() => status("Done"));
+            new Geary.Endpoint(
+                args[0],
+                Geary.Imap.IMAP_TLS_PORT,
+                method,
+                IMAP_TIMEOUT_SEC
+            )
+        );
 
         cx.sent_command.connect(on_sent_command);
         cx.received_status_response.connect(on_received_status_response);

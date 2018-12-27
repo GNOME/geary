@@ -27,7 +27,10 @@ public abstract class Geary.Account : BaseObject {
     internal const uint AUTH_ATTEMPTS_MAX = 3;
 
 
-    public Geary.AccountInformation information { get; protected set; }
+    /**
+     * The account's current configuration.
+     */
+    public AccountInformation information { get; protected set; }
 
     /**
      * Determines if this account appears to be online.
@@ -41,11 +44,24 @@ public abstract class Geary.Account : BaseObject {
      */
     public abstract bool is_online { get; protected set; }
 
+    /**
+     * The service manager for the incoming email service.
+     */
+    public abstract ClientService incoming { get; }
+
+    /**
+     * The service manager for the outgoing email service.
+     */
+    public abstract ClientService outgoing { get; }
+
     public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_vacuum_monitor { get; protected set; }
     public Geary.ProgressMonitor opening_monitor { get; protected set; }
     public Geary.ProgressMonitor sending_monitor { get; protected set; }
+
+    protected string id { get; private set; }
+
 
     public signal void opened();
     
@@ -156,12 +172,13 @@ public abstract class Geary.Account : BaseObject {
      */
     public signal void email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
-    
-    private string name;
-    
-    protected Account(string name, AccountInformation information) {
-        this.name = name;
+
+
+    protected Account(AccountInformation information) {
         this.information = information;
+        this.id = "%s[%s]".printf(
+            information.id, information.service_provider.to_value()
+        );
     }
 
     /**
@@ -220,26 +237,6 @@ public abstract class Geary.Account : BaseObject {
      * Unlike most methods in Account, this should only be called when the Account is closed.
      */
     public abstract async void rebuild_async(Cancellable? cancellable = null) throws Error;
-
-    /**
-     * Starts delivery of messages to the outgoing server.
-     *
-     * Outgoing delivery will be started by default when the account
-     * is opened. This method is mostly useful when re-starting it
-     * after an error has occurred.
-     */
-    public abstract async void start_outgoing_client()
-        throws Error;
-
-    /**
-     * Starts receiving messages from the incoming server.
-     *
-     * The incoming client will be started by default when the account
-     * is opened. This method is mostly useful when re-starting it
-     * after an error has occurred.
-     */
-    public abstract async void start_incoming_client()
-        throws Error;
 
     /**
      * Lists all the currently-available folders found under the parent path
@@ -389,7 +386,7 @@ public abstract class Geary.Account : BaseObject {
      * Used only for debugging.  Should not be used for user-visible strings.
      */
     public virtual string to_string() {
-        return name;
+        return this.id;
     }
 
     /** Fires a {@link opened} signal. */

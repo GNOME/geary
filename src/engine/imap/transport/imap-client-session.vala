@@ -896,48 +896,45 @@ public class Geary.Imap.ClientSession : BaseObject {
         // If no capabilities available, get them now
         if (capabilities.is_empty())
             yield send_command_async(new CapabilityCommand());
-        
+
         // store them for comparison later
         Imap.Capabilities caps = capabilities;
-        
-        debug("[%s] use_starttls=%s is_ssl=%s starttls=%s", to_string(), imap_endpoint.use_starttls.to_string(),
-            imap_endpoint.is_ssl.to_string(), caps.has_capability(Capabilities.STARTTLS).to_string());
-        switch (imap_endpoint.attempt_starttls(caps.has_capability(Capabilities.STARTTLS))) {
-            case Endpoint.AttemptStarttls.YES:
-                debug("[%s] Attempting STARTTLS...", to_string());
-                StatusResponse resp;
-                try {
-                    resp = yield send_command_async(new StarttlsCommand());
-                } catch (Error err) {
-                    debug("Error attempting STARTTLS command on %s: %s", to_string(), err.message);
-                    
-                    throw err;
-                }
-                
-                if (resp.status == Status.OK) {
-                    yield cx.starttls_async(cancellable);
-                    debug("[%s] STARTTLS completed", to_string());
-                } else {
-                    debug("[%s} STARTTLS refused: %s", to_string(), resp.status.to_string());
-                    
-                    // throw an exception and fail rather than send credentials under suspect
-                    // conditions
-                    throw new ImapError.NOT_SUPPORTED("STARTTLS refused by %s: %s", to_string(),
-                        resp.status.to_string());
-                }
-            break;
-            
-            case Endpoint.AttemptStarttls.NO:
-                debug("[%s] No STARTTLS attempted", to_string());
-            break;
-            
-            case Endpoint.AttemptStarttls.HALT:
-                throw new ImapError.NOT_SUPPORTED("STARTTLS unavailable for %s", to_string());
-            
-            default:
-                assert_not_reached();
+
+        if (imap_endpoint.tls_method == TlsNegotiationMethod.START_TLS) {
+            if (!caps.has_capability(Capabilities.STARTTLS)) {
+                throw new ImapError.NOT_SUPPORTED(
+                    "STARTTLS unavailable for %s", to_string());
+            }
+
+            debug("[%s] Attempting STARTTLS...", to_string());
+            StatusResponse resp;
+            try {
+                resp = yield send_command_async(new StarttlsCommand());
+            } catch (Error err) {
+                debug(
+                    "Error attempting STARTTLS command on %s: %s",
+                    to_string(), err.message
+                );
+                throw err;
+            }
+
+            if (resp.status == Status.OK) {
+                yield cx.starttls_async(cancellable);
+                debug("[%s] STARTTLS completed", to_string());
+            } else {
+                debug(
+                    "[%s} STARTTLS refused: %s",
+                    to_string(), resp.status.to_string()
+                );
+                // Throw an exception and fail rather than send
+                // credentials under suspect conditions
+                throw new ImapError.NOT_SUPPORTED(
+                    "STARTTLS refused by %s: %s", to_string(),
+                    resp.status.to_string()
+                );
+            }
         }
-        
+
         // Login after STARTTLS
         StatusResponse login_resp = yield login_async(credentials, cancellable);
         if (login_resp.status != Status.OK) {

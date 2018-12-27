@@ -71,10 +71,11 @@ public class Geary.ImapEngine.AccountProcessorTest : TestCase {
     public override void set_up() {
         this.info = new Geary.AccountInformation(
             "test-info",
-            new MockServiceInformation(),
-            new MockServiceInformation()
+            ServiceProvider.OTHER,
+            new MockCredentialsMediator(),
+            new RFC822.MailboxAddress(null, "test1@example.com")
         );
-        this.account = new Geary.MockAccount("test-account", this.info);
+        this.account = new Geary.MockAccount(this.info);
 
         this.succeeded = 0;
         this.failed = 0;

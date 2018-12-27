@@ -51,6 +51,7 @@ subdir('mailer')
 # Web process extension library
 geary_web_process = library('geary-web-process',
   join_paths('client', 'web-process', 'web-process-extension.vala'),
+  c_args: geary_c_options,
   dependencies: [
     gee,
     gmime,

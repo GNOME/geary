@@ -26,7 +26,10 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     /** URI Scheme and delimiter for images loaded by Content-ID. */
     public const string CID_URL_PREFIX = "cid:";
 
+    // WebKit message handler names
+    private const string COMMAND_STACK_CHANGED = "commandStackChanged";
     private const string CONTENT_LOADED = "contentLoaded";
+    private const string DOCUMENT_MODIFIED = "documentModified";
     private const string PREFERRED_HEIGHT_CHANGED = "preferredHeightChanged";
     private const string REMOTE_IMAGE_LOAD_BLOCKED = "remoteImageLoadBlocked";
     private const string SELECTION_CHANGED = "selectionChanged";
@@ -260,6 +263,12 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      */
     public signal void content_loaded();
 
+    /** Emitted when the web view's undo/redo stack state changes. */
+    public signal void command_stack_changed(bool can_undo, bool can_redo);
+
+    /** Emitted when the web view's content has changed. */
+    public signal void document_modified();
+
     /** Emitted when the view's selection has changed. */
     public signal void selection_changed(bool has_selection);
 
@@ -309,7 +318,13 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
             });
 
         register_message_handler(
+            COMMAND_STACK_CHANGED, on_command_stack_changed
+        );
+        register_message_handler(
             CONTENT_LOADED, on_content_loaded
+        );
+        register_message_handler(
+            DOCUMENT_MODIFIED, on_document_modified
         );
         register_message_handler(
             PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
@@ -356,6 +371,15 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     public new void load_html(string? body, string? base_uri=null) {
         this.body = body;
         base.load_html(body, base_uri ?? INTERNAL_URL_BODY);
+    }
+
+    /**
+     * Returns the view's content as an HTML string.
+     */
+    public async string? get_html() throws Error {
+        return WebKitUtil.to_string(
+            yield call(Geary.JS.callable("geary.getHtml"), null)
+        );
     }
 
     /**
@@ -439,6 +463,14 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         }
         this.zoom_level = new_zoom;
         notify_property("preferred-height");
+    }
+
+    public new async void set_editable(bool enabled,
+                                       Cancellable? cancellable)
+        throws Error {
+        yield call(
+            Geary.JS.callable("geary.setEditable").bool(enabled), cancellable
+        );
     }
 
     /**
@@ -580,6 +612,19 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
             this.webkit_reported_height = height;
             notify_property("preferred-height");
         }
+    }
+
+    private void on_command_stack_changed(WebKit.JavascriptResult result) {
+        try {
+            string[] values = WebKitUtil.to_string(result).split(",");
+            command_stack_changed(values[0] == "true", values[1] == "true");
+        } catch (Geary.JS.Error err) {
+            debug("Could not get command stack state: %s", err.message);
+        }
+    }
+
+    private void on_document_modified(WebKit.JavascriptResult result) {
+        document_modified();
     }
 
     private void on_remote_image_load_blocked(WebKit.JavascriptResult result) {

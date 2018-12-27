@@ -30,10 +30,11 @@ class Geary.App.ConversationMonitorTest : TestCase {
     public override void set_up() {
         this.account_info = new AccountInformation(
             "account_01",
-            new MockServiceInformation(),
-            new MockServiceInformation()
+            ServiceProvider.OTHER,
+            new MockCredentialsMediator(),
+            new RFC822.MailboxAddress(null, "test1@example.com")
         );
-        this.account = new MockAccount("test", this.account_info);
+        this.account = new MockAccount(this.account_info);
         this.base_folder = new MockFolder(
             this.account,
             null,

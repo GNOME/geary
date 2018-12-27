@@ -121,11 +121,11 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         // Need to close it again to stop the GC process running
         db.close();
 
-        Geary.Files.recursive_delete_async.begin(
-            tmp_dir, null,
+        Files.recursive_delete_async.begin(
+            tmp_dir, GLib.Priority.DEFAULT, null,
             (obj, res) => { async_complete(res); }
         );
-        Geary.Files.recursive_delete_async.end(async_result());
+        Files.recursive_delete_async.end(async_result());
     }
 
 

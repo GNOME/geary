@@ -7,11 +7,20 @@
 
 /**
  * A simple ini-file-like configuration file.
+ *
+ * This class provides a convenient, high-level API for the {@link
+ * GLib.KeyFile} class.
  */
 public class Geary.ConfigFile {
 
 
-    /** A set of configuration items under a "[Name]" heading. */
+    /** A string parser that can be used to extract custom values. */
+    public delegate T Parser<T>(string value) throws GLib.KeyFileError;
+
+
+    /**
+     * A set of configuration keys grouped under a "[Name]" heading.
+     */
     public class Group {
 
 
@@ -31,6 +40,11 @@ public class Geary.ConfigFile {
 
         /** The name of this group, as specified by a [Name] heading. */
         public string name { get; private set; }
+
+        /** Determines if this group already exists in the config or not. */
+        public bool exists {
+            get { return this.backing.has_group(this.name); }
+        }
 
         private GLib.KeyFile backing;
         private GroupLookup[] lookups;
@@ -58,28 +72,17 @@ public class Geary.ConfigFile {
             this.lookups = { this.lookups[0], GroupLookup(group, prefix) };
         }
 
-
-        public string get_string(string key, string def = "") {
-            string ret = def;
-            foreach (GroupLookup lookup in this.lookups) {
-                try {
-                    ret = this.backing.get_value(
-                        lookup.group, lookup.prefix + key
-                    );
-                    break;
-                } catch (GLib.KeyFileError err) {
-                    // continue
-                }
+        /** Determines if this group as a specific config key set. */
+        public bool has_key(string name) {
+            try {
+                return this.backing.has_key(this.name, name);
+            } catch (GLib.Error err) {
+                return false;
             }
-            return ret;
         }
 
-        public void set_string(string key, string value) {
-            this.backing.set_value(this.name, key, value);
-        }
-
-        public string get_escaped_string(string key, string def = "") {
-            string ret = def;
+        public string? get_string(string key, string? def = null) {
+            string? ret = def;
             foreach (GroupLookup lookup in this.lookups) {
                 try {
                     ret = this.backing.get_string(
@@ -93,7 +96,32 @@ public class Geary.ConfigFile {
             return ret;
         }
 
-        public void set_escaped_string(string key, string value) {
+        public string get_required_string(string key)
+            throws GLib.KeyFileError {
+            string? ret = null;
+            GLib.KeyFileError? key_err = null;
+            foreach (GroupLookup lookup in this.lookups) {
+                try {
+                    ret = this.backing.get_string(
+                        lookup.group, lookup.prefix + key
+                    );
+                    break;
+                } catch (GLib.KeyFileError err) {
+                    if (key_err == null) {
+                        key_err = err;
+                    }
+                    // continue
+                }
+            }
+
+            if (key_err != null) {
+                throw key_err;
+            }
+
+            return ret;
+        }
+
+        public void set_string(string key, string value) {
             this.backing.set_string(this.name, key, value);
         }
 
@@ -106,6 +134,12 @@ public class Geary.ConfigFile {
                 // Oh well
             }
             return new Gee.ArrayList<string>();
+        }
+
+        public Gee.List<string> get_required_string_list(string key)
+            throws GLib.KeyFileError {
+            string[] list = this.backing.get_string_list(this.name, key);
+            return Geary.Collection.array_list_wrap<string>(list);
         }
 
         public void set_string_list(string key, Gee.List<string> value) {
@@ -158,8 +192,48 @@ public class Geary.ConfigFile {
             this.backing.set_integer(this.name, key, (int) value);
         }
 
+        public T? parse_value<T>(string key, Parser<T> parser, T? def = null) {
+            T value = def;
+            string? str = get_string(key);
+            if (str != null) {
+                try {
+                    value = parser(str);
+                } catch (GLib.KeyFileError err) {
+                    debug(
+                        "%s:%s value is invalid: %s", this.name, key, err.message
+                    );
+                }
+            }
+            return value;
+        }
+
+        public T parse_required_value<T>(string key, Parser<T> parser)
+            throws GLib.KeyFileError {
+            string? str = get_required_string(key);
+            try {
+                return parser(str);
+            } catch (GLib.KeyFileError err) {
+                throw new GLib.KeyFileError.INVALID_VALUE(
+                    "%s:%s value is invalid: %s", this.name, key, err.message
+                );
+            }
+        }
+
+        /** Removes a key from this group. */
+        public void remove_key(string name) throws GLib.KeyFileError {
+            this.backing.remove_key(this.name, name);
+        }
+
+        /** Removes this group from the config file. */
+        public void remove() throws GLib.KeyFileError {
+            this.backing.remove_group(this.name);
+        }
+
     }
 
+
+    /** The file this config will be read from and written to. */
+    public GLib.File file { get { return this.config_file; } }
 
     private GLib.File config_file;
     private GLib.KeyFile backing = new KeyFile();
@@ -173,7 +247,12 @@ public class Geary.ConfigFile {
     }
 
     /**
-     * Returns the config group under the given named heading.
+     * Returns the config key group under the given heading name.
+     *
+     * If the group does not already exist, it will be created when a
+     * key is first set, but an error will be thrown if a value is
+     * accessed from it before doing so. Use {@link Group.exists} to
+     * determine if the group has previously been created.
      */
     public Group get_group(string name) {
         return new Group(this, name, this.backing);

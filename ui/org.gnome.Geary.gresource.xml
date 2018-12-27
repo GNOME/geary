@@ -1,9 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <gresources>
   <gresource prefix="/org/gnome/Geary">
-    <file compressed="true" preprocess="xml-stripblanks">account_cannot_remove.glade</file>
-    <file compressed="true" preprocess="xml-stripblanks">account_list.glade</file>
-    <file compressed="true" preprocess="xml-stripblanks">account_spinner.glade</file>
+    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_add_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_edit_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_list_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_remove_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_servers_pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">certificate_warning_dialog.glade</file>
     <file compressed="true">client-web-view.js</file>
     <file compressed="true">client-web-view-allow-remote-images.js</file>
@@ -21,21 +23,18 @@
     <file compressed="true" preprocess="xml-stripblanks">conversation-viewer.ui</file>
     <file compressed="true">conversation-web-view.css</file>
     <file compressed="true">conversation-web-view.js</file>
-    <file compressed="true" preprocess="xml-stripblanks">edit_alternate_emails.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">empty-placeholder.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">find_bar.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">folder-popover.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtk/menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">in-app-notification.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">login.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">main-toolbar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">main-toolbar-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">main-window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">main-window-info-bar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">password-dialog.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">preferences-dialog.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">remove_confirm.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">upgrade_dialog.glade</file>
     <file compressed="true">geary.css</file>
   </gresource>

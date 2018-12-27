@@ -79,12 +79,12 @@ public class SearchBar : Gtk.SearchBar {
             search_upgrade_progress_monitor.finish.disconnect(on_search_upgrade_finished);
             search_upgrade_progress_monitor = null;
         }
-        
+
         if (current_account != null) {
-            current_account.information.notify[Geary.AccountInformation.PROP_NICKNAME].disconnect(
-                on_nickname_changed);
+            current_account.information.changed.disconnect(
+                on_information_changed);
         }
-        
+
         if (account != null) {
             search_upgrade_progress_monitor = account.search_upgrade_monitor;
             search_upgrade_progress_bar.set_progress_monitor(search_upgrade_progress_monitor);
@@ -93,21 +93,23 @@ public class SearchBar : Gtk.SearchBar {
             search_upgrade_progress_monitor.finish.connect(on_search_upgrade_finished);
             if (search_upgrade_progress_monitor.is_in_progress)
                 on_search_upgrade_start(); // Remove search box, we're already in progress.
-            
-            account.information.notify[Geary.AccountInformation.PROP_NICKNAME].connect(
-                on_nickname_changed);
-            
-            search_upgrade_progress_bar.text = _("Indexing %s account").printf(account.information.nickname);
+
+            account.information.changed.connect(
+                on_information_changed);
+
+            search_upgrade_progress_bar.text =
+                _("Indexing %s account").printf(account.information.display_name);
         }
-        
+
         current_account = account;
-        
-        on_nickname_changed(); // Set new account name.
+
+        on_information_changed(); // Set new account name.
     }
-    
-    private void on_nickname_changed() {
+
+    private void on_information_changed() {
         set_search_placeholder_text(current_account == null ||
             GearyApplication.instance.controller.get_num_accounts() == 1 ? DEFAULT_SEARCH_TEXT :
-            _("Search %s account").printf(current_account.information.nickname));
+            _("Search %s account").printf(current_account.information.display_name));
     }
+
 }

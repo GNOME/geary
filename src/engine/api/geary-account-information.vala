@@ -1,26 +1,19 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 public class Geary.AccountInformation : BaseObject {
 
-    /** Name of of the nickname property, for signal handlers. */
-    public const string PROP_NICKNAME = "nickname";
 
     public const int DEFAULT_PREFETCH_PERIOD_DAYS = 14;
 
-    public const string SETTINGS_FILENAME = "geary.ini";
 
-
+    /** The next ordinal that should be allocated for an account. */
     public static int next_ordinal = 0;
-
-
-    private static Gee.HashMap<string,weak Endpoint> known_endpoints =
-        new Gee.HashMap<string,weak Endpoint>();
-
 
     /** Comparator for account info objects based on their ordinals. */
     public static int compare_ascending(AccountInformation a, AccountInformation b) {
@@ -28,39 +21,172 @@ public class Geary.AccountInformation : BaseObject {
         if (diff != 0)
             return diff;
 
-        // Stabilize on nickname, which should always be unique.
+        // Stabilize on display name, which should always be unique.
         return a.display_name.collate(b.display_name);
     }
 
-    private static Geary.Endpoint get_shared_endpoint(ServiceInformation service,
-                                                      Endpoint endpoint) {
-        string key = "%s/%s:%u".printf(
-            service.protocol.user_label(),
-            endpoint.remote_address.hostname,
-            endpoint.remote_address.port
-        );
+    public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
+        if (parts == null || parts.size == 0)
+            return null;
 
-        weak Endpoint? cached = AccountInformation.known_endpoints.get(key);
-        weak Endpoint? shared = endpoint;
-        if (cached != null) {
-            shared = cached;
-            AccountInformation.known_endpoints.set(key, shared);
-        }
-
-        return shared;
+        Geary.FolderPath path = new Imap.FolderRoot(parts[0]);
+        for (int i = 1; i < parts.size; i++)
+            path = path.get_child(parts.get(i));
+        return path;
     }
 
 
-    /** Location of the account information's settings key file. */
-    public File? settings_file {
+    /** A unique (engine-wide), opaque identifier for the account. */
+    public string id { get; private set; }
+
+    /** A unique (engine-wide) ordering for the account. */
+    public int ordinal {
+        get; set; default = AccountInformation.next_ordinal++;
+    }
+
+    /** Specifies the email provider for this account. */
+    public Geary.ServiceProvider service_provider { get; private set; }
+
+    /**
+     * A human-readable label describing the email service provider.
+     *
+     * Known providers such as Gmail will have a label specified by
+     * clients, but other accounts can only really be identified by
+     * their server names. This attempts to extract a 'nice' value for
+     * label based on the service's host names.
+     */
+    public string service_label {
         owned get {
-            File? settings = null;
-            if (this.config_dir != null) {
-                settings = this.config_dir.get_child(SETTINGS_FILENAME);
+            string? value = this._service_label;
+            if (value == null) {
+                string[] host_parts = this.incoming.host.split(".");
+                if (host_parts.length > 1) {
+                    host_parts = host_parts[1:host_parts.length];
+                }
+                // don't stash this in _service_label since we want it
+                // updated if the service host names change
+                value = string.joinv(".", host_parts);
             }
-            return settings;
+            return value;
+        }
+        set { this._service_label = value; }
+    }
+    private string? _service_label = null;
+
+    /**
+     * A unique human-readable display name for this account.
+     *
+     * Use this to display a string to the user that can uniquely
+     * identify this account. Note this value is mutable - it may
+     * change as a result of user action, so do not rely on it staying
+     * the same.
+     */
+    public string display_name {
+        get {
+            return (!String.is_empty_or_whitespace(this.label))
+                ? this.label
+                : this.primary_mailbox.address;
         }
     }
+
+    /**
+     * User-provided label for the account.
+     *
+     * This is not to be used in the UI (use `display_name` instead)
+     * and not transmitted on the wire or used in correspondence.
+     */
+    public string label { get; set; default = ""; }
+
+    /**
+     * The default sender mailbox address for the account.
+     *
+     * This is the first mailbox in the {@link sender_mailboxes} list.
+     */
+    public Geary.RFC822.MailboxAddress primary_mailbox {
+        owned get { return this.sender_mailboxes.get(0); }
+    }
+
+    /**
+     * A read-only list of sender mailbox address for the account.
+     *
+     * The first address in the list is the default address, others
+     * are essentially aliases.
+     */
+    public Gee.List<Geary.RFC822.MailboxAddress>? sender_mailboxes {
+        owned get { return this.mailboxes.read_only_view; }
+    }
+
+    /** Determines if the account has more than one sender mailbox. */
+    public bool has_sender_aliases {
+        get { return this.sender_mailboxes.size > 1; }
+    }
+
+    /** Specifies the number of days to be fetched by the account sync. */
+    public int prefetch_period_days {
+        get; set; default = DEFAULT_PREFETCH_PERIOD_DAYS;
+    }
+
+    /**
+     * Specifies if the user has requested that sent mail be saved.
+     *
+     * Note that Geary will only actively push sent mail when this AND
+     * {@link allow_save_sent} are both true.
+     */
+    public bool save_sent {
+        // If we aren't allowed to save sent mail due to account type, we want
+        // to return true here on the assumption that the account will save
+        // sent mail for us, and thus the user can't disable sent mail from
+        // being saved.
+        get { return (allow_save_sent() ? this._save_sent : true); }
+        set { this._save_sent = value; }
+    }
+    private bool _save_sent = true;
+
+    /** Determines if drafts should be saved on the server. */
+    public bool save_drafts { get; set; default = true; }
+
+    /**
+     * The source of authentication credentials for this account.
+     */
+    public CredentialsMediator mediator { get; private set; }
+
+    /* Incoming email service configuration. */
+    public ServiceInformation incoming {
+        get; set;
+        default = new ServiceInformation(Protocol.IMAP);
+    }
+
+    /* Outgoing email service configuration. */
+    public ServiceInformation outgoing {
+        get; set;
+        default = new ServiceInformation(Protocol.SMTP);
+    }
+
+    /** A lock that can be used to ensure saving is serialised. */
+    public Nonblocking.Mutex write_lock {
+        get; private set; default = new Nonblocking.Mutex();
+    }
+
+    /** Specifies if an email sig should be appended to new messages. */
+    public bool use_signature { get; set; default = false; }
+
+    /** Specifies the email sig to be appended to new messages. */
+    public string signature { get; set; default = ""; }
+
+    /** Draft special folder path. */
+    public Geary.FolderPath? drafts_folder_path { get; set; default = null; }
+
+    /** Sent special folder path. */
+    public Geary.FolderPath? sent_folder_path { get; set; default = null; }
+
+    /** Spam special folder path. */
+    public Geary.FolderPath? spam_folder_path { get; set; default = null; }
+
+    /** Trash special folder path. */
+    public Geary.FolderPath? trash_folder_path { get; set; default = null; }
+
+    /** Archive special folder path. */
+    public Geary.FolderPath? archive_folder_path { get; set; default = null; }
 
     /**
      * Location of the account's config directory.
@@ -78,180 +204,72 @@ public class Geary.AccountInformation : BaseObject {
      */
     public File? data_dir { get; private set; default = null; }
 
-    //
-    // IMPORTANT: When adding new properties, be sure to add them to the copy method.
-    //
+    private Gee.List<Geary.RFC822.MailboxAddress> mailboxes {
+        get; private set;
+        default = new Gee.LinkedList<Geary.RFC822.MailboxAddress>();
+    }
+
 
     /**
-     * A unique, immutable, machine-readable identifier for this account.
+     * Emitted when a service has reported TLS certificate warnings.
      *
-     * This string's value should be treated as an opaque, private
-     * implementation detail and not parsed at all. For older accounts
-     * it will be an email address, for newer accounts it will be
-     * something else. Once created, this string will never change.
-     */
-    public string id { get; private set; }
-
-    /**
-     * A unique human-readable display name for this account.
-     *
-     * Use this to display a string to the user that can uniquely
-     * identify this account. Note this value is mutable - it may
-     * change as a result of user action, so do not rely on it staying
-     * the same.
-     */
-    public string display_name {
-        get {
-            return (!String.is_empty_or_whitespace(this.nickname))
-                ? this.nickname
-                : this.primary_mailbox.address;
-        }
-    }
-
-    /**
-     * User-provided label for the account.
-     *
-     * This is not to be used in the UI (use `display_name` instead)
-     * and not transmitted on the wire or used in correspondence.
-     */
-    public string nickname { get; set; default = ""; }
-
-    /**
-     * The default email address for the account.
-     */
-    public Geary.RFC822.MailboxAddress primary_mailbox {
-        get; set; default = new RFC822.MailboxAddress("", "");
-    }
-
-    /**
-     * A list of additional email addresses this account accepts.
-     *
-     * Use {@link add_alternate_mailbox} or {@link replace_alternate_mailboxes} rather than edit
-     * this collection directly.
-     *
-     * @see get_all_mailboxes
-     */
-    public Gee.List<Geary.RFC822.MailboxAddress>? alternate_mailboxes { get; private set; default = null; }
-
-    public Geary.ServiceProvider service_provider {
-        get; set; default = Geary.ServiceProvider.OTHER;
-    }
-    public int prefetch_period_days {
-        get; set; default = DEFAULT_PREFETCH_PERIOD_DAYS;
-    }
-
-    /**
-     * Whether the user has requested that sent mail be saved.  Note that Geary
-     * will only actively push sent mail when this AND allow_save_sent_mail()
-     * are both true.
-     */
-    public bool save_sent_mail {
-        // If we aren't allowed to save sent mail due to account type, we want
-        // to return true here on the assumption that the account will save
-        // sent mail for us, and thus the user can't disable sent mail from
-        // being saved.
-        get { return (allow_save_sent_mail() ? _save_sent_mail : true); }
-        set { _save_sent_mail = value; }
-    }
-
-    // Order for display purposes.
-    public int ordinal {
-        get; set; default = AccountInformation.next_ordinal++;
-    }
-
-    /* Information related to the account's server-side authentication
-     * and configuration. */
-    public ServiceInformation imap { get; private set; }
-    public ServiceInformation smtp { get; private set; }
-
-    /** A lock that can be used to ensure saving is serialised. */
-    public Nonblocking.Mutex write_lock {
-        get; private set; default = new Nonblocking.Mutex();
-    }
-
-    // These properties are only used if the service provider's
-    // account type does not override them.
-
-    public bool use_email_signature { get; set; default = false; }
-    public string email_signature { get; set; default = ""; }
-
-    public Geary.FolderPath? drafts_folder_path { get; set; default = null; }
-    public Geary.FolderPath? sent_mail_folder_path { get; set; default = null; }
-    public Geary.FolderPath? spam_folder_path { get; set; default = null; }
-    public Geary.FolderPath? trash_folder_path { get; set; default = null; }
-    public Geary.FolderPath? archive_folder_path { get; set; default = null; }
-
-    public bool save_drafts { get; set; default = true; }
-
-    public bool is_copy { get; set; default = false; }
-
-    private bool _save_sent_mail = true;
-
-
-    /**
-     * Indicates the supplied {@link Endpoint} has reported TLS certificate warnings during
-     * connection.
-     *
-     * Since this {@link Endpoint} persists for the lifetime of the {@link AccountInformation},
-     * marking it as trusted once will survive the application session.  It is up to the caller to
-     * pin the certificate appropriately if the user does not want to receive these warnings in
-     * the future.
+     * It is up to the caller to pin the certificate appropriately if
+     * the user does not want to receive these warnings in the future.
      */
     public signal void untrusted_host(ServiceInformation service,
-                                      Endpoint.SecurityType security,
-                                      TlsConnection cx);
+                                      TlsNegotiationMethod method,
+                                      GLib.TlsConnection cx);
 
-    /** Indicates that properties contained herein have changed. */
-    public signal void information_changed();
+    /** Emitted when the account settings have changed. */
+    public signal void changed();
 
     /**
-     * Creates a new, empty account info file.
+     * Creates a new account with default settings.
      */
     public AccountInformation(string id,
-                              ServiceInformation imap,
-                              ServiceInformation smtp) {
+                              ServiceProvider provider,
+                              CredentialsMediator mediator,
+                              RFC822.MailboxAddress primary_mailbox) {
         this.id = id;
-        this.imap = imap;
-        this.smtp = smtp;
+        this.mediator = mediator;
+        this.service_provider = provider;
+        append_sender(primary_mailbox);
     }
 
     /**
-     * Creates a copy of an instance.
+     * Creates a copy of an existing config.
      */
-    public AccountInformation.temp_copy(AccountInformation from) {
-        this(from.id, from.imap.temp_copy(), from.smtp.temp_copy());
-        copy_from(from);
-        this.is_copy = true;
-    }
-
-    ~AccountInformation() {
-        disconnect_endpoints();
-    }
-
-
-    /** Copies all properties from an instance into this one. */
-    public void copy_from(AccountInformation from) {
-        this.id = from.id;
-        this.nickname = from.nickname;
-        this.primary_mailbox = from.primary_mailbox;
-        if (from.alternate_mailboxes != null) {
-            foreach (RFC822.MailboxAddress alternate_mailbox in from.alternate_mailboxes)
-                add_alternate_mailbox(alternate_mailbox);
+    public AccountInformation.copy(AccountInformation other) {
+        this(
+            other.id,
+            other.service_provider,
+            other.mediator,
+            other.primary_mailbox
+        );
+        this.service_label = other.service_label;
+        this.label = other.label;
+        if (other.mailboxes.size > 1) {
+            this.mailboxes.add_all(
+                other.mailboxes.slice(1, other.mailboxes.size)
+            );
         }
-        this.service_provider = from.service_provider;
-        this.prefetch_period_days = from.prefetch_period_days;
-        this.save_sent_mail = from.save_sent_mail;
-        this.ordinal = from.ordinal;
-        this.imap.copy_from(from.imap);
-        this.smtp.copy_from(from.smtp);
-        this.drafts_folder_path = from.drafts_folder_path;
-        this.sent_mail_folder_path = from.sent_mail_folder_path;
-        this.spam_folder_path = from.spam_folder_path;
-        this.trash_folder_path = from.trash_folder_path;
-        this.archive_folder_path = from.archive_folder_path;
-        this.save_drafts = from.save_drafts;
-        this.use_email_signature = from.use_email_signature;
-        this.email_signature = from.email_signature;
+        this.prefetch_period_days = other.prefetch_period_days;
+        this.save_sent = other.save_sent;
+        this.save_drafts = other.save_drafts;
+        this.use_signature = other.use_signature;
+        this.signature = other.signature;
+
+        this.incoming = new ServiceInformation.copy(other.incoming);
+        this.outgoing = new ServiceInformation.copy(other.outgoing);
+
+        this.drafts_folder_path = other.drafts_folder_path;
+        this.sent_folder_path = other.sent_folder_path;
+        this.spam_folder_path = other.spam_folder_path;
+        this.trash_folder_path = other.trash_folder_path;
+        this.archive_folder_path = other.archive_folder_path;
+
+        this.config_dir = other.config_dir;
+        this.data_dir = other.data_dir;
     }
 
     /** Sets the location of the account's storage directories. */
@@ -261,178 +279,193 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     /**
-     * Return a list of the primary and all alternate email addresses.
-     */
-    public Gee.List<Geary.RFC822.MailboxAddress> get_all_mailboxes() {
-        Gee.ArrayList<RFC822.MailboxAddress> all = new Gee.ArrayList<RFC822.MailboxAddress>();
-
-        all.add(this.primary_mailbox);
-
-        if (alternate_mailboxes != null)
-            all.add_all(alternate_mailboxes);
-
-        return all;
-    }
-
-    /**
-     * Add an alternate email address to the account.
+     * Determines if a mailbox is in the sender mailbox list.
      *
-     * Duplicates will be ignored.
-     */
-    public void add_alternate_mailbox(Geary.RFC822.MailboxAddress mailbox) {
-        if (alternate_mailboxes == null)
-            alternate_mailboxes = new Gee.ArrayList<RFC822.MailboxAddress>();
-
-        if (!alternate_mailboxes.contains(mailbox))
-            alternate_mailboxes.add(mailbox);
-    }
-
-    /**
-     * Replaces the list of alternate email addresses with the supplied collection.
+     * Returns true if the given address is equal to one of the
+     * addresses in {@link sender_mailboxes}, by case-insensitive
+     * matching the address parts.
      *
-     * Duplicates will be ignored.
+     * @see Geary.RFC822.MailboxAddress.equal_to
      */
-    public void replace_alternate_mailboxes(Gee.Collection<Geary.RFC822.MailboxAddress>? mailboxes) {
-        alternate_mailboxes = null;
-
-        if (mailboxes == null || mailboxes.size == 0)
-            return;
-
-        foreach (RFC822.MailboxAddress mailbox in mailboxes)
-            add_alternate_mailbox(mailbox);
+    public bool has_sender_mailbox(Geary.RFC822.MailboxAddress email) {
+        return this.mailboxes.any_match((alt) => alt.equal_to(email));
     }
 
     /**
-     * Return whether this account allows setting the save_sent_mail option.
-     * If not, save_sent_mail will always be true and setting it will be
-     * ignored.
+     * Appends a mailbox to the list of sender mailboxes.
+     *
+     * Mailboxes with duplicate addresses will not be added.
+     *
+     * Returns true if the mailbox was appended.
      */
-    public bool allow_save_sent_mail() {
-        // We should never push mail to Gmail, since its servers automatically
-        // push sent mail to the sent mail folder.
-        return service_provider != ServiceProvider.GMAIL;
+    public bool append_sender(Geary.RFC822.MailboxAddress mailbox) {
+        bool add = !has_sender_mailbox(mailbox);
+        if (add) {
+            this.mailboxes.add(mailbox);
+        }
+        return add;
     }
-    
+
     /**
-     * Gets the path used when Geary has found or created a special folder for
-     * this account.  This will be null if Geary has always been told about the
-     * special folders by the server, and hasn't had to go looking for them.
-     * Only the DRAFTS, SENT, SPAM, and TRASH special folder types are valid to
-     * pass to this function.
+     * Inserts a mailbox into the list of sender mailboxes.
+     *
+     * Mailboxes with duplicate addresses will not be added.
+     *
+     * Returns true if the mailbox was inserted.
+     */
+    public bool insert_sender(int index, Geary.RFC822.MailboxAddress mailbox) {
+        bool add = !has_sender_mailbox(mailbox);
+        if (add) {
+            this.mailboxes.insert(index, mailbox);
+        }
+        return add;
+    }
+
+    /**
+     * Removes a mailbox from the list of sender mailboxes.
+     *
+     * The last mailbox cannot be removed.
+     *
+     * Returns true if the mailbox was removed.
+     */
+    public bool remove_sender(Geary.RFC822.MailboxAddress mailbox) {
+        bool removed = false;
+        if (this.mailboxes.size > 1) {
+            removed = this.mailboxes.remove(mailbox);
+        }
+        return removed;
+    }
+
+    /**
+     * Determines if {@link save_sent} property can be set.
+     *
+     * If not, that property will always be true and setting it will
+     * be ignored.
+     */
+    public bool allow_save_sent() {
+        // We should never push mail to Gmail, since its servers
+        // automatically push sent mail to the sent mail folder.
+        return this.service_provider != ServiceProvider.GMAIL;
+    }
+
+    /**
+     * Returns the configured path for a special folder type.
+     *
+     * This is used when Geary has found or created a special folder
+     * for this account. The path will be null if Geary has always
+     * been told about the special folders by the server, and hasn't
+     * had to go looking for them.  Only the ARCHIVE, DRAFTS, SENT,
+     * SPAM, and TRASH special folder types are valid to pass to this
+     * function.
      */
     public Geary.FolderPath? get_special_folder_path(Geary.SpecialFolderType special) {
         switch (special) {
             case Geary.SpecialFolderType.DRAFTS:
-                return drafts_folder_path;
+                return this.drafts_folder_path;
 
             case Geary.SpecialFolderType.SENT:
-                return sent_mail_folder_path;
-            
+                return this.sent_folder_path;
+
             case Geary.SpecialFolderType.SPAM:
-                return spam_folder_path;
-            
+                return this.spam_folder_path;
+
             case Geary.SpecialFolderType.TRASH:
-                return trash_folder_path;
+                return this.trash_folder_path;
 
             case Geary.SpecialFolderType.ARCHIVE:
-                return archive_folder_path;
-            
-            default:
-                assert_not_reached();
+                return this.archive_folder_path;
         }
+
+        return null;
     }
-    
+
     /**
-     * Sets the path Geary will look for or create a special folder.  This is
-     * only obeyed if the server doesn't tell Geary which folders are special.
-     * Only the DRAFTS, SENT, SPAM, TRASH and ARCHIVE special folder types are
-     * valid to pass to this function.
+     * Sets the configured path for a special folder type.
+     *
+     * This is only obeyed if the server doesn't tell Geary which
+     * folders are special. Only the DRAFTS, SENT, SPAM, TRASH and
+     * ARCHIVE special folder types are valid to pass to this
+     * function.
      */
-    public void set_special_folder_path(Geary.SpecialFolderType special, Geary.FolderPath? path) {
+    public void set_special_folder_path(Geary.SpecialFolderType special,
+                                        Geary.FolderPath? new_path) {
+        Geary.FolderPath? old_path = null;
         switch (special) {
             case Geary.SpecialFolderType.DRAFTS:
-                drafts_folder_path = path;
+                old_path = this.drafts_folder_path;
+                this.drafts_folder_path = new_path;
             break;
-            
+
             case Geary.SpecialFolderType.SENT:
-                sent_mail_folder_path = path;
+                old_path = this.sent_folder_path;
+                this.sent_folder_path = new_path;
             break;
-            
+
             case Geary.SpecialFolderType.SPAM:
-                spam_folder_path = path;
+                old_path = this.spam_folder_path;
+                this.spam_folder_path = new_path;
             break;
-            
+
             case Geary.SpecialFolderType.TRASH:
-                trash_folder_path = path;
+                old_path = this.trash_folder_path;
+                this.trash_folder_path = new_path;
             break;
 
             case Geary.SpecialFolderType.ARCHIVE:
-                archive_folder_path = path;
+                old_path = this.archive_folder_path;
+                this.archive_folder_path = new_path;
             break;
-            
-            default:
-                assert_not_reached();
         }
 
-        // This account's information should be stored again. Signal this.
-        information_changed();
-    }
-
-    /**
-     * Determines if this account contains a specific email address.
-     *
-     * Returns true if the address part of `email` is equal to (case
-     * insensitive) the address part of this account's primary mailbox
-     * or any of its secondary mailboxes.
-     */
-    public bool has_email_address(Geary.RFC822.MailboxAddress email) {
-        return (
-            this.primary_mailbox.equal_to(email) ||
-            (this.alternate_mailboxes != null &&
-             this.alternate_mailboxes.any_match((alt) => {
-                     return alt.equal_to(email);
-                 }))
-        );
-    }
-
-    /**
-     * Returns the best credentials to use for SMTP authentication.
-     *
-     * This method checks for SMTP services that use IMAP credentials
-     * for authentication and if enabled, returns those. If this
-     * method returns null, then SMTP authentication should not be
-     * attempted for this account.
-     */
-    public Credentials? get_smtp_credentials() {
-        Credentials? smtp = null;
-        if (!this.smtp.smtp_noauth) {
-            smtp = this.smtp.smtp_use_imap_credentials
-                ? this.imap.credentials
-                : this.smtp.credentials;
+        if (old_path == null && new_path != null ||
+            old_path != null && !old_path.equal_to(new_path)) {
+            changed();
         }
-        return smtp;
     }
 
     /**
-     * Loads this account's SMTP credentials from its mediator, if needed.
+     * Returns the best credentials to use for the outgoing service.
      *
-     * This method may cause the user to be prompted for their
-     * secrets, thus it may yield for some time.
+     * This method checks for an outgoing service that use incoming
+     * service's credentials for authentication and if enabled,
+     * returns those. If this method returns null, then outgoing
+     * authentication should not be attempted for this account.
+     */
+    public Credentials? get_outgoing_credentials() {
+        Credentials? outgoing = null;
+        switch (this.outgoing.credentials_requirement) {
+        case USE_INCOMING:
+            outgoing = this.incoming.credentials;
+            break;
+        case CUSTOM:
+            outgoing = this.outgoing.credentials;
+            break;
+        }
+        return outgoing;
+    }
+
+    /**
+     * Loads this account's outgoing service credentials, if needed.
+     *
+     * Credentials are loaded from the mediator, which may cause the
+     * user to be prompted for the secret, thus it may yield for some
+     * time.
      *
      * Returns true if the credentials were successfully loaded or had
-     * been previously loaded, the credentials could not be loaded and
-     * the SMTP credentials are invalid.
+     * been previously loaded, or false the credentials could not be
+     * loaded and the service's credentials are invalid.
      */
-    public async bool load_smtp_credentials(GLib.Cancellable? cancellable)
+    public async bool load_outgoing_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Credentials? creds = get_smtp_credentials();
+        Credentials? creds = get_outgoing_credentials();
         bool loaded = (creds == null || creds.is_complete());
         if (!loaded && creds != null) {
-            ServiceInformation service = this.smtp;
-            if (this.smtp.smtp_use_imap_credentials) {
-                service = this.imap;
+            ServiceInformation service = this.outgoing;
+            if (this.outgoing.credentials_requirement ==
+                Credentials.Requirement.USE_INCOMING) {
+                service = this.incoming;
             }
-            loaded = yield service.mediator.load_token(
+            loaded = yield this.mediator.load_token(
                 this, service, cancellable
             );
         }
@@ -440,183 +473,85 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     /**
-     * Prompts the user for their SMTP authentication secret.
+     * Prompts the user for their outgoing service authentication secret.
      *
      * Returns true if the credentials were successfully entered, else
      * false if the user dismissed the prompt.
      */
-    public async bool prompt_smtp_credentials(GLib.Cancellable? cancellable)
+    public async bool prompt_outgoing_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        return yield this.smtp.mediator.prompt_token(
-            this, this.smtp, cancellable
+        return yield this.mediator.prompt_token(
+            this, this.outgoing, cancellable
         );
     }
 
     /**
-     * Loads this account's IMAP credentials from its mediator, if needed.
+     * Loads this account's incoming service credentials, if needed.
      *
-     * This method may cause the user to be prompted for their
-     * secrets, thus it may yield for some time.
+     * Credentials are loaded from the mediator, which may cause the
+     * user to be prompted for the secret, thus it may yield for some
+     * time.
      *
      * Returns true if the credentials were successfully loaded or had
-     * been previously loaded, the credentials could not be loaded and
-     * the IMAP credentials are invalid.
+     * been previously loaded, or false the credentials could not be
+     * loaded and the service's credentials are invalid.
      */
-    public async bool load_imap_credentials(GLib.Cancellable? cancellable)
+    public async bool load_incoming_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Credentials? creds = this.imap.credentials;
+        Credentials? creds = this.incoming.credentials;
         bool loaded = creds.is_complete();
         if (!loaded) {
-            loaded = yield this.imap.mediator.load_token(
-                this, this.imap, cancellable
+            loaded = yield this.mediator.load_token(
+                this, this.incoming, cancellable
             );
         }
         return loaded;
     }
 
     /**
-     * Prompts the user for their IMAP authentication secret.
+     * Prompts the user for their incoming service authentication secret.
      *
      * Returns true if the credentials were successfully entered, else
      * false if the user dismissed the prompt.
      */
-    public async bool prompt_imap_credentials(GLib.Cancellable? cancellable)
+    public async bool prompt_incoming_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        return yield this.imap.mediator.prompt_token(
-            this, this.imap, cancellable
+        return yield this.mediator.prompt_token(
+            this, this.incoming, cancellable
         );
     }
 
-    internal void connect_endpoints() {
-        if (this.imap.endpoint == null) {
-            this.imap.endpoint = get_imap_endpoint();
-            this.imap.endpoint.untrusted_host.connect(
-                on_imap_untrusted_host
-            );
-        }
-        if (this.smtp.endpoint == null) {
-            this.smtp.endpoint = get_smtp_endpoint();
-            this.smtp.endpoint.untrusted_host.connect(
-                on_smtp_untrusted_host
-            );
-        }
-    }
-
-    internal void disconnect_endpoints() {
-        if (this.imap.endpoint != null) {
-            this.imap.endpoint.untrusted_host.disconnect(
-                on_imap_untrusted_host
-            );
-            this.imap.endpoint = null;
-        }
-        if (this.smtp.endpoint != null) {
-            this.smtp.endpoint.untrusted_host.disconnect(
-                on_smtp_untrusted_host
-            );
-            this.smtp.endpoint = null;
-        }
-    }
-
-    private Endpoint get_imap_endpoint() {
-        Endpoint? imap_endpoint = null;
-        switch (this.service_provider) {
-            case ServiceProvider.GMAIL:
-                imap_endpoint = ImapEngine.GmailAccount.generate_imap_endpoint();
-            break;
-
-            case ServiceProvider.YAHOO:
-                imap_endpoint = ImapEngine.YahooAccount.generate_imap_endpoint();
-            break;
-
-            case ServiceProvider.OUTLOOK:
-                imap_endpoint = ImapEngine.OutlookAccount.generate_imap_endpoint();
-            break;
-
-            case ServiceProvider.OTHER:
-                Endpoint.Flags imap_flags = Endpoint.Flags.NONE;
-                if (this.imap.use_ssl)
-                    imap_flags |= Endpoint.Flags.SSL;
-                if (this.imap.use_starttls)
-                    imap_flags |= Endpoint.Flags.STARTTLS;
-
-                imap_endpoint = new Endpoint(this.imap.host, this.imap.port,
-                    imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
-            break;
-            
-            default:
-                assert_not_reached();
-        }
-
-        // look for existing one in the global pool; want to use that
-        // because Endpoint is mutable and signalled in such a way
-        // that it's better to share them
-        imap_endpoint = get_shared_endpoint(this.imap, imap_endpoint);
-
-        // bind shared Endpoint signal to this AccountInformation's signal
-        imap_endpoint.untrusted_host.connect(on_imap_untrusted_host);
-
-        return imap_endpoint;
-    }
-
-    private Endpoint get_smtp_endpoint() {
-        Endpoint? smtp_endpoint = null;
-        switch (service_provider) {
-            case ServiceProvider.GMAIL:
-                smtp_endpoint = ImapEngine.GmailAccount.generate_smtp_endpoint();
-            break;
-
-            case ServiceProvider.YAHOO:
-                smtp_endpoint = ImapEngine.YahooAccount.generate_smtp_endpoint();
-            break;
-
-            case ServiceProvider.OUTLOOK:
-                smtp_endpoint = ImapEngine.OutlookAccount.generate_smtp_endpoint();
-            break;
-
-            case ServiceProvider.OTHER:
-                Endpoint.Flags smtp_flags = Endpoint.Flags.NONE;
-                if (this.smtp.use_ssl)
-                    smtp_flags |= Endpoint.Flags.SSL;
-                if (this.smtp.use_starttls)
-                    smtp_flags |= Endpoint.Flags.STARTTLS;
-
-                smtp_endpoint = new Endpoint(this.smtp.host, this.smtp.port,
-                    smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
-            break;
-
-            default:
-                assert_not_reached();
-        }
-
-        // look for existing one in the global pool; want to use that
-        // because Endpoint is mutable and signalled in such a way
-        // that it's better to share them
-        smtp_endpoint = get_shared_endpoint(this.smtp, smtp_endpoint);
-
-        // bind shared Endpoint signal to this AccountInformation's signal
-        smtp_endpoint.untrusted_host.connect(on_smtp_untrusted_host);
-
-        return smtp_endpoint;
-    }
-
-    public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
-        if (parts == null || parts.size == 0)
-            return null;
-        
-        Geary.FolderPath path = new Imap.FolderRoot(parts[0]);
-        for (int i = 1; i < parts.size; i++)
-            path = path.get_child(parts.get(i));
-        return path;
-    }
-
-    private void on_imap_untrusted_host(Endpoint.SecurityType security,
-                                        TlsConnection cx) {
-        untrusted_host(this.imap, security, cx);
-    }
-
-    private void on_smtp_untrusted_host(Endpoint.SecurityType security,
-                                        TlsConnection cx) {
-        untrusted_host(this.smtp, security, cx);
+    public bool equal_to(AccountInformation other) {
+        return (
+            this == other || (
+                // This is probably overkill, but handy for testing.
+                this.id == other.id &&
+                this.ordinal == other.ordinal &&
+                this.mediator == other.mediator &&
+                this.service_provider == other.service_provider &&
+                this.service_label == other.service_label &&
+                this.label == other.label &&
+                this.primary_mailbox.equal_to(other.primary_mailbox) &&
+                this.sender_mailboxes.size == other.sender_mailboxes.size &&
+                traverse(this.sender_mailboxes).all(
+                    addr => other.sender_mailboxes.contains(addr)
+                ) &&
+                this.prefetch_period_days == other.prefetch_period_days &&
+                this.save_sent == other.save_sent &&
+                this.save_drafts == other.save_drafts &&
+                this.use_signature == other.use_signature &&
+                this.signature == other.signature &&
+                this.incoming.equal_to(other.incoming) &&
+                this.outgoing.equal_to(other.outgoing) &&
+                this.drafts_folder_path == other.drafts_folder_path &&
+                this.sent_folder_path == other.sent_folder_path &&
+                this.spam_folder_path == other.spam_folder_path &&
+                this.trash_folder_path == other.trash_folder_path &&
+                this.archive_folder_path == other.archive_folder_path &&
+                this.config_dir == other.config_dir &&
+                this.data_dir == other.data_dir
+            )
+        );
     }
 
 }

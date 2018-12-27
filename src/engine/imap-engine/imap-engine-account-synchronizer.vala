@@ -129,7 +129,7 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
                 new ServiceProblemReport(
                     ProblemType.GENERIC_ERROR,
                     this.account.information,
-                    this.account.information.imap,
+                    this.account.information.outgoing,
                     err
                 )
             );

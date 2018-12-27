@@ -31,15 +31,56 @@ public class Geary.MockAccount : Account, MockObject {
     }
 
 
+    public class MockClientService : ClientService {
+
+        public MockClientService(AccountInformation account,
+                                 ServiceInformation configuration,
+                                 Endpoint remote) {
+            base(account, configuration, remote);
+        }
+
+        public override async void start(GLib.Cancellable? cancellable = null)
+            throws GLib.Error {
+            throw new EngineError.UNSUPPORTED("Mock method");
+        }
+
+        public override async void stop(GLib.Cancellable? cancellable = null)
+            throws GLib.Error {
+            throw new EngineError.UNSUPPORTED("Mock method");
+        }
+
+    }
+
+
     public override bool is_online { get; protected set; default = false; }
+
+    public override ClientService incoming {
+        get { return this.incoming; }
+    }
+    private ClientService _incoming;
+
+    public override ClientService outgoing {
+        get { return this._outgoing; }
+    }
+    private ClientService _outgoing;
 
     protected Gee.Queue<ExpectedCall> expected {
         get; set; default = new Gee.LinkedList<ExpectedCall>();
     }
 
 
-    public MockAccount(string name, AccountInformation information) {
-        base(name, information);
+    public MockAccount(AccountInformation config) {
+        base(config);
+        this._incoming = new MockClientService(
+            config,
+            config.incoming,
+            new Endpoint(config.incoming.host, config.incoming.port, 0, 0)
+        );
+        this._outgoing = new MockClientService(
+            config,
+            config.outgoing,
+            new Endpoint(config.outgoing.host, config.outgoing.port, 0, 0)
+        );
     }
 
     public override async void open_async(Cancellable? cancellable = null) throws Error {
@@ -62,21 +103,14 @@ public class Geary.MockAccount : Account, MockObject {
         void_call("rebuild_async", { cancellable });
     }
 
-    public override async void start_outgoing_client()
-        throws Error {
-        void_call("start_outgoing_client", {});
-    }
-
-    public override async void start_incoming_client()
-        throws Error {
-        void_call("start_incoming_client", {});
-    }
-
-    public override Gee.Collection<Folder> list_matching_folders(FolderPath? parent)
-        throws Error {
-        return object_call<Gee.Collection<Folder>>(
-            "get_containing_folders_async", {parent}, Gee.List.empty<Folder>()
-        );
+    public override Gee.Collection<Folder> list_matching_folders(FolderPath? parent) {
+        try {
+            return object_call<Gee.Collection<Folder>>(
+                "get_containing_folders_async", {parent}, Gee.List.empty<Folder>()
+            );
+        } catch (GLib.Error err) {
+            return Gee.Collection.empty<Folder>();
+        }
     }
 
     public override Gee.Collection<Folder> list_folders() throws Error {

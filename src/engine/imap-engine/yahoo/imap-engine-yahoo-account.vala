@@ -6,28 +6,32 @@
 
 private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
 
-    public static Geary.Endpoint generate_imap_endpoint() {
-        return new Geary.Endpoint(
-            "imap.mail.yahoo.com",
-            Imap.ClientConnection.DEFAULT_PORT_SSL,
-            Geary.Endpoint.Flags.SSL,
-            Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
-    }
-
-    public static Geary.Endpoint generate_smtp_endpoint() {
-        return new Geary.Endpoint(
-            "smtp.mail.yahoo.com",
-            Smtp.ClientConnection.DEFAULT_PORT_SSL,
-            Geary.Endpoint.Flags.SSL,
-            Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
-    }
 
     private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? special_map = null;
 
-    public YahooAccount(string name,
-                        AccountInformation account_information,
-                        ImapDB.Account local) {
-        base(name, account_information, local);
+
+    public static void setup_service(ServiceInformation service) {
+        switch (service.protocol) {
+        case Protocol.IMAP:
+            service.host = "imap.mail.yahoo.com";
+            service.port = Imap.IMAP_TLS_PORT;
+            service.transport_security = TlsNegotiationMethod.TRANSPORT;
+            break;
+
+        case Protocol.SMTP:
+            service.host = "smtp.mail.yahoo.com";
+            service.port = Smtp.SUBMISSION_TLS_PORT;
+            service.transport_security = TlsNegotiationMethod.TRANSPORT;
+            break;
+        }
+    }
+
+
+    public YahooAccount(AccountInformation config,
+                        ImapDB.Account local,
+                        Endpoint incoming_remote,
+                        Endpoint outgoing_remote) {
+        base(config, local, incoming_remote, outgoing_remote);
 
         if (special_map == null) {
             special_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>();

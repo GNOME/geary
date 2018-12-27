@@ -14,26 +14,29 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         Geary.SpecialFolderType.TRASH,
     };
 
-    public static Geary.Endpoint generate_imap_endpoint() {
-        return new Geary.Endpoint(
-            "imap.gmail.com",
-            Imap.ClientConnection.DEFAULT_PORT_SSL,
-            Geary.Endpoint.Flags.SSL,
-            Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
+
+    public static void setup_service(ServiceInformation service) {
+        switch (service.protocol) {
+        case Protocol.IMAP:
+            service.host = "imap.gmail.com";
+            service.port = Imap.IMAP_TLS_PORT;
+            service.transport_security = TlsNegotiationMethod.TRANSPORT;
+            break;
+
+        case Protocol.SMTP:
+            service.host = "smtp.gmail.com";
+            service.port = Smtp.SUBMISSION_TLS_PORT;
+            service.transport_security = TlsNegotiationMethod.TRANSPORT;
+            break;
+        }
     }
 
-    public static Geary.Endpoint generate_smtp_endpoint() {
-        return new Geary.Endpoint(
-            "smtp.gmail.com",
-            Smtp.ClientConnection.DEFAULT_PORT_SSL,
-            Geary.Endpoint.Flags.SSL,
-            Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
-    }
 
-    public GmailAccount(string name,
-                        Geary.AccountInformation account_information,
-                        ImapDB.Account local) {
-        base(name, account_information, local);
+    public GmailAccount(Geary.AccountInformation config,
+                        ImapDB.Account local,
+                        Endpoint incoming_remote,
+                        Endpoint outgoing_remote) {
+        base(config, local, incoming_remote, outgoing_remote);
     }
 
     protected override Geary.SpecialFolderType[] get_supported_special_folders() {

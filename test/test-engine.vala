@@ -27,6 +27,7 @@ int main(string[] args) {
     engine.add_suite(new Geary.EngineTest().get_suite());
     engine.add_suite(new Geary.IdleManagerTest().get_suite());
     engine.add_suite(new Geary.TimeoutManagerTest().get_suite());
+    engine.add_suite(new Geary.TlsNegotiationMethodTest().get_suite());
     engine.add_suite(new Geary.App.ConversationTest().get_suite());
     engine.add_suite(new Geary.App.ConversationSetTest().get_suite());
     // Depends on ConversationTest and ConversationSetTest passing

@@ -403,7 +403,8 @@ public class ComposerWidget : Gtk.EventBox {
         this.compose_type = compose_type;
         if (this.compose_type == ComposeType.NEW_MESSAGE)
             this.state = ComposerState.PANED;
-        else if (this.compose_type == ComposeType.FORWARD || this.account.information.alternate_mailboxes != null)
+        else if (this.compose_type == ComposeType.FORWARD ||
+                 this.account.information.has_sender_aliases)
             this.state = ComposerState.INLINE;
         else
             this.state = ComposerState.INLINE_COMPACT;
@@ -715,7 +716,7 @@ public class ComposerWidget : Gtk.EventBox {
             this.state = ComposerState.PANED;
         } else if (this.compose_type == ComposeType.FORWARD || this.to_entry.modified
                    || this.cc_entry.modified || this.bcc_entry.modified
-                   || this.account.information.alternate_mailboxes != null) {
+                   || this.account.information.has_sender_aliases) {
             this.state = ComposerState.INLINE;
         } else {
             this.state = ComposerState.INLINE_COMPACT;
@@ -1039,7 +1040,7 @@ public class ComposerWidget : Gtk.EventBox {
     private void add_recipients_and_ids(ComposeType type, Geary.Email referred,
         bool modify_headers = true) {
         Gee.List<Geary.RFC822.MailboxAddress> sender_addresses =
-            account.information.get_all_mailboxes();
+            account.information.sender_mailboxes;
 
         // Set the preferred from address. New messages should retain
         // the account default and drafts should retain the draft's
@@ -2013,25 +2014,32 @@ public class ComposerWidget : Gtk.EventBox {
             set_active = true;
         }
 
-        if (other_account.information.alternate_mailboxes != null) {
-            foreach (Geary.RFC822.MailboxAddress alternate_mailbox in other_account.information.alternate_mailboxes) {
-                Geary.RFC822.MailboxAddresses addresses = new Geary.RFC822.MailboxAddresses.single(
-                    alternate_mailbox);
-                
-                // Displayed in the From dropdown to indicate an "alternate email address"
-                // for an account.  The first printf argument will be the alternate email
-                // address, and the second will be the account's primary email address.
-                string display = _("%1$s via %2$s").printf(
-                    addresses.to_full_display(),
-                    other_account.information.display_name
+        bool is_primary = true;
+        foreach (Geary.RFC822.MailboxAddress alternate_mailbox in
+                 other_account.information.sender_mailboxes) {
+            Geary.RFC822.MailboxAddresses addresses =
+            new Geary.RFC822.MailboxAddresses.single(alternate_mailbox);
+
+            string display = primary_address.to_full_display();
+            if (!is_primary) {
+                // Displayed in the From dropdown to indicate an
+                // "alternate email address" for an account.  The first
+                // printf argument will be the alternate email address,
+                // and the second will be the account's primary email
+                // address.
+                display = _("%1$s via %2$s").printf(
+                    display, other_account.information.display_name
                 );
-                this.from_multiple.append_text(display);
-                this.from_list.add(new FromAddressMap(other_account, addresses));
-                
-                if (!set_active && this.from.equal_to(addresses)) {
-                    this.from_multiple.set_active(this.from_list.size - 1);
-                    set_active = true;
-                }
+            } else {
+                is_primary = false;
+            }
+
+            this.from_multiple.append_text(display);
+            this.from_list.add(new FromAddressMap(other_account, addresses));
+
+            if (!set_active && this.from.equal_to(addresses)) {
+                this.from_multiple.set_active(this.from_list.size - 1);
+                set_active = true;
             }
         }
         return set_active;
@@ -2067,12 +2075,12 @@ public class ComposerWidget : Gtk.EventBox {
         // Don't show in inline, compact, or paned modes, unless the current
         // account has multiple emails.
         if ((this.state == ComposerState.INLINE || this.state == ComposerState.INLINE_COMPACT ||
-             this.state == ComposerState.PANED) && this.account.information.alternate_mailboxes == null)
+             this.state == ComposerState.PANED) && !this.account.information.has_sender_aliases)
             return false;
 
         // If there's only one account, show nothing. (From fields are hidden above.)
-        if (accounts.size < 1 || (accounts.size == 1 && Geary.traverse<Geary.AccountInformation>(
-            accounts.values).first().alternate_mailboxes == null))
+        if (accounts.size < 1 || (accounts.size == 1 && !Geary.traverse<Geary.AccountInformation>(
+            accounts.values).first().has_sender_aliases))
             return false;
 
         this.from_label.visible = true;
@@ -2132,8 +2140,8 @@ public class ComposerWidget : Gtk.EventBox {
     private async string load_signature(Cancellable? cancellable = null) {
         string account_sig = "";
 
-        if (this.account.information.use_email_signature) {
-            account_sig = account.information.email_signature ?? "";
+        if (this.account.information.use_signature) {
+            account_sig = account.information.signature;
             if (Geary.String.is_empty_or_whitespace(account_sig)) {
                 // No signature is specified in the settings, so use
                 // ~/.signature
