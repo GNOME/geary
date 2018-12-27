@@ -108,19 +108,6 @@ public class Geary.Engine : BaseObject {
      */
     public signal void account_unavailable(AccountInformation account);
 
-    /**
-     * Emitted when a service has reported TLS certificate warnings.
-     *
-     * This may be fired during normal operation or while validating
-     * the account information, in which case there is no {@link
-     * Account} associated with it.
-     *
-     * @see AccountInformation.untrusted_host
-     */
-    public signal void untrusted_host(AccountInformation account,
-                                      ServiceInformation service,
-                                      TlsNegotiationMethod method,
-                                      GLib.TlsConnection cx);
 
     // Public so it can be tested
     public Engine() {
@@ -390,7 +377,6 @@ public class Geary.Engine : BaseObject {
         }
 
         accounts.set(account.id, account);
-        account.untrusted_host.connect(on_untrusted_host);
         account_available(account);
     }
 
@@ -410,8 +396,6 @@ public class Geary.Engine : BaseObject {
         }
 
         if (this.accounts.has_key(account.id)) {
-            account.untrusted_host.disconnect(on_untrusted_host);
-
             // Send the account-unavailable signal, account will be
             // removed client side.
             account_unavailable(account);
@@ -506,11 +490,4 @@ public class Geary.Engine : BaseObject {
         return shared;
     }
 
-
-    private void on_untrusted_host(AccountInformation account,
-                                   ServiceInformation service,
-                                   TlsNegotiationMethod method,
-                                   GLib.TlsConnection cx) {
-        untrusted_host(account, service, method, cx);
-    }
 }

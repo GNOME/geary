@@ -289,7 +289,6 @@ public class GearyController : Geary.BaseObject {
         enable_message_buttons(false);
 
         engine.account_available.connect(on_account_available);
-        engine.untrusted_host.connect(on_untrusted_host);
 
         // Connect to various UI signals.
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
@@ -404,7 +403,6 @@ public class GearyController : Geary.BaseObject {
         this.open_cancellable = null;
 
         Geary.Engine.instance.account_available.disconnect(on_account_available);
-        Geary.Engine.instance.untrusted_host.disconnect(on_untrusted_host);
 
         // Release folder and conversations in the main window
         on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
@@ -638,6 +636,7 @@ public class GearyController : Geary.BaseObject {
         account.information.authentication_failure.connect(
             on_authentication_failure
         );
+        account.information.untrusted_host.connect(on_untrusted_host);
         account.notify["current-status"].connect(
             on_account_status_notify
         );
@@ -674,19 +673,13 @@ public class GearyController : Geary.BaseObject {
             account.information.authentication_failure.disconnect(
                 on_authentication_failure
             );
+            account.information.untrusted_host.disconnect(on_untrusted_host);
             account.notify["current-status"].disconnect(
                 on_account_status_notify
             );
 
             yield disconnect_account_async(context);
         }
-    }
-
-    private void on_untrusted_host(Geary.AccountInformation account,
-                                   Geary.ServiceInformation service,
-                                   Geary.TlsNegotiationMethod method,
-                                   TlsConnection cx) {
-        this.prompt_untrusted_host_async.begin(account, service, method, cx);
     }
 
     private async void
@@ -3059,6 +3052,15 @@ public class GearyController : Geary.BaseObject {
         if (context != null && !is_currently_prompting()) {
             this.prompt_for_password.begin(context, service);
         }
+    }
+
+    private void on_untrusted_host(Geary.AccountInformation account,
+                                   Geary.ServiceInformation service,
+                                   Geary.Endpoint endpoint,
+                                   TlsConnection cx) {
+        this.prompt_untrusted_host_async.begin(
+            account, service, endpoint.tls_method, cx
+        );
     }
 
     private void on_retry_service_problem(Geary.ClientService.Status type) {

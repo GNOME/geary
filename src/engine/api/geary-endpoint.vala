@@ -130,18 +130,23 @@ public class Geary.Endpoint : BaseObject {
 
     private SocketClient? socket_client = null;
 
+
     /**
-     * Fired when TLS certificate warnings are detected and the caller has not marked this
-     * {@link Endpoint} as trusted via {@link trust_untrusted_host}.
+     * Emitted when unexpected TLS certificate warnings are detected.
      *
-     * The connection will be closed when this is fired.  The caller should query the user about
-     * how to deal with the situation.  If user wants to proceed, set {@link trust_untrusted_host}
-     * to {@link Trillian.TRUE} and retry connection.
+     * This occurs when a connection receives a TLS certificate
+     * warning and the caller has not marked this endpoint as trusted
+     * via {@link trust_untrusted_host}.
      *
+     * The connection will be closed when this is fired. The caller
+     * should query the user about how to deal with the situation. If
+     * user wants to proceed, set {@link trust_untrusted_host} to
+     * {@link Trillian.TRUE} and retry connection.
+     *
+     * @see AccountInformation.untrusted_host
      * @see tls_validation_warnings
      */
-    public signal void untrusted_host(TlsNegotiationMethod method,
-                                      GLib.TlsConnection cx);
+    public signal void untrusted_host(GLib.TlsConnection cx);
 
 
     public Endpoint(GLib.SocketConnectable remote,
@@ -219,7 +224,7 @@ public class Geary.Endpoint : BaseObject {
             return true;
 
         // signal an issue has been detected and return false to deny the connection
-        untrusted_host(this.tls_method, cx);
+        untrusted_host(cx);
 
         return false;
     }
