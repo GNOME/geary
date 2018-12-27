@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -26,7 +26,10 @@ public enum Geary.ProblemType {
     SERVER_ERROR,
 
     /** Indicates credentials supplied for authentication were rejected. */
-    LOGIN_FAILED,
+    AUTHENTICATION,
+
+    /** Indicates a remote TLS certificate failed validation. */
+    UNTRUSTED,
 
     /** Indicates an outgoing message was sent, but not saved. */
     SEND_EMAIL_SAVE_FAILED;
