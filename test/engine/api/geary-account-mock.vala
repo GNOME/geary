@@ -49,6 +49,14 @@ public class Geary.MockAccount : Account, MockObject {
             throw new EngineError.UNSUPPORTED("Mock method");
         }
 
+        public override void became_reachable() {
+
+        }
+
+        public override void became_unreachable() {
+
+        }
+
     }
 
 

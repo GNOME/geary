@@ -74,9 +74,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             config, config.incoming, incoming_remote
         );
         this.imap.min_pool_size = IMAP_MIN_POOL_SIZE;
-        this.imap.ready.connect(on_pool_session_ready);
-        this.imap.connection_failed.connect(on_pool_connection_failed);
         this.imap.login_failed.connect(on_pool_login_failed);
+        this.imap.notify["current-status"].connect(
+            on_remote_status_notify
+        );
 
         this.smtp = new Smtp.ClientService(
             config,
@@ -1016,29 +1017,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
     }
 
-    private void on_pool_session_ready(bool is_ready) {
-        this.is_online = is_ready;
-        if (is_ready) {
-            // Now have a valid session, so credentials must be good
-            this.authentication_failures = 0;
-            this.remote_ready_lock.blind_notify();
-            update_remote_folders();
-        } else {
-            this.remote_ready_lock.reset();
-            this.refresh_folder_timer.reset();
-        }
-    }
-
-    private void on_pool_connection_failed(Error error) {
-        this.remote_ready_lock.reset();
-        if (error is ImapError.UNAUTHENTICATED) {
-            // This is effectively a login failure
-            on_pool_login_failed(null);
-        } else {
-            notify_imap_problem(ProblemType.CONNECTION_ERROR, error);
-        }
-    }
-
     private void on_pool_login_failed(Geary.Imap.StatusResponse? response) {
         this.remote_ready_lock.reset();
         this.authentication_failures++;
@@ -1088,6 +1066,20 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                             notify_imap_problem(ProblemType.GENERIC_ERROR, err);
                         }
                     });
+            }
+        }
+    }
+
+    private void on_remote_status_notify() {
+        if (this.open) {
+            if (this.imap.current_status == CONNECTED) {
+                this.is_online = true;
+                this.remote_ready_lock.blind_notify();
+                update_remote_folders();
+            } else {
+                this.is_online = false;
+                this.remote_ready_lock.reset();
+                this.refresh_folder_timer.reset();
             }
         }
     }

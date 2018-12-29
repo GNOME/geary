@@ -781,7 +781,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // manipulate), no remote connection will ever be made,
         // meaning that folder normalization never happens and
         // unsolicited notifications never arrive
-        this._account.imap.ready.connect(on_remote_ready);
+        this._account.imap.notify["current-status"].connect(
+            on_remote_status_notify
+        );
         if (open_flags.is_all_set(OpenFlags.NO_DELAY)) {
             this.open_remote_session.begin();
         } else {
@@ -822,7 +824,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         // Ensure we don't attempt to start opening a remote while
         // closing
-        this._account.imap.ready.disconnect(on_remote_ready);
+        this._account.imap.notify["current-status"].disconnect(
+            on_remote_status_notify
+        );
         this.remote_open_timer.reset();
 
         // Stop any internal tasks from running
@@ -906,7 +910,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // Ensure we are open already and guard against someone
             // else having called this just before we did.
             if (this.open_count > 0 &&
-                this._account.imap.is_ready &&
+                this._account.imap.current_status == CONNECTED &&
                 this.remote_session == null) {
 
                 this.opening_monitor.notify_start();
@@ -1532,8 +1536,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         );
     }
 
-    private void on_remote_ready(bool is_ready) {
-        if (is_ready) {
+    private void on_remote_status_notify() {
+        if (this._account.imap.current_status == CONNECTED) {
             this.open_remote_session.begin();
         }
     }
@@ -1554,7 +1558,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 // occurred, but the folder is still open and so is
                 // the pool, try re-establishing the connection.
                 if (is_error &&
-                    this._account.imap.is_ready &&
+                    this._account.imap.current_status == CONNECTED &&
                     !this.open_cancellable.is_cancelled()) {
                     this.open_remote_session.begin();
                 }
