@@ -30,27 +30,38 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
 
     private void send_all(Gee.Collection<Folder> folders, bool became_available) {
         foreach (Folder folder in folders) {
+            // Only sync folders that:
+            // 1. Can actually be opened (i.e. are selectable)
+            // 2. Are remote backed
+            // and 3. if considering a folder not because it's
+            // contents changed (i.e. didn't just become available,
+            // only sync if closed, otherwise he folder will keep
+            // track of changes as they occur
+            //
+            // All this implies the folder must be a MinimalFolder and
+            // we do require that for syncing at the moment anyway,
+            // but keep the tests in for that one glorious day where
+            // we can just use a generic folder.
+            debug("Is folder \"%s\" openable: %s", folder.path.to_string(), folder.properties.is_openable.to_string());
             MinimalFolder? imap_folder = folder as MinimalFolder;
-            // only deal with ImapEngine.MinimalFolder
-            if (imap_folder == null)
-                continue;
+            if (imap_folder != null &&
+                folder.properties.is_openable.is_possible() &&
+                !folder.properties.is_local_only &&
+                !folder.properties.is_virtual &&
+                (became_available ||
+                 imap_folder.get_open_state() == Folder.OpenState.CLOSED)) {
 
-            // if considering folder not because it's available (i.e. because its contents changed),
-            // and the folder is open, don't process it; MinimalFolder will take care of changes as
-            // they occur, in order to remain synchronized
-            if (!became_available &&
-                imap_folder.get_open_state() != Folder.OpenState.CLOSED) {
-                continue;
-            }
+                AccountOperation op = became_available
+                    ? new CheckFolderSync(
+                        this.account, imap_folder, this.max_epoch
+                    )
+                    : new RefreshFolderSync(this.account, imap_folder);
 
-            AccountOperation op = became_available
-                ? new CheckFolderSync(this.account, imap_folder, this.max_epoch)
-                : new RefreshFolderSync(this.account, imap_folder);
-
-            try {
-                this.account.queue_operation(op);
-            } catch (Error err) {
-                debug("Failed to queue sync operation: %s", err.message);
+                try {
+                    this.account.queue_operation(op);
+                } catch (Error err) {
+                    debug("Failed to queue sync operation: %s", err.message);
+                }
             }
         }
     }

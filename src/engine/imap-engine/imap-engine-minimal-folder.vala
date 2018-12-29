@@ -944,12 +944,19 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // Fine, just bail out
             return;
         } catch (EngineError.NOT_FOUND err) {
-            // Folder no longer exists, so force closed
+            debug("Remote folder not found, forcing closed");
+            yield force_close(
+                CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR
+            );
+            return;
+        } catch (ImapError.NOT_SUPPORTED err) {
+            debug("Remote folder not selectable, forcing closed");
             yield force_close(
                 CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR
             );
             return;
         } catch (Error err) {
+            debug("Other error: %s", err.message);
             // Notify that there was a connection error, but don't
             // force the folder closed, since it might come good again
             // if the user fixes an auth problem or the network comes
