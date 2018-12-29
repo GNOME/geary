@@ -252,7 +252,7 @@ public class Geary.Imap.Deserializer : BaseObject {
 
         // wait for outstanding I/O to exit
         yield closed_semaphore.wait_async();
-        debug("[%s] Deserializer closed", to_string());
+        Logging.debug(Logging.Flag.DESERIALIZER, "[%s] Deserializer closed", to_string());
     }
 
     /**
@@ -808,7 +808,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
 
     private uint on_eos() {
-        debug("[%s] EOS", to_string());
+        Logging.debug(Logging.Flag.DESERIALIZER, "[%s] EOS", to_string());
 
         // Per RFC 3501 7.1.5, we may get a EOS immediately after a
         // BYE, so flush any message being processed.
@@ -828,7 +828,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         // only Cancellable allowed is internal used to notify when closed; all other errors should
         // be reported
         if (!(err is IOError.CANCELLED)) {
-            debug("[%s] input error: %s", to_string(), err.message);
+            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] input error: %s", to_string(), err.message);
             receive_failure(err);
         }
 

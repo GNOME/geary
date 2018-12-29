@@ -14,7 +14,7 @@
  * itself, rather manages the configuration, status tracking, and
  * life-cycle of concrete implementations.
  */
-public abstract class Geary.ClientService : BaseObject {
+public abstract class Geary.ClientService : BaseObject, Loggable {
 
 
     private const int BECAME_REACHABLE_TIMEOUT_SEC = 1;
@@ -197,6 +197,15 @@ public abstract class Geary.ClientService : BaseObject {
     /** The last reported error, if any. */
     public ErrorContext? last_error { get; private set; default = null; }
 
+    /** {@inheritDoc} */
+    public Logging.Flag loggable_flags {
+        get; protected set; default = Logging.Flag.ALL;
+    }
+
+    /** {@inheritDoc} */
+    public Loggable? loggable_parent { get { return _loggable_parent; } }
+    private weak Loggable? _loggable_parent = null;
+
 
     protected ClientService(AccountInformation account,
                             ServiceInformation configuration,
@@ -281,6 +290,19 @@ public abstract class Geary.ClientService : BaseObject {
         }
 
         yield start(cancellable);
+    }
+
+    /** {@inheritDoc} */
+    public virtual string to_string() {
+        return "%s(%s)".printf(
+            this.get_type().name(),
+            this.configuration.protocol.to_value()
+        );
+    }
+
+    /** Sets the service's logging parent. */
+    internal void set_loggable_parent(Loggable parent) {
+        this._loggable_parent = parent;
     }
 
     /**
@@ -407,21 +429,11 @@ public abstract class Geary.ClientService : BaseObject {
     }
 
     private void on_running_notify() {
-        debug(
-            "%s:%s %s",
-            this.account.id,
-            this.configuration.protocol.to_value(),
-            this.is_running ? "started" : "stopped"
-        );
+        debug(this.is_running ? "Started" : "Stopped");
     }
 
     private void on_current_status_notify() {
-        debug(
-            "%s:%s: status changed to: %s",
-            this.account.id,
-            this.configuration.protocol.to_value(),
-            this.current_status.to_value()
-        );
+        debug("Status changed to: %s", this.current_status.to_value());
     }
 
     private void on_connectivity_change() {
