@@ -831,7 +831,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     //
     // login
     //
-    
+
     /**
      * Performs the LOGIN command using the supplied credentials.
      *
@@ -839,11 +839,6 @@ public class Geary.Imap.ClientSession : BaseObject {
      */
     public async StatusResponse login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
         throws Error {
-        if (!credentials.is_complete()) {
-            login_failed(null);
-            throw new ImapError.UNAUTHENTICATED("No credentials provided for account: %s", credentials.to_string());
-        }
-
         Command? cmd = null;
         switch (credentials.supported_method) {
         case Geary.Credentials.Method.PASSWORD:

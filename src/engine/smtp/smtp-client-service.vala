@@ -188,7 +188,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
     }
 
     // Returns true if email was successfully processed, else false
-    private async bool process_email(EmailIdentifier id, Cancellable cancellable)
+    private async void process_email(EmailIdentifier id, Cancellable cancellable)
         throws GLib.Error {
         Email? email = null;
         try {
@@ -198,60 +198,27 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         } catch (EngineError.NOT_FOUND err) {
             debug("Queued email %s not found in outbox, ignoring: %s",
                   id.to_string(), err.message);
-            return true;
         }
 
-        bool mail_sent = email.email_flags.contains(EmailFlags.OUTBOX_SENT);
-        if (!mail_sent) {
-            // We immediately retry auth errors after the prompting
-            // the user, but if they get it wrong enough times or
-            // cancel we have no choice other than to stop the postie
-            uint attempts = 0;
-            while (!mail_sent && ++attempts <= Geary.Account.AUTH_ATTEMPTS_MAX) {
-                RFC822.Message message = email.get_message();
-                try {
-                    debug("Outbox postie: Sending \"%s\" (ID:%s)...",
-                          message_subject(message), email.id.to_string());
-                    yield send_email(message, cancellable);
-                    mail_sent = true;
-                } catch (Error send_err) {
-                    debug("Outbox postie send error: %s", send_err.message);
-                    if (send_err is SmtpError.AUTHENTICATION_FAILED) {
-                        if (attempts == Geary.Account.AUTH_ATTEMPTS_MAX) {
-                            throw send_err;
-                        }
-
-                        // At this point we may already have a
-                        // password in memory -- but it's incorrect.
-                        if (!yield this.account
-                            .prompt_outgoing_credentials(cancellable)) {
-                            // The user cancelled and hence they don't
-                            // want to be prompted again, so bail out.
-                            throw send_err;
-                        }
-                    } else {
-                        // not much else we can do - just bail out
-                        throw send_err;
-                    }
-                }
-            }
+        if (!email.email_flags.contains(EmailFlags.OUTBOX_SENT)) {
+            RFC822.Message message = email.get_message();
+            debug("Outbox postie: Sending \"%s\" (ID:%s)...",
+                  message_subject(message), email.id.to_string());
+            yield send_email(message, cancellable);
 
             // Mark as sent, so if there's a problem pushing up to
             // Sent, we don't retry sending. Don't pass the
             // cancellable here - if it's been sent we want to try to
             // update the sent flag anyway
-            if (mail_sent) {
-                debug("Outbox postie: Marking %s as sent", email.id.to_string());
-                Geary.EmailFlags flags = new Geary.EmailFlags();
-                flags.add(Geary.EmailFlags.OUTBOX_SENT);
-                yield this.outbox.mark_email_async(
-                    Collection.single(email.id), flags, null, null
-                );
-            }
+            debug("Outbox postie: Marking %s as sent", email.id.to_string());
+            Geary.EmailFlags flags = new Geary.EmailFlags();
+            flags.add(Geary.EmailFlags.OUTBOX_SENT);
+            yield this.outbox.mark_email_async(
+                Collection.single(email.id), flags, null, null
+            );
 
-            if (!mail_sent || cancellable.is_cancelled()) {
-                // try again later
-                return false;
+            if (cancellable.is_cancelled()) {
+                throw new GLib.IOError.CANCELLED("Send has been cancelled");
             }
         }
 
@@ -259,21 +226,14 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         // sent, or previously sent but not saved. So now try flagging
         // as such and saving it.
         if (this.account.save_sent) {
-            try {
-                debug("Outbox postie: Saving %s to sent mail", email.id.to_string());
-                yield save_sent_mail_async(email, cancellable);
-            } catch (Error err) {
-                debug("Outbox postie: Error saving sent mail: %s", err.message);
-                return false;
-            }
+            debug("Outbox postie: Saving %s to sent mail", email.id.to_string());
+            yield save_sent_mail_async(email, cancellable);
         }
 
         // Again, don't observe the cancellable here - if it's been
         // send and saved we want to try to remove it anyway.
         debug("Outbox postie: Deleting row %s", email.id.to_string());
         yield this.outbox.remove_email_async(Collection.single(email.id), null);
-
-        return true;
     }
 
     private async void send_email(Geary.RFC822.Message rfc822, Cancellable? cancellable)

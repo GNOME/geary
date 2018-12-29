@@ -91,11 +91,6 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
     private Cancellable? pool_cancellable = null;
 
-    private bool authentication_failed = false;
-
-    /** Fired when an authentication error occurs opening a session. */
-    public signal void login_failed(StatusResponse? response);
-
 
     public ClientService(AccountInformation account,
                          ServiceInformation service,
@@ -114,7 +109,6 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             );
         }
 
-        this.authentication_failed = false;
         this.pool_cancellable = new Cancellable();
         notify_started();
     }
@@ -484,7 +478,6 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     }
 
     private void on_login_failed(ClientSession session, StatusResponse? response) {
-        login_failed(response);
         notify_authentication_failed();
         this.close_pool.begin();
     }

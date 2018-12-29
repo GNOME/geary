@@ -308,6 +308,7 @@ public abstract class Geary.ClientService : BaseObject {
      */
     protected void notify_authentication_failed() {
         this.current_status = AUTHENTICATION_FAILED;
+        this.account.authentication_failure(this.configuration);
     }
 
     /**

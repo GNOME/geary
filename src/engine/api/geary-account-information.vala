@@ -211,10 +211,23 @@ public class Geary.AccountInformation : BaseObject {
 
 
     /**
+     * Emitted when a service has reported an authentication failure.
+     *
+     * No further connection attempts will be made after this signal
+     * has been fired until the associated {@link ClientService} has
+     * been restarted. It is up to the client to prompt the user for
+     * updated credentials and restart the service.
+     */
+    public signal void authentication_failure(ServiceInformation service);
+
+    /**
      * Emitted when a service has reported TLS certificate warnings.
      *
-     * It is up to the caller to pin the certificate appropriately if
-     * the user does not want to receive these warnings in the future.
+     * No further connection attempts will be made after this signal
+     * has been fired until the associated {@link ClientService} has
+     * been restarted. It is up to the client to prompt the user to
+     * take action about the certificate (e.g. decide to pin it) then
+     * restart the service.
      */
     public signal void untrusted_host(ServiceInformation service,
                                       TlsNegotiationMethod method,
@@ -473,19 +486,6 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     /**
-     * Prompts the user for their outgoing service authentication secret.
-     *
-     * Returns true if the credentials were successfully entered, else
-     * false if the user dismissed the prompt.
-     */
-    public async bool prompt_outgoing_credentials(GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        return yield this.mediator.prompt_token(
-            this, this.outgoing, cancellable
-        );
-    }
-
-    /**
      * Loads this account's incoming service credentials, if needed.
      *
      * Credentials are loaded from the mediator, which may cause the
@@ -506,19 +506,6 @@ public class Geary.AccountInformation : BaseObject {
             );
         }
         return loaded;
-    }
-
-    /**
-     * Prompts the user for their incoming service authentication secret.
-     *
-     * Returns true if the credentials were successfully entered, else
-     * false if the user dismissed the prompt.
-     */
-    public async bool prompt_incoming_credentials(GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        return yield this.mediator.prompt_token(
-            this, this.incoming, cancellable
-        );
     }
 
     public bool equal_to(AccountInformation other) {
