@@ -31,6 +31,8 @@ endif
 
 geary_c_options = [
   '-include', 'config.h',
+  # Enable GLib structured logging
+  '-DG_LOG_USE_STRUCTURED',
   # Select libunwind's optimised, local-only backtrace unwiding. See
   # libunwind(3).
   '-DUNW_LOCAL_ONLY',

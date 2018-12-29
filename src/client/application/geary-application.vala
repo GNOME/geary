@@ -412,7 +412,7 @@ public class GearyApplication : Gtk.Application {
         Configuration.init(this.is_installed, GSETTINGS_DIR);
         Geary.Logging.init();
         Geary.Logging.log_to(stderr);
-        GLib.Log.set_default_handler(Geary.Logging.default_handler);
+        GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
 
         Util.Date.init();
 

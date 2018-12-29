@@ -18,6 +18,88 @@
 public interface Geary.Loggable : GLib.Object {
 
 
+    // Based on function from with the same name from GLib's
+    // gmessages.c. Return value must be 1 byte long (plus nul byte).
+    // Reference:
+    // http://man7.org/linux/man-pages/man3/syslog.3.html#DESCRIPTION
+    private static string log_level_to_priority(GLib.LogLevelFlags level) {
+        if (GLib.LogLevelFlags.LEVEL_ERROR in level) {
+            return "3";
+        }
+        if (GLib.LogLevelFlags.LEVEL_CRITICAL in level) {
+            return "4";
+        }
+        if (GLib.LogLevelFlags.LEVEL_WARNING in level) {
+            return "4";
+        }
+        if (GLib.LogLevelFlags.LEVEL_MESSAGE in level) {
+            return "5";
+        }
+        if (GLib.LogLevelFlags.LEVEL_INFO in level) {
+            return "6";
+        }
+        if (GLib.LogLevelFlags.LEVEL_DEBUG in level) {
+            return "7";
+        }
+
+        /* Default to LOG_NOTICE for custom log levels. */
+        return "5";
+    }
+
+
+    protected struct Context {
+
+        // 8 fields ought to be enough for anybody...
+        private const uint8 FIELD_COUNT = 8;
+
+        public GLib.LogField[] fields;
+        public uint8 len;
+        public uint8 count;
+
+        public string message;
+
+
+        Context(string domain,
+                Logging.Flag flags,
+                GLib.LogLevelFlags level,
+                string message,
+                va_list args) {
+            this.fields = new GLib.LogField[FIELD_COUNT];
+            this.len = FIELD_COUNT;
+            this.count = 0;
+            append("PRIORITY", log_level_to_priority(level));
+            append("GLIB_DOMAIN", domain);
+            append("GEARY_FLAGS", flags);
+
+            this.message = message.vprintf(va_list.copy(args));
+        }
+
+        public void append<T>(string key, T value) {
+            uint8 count = this.count;
+            if (count + 1 >= this.len) {
+                this.fields.resize(this.len + FIELD_COUNT);
+            }
+
+            this.fields[count].key = key;
+            this.fields[count].value = value;
+            this.fields[count].length = (typeof(T) == typeof(string)) ? -1 : 0;
+
+            this.count++;
+        }
+
+        public inline void append_instance<T>(T value) {
+            this.append(typeof(T).name(), value);
+        }
+
+        public GLib.LogField[] to_array() {
+            // MESSAGE must always be last, so append it here
+            append("MESSAGE", this.message);
+            return this.fields[0:this.count];
+        }
+
+    }
+
+
     /**
      * Default flags to use for this loggable when logging messages.
      */
@@ -92,15 +174,14 @@ public interface Geary.Loggable : GLib.Object {
                                        GLib.LogLevelFlags levels,
                                        string fmt,
                                        va_list args) {
-        GLib.StringBuilder message = new GLib.StringBuilder(fmt);
-        Loggable? decorator = this;
-        while (decorator != null) {
-            message.prepend_c(' ');
-            message.prepend(decorator.to_string());
-            decorator = decorator.loggable_parent;
+        Context context = Context(Logging.DOMAIN, flags, levels, fmt, args);
+        Loggable? decorated = this;
+        while (decorated != null) {
+            context.append_instance(decorated);
+            decorated = decorated.loggable_parent;
         }
 
-        Logging.logv(flags, levels, message.str, args);
+        GLib.log_structured_array(levels, context.to_array());
     }
 
 }
