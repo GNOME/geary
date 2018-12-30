@@ -23,7 +23,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
 
     /** Folder used for storing and retrieving queued mail. */
-    public Outbox.Folder outbox { get; private set; }
+    public Outbox.Folder? outbox { get; internal set; default = null; }
 
     /** Progress monitor indicating when email is being sent. */
     public ProgressMonitor sending_monitor {
@@ -47,10 +47,8 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
     public ClientService(AccountInformation account,
                          ServiceInformation service,
-                         Endpoint remote,
-                         Outbox.Folder outbox) {
+                         Endpoint remote) {
         base(account, service, remote);
-        this.outbox = outbox;
     }
 
     /**

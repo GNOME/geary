@@ -25,14 +25,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Geary.SpecialFolderType.ARCHIVE,
     };
 
-    public override bool is_online { get; protected set; default = false; }
-
-    /** Returns the IMAP client service. */
-    public override ClientService incoming { get { return this.imap; } }
-
-    /** Returns the SMTP client service. */
-    public override ClientService outgoing { get { return this.smtp; } }
-
     /** Service for incoming IMAP connections. */
     public Imap.ClientService imap  { get; private set; }
 
@@ -64,26 +56,32 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                           ImapDB.Account local,
                           Endpoint incoming_remote,
                           Endpoint outgoing_remote) {
-        base(config);
+        Imap.ClientService imap = new Imap.ClientService(
+            config,
+            config.incoming,
+            incoming_remote
+        );
+        Smtp.ClientService smtp = new Smtp.ClientService(
+            config,
+            config.outgoing,
+            outgoing_remote
+        );
+
+        base(config, imap, smtp);
+
         this.local = local;
         this.local.contacts_loaded.connect(() => { contacts_loaded(); });
 
-        this.imap = new Imap.ClientService(
-            config, config.incoming, incoming_remote
-        );
-        this.imap.min_pool_size = IMAP_MIN_POOL_SIZE;
-        this.imap.notify["current-status"].connect(
+        imap.min_pool_size = IMAP_MIN_POOL_SIZE;
+        imap.notify["current-status"].connect(
             on_imap_status_notify
         );
+        this.imap = imap;
 
-        this.smtp = new Smtp.ClientService(
-            config,
-            config.outgoing,
-            outgoing_remote,
-            new Outbox.Folder(this, this.local)
-        );
-        this.smtp.email_sent.connect(on_email_sent);
-        this.smtp.report_problem.connect(notify_report_problem);
+        smtp.outbox = new Outbox.Folder(this, local);
+        smtp.email_sent.connect(on_email_sent);
+        smtp.report_problem.connect(notify_report_problem);
+        this.smtp = smtp;
 
         this.sync = new AccountSynchronizer(this);
 
@@ -994,11 +992,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private void on_imap_status_notify() {
         if (this.open) {
             if (this.imap.current_status == CONNECTED) {
-                this.is_online = true;
                 this.remote_ready_lock.blind_notify();
                 update_remote_folders();
             } else {
-                this.is_online = false;
                 this.remote_ready_lock.reset();
                 this.refresh_folder_timer.reset();
             }

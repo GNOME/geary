@@ -25,6 +25,7 @@ public abstract class Geary.ClientService : BaseObject {
      * Denotes the service's current status.
      *
      * @see ClientService.current_status
+     * @see Account.current_status
      */
     public enum Status {
 
@@ -109,6 +110,18 @@ public abstract class Geary.ClientService : BaseObject {
             );
         }
 
+        /**
+         * Determines the current status is an error condition.
+         *
+         * Returns true if not offline or connected.
+         */
+        public bool is_error() {
+            return (
+                this != OFFLINE &&
+                this != CONNECTED
+            );
+        }
+
         public string to_value() {
             return ObjectUtils.to_enum_nick<Status>(typeof(Status), this);
         }
@@ -144,6 +157,8 @@ public abstract class Geary.ClientService : BaseObject {
      * (e.g. online/offline state may not be fully known, and hence
      * the value of this property reflects the engine's current
      * understanding of the service's status, not necessarily reality.
+     *
+     * @see Account.current_status
      */
     public Status current_status { get; protected set; default = OFFLINE; }
 
