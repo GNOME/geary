@@ -88,6 +88,29 @@ public class GearyController : Geary.BaseObject {
             this.store = new Geary.App.EmailStore(account);
         }
 
+        public Geary.Account.Status get_effective_status() {
+            Geary.Account.Status current = this.account.current_status;
+            Geary.Account.Status effective = 0;
+            if (current.is_online()) {
+                effective |= ONLINE;
+            }
+            if (current.has_service_problem()) {
+                // Only retain this flag if the problem isn't auth or
+                // cert related, that is handled elsewhere.
+                Geary.ClientService.Status incoming =
+                    account.incoming.current_status;
+                Geary.ClientService.Status outgoing =
+                    account.outgoing.current_status;
+                if (incoming != AUTHENTICATION_FAILED &&
+                    incoming != TLS_VALIDATION_FAILED &&
+                    outgoing != AUTHENTICATION_FAILED &&
+                    outgoing != TLS_VALIDATION_FAILED) {
+                    effective |= SERVICE_PROBLEM;
+                }
+            }
+            return effective;
+        }
+
     }
 
 
@@ -601,6 +624,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void open_account(Geary.Account account) {
+        account.notify["current-status"].connect(
+            on_account_status_notify
+        );
         account.report_problem.connect(on_report_problem);
         connect_account_async.begin(account, cancellable_open_account);
 
@@ -608,16 +634,18 @@ public class GearyController : Geary.BaseObject {
         account.contacts_loaded.connect(list_store.set_sort_function);
     }
 
-    private async void close_account(Geary.AccountInformation info) {
-        AccountContext? context = this.accounts.get(info);
+    private async void close_account(Geary.AccountInformation config) {
+        AccountContext? context = this.accounts.get(config);
         if (context != null) {
-            Geary.ContactStore contact_store = context.account.get_contact_store();
-            ContactListStore list_store = this.contact_list_store_cache.get(contact_store);
+            Geary.Account account = context.account;
+            Geary.ContactStore contact_store = account.get_contact_store();
+            ContactListStore list_store =
+                this.contact_list_store_cache.get(contact_store);
 
-            context.account.contacts_loaded.disconnect(list_store.set_sort_function);
+            account.contacts_loaded.disconnect(list_store.set_sort_function);
             this.contact_list_store_cache.unset(contact_store);
 
-            if (this.current_account == context.account) {
+            if (this.current_account == account) {
                 this.current_account = null;
 
                 previous_non_search_folder = null;
@@ -626,9 +654,12 @@ public class GearyController : Geary.BaseObject {
                 cancel_folder();
             }
 
-            // Stop showing errors when closing the account - the user
-            // doesn't care
-            context.account.report_problem.disconnect(on_report_problem);
+            // Stop updating status and showing errors when closing
+            // the account - the user doesn't care any more
+            account.report_problem.disconnect(on_report_problem);
+            account.notify["current-status"].disconnect(
+                on_account_status_notify
+            );
 
             yield disconnect_account_async(context);
         }
@@ -858,6 +889,21 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
+    private void update_account_status() {
+        Geary.Account.Status effective_status =
+            this.accounts.values.fold<Geary.Account.Status>(
+                (ctx, status) => ctx.get_effective_status() | status,
+                0
+            );
+
+        foreach (Gtk.Window window in this.application.get_windows()) {
+            MainWindow? main = window as MainWindow;
+            if (main != null) {
+                main.update_account_status(effective_status);
+            }
+        }
+    }
+
     private void on_retry_problem(MainWindowInfoBar info_bar) {
         Geary.ServiceProblemReport? service_report =
             info_bar.report as Geary.ServiceProblemReport;
@@ -950,6 +996,10 @@ public class GearyController : Geary.BaseObject {
 
     private void on_report_problem(Geary.ProblemReport problem) {
         report_problem(problem);
+    }
+
+    private void on_account_status_notify() {
+        update_account_status();
     }
 
     private void on_account_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {

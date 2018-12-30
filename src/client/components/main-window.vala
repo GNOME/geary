@@ -59,6 +59,19 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     [GtkChild]
     private Gtk.Grid info_bar_container;
 
+    [GtkChild]
+    private Gtk.InfoBar offline_infobar;
+
+    [GtkChild]
+    private Gtk.InfoBar service_problem_infobar;
+
+    [GtkChild]
+    private Gtk.InfoBar auth_problem_infobar;
+
+    [GtkChild]
+    private Gtk.InfoBar cert_problem_infobar;
+
+
     /** Fired when the shift key is pressed or released. */
     public signal void on_shift_key(bool pressed);
 
@@ -85,6 +98,23 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     ~MainWindow() {
         base_unref();
+    }
+
+    /** Updates the window's account status info bars. */
+    public void update_account_status(Geary.Account.Status status) {
+        // Only ever show one at a time. Offline is primary since
+        // nothing else can happen when offline. Service problems are
+        // secondary since auth and cert problems can't be resolved
+        // when the service isn't talking to the server. Auth and cert
+        // problems are enabled elsewhere, since the controller might
+        // be already prompting the user about it.
+        this.offline_infobar.set_visible(!status.is_online());
+        this.service_problem_infobar.set_visible(
+            status.is_online() && status.has_service_problem()
+        );
+        this.auth_problem_infobar.hide();
+        this.cert_problem_infobar.hide();
+        update_infobar_frame();
     }
 
     public void show_infobar(MainWindowInfoBar info_bar) {
@@ -443,6 +473,18 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             this.main_toolbar.folder = this.current_folder.get_display_name();
     }
 
+    private void update_infobar_frame() {
+        // Ensure the info bar frame is shown only when it has visible
+        // children
+        bool show_frame = false;
+        info_bar_container.foreach((child) => {
+                if (child.visible) {
+                    show_frame = true;
+                }
+            });
+        this.info_bar_frame.set_visible(show_frame);
+    }
+
     private inline void check_shift_event(Gdk.EventKey event) {
         // FIXME: it's possible the user will press two shift keys.  We want
         // the shift key to report as released when they release ALL of them.
@@ -475,12 +517,14 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     [GtkCallback]
+    private void on_offline_infobar_response() {
+        this.offline_infobar.hide();
+        update_infobar_frame();
+    }
+
+    [GtkCallback]
     private void on_info_bar_container_remove() {
-        // Ensure the info bar frame is hidden when the last info bar
-        // is removed from the container.
-        if (this.info_bar_container.get_children().length() == 0) {
-            this.info_bar_frame.hide();
-        }
+        update_infobar_frame();
     }
 
 }
