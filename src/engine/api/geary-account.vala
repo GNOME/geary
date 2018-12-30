@@ -79,11 +79,17 @@ public abstract class Geary.Account : BaseObject {
      *
      * This property's value is set based on the {@link
      * ClientService.current_status} of the account's {@link incoming}
-     * and {@link outgoing} services. if
+     * and {@link outgoing} services. See {@link Status} for more
+     * information.
+     *
+     * The initial value for this property is {@link Status.ONLINE},
+     * which may or may not be incorrect. However the once the account
+     * has been opened, its services will begin checking connectivity
+     * and the value will be updated to match in due course.
      *
      * @see ClientService.current_status
      */
-    public Status current_status { get; protected set; default = 0; }
+    public Status current_status { get; protected set; default = ONLINE; }
 
     /**
      * The service manager for the incoming email service.

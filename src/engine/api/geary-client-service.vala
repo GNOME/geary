@@ -30,16 +30,30 @@ public abstract class Geary.ClientService : BaseObject {
     public enum Status {
 
         /**
+         * The service status is currently unknown.
+         *
+         * This is the initial state, and will only change after the
+         * service has performed initial connectivity testing and/or
+         * successfully connected to the remote host.
+         */
+        UNKNOWN,
+
+        /**
          * The service is currently offline.
          *
-         * This is the initial state, and will only change after
+         * This is the initial state, will only change after
          * having successfully connected to the remote service. An
          * attempt to connect will be made when the connectivity
          * manager indicates the network has changed.
          */
         OFFLINE,
 
-        /** A connection has been established and is operating normally. */
+        /**
+         * The service is connected and working normally.
+         *
+         * A connection to the remote host has been established and is
+         * operating normally.
+         */
         CONNECTED,
 
         /**
@@ -104,6 +118,7 @@ public abstract class Geary.ClientService : BaseObject {
          */
         public bool automatically_reconnect() {
             return (
+                this == UNKNOWN ||
                 this == OFFLINE ||
                 this == CONNECTED ||
                 this == CONNECTION_FAILED
@@ -117,6 +132,7 @@ public abstract class Geary.ClientService : BaseObject {
          */
         public bool is_error() {
             return (
+                this != UNKNOWN &&
                 this != OFFLINE &&
                 this != CONNECTED
             );
@@ -156,11 +172,14 @@ public abstract class Geary.ClientService : BaseObject {
      * The current state of certain aspects of the service
      * (e.g. online/offline state may not be fully known, and hence
      * the value of this property reflects the engine's current
-     * understanding of the service's status, not necessarily reality.
+     * understanding of the service's status, not necessarily that of
+     * actual reality.
+     *
+     * The initial value for this property is {@link Status.UNKNOWN}.
      *
      * @see Account.current_status
      */
-    public Status current_status { get; protected set; default = OFFLINE; }
+    public Status current_status { get; protected set; default = UNKNOWN; }
 
     /** The network endpoint the service will connect to. */
     public Endpoint remote { get; private set; }
