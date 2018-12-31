@@ -446,61 +446,118 @@ ComposerPageState.cleanPart = function(part, removeIfEmpty) {
  * Lines are delinated using LF. Quoted lines are prefixed with
  * `ComposerPageState.QUOTE_MARKER`, where the number of markers
  * indicates the depth of nesting of the quote.
- *
- * This will modify/reset the DOM, since it ultimately requires
- * stuffing `QUOTE_MARKER` into existing paragraphs and getting it
- * back out in a way that preserves the visual presentation.
  */
 ComposerPageState.htmlToQuotedText = function(root) {
-    // XXX It would be nice to just clone the root and modify that, or
-    // see if we can implement this some other way so as to not modify
-    // the DOM at all, but currently unit test show that the results
-    // are not the same if we work on a clone, likely because of the
-    // use of HTMLElement::innerText. Need to look into it more.
+    let bqTexts = [];
 
-    let savedDoc = root.innerHTML;
-    let blockquotes = root.querySelectorAll("blockquote");
-    let nbq = blockquotes.length;
-    let bqtexts = new Array(nbq);
-
-    // Get text of blockquotes and pull them out of DOM.  They are
-    // replaced with tokens deliminated with the characters
-    // QUOTE_START and QUOTE_END (from a unicode private use block).
-    // We need to get the text while they're still in the DOM to get
-    // newlines at appropriate places.  We go through the list of
-    // blockquotes from the end so that we get the innermost ones
-    // first.
-    for (let i = nbq - 1; i >= 0; i--) {
-        let bq = blockquotes.item(i);
-        let text = bq.innerText;
-        if (text.substr(-1, 1) == "\n") {
-            text = text.slice(0, -1);
-        } else {
-            console.debug(
-                "  no newline at end of quote: " +
-                    text.length > 0
-                    ? "0x" + text.codePointAt(text.length - 1).toString(16)
-                    : "empty line"
-            );
-        }
-        bqtexts[i] = text;
-
-        bq.innerText = (
-            ComposerPageState.QUOTE_START
-                + i.toString()
-                + ComposerPageState.QUOTE_END
-        );
-    }
+    text = ComposerPageState.htmlToTextAndQuotes(root, bqTexts);
 
     // Reassemble plain text out of parts, and replace non-breaking
     // space with regular space.
-    let text = ComposerPageState.resolveNesting(root.innerText, bqtexts);
-
-    // Reassemble DOM now we have the plain text
-    root.innerHTML = savedDoc;
+    text = ComposerPageState.resolveNesting(text, bqTexts);
 
     return ComposerPageState.replaceNonBreakingSpace(text);
 };
+
+/**
+ * Gets plain text that adequately represents the information in the HTML
+ *
+ * Asterisks are inserted around bold text, slashes around italic text, and
+ * underscores around underlined text. Link URLs are inserted after the link
+ * text.
+ *
+ * Blockquotes are extracted and replaced with tokens deliminated with the
+ * characters QUOTE_START and QUOTE_END (from a unicode private use block).
+ */
+ComposerPageState.htmlToTextAndQuotes = function(root, bqTexts) {
+    let parentStyle = window.getComputedStyle(root);
+    let text = "";
+
+    for (let node of (root.childNodes || [])) {
+        let isBlock = (
+            node instanceof Element
+                && window.getComputedStyle(node).display == "block"
+                && node.innerText
+        );
+        if (isBlock) {
+            // Make sure there's a newline before the element
+            if (text != "" && text.substr(-1) != "\n") {
+                text += "\n";
+            }
+        }
+        switch (node.nodeName.toLowerCase()) {
+            case "#text":
+                let nodeText = node.nodeValue;
+                switch (parentStyle.whiteSpace) {
+                    case 'normal':
+                    case 'nowrap':
+                    case 'pre-line':
+                        nodeText = nodeText.replace(/\s+/g, " ");
+                        if (nodeText == " " && /\s/.test(text.substr(-1)))
+                            break; // There's already whitespace here
+                        if (node == root.firstChild)
+                            nodeText = nodeText.replace(/^ /, "");
+                        if (node == root.lastChild)
+                            nodeText = nodeText.replace(/ $/, "");
+                        // Fall through
+                    default:
+                        text += nodeText;
+                        break;
+                }
+                break;
+            case "a":
+                if (node.textContent == node.href) {
+                    text += "<" + node.href + ">";
+                } else {
+                    text += ComposerPageState.htmlToTextAndQuotes(node, bqTexts);
+                    text += " <" + node.href + ">";
+                }
+                break;
+            case "b":
+            case "strong":
+                text += "*" + ComposerPageState.htmlToTextAndQuotes(node, bqTexts) + "*";
+                break;
+            case "blockquote":
+                let bqText = ComposerPageState.htmlToTextAndQuotes(node, bqTexts);
+                text += (
+                    ComposerPageState.QUOTE_START
+                        + bqTexts.length.toString()
+                        + ComposerPageState.QUOTE_END
+                );
+                bqTexts.push(bqText);
+                break;
+            case "br":
+                text += "\n";
+                break;
+            case "i":
+            case "em":
+                text += "/" + ComposerPageState.htmlToTextAndQuotes(node, bqTexts) + "/";
+                break;
+            case "u":
+                text += "_" + ComposerPageState.htmlToTextAndQuotes(node, bqTexts) + "_";
+                break;
+            case "#comment":
+                break;
+            default:
+                text += ComposerPageState.htmlToTextAndQuotes(node, bqTexts);
+                break;
+        }
+        if (isBlock) {
+            // Ensure that the last character is a newline
+            if (text.substr(-1) != "\n") {
+                text += "\n";
+            }
+            if (node.nodeName.toLowerCase() == "p") {
+                // Ensure that the last two characters are newlines
+                if (text.substr(-2, 1) != "\n") {
+                    text += "\n";
+                }
+            }
+        }
+    }
+
+    return text;
+}
 
 // Linkifies "plain text" link
 ComposerPageState.linkify = function(node) {
@@ -552,27 +609,20 @@ ComposerPageState.linkify = function(node) {
 
 ComposerPageState.resolveNesting = function(text, values) {
     let tokenregex = new RegExp(
-        "(.?)" +
-            ComposerPageState.QUOTE_START +
-            "([0-9]*)" +
-            ComposerPageState.QUOTE_END +
-            "(?=(.?))", "g"
+        ComposerPageState.QUOTE_START
+            + "([0-9]+)"
+            + ComposerPageState.QUOTE_END, "g"
     );
-    return text.replace(tokenregex, function(match, p1, p2, p3, offset, str) {
-        let key = new Number(p2);
-        let prevChars = p1;
-        let nextChars = p3;
-        let insertNext = "";
-        // Make sure there's a newline before and after the quote.
-        if (prevChars != "" && prevChars != "\n")
-            prevChars = prevChars + "\n";
-        if (nextChars != "" && nextChars != "\n")
-            insertNext = "\n";
+    return text.replace(tokenregex, function(match, p1, offset, str) {
+        let key = new Number(p1);
 
         let value = "";
         if (key >= 0 && key < values.length) {
             let nested = ComposerPageState.resolveNesting(values[key], values);
-            value = prevChars + ComposerPageState.quoteLines(nested) + insertNext;
+            // If there is a newline at the end of the quote, remove it
+            // htmltoTextandQuotes already ensured that there is a newline after the quote
+            nested = nested.replace(/\n$/, "");
+            value = ComposerPageState.quoteLines(nested);
         } else {
             console.error("Regex error in denesting blockquotes: Invalid key");
         }

@@ -20,6 +20,8 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("get_text_with_long_line", get_text_with_long_line);
         add_test("get_text_with_long_quote", get_text_with_long_quote);
         add_test("get_text_with_nbsp", get_text_with_nbsp);
+        add_test("get_text_with_named_link", get_text_with_named_link);
+        add_test("get_text_with_url_link", get_text_with_named_link);
     }
 
     public void load_resources() throws Error {
@@ -165,6 +167,30 @@ long, long, long, long, long, long, long, long, long, long,
 
 
 """);
+        } catch (Error err) {
+            print("Error: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void get_text_with_named_link() throws Error {
+        load_body_fixture("Check out <a href=\"https://wiki.gnome.org/Apps/Geary\">Geary</a>!");
+        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        try {
+            assert(this.test_view.get_text.end(async_result()) ==
+                   "Check out Geary <https://wiki.gnome.org/Apps/Geary>!\n\n\n\n");
+        } catch (Error err) {
+            print("Error: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void get_text_with_url_link() throws Error {
+        load_body_fixture("Check out <a href=\"https://wiki.gnome.org/Apps/Geary\">https://wiki.gnome.org/Apps/Geary</a>!");
+        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        try {
+            assert(this.test_view.get_text.end(async_result()) ==
+                   "Check out <https://wiki.gnome.org/Apps/Geary>!\n\n\n\n");
         } catch (Error err) {
             print("Error: %s\n", err.message);
             assert_not_reached();
