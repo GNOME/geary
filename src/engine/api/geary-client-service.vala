@@ -39,14 +39,15 @@ public abstract class Geary.ClientService : BaseObject {
         UNKNOWN,
 
         /**
-         * The service is currently offline.
+         * The service is currently unreachable.
          *
-         * This is the initial state, will only change after
-         * having successfully connected to the remote service. An
-         * attempt to connect will be made when the connectivity
-         * manager indicates the network has changed.
+         * This typically indicates the local computer is offline. The
+         * service will attempt to determine if the remote host is
+         * reachable once the service has been started. If determined
+         * to be reachable, the service will attempt to connect to the
+         * host, otherwise it will be marked as unreachable.
          */
-        OFFLINE,
+        UNREACHABLE,
 
         /**
          * The service is connected and working normally.
@@ -119,7 +120,7 @@ public abstract class Geary.ClientService : BaseObject {
         public bool automatically_reconnect() {
             return (
                 this == UNKNOWN ||
-                this == OFFLINE ||
+                this == UNREACHABLE ||
                 this == CONNECTED ||
                 this == CONNECTION_FAILED
             );
@@ -133,7 +134,7 @@ public abstract class Geary.ClientService : BaseObject {
         public bool is_error() {
             return (
                 this != UNKNOWN &&
-                this != OFFLINE &&
+                this != UNREACHABLE &&
                 this != CONNECTED
             );
         }
@@ -303,7 +304,7 @@ public abstract class Geary.ClientService : BaseObject {
      */
     protected void notify_stopped() {
         this.is_running = false;
-        this.current_status = OFFLINE;
+        this.current_status = UNKNOWN;
         this.became_reachable_timer.reset();
         this.became_unreachable_timer.reset();
     }
@@ -391,7 +392,7 @@ public abstract class Geary.ClientService : BaseObject {
                 this.became_reachable_timer.start();
                 this.became_unreachable_timer.reset();
             } else {
-                this.current_status = OFFLINE;
+                this.current_status = UNREACHABLE;
                 this.became_unreachable_timer.start();
                 this.became_reachable_timer.reset();
             }
