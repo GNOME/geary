@@ -287,15 +287,15 @@ unknown://example6.com
             assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_no_quote)', $(js_values));")) ==
                    @"foo");
             assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_spaced_quote)', $(js_values));")) ==
-                   @"foo \n$(q_marker)quote1\n bar");
+                   @"foo $(q_marker)quote1 bar");
             assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_leading_quote)', $(js_values));")) ==
-                   @"$(q_marker)quote1\n bar");
+                   @"$(q_marker)quote1 bar");
             assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_hanging_quote)', $(js_values));")) ==
-                   @"foo \n$(q_marker)quote1");
+                   @"foo $(q_marker)quote1");
             assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_cosy_quote1)', $(js_values));")) ==
-                   @"foo\n$(q_marker)quote1\nbar");
+                   @"foo$(q_marker)quote1bar");
             assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_cosy_quote2)', $(js_values));")) ==
-                   @"foo\n$(q_marker)quote1\n$(q_marker)quote2\nbar");
+                   @"foo$(q_marker)quote1$(q_marker)quote2bar");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
