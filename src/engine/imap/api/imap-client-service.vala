@@ -282,13 +282,22 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             ClientSession free = yield this.create_new_authorized_session(
                 this.pool_cancellable
             );
+            notify_connected();
             yield this.sessions_mutex.execute_locked(() => {
                     this.all_sessions.add(free);
                 });
             this.free_queue.send(free);
-        } catch (Error err) {
-            debug("[%s] Error adding new session to the pool: %s",
+        } catch (ImapError.UNAUTHENTICATED err) {
+            debug("[%s] Auth error adding new session to the pool: %s",
                   this.account.id, err.message);
+            notify_authentication_failed();
+            this.close_pool.begin();
+        } catch (Error err) {
+            if (!(err is IOError.CANCELLED)) {
+                debug("[%s] Error adding new session to the pool: %s",
+                      this.account.id, err.message);
+                notify_connection_failed(err);
+            }
             this.close_pool.begin();
         }
     }
@@ -357,12 +366,6 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         debug("[%s] Opening new session", this.account.id);
         ClientSession new_session = new ClientSession(remote);
-
-        // Listen for auth failures early so the client is notified if
-        // there is an error, even though we won't want to keep the
-        // session around.
-        new_session.login_failed.connect(on_login_failed);
-
         try {
             yield new_session.connect_async(cancellable);
         } catch (GLib.Error err) {
@@ -376,16 +379,10 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             yield new_session.initiate_session_async(
                 this.configuration.credentials, cancellable
             );
-        } catch (ImapError.UNAUTHENTICATED err) {
-            notify_authentication_failed();
-            throw err;
         } catch (Error err) {
-            if (!(err is IOError.CANCELLED)) {
-                notify_connection_failed(err);
-            }
-
-            // need to disconnect before throwing error ... don't honor Cancellable here, it's
-            // important to disconnect the client before dropping the ref
+            // need to disconnect before throwing error ... don't
+            // honor Cancellable here, it's important to disconnect
+            // the client before dropping the ref
             try {
                 yield new_session.disconnect_async();
             } catch (Error disconnect_err) {
@@ -403,7 +400,6 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                                       unselected_keepalive_sec,
                                       selected_with_idle_keepalive_sec);
 
-        notify_connected();
         return new_session;
     }
 
@@ -458,7 +454,6 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
         if (removed) {
             session.disconnected.disconnect(on_disconnected);
-            session.login_failed.disconnect(on_login_failed);
         }
         return removed;
     }
@@ -475,11 +470,6 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                 }
             }
         );
-    }
-
-    private void on_login_failed(ClientSession session, StatusResponse? response) {
-        notify_authentication_failed();
-        this.close_pool.begin();
     }
 
 }

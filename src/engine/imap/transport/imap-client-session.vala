@@ -827,17 +827,14 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         return State.LOGGED_OUT;
     }
-    
-    //
-    // login
-    //
 
     /**
      * Performs the LOGIN command using the supplied credentials.
      *
      * @see initiate_session_async
      */
-    public async StatusResponse login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
+    public async StatusResponse login_async(Geary.Credentials credentials,
+                                            Cancellable? cancellable = null)
         throws Error {
         Command? cmd = null;
         switch (credentials.supported_method) {
@@ -869,16 +866,42 @@ public class Geary.Imap.ClientSession : BaseObject {
 
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.LOGIN, null, params);
-        
+
         if (params.err != null)
             throw params.err;
-        
+
         // should always proceed; only an Error could change this
         assert(params.proceed);
-        
-        return yield command_transaction_async(cmd, cancellable);
+
+        GLib.Error? login_err = null;
+        try {
+            yield command_transaction_async(cmd, cancellable);
+        } catch (Error err) {
+            login_err = err;
+        }
+
+        if (login_err != null) {
+            // Throw an error indicating auth failed here, unless the
+            // response code indicated that the server is merely
+            // unavailable, then don't since the creds might actually
+            // be fine.
+            ResponseCode? code = cmd.status.response_code;
+            ResponseCodeType? code_type = null;
+            if (code != null) {
+                code_type = code.get_response_code_type();
+            }
+
+            if (code_type == null ||
+                code_type.value != ResponseCodeType.UNAVAILABLE) {
+                throw new ImapError.UNAUTHENTICATED(login_err.message);
+            } else {
+                throw login_err;
+            }
+        }
+
+        return cmd.status;
     }
-    
+
     /**
      * Prepares the connection and performs a login using the supplied credentials.
      *
@@ -931,12 +954,8 @@ public class Geary.Imap.ClientSession : BaseObject {
         }
 
         // Login after STARTTLS
-        StatusResponse login_resp = yield login_async(credentials, cancellable);
-        if (login_resp.status != Status.OK) {
-            throw new ImapError.UNAUTHENTICATED("Unable to login to %s with supplied credentials",
-                to_string());
-        }
-        
+        yield login_async(credentials, cancellable);
+
         // if new capabilities not offered after login, get them now
         if (caps.revision == capabilities.revision)
             yield send_command_async(new CapabilityCommand());
