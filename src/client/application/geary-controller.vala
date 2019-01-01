@@ -59,6 +59,7 @@ public class GearyController : Geary.BaseObject {
 
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
 
+    private const uint MAX_AUTH_ATTEMPTS = 3;
 
     private static string untitled_file_name;
 
@@ -81,6 +82,11 @@ public class GearyController : Geary.BaseObject {
         public Geary.Account account { get; private set; }
         public Geary.Folder? inbox = null;
         public Geary.App.EmailStore store { get; private set; }
+
+        public bool authentication_failed = false;
+        public bool authentication_prompting = false;
+        public uint authentication_attempts = 0;
+
         public Cancellable cancellable { get; private set; default = new Cancellable(); }
 
         public AccountContext(Geary.Account account) {
@@ -625,6 +631,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void open_account(Geary.Account account) {
+        account.information.authentication_failure.connect(
+            on_authentication_failure
+        );
         account.notify["current-status"].connect(
             on_account_status_notify
         );
@@ -658,6 +667,9 @@ public class GearyController : Geary.BaseObject {
             // Stop updating status and showing errors when closing
             // the account - the user doesn't care any more
             account.report_problem.disconnect(on_report_problem);
+            account.information.authentication_failure.disconnect(
+                on_authentication_failure
+            );
             account.notify["current-status"].disconnect(
                 on_account_status_notify
             );
@@ -890,17 +902,98 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void update_account_status() {
-        Geary.Account.Status effective_status =
-            this.accounts.values.fold<Geary.Account.Status>(
-                (ctx, status) => ctx.get_effective_status() | status,
-                0
+    private bool is_currently_prompting() {
+        return this.accounts.values.fold<bool>(
+            (ctx, seed) => ctx.authentication_prompting | seed,
+            false
+        );
+    }
+
+    private async void prompt_for_password(AccountContext context,
+                                           Geary.ServiceInformation service) {
+        Geary.AccountInformation account = context.account.information;
+        bool is_incoming = (service == account.incoming);
+        Geary.Credentials credentials = is_incoming
+            ? account.incoming.credentials
+            : account.get_outgoing_credentials();
+
+        bool handled = true;
+        if (this.account_manager.is_goa_account(account) ||
+            context.authentication_attempts > MAX_AUTH_ATTEMPTS ||
+            credentials == null) {
+            // A managed account has had a problem, we have run out of
+            // authentication attempts, or have been asked for creds
+            // but don't even have a login. So just bail out
+            // immediately and flag the account as needing attention.
+            handled = false;
+        } else {
+            context.authentication_prompting = true;
+            this.application.present();
+            PasswordDialog password_dialog = new PasswordDialog(
+                this.application.get_active_window(),
+                account,
+                service
             );
+            if (password_dialog.run()) {
+                service.credentials = service.credentials.copy_with_token(
+                    password_dialog.password
+                );
+                service.remember_password = password_dialog.remember_password;
+
+                // The update the credentials for the service that the
+                // credentials actually came from
+                Geary.ServiceInformation creds_service =
+                    credentials == account.incoming.credentials
+                    ? account.incoming
+                    : account.outgoing;
+                SecretMediator libsecret = (SecretMediator) account.mediator;
+                try {
+                    yield libsecret.update_token(
+                        account, creds_service, context.cancellable
+                    );
+                    // Update the actual service in the engine though
+                    yield this.application.engine.update_account_service(
+                        account, service, context.cancellable
+                    );
+                } catch (GLib.IOError.CANCELLED err) {
+                    // all good
+                } catch (GLib.Error err) {
+                    report_problem(
+                        new Geary.ServiceProblemReport(
+                            Geary.ProblemType.GENERIC_ERROR,
+                            account,
+                            service,
+                            err
+                        )
+                    );
+                }
+                context.authentication_attempts++;
+            } else {
+                // User cancelled, bail out unconditionally
+                handled = false;
+            }
+            context.authentication_prompting = false;
+        }
+
+        if (!handled) {
+            context.authentication_attempts = 0;
+            context.authentication_failed = true;
+            update_account_status();
+        }
+    }
+
+    private void update_account_status() {
+        Geary.Account.Status effective_status = 0;
+        bool auth_error = false;
+        foreach (AccountContext context in this.accounts.values) {
+            effective_status |= context.get_effective_status();
+            auth_error |= context.authentication_failed;
+        }
 
         foreach (Gtk.Window window in this.application.get_windows()) {
             MainWindow? main = window as MainWindow;
             if (main != null) {
-                main.update_account_status(effective_status);
+                main.update_account_status(effective_status, auth_error);
             }
         }
     }
@@ -997,6 +1090,14 @@ public class GearyController : Geary.BaseObject {
 
     private void on_report_problem(Geary.ProblemReport problem) {
         report_problem(problem);
+    }
+
+    private void on_authentication_failure(Geary.AccountInformation account,
+                                           Geary.ServiceInformation service) {
+        AccountContext? context = this.accounts.get(account);
+        if (context != null && !is_currently_prompting()) {
+            this.prompt_for_password.begin(context, service);
+        }
     }
 
     private void on_retry_service_problem(Geary.ClientService.Status type) {
