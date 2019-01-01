@@ -247,7 +247,7 @@ public abstract class Geary.ClientService : BaseObject {
     }
 
     /**
-     * Starts the service manager running.
+     * Starts the service running.
      *
      * This may cause the manager to establish connections to the
      * network service.
@@ -256,12 +256,29 @@ public abstract class Geary.ClientService : BaseObject {
         throws GLib.Error;
 
     /**
-     * Stops the service manager running.
+     * Stops the service running.
      *
      * Any existing connections to the network service will be closed.
      */
     public abstract async void stop(GLib.Cancellable? cancellable = null)
         throws GLib.Error;
+
+    /**
+     * Starts the service, stopping it first if running.
+     *
+     * An error will be thrown if the service could not be stopped or
+     * could not be started again. If an error is thrown while
+     * stopping the service, no attempt will be made to start it
+     * again.
+     */
+    public async void restart(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        if (this.is_running) {
+            yield stop(cancellable);
+        }
+
+        yield start(cancellable);
+    }
 
     /**
      * Called when the network service has become reachable.

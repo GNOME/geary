@@ -270,6 +270,7 @@ public class GearyController : Geary.BaseObject {
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
+        main_window.retry_service_problem.connect(on_retry_service_problem);
         main_window.on_shift_key.connect(on_shift_key);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
@@ -996,6 +997,33 @@ public class GearyController : Geary.BaseObject {
 
     private void on_report_problem(Geary.ProblemReport problem) {
         report_problem(problem);
+    }
+
+    private void on_retry_service_problem(Geary.ClientService.Status type) {
+        AccountContext? context = Geary.traverse(this.accounts.values)
+            .first_matching((ctx) => (
+                ctx.account.current_status.has_service_problem() &&
+                (ctx.account.incoming.current_status == type ||
+                 ctx.account.outgoing.current_status == type)
+            )
+        );
+
+        if (context != null) {
+            Geary.Account account = context.account;
+            Geary.ClientService service = account.incoming.current_status == type
+              ? account.incoming
+              : account.outgoing;
+
+            switch (type) {
+            case AUTHENTICATION_FAILED:
+                // Reset so the infobar does not show up again
+                context.authentication_failed = false;
+                break;
+
+            }
+
+            service.restart.begin(context.cancellable);
+        }
     }
 
     private void on_account_status_notify() {

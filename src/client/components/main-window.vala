@@ -66,11 +66,14 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private Gtk.InfoBar service_problem_infobar;
 
     [GtkChild]
-    private Gtk.InfoBar auth_problem_infobar;
-
-    [GtkChild]
     private Gtk.InfoBar cert_problem_infobar;
 
+    [GtkChild]
+    private Gtk.InfoBar auth_problem_infobar;
+
+
+    /** Fired when the user requests an account status be retried. */
+    public signal void retry_service_problem(Geary.ClientService.Status problem);
 
     /** Fired when the shift key is pressed or released. */
     public signal void on_shift_key(bool pressed);
@@ -520,6 +523,27 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private void on_offline_infobar_response() {
         this.offline_infobar.hide();
         update_infobar_frame();
+    }
+
+    [GtkCallback]
+    private void on_service_problem_retry() {
+        this.service_problem_infobar.hide();
+        update_infobar_frame();
+        retry_service_problem(Geary.ClientService.Status.CONNECTION_FAILED);
+    }
+
+    [GtkCallback]
+    private void on_cert_problem_retry() {
+        this.cert_problem_infobar.hide();
+        update_infobar_frame();
+        retry_service_problem(Geary.ClientService.Status.TLS_VALIDATION_FAILED);
+    }
+
+    [GtkCallback]
+    private void on_auth_problem_retry() {
+        this.auth_problem_infobar.hide();
+        update_infobar_frame();
+        retry_service_problem(Geary.ClientService.Status.AUTHENTICATION_FAILED);
     }
 
     [GtkCallback]
