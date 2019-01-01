@@ -226,7 +226,9 @@ public class Geary.Imap.Command : BaseObject {
     public async void wait_until_complete(GLib.Cancellable cancellable)
         throws GLib.Error {
         yield this.complete_lock.wait_async(cancellable);
-        check_status();
+        // Since this is part of the public API, perform a strict
+        // check on the status code.
+        check_status(true);
     }
 
     /**
@@ -250,7 +252,9 @@ public class Geary.Imap.Command : BaseObject {
         this.response_timer.reset();
         this.complete_lock.blind_notify();
         cancel_send();
-        check_status();
+        // Since this gets called by the client connection only check
+        // for an expected server response, good or bad
+        check_status(false);
     }
 
     /**
@@ -319,7 +323,7 @@ public class Geary.Imap.Command : BaseObject {
         }
     }
 
-    private void check_status() throws ImapError {
+    private void check_status(bool require_okay) throws ImapError {
         if (this.status == null) {
             throw new ImapError.SERVER_ERROR(
                 "%s: No command response was received",
@@ -335,7 +339,9 @@ public class Geary.Imap.Command : BaseObject {
             );
         }
 
-        if (this.status.status != Status.OK) {
+        // XXX should we be distinguishing between NO and BAD
+        // responses here?
+        if (require_okay && this.status.status != Status.OK) {
             throw new ImapError.SERVER_ERROR(
                 "%s: Command failed: %s",
                 to_brief_string(),
