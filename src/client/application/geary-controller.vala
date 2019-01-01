@@ -1032,18 +1032,21 @@ public class GearyController : Geary.BaseObject {
             } catch (Error open_err) {
                 debug("Unable to open account %s: %s", account.to_string(), open_err.message);
 
-                if (open_err is Geary.EngineError.CORRUPT)
+                if (open_err is Geary.EngineError.CORRUPT) {
                     retry = yield account_database_error_async(account);
-                else if (open_err is Geary.EngineError.PERMISSIONS)
-                    yield account_database_perms_async(account);
-                else if (open_err is Geary.EngineError.VERSION)
-                    yield account_database_version_async(account);
-                else
-                    yield account_general_error_async(account);
+                }
 
                 if (!retry) {
+                    report_problem(
+                        new Geary.AccountProblemReport(
+                            Geary.ProblemType.GENERIC_ERROR,
+                            account.information,
+                            open_err
+                        )
+                    );
+
+                    this.account_manager.disable_account(account.information);
                     this.accounts.unset(account.information);
-                    return;
                 }
             }
         } while (retry);
@@ -1051,7 +1054,7 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.set_user_folders_root_name(account, _("Labels"));
         display_main_window_if_ready();
     }
-    
+
     // Returns true if the caller should try opening the account again
     private async bool account_database_error_async(Geary.Account account) {
         bool retry = true;
@@ -1085,42 +1088,7 @@ public class GearyController : Geary.BaseObject {
             break;
         }
 
-        if (!retry)
-            this.application.exit(1);
-
         return retry;
-    }
-    
-    private async void account_database_perms_async(Geary.Account account) {
-        // some other problem opening the account ... as with other flow path, can't run
-        // Geary today with an account in unopened state, so have to exit
-        ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open local mailbox for %s").printf(account.information.id),
-            _("There was an error opening the local mail database for this account. This is possibly due to a file permissions problem.\n\nPlease check that you have read/write permissions for all files in this directory:\n\n%s")
-                .printf(account.information.data_dir.get_path()));
-        dialog.run();
-
-        this.application.exit(1);
-    }
-
-    private async void account_database_version_async(Geary.Account account) {
-        ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open local mailbox for %s").printf(account.information.id),
-            _("The version number of the local mail database is formatted for a newer version of Geary. Unfortunately, the database cannot be “rolled back” to work with this version of Geary.\n\nPlease install the latest version of Geary and try again."));
-        dialog.run();
-
-        this.application.exit(1);
-    }
-
-    private async void account_general_error_async(Geary.Account account) {
-        // some other problem opening the account ... as with other flow path, can't run
-        // Geary today with an account in unopened state, so have to exit
-        ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open local mailbox for %s").printf(account.information.id),
-            _("There was an error opening the local account. This is probably due to connectivity issues.\n\nPlease check your network connection and restart Geary."));
-        dialog.run();
-
-        this.application.exit(1);
     }
 
     private async void disconnect_account_async(AccountContext context, Cancellable? cancellable = null) {
