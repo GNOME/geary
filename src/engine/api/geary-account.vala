@@ -538,8 +538,12 @@ public abstract class Geary.Account : BaseObject {
 
     private void on_service_status_notify() {
         Status new_status = 0;
-        if (incoming.current_status != UNKNOWN &&
-            incoming.current_status != UNREACHABLE) {
+        // Don't consider service status UNKNOWN to indicate being
+        // offline, since clients will indicate offline status, but
+        // not indicate online status. So when at startup, or when
+        // restarting services, we don't want to cause them to
+        // spuriously indicate being offline.
+        if (incoming.current_status != UNREACHABLE) {
             new_status |= ONLINE;
         }
         if (incoming.current_status.is_error() ||
