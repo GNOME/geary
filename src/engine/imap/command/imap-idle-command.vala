@@ -30,13 +30,14 @@ public class Geary.Imap.IdleCommand : Command {
         this.exit_lock = new Geary.Nonblocking.Spinlock(this.exit_cancellable);
     }
 
+    /** Causes the idle command to exit, if currently executing. **/
     public void exit_idle() {
         this.exit_lock.blind_notify();
     }
 
     /** Waits after serialisation has completed for {@link exit_idle}. */
-    public override async void send(Serializer ser,
-                                    GLib.Cancellable cancellable)
+    internal override async void send(Serializer ser,
+                                      GLib.Cancellable cancellable)
         throws GLib.Error {
         // Need to manually flush here since Dovecot doesn't like
         // getting IDLE in the same buffer as other commands.
@@ -46,12 +47,13 @@ public class Geary.Imap.IdleCommand : Command {
         this.serialised = true;
 
         // Need to manually flush again since the connection will be
-        // waiting this to complete before do so.
+        // waiting for all pending commands to complete before
+        // flushing it itself
         yield ser.flush_stream(cancellable);
     }
 
-    public override async void send_wait(Serializer ser,
-                                         GLib.Cancellable cancellable)
+    internal override async void send_wait(Serializer ser,
+                                           GLib.Cancellable cancellable)
         throws GLib.Error {
         // Wait for exit_idle() to be called, the server to send a
         // status response, or everything to be cancelled.
@@ -72,12 +74,7 @@ public class Geary.Imap.IdleCommand : Command {
         yield wait_until_complete(cancellable);
     }
 
-    public override void cancel_send() {
-        base.cancel_send();
-        this.exit_cancellable.cancel();
-    }
-
-    public override void continuation_requested(ContinuationResponse response)
+    internal override void continuation_requested(ContinuationResponse response)
         throws ImapError {
         if (!this.serialised) {
             // Allow any args sent as literals to be processed
@@ -89,6 +86,11 @@ public class Geary.Imap.IdleCommand : Command {
             // received fine.
             this.response_timer.reset();
         }
+    }
+
+    protected override void cancel_send() {
+        base.cancel_send();
+        this.exit_cancellable.cancel();
     }
 
 }

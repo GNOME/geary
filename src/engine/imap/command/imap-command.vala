@@ -96,7 +96,7 @@ public class Geary.Imap.Command : BaseObject {
      * @see Tag
      */
     public Command(string name, string[]? args = null) {
-        tag = Tag.get_unassigned();
+        this.tag = Tag.get_unassigned();
         this.name = name;
         if (args != null) {
             foreach (string arg in args) {
@@ -116,13 +116,11 @@ public class Geary.Imap.Command : BaseObject {
     /**
      * Assign a Tag to this command, if currently unassigned.
      *
-     * Can only be called on a Command that holds an unassigned Tag.
-     * Thus, this can only be called once at most, and zero times if
-     * Command.assigned() was used to generate the Command.  Fires an
-     * assertion if either of these cases is true, or if the supplied
-     * Tag is unassigned.
+     * Can only be called on a Command that holds an unassigned tag,
+     * and hence this can only be called once at most. Throws an error
+     * if already assigned or if the supplied tag is unassigned.
      */
-    public void assign_tag(Tag new_tag) throws ImapError {
+    internal void assign_tag(Tag new_tag) throws ImapError {
         if (this.tag.is_assigned()) {
             throw new ImapError.SERVER_ERROR(
                 "%s: Command tag is already assigned", to_brief_string()
@@ -146,8 +144,8 @@ public class Geary.Imap.Command : BaseObject {
      * required, this method will yield until a command continuation
      * has been received, when it will resume the same process.
      */
-    public virtual async void send(Serializer ser,
-                                   GLib.Cancellable cancellable)
+    internal virtual async void send(Serializer ser,
+                                     GLib.Cancellable cancellable)
         throws GLib.Error {
         this.response_timer.start();
         this.tag.serialize(ser, cancellable);
@@ -199,8 +197,8 @@ public class Geary.Imap.Command : BaseObject {
      * Most commands will not need to override this, and it by default
      * does nothing.
      */
-    public virtual async void send_wait(Serializer ser,
-                                        GLib.Cancellable cancellable)
+    internal virtual async void send_wait(Serializer ser,
+                                          GLib.Cancellable cancellable)
         throws GLib.Error {
         // Nothing to do by default
     }
@@ -211,7 +209,7 @@ public class Geary.Imap.Command : BaseObject {
      * When this method is called, all locks will be released,
      * including {@link wait_until_complete}.
      */
-    public virtual void cancel_command() {
+    internal virtual void cancel_command() {
         cancel_send();
         this.response_timer.reset();
         this.complete_lock.blind_notify();
@@ -231,13 +229,20 @@ public class Geary.Imap.Command : BaseObject {
         check_status(true);
     }
 
+    public virtual string to_string() {
+        string args = this.args.to_string();
+        return (Geary.String.is_empty(args))
+            ? "%s %s".printf(this.tag.to_string(), this.name)
+            : "%s %s %s".printf(this.tag.to_string(), this.name, args);
+    }
+
     /**
      * Called when a tagged status response is received for this command.
      *
      * This will update the command's {@link status} property, then
-     * throw an error it does not indicate a successful completion.
+     * throw an error if it does not indicate a successful completion.
      */
-    public virtual void completed(StatusResponse new_status)
+    internal virtual void completed(StatusResponse new_status)
         throws ImapError {
         if (this.status != null) {
             cancel_send();
@@ -260,7 +265,7 @@ public class Geary.Imap.Command : BaseObject {
     /**
      * Called when tagged server data is received for this command.
      */
-    public virtual void data_received(ServerData data)
+    internal virtual void data_received(ServerData data)
         throws ImapError {
         if (this.status != null) {
             cancel_send();
@@ -281,7 +286,7 @@ public class Geary.Imap.Command : BaseObject {
      * {@link send} is waiting to send a literal, it will do so
      * now.
      */
-    public virtual void
+    internal virtual void
         continuation_requested(ContinuationResponse continuation)
         throws ImapError {
         if (this.status != null) {
@@ -302,13 +307,6 @@ public class Geary.Imap.Command : BaseObject {
 
         this.response_timer.start();
         this.literal_spinlock.blind_notify();
-    }
-
-    public virtual string to_string() {
-        string args = this.args.to_string();
-        return (Geary.String.is_empty(args))
-            ? "%s %s".printf(this.tag.to_string(), this.name)
-            : "%s %s %s".printf(this.tag.to_string(), this.name, args);
     }
 
     /**
