@@ -892,12 +892,24 @@ public class GearyController : Geary.BaseObject {
         debug("Problem reported: %s", report.to_string());
 
         if (!(report.error is IOError.CANCELLED)) {
-            if (report.problem_type == Geary.ProblemType.SEND_EMAIL_SAVE_FAILED) {
-                handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
-            } else {
-                MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
-                info_bar.retry.connect(on_retry_problem);
-                this.main_window.show_infobar(info_bar);
+            MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
+            info_bar.retry.connect(on_retry_problem);
+            this.main_window.show_infobar(info_bar);
+        }
+    }
+
+    private void update_account_status() {
+        Geary.Account.Status effective_status = 0;
+        bool auth_error = false;
+        foreach (AccountContext context in this.accounts.values) {
+            effective_status |= context.get_effective_status();
+            auth_error |= context.authentication_failed;
+        }
+
+        foreach (Gtk.Window window in this.application.get_windows()) {
+            MainWindow? main = window as MainWindow;
+            if (main != null) {
+                main.update_account_status(effective_status, auth_error);
             }
         }
     }
@@ -980,155 +992,6 @@ public class GearyController : Geary.BaseObject {
             context.authentication_failed = true;
             update_account_status();
         }
-    }
-
-    private void update_account_status() {
-        Geary.Account.Status effective_status = 0;
-        bool auth_error = false;
-        foreach (AccountContext context in this.accounts.values) {
-            effective_status |= context.get_effective_status();
-            auth_error |= context.authentication_failed;
-        }
-
-        foreach (Gtk.Window window in this.application.get_windows()) {
-            MainWindow? main = window as MainWindow;
-            if (main != null) {
-                main.update_account_status(effective_status, auth_error);
-            }
-        }
-    }
-
-    private void on_retry_problem(MainWindowInfoBar info_bar) {
-        Geary.ServiceProblemReport? service_report =
-            info_bar.report as Geary.ServiceProblemReport;
-        Error retry_err = null;
-        if (service_report != null) {
-            AccountContext? context = this.accounts.get(service_report.account);
-            if (context != null && context.account.is_open()) {
-                switch (service_report.service.protocol) {
-                case Geary.Protocol.IMAP:
-                    context.account.incoming.start.begin(
-                        context.cancellable,
-                        (obj, ret) => {
-                            try {
-                                context.account.incoming.start.end(ret);
-                            } catch (Error err) {
-                                retry_err = err;
-                            }
-                        });
-                    break;
-
-                case Geary.Protocol.SMTP:
-                    context.account.outgoing.start.begin(
-                        context.cancellable,
-                        (obj, ret) => {
-                            try {
-                                context.account.outgoing.start.end(ret);
-                            } catch (Error err) {
-                                retry_err = err;
-                            }
-                        });
-                    break;
-                }
-
-                if (retry_err != null) {
-                    report_problem(
-                        new Geary.ServiceProblemReport(
-                            Geary.ProblemType.GENERIC_ERROR,
-                            service_report.account,
-                            service_report.service,
-                            retry_err
-                        )
-                    );
-                }
-            }
-        }
-    }
-
-    private void handle_outbox_failure(StatusBar.Message message) {
-        bool activate_message = false;
-        try {
-            // Due to a timing hole where it's possible to delete a message
-            // from the outbox after the SMTP queue has picked it up and is
-            // in the process of sending it, we only want to display a message
-            // telling the user there's a problem if there are any other
-            // messages waiting to be sent on any account.
-            foreach (Geary.AccountInformation info in Geary.Engine.instance.get_accounts().values) {
-                Geary.Account account = Geary.Engine.instance.get_account_instance(info);
-                if (account.is_open()) {
-                    Geary.Folder? outbox = account.get_special_folder(Geary.SpecialFolderType.OUTBOX);
-                    if (outbox != null && outbox.properties.email_total > 0) {
-                        activate_message = true;
-                        break;
-                    }
-                }
-            }
-        } catch (Error e) {
-            debug("Error determining whether any outbox has messages: %s", e.message);
-            activate_message = true;
-        }
-        
-        if (activate_message) {
-            if (!main_window.status_bar.is_message_active(message))
-                main_window.status_bar.activate_message(message);
-            switch (message) {
-                case StatusBar.Message.OUTBOX_SEND_FAILURE:
-                    libnotify.set_error_notification(_("Error sending email"),
-                        _("Geary encountered an error sending an email.  If the problem persists, please manually delete the email from your Outbox folder."));
-                break;
-                
-                case StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED:
-                    libnotify.set_error_notification(_("Error saving sent mail"),
-                        _("Geary encountered an error saving a sent message to Sent Mail.  The message will stay in your Outbox folder until you delete it."));
-                break;
-                
-                default:
-                    assert_not_reached();
-            }
-        }
-    }
-
-    private void on_report_problem(Geary.ProblemReport problem) {
-        report_problem(problem);
-    }
-
-    private void on_authentication_failure(Geary.AccountInformation account,
-                                           Geary.ServiceInformation service) {
-        AccountContext? context = this.accounts.get(account);
-        if (context != null && !is_currently_prompting()) {
-            this.prompt_for_password.begin(context, service);
-        }
-    }
-
-    private void on_retry_service_problem(Geary.ClientService.Status type) {
-        AccountContext? context = Geary.traverse(this.accounts.values)
-            .first_matching((ctx) => (
-                ctx.account.current_status.has_service_problem() &&
-                (ctx.account.incoming.current_status == type ||
-                 ctx.account.outgoing.current_status == type)
-            )
-        );
-
-        if (context != null) {
-            Geary.Account account = context.account;
-            Geary.ClientService service = account.incoming.current_status == type
-              ? account.incoming
-              : account.outgoing;
-
-            switch (type) {
-            case AUTHENTICATION_FAILED:
-                // Reset so the infobar does not show up again
-                context.authentication_failed = false;
-                break;
-
-            }
-
-            service.restart.begin(context.cancellable);
-        }
-    }
-
-    private void on_account_status_notify() {
-        update_account_status();
     }
 
     private void on_account_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
@@ -3177,6 +3040,68 @@ public class GearyController : Geary.BaseObject {
                 }
             }
         );
+    }
+
+    private void on_report_problem(Geary.ProblemReport problem) {
+        report_problem(problem);
+    }
+
+    private void on_retry_problem(MainWindowInfoBar info_bar) {
+        Geary.ServiceProblemReport? service_report =
+            info_bar.report as Geary.ServiceProblemReport;
+        if (service_report != null) {
+            AccountContext? context = this.accounts.get(service_report.account);
+            if (context != null && context.account.is_open()) {
+                switch (service_report.service.protocol) {
+                case Geary.Protocol.IMAP:
+                    context.account.incoming.restart.begin(context.cancellable);
+                    break;
+
+                case Geary.Protocol.SMTP:
+                    context.account.outgoing.start.begin(context.cancellable);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void on_account_status_notify() {
+        update_account_status();
+    }
+
+    private void on_authentication_failure(Geary.AccountInformation account,
+                                           Geary.ServiceInformation service) {
+        AccountContext? context = this.accounts.get(account);
+        if (context != null && !is_currently_prompting()) {
+            this.prompt_for_password.begin(context, service);
+        }
+    }
+
+    private void on_retry_service_problem(Geary.ClientService.Status type) {
+        AccountContext? context = Geary.traverse(this.accounts.values)
+            .first_matching((ctx) => (
+                ctx.account.current_status.has_service_problem() &&
+                (ctx.account.incoming.current_status == type ||
+                 ctx.account.outgoing.current_status == type)
+            )
+        );
+
+        if (context != null) {
+            Geary.Account account = context.account;
+            Geary.ClientService service = account.incoming.current_status == type
+              ? account.incoming
+              : account.outgoing;
+
+            switch (type) {
+            case AUTHENTICATION_FAILED:
+                // Reset so the infobar does not show up again
+                context.authentication_failed = false;
+                break;
+
+            }
+
+            service.restart.begin(context.cancellable);
+        }
     }
 
     private void on_scan_completed() {
