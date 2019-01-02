@@ -13,8 +13,6 @@ let ComposerPageState = function() {
     this.init.apply(this, arguments);
 };
 ComposerPageState.KEYWORD_SPLIT_REGEX = /[\s]+/g;
-ComposerPageState.QUOTE_START = "\x91";  // private use one
-ComposerPageState.QUOTE_END = "\x92";    // private use two
 ComposerPageState.QUOTE_MARKER = "\x7f"; // delete
 ComposerPageState.PROTOCOL_REGEX = /^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):/i;
 // Taken from Geary.HTML.URL_REGEX, without the inline modifier (?x)
@@ -330,7 +328,8 @@ ComposerPageState.prototype = {
         return parent.innerHTML;
     },
     getText: function() {
-        return ComposerPageState.htmlToQuotedText(document.body);
+        let text = ComposerPageState.htmlToText(document.body);
+        return ComposerPageState.replaceNonBreakingSpace(text);
     },
     setRichText: function(enabled) {
         if (enabled) {
@@ -441,35 +440,17 @@ ComposerPageState.cleanPart = function(part, removeIfEmpty) {
 };
 
 /**
- * Convert a HTML DOM tree to plain text with delineated quotes.
- *
- * Lines are delinated using LF. Quoted lines are prefixed with
- * `ComposerPageState.QUOTE_MARKER`, where the number of markers
- * indicates the depth of nesting of the quote.
- */
-ComposerPageState.htmlToQuotedText = function(root) {
-    let bqTexts = [];
-
-    text = ComposerPageState.htmlToTextAndQuotes(root, bqTexts);
-
-    // Reassemble plain text out of parts, and replace non-breaking
-    // space with regular space.
-    text = ComposerPageState.resolveNesting(text, bqTexts);
-
-    return ComposerPageState.replaceNonBreakingSpace(text);
-};
-
-/**
  * Gets plain text that adequately represents the information in the HTML
  *
  * Asterisks are inserted around bold text, slashes around italic text, and
  * underscores around underlined text. Link URLs are inserted after the link
  * text.
  *
- * Blockquotes are extracted and replaced with tokens deliminated with the
- * characters QUOTE_START and QUOTE_END (from a unicode private use block).
+ * Each line of a blockquote is prefixed with
+ * `ComposerPageState.QUOTE_MARKER`, where the number of markers indicates
+ * the depth of nesting of the quote.
  */
-ComposerPageState.htmlToTextAndQuotes = function(root, bqTexts) {
+ComposerPageState.htmlToText = function(root) {
     let parentStyle = window.getComputedStyle(root);
     let text = "";
 
@@ -509,37 +490,38 @@ ComposerPageState.htmlToTextAndQuotes = function(root, bqTexts) {
                 if (node.textContent == node.href) {
                     text += "<" + node.href + ">";
                 } else {
-                    text += ComposerPageState.htmlToTextAndQuotes(node, bqTexts);
+                    text += ComposerPageState.htmlToText(node);
                     text += " <" + node.href + ">";
                 }
                 break;
             case "b":
             case "strong":
-                text += "*" + ComposerPageState.htmlToTextAndQuotes(node, bqTexts) + "*";
+                text += "*" + ComposerPageState.htmlToText(node) + "*";
                 break;
             case "blockquote":
-                let bqText = ComposerPageState.htmlToTextAndQuotes(node, bqTexts);
-                text += (
-                    ComposerPageState.QUOTE_START
-                        + bqTexts.length.toString()
-                        + ComposerPageState.QUOTE_END
-                );
-                bqTexts.push(bqText);
+                let bqText = ComposerPageState.htmlToText(node);
+                // If there is a newline at the end of the quote, remove it
+                // After this switch we ensure that there is a newline after the quote
+                bqText = bqText.replace(/\n$/, "");
+                let lines = bqText.split("\n");
+                for (let i = 0; i < lines.length; i++)
+                    lines[i] = ComposerPageState.QUOTE_MARKER + lines[i];
+                text += lines.join("\n");
                 break;
             case "br":
                 text += "\n";
                 break;
             case "i":
             case "em":
-                text += "/" + ComposerPageState.htmlToTextAndQuotes(node, bqTexts) + "/";
+                text += "/" + ComposerPageState.htmlToText(node) + "/";
                 break;
             case "u":
-                text += "_" + ComposerPageState.htmlToTextAndQuotes(node, bqTexts) + "_";
+                text += "_" + ComposerPageState.htmlToText(node) + "_";
                 break;
             case "#comment":
                 break;
             default:
-                text += ComposerPageState.htmlToTextAndQuotes(node, bqTexts);
+                text += ComposerPageState.htmlToText(node);
                 break;
         }
         if (isBlock) {
@@ -605,39 +587,6 @@ ComposerPageState.linkify = function(node) {
             }
         }
     }
-};
-
-ComposerPageState.resolveNesting = function(text, values) {
-    let tokenregex = new RegExp(
-        ComposerPageState.QUOTE_START
-            + "([0-9]+)"
-            + ComposerPageState.QUOTE_END, "g"
-    );
-    return text.replace(tokenregex, function(match, p1, offset, str) {
-        let key = new Number(p1);
-
-        let value = "";
-        if (key >= 0 && key < values.length) {
-            let nested = ComposerPageState.resolveNesting(values[key], values);
-            // If there is a newline at the end of the quote, remove it
-            // htmltoTextandQuotes already ensured that there is a newline after the quote
-            nested = nested.replace(/\n$/, "");
-            value = ComposerPageState.quoteLines(nested);
-        } else {
-            console.error("Regex error in denesting blockquotes: Invalid key");
-        }
-        return value;
-    });
-};
-
-/**
- * Prefixes each NL-delineated line with `ComposerPageState.QUOTE_MARKER`.
- */
-ComposerPageState.quoteLines = function(text) {
-    let lines = text.split("\n");
-    for (let i = 0; i < lines.length; i++)
-        lines[i] = ComposerPageState.QUOTE_MARKER + lines[i];
-    return lines.join("\n");
 };
 
 /**
