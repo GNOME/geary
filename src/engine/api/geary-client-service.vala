@@ -151,14 +151,14 @@ public abstract class Geary.ClientService : BaseObject {
      *
      * @see Status.CONNECTION_FAILED
      */
-    public signal void connection_error(GLib.Error? err);
+    public signal void connection_error(ErrorContext err);
 
     /**
      * Fired when the service encounters an unrecoverable error.
      *
      * @see Status.UNRECOVERABLE_ERROR
      */
-    public signal void unrecoverable_error(GLib.Error? err);
+    public signal void unrecoverable_error(ErrorContext err);
 
 
     /** The service's account. */
@@ -193,6 +193,9 @@ public abstract class Geary.ClientService : BaseObject {
     // transitions.
     private TimeoutManager became_reachable_timer;
     private TimeoutManager became_unreachable_timer;
+
+    /** The last reported error, if any. */
+    public ErrorContext? last_error { get; private set; default = null; }
 
 
     protected ClientService(AccountInformation account,
@@ -344,9 +347,12 @@ public abstract class Geary.ClientService : BaseObject {
      * network service encountered some network error other than a
      * login failure or TLS certificate validation error.
      */
-    protected void notify_connection_failed(GLib.Error? err) {
+    protected void notify_connection_failed(ErrorContext? error) {
+        // Set the error first so it is up to date when any
+        // current-status notify handlers fire
+        this.last_error = error;
         this.current_status = CONNECTION_FAILED;
-        connection_error(err);
+        connection_error(error);
     }
 
     /**
@@ -370,9 +376,12 @@ public abstract class Geary.ClientService : BaseObject {
      * some unrecoverable error has occurred when connecting to the
      * service, such as an unsupported protocol or version.
      */
-    protected void notify_unrecoverable_error(GLib.Error? err) {
+    protected void notify_unrecoverable_error(ErrorContext error) {
+        // Set the error first so it is up to date when any
+        // current-status notify handlers fire
+        this.last_error = error;
         this.current_status = UNRECOVERABLE_ERROR;
-        unrecoverable_error(err);
+        unrecoverable_error(error);
     }
 
     private void connect_handlers() {

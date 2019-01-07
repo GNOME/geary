@@ -296,7 +296,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             if (!(err is IOError.CANCELLED)) {
                 debug("[%s] Error adding new session to the pool: %s",
                       this.account.id, err.message);
-                notify_connection_failed(err);
+                notify_connection_failed(new ErrorContext(err));
             }
             this.close_pool.begin();
         }
@@ -370,7 +370,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             yield new_session.connect_async(cancellable);
         } catch (GLib.Error err) {
             if (!(err is IOError.CANCELLED)) {
-                notify_connection_failed(err);
+                notify_connection_failed(new ErrorContext(err));
             }
             throw err;
         }

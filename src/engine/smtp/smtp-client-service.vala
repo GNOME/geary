@@ -128,17 +128,17 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
                     notify_authentication_failed();
                 } else if (err is SmtpError.STARTTLS_FAILED ||
                            err is SmtpError.NOT_CONNECTED) {
-                    notify_connection_failed(err);
+                    notify_connection_failed(new ErrorContext(err));
                 } else if (err is SmtpError.PARSE_ERROR ||
                            err is SmtpError.SERVER_ERROR ||
                            err is SmtpError.NOT_SUPPORTED) {
-                    notify_unrecoverable_error(err);
+                    notify_unrecoverable_error(new ErrorContext(err));
                 }
                 cancellable.cancel();
             } catch (GLib.IOError.CANCELLED err) {
                 // Nothing to do here — we're already cancelled.
             } catch (GLib.Error err) {
-                notify_connection_failed(err);
+                notify_connection_failed(new ErrorContext(err));
                 cancellable.cancel();
             }
 

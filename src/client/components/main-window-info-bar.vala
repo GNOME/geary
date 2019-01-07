@@ -222,12 +222,15 @@ public class MainWindowInfoBar : Gtk.InfoBar {
         if (this.report.error == null) {
             details.append("No error reported");
         } else {
-            details.append_printf("Error type: %s\n", this.report.format_error_type());
-            details.append_printf("Message: %s\n", this.report.error.message);
-        }
-        if (this.report.backtrace != null) {
+            details.append_printf(
+                "Error type: %s\n", this.report.error.format_error_type()
+            );
+            details.append_printf(
+                "Message: %s\n", this.report.error.thrown.message
+            );
             details.append("Back trace:\n");
-            foreach (Geary.ProblemReport.StackFrame frame in this.report.backtrace) {
+            foreach (Geary.ErrorContext.StackFrame frame in
+                     this.report.error.backtrace) {
                 details.append_printf(" - %s\n", frame.to_string());
             }
         }
