@@ -3054,29 +3054,38 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_retry_service_problem(Geary.ClientService.Status type) {
-        AccountContext? context = Geary.traverse(this.accounts.values)
-            .first_matching((ctx) => (
-                ctx.account.current_status.has_service_problem() &&
-                (ctx.account.incoming.current_status == type ||
-                 ctx.account.outgoing.current_status == type)
-            )
-        );
-
-        if (context != null) {
+        bool auth_restarted = false;
+        foreach (AccountContext context in this.accounts.values) {
             Geary.Account account = context.account;
-            Geary.ClientService service = account.incoming.current_status == type
-              ? account.incoming
-              : account.outgoing;
+            if (account.current_status.has_service_problem() &&
+                (account.incoming.current_status == type ||
+                 account.outgoing.current_status == type)) {
 
-            switch (type) {
-            case AUTHENTICATION_FAILED:
-                // Reset so the infobar does not show up again
-                context.authentication_failed = false;
-                break;
+                Geary.ClientService service =
+                    (account.incoming.current_status == type)
+                        ? account.incoming
+                        : account.outgoing;
 
+                bool restart = true;
+                switch (type) {
+                case AUTHENTICATION_FAILED:
+                    if (auth_restarted) {
+                        // Only restart at most one at a time, so we
+                        // don't attempt to re-auth multiple bad
+                        // accounts at once.
+                        restart = false;
+                    } else {
+                        // Reset so the infobar does not show up again
+                        context.authentication_failed = false;
+                        auth_restarted = true;
+                    }
+                    break;
+                }
+
+                if (restart) {
+                    service.restart.begin(context.cancellable);
+                }
             }
-
-            service.restart.begin(context.cancellable);
         }
     }
 
