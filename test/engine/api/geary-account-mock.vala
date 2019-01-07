@@ -19,7 +19,7 @@ public class Geary.MockAccount : Account, MockObject {
     public class MockContactStore : ContactStore {
 
         internal MockContactStore() {
-            
+
         }
 
         public override async void
@@ -49,20 +49,16 @@ public class Geary.MockAccount : Account, MockObject {
             throw new EngineError.UNSUPPORTED("Mock method");
         }
 
+        public override void became_reachable() {
+
+        }
+
+        public override void became_unreachable() {
+
+        }
+
     }
 
-
-    public override bool is_online { get; protected set; default = false; }
-
-    public override ClientService incoming {
-        get { return this.incoming; }
-    }
-    private ClientService _incoming;
-
-    public override ClientService outgoing {
-        get { return this._outgoing; }
-    }
-    private ClientService _outgoing;
 
     protected Gee.Queue<ExpectedCall> expected {
         get; set; default = new Gee.LinkedList<ExpectedCall>();
@@ -70,16 +66,17 @@ public class Geary.MockAccount : Account, MockObject {
 
 
     public MockAccount(AccountInformation config) {
-        base(config);
-        this._incoming = new MockClientService(
-            config,
-            config.incoming,
-            new Endpoint(config.incoming.host, config.incoming.port, 0, 0)
-        );
-        this._outgoing = new MockClientService(
-            config,
-            config.outgoing,
-            new Endpoint(config.outgoing.host, config.outgoing.port, 0, 0)
+        base(config,
+             new MockClientService(
+                 config,
+                 config.incoming,
+                 new Endpoint(config.incoming.host, config.incoming.port, 0, 0)
+             ),
+             new MockClientService(
+                 config,
+                 config.outgoing,
+                 new Endpoint(config.outgoing.host, config.outgoing.port, 0, 0)
+             )
         );
     }
 

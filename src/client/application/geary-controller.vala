@@ -59,6 +59,7 @@ public class GearyController : Geary.BaseObject {
 
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
 
+    private const uint MAX_AUTH_ATTEMPTS = 3;
 
     private static string untitled_file_name;
 
@@ -81,11 +82,39 @@ public class GearyController : Geary.BaseObject {
         public Geary.Account account { get; private set; }
         public Geary.Folder? inbox = null;
         public Geary.App.EmailStore store { get; private set; }
+
+        public bool authentication_failed = false;
+        public bool authentication_prompting = false;
+        public uint authentication_attempts = 0;
+
         public Cancellable cancellable { get; private set; default = new Cancellable(); }
 
         public AccountContext(Geary.Account account) {
             this.account = account;
             this.store = new Geary.App.EmailStore(account);
+        }
+
+        public Geary.Account.Status get_effective_status() {
+            Geary.Account.Status current = this.account.current_status;
+            Geary.Account.Status effective = 0;
+            if (current.is_online()) {
+                effective |= ONLINE;
+            }
+            if (current.has_service_problem()) {
+                // Only retain this flag if the problem isn't auth or
+                // cert related, that is handled elsewhere.
+                Geary.ClientService.Status incoming =
+                    account.incoming.current_status;
+                Geary.ClientService.Status outgoing =
+                    account.outgoing.current_status;
+                if (incoming != AUTHENTICATION_FAILED &&
+                    incoming != TLS_VALIDATION_FAILED &&
+                    outgoing != AUTHENTICATION_FAILED &&
+                    outgoing != TLS_VALIDATION_FAILED) {
+                    effective |= SERVICE_PROBLEM;
+                }
+            }
+            return effective;
         }
 
     }
@@ -247,6 +276,7 @@ public class GearyController : Geary.BaseObject {
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
+        main_window.retry_service_problem.connect(on_retry_service_problem);
         main_window.on_shift_key.connect(on_shift_key);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
@@ -601,6 +631,12 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void open_account(Geary.Account account) {
+        account.information.authentication_failure.connect(
+            on_authentication_failure
+        );
+        account.notify["current-status"].connect(
+            on_account_status_notify
+        );
         account.report_problem.connect(on_report_problem);
         connect_account_async.begin(account, cancellable_open_account);
 
@@ -608,16 +644,18 @@ public class GearyController : Geary.BaseObject {
         account.contacts_loaded.connect(list_store.set_sort_function);
     }
 
-    private async void close_account(Geary.AccountInformation info) {
-        AccountContext? context = this.accounts.get(info);
+    private async void close_account(Geary.AccountInformation config) {
+        AccountContext? context = this.accounts.get(config);
         if (context != null) {
-            Geary.ContactStore contact_store = context.account.get_contact_store();
-            ContactListStore list_store = this.contact_list_store_cache.get(contact_store);
+            Geary.Account account = context.account;
+            Geary.ContactStore contact_store = account.get_contact_store();
+            ContactListStore list_store =
+                this.contact_list_store_cache.get(contact_store);
 
-            context.account.contacts_loaded.disconnect(list_store.set_sort_function);
+            account.contacts_loaded.disconnect(list_store.set_sort_function);
             this.contact_list_store_cache.unset(contact_store);
 
-            if (this.current_account == context.account) {
+            if (this.current_account == account) {
                 this.current_account = null;
 
                 previous_non_search_folder = null;
@@ -626,9 +664,15 @@ public class GearyController : Geary.BaseObject {
                 cancel_folder();
             }
 
-            // Stop showing errors when closing the account - the user
-            // doesn't care
-            context.account.report_problem.disconnect(on_report_problem);
+            // Stop updating status and showing errors when closing
+            // the account - the user doesn't care any more
+            account.report_problem.disconnect(on_report_problem);
+            account.information.authentication_failure.disconnect(
+                on_authentication_failure
+            );
+            account.notify["current-status"].disconnect(
+                on_account_status_notify
+            );
 
             yield disconnect_account_async(context);
         }
@@ -847,109 +891,115 @@ public class GearyController : Geary.BaseObject {
     private void report_problem(Geary.ProblemReport report) {
         debug("Problem reported: %s", report.to_string());
 
-        if (!(report.error is IOError.CANCELLED)) {
-            if (report.problem_type == Geary.ProblemType.SEND_EMAIL_SAVE_FAILED) {
-                handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
-            } else {
-                MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
-                info_bar.retry.connect(on_retry_problem);
-                this.main_window.show_infobar(info_bar);
+        if (report.error == null ||
+            !(report.error.thrown is IOError.CANCELLED)) {
+            MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
+            info_bar.retry.connect(on_retry_problem);
+            this.main_window.show_infobar(info_bar);
+        }
+    }
+
+    private void update_account_status() {
+        Geary.Account.Status effective_status = 0;
+        bool has_auth_error = false;
+        Geary.Account? service_problem_source = null;
+        foreach (AccountContext context in this.accounts.values) {
+            effective_status |= context.get_effective_status();
+            if (effective_status.has_service_problem() &&
+                service_problem_source == null) {
+                service_problem_source = context.account;
+            }
+            has_auth_error |= context.authentication_failed;
+        }
+
+        foreach (Gtk.Window window in this.application.get_windows()) {
+            MainWindow? main = window as MainWindow;
+            if (main != null) {
+                main.update_account_status(
+                    effective_status, has_auth_error, service_problem_source
+                );
             }
         }
     }
 
-    private void on_retry_problem(MainWindowInfoBar info_bar) {
-        Geary.ServiceProblemReport? service_report =
-            info_bar.report as Geary.ServiceProblemReport;
-        Error retry_err = null;
-        if (service_report != null) {
-            AccountContext? context = this.accounts.get(service_report.account);
-            if (context != null && context.account.is_open()) {
-                switch (service_report.service.protocol) {
-                case Geary.Protocol.IMAP:
-                    context.account.incoming.start.begin(
-                        context.cancellable,
-                        (obj, ret) => {
-                            try {
-                                context.account.incoming.start.end(ret);
-                            } catch (Error err) {
-                                retry_err = err;
-                            }
-                        });
-                    break;
+    private bool is_currently_prompting() {
+        return this.accounts.values.fold<bool>(
+            (ctx, seed) => ctx.authentication_prompting | seed,
+            false
+        );
+    }
 
-                case Geary.Protocol.SMTP:
-                    context.account.outgoing.start.begin(
-                        context.cancellable,
-                        (obj, ret) => {
-                            try {
-                                context.account.outgoing.start.end(ret);
-                            } catch (Error err) {
-                                retry_err = err;
-                            }
-                        });
-                    break;
-                }
+    private async void prompt_for_password(AccountContext context,
+                                           Geary.ServiceInformation service) {
+        Geary.AccountInformation account = context.account.information;
+        bool is_incoming = (service == account.incoming);
+        Geary.Credentials credentials = is_incoming
+            ? account.incoming.credentials
+            : account.get_outgoing_credentials();
 
-                if (retry_err != null) {
+        bool handled = true;
+        if (this.account_manager.is_goa_account(account) ||
+            context.authentication_attempts > MAX_AUTH_ATTEMPTS ||
+            credentials == null) {
+            // A managed account has had a problem, we have run out of
+            // authentication attempts, or have been asked for creds
+            // but don't even have a login. So just bail out
+            // immediately and flag the account as needing attention.
+            handled = false;
+        } else {
+            context.authentication_prompting = true;
+            this.application.present();
+            PasswordDialog password_dialog = new PasswordDialog(
+                this.application.get_active_window(),
+                account,
+                service
+            );
+            if (password_dialog.run()) {
+                service.credentials = service.credentials.copy_with_token(
+                    password_dialog.password
+                );
+                service.remember_password = password_dialog.remember_password;
+
+                // The update the credentials for the service that the
+                // credentials actually came from
+                Geary.ServiceInformation creds_service =
+                    credentials == account.incoming.credentials
+                    ? account.incoming
+                    : account.outgoing;
+                SecretMediator libsecret = (SecretMediator) account.mediator;
+                try {
+                    yield libsecret.update_token(
+                        account, creds_service, context.cancellable
+                    );
+                    // Update the actual service in the engine though
+                    yield this.application.engine.update_account_service(
+                        account, service, context.cancellable
+                    );
+                } catch (GLib.IOError.CANCELLED err) {
+                    // all good
+                } catch (GLib.Error err) {
                     report_problem(
                         new Geary.ServiceProblemReport(
                             Geary.ProblemType.GENERIC_ERROR,
-                            service_report.account,
-                            service_report.service,
-                            retry_err
+                            account,
+                            service,
+                            err
                         )
                     );
                 }
+                context.authentication_attempts++;
+            } else {
+                // User cancelled, bail out unconditionally
+                handled = false;
             }
+            context.authentication_prompting = false;
         }
-    }
 
-    private void handle_outbox_failure(StatusBar.Message message) {
-        bool activate_message = false;
-        try {
-            // Due to a timing hole where it's possible to delete a message
-            // from the outbox after the SMTP queue has picked it up and is
-            // in the process of sending it, we only want to display a message
-            // telling the user there's a problem if there are any other
-            // messages waiting to be sent on any account.
-            foreach (Geary.AccountInformation info in Geary.Engine.instance.get_accounts().values) {
-                Geary.Account account = Geary.Engine.instance.get_account_instance(info);
-                if (account.is_open()) {
-                    Geary.Folder? outbox = account.get_special_folder(Geary.SpecialFolderType.OUTBOX);
-                    if (outbox != null && outbox.properties.email_total > 0) {
-                        activate_message = true;
-                        break;
-                    }
-                }
-            }
-        } catch (Error e) {
-            debug("Error determining whether any outbox has messages: %s", e.message);
-            activate_message = true;
+        if (!handled) {
+            context.authentication_attempts = 0;
+            context.authentication_failed = true;
+            update_account_status();
         }
-        
-        if (activate_message) {
-            if (!main_window.status_bar.is_message_active(message))
-                main_window.status_bar.activate_message(message);
-            switch (message) {
-                case StatusBar.Message.OUTBOX_SEND_FAILURE:
-                    libnotify.set_error_notification(_("Error sending email"),
-                        _("Geary encountered an error sending an email.  If the problem persists, please manually delete the email from your Outbox folder."));
-                break;
-                
-                case StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED:
-                    libnotify.set_error_notification(_("Error saving sent mail"),
-                        _("Geary encountered an error saving a sent message to Sent Mail.  The message will stay in your Outbox folder until you delete it."));
-                break;
-                
-                default:
-                    assert_not_reached();
-            }
-        }
-    }
-
-    private void on_report_problem(Geary.ProblemReport problem) {
-        report_problem(problem);
     }
 
     private void on_account_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
@@ -990,18 +1040,21 @@ public class GearyController : Geary.BaseObject {
             } catch (Error open_err) {
                 debug("Unable to open account %s: %s", account.to_string(), open_err.message);
 
-                if (open_err is Geary.EngineError.CORRUPT)
+                if (open_err is Geary.EngineError.CORRUPT) {
                     retry = yield account_database_error_async(account);
-                else if (open_err is Geary.EngineError.PERMISSIONS)
-                    yield account_database_perms_async(account);
-                else if (open_err is Geary.EngineError.VERSION)
-                    yield account_database_version_async(account);
-                else
-                    yield account_general_error_async(account);
+                }
 
                 if (!retry) {
+                    report_problem(
+                        new Geary.AccountProblemReport(
+                            Geary.ProblemType.GENERIC_ERROR,
+                            account.information,
+                            open_err
+                        )
+                    );
+
+                    this.account_manager.disable_account(account.information);
                     this.accounts.unset(account.information);
-                    return;
                 }
             }
         } while (retry);
@@ -1009,7 +1062,7 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.set_user_folders_root_name(account, _("Labels"));
         display_main_window_if_ready();
     }
-    
+
     // Returns true if the caller should try opening the account again
     private async bool account_database_error_async(Geary.Account account) {
         bool retry = true;
@@ -1043,42 +1096,7 @@ public class GearyController : Geary.BaseObject {
             break;
         }
 
-        if (!retry)
-            this.application.exit(1);
-
         return retry;
-    }
-    
-    private async void account_database_perms_async(Geary.Account account) {
-        // some other problem opening the account ... as with other flow path, can't run
-        // Geary today with an account in unopened state, so have to exit
-        ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open local mailbox for %s").printf(account.information.id),
-            _("There was an error opening the local mail database for this account. This is possibly due to a file permissions problem.\n\nPlease check that you have read/write permissions for all files in this directory:\n\n%s")
-                .printf(account.information.data_dir.get_path()));
-        dialog.run();
-
-        this.application.exit(1);
-    }
-
-    private async void account_database_version_async(Geary.Account account) {
-        ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open local mailbox for %s").printf(account.information.id),
-            _("The version number of the local mail database is formatted for a newer version of Geary. Unfortunately, the database cannot be “rolled back” to work with this version of Geary.\n\nPlease install the latest version of Geary and try again."));
-        dialog.run();
-
-        this.application.exit(1);
-    }
-
-    private async void account_general_error_async(Geary.Account account) {
-        // some other problem opening the account ... as with other flow path, can't run
-        // Geary today with an account in unopened state, so have to exit
-        ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open local mailbox for %s").printf(account.information.id),
-            _("There was an error opening the local account. This is probably due to connectivity issues.\n\nPlease check your network connection and restart Geary."));
-        dialog.run();
-
-        this.application.exit(1);
     }
 
     private async void disconnect_account_async(AccountContext context, Cancellable? cancellable = null) {
@@ -1088,6 +1106,10 @@ public class GearyController : Geary.BaseObject {
 
         // Guard against trying to disconnect the account twice
         this.accounts.unset(account.information);
+
+        // Now the account is not in the accounts map, reset any
+        // status notifications for it
+        update_account_status();
 
         account.email_sent.disconnect(on_sent);
         account.email_removed.disconnect(on_account_email_removed);
@@ -2998,6 +3020,77 @@ public class GearyController : Geary.BaseObject {
                 }
             }
         );
+    }
+
+    private void on_report_problem(Geary.ProblemReport problem) {
+        report_problem(problem);
+    }
+
+    private void on_retry_problem(MainWindowInfoBar info_bar) {
+        Geary.ServiceProblemReport? service_report =
+            info_bar.report as Geary.ServiceProblemReport;
+        if (service_report != null) {
+            AccountContext? context = this.accounts.get(service_report.account);
+            if (context != null && context.account.is_open()) {
+                switch (service_report.service.protocol) {
+                case Geary.Protocol.IMAP:
+                    context.account.incoming.restart.begin(context.cancellable);
+                    break;
+
+                case Geary.Protocol.SMTP:
+                    context.account.outgoing.start.begin(context.cancellable);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void on_account_status_notify() {
+        update_account_status();
+    }
+
+    private void on_authentication_failure(Geary.AccountInformation account,
+                                           Geary.ServiceInformation service) {
+        AccountContext? context = this.accounts.get(account);
+        if (context != null && !is_currently_prompting()) {
+            this.prompt_for_password.begin(context, service);
+        }
+    }
+
+    private void on_retry_service_problem(Geary.ClientService.Status type) {
+        bool auth_restarted = false;
+        foreach (AccountContext context in this.accounts.values) {
+            Geary.Account account = context.account;
+            if (account.current_status.has_service_problem() &&
+                (account.incoming.current_status == type ||
+                 account.outgoing.current_status == type)) {
+
+                Geary.ClientService service =
+                    (account.incoming.current_status == type)
+                        ? account.incoming
+                        : account.outgoing;
+
+                bool restart = true;
+                switch (type) {
+                case AUTHENTICATION_FAILED:
+                    if (auth_restarted) {
+                        // Only restart at most one at a time, so we
+                        // don't attempt to re-auth multiple bad
+                        // accounts at once.
+                        restart = false;
+                    } else {
+                        // Reset so the infobar does not show up again
+                        context.authentication_failed = false;
+                        auth_restarted = true;
+                    }
+                    break;
+                }
+
+                if (restart) {
+                    service.restart.begin(context.cancellable);
+                }
+            }
+        }
     }
 
     private void on_scan_completed() {

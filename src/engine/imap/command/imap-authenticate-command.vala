@@ -40,18 +40,25 @@ public class Geary.Imap.AuthenticateCommand : Command {
         this(OAUTH2_METHOD, encoded_token);
     }
 
-    public override async void send(Serializer ser,
-                                    GLib.Cancellable cancellable)
+    internal override async void send(Serializer ser,
+                                      GLib.Cancellable cancellable)
         throws GLib.Error {
         yield base.send(ser, cancellable);
         this.serialised = true;
 
         // Need to manually flush here since the connection will be
-        // waiting this to complete before do so.
+        // waiting for all pending commands to complete before
+        // flushing it itself
         yield ser.flush_stream(cancellable);
     }
 
-    public override async void send_wait(Serializer ser,
+    public override string to_string() {
+        return "%s %s %s <token>".printf(
+            tag.to_string(), this.name, this.method
+        );
+    }
+
+    internal override async void send_wait(Serializer ser,
                                          GLib.Cancellable cancellable)
         throws GLib.Error {
         // Wait to either get a response or a continuation request
@@ -65,18 +72,13 @@ public class Geary.Imap.AuthenticateCommand : Command {
         yield wait_until_complete(cancellable);
     }
 
-    public override void cancel_send() {
-        base.cancel_send();
-        this.error_cancellable.cancel();
-    }
-
-    public override void completed(StatusResponse new_status)
+    internal override void completed(StatusResponse new_status)
         throws ImapError {
         this.error_lock.blind_notify();
         base.completed(new_status);
     }
 
-    public override void continuation_requested(ContinuationResponse response)
+    internal override void continuation_requested(ContinuationResponse response)
         throws ImapError {
         if (!this.serialised) {
             // Allow any args sent as literals to be processed
@@ -104,10 +106,9 @@ public class Geary.Imap.AuthenticateCommand : Command {
         }
     }
 
-    public override string to_string() {
-        return "%s %s %s <token>".printf(
-            tag.to_string(), this.name, this.method
-        );
+    protected override void cancel_send() {
+        base.cancel_send();
+        this.error_cancellable.cancel();
     }
 
 }

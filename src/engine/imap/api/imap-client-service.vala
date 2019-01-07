@@ -24,18 +24,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
     private const int DEFAULT_MIN_POOL_SIZE = 1;
     private const int DEFAULT_MAX_FREE_SIZE = 1;
-    private const int POOL_START_TIMEOUT_SEC = 1;
-    private const int POOL_STOP_TIMEOUT_SEC = 3;
     private const int CHECK_NOOP_THRESHOLD_SEC = 5;
-
-    /**
-     * Determines if the manager has a working connection.
-     *
-     * This will be true once at least one connection has been
-     * established, and after the server has become reachable again
-     * after being unreachable.
-     */
-    public bool is_ready { get; private set; default = false; }
 
     /**
      * Set to zero or negative value if keepalives should be disabled when a connection has not
@@ -100,44 +89,13 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     private Nonblocking.Queue<ClientSession> free_queue =
         new Nonblocking.Queue<ClientSession>.fifo();
 
-    private TimeoutManager pool_start;
-    private TimeoutManager pool_stop;
     private Cancellable? pool_cancellable = null;
-
-    private bool authentication_failed = false;
-    private bool untrusted_host = false;
-
-    /**
-     * Fired when the manager's ready state changes.
-     *
-     * This will be fired after opening if online and once at least
-     * one connection has been established, after the server has
-     * become reachable again after being unreachable, and if the
-     * server becomes unreachable.
-     */
-    public signal void ready(bool is_ready);
-
-    /** Fired when a network or non-auth error occurs opening a session. */
-    public signal void connection_failed(Error err);
-
-    /** Fired when an authentication error occurs opening a session. */
-    public signal void login_failed(StatusResponse? response);
 
 
     public ClientService(AccountInformation account,
                          ServiceInformation service,
                          Endpoint remote) {
         base(account, service, remote);
-
-        this.pool_start = new TimeoutManager.seconds(
-            POOL_START_TIMEOUT_SEC,
-            () => { this.check_pool.begin(); }
-        );
-
-        this.pool_stop = new TimeoutManager.seconds(
-            POOL_STOP_TIMEOUT_SEC,
-            () => { this.close_pool.begin(); }
-        );
     }
 
     /**
@@ -151,25 +109,8 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             );
         }
 
-        this.is_running = true;
-        this.authentication_failed = false;
         this.pool_cancellable = new Cancellable();
-
-        this.remote.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(
-            on_imap_trust_untrusted_host
-        );
-        this.remote.untrusted_host.connect(on_imap_untrusted_host);
-		this.remote.connectivity.notify["is-reachable"].connect(
-            on_connectivity_change
-        );
-        this.remote.connectivity.address_error_reported.connect(
-            on_connectivity_error
-        );
-        if (this.remote.connectivity.is_reachable.is_certain()) {
-            this.check_pool.begin();
-        } else {
-            this.remote.connectivity.check_reachable.begin();
-        }
+        notify_started();
     }
 
     /**
@@ -181,20 +122,9 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             return;
         }
 
-        this.is_running = false;
+        notify_stopped();
+
         this.pool_cancellable.cancel();
-
-        this.remote.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(
-            on_imap_trust_untrusted_host
-        );
-        this.remote.untrusted_host.disconnect(on_imap_untrusted_host);
-		this.remote.connectivity.notify["is-reachable"].disconnect(
-            on_connectivity_change
-        );
-        this.remote.connectivity.address_error_reported.disconnect(
-            on_connectivity_error
-        );
-
         yield close_pool();
 
         // TODO: This isn't the best (deterministic) way to deal with
@@ -229,20 +159,27 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
      * @throws ImapError.UNAVAILABLE if the IMAP endpoint is not
      * trusted or is not reachable.
      */
-    public async ClientSession claim_authorized_session_async(Cancellable? cancellable)
-        throws Error {
-        check_open();
-        debug("[%s] Claiming session with %d of %d free",
-              this.account.id, this.free_queue.size, this.all_sessions.size);
+    public async ClientSession
+        claim_authorized_session_async(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (!this.is_running) {
+            throw new EngineError.OPEN_REQUIRED(
+                "IMAP client service is not running"
+            );
+        }
 
-        if (this.authentication_failed)
-            throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
+        debug("Claiming session with %d of %d free",
+              this.free_queue.size, this.all_sessions.size);
 
-        if (this.untrusted_host)
-            throw new ImapError.UNAVAILABLE("Untrusted host %s", remote.to_string());
+        if (this.current_status == AUTHENTICATION_FAILED) {
+            throw new ImapError.UNAUTHENTICATED("Invalid credentials");
+        }
 
-        if (!this.remote.connectivity.is_reachable.is_certain())
-            throw new ImapError.UNAVAILABLE("Host at %s is unreachable", remote.to_string());
+        if (this.current_status == TLS_VALIDATION_FAILED) {
+            throw new ImapError.UNAVAILABLE(
+                "Untrusted host %s", this.remote.to_string()
+            );
+        }
 
         ClientSession? claimed = null;
         while (claimed == null) {
@@ -314,35 +251,29 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         }
     }
 
-    private void check_open() throws Error {
-        if (!this.is_running) {
-            throw new EngineError.OPEN_REQUIRED(
-                "IMAP client service is not running"
-            );
-        }
+    /** Restarts the client session pool. */
+    protected override void became_reachable() {
+        this.check_pool.begin(false);
     }
 
-    private async void check_pool(bool is_claiming = false) {
-        debug("[%s] Checking session pool with %d of %d free",
-              this.account.id, this.free_queue.size, this.all_sessions.size);
+    /** Closes the client session pool. */
+    protected override void became_unreachable() {
+        this.close_pool.begin();
+    }
 
-        this.pool_start.reset();
+    private async void check_pool(bool is_claiming) {
+        debug("Checking session pool with %d of %d free",
+              this.free_queue.size, this.all_sessions.size);
 
-        if (this.is_running &&
-            !this.authentication_failed &&
-            !this.untrusted_host &&
-            this.remote.connectivity.is_reachable.is_certain()) {
+        int needed = this.min_pool_size - this.all_sessions.size;
+        if (needed <= 0 && is_claiming) {
+            needed = 1;
+        }
 
-            int needed = this.min_pool_size - this.all_sessions.size;
-            if (needed <= 0 && is_claiming) {
-                needed = 1;
-            }
-
-            // Open as many as needed in parallel
-            while (needed > 0) {
-                add_pool_session.begin();
-                needed--;
-            }
+        // Open as many as needed in parallel
+        while (needed > 0) {
+            add_pool_session.begin();
+            needed--;
         }
     }
 
@@ -351,13 +282,22 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             ClientSession free = yield this.create_new_authorized_session(
                 this.pool_cancellable
             );
+            notify_connected();
             yield this.sessions_mutex.execute_locked(() => {
                     this.all_sessions.add(free);
                 });
             this.free_queue.send(free);
-        } catch (Error err) {
-            debug("[%s] Error adding new session to the pool: %s",
+        } catch (ImapError.UNAUTHENTICATED err) {
+            debug("[%s] Auth error adding new session to the pool: %s",
                   this.account.id, err.message);
+            notify_authentication_failed();
+            this.close_pool.begin();
+        } catch (Error err) {
+            if (!(err is IOError.CANCELLED)) {
+                debug("[%s] Error adding new session to the pool: %s",
+                      this.account.id, err.message);
+                notify_connection_failed(new ErrorContext(err));
+            }
             this.close_pool.begin();
         }
     }
@@ -426,17 +366,11 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         debug("[%s] Opening new session", this.account.id);
         ClientSession new_session = new ClientSession(remote);
-
-        // Listen for auth failures early so the client is notified if
-        // there is an error, even though we won't want to keep the
-        // session around.
-        new_session.login_failed.connect(on_login_failed);
-
         try {
             yield new_session.connect_async(cancellable);
-        } catch (Error err) {
+        } catch (GLib.Error err) {
             if (!(err is IOError.CANCELLED)) {
-                connection_failed(err);
+                notify_connection_failed(new ErrorContext(err));
             }
             throw err;
         }
@@ -446,12 +380,9 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                 this.configuration.credentials, cancellable
             );
         } catch (Error err) {
-            if (!(err is IOError.CANCELLED)) {
-                connection_failed(err);
-            }
-
-            // need to disconnect before throwing error ... don't honor Cancellable here, it's
-            // important to disconnect the client before dropping the ref
+            // need to disconnect before throwing error ... don't
+            // honor Cancellable here, it's important to disconnect
+            // the client before dropping the ref
             try {
                 yield new_session.disconnect_async();
             } catch (Error disconnect_err) {
@@ -469,23 +400,12 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                                       unselected_keepalive_sec,
                                       selected_with_idle_keepalive_sec);
 
-        // We now have a good connection, so signal us as ready if not
-        // already done so.
-        if (!this.is_ready) {
-            debug("[%s] Became ready", this.account.id);
-            notify_ready(true);
-        }
-
         return new_session;
     }
 
     private async void close_pool() {
-        debug("[%s] Closing the pool, disconnecting %d sessions",
-              this.account.id, this.all_sessions.size);
-
-        this.pool_start.reset();
-        this.pool_stop.reset();
-        notify_ready(false);
+        debug("Closing the pool, disconnecting %d sessions",
+              this.all_sessions.size);
 
         // Take a copy and work off that while scheduling disconnects,
         // since as they disconnect they'll remove themselves from the
@@ -534,14 +454,8 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
         if (removed) {
             session.disconnected.disconnect(on_disconnected);
-            session.login_failed.disconnect(on_login_failed);
         }
         return removed;
-    }
-
-    private void notify_ready(bool is_ready) {
-        this.is_ready = is_ready;
-        ready(is_ready);
     }
 
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
@@ -557,44 +471,5 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             }
         );
     }
-
-    private void on_login_failed(ClientSession session, StatusResponse? response) {
-        this.authentication_failed = true;
-        login_failed(response);
-        this.close_pool.begin();
-    }
-
-    private void on_imap_untrusted_host() {
-        this.untrusted_host = true;
-        this.close_pool.begin();
-    }
-
-    private void on_imap_trust_untrusted_host() {
-        // fired when the trust_untrusted_host property changes, indicating if the user has agreed
-        // to ignore the trust problems and continue connecting
-        if (untrusted_host && remote.trust_untrusted_host == Trillian.TRUE) {
-            untrusted_host = false;
-
-            if (this.is_running) {
-                check_pool.begin();
-            }
-        }
-    }
-
-	private void on_connectivity_change() {
-		bool is_reachable = this.remote.connectivity.is_reachable.is_certain();
-		if (is_reachable) {
-            this.pool_start.start();
-            this.pool_stop.reset();
-		} else {
-            this.pool_start.reset();
-            this.pool_stop.start();
-        }
-	}
-
-	private void on_connectivity_error(Error error) {
-        connection_failed(error);
-        this.close_pool.begin();
-	}
 
 }

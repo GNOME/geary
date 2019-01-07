@@ -21,19 +21,4 @@ public interface Geary.CredentialsMediator : GLib.Object {
                                           GLib.Cancellable? cancellable)
         throws GLib.Error;
 
-    /**
-     * Prompt the user to enter passwords for the given service.
-     *
-     * Updates authentication-related details for the given service,
-     * possibly including user login names, authentication tokens, and
-     * the remember password preference.
-     *
-     * Returns false if the user tried to cancel the interaction, or
-     * true if they tried to proceed.
-     */
-    public abstract async bool prompt_token(AccountInformation account,
-                                            ServiceInformation service,
-                                            GLib.Cancellable? cancellable)
-        throws GLib.Error;
-
 }

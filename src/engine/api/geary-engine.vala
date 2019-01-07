@@ -243,28 +243,20 @@ public class Geary.Engine : BaseObject {
         );
 
         Geary.Imap.ClientSession client = new Imap.ClientSession(endpoint);
-        GLib.Error? connect_err = null;
+        GLib.Error? imap_err = null;
         try {
             yield client.connect_async(cancellable);
         } catch (GLib.Error err) {
-            connect_err = err;
+            imap_err = err;
         }
 
-        bool login_failed = false;
-        GLib.Error? login_err = null;
-        if (connect_err == null) {
-            // XXX initiate_session_async doesn't seem to actually
-            // throw an imap error on login failed. This is not worth
-            // fixing until wip/26-proton-mail-bridge lands though, so
-            // use signals as a workaround instead.
-            client.login_failed.connect(() => login_failed = true);
-
+        if (imap_err == null) {
             try {
                 yield client.initiate_session_async(
                     service.credentials, cancellable
                 );
             } catch (GLib.Error err) {
-                login_err = err;
+                imap_err = err;
             }
 
             try {
@@ -278,17 +270,8 @@ public class Geary.Engine : BaseObject {
         // error
         endpoint.disconnect(untrusted_id);
 
-        if (connect_err != null) {
-            throw connect_err;
-        }
-
-        if (login_failed) {
-            // XXX This should be a LOGIN_FAILED error or something
-            throw new ImapError.UNAUTHENTICATED("Login failed");
-        }
-
-        if (login_err != null) {
-            throw login_err;
+        if (imap_err != null) {
+            throw imap_err;
         }
     }
 

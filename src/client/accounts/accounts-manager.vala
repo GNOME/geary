@@ -289,6 +289,18 @@ public class Accounts.Manager : GLib.Object {
     }
 
     /**
+     * Marks an existing account as being unavailable.
+     *
+     * This keeps the account in the known set, but marks it as being
+     * unavailable.
+     */
+    public void disable_account(Geary.AccountInformation account) {
+        if (this.accounts.has_key(account.id)) {
+            set_available(account, false);
+        }
+    }
+
+    /**
      * Removes an account from the manager's set of known accounts.
      *
      * This removes the account from the known set, marks the account

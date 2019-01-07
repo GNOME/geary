@@ -62,6 +62,7 @@ src/client/conversation-viewer/conversation-web-view.vala
 src/client/dialogs/alert-dialog.vala
 src/client/dialogs/attachment-dialog.vala
 src/client/dialogs/certificate-warning-dialog.vala
+src/client/dialogs/dialogs-problem-details-dialog.vala
 src/client/dialogs/password-dialog.vala
 src/client/dialogs/preferences-dialog.vala
 src/client/dialogs/upgrade-dialog.vala
@@ -380,6 +381,7 @@ src/engine/util/util-ascii.vala
 src/engine/util/util-collection.vala
 src/engine/util/util-config-file.vala
 src/engine/util/util-connectivity-manager.vala
+src/engine/util/util-error-context.vala
 src/engine/util/util-files.vala
 src/engine/util/util-generic-capabilities.vala
 src/engine/util/util-html.vala
@@ -427,4 +429,5 @@ ui/main-window.ui
 ui/main-window-info-bar.ui
 ui/password-dialog.glade
 ui/preferences-dialog.ui
+ui/problem-details-dialog.vala
 ui/upgrade_dialog.glade

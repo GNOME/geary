@@ -25,14 +25,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Geary.SpecialFolderType.ARCHIVE,
     };
 
-    public override bool is_online { get; protected set; default = false; }
-
-    /** Returns the IMAP client service. */
-    public override ClientService incoming { get { return this.imap; } }
-
-    /** Returns the SMTP client service. */
-    public override ClientService outgoing { get { return this.smtp; } }
-
     /** Service for incoming IMAP connections. */
     public Imap.ClientService imap  { get; private set; }
 
@@ -56,8 +48,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private AccountSynchronizer sync;
     private TimeoutManager refresh_folder_timer;
 
-    private uint authentication_failures = 0;
-
     private Gee.Map<Geary.SpecialFolderType, Gee.List<string>> special_search_names =
         new Gee.HashMap<Geary.SpecialFolderType, Gee.List<string>>();
 
@@ -66,26 +56,32 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                           ImapDB.Account local,
                           Endpoint incoming_remote,
                           Endpoint outgoing_remote) {
-        base(config);
+        Imap.ClientService imap = new Imap.ClientService(
+            config,
+            config.incoming,
+            incoming_remote
+        );
+        Smtp.ClientService smtp = new Smtp.ClientService(
+            config,
+            config.outgoing,
+            outgoing_remote
+        );
+
+        base(config, imap, smtp);
+
         this.local = local;
         this.local.contacts_loaded.connect(() => { contacts_loaded(); });
 
-        this.imap = new Imap.ClientService(
-            config, config.incoming, incoming_remote
+        imap.min_pool_size = IMAP_MIN_POOL_SIZE;
+        imap.notify["current-status"].connect(
+            on_imap_status_notify
         );
-        this.imap.min_pool_size = IMAP_MIN_POOL_SIZE;
-        this.imap.ready.connect(on_pool_session_ready);
-        this.imap.connection_failed.connect(on_pool_connection_failed);
-        this.imap.login_failed.connect(on_pool_login_failed);
+        this.imap = imap;
 
-        this.smtp = new Smtp.ClientService(
-            config,
-            config.outgoing,
-            outgoing_remote,
-            new Outbox.Folder(this, this.local)
-        );
-        this.smtp.email_sent.connect(on_email_sent);
-        this.smtp.report_problem.connect(notify_report_problem);
+        smtp.outbox = new Outbox.Folder(this, local);
+        smtp.email_sent.connect(on_email_sent);
+        smtp.report_problem.connect(notify_report_problem);
+        this.smtp = smtp;
 
         this.sync = new AccountSynchronizer(this);
 
@@ -119,9 +115,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private async void internal_open_async(Cancellable? cancellable) throws Error {
         this.open_cancellable = new Cancellable();
         this.remote_ready_lock = new Nonblocking.Semaphore(this.open_cancellable);
-
-        // Reset this so we start trying to authenticate again
-        this.authentication_failures = 0;
 
         this.processor = new AccountProcessor(this.to_string());
         this.processor.operation_error.connect(on_operation_error);
@@ -981,26 +974,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             throw new EngineError.OPEN_REQUIRED("Account %s not opened", to_string());
     }
 
-    private async void restart_incoming_service() {
-        if (this.incoming.is_running) {
-            try {
-                yield this.incoming.stop(this.open_cancellable);
-            } catch (GLib.Error err) {
-                debug("%s: Failed to stop incoming mail service: %s",
-                      to_string(), err.message
-                );
-            }
-        }
-        try {
-            yield this.incoming.start(this.open_cancellable);
-        } catch (GLib.Error err) {
-            debug("%s: Failed to start incoming mail service: %s",
-                  to_string(), err.message
-            );
-        }
-
-    }
-
     private void on_operation_error(AccountOperation op, Error error) {
         if (error is ImapError) {
             notify_service_problem(
@@ -1016,78 +989,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
     }
 
-    private void on_pool_session_ready(bool is_ready) {
-        this.is_online = is_ready;
-        if (is_ready) {
-            // Now have a valid session, so credentials must be good
-            this.authentication_failures = 0;
-            this.remote_ready_lock.blind_notify();
-            update_remote_folders();
-        } else {
-            this.remote_ready_lock.reset();
-            this.refresh_folder_timer.reset();
-        }
-    }
-
-    private void on_pool_connection_failed(Error error) {
-        this.remote_ready_lock.reset();
-        if (error is ImapError.UNAUTHENTICATED) {
-            // This is effectively a login failure
-            on_pool_login_failed(null);
-        } else {
-            notify_imap_problem(ProblemType.CONNECTION_ERROR, error);
-        }
-    }
-
-    private void on_pool_login_failed(Geary.Imap.StatusResponse? response) {
-        this.remote_ready_lock.reset();
-        this.authentication_failures++;
-        if (this.authentication_failures >= Geary.Account.AUTH_ATTEMPTS_MAX) {
-            // We have tried auth too many times, so bail out
-            notify_imap_problem(ProblemType.LOGIN_FAILED, null);
-        } else {
-            // login can fail due to an invalid password hence we
-            // should re-ask it, but it can also fail due to server
-            // inaccessibility, for instance "[UNAVAILABLE] / Maximum
-            // number of connections from user+IP exceeded". In that
-            // case, resetting password seems unneeded.
-            bool reask_password = false;
-            Error? login_error = null;
-            try {
-                reask_password = (
-                    response == null ||
-                    response.response_code == null ||
-                    response.response_code.get_response_code_type().value != Geary.Imap.ResponseCodeType.UNAVAILABLE
-                );
-            } catch (ImapError err) {
-                login_error = err;
-                debug("Unable to parse ResponseCode %s: %s", response.response_code.to_string(),
-                      err.message);
-            }
-
-            if (!reask_password) {
-                // Either the server was unavailable, or we were unable to
-                // parse the login response. Either way, indicate a
-                // non-login error.
-                notify_imap_problem(ProblemType.SERVER_ERROR, login_error);
+    private void on_imap_status_notify() {
+        if (this.open) {
+            if (this.imap.current_status == CONNECTED) {
+                this.remote_ready_lock.blind_notify();
+                update_remote_folders();
             } else {
-                // Now, we should ask the user for their password
-                this.information.prompt_incoming_credentials.begin(
-                    this.open_cancellable,
-                    (obj, ret) => {
-                        try {
-                            if (this.information
-                                .prompt_incoming_credentials.end(ret)) {
-                                // Have a new password, so try that
-                                this.restart_incoming_service.begin();
-                            } else {
-                                // User cancelled, so indicate a login problem
-                                notify_imap_problem(ProblemType.LOGIN_FAILED, null);
-                            }
-                        } catch (Error err) {
-                            notify_imap_problem(ProblemType.GENERIC_ERROR, err);
-                        }
-                    });
+                this.remote_ready_lock.reset();
+                this.refresh_folder_timer.reset();
             }
         }
     }

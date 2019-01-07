@@ -547,8 +547,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 );
             }
             this.sent_queue.remove(sent);
-            sent.completed(status);
             sent.response_timed_out.disconnect(on_command_timeout);
+            // This could throw an error so call it after cleaning up
+            sent.completed(status);
         }
 
         received_status_response(status);

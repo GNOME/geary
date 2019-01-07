@@ -14,11 +14,6 @@
  */
 internal class Geary.Smtp.ClientService : Geary.ClientService {
 
-    // Min and max times between attempting to re-send after a
-    // connection failure.
-    private const uint MIN_SEND_RETRY_INTERVAL_SEC = 4;
-    private const uint MAX_SEND_RETRY_INTERVAL_SEC = 64;
-
 
     // Used solely for debugging, hence "(no subject)" not marked for translation
     private static string message_subject(RFC822.Message message) {
@@ -28,7 +23,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
 
     /** Folder used for storing and retrieving queued mail. */
-    public Outbox.Folder outbox { get; private set; }
+    public Outbox.Folder? outbox { get; internal set; default = null; }
 
     /** Progress monitor indicating when email is being sent. */
     public ProgressMonitor sending_monitor {
@@ -52,10 +47,8 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
     public ClientService(AccountInformation account,
                          ServiceInformation service,
-                         Endpoint remote,
-                         Outbox.Folder outbox) {
+                         Endpoint remote) {
         base(account, service, remote);
-        this.outbox = outbox;
     }
 
     /**
@@ -63,16 +56,9 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
      */
     public override async void start(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        this.is_running = true;
         yield this.outbox.open_async(Folder.OpenFlags.NONE, cancellable);
         yield this.fill_outbox_queue(cancellable);
-        this.remote.connectivity.notify["is-reachable"].connect(
-            on_reachable_changed
-        );
-        this.remote.connectivity.address_error_reported.connect(
-            on_connectivity_error
-        );
-        this.remote.connectivity.check_reachable.begin();
+        notify_started();
     }
 
     /**
@@ -80,12 +66,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
      */
     public override async void stop(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        this.remote.connectivity.notify["is-reachable"].disconnect(
-            on_reachable_changed
-        );
-        this.remote.connectivity.address_error_reported.disconnect(
-            on_connectivity_error
-        );
+        notify_stopped();
         this.stop_postie();
         // Wait for the postie to actually stop before closing the
         // folder so w don't interrupt e.g. sending/saving/deleting
@@ -95,7 +76,6 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
             yield;
         }
         yield this.outbox.close_async(cancellable);
-        this.is_running = false;
     }
 
     /**
@@ -112,6 +92,16 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         this.outbox_queue.send(id);
     }
 
+    /** Starts the postie delivering messages. */
+    protected override void became_reachable() {
+        this.start_postie.begin();
+    }
+
+    /** Stops the postie delivering. */
+    protected override void became_unreachable() {
+        this.stop_postie();
+    }
+
     /**
      * Starts delivery of messages in the queue.
      */
@@ -123,7 +113,6 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
         Cancellable cancellable = this.queue_cancellable =
             new GLib.Cancellable();
-        uint send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
 
         // Start the send queue.
         while (!cancellable.is_cancelled()) {
@@ -132,54 +121,30 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
             bool email_handled = false;
             try {
                 id = yield this.outbox_queue.receive(cancellable);
-                email_handled = yield process_email(id, cancellable);
+                yield process_email(id, cancellable);
+                email_handled = true;
             } catch (SmtpError err) {
-                ProblemType problem = ProblemType.GENERIC_ERROR;
                 if (err is SmtpError.AUTHENTICATION_FAILED) {
-                    problem = ProblemType.LOGIN_FAILED;
-                } else if (err is SmtpError.STARTTLS_FAILED) {
-                    problem = ProblemType.CONNECTION_ERROR;
-                } else if (err is SmtpError.NOT_CONNECTED) {
-                    problem = ProblemType.NETWORK_ERROR;
+                    notify_authentication_failed();
+                } else if (err is SmtpError.STARTTLS_FAILED ||
+                           err is SmtpError.NOT_CONNECTED) {
+                    notify_connection_failed(new ErrorContext(err));
                 } else if (err is SmtpError.PARSE_ERROR ||
                            err is SmtpError.SERVER_ERROR ||
                            err is SmtpError.NOT_SUPPORTED) {
-                    problem = ProblemType.SERVER_ERROR;
+                    notify_unrecoverable_error(new ErrorContext(err));
                 }
-                notify_report_problem(problem, err);
                 cancellable.cancel();
-            } catch (IOError.CANCELLED err) {
-                // Nothing to do here — we're already cancelled. In
-                // particular we don't want to report the cancelled
-                // error as a problem since this is the normal
-                // shutdown method.
-            } catch (IOError err) {
-                notify_report_problem(ProblemType.for_ioerror(err), err);
-                cancellable.cancel();
-            } catch (Error err) {
-                notify_report_problem(ProblemType.GENERIC_ERROR, err);
+            } catch (GLib.IOError.CANCELLED err) {
+                // Nothing to do here — we're already cancelled.
+            } catch (GLib.Error err) {
+                notify_connection_failed(new ErrorContext(err));
                 cancellable.cancel();
             }
 
-            if (email_handled) {
-                // send was good, reset nap length
-                send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
-            } else {
-                // send was bad, try sending again later
-                if (id != null) {
-                    this.outbox_queue.send(id);
-                }
-
-                if (!cancellable.is_cancelled()) {
-                    debug("Outbox napping for %u seconds...", send_retry_seconds);
-                    // Take a brief nap before continuing to allow
-                    // connection problems to resolve.
-                    yield Geary.Scheduler.sleep_async(send_retry_seconds);
-                    send_retry_seconds = Geary.Numeric.uint_ceiling(
-                        send_retry_seconds * 2,
-                        MAX_SEND_RETRY_INTERVAL_SEC
-                    );
-                }
+            if (!email_handled && id != null) {
+                // Send was bad, try sending again later
+                this.outbox_queue.send(id);
             }
         }
 
@@ -221,7 +186,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
     }
 
     // Returns true if email was successfully processed, else false
-    private async bool process_email(EmailIdentifier id, Cancellable cancellable)
+    private async void process_email(EmailIdentifier id, Cancellable cancellable)
         throws GLib.Error {
         Email? email = null;
         try {
@@ -231,60 +196,27 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         } catch (EngineError.NOT_FOUND err) {
             debug("Queued email %s not found in outbox, ignoring: %s",
                   id.to_string(), err.message);
-            return true;
         }
 
-        bool mail_sent = email.email_flags.contains(EmailFlags.OUTBOX_SENT);
-        if (!mail_sent) {
-            // We immediately retry auth errors after the prompting
-            // the user, but if they get it wrong enough times or
-            // cancel we have no choice other than to stop the postie
-            uint attempts = 0;
-            while (!mail_sent && ++attempts <= Geary.Account.AUTH_ATTEMPTS_MAX) {
-                RFC822.Message message = email.get_message();
-                try {
-                    debug("Outbox postie: Sending \"%s\" (ID:%s)...",
-                          message_subject(message), email.id.to_string());
-                    yield send_email(message, cancellable);
-                    mail_sent = true;
-                } catch (Error send_err) {
-                    debug("Outbox postie send error: %s", send_err.message);
-                    if (send_err is SmtpError.AUTHENTICATION_FAILED) {
-                        if (attempts == Geary.Account.AUTH_ATTEMPTS_MAX) {
-                            throw send_err;
-                        }
-
-                        // At this point we may already have a
-                        // password in memory -- but it's incorrect.
-                        if (!yield this.account
-                            .prompt_outgoing_credentials(cancellable)) {
-                            // The user cancelled and hence they don't
-                            // want to be prompted again, so bail out.
-                            throw send_err;
-                        }
-                    } else {
-                        // not much else we can do - just bail out
-                        throw send_err;
-                    }
-                }
-            }
+        if (!email.email_flags.contains(EmailFlags.OUTBOX_SENT)) {
+            RFC822.Message message = email.get_message();
+            debug("Outbox postie: Sending \"%s\" (ID:%s)...",
+                  message_subject(message), email.id.to_string());
+            yield send_email(message, cancellable);
 
             // Mark as sent, so if there's a problem pushing up to
             // Sent, we don't retry sending. Don't pass the
             // cancellable here - if it's been sent we want to try to
             // update the sent flag anyway
-            if (mail_sent) {
-                debug("Outbox postie: Marking %s as sent", email.id.to_string());
-                Geary.EmailFlags flags = new Geary.EmailFlags();
-                flags.add(Geary.EmailFlags.OUTBOX_SENT);
-                yield this.outbox.mark_email_async(
-                    Collection.single(email.id), flags, null, null
-                );
-            }
+            debug("Outbox postie: Marking %s as sent", email.id.to_string());
+            Geary.EmailFlags flags = new Geary.EmailFlags();
+            flags.add(Geary.EmailFlags.OUTBOX_SENT);
+            yield this.outbox.mark_email_async(
+                Collection.single(email.id), flags, null, null
+            );
 
-            if (!mail_sent || cancellable.is_cancelled()) {
-                // try again later
-                return false;
+            if (cancellable.is_cancelled()) {
+                throw new GLib.IOError.CANCELLED("Send has been cancelled");
             }
         }
 
@@ -292,22 +224,14 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         // sent, or previously sent but not saved. So now try flagging
         // as such and saving it.
         if (this.account.save_sent) {
-            try {
-                debug("Outbox postie: Saving %s to sent mail", email.id.to_string());
-                yield save_sent_mail_async(email, cancellable);
-            } catch (Error err) {
-                debug("Outbox postie: Error saving sent mail: %s", err.message);
-                notify_report_problem(ProblemType.SEND_EMAIL_SAVE_FAILED, err);
-                return false;
-            }
+            debug("Outbox postie: Saving %s to sent mail", email.id.to_string());
+            yield save_sent_mail_async(email, cancellable);
         }
 
         // Again, don't observe the cancellable here - if it's been
         // send and saved we want to try to remove it anyway.
         debug("Outbox postie: Deleting row %s", email.id.to_string());
         yield this.outbox.remove_email_async(Collection.single(email.id), null);
-
-        return true;
     }
 
     private async void send_email(Geary.RFC822.Message rfc822, Cancellable? cancellable)
@@ -405,25 +329,6 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
                 }
             }
         }
-    }
-
-    private void notify_report_problem(ProblemType problem, Error? err) {
-        report_problem(
-            new ServiceProblemReport(problem, this.account, this.configuration, err)
-        );
-    }
-
-    private void on_reachable_changed() {
-        if (this.remote.connectivity.is_reachable.is_certain()) {
-            start_postie.begin();
-        } else {
-            stop_postie();
-        }
-    }
-
-    private void on_connectivity_error(Error error) {
-        stop_postie();
-        notify_report_problem(ProblemType.CONNECTION_ERROR, error);
     }
 
 }
