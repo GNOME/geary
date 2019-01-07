@@ -1107,6 +1107,10 @@ public class GearyController : Geary.BaseObject {
         // Guard against trying to disconnect the account twice
         this.accounts.unset(account.information);
 
+        // Now the account is not in the accounts map, reset any
+        // status notifications for it
+        update_account_status();
+
         account.email_sent.disconnect(on_sent);
         account.email_removed.disconnect(on_account_email_removed);
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
