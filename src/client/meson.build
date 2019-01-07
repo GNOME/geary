@@ -62,6 +62,7 @@ geary_client_vala_sources = files(
   'dialogs/alert-dialog.vala',
   'dialogs/attachment-dialog.vala',
   'dialogs/certificate-warning-dialog.vala',
+  'dialogs/dialogs-problem-details-dialog.vala',
   'dialogs/password-dialog.vala',
   'dialogs/preferences-dialog.vala',
   'dialogs/upgrade-dialog.vala',

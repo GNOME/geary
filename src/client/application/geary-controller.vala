@@ -891,7 +891,8 @@ public class GearyController : Geary.BaseObject {
     private void report_problem(Geary.ProblemReport report) {
         debug("Problem reported: %s", report.to_string());
 
-        if (!(report.error is IOError.CANCELLED)) {
+        if (report.error == null ||
+            !(report.error.thrown is IOError.CANCELLED)) {
             MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
             info_bar.retry.connect(on_retry_problem);
             this.main_window.show_infobar(info_bar);
@@ -900,16 +901,23 @@ public class GearyController : Geary.BaseObject {
 
     private void update_account_status() {
         Geary.Account.Status effective_status = 0;
-        bool auth_error = false;
+        bool has_auth_error = false;
+        Geary.Account? service_problem_source = null;
         foreach (AccountContext context in this.accounts.values) {
             effective_status |= context.get_effective_status();
-            auth_error |= context.authentication_failed;
+            if (effective_status.has_service_problem() &&
+                service_problem_source == null) {
+                service_problem_source = context.account;
+            }
+            has_auth_error |= context.authentication_failed;
         }
 
         foreach (Gtk.Window window in this.application.get_windows()) {
             MainWindow? main = window as MainWindow;
             if (main != null) {
-                main.update_account_status(effective_status, auth_error);
+                main.update_account_status(
+                    effective_status, has_auth_error, service_problem_source
+                );
             }
         }
     }

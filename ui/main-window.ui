@@ -243,17 +243,32 @@ You will not be able to send or receive email until it is re-connected.</propert
                             <property name="spacing">6</property>
                             <property name="layout_style">end</property>
                             <child>
-                              <object class="GtkButton">
-                                <property name="label" translatable="yes" comments="Button label for retrying an account problem">Retry</property>
-                                <property name="visible">True</property>
+                              <object class="GtkButton" id="service_problem_details">
+                                <property name="label" translatable="yes" comments="Button label for displaying technical details about an account problem">Details</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                                <signal name="clicked" handler="on_service_problem_retry" swapped="no"/>
+                                <property name="tooltip_text" translatable="yes" comments="Button tooltip for displaying technical details about an account problem">View technical details about the error</property>
+                                <signal name="clicked" handler="on_service_problem_details" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton">
+                                <property name="label" translatable="yes" comments="Button label for retrying an account problem">Retry</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes" comments="Button tooltip for retrying an account problem">Retry connecting now</property>
+                                <signal name="clicked" handler="on_service_problem_retry" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
@@ -340,10 +355,11 @@ Please check your Internet connection, the server configuration and try again.</
                             <property name="layout_style">end</property>
                             <child>
                               <object class="GtkButton">
-                                <property name="label" translatable="yes" comments="Button label for retrying an account problem">Retry</property>
+                                <property name="label" translatable="yes" comments="Button label for retrying TLS cert validation">Check</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes" comments="Button tooltip for retrying TLS cert validation">Check the security details for the connection</property>
                                 <signal name="clicked" handler="on_cert_problem_retry" swapped="no"/>
                               </object>
                               <packing>
@@ -436,10 +452,11 @@ Please check the server configuration and try again.</property>
                             <property name="layout_style">end</property>
                             <child>
                               <object class="GtkButton">
-                                <property name="label" translatable="yes" comments="Button label for retrying an account problem">Retry</property>
+                                <property name="label" translatable="yes" comments="Button label for retrying when a login error has occurred">Login</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes" comments="Button tooltip for retrying when a login error has occurred">Retry login, you will be prompted for your password</property>
                                 <signal name="clicked" handler="on_auth_problem_retry" swapped="no"/>
                               </object>
                               <packing>

@@ -12,7 +12,7 @@
 public class MainWindowInfoBar : Gtk.InfoBar {
 
 
-    private enum ResponseType { COPY, DETAILS, RETRY; }
+    private enum ResponseType { DETAILS, RETRY; }
 
     /** If reporting a problem, returns the problem report else null. */
     public Geary.ProblemReport? report { get; private set; default = null; }
@@ -26,12 +26,6 @@ public class MainWindowInfoBar : Gtk.InfoBar {
 
     [GtkChild]
     private Gtk.Label description;
-
-    [GtkChild]
-    private Gtk.Grid problem_details;
-
-    [GtkChild]
-    private Gtk.TextView detail_text;
 
 
     public MainWindowInfoBar.for_problem(Geary.ProblemReport report) {
@@ -182,107 +176,13 @@ public class MainWindowInfoBar : Gtk.InfoBar {
         this.show_close_button = show_close;
     }
 
-    private string format_details() {
-        Geary.ServiceProblemReport? service_report = this.report as Geary.ServiceProblemReport;
-        Geary.AccountProblemReport? account_report = this.report as Geary.AccountProblemReport;
-
-        StringBuilder details = new StringBuilder();
-        details.append_printf(
-            "Geary version: %s\n",
-            GearyApplication.VERSION
-        );
-        details.append_printf(
-            "GTK version: %u.%u.%u\n",
-            Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()
-        );
-        details.append_printf(
-            "Desktop: %s\n",
-            Environment.get_variable("XDG_CURRENT_DESKTOP") ?? "Unknown"
-        );
-        details.append_printf(
-            "Problem type: %s\n",
-            this.report.problem_type.to_string()
-        );
-        if (account_report != null) {
-            details.append_printf(
-                "Account type: %s\n",
-                account_report.account.service_provider.to_string()
-            );
-        }
-        if (service_report != null) {
-            details.append_printf(
-                "Service type: %s\n",
-                service_report.service.protocol.to_string()
-            );
-            details.append_printf(
-                "Service host: %s\n",
-                service_report.service.host
-            );
-        }
-        if (this.report.error == null) {
-            details.append("No error reported");
-        } else {
-            details.append_printf(
-                "Error type: %s\n", this.report.error.format_error_type()
-            );
-            details.append_printf(
-                "Message: %s\n", this.report.error.thrown.message
-            );
-            details.append("Back trace:\n");
-            foreach (Geary.ErrorContext.StackFrame frame in
-                     this.report.error.backtrace) {
-                details.append_printf(" - %s\n", frame.to_string());
-            }
-        }
-        return details.str;
-    }
-
     private void show_details() {
-        this.detail_text.buffer.text = format_details();
-
-        // Would love to construct the dialog in Builder, but we to
-        // construct the dialog manually since we can't adjust the
-        // Headerbar setting afterwards. If the user re-clicks on the
-        // Details button to re-show it, a whole bunch of GTK
-        // criticals are spewed and the dialog appears b0rked, so just
-        // do it from scratch ever time anyway.
-        bool use_header = Gtk.Settings.get_default().gtk_dialogs_use_header;
-        Gtk.DialogFlags flags = Gtk.DialogFlags.MODAL;
-        if (use_header) {
-            flags |= Gtk.DialogFlags.USE_HEADER_BAR;
-        }
-        Gtk.Dialog dialog = new Gtk.Dialog.with_buttons(
-            _("Details"), // same as the button
-            get_toplevel() as Gtk.Window,
-            flags,
-            null
+        Dialogs.ProblemDetailsDialog dialog =
+            new Dialogs.ProblemDetailsDialog.for_problem_report(
+                get_toplevel() as Gtk.Window, this.report
         );
-        dialog.set_default_size(600, -1);
-        dialog.get_content_area().add(this.problem_details);
-
-        Gtk.HeaderBar? header_bar = dialog.get_header_bar() as Gtk.HeaderBar;
-        use_header = (header_bar != null);
-        if (use_header) {
-            header_bar.show_close_button = true;
-        } else {
-            dialog.add_button(_("_Close"), Gtk.ResponseType.CLOSE);
-        }
-
-        Gtk.Widget copy = dialog.add_button(
-            _("Copy to Clipboard"), ResponseType.COPY
-        );
-        copy.tooltip_text =
-            _("Copy technical details to clipboard for pasting into an email or bug report");
-
-
-        dialog.set_default_response(ResponseType.COPY);
-        dialog.response.connect(on_details_response);
-        dialog.show();
-        copy.grab_focus();
-    }
-
-    private void copy_details() {
-        get_clipboard(Gdk.SELECTION_CLIPBOARD).set_text(format_details(), -1);
+        dialog.run();
+        dialog.destroy();
     }
 
     [GtkCallback]
@@ -307,20 +207,5 @@ public class MainWindowInfoBar : Gtk.InfoBar {
     private void on_hide() {
         this.parent.remove(this);
     }
-
-    private void on_details_response(Gtk.Dialog dialog, int response) {
-        switch(response) {
-        case ResponseType.COPY:
-            copy_details();
-            break;
-
-        default:
-            // fml
-            dialog.get_content_area().remove(this.problem_details);
-            dialog.hide();
-            break;
-        }
-    }
-
 
 }

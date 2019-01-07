@@ -33,6 +33,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     private MonitoredSpinner spinner = new MonitoredSpinner();
+
     [GtkChild]
     private Gtk.Box main_layout;
     [GtkChild]
@@ -66,11 +67,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private Gtk.InfoBar service_problem_infobar;
 
     [GtkChild]
+    private Gtk.Button service_problem_details;
+
+    [GtkChild]
     private Gtk.InfoBar cert_problem_infobar;
 
     [GtkChild]
     private Gtk.InfoBar auth_problem_infobar;
 
+    private Geary.Account? service_problem_account = null;
 
     /** Fired when the user requests an account status be retried. */
     public signal void retry_service_problem(Geary.ClientService.Status problem);
@@ -105,7 +110,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     /** Updates the window's account status info bars. */
     public void update_account_status(Geary.Account.Status status,
-                                      bool auth_error) {
+                                      bool has_auth_error,
+                                      Geary.Account? service_problem) {
         // Only ever show one at a time. Offline is primary since
         // nothing else can happen when offline. Service problems are
         // secondary since auth and cert problems can't be resolved
@@ -120,12 +126,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             show_offline = true;
         } else if (status.has_service_problem()) {
             show_service = true;
-        } else if (auth_error) {
+        } else if (has_auth_error) {
             show_auth = true;
         }
 
+        this.service_problem_account = service_problem;
+
         this.offline_infobar.set_visible(show_offline);
         this.service_problem_infobar.set_visible(show_service);
+        this.service_problem_details.set_visible(get_problem_service() != null);
         this.cert_problem_infobar.hide();
         this.auth_problem_infobar.set_visible(show_auth);
         update_infobar_frame();
@@ -512,6 +521,18 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
+    private Geary.ClientService? get_problem_service() {
+        Geary.ClientService? service = null;
+        if (this.service_problem_account != null) {
+            if (this.service_problem_account.incoming.last_error != null) {
+                service = this.service_problem_account.incoming;
+            } else if (this.service_problem_account.outgoing.last_error != null) {
+                service = this.service_problem_account.outgoing;
+            }
+        }
+        return service;
+    }
+
     [GtkCallback]
     private bool on_focus_event() {
         on_shift_key(false);
@@ -541,6 +562,22 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.service_problem_infobar.hide();
         update_infobar_frame();
         retry_service_problem(Geary.ClientService.Status.CONNECTION_FAILED);
+    }
+
+    [GtkCallback]
+    private void on_service_problem_details() {
+        Geary.ClientService? service = get_problem_service();
+        if (service != null) {
+            Dialogs.ProblemDetailsDialog dialog =
+                new Dialogs.ProblemDetailsDialog(
+                    this,
+                    service.last_error,
+                    this.service_problem_account.information,
+                    service.configuration
+                );
+            dialog.run();
+            dialog.destroy();
+        }
     }
 
     [GtkCallback]
