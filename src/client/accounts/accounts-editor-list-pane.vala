@@ -55,9 +55,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     private Gtk.HeaderBar header;
 
     [GtkChild]
-    private Gtk.Overlay osd_overlay;
-
-    [GtkChild]
     private Gtk.Grid pane_content;
 
     [GtkChild]
@@ -165,11 +162,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         this.accounts_list.add(row);
     }
 
-    private void add_notification(InAppNotification notification) {
-        this.osd_overlay.add_overlay(notification);
-        notification.show();
-    }
-
     private void update_welcome_panel() {
         if (this.show_welcome) {
             // No accounts are available, so show only the welcome
@@ -241,7 +233,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         if (command.executed_label != null) {
             InAppNotification ian = new InAppNotification(command.executed_label);
             ian.set_button(_("Undo"), "win." + GearyController.ACTION_UNDO);
-            add_notification(ian);
+            this.editor.add_notification(ian);
         }
     }
 
@@ -249,7 +241,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         if (command.undone_label != null) {
             InAppNotification ian = new InAppNotification(command.undone_label);
             ian.set_button(_("Redo"), "win." + GearyController.ACTION_REDO);
-            add_notification(ian);
+            this.editor.add_notification(ian);
         }
     }
 

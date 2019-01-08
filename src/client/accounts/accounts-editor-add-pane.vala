@@ -28,9 +28,6 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     private Gtk.HeaderBar header;
 
     [GtkChild]
-    private Gtk.Overlay osd_overlay;
-
-    [GtkChild]
     private Gtk.Grid pane_content;
 
     [GtkChild]
@@ -146,11 +143,6 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
     internal Gtk.HeaderBar get_header() {
         return this.header;
-    }
-
-    private void add_notification(InAppNotification notification) {
-        this.osd_overlay.add_overlay(notification);
-        notification.show();
     }
 
     private async void validate_account(GLib.Cancellable? cancellable) {
@@ -271,7 +263,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             if (to_focus != null) {
                 to_focus.grab_focus();
             }
-            add_notification(
+            this.editor.add_notification(
                 new InAppNotification(
                     // Translators: In-app notification label, the
                     // string substitution is a more detailed reason.

@@ -8,6 +8,7 @@
 /**
  * The main account editor window.
  */
+[GtkTemplate (ui = "/org/gnome/Geary/accounts_editor.ui")]
 public class Accounts.Editor : Gtk.Dialog {
 
 
@@ -32,7 +33,12 @@ public class Accounts.Editor : Gtk.Dialog {
 
     private SimpleActionGroup actions = new SimpleActionGroup();
 
-    private Gtk.Stack editor_panes = new Gtk.Stack();
+    [GtkChild]
+    private Gtk.Overlay notifications_pane;
+
+    [GtkChild]
+    private Gtk.Stack editor_panes;
+
     private EditorListPane editor_list_pane;
 
     private Gee.LinkedList<EditorPane> editor_pane_stack =
@@ -41,22 +47,12 @@ public class Accounts.Editor : Gtk.Dialog {
 
     public Editor(GearyApplication application, Gtk.Window parent) {
         this.application = application;
+        this.transient_for = parent;
+
+        // Can't set this in Glade 3.22.1 :(
+        this.get_content_area().border_width = 0;
+
         this.accounts = application.controller.account_manager;
-
-        set_default_size(700, 450);
-        set_icon_name(GearyApplication.APP_ID);
-        set_modal(true);
-        set_title(_("Accounts"));
-        set_transient_for(parent);
-
-        get_content_area().border_width = 0;
-        get_content_area().add(this.editor_panes);
-
-        this.editor_panes.set_transition_type(
-            Gtk.StackTransitionType.SLIDE_LEFT_RIGHT
-        );
-        this.editor_panes.notify["visible-child"].connect_after(on_pane_changed);
-        this.editor_panes.show();
 
         this.actions.add_action_entries(ACTION_ENTRIES, this);
         insert_action_group("win", this.actions);
@@ -94,11 +90,6 @@ public class Accounts.Editor : Gtk.Dialog {
         return ret;
     }
 
-    public override void destroy() {
-        this.editor_panes.notify["visible-child"].disconnect(on_pane_changed);
-        base.destroy();
-    }
-
     internal void push(EditorPane pane) {
         // Since we keep old, already-popped panes around (see pop for
         // details), when a new pane is pushed on they need to be
@@ -125,6 +116,12 @@ public class Accounts.Editor : Gtk.Dialog {
         int prev_index = this.editor_pane_stack.index_of(current) - 1;
         EditorPane prev = this.editor_pane_stack.get(prev_index);
         this.editor_panes.set_visible_child(prev);
+    }
+
+    /** Displays an in-app notification in the dialog. */
+    internal void add_notification(InAppNotification notification) {
+        this.notifications_pane.add_overlay(notification);
+        notification.show();
     }
 
     internal void remove_account(Geary.AccountInformation account) {
@@ -168,6 +165,7 @@ public class Accounts.Editor : Gtk.Dialog {
         }
     }
 
+    [GtkCallback]
     private void on_pane_changed() {
         EditorPane? visible = get_current_pane();
         Gtk.Widget? header = null;

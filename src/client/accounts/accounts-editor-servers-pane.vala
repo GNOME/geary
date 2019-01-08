@@ -45,9 +45,6 @@ internal class Accounts.EditorServersPane :
     private Gtk.HeaderBar header;
 
     [GtkChild]
-    private Gtk.Overlay osd_overlay;
-
-    [GtkChild]
     private Gtk.Grid pane_content;
 
     [GtkChild]
@@ -283,7 +280,7 @@ internal class Accounts.EditorServersPane :
         debug("Validation complete, is valid: %s", is_valid.to_string());
 
         if (!is_valid) {
-            add_notification(
+            this.editor.add_notification(
                 new InAppNotification(
                     // Translators: In-app notification label, the
                     // string substitution is a more detailed reason.
@@ -327,11 +324,6 @@ internal class Accounts.EditorServersPane :
             }
         }
         return has_changed;
-    }
-
-    private void add_notification(InAppNotification notification) {
-        this.osd_overlay.add_overlay(notification);
-        notification.show();
     }
 
     private void add_row(Gtk.ListBox list, EditorRow<EditorServersPane> row) {
