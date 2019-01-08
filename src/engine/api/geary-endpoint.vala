@@ -12,9 +12,6 @@
 public class Geary.Endpoint : BaseObject {
 
 
-    public const string PROP_TRUST_UNTRUSTED_HOST = "trust-untrusted-host";
-
-
     /**
      * The default TLS certificate database to use when connecting.
      *
@@ -85,7 +82,6 @@ public class Geary.Endpoint : BaseObject {
     /**
      * When set, TLS has reported certificate issues.
      *
-     * @see trust_untrusted_host
      * @see untrusted_host
      */
     public TlsCertificateFlags tls_validation_warnings { get; private set; default = 0; }
@@ -95,39 +91,6 @@ public class Geary.Endpoint : BaseObject {
      */
     public TlsCertificate? untrusted_certificate { get; private set; default = null; }
 
-    /**
-     * When set, indicates the user has acceded to trusting the host even though TLS has reported
-     * certificate issues.
-     *
-     * Initialized to {@link Trillian.UNKNOWN}, meaning the user must decide when warnings are
-     * detected.
-     *
-     * @see untrusted_host
-     * @see tls_validation_warnings
-     */
-    public Trillian trust_untrusted_host { get; set; default = Trillian.UNKNOWN; }
-
-    /**
-     * Returns true if (a) no TLS warnings have been detected or (b) user has explicitly acceded
-     * to ignoring them and continuing the connection.
-     *
-     * This returns true if no connection has been attempted or connected and STARTTLS has not
-     * been issued.  It's only when a connection is attempted can the certificate be examined
-     * and this can accurately return false.  This behavior allows for a single code path to
-     * first attempt a connection and thereafter only attempt connections when TLS issues have
-     * been resolved by the user.
-     *
-     * @see tls_validation_warnings
-     * @see trust_untrusted_host
-     */
-    public bool is_trusted_or_never_connected {
-        get {
-            return (tls_validation_warnings != 0)
-                ? trust_untrusted_host.is_certain()
-                : trust_untrusted_host.is_possible();
-        }
-    }
-
     private SocketClient? socket_client = null;
 
 
@@ -135,13 +98,11 @@ public class Geary.Endpoint : BaseObject {
      * Emitted when unexpected TLS certificate warnings are detected.
      *
      * This occurs when a connection receives a TLS certificate
-     * warning and the caller has not marked this endpoint as trusted
-     * via {@link trust_untrusted_host}.
-     *
-     * The connection will be closed when this is fired. The caller
-     * should query the user about how to deal with the situation. If
-     * user wants to proceed, set {@link trust_untrusted_host} to
-     * {@link Trillian.TRUE} and retry connection.
+     * warning. The connection will be closed when this is fired. The
+     * caller should query the user about how to deal with the
+     * situation. If user wants to proceed, pin the certificate in a
+     * way such that it accessible to the connection via {@link
+     * default_tls_database}.
      *
      * @see AccountInformation.untrusted_host
      * @see tls_validation_warnings
@@ -219,11 +180,6 @@ public class Geary.Endpoint : BaseObject {
         tls_validation_warnings = warnings;
         untrusted_certificate = cert;
 
-        // if user has marked this untrusted host as trusted already, accept warnings and move on
-        if (trust_untrusted_host == Trillian.TRUE)
-            return true;
-
-        // signal an issue has been detected and return false to deny the connection
         untrusted_host(cx);
 
         return false;
