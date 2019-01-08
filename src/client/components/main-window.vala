@@ -111,21 +111,24 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     /** Updates the window's account status info bars. */
     public void update_account_status(Geary.Account.Status status,
                                       bool has_auth_error,
+                                      bool has_cert_error,
                                       Geary.Account? service_problem) {
         // Only ever show one at a time. Offline is primary since
         // nothing else can happen when offline. Service problems are
         // secondary since auth and cert problems can't be resolved
-        // when the service isn't talking to the server. Auth and cert
-        // problems are enabled elsewhere, since the controller might
-        // be already prompting the user about it.
+        // when the service isn't talking to the server. Cert problems
+        // are tertiary since you can't auth if you can't connect.
         bool show_offline = false;
         bool show_service = false;
+        bool show_cert = false;
         bool show_auth = false;
 
         if (!status.is_online()) {
             show_offline = true;
         } else if (status.has_service_problem()) {
             show_service = true;
+        } else if (has_cert_error) {
+            show_cert = true;
         } else if (has_auth_error) {
             show_auth = true;
         }
@@ -135,7 +138,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.offline_infobar.set_visible(show_offline);
         this.service_problem_infobar.set_visible(show_service);
         this.service_problem_details.set_visible(get_problem_service() != null);
-        this.cert_problem_infobar.hide();
+        this.cert_problem_infobar.set_visible(show_cert);
         this.auth_problem_infobar.set_visible(show_auth);
         update_infobar_frame();
     }
