@@ -154,7 +154,7 @@ internal class Accounts.EditorEditPane :
 
     /** {@inheritDoc} */
     protected void command_executed() {
-        update_command_actions();
+        this.editor.update_command_actions();
 
         Application.Command next_undo = this.commands.peek_undo();
         this.undo_button.set_tooltip_text(

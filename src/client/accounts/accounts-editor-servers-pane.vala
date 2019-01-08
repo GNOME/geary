@@ -179,7 +179,7 @@ internal class Accounts.EditorServersPane :
 
     /** {@inheritDoc} */
     protected void command_executed() {
-        update_command_actions();
+        this.editor.update_command_actions();
         this.apply_button.set_sensitive(this.commands.can_undo);
     }
 

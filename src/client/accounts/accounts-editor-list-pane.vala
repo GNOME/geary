@@ -110,7 +110,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         this.commands.executed.connect(on_execute);
         this.commands.undone.connect(on_undo);
         this.commands.redone.connect(on_execute);
-
+        connect_command_signals();
         update_welcome_panel();
     }
 
@@ -118,6 +118,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         this.commands.executed.disconnect(on_execute);
         this.commands.undone.disconnect(on_undo);
         this.commands.redone.disconnect(on_execute);
+        disconnect_command_signals();
 
         this.accounts.account_added.disconnect(on_account_added);
         this.accounts.account_status_changed.disconnect(on_account_status_changed);
@@ -167,15 +168,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     private void add_notification(InAppNotification notification) {
         this.osd_overlay.add_overlay(notification);
         notification.show();
-    }
-
-    private void update_actions() {
-        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
-            this.commands.can_undo
-        );
-        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
-            this.commands.can_redo
-        );
     }
 
     private void update_welcome_panel() {
@@ -251,8 +243,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
             ian.set_button(_("Undo"), "win." + GearyController.ACTION_UNDO);
             add_notification(ian);
         }
-
-        update_actions();
     }
 
     private void on_undo(Application.Command command) {
@@ -261,8 +251,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
             ian.set_button(_("Redo"), "win." + GearyController.ACTION_REDO);
             add_notification(ian);
         }
-
-        update_actions();
     }
 
     [GtkCallback]

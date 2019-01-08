@@ -61,11 +61,10 @@ public class Accounts.Editor : Gtk.Dialog {
         this.actions.add_action_entries(ACTION_ENTRIES, this);
         insert_action_group("win", this.actions);
 
-        get_action(GearyController.ACTION_UNDO).set_enabled(false);
-        get_action(GearyController.ACTION_REDO).set_enabled(false);
-
         this.editor_list_pane = new EditorListPane(this);
         push(this.editor_list_pane);
+
+        update_command_actions();
     }
 
     public override bool key_press_event(Gdk.EventKey event) {
@@ -111,9 +110,6 @@ public class Accounts.Editor : Gtk.Dialog {
             this.editor_panes.remove(old);
         }
 
-        get_action(GearyController.ACTION_UNDO).set_enabled(false);
-        get_action(GearyController.ACTION_REDO).set_enabled(false);
-
         // Now push the new pane on
         this.editor_pane_stack.add(pane);
         this.editor_panes.add(pane);
@@ -131,17 +127,31 @@ public class Accounts.Editor : Gtk.Dialog {
         this.editor_panes.set_visible_child(prev);
     }
 
-    internal GLib.SimpleAction get_action(string name) {
-        return (GLib.SimpleAction) this.actions.lookup_action(name);
-    }
-
     internal void remove_account(Geary.AccountInformation account) {
         this.editor_panes.set_visible_child(this.editor_list_pane);
         this.editor_list_pane.remove_account(account);
     }
 
+    /** Updates the state of the editor's undo and redo actions. */
+    internal void update_command_actions() {
+        bool can_undo = false;
+        bool can_redo = false;
+        CommandPane? pane = get_current_pane() as CommandPane;
+        if (pane != null) {
+            can_undo = pane.commands.can_undo;
+            can_redo = pane.commands.can_redo;
+        }
+
+        get_action(GearyController.ACTION_UNDO).set_enabled(can_undo);
+        get_action(GearyController.ACTION_REDO).set_enabled(can_redo);
+    }
+
     private inline EditorPane? get_current_pane() {
         return this.editor_panes.get_visible_child() as EditorPane;
+    }
+
+    private inline GLib.SimpleAction get_action(string name) {
+        return (GLib.SimpleAction) this.actions.lookup_action(name);
     }
 
     private void on_undo() {
@@ -171,11 +181,7 @@ public class Accounts.Editor : Gtk.Dialog {
             header = visible.get_header();
         }
         set_titlebar(header);
-
-        CommandPane? commands = visible as CommandPane;
-        if (commands != null) {
-            commands.update_command_actions();
-        }
+        update_command_actions();
     }
 
 }
@@ -280,18 +286,6 @@ internal interface Accounts.CommandPane : EditorPane {
     }
 
     /**
-     * Updates the state of the editor's undo and redo actions.
-     */
-    internal virtual void update_command_actions() {
-        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
-            this.commands.can_undo
-        );
-        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
-            this.commands.can_redo
-        );
-    }
-
-    /**
      * Connects to command stack signals.
      *
      * Implementing classes should call this in their constructor.
@@ -316,10 +310,10 @@ internal interface Accounts.CommandPane : EditorPane {
     /**
      * Called when a command is executed, undone or redone.
      *
-     * By default, calls {@link update_command_actions}.
+     * By default, calls {@link Accounts.Editor.update_command_actions}.
      */
     protected virtual void command_executed() {
-        update_command_actions();
+        this.editor.update_command_actions();
     }
 
     private void on_command() {
