@@ -429,5 +429,5 @@ ui/main-window.ui
 ui/main-window-info-bar.ui
 ui/password-dialog.glade
 ui/preferences-dialog.ui
-ui/problem-details-dialog.vala
+ui/problem-details-dialog.ui
 ui/upgrade_dialog.glade
