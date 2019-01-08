@@ -166,7 +166,7 @@ public class Geary.Endpoint : BaseObject {
         tls_cx.accept_certificate.connect(on_accept_certificate);
     }
 
-    private bool report_tls_warnings(GLib.TlsConnection cx,
+    private void report_tls_warnings(GLib.TlsConnection cx,
                                      GLib.TlsCertificate cert,
                                      GLib.TlsCertificateFlags warnings) {
         // TODO: Report or verify flags with user, but for now merely
@@ -181,8 +181,6 @@ public class Geary.Endpoint : BaseObject {
         untrusted_certificate = cert;
 
         untrusted_host(cx);
-
-        return false;
     }
 
     private string tls_flags_to_string(TlsCertificateFlags flags) {
@@ -213,7 +211,15 @@ public class Geary.Endpoint : BaseObject {
     private bool on_accept_certificate(GLib.TlsConnection cx,
                                        GLib.TlsCertificate cert,
                                        GLib.TlsCertificateFlags flags) {
-        return report_tls_warnings(cx, cert, flags);
+        // Per the docs for GTlsConnection.accept-certificate,
+        // handling this signal must not block, so do this when idle
+        GLib.Idle.add(() => {
+                report_tls_warnings(cx, cert, flags);
+                return GLib.Source.REMOVE;
+            },
+            GLib.Priority.HIGH
+        );
+        return false;
     }
 
 }
