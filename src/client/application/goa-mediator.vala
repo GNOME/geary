@@ -47,16 +47,12 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
     public async void update(Geary.AccountInformation geary_account,
                              GLib.Cancellable? cancellable)
         throws GLib.Error {
-        debug("checking auth");
         // Call this to get the exception thrown if no auth method is
         // supported.
         get_auth_method();
 
-        debug("updating imap");
         update_imap_config(geary_account.incoming);
-        debug("updating smtp");
         update_smtp_config(geary_account.outgoing);
-        debug("updating done");
     }
 
     public virtual async bool load_token(Geary.AccountInformation account,
@@ -165,9 +161,9 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         if (mail != null) {
             parse_host_name(service, mail.smtp_host);
 
-            if (mail.imap_use_ssl) {
+            if (mail.smtp_use_ssl) {
                 service.transport_security = Geary.TlsNegotiationMethod.TRANSPORT;
-            } else if (mail.imap_use_tls) {
+            } else if (mail.smtp_use_tls) {
                 service.transport_security = Geary.TlsNegotiationMethod.START_TLS;
             } else {
                 service.transport_security = Geary.TlsNegotiationMethod.NONE;
