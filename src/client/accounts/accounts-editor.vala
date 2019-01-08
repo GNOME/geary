@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -7,6 +7,12 @@
 
 /**
  * The main account editor window.
+ *
+ * The editor is a dialog window that manages a stack of {@link
+ * EditorPane} instances. Each pane handles a specific task (listing
+ * accounts, adding a new account, editing an existing one, etc.). The
+ * editor displaying panes as needed, and provides some common command
+ * management, account management and other common code for the panes.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor.ui")]
 public class Accounts.Editor : Gtk.Dialog {
@@ -90,6 +96,9 @@ public class Accounts.Editor : Gtk.Dialog {
         return ret;
     }
 
+    /**
+     * Adds and shows a new pane in the editor.
+     */
     internal void push(EditorPane pane) {
         // Since we keep old, already-popped panes around (see pop for
         // details), when a new pane is pushed on they need to be
@@ -107,6 +116,9 @@ public class Accounts.Editor : Gtk.Dialog {
         this.editor_panes.set_visible_child(pane);
     }
 
+    /**
+     * Removes the current pane from the editor, showing the last one.
+     */
     internal void pop() {
         // One can't simply remove old panes fro the GTK stack since
         // there won't be any transition between them - the old one
@@ -124,6 +136,7 @@ public class Accounts.Editor : Gtk.Dialog {
         notification.show();
     }
 
+    /** Removes an account from the editor. */
     internal void remove_account(Geary.AccountInformation account) {
         this.editor_panes.set_visible_child(this.editor_list_pane);
         this.editor_list_pane.remove_account(account);
