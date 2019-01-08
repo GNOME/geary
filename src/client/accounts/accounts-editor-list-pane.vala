@@ -379,7 +379,7 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
         case DISABLED:
             this.set_tooltip_text(
                 // Translators: Tooltip for accounts that have been
-                // loaded by disabled by the user.
+                // loaded but disabled by the user.
                 _("This account has been disabled")
             );
             break;
