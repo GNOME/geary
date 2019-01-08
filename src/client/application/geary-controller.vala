@@ -112,6 +112,11 @@ public class GearyController : Geary.BaseObject {
 
     public Accounts.Manager? account_manager { get; private set; default = null; }
 
+    /** Application-wide {@link Application.CertificateManager} instance. */
+    public Application.CertificateManager? certificate_manager {
+        get; private set; default = null;
+    }
+
     public MainWindow? main_window { get; private set; default = null; }
 
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
@@ -320,7 +325,10 @@ public class GearyController : Geary.BaseObject {
             error("Error migrating configuration directories: %s", e.message);
         }
 
-        // Hook up accounts and credentials machinery
+        // Hook up cert, accounts and credentials machinery
+
+        this.certificate_manager = new Application.CertificateManager();
+
         SecretMediator? libsecret = null;
         try {
             libsecret = yield new SecretMediator(this.application, cancellable);
@@ -797,6 +805,32 @@ public class GearyController : Geary.BaseObject {
         }
 
         context.tls_validation_prompting = true;
+        try {
+            yield this.certificate_manager.prompt_pin_certificate(
+                this.main_window,
+                context.account.information,
+                service,
+                endpoint,
+                true,
+                context.cancellable
+            );
+            context.tls_validation_failed = false;
+        } catch (Application.CertificateManagerError.UNTRUSTED err) {
+            // Don't report an error here, the user simply declined.
+            context.tls_validation_failed = true;
+        } catch (Application.CertificateManagerError err) {
+            // Assume validation is now good, but report the error
+            // since the cert may not have been saved
+            context.tls_validation_failed = false;
+            report_problem(
+                new Geary.ServiceProblemReport(
+                    Geary.ProblemType.UNTRUSTED,
+                    context.account.information,
+                    service,
+                    err
+                )
+            );
+        }
 
         context.tls_validation_prompting = false;
         update_account_status();

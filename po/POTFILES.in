@@ -15,8 +15,9 @@ src/client/accounts/accounts-editor-row.vala
 src/client/accounts/accounts-editor-servers-pane.vala
 src/client/accounts/accounts-manager.vala
 src/client/application/application-avatar-store.vala
-src/client/application/autostart-manager.vala
+src/client/application/application-certficate-manager.vala
 src/client/application/application-command.vala
+src/client/application/autostart-manager.vala
 src/client/application/geary-application.vala
 src/client/application/geary-args.vala
 src/client/application/geary-controller.vala
