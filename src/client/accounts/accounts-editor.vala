@@ -36,6 +36,9 @@ public class Accounts.Editor : Gtk.Dialog {
 
     internal Manager accounts { get; private set; }
 
+    internal Application.CertificateManager certificates {
+        get; private set;
+    }
 
     private SimpleActionGroup actions = new SimpleActionGroup();
 
@@ -54,6 +57,9 @@ public class Accounts.Editor : Gtk.Dialog {
     public Editor(GearyApplication application, Gtk.Window parent) {
         this.application = application;
         this.transient_for = parent;
+
+        this.accounts = application.controller.account_manager;
+        this.certificates = application.controller.certificate_manager;
 
         // Can't set this in Glade 3.22.1 :(
         this.get_content_area().border_width = 0;
