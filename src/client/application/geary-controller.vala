@@ -811,7 +811,7 @@ public class GearyController : Geary.BaseObject {
                 context.account.information,
                 service,
                 endpoint,
-                true,
+                false,
                 context.cancellable
             );
             context.tls_validation_failed = false;
