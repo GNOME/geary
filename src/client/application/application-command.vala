@@ -193,10 +193,18 @@ public class Application.PropertyCommand<T> : Application.Command {
 
         this.object.get(this.property_name, ref this.old_value);
 
-        this.undo_label = undo_label.printf(this.old_value);
-        this.redo_label = redo_label.printf(this.new_value);
-        this.executed_label = executed_label.printf(this.new_value);
-        this.undone_label = undone_label.printf(this.old_value);
+        if (undo_label != null) {
+            this.undo_label = undo_label.printf(this.old_value);
+        }
+        if (redo_label != null) {
+            this.redo_label = redo_label.printf(this.new_value);
+        }
+        if (executed_label != null) {
+            this.executed_label = executed_label.printf(this.new_value);
+        }
+        if (undone_label != null) {
+            this.undone_label = undone_label.printf(this.old_value);
+        }
     }
 
     public async override void execute(GLib.Cancellable? cancellable) {
