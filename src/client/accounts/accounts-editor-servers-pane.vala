@@ -238,12 +238,14 @@ internal class Accounts.EditorServersPane :
     private async void save(GLib.Cancellable? cancellable) {
         this.is_operation_running = true;
 
-        // Only need to validate if a generic account
+        // Only need to validate if a generic, local account since
+        // other account types have read-only incoming/outgoing
+        // settings
         bool is_valid = true;
         bool has_changed = false;
-        if (this.account.service_provider == Geary.ServiceProvider.OTHER) {
+        if (this.account.service_provider == Geary.ServiceProvider.OTHER &&
+            !this.editor.accounts.is_goa_account(this.account)) {
             is_valid = yield validate(cancellable);
-
             if (is_valid) {
                 has_changed |= yield update_service(
                     this.account.incoming, this.incoming_mutable, cancellable
