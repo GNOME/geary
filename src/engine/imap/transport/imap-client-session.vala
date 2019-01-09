@@ -881,14 +881,16 @@ public class Geary.Imap.ClientSession : BaseObject {
         }
 
         if (login_err != null) {
-            // Throw an error indicating auth failed here, unless the
-            // response code indicated that the server is merely
-            // unavailable, then don't since the creds might actually
-            // be fine.
-            ResponseCode? code = cmd.status.response_code;
+            // Throw an error indicating auth failed here, unless
+            // there is a status response and it indicates that the
+            // server is merely reporting login as being unavailable,
+            // then don't since the creds might actually be fine.
             ResponseCodeType? code_type = null;
-            if (code != null) {
-                code_type = code.get_response_code_type();
+            if (cmd.status != null) {
+                ResponseCode? code = cmd.status.response_code;
+                if (code != null) {
+                    code_type = code.get_response_code_type();
+                }
             }
 
             if (code_type == null ||

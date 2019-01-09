@@ -401,6 +401,7 @@ src/engine/util/util-time.vala
 src/engine/util/util-timeout-manager.vala
 src/engine/util/util-trillian.vala
 src/mailer/main.vala
+ui/accounts_editor.ui
 ui/accounts_editor_add_pane.ui
 ui/accounts_editor_edit_pane.ui
 ui/accounts_editor_list_pane.ui

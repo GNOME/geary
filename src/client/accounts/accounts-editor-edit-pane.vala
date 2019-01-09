@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -24,6 +24,14 @@ internal class Accounts.EditorEditPane :
     /** {@inheritDoc} */
     internal Application.CommandStack commands {
         get; protected set; default = new Application.CommandStack();
+    }
+
+    /** {@inheritDoc} */
+    internal bool is_operation_running { get; protected set; default = false; }
+
+    /** {@inheritDoc} */
+    internal GLib.Cancellable? op_cancellable {
+        get; protected set; default = null;
     }
 
     /** {@inheritDoc} */
@@ -67,7 +75,9 @@ internal class Accounts.EditorEditPane :
         this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
         this.details_list.set_header_func(Editor.seperator_headers);
-        this.details_list.add(new DisplayNameRow(account, this.commands));
+        this.details_list.add(
+            new DisplayNameRow(account, this.commands, this.op_cancellable)
+        );
 
         this.senders_list.set_header_func(Editor.seperator_headers);
         foreach (Geary.RFC822.MailboxAddress sender in
@@ -85,7 +95,9 @@ internal class Accounts.EditorEditPane :
         this.signature_preview.content_loaded.connect(() => {
                 // Only enable editability after the content has fully
                 // loaded to avoid the WebProcess crashing.
-                this.signature_preview.set_editable.begin(true, null);
+                this.signature_preview.set_editable.begin(
+                    true, this.op_cancellable
+                );
             });
         this.signature_preview.document_modified.connect(() => {
                 this.signature_changed = true;
@@ -101,7 +113,7 @@ internal class Accounts.EditorEditPane :
                         new SignatureChangedCommand(
                             this.signature_preview, account
                         ),
-                        null
+                        this.op_cancellable
                     );
                 }
                 return Gdk.EVENT_PROPAGATE;
@@ -154,7 +166,7 @@ internal class Accounts.EditorEditPane :
 
     /** {@inheritDoc} */
     protected void command_executed() {
-        update_command_actions();
+        this.editor.update_command_actions();
 
         Application.Command next_undo = this.commands.peek_undo();
         this.undo_button.set_tooltip_text(
@@ -175,7 +187,7 @@ internal class Accounts.EditorEditPane :
                 this.account,
                 this.senders_list
             ),
-            null
+            this.op_cancellable
         );
     }
 
@@ -187,7 +199,7 @@ internal class Accounts.EditorEditPane :
                 this.account,
                 this.senders_list
             ),
-            null
+            this.op_cancellable
         );
     }
 
@@ -253,9 +265,12 @@ private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
 
 
     private Application.CommandStack commands;
+    private GLib.Cancellable? cancellable;
+
 
     public DisplayNameRow(Geary.AccountInformation account,
-                          Application.CommandStack commands) {
+                          Application.CommandStack commands,
+                          GLib.Cancellable? cancellable) {
         base(
             account,
             // Translators: Label in the account editor for the user's
@@ -265,6 +280,7 @@ private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
         );
         this.activatable = false;
         this.commands = commands;
+        this.cancellable = cancellable;
 
         update();
 
@@ -295,7 +311,7 @@ private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
                     // account.
                     _("Change account name back to “%s”")
                 ),
-                null
+                this.cancellable
             );
         }
 
@@ -335,7 +351,7 @@ private class Accounts.AddMailboxRow : AddRow<EditorEditPane> {
                             )
                         )
                     ),
-                    null
+                    pane.op_cancellable
                 );
                 popover.popdown();
             });
@@ -376,13 +392,14 @@ private class Accounts.MailboxRow : AccountRow<EditorEditPane,Gtk.Label> {
                             popover.address
                         )
                     ),
-                    null
+                    pane.op_cancellable
                 );
                 popover.popdown();
             });
         popover.remove_clicked.connect(() => {
                 pane.commands.execute.begin(
-                    new RemoveMailboxCommand(this), null
+                    new RemoveMailboxCommand(this),
+                    pane.op_cancellable
                 );
                 popover.popdown();
             });
@@ -788,7 +805,7 @@ private class Accounts.EmailPrefetchRow :
                             get_label(this.account.prefetch_period_days)
                         )
                     ),
-                    null
+                    pane.op_cancellable
                 );
             });
     }

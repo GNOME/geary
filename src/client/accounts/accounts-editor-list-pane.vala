@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -28,21 +28,29 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     }
 
 
-    /** {@iinheritDoc} */
+    /** {@inheritDoc} */
     internal Gtk.Widget initial_widget {
         get {
             return this.show_welcome ? this.service_list : this.accounts_list;
         }
     }
 
-    /** {@iinheritDoc} */
+    /** {@inheritDoc} */
     internal Application.CommandStack commands {
         get; protected set; default = new Application.CommandStack();
     }
 
+    /** {@inheritDoc} */
+    internal bool is_operation_running { get; protected set; default = false; }
+
+    /** {@inheritDoc} */
+    internal GLib.Cancellable? op_cancellable {
+        get; protected set; default = null;
+    }
+
     internal Manager accounts { get; private set; }
 
-    /** {@iinheritDoc} */
+    /** {@inheritDoc} */
     protected weak Accounts.Editor editor { get; set; }
 
     private bool show_welcome {
@@ -53,9 +61,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
     [GtkChild]
     private Gtk.HeaderBar header;
-
-    [GtkChild]
-    private Gtk.Overlay osd_overlay;
 
     [GtkChild]
     private Gtk.Grid pane_content;
@@ -110,7 +115,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         this.commands.executed.connect(on_execute);
         this.commands.undone.connect(on_undo);
         this.commands.redone.connect(on_execute);
-
+        connect_command_signals();
         update_welcome_panel();
     }
 
@@ -118,6 +123,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         this.commands.executed.disconnect(on_execute);
         this.commands.undone.disconnect(on_undo);
         this.commands.redone.disconnect(on_execute);
+        disconnect_command_signals();
 
         this.accounts.account_added.disconnect(on_account_added);
         this.accounts.account_status_changed.disconnect(on_account_status_changed);
@@ -146,7 +152,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         if (row != null) {
             this.commands.execute.begin(
                 new RemoveAccountCommand(account, this.accounts),
-                null
+                this.op_cancellable
             );
         }
     }
@@ -162,20 +168,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         row.move_to.connect(on_editor_row_moved);
         row.dropped.connect(on_editor_row_dropped);
         this.accounts_list.add(row);
-    }
-
-    private void add_notification(InAppNotification notification) {
-        this.osd_overlay.add_overlay(notification);
-        notification.show();
-    }
-
-    private void update_actions() {
-        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
-            this.commands.can_undo
-        );
-        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
-            this.commands.can_redo
-        );
     }
 
     private void update_welcome_panel() {
@@ -224,7 +216,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
             new ReorderAccountCommand(
                 (AccountListRow) source, new_position, this.accounts
             ),
-            null
+            this.op_cancellable
         );
     }
 
@@ -233,7 +225,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
             new ReorderAccountCommand(
                 (AccountListRow) source, target.get_index(), this.accounts
             ),
-            null
+            this.op_cancellable
         );
     }
 
@@ -249,20 +241,16 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         if (command.executed_label != null) {
             InAppNotification ian = new InAppNotification(command.executed_label);
             ian.set_button(_("Undo"), "win." + GearyController.ACTION_UNDO);
-            add_notification(ian);
+            this.editor.add_notification(ian);
         }
-
-        update_actions();
     }
 
     private void on_undo(Application.Command command) {
         if (command.undone_label != null) {
             InAppNotification ian = new InAppNotification(command.undone_label);
             ian.set_button(_("Redo"), "win." + GearyController.ACTION_REDO);
-            add_notification(ian);
+            this.editor.add_notification(ian);
         }
-
-        update_actions();
     }
 
     [GtkCallback]
@@ -326,7 +314,7 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
             // GOA account but it's disabled, so just take people
             // directly to the GOA panel
             manager.show_goa_account.begin(
-                account, null,
+                account, pane.op_cancellable,
                 (obj, res) => {
                     try {
                         manager.show_goa_account.end(res);
@@ -379,7 +367,7 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
         case DISABLED:
             this.set_tooltip_text(
                 // Translators: Tooltip for accounts that have been
-                // loaded by disabled by the user.
+                // loaded but disabled by the user.
                 _("This account has been disabled")
             );
             break;
@@ -466,7 +454,7 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
 
     public override void activated(EditorListPane pane) {
         pane.accounts.add_goa_account.begin(
-            this.provider, null,
+            this.provider, pane.op_cancellable,
             (obj, res) => {
                 bool add_local = false;
                 try {

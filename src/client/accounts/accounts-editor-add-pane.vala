@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -16,6 +16,17 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         get { return this.real_name.value; }
     }
 
+    /** {@inheritDoc} */
+    internal bool is_operation_running {
+        get { return !this.sensitive; }
+        protected set { update_operation_ui(value); }
+    }
+
+    /** {@inheritDoc} */
+    internal GLib.Cancellable? op_cancellable {
+        get; protected set; default = new GLib.Cancellable();
+    }
+
     protected weak Accounts.Editor editor { get; set; }
 
     private Geary.ServiceProvider provider;
@@ -26,9 +37,6 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
     [GtkChild]
     private Gtk.HeaderBar header;
-
-    [GtkChild]
-    private Gtk.Overlay osd_overlay;
 
     [GtkChild]
     private Gtk.Grid pane_content;
@@ -53,6 +61,9 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
     [GtkChild]
     private Gtk.Button create_button;
+
+    [GtkChild]
+    private Gtk.Button back_button;
 
     [GtkChild]
     private Gtk.Spinner create_spinner;
@@ -148,16 +159,8 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         return this.header;
     }
 
-    private void add_notification(InAppNotification notification) {
-        this.osd_overlay.add_overlay(notification);
-        notification.show();
-    }
-
     private async void validate_account(GLib.Cancellable? cancellable) {
-        this.create_spinner.show();
-        this.create_spinner.start();
-        this.create_button.set_sensitive(false);
-        this.set_sensitive(false);
+        this.is_operation_running = true;
 
         bool is_valid = false;
         string message = "";
@@ -190,6 +193,9 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                 to_focus = this.imap_login.value;
                 // Translators: In-app notification label
                 message = _("Check your receiving login and password");
+            } catch (GLib.IOError.CANCELLED err) {
+                // Nothing to do here, someone just cancelled
+                debug("IMAP validation was cancelled: %s", err.message);
             } catch (GLib.Error err) {
                 debug("Error validating IMAP service: %s", err.message);
                 this.imap_tls.show();
@@ -218,6 +224,9 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                     to_focus = this.smtp_login.value;
                     // Translators: In-app notification label
                     message = _("Check your sending login and password");
+                } catch (GLib.IOError.CANCELLED err) {
+                    // Nothing to do here, someone just cancelled
+                    debug("SMTP validation was cancelled: %s", err.message);
                 } catch (GLib.Error err) {
                     debug("Error validating SMTP service: %s", err.message);
                     this.smtp_tls.show();
@@ -260,10 +269,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             }
         }
 
-        this.create_spinner.stop();
-        this.create_spinner.hide();
-        this.create_button.set_sensitive(true);
-        this.set_sensitive(true);
+        this.is_operation_running = false;
 
         // Focus and pop up the notification after re-sensitising
         // so it actually succeeds.
@@ -271,7 +277,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             if (to_focus != null) {
                 to_focus.grab_focus();
             }
-            add_notification(
+            this.editor.add_notification(
                 new InAppNotification(
                     // Translators: In-app notification label, the
                     // string substitution is a more detailed reason.
@@ -365,6 +371,14 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         this.controls_valid = controls_valid;
     }
 
+    private void update_operation_ui(bool is_running) {
+        this.create_spinner.visible = is_running;
+        this.create_spinner.active = is_running;
+        this.create_button.sensitive = !is_running;
+        this.back_button.sensitive = !is_running;
+        this.sensitive = !is_running;
+    }
+
     private void on_validated(Components.Validator.Trigger reason) {
         check_validation();
         if (this.controls_valid && reason == Components.Validator.Trigger.ACTIVATED) {
@@ -407,7 +421,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
     [GtkCallback]
     private void on_create_button_clicked() {
-        this.validate_account.begin(null);
+        this.validate_account.begin(this.op_cancellable);
     }
 
     [GtkCallback]

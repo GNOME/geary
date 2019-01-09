@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -30,6 +30,17 @@ internal class Accounts.EditorServersPane :
         get { return this.details_list; }
     }
 
+    /** {@inheritDoc} */
+    internal bool is_operation_running {
+        get { return !this.sensitive; }
+        protected set { update_operation_ui(value); }
+    }
+
+    /** {@inheritDoc} */
+    internal GLib.Cancellable? op_cancellable {
+        get; protected set; default = new GLib.Cancellable();
+    }
+
     private Geary.Engine engine;
 
     // These are copies of the originals that can be updated before
@@ -43,9 +54,6 @@ internal class Accounts.EditorServersPane :
 
     [GtkChild]
     private Gtk.HeaderBar header;
-
-    [GtkChild]
-    private Gtk.Overlay osd_overlay;
 
     [GtkChild]
     private Gtk.Grid pane_content;
@@ -105,7 +113,9 @@ internal class Accounts.EditorServersPane :
         service_provider.activatable = false;
         add_row(this.details_list, service_provider);
 
-        this.save_drafts = new SaveDraftsRow(this.account, this.commands);
+        this.save_drafts = new SaveDraftsRow(
+            this.account, this.commands, this.op_cancellable
+        );
         add_row(this.details_list, this.save_drafts);
 
         // Receiving
@@ -113,19 +123,36 @@ internal class Accounts.EditorServersPane :
         this.receiving_list.set_header_func(Editor.seperator_headers);
         add_row(
             this.receiving_list,
-            new ServiceHostRow(account, this.incoming_mutable, this.commands)
+            new ServiceHostRow(
+                account,
+                this.incoming_mutable,
+                this.commands,
+                this.op_cancellable
+            )
         );
         add_row(
             this.receiving_list,
-            new ServiceSecurityRow(account, this.incoming_mutable, this.commands)
+            new ServiceSecurityRow(
+                account,
+                this.incoming_mutable,
+                this.commands,
+                this.op_cancellable
+            )
         );
 
         this.incoming_password = new ServicePasswordRow(
-            account, this.incoming_mutable, this.commands
+            account,
+            this.incoming_mutable,
+            this.commands,
+            this.op_cancellable
         );
 
         this.incoming_login = new ServiceLoginRow(
-            account, this.incoming_mutable, this.commands, this.incoming_password
+            account,
+            this.incoming_mutable,
+            this.commands,
+            this.op_cancellable,
+            this.incoming_password
         );
 
         add_row(this.receiving_list, this.incoming_login);
@@ -136,24 +163,45 @@ internal class Accounts.EditorServersPane :
         this.sending_list.set_header_func(Editor.seperator_headers);
         add_row(
             this.sending_list,
-            new ServiceHostRow(account, this.outgoing_mutable, this.commands)
+            new ServiceHostRow(
+                account,
+                this.outgoing_mutable,
+                this.commands,
+                this.op_cancellable
+            )
         );
         add_row(
             this.sending_list,
-            new ServiceSecurityRow(account, this.outgoing_mutable, this.commands)
+            new ServiceSecurityRow(
+                account,
+                this.outgoing_mutable,
+                this.commands,
+                this.op_cancellable
+            )
         );
         this.outgoing_auth = new ServiceOutgoingAuthRow(
-            account, this.outgoing_mutable, this.incoming_mutable, this.commands
+            account,
+            this.outgoing_mutable,
+            this.incoming_mutable,
+            this.commands,
+            this.op_cancellable
         );
         this.outgoing_auth.value.changed.connect(on_outgoing_auth_changed);
         add_row(this.sending_list, this.outgoing_auth);
 
         this.outgoing_password = new ServicePasswordRow(
-            account, this.outgoing_mutable, this.commands
+            account,
+            this.outgoing_mutable,
+            this.commands,
+            this.op_cancellable
         );
 
         this.outgoing_login = new ServiceLoginRow(
-            account, this.outgoing_mutable, this.commands, this.outgoing_password
+            account,
+            this.outgoing_mutable,
+            this.commands,
+            this.op_cancellable,
+            this.outgoing_password
         );
 
         add_row(this.sending_list, this.outgoing_login);
@@ -179,7 +227,7 @@ internal class Accounts.EditorServersPane :
 
     /** {@inheritDoc} */
     protected void command_executed() {
-        update_command_actions();
+        this.editor.update_command_actions();
         this.apply_button.set_sensitive(this.commands.can_undo);
     }
 
@@ -188,17 +236,16 @@ internal class Accounts.EditorServersPane :
     }
 
     private async void save(GLib.Cancellable? cancellable) {
-        this.apply_button.set_sensitive(false);
-        this.apply_spinner.show();
-        this.apply_spinner.start();
-        this.set_sensitive(false);
+        this.is_operation_running = true;
 
-        // Only need to validate if a generic account
+        // Only need to validate if a generic, local account since
+        // other account types have read-only incoming/outgoing
+        // settings
         bool is_valid = true;
         bool has_changed = false;
-        if (this.account.service_provider == Geary.ServiceProvider.OTHER) {
+        if (this.account.service_provider == Geary.ServiceProvider.OTHER &&
+            !this.editor.accounts.is_goa_account(this.account)) {
             is_valid = yield validate(cancellable);
-
             if (is_valid) {
                 has_changed |= yield update_service(
                     this.account.incoming, this.incoming_mutable, cancellable
@@ -208,6 +255,8 @@ internal class Accounts.EditorServersPane :
                 );
             }
         }
+
+        this.is_operation_running = false;
 
         if (is_valid) {
             if (this.save_drafts.value_changed) {
@@ -229,14 +278,10 @@ internal class Accounts.EditorServersPane :
             // updated already by the command
             this.account.save_drafts = this.save_drafts.initial_value;
         }
-
-        this.apply_spinner.stop();
-        this.apply_spinner.hide();
-        this.set_sensitive(true);
     }
 
     private async bool validate(GLib.Cancellable? cancellable) {
-        string message = "";
+        string? message = null;
         bool imap_valid = false;
         try {
             yield this.engine.validate_imap(
@@ -247,6 +292,9 @@ internal class Accounts.EditorServersPane :
             debug("Error authenticating IMAP service: %s", err.message);
             // Translators: In-app notification label
             message = _("Check your receiving login and password");
+        } catch (GLib.IOError.CANCELLED err) {
+            // Nothing to do here, someone just cancelled
+            debug("IMAP validation was cancelled: %s", err.message);
         } catch (GLib.Error err) {
             debug("Error validating IMAP service: %s", err.message);
             // Translators: In-app notification label
@@ -272,6 +320,9 @@ internal class Accounts.EditorServersPane :
                 this.outgoing_auth.value.source = Geary.Credentials.Requirement.CUSTOM;
                 // Translators: In-app notification label
                 message = _("Check your sending login and password");
+            } catch (GLib.IOError.CANCELLED err) {
+                // Nothing to do here, someone just cancelled
+                debug("SMTP validation was cancelled: %s", err.message);
             } catch (GLib.Error err) {
                 debug("Error validating SMTP service: %s", err.message);
                     // Translators: In-app notification label
@@ -282,8 +333,8 @@ internal class Accounts.EditorServersPane :
         bool is_valid = imap_valid && smtp_valid;
         debug("Validation complete, is valid: %s", is_valid.to_string());
 
-        if (!is_valid) {
-            add_notification(
+        if (!is_valid && message != null) {
+            this.editor.add_notification(
                 new InAppNotification(
                     // Translators: In-app notification label, the
                     // string substitution is a more detailed reason.
@@ -329,11 +380,6 @@ internal class Accounts.EditorServersPane :
         return has_changed;
     }
 
-    private void add_notification(InAppNotification notification) {
-        this.osd_overlay.add_overlay(notification);
-        notification.show();
-    }
-
     private void add_row(Gtk.ListBox list, EditorRow<EditorServersPane> row) {
         list.add(row);
         ValidatingRow? validating = row as ValidatingRow;
@@ -350,6 +396,13 @@ internal class Accounts.EditorServersPane :
         );
     }
 
+    private void update_operation_ui(bool is_running) {
+        this.apply_spinner.visible = is_running;
+        this.apply_spinner.active = is_running;
+        this.apply_button.sensitive = !is_running;
+        this.sensitive = !is_running;
+    }
+
     private void on_validator_changed() {
         this.apply_button.set_sensitive(is_valid());
     }
@@ -362,12 +415,16 @@ internal class Accounts.EditorServersPane :
 
     [GtkCallback]
     private void on_cancel_button_clicked() {
-        this.editor.pop();
+        if (this.is_operation_running) {
+            cancel_operation();
+        } else {
+            this.editor.pop();
+        }
     }
 
     [GtkCallback]
     private void on_apply_button_clicked() {
-        this.save.begin(null);
+        this.save.begin(this.op_cancellable);
     }
 
     [GtkCallback]
@@ -455,7 +512,7 @@ private class Accounts.AccountProviderRow :
     public override void activated(EditorServersPane pane) {
         if (this.accounts.is_goa_account(this.account)) {
             this.accounts.show_goa_account.begin(
-                account, null,
+                account, pane.op_cancellable,
                 (obj, res) => {
                     try {
                         this.accounts.show_goa_account.end(res);
@@ -484,9 +541,12 @@ private class Accounts.SaveDraftsRow :
     public bool initial_value { get; private set; }
 
     private Application.CommandStack commands;
+    private GLib.Cancellable? cancellable;
+
 
     public SaveDraftsRow(Geary.AccountInformation account,
-                         Application.CommandStack commands) {
+                         Application.CommandStack commands,
+                         GLib.Cancellable? cancellable) {
         Gtk.Switch value = new Gtk.Switch();
         base(
             account,
@@ -497,6 +557,7 @@ private class Accounts.SaveDraftsRow :
         );
         update();
         this.commands = commands;
+        this.cancellable = cancellable;
         this.activatable = false;
         this.initial_value = this.account.save_drafts;
         this.account.notify["save-drafts"].connect(on_account_changed);
@@ -513,7 +574,7 @@ private class Accounts.SaveDraftsRow :
                 new Application.PropertyCommand<bool>(
                     this.account, "save_drafts", this.value.state
                 ),
-                null
+                this.cancellable
             );
         }
     }
@@ -540,11 +601,13 @@ private class Accounts.ServiceHostRow :
     }
 
     private Application.CommandStack commands;
+    private GLib.Cancellable? cancellable;
 
 
     public ServiceHostRow(Geary.AccountInformation account,
                           Geary.ServiceInformation service,
-                          Application.CommandStack commands) {
+                          Application.CommandStack commands,
+                          GLib.Cancellable? cancellable) {
         string label = "";
         switch (service.protocol) {
         case Geary.Protocol.IMAP:
@@ -562,6 +625,7 @@ private class Accounts.ServiceHostRow :
 
         base(account, service, label, new Gtk.Entry());
         this.commands = commands;
+        this.cancellable = cancellable;
         this.activatable = false;
         this.validator = new Components.NetworkAddressValidator(this.value);
 
@@ -596,8 +660,8 @@ private class Accounts.ServiceHostRow :
                             this.service, "port", port
                         )
                 }),
-                null
-                );
+                this.cancellable
+            );
         }
     }
 
@@ -621,16 +685,19 @@ private class Accounts.ServiceSecurityRow :
 
 
     private Application.CommandStack commands;
+    private GLib.Cancellable? cancellable;
 
 
     public ServiceSecurityRow(Geary.AccountInformation account,
                               Geary.ServiceInformation service,
-                              Application.CommandStack commands) {
+                              Application.CommandStack commands,
+                              GLib.Cancellable? cancellable) {
         TlsComboBox value = new TlsComboBox();
         base(account, service, value.label, value);
         update();
 
         this.commands = commands;
+        this.cancellable = cancellable;
         this.activatable = false;
         value.changed.connect(on_value_changed);
     }
@@ -663,7 +730,7 @@ private class Accounts.ServiceSecurityRow :
                      )
                     });
             }
-            this.commands.execute.begin(cmd, null);
+            this.commands.execute.begin(cmd, this.cancellable);
         }
     }
 
@@ -685,12 +752,14 @@ private class Accounts.ServiceLoginRow :
     }
 
     private Application.CommandStack commands;
+    private GLib.Cancellable? cancellable;
     private ServicePasswordRow? password_row;
 
 
     public ServiceLoginRow(Geary.AccountInformation account,
                            Geary.ServiceInformation service,
                            Application.CommandStack commands,
+                           GLib.Cancellable? cancellable,
                            ServicePasswordRow? password_row = null) {
         base(
             account,
@@ -702,6 +771,7 @@ private class Accounts.ServiceLoginRow :
         );
 
         this.commands = commands;
+        this.cancellable = cancellable;
         this.activatable = false;
         this.validator = new Components.Validator(this.value);
         this.password_row = password_row;
@@ -745,7 +815,7 @@ private class Accounts.ServiceLoginRow :
                     });
             }
 
-            this.commands.execute.begin(cmd, null);
+            this.commands.execute.begin(cmd, this.cancellable);
         }
     }
 
@@ -803,11 +873,13 @@ private class Accounts.ServicePasswordRow :
     }
 
     private Application.CommandStack commands;
+    private GLib.Cancellable? cancellable;
 
 
     public ServicePasswordRow(Geary.AccountInformation account,
                               Geary.ServiceInformation service,
-                              Application.CommandStack commands) {
+                              Application.CommandStack commands,
+                              GLib.Cancellable? cancellable) {
         base(
             account,
             service,
@@ -818,6 +890,7 @@ private class Accounts.ServicePasswordRow :
         );
 
         this.commands = commands;
+        this.cancellable = cancellable;
         this.activatable = false;
         this.value.visibility = false;
         this.value.input_purpose = Gtk.InputPurpose.PASSWORD;
@@ -841,7 +914,7 @@ private class Accounts.ServicePasswordRow :
                     "credentials",
                     this.service.credentials.copy_with_token(this.value.text)
                 ),
-                null
+                this.cancellable
             );
         }
     }
@@ -860,18 +933,21 @@ private class Accounts.ServiceOutgoingAuthRow :
 
 
     private Application.CommandStack commands;
+    private GLib.Cancellable? cancellable;
     private Geary.ServiceInformation imap_service;
 
 
     public ServiceOutgoingAuthRow(Geary.AccountInformation account,
                                   Geary.ServiceInformation smtp_service,
                                   Geary.ServiceInformation imap_service,
-                                  Application.CommandStack commands) {
+                                  Application.CommandStack commands,
+                                  GLib.Cancellable? cancellable) {
         OutgoingAuthComboBox value = new OutgoingAuthComboBox();
         base(account, smtp_service, value.label, value);
         update();
 
         this.commands = commands;
+        this.cancellable = cancellable;
         this.imap_service = imap_service;
         this.activatable = false;
         value.changed.connect(on_value_changed);
@@ -919,7 +995,7 @@ private class Accounts.ServiceOutgoingAuthRow :
                 );
             }
 
-            this.commands.execute.begin(seq, null);
+            this.commands.execute.begin(seq, this.cancellable);
         }
     }
 

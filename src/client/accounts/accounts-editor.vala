@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -7,7 +7,14 @@
 
 /**
  * The main account editor window.
+ *
+ * The editor is a dialog window that manages a stack of {@link
+ * EditorPane} instances. Each pane handles a specific task (listing
+ * accounts, adding a new account, editing an existing one, etc.). The
+ * editor displaying panes as needed, and provides some common command
+ * management, account management and other common code for the panes.
  */
+[GtkTemplate (ui = "/org/gnome/Geary/accounts_editor.ui")]
 public class Accounts.Editor : Gtk.Dialog {
 
 
@@ -32,7 +39,12 @@ public class Accounts.Editor : Gtk.Dialog {
 
     private SimpleActionGroup actions = new SimpleActionGroup();
 
-    private Gtk.Stack editor_panes = new Gtk.Stack();
+    [GtkChild]
+    private Gtk.Overlay notifications_pane;
+
+    [GtkChild]
+    private Gtk.Stack editor_panes;
+
     private EditorListPane editor_list_pane;
 
     private Gee.LinkedList<EditorPane> editor_pane_stack =
@@ -41,51 +53,73 @@ public class Accounts.Editor : Gtk.Dialog {
 
     public Editor(GearyApplication application, Gtk.Window parent) {
         this.application = application;
+        this.transient_for = parent;
+
+        // Can't set this in Glade 3.22.1 :(
+        this.get_content_area().border_width = 0;
+
         this.accounts = application.controller.account_manager;
-
-        set_default_size(700, 450);
-        set_icon_name(GearyApplication.APP_ID);
-        set_modal(true);
-        set_title(_("Accounts"));
-        set_transient_for(parent);
-
-        get_content_area().border_width = 0;
-        get_content_area().add(this.editor_panes);
-
-        this.editor_panes.set_transition_type(
-            Gtk.StackTransitionType.SLIDE_LEFT_RIGHT
-        );
-        this.editor_panes.notify["visible-child"].connect_after(on_pane_changed);
-        this.editor_panes.show();
 
         this.actions.add_action_entries(ACTION_ENTRIES, this);
         insert_action_group("win", this.actions);
 
-        get_action(GearyController.ACTION_UNDO).set_enabled(false);
-        get_action(GearyController.ACTION_REDO).set_enabled(false);
-
         this.editor_list_pane = new EditorListPane(this);
         push(this.editor_list_pane);
+
+        update_command_actions();
     }
 
     public override bool key_press_event(Gdk.EventKey event) {
         bool ret = Gdk.EVENT_PROPAGATE;
 
         // Allow the user to use Esc, Back and Alt+arrow keys to
-        // navigate between panes.
-        if (get_current_pane() != this.editor_list_pane) {
+        // navigate between panes. If a pane is executing a long
+        // running operation, only allow Esc and use it to cancel the
+        // operation instead.
+        EditorPane? current_pane = get_current_pane();
+        if (current_pane != null &&
+            current_pane != this.editor_list_pane) {
             Gdk.ModifierType state = (
                 event.state & Gtk.accelerator_get_default_mod_mask()
             );
             bool is_ltr = (get_direction() == Gtk.TextDirection.LTR);
-            if (event.keyval == Gdk.Key.Escape ||
-                event.keyval == Gdk.Key.Back ||
-                (state == Gdk.ModifierType.MOD1_MASK &&
-                 (is_ltr && event.keyval == Gdk.Key.Left) ||
-                 (!is_ltr && event.keyval == Gdk.Key.Right))) {
-                pop();
+
+            switch (event.keyval) {
+            case Gdk.Key.Escape:
+                if (current_pane.is_operation_running) {
+                    current_pane.cancel_operation();
+                } else {
+                    pop();
+                }
                 ret = Gdk.EVENT_STOP;
+                break;
+
+            case Gdk.Key.Back:
+                if (!current_pane.is_operation_running) {
+                    pop();
+                    ret = Gdk.EVENT_STOP;
+                }
+                break;
+
+            case Gdk.Key.Left:
+                if (!current_pane.is_operation_running &&
+                    state == Gdk.ModifierType.MOD1_MASK &&
+                    is_ltr) {
+                    pop();
+                    ret = Gdk.EVENT_STOP;
+                }
+                break;
+
+            case Gdk.Key.Right:
+                if (!current_pane.is_operation_running &&
+                    state == Gdk.ModifierType.MOD1_MASK &&
+                    !is_ltr) {
+                    pop();
+                    ret = Gdk.EVENT_STOP;
+                }
+                break;
             }
+
         }
 
         if (ret != Gdk.EVENT_STOP) {
@@ -95,11 +129,9 @@ public class Accounts.Editor : Gtk.Dialog {
         return ret;
     }
 
-    public override void destroy() {
-        this.editor_panes.notify["visible-child"].disconnect(on_pane_changed);
-        base.destroy();
-    }
-
+    /**
+     * Adds and shows a new pane in the editor.
+     */
     internal void push(EditorPane pane) {
         // Since we keep old, already-popped panes around (see pop for
         // details), when a new pane is pushed on they need to be
@@ -111,15 +143,15 @@ public class Accounts.Editor : Gtk.Dialog {
             this.editor_panes.remove(old);
         }
 
-        get_action(GearyController.ACTION_UNDO).set_enabled(false);
-        get_action(GearyController.ACTION_REDO).set_enabled(false);
-
         // Now push the new pane on
         this.editor_pane_stack.add(pane);
         this.editor_panes.add(pane);
         this.editor_panes.set_visible_child(pane);
     }
 
+    /**
+     * Removes the current pane from the editor, showing the last one.
+     */
     internal void pop() {
         // One can't simply remove old panes fro the GTK stack since
         // there won't be any transition between them - the old one
@@ -131,17 +163,38 @@ public class Accounts.Editor : Gtk.Dialog {
         this.editor_panes.set_visible_child(prev);
     }
 
-    internal GLib.SimpleAction get_action(string name) {
-        return (GLib.SimpleAction) this.actions.lookup_action(name);
+    /** Displays an in-app notification in the dialog. */
+    internal void add_notification(InAppNotification notification) {
+        this.notifications_pane.add_overlay(notification);
+        notification.show();
     }
 
+    /** Removes an account from the editor. */
     internal void remove_account(Geary.AccountInformation account) {
         this.editor_panes.set_visible_child(this.editor_list_pane);
         this.editor_list_pane.remove_account(account);
     }
 
+    /** Updates the state of the editor's undo and redo actions. */
+    internal void update_command_actions() {
+        bool can_undo = false;
+        bool can_redo = false;
+        CommandPane? pane = get_current_pane() as CommandPane;
+        if (pane != null) {
+            can_undo = pane.commands.can_undo;
+            can_redo = pane.commands.can_redo;
+        }
+
+        get_action(GearyController.ACTION_UNDO).set_enabled(can_undo);
+        get_action(GearyController.ACTION_REDO).set_enabled(can_redo);
+    }
+
     private inline EditorPane? get_current_pane() {
         return this.editor_panes.get_visible_child() as EditorPane;
+    }
+
+    private inline GLib.SimpleAction get_action(string name) {
+        return (GLib.SimpleAction) this.actions.lookup_action(name);
     }
 
     private void on_undo() {
@@ -158,6 +211,7 @@ public class Accounts.Editor : Gtk.Dialog {
         }
     }
 
+    [GtkCallback]
     private void on_pane_changed() {
         EditorPane? visible = get_current_pane();
         Gtk.Widget? header = null;
@@ -171,11 +225,7 @@ public class Accounts.Editor : Gtk.Dialog {
             header = visible.get_header();
         }
         set_titlebar(header);
-
-        CommandPane? commands = visible as CommandPane;
-        if (commands != null) {
-            commands.update_command_actions();
-        }
+        update_command_actions();
     }
 
 }
@@ -205,9 +255,41 @@ internal interface Accounts.EditorPane : Gtk.Grid {
     /** The editor displaying this pane. */
     internal abstract Gtk.Widget initial_widget { get; }
 
+    /**
+     * Determines if a long running operation is being executed.
+     *
+     * @see cancel_operation
+     */
+    internal abstract bool is_operation_running { get; protected set; }
+
+    /**
+     * Long running operation cancellable.
+     *
+     * This cancellable must be passed to any long-running operations
+     * involving I/O. If not null and operation is cancelled, the
+     * value should be cancelled and replaced with a new instance.
+     *
+     * @see cancel_operation
+     */
+    internal abstract GLib.Cancellable? op_cancellable { get; protected set; }
+
     /** The GTK header bar to display for this pane. */
     internal abstract Gtk.HeaderBar get_header();
 
+    /**
+     * Cancels this pane's current operation, any.
+     *
+     * Sets {@link is_operation_running} to false and if {@link
+     * op_cancellable} is not null, it is cancelled and replaced with
+     * a new instance.
+     */
+    internal void cancel_operation() {
+        this.is_operation_running = false;
+        if (this.op_cancellable != null) {
+            this.op_cancellable.cancel();
+            this.op_cancellable = new GLib.Cancellable();
+        }
+    }
 }
 
 
@@ -280,18 +362,6 @@ internal interface Accounts.CommandPane : EditorPane {
     }
 
     /**
-     * Updates the state of the editor's undo and redo actions.
-     */
-    internal virtual void update_command_actions() {
-        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
-            this.commands.can_undo
-        );
-        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
-            this.commands.can_redo
-        );
-    }
-
-    /**
      * Connects to command stack signals.
      *
      * Implementing classes should call this in their constructor.
@@ -316,10 +386,10 @@ internal interface Accounts.CommandPane : EditorPane {
     /**
      * Called when a command is executed, undone or redone.
      *
-     * By default, calls {@link update_command_actions}.
+     * By default, calls {@link Accounts.Editor.update_command_actions}.
      */
     protected virtual void command_executed() {
-        update_command_actions();
+        this.editor.update_command_actions();
     }
 
     private void on_command() {

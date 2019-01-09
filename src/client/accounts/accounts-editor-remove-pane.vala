@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -21,6 +21,14 @@ internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
     /** {@inheritDoc} */
     internal Gtk.Widget initial_widget {
         get { return this.remove_button; }
+    }
+
+    /** {@inheritDoc} */
+    internal bool is_operation_running { get; protected set; default = false; }
+
+    /** {@inheritDoc} */
+    internal GLib.Cancellable? op_cancellable {
+        get; protected set; default = null;
     }
 
     [GtkChild]
