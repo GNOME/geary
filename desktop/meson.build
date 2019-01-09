@@ -25,7 +25,7 @@ if install_contractor_file
   # Description field. See merge req !50.
   msgfmt = find_program('msgfmt')
 
-  custom_target(
+  custom_target('geary-attach-contract',
     input: 'geary-attach.contract.desktop.in',
     output: 'geary-attach.contract',
     command: [msgfmt, '--desktop', '--keyword=Description', '--template', '@INPUT@', '-d', po_dir, '-o', '@OUTPUT@'],
