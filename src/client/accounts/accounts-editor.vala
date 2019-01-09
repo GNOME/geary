@@ -175,6 +175,41 @@ public class Accounts.Editor : Gtk.Dialog {
         notification.show();
     }
 
+    /**
+     * Prompts for pinning a certificate using the certificate manager.
+     *
+     * This provides a thing wrapper around {@link
+     * CertificateManager.prompt_pin_certificate} that uses the
+     * account editor as the dialog parent.
+     */
+    internal async void prompt_pin_certificate(Geary.AccountInformation account,
+                                               Geary.ServiceInformation service,
+                                               Geary.Endpoint endpoint,
+                                               GLib.Cancellable? cancellable)
+        throws Application.CertificateManagerError {
+        try {
+            yield this.certificates.prompt_pin_certificate(
+                this, account, service, endpoint, true, cancellable
+            );
+        } catch (Application.CertificateManagerError.UNTRUSTED err) {
+            throw err;
+        } catch (Application.CertificateManagerError.STORE_FAILED err) {
+            // XXX show error info bar rather than a notification?
+            add_notification(
+                new InAppNotification(
+                    // Translators: In-app notification label, when
+                    // the app had a problem pinning an otherwise
+                    // untrusted TLS certificate
+                    _("Failed to store certificate")
+                )
+            );
+            throw err;
+        } catch (Application.CertificateManagerError err) {
+            debug("Unexpected error pinning cert: %s", err.message);
+            throw err;
+        }
+    }
+
     /** Removes an account from the editor. */
     internal void remove_account(Geary.AccountInformation account) {
         this.editor_panes.set_visible_child(this.editor_list_pane);

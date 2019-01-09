@@ -232,7 +232,6 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                     // Translators: In-app notification label
                     message = _("Check your sending login and password");
                 } catch (GLib.TlsError.BAD_CERTIFICATE err) {
-                    debug("Error validating SMTP certifiate: %s", err.message);
                     // Nothing to do here, since the untrusted host
                     // handler will be dealing with it
                 } catch (GLib.IOError.CANCELLED err) {
@@ -261,6 +260,10 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                 to_focus = this.email.value;
                 // Translators: In-app notification label
                 message = _("Check your email address and password");
+            } catch (GLib.TlsError.BAD_CERTIFICATE err) {
+                // Nothing to do here, since the untrusted host
+                // handler will be dealing with it
+                debug("Error validating SMTP certifiate: %s", err.message);
             } catch (GLib.Error err) {
                 Geary.ErrorContext context = new Geary.ErrorContext(err);
                 debug("Error validating SMTP service: %s",
@@ -441,29 +444,15 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                                    Geary.ServiceInformation service,
                                    Geary.Endpoint endpoint,
                                    GLib.TlsConnection cx) {
-        this.editor.certificates.prompt_pin_certificate.begin(
-            this.editor, account, service, endpoint, true, this.op_cancellable,
+        this.editor.prompt_pin_certificate.begin(
+            account, service, endpoint, this.op_cancellable,
             (obj, res) => {
                 try {
-                    this.editor.certificates.prompt_pin_certificate.end(res);
-                } catch (Application.CertificateManagerError.UNTRUSTED err) {
-                    // All good, just drop back into the editor window.
-                    return;
-                } catch (Application.CertificateManagerError.STORE_FAILED err) {
-                    // All good, just drop back into the editor
-                    // window. XXX show error info bar rather than a
-                    // notification
-                    this.editor.add_notification(
-                        new InAppNotification(
-                            // Translators: In-app notification label,
-                            // when the app had a problem pinning an
-                            // otherwise untrusted TLS certificate
-                            _("Failed to store certificate")
-                        )
-                    );
-                    return;
+                    this.editor.prompt_pin_certificate.end(res);
                 } catch (Application.CertificateManagerError err) {
-                    debug("Unexptected error pinning cert: %s", err.message);
+                    // All good, just drop back into the editor
+                    // window.
+                    return;
                 }
 
                 // Kick off another attempt to validate
