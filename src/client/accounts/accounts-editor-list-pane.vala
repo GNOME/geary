@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -28,21 +28,29 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     }
 
 
-    /** {@iinheritDoc} */
+    /** {@inheritDoc} */
     internal Gtk.Widget initial_widget {
         get {
             return this.show_welcome ? this.service_list : this.accounts_list;
         }
     }
 
-    /** {@iinheritDoc} */
+    /** {@inheritDoc} */
     internal Application.CommandStack commands {
         get; protected set; default = new Application.CommandStack();
     }
 
+    /** {@inheritDoc} */
+    internal bool is_operation_running { get; protected set; default = false; }
+
+    /** {@inheritDoc} */
+    internal GLib.Cancellable? op_cancellable {
+        get; protected set; default = null;
+    }
+
     internal Manager accounts { get; private set; }
 
-    /** {@iinheritDoc} */
+    /** {@inheritDoc} */
     protected weak Accounts.Editor editor { get; set; }
 
     private bool show_welcome {
@@ -144,7 +152,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         if (row != null) {
             this.commands.execute.begin(
                 new RemoveAccountCommand(account, this.accounts),
-                null
+                this.op_cancellable
             );
         }
     }
@@ -208,7 +216,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
             new ReorderAccountCommand(
                 (AccountListRow) source, new_position, this.accounts
             ),
-            null
+            this.op_cancellable
         );
     }
 
@@ -217,7 +225,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
             new ReorderAccountCommand(
                 (AccountListRow) source, target.get_index(), this.accounts
             ),
-            null
+            this.op_cancellable
         );
     }
 
@@ -306,7 +314,7 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
             // GOA account but it's disabled, so just take people
             // directly to the GOA panel
             manager.show_goa_account.begin(
-                account, null,
+                account, pane.op_cancellable,
                 (obj, res) => {
                     try {
                         manager.show_goa_account.end(res);
@@ -446,7 +454,7 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
 
     public override void activated(EditorListPane pane) {
         pane.accounts.add_goa_account.begin(
-            this.provider, null,
+            this.provider, pane.op_cancellable,
             (obj, res) => {
                 bool add_local = false;
                 try {

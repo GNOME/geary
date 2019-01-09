@@ -73,20 +73,53 @@ public class Accounts.Editor : Gtk.Dialog {
         bool ret = Gdk.EVENT_PROPAGATE;
 
         // Allow the user to use Esc, Back and Alt+arrow keys to
-        // navigate between panes.
-        if (get_current_pane() != this.editor_list_pane) {
+        // navigate between panes. If a pane is executing a long
+        // running operation, only allow Esc and use it to cancel the
+        // operation instead.
+        EditorPane? current_pane = get_current_pane();
+        if (current_pane != null &&
+            current_pane != this.editor_list_pane) {
             Gdk.ModifierType state = (
                 event.state & Gtk.accelerator_get_default_mod_mask()
             );
             bool is_ltr = (get_direction() == Gtk.TextDirection.LTR);
-            if (event.keyval == Gdk.Key.Escape ||
-                event.keyval == Gdk.Key.Back ||
-                (state == Gdk.ModifierType.MOD1_MASK &&
-                 (is_ltr && event.keyval == Gdk.Key.Left) ||
-                 (!is_ltr && event.keyval == Gdk.Key.Right))) {
-                pop();
+
+            switch (event.keyval) {
+            case Gdk.Key.Escape:
+                if (current_pane.is_operation_running) {
+                    current_pane.cancel_operation();
+                } else {
+                    pop();
+                }
                 ret = Gdk.EVENT_STOP;
+                break;
+
+            case Gdk.Key.Back:
+                if (!current_pane.is_operation_running) {
+                    pop();
+                    ret = Gdk.EVENT_STOP;
+                }
+                break;
+
+            case Gdk.Key.Left:
+                if (!current_pane.is_operation_running &&
+                    state == Gdk.ModifierType.MOD1_MASK &&
+                    is_ltr) {
+                    pop();
+                    ret = Gdk.EVENT_STOP;
+                }
+                break;
+
+            case Gdk.Key.Right:
+                if (!current_pane.is_operation_running &&
+                    state == Gdk.ModifierType.MOD1_MASK &&
+                    !is_ltr) {
+                    pop();
+                    ret = Gdk.EVENT_STOP;
+                }
+                break;
             }
+
         }
 
         if (ret != Gdk.EVENT_STOP) {
@@ -222,9 +255,41 @@ internal interface Accounts.EditorPane : Gtk.Grid {
     /** The editor displaying this pane. */
     internal abstract Gtk.Widget initial_widget { get; }
 
+    /**
+     * Determines if a long running operation is being executed.
+     *
+     * @see cancel_operation
+     */
+    internal abstract bool is_operation_running { get; protected set; }
+
+    /**
+     * Long running operation cancellable.
+     *
+     * This cancellable must be passed to any long-running operations
+     * involving I/O. If not null and operation is cancelled, the
+     * value should be cancelled and replaced with a new instance.
+     *
+     * @see cancel_operation
+     */
+    internal abstract GLib.Cancellable? op_cancellable { get; protected set; }
+
     /** The GTK header bar to display for this pane. */
     internal abstract Gtk.HeaderBar get_header();
 
+    /**
+     * Cancels this pane's current operation, any.
+     *
+     * Sets {@link is_operation_running} to false and if {@link
+     * op_cancellable} is not null, it is cancelled and replaced with
+     * a new instance.
+     */
+    internal void cancel_operation() {
+        this.is_operation_running = false;
+        if (this.op_cancellable != null) {
+            this.op_cancellable.cancel();
+            this.op_cancellable = new GLib.Cancellable();
+        }
+    }
 }
 
 
