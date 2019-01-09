@@ -92,7 +92,7 @@ libunity = dependency('unity', version: '>= 5.12.0', required: false)
 libmessagingmenu = meson.get_compiler('c').find_library('libmessaging-menu', required: false)
 
 # Ensure SQLite was built correctly
-if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER')
+if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
   error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3.\n'
         + 'See https://bugzilla.gnome.org/show_bug.cgi?id=763203 for details.')
 endif
