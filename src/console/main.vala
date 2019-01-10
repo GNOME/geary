@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
+n * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -311,8 +311,7 @@ class ImapConsole : Gtk.Window {
 
         cx = new Geary.Imap.ClientConnection(
             new Geary.Endpoint(
-                args[0],
-                Geary.Imap.IMAP_TLS_PORT,
+                new GLib.NetworkAddress(args[0], Geary.Imap.IMAP_TLS_PORT),
                 method,
                 IMAP_TIMEOUT_SEC
             )

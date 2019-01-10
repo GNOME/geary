@@ -36,6 +36,9 @@ public class Accounts.Editor : Gtk.Dialog {
 
     internal Manager accounts { get; private set; }
 
+    internal Application.CertificateManager certificates {
+        get; private set;
+    }
 
     private SimpleActionGroup actions = new SimpleActionGroup();
 
@@ -54,6 +57,9 @@ public class Accounts.Editor : Gtk.Dialog {
     public Editor(GearyApplication application, Gtk.Window parent) {
         this.application = application;
         this.transient_for = parent;
+
+        this.accounts = application.controller.account_manager;
+        this.certificates = application.controller.certificate_manager;
 
         // Can't set this in Glade 3.22.1 :(
         this.get_content_area().border_width = 0;
@@ -167,6 +173,41 @@ public class Accounts.Editor : Gtk.Dialog {
     internal void add_notification(InAppNotification notification) {
         this.notifications_pane.add_overlay(notification);
         notification.show();
+    }
+
+    /**
+     * Prompts for pinning a certificate using the certificate manager.
+     *
+     * This provides a thing wrapper around {@link
+     * CertificateManager.prompt_pin_certificate} that uses the
+     * account editor as the dialog parent.
+     */
+    internal async void prompt_pin_certificate(Geary.AccountInformation account,
+                                               Geary.ServiceInformation service,
+                                               Geary.Endpoint endpoint,
+                                               GLib.Cancellable? cancellable)
+        throws Application.CertificateManagerError {
+        try {
+            yield this.certificates.prompt_pin_certificate(
+                this, account, service, endpoint, true, cancellable
+            );
+        } catch (Application.CertificateManagerError.UNTRUSTED err) {
+            throw err;
+        } catch (Application.CertificateManagerError.STORE_FAILED err) {
+            // XXX show error info bar rather than a notification?
+            add_notification(
+                new InAppNotification(
+                    // Translators: In-app notification label, when
+                    // the app had a problem pinning an otherwise
+                    // untrusted TLS certificate
+                    _("Failed to store certificate")
+                )
+            );
+            throw err;
+        } catch (Application.CertificateManagerError err) {
+            debug("Unexpected error pinning cert: %s", err.message);
+            throw err;
+        }
     }
 
     /** Removes an account from the editor. */

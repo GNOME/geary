@@ -1,8 +1,9 @@
 # Geary client
 geary_client_vala_sources = files(
   'application/application-avatar-store.vala',
-  'application/autostart-manager.vala',
+  'application/application-certificate-manager.vala',
   'application/application-command.vala',
+  'application/autostart-manager.vala',
   'application/geary-application.vala',
   'application/geary-args.vala',
   'application/geary-config.vala',
@@ -108,6 +109,7 @@ geary_client_sources = [
 geary_client_dependencies = [
   libmath,
   enchant,
+  gck,
   gcr,
   gee,
   gio,

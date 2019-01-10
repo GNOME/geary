@@ -388,7 +388,7 @@ public abstract class Geary.ClientService : BaseObject {
 		this.remote.connectivity.notify["is-reachable"].connect(
             on_connectivity_change
         );
-        this.remote.connectivity.address_error_reported.connect(
+        this.remote.connectivity.remote_error_reported.connect(
             on_connectivity_error
         );
         this.remote.untrusted_host.connect(on_untrusted_host);
@@ -398,7 +398,7 @@ public abstract class Geary.ClientService : BaseObject {
 		this.remote.connectivity.notify["is-reachable"].disconnect(
             on_connectivity_change
         );
-        this.remote.connectivity.address_error_reported.disconnect(
+        this.remote.connectivity.remote_error_reported.disconnect(
             on_connectivity_error
         );
         this.remote.untrusted_host.disconnect(on_untrusted_host);
@@ -434,14 +434,14 @@ public abstract class Geary.ClientService : BaseObject {
         }
 	}
 
-    private void on_untrusted_host(Geary.TlsNegotiationMethod method,
+    private void on_untrusted_host(Endpoint remote,
                                    GLib.TlsConnection cx) {
         if (this.is_running) {
             this.current_status = TLS_VALIDATION_FAILED;
             this.became_reachable_timer.reset();
             this.became_unreachable_timer.reset();
             became_unreachable();
-            this.account.untrusted_host(this.configuration, method, cx);
+            this.account.untrusted_host(this.configuration, remote, cx);
         }
     }
 

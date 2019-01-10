@@ -70,12 +70,22 @@ public class Geary.MockAccount : Account, MockObject {
              new MockClientService(
                  config,
                  config.incoming,
-                 new Endpoint(config.incoming.host, config.incoming.port, 0, 0)
+                 new Endpoint(
+                     new GLib.NetworkAddress(
+                         config.incoming.host, config.incoming.port
+                     ),
+                     0, 0
+                 )
              ),
              new MockClientService(
                  config,
                  config.outgoing,
-                 new Endpoint(config.outgoing.host, config.outgoing.port, 0, 0)
+                 new Endpoint(
+                     new GLib.NetworkAddress(
+                         config.outgoing.host, config.outgoing.port
+                     ),
+                     0, 0
+                 )
              )
         );
     }

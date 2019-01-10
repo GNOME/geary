@@ -221,16 +221,22 @@ public class Geary.AccountInformation : BaseObject {
     public signal void authentication_failure(ServiceInformation service);
 
     /**
-     * Emitted when a service has reported TLS certificate warnings.
+     * Emitted when an endpoint has reported TLS certificate warnings.
+     *
+     * This signal is emitted when either of the incoming or outgoing
+     * endpoints emit the signal with the same name. It may be more
+     * convenient for clients to connect to this instead.
      *
      * No further connection attempts will be made after this signal
      * has been fired until the associated {@link ClientService} has
      * been restarted. It is up to the client to prompt the user to
      * take action about the certificate (e.g. decide to pin it) then
      * restart the service.
+     *
+     * @see Endpoint.untrusted_host
      */
     public signal void untrusted_host(ServiceInformation service,
-                                      TlsNegotiationMethod method,
+                                      Endpoint endpoint,
                                       GLib.TlsConnection cx);
 
     /** Emitted when the account settings have changed. */

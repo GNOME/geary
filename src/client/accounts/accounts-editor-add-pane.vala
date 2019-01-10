@@ -163,7 +163,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         this.is_operation_running = true;
 
         bool is_valid = false;
-        string message = "";
+        string? message = null;
         Gtk.Widget? to_focus = null;
 
         Geary.AccountInformation account =
@@ -178,6 +178,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
         account.incoming = new_imap_service();
         account.outgoing = new_smtp_service();
+        account.untrusted_host.connect(on_untrusted_host);
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
             bool imap_valid = false;
@@ -193,11 +194,17 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                 to_focus = this.imap_login.value;
                 // Translators: In-app notification label
                 message = _("Check your receiving login and password");
+            } catch (GLib.TlsError.BAD_CERTIFICATE err) {
+                debug("Error validating IMAP certifiate: %s", err.message);
+                // Nothing to do here, since the untrusted host
+                // handler will be dealing with it
             } catch (GLib.IOError.CANCELLED err) {
                 // Nothing to do here, someone just cancelled
                 debug("IMAP validation was cancelled: %s", err.message);
             } catch (GLib.Error err) {
-                debug("Error validating IMAP service: %s", err.message);
+                Geary.ErrorContext context = new Geary.ErrorContext(err);
+                debug("Error validating IMAP service: %s",
+                      context.format_full_error());
                 this.imap_tls.show();
                 to_focus = this.imap_hostname.value;
                 // Translators: In-app notification label
@@ -224,11 +231,16 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                     to_focus = this.smtp_login.value;
                     // Translators: In-app notification label
                     message = _("Check your sending login and password");
+                } catch (GLib.TlsError.BAD_CERTIFICATE err) {
+                    // Nothing to do here, since the untrusted host
+                    // handler will be dealing with it
                 } catch (GLib.IOError.CANCELLED err) {
                     // Nothing to do here, someone just cancelled
                     debug("SMTP validation was cancelled: %s", err.message);
                 } catch (GLib.Error err) {
-                    debug("Error validating SMTP service: %s", err.message);
+                    Geary.ErrorContext context = new Geary.ErrorContext(err);
+                    debug("Error validating SMTP service: %s",
+                          context.format_full_error());
                     this.smtp_tls.show();
                     to_focus = this.smtp_hostname.value;
                     // Translators: In-app notification label
@@ -248,8 +260,14 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                 to_focus = this.email.value;
                 // Translators: In-app notification label
                 message = _("Check your email address and password");
+            } catch (GLib.TlsError.BAD_CERTIFICATE err) {
+                // Nothing to do here, since the untrusted host
+                // handler will be dealing with it
+                debug("Error validating SMTP certifiate: %s", err.message);
             } catch (GLib.Error err) {
-                debug("Error validating provider service: %s", err.message);
+                Geary.ErrorContext context = new Geary.ErrorContext(err);
+                debug("Error validating SMTP service: %s",
+                      context.format_full_error());
                 is_valid = false;
                 // Translators: In-app notification label
                 message = _("Could not connect, check your network");
@@ -269,6 +287,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             }
         }
 
+        account.untrusted_host.disconnect(on_untrusted_host);
         this.is_operation_running = false;
 
         // Focus and pop up the notification after re-sensitising
@@ -277,13 +296,15 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             if (to_focus != null) {
                 to_focus.grab_focus();
             }
-            this.editor.add_notification(
-                new InAppNotification(
-                    // Translators: In-app notification label, the
-                    // string substitution is a more detailed reason.
-                    _("Account not created: %s").printf(message)
-                )
-            );
+            if (message != null) {
+                this.editor.add_notification(
+                    new InAppNotification(
+                        // Translators: In-app notification label, the
+                        // string substitution is a more detailed reason.
+                        _("Account not created: %s").printf(message)
+                    )
+                );
+            }
         }
     }
 
@@ -417,6 +438,26 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             this.sending_list.remove(this.smtp_password);
         }
         check_validation();
+    }
+
+    private void on_untrusted_host(Geary.AccountInformation account,
+                                   Geary.ServiceInformation service,
+                                   Geary.Endpoint endpoint,
+                                   GLib.TlsConnection cx) {
+        this.editor.prompt_pin_certificate.begin(
+            account, service, endpoint, this.op_cancellable,
+            (obj, res) => {
+                try {
+                    this.editor.prompt_pin_certificate.end(res);
+                } catch (Application.CertificateManagerError err) {
+                    // All good, just drop back into the editor
+                    // window.
+                    return;
+                }
+
+                // Kick off another attempt to validate
+                this.validate_account.begin(this.op_cancellable);
+            });
     }
 
     [GtkCallback]

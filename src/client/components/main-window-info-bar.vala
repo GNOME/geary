@@ -90,19 +90,33 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 descr = _("Could not communicate with %s for %s, check the server name and try again in a moment").printf(server, account);
                 retry = _("Try reconnecting");
 
-            } else if (report.problem_type == Geary.ProblemType.LOGIN_FAILED &&
+            } else if (report.problem_type == Geary.ProblemType.AUTHENTICATION &&
                        service_report.service.protocol == Geary.Protocol.IMAP) {
                 // Translators: String substitution is the account name
                 title = _("Incoming mail server password required for %s").printf(account);
                 descr = _("Messages cannot be received without the correct password.");
                 retry = _("Retry receiving email, you will be prompted for a password");
 
-            } else if (report.problem_type == Geary.ProblemType.LOGIN_FAILED &&
+            } else if (report.problem_type == Geary.ProblemType.AUTHENTICATION &&
                        service_report.service.protocol == Geary.Protocol.SMTP) {
                 // Translators: String substitution is the account name
                 title = _("Outgoing mail server password required for %s").printf(account);
                 descr = _("Messages cannot be sent without the correct password.");
                 retry = _("Retry sending queued messages, you will be prompted for a password");
+
+            } else if (report.problem_type == Geary.ProblemType.UNTRUSTED &&
+                       service_report.service.protocol == Geary.Protocol.IMAP) {
+                // Translators: String substitution is the account name
+                title = _("Incoming mail server security is not trusted for %s").printf(account);
+                descr = _("Messages will not be received until checked.");
+                retry = _("Check security details");
+
+            } else if (report.problem_type == Geary.ProblemType.UNTRUSTED &&
+                       service_report.service.protocol == Geary.Protocol.SMTP) {
+                // Translators: String substitution is the account name
+                title = _("Outgoing mail server security is not trusted for %s").printf(account);
+                descr = _("Messages cannot be sent until checked.");
+                retry = _("Check security details");
 
             } else if (report.problem_type == Geary.ProblemType.GENERIC_ERROR &&
                        service_report.service.protocol == Geary.Protocol.IMAP) {

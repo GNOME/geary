@@ -278,26 +278,37 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     }
 
     private async void add_pool_session() {
+        ClientSession? new_session = null;
         try {
-            ClientSession free = yield this.create_new_authorized_session(
+            new_session = yield this.create_new_authorized_session(
                 this.pool_cancellable
             );
-            notify_connected();
-            yield this.sessions_mutex.execute_locked(() => {
-                    this.all_sessions.add(free);
-                });
-            this.free_queue.send(free);
         } catch (ImapError.UNAUTHENTICATED err) {
             debug("[%s] Auth error adding new session to the pool: %s",
                   this.account.id, err.message);
             notify_authentication_failed();
-            this.close_pool.begin();
-        } catch (Error err) {
-            if (!(err is IOError.CANCELLED)) {
-                debug("[%s] Error adding new session to the pool: %s",
-                      this.account.id, err.message);
-                notify_connection_failed(new ErrorContext(err));
-            }
+        } catch (GLib.TlsError.BAD_CERTIFICATE err) {
+            // Don't notify of an error here, since the untrusted host
+            // handler will be dealing with it already.
+            debug("[%s] TLS validation error adding new session to the pool: %s",
+                  this.account.id, err.message);
+        } catch (GLib.IOError.CANCELLED err) {
+            // Nothing to do here
+        } catch (GLib.Error err) {
+            Geary.ErrorContext context = new Geary.ErrorContext(err);
+            debug("[%s] Error adding new session to the pool: %s",
+                  this.account.id, context.format_full_error());
+            notify_connection_failed(new ErrorContext(err));
+        }
+
+        if (new_session != null) {
+            notify_connected();
+            yield this.sessions_mutex.execute_locked(() => {
+                    this.all_sessions.add(new_session);
+                });
+            this.free_queue.send(new_session);
+        } else {
+            // An error was thrown, so close the pool
             this.close_pool.begin();
         }
     }
@@ -366,14 +377,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         debug("[%s] Opening new session", this.account.id);
         ClientSession new_session = new ClientSession(remote);
-        try {
-            yield new_session.connect_async(cancellable);
-        } catch (GLib.Error err) {
-            if (!(err is IOError.CANCELLED)) {
-                notify_connection_failed(new ErrorContext(err));
-            }
-            throw err;
-        }
+        yield new_session.connect_async(cancellable);
 
         try {
             yield new_session.initiate_session_async(

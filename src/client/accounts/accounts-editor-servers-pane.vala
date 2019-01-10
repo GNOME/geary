@@ -281,22 +281,34 @@ internal class Accounts.EditorServersPane :
     }
 
     private async bool validate(GLib.Cancellable? cancellable) {
+        // Use a copy here so we can handle any prompting needed
+        // (auth, certs) directly, rather than through the main window
+        Geary.AccountInformation local_account =
+            new Geary.AccountInformation.copy(this.account);
+        local_account.untrusted_host.connect(on_untrusted_host);
+
         string? message = null;
         bool imap_valid = false;
         try {
             yield this.engine.validate_imap(
-                this.account, this.incoming_mutable, cancellable
+                local_account, this.incoming_mutable, cancellable
             );
             imap_valid = true;
         } catch (Geary.ImapError.UNAUTHENTICATED err) {
             debug("Error authenticating IMAP service: %s", err.message);
             // Translators: In-app notification label
             message = _("Check your receiving login and password");
+        } catch (GLib.TlsError.BAD_CERTIFICATE err) {
+            // Nothing to do here, since the untrusted host
+            // handler will be dealing with it
+            debug("Error validating IMAP certifiate: %s", err.message);
         } catch (GLib.IOError.CANCELLED err) {
             // Nothing to do here, someone just cancelled
             debug("IMAP validation was cancelled: %s", err.message);
         } catch (GLib.Error err) {
-            debug("Error validating IMAP service: %s", err.message);
+            Geary.ErrorContext context = new Geary.ErrorContext(err);
+            debug("Error validating IMAP service: %s",
+                  context.format_full_error());
             // Translators: In-app notification label
             message = _("Check your receiving server details");
         }
@@ -306,7 +318,7 @@ internal class Accounts.EditorServersPane :
             debug("Validating SMTP...");
             try {
                 yield this.engine.validate_smtp(
-                    this.account,
+                    local_account,
                     this.outgoing_mutable,
                     this.incoming_mutable.credentials,
                     cancellable
@@ -320,15 +332,23 @@ internal class Accounts.EditorServersPane :
                 this.outgoing_auth.value.source = Geary.Credentials.Requirement.CUSTOM;
                 // Translators: In-app notification label
                 message = _("Check your sending login and password");
+            } catch (GLib.TlsError.BAD_CERTIFICATE err) {
+                // Nothing to do here, since the untrusted host
+                // handler will be dealing with it
+                debug("Error validating SMTP certifiate: %s", err.message);
             } catch (GLib.IOError.CANCELLED err) {
                 // Nothing to do here, someone just cancelled
                 debug("SMTP validation was cancelled: %s", err.message);
             } catch (GLib.Error err) {
-                debug("Error validating SMTP service: %s", err.message);
-                    // Translators: In-app notification label
-                    message = _("Check your sending server details");
+                Geary.ErrorContext context = new Geary.ErrorContext(err);
+                debug("Error validating SMTP service: %s",
+                      context.format_full_error());
+                // Translators: In-app notification label
+                message = _("Check your sending server details");
             }
         }
+
+        local_account.untrusted_host.disconnect(on_untrusted_host);
 
         bool is_valid = imap_valid && smtp_valid;
         debug("Validation complete, is valid: %s", is_valid.to_string());
@@ -411,6 +431,26 @@ internal class Accounts.EditorServersPane :
         if (is_valid()) {
             this.apply_button.clicked();
         }
+    }
+
+    private void on_untrusted_host(Geary.AccountInformation account,
+                                   Geary.ServiceInformation service,
+                                   Geary.Endpoint endpoint,
+                                   GLib.TlsConnection cx) {
+        this.editor.prompt_pin_certificate.begin(
+            account, service, endpoint, null,
+            (obj, res) => {
+                try {
+                    this.editor.prompt_pin_certificate.end(res);
+                } catch (Application.CertificateManagerError err) {
+                    // All good, just drop back into the editor
+                    // window.
+                    return;
+                }
+
+                // Kick off another attempt to save
+                this.save.begin(null);
+            });
     }
 
     [GtkCallback]

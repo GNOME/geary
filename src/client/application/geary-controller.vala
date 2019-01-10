@@ -6,15 +6,6 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-// Required because Gcr's VAPI is behind-the-times
-// TODO: When bindings available, use async variants of these calls
-extern const string GCR_PURPOSE_SERVER_AUTH;
-extern bool gcr_trust_add_pinned_certificate(Gcr.Certificate cert, string purpose, string peer,
-    Cancellable? cancellable) throws Error;
-extern bool gcr_trust_is_certificate_pinned(Gcr.Certificate cert, string purpose, string peer,
-    Cancellable? cancellable) throws Error;
-extern bool gcr_trust_remove_pinned_certificate(Gcr.Certificate cert, string purpose, string peer,
-    Cancellable? cancellable) throws Error;
 
 /**
  * Primary controller for a Geary application instance.
@@ -70,12 +61,6 @@ public class GearyController : Geary.BaseObject {
         GearyController.untitled_file_name = _("Untitled");
     }
 
-    private static void get_gcr_params(Geary.Endpoint endpoint, out Gcr.Certificate cert,
-        out string peer) {
-        cert = new Gcr.SimpleCertificate(endpoint.untrusted_certificate.certificate.data);
-        peer = "%s:%u".printf(endpoint.remote_address.hostname, endpoint.remote_address.port);
-    }
-
 
     internal class AccountContext : Geary.BaseObject {
 
@@ -86,6 +71,9 @@ public class GearyController : Geary.BaseObject {
         public bool authentication_failed = false;
         public bool authentication_prompting = false;
         public uint authentication_attempts = 0;
+
+        public bool tls_validation_failed = false;
+        public bool tls_validation_prompting = false;
 
         public Cancellable cancellable { get; private set; default = new Cancellable(); }
 
@@ -124,6 +112,11 @@ public class GearyController : Geary.BaseObject {
 
     public Accounts.Manager? account_manager { get; private set; default = null; }
 
+    /** Application-wide {@link Application.CertificateManager} instance. */
+    public Application.CertificateManager? certificate_manager {
+        get; private set; default = null;
+    }
+
     public MainWindow? main_window { get; private set; default = null; }
 
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
@@ -161,7 +154,6 @@ public class GearyController : Geary.BaseObject {
     private Geary.Folder? previous_non_search_folder = null;
     private UpgradeDialog upgrade_dialog;
     private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
-    private Geary.Nonblocking.Mutex untrusted_host_prompt_mutex = new Geary.Nonblocking.Mutex();
 
     private uint operation_count = 0;
     private Geary.Revokable? revokable = null;
@@ -285,7 +277,6 @@ public class GearyController : Geary.BaseObject {
         enable_message_buttons(false);
 
         engine.account_available.connect(on_account_available);
-        engine.untrusted_host.connect(on_untrusted_host);
 
         // Connect to various UI signals.
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
@@ -334,7 +325,13 @@ public class GearyController : Geary.BaseObject {
             error("Error migrating configuration directories: %s", e.message);
         }
 
-        // Hook up accounts and credentials machinery
+        // Hook up cert, accounts and credentials machinery
+
+        this.certificate_manager = yield new Application.CertificateManager(
+            this.application.get_user_data_directory().get_child("pinned-certs"),
+            cancellable
+        );
+
         SecretMediator? libsecret = null;
         try {
             libsecret = yield new SecretMediator(this.application, cancellable);
@@ -400,7 +397,6 @@ public class GearyController : Geary.BaseObject {
         this.open_cancellable = null;
 
         Geary.Engine.instance.account_available.disconnect(on_account_available);
-        Geary.Engine.instance.untrusted_host.disconnect(on_untrusted_host);
 
         // Release folder and conversations in the main window
         on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
@@ -634,6 +630,7 @@ public class GearyController : Geary.BaseObject {
         account.information.authentication_failure.connect(
             on_authentication_failure
         );
+        account.information.untrusted_host.connect(on_untrusted_host);
         account.notify["current-status"].connect(
             on_account_status_notify
         );
@@ -670,222 +667,13 @@ public class GearyController : Geary.BaseObject {
             account.information.authentication_failure.disconnect(
                 on_authentication_failure
             );
+            account.information.untrusted_host.disconnect(on_untrusted_host);
             account.notify["current-status"].disconnect(
                 on_account_status_notify
             );
 
             yield disconnect_account_async(context);
         }
-    }
-
-    private void on_untrusted_host(Geary.AccountInformation account,
-                                   Geary.ServiceInformation service,
-                                   Geary.TlsNegotiationMethod method,
-                                   TlsConnection cx) {
-        this.prompt_untrusted_host_async.begin(account, service, method, cx);
-    }
-
-    private async void
-        prompt_untrusted_host_async(Geary.AccountInformation account,
-                                    Geary.ServiceInformation service,
-                                    Geary.TlsNegotiationMethod method,
-                                    TlsConnection cx) {
-        // use a mutex to prevent multiple dialogs popping up at the same time
-        int token = Geary.Nonblocking.Mutex.INVALID_TOKEN;
-        try {
-            token = yield untrusted_host_prompt_mutex.claim_async();
-        } catch (Error err) {
-            message("Unable to lock mutex to prompt user about invalid certificate: %s", err.message);
-            return;
-        }
-
-        yield locked_prompt_untrusted_host_async(account, service, method, cx);
-
-        try {
-            untrusted_host_prompt_mutex.release(ref token);
-        } catch (Error err) {
-            message("Unable to release mutex after prompting user about invalid certificate: %s",
-                err.message);
-        }
-    }
-
-    private async void
-        locked_prompt_untrusted_host_async(Geary.AccountInformation account,
-                                           Geary.ServiceInformation service,
-                                           Geary.TlsNegotiationMethod method,
-                                           GLib.TlsConnection cx) {
-        Geary.Endpoint endpoint = get_endpoint(account, service);
-
-        // possible while waiting on mutex that this endpoint became trusted or untrusted
-        if (endpoint == null ||
-            endpoint.trust_untrusted_host != Geary.Trillian.UNKNOWN) {
-            return;
-        }
-
-        // get GCR parameters
-        Gcr.Certificate cert;
-        string peer;
-        get_gcr_params(endpoint, out cert, out peer);
-
-        // Geary allows for user to auto-revoke all questionable server certificates without
-        // digging around in a keyring/pk manager
-        if (Args.revoke_certs) {
-            debug("Auto-revoking certificate for %s...", peer);
-            
-            try {
-                gcr_trust_remove_pinned_certificate(cert, GCR_PURPOSE_SERVER_AUTH, peer, null);
-            } catch (Error err) {
-                message("Unable to auto-revoke server certificate for %s: %s", peer, err.message);
-                
-                // drop through, not absolutely valid to do this (might also mean certificate
-                // was never pinned)
-            }
-        }
-        
-        // if pinned, the user has already made an exception for this server and its certificate,
-        // so go ahead w/o asking
-        try {
-            if (gcr_trust_is_certificate_pinned(cert, GCR_PURPOSE_SERVER_AUTH, peer, null)) {
-                debug("Certificate for %s is pinned, accepting connection...", peer);
-                endpoint.trust_untrusted_host = Geary.Trillian.TRUE;
-                return;
-            }
-        } catch (Error err) {
-            message("Unable to check if server certificate for %s is pinned, assuming not: %s",
-                peer, err.message);
-        }
-
-        prompt_for_untrusted_host(main_window, account, service, false);
-    }
-
-    private void prompt_for_untrusted_host(Gtk.Window? parent,
-                                           Geary.AccountInformation account,
-                                           Geary.ServiceInformation service,
-                                           bool is_validation) {
-        Geary.Endpoint endpoint = get_endpoint(account, service);
-        CertificateWarningDialog dialog = new CertificateWarningDialog(
-            parent, account, service, endpoint, is_validation
-        );
-        switch (dialog.run()) {
-            case CertificateWarningDialog.Result.TRUST:
-                endpoint.trust_untrusted_host = Geary.Trillian.TRUE;
-            break;
-            
-            case CertificateWarningDialog.Result.ALWAYS_TRUST:
-                endpoint.trust_untrusted_host = Geary.Trillian.TRUE;
-                
-                // get GCR parameters for pinning
-                Gcr.Certificate cert;
-                string peer;
-                get_gcr_params(endpoint, out cert, out peer);
-                
-                // pinning the certificate creates an exception for the next time a connection
-                // is attempted
-                debug("Pinning certificate for %s...", peer);
-                try {
-                    gcr_trust_add_pinned_certificate(cert, GCR_PURPOSE_SERVER_AUTH, peer, null);
-                } catch (Error err) {
-                    ErrorDialog error_dialog = new ErrorDialog(main_window,
-                        _("Unable to store server trust exception"), err.message);
-                    error_dialog.run();
-                }
-            break;
-            
-            default:
-                endpoint.trust_untrusted_host = Geary.Trillian.FALSE;
-
-                // close the account; can't go any further w/o offline mode.
-                this.close_account.begin(account);
-            break;
-        }
-    }
-
-    // Returns possibly modified validation results
-    private Geary.Engine.ValidationResult validation_check_endpoint_for_tls_warnings(
-        Geary.AccountInformation account, Geary.ServiceInformation service,
-        Geary.Engine.ValidationResult validation_result, out bool prompted, out bool retry_required) {
-        prompted = false;
-        retry_required = false;
-
-        // use LoginDialog for parent only if available and visible
-        Gtk.Window? parent;
-        //if (login_dialog != null && login_dialog.visible)
-        //    parent = login_dialog;
-        //else
-            parent = main_window;
-
-        Geary.Endpoint endpoint = get_endpoint(account, service);
-
-        // If Endpoint had unresolved TLS issues, prompt user about them
-        if (endpoint.tls_validation_warnings != 0 && endpoint.trust_untrusted_host != Geary.Trillian.TRUE) {
-            prompt_for_untrusted_host(parent, account, service, true);
-            prompted = true;
-        }
-
-        // If there are still TLS connection issues that caused the connection to fail (happens on the
-        // first attempt), clear those errors and retry
-        if (endpoint.tls_validation_warnings != 0 && endpoint.trust_untrusted_host == Geary.Trillian.TRUE) {
-            Geary.Engine.ValidationResult flag = (service.protocol == Geary.Protocol.IMAP)
-                ? Geary.Engine.ValidationResult.IMAP_CONNECTION_FAILED
-                : Geary.Engine.ValidationResult.SMTP_CONNECTION_FAILED;
-
-            if ((validation_result & flag) != 0) {
-                validation_result &= ~flag;
-                retry_required = true;
-            }
-        }
-        
-        return validation_result;
-    }
-    
-    // Use after validating to see if TLS warnings were handled by the user and need to retry the
-    // validation; this will also modify the validation results to better indicate issues to the user
-    //
-    // Returns possibly modified validation results
-    public async Geary.Engine.ValidationResult validation_check_for_tls_warnings_async(
-        Geary.AccountInformation config, Geary.Engine.ValidationResult validation_result,
-        out bool retry_required) {
-        retry_required = false;
-
-        // Because TLS warnings need cycles to process, sleep and give 'em a chance to do their
-        // thing ... note that the signal handler does *not* invoke the user prompt dialog when the
-        // login dialog is in play, so this sleep does not need to worry about user input
-        yield Geary.Scheduler.sleep_ms_async(100);
-
-        // check each service for problems, prompting user each time for verification
-        bool imap_prompted, imap_retry_required;
-        validation_result = validation_check_endpoint_for_tls_warnings(
-            config,
-            config.incoming,
-            validation_result,
-            out imap_prompted,
-            out imap_retry_required
-        );
-
-        bool smtp_prompted, smtp_retry_required;
-        validation_result = validation_check_endpoint_for_tls_warnings(
-            config,
-            config.outgoing,
-            validation_result,
-            out smtp_prompted,
-            out smtp_retry_required
-        );
-
-        // if prompted for user acceptance of bad certificates and
-        // they agreed to both, try again
-        Geary.Account account = this.accounts.get(config).account;
-        if (imap_prompted && smtp_prompted
-            && account.incoming.remote.is_trusted_or_never_connected
-            && account.outgoing.remote.is_trusted_or_never_connected) {
-            retry_required = true;
-        } else if (validation_result == Geary.Engine.ValidationResult.OK) {
-            retry_required = true;
-        } else {
-            // if prompt requires retry or otherwise detected it, retry
-            retry_required = imap_retry_required && smtp_retry_required;
-        }
-
-        return validation_result;
     }
 
     private void report_problem(Geary.ProblemReport report) {
@@ -902,6 +690,7 @@ public class GearyController : Geary.BaseObject {
     private void update_account_status() {
         Geary.Account.Status effective_status = 0;
         bool has_auth_error = false;
+        bool has_cert_error = false;
         Geary.Account? service_problem_source = null;
         foreach (AccountContext context in this.accounts.values) {
             effective_status |= context.get_effective_status();
@@ -910,13 +699,17 @@ public class GearyController : Geary.BaseObject {
                 service_problem_source = context.account;
             }
             has_auth_error |= context.authentication_failed;
+            has_cert_error |= context.tls_validation_failed;
         }
 
         foreach (Gtk.Window window in this.application.get_windows()) {
             MainWindow? main = window as MainWindow;
             if (main != null) {
                 main.update_account_status(
-                    effective_status, has_auth_error, service_problem_source
+                    effective_status,
+                    has_auth_error,
+                    has_cert_error,
+                    service_problem_source
                 );
             }
         }
@@ -924,7 +717,11 @@ public class GearyController : Geary.BaseObject {
 
     private bool is_currently_prompting() {
         return this.accounts.values.fold<bool>(
-            (ctx, seed) => ctx.authentication_prompting | seed,
+            (ctx, seed) => (
+                ctx.authentication_prompting |
+                ctx.tls_validation_prompting |
+                seed
+            ),
             false
         );
     }
@@ -1000,6 +797,46 @@ public class GearyController : Geary.BaseObject {
             context.authentication_failed = true;
             update_account_status();
         }
+    }
+
+    private async void prompt_untrusted_host(AccountContext context,
+                                             Geary.ServiceInformation service,
+                                             Geary.Endpoint endpoint,
+                                             GLib.TlsConnection cx) {
+        if (Args.revoke_certs) {
+            // XXX
+        }
+
+        context.tls_validation_prompting = true;
+        try {
+            yield this.certificate_manager.prompt_pin_certificate(
+                this.main_window,
+                context.account.information,
+                service,
+                endpoint,
+                false,
+                context.cancellable
+            );
+            context.tls_validation_failed = false;
+        } catch (Application.CertificateManagerError.UNTRUSTED err) {
+            // Don't report an error here, the user simply declined.
+            context.tls_validation_failed = true;
+        } catch (Application.CertificateManagerError err) {
+            // Assume validation is now good, but report the error
+            // since the cert may not have been saved
+            context.tls_validation_failed = false;
+            report_problem(
+                new Geary.ServiceProblemReport(
+                    Geary.ProblemType.UNTRUSTED,
+                    context.account.information,
+                    service,
+                    err
+                )
+            );
+        }
+
+        context.tls_validation_prompting = false;
+        update_account_status();
     }
 
     private void on_account_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
@@ -2909,21 +2746,6 @@ public class GearyController : Geary.BaseObject {
         return selected_conversations.read_only_view;
     }
 
-    private inline Geary.Endpoint? get_endpoint(Geary.AccountInformation config,
-                                               Geary.ServiceInformation service) {
-        Geary.Account account = this.accounts.get(config).account;
-        Geary.Endpoint? endpoint = null;
-        switch (service.protocol) {
-        case Geary.Protocol.IMAP:
-            endpoint = account.incoming.remote;
-            break;
-        case Geary.Protocol.SMTP:
-            endpoint = account.outgoing.remote;
-            break;
-        }
-        return endpoint;
-    }
-
     private inline Geary.App.EmailStore get_store_for_folder(Geary.Folder target) {
         return this.accounts.get(target.account.information).store;
     }
@@ -3057,8 +2879,18 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
+    private void on_untrusted_host(Geary.AccountInformation account,
+                                   Geary.ServiceInformation service,
+                                   Geary.Endpoint endpoint,
+                                   TlsConnection cx) {
+        AccountContext? context = this.accounts.get(account);
+        if (context != null && !is_currently_prompting()) {
+            this.prompt_untrusted_host.begin(context, service, endpoint, cx);
+        }
+    }
+
     private void on_retry_service_problem(Geary.ClientService.Status type) {
-        bool auth_restarted = false;
+        bool has_restarted = false;
         foreach (AccountContext context in this.accounts.values) {
             Geary.Account account = context.account;
             if (account.current_status.has_service_problem() &&
@@ -3070,23 +2902,35 @@ public class GearyController : Geary.BaseObject {
                         ? account.incoming
                         : account.outgoing;
 
-                bool restart = true;
+                bool do_restart = true;
                 switch (type) {
                 case AUTHENTICATION_FAILED:
-                    if (auth_restarted) {
+                    if (has_restarted) {
                         // Only restart at most one at a time, so we
                         // don't attempt to re-auth multiple bad
                         // accounts at once.
-                        restart = false;
+                        do_restart = false;
                     } else {
                         // Reset so the infobar does not show up again
                         context.authentication_failed = false;
-                        auth_restarted = true;
+                    }
+                    break;
+
+                case TLS_VALIDATION_FAILED:
+                    if (has_restarted) {
+                        // Only restart at most one at a time, so we
+                        // don't attempt to re-pin multiple bad
+                        // accounts at once.
+                        do_restart = false;
+                    } else {
+                        // Reset so the infobar does not show up again
+                        context.tls_validation_failed = false;
                     }
                     break;
                 }
 
-                if (restart) {
+                if (do_restart) {
+                    has_restarted = true;
                     service.restart.begin(context.cancellable);
                 }
             }

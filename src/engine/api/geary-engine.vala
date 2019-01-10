@@ -7,49 +7,24 @@
  */
 
 /**
- * The Geary email engine initial entry points.
+ * Manages email account instances and their life-cycle.
  *
- * Engine represents and contains interfaces into the rest of the email library.  It's a singleton
- * class (see {@link instance}) with various signals for event notification.  Engine is initialized
- * by calling {@link open_async} and closed with {@link close_async}.
- *
- * Engine can list existing {@link Account} objects and create/delete them.  It can also validate
- * changes to Accounts prior to saving those changes.
+ * An engine represents and contains interfaces into the rest of the
+ * email library. Instances are initialized by calling {@link
+ * open_async} and closed with {@link close_async}. Use this class for
+ * verifying and adding {@link AccountInformation} objects to check
+ * and start using email accounts.
  */
 public class Geary.Engine : BaseObject {
 
-    [Flags]
-    public enum ValidationOption {
-        NONE = 0,
-        CHECK_CONNECTIONS,
-        UPDATING_EXISTING;
-        
-        public inline bool is_all_set(ValidationOption options) {
-            return (options & this) == options;
-        }
-    }
-    
-    [Flags]
-    public enum ValidationResult {
-        OK = 0,
-        INVALID_NICKNAME,
-        EMAIL_EXISTS,
-        IMAP_CONNECTION_FAILED,
-        IMAP_CREDENTIALS_INVALID,
-        SMTP_CONNECTION_FAILED,
-        SMTP_CREDENTIALS_INVALID;
-        
-        public inline bool is_all_set(ValidationResult result) {
-            return (result & this) == result;
-        }
-    }
-    
-    private static Engine? _instance = null;
+
     public static Engine instance {
         get {
             return (_instance != null) ? _instance : (_instance = new Engine());
         }
     }
+    private static Engine? _instance = null;
+
 
     // Workaround for Vala issue #659. See shared_endpoints below.
     private class EndpointWeakRef {
@@ -108,19 +83,6 @@ public class Geary.Engine : BaseObject {
      */
     public signal void account_unavailable(AccountInformation account);
 
-    /**
-     * Emitted when a service has reported TLS certificate warnings.
-     *
-     * This may be fired during normal operation or while validating
-     * the account information, in which case there is no {@link
-     * Account} associated with it.
-     *
-     * @see AccountInformation.untrusted_host
-     */
-    public signal void untrusted_host(AccountInformation account,
-                                      ServiceInformation service,
-                                      TlsNegotiationMethod method,
-                                      GLib.TlsConnection cx);
 
     // Public so it can be tested
     public Engine() {
@@ -390,7 +352,6 @@ public class Geary.Engine : BaseObject {
         }
 
         accounts.set(account.id, account);
-        account.untrusted_host.connect(on_untrusted_host);
         account_available(account);
     }
 
@@ -410,8 +371,6 @@ public class Geary.Engine : BaseObject {
         }
 
         if (this.accounts.has_key(account.id)) {
-            account.untrusted_host.disconnect(on_untrusted_host);
-
             // Send the account-unavailable signal, account will be
             // removed client side.
             account_unavailable(account);
@@ -463,10 +422,12 @@ public class Geary.Engine : BaseObject {
 
     private Geary.Endpoint get_shared_endpoint(ServiceProvider provider,
                                                ServiceInformation service) {
-        string key = "%s/%s:%u".printf(
-            service.protocol.to_value(),
+        // Key includes TLS method since endpoints encapsulate
+        // TLS-specific state
+        string key = "%s:%u/%s".printf(
             service.host,
-            service.port
+            service.port,
+            service.transport_security.to_value()
         );
 
         Endpoint? shared = null;
@@ -480,8 +441,7 @@ public class Geary.Engine : BaseObject {
                 : Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC;
 
             shared = new Endpoint(
-                service.host,
-                service.port,
+                new NetworkAddress(service.host, service.port),
                 service.transport_security,
                 timeout
             );
@@ -505,11 +465,4 @@ public class Geary.Engine : BaseObject {
         return shared;
     }
 
-
-    private void on_untrusted_host(AccountInformation account,
-                                   ServiceInformation service,
-                                   TlsNegotiationMethod method,
-                                   GLib.TlsConnection cx) {
-        untrusted_host(account, service, method, cx);
-    }
 }
