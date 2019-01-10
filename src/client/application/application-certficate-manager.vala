@@ -112,93 +112,71 @@ public class Application.CertificateManager : GLib.Object {
 private class Application.TlsDatabase : GLib.TlsDatabase {
 
 
-    private class TrustContext {
+    /** A certificate and the identities it is trusted for. */
+    private class TrustContext : Geary.BaseObject {
 
-        private static string to_name(GLib.SocketConnectable id) {
-            GLib.NetworkAddress? name = id as GLib.NetworkAddress;
-            if (name != null) {
-                return name.hostname;
-            }
 
-            GLib.NetworkService? service = id as GLib.NetworkService;
-            if (service != null) {
-                return service.domain;
-            }
+        // Perform IO at high priority since UI and network
+        // connections depend on it
+        private const int IO_PRIO = GLib.Priority.HIGH;
+        private const GLib.ChecksumType ID_TYPE = GLib.ChecksumType.SHA384;
+        private const string FILENAME_FORMAT = "%s.pem";
 
-            GLib.InetSocketAddress? inet = id as GLib.InetSocketAddress;
-            if (inet != null) {
-                return inet.address.to_string();
-            }
-
-            return id.to_string();
-        }
 
         public string id;
-        public Gcr.Certificate certificate;
-        public Gee.Set<string> pinned_identities = new Gee.HashSet<string>();
+        public GLib.TlsCertificate certificate;
 
 
-        public TrustContext(Gcr.Certificate certificate) {
-            this.id = certificate.get_fingerprint_hex(GLib.ChecksumType.SHA256);
+        public TrustContext(GLib.TlsCertificate certificate) {
+            this.id = GLib.Checksum.compute_for_data(
+                ID_TYPE, certificate.certificate.data
+            );
             this.certificate = certificate;
         }
 
-        public bool add_identity(GLib.SocketConnectable id) {
-            return this.pinned_identities.add(to_name(id));
+    }
+
+
+    private static string to_name(GLib.SocketConnectable id) {
+        GLib.NetworkAddress? name = id as GLib.NetworkAddress;
+        if (name != null) {
+            return name.hostname;
         }
 
-        public bool matches_identity(GLib.SocketConnectable id) {
-            return this.pinned_identities.contains(to_name(id));
+        GLib.NetworkService? service = id as GLib.NetworkService;
+        if (service != null) {
+            return service.domain;
         }
 
-        public GLib.TlsCertificate to_tls_certificate()
-            throws GLib.Error {
-            //return new GLib.TlsCertificate.from_pem(
-            //    this.certificate.get_pem_data(), -1
-            //);
-            warning("Was actually asked to make a TLS cert from a GCR cert");
-            throw new GLib.IOError.NOT_SUPPORTED("TODO");
+        GLib.InetSocketAddress? inet = id as GLib.InetSocketAddress;
+        if (inet != null) {
+            return inet.address.to_string();
         }
 
+        return id.to_string();
     }
 
 
     public GLib.TlsDatabase parent { get; private set; }
 
-    private Gee.List<TrustContext> contexts =
-        new Gee.ArrayList<TrustContext>();
+    private GLib.File store_dir;
+    private Gee.Map<string,TrustContext> pinned_certs =
+        new Gee.HashMap<string,TrustContext>();
 
 
-    public TlsDatabase(GLib.TlsDatabase parent) {
+    public TlsDatabase(GLib.TlsDatabase parent, GLib.File store_dir) {
         this.parent = parent;
+        this.store_dir = store_dir;
     }
-
 
     public void pin_certificate(GLib.TlsCertificate certificate,
-                                GLib.SocketConnectable identity) {
-        Gcr.Certificate gcr = new Gcr.SimpleCertificate(
-            certificate.certificate.data
-        );
-        lock (this.contexts) {
-            TrustContext? context = lookup_gcr_unlocked(gcr);
-            if (context == null) {
-                context = new TrustContext(gcr);
-                debug("Adding certificate %s",
-                      gcr.get_fingerprint_hex(GLib.ChecksumType.SHA1));
-                this.contexts.add(context);
-            }
-            if (context.add_identity(identity)){
-                debug("Adding identity %s", identity.to_string());
-            }
-        }
-    }
-
-    public void remove_certificate(Gcr.Certificate certificate) {
-        lock (this.contexts) {
-            TrustContext? context = lookup_gcr_unlocked(certificate);
-            if (context != null) {
-                this.contexts.remove(context);
-            }
+                                GLib.SocketConnectable identity,
+                                GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        string id = to_name(identity);
+        TrustContext context = new TrustContext(certificate);
+        lock (this.pinned_certs) {
+            this.pinned_certs.set(id, context);
         }
     }
 
@@ -218,7 +196,7 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
         throws GLib.Error {
         TrustContext? context = lookup_id(handle);
         return (context != null)
-            ? context.to_tls_certificate()
+            ? context.certificate
             : this.parent.lookup_certificate_for_handle(
                 handle, interaction, flags, cancellable
             );
@@ -232,7 +210,7 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
         throws GLib.Error {
         TrustContext? context = lookup_id(handle);
         return (context != null)
-            ? context.to_tls_certificate()
+            ? context.certificate
             : yield this.parent.lookup_certificate_for_handle_async(
                 handle, interaction, flags, cancellable
             );
@@ -290,21 +268,12 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
                      GLib.TlsDatabaseVerifyFlags flags,
                      GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        debug("Verifying cert sync: %s: %s",
-              purpose,
-              identity != null ? identity.to_string() : "[no identity]");
         GLib.TlsCertificateFlags ret = this.parent.verify_chain(
             chain, purpose, identity, interaction, flags, cancellable
         );
-        if (should_verify(ret, purpose, identity)) {
-            debug("Looking for pinned cert");
-            TrustContext? context = lookup_tls_certificate(chain);
-            if (context != null) {
-                debug("Have trust context with %d ids", context.pinned_identities.size);
-            }
-            if (context != null && context.matches_identity(identity)) {
-                ret = 0;
-            }
+        if (should_verify(ret, purpose, identity) &&
+            verify(chain, identity, cancellable)) {
+            ret = 0;
         }
         return ret;
     }
@@ -317,21 +286,12 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
                            GLib.TlsDatabaseVerifyFlags flags,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        debug("Verifying cert async: %s: %s",
-              purpose,
-              identity != null ? identity.to_string() : "[no identity]");
         GLib.TlsCertificateFlags ret = yield this.parent.verify_chain_async(
             chain, purpose, identity, interaction, flags, cancellable
         );
-        if (should_verify(ret, purpose, identity)) {
-            debug("Looking for pinned cert");
-            TrustContext? context = lookup_tls_certificate(chain);
-            if (context != null) {
-                debug("Have trust context with %d ids", context.pinned_identities.size);
-            }
-            if (context != null && context.matches_identity(identity)) {
-                ret = 0;
-            }
+        if (should_verify(ret, purpose, identity) &&
+            yield verify_async(chain, identity, cancellable)) {
+            ret = 0;
         }
         return ret;
     }
@@ -350,27 +310,43 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
         );
     }
 
+    private bool verify(GLib.TlsCertificate chain,
+                        GLib.SocketConnectable identity,
+                        GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        string id = to_name(identity);
+        TrustContext? context = null;
+        lock (this.pinned_certs) {
+            context = this.pinned_certs.get(id);
+        }
+        return (context != null);
+    }
+
+    private async bool verify_async(GLib.TlsCertificate chain,
+                                    GLib.SocketConnectable identity,
+                                    GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        bool is_valid = false;
+        yield Geary.Nonblocking.Concurrent.global.schedule_async(() => {
+                is_valid = verify(chain, identity, cancellable);
+            }, cancellable);
+        return is_valid;
+    }
+
     private TrustContext? lookup_id(string id) {
-        lock (this.contexts) {
-            return Geary.traverse(this.contexts).first_matching(
+        lock (this.pinned_certs) {
+            return Geary.traverse(this.pinned_certs.values).first_matching(
                 (ctx) => ctx.id == id
             );
         }
     }
 
-    private TrustContext? lookup_tls_certificate(GLib.TlsCertificate tls) {
-        lock (this.contexts) {
-            return lookup_gcr_unlocked(
-                new Gcr.SimpleCertificate(tls.certificate.data)
+    private TrustContext? lookup_tls_certificate(GLib.TlsCertificate cert) {
+        lock (this.pinned_certs) {
+            return Geary.traverse(this.pinned_certs.values).first_matching(
+                (ctx) => ctx.certificate.is_same(cert)
             );
         }
-    }
-
-    private TrustContext? lookup_gcr_unlocked(Gcr.Certificate cert) {
-        debug("Looking for %s", cert.get_fingerprint_hex(GLib.ChecksumType.SHA1));
-        return Geary.traverse(this.contexts).first_matching(
-            (ctx) => Gcr.Certificate.compare(ctx.certificate, cert) == 0
-        );
     }
 
 }
