@@ -36,9 +36,10 @@ public class Application.CertificateManager : GLib.Object {
     /**
      * Constructs a new instance, globally installing the pinning database.
      */
-    public CertificateManager() {
+    public CertificateManager(GLib.File store_dir) {
         this.pinning_database = new TlsDatabase(
-            GLib.TlsBackend.get_default().get_default_database()
+            GLib.TlsBackend.get_default().get_default_database(),
+            store_dir
         );
         Geary.Endpoint.default_tls_database = this.pinning_database;
     }
@@ -83,7 +84,7 @@ public class Application.CertificateManager : GLib.Object {
 
         debug("Pinning certificate for %s...", endpoint.remote.to_string());
         try {
-            yield add_pinned(
+            yield this.pinning_database.pin_certificate(
                 endpoint.untrusted_certificate,
                 endpoint.remote,
                 save,
@@ -91,17 +92,6 @@ public class Application.CertificateManager : GLib.Object {
             );
         } catch (GLib.Error err) {
             throw new CertificateManagerError.STORE_FAILED(err.message);
-        }
-    }
-
-    private async void add_pinned(GLib.TlsCertificate cert,
-                                  GLib.SocketConnectable? identity,
-                                  bool save,
-                                  GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        this.pinning_database.pin_certificate(cert, identity);
-        if (save) {
-            // XXX
         }
     }
 
@@ -132,6 +122,52 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
                 ID_TYPE, certificate.certificate.data
             );
             this.certificate = certificate;
+        }
+
+        public TrustContext.lookup(GLib.File dir,
+                                   string identity,
+                                   GLib.Cancellable? cancellable)
+            throws GLib.Error {
+            // This isn't async so that we can support both
+            // verify_chain and verify_chain_async with the same call
+            GLib.File storage = dir.get_child(FILENAME_FORMAT.printf(identity));
+            GLib.FileInputStream f_in = storage.read(cancellable);
+            GLib.BufferedInputStream buf = new GLib.BufferedInputStream(f_in);
+            GLib.ByteArray cert_pem = new GLib.ByteArray.sized(buf.buffer_size);
+            bool eof = false;
+            while (!eof) {
+                size_t filled = buf.fill(-1, cancellable);
+                if (filled > 0) {
+                    cert_pem.append(buf.peek_buffer());
+                    buf.skip(filled, cancellable);
+                } else {
+                    eof = true;
+                }
+            }
+            buf.close(cancellable);
+
+            this(new GLib.TlsCertificate.from_pem((string) cert_pem.data, -1));
+        }
+
+        public async void save(GLib.File dir,
+                               string identity,
+                               GLib.Cancellable? cancellable)
+            throws GLib.Error {
+            yield Geary.Files.make_directory_with_parents(dir, cancellable);
+            GLib.File storage = dir.get_child(FILENAME_FORMAT.printf(identity));
+            GLib.FileOutputStream f_out = yield storage.replace_async(
+                null, false, GLib.FileCreateFlags.NONE, IO_PRIO, cancellable
+            );
+            GLib.BufferedOutputStream buf = new GLib.BufferedOutputStream(f_out);
+
+            size_t written = 0;
+            yield buf.write_all_async(
+                this.certificate.certificate_pem.data,
+                IO_PRIO,
+                cancellable,
+                out written
+            );
+            yield buf.close_async(IO_PRIO, cancellable);
         }
 
     }
@@ -169,14 +205,18 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
         this.store_dir = store_dir;
     }
 
-    public void pin_certificate(GLib.TlsCertificate certificate,
-                                GLib.SocketConnectable identity,
-                                GLib.Cancellable? cancellable = null)
+    public async void pin_certificate(GLib.TlsCertificate certificate,
+                                      GLib.SocketConnectable identity,
+                                      bool save,
+                                      GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         string id = to_name(identity);
         TrustContext context = new TrustContext(certificate);
         lock (this.pinned_certs) {
             this.pinned_certs.set(id, context);
+        }
+        if (save) {
+            yield context.save(this.store_dir, to_name(identity), cancellable);
         }
     }
 
@@ -318,6 +358,20 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
         TrustContext? context = null;
         lock (this.pinned_certs) {
             context = this.pinned_certs.get(id);
+            if (context == null) {
+                try {
+                    context = new TrustContext.lookup(
+                        this.store_dir, id, cancellable
+                    );
+                    this.pinned_certs.set(id, context);
+                } catch (GLib.IOError.NOT_FOUND err) {
+                    // Cert was not found saved, so it not pinned
+                } catch (GLib.Error err) {
+                    Geary.ErrorContext err_context = new Geary.ErrorContext(err);
+                    debug("Error loading pinned certificate: %s",
+                          err_context.format_full_error());
+                }
+            }
         }
         return (context != null);
     }

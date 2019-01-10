@@ -327,7 +327,9 @@ public class GearyController : Geary.BaseObject {
 
         // Hook up cert, accounts and credentials machinery
 
-        this.certificate_manager = new Application.CertificateManager();
+        this.certificate_manager = new Application.CertificateManager(
+            this.application.get_user_data_directory().get_child("pinned-certs")
+        );
 
         SecretMediator? libsecret = null;
         try {
