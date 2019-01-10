@@ -371,7 +371,7 @@ geary_engine_internal_header_fixup = custom_target(
   ],
   command: [
     find_program('sed'),
-    '-i',
+    '-ibak',
     's/geary-engine.h/geary-engine-internal.h/g',
     '@OUTDIR@/geary-engine-internal.vapi',
   ],
