@@ -6,6 +6,21 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+// Required because GCR's VAPI is behind-the-times. See:
+// https://gitlab.gnome.org/GNOME/gcr/merge_requests/7
+extern async bool gcr_trust_add_pinned_certificate_async(
+    Gcr.Certificate cert,
+    string purpose,
+    string peer,
+    Cancellable? cancellable
+) throws Error;
+extern bool gcr_trust_is_certificate_pinned(
+    Gcr.Certificate cert,
+    string purpose,
+    string peer,
+    Cancellable? cancellable
+) throws Error;
+
 
 // All of the below basically exists since cert pinning using GCR
 // stopped working (GNOME/gcr#10) after gnome-keyring stopped
@@ -30,16 +45,56 @@ public errordomain Application.CertificateManagerError {
 public class Application.CertificateManager : GLib.Object {
 
 
+    // PCKS11 flag value lifted from pkcs11.h
+    private const ulong CKF_WRITE_PROTECTED = 1UL << 1;
+
+
+    private static async bool is_gcr_enabled(GLib.Cancellable? cancellable) {
+        // Use GCR if it looks like it should be able to be
+        // used. Specifically, if we can initialise the trust store
+        // must have both lookup and store PKCS11 slot URIs or else it
+        // won't be able to lookup or store pinned certs, secondly,
+        // there must be at least a read-write store slot available.
+        bool init_okay = false;
+        try {
+            init_okay = yield Gcr.pkcs11_initialize_async(cancellable);
+        } catch (GLib.Error err) {
+            warning("Failed to initialise GCR PCKS#11 modules: %s", err.message);
+        }
+
+        bool has_uris = false;
+        if (init_okay) {
+            has_uris = (
+                !Geary.String.is_empty(Gcr.pkcs11_get_trust_store_uri()) &&
+                Gcr.pkcs11_get_trust_lookup_uris().length > 0
+            );
+            debug("GCR slot URIs found: %s", has_uris.to_string());
+        }
+
+        bool has_rw_store = false;
+        if (has_uris) {
+            Gck.Slot? store = Gcr.pkcs11_get_trust_store_slot();
+            has_rw_store = !store.has_flags(CKF_WRITE_PROTECTED);
+            debug("GCR store is R/W: %s", has_rw_store.to_string());
+        }
+
+        return has_rw_store;
+    }
+
+
     private TlsDatabase? pinning_database;
 
 
     /**
      * Constructs a new instance, globally installing the pinning database.
      */
-    public CertificateManager(GLib.File store_dir) {
+    public async CertificateManager(GLib.File store_dir,
+                                    GLib.Cancellable? cancellable) {
+        bool use_gcr = yield is_gcr_enabled(cancellable);
         this.pinning_database = new TlsDatabase(
             GLib.TlsBackend.get_default().get_default_database(),
-            store_dir
+            store_dir,
+            use_gcr
         );
         Geary.Endpoint.default_tls_database = this.pinning_database;
     }
@@ -193,16 +248,20 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
     }
 
 
-    public GLib.TlsDatabase parent { get; private set; }
-
+    private GLib.TlsDatabase parent { get; private set; }
     private GLib.File store_dir;
+    private bool use_gcr;
+
     private Gee.Map<string,TrustContext> pinned_certs =
         new Gee.HashMap<string,TrustContext>();
 
 
-    public TlsDatabase(GLib.TlsDatabase parent, GLib.File store_dir) {
+        public TlsDatabase(GLib.TlsDatabase parent,
+                           GLib.File store_dir,
+                           bool use_gcr) {
         this.parent = parent;
         this.store_dir = store_dir;
+        this.use_gcr = use_gcr;
     }
 
     public async void pin_certificate(GLib.TlsCertificate certificate,
@@ -216,7 +275,18 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
             this.pinned_certs.set(id, context);
         }
         if (save) {
-            yield context.save(this.store_dir, to_name(identity), cancellable);
+            if (this.use_gcr) {
+                yield gcr_trust_add_pinned_certificate_async(
+                    new Gcr.SimpleCertificate(certificate.certificate.data),
+                    GLib.TlsDatabase.PURPOSE_AUTHENTICATE_SERVER,
+                    id,
+                    cancellable
+                );
+            } else {
+                yield context.save(
+                    this.store_dir, to_name(identity), cancellable
+                );
+            }
         }
     }
 
@@ -354,26 +424,48 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
                         GLib.SocketConnectable identity,
                         GLib.Cancellable? cancellable)
         throws GLib.Error {
+        bool is_verified = false;
         string id = to_name(identity);
         TrustContext? context = null;
         lock (this.pinned_certs) {
             context = this.pinned_certs.get(id);
-            if (context == null) {
-                try {
-                    context = new TrustContext.lookup(
-                        this.store_dir, id, cancellable
+            if (context != null) {
+                is_verified = true;
+            } else {
+                // Cert not found in memory, check with GCR if
+                // enabled.
+                if (this.use_gcr) {
+                    is_verified = gcr_trust_is_certificate_pinned(
+                        new Gcr.SimpleCertificate(chain.certificate.data),
+                        GLib.TlsDatabase.PURPOSE_AUTHENTICATE_SERVER,
+                        id,
+                        cancellable
                     );
-                    this.pinned_certs.set(id, context);
-                } catch (GLib.IOError.NOT_FOUND err) {
-                    // Cert was not found saved, so it not pinned
-                } catch (GLib.Error err) {
-                    Geary.ErrorContext err_context = new Geary.ErrorContext(err);
-                    debug("Error loading pinned certificate: %s",
-                          err_context.format_full_error());
+                }
+
+                if (!is_verified) {
+                    // Cert is not pinned in memory or in GCR, so look
+                    // for it on disk. Do this even if GCR support is
+                    // enabled, since if the cert was previously saved
+                    // to disk, it should still be able to be used
+                    try {
+                        context = new TrustContext.lookup(
+                            this.store_dir, id, cancellable
+                        );
+                        this.pinned_certs.set(id, context);
+                        is_verified = true;
+                    } catch (GLib.IOError.NOT_FOUND err) {
+                        // Cert was not found saved, so it not pinned
+                    } catch (GLib.Error err) {
+                        Geary.ErrorContext err_context =
+                            new Geary.ErrorContext(err);
+                        debug("Error loading pinned certificate: %s",
+                              err_context.format_full_error());
+                    }
                 }
             }
         }
-        return (context != null);
+        return is_verified;
     }
 
     private async bool verify_async(GLib.TlsCertificate chain,
