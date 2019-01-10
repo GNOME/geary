@@ -296,20 +296,29 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             // Nothing to do here
         } catch (GLib.Error err) {
             Geary.ErrorContext context = new Geary.ErrorContext(err);
-            debug("[%s] Error adding new session to the pool: %s",
+            debug("[%s] Error creating new session for the pool: %s",
                   this.account.id, context.format_full_error());
-            notify_connection_failed(new ErrorContext(err));
+            notify_connection_failed(context);
         }
 
-        if (new_session != null) {
-            notify_connected();
-            yield this.sessions_mutex.execute_locked(() => {
-                    this.all_sessions.add(new_session);
-                });
-            this.free_queue.send(new_session);
-        } else {
+        if (new_session == null) {
             // An error was thrown, so close the pool
             this.close_pool.begin();
+        } else {
+            try {
+                yield this.sessions_mutex.execute_locked(() => {
+                        this.all_sessions.add(new_session);
+                    });
+                this.free_queue.send(new_session);
+                notify_connected();
+            } catch (GLib.Error err) {
+                Geary.ErrorContext context = new Geary.ErrorContext(err);
+                debug("[%s] Error adding new session to the pool: %s",
+                      this.account.id, context.format_full_error());
+                notify_connection_failed(context);
+                new_session.disconnect_async.begin(null);
+                this.close_pool.begin();
+            }
         }
     }
 

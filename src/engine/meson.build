@@ -365,7 +365,6 @@ geary_engine_lib = static_library('geary-engine',
 # GNOME/vala#358
 geary_engine_internal_header_fixup = custom_target(
   'geary_engine_internal_header_fixup',
-  source: geary_engine_sources,
   output: [
     'geary-engine-internal.h',
     'geary-engine-internal.vapi',
