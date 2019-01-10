@@ -1,7 +1,7 @@
 # Geary client
 geary_client_vala_sources = files(
   'application/application-avatar-store.vala',
-  'application/application-certficate-manager.vala',
+  'application/application-certificate-manager.vala',
   'application/application-command.vala',
   'application/autostart-manager.vala',
   'application/geary-application.vala',
