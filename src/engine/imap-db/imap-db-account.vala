@@ -369,10 +369,19 @@ private class Geary.ImapDB.Account : BaseObject {
 
         // XXX this should really be a db table constraint
         Geary.ImapDB.Folder? folder = get_local_folder(path);
-        if (folder != null)
+        if (folder != null) {
             throw new EngineError.ALREADY_EXISTS(
                 "Folder with path already exists: %s", path.to_string()
             );
+        }
+
+        if (Imap.MailboxSpecifier.folder_path_is_inbox(path) &&
+            !Imap.MailboxSpecifier.is_canonical_inbox_name(path.basename)) {
+            // Don't add faux inboxes
+            throw new ImapError.NOT_SUPPORTED(
+                "Inbox has : %s", path.to_string()
+            );
+        }
 
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             // get the parent of this folder, creating parents if necessary ... ok if this fails,
@@ -506,15 +515,6 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 string basename = result.string_for("name");
-                
-                // ignore anything that's not canonical Inbox
-                if (parent == null
-                    && Imap.MailboxSpecifier.is_inbox_name(basename)
-                    && !Imap.MailboxSpecifier.is_canonical_inbox_name(basename)) {
-                    result.next(cancellable);
-                    
-                    continue;
-                }
                 
                 Geary.FolderPath path = (parent != null)
                     ? parent.get_child(basename)
