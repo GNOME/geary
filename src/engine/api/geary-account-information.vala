@@ -437,8 +437,9 @@ public class Geary.AccountInformation : BaseObject {
             break;
         }
 
-        if (old_path == null && new_path != null ||
-            old_path != null && !old_path.equal_to(new_path)) {
+        if ((old_path == null && new_path != null) ||
+            (old_path != null && new_path == null) ||
+            (old_path != null && !old_path.equal_to(new_path))) {
             changed();
         }
     }
