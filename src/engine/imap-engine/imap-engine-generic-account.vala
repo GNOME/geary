@@ -698,15 +698,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                                                             Cancellable? cancellable)
         throws Error {
         Geary.FolderPath? path = information.get_special_folder_path(special);
-        if (!remote.is_folder_path_valid(path)) {
+        if (path != null && !remote.is_folder_path_valid(path)) {
             debug("Ignoring bad special folder path '%s' for type %s",
                   path.to_string(),
                   special.to_string());
             path = null;
         }
         if (path == null) {
-            debug("Guessing path for special folder type: %s",
-                  special.to_string());
             Geary.FolderPath root =
                 yield remote.get_default_personal_namespace(cancellable);
             Gee.List<string> search_names = special_search_names.get(special);
@@ -725,6 +723,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             if (path == null)
                 path = root.get_child(search_names[0]);
 
+            debug("Guessed folder \'%s\' for special_path %s",
+                  path.to_string(), special.to_string()
+            );
             information.set_special_folder_path(special, path);
         }
 
@@ -1158,6 +1159,15 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
                 account.local.imap_folder_root,
                 cancellable
             );
+
+            debug("Existing folders:");
+            foreach (FolderPath path in existing_folders.keys) {
+                debug(" - %s (%u)", path.to_string(), path.hash());
+            }
+            debug("Remote folders:");
+            foreach (FolderPath path in remote_folders.keys) {
+                debug(" - %s (%u)", path.to_string(), path.hash());
+            }
 
             // pair the local and remote folders and make sure
             // everything is up-to-date
