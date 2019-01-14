@@ -638,6 +638,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         foreach (Geary.SpecialFolderType special in specials.keys) {
             MinimalFolder? minimal = specials.get(special) as MinimalFolder;
             if (minimal.special_folder_type != special) {
+                debug("%s: Promoting %s to %s",
+                      to_string(), minimal.to_string(), special.to_string());
                 minimal.set_special_folder_type(special);
                 changed.add(minimal);
 
@@ -693,85 +695,94 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     /**
      * Locates a special folder, creating it if needed.
      */
-    internal async Geary.Folder ensure_special_folder_async(Imap.AccountSession remote,
-                                                            Geary.SpecialFolderType special,
-                                                            Cancellable? cancellable)
-        throws Error {
-        Geary.FolderPath? path = information.get_special_folder_path(special);
-        if (path != null && !remote.is_folder_path_valid(path)) {
-            debug("Ignoring bad special folder path '%s' for type %s",
-                  path.to_string(),
-                  special.to_string());
-            path = null;
-        }
-        if (path == null) {
-            Geary.FolderPath root =
-                yield remote.get_default_personal_namespace(cancellable);
-            Gee.List<string> search_names = special_search_names.get(special);
-            foreach (string search_name in search_names) {
-                Geary.FolderPath search_path = root.get_child(search_name);
-                foreach (Geary.FolderPath test_path in folder_map.keys) {
-                    if (test_path.compare_normalized_ci(search_path) == 0) {
-                        path = search_path;
+    internal async Folder
+        ensure_special_folder_async(Imap.AccountSession remote,
+                                    SpecialFolderType type,
+                                    GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Folder? special = get_special_folder(type);
+        if (special == null) {
+            FolderPath? path = information.get_special_folder_path(type);
+            if (path != null && !remote.is_folder_path_valid(path)) {
+                debug("%s: Ignoring bad special folder path '%s' for type %s",
+                      to_string(),
+                      path.to_string(),
+                      type.to_string());
+                path = null;
+            }
+            if (path == null) {
+                FolderPath root =
+                    yield remote.get_default_personal_namespace(cancellable);
+                Gee.List<string> search_names = special_search_names.get(type);
+                foreach (string search_name in search_names) {
+                    FolderPath search_path = root.get_child(search_name);
+                    foreach (FolderPath test_path in folder_map.keys) {
+                        if (test_path.compare_normalized_ci(search_path) == 0) {
+                            path = search_path;
+                            break;
+                        }
+                    }
+                    if (path != null)
                         break;
+                }
+
+                if (path == null) {
+                    path = root.get_child(search_names[0]);
+                }
+
+                debug("%s: Guessed folder \'%s\' for special_path %s",
+                      to_string(), path.to_string(), type.to_string()
+                );
+                information.set_special_folder_path(type, path);
+            }
+
+            if (!this.folder_map.has_key(path)) {
+                debug("%s: Creating \"%s\" to use as special folder %s",
+                      to_string(), path.to_string(), type.to_string());
+
+                GLib.Error? created_err = null;
+                try {
+                    yield remote.create_folder_async(path, type, cancellable);
+                } catch (GLib.Error err) {
+                    // Hang on to the error since the folder might exist
+                    // on the remote, so try fetching it anyway.
+                    created_err = err;
+                }
+
+                Imap.Folder? remote_folder = null;
+                try {
+                    remote_folder = yield remote.fetch_folder_async(
+                        path, cancellable
+                    );
+                } catch (GLib.Error err) {
+                    // If we couldn't fetch it after also failing to
+                    // create it, it's probably due to the problem
+                    // creating it, so throw that error instead.
+                    if (created_err != null) {
+                        throw created_err;
+                    } else {
+                        throw err;
                     }
                 }
-                if (path != null)
-                    break;
-            }
 
-            if (path == null)
-                path = root.get_child(search_names[0]);
-
-            debug("Guessed folder \'%s\' for special_path %s",
-                  path.to_string(), special.to_string()
-            );
-            information.set_special_folder_path(special, path);
-        }
-
-        if (!this.folder_map.has_key(path)) {
-            debug("Creating \"%s\" to use as special folder %s",
-                  path.to_string(), special.to_string());
-
-            GLib.Error? created_err = null;
-            try {
-                yield remote.create_folder_async(path, special, cancellable);
-            } catch (GLib.Error err) {
-                // Hang on to the error since the folder might exist
-                // on the remote, so try fetching it anyway.
-                created_err = err;
-            }
-
-            Imap.Folder? remote_folder = null;
-            try {
-                remote_folder = yield remote.fetch_folder_async(
-                    path, cancellable
+                ImapDB.Folder local_folder =
+                    yield this.local.clone_folder_async(
+                        remote_folder, cancellable
+                    );
+                add_folders(
+                    Collection.single(local_folder), created_err != null
                 );
-            } catch (GLib.Error err) {
-                // If we couldn't fetch it after also failing to
-                // create it, it's probably due to the problem
-                // creating it, so throw that error instead.
-                if (created_err != null) {
-                    throw created_err;
-                } else {
-                    throw err;
-                }
             }
 
-            ImapDB.Folder local_folder = yield this.local.clone_folder_async(
-                remote_folder, cancellable
+            special= this.folder_map.get(path);
+            promote_folders(
+                Collection.single_map<SpecialFolderType,Folder>(
+                    type, special
+                )
             );
-            add_folders(Collection.single(local_folder), created_err != null);
         }
 
-        Geary.Folder special_folder = this.folder_map.get(path);
-        promote_folders(
-            Collection.single_map<Geary.SpecialFolderType,Geary.Folder>(
-                special, special_folder
-            )
-        );
-
-        return special_folder;
+        return special;
     }
 
     /**
@@ -1079,25 +1090,43 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
         }
     }
 
-    private async void check_special_folders(Cancellable cancellable)
-        throws Error {
+    private async void check_special_folders(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        // Local folders loaded that have the SPECIAL-USE flags set
+        // will have been promoted already via derived account type's
+        // new_child overrides or some other means. However for those
+        // that do not have the flag, check here against the local
+        // config and promote ASAP.
+        //
+        // Can't just use ensure_special_folder_async however since
+        // that will attempt to create the folders if missing, which
+        // is bad if offline.
         GenericAccount generic = (GenericAccount) this.account;
-        Gee.Map<Geary.SpecialFolderType,Geary.Folder> specials =
+        Gee.Map<Geary.SpecialFolderType,Geary.Folder> added_specials =
             new Gee.HashMap<Geary.SpecialFolderType,Geary.Folder>();
-        foreach (Geary.SpecialFolderType special in this.specials) {
-            Geary.FolderPath? path = generic.information.get_special_folder_path(special);
-            if (path != null) {
-                try {
-                    Geary.Folder target = yield generic.fetch_folder_async(path, cancellable);
-                    specials.set(special, target);
-                } catch (Error err) {
-                    debug("%s: Previously used special folder %s not loaded: %s",
-                          generic.information.id, special.to_string(), err.message);
+        foreach (Geary.SpecialFolderType type in this.specials) {
+            if (generic.get_special_folder(type) == null) {
+                Geary.FolderPath? path =
+                    generic.information.get_special_folder_path(type);
+                if (path != null) {
+                    try {
+                        Geary.Folder target = yield generic.fetch_folder_async(
+                            path, cancellable
+                        );
+                        added_specials.set(type, target);
+                    } catch (Error err) {
+                        debug(
+                            "%s: Previously used special folder %s not loaded: %s",
+                            generic.information.id,
+                            type.to_string(),
+                            err.message
+                        );
+                    }
                 }
             }
         }
 
-        generic.promote_folders(specials);
+        generic.promote_folders(added_specials);
     }
 
 }
