@@ -207,7 +207,7 @@ public class Geary.FolderPath :
 
         FolderPath? a = this;
         FolderPath? b = other;
-        while (a != null && b != null) {
+        while (a != null || b != null) {
             if (a == b) {
                 return true;
             }

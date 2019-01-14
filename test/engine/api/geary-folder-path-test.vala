@@ -134,6 +134,12 @@ public class Geary.FolderPathTest : TestCase {
             .equal_to(this.root.get_child("test2").get_child("test")),
             "Disjoint parents"
         );
+
+        assert_false(
+            this.root.get_child("test").equal_to(
+                this.root.get_child("").get_child("test")),
+            "Pathological case"
+        );
     }
 
     public void path_hash() throws GLib.Error {
