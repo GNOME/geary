@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
@@ -36,11 +38,22 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
         if (special_map == null) {
             special_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>();
 
-            special_map.set(Imap.MailboxSpecifier.inbox.to_folder_path(null, null), Geary.SpecialFolderType.INBOX);
-            special_map.set(new Imap.FolderRoot("Sent"), Geary.SpecialFolderType.SENT);
-            special_map.set(new Imap.FolderRoot("Draft"), Geary.SpecialFolderType.DRAFTS);
-            special_map.set(new Imap.FolderRoot("Bulk Mail"), Geary.SpecialFolderType.SPAM);
-            special_map.set(new Imap.FolderRoot("Trash"), Geary.SpecialFolderType.TRASH);
+            FolderRoot root = this.local.imap_folder_root;
+            special_map.set(
+                this.local.imap_folder_root.inbox, Geary.SpecialFolderType.INBOX
+            );
+            special_map.set(
+                root.get_child("Sent"), Geary.SpecialFolderType.SENT
+            );
+            special_map.set(
+                root.get_child("Draft"), Geary.SpecialFolderType.DRAFTS
+            );
+            special_map.set(
+                root.get_child("Bulk Mail"), Geary.SpecialFolderType.SPAM
+            );
+            special_map.set(
+                root.get_child("Trash"), Geary.SpecialFolderType.TRASH
+            );
         }
     }
 

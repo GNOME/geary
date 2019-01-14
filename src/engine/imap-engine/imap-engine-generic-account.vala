@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017-2018 Michael Gratton <mike@vee.net>.
+ * Copyright 2017-2019 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -33,6 +33,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     /** Local database for the account. */
     public ImapDB.Account local { get; private set; }
+
+    /**
+     * The root path for all local folders.
+     *
+     * No folder exists for this path, it merely exists to provide a
+     * common root for the paths of all local folders.
+     */
+    protected FolderRoot local_folder_root = new Geary.FolderRoot(true);
 
     private bool open = false;
     private Cancellable? open_cancellable = null;
@@ -78,7 +86,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         );
         this.imap = imap;
 
-        smtp.outbox = new Outbox.Folder(this, local);
+        smtp.outbox = new Outbox.Folder(this, local_folder_root, local);
         smtp.email_sent.connect(on_email_sent);
         smtp.report_problem.connect(notify_report_problem);
         this.smtp = smtp;
@@ -139,10 +147,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         // Create/load local folders
 
-        local_only.set(new Outbox.FolderRoot(), this.smtp.outbox);
+        local_only.set(this.smtp.outbox.path, this.smtp.outbox);
 
         this.search_folder = new_search_folder();
-        local_only.set(new ImapDB.SearchFolderRoot(), this.search_folder);
+        local_only.set(this.search_folder.path, this.search_folder);
 
         this.open = true;
         notify_opened();
@@ -300,7 +308,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         yield this.remote_ready_lock.wait_async(cancellable);
         Imap.ClientSession client =
             yield this.imap.claim_authorized_session_async(cancellable);
-        return new Imap.AccountSession(this.information.id, client);
+        return new Imap.AccountSession(
+            this.information.id, this.local.imap_folder_root, client
+        );
     }
 
     /**
@@ -350,7 +360,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Imap.ClientSession? client =
             yield this.imap.claim_authorized_session_async(cancellable);
         Imap.AccountSession account = new Imap.AccountSession(
-            this.information.id, client
+            this.information.id, this.local.imap_folder_root, client
         );
 
         Imap.Folder? folder = null;
@@ -688,11 +698,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                                                             Cancellable? cancellable)
         throws Error {
         Geary.FolderPath? path = information.get_special_folder_path(special);
-        if (path != null) {
-            debug("Previously used %s for special folder %s", path.to_string(), special.to_string());
-        } else {
-            // This is the first time we're turning a non-special folder into a special one.
-            // After we do this, we'll record which one we picked in the account info.
+        if (!remote.is_folder_path_valid(path)) {
+            debug("Ignoring bad special folder path '%s' for type %s",
+                  path.to_string(),
+                  special.to_string());
+            path = null;
+        }
+        if (path == null) {
+            debug("Guessing path for special folder type: %s",
+                  special.to_string());
             Geary.FolderPath root =
                 yield remote.get_default_personal_namespace(cancellable);
             Gee.List<string> search_names = special_search_names.get(special);
@@ -779,7 +793,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * override this to return the correct subclass.
      */
     protected virtual SearchFolder new_search_folder() {
-        return new ImapDB.SearchFolder(this);
+        return new ImapDB.SearchFolder(this, this.local_folder_root);
     }
 
     /** {@inheritDoc} */
@@ -1028,7 +1042,9 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
         GenericAccount generic = (GenericAccount) this.account;
         Gee.List<ImapDB.Folder> folders = new Gee.LinkedList<ImapDB.Folder>();
 
-        yield enumerate_local_folders_async(folders, null, cancellable);
+        yield enumerate_local_folders_async(
+            folders, generic.local.imap_folder_root, cancellable
+        );
         generic.add_folders(folders, true);
         if (!folders.is_empty) {
             // If we have some folders to load, then this isn't the
@@ -1039,7 +1055,7 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
     }
 
     private async void enumerate_local_folders_async(Gee.List<ImapDB.Folder> folders,
-                                                     Geary.FolderPath? parent,
+                                                     Geary.FolderPath parent,
                                                      Cancellable? cancellable)
         throws Error {
         Gee.Collection<ImapDB.Folder>? children = null;
@@ -1074,7 +1090,7 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
                     Geary.Folder target = yield generic.fetch_folder_async(path, cancellable);
                     specials.set(special, target);
                 } catch (Error err) {
-                    debug("%s: Previously used special folder %s does not exist: %s",
+                    debug("%s: Previously used special folder %s not loaded: %s",
                           generic.information.id, special.to_string(), err.message);
                 }
             }
@@ -1137,7 +1153,10 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
         );
         try {
             bool is_suspect = yield enumerate_remote_folders_async(
-                remote, remote_folders, null, cancellable
+                remote,
+                remote_folders,
+                account.local.imap_folder_root,
+                cancellable
             );
 
             // pair the local and remote folders and make sure

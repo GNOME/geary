@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 private class Geary.ImapDB.Account : BaseObject {
@@ -74,9 +76,22 @@ private class Geary.ImapDB.Account : BaseObject {
 
     public signal void contacts_loaded();
 
+    /**
+     * The root path for all remote IMAP folders.
+     *
+     * No folder exists for this path locally or on the remote server,
+     * it merely exists to provide a common root for the paths of all
+     * IMAP folders.
+     *
+     * @see list_folders_async
+     */
+    public Imap.FolderRoot imap_folder_root {
+        get; private set; default = new Imap.FolderRoot();
+    }
+
     // Only available when the Account is opened
     public ImapEngine.ContactStore contact_store { get; private set; }
-    public IntervalProgressMonitor search_index_monitor { get; private set; 
+    public IntervalProgressMonitor search_index_monitor { get; private set;
         default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
     public SimpleProgressMonitor upgrade_monitor { get; private set; default = new SimpleProgressMonitor(
         ProgressType.DB_UPGRADE); }
@@ -476,11 +491,19 @@ private class Geary.ImapDB.Account : BaseObject {
             contacts_loaded();
         }
     }
-    
-    public async Gee.Collection<Geary.ImapDB.Folder> list_folders_async(Geary.FolderPath? parent,
-        Cancellable? cancellable = null) throws Error {
+
+    /**
+     * Lists all children of a given folder.
+     *
+     * To list all top-level folders, pass in {@link imap_folder_root}
+     * as the parent.
+     */
+    public async Gee.Collection<Geary.ImapDB.Folder>
+        list_folders_async(Geary.FolderPath parent,
+                           GLib.Cancellable? cancellable)
+        throws GLib.Error {
         check_open();
-        
+
         // TODO: A better solution here would be to only pull the FolderProperties if the Folder
         // object itself doesn't already exist
         Gee.HashMap<Geary.FolderPath, int64?> id_map = new Gee.HashMap<
@@ -489,17 +512,14 @@ private class Geary.ImapDB.Account : BaseObject {
             Geary.FolderPath, Geary.Imap.FolderProperties>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             int64 parent_id = Db.INVALID_ROWID;
-            if (parent != null) {
-                if (!do_fetch_folder_id(cx, parent, false, out parent_id, cancellable)) {
-                    debug("Unable to find folder ID for %s to list folders", parent.to_string());
-                    
-                    return Db.TransactionOutcome.ROLLBACK;
-                }
-                
-                if (parent_id == Db.INVALID_ROWID)
-                    throw new EngineError.NOT_FOUND("Folder %s not found", parent.to_string());
+            if (!parent.is_root &&
+                !do_fetch_folder_id(
+                    cx, parent, false, out parent_id, cancellable
+                )) {
+                debug("Unable to find folder ID for \"%s\" to list folders", parent.to_string());
+                return Db.TransactionOutcome.ROLLBACK;
             }
-            
+
             Db.Statement stmt;
             if (parent_id != Db.INVALID_ROWID) {
                 stmt = cx.prepare(
@@ -511,15 +531,11 @@ private class Geary.ImapDB.Account : BaseObject {
                     "SELECT id, name, last_seen_total, unread_count, last_seen_status_total, "
                     + "uid_validity, uid_next, attributes FROM FolderTable WHERE parent_id IS NULL");
             }
-            
+
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 string basename = result.string_for("name");
-                
-                Geary.FolderPath path = (parent != null)
-                    ? parent.get_child(basename)
-                    : new Imap.FolderRoot(basename);
-
+                Geary.FolderPath path = parent.get_child(basename);
                 Geary.Imap.FolderProperties properties = new Geary.Imap.FolderProperties.from_imapdb(
                     Geary.Imap.MailboxAttributes.deserialize(result.string_for("attributes")),
                     result.int_for("last_seen_total"),
@@ -544,12 +560,13 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
         
         assert(id_map.size == prop_map.size);
-        
+
         if (id_map.size == 0) {
-            throw new EngineError.NOT_FOUND("No local folders in %s",
-                (parent != null) ? parent.to_string() : "root");
+            throw new EngineError.NOT_FOUND(
+                "No local folders under \"%s\"", parent.to_string()
+            );
         }
-        
+
         Gee.Collection<Geary.ImapDB.Folder> folders = new Gee.ArrayList<Geary.ImapDB.Folder>();
         foreach (Geary.FolderPath path in id_map.keys) {
             Geary.ImapDB.Folder? folder = get_local_folder(path);
@@ -1555,23 +1572,32 @@ private class Geary.ImapDB.Account : BaseObject {
         
         folder_stmt.exec(cancellable);
     }
-    
-    // If the FolderPath has no parent, returns true and folder_id will be set to Db.INVALID_ROWID.
-    // If cannot create path or there is a logical problem traversing it, returns false with folder_id
-    // set to Db.INVALID_ROWID.
-    internal bool do_fetch_folder_id(Db.Connection cx, Geary.FolderPath path, bool create, out int64 folder_id,
-        Cancellable? cancellable) throws Error {
-        int length = path.get_path_length();
-        if (length < 0)
-            throw new EngineError.BAD_PARAMETERS("Invalid path %s", path.to_string());
-        
+
+    // If the FolderPath has no parent, returns true and folder_id
+    // will be set to Db.INVALID_ROWID.  If cannot create path or
+    // there is a logical problem traversing it, returns false with
+    // folder_id set to Db.INVALID_ROWID.
+    internal bool do_fetch_folder_id(Db.Connection cx,
+                                     Geary.FolderPath path,
+                                     bool create,
+                                     out int64 folder_id,
+                                     GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (path.is_root) {
+            throw new EngineError.BAD_PARAMETERS(
+                "Cannot fetch folder for root path"
+            );
+        }
+
+        // Don't include the root since top-level folders are stored
+        // with no parent.
+        Gee.List<string> parts = path.as_list();
+        parts.remove_at(0);
+
         folder_id = Db.INVALID_ROWID;
         int64 parent_id = Db.INVALID_ROWID;
-        
-        // walk the folder tree to the final node (which is at length - 1 - 1)
-        for (int ctr = 0; ctr < length; ctr++) {
-            string basename = path.get_folder_at(ctr).basename;
-            
+
+        foreach (string basename in parts) {
             Db.Statement stmt;
             if (parent_id != Db.INVALID_ROWID) {
                 stmt = cx.prepare("SELECT id FROM FolderTable WHERE parent_id=? AND name=?");
@@ -1616,19 +1642,28 @@ private class Geary.ImapDB.Account : BaseObject {
         
         return true;
     }
-    
-    // See do_fetch_folder_id() for return semantics.
-    internal bool do_fetch_parent_id(Db.Connection cx, Geary.FolderPath path, bool create, out int64 parent_id,
-        Cancellable? cancellable = null) throws Error {
-        if (path.is_root()) {
+
+    internal bool do_fetch_parent_id(Db.Connection cx,
+                                     FolderPath path,
+                                     bool create,
+                                     out int64 parent_id,
+                                     GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        // See do_fetch_folder_id() for return semantics
+        bool ret = true;
+
+        // No folder for the root is saved in the database, so
+        // top-levels should not have a parent.
+        if (path.is_top_level) {
             parent_id = Db.INVALID_ROWID;
-            
-            return true;
+        } else {
+            ret = do_fetch_folder_id(
+                cx, path.get_parent(), create, out parent_id, cancellable
+            );
         }
-        
-        return do_fetch_folder_id(cx, path.get_parent(), create, out parent_id, cancellable);
+        return ret;
     }
-    
+
     private bool do_has_children(Db.Connection cx, int64 folder_id, Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("SELECT 1 FROM FolderTable WHERE parent_id = ?");
         stmt.bind_rowid(0, folder_id);
@@ -1700,8 +1735,12 @@ private class Geary.ImapDB.Account : BaseObject {
     
     // For a message row id, return a set of all folders it's in, or null if
     // it's not in any folders.
-    private static Gee.Set<Geary.FolderPath>? do_find_email_folders(Db.Connection cx, int64 message_id,
-        bool include_removed, Cancellable? cancellable) throws Error {
+    private Gee.Set<Geary.FolderPath>?
+        do_find_email_folders(Db.Connection cx,
+                              int64 message_id,
+                              bool include_removed,
+                              GLib.Cancellable? cancellable)
+        throws GLib.Error {
         string sql = "SELECT folder_id FROM MessageLocationTable WHERE message_id=?";
         if (!include_removed)
             sql += " AND remove_marker=0";
@@ -1724,16 +1763,20 @@ private class Geary.ImapDB.Account : BaseObject {
         
         return (folder_paths.size == 0 ? null : folder_paths);
     }
-    
+
     // For a folder row id, return the folder path (constructed with default
     // separator and case sensitivity) of that folder, or null in the event
     // it's not found.
-    private static Geary.FolderPath? do_find_folder_path(Db.Connection cx, int64 folder_id,
-        Cancellable? cancellable) throws Error {
-        Db.Statement stmt = cx.prepare("SELECT parent_id, name FROM FolderTable WHERE id=?");
+    private Geary.FolderPath? do_find_folder_path(Db.Connection cx,
+                                                  int64 folder_id,
+                                                  GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Db.Statement stmt = cx.prepare(
+            "SELECT parent_id, name FROM FolderTable WHERE id=?"
+        );
         stmt.bind_int64(0, folder_id);
         Db.Result result = stmt.exec(cancellable);
-        
+
         if (result.finished)
             return null;
         
@@ -1746,12 +1789,19 @@ private class Geary.ImapDB.Account : BaseObject {
                 folder_id.to_string(), parent_id.to_string());
             return null;
         }
-        
-        if (parent_id <= 0)
-            return new Imap.FolderRoot(name);
-        
-        Geary.FolderPath? parent_path = do_find_folder_path(cx, parent_id, cancellable);
-        return (parent_path == null ? null : parent_path.get_child(name));
+
+        Geary.FolderPath? path = null;
+        if (parent_id <= 0) {
+            path = this.imap_folder_root.get_child(name);
+        } else {
+            Geary.FolderPath? parent_path = do_find_folder_path(
+                cx, parent_id, cancellable
+            );
+            if (parent_path != null) {
+                path = parent_path.get_child(name);
+            }
+        }
+        return path;
     }
 
     private void on_unread_updated(ImapDB.Folder source, Gee.Map<ImapDB.EmailIdentifier, bool>

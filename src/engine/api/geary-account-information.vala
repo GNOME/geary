@@ -29,9 +29,10 @@ public class Geary.AccountInformation : BaseObject {
         if (parts == null || parts.size == 0)
             return null;
 
-        Geary.FolderPath path = new Imap.FolderRoot(parts[0]);
-        for (int i = 1; i < parts.size; i++)
-            path = path.get_child(parts.get(i));
+        Geary.FolderPath path = new Imap.FolderRoot();
+        foreach (string basename in parts) {
+            path = path.get_child(basename);
+        }
         return path;
     }
 

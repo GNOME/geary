@@ -75,6 +75,7 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
     }
 
     protected override SearchFolder new_search_folder() {
-        return new GmailSearchFolder(this);
+        return new GmailSearchFolder(this, this.local_folder_root);
     }
+
 }

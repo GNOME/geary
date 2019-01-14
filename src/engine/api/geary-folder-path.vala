@@ -15,11 +15,13 @@
 
 public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     Gee.Comparable<Geary.FolderPath> {
+
+
     /**
      * The name of this folder (without any child or parent names or delimiters).
      */
     public string basename { get; private set; }
-    
+
     /**
      * Whether this path is lexiographically case-sensitive.
      *
@@ -27,16 +29,34 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      */
     public bool case_sensitive { get; private set; }
 
+    /**
+     * Determines if this path is a root folder path.
+     */
+    public virtual bool is_root {
+        get { return this.path == null || this.path.size == 0; }
+    }
+
+    /**
+     * Determines if this path is a child of the root folder.
+     */
+    public bool is_top_level {
+        get {
+            FolderPath? parent = get_parent();
+            return parent != null && parent.is_root;
+        }
+    }
+
+
     private Gee.List<Geary.FolderPath>? path = null;
     private uint stored_hash = uint.MAX;
-    
-    protected FolderPath(string basename, bool case_sensitive) {
-        assert(this is FolderRoot);
-        
-        this.basename = basename;
-        this.case_sensitive = case_sensitive;
+
+
+    /** Constructor only for use by {@link FolderRoot}. */
+    internal FolderPath() {
+        this.basename = "";
+        this.case_sensitive = false;
     }
-    
+
     private FolderPath.child(Gee.List<Geary.FolderPath> path, string basename, bool case_sensitive) {
         assert(path[0] is FolderRoot);
         
@@ -44,19 +64,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         this.basename = basename;
         this.case_sensitive = case_sensitive;
     }
-    
-    /**
-     * Returns true if this {@link FolderPath} is a root folder.
-     *
-     * This means that the FolderPath ''should'' be castable into {@link FolderRoot}, which is
-     * enforced through the constructor and accessor styles of this class.  However, this test
-     * merely checks if this FolderPath has any children.  A GObject "is" operation is the
-     * reliable way to cast to FolderRoot.
-     */
-    public bool is_root() {
-        return (path == null || path.size == 0);
-    }
-    
+
     /**
      * Returns the {@link FolderRoot} of this path.
      */
@@ -127,24 +135,31 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         
         return list;
     }
-    
+
     /**
-     * Creates a {@link FolderPath} object that is a child of this folder.
+     * Creates a path that is a child of this folder.
      *
-     * {@link Trillian.TRUE} and {@link Trillian.FALSE} force case-sensitivity.
-     * {@link Trillian.UNKNOWN} indicates to use {@link FolderRoot.default_case_sensitivity}.
+     * Specifying {@link Trillian.TRUE} or {@link Trillian.FALSE} for
+     * `is_case_sensitive` forces case-sensitivity either way. If
+     * {@link Trillian.UNKNOWN}, then {@link
+     * FolderRoot.default_case_sensitivity} is used.
      */
-    public Geary.FolderPath get_child(string basename, Trillian child_case_sensitive = Trillian.UNKNOWN) {
+    public virtual Geary.FolderPath
+        get_child(string basename,
+                  Trillian is_case_sensitive = Trillian.UNKNOWN) {
         // Build the child's path, which is this node's path plus this node
         Gee.List<FolderPath> child_path = new Gee.ArrayList<FolderPath>();
         if (path != null)
             child_path.add_all(path);
         child_path.add(this);
-        
-        return new FolderPath.child(child_path, basename,
-            child_case_sensitive.to_boolean(get_root().default_case_sensitivity));
+
+        return new FolderPath.child(
+            child_path,
+            basename,
+            is_case_sensitive.to_boolean(get_root().default_case_sensitivity)
+        );
     }
-    
+
     /**
      * Returns true if the other {@link FolderPath} has the same parent as this one.
      *
@@ -312,28 +327,36 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
 }
 
 /**
- * The root of a folder heirarchy.
+ * The root of a folder hierarchy.
  *
- * A {@link FolderPath} can only be created by starting with a FolderRoot and adding children
- * via {@link FolderPath.get_child}.  Because all FolderPaths hold references to their parents,
- * this element can be retrieved with {@link FolderPath.get_root}.
- *
- * Since each email system may have different requirements for its paths, this is an abstract
- * class.
+ * A {@link FolderPath} can only be created by starting with a
+ * FolderRoot and adding children via {@link FolderPath.get_child}.
+ * Because all FolderPaths hold references to their parents, this
+ * element can be retrieved with {@link FolderPath.get_root}.
  */
-public abstract class Geary.FolderRoot : Geary.FolderPath {
+public class Geary.FolderRoot : Geary.FolderPath {
+
+
+    /** {@inheritDoc} */
+    public override bool is_root {
+        get { return true; }
+    }
+
     /**
-     * The default case sensitivity of each element in the {@link FolderPath}.
+     * The default case sensitivity of descendant folders.
      *
      * @see FolderRoot.case_sensitive
      * @see FolderPath.get_child
      */
     public bool default_case_sensitivity { get; private set; }
-    
-    protected FolderRoot(string basename, bool case_sensitive, bool default_case_sensitivity) {
-        base (basename, case_sensitive);
-        
+
+
+    /**
+     * Constructs a new folder root with given default sensitivity.
+     */
+    public FolderRoot(bool default_case_sensitivity) {
+        base();
         this.default_case_sensitivity = default_case_sensitivity;
     }
-}
 
+}

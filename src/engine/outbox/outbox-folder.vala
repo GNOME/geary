@@ -16,6 +16,10 @@ private class Geary.Outbox.Folder :
     Geary.FolderSupport.Remove {
 
 
+    /** The canonical name of the outbox folder. */
+    public const string MAGIC_BASENAME = "$GearyOutbox$";
+
+
     private class OutboxRow {
         public int64 id;
         public int position;
@@ -38,19 +42,32 @@ private class Geary.Outbox.Folder :
     }
 
 
+    /** {@inheritDoc} */
     public override Account account { get { return this._account; } }
 
+    /** {@inheritDoc} */
     public override Geary.FolderProperties properties {
         get { return _properties; }
     }
 
-    private FolderRoot _path = new FolderRoot();
+    /**
+     * Returns the path to this folder.
+     *
+     * This is always the child of the root given to the constructor,
+     * with the name given by @{link MAGIC_BASENAME}.
+     */
     public override FolderPath path {
         get {
             return _path;
         }
     }
+    private FolderPath _path;
 
+    /**
+     * Returns the type of this folder.
+     *
+     * This is always {@link Geary.SpecialFolderType.OUTBOX}
+     */
     public override SpecialFolderType special_folder_type {
         get {
             return Geary.SpecialFolderType.OUTBOX;
@@ -66,8 +83,9 @@ private class Geary.Outbox.Folder :
 
     // Requires the Database from the get-go because it runs a background task that access it
     // whether open or not
-    public Folder(Account account, ImapDB.Account local) {
+    public Folder(Account account, FolderRoot root, ImapDB.Account local) {
         this._account = account;
+        this._path = root.get_child(MAGIC_BASENAME, Trillian.TRUE);
         this.local = local;
     }
 

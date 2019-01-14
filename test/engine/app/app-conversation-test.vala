@@ -10,6 +10,8 @@ class Geary.App.ConversationTest : TestCase {
 
     Conversation? test = null;
     Folder? base_folder = null;
+    FolderRoot? folder_root = null;
+
 
     public ConversationTest() {
         base("Geary.App.ConversationTest");
@@ -24,14 +26,21 @@ class Geary.App.ConversationTest : TestCase {
     }
 
     public override void set_up() {
+        this.folder_root = new FolderRoot(false);
         this.base_folder = new MockFolder(
             null,
             null,
-            new MockFolderRoot("test"),
+            this.folder_root.get_child("test"),
             SpecialFolderType.NONE,
             null
         );
         this.test = new Conversation(this.base_folder);
+    }
+
+    public override void tear_down() {
+        this.test = null;
+        this.folder_root = null;
+        this.base_folder = null;
     }
 
     public void add_basic() throws Error {
@@ -78,8 +87,8 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(this.base_folder.path));
 
-        FolderRoot other_path = new MockFolderRoot("other");
-        Gee.LinkedList<FolderRoot> other_paths = new Gee.LinkedList<FolderRoot>();
+        FolderPath other_path = this.folder_root.get_child("other");
+        Gee.LinkedList<FolderPath> other_paths = new Gee.LinkedList<FolderPath>();
         other_paths.add(other_path);
 
         assert(this.test.add(e1, other_paths) == false);
@@ -145,7 +154,7 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
-        FolderRoot other_path = new MockFolderRoot("other");
+        FolderPath other_path = this.folder_root.get_child("other");
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(other_path));
 
@@ -158,7 +167,7 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
-        FolderRoot other_path = new MockFolderRoot("other");
+        FolderPath other_path = this.folder_root.get_child("other");
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(other_path));
 
@@ -193,7 +202,7 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
-        FolderRoot other_path = new MockFolderRoot("other");
+        FolderPath other_path = this.folder_root.get_child("other");
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(other_path));
 

@@ -90,7 +90,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
             
             // Special folders go in the root of the account.
             graft_point = get_root();
-        } else if (folder.path.get_parent() == null) {
+        } else if (folder.path.is_top_level) {
             // Top-level folders get put in our special user folders group.
             graft_point = user_folder_group;
 

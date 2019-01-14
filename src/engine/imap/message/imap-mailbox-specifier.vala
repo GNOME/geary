@@ -84,9 +84,9 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
      * Returns true if the {@link Geary.FolderPath} points to the IMAP Inbox.
      */
     public static bool folder_path_is_inbox(FolderPath path) {
-        return path.is_root() && is_inbox_name(path.basename);
+        return path.is_top_level && is_inbox_name(path.basename);
     }
-    
+
     /**
      * Returns true if the string is the name of the IMAP Inbox.
      *
@@ -115,30 +115,50 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     public static bool is_canonical_inbox_name(string name) {
         return Ascii.str_equal(name, CANONICAL_INBOX_NAME);
     }
-    
+
     /**
      * Converts a generic {@link FolderPath} into an IMAP mailbox specifier.
      */
-    public MailboxSpecifier.from_folder_path(FolderPath path, MailboxSpecifier inbox, string? delim)
-    throws ImapError {
-        Gee.List<string> parts = path.as_list();
-        if (parts.size > 1 && delim == null) {
-            // XXX not quite right
-            throw new ImapError.INVALID("Path has more than one part but no delimiter given");
+    public MailboxSpecifier.from_folder_path(FolderPath path,
+                                             MailboxSpecifier inbox,
+                                             string? delim)
+        throws ImapError {
+        if (path.is_root) {
+            throw new ImapError.INVALID(
+                "Cannot convert root path into a mailbox"
+            );
         }
 
-        // Don't include the root if it is an empty string so that
-        // mailboxes do not begin with the delim.
-        if (parts.size > 1 && parts[0] == "") {
-            parts.remove_at(0);
+        Gee.List<string> parts = path.as_list();
+        // Don't include the root so that mailboxes do not begin with
+        // the delim.
+        parts.remove_at(0);
+
+        if (parts.size > 1 && delim == null) {
+            throw new ImapError.INVALID(
+                "Path has more than one part but no delimiter given"
+            );
+        }
+
+        if (String.is_empty_or_whitespace(parts[0])) {
+            throw new ImapError.INVALID(
+                "Path contains empty base part: '%s'", path.to_string()
+            );
         }
 
         StringBuilder builder = new StringBuilder(
-            is_inbox_name(parts[0]) ? inbox.name : parts[0]);
+            is_inbox_name(parts[0]) ? inbox.name : parts[0]
+        );
 
         for (int i = 1; i < parts.size; i++) {
+            string basename = parts[i];
+            if (String.is_empty_or_whitespace(basename)) {
+                throw new ImapError.INVALID(
+                    "Path contains empty part: '%s'", path.to_string()
+                );
+            }
             builder.append(delim);
-            builder.append(parts[i]);
+            builder.append(basename);
         }
 
         init(builder.str);
@@ -156,7 +176,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
      * the name is returned as a single element.
      */
     public Gee.List<string> to_list(string? delim) {
-        Gee.List<string> path = new Gee.ArrayList<string>();
+        Gee.List<string> path = new Gee.LinkedList<string>();
         
         if (!String.is_empty(delim)) {
             string[] split = name.split(delim);
@@ -171,33 +191,36 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
         
         return path;
     }
-    
+
     /**
-     * Converts the {@link MailboxSpecifier} into a {@link FolderPath}.
+     * Converts the mailbox into a folder path.
      *
-     * If the inbox_specifier is supplied, if the root element matches it, the canonical Inbox
-     * name is used in its place.  This is useful for XLIST where that command returns a translated
-     * name but the standard IMAP name ("INBOX") must be used in addressing its children.
+     * If the inbox_specifier is supplied and the first element
+     * matches it, the canonical Inbox name is used in its place.
+     * This is useful for XLIST where that command returns a
+     * translated name but the standard IMAP name ("INBOX") must be
+     * used in addressing its children.
      */
-    public FolderPath to_folder_path(string? delim, MailboxSpecifier? inbox_specifier) {
-        // convert path to list of elements
+    public FolderPath to_folder_path(FolderRoot root,
+                                     string? delim,
+                                     MailboxSpecifier? inbox_specifier) {
         Gee.List<string> list = to_list(delim);
-        
-        // if root element is same as supplied inbox specifier, use canonical inbox name, otherwise
-        // keep
-        FolderPath path;
-        if (inbox_specifier != null && list[0] == inbox_specifier.name)
-            path = new Imap.FolderRoot(CANONICAL_INBOX_NAME);
-        else
-            path = new Imap.FolderRoot(list[0]);
-        
-        // walk down rest of elements adding as we go
-        for (int ctr = 1; ctr < list.size; ctr++)
-            path = path.get_child(list[ctr]);
-        
+
+        // If the first element is same as supplied inbox specifier,
+        // use canonical inbox name, otherwise keep
+        FolderPath? path = (
+            (inbox_specifier != null && list[0] == inbox_specifier.name)
+            ? root.get_child(CANONICAL_INBOX_NAME)
+            : root.get_child(list[0])
+        );
+        list.remove_at(0);
+
+        foreach (string name in list) {
+            path = path.get_child(name);
+        }
         return path;
     }
-    
+
     /**
      * The mailbox's name without parent folders.
      *

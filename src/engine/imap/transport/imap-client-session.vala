@@ -509,7 +509,7 @@ public class Geary.Imap.ClientSession : BaseObject {
      * Determines the SELECT-able mailbox name for a specific folder path.
      */
     public MailboxSpecifier get_mailbox_for_path(FolderPath path)
-    throws ImapError {
+        throws ImapError {
         string? delim = get_delimiter_for_path(path);
         return new MailboxSpecifier.from_folder_path(path, this.inbox.mailbox, delim);
     }
@@ -517,10 +517,11 @@ public class Geary.Imap.ClientSession : BaseObject {
     /**
      * Determines the folder path for a mailbox name.
      */
-    public FolderPath get_path_for_mailbox(MailboxSpecifier mailbox)
-    throws ImapError {
+    public FolderPath get_path_for_mailbox(FolderRoot root,
+                                           MailboxSpecifier mailbox)
+        throws ImapError {
         string? delim = get_delimiter_for_mailbox(mailbox);
-        return mailbox.to_folder_path(delim, this.inbox.mailbox);
+        return mailbox.to_folder_path(root, delim, this.inbox.mailbox);
     }
 
     /**
