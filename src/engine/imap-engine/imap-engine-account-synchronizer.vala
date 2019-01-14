@@ -42,7 +42,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             // we do require that for syncing at the moment anyway,
             // but keep the tests in for that one glorious day where
             // we can just use a generic folder.
-            debug("Is folder \"%s\" openable: %s", folder.path.to_string(), folder.properties.is_openable.to_string());
             MinimalFolder? imap_folder = folder as MinimalFolder;
             if (imap_folder != null &&
                 folder.properties.is_openable.is_possible() &&

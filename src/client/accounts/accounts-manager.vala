@@ -599,9 +599,6 @@ public class Accounts.Manager : GLib.Object {
             try {
                 services.load(config, account, account.incoming);
                 services.load(config, account, account.outgoing);
-
-                debug("IMAP host name: %s", account.incoming.host);
-
             } catch (GLib.KeyFileError err) {
                 throw new ConfigError.SYNTAX(err.message);
             }
@@ -1456,8 +1453,6 @@ public class Accounts.ServiceConfigLegacy : ServiceConfig, GLib.Object {
         Geary.ConfigFile.Group service_config =
             config.get_group(AccountConfigLegacy.GROUP);
 
-        debug("Loading...");
-
         string prefix = service.protocol == Geary.Protocol.IMAP
             ? "imap_" :  "smtp_";
 
@@ -1478,8 +1473,6 @@ public class Accounts.ServiceConfigLegacy : ServiceConfig, GLib.Object {
             service.port = (uint16) service_config.get_int(
                 prefix + PORT, service.port
             );
-
-            debug("Host name: %s", service.host);
 
             bool use_tls = service_config.get_bool(
                 prefix + SSL, service.protocol == Geary.Protocol.IMAP
