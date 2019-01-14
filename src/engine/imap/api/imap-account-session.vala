@@ -23,6 +23,7 @@
  */
 internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
 
+    private FolderRoot root;
     private Gee.HashMap<FolderPath,Imap.Folder> folders =
         new Gee.HashMap<FolderPath,Imap.Folder>();
 
@@ -32,8 +33,10 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
 
 
     internal AccountSession(string account_id,
+                            FolderRoot root,
                             ClientSession session) {
         base("%s:account".printf(account_id), session);
+        this.root = root;
 
         session.list.connect(on_list_data);
         session.status.connect(on_status_data);
@@ -56,7 +59,26 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
             prefix = prefix.substring(0, prefix.length - delim.length);
         }
 
-        return new FolderRoot(prefix);
+        return Geary.String.is_empty(prefix)
+            ? this.root
+            : this.root.get_child(prefix);
+    }
+
+    /**
+     * Determines if the given folder path appears to a valid mailbox.
+     */
+    public bool is_folder_path_valid(FolderPath? path) throws GLib.Error {
+        bool is_valid = false;
+        if (path != null) {
+            ClientSession session = claim_session();
+            try {
+                session.get_mailbox_for_path(path);
+                is_valid = true;
+            } catch (GLib.Error err) {
+                // still not valid
+            }
+        }
+        return is_valid;
     }
 
     /**
@@ -139,17 +161,18 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     /**
      * Returns a list of children of the given folder.
      *
-     * If the parent folder is `null`, then the root of the server
-     * will be listed.
-     *
      * This method will perform a pipe-lined IMAP SELECT for all
      * folders found, and hence should be used with care.
      */
-    public async Gee.List<Imap.Folder> fetch_child_folders_async(FolderPath? parent, Cancellable? cancellable)
-        throws Error {
+    public async Gee.List<Folder>
+        fetch_child_folders_async(FolderPath parent,
+                                  GLib.Cancellable? cancellable)
+        throws GLib.Error {
         ClientSession session = claim_session();
         Gee.List<Imap.Folder> children = new Gee.ArrayList<Imap.Folder>();
-        Gee.List<MailboxInformation> mailboxes = yield send_list_async(session, parent, true, cancellable);
+        Gee.List<MailboxInformation> mailboxes = yield send_list_async(
+            session, parent, true, cancellable
+        );
         if (mailboxes.size == 0) {
             return children;
         }
@@ -172,7 +195,9 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                 // Mailbox is unselectable, so doesn't need a STATUS,
                 // so we can create it now if it does not already
                 // exist
-                FolderPath path = session.get_path_for_mailbox(mailbox_info.mailbox);
+                FolderPath path = session.get_path_for_mailbox(
+                    this.root, mailbox_info.mailbox
+                );
                 Folder? child = this.folders.get(path);
                 if (child == null) {
                     child = new Imap.Folder(
@@ -223,7 +248,9 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                 }
                 status_results.remove(status);
 
-                FolderPath child_path = session.get_path_for_mailbox(mailbox_info.mailbox);
+                FolderPath child_path = session.get_path_for_mailbox(
+                    this.root, mailbox_info.mailbox
+                );
                 Imap.Folder? child = this.folders.get(child_path);
 
                 if (child != null) {
@@ -269,7 +296,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
 
     // Performs a LIST against the server, returning the results
     private async Gee.List<MailboxInformation> send_list_async(ClientSession session,
-                                                               FolderPath? folder,
+                                                               FolderPath folder,
                                                                bool list_children,
                                                                Cancellable? cancellable)
         throws Error {
@@ -283,7 +310,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         }
 
         ListCommand cmd;
-        if (folder == null) {
+        if (folder.is_root) {
             // List the server root
             cmd = new ListCommand.wildcarded(
                 "", new MailboxSpecifier("%"), can_xlist, return_param
@@ -314,7 +341,9 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         if (folder != null && list_children) {
             Gee.Iterator<MailboxInformation> iter = list_results.iterator();
             while (iter.next()) {
-                FolderPath list_path = session.get_path_for_mailbox(iter.get().mailbox);
+                FolderPath list_path = session.get_path_for_mailbox(
+                    this.root, iter.get().mailbox
+                );
                 if (list_path.equal_to(folder)) {
                     debug("Removing parent from LIST results: %s", list_path.to_string());
                     iter.remove();

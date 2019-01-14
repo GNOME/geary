@@ -9,6 +9,7 @@ class Geary.App.ConversationSetTest : TestCase {
 
 
     ConversationSet? test = null;
+    FolderRoot? folder_root = null;
     Folder? base_folder = null;
 
     public ConversationSetTest() {
@@ -26,14 +27,21 @@ class Geary.App.ConversationSetTest : TestCase {
     }
 
     public override void set_up() {
-        this.test = new ConversationSet();
+        this.folder_root = new FolderRoot(false);
         this.base_folder = new MockFolder(
             null,
             null,
-            new MockFolderRoot("test"),
+            this.folder_root.get_child("test"),
             SpecialFolderType.NONE,
             null
         );
+        this.test = new ConversationSet();
+    }
+
+    public override void tear_down() {
+        this.test = null;
+        this.folder_root = null;
+        this.base_folder = null;
     }
 
     public void add_all_basic() throws Error {
@@ -144,7 +152,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath> email_paths =
             new Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath>();
         email_paths.set(e1.id, this.base_folder.path);
-        email_paths.set(e2.id, new MockFolderRoot("other"));
+        email_paths.set(e2.id, this.folder_root.get_child("other"));
 
         Gee.Collection<Conversation>? added = null;
         Gee.MultiMap<Conversation,Email>? appended = null;
@@ -310,7 +318,7 @@ class Geary.App.ConversationSetTest : TestCase {
 
     public void add_all_multi_path() throws Error {
         Email e1 = setup_email(1);
-        MockFolderRoot other_path = new MockFolderRoot("other");
+        FolderPath other_path = this.folder_root.get_child("other");
 
         Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
         emails.add(e1);
@@ -340,7 +348,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Email e1 = setup_email(1);
         add_email_to_test_set(e1);
 
-        MockFolderRoot other_path = new MockFolderRoot("other");
+        FolderPath other_path = this.folder_root.get_child("other");
 
         Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
         emails.add(e1);
@@ -426,7 +434,7 @@ class Geary.App.ConversationSetTest : TestCase {
     }
 
     public void remove_all_remove_path() throws Error {
-        MockFolderRoot other_path = new MockFolderRoot("other");
+        FolderPath other_path = this.folder_root.get_child("other");
         Email e1 = setup_email(1);
         add_email_to_test_set(e1, other_path);
 

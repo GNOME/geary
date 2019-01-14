@@ -181,7 +181,6 @@ geary_engine_vala_sources = files(
   'imap-db/search/imap-db-search-email-identifier.vala',
   'imap-db/search/imap-db-search-folder.vala',
   'imap-db/search/imap-db-search-folder-properties.vala',
-  'imap-db/search/imap-db-search-folder-root.vala',
   'imap-db/search/imap-db-search-query.vala',
   'imap-db/search/imap-db-search-term.vala',
 
@@ -264,7 +263,6 @@ geary_engine_vala_sources = files(
   'outbox/outbox-email-properties.vala',
   'outbox/outbox-folder.vala',
   'outbox/outbox-folder-properties.vala',
-  'outbox/outbox-folder-root.vala',
 
   'rfc822/rfc822.vala',
   'rfc822/rfc822-error.vala',

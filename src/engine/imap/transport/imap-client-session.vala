@@ -509,7 +509,7 @@ public class Geary.Imap.ClientSession : BaseObject {
      * Determines the SELECT-able mailbox name for a specific folder path.
      */
     public MailboxSpecifier get_mailbox_for_path(FolderPath path)
-    throws ImapError {
+        throws ImapError {
         string? delim = get_delimiter_for_path(path);
         return new MailboxSpecifier.from_folder_path(path, this.inbox.mailbox, delim);
     }
@@ -517,10 +517,11 @@ public class Geary.Imap.ClientSession : BaseObject {
     /**
      * Determines the folder path for a mailbox name.
      */
-    public FolderPath get_path_for_mailbox(MailboxSpecifier mailbox)
-    throws ImapError {
+    public FolderPath get_path_for_mailbox(FolderRoot root,
+                                           MailboxSpecifier mailbox)
+        throws ImapError {
         string? delim = get_delimiter_for_mailbox(mailbox);
-        return mailbox.to_folder_path(delim, this.inbox.mailbox);
+        return mailbox.to_folder_path(root, delim, this.inbox.mailbox);
     }
 
     /**
@@ -532,21 +533,23 @@ public class Geary.Imap.ClientSession : BaseObject {
     public string? get_delimiter_for_path(FolderPath path)
     throws ImapError {
         string? delim = null;
-        Geary.FolderRoot root = path.get_root();
-        if (MailboxSpecifier.folder_path_is_inbox(root)) {
+
+        FolderRoot root = (FolderRoot) path.get_root();
+        if (root.inbox.equal_to(path) ||
+            root.inbox.is_descendant(path)) {
             delim = this.inbox.delim;
         } else {
-            Namespace? ns = this.namespaces.get(root.basename);
-            if (ns == null) {
-                // Folder's root doesn't exist as a namespace, so try
-                // the empty namespace.
-                ns = this.namespaces.get("");
-                if (ns == null) {
-                    // If that doesn't exist, fall back to the default
-                    // personal namespace
-                    ns = this.personal_namespaces[0];
-                }
+            Namespace? ns = null;
+            FolderPath? search = path;
+            while (ns == null && search != null) {
+                ns = this.namespaces.get(search.name);
+                search = search.parent;
             }
+            if (ns == null) {
+                // fall back to the default personal namespace
+                ns = this.personal_namespaces[0];
+            }
+
             delim = ns.delim;
         }
         return delim;

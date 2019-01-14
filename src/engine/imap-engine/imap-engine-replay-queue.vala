@@ -519,11 +519,11 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 } catch (Error replay_err) {
                     debug("Replay remote error for %s on %s: %s (%s)", op.to_string(), to_string(),
                         replay_err.message, op.on_remote_error.to_string());
-                    
-                    // If a hard failure and operation allows remote replay and not closing,
-                    // re-schedule now
+
+                    // If a recoverable failure and operation allows
+                    // remote replay and not closing, re-schedule now
                     if ((op.on_remote_error == ReplayOperation.OnError.RETRY)
-                        && is_hard_failure(replay_err)
+                        && !is_unrecoverable_failure(replay_err)
                         && state == State.OPEN) {
                         debug("Schedule op retry %s on %s", op.to_string(), to_string());
                         

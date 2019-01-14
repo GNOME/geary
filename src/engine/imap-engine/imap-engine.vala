@@ -6,40 +6,51 @@
 
 namespace Geary.ImapEngine {
 
-/**
- * A hard failure is defined as one due to hardware or connectivity issues, where a soft failure
- * is due to software reasons, like credential failure or protocol violation.
- */
-private static bool is_hard_failure(Error err) {
-    // CANCELLED is not a hard error
-    if (err is IOError.CANCELLED)
-        return false;
+    /**
+     * Determines if retrying an operation might succeed or not.
+     *
+     * A recoverable failure is defined as one that may not occur
+     * again if the operation that caused it is retried, without
+     * needing to make some change in the mean time. For example,
+     * recoverable failures may occur due to transient network
+     * connectivity issues or server rate limiting. On the other hand,
+     * an unrecoverable failure is due to some problem that will not
+     * succeed if tried again unless some action is taken, such as
+     * authentication failures, protocol parsing errors, and so on.
+     */
+    private static bool is_unrecoverable_failure(GLib.Error err) {
+        return !(
+            err is EngineError.SERVER_UNAVAILABLE ||
+            err is IOError.BROKEN_PIPE ||
+            err is IOError.BUSY ||
+            err is IOError.CONNECTION_CLOSED ||
+            err is IOError.NOT_CONNECTED ||
+            err is IOError.TIMED_OUT ||
+            err is ImapError.NOT_CONNECTED ||
+            err is ImapError.TIMED_OUT ||
+            err is ImapError.UNAVAILABLE
+        );
+    }
 
-    // Treat other errors -- most likely IOErrors -- as hard failures
-    if (!(err is ImapError) && !(err is EngineError))
-        return true;
-
-    return err is ImapError.NOT_CONNECTED
-        || err is ImapError.TIMED_OUT
-        || err is ImapError.SERVER_ERROR
-        || err is EngineError.SERVER_UNAVAILABLE;
-}
-
-/**
- * Determines if this IOError related to a remote host or not.
- */
-private static bool is_remote_error(GLib.Error err) {
-    return err is ImapError
-        || err is IOError.CONNECTION_CLOSED
-        || err is IOError.CONNECTION_REFUSED
-        || err is IOError.HOST_UNREACHABLE
-        || err is IOError.MESSAGE_TOO_LARGE
-        || err is IOError.NETWORK_UNREACHABLE
-        || err is IOError.NOT_CONNECTED
-        || err is IOError.PROXY_AUTH_FAILED
-        || err is IOError.PROXY_FAILED
-        || err is IOError.PROXY_NEED_AUTH
-        || err is IOError.PROXY_NOT_ALLOWED;
-}
+    /**
+     * Determines if an error was caused by the remote host or not.
+     */
+    private static bool is_remote_error(GLib.Error err) {
+        return (
+            err is EngineError.NOT_FOUND ||
+            err is EngineError.SERVER_UNAVAILABLE ||
+            err is IOError.CONNECTION_CLOSED ||
+            err is IOError.CONNECTION_REFUSED ||
+            err is IOError.HOST_UNREACHABLE ||
+            err is IOError.MESSAGE_TOO_LARGE ||
+            err is IOError.NETWORK_UNREACHABLE ||
+            err is IOError.NOT_CONNECTED ||
+            err is IOError.PROXY_AUTH_FAILED ||
+            err is IOError.PROXY_FAILED ||
+            err is IOError.PROXY_NEED_AUTH ||
+            err is IOError.PROXY_NOT_ALLOWED ||
+            err is ImapError
+        );
+    }
 
 }

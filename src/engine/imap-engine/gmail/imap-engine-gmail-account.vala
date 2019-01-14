@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
@@ -44,30 +46,36 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
     }
 
     protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {
-        Geary.FolderPath path = local_folder.get_path();
-        SpecialFolderType special_folder_type;
-        if (Imap.MailboxSpecifier.folder_path_is_inbox(path))
-            special_folder_type = SpecialFolderType.INBOX;
-        else
-            special_folder_type = local_folder.get_properties().attrs.get_special_folder_type();
+        FolderPath path = local_folder.get_path();
+        SpecialFolderType type;
+        if (Imap.MailboxSpecifier.folder_path_is_inbox(path)) {
+            type = SpecialFolderType.INBOX;
+        } else {
+            type = local_folder.get_properties().attrs.get_special_folder_type();
+            // There can be only one Inbox
+            if (type == SpecialFolderType.INBOX) {
+                type = SpecialFolderType.NONE;
+            }
+        }
 
-        switch (special_folder_type) {
+        switch (type) {
             case SpecialFolderType.ALL_MAIL:
-                return new GmailAllMailFolder(this, local_folder, special_folder_type);
+                return new GmailAllMailFolder(this, local_folder, type);
 
             case SpecialFolderType.DRAFTS:
-                return new GmailDraftsFolder(this, local_folder, special_folder_type);
+                return new GmailDraftsFolder(this, local_folder, type);
 
             case SpecialFolderType.SPAM:
             case SpecialFolderType.TRASH:
-                return new GmailSpamTrashFolder(this, local_folder, special_folder_type);
+                return new GmailSpamTrashFolder(this, local_folder, type);
 
             default:
-                return new GmailFolder(this, local_folder, special_folder_type);
+                return new GmailFolder(this, local_folder, type);
         }
     }
 
     protected override SearchFolder new_search_folder() {
-        return new GmailSearchFolder(this);
+        return new GmailSearchFolder(this, this.local_folder_root);
     }
+
 }

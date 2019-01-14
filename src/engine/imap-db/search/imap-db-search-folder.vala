@@ -5,23 +5,34 @@
  */
 
 private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSupport.Remove {
-    // Max number of emails that can ever be in the folder.
+
+
+    /** Max number of emails that can ever be in the folder. */
     public const int MAX_RESULT_EMAILS = 1000;
-    
+
+    /** The canonical name of the search folder. */
+    public const string MAGIC_BASENAME = "$GearySearchFolder$";
+
     private const Geary.SpecialFolderType[] exclude_types = {
         Geary.SpecialFolderType.SPAM,
         Geary.SpecialFolderType.TRASH,
         Geary.SpecialFolderType.DRAFTS,
         // Orphan emails (without a folder) are also excluded; see ctor.
     };
-    
+
+
     private Gee.HashSet<Geary.FolderPath?> exclude_folders = new Gee.HashSet<Geary.FolderPath?>();
     private Gee.TreeSet<ImapDB.SearchEmailIdentifier> search_results;
     private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
-    
-    public SearchFolder(Geary.Account account) {
-        base (account, new SearchFolderProperties(0, 0), new SearchFolderRoot());
-        
+
+
+    public SearchFolder(Geary.Account account, FolderRoot root) {
+        base(
+            account,
+            new SearchFolderProperties(0, 0),
+            root.get_child(MAGIC_BASENAME, Trillian.TRUE)
+        );
+
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.email_locally_complete.connect(on_email_locally_complete);
         account.email_removed.connect(on_account_email_removed);

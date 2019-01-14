@@ -13,6 +13,7 @@ class Geary.Imap.MailboxSpecifierTest : TestCase {
         add_test("to_parameter", to_parameter);
         add_test("from_parameter", from_parameter);
         add_test("from_folder_path", from_folder_path);
+        add_test("folder_path_is_inbox", folder_path_is_inbox);
     }
 
     public void to_parameter() throws Error {
@@ -59,54 +60,82 @@ class Geary.Imap.MailboxSpecifierTest : TestCase {
     }
 
     public void from_folder_path() throws Error {
-        MockFolderRoot empty_root = new MockFolderRoot("");
-        MailboxSpecifier empty_inbox = new MailboxSpecifier("Inbox");
+        FolderRoot root = new FolderRoot();
+        MailboxSpecifier inbox = new MailboxSpecifier("Inbox");
         assert_string(
             "Foo",
             new MailboxSpecifier.from_folder_path(
-                empty_root.get_child("Foo"), empty_inbox, "$"
+                root.get_child("Foo"), inbox, "$"
             ).name
         );
         assert_string(
             "Foo$Bar",
             new MailboxSpecifier.from_folder_path(
-                empty_root.get_child("Foo").get_child("Bar"), empty_inbox, "$"
+                root.get_child("Foo").get_child("Bar"), inbox, "$"
             ).name
         );
         assert_string(
             "Inbox",
             new MailboxSpecifier.from_folder_path(
-                empty_root.get_child(MailboxSpecifier.CANONICAL_INBOX_NAME),
-                empty_inbox,
+                root.get_child(MailboxSpecifier.CANONICAL_INBOX_NAME),
+                inbox,
                 "$"
             ).name
         );
 
-        MockFolderRoot non_empty_root = new MockFolderRoot("Root");
-        MailboxSpecifier non_empty_inbox = new MailboxSpecifier("Inbox");
-        assert_string(
-            "Root$Foo",
+        try {
             new MailboxSpecifier.from_folder_path(
-                non_empty_root.get_child("Foo"),
-                non_empty_inbox,
-                "$"
-            ).name
+                root.get_child(""), inbox, "$"
+            );
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            // all good
+        }
+
+        try {
+            new MailboxSpecifier.from_folder_path(
+                root.get_child("test").get_child(""), inbox, "$"
+            );
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            // all good
+        }
+
+        try {
+            new MailboxSpecifier.from_folder_path(root, inbox, "$");
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            // all good
+        }
+    }
+
+    public void folder_path_is_inbox() throws GLib.Error {
+        FolderRoot root = new FolderRoot();
+        assert_true(
+            MailboxSpecifier.folder_path_is_inbox(root.get_child("Inbox"))
         );
-        assert_string(
-            "Root$Foo$Bar",
-            new MailboxSpecifier.from_folder_path(
-                non_empty_root.get_child("Foo").get_child("Bar"),
-                non_empty_inbox,
-                "$"
-            ).name
+        assert_true(
+            MailboxSpecifier.folder_path_is_inbox(root.get_child("inbox"))
         );
-        assert_string(
-            "Root$INBOX",
-            new MailboxSpecifier.from_folder_path(
-                non_empty_root.get_child(MailboxSpecifier.CANONICAL_INBOX_NAME),
-                non_empty_inbox,
-                "$"
-            ).name
+        assert_true(
+            MailboxSpecifier.folder_path_is_inbox(root.get_child("INBOX"))
+        );
+
+        assert_false(
+            MailboxSpecifier.folder_path_is_inbox(root)
+        );
+        assert_false(
+            MailboxSpecifier.folder_path_is_inbox(root.get_child("blah"))
+        );
+        assert_false(
+            MailboxSpecifier.folder_path_is_inbox(
+                root.get_child("blah").get_child("Inbox")
+            )
+        );
+        assert_false(
+            MailboxSpecifier.folder_path_is_inbox(
+                root.get_child("Inbox").get_child("Inbox")
+            )
         );
     }
 

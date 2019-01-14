@@ -451,16 +451,16 @@ public abstract class Geary.Folder : BaseObject {
     protected virtual void notify_display_name_changed() {
         display_name_changed();
     }
-    
+
     /**
      * Returns a name suitable for displaying to the user.
      *
-     * Default is to display the basename of the Folder's path, unless it's a special folder,
+     * Default is to display the name of the Folder's path, unless it's a special folder,
      * in which case {@link SpecialFolderType.get_display_name} is returned.
      */
     public virtual string get_display_name() {
         return (special_folder_type == Geary.SpecialFolderType.NONE)
-            ? path.basename : special_folder_type.get_display_name();
+            ? path.name : special_folder_type.get_display_name();
     }
 
     /** Determines if a folder has been opened, and if so in which way. */

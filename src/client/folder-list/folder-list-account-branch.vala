@@ -90,7 +90,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
             
             // Special folders go in the root of the account.
             graft_point = get_root();
-        } else if (folder.path.get_parent() == null) {
+        } else if (folder.path.is_top_level) {
             // Top-level folders get put in our special user folders group.
             graft_point = user_folder_group;
 
@@ -98,11 +98,11 @@ public class FolderList.AccountBranch : Sidebar.Branch {
                 graft(get_root(), user_folder_group);
             }
         } else {
-            Sidebar.Entry? entry = folder_entries.get(folder.path.get_parent());
+            Sidebar.Entry? entry = folder_entries.get(folder.path.parent);
             if (entry != null)
                 graft_point = entry;
         }
-        
+
         // Due to how we enumerate folders on the server, it's unfortunately
         // possible now to have two folders that we'd put in the same place in
         // our tree.  In that case, we just ignore the second folder for now.
