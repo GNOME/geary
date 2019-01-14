@@ -533,21 +533,23 @@ public class Geary.Imap.ClientSession : BaseObject {
     public string? get_delimiter_for_path(FolderPath path)
     throws ImapError {
         string? delim = null;
-        Geary.FolderRoot root = path.get_root();
-        if (MailboxSpecifier.folder_path_is_inbox(root)) {
+
+        FolderRoot root = (FolderRoot) path.get_root();
+        if (root.inbox.equal_to(path) ||
+            root.inbox.is_descendant(path)) {
             delim = this.inbox.delim;
         } else {
-            Namespace? ns = this.namespaces.get(root.basename);
-            if (ns == null) {
-                // Folder's root doesn't exist as a namespace, so try
-                // the empty namespace.
-                ns = this.namespaces.get("");
-                if (ns == null) {
-                    // If that doesn't exist, fall back to the default
-                    // personal namespace
-                    ns = this.personal_namespaces[0];
-                }
+            Namespace? ns = null;
+            FolderPath? search = path;
+            while (ns == null && search != null) {
+                ns = this.namespaces.get(search.name);
+                search = search.parent;
             }
+            if (ns == null) {
+                // fall back to the default personal namespace
+                ns = this.personal_namespaces[0];
+            }
+
             delim = ns.delim;
         }
         return delim;

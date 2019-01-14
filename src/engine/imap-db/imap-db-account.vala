@@ -391,7 +391,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }
 
         if (Imap.MailboxSpecifier.folder_path_is_inbox(path) &&
-            !Imap.MailboxSpecifier.is_canonical_inbox_name(path.basename)) {
+            !Imap.MailboxSpecifier.is_canonical_inbox_name(path.name)) {
             // Don't add faux inboxes
             throw new ImapError.NOT_SUPPORTED(
                 "Inbox has : %s", path.to_string()
@@ -412,7 +412,7 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Statement stmt = cx.prepare(
                 "INSERT INTO FolderTable (name, parent_id, last_seen_total, last_seen_status_total, "
                 + "uid_validity, uid_next, attributes, unread_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            stmt.bind_string(0, path.basename);
+            stmt.bind_string(0, path.name);
             stmt.bind_rowid(1, parent_id);
             stmt.bind_int(2, Numeric.int_floor(properties.select_examine_messages, 0));
             stmt.bind_int(3, Numeric.int_floor(properties.status_messages, 0));
@@ -1589,13 +1589,9 @@ private class Geary.ImapDB.Account : BaseObject {
             );
         }
 
-        // Don't include the root since top-level folders are stored
-        // with no parent.
-        Gee.List<string> parts = path.as_list();
-        parts.remove_at(0);
-
-        folder_id = Db.INVALID_ROWID;
+        string[] parts = path.as_array();
         int64 parent_id = Db.INVALID_ROWID;
+        folder_id = Db.INVALID_ROWID;
 
         foreach (string basename in parts) {
             Db.Statement stmt;
@@ -1658,7 +1654,7 @@ private class Geary.ImapDB.Account : BaseObject {
             parent_id = Db.INVALID_ROWID;
         } else {
             ret = do_fetch_folder_id(
-                cx, path.get_parent(), create, out parent_id, cancellable
+                cx, path.parent, create, out parent_id, cancellable
             );
         }
         return ret;

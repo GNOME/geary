@@ -1152,7 +1152,9 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
                              string key,
                              Geary.FolderPath? path) {
         if (path != null) {
-            config.set_string_list(key, path.as_list());
+            config.set_string_list(
+                key, new Gee.ArrayList<string>.wrap(path.as_array())
+            );
         }
     }
 
@@ -1311,17 +1313,37 @@ public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
             );
         }
 
-        Gee.LinkedList<string> empty = new Gee.LinkedList<string>();
-        config.set_string_list(DRAFTS_FOLDER_KEY, (info.drafts_folder_path != null
-            ? info.drafts_folder_path.as_list() : empty));
-        config.set_string_list(SENT_MAIL_FOLDER_KEY, (info.sent_folder_path != null
-            ? info.sent_folder_path.as_list() : empty));
-        config.set_string_list(SPAM_FOLDER_KEY, (info.spam_folder_path != null
-            ? info.spam_folder_path.as_list() : empty));
-        config.set_string_list(TRASH_FOLDER_KEY, (info.trash_folder_path != null
-            ? info.trash_folder_path.as_list() : empty));
-        config.set_string_list(ARCHIVE_FOLDER_KEY, (info.archive_folder_path != null
-            ? info.archive_folder_path.as_list() : empty));
+        Gee.ArrayList<string> empty = new Gee.ArrayList<string>();
+        config.set_string_list(
+            DRAFTS_FOLDER_KEY,
+            (info.drafts_folder_path != null
+             ? new Gee.ArrayList<string>.wrap(info.drafts_folder_path.as_array())
+             : empty)
+        );
+        config.set_string_list(
+            SENT_MAIL_FOLDER_KEY,
+            (info.sent_folder_path != null
+             ? new Gee.ArrayList<string>.wrap(info.sent_folder_path.as_array())
+             : empty)
+        );
+        config.set_string_list(
+            SPAM_FOLDER_KEY,
+            (info.spam_folder_path != null
+             ? new Gee.ArrayList<string>.wrap(info.spam_folder_path.as_array())
+             : empty)
+        );
+        config.set_string_list(
+            TRASH_FOLDER_KEY,
+            (info.trash_folder_path != null
+             ? new Gee.ArrayList<string>.wrap(info.trash_folder_path.as_array())
+             : empty)
+        );
+        config.set_string_list(
+            ARCHIVE_FOLDER_KEY,
+            (info.archive_folder_path != null
+             ? new Gee.ArrayList<string>.wrap(info.archive_folder_path.as_array())
+             : empty)
+        );
 
         config.set_bool(SAVE_DRAFTS_KEY, info.save_drafts);
     }

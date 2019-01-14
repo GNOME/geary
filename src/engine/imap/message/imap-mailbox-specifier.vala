@@ -84,14 +84,14 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
      * Returns true if the {@link Geary.FolderPath} points to the IMAP Inbox.
      */
     public static bool folder_path_is_inbox(FolderPath path) {
-        return path.is_top_level && is_inbox_name(path.basename);
+        return path.is_top_level && is_inbox_name(path.name);
     }
 
     /**
      * Returns true if the string is the name of the IMAP Inbox.
      *
      * This accounts for IMAP's Inbox name being case-insensitive.  This is only for comparing
-     * folder basenames; this does not account for path delimiters.
+     * folder names; this does not account for path delimiters.
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-5.1]]
      *
@@ -129,19 +129,15 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
             );
         }
 
-        Gee.List<string> parts = path.as_list();
-        // Don't include the root so that mailboxes do not begin with
-        // the delim.
-        parts.remove_at(0);
-
-        if (parts.size > 1 && delim == null) {
-            throw new ImapError.INVALID(
+        string[] parts = path.as_array();
+        if (parts.length > 1 && delim == null) {
+            throw new ImapError.NOT_SUPPORTED(
                 "Path has more than one part but no delimiter given"
             );
         }
 
         if (String.is_empty_or_whitespace(parts[0])) {
-            throw new ImapError.INVALID(
+            throw new ImapError.NOT_SUPPORTED(
                 "Path contains empty base part: '%s'", path.to_string()
             );
         }
@@ -150,15 +146,14 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
             is_inbox_name(parts[0]) ? inbox.name : parts[0]
         );
 
-        for (int i = 1; i < parts.size; i++) {
-            string basename = parts[i];
-            if (String.is_empty_or_whitespace(basename)) {
-                throw new ImapError.INVALID(
+        foreach (string name in parts[1:parts.length]) {
+            if (String.is_empty_or_whitespace(name)) {
+                throw new ImapError.NOT_SUPPORTED(
                     "Path contains empty part: '%s'", path.to_string()
                 );
             }
             builder.append(delim);
-            builder.append(basename);
+            builder.append(name);
         }
 
         init(builder.str);

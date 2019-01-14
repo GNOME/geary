@@ -421,7 +421,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         return Geary.traverse<FolderPath>(folder_map.keys)
             .filter(p => {
-                FolderPath? path_parent = p.get_parent();
+                FolderPath? path_parent = p.parent;
                 return ((parent == null && path_parent == null) ||
                     (parent != null && path_parent != null && path_parent.equal_to(parent)));
             })
@@ -1283,7 +1283,9 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
                 this.generic_account.remove_folders(to_remove);
 
             // Sort by path length descending, so we always remove children first.
-            removed.sort((a, b) => b.path.get_path_length() - a.path.get_path_length());
+            removed.sort(
+                (a, b) => b.path.as_array().length - a.path.as_array().length
+            );
             foreach (Geary.Folder folder in removed) {
                 try {
                     debug("Locally deleting removed folder %s", folder.to_string());

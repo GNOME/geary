@@ -157,7 +157,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder test1 = traverse(result).first();
         assert_int(1, result.size, "Base folder not listed");
-        assert_string("test1", test1.get_path().basename, "Base folder name");
+        assert_string("test1", test1.get_path().name, "Base folder name");
 
         this.account.list_folders_async.begin(
             test1.get_path(),
@@ -168,7 +168,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder test2 = traverse(result).first();
         assert_int(1, result.size, "Child folder not listed");
-        assert_string("test2", test2.get_path().basename, "Child folder name");
+        assert_string("test2", test2.get_path().name, "Child folder name");
 
         this.account.list_folders_async.begin(
             test2.get_path(),
@@ -179,7 +179,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder test3 = traverse(result).first();
         assert_int(1, result.size, "Grandchild folder not listed");
-        assert_string("test3", test3.get_path().basename, "Grandchild folder name");
+        assert_string("test3", test3.get_path().name, "Grandchild folder name");
     }
 
     public void delete_folder() throws GLib.Error {
@@ -263,7 +263,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder? result = this.account.fetch_folder_async.end(async_result());
         assert_non_null(result);
-        assert_string("test1", result.get_path().basename);
+        assert_string("test1", result.get_path().name);
     }
 
     public void fetch_child_folder() throws GLib.Error {
@@ -282,7 +282,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder? result = this.account.fetch_folder_async.end(async_result());
         assert_non_null(result);
-        assert_string("test2", result.get_path().basename);
+        assert_string("test2", result.get_path().name);
     }
 
     public void fetch_nonexistent_folder() throws GLib.Error {

@@ -98,11 +98,11 @@ public class FolderList.AccountBranch : Sidebar.Branch {
                 graft(get_root(), user_folder_group);
             }
         } else {
-            Sidebar.Entry? entry = folder_entries.get(folder.path.get_parent());
+            Sidebar.Entry? entry = folder_entries.get(folder.path.parent);
             if (entry != null)
                 graft_point = entry;
         }
-        
+
         // Due to how we enumerate folders on the server, it's unfortunately
         // possible now to have two folders that we'd put in the same place in
         // our tree.  In that case, we just ignore the second folder for now.

@@ -17,10 +17,12 @@ public class Geary.FolderPathTest : TestCase {
         add_test("get_child_from_child", get_child_from_child);
         add_test("root_is_root", root_is_root);
         add_test("child_is_not_root", root_is_root);
-        add_test("as_list", as_list);
+        add_test("as_array", as_array);
         add_test("is_top_level", is_top_level);
+        add_test("path_to_string", path_to_string);
         add_test("path_parent", path_parent);
         add_test("path_equal", path_equal);
+        add_test("path_hash", path_hash);
         add_test("path_compare", path_compare);
         add_test("path_compare_normalised", path_compare_normalised);
     }
@@ -35,15 +37,15 @@ public class Geary.FolderPathTest : TestCase {
 
     public void get_child_from_root() throws GLib.Error {
         assert_string(
-            ">test",
-            this.root.get_child("test").to_string()
+            "test",
+            this.root.get_child("test").name
         );
     }
 
     public void get_child_from_child() throws GLib.Error {
         assert_string(
-            ">test1>test2",
-            this.root.get_child("test1").get_child("test2").to_string()
+            "test2",
+            this.root.get_child("test1").get_child("test2").name
         );
     }
 
@@ -55,17 +57,32 @@ public class Geary.FolderPathTest : TestCase {
         assert_false(this.root.get_child("test").is_root);
     }
 
-    public void as_list() throws GLib.Error {
-        assert_true(this.root.as_list().size == 1, "Root list");
+    public void as_array() throws GLib.Error {
+        assert_true(this.root.as_array().length == 0, "Root list");
         assert_int(
-            2,
-            this.root.get_child("test").as_list().size,
-            "Child list size"
+            1,
+            this.root.get_child("test").as_array().length,
+            "Child array length"
         );
         assert_string(
             "test",
-            this.root.get_child("test").as_list()[1],
-            "Child list contents"
+            this.root.get_child("test").as_array()[0],
+            "Child array contents"
+        );
+        assert_int(
+            2,
+            this.root.get_child("test1").get_child("test2").as_array().length,
+            "Descendent array length"
+        );
+        assert_string(
+            "test1",
+            this.root.get_child("test1").get_child("test2").as_array()[0],
+            "Descendent first child"
+        );
+        assert_string(
+            "test2",
+            this.root.get_child("test1").get_child("test2").as_array()[1],
+            "Descendent second child"
         );
     }
 
@@ -81,15 +98,24 @@ public class Geary.FolderPathTest : TestCase {
         );
     }
 
+    public void path_to_string() throws GLib.Error {
+        assert_string(">", this.root.to_string());
+        assert_string(">test", this.root.get_child("test").to_string());
+        assert_string(
+            ">test1>test2",
+            this.root.get_child("test1").get_child("test2").to_string()
+        );
+    }
+
     public void path_parent() throws GLib.Error {
-        assert_null(this.root.get_parent(), "Root parent");
+        assert_null(this.root.parent, "Root parent");
         assert_string(
             "",
-            this.root.get_child("test").get_parent().basename,
+            this.root.get_child("test").parent.name,
             "Root child parent");
         assert_string(
             "test1",
-            this.root.get_child("test1").get_child("test2").get_parent().basename,
+            this.root.get_child("test1").get_child("test2").parent.name,
             "Child parent");
     }
 
@@ -107,6 +133,17 @@ public class Geary.FolderPathTest : TestCase {
             this.root.get_child("test1").get_child("test")
             .equal_to(this.root.get_child("test2").get_child("test")),
             "Disjoint parents"
+        );
+    }
+
+    public void path_hash() throws GLib.Error {
+        assert_true(
+            this.root.hash() !=
+            this.root.get_child("test").hash()
+        );
+        assert_true(
+            this.root.get_child("test1").hash() !=
+            this.root.get_child("test2").hash()
         );
     }
 
