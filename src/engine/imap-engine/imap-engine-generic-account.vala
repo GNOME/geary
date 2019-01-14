@@ -1268,7 +1268,7 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             foreach (Geary.Folder folder in removed) {
                 try {
                     debug("Locally deleting removed folder %s", folder.to_string());
-                    yield local.delete_folder_async(folder, cancellable);
+                    yield local.delete_folder_async(folder.path, cancellable);
                 } catch (Error e) {
                     debug("Unable to locally delete removed folder %s: %s", folder.to_string(), e.message);
                 }

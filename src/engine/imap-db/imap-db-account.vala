@@ -326,18 +326,7 @@ private class Geary.ImapDB.Account : BaseObject {
             
             throw err;
         }
-        
-        Geary.Account account;
-        try {
-            account = Geary.Engine.instance.get_account_instance(account_information);
-        } catch (Error e) {
-            // If they're opening an account, the engine should already be
-            // open, and there should be no reason for this to fail.  Thus, if
-            // we get here, it's a programmer error.
-            
-            error("Error finding account from its information: %s", e.message);
-        }
-        
+
         background_cancellable = new Cancellable();
         
         // Kick off a background update of the search table, but since the database is getting
@@ -419,21 +408,23 @@ private class Geary.ImapDB.Account : BaseObject {
         return yield fetch_folder_async(path, cancellable);
     }
 
-    public async void delete_folder_async(Geary.Folder folder, Cancellable? cancellable)
-        throws Error {
+    public async void delete_folder_async(Geary.FolderPath path,
+                                          GLib.Cancellable? cancellable)
+        throws GLib.Error {
         check_open();
-        
-        Geary.FolderPath path = folder.path;
-        
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             int64 folder_id;
             do_fetch_folder_id(cx, path, false, out folder_id, cancellable);
-            if (folder_id == Db.INVALID_ROWID)
-                return Db.TransactionOutcome.ROLLBACK;
-            
+            if (folder_id == Db.INVALID_ROWID) {
+                throw new EngineError.NOT_FOUND(
+                    "Folder not found: %s", path.to_string()
+                );
+            }
+
             if (do_has_children(cx, folder_id, cancellable)) {
-                debug("Can't delete folder %s because it has children", folder.to_string());
-                return Db.TransactionOutcome.ROLLBACK;
+                throw new ImapError.NOT_SUPPORTED(
+                    "Folder has children: %s", path.to_string()
+                );
             }
 
             do_delete_folder(cx, folder_id, cancellable);
@@ -441,7 +432,6 @@ private class Geary.ImapDB.Account : BaseObject {
 
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-
     }
 
     private void initialize_contacts(Cancellable? cancellable = null) throws Error {
