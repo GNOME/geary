@@ -144,11 +144,6 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
      *
      * If an error is thrown, {@link backout_local_async} will be
      * executed only if scope is LOCAL_AND_REMOTE.
-     *
-     * @return {@link Status.COMPLETED} if the operation has completed
-     * and no further calls should be made, else {@link
-     * Status.CONTINUE} if treated as `COMPLETED`.
-     *
      */
     public virtual async void replay_remote_async(Imap.FolderSession remote)
         throws GLib.Error {
