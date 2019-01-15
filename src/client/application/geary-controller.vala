@@ -2778,7 +2778,7 @@ public class GearyController : Geary.BaseObject {
         // if folder contains children, we must ensure that there is at least one of the same type
         Geary.SpecialFolderType type = folder.special_folder_type;
         foreach (Geary.Folder other in all) {
-            if (other.special_folder_type == type && other.path.get_parent() == folder.path)
+            if (other.special_folder_type == type && other.path.parent == folder.path)
                 return true;
         }
 
