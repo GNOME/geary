@@ -77,7 +77,7 @@ row.geary-folder-popover-list-row > label {
 /* ConversationListBox */
 
 .conversation-listbox {
-  padding: 18px;
+  padding: 12px;
 }
 .conversation-listbox > row {
   margin: 0;
