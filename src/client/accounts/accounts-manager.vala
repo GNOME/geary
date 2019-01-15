@@ -602,6 +602,9 @@ public class Accounts.Manager : GLib.Object {
             } catch (GLib.KeyFileError err) {
                 throw new ConfigError.SYNTAX(err.message);
             }
+            account.service_provider.setup_service(account.incoming);
+            account.service_provider.setup_service(account.outgoing);
+
         } else {
             account.service_label = goa_mediator.get_service_label();
             try {
