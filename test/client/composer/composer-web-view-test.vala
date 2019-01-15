@@ -22,6 +22,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("get_text_with_nbsp", get_text_with_nbsp);
         add_test("get_text_with_named_link", get_text_with_named_link);
         add_test("get_text_with_url_link", get_text_with_named_link);
+        add_test("get_text_with_surrounding_nbsps", get_text_with_surrounding_nbsps);
     }
 
     public void load_resources() throws Error {
@@ -191,6 +192,18 @@ long, long, long, long, long, long, long, long, long, long,
         try {
             assert(this.test_view.get_text.end(async_result()) ==
                    "Check out <https://wiki.gnome.org/Apps/Geary>!\n\n\n\n");
+        } catch (Error err) {
+            print("Error: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void get_text_with_surrounding_nbsps() throws Error {
+        load_body_fixture("&nbsp;&nbsp;I like my space&nbsp;&nbsp;");
+        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        try {
+            assert(this.test_view.get_text.end(async_result()) ==
+                   "  I like my space\n\n\n\n");
         } catch (Error err) {
             print("Error: %s\n", err.message);
             assert_not_reached();
