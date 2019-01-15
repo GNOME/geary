@@ -473,8 +473,10 @@ ComposerPageState.htmlToText = function(root) {
                     case 'normal':
                     case 'nowrap':
                     case 'pre-line':
-                        nodeText = nodeText.replace(/\s+/g, " ");
-                        if (nodeText == " " && /\s/.test(text.substr(-1)))
+                        // Only space, tab, carriage return, and newline collapse
+                        // https://www.w3.org/TR/2011/REC-CSS2-20110607/text.html#white-space-model
+                        nodeText = nodeText.replace(/[ \t\r\n]+/g, " ");
+                        if (nodeText == " " && " \t\r\n".includes(text.substr(-1)))
                             break; // There's already whitespace here
                         if (node == root.firstChild)
                             nodeText = nodeText.replace(/^ /, "");
