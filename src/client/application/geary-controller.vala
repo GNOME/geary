@@ -1530,11 +1530,15 @@ public class GearyController : Geary.BaseObject {
     private void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         if (ids.size > 0) {
-            get_store_for_folder(current_folder).mark_email_async.begin(
-                ids, flags_to_add, flags_to_remove, cancellable_folder);
+            Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+            if (store != null) {
+                store.mark_email_async.begin(
+                    ids, flags_to_add, flags_to_remove, cancellable_folder
+                );
+            }
         }
     }
-    
+
     private void on_show_mark_menu() {
         bool unread_selected = false;
         bool read_selected = false;
@@ -1698,9 +1702,12 @@ public class GearyController : Geary.BaseObject {
     private void copy_email(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.FolderPath destination) {
         if (ids.size > 0) {
-            get_store_for_folder(current_folder).copy_email_async.begin(
-                ids, destination, cancellable_folder
-            );
+            Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+            if (store != null) {
+                store.copy_email_async.begin(
+                    ids, destination, cancellable_folder
+                );
+            }
         }
     }
 
@@ -2091,12 +2098,18 @@ public class GearyController : Geary.BaseObject {
         // Load the widget's content
         Geary.Email? full = null;
         if (referred != null) {
-            try {
-                full = yield get_store_for_folder(current_folder).fetch_email_async(
-                    referred.id, Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
-                    Geary.Folder.ListFlags.NONE, cancellable_folder);
-            } catch (Error e) {
-                message("Could not load full message: %s", e.message);
+            Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+            if (store != null) {
+                try {
+                    full = yield store.fetch_email_async(
+                        referred.id,
+                        Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
+                        Geary.Folder.ListFlags.NONE,
+                        cancellable_folder
+                    );
+                } catch (Error e) {
+                    message("Could not load full message: %s", e.message);
+                }
             }
         }
         yield widget.load(full, quote, is_draft);
@@ -2746,8 +2759,9 @@ public class GearyController : Geary.BaseObject {
         return selected_conversations.read_only_view;
     }
 
-    private inline Geary.App.EmailStore get_store_for_folder(Geary.Folder target) {
-        return this.accounts.get(target.account.information).store;
+    private inline Geary.App.EmailStore? get_store_for_folder(Geary.Folder target) {
+        AccountContext? context = this.accounts.get(target.account.information);
+        return context != null ? context.store : null;
     }
 
     private void on_account_available(Geary.AccountInformation info) {
