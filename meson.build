@@ -73,7 +73,6 @@ libunwind_dep = dependency('libunwind', version: '>= 1.1')
 libunwind_generic_dep = dependency('libunwind-generic', version: '>= 1.1')
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 posix = valac.find_library('posix')
-webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
 
 # Can currently use either Enchant 1 or 2
