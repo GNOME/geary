@@ -17,7 +17,7 @@ variables:
                meson desktop-file-utils libcanberra-devel libgee-devel
                glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel
                webkitgtk4-devel libsecret-devel libxml2-devel vala-tools
-               gcr-devel enchant-devel libunwind-devel iso-codes-devel
+               gcr-devel enchant2-devel libunwind-devel iso-codes-devel
                gnome-online-accounts-devel itstool json-glib-devel
   FEDORA_TEST_DEPS: Xvfb tar xz
 
