@@ -1330,6 +1330,10 @@ public class GearyController : Geary.BaseObject {
 
         if (available != null && available.size > 0) {
             foreach (Geary.Folder folder in available) {
+                if (!should_add_folder(available, folder)) {
+                    continue;
+                }
+
                 main_window.folder_list.add_folder(folder);
                 if (folder.account == current_account) {
                     if (!main_window.main_toolbar.copy_folder_menu.has_folder(folder))
@@ -2762,6 +2766,23 @@ public class GearyController : Geary.BaseObject {
     private inline Geary.App.EmailStore? get_store_for_folder(Geary.Folder target) {
         AccountContext? context = this.accounts.get(target.account.information);
         return context != null ? context.store : null;
+    }
+
+    private bool should_add_folder(Gee.List<Geary.Folder>? all, Geary.Folder folder) {
+        // if folder is openable, add it
+        if (folder.properties.is_openable != Geary.Trillian.FALSE)
+            return true;
+        else if (folder.properties.has_children == Geary.Trillian.FALSE)
+            return false;
+
+        // if folder contains children, we must ensure that there is at least one of the same type
+        Geary.SpecialFolderType type = folder.special_folder_type;
+        foreach (Geary.Folder other in all) {
+            if (other.special_folder_type == type && other.path.parent == folder.path)
+                return true;
+        }
+
+        return false;
     }
 
     private void on_account_available(Geary.AccountInformation info) {
