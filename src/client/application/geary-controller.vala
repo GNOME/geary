@@ -1149,7 +1149,12 @@ public class GearyController : Geary.BaseObject {
         current_conversations = new Geary.App.ConversationMonitor(
             current_folder,
             Geary.Folder.OpenFlags.NO_DELAY,
-            ConversationListStore.REQUIRED_FIELDS,
+            // Include fields for the conversation viewer as well so
+            // conversations can be displayed without having to go
+            // back to the db
+            ConversationListStore.REQUIRED_FIELDS |
+            ConversationListBox.REQUIRED_FIELDS |
+            ConversationEmail.REQUIRED_FOR_CONSTRUCT,
             MIN_CONVERSATION_COUNT
         );
 

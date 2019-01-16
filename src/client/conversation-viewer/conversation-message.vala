@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016-2018 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -142,12 +142,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private const string ACTION_SELECT_ALL = "select_all";
 
 
-    /** The specific RFC822 message displayed by this view. */
-    public Geary.RFC822.Message message { get; private set; }
-
-    /** Determines if the message body as started loading. */
-    public bool body_load_started { get; private set; default = false; }
-
     /** Box containing the preview and full header widgets.  */
     [GtkChild]
     internal Gtk.Grid summary;
@@ -158,6 +152,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     /** HTML view that displays the message body. */
     internal ConversationWebView web_view { get; private set; }
+
+    private Geary.RFC822.MailboxAddress? primary_originator;
 
     [GtkChild]
     private Gtk.Image avatar;
@@ -270,18 +266,72 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
 
     /**
-     * Constructs a new view to display an RFC 822 message headers and body.
+     * Constructs a new view from an email's headers and body.
      *
      * This method sets up most of the user interface for displaying
      * the message, but does not attempt any possibly long-running
      * loading processes.
      */
-    public ConversationMessage(Geary.RFC822.Message message,
-                               Configuration config,
-                               bool load_remote_images) {
+    public ConversationMessage.from_email(Geary.Email email,
+                                          bool load_remote_images,
+                                          Configuration config) {
+        this(
+            email.get_primary_originator(),
+            email.from,
+            email.reply_to,
+            email.sender,
+            email.to,
+            email.cc,
+            email.bcc,
+            email.date,
+            email.subject,
+            email.preview != null ? email.preview.buffer.get_valid_utf8() : null,
+            load_remote_images,
+            config
+        );
+    }
+
+    /**
+     * Constructs a new view from an RFC 822 message's headers and body.
+     *
+     * This method sets up most of the user interface for displaying
+     * the message, but does not attempt any possibly long-running
+     * loading processes.
+     */
+    public ConversationMessage.from_message(Geary.RFC822.Message message,
+                                            bool load_remote_images,
+                                            Configuration config) {
+        this(
+            message.get_primary_originator(),
+            message.from,
+            message.reply_to,
+            message.sender,
+            message.to,
+            message.cc,
+            message.bcc,
+            message.date,
+            message.subject,
+            message.get_preview(),
+            load_remote_images,
+            config
+        );
+    }
+
+    private ConversationMessage(Geary.RFC822.MailboxAddress? primary_originator,
+                                Geary.RFC822.MailboxAddresses? from,
+                                Geary.RFC822.MailboxAddresses? reply_to,
+                                Geary.RFC822.MailboxAddress? sender,
+                                Geary.RFC822.MailboxAddresses? to,
+                                Geary.RFC822.MailboxAddresses? cc,
+                                Geary.RFC822.MailboxAddresses? bcc,
+                                Geary.RFC822.Date? date,
+                                Geary.RFC822.Subject? subject,
+                                string? preview,
+                                bool load_remote_images,
+                                Configuration config) {
         base_ref();
-        this.message = message;
         this.is_loading_images = load_remote_images;
+        this.primary_originator = primary_originator;
 
         // Actions
 
@@ -332,44 +382,50 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         // when the message has no from address.
         string empty_from = _("No sender");
 
-        this.preview_from.set_text(format_originator_preview(empty_from));
+        this.preview_from.set_text(format_originator_preview(from, empty_from));
         this.preview_from.get_style_context().add_class(FROM_CLASS);
 
         string date_text = "";
         string date_tooltip = "";
-        if (this.message.date != null) {
+        if (date != null) {
             date_text = Date.pretty_print(
-                this.message.date.value, config.clock_format
+                date.value, config.clock_format
             );
             date_tooltip = Date.pretty_print_verbose(
-                this.message.date.value, config.clock_format
+                date.value, config.clock_format
             );
         }
         this.preview_date.set_text(date_text);
         this.preview_date.set_tooltip_text(date_tooltip);
 
-        string preview = this.message.get_preview();
-        if (preview.length > MAX_PREVIEW_BYTES) {
-            preview = Geary.String.safe_byte_substring(preview, MAX_PREVIEW_BYTES);
-            // Add an ellipsis in case the wider is wider than the text
-            preview += "…";
+        if (preview != null) {
+            string clean_preview = preview;
+            if (preview.length > MAX_PREVIEW_BYTES) {
+                clean_preview = Geary.String.safe_byte_substring(
+                    preview, MAX_PREVIEW_BYTES
+                );
+                // Add an ellipsis in case the view is wider is wider than
+                // the text
+                clean_preview += "…";
+            }
+            this.preview_body.set_text(clean_preview);
         }
-        this.preview_body.set_text(preview);
 
         // Full headers
 
-        fill_originator_addresses(empty_from);
+        fill_originator_addresses(from, reply_to, sender, empty_from);
 
         this.date.set_text(date_text);
         this.date.set_tooltip_text(date_tooltip);
-        if (this.message.subject != null) {
-            this.subject.set_text(this.message.subject.value);
+        if (subject != null) {
+            this.subject.set_text(subject.value);
             this.subject.set_visible(true);
-            this.subject_searchable = this.message.subject.value.casefold();
+            this.subject_searchable = subject.value.casefold();
         }
-        fill_header_addresses(this.to_header, this.message.to);
-        fill_header_addresses(this.cc_header, this.message.cc);
-        fill_header_addresses(this.bcc_header, this.message.bcc);
+        fill_header_addresses(this.to_header, to);
+        fill_header_addresses(this.cc_header, cc);
+        fill_header_addresses(this.bcc_header, bcc);
+
 
         // Web view
 
@@ -440,10 +496,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
      * Starts loading the avatar for the message's sender.
      */
     public async void load_avatar(Application.AvatarStore loader,
-                                  Cancellable load_cancelled) {
+                                  GLib.Cancellable load_cancelled)
+        throws GLib.Error {
+        if (load_cancelled.is_cancelled()) {
+            throw new GLib.IOError.CANCELLED("Conversation load cancelled");
+        }
+
         const int PIXEL_SIZE = 32;
-        Geary.RFC822.MailboxAddress? primary = message.get_primary_originator();
-        if (primary != null) {
+        if (this.primary_originator != null) {
             int window_scale = get_scale_factor();
             // We occasionally get crashes calling as below
             // Gtk.Image.get_pixel_size() when the image is
@@ -453,20 +513,15 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             //
             //int pixel_size = this.avatar.get_pixel_size() * window_scale;
             int pixel_size = PIXEL_SIZE * window_scale;
-            try {
-                Gdk.Pixbuf? avatar_buf = yield loader.load(
-                    primary, pixel_size, load_cancelled
+            Gdk.Pixbuf? avatar_buf = yield loader.load(
+                this.primary_originator, pixel_size, load_cancelled
+            );
+            if (avatar_buf != null) {
+                this.avatar.set_from_surface(
+                    Gdk.cairo_surface_create_from_pixbuf(
+                        avatar_buf, window_scale, get_window()
+                    )
                 );
-                if (avatar_buf != null) {
-                    this.avatar.set_from_surface(
-                        Gdk.cairo_surface_create_from_pixbuf(
-                            avatar_buf, window_scale, get_window()
-                        )
-                    );
-                }
-            } catch (Error err) {
-                debug("Avatar load failed for %s: %s",
-                      primary.to_string(), err.message);
             }
         }
     }
@@ -474,13 +529,18 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /**
      * Starts loading the message body in the HTML view.
      */
-    public async void load_message_body(Cancellable load_cancelled) {
-        this.body_load_started = true;
+    public async void load_message_body(Geary.RFC822.Message message,
+                                        GLib.Cancellable load_cancelled)
+        throws GLib.Error {
+        if (load_cancelled.is_cancelled()) {
+            throw new GLib.IOError.CANCELLED("Conversation load cancelled");
+        }
+
         string? body_text = null;
         try {
-            body_text = (this.message.has_html_body())
-                ? this.message.get_html_body(inline_image_replacer)
-                : this.message.get_plain_body(true, inline_image_replacer);
+            body_text = (message.has_html_body())
+                ? message.get_html_body(inline_image_replacer)
+                : message.get_plain_body(true, inline_image_replacer);
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
         }
@@ -578,12 +638,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         return menu;
     }
 
-    private string format_originator_preview(string empty_from_text) {
+    private string format_originator_preview(Geary.RFC822.MailboxAddresses? from,
+                                             string empty_from_text) {
         string text = "";
-        if (this.message.from != null && this.message.from.size > 0) {
+        if (from != null && from.size > 0) {
             int i = 0;
-            Gee.List<Geary.RFC822.MailboxAddress> list =
-                this.message.from.get_all();
+            Gee.List<Geary.RFC822.MailboxAddress> list = from.get_all();
             foreach (Geary.RFC822.MailboxAddress addr in list) {
                 text += addr.to_short_display();
 
@@ -599,10 +659,13 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         return text;
     }
 
-    private void fill_originator_addresses(string empty_from_text)  {
+    private void fill_originator_addresses(Geary.RFC822.MailboxAddresses? from,
+                                           Geary.RFC822.MailboxAddresses? reply_to,
+                                           Geary.RFC822.MailboxAddress? sender,
+                                           string empty_from_text)  {
         // Show any From header addresses
-        if (this.message.from != null && this.message.from.size > 0) {
-            foreach (Geary.RFC822.MailboxAddress address in this.message.from) {
+        if (from != null && from.size > 0) {
+            foreach (Geary.RFC822.MailboxAddress address in from) {
                 AddressFlowBoxChild child = new AddressFlowBoxChild(
                     address, AddressFlowBoxChild.Type.FROM
                 );
@@ -622,10 +685,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         // Show the Sender header addresses if present, but only if
         // not already in the From header.
-        if (this.message.sender != null &&
-            (this.message.from == null ||
-             !this.message.from.contains_normalized(this.message.sender.address))) {
-            AddressFlowBoxChild child = new AddressFlowBoxChild(this.message.sender);
+        if (sender != null &&
+            (from == null || !from.contains_normalized(sender.address))) {
+            AddressFlowBoxChild child = new AddressFlowBoxChild(sender);
             this.searchable_addresses.add(child);
             this.sender_header.show();
             this.sender_address.add(child);
@@ -633,10 +695,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         // Show any Reply-To header addresses if present, but only if
         // each is not already in the From header.
-        if (this.message.reply_to != null) {
-            foreach (Geary.RFC822.MailboxAddress address in this.message.reply_to) {
-                if (this.message.from == null ||
-                    !this.message.from.contains_normalized(address.address)) {
+        if (reply_to != null) {
+            foreach (Geary.RFC822.MailboxAddress address in reply_to) {
+                if (from == null || !from.contains_normalized(address.address)) {
                     AddressFlowBoxChild child = new AddressFlowBoxChild(address);
                     this.searchable_addresses.add(child);
                     this.reply_to_addresses.add(child);
