@@ -331,7 +331,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // Total number of search matches found
     private uint search_matches_found = 0;
 
-    private uint loading_timeout_id = 0;
+    private Geary.TimeoutManager loading_timeout;
 
 
     /** Keyboard action to scroll the conversation. */
@@ -428,15 +428,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.conversation.email_flags_changed.connect(on_update_flags);
 
         // If the load is taking too long, display a spinner
-        this.loading_timeout_id =
-            Timeout.add(LOADING_TIMEOUT_MSEC, () => {
-                if (this.loading_timeout_id != 0) {
-                    debug("Loading timed out");
-                    show_loading();
-                }
-                this.loading_timeout_id = 0;
-                return Source.REMOVE;
-            });
+        this.loading_timeout = new Geary.TimeoutManager.milliseconds(
+            LOADING_TIMEOUT_MSEC, show_loading
+        );
     }
 
     ~ConversationListBox() {
@@ -444,11 +438,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
     public override void destroy() {
-        if (this.loading_timeout_id != 0) {
-            Source.remove(this.loading_timeout_id);
-            // Clear in case this is called twice
-            this.loading_timeout_id = 0;
-        }
+        this.loading_timeout.reset();
         this.cancellable.cancel();
         this.email_rows.clear();
         base.destroy();
@@ -463,6 +453,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                     Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING
                 )
             );
+
+        // Have the full set of email and a UI update is imminent. So
+        // cancel the spinner timeout if still running, and remove the
+        // spinner it may have set in any case.
+        this.loading_timeout.reset();
+        set_placeholder(null);
 
         // Add them all
         EmailRow? first_expanded_row = null;
@@ -508,9 +504,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
             debug("Conversation loading complete");
         }
-
-        this.loading_timeout_id = 0;
-        set_placeholder(null);
     }
 
     /**
