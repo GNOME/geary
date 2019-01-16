@@ -492,9 +492,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
             // Start the first expanded row loading before any others,
             // scroll the view to it when its done
-            yield first_expanded_row.view.start_loading(
-                this.avatar_store, this.cancellable
-            );
+            yield first_expanded_row.view.load_avatars(this.avatar_store);
             first_expanded_row.should_scroll.connect(scroll_to);
             first_expanded_row.enable_should_scroll();
 
@@ -503,9 +501,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                     if (!this.cancellable.is_cancelled()) {
                         EmailRow? row = child as EmailRow;
                         if (row != null && row != first_expanded_row) {
-                            row.view.start_loading.begin(
-                                this.avatar_store, this.cancellable
-                            );
+                            row.view.load_avatars.begin(this.avatar_store);
                         }
                     }
                 });
@@ -762,7 +758,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
             update_first_last_row();
-            yield row.view.start_loading(this.avatar_store, this.cancellable);
+            yield row.view.load_avatars(this.avatar_store);
         }
     }
 
@@ -789,7 +785,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             this.contact_store,
             this.config,
             is_sent,
-            is_draft
+            is_draft,
+            this.cancellable
         );
         view.mark_email.connect(on_mark_email);
         view.mark_email_from_here.connect(on_mark_email_from_here);

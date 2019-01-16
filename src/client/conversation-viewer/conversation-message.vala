@@ -145,6 +145,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** The specific RFC822 message displayed by this view. */
     public Geary.RFC822.Message message { get; private set; }
 
+    /** Determines if the message body as started loading. */
+    public bool body_load_started { get; private set; default = false; }
+
     /** Box containing the preview and full header widgets.  */
     [GtkChild]
     internal Gtk.Grid summary;
@@ -472,6 +475,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
      * Starts loading the message body in the HTML view.
      */
     public async void load_message_body(Cancellable load_cancelled) {
+        this.body_load_started = true;
         string? body_text = null;
         try {
             body_text = (this.message.has_html_body())

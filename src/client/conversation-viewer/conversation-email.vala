@@ -255,6 +255,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /** Determines if all message's web views have finished loading. */
     public bool message_bodies_loaded { get; private set; default = false; }
 
+    // Cancellable to use when loading message content
+    private GLib.Cancellable load_cancellable;
+
     // Contacts for the email's account
     private Geary.ContactStore contact_store;
 
@@ -268,7 +271,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     // A subset of the message's attachments that are displayed in the
     // attachments view
-    Gee.Collection<Geary.Attachment> displayed_attachments =
+    private Gee.Collection<Geary.Attachment> displayed_attachments =
          new Gee.LinkedList<Geary.Attachment>();
 
     // Message-specific actions
@@ -371,11 +374,13 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                              Geary.ContactStore contact_store,
                              Configuration config,
                              bool is_sent,
-                             bool is_draft) {
+                             bool is_draft,
+                             GLib.Cancellable load_cancellable) {
         base_ref();
         this.email = email;
         this.contact_store = contact_store;
         this.config = config;
+        this.load_cancellable = load_cancellable;
 
         if (is_sent) {
             get_style_context().add_class(SENT_CLASS);
@@ -520,33 +525,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     /**
-     * Starts loading the complete email.
-     *
-     * This method will load the avatar and message body for the
-     * primary message and any attached messages, as well as
-     * attachment names, types and icons.
+     * Loads avatars for the email's messages.
      */
-    public async void start_loading(Application.AvatarStore avatars,
-                                    Cancellable load_cancelled) {
+    public async void load_avatars(Application.AvatarStore store) {
         foreach (ConversationMessage view in this)  {
-            if (load_cancelled.is_cancelled()) {
-                break;
-            }
-            yield view.load_message_body(load_cancelled);
-            view.load_avatar.begin(avatars, load_cancelled);
-        }
-
-        // Only load attachments once the web views have finished
-        // loading, since we want to know if any attachments marked as
-        // being inline were actually not displayed inline, and hence
-        // need to be displayed as if they were attachments.
-        if (!load_cancelled.is_cancelled()) {
-            if (this.message_bodies_loaded) {
-                yield load_attachments(load_cancelled);
-            } else {
-                this.notify["message-bodies-loaded"].connect(() => {
-                        load_attachments.begin(load_cancelled);
-                    });
+            if (!this.load_cancellable.is_cancelled()) {
+                yield view.load_avatar(store, this.load_cancellable);
             }
         }
     }
@@ -572,13 +556,15 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      * Shows the complete message: headers, body and attachments.
      */
     public void expand_email(bool include_transitions=true) {
-        is_collapsed = false;
+        this.is_collapsed = false;
         update_email_state();
-        attachments_button.set_sensitive(true);
-        email_menubutton.set_sensitive(true);
-        primary_message.show_message_body(include_transitions);
-        foreach (ConversationMessage attached in this._attached_messages) {
-            attached.show_message_body(include_transitions);
+        this.attachments_button.set_sensitive(true);
+        this.email_menubutton.set_sensitive(true);
+        foreach (ConversationMessage message in this) {
+            message.show_message_body(include_transitions);
+            if (!message.body_load_started) {
+                message.load_message_body.begin(this.load_cancellable);
+            }
         }
     }
 
@@ -682,10 +668,16 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                         break;
                     }
                 }
-                if (all_loaded == true && !this.message_bodies_loaded) {
-                    // Only update the property value if not already
-                    // true
+                if (all_loaded && !this.message_bodies_loaded) {
                     this.message_bodies_loaded = true;
+                    // Only load attachments once the web views have
+                    // finished loading, since we want to know if any
+                    // attachments marked as being inline were
+                    // actually not displayed inline, and hence need
+                    // to be displayed as if they were attachments.
+                    if (!this.load_cancellable.is_cancelled()) {
+                        this.load_attachments.begin();
+                    }
                 }
             });
         view.web_view.selection_changed.connect((has_selection) => {
@@ -726,7 +718,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         }
     }
 
-    private async void load_attachments(Cancellable load_cancelled) {
+    private async void load_attachments() {
         // Determine if we have any attachments to be displayed. This
         // relies on the primary and any attached message bodies
         // having being already loaded, so that we know which
@@ -765,12 +757,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             }
 
             foreach (Geary.Attachment attachment in this.displayed_attachments) {
-                if (load_cancelled.is_cancelled()) {
+                if (this.load_cancellable.is_cancelled()) {
                     return;
                 }
                 AttachmentView view = new AttachmentView(attachment);
                 this.attachments_view.add(view);
-                yield view.load_icon(load_cancelled);
+                yield view.load_icon(this.load_cancellable);
             }
         }
     }
