@@ -287,29 +287,20 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /** Conversation being displayed. */
     public Geary.App.Conversation conversation { get; private set; }
 
-    // Folder from which the conversation was loaded
-    internal Geary.Folder location { get; private set; }
-
     // Used to load messages in conversation.
     private Geary.App.EmailStore email_store;
-
-    // Contacts for the account this conversation exists in
-    private Geary.ContactStore contact_store;
 
     // Avatars for this conversation
     private Application.AvatarStore avatar_store;
 
-    // Account this conversation belongs to
-    private Geary.AccountInformation account_info;
+    // App config
+    private Configuration config;
 
     // Was this conversation loaded from the drafts folder?
     private bool is_draft_folder;
 
     // Cancellable for this conversation's data loading.
     private Cancellable cancellable = new Cancellable();
-
-    // App config
-    private Configuration config;
 
     // Email view with selected text, if any
     private ConversationEmail? body_selected_view = null;
@@ -392,23 +383,20 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Constructs a new conversation list box instance.
      */
     public ConversationListBox(Geary.App.Conversation conversation,
-                               Geary.Folder location,
-                               Geary.App.EmailStore? email_store,
-                               Geary.ContactStore contact_store,
-                               Geary.AccountInformation account_info,
-                               bool is_draft_folder,
-                               Configuration config,
+                               Geary.App.EmailStore email_store,
                                Application.AvatarStore avatar_store,
+                               Configuration config,
                                Gtk.Adjustment adjustment) {
         base_ref();
         this.conversation = conversation;
-        this.location = location;
         this.email_store = email_store;
-        this.contact_store = contact_store;
         this.avatar_store = avatar_store;
-        this.account_info = account_info;
-        this.is_draft_folder = is_draft_folder;
         this.config = config;
+
+        this.is_draft_folder = (
+            conversation.base_folder.special_folder_type ==
+            Geary.SpecialFolderType.DRAFTS
+        );
 
         get_style_context().add_class("background");
         get_style_context().add_class("conversation-listbox");
@@ -603,8 +591,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Loads search term matches for this list's emails.
      */
     public async void load_search_terms() {
-        Geary.SearchFolder search = (Geary.SearchFolder) this.location;
-        Geary.SearchQuery? query = search.search_query;
+        Geary.SearchFolder? search_folder =
+            this.conversation.base_folder as Geary.SearchFolder;
+        Geary.SearchQuery? query = null;
+        if (search_folder != null) {
+            query = search_folder.search_query;
+        }
         if (query != null) {
 
             // List all IDs of emails we're viewing.
@@ -619,7 +611,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
             Gee.Set<string>? search_matches = null;
             try {
-                search_matches = yield search.get_search_matches_async(
+                search_matches = yield search_folder.get_search_matches_async(
                     ids, cancellable
                 );
             } catch (Error e) {
@@ -764,9 +756,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         bool is_draft = (this.is_draft_folder && is_in_folder);
 
         bool is_sent = false;
+        Geary.Account account = this.conversation.base_folder.account;
         if (email.from != null) {
             foreach (Geary.RFC822.MailboxAddress from in email.from) {
-                if (this.account_info.has_sender_mailbox(from)) {
+                if (account.information.has_sender_mailbox(from)) {
                     is_sent = true;
                     break;
                 }
@@ -775,7 +768,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         ConversationEmail view = new ConversationEmail(
             email,
-            this.contact_store,
+            account.get_contact_store(),
             this.config,
             is_sent,
             is_draft,

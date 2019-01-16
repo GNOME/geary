@@ -197,22 +197,17 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      * Shows a conversation in the viewer.
      */
     public async void load_conversation(Geary.App.Conversation conversation,
-                                        Geary.Folder location,
-                                        Configuration config,
-                                        Application.AvatarStore avatars)
-        throws Error {
+                                        Geary.App.EmailStore email_store,
+                                        Application.AvatarStore avatar_store,
+                                        Configuration config)
+        throws GLib.Error {
         remove_current_list();
 
-        Geary.Account account = location.account;
         ConversationListBox new_list = new ConversationListBox(
             conversation,
-            location,
-            new Geary.App.EmailStore(account),
-            account.get_contact_store(),
-            account.information,
-            location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
+            email_store,
+            avatar_store,
             config,
-            avatars,
             this.conversation_scroller.get_vadjustment()
         );
 
@@ -247,7 +242,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
         // Highlight matching terms from the search if it exists, but
         // don't clobber any find terms.
-        if (find_terms == null && location is Geary.SearchFolder) {
+        if (find_terms == null &&
+            conversation.base_folder is Geary.SearchFolder) {
             yield new_list.load_search_terms();
         }
     }
@@ -348,7 +344,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             } else {
                 // Find was disabled
                 this.current_list.unmark_search_terms();
-                if (!(this.current_list.location is Geary.SearchFolder)) {
+                if (!(this.current_list.conversation.base_folder
+                      is Geary.SearchFolder)) {
                     //this.current_list.update_collapsed_state();
                 } else {
                     this.current_list.load_search_terms.begin();
