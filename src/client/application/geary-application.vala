@@ -213,11 +213,11 @@ public class GearyApplication : Gtk.Application {
         // Use present_with_time and a synthesised time so the present
         // actually works, as a work around for Bug 766284
         // <https://bugzilla.gnome.org/show_bug.cgi?id=766284>.
-        // Subtract 10ms from the current time to avoid the main
+        // Subtract 1000ms from the current time to avoid the main
         // window stealing the focus when presented just before
-        // showing a dialog (issue #43).
+        // showing a dialog (issue #43, bgo 726282).
         this.controller.main_window.present_with_time(
-            (uint32) (get_monotonic_time() / 1000) - 10
+            (uint32) (get_monotonic_time() / 1000) - 1000
         );
 
         return true;
