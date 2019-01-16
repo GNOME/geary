@@ -674,7 +674,8 @@ public class Geary.Imap.ClientSession : BaseObject {
      * even if the error was from the server (that is, not a network problem).  The
      * {@link ClientSession} should be discarded.
      */
-    public async void connect_async(Cancellable? cancellable = null) throws Error {
+    public async void connect_async(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         MachineParams params = new MachineParams(null);
         fsm.issue(Event.CONNECT, null, params);
         
@@ -837,8 +838,8 @@ public class Geary.Imap.ClientSession : BaseObject {
      * @see initiate_session_async
      */
     public async StatusResponse login_async(Geary.Credentials credentials,
-                                            Cancellable? cancellable = null)
-        throws Error {
+                                            GLib.Cancellable? cancellable)
+        throws GLib.Error {
         Command? cmd = null;
         switch (credentials.supported_method) {
         case Geary.Credentials.Method.PASSWORD:
@@ -914,11 +915,12 @@ public class Geary.Imap.ClientSession : BaseObject {
      * {@link Capabilities} are also retrieved automatically at the right time to ensure the best
      * results are available with {@link capabilities}.
      */
-    public async void initiate_session_async(Geary.Credentials credentials, Cancellable? cancellable = null)
-        throws Error {
+    public async void initiate_session_async(Geary.Credentials credentials,
+                                             GLib.Cancellable? cancellable)
+        throws GLib.Error {
         // If no capabilities available, get them now
         if (capabilities.is_empty())
-            yield send_command_async(new CapabilityCommand());
+            yield send_command_async(new CapabilityCommand(), cancellable);
 
         // store them for comparison later
         Imap.Capabilities caps = capabilities;
@@ -932,7 +934,9 @@ public class Geary.Imap.ClientSession : BaseObject {
             debug("[%s] Attempting STARTTLS...", to_string());
             StatusResponse resp;
             try {
-                resp = yield send_command_async(new StarttlsCommand());
+                resp = yield send_command_async(
+                    new StarttlsCommand(), cancellable
+                );
             } catch (Error err) {
                 debug(
                     "Error attempting STARTTLS command on %s: %s",
@@ -962,9 +966,10 @@ public class Geary.Imap.ClientSession : BaseObject {
         yield login_async(credentials, cancellable);
 
         // if new capabilities not offered after login, get them now
-        if (caps.revision == capabilities.revision)
-            yield send_command_async(new CapabilityCommand());
-        
+        if (caps.revision == capabilities.revision) {
+            yield send_command_async(new CapabilityCommand(), cancellable);
+        }
+
         // either way, new capabilities should be available
         caps = capabilities;
 
@@ -1216,11 +1221,12 @@ public class Geary.Imap.ClientSession : BaseObject {
     //
     // send commands
     //
-    
-    public async StatusResponse send_command_async(Command cmd, Cancellable? cancellable = null) 
-        throws Error {
+
+    public async StatusResponse send_command_async(Command cmd,
+                                                   GLib.Cancellable? cancellable)
+        throws GLib.Error {
         check_unsupported_send_command(cmd);
-        
+
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.SEND_CMD, null, params);
         
@@ -1231,12 +1237,14 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         return yield command_transaction_async(cmd, cancellable);
     }
-    
-    public async Gee.Map<Command, StatusResponse> send_multiple_commands_async(
-        Gee.Collection<Command> cmds, Cancellable? cancellable = null) throws Error {
+
+    public async Gee.Map<Command, StatusResponse>
+        send_multiple_commands_async(Gee.Collection<Command> cmds,
+                                     GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (cmds.size == 0)
             throw new ImapError.INVALID("Must supply at least one command");
-        
+
         foreach (Command cmd in cmds)
             check_unsupported_send_command(cmd);
         
@@ -1335,19 +1343,23 @@ public class Geary.Imap.ClientSession : BaseObject {
     //
     // select/examine
     //
-    
-    public async StatusResponse select_async(MailboxSpecifier mailbox, Cancellable? cancellable = null) 
-        throws Error {
+
+    public async StatusResponse select_async(MailboxSpecifier mailbox,
+                                             GLib.Cancellable? cancellable)
+        throws GLib.Error {
         return yield select_examine_async(mailbox, true, cancellable);
     }
-    
-    public async StatusResponse examine_async(MailboxSpecifier mailbox, Cancellable? cancellable = null)
-        throws Error {
+
+    public async StatusResponse examine_async(MailboxSpecifier mailbox,
+                                              GLib.Cancellable? cancellable)
+        throws GLib.Error {
         return yield select_examine_async(mailbox, false, cancellable);
     }
-    
-    public async StatusResponse select_examine_async(MailboxSpecifier mailbox, bool is_select,
-        Cancellable? cancellable) throws Error {
+
+    public async StatusResponse select_examine_async(MailboxSpecifier mailbox,
+                                                     bool is_select,
+                                                     GLib.Cancellable? cancellable)
+        throws GLib.Error {
         // Ternary troubles
         Command cmd;
         if (is_select)
@@ -1431,10 +1443,11 @@ public class Geary.Imap.ClientSession : BaseObject {
     //
     // close mailbox
     //
-    
-    public async StatusResponse close_mailbox_async(Cancellable? cancellable = null) throws Error {
+
+    public async StatusResponse close_mailbox_async(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         CloseCommand cmd = new CloseCommand();
-        
+
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.CLOSE_MAILBOX, null, params);
         
@@ -1487,10 +1500,11 @@ public class Geary.Imap.ClientSession : BaseObject {
     //
     // logout
     //
-    
-    public async void logout_async(Cancellable? cancellable = null) throws Error {
+
+    public async void logout_async(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         LogoutCommand cmd = new LogoutCommand();
-        
+
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.LOGOUT, null, params);
         
@@ -1528,8 +1542,9 @@ public class Geary.Imap.ClientSession : BaseObject {
     //
     // disconnect
     //
-    
-    public async void disconnect_async(Cancellable? cancellable = null) throws Error {
+
+    public async void disconnect_async(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         MachineParams params = new MachineParams(null);
         fsm.issue(Event.DISCONNECT, null, params);
         
