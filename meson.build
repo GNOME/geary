@@ -27,6 +27,7 @@ locale_dir = join_paths(geary_prefix, get_option('localedir'))
 po_dir = join_paths(meson.source_root(), 'po')
 vapi_dir = join_paths(meson.source_root(), 'bindings', 'vapi')
 metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
+web_extensions_dir = join_paths(libdir, 'geary', 'web-extensions')
 
 # Make sure Meson can find our custom VAPI's
 add_project_arguments([
@@ -128,6 +129,7 @@ conf.set_quoted('_BUILD_ROOT_DIR', meson.build_root())
 conf.set_quoted('_SOURCE_ROOT_DIR', meson.source_root())
 conf.set_quoted('_GSETTINGS_DIR', join_paths(meson.build_root(), 'desktop'))
 conf.set_quoted('_INSTALL_PREFIX', geary_prefix)
+conf.set_quoted('_WEB_EXTENSIONS_DIR', web_extensions_dir)
 conf.set_quoted('LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
 conf.set_quoted('ISO_CODE_639_XML', iso_639_xml)
 conf.set_quoted('ISO_CODE_3166_XML', iso_3166_xml)

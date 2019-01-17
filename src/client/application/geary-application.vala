@@ -7,6 +7,7 @@
 // Defined by CMake build script.
 extern const string _INSTALL_PREFIX;
 extern const string _GSETTINGS_DIR;
+extern const string _WEB_EXTENSIONS_DIR;
 extern const string _SOURCE_ROOT_DIR;
 extern const string _BUILD_ROOT_DIR;
 extern const string GETTEXT_PACKAGE;
@@ -295,16 +296,14 @@ public class GearyApplication : Gtk.Application {
     /**
      * Returns the directory containing the application's WebExtension libs.
      *
-     * If the application is installed, this will be
-     * `$INSTALL_PREFIX/lib/geary/web-extension`, else it will be
+     * When running from the installation prefix, this will be based
+     * on the Meson `libdir` option, and can be set by invoking `meson
+     * configure` as appropriate.
      */
     public File get_web_extensions_dir() {
-        File? dir = get_install_dir();
-        if (dir != null)
-            dir = dir.get_child("lib").get_child("geary").get_child("web-extensions");
-        else
-            dir = File.new_for_path(BUILD_ROOT_DIR).get_child("src");
-        return dir;
+        return (get_install_dir() != null)
+            ? File.new_for_path(_WEB_EXTENSIONS_DIR)
+            : File.new_for_path(BUILD_ROOT_DIR).get_child("src");
     }
 
     public File? get_desktop_file() {
