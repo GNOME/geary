@@ -590,72 +590,35 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /**
      * Loads search term matches for this list's emails.
      */
-    public async void load_search_terms() {
-        Geary.SearchFolder? search_folder =
-            this.conversation.base_folder as Geary.SearchFolder;
-        Geary.SearchQuery? query = null;
-        if (search_folder != null) {
-            query = search_folder.search_query;
-        }
-        if (query != null) {
-
-            // List all IDs of emails we're viewing.
-            Gee.Collection<Geary.EmailIdentifier> ids =
-                new Gee.ArrayList<Geary.EmailIdentifier>();
-            foreach (Gee.Map.Entry<Geary.EmailIdentifier, EmailRow> entry
-                        in this.email_rows.entries) {
-                if (entry.value.get_visible()) {
-                    ids.add(entry.key);
-                }
-            }
-
-            Gee.Set<string>? search_matches = null;
-            try {
-                search_matches = yield search_folder.get_search_matches_async(
-                    ids, cancellable
-                );
-            } catch (Error e) {
-                debug("Error highlighting search results: %s", e.message);
-                // Continue on here since if nothing else we have the
-                // fudging to fall back on immediately below.
-            }
-
-            if (search_matches == null)
-                search_matches = new Gee.HashSet<string>();
-
-            // This applies a fudge-factor set of matches when the database results
-            // aren't entirely satisfactory, such as when you search for an email
-            // address and the database tokenizes out the @ and ., etc.  It's not meant
-            // to be comprehensive, just a little extra highlighting applied to make
-            // the results look a little closer to what you typed.
-            foreach (string word in query.raw.split(" ")) {
-                if (word.has_suffix("\""))
-                    word = word.substring(0, word.length - 1);
-                if (word.has_prefix("\""))
-                    word = word.substring(1);
-
-                if (!Geary.String.is_empty_or_whitespace(word))
-                    search_matches.add(word);
-            }
-
-            if (!this.cancellable.is_cancelled()) {
-                highlight_search_terms(search_matches);
-            }
-        }
-    }
-
-    /**
-     * Applies search term highlighting to all email views.
-     *
-     * Returns true if any were found, else returns false.
-     */
-    public void highlight_search_terms(Gee.Set<string> terms) {
-        this.search_terms = terms;
+    public async void highlight_matching_email(Geary.SearchQuery query)
+        throws GLib.Error {
+        this.search_terms = null;
         this.search_matches_found = 0;
-        foreach (Gtk.Widget child in get_children()) {
-            EmailRow? row = child as EmailRow;
-            if (row != null) {
-                apply_search_terms(row);
+
+        Geary.Account account = this.conversation.base_folder.account;
+        Gee.Collection<Geary.EmailIdentifier>? matching =
+            yield account.local_search_async(
+                query,
+                this.conversation.get_count(),
+                0,
+                null,
+                this.conversation.get_email_ids(),
+                this.cancellable
+            );
+
+        if (matching != null) {
+            this.search_terms = yield account.get_search_matches_async(
+                query, matching, this.cancellable
+            );
+
+            if (this.search_terms != null) {
+                foreach (Geary.EmailIdentifier id in matching) {
+                    EmailRow? row = this.email_rows.get(id);
+                    if (row != null) {
+                        row.expand();
+                        apply_search_terms(row);
+                    }
+                }
             }
         }
     }
@@ -742,6 +705,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
+            row.expand();
             update_first_last_row();
             yield row.view.load_avatars(this.avatar_store);
         }
@@ -927,8 +891,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
     private void apply_search_terms(EmailRow row) {
-        // Message bodies need to be loaded to be able to search for
-        // them?
         if (row.view.message_bodies_loaded) {
             this.apply_search_terms_impl.begin(row);
         } else {
@@ -942,6 +904,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     private async void apply_search_terms_impl(EmailRow row) {
         bool found = false;
         foreach (ConversationMessage view in row.view) {
+            if (this.search_terms == null) {
+                break;
+            }
             uint count = yield view.highlight_search_terms(this.search_terms);
             if (count > 0) {
                 found = true;

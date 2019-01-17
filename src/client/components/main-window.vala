@@ -30,7 +30,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; default = new SearchBar(); }
     public ConversationListView conversation_list_view  { get; private set; }
-    public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
+    public ConversationViewer conversation_viewer { get; private set; }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
@@ -255,9 +255,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void setup_layout(Configuration config) {
-        // ConversationListView
         this.conversation_list_view = new ConversationListView(this);
-        // Toolbar
+
+        this.conversation_viewer = new ConversationViewer(
+            this.application.config
+        );
+
         this.main_toolbar = new MainToolbar(config);
         this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);

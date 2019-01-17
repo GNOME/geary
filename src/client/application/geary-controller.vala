@@ -1262,7 +1262,6 @@ public class GearyController : Geary.BaseObject {
                         convo,
                         store,
                         this.avatar_store,
-                        this.application.config,
                         (obj, ret) => {
                             try {
                                 viewer.load_conversation.end(ret);
