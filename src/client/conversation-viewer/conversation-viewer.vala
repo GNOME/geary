@@ -201,8 +201,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      */
     public async void load_conversation(Geary.App.Conversation conversation,
                                         Geary.App.EmailStore email_store,
-                                        Application.AvatarStore avatar_store)
-        throws GLib.Error {
+                                        Application.AvatarStore avatar_store) {
         remove_current_list();
 
         ConversationListBox new_list = new ConversationListBox(
@@ -235,8 +234,6 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         add_new_list(new_list);
         set_visible_child(this.conversation_page);
 
-        yield new_list.load_conversation();
-
         // Highlight matching terms from find if active, otherwise
         // from the search folder if that's where we are at
         Geary.SearchQuery? query = get_find_search_query(
@@ -249,9 +246,24 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                 query = search_folder.search_query;
             }
         }
-        if (query != null) {
-            new_list.highlight_matching_email.begin(query);
-        }
+
+        // Launch this as a background task so that additional
+        // conversation selection events can get processed before
+        // loading this one has completed.
+        //
+        // XXX we really should be yielding until the first
+        // interesting email has been loaded, and the rest should be
+        // loaded in he background.
+        new_list.load_conversation.begin(
+            query,
+            (obj, res) => {
+                try {
+                    new_list.load_conversation.end(res);
+                } catch (GLib.Error err) {
+                    debug("Error loading conversation: %s", err.message);
+                }
+            }
+        );
     }
 
     // Add a new conversation list to the UI
@@ -272,15 +284,15 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
     // Remove any existing conversation list, cancelling its loading
     private void remove_current_list() {
-        // XXX GTK+ Bug 778190 workaround
-        this.conversation_scroller.destroy();
-        new_conversation_scroller();
-
-        // Notify that the current list was removed
         if (this.current_list != null) {
+            this.current_list.cancel_conversation_load();
             this.conversation_removed(this.current_list);
             this.current_list = null;
         }
+
+        // XXX GTK+ Bug 778190 workaround
+        this.conversation_scroller.destroy(); // removes the list
+        new_conversation_scroller();
     }
 
     private void new_conversation_scroller() {

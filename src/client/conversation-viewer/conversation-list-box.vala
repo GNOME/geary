@@ -426,7 +426,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         base.destroy();
     }
 
-    public async void load_conversation()
+    public async void load_conversation(Geary.SearchQuery? query)
         throws GLib.Error {
         set_sort_func(null);
 
@@ -501,17 +501,24 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             bool added = false;
             Gtk.Adjustment listbox_adj = get_adjustment();
             foreach (Geary.Email email in uninteresting) {
+                // Give GTK a moment to process newly added rows, so
+                // when updating the adjustment below the values are
+                // valid. Priority must be low otherwise other async
+                // tasks (like cancelling loading if another
+                // conversation is selected) won't get a look in until
+                // this is done.
+                GLib.Idle.add(
+                    this.load_conversation.callback, GLib.Priority.LOW
+                );
+                yield;
+
+                // Check for cancellation after resuming in case the
+                // load was cancelled in the mean time.
                 if (this.cancellable.is_cancelled()) {
                     throw new GLib.IOError.CANCELLED(
                         "Conversation load cancelled"
                     );
                 }
-
-                // Give GTK a moment to process newly added rows, so
-                // when updating the adjustment below the values are
-                // valid
-                GLib.Idle.add(this.load_conversation.callback);
-                yield;
 
                 EmailRow row = add_email(email, false);
                 // Drafts aren't interesting?
@@ -538,6 +545,19 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
 
         set_sort_func(on_sort);
+
+        if (query != null) {
+            // XXX this sucks for large conversations because it can take
+            // a long time for the load to complete and hence for
+            // matches to show up.
+            highlight_matching_email(query);
+        }
+    }
+
+    /** Cancels loading the current conversation, if still in progress */
+    public void cancel_conversation_load() {
+        this.loading_timeout.reset();
+        this.cancellable.cancel();
     }
 
     /**
