@@ -658,6 +658,18 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             );
 
             if (this.search_terms != null) {
+                EmailRow? first = null;
+                foreach (Geary.EmailIdentifier id in matching) {
+                    EmailRow? row = this.email_rows.get(id);
+                    if (row != null &&
+                        (first == null || row.get_index() < first.get_index())) {
+                        first = row;
+                    }
+                }
+                if (first != null) {
+                    scroll_to(first);
+                }
+
                 foreach (Geary.EmailIdentifier id in matching) {
                     EmailRow? row = this.email_rows.get(id);
                     if (row != null) {
