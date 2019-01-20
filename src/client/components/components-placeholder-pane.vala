@@ -8,19 +8,22 @@
 /**
  * A placeholder image and message for empty views.
  */
-[GtkTemplate (ui = "/org/gnome/Geary/empty-placeholder.ui")]
-public class EmptyPlaceholder : Gtk.Grid {
+[GtkTemplate (ui = "/org/gnome/Geary/components-placeholder-pane.ui")]
+public class Components.PlaceholderPane : Gtk.Grid {
 
-    public string image_name {
+    /** The icon name of the pane's image. */
+    public string icon_name {
         owned get { return this.placeholder_image.icon_name; }
         set { this.placeholder_image.icon_name = value; }
     }
 
+    /** The text of the pane's title label. */
     public string title {
         get { return this.title_label.get_text(); }
         set { this.title_label.set_text(value); }
     }
 
+    /** The text of the pane's sub-title label. */
     public string subtitle {
         get { return this.subtitle_label.get_text(); }
         set { this.subtitle_label.set_text(value); }

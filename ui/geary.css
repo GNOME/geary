@@ -178,12 +178,12 @@ grid.geary-message-summary {
   border-radius: 0px;
 }
 
-/* EmptyPlaceholder */
+/* PlaceholderPane  */
 
-.geary-empty-placeholder > image {
+.geary-placeholder-pane > image {
   margin-bottom: 12px;
 }
-.geary-empty-placeholder > .title {
+.geary-placeholder-pane > .title {
   font-weight: bold;
 }
 

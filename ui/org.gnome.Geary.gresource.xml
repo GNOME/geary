@@ -10,6 +10,7 @@
     <file compressed="true" preprocess="xml-stripblanks">certificate_warning_dialog.glade</file>
     <file compressed="true">client-web-view.js</file>
     <file compressed="true">client-web-view-allow-remote-images.js</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-placeholder-pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-headerbar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-link-popover.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-menus.ui</file>
@@ -24,7 +25,6 @@
     <file compressed="true" preprocess="xml-stripblanks">conversation-viewer.ui</file>
     <file compressed="true">conversation-web-view.css</file>
     <file compressed="true">conversation-web-view.js</file>
-    <file compressed="true" preprocess="xml-stripblanks">empty-placeholder.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">find_bar.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">folder-popover.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtk/help-overlay.ui</file>

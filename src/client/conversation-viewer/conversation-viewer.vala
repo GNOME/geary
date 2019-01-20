@@ -73,29 +73,49 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         base_ref();
         this.config = config;
 
-        EmptyPlaceholder no_conversations = new EmptyPlaceholder();
+        Components.PlaceholderPane no_conversations = new Components.PlaceholderPane();
+        no_conversations.icon_name = "folder-symbolic";
+        // Translators: Title label for placeholder when no
+        // conversations have been selected.
         no_conversations.title = _("No conversations selected");
+        // Translators: Sub-title label for placeholder when no
+        // conversations have been selected.
         no_conversations.subtitle = _(
             "Selecting a conversation from the list will display it here"
         );
         this.no_conversations_page.add(no_conversations);
 
-        EmptyPlaceholder multi_conversations = new EmptyPlaceholder();
+        Components.PlaceholderPane multi_conversations = new Components.PlaceholderPane();
+        no_conversations.icon_name = "folder-symbolic";
+        // Translators: Title label for placeholder when multiple
+        // conversations have been selected.
         multi_conversations.title = _("Multiple conversations selected");
+        // Translators: Sub-title label for placeholder when multiple
+        // conversations have been selected.
         multi_conversations.subtitle = _(
             "Choosing an action will apply to all selected conversations"
         );
         this.multiple_conversations_page.add(multi_conversations);
 
-        EmptyPlaceholder empty_folder = new EmptyPlaceholder();
+        Components.PlaceholderPane empty_folder = new Components.PlaceholderPane();
+        no_conversations.icon_name = "folder-symbolic";
+        // Translators: Title label for placeholder when no
+        // conversations have exist in a folder.
         empty_folder.title = _("No conversations found");
+        // Translators: Sub-title label for placeholder when no
+        // conversations have exist in a folder.
         empty_folder.subtitle = _(
             "This folder does not contain any conversations"
         );
         this.empty_folder_page.add(empty_folder);
 
-        EmptyPlaceholder empty_search = new EmptyPlaceholder();
+        Components.PlaceholderPane empty_search = new Components.PlaceholderPane();
+        no_conversations.icon_name = "folder-symbolic";
+        // Translators: Title label for placeholder when no
+        // conversations have been found in a search.
         empty_search.title = _("No conversations found");
+        // Translators: Sub-title label for placeholder when no
+        // conversations have been found in a search.
         empty_search.subtitle = _(
             "Your search returned no results, try refining your search terms"
         );
