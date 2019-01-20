@@ -870,7 +870,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // size of the body will be off, affecting the visibility
             // of emails further down the conversation.
             if (email_view.email.is_unread().is_certain() &&
-                conversation_message.web_view.has_valid_height &&
+                email_view.message_bodies_loaded &&
                 !email_view.is_manually_read) {
                  int body_top = 0;
                  int body_left = 0;
@@ -899,7 +899,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             return true;
         });
 
-        if (email_ids.size > 0) {
+        // Only-automark if the window is currently focused
+        Gtk.Window? top_level = get_toplevel() as Gtk.Window;
+        if (top_level != null &&
+            top_level.is_active &&
+            email_ids.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.UNREAD);
             mark_emails(email_ids, null, flags);
