@@ -1274,6 +1274,8 @@ public class GearyController : Geary.BaseObject {
                                 get_window_action(
                                     ACTION_FIND_IN_CONVERSATION
                                 ).set_enabled(true);
+                            } catch (GLib.IOError.CANCELLED err) {
+                                // All good
                             } catch (Error err) {
                                 debug("Unable to load conversation: %s",
                                       err.message);

@@ -38,9 +38,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // account.
     private const int EMAIL_TOP_OFFSET = 32;
 
-    // Loading spinner timeout
-    private const int LOADING_TIMEOUT_MSEC = 150;
-
 
     // Base class for list rows it the list box
     private abstract class ConversationRow : Gtk.ListBoxRow, Geary.BaseInterface {
@@ -312,8 +309,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // Total number of search matches found
     private uint search_matches_found = 0;
 
-    private Geary.TimeoutManager loading_timeout;
-
 
     /** Keyboard action to scroll the conversation. */
     [Signal (action=true)]
@@ -399,11 +394,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.conversation.appended.connect(on_conversation_appended);
         this.conversation.trimmed.connect(on_conversation_trimmed);
         this.conversation.email_flags_changed.connect(on_update_flags);
-
-        // If the load is taking too long, display a spinner
-        this.loading_timeout = new Geary.TimeoutManager.milliseconds(
-            LOADING_TIMEOUT_MSEC, show_loading
-        );
     }
 
     ~ConversationListBox() {
@@ -411,7 +401,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
     public override void destroy() {
-        this.loading_timeout.reset();
         this.cancellable.cancel();
         this.email_rows.clear();
         base.destroy();
@@ -424,12 +413,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         Gee.Collection<Geary.Email>? all_email = this.conversation.get_emails(
             Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING
         );
-
-        // Now have the full set of email and a UI update is
-        // imminent. So cancel the spinner timeout if still running,
-        // and remove the spinner it may have set in any case.
-        this.loading_timeout.reset();
-        set_placeholder(null);
 
         // Work out what the first interesting email is, and load it
         // before all of the email before and after that so we can
@@ -477,7 +460,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     /** Cancels loading the current conversation, if still in progress */
     public void cancel_conversation_load() {
-        this.loading_timeout.reset();
         this.cancellable.cancel();
     }
 
@@ -828,15 +810,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             remove(row);
             email_removed(row.view);
         }
-    }
-
-    private void show_loading() {
-        Gtk.Spinner spinner = new Gtk.Spinner();
-        spinner.set_size_request(32, 32);
-        spinner.halign = spinner.valign = Gtk.Align.CENTER;
-        spinner.start();
-        spinner.show();
-        set_placeholder(spinner);
     }
 
     private void scroll_to(ConversationRow row) {

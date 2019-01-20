@@ -25,6 +25,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
 
+    private const int PULSE_TIMEOUT_MSEC = 250;
+
 
     // Widget used to display sender/recipient email addresses in
     // message header Gtk.FlowBox instances.
@@ -248,6 +250,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private Geary.TimeoutManager show_progress_timeout = null;
     private Geary.TimeoutManager hide_progress_timeout = null;
 
+    // Timer for pulsing progress bar
+    private Geary.TimeoutManager progress_pulse;
+
 
     /** Fired when the user clicks a link in the email. */
     public signal void link_activated(string link);
@@ -460,6 +465,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.hide_progress_timeout = new Geary.TimeoutManager.seconds(
             1, () => { this.body_progress.hide(); }
         );
+
+        this.progress_pulse = new Geary.TimeoutManager.milliseconds(
+            PULSE_TIMEOUT_MSEC, this.body_progress.pulse
+        );
+        this.progress_pulse.repetition = FOREVER;
     }
 
     ~ConversationMessage() {
@@ -469,6 +479,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public override void destroy() {
         this.show_progress_timeout.reset();
         this.hide_progress_timeout.reset();
+        this.progress_pulse.reset();
         this.resources.clear();
         this.searchable_addresses.clear();
         base.destroy();
@@ -490,6 +501,18 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         preview_revealer.set_reveal_child(true);
         header_revealer.set_reveal_child(false);
         body_revealer.set_reveal_child(false);
+    }
+
+    /** Shows and starts pulsing the progress meter. */
+    public void start_progress_pulse() {
+        this.body_progress.show();
+        this.progress_pulse.start();
+    }
+
+    /** Hides and stops pulsing the progress meter. */
+    public void stop_progress_pulse() {
+        this.body_progress.hide();
+        this.progress_pulse.reset();
     }
 
     /**

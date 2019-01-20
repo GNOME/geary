@@ -221,7 +221,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      */
     public async void load_conversation(Geary.App.Conversation conversation,
                                         Geary.App.EmailStore email_store,
-                                        Application.AvatarStore avatar_store) {
+                                        Application.AvatarStore avatar_store)
+        throws GLib.Error {
         remove_current_list();
 
         ConversationListBox new_list = new ConversationListBox(
@@ -267,23 +268,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             }
         }
 
-        // Launch this as a background task so that additional
-        // conversation selection events can get processed before
-        // loading this one has completed.
-        //
-        // XXX we really should be yielding until the first
-        // interesting email has been loaded, and the rest should be
-        // loaded in he background.
-        new_list.load_conversation.begin(
-            query,
-            (obj, res) => {
-                try {
-                    new_list.load_conversation.end(res);
-                } catch (GLib.Error err) {
-                    debug("Error loading conversation: %s", err.message);
-                }
-            }
-        );
+        yield new_list.load_conversation(query);
     }
 
     // Add a new conversation list to the UI
