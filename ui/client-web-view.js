@@ -52,8 +52,11 @@ PageState.prototype = {
         // Queues an update after the DOM has been initially loaded
         // and had any changes made to it by derived classes.
         document.addEventListener("DOMContentLoaded", function(e) {
+            // Always fire a prefered height update first so that it
+            // will be vaguegly correct when notifying of the HTML
+            // load completing.
+            state.updatePreferredHeight();
             state.loaded();
-            queuePreferredHeightUpdate();
         });
 
         // Queues an update when the complete document is loaded.

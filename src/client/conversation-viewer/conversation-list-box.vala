@@ -47,8 +47,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
 
         protected const string EXPANDED_CLASS = "geary-expanded";
-        private const string FIRST_CLASS = "geary-first";
-        private const string LAST_CLASS = "geary-last";
+
 
         // The email being displayed by this row, if any
         public Geary.Email? email { get; private set; default = null; }
@@ -63,24 +62,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             }
         }
         private bool _is_expanded = false;
-
-        // Designate this row as the first visible row in the
-        // conversation listbox, or not. See Bug 764710 and
-        // ::update_first_last_row() below.
-        internal bool is_first {
-            set {
-                set_style_context_class(FIRST_CLASS, value);
-            }
-        }
-
-        // Designate this row as the last visible row in the
-        // conversation listbox, or not. See Bug 764710 and
-        // ::update_first_last_row() below.
-        internal bool is_last {
-            set {
-                set_style_context_class(LAST_CLASS, value);
-            }
-        }
 
 
         // We can only scroll to a specific row once it has been
@@ -202,6 +183,28 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
 
+    // Displays a loading widget in the list box
+    private class LoadingRow : ConversationRow {
+
+
+        protected const string LOADING_CLASS = "geary-loading";
+
+
+        public LoadingRow() {
+            base(null);
+            get_style_context().add_class(LOADING_CLASS);
+
+            Gtk.Spinner spinner = new Gtk.Spinner();
+            spinner.height_request = 16;
+            spinner.width_request = 16;
+            spinner.show();
+            spinner.start();
+            add(spinner);
+        }
+
+    }
+
+
     // Displays a single embedded composer in the list box
     private class ComposerRow : ConversationRow {
 
@@ -290,9 +293,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // App config
     private Configuration config;
 
-    // Was this conversation loaded from the drafts folder?
-    private bool is_draft_folder;
-
     // Cancellable for this conversation's data loading.
     private Cancellable cancellable = new Cancellable();
 
@@ -305,10 +305,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     // The id of the draft referred to by the current composer.
     private Geary.EmailIdentifier? draft_id = null;
-
-    // First and last visible row in the list, if any
-    private ConversationRow? first_row = null;
-    private ConversationRow? last_row = null;
 
     // Cached search terms to apply to new messages
     private Gee.Set<string>? search_terms = null;
@@ -387,11 +383,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.avatar_store = avatar_store;
         this.config = config;
 
-        this.is_draft_folder = (
-            conversation.base_folder.special_folder_type ==
-            Geary.SpecialFolderType.DRAFTS
-        );
-
         get_style_context().add_class("background");
         get_style_context().add_class("conversation-listbox");
 
@@ -442,116 +433,46 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         // Work out what the first interesting email is, and load it
         // before all of the email before and after that so we can
-        // load them in an optimal order
-        EmailRow? first_interesting = null;
+        // load them in an optimal order.
         Gee.LinkedList<Geary.Email> uninteresting =
             new Gee.LinkedList<Geary.Email>();
+        Geary.Email? first_interesting = null;
+        Gee.LinkedList<Geary.Email> post_interesting =
+            new Gee.LinkedList<Geary.Email>();
         foreach (Geary.Email email in all_email) {
-            if (this.cancellable.is_cancelled()) {
-                throw new GLib.IOError.CANCELLED("Conversation load cancelled");
-            }
-
             if (first_interesting == null) {
                 if (email.is_unread().is_certain() ||
                     email.is_flagged().is_certain()) {
-                    // Found and an interesting email! So load it!
-                    EmailRow row = add_email(email);
-                    first_interesting = row;
-
-                    // Update first/last row after adding the first to
-                    // avoid the UI flashing as the border
-                    // appears/disappears
-                    update_first_last_row();
-
-                    yield row.expand(this.email_store, this.avatar_store);
+                    first_interesting = email;
                 } else {
                     // Inserted reversed so most recent uninteresting
-                    // rows are added first
+                    // rows are added first.
                     uninteresting.insert(0, email);
                 }
             } else {
-                // Already found and loaded an interesting email, so
-                // load the rest now normally.
-                EmailRow row = add_email(email);
-                if (email.is_unread().is_certain() ||
-                    email.is_flagged().is_certain() ||
-                    row.view.is_draft) {
-                    yield row.expand(this.email_store, this.avatar_store);
-                }
+                post_interesting.add(email);
             }
         }
 
         if (first_interesting == null) {
-            // No interesting messages found so none have been
-            // expanded yet, show the last one at least.
-            EmailRow row = add_email(
-                uninteresting.remove_at(0)
-            );
-            // Update first/last row after adding the first to
-            // avoid the UI flashing as the border
-            // appears/disappears
-            update_first_last_row();
+            // No interesting messages found so use the last one.
+            first_interesting = uninteresting.remove_at(0);
+        }
+        EmailRow interesting_row = add_email(first_interesting);
 
-            yield row.expand(this.email_store, this.avatar_store);
-            first_interesting = row;
+        // If we have at least one uninteresting and one
+        // post-interesting to load afterwards, show a spinner above
+        // the interesting row to act as a placeholder.
+        if (!uninteresting.is_empty && !post_interesting.is_empty) {
+            insert(new LoadingRow(), 0);
         }
 
-        // Finally, load all of the uninteresting messages
-        if (!uninteresting.is_empty) {
-            bool added = false;
-            Gtk.Adjustment listbox_adj = get_adjustment();
-            foreach (Geary.Email email in uninteresting) {
-                // Give GTK a moment to process newly added rows, so
-                // when updating the adjustment below the values are
-                // valid. Priority must be low otherwise other async
-                // tasks (like cancelling loading if another
-                // conversation is selected) won't get a look in until
-                // this is done.
-                GLib.Idle.add(
-                    this.load_conversation.callback, GLib.Priority.LOW
-                );
-                yield;
-
-                // Check for cancellation after resuming in case the
-                // load was cancelled in the mean time.
-                if (this.cancellable.is_cancelled()) {
-                    throw new GLib.IOError.CANCELLED(
-                        "Conversation load cancelled"
-                    );
-                }
-
-                EmailRow row = add_email(email, false);
-                // Drafts aren't interesting?
-                if (row.view.is_draft) {
-                    yield row.expand(this.email_store, this.avatar_store);
-                }
-
-                if (!added) {
-                    added = true;
-                    update_first_last_row();
-                }
-
-                // Since uninteresting rows are inserted above the
-                // first expanded, adjust the scrollbar as they are
-                // inserted so as to keep the list scrolled to the
-                // same place.
-                row.enable_should_scroll();
-                row.should_scroll.connect(() => {
-                        Gtk.Allocation row_alloc;
-                        row.get_allocation(out row_alloc);
-                        listbox_adj.value += row_alloc.height;
-                    });
-            }
-        }
-
-        set_sort_func(on_sort);
-
-        if (query != null) {
-            // XXX this sucks for large conversations because it can take
-            // a long time for the load to complete and hence for
-            // matches to show up.
-            highlight_matching_email(query);
-        }
+        // Load the interesting row completely up front, and load the
+        // remaining in the background so we can return fast.
+        yield interesting_row.expand(this.email_store, this.avatar_store);
+        this.finish_loading.begin(
+            query, uninteresting, post_interesting
+        );
     }
 
     /** Cancels loading the current conversation, if still in progress */
@@ -619,7 +540,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         row.enable_should_scroll();
         row.should_scroll.connect(() => { scroll_to(row); });
         add(row);
-        update_first_last_row();
 
         embed.composer.draft_id_changed.connect((id) => { this.draft_id = id; });
         embed.vanished.connect(() => {
@@ -752,6 +672,81 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             });
     }
 
+    private async void finish_loading(Geary.SearchQuery? query,
+                                      Gee.LinkedList<Geary.Email> to_insert,
+                                      Gee.LinkedList<Geary.Email> to_append)
+        throws GLib.Error {
+        // Add emails to append first because if the first interesting
+        // message was short, these will show up in the UI under it,
+        // filling the empty space.
+        foreach (Geary.Email email in to_append) {
+            EmailRow row = add_email(email);
+            if (is_interesting(email)) {
+                yield row.expand(this.email_store, this.avatar_store);
+            }
+            yield throttle_loading();
+        }
+
+        // Since first rows may have extra margin, remove that from
+        // the height of rows when adjusting scrolling.
+        Gtk.ListBoxRow initial_row = get_row_at_index(0);
+        int loading_height = 0;
+        if (initial_row is LoadingRow) {
+            loading_height = GtkUtil.get_border_box_height(initial_row);
+            remove(initial_row);
+        }
+
+        // None of these will be interesting, so just add them all,
+        // but keep the scrollbar adjusted so that the first
+        // interesting message remains visible.
+        Gtk.Adjustment listbox_adj = get_adjustment();
+        foreach (Geary.Email email in to_insert) {
+            EmailRow row = add_email(email, false);
+            // Since uninteresting rows are inserted above the
+            // first expanded, adjust the scrollbar as they are
+            // inserted so as to keep the list scrolled to the
+            // same place.
+            row.enable_should_scroll();
+            row.should_scroll.connect(() => {
+                    listbox_adj.value += GtkUtil.get_border_box_height(row);
+                });
+
+            // Only adjust for the loading row going away once
+            loading_height = 0;
+
+            yield throttle_loading();
+        }
+
+        set_sort_func(on_sort);
+
+        if (query != null) {
+            // XXX this sucks for large conversations because it can take
+            // a long time for the load to complete and hence for
+            // matches to show up.
+            yield highlight_matching_email(query);
+        }
+    }
+
+    private inline async void throttle_loading() throws GLib.IOError {
+        // Give GTK a moment to process newly added rows, so when
+        // updating the adjustment below the values are
+        // valid. Priority must be low otherwise other async tasks
+        // (like cancelling loading if another conversation is
+        // selected) won't get a look in until this is done.
+        GLib.Idle.add(
+            this.throttle_loading.callback, GLib.Priority.LOW
+        );
+        yield;
+
+        // Check for cancellation after resuming in case the load was
+        // cancelled in the mean time.
+        if (this.cancellable.is_cancelled()) {
+            throw new GLib.IOError.CANCELLED(
+                "Conversation load cancelled"
+            );
+        }
+    }
+
     // Loads full version of an email, adds it to the listbox
     private async void load_full_email(Geary.EmailIdentifier id)
         throws Error {
@@ -768,8 +763,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
-            update_first_last_row();
-
             row.view.load_avatar.begin(this.avatar_store);
             yield row.expand(this.email_store, this.avatar_store);
         }
@@ -777,12 +770,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     // Constructs a row and view for an email, adds it to the listbox
     private EmailRow add_email(Geary.Email email, bool append_row = true) {
-        // Should be able to edit draft emails from any
-        // conversation. This test should be more like "is in drafts
-        // folder"
-        bool is_in_folder = this.conversation.is_in_base_folder(email.id);
-        bool is_draft = (this.is_draft_folder && is_in_folder);
-
         bool is_sent = false;
         Geary.Account account = this.conversation.base_folder.account;
         if (email.from != null) {
@@ -799,7 +786,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             account.get_contact_store(),
             this.config,
             is_sent,
-            is_draft,
+            is_draft(email),
             this.cancellable
         );
         view.mark_email.connect(on_mark_email);
@@ -919,38 +906,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
     }
 
-    // Due to Bug 764710, we can only use the CSS :last-child selector
-    // for GTK themes after 3.20.3, so for now manually maintain a
-    // class on the last box so we can emulate it
-    private void update_first_last_row() {
-        ConversationRow? first = null;
-        ConversationRow? last = null;
-        this.foreach((child) => {
-                if (first == null) {
-                    first = (ConversationRow) child;
-                }
-                last = (ConversationRow) child;
-            });
-
-        if (this.first_row != first) {
-            if (this.first_row != null) {
-                this.first_row.is_first = false;
-            }
-
-            this.first_row = first;
-            this.first_row.is_first = true;
-        }
-
-        if (this.last_row != last) {
-            if (this.last_row != null) {
-                this.last_row.is_last = false;
-            }
-
-            this.last_row = last;
-            this.last_row.is_last = true;
-        }
-    }
-
     private void apply_search_terms(EmailRow row) {
         if (row.view.message_bodies_loaded) {
             this.apply_search_terms_impl.begin(row);
@@ -995,6 +950,30 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             email_view_iterator().map<Gee.Iterator<ConversationMessage>>(
                 (email_view) => { return email_view.iterator(); }
             )
+        );
+    }
+
+    /** Determines if an email should be expanded by default. */
+    private inline bool is_interesting(Geary.Email email) {
+        return (
+            email.is_unread().is_certain() ||
+            email.is_flagged().is_certain() ||
+            is_draft(email)
+        );
+    }
+
+    /** Determines if an email should be considered to be a draft. */
+    private inline bool is_draft(Geary.Email email) {
+        // XXX should be able to edit draft emails from any
+        // conversation. This test should be more like "is in drafts
+        // folder"
+        Geary.SpecialFolderType type =
+            this.conversation.base_folder.special_folder_type;
+        bool is_in_folder = this.conversation.is_in_base_folder(email.id);
+
+        return (
+            is_in_folder && type == Geary.SpecialFolderType.DRAFTS // ||
+            //email.flags.is_draft()
         );
     }
 
@@ -1080,7 +1059,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // be appended last. Finally, don't let rows with active
             // composers be collapsed.
             if (row.is_expanded) {
-                if (row != this.last_row) {
+                if (get_row_at_index(row.get_index() + 1) != null) {
                     row.collapse();
                 }
             } else {
