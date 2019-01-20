@@ -47,19 +47,8 @@ private class Geary.ImapEngine.MoveEmailRevoke : Geary.ImapEngine.SendReplayOper
         
         return ReplayOperation.Status.COMPLETED;
     }
-    
-    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        return ReplayOperation.Status.COMPLETED;
-    }
-    
-    public override async void backout_local_async() throws Error {
-    }
-    
+
     public override string describe_state() {
         return "%d email IDs".printf(to_revoke.size);
     }
 }
-

@@ -205,21 +205,9 @@ public class GearyApplication : Gtk.Application {
         if (!present())
             create_async.begin();
     }
-    
+
     public bool present() {
-        if (controller == null)
-            return false;
-        
-        // if LoginDialog (i.e. the opening dialog for creating the initial account) is present
-        // and visible, bring that to top (to prevent opening the hidden main window, which is
-        // empty)
-        if (controller.login_dialog != null && controller.login_dialog.visible) {
-            controller.login_dialog.present_with_time(Gdk.CURRENT_TIME);
-            
-            return true;
-        }
-        
-        if (controller.main_window == null)
+        if (controller == null || controller.main_window == null)
             return false;
 
         // Use present_with_time and a synthesised time so the present
@@ -234,7 +222,7 @@ public class GearyApplication : Gtk.Application {
 
         return true;
     }
-    
+
     private async void create_async() {
         // Manually keep the main loop around for the duration of this call.
         // Without this, the main loop will exit as soon as we hit the yield
@@ -263,6 +251,16 @@ public class GearyApplication : Gtk.Application {
         
         is_destroyed = true;
     }
+
+    public void show_accounts() {
+        activate();
+
+        Accounts.Editor editor = new Accounts.Editor(this, get_active_window());
+        editor.run();
+        editor.destroy();
+        this.controller.expunge_accounts.begin();
+    }
+
 
     public File get_user_data_directory() {
         return File.new_for_path(Environment.get_user_data_dir()).get_child("geary");
@@ -422,10 +420,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_accounts() {
-        AccountDialog dialog = new AccountDialog(this, get_active_window());
-        dialog.show_all();
-        dialog.run();
-        dialog.destroy();
+        show_accounts();
     }
 
     private void on_activate_compose() {

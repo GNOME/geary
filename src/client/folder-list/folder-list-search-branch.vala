@@ -36,7 +36,7 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     
     public override string get_sidebar_name() {
         return GearyApplication.instance.controller.get_num_accounts() == 1 ? _("Search") :
-            _("Search %s account").printf(folder.account.information.nickname);
+            _("Search %s account").printf(folder.account.information.display_name);
     }
     
     public override string? get_sidebar_tooltip() {

@@ -64,22 +64,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     /** The IMAP database representation of the folder. */
     internal ImapDB.Folder local_folder { get; private set; }
 
-    /**
-     * Determines if a remote session is currently available.
-     *
-     * If this property is //true//, then a subsequent call to {@link
-     * wait_for_remote_async} or {@link claim_remote_session} should
-     * return immediately without error.
-     */
-    internal bool is_remote_available {
-        get {
-            return (
-                this.remote_wait_semaphore.can_pass &&
-                this.remote_wait_semaphore.result
-            );
-        }
-    }
-
     internal ReplayQueue? replay_queue { get; private set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
 
@@ -236,20 +220,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         return opening;
     }
 
-    /** {@inheritDoc} */
-    public override async void wait_for_remote_async(Cancellable? cancellable = null) throws Error {
-        check_open("wait_for_remote_async");
-
-        // If remote has not yet been opened and we are not in the
-        // process of closing the folder, open a session right away.
-        if (this.remote_session == null && !this.open_cancellable.is_cancelled()) {
-            this.open_remote_session.begin();
-        }
-
-        if (!yield this.remote_wait_semaphore.wait_for_result_async(cancellable))
-            throw new EngineError.ALREADY_CLOSED("%s failed to open", to_string());
-    }
-
     /**
      * Returns a valid IMAP folder session when one is available.
      *
@@ -267,7 +237,17 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         throws Error {
         check_open("claim_remote_session");
         debug("%s: Claiming folder session", this.to_string());
-        yield this.wait_for_remote_async(cancellable);
+
+
+        // If remote has not yet been opened and we are not in the
+        // process of closing the folder, open a session right away.
+        if (this.remote_session == null && !this.open_cancellable.is_cancelled()) {
+            this.open_remote_session.begin();
+        }
+
+        if (!yield this.remote_wait_semaphore.wait_for_result_async(cancellable))
+            throw new EngineError.ALREADY_CLOSED("%s failed to open", to_string());
+
         return this.remote_session;
     }
 
@@ -787,18 +767,23 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             this.local_folder.get_properties().email_total
         );
 
-        // Unless NO_DELAY is set, do NOT open the remote side here; wait for the ReplayQueue to
-        // require a remote connection or wait_for_remote_async() to be called ... this allows for
-        // fast local-only operations to occur, local-only either because (a) the folder has all
-        // the information required (for a list or fetch operation), or (b) the operation was de
-        // facto local-only.  In particular, EmailStore will open and close lots of folders,
-        // causing a lot of connection setup and teardown
+        // Unless NO_DELAY is set, do NOT open the remote side here;
+        // wait for a folder session to be claimed ... this allows for
+        // fast local-only operations to occur, local-only either
+        // because (a) the folder has all the information required
+        // (for a list or fetch operation), or (b) the operation was
+        // de facto local-only.  In particular, EmailStore will open
+        // and close lots of folders, causing a lot of connection
+        // setup and teardown
         //
-        // However, want to eventually open, otherwise if there's no user interaction (i.e. a
-        // second account Inbox they don't manipulate), no remote connection will ever be made,
-        // meaning that folder normalization never happens and unsolicited notifications never
-        // arrive
-        this._account.session_pool.ready.connect(on_remote_ready);
+        // However, we want to eventually open, otherwise if there's
+        // no user interaction (i.e. a second account Inbox they don't
+        // manipulate), no remote connection will ever be made,
+        // meaning that folder normalization never happens and
+        // unsolicited notifications never arrive
+        this._account.imap.notify["current-status"].connect(
+            on_remote_status_notify
+        );
         if (open_flags.is_all_set(OpenFlags.NO_DELAY)) {
             this.open_remote_session.begin();
         } else {
@@ -839,7 +824,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         // Ensure we don't attempt to start opening a remote while
         // closing
-        this._account.session_pool.ready.disconnect(on_remote_ready);
+        this._account.imap.notify["current-status"].disconnect(
+            on_remote_status_notify
+        );
         this.remote_open_timer.reset();
 
         // Stop any internal tasks from running
@@ -923,7 +910,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // Ensure we are open already and guard against someone
             // else having called this just before we did.
             if (this.open_count > 0 &&
-                this._account.session_pool.is_ready &&
+                this._account.imap.current_status == CONNECTED &&
                 this.remote_session == null) {
 
                 this.opening_monitor.notify_start();
@@ -961,17 +948,30 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // Fine, just bail out
             return;
         } catch (EngineError.NOT_FOUND err) {
-            // Folder no longer exists, so force closed
+            debug("Remote folder not found, forcing closed");
+            yield force_close(
+                CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR
+            );
+            return;
+        } catch (ImapError.NOT_SUPPORTED err) {
+            debug("Remote folder not selectable, forcing closed");
             yield force_close(
                 CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR
             );
             return;
         } catch (Error err) {
-            // Notify that there was a connection error, but don't
-            // force the folder closed, since it might come good again
-            // if the user fixes an auth problem or the network comes
-            // back or whatever.
-            notify_open_failed(Folder.OpenFailed.REMOTE_ERROR, err);
+            ErrorContext context = new ErrorContext(err);
+            if (is_unrecoverable_failure(err)) {
+                debug("Unrecoverable failure opening remote, forcing closed: %s",
+                      context.format_full_error());
+                yield force_close(
+                    CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR
+                );
+            } else {
+                debug("Recoverable error opening remote: %s",
+                      context.format_full_error());
+                notify_open_failed(Folder.OpenFailed.REMOTE_ERROR, err);
+            }
             return;
         }
 
@@ -1464,8 +1464,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // we support IMAP CONDSTORE (Bug 713117).
         int chunk_size = FLAG_UPDATE_START_CHUNK;
         Geary.EmailIdentifier? lowest = null;
-        for (;;) {
-            yield wait_for_remote_async(cancellable);
+        while (get_open_state() != Geary.Folder.OpenState.CLOSED) {
             Gee.List<Geary.Email>? list_local = yield list_email_by_id_async(
                 lowest, chunk_size,
                 Geary.Email.Field.FLAGS,
@@ -1543,8 +1542,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         );
     }
 
-    private void on_remote_ready(bool is_ready) {
-        if (is_ready) {
+    private void on_remote_status_notify() {
+        if (this._account.imap.current_status == CONNECTED) {
             this.open_remote_session.begin();
         }
     }
@@ -1565,7 +1564,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 // occurred, but the folder is still open and so is
                 // the pool, try re-establishing the connection.
                 if (is_error &&
-                    this._account.session_pool.is_ready &&
+                    this._account.imap.current_status == CONNECTED &&
                     !this.open_cancellable.is_cancelled()) {
                     this.open_remote_session.begin();
                 }

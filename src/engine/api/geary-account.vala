@@ -27,13 +27,88 @@ public abstract class Geary.Account : BaseObject {
     internal const uint AUTH_ATTEMPTS_MAX = 3;
 
 
-    public Geary.AccountInformation information { get; protected set; }
-    
+     /**
+     * Denotes the account's current status.
+     *
+     * @see Account.current_status
+     * @see ClientService.current_status
+     */
+    [Flags]
+    public enum Status {
+
+        /**
+         * The account is currently online and operating normally.
+         *
+         * This flags will be set when the account's {@link incoming}
+         * service's {@link ClientService.current_status} is {@link
+         * ClientService.Status.CONNECTED}.
+         */
+        ONLINE,
+
+        /**
+         * One or of the account's services is degraded.
+         *
+         * This flag will be set when one or both of its services has
+         * encountered a problem. Consult the {@link
+         * ClientService.current_status} to determine which and the
+         * exact problem.
+         */
+        SERVICE_PROBLEM;
+
+
+        /** Determines if the {@link ONLINE} flag is set. */
+        public bool is_online() {
+            return (this & ONLINE) == ONLINE;
+        }
+
+        /** Determines if the {@link SERVICE_PROBLEM} flag is set. */
+        public bool has_service_problem() {
+            return (this & SERVICE_PROBLEM) == SERVICE_PROBLEM;
+        }
+
+    }
+
+
+   /**
+     * The account's current configuration.
+     */
+    public AccountInformation information { get; protected set; }
+
+    /**
+     * The account's current status.
+     *
+     * This property's value is set based on the {@link
+     * ClientService.current_status} of the account's {@link incoming}
+     * and {@link outgoing} services. See {@link Status} for more
+     * information.
+     *
+     * The initial value for this property is {@link Status.ONLINE},
+     * which may or may not be incorrect. However the once the account
+     * has been opened, its services will begin checking connectivity
+     * and the value will be updated to match in due course.
+     *
+     * @see ClientService.current_status
+     */
+    public Status current_status { get; protected set; default = ONLINE; }
+
+    /**
+     * The service manager for the incoming email service.
+     */
+    public ClientService incoming { get; private set; }
+
+    /**
+     * The service manager for the outgoing email service.
+     */
+    public ClientService outgoing { get; private set; }
+
     public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_vacuum_monitor { get; protected set; }
     public Geary.ProgressMonitor opening_monitor { get; protected set; }
     public Geary.ProgressMonitor sending_monitor { get; protected set; }
+
+    protected string id { get; private set; }
+
 
     public signal void opened();
     
@@ -144,12 +219,24 @@ public abstract class Geary.Account : BaseObject {
      */
     public signal void email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
-    
-    private string name;
-    
-    protected Account(string name, AccountInformation information) {
-        this.name = name;
+
+
+    protected Account(AccountInformation information,
+                      ClientService incoming,
+                      ClientService outgoing) {
         this.information = information;
+        this.incoming = incoming;
+        this.outgoing = outgoing;
+        this.id = "%s[%s]".printf(
+            information.id, information.service_provider.to_value()
+        );
+
+        incoming.notify["current-status"].connect(
+            on_service_status_notify
+        );
+        outgoing.notify["current-status"].connect(
+            on_service_status_notify
+        );
     }
 
     /**
@@ -208,26 +295,6 @@ public abstract class Geary.Account : BaseObject {
      * Unlike most methods in Account, this should only be called when the Account is closed.
      */
     public abstract async void rebuild_async(Cancellable? cancellable = null) throws Error;
-
-    /**
-     * Starts delivery of messages to the outgoing server.
-     *
-     * Outgoing delivery will be started by default when the account
-     * is opened. This method is mostly useful when re-starting it
-     * after an error has occurred.
-     */
-    public abstract async void start_outgoing_client()
-        throws Error;
-
-    /**
-     * Starts receiving messages from the incoming server.
-     *
-     * The incoming client will be started by default when the account
-     * is opened. This method is mostly useful when re-starting it
-     * after an error has occurred.
-     */
-    public abstract async void start_incoming_client()
-        throws Error;
 
     /**
      * Lists all the currently-available folders found under the parent path
@@ -377,7 +444,7 @@ public abstract class Geary.Account : BaseObject {
      * Used only for debugging.  Should not be used for user-visible strings.
      */
     public virtual string to_string() {
-        return name;
+        return this.id;
     }
 
     /** Fires a {@link opened} signal. */
@@ -467,6 +534,23 @@ public abstract class Geary.Account : BaseObject {
         report_problem(
             new ServiceProblemReport(type, this.information, service, err)
         );
+    }
+
+    private void on_service_status_notify() {
+        Status new_status = 0;
+        // Don't consider service status UNKNOWN to indicate being
+        // offline, since clients will indicate offline status, but
+        // not indicate online status. So when at startup, or when
+        // restarting services, we don't want to cause them to
+        // spuriously indicate being offline.
+        if (incoming.current_status != UNREACHABLE) {
+            new_status |= ONLINE;
+        }
+        if (incoming.current_status.is_error() ||
+            outgoing.current_status.is_error()) {
+            new_status |= SERVICE_PROBLEM;
+        }
+        this.current_status = new_status;
     }
 
 }

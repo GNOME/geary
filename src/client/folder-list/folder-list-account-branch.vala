@@ -9,31 +9,37 @@ public class FolderList.AccountBranch : Sidebar.Branch {
     public Geary.Account account { get; private set; }
     public SpecialGrouping user_folder_group { get; private set; }
     public Gee.HashMap<Geary.FolderPath, FolderEntry> folder_entries { get; private set; }
-    
+
+    private string display_name = "";
+
     public AccountBranch(Geary.Account account) {
-        base(new Sidebar.Header(account.information.nickname),
+        base(new Sidebar.Header(account.information.display_name),
              Sidebar.Branch.Options.AUTO_OPEN_ON_NEW_CHILD, normal_folder_comparator, special_folder_comparator);
-        
+
         this.account = account;
         user_folder_group = new SpecialGrouping(2, "", "tag-symbolic");
         folder_entries = new Gee.HashMap<Geary.FolderPath, FolderEntry>();
-        
-        account.information.notify["nickname"].connect(on_nicknamed_changed);
-        
+
+        this.display_name = account.information.display_name;
+        account.information.changed.connect(on_information_changed);
+
         entry_removed.connect(on_entry_removed);
         entry_moved.connect(check_user_folders);
     }
-    
+
     ~AccountBranch() {
-        account.information.notify["nickname"].disconnect(on_nicknamed_changed);
+        account.information.changed.disconnect(on_information_changed);
         entry_removed.disconnect(on_entry_removed);
         entry_moved.disconnect(check_user_folders);
     }
-    
-    private void on_nicknamed_changed() {
-        ((Sidebar.Grouping) get_root()).rename(account.information.nickname);
+
+    private void on_information_changed() {
+        if (this.display_name != this.account.information.display_name) {
+            this.display_name = account.information.display_name;
+            ((Sidebar.Grouping) get_root()).rename(this.display_name);
+        }
     }
-    
+
     private static int special_grouping_comparator(Sidebar.Entry a, Sidebar.Entry b) {
         SpecialGrouping? grouping_a = a as SpecialGrouping;
         SpecialGrouping? grouping_b = b as SpecialGrouping;
@@ -84,7 +90,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
             
             // Special folders go in the root of the account.
             graft_point = get_root();
-        } else if (folder.path.get_parent() == null) {
+        } else if (folder.path.is_top_level) {
             // Top-level folders get put in our special user folders group.
             graft_point = user_folder_group;
 
@@ -92,11 +98,11 @@ public class FolderList.AccountBranch : Sidebar.Branch {
                 graft(get_root(), user_folder_group);
             }
         } else {
-            Sidebar.Entry? entry = folder_entries.get(folder.path.get_parent());
+            Sidebar.Entry? entry = folder_entries.get(folder.path.parent);
             if (entry != null)
                 graft_point = entry;
         }
-        
+
         // Due to how we enumerate folders on the server, it's unfortunately
         // possible now to have two folders that we'd put in the same place in
         // our tree.  In that case, we just ignore the second folder for now.

@@ -108,6 +108,19 @@
             ]
         },
         {
+            "name" : "enchant",
+            "cleanup" : [
+                "/bin"
+             ],
+             "sources" : [
+                {
+                    "type" : "archive",
+                    "url" : "https://github.com/AbiWord/enchant/releases/download/enchant-1-6-1/enchant-1.6.1.tar.gz",
+                    "sha256" : "bef0d9c0fef2e4e8746956b68e4d6c6641f6b85bd2908d91731efb68eba9e3f5"
+                }
+            ]
+        },
+        {
             "name": "geary",
             "buildsystem": "meson",
             "builddir": true,

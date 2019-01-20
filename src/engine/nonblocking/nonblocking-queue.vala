@@ -115,7 +115,7 @@ public class Geary.Nonblocking.Queue<G> : BaseObject {
     }
 
     /**
-     * Retrieves the next item from the queue, blocking until available.
+     * Removes and returns the next queued item, blocking until available.
      *
      * If the queue is paused, this will continue to wait until
      * unpaused and an item is ready. If `cancellable` is non-null,
@@ -125,6 +125,22 @@ public class Geary.Nonblocking.Queue<G> : BaseObject {
         for (;;) {
             if (queue.size > 0 && !is_paused)
                 return queue.poll();
+
+            yield spinlock.wait_async(cancellable);
+        }
+    }
+
+    /**
+     * Returns the next queued item without removal, blocking until available.
+     *
+     * If the queue is paused, this will continue to wait until
+     * unpaused and an item is ready. If `cancellable` is non-null,
+     * when used will cancel this call.
+     */
+    public async G peek(Cancellable? cancellable = null) throws Error {
+        for (;;) {
+            if (queue.size > 0 && !is_paused)
+                return queue.peek();
 
             yield spinlock.wait_async(cancellable);
         }

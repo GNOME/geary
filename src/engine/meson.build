@@ -7,6 +7,7 @@ geary_engine_vala_sources = files(
   'api/geary-aggregated-folder-properties.vala',
   'api/geary-attachment.vala',
   'api/geary-base-object.vala',
+  'api/geary-client-service.vala',
   'api/geary-composed-email.vala',
   'api/geary-contact.vala',
   'api/geary-contact-flags.vala',
@@ -84,6 +85,7 @@ geary_engine_vala_sources = files(
   'imap/imap.vala',
   'imap/imap-error.vala',
   'imap/api/imap-account-session.vala',
+  'imap/api/imap-client-service.vala',
   'imap/api/imap-email-flags.vala',
   'imap/api/imap-email-properties.vala',
   'imap/api/imap-folder.vala',
@@ -163,7 +165,6 @@ geary_engine_vala_sources = files(
   'imap/response/imap-status-data.vala',
   'imap/response/imap-status-response.vala',
   'imap/transport/imap-client-connection.vala',
-  'imap/transport/imap-client-session-manager.vala',
   'imap/transport/imap-client-session.vala',
   'imap/transport/imap-deserializer.vala',
   'imap/transport/imap-serializer.vala',
@@ -180,14 +181,8 @@ geary_engine_vala_sources = files(
   'imap-db/search/imap-db-search-email-identifier.vala',
   'imap-db/search/imap-db-search-folder.vala',
   'imap-db/search/imap-db-search-folder-properties.vala',
-  'imap-db/search/imap-db-search-folder-root.vala',
   'imap-db/search/imap-db-search-query.vala',
   'imap-db/search/imap-db-search-term.vala',
-  'imap-db/outbox/smtp-outbox-email-identifier.vala',
-  'imap-db/outbox/smtp-outbox-email-properties.vala',
-  'imap-db/outbox/smtp-outbox-folder.vala',
-  'imap-db/outbox/smtp-outbox-folder-properties.vala',
-  'imap-db/outbox/smtp-outbox-folder-root.vala',
 
   'imap-engine/imap-engine.vala',
   'imap-engine/imap-engine-account-operation.vala',
@@ -264,6 +259,11 @@ geary_engine_vala_sources = files(
   'nonblocking/nonblocking-reporting-semaphore.vala',
   'nonblocking/nonblocking-variants.vala',
 
+  'outbox/outbox-email-identifier.vala',
+  'outbox/outbox-email-properties.vala',
+  'outbox/outbox-folder.vala',
+  'outbox/outbox-folder-properties.vala',
+
   'rfc822/rfc822.vala',
   'rfc822/rfc822-error.vala',
   'rfc822/rfc822-gmime-filter-flowed.vala',
@@ -279,6 +279,7 @@ geary_engine_vala_sources = files(
   'smtp/smtp-authenticator.vala',
   'smtp/smtp-capabilities.vala',
   'smtp/smtp-client-connection.vala',
+  'smtp/smtp-client-service.vala',
   'smtp/smtp-client-session.vala',
   'smtp/smtp-command.vala',
   'smtp/smtp-data-format.vala',
@@ -300,6 +301,7 @@ geary_engine_vala_sources = files(
   'util/util-collection.vala',
   'util/util-config-file.vala',
   'util/util-connectivity-manager.vala',
+  'util/util-error-context.vala',
   'util/util-files.vala',
   'util/util-generic-capabilities.vala',
   'util/util-html.vala',
@@ -337,69 +339,61 @@ geary_engine_dependencies = [
   sqlite
 ]
 
+build_dir = meson.current_build_dir()
+
+# Generate internal VAPI for unit testing. See Meson issue
+# https://github.com/mesonbuild/meson/issues/1781 for official
+# internal VAPI support.
 geary_engine_vala_options = geary_vala_options
 geary_engine_vala_options += [
-  # Nasty hack to make sure engine internal VAPI is generated. See
-  # Meson issue https://github.com/mesonbuild/meson/issues/1781 for
-  # official internal VAPI support. See Vala Bug 731322 about the
-  # specifics of the arguments used below to generate the internal
-  # VAPI. In particular, the header filenames must not contain any
-  # paths or else the internal vapi will use the public header, not
-  # the internal header. Of course these paths breaks the build, so we
-  # fix it up using cp below. The internal VAPI is correctly put in
-  # Meson's base working directory,
-  '--header=geary-engine.h',
-  '--internal-vapi=../geary-engine-internal.vapi',
-  '--internal-header=geary-engine-internal.h'
+  '--internal-header=@0@/geary-engine-internal.h'.format(build_dir),
+  '--internal-vapi=@0@/geary-engine-internal.vapi'.format(build_dir)
 ]
 
 geary_engine_lib = static_library('geary-engine',
   geary_engine_sources,
   dependencies: geary_engine_dependencies,
-  link_with: sqlite3_unicodesn_lib,
   include_directories: config_h_dir,
   vala_args: geary_engine_vala_options,
   c_args: geary_c_options,
 )
 
-geary_engine_dep = declare_dependency(
-  link_with: [
-    geary_engine_lib,
-    sqlite3_unicodesn_lib,
-  ],
-  include_directories: include_directories('.'),
-)
-
-# Dummy target to fix the location of the public and internal headers,
-# and tell Meson about the internal VAPI
-geary_engine_internal_vapi = custom_target(
-  'geary-engine-internal-vapi',
-  input: geary_engine_sources,
+# Dummy target to tell Meson about the internal VAPI given the
+# workaround above, and fix the VAPI header to work around
+# GNOME/vala#358
+geary_engine_internal_header_fixup = custom_target(
+  'geary_engine_internal_header_fixup',
   output: [
     'geary-engine-internal.h',
     'geary-engine-internal.vapi',
   ],
   command: [
-    find_program('cp'),
-    'geary-engine.h',
-    'geary-engine-internal.h',
-    '@OUTDIR@',
+    find_program('sed'),
+    '-ibak',
+    's/geary-engine.h/geary-engine-internal.h/g',
+    '@OUTDIR@/geary-engine-internal.vapi',
   ],
   depends: geary_engine_lib
+)
+
+geary_engine_dep = declare_dependency(
+  link_with: [
+    geary_engine_lib,
+    sqlite3_unicodesn_lib
+  ],
+  include_directories: include_directories('.')
 )
 
 geary_engine_internal_dep = declare_dependency(
   # Can't just include geary_engine_lib in link_with since that will
   # pull in the public header and we get duplicate symbol errors.
   link_args: [
-    '-L' + meson.build_root() + '/src/engine',
+    '-L' + build_dir,
     '-lgeary-engine'
   ],
   link_with: [
     sqlite3_unicodesn_lib,
   ],
   include_directories: include_directories('.'),
-  sources: [
-    geary_engine_internal_vapi
-  ],
+  sources: geary_engine_internal_header_fixup
 )

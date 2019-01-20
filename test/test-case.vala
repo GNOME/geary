@@ -152,6 +152,27 @@ private inline void print_assert(string message, string? context) {
     GLib.stderr.putc('\n');
 }
 
+public void delete_file(File parent) throws GLib.Error {
+    FileInfo info = parent.query_info(
+        "standard::*",
+        FileQueryInfoFlags.NOFOLLOW_SYMLINKS
+    );
+
+    if (info.get_file_type () == FileType.DIRECTORY) {
+        FileEnumerator enumerator = parent.enumerate_children(
+            "standard::*",
+            FileQueryInfoFlags.NOFOLLOW_SYMLINKS
+        );
+
+        info = null;
+        while (((info = enumerator.next_file()) != null)) {
+            delete_file(parent.get_child(info.get_name()));
+        }
+    }
+
+    parent.delete();
+}
+
 
 public abstract class TestCase : Object {
 
@@ -304,5 +325,7 @@ public abstract class TestCase : Object {
                 assert_no_error(err);
             }
 		}
+
 	}
+
 }

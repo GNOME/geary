@@ -3,18 +3,6 @@
 
 <schema id="org.gnome.Geary" path="/org/gnome/Geary/" gettext-domain="geary">
 
-    <key name="attachments-directory" type="s">
-        <default>''</default>
-        <summary>Default attachments directory</summary>
-        <description>Location used when opening and saving attachments.</description>
-    </key>
-
-    <key name="print-directory" type="s">
-        <default>''</default>
-        <summary>Default print output directory</summary>
-        <description>Location used when printing to a file.</description>
-    </key>
-
     <key name="window-maximize" type="b">
         <default>false</default>
         <summary>Maximize window</summary>
@@ -133,6 +121,12 @@
         <default>[-1,-1]</default>
         <summary>Size of detached composer window</summary>
         <description>The last recorded size of the detached composer window.</description>
+    </key>
+
+    <key name="avatar-url" type="s">
+        <default>"https://secure.gravatar.com/avatar"</default>
+        <summary>Base URL to look up contact avatars</summary>
+        <description>A Gravatar or Libravatar compatible URL, set to the empty string to disable.</description>
     </key>
 
     <key name="migrated-config" type="b">

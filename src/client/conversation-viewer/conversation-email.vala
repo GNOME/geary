@@ -526,7 +526,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      * primary message and any attached messages, as well as
      * attachment names, types and icons.
      */
-    public async void start_loading(ConversationListBox.AvatarStore avatars,
+    public async void start_loading(Application.AvatarStore avatars,
                                     Cancellable load_cancelled) {
         foreach (ConversationMessage view in this)  {
             if (load_cancelled.is_cancelled()) {
@@ -843,10 +843,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         );
         Gtk.PrintSettings settings = new Gtk.PrintSettings();
 
-        if (!Geary.String.is_empty(this.config.print_dir)) {
-            settings.set(Gtk.PRINT_SETTINGS_OUTPUT_DIR, this.config.print_dir);
-        }
-
         if (this.email.subject != null) {
             string file_name = Geary.String.reduce_whitespace(this.email.subject.value);
             file_name = file_name.replace("/", "_");
@@ -861,12 +857,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         op.set_print_settings(settings);
         op.run_dialog(window);
-
-        string? file_uri = op.get_print_settings().get(Gtk.PRINT_SETTINGS_OUTPUT_URI);
-        if (!Geary.String.is_empty(file_uri)) {
-            File print_file = File.new_for_uri(file_uri);
-            this.config.print_dir = print_file.get_parent().get_path();
-        }
     }
 
     private void on_flag_remote_images(ConversationMessage view) {

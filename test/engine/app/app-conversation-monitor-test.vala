@@ -11,6 +11,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
     AccountInformation? account_info = null;
     MockAccount? account = null;
+    FolderRoot? folder_root = null;
     MockFolder? base_folder = null;
     MockFolder? other_folder = null;
 
@@ -31,24 +32,34 @@ class Geary.App.ConversationMonitorTest : TestCase {
     public override void set_up() {
         this.account_info = new AccountInformation(
             "account_01",
-            new MockServiceInformation(),
-            new MockServiceInformation()
+            ServiceProvider.OTHER,
+            new MockCredentialsMediator(),
+            new RFC822.MailboxAddress(null, "test1@example.com")
         );
-        this.account = new MockAccount("test", this.account_info);
+        this.account = new MockAccount(this.account_info);
+        this.folder_root = new FolderRoot(false);
         this.base_folder = new MockFolder(
             this.account,
             null,
-            new MockFolderRoot("base"),
+            this.folder_root.get_child("base"),
             SpecialFolderType.NONE,
             null
         );
         this.other_folder = new MockFolder(
             this.account,
             null,
-            new MockFolderRoot("other"),
+            this.folder_root.get_child("other"),
             SpecialFolderType.NONE,
             null
         );
+    }
+
+    public override void tear_down() {
+        this.other_folder = null;
+        this.base_folder = null;
+        this.folder_root = null;
+        this.account_info = null;
+        this.account = null;
     }
 
     public void start_stop_monitoring() throws Error {

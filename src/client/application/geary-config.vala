@@ -9,8 +9,6 @@
  */
 public class Configuration {
 
-    public const string ATTACHMENTS_DIR_KEY = "attachments-directory";
-    public const string PRINT_DIR_KEY = "print-directory";
     public const string WINDOW_WIDTH_KEY = "window-width";
     public const string WINDOW_HEIGHT_KEY = "window-height";
     public const string WINDOW_MAXIMIZE_KEY = "window-maximize";
@@ -31,6 +29,7 @@ public class Configuration {
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
     public const string COMPOSER_WINDOW_SIZE_KEY = "composer-window-size";
+    public const string AVATAR_URL = "avatar-url";
 
 
     public enum DesktopEnvironment {
@@ -63,16 +62,6 @@ public class Configuration {
                 return DesktopEnvironment.UNKNOWN;
             }
         }
-    }
-
-    public string? attachments_dir {
-        owned get { return settings.get_string(ATTACHMENTS_DIR_KEY); }
-        set { settings.set_string(ATTACHMENTS_DIR_KEY, value); }
-    }
-
-    public string? print_dir {
-        owned get { return settings.get_string(PRINT_DIR_KEY); }
-        set { settings.set_string(PRINT_DIR_KEY, value); }
     }
 
     public int window_width {
@@ -187,6 +176,10 @@ public class Configuration {
         set {
             settings.set_value(COMPOSER_WINDOW_SIZE_KEY, value);
         }
+    }
+
+    public string avatar_url {
+        owned get { return settings.get_string(AVATAR_URL); }
     }
 
     // Creates a configuration object.

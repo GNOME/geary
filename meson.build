@@ -20,6 +20,7 @@ cc = meson.get_compiler('c')
 valac = meson.get_compiler('vala')
 config_h_dir = include_directories('.')
 geary_prefix = get_option('prefix')
+bindir = join_paths(geary_prefix, get_option('bindir'))
 datadir = join_paths(geary_prefix, get_option('datadir'))
 libdir = join_paths(geary_prefix, get_option('libdir'))
 locale_dir = join_paths(geary_prefix, get_option('localedir'))
@@ -52,6 +53,7 @@ webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 
 # Secondary deps - keep sorted alphabetically
 enchant = dependency('enchant', version: '>= 1.6')
+gck = dependency('gck-1')
 gcr = dependency('gcr-3', version: '>= 3.10.1')
 gdk = dependency('gdk-3.0', version: '>=' + target_gtk)
 gee = dependency('gee-0.8', version: '>= 0.8.5')
@@ -92,7 +94,7 @@ libunity = dependency('unity', version: '>= 5.12.0', required: false)
 libmessagingmenu = meson.get_compiler('c').find_library('libmessaging-menu', required: false)
 
 # Ensure SQLite was built correctly
-if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER')
+if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
   error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3.\n'
         + 'See https://bugzilla.gnome.org/show_bug.cgi?id=763203 for details.')
 endif

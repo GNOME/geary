@@ -86,19 +86,8 @@ public class Geary.Imap.MailboxInformation : BaseObject {
         );
     }
 
-    /**
-     * The {@link Geary.FolderPath} for the {@link mailbox}.
-     *
-     * This is constructed from the supplied {@link mailbox} and {@link delim} returned from the
-     * server.  If the mailbox is the same as the supplied inbox_specifier, a canonical name for
-     * the Inbox is returned.
-     */
-    public Geary.FolderPath get_path(MailboxSpecifier? inbox_specifier) {
-        return mailbox.to_folder_path(delim, inbox_specifier);
-    }
-    
     public string to_string() {
         return "%s/%s".printf(mailbox.to_string(), attrs.to_string());
     }
-}
 
+}

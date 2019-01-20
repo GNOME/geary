@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-09-30 13:37+0000\n"
-"PO-Revision-Date: 2018-10-02 20:32+0700\n"
+"POT-Creation-Date: 2018-10-24 11:36+0000\n"
+"PO-Revision-Date: 2018-11-15 23:24+0700\n"
 "Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: Indonesian (http://www.transifex.com/projects/p/geary/"
 "language/id/)\n"
@@ -30,6 +30,10 @@ msgstr "Kirim melalui surel"
 #: desktop/geary-attach.contract.desktop.in:5
 msgid "mail-send"
 msgstr "mail-send"
+
+#: desktop/geary-attach.contract.desktop.in:6
+msgid "Send files using Geary"
+msgstr "Kirim berkas memakai Geary"
 
 #. Translators: The application name
 #: desktop/geary-autostart.desktop.in:3
@@ -132,192 +136,187 @@ msgid "Compose Message"
 msgstr "Susun Pesan"
 
 #: desktop/org.gnome.Geary.gschema.xml:8
-msgid "Default attachments directory"
-msgstr "Direktori lampiran bawaan"
-
-#: desktop/org.gnome.Geary.gschema.xml:9
-msgid "Location used when opening and saving attachments."
-msgstr "Lokasi yang digunakan saat membuka dan menyimpan lampiran."
-
-#: desktop/org.gnome.Geary.gschema.xml:14
-msgid "Default print output directory"
-msgstr "Direktori keluaran cetak bawaan"
-
-#: desktop/org.gnome.Geary.gschema.xml:15
-msgid "Location used when printing to a file."
-msgstr "Lokasi yang digunakan saat mencetak ke berkas."
-
-#: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Maximize window"
 msgstr "Maksimalkan jendela"
 
-#: desktop/org.gnome.Geary.gschema.xml:21
+#: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
 msgstr "True jika jendela aplikasi dimaksimalkan, false jika sebaliknya."
 
-#: desktop/org.gnome.Geary.gschema.xml:26
+#: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
 msgstr "Lebar jendela"
 
-#: desktop/org.gnome.Geary.gschema.xml:27
+#: desktop/org.gnome.Geary.gschema.xml:15
 msgid "The last recorded width of the application window."
 msgstr "Lebar yang tersimpan dari jendela pustaka aplikasi sebelumnya."
 
-#: desktop/org.gnome.Geary.gschema.xml:32
+#: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Height of window"
 msgstr "Tinggi jendela"
 
-#: desktop/org.gnome.Geary.gschema.xml:33
+#: desktop/org.gnome.Geary.gschema.xml:21
 msgid "The last recorded height of the application window."
 msgstr "Tinggi yang tersimpan dari jendela pustaka aplikasi sebelumnya."
 
-#: desktop/org.gnome.Geary.gschema.xml:38
+#: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Position of folder list pane"
 msgstr "Posisi panel daftar folder"
 
-#: desktop/org.gnome.Geary.gschema.xml:39
+#: desktop/org.gnome.Geary.gschema.xml:27
 msgid "Position of the folder list Paned grabber."
 msgstr "Posisi daftar folder Paned grabber."
 
-#: desktop/org.gnome.Geary.gschema.xml:44
+#: desktop/org.gnome.Geary.gschema.xml:32
 msgid "Position of folder list pane when horizontal"
 msgstr "Posisi panel daftar folder saat horisontal"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:33
 msgid ""
 "Position of the folder list Paned grabber in the horizontal orientation."
 msgstr "Posisi daftar folder Paned grabber dalam orientasi horizontal."
 
-#: desktop/org.gnome.Geary.gschema.xml:50
+#: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Position of folder list pane when vertical"
 msgstr "Posisi panel daftar folder saat vertikal"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:39
 msgid "Position of the folder list Paned grabber in the vertical orientation."
 msgstr "Posisi daftar folder Paned grabber dalam orientasi vertikal."
 
-#: desktop/org.gnome.Geary.gschema.xml:56
+#: desktop/org.gnome.Geary.gschema.xml:44
 msgid "Orientation of the folder list pane"
 msgstr "Orientasi panel daftar folder"
 
-#: desktop/org.gnome.Geary.gschema.xml:57
+#: desktop/org.gnome.Geary.gschema.xml:45
 msgid "True if the folder list Paned is in the horizontal orientation."
 msgstr "True jika daftar folder Paned berada dalam orientasi horizontal."
 
-#: desktop/org.gnome.Geary.gschema.xml:62
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Position of message list pane"
 msgstr "Posisi panel daftar pesan"
 
-#: desktop/org.gnome.Geary.gschema.xml:63
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "Position of the message list Paned grabber."
 msgstr "Posisi dari daftar pesan Paned grabber."
 
-#: desktop/org.gnome.Geary.gschema.xml:68
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Autoselect next message"
 msgstr "Otomatis pilih pesan selanjutnya"
 
-#: desktop/org.gnome.Geary.gschema.xml:69
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid "True if we should autoselect the next available conversation."
 msgstr "True jika kita harus memilih ulang percakapan yang ada selanjutnya."
 
-#: desktop/org.gnome.Geary.gschema.xml:74
+#: desktop/org.gnome.Geary.gschema.xml:62
 msgid "Display message previews"
 msgstr "Tampilkan pratinjau pesan"
 
-#: desktop/org.gnome.Geary.gschema.xml:75
+#: desktop/org.gnome.Geary.gschema.xml:63
 msgid "True if we should display a short preview of each message."
 msgstr "True jika kita harus menampilkan pratinjau singkat setiap pesan."
 
-#: desktop/org.gnome.Geary.gschema.xml:80
+#: desktop/org.gnome.Geary.gschema.xml:68
 msgid "Languages that shall be used in the spell checker"
 msgstr "Bahasa yang akan digunakan dalam pemeriksa ejaan"
 
-#: desktop/org.gnome.Geary.gschema.xml:81
+#: desktop/org.gnome.Geary.gschema.xml:69
 msgid "List of the languages to use in the spell checker."
 msgstr "Daftar bahasa yang akan digunakan di pemeriksa ejaan."
 
-#: desktop/org.gnome.Geary.gschema.xml:86
+#: desktop/org.gnome.Geary.gschema.xml:74
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Bahasa yang ditampilkan dalam popover pemeriksa ejaan"
 
-#: desktop/org.gnome.Geary.gschema.xml:87
+#: desktop/org.gnome.Geary.gschema.xml:75
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr "Daftar bahasa yang selalu ditampilkan di popover pemeriksa ejaan."
 
-#: desktop/org.gnome.Geary.gschema.xml:92
+#: desktop/org.gnome.Geary.gschema.xml:80
 msgid "Enable notification sounds"
 msgstr "Aktifkan suara pemberitahuan"
 
-#: desktop/org.gnome.Geary.gschema.xml:93
+#: desktop/org.gnome.Geary.gschema.xml:81
 msgid "True to play sounds for notifications and sending."
 msgstr "True untuk memutar suara untuk pemberitahuan dan pengiriman."
 
-#: desktop/org.gnome.Geary.gschema.xml:98
+#: desktop/org.gnome.Geary.gschema.xml:86
 msgid "Show notifications for new mail"
 msgstr "Tampilkan pemberitahuan bagi surat baru"
 
-#: desktop/org.gnome.Geary.gschema.xml:99
+#: desktop/org.gnome.Geary.gschema.xml:87
 msgid "True to show notification bubbles."
 msgstr "True untuk menunjukkan gelembung pemberitahuan."
 
-#: desktop/org.gnome.Geary.gschema.xml:104
+#: desktop/org.gnome.Geary.gschema.xml:92
 msgid "Notify of new mail at startup"
 msgstr "Beritahu surel baru saat awal mula"
 
-#: desktop/org.gnome.Geary.gschema.xml:105
+#: desktop/org.gnome.Geary.gschema.xml:93
 msgid "True to notify of new mail at startup."
 msgstr "True untuk memberitahukan surel baru saat memulai."
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:98
 msgid "Ask when opening an attachment"
 msgstr "Tanyakan saat membuka lampiran"
 
-#: desktop/org.gnome.Geary.gschema.xml:111
+#: desktop/org.gnome.Geary.gschema.xml:99
 msgid "True to ask when opening an attachment."
 msgstr "True untuk bertanya saat membuka lampiran."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:104
 msgid "Whether to compose emails in HTML"
 msgstr "Apakah untuk menulis surel dalam HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:105
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "True untuk menulis surel dalam HTML; false untuk teks biasa."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:110
 msgid "Advisory strategy for full-text searching"
 msgstr "Strategi penasehat untuk penelusuran teks lengkap"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:111
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Nilai yang dapat diterima \"exact\" (tepat), \"conservative\" (konservatif), "
 "\"aggressive\" (agresif), dan \"horizon\" (horizon)."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Zoom of conversation viewer"
 msgstr "Zoom penampil percakapan"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:117
 msgid "The zoom to apply on the conservation view."
 msgstr "Zum untuk diterapkan pada tampilan konservasi."
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "Size of detached composer window"
 msgstr "Ukuran jendela penyusun yang terpisah"
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "The last recorded size of the detached composer window."
 msgstr "Ukuran yang terekam terakhir dari jendela komposer yang terpisah."
 
-#: desktop/org.gnome.Geary.gschema.xml:140
+#: desktop/org.gnome.Geary.gschema.xml:128
+msgid "Base URL to look up contact avatars"
+msgstr "URL dasar untuk mencari avatar kontak"
+
+#: desktop/org.gnome.Geary.gschema.xml:129
+msgid ""
+"A Gravatar or Libravatar compatible URL, set to the empty string to disable."
+msgstr ""
+"URL yang kompatibel dengan Gravatar atau Libravatar, disetel ke string "
+"kosong untuk dinonaktifkan."
+
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "Apakah kita memigrasikan pengaturan lama"
 
-#: desktop/org.gnome.Geary.gschema.xml:141
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -560,15 +559,21 @@ msgstr "Gagal mengurai opsi baris perintah: %s\n"
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Opsi baris perintah tidak dikenal \"%s\"\n"
 
-#: src/client/application/geary-controller.vala:719
+#. Translators: File name used in save chooser when saving
+#. attachments that do not otherwise have a name.
+#: src/client/application/geary-controller.vala:68
+msgid "Untitled"
+msgstr "Tak ada judul"
+
+#: src/client/application/geary-controller.vala:721
 msgid "Unable to store server trust exception"
 msgstr "Tak bisa menyimpan pengecualian kepercayaan server"
 
-#: src/client/application/geary-controller.vala:970
+#: src/client/application/geary-controller.vala:972
 msgid "Your settings are insecure"
 msgstr "Pengaturan Anda tak aman"
 
-#: src/client/application/geary-controller.vala:971
+#: src/client/application/geary-controller.vala:973
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -578,17 +583,17 @@ msgstr ""
 "nama pengguna dan sandi Anda bisa dibaca orang lain di jaringan ini. Anda "
 "yakin ingin melakukan ini?"
 
-#: src/client/application/geary-controller.vala:972
+#: src/client/application/geary-controller.vala:974
 msgid "Co_ntinue"
 msgstr "La_njutkan"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/application/geary-controller.vala:1076
+#: src/client/application/geary-controller.vala:1078
 #: src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Galat saat mengirim surel"
 
-#: src/client/application/geary-controller.vala:1077
+#: src/client/application/geary-controller.vala:1079
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -598,12 +603,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: src/client/application/geary-controller.vala:1081
+#: src/client/application/geary-controller.vala:1083
 #: src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Galat saat menyimpan surel terkirim"
 
-#: src/client/application/geary-controller.vala:1082
+#: src/client/application/geary-controller.vala:1084
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -611,19 +616,19 @@ msgstr ""
 "Gary menemui galat ketika menyimpan sebuah surel terkirim ke Sent Mail.  "
 "Pesan akan tetap berada di folder Kotak Keluar Anda sampai Anda menghapusnya."
 
-#: src/client/application/geary-controller.vala:1149
+#: src/client/application/geary-controller.vala:1151
 msgid "Labels"
 msgstr "Label"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:1161
+#: src/client/application/geary-controller.vala:1163
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Tak bisa membuka basis data bagi %s"
 
-#: src/client/application/geary-controller.vala:1162
+#: src/client/application/geary-controller.vala:1164
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -647,20 +652,20 @@ msgstr ""
 "Membangun ulang basis data akan menghancurkan semua surel lokal dan "
 "lampirannya. <b>Surat pada server Anda tak akan terpengaruh.</b>"
 
-#: src/client/application/geary-controller.vala:1164
+#: src/client/application/geary-controller.vala:1166
 msgid "_Rebuild"
 msgstr "_Bangun Ulang"
 
-#: src/client/application/geary-controller.vala:1164
+#: src/client/application/geary-controller.vala:1166
 msgid "E_xit"
 msgstr "_Keluar"
 
-#: src/client/application/geary-controller.vala:1173
+#: src/client/application/geary-controller.vala:1175
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Tak bisa membangun ulang basis data bagi \"%s\""
 
-#: src/client/application/geary-controller.vala:1174
+#: src/client/application/geary-controller.vala:1176
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -673,14 +678,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: src/client/application/geary-controller.vala:1196
-#: src/client/application/geary-controller.vala:1206
-#: src/client/application/geary-controller.vala:1217
+#: src/client/application/geary-controller.vala:1198
+#: src/client/application/geary-controller.vala:1208
+#: src/client/application/geary-controller.vala:1219
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Tak bisa membuka kotak surat bagi %s"
 
-#: src/client/application/geary-controller.vala:1197
+#: src/client/application/geary-controller.vala:1199
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -699,7 +704,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1207
+#: src/client/application/geary-controller.vala:1209
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be “rolled back” to "
@@ -713,7 +718,7 @@ msgstr ""
 "\n"
 "Harap pasang versi Geary terbaru dan coba lagi."
 
-#: src/client/application/geary-controller.vala:1218
+#: src/client/application/geary-controller.vala:1220
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -724,15 +729,15 @@ msgstr ""
 "\n"
 "Harap periksa koneksi jaringan Anda dan start ulang Geary."
 
-#: src/client/application/geary-controller.vala:2036
+#: src/client/application/geary-controller.vala:2038
 msgid "Undo move (Ctrl+Z)"
 msgstr "Tak jadi pindah (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2046
+#: src/client/application/geary-controller.vala:2048
 msgid "Are you sure you want to open these attachments?"
 msgstr "Anda yakin ingin membuka lampiran-lampiran ini?"
 
-#: src/client/application/geary-controller.vala:2047
+#: src/client/application/geary-controller.vala:2049
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -740,82 +745,88 @@ msgstr ""
 "Lampiran berpotensi bahaya jika dibuka. Hanya buka berkas dari sumber "
 "terpercaya."
 
-#: src/client/application/geary-controller.vala:2048
+#: src/client/application/geary-controller.vala:2050
 msgid "Don’t _ask me again"
 msgstr "Jangan tanya s_aya lagi"
 
-#: src/client/application/geary-controller.vala:2144
+#. Translators: Dialog primary label when prompting to
+#. overwrite a file. The string substitution is the file'sx
+#. name.
+#: src/client/application/geary-controller.vala:2179
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Berkas bernama \"%s\" sudah ada. Anda ingin menimpanya?"
 
-#: src/client/application/geary-controller.vala:2146
+#. Translators: Dialog secondary label when prompting to
+#. overwrite a file. The string substitution is the parent
+#. folder's name.
+#: src/client/application/geary-controller.vala:2186
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Berkas telah ada di \"%s\".  Kalau ditimpa isi sebelumnya hilang."
 
-#: src/client/application/geary-controller.vala:2149
+#: src/client/application/geary-controller.vala:2190
 msgid "_Replace"
 msgstr "Timp_a"
 
-#: src/client/application/geary-controller.vala:2389
+#: src/client/application/geary-controller.vala:2460
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Tutup semua draf pesan?"
 
-#: src/client/application/geary-controller.vala:2515
+#: src/client/application/geary-controller.vala:2586
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Kosongkan semua surel dari folder %s Anda?"
 
-#: src/client/application/geary-controller.vala:2516
+#: src/client/application/geary-controller.vala:2587
 msgid "This removes the email from Geary and your email server."
 msgstr "Ini menghapus surel dari Geary dan server surel Anda."
 
-#: src/client/application/geary-controller.vala:2517
+#: src/client/application/geary-controller.vala:2588
 msgid "This cannot be undone."
 msgstr "Ini tidak bisa dibatalkan."
 
-#: src/client/application/geary-controller.vala:2518
+#: src/client/application/geary-controller.vala:2589
 #, c-format
 msgid "Empty %s"
 msgstr "Kosongkan %s"
 
-#: src/client/application/geary-controller.vala:2535
+#: src/client/application/geary-controller.vala:2606
 #, c-format
 msgid "Error emptying %s"
 msgstr "Galat saat mengosongkan %s"
 
-#: src/client/application/geary-controller.vala:2567
+#: src/client/application/geary-controller.vala:2638
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Anda mau membuang pesan ini secara permanen?"
 
-#: src/client/application/geary-controller.vala:2569
+#: src/client/application/geary-controller.vala:2640
 msgid "Delete"
 msgstr "Hapus"
 
-#: src/client/application/geary-controller.vala:2583
+#: src/client/application/geary-controller.vala:2654
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Tak jadi buang ke tong sampah (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2633
+#: src/client/application/geary-controller.vala:2704
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Tak jadi arsipkan (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2678
+#: src/client/application/geary-controller.vala:2749
 msgid "Undo (Ctrl+Z)"
 msgstr "Tak jadi (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2755
+#: src/client/application/geary-controller.vala:2826
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Berhasil mengirim surel ke %s."
 
-#: src/client/application/geary-controller.vala:2836
+#: src/client/application/geary-controller.vala:2907
 msgid "Failed to open default text editor."
 msgstr "Gagal membuka penyunting teks utama."
 
@@ -1566,19 +1577,19 @@ msgstr[0] "%d hasil"
 msgid "%s — New Messages"
 msgstr "%s - Pesan Baru"
 
-#: src/client/notification/libnotify.vala:70
+#: src/client/notification/libnotify.vala:75
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
 msgstr[0] "%d pesan baru"
 
-#: src/client/notification/libnotify.vala:73
+#: src/client/notification/libnotify.vala:78
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
 msgstr[0] "%s, total %d pesan baru"
 
-#: src/client/notification/libnotify.vala:105
+#: src/client/notification/libnotify.vala:110
 #, c-format
 msgid ""
 "%s\n"
@@ -1590,7 +1601,7 @@ msgstr[0] ""
 "%s\n"
 "(%d pesan baru lain bagi %s)"
 
-#: src/client/notification/libnotify.vala:161
+#: src/client/notification/libnotify.vala:149
 msgid "Open"
 msgstr "Buka"
 
@@ -3080,8 +3091,17 @@ msgstr "Alamat surel:"
 msgid "Geary update in progress…"
 msgstr "Pemutakhiran Geary sedang berlangsung…"
 
-#~ msgid "Send files using Geary"
-#~ msgstr "Kirim berkas memakai Geary"
+#~ msgid "Default attachments directory"
+#~ msgstr "Direktori lampiran bawaan"
+
+#~ msgid "Location used when opening and saving attachments."
+#~ msgstr "Lokasi yang digunakan saat membuka dan menyimpan lampiran."
+
+#~ msgid "Default print output directory"
+#~ msgstr "Direktori keluaran cetak bawaan"
+
+#~ msgid "Location used when printing to a file."
+#~ msgstr "Lokasi yang digunakan saat mencetak ke berkas."
 
 #~ msgid "Geary will run in the background and notify of new mail"
 #~ msgstr "Geary akan berjalan di latar dan memberitahukan adanya surel baru"

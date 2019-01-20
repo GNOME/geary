@@ -60,7 +60,7 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
         this.scope = scope;
         this.on_remote_error = on_remote_error;
     }
-    
+
     /**
      * Notify the operation that a message has been removed by position (SequenceNumber).
      *
@@ -72,8 +72,10 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
      *
      * This won't be called while replay_local_async() or replay_remote_async() are executing.
      */
-    public abstract void notify_remote_removed_position(Imap.SequenceNumber removed);
-    
+    public virtual void notify_remote_removed_position(Imap.SequenceNumber removed) {
+        // noop
+    }
+
     /**
      * Notify the operation that a message has been removed by UID (EmailIdentifier).
      *
@@ -90,8 +92,10 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
      *
      * This won't be called while replay_local_async() or replay_remote_async() are executing.
      */
-    public abstract void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids);
-    
+    public virtual void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        // noop
+    }
+
     /**
      * Add to the Collection EmailIdentifiers that will be removed in replay_remote_async().
      *
@@ -104,12 +108,16 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
      * invocation (i.e. the Folder closed before the server could notify the engine that they were
      * removed).
      */
-    public abstract void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids);
-    
+    public virtual void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        // noop
+    }
+
     /**
+     * Executes the local parts of this operation, if any.
+     *
      * See Scope for conditions where this method will be called.
      *
-     * If an error is thrown, {@link backout_local_async} will will
+     * If an error is thrown, {@link backout_local_async} will
      * *not* be executed.
      *
      * @return {@link Status.COMPLETED} if the operation has completed
@@ -118,27 +126,43 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
      * remote portion must be executed as well. This is treated as
      * `COMPLETED` if get_scope() returns {@link Scope.LOCAL_ONLY}.
      */
-    public abstract async Status replay_local_async() throws Error;
+    public virtual async Status replay_local_async()
+        throws GLib.Error {
+        if (this.scope != Scope.REMOTE_ONLY) {
+            throw new GLib.IOError.NOT_SUPPORTED("Local operation is not implemented");
+        }
+        return (this.scope == Scope.LOCAL_ONLY)
+            ? Status.COMPLETED : Status.CONTINUE;
+    }
 
     /**
+     * Executes the remote parts of this operation, if any.
+     *
      * See Scope for conditions where this method will be called.
+     *
+     * Passed a folder session with the current folder selected.
      *
      * If an error is thrown, {@link backout_local_async} will be
      * executed only if scope is LOCAL_AND_REMOTE.
-     *
-     * @return {@link Status.COMPLETED} if the operation has completed
-     * and no further calls should be made, else {@link
-     * Status.CONTINUE} if treated as `COMPLETED`.
-     *
      */
-    public abstract async Status replay_remote_async() throws Error;
+    public virtual async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
+        if (this.scope != Scope.LOCAL_ONLY) {
+            throw new GLib.IOError.NOT_SUPPORTED("Remote operation is not implemented");
+        }
+    }
 
     /**
-     * See Scope, replay_local_async(), and replay_remote_async() for conditions for this where this
-     * will be called.
+     * Reverts any local effects of this operation.
+     *
+     * See {@link Scope}, {@link replay_local_async}, and {@link
+     * replay_remote_async} for conditions for this where this will be
+     * called.
      */
-    public abstract async void backout_local_async() throws Error;
-    
+    public virtual async void backout_local_async() throws Error {
+        // noop
+    }
+
     /**
      * Completes when the operation has completed execution.  If the operation threw an error
      * during execution, it will be thrown here.

@@ -11,12 +11,14 @@ class Geary.EngineTest : TestCase {
     private Engine? engine = null;
     private File? tmp = null;
     private File? res = null;
+    private Geary.AccountInformation? account = null;
 
 
     public EngineTest() {
         base("Geary.EngineTest");
-        add_test("create_orphan_account", create_orphan_account);
-        add_test("create_orphan_account_with_legacy", create_orphan_account_with_legacy);
+        add_test("add_account", add_account);
+        add_test("remove_account", remove_account);
+        add_test("re_add_account", re_add_account);
     }
 
     ~EngineTest() {
@@ -49,9 +51,17 @@ class Geary.EngineTest : TestCase {
                 async_complete(res);
             });
         this.engine.open_async.end(async_result());
+
+        this.account = new AccountInformation(
+            "test",
+            ServiceProvider.OTHER,
+            new MockCredentialsMediator(),
+            new RFC822.MailboxAddress(null, "test1@example.com")
+        );
     }
 
 	public override void tear_down () {
+        this.account = null;
         try {
             this.res.delete();
             this.tmp.delete();
@@ -61,78 +71,42 @@ class Geary.EngineTest : TestCase {
         }
 	}
 
-    public void create_orphan_account() throws Error {
+    public void add_account() throws GLib.Error {
+        assert_false(this.engine.has_account(this.account.id));
+
+        this.engine.add_account(this.account);
+        assert_true(this.engine.has_account(this.account.id), "Account not added");
+
         try {
-            AccountInformation info = this.engine.create_orphan_account(
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            );
-            assert(info.id == "account_01");
-            this.engine.add_account(info);
-
-            info = this.engine.create_orphan_account(
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            );
-            assert(info.id == "account_02");
-            this.engine.add_account(info);
-
-            info = this.engine.create_orphan_account(
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            );
-            assert(info.id == "account_03");
-            this.engine.add_account(info);
-
-            info = this.engine.create_orphan_account(
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            );
-            assert(info.id == "account_04");
-        } catch (Error err) {
-            print("\nerr: %s\n", err.message);
+            this.engine.add_account(this.account);
             assert_not_reached();
+        } catch (GLib.Error err) {
+            // expected
         }
     }
 
-    public void create_orphan_account_with_legacy() throws Error {
-        this.engine.add_account(
-            new AccountInformation(
-                "foo",
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            )
-        );
+    public void remove_account() throws GLib.Error {
+        this.engine.add_account(this.account);
+        assert_true(this.engine.has_account(this.account.id));
 
-        AccountInformation info = this.engine.create_orphan_account(
-            new MockServiceInformation(),
-            new MockServiceInformation()
-        );
-        assert(info.id == "account_01");
-        this.engine.add_account(info);
+        this.engine.remove_account(this.account);
+        assert_false(this.engine.has_account(this.account.id), "Account not rmoeved");
 
-        info = this.engine.create_orphan_account(
-            new MockServiceInformation(),
-            new MockServiceInformation()
-        );
-        assert(info.id == "account_02");
-
-        this.engine.add_account(
-            new AccountInformation(
-                "bar",
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            )
-        );
-
-        info = this.engine.create_orphan_account(
-            new MockServiceInformation(),
-            new MockServiceInformation()
-        );
-        assert(info.id == "account_02");
+        // Should not throw an error
+        this.engine.remove_account(this.account);
     }
 
-    private void delete(File parent) throws Error {
+    public void re_add_account() throws GLib.Error {
+        assert_false(this.engine.has_account(this.account.id));
+
+        this.engine.add_account(this.account);
+        this.engine.remove_account(this.account);
+        this.engine.add_account(this.account);
+
+        assert_true(this.engine.has_account(this.account.id));
+    }
+
+   private void delete(File parent) throws Error {
         FileInfo info = parent.query_info(
             "standard::*",
             FileQueryInfoFlags.NOFOLLOW_SYMLINKS

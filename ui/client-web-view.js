@@ -16,10 +16,25 @@ PageState.prototype = {
     init: function() {
         this.allowRemoteImages = false;
         this.isLoaded = false;
+        this.undoEnabled = false;
+        this.redoEnabled = false;
         this.hasSelection = false;
         this.lastPreferredHeight = 0;
 
         let state = this;
+
+        // Set up an observer to keep track of modifications made to
+        // the document when editing.
+        let modifiedId = null;
+        this.bodyObserver = new MutationObserver(function(records) {
+            if (modifiedId == null) {
+                modifiedId = window.setTimeout(function() {
+                    state.documentModified();
+                    state.checkCommandStack();
+                    modifiedId = null;
+                }, 1000);
+            }
+        });
 
         // Coalesce multiple calls to updatePreferredHeight using a
         // timeout to avoid the overhead of multiple JS messages sent
@@ -57,19 +72,24 @@ PageState.prototype = {
         document.addEventListener("load", function(e) {
             queuePreferredHeightUpdate();
         }, true); // load does not bubble
+
+        // Queues an update if the window changes size, e.g. if the
+        // user resized the window
+        window.addEventListener("resize", function(e) {
+            queuePreferredHeightUpdate();
+        }, false); // load does not bubble
+
+        // Queues an update when a transition has completed, e.g. if the
+        // user resized the window
+        window.addEventListener("transitionend", function(e) {
+            queuePreferredHeightUpdate();
+        }, false); // load does not bubble
     },
     getPreferredHeight: function() {
-        let html = window.document.documentElement;
-        let height = html.offsetHeight;
-        let computed = window.getComputedStyle(html);
-        let top = computed.getPropertyValue('margin-top');
-        let bot = computed.getPropertyValue('margin-bottom');
-
-        return (
-            height
-                + parseInt(top.substring(0, top.length - 2))
-                + parseInt(bot.substring(0, bot.length - 2))
-        );
+        return window.document.documentElement.scrollHeight;
+    },
+    getHtml: function() {
+        return document.body.innerHTML;
     },
     loaded: function() {
         this.isLoaded = true;
@@ -84,6 +104,29 @@ PageState.prototype = {
             img.src = "";
             img.src = src;
         }
+    },
+    setEditable: function(enabled) {
+        if (!enabled) {
+            this.stopBodyObserver();
+        }
+        document.body.contentEditable = enabled;
+        if (enabled) {
+            // Enable modification observation only after the document
+            // has been set editable as WebKit will alter some attrs
+            this.startBodyObserver();
+        }
+    },
+    startBodyObserver: function() {
+        let config = {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            subtree: true
+        };
+        this.bodyObserver.observe(document.body, config);
+    },
+    stopBodyObserver: function() {
+        this.bodyObserver.disconnect();
     },
     remoteImageLoadBlocked: function() {
         window.webkit.messageHandlers.remoteImageLoadBlocked.postMessage(null);
@@ -106,6 +149,21 @@ PageState.prototype = {
         }
         return updated;
     },
+    checkCommandStack: function() {
+        let canUndo = document.queryCommandEnabled("undo");
+        let canRedo = document.queryCommandEnabled("redo");
+
+        if (canUndo != this.undoEnabled || canRedo != this.redoEnabled) {
+            this.undoEnabled = canUndo;
+            this.redoEnabled = canRedo;
+            window.webkit.messageHandlers.commandStackChanged.postMessage(
+                this.undoEnabled + "," + this.redoEnabled
+            );
+        }
+    },
+    documentModified: function(element) {
+        window.webkit.messageHandlers.documentModified.postMessage(null);
+    },
     selectionChanged: function() {
         let hasSelection = !window.getSelection().isCollapsed;
         if (this.hasSelection != hasSelection) {
@@ -114,3 +172,5 @@ PageState.prototype = {
         }
     }
 };
+
+var geary = new PageState();

@@ -509,7 +509,7 @@ public class Geary.Imap.ClientSession : BaseObject {
      * Determines the SELECT-able mailbox name for a specific folder path.
      */
     public MailboxSpecifier get_mailbox_for_path(FolderPath path)
-    throws ImapError {
+        throws ImapError {
         string? delim = get_delimiter_for_path(path);
         return new MailboxSpecifier.from_folder_path(path, this.inbox.mailbox, delim);
     }
@@ -517,10 +517,11 @@ public class Geary.Imap.ClientSession : BaseObject {
     /**
      * Determines the folder path for a mailbox name.
      */
-    public FolderPath get_path_for_mailbox(MailboxSpecifier mailbox)
-    throws ImapError {
+    public FolderPath get_path_for_mailbox(FolderRoot root,
+                                           MailboxSpecifier mailbox)
+        throws ImapError {
         string? delim = get_delimiter_for_mailbox(mailbox);
-        return mailbox.to_folder_path(delim, this.inbox.mailbox);
+        return mailbox.to_folder_path(root, delim, this.inbox.mailbox);
     }
 
     /**
@@ -532,21 +533,23 @@ public class Geary.Imap.ClientSession : BaseObject {
     public string? get_delimiter_for_path(FolderPath path)
     throws ImapError {
         string? delim = null;
-        Geary.FolderRoot root = path.get_root();
-        if (MailboxSpecifier.folder_path_is_inbox(root)) {
+
+        FolderRoot root = (FolderRoot) path.get_root();
+        if (root.inbox.equal_to(path) ||
+            root.inbox.is_descendant(path)) {
             delim = this.inbox.delim;
         } else {
-            Namespace? ns = this.namespaces.get(root.basename);
-            if (ns == null) {
-                // Folder's root doesn't exist as a namespace, so try
-                // the empty namespace.
-                ns = this.namespaces.get("");
-                if (ns == null) {
-                    // If that doesn't exist, fall back to the default
-                    // personal namespace
-                    ns = this.personal_namespaces[0];
-                }
+            Namespace? ns = null;
+            FolderPath? search = path;
+            while (ns == null && search != null) {
+                ns = this.namespaces.get(search.name);
+                search = search.parent;
             }
+            if (ns == null) {
+                // fall back to the default personal namespace
+                ns = this.personal_namespaces[0];
+            }
+
             delim = ns.delim;
         }
         return delim;
@@ -827,23 +830,15 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         return State.LOGGED_OUT;
     }
-    
-    //
-    // login
-    //
-    
+
     /**
      * Performs the LOGIN command using the supplied credentials.
      *
      * @see initiate_session_async
      */
-    public async StatusResponse login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
+    public async StatusResponse login_async(Geary.Credentials credentials,
+                                            Cancellable? cancellable = null)
         throws Error {
-        if (!credentials.is_complete()) {
-            login_failed(null);
-            throw new ImapError.UNAUTHENTICATED("No credentials provided for account: %s", credentials.to_string());
-        }
-
         Command? cmd = null;
         switch (credentials.supported_method) {
         case Geary.Credentials.Method.PASSWORD:
@@ -874,16 +869,44 @@ public class Geary.Imap.ClientSession : BaseObject {
 
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.LOGIN, null, params);
-        
+
         if (params.err != null)
             throw params.err;
-        
+
         // should always proceed; only an Error could change this
         assert(params.proceed);
-        
-        return yield command_transaction_async(cmd, cancellable);
+
+        GLib.Error? login_err = null;
+        try {
+            yield command_transaction_async(cmd, cancellable);
+        } catch (Error err) {
+            login_err = err;
+        }
+
+        if (login_err != null) {
+            // Throw an error indicating auth failed here, unless
+            // there is a status response and it indicates that the
+            // server is merely reporting login as being unavailable,
+            // then don't since the creds might actually be fine.
+            ResponseCodeType? code_type = null;
+            if (cmd.status != null) {
+                ResponseCode? code = cmd.status.response_code;
+                if (code != null) {
+                    code_type = code.get_response_code_type();
+                }
+            }
+
+            if (code_type == null ||
+                code_type.value != ResponseCodeType.UNAVAILABLE) {
+                throw new ImapError.UNAUTHENTICATED(login_err.message);
+            } else {
+                throw login_err;
+            }
+        }
+
+        return cmd.status;
     }
-    
+
     /**
      * Prepares the connection and performs a login using the supplied credentials.
      *
@@ -896,55 +919,48 @@ public class Geary.Imap.ClientSession : BaseObject {
         // If no capabilities available, get them now
         if (capabilities.is_empty())
             yield send_command_async(new CapabilityCommand());
-        
+
         // store them for comparison later
         Imap.Capabilities caps = capabilities;
-        
-        debug("[%s] use_starttls=%s is_ssl=%s starttls=%s", to_string(), imap_endpoint.use_starttls.to_string(),
-            imap_endpoint.is_ssl.to_string(), caps.has_capability(Capabilities.STARTTLS).to_string());
-        switch (imap_endpoint.attempt_starttls(caps.has_capability(Capabilities.STARTTLS))) {
-            case Endpoint.AttemptStarttls.YES:
-                debug("[%s] Attempting STARTTLS...", to_string());
-                StatusResponse resp;
-                try {
-                    resp = yield send_command_async(new StarttlsCommand());
-                } catch (Error err) {
-                    debug("Error attempting STARTTLS command on %s: %s", to_string(), err.message);
-                    
-                    throw err;
-                }
-                
-                if (resp.status == Status.OK) {
-                    yield cx.starttls_async(cancellable);
-                    debug("[%s] STARTTLS completed", to_string());
-                } else {
-                    debug("[%s} STARTTLS refused: %s", to_string(), resp.status.to_string());
-                    
-                    // throw an exception and fail rather than send credentials under suspect
-                    // conditions
-                    throw new ImapError.NOT_SUPPORTED("STARTTLS refused by %s: %s", to_string(),
-                        resp.status.to_string());
-                }
-            break;
-            
-            case Endpoint.AttemptStarttls.NO:
-                debug("[%s] No STARTTLS attempted", to_string());
-            break;
-            
-            case Endpoint.AttemptStarttls.HALT:
-                throw new ImapError.NOT_SUPPORTED("STARTTLS unavailable for %s", to_string());
-            
-            default:
-                assert_not_reached();
+
+        if (imap_endpoint.tls_method == TlsNegotiationMethod.START_TLS) {
+            if (!caps.has_capability(Capabilities.STARTTLS)) {
+                throw new ImapError.NOT_SUPPORTED(
+                    "STARTTLS unavailable for %s", to_string());
+            }
+
+            debug("[%s] Attempting STARTTLS...", to_string());
+            StatusResponse resp;
+            try {
+                resp = yield send_command_async(new StarttlsCommand());
+            } catch (Error err) {
+                debug(
+                    "Error attempting STARTTLS command on %s: %s",
+                    to_string(), err.message
+                );
+                throw err;
+            }
+
+            if (resp.status == Status.OK) {
+                yield cx.starttls_async(cancellable);
+                debug("[%s] STARTTLS completed", to_string());
+            } else {
+                debug(
+                    "[%s} STARTTLS refused: %s",
+                    to_string(), resp.status.to_string()
+                );
+                // Throw an exception and fail rather than send
+                // credentials under suspect conditions
+                throw new ImapError.NOT_SUPPORTED(
+                    "STARTTLS refused by %s: %s", to_string(),
+                    resp.status.to_string()
+                );
+            }
         }
-        
+
         // Login after STARTTLS
-        StatusResponse login_resp = yield login_async(credentials, cancellable);
-        if (login_resp.status != Status.OK) {
-            throw new ImapError.UNAUTHENTICATED("Unable to login to %s with supplied credentials",
-                to_string());
-        }
-        
+        yield login_async(credentials, cancellable);
+
         // if new capabilities not offered after login, get them now
         if (caps.revision == capabilities.revision)
             yield send_command_async(new CapabilityCommand());

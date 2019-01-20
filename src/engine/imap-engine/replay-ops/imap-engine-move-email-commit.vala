@@ -31,54 +31,47 @@ private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOper
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         to_move.remove_all(ids);
     }
-    
-    public override async ReplayOperation.Status replay_local_async() throws Error {
-        return ReplayOperation.Status.CONTINUE;
-    }
-    
+
     public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         ids.add_all(to_move);
     }
-    
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (to_move.size == 0)
-            return ReplayOperation.Status.COMPLETED;
-        
-        // Remaining MessageSets are persisted in case of network retries
-        if (remaining_msg_sets == null)
-            remaining_msg_sets = Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(to_move));
-        
-        if (remaining_msg_sets == null || remaining_msg_sets.size == 0)
-            return ReplayOperation.Status.COMPLETED;
 
-        Imap.FolderSession remote =
-            yield this.engine.claim_remote_session(cancellable);
-
-        Gee.Iterator<Imap.MessageSet> iter = remaining_msg_sets.iterator();
-        while (iter.next()) {
-            // don't use Cancellable throughout I/O operations in order to assure transaction completes
-            // fully
-            if (cancellable != null && cancellable.is_cancelled()) {
-                throw new IOError.CANCELLED(
-                    "Move email to %s cancelled", this.destination.to_string()
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
+        if (to_move.size > 0) {
+            // Remaining MessageSets are persisted in case of network retries
+            if (remaining_msg_sets == null)
+                remaining_msg_sets = Imap.MessageSet.uid_sparse(
+                    ImapDB.EmailIdentifier.to_uids(to_move)
                 );
+
+            if (remaining_msg_sets == null || remaining_msg_sets.size == 0)
+                return;
+
+            Gee.Iterator<Imap.MessageSet> iter = remaining_msg_sets.iterator();
+            while (iter.next()) {
+                // don't use Cancellable throughout I/O operations in
+                // order to assure transaction completes fully
+                if (cancellable != null && cancellable.is_cancelled()) {
+                    throw new IOError.CANCELLED(
+                        "Move email to %s cancelled", this.destination.to_string()
+                    );
+                }
+
+                Imap.MessageSet msg_set = iter.get();
+
+                Gee.Map<Imap.UID, Imap.UID>? map = yield remote.copy_email_async(
+                    msg_set, destination, null
+                );
+                if (map != null)
+                    destination_uids.add_all(map.values);
+
+                yield remote.remove_email_async(msg_set.to_list(), null);
+
+                // completed successfully, remove from list in case of retry
+                iter.remove();
             }
-
-            Imap.MessageSet msg_set = iter.get();
-
-            Gee.Map<Imap.UID, Imap.UID>? map = yield remote.copy_email_async(
-                msg_set, destination, null
-            );
-            if (map != null)
-                destination_uids.add_all(map.values);
-
-            yield remote.remove_email_async(msg_set.to_list(), null);
-
-            // completed successfully, remove from list in case of retry
-            iter.remove();
         }
-
-        return ReplayOperation.Status.COMPLETED;
     }
 
     public override async void backout_local_async() throws Error {
@@ -99,4 +92,3 @@ private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOper
         return "%d email IDs to %s".printf(to_move.size, destination.to_string());
     }
 }
-

@@ -38,8 +38,9 @@ geary_c_options = [
   # Select libunwind's optimised, local-only backtrace unwiding. See
   # libunwind(3).
   '-DUNW_LOCAL_ONLY',
-  # Yes yes, GOA's API is unstable. :(
-  '-DGOA_API_IS_SUBJECT_TO_CHANGE'
+  # Neither GOA nor GCK want to hang out unless you are cool enough
+  '-DGOA_API_IS_SUBJECT_TO_CHANGE',
+  '-DGCK_API_SUBJECT_TO_CHANGE',
 ]
 
 subdir('sqlite3-unicodesn')
@@ -51,6 +52,7 @@ subdir('mailer')
 # Web process extension library
 geary_web_process = library('geary-web-process',
   join_paths('client', 'web-process', 'web-process-extension.vala'),
+  c_args: geary_c_options,
   dependencies: [
     gee,
     gmime,

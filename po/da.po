@@ -11,10 +11,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
-"product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2018-03-05 12:21+0000\n"
-"PO-Revision-Date: 2018-03-09 19:22+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
+"POT-Creation-Date: 2018-10-24 16:18+0000\n"
+"PO-Revision-Date: 2018-10-27 16:32+0200\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish (http://www.transifex.com/projects/p/geary/language/"
 "da/)\n"
@@ -23,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.7.1\n"
+"X-Generator: Poedit 2.0.6\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -139,208 +138,202 @@ msgid "Compose Message"
 msgstr "Skriv besked"
 
 #: desktop/org.gnome.Geary.gschema.xml:8
-msgid "Default attachments directory"
-msgstr "Standardmappe til vedhæftede filer"
-
-#: desktop/org.gnome.Geary.gschema.xml:9
-msgid "Location used when opening and saving attachments."
-msgstr "Placering der bruges, når vedhæftede filer åbnes og gemmes."
-
-#: desktop/org.gnome.Geary.gschema.xml:14
-msgid "Default print output directory"
-msgstr "Standardmappe til output ved udskrivning"
-
-#: desktop/org.gnome.Geary.gschema.xml:15
-msgid "Location used when printing to a file."
-msgstr "Placering der bruges ved udskrivning til en fil."
-
-#: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Maximize window"
 msgstr "Maksimér vindue"
 
-#: desktop/org.gnome.Geary.gschema.xml:21
+#: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
 msgstr "Sand (true) hvis programvinduet er maksimeret og ellers falsk (false)."
 
-#: desktop/org.gnome.Geary.gschema.xml:26
+#: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
 msgstr "Vinduesbredde"
 
-#: desktop/org.gnome.Geary.gschema.xml:27
+#: desktop/org.gnome.Geary.gschema.xml:15
 msgid "The last recorded width of the application window."
 msgstr "Den sidste registrerede bredde af programvinduet."
 
-#: desktop/org.gnome.Geary.gschema.xml:32
+#: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Height of window"
 msgstr "Vindueshøjde"
 
-#: desktop/org.gnome.Geary.gschema.xml:33
+#: desktop/org.gnome.Geary.gschema.xml:21
 msgid "The last recorded height of the application window."
 msgstr "Den sidste registrerede højde af programvinduet."
 
-#: desktop/org.gnome.Geary.gschema.xml:38
+#: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Position of folder list pane"
 msgstr "Placering af ruden med mappeoversigten"
 
 # Paned betyder sprosset (men hvorfor er det med stort?) - i denne sammenhæng måske rudeopdelt. Men hvad betyder grabber her?
-#: desktop/org.gnome.Geary.gschema.xml:39
+#: desktop/org.gnome.Geary.gschema.xml:27
 msgid "Position of the folder list Paned grabber."
 msgstr "Placering af mappelisten i rudeopdelt visning."
 
-#: desktop/org.gnome.Geary.gschema.xml:44
+#: desktop/org.gnome.Geary.gschema.xml:32
 msgid "Position of folder list pane when horizontal"
 msgstr "Placering af den vandrette rude med mappeoversigten"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:33
 msgid ""
 "Position of the folder list Paned grabber in the horizontal orientation."
 msgstr "Placering af mappelisten i rudeopdelt visning i vandret orientering."
 
-#: desktop/org.gnome.Geary.gschema.xml:50
+#: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Position of folder list pane when vertical"
 msgstr "Placering af den lodrette rude med mappeoversigten"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:39
 msgid "Position of the folder list Paned grabber in the vertical orientation."
 msgstr "Placering af mappelisten i rudeopdelt visning i lodret orientering."
 
-#: desktop/org.gnome.Geary.gschema.xml:56
+#: desktop/org.gnome.Geary.gschema.xml:44
 msgid "Orientation of the folder list pane"
 msgstr "Orientering af ruden med mappeoversigten"
 
-#: desktop/org.gnome.Geary.gschema.xml:57
+#: desktop/org.gnome.Geary.gschema.xml:45
 msgid "True if the folder list Paned is in the horizontal orientation."
 msgstr ""
 "Sand (true) hvis mappelisten i rudeopdelt visning er i vandret orientering."
 
-#: desktop/org.gnome.Geary.gschema.xml:62
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Position of message list pane"
 msgstr "Placering af ruden med beskedoversigten"
 
-#: desktop/org.gnome.Geary.gschema.xml:63
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "Position of the message list Paned grabber."
 msgstr "Placering af beskedlisten i rudeopdelt visning."
 
-#: desktop/org.gnome.Geary.gschema.xml:68
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Autoselect next message"
 msgstr "Vælg automatisk næste besked"
 
-#: desktop/org.gnome.Geary.gschema.xml:69
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid "True if we should autoselect the next available conversation."
 msgstr ""
 "Sand (true) hvis den næste tilgængelige samtale skal vælges automatisk."
 
-#: desktop/org.gnome.Geary.gschema.xml:74
+#: desktop/org.gnome.Geary.gschema.xml:62
 msgid "Display message previews"
 msgstr "Forhåndsvis beskeder"
 
-#: desktop/org.gnome.Geary.gschema.xml:75
+#: desktop/org.gnome.Geary.gschema.xml:63
 msgid "True if we should display a short preview of each message."
 msgstr ""
 "Sand (true) hvis der skal vises en kort forhåndsvisning af hver besked."
 
-#: desktop/org.gnome.Geary.gschema.xml:80
+#: desktop/org.gnome.Geary.gschema.xml:68
 msgid "Languages that shall be used in the spell checker"
 msgstr "Sprog der skal bruges til stavekontrol"
 
-#: desktop/org.gnome.Geary.gschema.xml:81
+#: desktop/org.gnome.Geary.gschema.xml:69
 msgid "List of the languages to use in the spell checker."
 msgstr "Liste med sprog der skal bruges til stavekontrol."
 
-#: desktop/org.gnome.Geary.gschema.xml:86
+#: desktop/org.gnome.Geary.gschema.xml:74
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Sprog der vises i pop-overen til stavekontrollen"
 
-#: desktop/org.gnome.Geary.gschema.xml:87
+#: desktop/org.gnome.Geary.gschema.xml:75
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr "Liste med sprog der altid vises i pop-overen til stavekontrollen"
 
-#: desktop/org.gnome.Geary.gschema.xml:92
+#: desktop/org.gnome.Geary.gschema.xml:80
 msgid "Enable notification sounds"
 msgstr "Aktivér påmindelseslyde"
 
-#: desktop/org.gnome.Geary.gschema.xml:93
+#: desktop/org.gnome.Geary.gschema.xml:81
 msgid "True to play sounds for notifications and sending."
 msgstr "Sand (true) for at afspille lyde ved påmindelser og afsending."
 
-#: desktop/org.gnome.Geary.gschema.xml:98
+#: desktop/org.gnome.Geary.gschema.xml:86
 msgid "Show notifications for new mail"
 msgstr "Vis påmindelse for ny e-mail"
 
-#: desktop/org.gnome.Geary.gschema.xml:99
+#: desktop/org.gnome.Geary.gschema.xml:87
 msgid "True to show notification bubbles."
 msgstr "Sand (true) for at vise påmindelsesbobler."
 
-#: desktop/org.gnome.Geary.gschema.xml:104
+#: desktop/org.gnome.Geary.gschema.xml:92
 msgid "Notify of new mail at startup"
 msgstr "Giv besked om ny e-mail ved opstart"
 
-#: desktop/org.gnome.Geary.gschema.xml:105
+#: desktop/org.gnome.Geary.gschema.xml:93
 msgid "True to notify of new mail at startup."
 msgstr "Sand (true) for at få besked om ny e-mail ved opstart."
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:98
 msgid "Ask when opening an attachment"
 msgstr "Spørg før en vedhæftet fil åbnes"
 
-#: desktop/org.gnome.Geary.gschema.xml:111
+#: desktop/org.gnome.Geary.gschema.xml:99
 msgid "True to ask when opening an attachment."
 msgstr "Sand (true) for at spørge inden en vedhæftet fil åbnes."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:104
 msgid "Whether to compose emails in HTML"
 msgstr "Om e-mail skal formateres som HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:105
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Sand (true) for at formatere e-mail som HTML; falsk (false) for klartekst."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:110
 msgid "Advisory strategy for full-text searching"
 msgstr "Vejledningsstrategi for fuldtekstsøgning"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:111
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
-msgstr ""
-"Mulige værdier er “exact”, “conservative”, “aggressive” og “horizon”."
+msgstr "Mulige værdier er “exact”, “conservative”, “aggressive” og “horizon”."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Zoom of conversation viewer"
 msgstr "Zoomniveau på samtalevisningen"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:117
 msgid "The zoom to apply on the conservation view."
 msgstr "Zoom der skal anvendes på samtalevisningen."
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "Size of detached composer window"
 msgstr "Størrelse på løsrevet redigeringsvindue"
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "The last recorded size of the detached composer window."
 msgstr "Den sidste registrerede størrelse på det løsrevede redigeringsvindue."
 
-#: desktop/org.gnome.Geary.gschema.xml:140
+#: desktop/org.gnome.Geary.gschema.xml:128
+msgid "Base URL to look up contact avatars"
+msgstr "Basis-URL til at slå kontaktavatarer op"
+
+#: desktop/org.gnome.Geary.gschema.xml:129
+msgid ""
+"A Gravatar or Libravatar compatible URL, set to the empty string to disable."
+msgstr ""
+"En URL som er kompatibel med Gravatar eller Libravatar; lad strengen være "
+"tom for at deaktivere."
+
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "Hvorvidt de gamle indstillinger blev overført"
 
-#: desktop/org.gnome.Geary.gschema.xml:141
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
 "Falsk (false) for at tjekke for det gamle “org.yorba.geary”-skema og kopiere "
 "dets værdier."
 
-#: src/client/accounts/account-dialog-add-edit-pane.vala:51
-#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:57
+#: src/client/accounts/account-dialog-add-edit-pane.vala:54
+#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:83
 msgid "_Save"
 msgstr "_Gem"
 
-#: src/client/accounts/account-dialog-add-edit-pane.vala:51
+#: src/client/accounts/account-dialog-add-edit-pane.vala:54
 #: src/client/components/stock.vala:22
 msgid "_Add"
 msgstr "Til_føj"
@@ -352,7 +345,7 @@ msgid "Additional addresses for %s"
 msgstr "Yderligere adresser for %s"
 
 #. Sets min size.
-#: src/client/accounts/account-dialog.vala:21
+#: src/client/accounts/account-dialog.vala:28
 msgid "Accounts"
 msgstr "Konti"
 
@@ -367,97 +360,97 @@ msgstr "Konti"
 msgid "First Last"
 msgstr "Fornavn Efternavn"
 
-#: src/client/accounts/add-edit-page.vala:235
+#: src/client/accounts/add-edit-page.vala:240
 msgid "Welcome to Geary."
 msgstr "Velkommen til Geary."
 
-#: src/client/accounts/add-edit-page.vala:235
+#: src/client/accounts/add-edit-page.vala:240
 msgid "Enter your account information to get started."
 msgstr "Indtast kontoinformation for at starte."
 
-#: src/client/accounts/add-edit-page.vala:255
+#: src/client/accounts/add-edit-page.vala:260
 msgid "2 weeks back"
 msgstr "2 uger siden"
 
 #. IDs are # of days
-#: src/client/accounts/add-edit-page.vala:256
+#: src/client/accounts/add-edit-page.vala:261
 msgid "1 month back"
 msgstr "1 måned siden"
 
-#: src/client/accounts/add-edit-page.vala:257
+#: src/client/accounts/add-edit-page.vala:262
 msgid "3 months back"
 msgstr "3 måneder siden"
 
-#: src/client/accounts/add-edit-page.vala:258
+#: src/client/accounts/add-edit-page.vala:263
 msgid "6 months back"
 msgstr "6 måneder siden"
 
-#: src/client/accounts/add-edit-page.vala:259
+#: src/client/accounts/add-edit-page.vala:264
 msgid "1 year back"
 msgstr "1 år siden"
 
-#: src/client/accounts/add-edit-page.vala:260
+#: src/client/accounts/add-edit-page.vala:265
 msgid "2 years back"
 msgstr "2 år siden"
 
-#: src/client/accounts/add-edit-page.vala:261
+#: src/client/accounts/add-edit-page.vala:266
 msgid "4 years back"
 msgstr "4 år siden"
 
 #. Separator
-#: src/client/accounts/add-edit-page.vala:263
+#: src/client/accounts/add-edit-page.vala:268
 msgid "Everything"
 msgstr "Alt"
 
-#: src/client/accounts/add-edit-page.vala:283
+#: src/client/accounts/add-edit-page.vala:288
 msgid "Edit"
 msgstr "Redigér"
 
-#: src/client/accounts/add-edit-page.vala:285
+#: src/client/accounts/add-edit-page.vala:290
 msgid "Preview"
 msgstr "Forhåndsvisning"
 
-#: src/client/accounts/add-edit-page.vala:751
+#: src/client/accounts/add-edit-page.vala:778
 msgid "Remem_ber passwords"
 msgstr "Hus_k adgangskoder"
 
-#: src/client/accounts/add-edit-page.vala:758 ui/login.glade:233
+#: src/client/accounts/add-edit-page.vala:785 ui/login.glade:233
 msgid "Remem_ber password"
 msgstr "Hu_sk adgangskode"
 
-#: src/client/accounts/add-edit-page.vala:792
+#: src/client/accounts/add-edit-page.vala:819
 msgid "Unable to validate:\n"
 msgstr "Kunne ikke validere:\n"
 
-#: src/client/accounts/add-edit-page.vala:794
+#: src/client/accounts/add-edit-page.vala:821
 msgid "        • Invalid account nickname.\n"
 msgstr "        • Ugyldigt kaldenavn til bruger.\n"
 
-#: src/client/accounts/add-edit-page.vala:797
+#: src/client/accounts/add-edit-page.vala:824
 msgid "        • Email address already added to Geary.\n"
 msgstr "        • E-mailadressen er allerede tilføjet til Geary.\n"
 
-#: src/client/accounts/add-edit-page.vala:801
+#: src/client/accounts/add-edit-page.vala:828
 msgid "        • IMAP connection error.\n"
 msgstr "        • IMAP-forbindelsesfejl.\n"
 
-#: src/client/accounts/add-edit-page.vala:804
+#: src/client/accounts/add-edit-page.vala:831
 msgid "        • IMAP username or password incorrect.\n"
 msgstr "        • Forkert brugernavn eller adgangskode til IMAP.\n"
 
-#: src/client/accounts/add-edit-page.vala:807
+#: src/client/accounts/add-edit-page.vala:834
 msgid "        • SMTP connection error.\n"
 msgstr "        • SMTP-forbindelsesfejl.\n"
 
-#: src/client/accounts/add-edit-page.vala:810
+#: src/client/accounts/add-edit-page.vala:837
 msgid "        • SMTP username or password incorrect.\n"
 msgstr "        • Forkert brugernavn eller adgangskode til SMTP.\n"
 
-#: src/client/accounts/add-edit-page.vala:814
+#: src/client/accounts/add-edit-page.vala:841
 msgid "        • Connection error.\n"
 msgstr "        • Forbindelsesfejl.\n"
 
-#: src/client/accounts/add-edit-page.vala:818
+#: src/client/accounts/add-edit-page.vala:845
 msgid "        • Username or password incorrect.\n"
 msgstr "        • Forkert brugernavn eller adgangskode.\n"
 
@@ -466,14 +459,14 @@ msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Ophavsret 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/geary-application.vala:23
-msgid "Copyright 2016-2017 Geary Development Team."
-msgstr "Ophavsret 2016-2017 Gearys udviklerhold."
+msgid "Copyright 2016-2018 Geary Development Team."
+msgstr "Ophavsret 2016-2018 Gearys udviklerhold."
 
 #: src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Besøg Gearys hjemmeside"
 
-#: src/client/application/geary-application.vala:428
+#: src/client/application/geary-application.vala:416
 #, c-format
 msgid "About %s"
 msgstr "Om %s"
@@ -481,7 +474,7 @@ msgstr "Om %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:432
+#: src/client/application/geary-application.vala:420
 msgid "translator-credits"
 msgstr ""
 "Nikolaj Holmquist Pedersen <nikolajholmquist@gmail.com>\n"
@@ -573,15 +566,21 @@ msgstr "Kunne ikke genkende indstillingerne på kommandolinjen: %s\n"
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Ukendt kommandolinje-indstilling “%s”\n"
 
-#: src/client/application/geary-controller.vala:627
+#. Translators: File name used in save chooser when saving
+#. attachments that do not otherwise have a name.
+#: src/client/application/geary-controller.vala:68
+msgid "Untitled"
+msgstr "Unavngivet"
+
+#: src/client/application/geary-controller.vala:721
 msgid "Unable to store server trust exception"
 msgstr "Kan ikke gemme undtagelse for tillid til server"
 
-#: src/client/application/geary-controller.vala:862
+#: src/client/application/geary-controller.vala:972
 msgid "Your settings are insecure"
 msgstr "Dine indstillinger er usikre"
 
-#: src/client/application/geary-controller.vala:863
+#: src/client/application/geary-controller.vala:973
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -591,17 +590,17 @@ msgstr ""
 "betyder, at dit brugernavn og din adgangskode kan læses af andre på "
 "netværket. Er du sikker på, at du vil gære dette?"
 
-#: src/client/application/geary-controller.vala:864
+#: src/client/application/geary-controller.vala:974
 msgid "Co_ntinue"
 msgstr "F_ortsæt"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/application/geary-controller.vala:977
+#: src/client/application/geary-controller.vala:1078
 #: src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Der opstod en fejl ved afsendelse af e-mail"
 
-#: src/client/application/geary-controller.vala:978
+#: src/client/application/geary-controller.vala:1079
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -611,12 +610,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: src/client/application/geary-controller.vala:982
+#: src/client/application/geary-controller.vala:1083
 #: src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Der opstod en fejl ved lagring af den afsendte e-mail"
 
-#: src/client/application/geary-controller.vala:983
+#: src/client/application/geary-controller.vala:1084
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -624,19 +623,19 @@ msgstr ""
 "Der opstod en fejl, da Geary forsøgte at gemme en sendt besked til mappen "
 "med afsendt e-mail.  Beskeden vil blive i din Udbakke, indtil du sletter den."
 
-#: src/client/application/geary-controller.vala:1056
+#: src/client/application/geary-controller.vala:1151
 msgid "Labels"
 msgstr "Etiketter"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:1068
+#: src/client/application/geary-controller.vala:1163
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Kunne ikke åbne databasen for %s"
 
-#: src/client/application/geary-controller.vala:1069
+#: src/client/application/geary-controller.vala:1164
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -660,20 +659,20 @@ msgstr ""
 "Genopbygning af databasen vil slette al lokal e-mail og dets vedhæftede "
 "filer. <b>Mail'en på serveren vil ikke blive rørt.</b>"
 
-#: src/client/application/geary-controller.vala:1071
+#: src/client/application/geary-controller.vala:1166
 msgid "_Rebuild"
 msgstr "_Genopbyg"
 
-#: src/client/application/geary-controller.vala:1071
+#: src/client/application/geary-controller.vala:1166
 msgid "E_xit"
 msgstr "_Afslut"
 
-#: src/client/application/geary-controller.vala:1080
+#: src/client/application/geary-controller.vala:1175
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Kunne ikke genopbygge databasen for “%s”"
 
-#: src/client/application/geary-controller.vala:1081
+#: src/client/application/geary-controller.vala:1176
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -686,14 +685,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: src/client/application/geary-controller.vala:1103
-#: src/client/application/geary-controller.vala:1113
-#: src/client/application/geary-controller.vala:1124
+#: src/client/application/geary-controller.vala:1198
+#: src/client/application/geary-controller.vala:1208
+#: src/client/application/geary-controller.vala:1219
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Kunne ikke åbne den lokale postkasse for %s"
 
-#: src/client/application/geary-controller.vala:1104
+#: src/client/application/geary-controller.vala:1199
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -711,7 +710,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1114
+#: src/client/application/geary-controller.vala:1209
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be “rolled back” to "
@@ -725,7 +724,7 @@ msgstr ""
 "\n"
 "Installér venligst den nyeste version af Geary og prøv igen."
 
-#: src/client/application/geary-controller.vala:1125
+#: src/client/application/geary-controller.vala:1220
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -737,15 +736,15 @@ msgstr ""
 "\n"
 "Tjek, at din internetforbindelse virker og genstart derefter Geary."
 
-#: src/client/application/geary-controller.vala:1934
+#: src/client/application/geary-controller.vala:2038
 msgid "Undo move (Ctrl+Z)"
 msgstr "Fortryd flyt (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:1944
+#: src/client/application/geary-controller.vala:2048
 msgid "Are you sure you want to open these attachments?"
 msgstr "Er du sikker på, at du vil åbne disse vedhæftede filer?"
 
-#: src/client/application/geary-controller.vala:1945
+#: src/client/application/geary-controller.vala:2049
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -753,16 +752,22 @@ msgstr ""
 "Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra "
 "folk, du stoler på."
 
-#: src/client/application/geary-controller.vala:1946
+#: src/client/application/geary-controller.vala:2050
 msgid "Don’t _ask me again"
 msgstr "S_pørg mig ikke igen"
 
-#: src/client/application/geary-controller.vala:2042
+#. Translators: Dialog primary label when prompting to
+#. overwrite a file. The string substitution is the file'sx
+#. name.
+#: src/client/application/geary-controller.vala:2179
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Filen “%s” findes allerede. Vil du erstatte den?"
 
-#: src/client/application/geary-controller.vala:2044
+#. Translators: Dialog secondary label when prompting to
+#. overwrite a file. The string substitution is the parent
+#. folder's name.
+#: src/client/application/geary-controller.vala:2186
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -770,62 +775,69 @@ msgstr ""
 "Filen findes allerede i “%s”. Hvis du erstatter den, overskrives dens "
 "indhold."
 
-#: src/client/application/geary-controller.vala:2047
+#: src/client/application/geary-controller.vala:2190
 msgid "_Replace"
 msgstr "_Erstat"
 
-#: src/client/application/geary-controller.vala:2287
+#: src/client/application/geary-controller.vala:2460
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Luk kladden?"
 msgstr[1] "Luk alle kladder?"
 
-#: src/client/application/geary-controller.vala:2413
+#: src/client/application/geary-controller.vala:2586
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Tøm al e-mail fra din %s-mappe?"
 
-#: src/client/application/geary-controller.vala:2414
+#: src/client/application/geary-controller.vala:2587
 msgid "This removes the email from Geary and your email server."
 msgstr "Dette fjerner e-mail fra Geary samt din e-mailserver."
 
-#: src/client/application/geary-controller.vala:2415
+#: src/client/application/geary-controller.vala:2588
 msgid "This cannot be undone."
 msgstr "Dette kan ikke fortrydes."
 
-#: src/client/application/geary-controller.vala:2416
+#: src/client/application/geary-controller.vala:2589
 #, c-format
 msgid "Empty %s"
 msgstr "Tøm %s"
 
-#: src/client/application/geary-controller.vala:2433
+#: src/client/application/geary-controller.vala:2606
 #, c-format
 msgid "Error emptying %s"
 msgstr "Fejl ved tømning af %s"
 
-#: src/client/application/geary-controller.vala:2465
+#: src/client/application/geary-controller.vala:2638
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Ønsker du at slette denne besked permanent?"
 msgstr[1] "Ønsker du at slette disse beskeder permanent?"
 
-#: src/client/application/geary-controller.vala:2467
+#: src/client/application/geary-controller.vala:2640
 msgid "Delete"
 msgstr "Slet"
 
-#: src/client/application/geary-controller.vala:2499
-msgid "Undo archive (Ctrl+Z)"
-msgstr "Fortryd arkivér (Ctrl+Z)"
-
-#: src/client/application/geary-controller.vala:2514
+#: src/client/application/geary-controller.vala:2654
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Fortryd smid i papirkurv (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2570
+#: src/client/application/geary-controller.vala:2704
+msgid "Undo archive (Ctrl+Z)"
+msgstr "Fortryd arkivér (Ctrl+Z)"
+
+#: src/client/application/geary-controller.vala:2749
 msgid "Undo (Ctrl+Z)"
 msgstr "Fortryd (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2682
+#. Translators: The label for an in-app notification. The
+#. string substitution is a list of recipients of the email.
+#: src/client/application/geary-controller.vala:2826
+#, c-format
+msgid "Successfully sent mail to %s."
+msgstr "Sendte mail til %s."
+
+#: src/client/application/geary-controller.vala:2907
 msgid "Failed to open default text editor."
 msgstr "Kunne ikke åbne standardprogrammet til tekstredigéring."
 
@@ -878,7 +890,7 @@ msgstr "Flyt samtale"
 msgid "Move conversations"
 msgstr "Flyt samtaler"
 
-#: src/client/components/main-window.vala:397
+#: src/client/components/main-window.vala:440
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1127,7 +1139,7 @@ msgstr "_Kassér"
 msgid "_Help"
 msgstr "_Hjælp"
 
-#: src/client/components/stock.vala:26 ui/conversation-email-menus.ui:51
+#: src/client/components/stock.vala:26 ui/conversation-email-menus.ui:77
 msgid "_Open"
 msgstr "_Åbn"
 
@@ -1135,7 +1147,8 @@ msgstr "_Åbn"
 msgid "_Preferences"
 msgstr "_Indstillinger"
 
-#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:39
+#. Translators: Menu item to print a single, specific message
+#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:64
 msgid "_Print…"
 msgstr "_Udskriv …"
 
@@ -1179,15 +1192,11 @@ msgstr "Der opstod en fejl under lagring"
 msgid "Press Backspace to delete quote"
 msgstr "Tryk tilbagetast for at slette citat"
 
-#: src/client/composer/composer-widget.vala:162
-msgid "New Message"
-msgstr "Ny besked"
-
 #. Translators: This is list of keywords, separated by pipe ("|")
 #. characters, that suggest an attachment; since this is full-word
 #. checking, include all variants of each word.  No spaces are
 #. allowed.
-#: src/client/composer/composer-widget.vala:171
+#: src/client/composer/composer-widget.vala:170
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1199,34 +1208,34 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1130
+#: src/client/composer/composer-widget.vala:1102
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Ønsker du at beholde eller kassere denne kladde?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1158
+#: src/client/composer/composer-widget.vala:1130
 msgid "Do you want to discard this draft message?"
 msgstr "Ønsker du at kassere denne kladde?"
 
-#: src/client/composer/composer-widget.vala:1266
+#: src/client/composer/composer-widget.vala:1247
 msgid "Send message with an empty subject and body?"
 msgstr "Send beskeden uden tekst og emne?"
 
-#: src/client/composer/composer-widget.vala:1268
+#: src/client/composer/composer-widget.vala:1249
 msgid "Send message with an empty subject?"
 msgstr "Send beskeden uden et emne?"
 
-#: src/client/composer/composer-widget.vala:1270
+#: src/client/composer/composer-widget.vala:1251
 msgid "Send message with an empty body?"
 msgstr "Send beskeden uden nogen tekst?"
 
-#: src/client/composer/composer-widget.vala:1274
+#: src/client/composer/composer-widget.vala:1255
 msgid "Send message without an attachment?"
 msgstr "Send beskeden uden en vedhæftet fil?"
 
-#: src/client/composer/composer-widget.vala:1536
+#: src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s” er allerede vedhæftet."
@@ -1236,75 +1245,79 @@ msgstr "“%s” er allerede vedhæftet."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1544
-#: src/client/conversation-viewer/conversation-email.vala:138
+#: src/client/composer/composer-widget.vala:1568
+#: src/client/conversation-viewer/conversation-email.vala:136
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1581
+#: src/client/composer/composer-widget.vala:1605
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s” blev ikke fundet."
 
-#: src/client/composer/composer-widget.vala:1587
+#: src/client/composer/composer-widget.vala:1611
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s” er en mappe."
 
-#: src/client/composer/composer-widget.vala:1593
+#: src/client/composer/composer-widget.vala:1617
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s” er en tom fil."
 
-#: src/client/composer/composer-widget.vala:1606
+#: src/client/composer/composer-widget.vala:1630
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s” kunne ikke åbnes til læsning."
 
-#: src/client/composer/composer-widget.vala:1614
+#: src/client/composer/composer-widget.vala:1638
 msgid "Cannot add attachment"
 msgstr "Kan ikke tilføje filen"
 
-#: src/client/composer/composer-widget.vala:1666
+#: src/client/composer/composer-widget.vala:1687
 msgid "To: "
 msgstr "Til: "
 
-#: src/client/composer/composer-widget.vala:1669
+#: src/client/composer/composer-widget.vala:1690
 msgid "Cc: "
 msgstr "Cc: "
 
-#: src/client/composer/composer-widget.vala:1672
+#: src/client/composer/composer-widget.vala:1693
 msgid "Bcc: "
 msgstr "Bcc: "
 
-#: src/client/composer/composer-widget.vala:1675
+#: src/client/composer/composer-widget.vala:1696
 msgid "Reply-To: "
 msgstr "Svar-Til: "
 
-#: src/client/composer/composer-widget.vala:1808
+#: src/client/composer/composer-widget.vala:1834
 msgid "Select Color"
 msgstr "Vælg farve"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: src/client/composer/composer-widget.vala:2016
+#: src/client/composer/composer-widget.vala:2024
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2062
+#: src/client/composer/composer-widget.vala:2082
 msgid "_From:"
 msgstr "_Fra:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2287
+#: src/client/composer/composer-widget.vala:2307
 msgid "Images"
 msgstr "Billeder"
+
+#: src/client/composer/composer-window.vala:14
+msgid "New Message"
+msgstr "Ny besked"
 
 #: src/client/composer/spell-check-popover.vala:117
 msgid "Remove this language from the preferred list"
@@ -1318,41 +1331,43 @@ msgstr "Tilføj dette sprog til listen over foretrukne"
 msgid "Search for more languages"
 msgstr "Søg efter flere sprog"
 
-#: src/client/conversation-list/conversation-list-view.vala:277
+#: src/client/conversation-list/conversation-list-view.vala:283
 msgid "Delete conversation"
 msgstr "Slet samtale"
 
-#: src/client/conversation-list/conversation-list-view.vala:280
+#: src/client/conversation-list/conversation-list-view.vala:286
 #: ui/main-toolbar-menus.ui:16
 msgid "Mark as _Read"
 msgstr "Markér som _læst"
 
-#: src/client/conversation-list/conversation-list-view.vala:283
+#: src/client/conversation-list/conversation-list-view.vala:289
 #: ui/main-toolbar-menus.ui:20
 msgid "Mark as _Unread"
 msgstr "Markér som _ulæst"
 
-#: src/client/conversation-list/conversation-list-view.vala:286
+#: src/client/conversation-list/conversation-list-view.vala:292
 #: ui/main-toolbar-menus.ui:28
 msgid "U_nstar"
 msgstr "Stj_ern ikke"
 
-#: src/client/conversation-list/conversation-list-view.vala:288
+#: src/client/conversation-list/conversation-list-view.vala:294
 #: ui/main-toolbar-menus.ui:24
 msgid "_Star"
 msgstr "St_jern"
 
-#: src/client/conversation-list/conversation-list-view.vala:291
-#: ui/conversation-email-menus.ui:8
+#. Translators: Menu item to reply to a specific message.
+#: src/client/conversation-list/conversation-list-view.vala:297
+#: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Svar"
 
-#: src/client/conversation-list/conversation-list-view.vala:292
+#: src/client/conversation-list/conversation-list-view.vala:298
 msgid "R_eply All"
 msgstr "S_var til alle"
 
-#: src/client/conversation-list/conversation-list-view.vala:293
-#: ui/conversation-email-menus.ui:18
+#. Translators: Menu item to forward a specific message.
+#: src/client/conversation-list/conversation-list-view.vala:299
+#: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Videresend"
 
@@ -1362,9 +1377,36 @@ msgstr "Mig"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/conversation-viewer/conversation-email.vala:124
+#: src/client/conversation-viewer/conversation-email.vala:122
 msgid "Unknown"
 msgstr "Ukendt"
+
+#: src/client/conversation-viewer/conversation-email.vala:811
+msgid "From:"
+msgstr "Fra:"
+
+#: src/client/conversation-viewer/conversation-email.vala:815
+#: ui/conversation-message.ui:313
+msgid "To:"
+msgstr "Til:"
+
+#: src/client/conversation-viewer/conversation-email.vala:819
+#: ui/conversation-message.ui:358
+msgid "Cc:"
+msgstr "Cc:"
+
+#: src/client/conversation-viewer/conversation-email.vala:823
+#: ui/conversation-message.ui:403
+msgid "Bcc:"
+msgstr "Bcc:"
+
+#: src/client/conversation-viewer/conversation-email.vala:827
+msgid "Date:"
+msgstr "Dato:"
+
+#: src/client/conversation-viewer/conversation-email.vala:831
+msgid "Subject:"
+msgstr "Emne:"
 
 #: src/client/conversation-viewer/conversation-message.vala:60
 msgid "This email address may have been forged"
@@ -1373,49 +1415,49 @@ msgstr "Denne e-mailadresse kan være forfalsket"
 #. Preview headers
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:329
+#: src/client/conversation-viewer/conversation-message.vala:330
 msgid "No sender"
 msgstr "Ingen afsender"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the header preview for a message.
-#: src/client/conversation-viewer/conversation-message.vala:583
+#: src/client/conversation-viewer/conversation-message.vala:589
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:682
+#: src/client/conversation-viewer/conversation-message.vala:691
 msgid "Image"
 msgstr "Billede"
 
-#: src/client/conversation-viewer/conversation-viewer.vala:72
+#: src/client/conversation-viewer/conversation-viewer.vala:74
 msgid "No conversations selected"
 msgstr "Ingen samtaler valgt"
 
-#: src/client/conversation-viewer/conversation-viewer.vala:74
+#: src/client/conversation-viewer/conversation-viewer.vala:76
 msgid "Selecting a conversation from the list will display it here"
 msgstr "Vælg en samtale fra listen for at vise den her"
 
-#: src/client/conversation-viewer/conversation-viewer.vala:79
+#: src/client/conversation-viewer/conversation-viewer.vala:81
 msgid "Multiple conversations selected"
 msgstr "Flere samtaler valgt"
 
-#: src/client/conversation-viewer/conversation-viewer.vala:81
+#: src/client/conversation-viewer/conversation-viewer.vala:83
 msgid "Choosing an action will apply to all selected conversations"
 msgstr "Ved valg af en handling, vil denne udføres på alle valgte samtaler"
 
-#: src/client/conversation-viewer/conversation-viewer.vala:86
-#: src/client/conversation-viewer/conversation-viewer.vala:93
+#: src/client/conversation-viewer/conversation-viewer.vala:88
+#: src/client/conversation-viewer/conversation-viewer.vala:95
 msgid "No conversations found"
 msgstr "Ingen samtaler fundet"
 
-#: src/client/conversation-viewer/conversation-viewer.vala:88
+#: src/client/conversation-viewer/conversation-viewer.vala:90
 msgid "This folder does not contain any conversations"
 msgstr "Denne mappe indeholder ikke nogen samtaler"
 
-#: src/client/conversation-viewer/conversation-viewer.vala:95
+#: src/client/conversation-viewer/conversation-viewer.vala:97
 msgid "Your search returned no results, try refining your search terms"
 msgstr "Din søgning gav ingen resultater. Prøv at ændre dine søgeord"
 
@@ -1427,17 +1469,17 @@ msgstr "Vælg en fil"
 msgid "_Attach"
 msgstr "_Vedhæft"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:33
+#: src/client/dialogs/certificate-warning-dialog.vala:35
 #, c-format
 msgid "Untrusted Connection: %s"
 msgstr "Ubetroet forbindelse: %s"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:36
+#: src/client/dialogs/certificate-warning-dialog.vala:38
 #, c-format
 msgid "The identity of the %s mail server at %s:%u could not be verified."
 msgstr "Identiteten af %s-mailserveren ved %s:%u kunne ikke godkendes."
 
-#: src/client/dialogs/certificate-warning-dialog.vala:44
+#: src/client/dialogs/certificate-warning-dialog.vala:48
 msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
@@ -1445,7 +1487,7 @@ msgstr ""
 "Hvis du vælger “Stol på serveren” eller “Stol altid på serveren”, kan dit "
 "brugernavn og din adgangskode blive sendt uden sikkerhed."
 
-#: src/client/dialogs/certificate-warning-dialog.vala:52
+#: src/client/dialogs/certificate-warning-dialog.vala:56
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
@@ -1453,11 +1495,11 @@ msgstr ""
 "Hvis du vælger “Stol ikke på serveren”, vil Geary ikke forbinde til denne "
 "server."
 
-#: src/client/dialogs/certificate-warning-dialog.vala:54
+#: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
 msgstr "Geary vil ikke tilføje eller opdatere denne e-mailkonto."
 
-#: src/client/dialogs/certificate-warning-dialog.vala:59
+#: src/client/dialogs/certificate-warning-dialog.vala:63
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
@@ -1465,11 +1507,11 @@ msgstr ""
 "Hvis du vælger “Stol ikke på serveren”, vil Geary holde op med at tilgå "
 "denne konto."
 
-#: src/client/dialogs/certificate-warning-dialog.vala:61
+#: src/client/dialogs/certificate-warning-dialog.vala:65
 msgid "Geary will exit if you have no other open email accounts."
 msgstr "Geary vil afsluttes, hvis du ikke har nogen andre åbne e-mailkonti."
 
-#: src/client/dialogs/certificate-warning-dialog.vala:66
+#: src/client/dialogs/certificate-warning-dialog.vala:70
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
@@ -1477,32 +1519,32 @@ msgstr ""
 "Kontakt din systemadministrator eller e-mail-serviceudbyder, hvis du har "
 "spørgsmål vedrørende disse problemer."
 
-#: src/client/dialogs/certificate-warning-dialog.vala:73
+#: src/client/dialogs/certificate-warning-dialog.vala:77
 msgid "The server’s certificate is not signed by a known authority"
 msgstr "Serverens certifikat er ikke signeret af en kendt autoritet"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:76
+#: src/client/dialogs/certificate-warning-dialog.vala:80
 msgid "The server’s identity does not match the identity in the certificate"
 msgstr ""
 "Serverens identitet stemmer ikke overens med identiteten i certifikatet"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:79
+#: src/client/dialogs/certificate-warning-dialog.vala:83
 msgid "The server’s certificate has expired"
 msgstr "Serverens certifikat er udløbet"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:82
+#: src/client/dialogs/certificate-warning-dialog.vala:86
 msgid "The server’s certificate has not been activated"
 msgstr "Serverens certifikat er ikke blevet aktiveret"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:85
+#: src/client/dialogs/certificate-warning-dialog.vala:89
 msgid "The server’s certificate has been revoked and is now invalid"
 msgstr "Serverens certifikat er blevet tilbagekaldt og er nu ugyldigt"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:88
+#: src/client/dialogs/certificate-warning-dialog.vala:92
 msgid "The server’s certificate is considered insecure"
 msgstr "Serverens certifikat anses som usikkert"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:91
+#: src/client/dialogs/certificate-warning-dialog.vala:95
 msgid "An error has occurred processing the server’s certificate"
 msgstr "Der opstod en fejl ved indlæsningen af serverens certifikat"
 
@@ -1553,21 +1595,21 @@ msgstr[1] "%d resultater"
 msgid "%s — New Messages"
 msgstr "%s — Nye beskeder"
 
-#: src/client/notification/libnotify.vala:74
+#: src/client/notification/libnotify.vala:75
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
 msgstr[0] "%d ny besked"
 msgstr[1] "%d nye beskeder"
 
-#: src/client/notification/libnotify.vala:77
+#: src/client/notification/libnotify.vala:78
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
 msgstr[0] "%s, %d ny besked i alt"
 msgstr[1] "%s, %d nye beskeder i alt"
 
-#: src/client/notification/libnotify.vala:109
+#: src/client/notification/libnotify.vala:110
 #, c-format
 msgid ""
 "%s\n"
@@ -1582,7 +1624,7 @@ msgstr[1] ""
 "%s\n"
 "(%d andre nye beskeder til %s)"
 
-#: src/client/notification/libnotify.vala:165
+#: src/client/notification/libnotify.vala:149
 msgid "Open"
 msgstr "Åbn"
 
@@ -1666,9 +1708,28 @@ msgstr "I går"
 msgid "%A"
 msgstr "%A"
 
-#: src/client/util/util-email.vala:30 src/engine/rfc822/rfc822-message.vala:899
+#: src/client/util/util-email.vala:30 src/engine/rfc822/rfc822-message.vala:846
 msgid "(no subject)"
 msgstr "(intet emne)"
+
+#. Translators: This is shown for displaying a list of
+#. email recipients that happens to be empty,
+#. i.e. contains no email addresses.
+#: src/client/util/util-email.vala:49
+msgid "(No recipients)"
+msgstr "(Ingen modtagere)"
+
+#. Translators: This is used for displaying a short list of
+#. email recipients lists with two or more addresses. The
+#. first (string) substitution is address of the first, the
+#. second substitution is the number of n - 1 remaining
+#. recipients.
+#: src/client/util/util-email.vala:63
+#, c-format
+msgid "%s and %d other"
+msgid_plural "%s and %d others"
+msgstr[0] "%s og %d anden"
+msgstr[1] "%s og %d andre"
 
 #: src/client/util/util-files.vala:16
 msgid "bytes"
@@ -1694,6 +1755,14 @@ msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
 
+#: src/engine/api/geary-service-information.vala:26
+msgid "IMAP"
+msgstr "IMAP"
+
+#: src/engine/api/geary-service-information.vala:29
+msgid "SMTP"
+msgstr "SMTP"
+
 #: src/engine/api/geary-service-provider.vala:52
 msgid "Gmail"
 msgstr "Gmail"
@@ -1709,14 +1778,6 @@ msgstr "Outlook.com"
 #: src/engine/api/geary-service-provider.vala:61
 msgid "Other"
 msgstr "Andet"
-
-#: src/engine/api/geary-service.vala:20
-msgid "IMAP"
-msgstr "IMAP"
-
-#: src/engine/api/geary-service.vala:23
-msgid "SMTP"
-msgstr "SMTP"
 
 #: src/engine/api/geary-special-folder-type.vala:24
 msgid "Inbox"
@@ -1776,7 +1837,7 @@ msgstr "Ingen"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:100
+#: src/engine/imap-db/imap-db-account.vala:114
 msgctxt "Search operator"
 msgid "attachment"
 msgstr "bilag"
@@ -1789,7 +1850,7 @@ msgstr "bilag"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:109
+#: src/engine/imap-db/imap-db-account.vala:123
 msgctxt "Search operator"
 msgid "bcc"
 msgstr "bcc"
@@ -1801,7 +1862,7 @@ msgstr "bcc"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:117
+#: src/engine/imap-db/imap-db-account.vala:131
 msgctxt "Search operator"
 msgid "body"
 msgstr "tekst"
@@ -1814,7 +1875,7 @@ msgstr "tekst"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:126
+#: src/engine/imap-db/imap-db-account.vala:140
 msgctxt "Search operator"
 msgid "cc"
 msgstr "cc"
@@ -1827,7 +1888,7 @@ msgstr "cc"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:135
+#: src/engine/imap-db/imap-db-account.vala:149
 msgctxt "Search operator"
 msgid "from"
 msgstr "fra"
@@ -1839,7 +1900,7 @@ msgstr "fra"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:143
+#: src/engine/imap-db/imap-db-account.vala:157
 msgctxt "Search operator"
 msgid "is"
 msgstr "er"
@@ -1851,7 +1912,7 @@ msgstr "er"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary
 #. User Guide.
-#: src/engine/imap-db/imap-db-account.vala:151
+#: src/engine/imap-db/imap-db-account.vala:165
 msgctxt "Search operator"
 msgid "subject"
 msgstr "emne"
@@ -1864,7 +1925,7 @@ msgstr "emne"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:160
+#: src/engine/imap-db/imap-db-account.vala:174
 msgctxt "Search operator"
 msgid "to"
 msgstr "til"
@@ -1877,7 +1938,7 @@ msgstr "til"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:181
+#: src/engine/imap-db/imap-db-account.vala:195
 msgctxt "Search operator value - mail addressed to the user"
 msgid "me"
 msgstr "mig"
@@ -1889,7 +1950,7 @@ msgstr "mig"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:193
+#: src/engine/imap-db/imap-db-account.vala:207
 msgctxt "Search operator value - mail sent by the user"
 msgid "me"
 msgstr "mig"
@@ -1901,7 +1962,7 @@ msgstr "mig"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:205
+#: src/engine/imap-db/imap-db-account.vala:219
 msgctxt "'is:' search operator value"
 msgid "read"
 msgstr "læst"
@@ -1916,7 +1977,7 @@ msgstr "læst"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:216
+#: src/engine/imap-db/imap-db-account.vala:230
 msgctxt "'is:' search operator value"
 msgid "starred"
 msgstr "stjerne"
@@ -1928,7 +1989,7 @@ msgstr "stjerne"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:226
+#: src/engine/imap-db/imap-db-account.vala:240
 msgctxt "'is:' search operator value"
 msgid "unread"
 msgstr "ulæst"
@@ -1937,7 +1998,7 @@ msgstr "ulæst"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:882
+#: src/engine/imap-engine/imap-engine-generic-account.vala:898
 msgid "Drafts | Draft"
 msgstr "Kladder | Drafts | Draft"
 
@@ -1945,7 +2006,7 @@ msgstr "Kladder | Drafts | Draft"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:891
+#: src/engine/imap-engine/imap-engine-generic-account.vala:907
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Sent | Sent Mail | Sent Email | Sent E-Mail | Sendt | Sendte | Sendt Mail | "
@@ -1953,7 +2014,7 @@ msgstr ""
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:896
+#: src/engine/imap-engine/imap-engine-generic-account.vala:912
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Sendt post"
@@ -1962,7 +2023,7 @@ msgstr "Sendt post"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:906
+#: src/engine/imap-engine/imap-engine-generic-account.vala:922
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1974,13 +2035,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:916
+#: src/engine/imap-engine/imap-engine-generic-account.vala:932
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Papirkurv | Affald | Trash | Rubbish | Rubbish Bin"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:921
+#: src/engine/imap-engine/imap-engine-generic-account.vala:937
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Slettede elementer"
@@ -1989,7 +2050,7 @@ msgstr "Slettede elementer"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:931
+#: src/engine/imap-engine/imap-engine-generic-account.vala:947
 msgid "Archive | Archives"
 msgstr "Arkiv | Arkiverede | Arkiveret| Arkiver | Archive | Archives"
 
@@ -2094,31 +2155,31 @@ msgstr "_Stol på serveren"
 msgid "_Don’t Trust This Server"
 msgstr "Stol _ikke på serveren"
 
-#: ui/composer-headerbar.ui:17 ui/composer-headerbar.ui:173
+#: ui/composer-headerbar.ui:17 ui/composer-headerbar.ui:174
 msgid "Detach (Ctrl+D)"
 msgstr "Fjern bilag (Ctrl+D)"
 
-#: ui/composer-headerbar.ui:56 ui/composer-headerbar.ui:82
+#: ui/composer-headerbar.ui:57 ui/composer-headerbar.ui:83
 msgid "Attach File (Ctrl+T)"
 msgstr "Vedhæft fil (Ctrl+T)"
 
-#: ui/composer-headerbar.ui:106
+#: ui/composer-headerbar.ui:107
 msgid "Include Original Attachments"
 msgstr "Medtag oprindelige vedhæftede filer"
 
-#: ui/composer-headerbar.ui:201
+#: ui/composer-headerbar.ui:202
 msgid "_Send"
 msgstr "_Send"
 
-#: ui/composer-headerbar.ui:206
+#: ui/composer-headerbar.ui:207
 msgid "Send (Ctrl+Enter)"
 msgstr "Send (Ctrl+Enter)"
 
-#: ui/composer-headerbar.ui:229
+#: ui/composer-headerbar.ui:230
 msgid "Discard and Close"
 msgstr "Forkast og luk"
 
-#: ui/composer-headerbar.ui:253
+#: ui/composer-headerbar.ui:254
 msgid "Save and Close"
 msgstr "Gem og luk"
 
@@ -2202,9 +2263,9 @@ msgid "_Paste"
 msgstr "Sæt _ind"
 
 #: ui/composer-menus.ui:100
-msgctxt "Clipboard paste with rich text"
-msgid "Paste _With Formatting"
-msgstr "Sæt ind _med formatering"
+msgctxt "Clipboard paste as plain text"
+msgid "Paste _Without Formatting"
+msgstr "Sæt ind _uden formatering"
 
 #: ui/composer-menus.ui:120
 msgid "Select _All"
@@ -2355,27 +2416,44 @@ msgstr "Besked ikke gemt"
 msgid "This message was sent, but has not been saved to your account."
 msgstr "Denne besked blev sendt, men er ikke blevet gemt på din konto."
 
-#: ui/conversation-email-menus.ui:13
+#. Translators: Menu item to reply to a specific message.
+#: ui/conversation-email-menus.ui:15
 msgid "Reply to _All"
 msgstr "Svar til _alle"
 
-#: ui/conversation-email-menus.ui:25
+#. Translators: Menu item to mark a specific message as
+#. read.
+#: ui/conversation-email-menus.ui:30
 msgid "_Mark Read"
 msgstr "_Markér som læst"
 
-#: ui/conversation-email-menus.ui:29
+#: ui/conversation-email-menus.ui:36
 msgid "_Mark Unread"
 msgstr "_Markér som ulæst"
 
-#: ui/conversation-email-menus.ui:33
+#. Translators: Menu item to mark all messages in a
+#. conversation from this one as unread.
+#: ui/conversation-email-menus.ui:42
 msgid "Mark Unread From _Here"
 msgstr "Markér som ulæst _herfra"
 
-#: ui/conversation-email-menus.ui:43
+#. Translators: Menu item to move a single, specific message
+#. to the trash
+#: ui/conversation-email-menus.ui:50
+msgid "_Trash"
+msgstr "Flyt til _Papirkurven"
+
+#. Translators: Menu item to delete a single, specific message
+#: ui/conversation-email-menus.ui:57
+msgid "_Delete…"
+msgstr "_Slet …"
+
+#. Translators: Menu item to view the source for a message
+#: ui/conversation-email-menus.ui:69
 msgid "_View Source"
 msgstr "Vis _kilde"
 
-#: ui/conversation-email-menus.ui:61
+#: ui/conversation-email-menus.ui:87
 msgid "_Save All"
 msgstr "_Gem alle"
 
@@ -2431,18 +2509,6 @@ msgstr "Svar til:"
 msgid "Subject"
 msgstr "Emne"
 
-#: ui/conversation-message.ui:313
-msgid "To:"
-msgstr "Til:"
-
-#: ui/conversation-message.ui:358
-msgid "Cc:"
-msgstr "Cc:"
-
-#: ui/conversation-message.ui:403
-msgid "Bcc:"
-msgstr "Bcc:"
-
 #: ui/conversation-message.ui:502
 msgid "Show Images"
 msgstr "Vis billeder"
@@ -2482,15 +2548,15 @@ msgid "If unsure, contact the sender and ask before continuing."
 msgstr ""
 "Hvis du er i tvivl, så kontakt afsenderen og spørg, inden du fortsætter."
 
-#: ui/conversation-viewer.ui:61
+#: ui/conversation-viewer.ui:60
 msgid "Find in conversation"
 msgstr "Find i samtale"
 
-#: ui/conversation-viewer.ui:75
+#: ui/conversation-viewer.ui:74
 msgid "Find the previous occurrence of the search string."
 msgstr "Find forrige forekomst af søgestrengen."
 
-#: ui/conversation-viewer.ui:96
+#: ui/conversation-viewer.ui:95
 msgid "Find the next occurrence of the search string."
 msgstr "Find næste forekomst af søgestrengen."
 
@@ -2968,8 +3034,8 @@ msgid ""
 msgstr ""
 "Hvis problemet er alvorligt eller vedbliver, så kopiér og send disse "
 "detaljer til <a href=\"https://wiki.gnome.org/Apps/Geary/Contact"
-"\">mailinglisten</a> eller registrér en <a href=\"https://wiki.gnome.org/Apps/"
-"Geary/ReportingABug\">ny fejlrapport</a>."
+"\">mailinglisten</a> eller registrér en <a href=\"https://wiki.gnome.org/"
+"Apps/Geary/ReportingABug\">ny fejlrapport</a>."
 
 #: ui/main-window-info-bar.ui:113
 msgid "Details:"
@@ -3060,6 +3126,18 @@ msgstr "E-mailadresse:"
 msgid "Geary update in progress…"
 msgstr "Geary er ved at blive opgraderet …"
 
+#~ msgid "Default attachments directory"
+#~ msgstr "Standardmappe til vedhæftede filer"
+
+#~ msgid "Location used when opening and saving attachments."
+#~ msgstr "Placering der bruges, når vedhæftede filer åbnes og gemmes."
+
+#~ msgid "Default print output directory"
+#~ msgstr "Standardmappe til output ved udskrivning"
+
+#~ msgid "Location used when printing to a file."
+#~ msgstr "Placering der bruges ved udskrivning til en fil."
+
 #, fuzzy
 #~ msgid "geary"
 #~ msgstr "Geary"
@@ -3144,12 +3222,6 @@ msgstr "Geary er ved at blive opgraderet …"
 #~ msgid "Copyright 2011-2014 Yorba Foundation"
 #~ msgstr "Copyright 2011-2014 Yorba Foundation"
 
-#~ msgid "_Delete"
-#~ msgstr "_Slet"
-
-#~ msgid "_Trash"
-#~ msgstr "Flyt til _Papirkurven"
-
 #~ msgid "_Donate"
 #~ msgstr "_Donér"
 
@@ -3169,14 +3241,8 @@ msgstr "Geary er ved at blive opgraderet …"
 #~ msgid "Do you want to discard the unsaved message?"
 #~ msgstr "Vil du kassére denne ugemte besked?"
 
-#~ msgid "From:"
-#~ msgstr "Fra:"
-
 #~ msgid "No search results found."
 #~ msgstr "Ingen søgeresultater blev fundet."
-
-#~ msgid "Date:"
-#~ msgstr "Dato:"
 
 #~ msgid "Select _Message"
 #~ msgstr "Vælg _besked"

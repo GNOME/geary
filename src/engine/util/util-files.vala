@@ -14,7 +14,9 @@ private const int RECURSIVE_DELETE_BATCH_SIZE = 50;
  * This method is designed to keep chugging along even if an error occurs.
  * If this method is called with a file, it will simply be deleted.
  */
-public async void recursive_delete_async(File folder, Cancellable? cancellable = null) {
+public async void recursive_delete_async(GLib.File folder,
+                                         int priority = GLib.Priority.DEFAULT,
+                                         GLib.Cancellable? cancellable = null) {
     // If this is a folder, recurse children.
     FileType file_type = FileType.UNKNOWN;
     try {
@@ -29,8 +31,12 @@ public async void recursive_delete_async(File folder, Cancellable? cancellable =
     if (file_type == FileType.DIRECTORY) {
         FileEnumerator? enumerator = null;
         try {
-            enumerator = yield folder.enumerate_children_async(FileAttribute.STANDARD_NAME,
-                FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, cancellable);
+            enumerator = yield folder.enumerate_children_async(
+                FileAttribute.STANDARD_NAME,
+                FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
+                priority,
+                cancellable
+            );
         } catch (Error e) {
             debug("Error enumerating files for deletion: %s", e.message);
         }
@@ -39,14 +45,22 @@ public async void recursive_delete_async(File folder, Cancellable? cancellable =
         if (enumerator != null) {
             try {
                 while (true) {
-                    List<FileInfo>? info_list = yield enumerator.next_files_async(RECURSIVE_DELETE_BATCH_SIZE,
-                        Priority.DEFAULT, cancellable);
+                    List<FileInfo>? info_list = yield enumerator.next_files_async(
+                        RECURSIVE_DELETE_BATCH_SIZE,
+                        priority,
+                        cancellable
+                    );
                     if (info_list == null)
                         break; // Stop condition.
-                    
+
                     // Recursive step.
-                    foreach (FileInfo info in info_list)
-                        yield recursive_delete_async(folder.get_child(info.get_name()), cancellable);
+                    foreach (FileInfo info in info_list) {
+                        yield recursive_delete_async(
+                            folder.get_child(info.get_name()),
+                            priority,
+                            cancellable
+                        );
+                    }
                 }
             } catch (Error e) {
                 debug("Error enumerating batch of files: %s", e.message);
@@ -56,10 +70,10 @@ public async void recursive_delete_async(File folder, Cancellable? cancellable =
             }
         }
     }
-    
+
     // Children have been deleted, it's now safe to delete this file/folder.
     try {
-        yield folder.delete_async(Priority.DEFAULT, cancellable);
+        yield folder.delete_async(priority, cancellable);
     } catch (Error e) {
         debug("Error removing file: %s", e.message);
     }

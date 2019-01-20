@@ -10,32 +10,41 @@ class Geary.AccountInformationTest : TestCase {
 
     public AccountInformationTest() {
         base("Geary.AccountInformationTest");
-        add_test("has_email_address", has_email_address);
+        add_test("test_sender_mailboxes", test_sender_mailboxes);
     }
 
-    public void has_email_address() throws GLib.Error {
+    public void test_sender_mailboxes() throws GLib.Error {
         AccountInformation test = new AccountInformation(
-            "test", new MockServiceInformation(), new MockServiceInformation()
+            "test",
+            ServiceProvider.OTHER,
+            new MockCredentialsMediator(),
+            new RFC822.MailboxAddress(null, "test1@example.com")
         );
 
-        test.primary_mailbox = (new RFC822.MailboxAddress(null, "test1@example.com"));
-        test.add_alternate_mailbox(new RFC822.MailboxAddress(null, "test2@example.com"));
-        test.add_alternate_mailbox(new RFC822.MailboxAddress(null, "test3@example.com"));
+        assert_true(test.primary_mailbox.equal_to(
+                        new RFC822.MailboxAddress(null, "test1@example.com")));
+        assert_false(test.has_sender_aliases);
+
+        test.append_sender(new RFC822.MailboxAddress(null, "test2@example.com"));
+        assert_true(test.has_sender_aliases);
+
+        test.append_sender(new RFC822.MailboxAddress(null, "test3@example.com"));
+        assert_true(test.has_sender_aliases);
 
         assert_true(
-            test.has_email_address(new RFC822.MailboxAddress(null, "test1@example.com")),
+            test.has_sender_mailbox(new RFC822.MailboxAddress(null, "test1@example.com")),
             "Primary address not found"
         );
         assert_true(
-            test.has_email_address(new RFC822.MailboxAddress(null, "test2@example.com")),
+            test.has_sender_mailbox(new RFC822.MailboxAddress(null, "test2@example.com")),
             "First alt address not found"
         );
         assert_true(
-            test.has_email_address(new RFC822.MailboxAddress(null, "test3@example.com")),
+            test.has_sender_mailbox(new RFC822.MailboxAddress(null, "test3@example.com")),
             "Second alt address not found"
         );
         assert_false(
-            test.has_email_address(new RFC822.MailboxAddress(null, "unknowne@example.com")),
+            test.has_sender_mailbox(new RFC822.MailboxAddress(null, "unknowne@example.com")),
             "Unknown address found"
         );
     }

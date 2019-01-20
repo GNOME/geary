@@ -8,12 +8,6 @@
 
 public class Geary.Imap.ClientConnection : BaseObject {
 
-    /** Default un-encrypted IMAP network port */
-    public const uint16 DEFAULT_PORT = 143;
-
-    /** Default encrypted IMAP network port */
-    public const uint16 DEFAULT_PORT_SSL = 993;
-
     /**
      * Default socket timeout duration.
      *
@@ -262,6 +256,16 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
         // close the Serializer and Deserializer
         yield close_channels_async(cancellable);
+
+        // Cancel any pending commands
+        foreach (Command pending in this.pending_queue.get_all()) {
+            debug(
+                "[%s] Cancelling pending command: %s",
+                to_string(), pending.to_string()
+            );
+            pending.cancel_command();
+        }
+        this.pending_queue.clear();
 
         // close the actual streams and the connection itself
         Error? close_err = null;
@@ -543,8 +547,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 );
             }
             this.sent_queue.remove(sent);
-            sent.completed(status);
             sent.response_timed_out.disconnect(on_command_timeout);
+            // This could throw an error so call it after cleaning up
+            sent.completed(status);
         }
 
         received_status_response(status);

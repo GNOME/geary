@@ -24,31 +24,12 @@ private class Geary.ImapEngine.CreateEmail : Geary.ImapEngine.SendReplayOperatio
         this.date_received = date_received;
         this.cancellable = cancellable;
     }
-    
-    public override async ReplayOperation.Status replay_local_async() throws Error {
-        return ReplayOperation.Status.CONTINUE;
-    }
-    
-    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
-    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-    }
-    
-    public override async void backout_local_async() throws Error {
-    }
-    
-    public override string describe_state() {
-        return "";
-    }
-    
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
+
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
         // Deal with cancellable manually since create_email_async cannot be cancelled.
         if (cancellable.is_cancelled())
             throw new IOError.CANCELLED("CreateEmail op cancelled immediately");
-
-        Imap.FolderSession remote =
-            yield this.engine.claim_remote_session(cancellable);
 
         // use IMAP APPEND command on remote folders, which doesn't require opening a folder ...
         // if retrying after a successful create, rfc822 will be null
@@ -71,19 +52,24 @@ private class Geary.ImapEngine.CreateEmail : Geary.ImapEngine.SendReplayOperatio
 
             throw new IOError.CANCELLED("CreateEmail op cancelled after create");
         }
-        
-        if (created_id == null)
-            return ReplayOperation.Status.COMPLETED;
-        
-        // TODO: need to prevent gaps that may occur here
-        Geary.Email created = new Geary.Email(created_id);
-        Gee.Map<Geary.Email, bool> results = yield engine.local_folder.create_or_merge_email_async(
-            Geary.iterate<Geary.Email>(created).to_array_list(), cancellable);
-        if (results.size > 0)
-            created_id = Collection.get_first<Geary.Email>(results.keys).id;
-        else
-            created_id = null;
-        
-        return ReplayOperation.Status.COMPLETED;
+
+        if (created_id != null) {
+            // TODO: need to prevent gaps that may occur here
+            Geary.Email created = new Geary.Email(created_id);
+            Gee.Map<Geary.Email, bool> results = yield engine.local_folder.create_or_merge_email_async(
+                Geary.iterate<Geary.Email>(created).to_array_list(), cancellable);
+            if (results.size > 0) {
+                created_id = Collection.get_first<Geary.Email>(results.keys).id;
+            } else {
+                created_id = null;
+            }
+        }
     }
+
+    public override string describe_state() {
+        return "created_id: %s".printf(
+            this.created_id != null ? this.created_id.to_string() :  "none"
+        );
+    }
+
 }
