@@ -40,10 +40,15 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     }
 
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        // If forcing an update, skip local operation and go direct to replay_remote()
-        if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
-            return ReplayOperation.Status.CONTINUE;
-        
+        if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE)) {
+            // Forcing an update, get the local UID then go direct to
+            // replay_remote()
+            this.uid = yield engine.local_folder.get_uid_async(
+                this.id, NONE, this.cancellable
+            );
+            return CONTINUE;
+        }
+
         try {
             email = yield engine.local_folder.fetch_email_async(id, required_fields,
                 ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
