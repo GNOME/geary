@@ -45,7 +45,7 @@ libraries. Install them by running this command:
         desktop-file-utils iso-codes-devel libcanberra-devel libgee-devel \
         glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel \
         webkitgtk4-devel libsecret-devel libxml2-devel vala-tools \
-        gcr-devel enchant-devel libunwind-devel json-glib-devel \
+        gcr-devel enchant2-devel libunwind-devel json-glib-devel \
         gnome-online-accounts-devel itstool
 
 Installing dependencies on Ubuntu/Debian

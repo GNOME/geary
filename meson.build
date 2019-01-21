@@ -53,7 +53,7 @@ sqlite = dependency('sqlite3', version: '>= 3.12')
 webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 
 # Secondary deps - keep sorted alphabetically
-enchant = dependency('enchant', version: '>= 1.6')
+enchant = dependency('enchant-2', version: '>=2.1', required: false) # see below
 gck = dependency('gck-1')
 gcr = dependency('gcr-3', version: '>= 3.10.1')
 gdk = dependency('gdk-3.0', version: '>=' + target_gtk)
@@ -74,8 +74,13 @@ libunwind_dep = dependency('libunwind', version: '>= 1.1')
 libunwind_generic_dep = dependency('libunwind-generic', version: '>= 1.1')
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 posix = valac.find_library('posix')
-webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
+
+# Can currently use either Enchant 1 or 2
+if not enchant.found()
+  enchant = dependency('enchant', version: '>=1.6')
+endif
+
 
 # Libunwind system dependencies above ensures appropriate versions,
 # but this declared depencency is what we actually build against so we
