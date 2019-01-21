@@ -59,7 +59,7 @@ ubuntu:
     - $INSTALL_CMD
 
 deb-package:
-  stage: build
+  stage: test
   image: ubuntu:rolling
   before_script:
     - apt-get update
