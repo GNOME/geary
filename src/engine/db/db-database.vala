@@ -84,9 +84,9 @@ public class Geary.Db.Database : Geary.Db.Context {
     }
 
     ~Database() {
-        // Not thrilled about using lock in a dtor
-        lock (outstanding_async_jobs) {
-            assert(outstanding_async_jobs == 0);
+        // Not thrilled about long-running tasks in a dtor
+        if (this.thread_pool != null) {
+            GLib.ThreadPool.free((owned) this.thread_pool, true, true);
         }
     }
 
