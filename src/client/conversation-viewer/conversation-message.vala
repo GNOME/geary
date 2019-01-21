@@ -161,13 +161,13 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private Gtk.Image avatar;
 
     [GtkChild]
-    private Gtk.Revealer preview_revealer;
+    private Gtk.Revealer compact_revealer;
     [GtkChild]
-    private Gtk.Label preview_from;
+    private Gtk.Label compact_from;
     [GtkChild]
-    private Gtk.Label preview_date;
+    private Gtk.Label compact_date;
     [GtkChild]
-    private Gtk.Label preview_body;
+    private Gtk.Label compact_body;
 
     [GtkChild]
     private Gtk.Revealer header_revealer;
@@ -381,14 +381,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 (MenuModel) builder.get_object("context_menu_inspector");
         }
 
-        // Preview headers
+        // Compact headers
 
         // Translators: This is displayed in place of the from address
         // when the message has no from address.
         string empty_from = _("No sender");
 
-        this.preview_from.set_text(format_originator_preview(from, empty_from));
-        this.preview_from.get_style_context().add_class(FROM_CLASS);
+        this.compact_from.set_text(format_originator_compact(from, empty_from));
+        this.compact_from.get_style_context().add_class(FROM_CLASS);
 
         string date_text = "";
         string date_tooltip = "";
@@ -400,8 +400,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 date.value, config.clock_format
             );
         }
-        this.preview_date.set_text(date_text);
-        this.preview_date.set_tooltip_text(date_tooltip);
+        this.compact_date.set_text(date_text);
+        this.compact_date.set_tooltip_text(date_tooltip);
 
         if (preview != null) {
             string clean_preview = preview;
@@ -413,7 +413,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 // the text
                 clean_preview += "…";
             }
-            this.preview_body.set_text(clean_preview);
+            this.compact_body.set_text(clean_preview);
         }
 
         // Full headers
@@ -486,19 +486,19 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     /**
-     * Shows the complete message and hides the preview headers.
+     * Shows the complete message and hides the compact headers.
      */
     public void show_message_body(bool include_transitions=true) {
-        set_revealer(this.preview_revealer, false, include_transitions);
+        set_revealer(this.compact_revealer, false, include_transitions);
         set_revealer(this.header_revealer, true, include_transitions);
         set_revealer(this.body_revealer, true, include_transitions);
     }
 
     /**
-     * Hides the complete message and shows the preview headers.
+     * Hides the complete message and shows the compact headers.
      */
     public void hide_message_body() {
-        preview_revealer.set_reveal_child(true);
+        compact_revealer.set_reveal_child(true);
         header_revealer.set_reveal_child(false);
         body_revealer.set_reveal_child(false);
     }
@@ -661,7 +661,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         return menu;
     }
 
-    private string format_originator_preview(Geary.RFC822.MailboxAddresses? from,
+    private string format_originator_compact(Geary.RFC822.MailboxAddresses? from,
                                              string empty_from_text) {
         string text = "";
         if (from != null && from.size > 0) {
@@ -672,7 +672,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
                 if (++i < list.size)
                     // Translators: This separates multiple 'from'
-                    // addresses in the header preview for a message.
+                    // addresses in the compact header for a message.
                     text += _(", ");
             }
         } else {
