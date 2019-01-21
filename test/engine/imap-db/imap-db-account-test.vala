@@ -59,6 +59,7 @@ class Geary.ImapDB.AccountTest : TestCase {
             (obj, ret) => { async_complete(ret); }
         );
         this.account.close_async.end(async_result());
+        this.account = null;
 
         delete_file(this.tmp_dir);
         this.tmp_dir = null;
