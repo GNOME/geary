@@ -42,8 +42,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         // Need to close it again to stop the GC process running
         db.close();
 
-        db.file.delete();
-        tmp_dir.delete();
+        delete_file(tmp_dir);
     }
 
     public void upgrade_0_6() throws Error {
@@ -121,11 +120,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         // Need to close it again to stop the GC process running
         db.close();
 
-        Files.recursive_delete_async.begin(
-            tmp_dir, GLib.Priority.DEFAULT, null,
-            (obj, res) => { async_complete(res); }
-        );
-        Files.recursive_delete_async.end(async_result());
+        delete_file(tmp_dir);
     }
 
 
