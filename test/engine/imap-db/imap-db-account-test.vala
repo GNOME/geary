@@ -30,7 +30,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
     public override void set_up() throws GLib.Error {
         this.tmp_dir = GLib.File.new_for_path(
-            GLib.DirUtils.make_tmp("geary-db-database-test-XXXXXX")
+            GLib.DirUtils.make_tmp("geary-imap-db-account-test-XXXXXX")
         );
 
         this.config = new Geary.AccountInformation(
