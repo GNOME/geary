@@ -60,7 +60,7 @@ geary_web_process = library('geary-web-process',
     geary_engine_dep,
   ],
   install: true,
-  install_dir: join_paths(libdir, meson.project_name(), 'web-extensions'),
+  install_dir: web_extensions_dir
 )
 
 # Now finally, make the geary executable
