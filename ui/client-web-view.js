@@ -57,6 +57,9 @@ PageState.prototype = {
             // load completing.
             state.updatePreferredHeight();
             state.loaded();
+            // Still need to queue an update though since it still may
+            // be updated after this event has been fired.
+            queuePreferredHeightUpdate();
         });
 
         // Queues an update when the complete document is loaded.
