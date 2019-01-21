@@ -181,14 +181,14 @@ public class Geary.App.Conversation : BaseObject {
     }
 
     /**
-     * Returns all the email in the conversation sorted and filtered according to the specifiers.
+     * Returns the conversation's email, possibly sorted and filtered.
      *
      * {@link Location.IN_FOLDER} and {@link Location.OUT_OF_FOLDER} are the
      * only preferences honored; the others ({@link Location.IN_FOLDER_OUT_OF_FOLDER},
      * {@link Location.IN_FOLDER_OUT_OF_FOLDER}, and {@link Location.ANYWHERE}
      * are all treated as ANYWHERE.
      */
-    public Gee.Collection<Email>
+    public Gee.List<Email>
         get_emails(Ordering ordering,
                    Location location = Location.ANYWHERE,
                    Gee.Collection<FolderPath>? blacklist = null) {

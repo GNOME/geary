@@ -40,10 +40,15 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     }
 
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        // If forcing an update, skip local operation and go direct to replay_remote()
-        if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
-            return ReplayOperation.Status.CONTINUE;
-        
+        if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE)) {
+            // Forcing an update, get the local UID then go direct to
+            // replay_remote()
+            this.uid = yield engine.local_folder.get_uid_async(
+                this.id, NONE, this.cancellable
+            );
+            return CONTINUE;
+        }
+
         try {
             email = yield engine.local_folder.fetch_email_async(id, required_fields,
                 ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
@@ -56,13 +61,17 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         // If returned in full, done
         if (email != null && email.fields.fulfills(required_fields))
             return ReplayOperation.Status.COMPLETED;
-        
-        // If local only and not found fully in local store, throw NOT_FOUND
+
+        // If local only, ensure the email has all required fields
         if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY)) {
-            throw new EngineError.NOT_FOUND("Email %s with fields %Xh not found in %s", id.to_string(),
-                required_fields, to_string());
+            throw new EngineError.INCOMPLETE_MESSAGE(
+                "Email %s with fields %Xh not found in %s",
+                id.to_string(),
+                required_fields,
+                to_string()
+            );
         }
-        
+
         // only fetch what's missing
         if (email != null)
             remaining_fields = required_fields.clear(email.fields);

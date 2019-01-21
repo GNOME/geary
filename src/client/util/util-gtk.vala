@@ -65,4 +65,18 @@ void menu_foreach(Menu menu, MenuForeachFunc foreach_func) {
  */
 delegate void MenuForeachFunc(string? label, string? action_name, Variant? target, Menu? section);
 
+/**
+ * Returns the CSS border box height for a widget.
+ *
+ * This adjusts the GTK widget's allocated height to exclude extra
+ * space added by the CSS margin property, if any.
+ */
+public inline int get_border_box_height(Gtk.Widget widget) {
+    Gtk.StyleContext style = widget.get_style_context();
+    Gtk.StateFlags flags = style.get_state();
+    Gtk.Border margin = style.get_margin(flags);
+
+    return widget.get_allocated_height() - margin.top - margin.bottom;
+}
+
 }

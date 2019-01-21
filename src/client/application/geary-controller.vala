@@ -1149,7 +1149,12 @@ public class GearyController : Geary.BaseObject {
         current_conversations = new Geary.App.ConversationMonitor(
             current_folder,
             Geary.Folder.OpenFlags.NO_DELAY,
-            ConversationListStore.REQUIRED_FIELDS,
+            // Include fields for the conversation viewer as well so
+            // conversations can be displayed without having to go
+            // back to the db
+            ConversationListStore.REQUIRED_FIELDS |
+            ConversationListBox.REQUIRED_FIELDS |
+            ConversationEmail.REQUIRED_FOR_CONSTRUCT,
             MIN_CONVERSATION_COUNT
         );
 
@@ -1251,22 +1256,33 @@ public class GearyController : Geary.BaseObject {
             case 1:
                 // Cancel existing avatar loads before loading new
                 // convo since that will start loading more avatars
-                viewer.load_conversation.begin(
-                    Geary.Collection.get_first(selected),
-                    this.current_folder,
-                    this.application.config,
-                    this.avatar_store,
-                    (obj, ret) => {
-                        try {
-                            viewer.load_conversation.end(ret);
-                            enable_message_buttons(true);
-                            get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(true);
-                        } catch (Error err) {
-                            debug("Unable to load conversation: %s",
-                                  err.message);
-                        }
-                    }
+                Geary.App.Conversation convo = Geary.Collection.get_first(
+                    selected
                 );
+                Geary.App.EmailStore? store = get_store_for_folder(
+                    convo.base_folder
+                );
+                if (store != null) {
+                    viewer.load_conversation.begin(
+                        convo,
+                        store,
+                        this.avatar_store,
+                        (obj, ret) => {
+                            try {
+                                viewer.load_conversation.end(ret);
+                                enable_message_buttons(true);
+                                get_window_action(
+                                    ACTION_FIND_IN_CONVERSATION
+                                ).set_enabled(true);
+                            } catch (GLib.IOError.CANCELLED err) {
+                                // All good
+                            } catch (Error err) {
+                                debug("Unable to load conversation: %s",
+                                      err.message);
+                            }
+                        }
+                    );
+                }
                 break;
 
             default:

@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright 2016,2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -19,6 +19,19 @@
 public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // This isn't a Gtk.Grid since when added to a Gtk.ListBoxRow the
     // hover style isn't applied to it.
+
+
+    /** Fields that must be available for constructing the view. */
+    internal const Geary.Email.Field REQUIRED_FOR_CONSTRUCT = (
+        Geary.Email.Field.ENVELOPE |
+        Geary.Email.Field.PREVIEW |
+        Geary.Email.Field.FLAGS
+    );
+
+    /** Fields that must be available for loading the body. */
+    internal const Geary.Email.Field REQUIRED_FOR_LOAD = (
+        Geary.Email.REQUIRED_FOR_MESSAGE
+    );
 
 
     /**
@@ -224,7 +237,14 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private const string STARRED_CLASS = "geary-starred";
     private const string UNREAD_CLASS = "geary-unread";
 
-    /** The specific email that is displayed by this view. */
+    /**
+     * The specific email that is displayed by this view.
+     *
+     * This object is updated as additional fields are loaded, so it
+     * should not be relied on to a) contain required fields without
+     * testing or b) assumed to be the same over the life of this view
+     * object.
+     */
     public Geary.Email email { get; private set; }
 
     /** Determines if the email is showing a preview or the full message. */
@@ -242,6 +262,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         }
     }
 
+    /** Determines if the email is a draft message. */
+    public bool is_draft { get; private set; }
+
     /** The view displaying the email's primary message headers and body. */
     public ConversationMessage primary_message { get; private set; }
 
@@ -252,23 +275,36 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private Gee.List<ConversationMessage> _attached_messages =
         new Gee.LinkedList<ConversationMessage>();
 
-    /** Determines if all message's web views have finished loading. */
+    /** Determines if message bodies have started loading. */
+    public bool message_body_load_started { get; private set; default = false; }
+
+    /** Determines if all message have had loaded their bodies. */
     public bool message_bodies_loaded { get; private set; default = false; }
 
-    // Contacts for the email's account
+    // Store from which to load message content, if needed
+    private Geary.App.EmailStore email_store;
+
+    // Store from which to lookup contacts
     private Geary.ContactStore contact_store;
 
+    // Store from which to load avatars
+    private Application.AvatarStore avatar_store;
+
+    // Cancellable to use when loading message content
+    private GLib.Cancellable load_cancellable;
+
     private Configuration config;
+
+    /** Determines if all message's web views have finished loading. */
+    private Geary.Nonblocking.Spinlock message_bodies_loaded_lock =
+        new Geary.Nonblocking.Spinlock();
 
     // Message view with selected text, if any
     private ConversationMessage? body_selection_message = null;
 
-    // Attachment ids that have been displayed inline
-    private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
-
     // A subset of the message's attachments that are displayed in the
     // attachments view
-    Gee.Collection<Geary.Attachment> displayed_attachments =
+    private Gee.List<Geary.Attachment> displayed_attachments =
          new Gee.LinkedList<Geary.Attachment>();
 
     // Message-specific actions
@@ -314,6 +350,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private Menu email_menu_trash;
     private Menu email_menu_delete;
     private bool shift_key_down;
+
 
     /** Fired when the user clicks "reply" in the message menu. */
     public signal void reply_to_message();
@@ -368,14 +405,20 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      * long-running loading processes.
      */
     public ConversationEmail(Geary.Email email,
-                             Geary.ContactStore contact_store,
+                             Geary.App.EmailStore email_store,
+                             Application.AvatarStore avatar_store,
                              Configuration config,
                              bool is_sent,
-                             bool is_draft) {
+                             bool is_draft,
+                             GLib.Cancellable load_cancellable) {
         base_ref();
         this.email = email;
-        this.contact_store = contact_store;
+        this.is_draft = is_draft;
+        this.email_store = email_store;
+        this.contact_store = email_store.account.get_contact_store();
+        this.avatar_store = avatar_store;
         this.config = config;
+        this.load_cancellable = load_cancellable;
 
         if (is_sent) {
             get_style_context().add_class(SENT_CLASS);
@@ -431,44 +474,24 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             });
         insert_action_group("eml", message_actions);
 
-        // Construct CID resources from attachments
-
-        Gee.Map<string,Geary.Memory.Buffer> cid_resources =
-            new Gee.HashMap<string,Geary.Memory.Buffer>();
-        foreach (Geary.Attachment att in email.attachments) {
-            if (att.content_id != null) {
-                try {
-                    cid_resources[att.content_id] =
-                        new Geary.Memory.FileBuffer(att.file, true);
-                } catch (Error err) {
-                    debug("Could not open attachment: %s", err.message);
-                }
-            }
-        }
-
         // Construct the view for the primary message, hook into it
-
-        Geary.RFC822.Message message;
-        try {
-            message = email.get_message();
-        } catch (Error error) {
-            debug("Error loading primary message: %s", error.message);
-            return;
-        }
 
         bool load_images = email.load_remote_images().is_certain();
         Geary.Contact contact = this.contact_store.get_by_rfc822(
-            message.get_primary_originator()
+            email.get_primary_originator()
         );
         if (contact != null)  {
             load_images |= contact.always_load_remote_images();
         }
 
-        this.primary_message = new ConversationMessage(message, config, load_images);
-        this.primary_message.web_view.add_internal_resources(cid_resources);
+        this.primary_message = new ConversationMessage.from_email(
+            email, load_images, config
+        );
         connect_message_view_signals(this.primary_message);
 
         this.primary_message.summary.add(this.actions);
+
+        // Wire up the rest of the UI
 
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/conversation-email-menus.ui"
@@ -498,21 +521,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         pack_start(this.primary_message, true, true, 0);
         update_email_state();
-
-        // Add sub_messages container and message viewers if any
-
-        Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
-        if (sub_messages.size > 0) {
-            this.primary_message.body_container.add(this.sub_messages);
-        }
-        foreach (Geary.RFC822.Message sub_message in sub_messages) {
-            ConversationMessage attached_message =
-                new ConversationMessage(sub_message, config, false);
-            connect_message_view_signals(attached_message);
-            attached_message.web_view.add_internal_resources(cid_resources);
-            this.sub_messages.add(attached_message);
-            this._attached_messages.add(attached_message);
-        }
     }
 
     ~ConversationEmail() {
@@ -520,34 +528,60 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     /**
-     * Starts loading the complete email.
-     *
-     * This method will load the avatar and message body for the
-     * primary message and any attached messages, as well as
-     * attachment names, types and icons.
+     * Loads the avatar for the primary message.
      */
-    public async void start_loading(Application.AvatarStore avatars,
-                                    Cancellable load_cancelled) {
-        foreach (ConversationMessage view in this)  {
-            if (load_cancelled.is_cancelled()) {
-                break;
+    public async void load_avatar(Application.AvatarStore store)
+        throws GLib.Error {
+        try {
+            yield this.primary_message.load_avatar(store, this.load_cancellable);
+        } catch (IOError.CANCELLED err) {
+            // okay
+        } catch (Error err) {
+            Geary.RFC822.MailboxAddress? from = this.email.get_primary_originator();
+            debug("Avatar load failed for \"%s\": %s",
+                  from != null ? from.to_string() : "<unknown>", err.message);
+        }
+    }
+
+    /**
+     * Loads the message body and attachments.
+     *
+     * This potentially hits the database if the email that the view
+     * was constructed from doesn't satisfy requirements, loads
+     * attachments, including views and avatars for any attached
+     * messages, and waits for the primary message body content to
+     * have been loaded by its web view before returning.
+     */
+    public async void load_body()
+        throws GLib.Error {
+        this.message_body_load_started = true;
+
+        // Ensure we have required data to load the message
+
+        Geary.Email? email = null;
+        if (this.email.fields.fulfills(REQUIRED_FOR_LOAD)) {
+            email = this.email;
+        } else {
+            try {
+                email = yield this.email_store.fetch_email_async(
+                    this.email.id,
+                    Geary.Email.REQUIRED_FOR_MESSAGE,
+                    LOCAL_ONLY, // Throw an error if not downloaded
+                    this.load_cancellable
+                );
+            } catch (Geary.EngineError.INCOMPLETE_MESSAGE err) {
+                // Don't have the complete message at the moment, so
+                // download it in the background.
+                this.fetch_body_remote.begin();
             }
-            yield view.load_message_body(load_cancelled);
-            view.load_avatar.begin(avatars, load_cancelled);
         }
 
-        // Only load attachments once the web views have finished
-        // loading, since we want to know if any attachments marked as
-        // being inline were actually not displayed inline, and hence
-        // need to be displayed as if they were attachments.
-        if (!load_cancelled.is_cancelled()) {
-            if (this.message_bodies_loaded) {
-                yield load_attachments(load_cancelled);
-            } else {
-                this.notify["message-bodies-loaded"].connect(() => {
-                        load_attachments.begin(load_cancelled);
-                    });
-            }
+        if (email != null) {
+            this.email = email;
+            yield update_body();
+            yield this.message_bodies_loaded_lock.wait_async(
+                this.load_cancellable
+            );
         }
     }
 
@@ -572,13 +606,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      * Shows the complete message: headers, body and attachments.
      */
     public void expand_email(bool include_transitions=true) {
-        is_collapsed = false;
+        this.is_collapsed = false;
         update_email_state();
-        attachments_button.set_sensitive(true);
-        email_menubutton.set_sensitive(true);
-        primary_message.show_message_body(include_transitions);
-        foreach (ConversationMessage attached in this._attached_messages) {
-            attached.show_message_body(include_transitions);
+        this.attachments_button.set_sensitive(true);
+        this.email_menubutton.set_sensitive(true);
+        foreach (ConversationMessage message in this) {
+            message.show_message_body(include_transitions);
         }
     }
 
@@ -671,27 +704,103 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void connect_message_view_signals(ConversationMessage view) {
         view.flag_remote_images.connect(on_flag_remote_images);
         view.remember_remote_images.connect(on_remember_remote_images);
-        view.web_view.internal_resource_loaded.connect((id) => {
-                this.inlined_content_ids.add(id);
-            });
-        view.web_view.notify["has-valid-height"].connect(() => {
-                bool all_loaded = true;
-                foreach (ConversationMessage message in this) {
-                    if (!message.web_view.has_valid_height) {
-                        all_loaded = false;
-                        break;
-                    }
-                }
-                if (all_loaded == true && !this.message_bodies_loaded) {
-                    // Only update the property value if not already
-                    // true
-                    this.message_bodies_loaded = true;
-                }
-            });
+        view.web_view.internal_resource_loaded.connect(on_resource_loaded);
+        view.web_view.content_loaded.connect(on_content_loaded);
         view.web_view.selection_changed.connect((has_selection) => {
                 this.body_selection_message = has_selection ? view : null;
                 body_selection_changed(has_selection);
             });
+    }
+
+    private async void fetch_body_remote()
+        throws GLib.Error {
+        // XXX Need proper progress reporting here, rather than just
+        // doing a pulse
+        this.primary_message.start_progress_pulse();
+        Geary.Email? email = null;
+        try {
+            email = yield this.email_store.fetch_email_async(
+                this.email.id,
+                Geary.Email.REQUIRED_FOR_MESSAGE,
+                FORCE_UPDATE,
+                this.load_cancellable
+            );
+        } catch (GLib.IOError.CANCELLED err) {
+            // Don't stop message progress pulse here since if
+            // cancelled, this could be well after the widgets have
+            // been removed and destroyed
+        } catch (GLib.Error err) {
+            // XXX Notify user of a problem here
+            debug("Remote message download failed: %s", err.message);
+            this.primary_message.stop_progress_pulse();
+        }
+
+        if (email != null) {
+            this.primary_message.stop_progress_pulse();
+            try {
+                this.email = email;
+                yield update_body();
+            } catch (GLib.Error err) {
+                debug("Remote message update failed: %s", err.message);
+            }
+        }
+    }
+
+    private async void update_body()
+        throws GLib.Error {
+        Geary.RFC822.Message message = this.email.get_message();
+
+        // Load all mime parts and construct CID resources from them
+
+        Gee.Map<string,Geary.Memory.Buffer> cid_resources =
+            new Gee.HashMap<string,Geary.Memory.Buffer>();
+        foreach (Geary.Attachment attachment in email.attachments) {
+            // Assume all parts are attachments. As the primary and
+            // secondary message bodies are loaded, any displayed
+            // inline will be removed from the list.
+            this.displayed_attachments.add(attachment);
+
+            if (attachment.content_id != null) {
+                try {
+                    cid_resources[attachment.content_id] =
+                        new Geary.Memory.FileBuffer(attachment.file, true);
+                } catch (Error err) {
+                    debug("Could not open attachment: %s", err.message);
+                }
+            }
+        }
+        this.attachments_button.set_visible(!this.displayed_attachments.is_empty);
+
+        // Load all messages
+
+        this.primary_message.web_view.add_internal_resources(cid_resources);
+        yield this.primary_message.load_message_body(
+            message, this.load_cancellable
+        );
+
+        Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
+        if (sub_messages.size > 0) {
+            this.primary_message.body_container.add(this.sub_messages);
+        }
+        foreach (Geary.RFC822.Message sub_message in sub_messages) {
+            ConversationMessage attached_message =
+                new ConversationMessage.from_message(
+                    sub_message, false, this.config
+                );
+            connect_message_view_signals(attached_message);
+            attached_message.web_view.add_internal_resources(cid_resources);
+            this.sub_messages.add(attached_message);
+            this._attached_messages.add(attached_message);
+            attached_message.load_avatar.begin(
+                this.avatar_store, this.load_cancellable
+            );
+            yield attached_message.load_message_body(
+                sub_message, this.load_cancellable
+            );
+            if (!this.is_collapsed) {
+                attached_message.show_message_body(false);
+            }
+        }
     }
 
     private void update_email_state() {
@@ -726,37 +835,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         }
     }
 
-    private async void load_attachments(Cancellable load_cancelled) {
-        // Determine if we have any attachments to be displayed. This
-        // relies on the primary and any attached message bodies
-        // having being already loaded, so that we know which
-        // attachments have been shown inline and hence do not need to
-        // be included here.
-        foreach (Geary.Attachment attachment in email.attachments) {
-            if (!(attachment.content_id in this.inlined_content_ids)) {
-                Geary.Mime.DispositionType? disposition = null;
-                if (attachment.content_disposition != null) {
-                    disposition = attachment.content_disposition.disposition_type;
-                }
-                // Display both any attachment and inline parts that
-                // have already not been inlined. Although any inline
-                // parts should be referred to by other content in a
-                // multipart/related or multipart/alternative
-                // container, or inlined if in a multipart/mixed
-                // container, this cannot be not guaranteed. C.f. Bug
-                // 769868.
-                if (disposition != null &&
-                    disposition == Geary.Mime.DispositionType.ATTACHMENT ||
-                    disposition == Geary.Mime.DispositionType.INLINE) {
-                    this.displayed_attachments.add(attachment);
-                }
-            }
-        }
-
-        // Now we can actually show the attachments, if any
-        if (!this.displayed_attachments.is_empty) {
-            this.attachments_button.show();
-            this.attachments_button.set_sensitive(!this.is_collapsed);
+    private void update_displayed_attachments() {
+        bool has_attachments = !this.displayed_attachments.is_empty;
+        this.attachments_button.set_visible(has_attachments);
+        if (has_attachments) {
             this.primary_message.body_container.add(this.attachments);
 
             if (this.displayed_attachments.size > 1) {
@@ -765,12 +847,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             }
 
             foreach (Geary.Attachment attachment in this.displayed_attachments) {
-                if (load_cancelled.is_cancelled()) {
-                    return;
-                }
                 AttachmentView view = new AttachmentView(attachment);
                 this.attachments_view.add(view);
-                yield view.load_icon(load_cancelled);
+                view.load_icon.begin(this.load_cancellable);
             }
         }
     }
@@ -866,25 +945,51 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
 
     private void on_remember_remote_images(ConversationMessage view) {
-        Geary.RFC822.MailboxAddress? sender = view.message.get_primary_originator();
-        if (sender == null) {
-            debug("Couldn't find sender for message: %s", email.id.to_string());
-            return;
+        Geary.RFC822.MailboxAddress? sender = this.email.get_primary_originator();
+        if (sender != null) {
+            Geary.Contact? contact = this.contact_store.get_by_rfc822(sender);
+            if (contact != null) {
+                Geary.ContactFlags flags = new Geary.ContactFlags();
+                flags.add(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
+                this.contact_store.mark_contacts_async.begin(
+                    Geary.Collection.single(contact), flags, null
+                );
+            }
         }
+    }
 
-        Geary.Contact? contact = contact_store.get_by_rfc822(
-            view.message.get_primary_originator()
-        );
-        if (contact == null) {
-            debug("Couldn't find contact for %s", sender.to_string());
-            return;
+    private void on_resource_loaded(string id) {
+        Gee.Iterator<Geary.Attachment> displayed =
+            this.displayed_attachments.iterator();
+        displayed.next();
+        while (displayed.has_next()) {
+            Geary.Attachment? attachment = displayed.get();
+            if (attachment.content_id == id) {
+                displayed.remove();
+            }
+            displayed.next();
         }
+    }
 
-        Geary.ContactFlags flags = new Geary.ContactFlags();
-        flags.add(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
-        Gee.ArrayList<Geary.Contact> contact_list = new Gee.ArrayList<Geary.Contact>();
-        contact_list.add(contact);
-        contact_store.mark_contacts_async.begin(contact_list, flags, null);
+    private void on_content_loaded() {
+        bool all_loaded = true;
+        foreach (ConversationMessage message in this) {
+            if (!message.web_view.is_content_loaded) {
+                all_loaded = false;
+                break;
+            }
+        }
+        if (all_loaded && !this.message_bodies_loaded) {
+            this.message_bodies_loaded = true;
+            this.message_bodies_loaded_lock.blind_notify();
+
+            // Update attachments once the web views have finished
+            // loading, since we want to know if any attachments
+            // marked as being inline were actually not displayed
+            // inline, and hence need to be displayed as if they were
+            // attachments.
+            this.update_displayed_attachments();
+        }
     }
 
     [GtkCallback]

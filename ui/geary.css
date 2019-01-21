@@ -77,7 +77,7 @@ row.geary-folder-popover-list-row > label {
 /* ConversationListBox */
 
 .conversation-listbox {
-  padding: 12px;
+  padding: 0 12px;
 }
 .conversation-listbox > row {
   margin: 0;
@@ -85,7 +85,6 @@ row.geary-folder-popover-list-row > label {
   border-bottom-width: 0;
   padding: 0;
   box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
-  transition: margin 0.1s;
 }
 .conversation-listbox > row > box {
   background: @theme_base_color;
@@ -101,9 +100,16 @@ row.geary-folder-popover-list-row > label {
 .conversation-listbox *.geary-matched *.geary-match {
   color: @theme_selected_fg_color;
   background: @theme_selected_bg_color;
+;}
+.conversation-listbox > row.geary-loading {
+  border-top-width: 0px;
+  padding: 6px;
 }
-.conversation-listbox > row.geary-last {
-  margin-bottom: 0;
+.conversation-listbox > row:first-child:not(.geary-loading) {
+  margin-top: 12px;
+}
+.conversation-listbox > row:last-child {
+  margin-bottom: 12px;
 }
 
 /* ConversationEmail */
@@ -172,12 +178,12 @@ grid.geary-message-summary {
   border-radius: 0px;
 }
 
-/* EmptyPlaceholder */
+/* PlaceholderPane  */
 
-.geary-empty-placeholder > image {
+.geary-placeholder-pane > image {
   margin-bottom: 12px;
 }
-.geary-empty-placeholder > .title {
+.geary-placeholder-pane > .title {
   font-weight: bold;
 }
 

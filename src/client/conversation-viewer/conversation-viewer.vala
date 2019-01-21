@@ -26,6 +26,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         get { return (get_visible_child() == this.composer_page); }
     }
 
+    private Configuration config;
+
     // Stack pages
     [GtkChild]
     private Gtk.Spinner loading_page;
@@ -67,32 +69,53 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     /**
      * Constructs a new conversation view instance.
      */
-    public ConversationViewer() {
+    public ConversationViewer(Configuration config) {
         base_ref();
+        this.config = config;
 
-        EmptyPlaceholder no_conversations = new EmptyPlaceholder();
+        Components.PlaceholderPane no_conversations = new Components.PlaceholderPane();
+        no_conversations.icon_name = "folder-symbolic";
+        // Translators: Title label for placeholder when no
+        // conversations have been selected.
         no_conversations.title = _("No conversations selected");
+        // Translators: Sub-title label for placeholder when no
+        // conversations have been selected.
         no_conversations.subtitle = _(
             "Selecting a conversation from the list will display it here"
         );
         this.no_conversations_page.add(no_conversations);
 
-        EmptyPlaceholder multi_conversations = new EmptyPlaceholder();
+        Components.PlaceholderPane multi_conversations = new Components.PlaceholderPane();
+        no_conversations.icon_name = "folder-symbolic";
+        // Translators: Title label for placeholder when multiple
+        // conversations have been selected.
         multi_conversations.title = _("Multiple conversations selected");
+        // Translators: Sub-title label for placeholder when multiple
+        // conversations have been selected.
         multi_conversations.subtitle = _(
             "Choosing an action will apply to all selected conversations"
         );
         this.multiple_conversations_page.add(multi_conversations);
 
-        EmptyPlaceholder empty_folder = new EmptyPlaceholder();
+        Components.PlaceholderPane empty_folder = new Components.PlaceholderPane();
+        no_conversations.icon_name = "folder-symbolic";
+        // Translators: Title label for placeholder when no
+        // conversations have exist in a folder.
         empty_folder.title = _("No conversations found");
+        // Translators: Sub-title label for placeholder when no
+        // conversations have exist in a folder.
         empty_folder.subtitle = _(
             "This folder does not contain any conversations"
         );
         this.empty_folder_page.add(empty_folder);
 
-        EmptyPlaceholder empty_search = new EmptyPlaceholder();
+        Components.PlaceholderPane empty_search = new Components.PlaceholderPane();
+        no_conversations.icon_name = "folder-symbolic";
+        // Translators: Title label for placeholder when no
+        // conversations have been found in a search.
         empty_search.title = _("No conversations found");
+        // Translators: Sub-title label for placeholder when no
+        // conversations have been found in a search.
         empty_search.subtitle = _(
             "Your search returned no results, try refining your search terms"
         );
@@ -197,22 +220,16 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      * Shows a conversation in the viewer.
      */
     public async void load_conversation(Geary.App.Conversation conversation,
-                                        Geary.Folder location,
-                                        Configuration config,
-                                        Application.AvatarStore avatars)
-        throws Error {
+                                        Geary.App.EmailStore email_store,
+                                        Application.AvatarStore avatar_store)
+        throws GLib.Error {
         remove_current_list();
 
-        Geary.Account account = location.account;
         ConversationListBox new_list = new ConversationListBox(
             conversation,
-            location,
-            new Geary.App.EmailStore(account),
-            account.get_contact_store(),
-            account.information,
-            location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
-            config,
-            avatars,
+            email_store,
+            avatar_store,
+            this.config,
             this.conversation_scroller.get_vadjustment()
         );
 
@@ -235,21 +252,23 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                 this.conversation_find_next.set_sensitive(found);
                 this.conversation_find_prev.set_sensitive(found);
             });
-        Gee.Set<string>? find_terms = get_find_search_terms();
-        if (find_terms != null) {
-            new_list.highlight_search_terms(find_terms);
-        }
-
         add_new_list(new_list);
         set_visible_child(this.conversation_page);
 
-        yield new_list.load_conversation();
-
-        // Highlight matching terms from the search if it exists, but
-        // don't clobber any find terms.
-        if (find_terms == null && location is Geary.SearchFolder) {
-            yield new_list.load_search_terms();
+        // Highlight matching terms from find if active, otherwise
+        // from the search folder if that's where we are at
+        Geary.SearchQuery? query = get_find_search_query(
+            conversation.base_folder.account
+        );
+        if (query == null) {
+            Geary.SearchFolder? search_folder =
+                conversation.base_folder as Geary.SearchFolder;
+            if (search_folder != null) {
+                query = search_folder.search_query;
+            }
         }
+
+        yield new_list.load_conversation(query);
     }
 
     // Add a new conversation list to the UI
@@ -270,15 +289,15 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
     // Remove any existing conversation list, cancelling its loading
     private void remove_current_list() {
-        // XXX GTK+ Bug 778190 workaround
-        this.conversation_scroller.destroy();
-        new_conversation_scroller();
-
-        // Notify that the current list was removed
         if (this.current_list != null) {
+            this.current_list.cancel_conversation_load();
             this.conversation_removed(this.current_list);
             this.current_list = null;
         }
+
+        // XXX GTK+ Bug 778190 workaround
+        this.conversation_scroller.destroy(); // removes the list
+        new_conversation_scroller();
     }
 
     private void new_conversation_scroller() {
@@ -319,21 +338,27 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         base.set_visible_child(widget);
     }
 
-    private Gee.Set<string>? get_find_search_terms() {
-        Gee.Set<string>? terms = null;
-        string search = this.conversation_find_entry.get_text().strip();
-        if (search.length > 0) {
-            terms = new Gee.HashSet<string>();
-            terms.add(search);
+    private Geary.SearchQuery? get_find_search_query(Geary.Account account) {
+        Geary.SearchQuery? query = null;
+        if (this.conversation_find_bar.get_search_mode()) {
+            string text = this.conversation_find_entry.get_text().strip();
+            // Require find string of at least two chars to avoid
+            // opening every message in the conversation as soon as
+            // the user presses a key
+            if (text.length >= 2) {
+                query = account.open_search(
+                    text, this.config.get_search_strategy()
+                );
+            }
         }
-        return terms;
+        return query;
     }
 
     [GtkCallback]
     private void on_find_mode_changed(Object obj, ParamSpec param) {
         if (this.current_list != null) {
             if (this.conversation_find_bar.get_search_mode()) {
-                // Find was enabled
+                // Find became enabled
                 ConversationEmail? email_view =
                     this.current_list.get_selection_view();
                 if (email_view != null) {
@@ -346,12 +371,19 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                         });
                 }
             } else {
-                // Find was disabled
+                // Find became disabled, re-show search terms if any
                 this.current_list.unmark_search_terms();
-                if (!(this.current_list.location is Geary.SearchFolder)) {
-                    //this.current_list.update_collapsed_state();
-                } else {
-                    this.current_list.load_search_terms.begin();
+                Geary.SearchFolder? search_folder = (
+                    this.current_list.conversation.base_folder
+                    as Geary.SearchFolder
+                );
+                if (search_folder != null) {
+                    Geary.SearchQuery? search_query = search_folder.search_query;
+                    if (search_query != null) {
+                        this.current_list.highlight_matching_email.begin(
+                            search_query
+                        );
+                    }
                 }
             }
         }
@@ -362,11 +394,11 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         this.conversation_find_next.set_sensitive(false);
         this.conversation_find_prev.set_sensitive(false);
         if (this.current_list != null) {
-            Gee.Set<string>? terms = get_find_search_terms();
-            if (terms != null) {
-                // Have a search string
-                this.current_list.highlight_search_terms(terms);
-                // XXX scroll to first match
+            Geary.SearchQuery? query = get_find_search_query(
+                this.current_list.conversation.base_folder.account
+            );
+            if (query != null) {
+                this.current_list.highlight_matching_email.begin(query);
             }
         }
     }

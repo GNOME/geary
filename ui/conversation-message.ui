@@ -34,7 +34,7 @@
             <property name="hexpand">True</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkRevealer" id="preview_revealer">
+              <object class="GtkRevealer" id="compact_revealer">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
@@ -46,7 +46,7 @@
                     <property name="can_focus">False</property>
                     <property name="hexpand">True</property>
                     <child>
-                      <object class="GtkGrid" id="preview">
+                      <object class="GtkGrid">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
@@ -57,7 +57,7 @@
                             <property name="can_focus">False</property>
                             <property name="hexpand">True</property>
                             <child>
-                              <object class="GtkLabel" id="preview_from">
+                              <object class="GtkLabel" id="compact_from">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="hexpand">True</property>
@@ -74,7 +74,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="preview_date">
+                              <object class="GtkLabel" id="compact_date">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">1/1/1970	</property>
@@ -95,7 +95,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="preview_body">
+                          <object class="GtkLabel" id="compact_body">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="halign">start</property>
@@ -595,6 +595,7 @@
             </child>
             <child>
               <object class="GtkOverlay">
+                <property name="height_request">6</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
