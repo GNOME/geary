@@ -78,9 +78,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
 
         // Request the row be expanded, if supported.
-        public virtual new async void
-            expand(Geary.App.EmailStore email_store,
-                   Application.AvatarStore contact_store)
+        public virtual new async void expand()
             throws GLib.Error {
             // Not supported by default
         }
@@ -145,14 +143,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             add(view);
         }
 
-        public override async void
-            expand(Geary.App.EmailStore email_store,
-                   Application.AvatarStore contact_store)
+        public override async void expand()
             throws GLib.Error {
             this.is_expanded = true;
             update_row_expansion();
             if (!this.view.message_body_load_started) {
-                yield this.view.load_body(email_store, contact_store);
+                yield this.view.load_body();
             }
             foreach (ConversationMessage message in this.view) {
                 if (!message.web_view.has_valid_height) {
@@ -452,7 +448,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         // Load the interesting row completely up front, and load the
         // remaining in the background so we can return fast.
-        yield interesting_row.expand(this.email_store, this.avatar_store);
+        yield interesting_row.expand();
         this.finish_loading.begin(
             query, uninteresting, post_interesting
         );
@@ -596,7 +592,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                     EmailRow? row = this.email_rows.get(id);
                     if (row != null) {
                         apply_search_terms(row);
-                        row.expand.begin(this.email_store, this.avatar_store);
+                        row.expand.begin();
                     }
                 }
             }
@@ -664,7 +660,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         foreach (Geary.Email email in to_append) {
             EmailRow row = add_email(email);
             if (is_interesting(email)) {
-                yield row.expand(this.email_store, this.avatar_store);
+                yield row.expand();
             }
             yield throttle_loading();
         }
@@ -746,7 +742,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
             row.view.load_avatar.begin(this.avatar_store);
-            yield row.expand(this.email_store, this.avatar_store);
+            yield row.expand();
         }
     }
 
@@ -765,7 +761,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         ConversationEmail view = new ConversationEmail(
             email,
-            account.get_contact_store(),
+            this.email_store,
+            this.avatar_store,
             this.config,
             is_sent,
             is_draft(email),
@@ -1040,7 +1037,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                     row.collapse();
                 }
             } else {
-                row.expand.begin(this.email_store, this.avatar_store);
+                row.expand.begin();
             }
         }
     }

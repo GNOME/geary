@@ -237,7 +237,14 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private const string STARRED_CLASS = "geary-starred";
     private const string UNREAD_CLASS = "geary-unread";
 
-    /** The specific email that is displayed by this view. */
+    /**
+     * The specific email that is displayed by this view.
+     *
+     * This object is updated as additional fields are loaded, so it
+     * should not be relied on to a) contain required fields without
+     * testing or b) assumed to be the same over the life of this view
+     * object.
+     */
     public Geary.Email email { get; private set; }
 
     /** Determines if the email is showing a preview or the full message. */
@@ -274,11 +281,17 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /** Determines if all message have had loaded their bodies. */
     public bool message_bodies_loaded { get; private set; default = false; }
 
+    // Store from which to load message content, if needed
+    private Geary.App.EmailStore email_store;
+
+    // Store from which to lookup contacts
+    private Geary.ContactStore contact_store;
+
+    // Store from which to load avatars
+    private Application.AvatarStore avatar_store;
+
     // Cancellable to use when loading message content
     private GLib.Cancellable load_cancellable;
-
-    // Contacts for the email's account
-    private Geary.ContactStore contact_store;
 
     private Configuration config;
 
@@ -392,7 +405,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      * long-running loading processes.
      */
     public ConversationEmail(Geary.Email email,
-                             Geary.ContactStore contact_store,
+                             Geary.App.EmailStore email_store,
+                             Application.AvatarStore avatar_store,
                              Configuration config,
                              bool is_sent,
                              bool is_draft,
@@ -400,7 +414,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         base_ref();
         this.email = email;
         this.is_draft = is_draft;
-        this.contact_store = contact_store;
+        this.email_store = email_store;
+        this.contact_store = email_store.account.get_contact_store();
+        this.avatar_store = avatar_store;
         this.config = config;
         this.load_cancellable = load_cancellable;
 
@@ -536,8 +552,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      * messages, and waits for the primary message body content to
      * have been loaded by its web view before returning.
      */
-    public async void load_body(Geary.App.EmailStore email_store,
-                                Application.AvatarStore contact_store)
+    public async void load_body()
         throws GLib.Error {
         this.message_body_load_started = true;
 
@@ -548,7 +563,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             email = this.email;
         } else {
             try {
-                email = yield email_store.fetch_email_async(
+                email = yield this.email_store.fetch_email_async(
                     this.email.id,
                     Geary.Email.REQUIRED_FOR_MESSAGE,
                     LOCAL_ONLY, // Throw an error if not downloaded
@@ -557,12 +572,13 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             } catch (Geary.EngineError.INCOMPLETE_MESSAGE err) {
                 // Don't have the complete message at the moment, so
                 // download it in the background.
-                this.fetch_body_remote.begin(email_store, contact_store);
+                this.fetch_body_remote.begin();
             }
         }
 
         if (email != null) {
-            yield update_body(email, contact_store);
+            this.email = email;
+            yield update_body();
             yield this.message_bodies_loaded_lock.wait_async(
                 this.load_cancellable
             );
@@ -696,38 +712,43 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             });
     }
 
-    private async void fetch_body_remote(Geary.App.EmailStore email_store,
-                                         Application.AvatarStore contact_store)
+    private async void fetch_body_remote()
         throws GLib.Error {
         // XXX Need proper progress reporting here, rather than just
         // doing a pulse
         this.primary_message.start_progress_pulse();
         Geary.Email? email = null;
         try {
-            email = yield email_store.fetch_email_async(
+            email = yield this.email_store.fetch_email_async(
                 this.email.id,
                 Geary.Email.REQUIRED_FOR_MESSAGE,
                 FORCE_UPDATE,
                 this.load_cancellable
             );
+        } catch (GLib.IOError.CANCELLED err) {
+            // Don't stop message progress pulse here since if
+            // cancelled, this could be well after the widgets have
+            // been removed and destroyed
         } catch (GLib.Error err) {
+            // XXX Notify user of a problem here
             debug("Remote message download failed: %s", err.message);
+            this.primary_message.stop_progress_pulse();
         }
 
         if (email != null) {
             this.primary_message.stop_progress_pulse();
             try {
-                yield update_body(email, contact_store);
+                this.email = email;
+                yield update_body();
             } catch (GLib.Error err) {
                 debug("Remote message update failed: %s", err.message);
             }
         }
     }
 
-    private async void update_body(Geary.Email email,
-                                   Application.AvatarStore contact_store)
+    private async void update_body()
         throws GLib.Error {
-        Geary.RFC822.Message message = email.get_message();
+        Geary.RFC822.Message message = this.email.get_message();
 
         // Load all mime parts and construct CID resources from them
 
@@ -771,7 +792,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             this.sub_messages.add(attached_message);
             this._attached_messages.add(attached_message);
             attached_message.load_avatar.begin(
-                contact_store, this.load_cancellable
+                this.avatar_store, this.load_cancellable
             );
             yield attached_message.load_message_body(
                 sub_message, this.load_cancellable
@@ -930,7 +951,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             if (contact != null) {
                 Geary.ContactFlags flags = new Geary.ContactFlags();
                 flags.add(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
-                contact_store.mark_contacts_async.begin(
+                this.contact_store.mark_contacts_async.begin(
                     Geary.Collection.single(contact), flags, null
                 );
             }
