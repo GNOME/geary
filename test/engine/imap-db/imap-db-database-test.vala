@@ -9,21 +9,31 @@
 class Geary.ImapDB.DatabaseTest : TestCase {
 
 
+    private GLib.File? tmp_dir = null;
+
+
     public DatabaseTest() {
         base("Geary.ImapDb.DatabaseTest");
         add_test("open_new", open_new);
         add_test("upgrade_0_6", upgrade_0_6);
     }
 
-    public void open_new() throws Error {
-        GLib.File tmp_dir = GLib.File.new_for_path(
-            GLib.DirUtils.make_tmp("geary-db-database-test-XXXXXX")
+    public override void set_up() throws GLib.Error {
+        this.tmp_dir = GLib.File.new_for_path(
+            GLib.DirUtils.make_tmp("geary-imap-db-database-test-XXXXXX")
         );
+    }
 
+    public override void tear_down() throws GLib.Error {
+        delete_file(this.tmp_dir);
+        this.tmp_dir = null;
+    }
+
+    public void open_new() throws Error {
         Database db = new Database(
-            tmp_dir.get_child("test.db"),
+            this.tmp_dir.get_child("test.db"),
             GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql"),
-            tmp_dir.get_child("attachments"),
+            this.tmp_dir.get_child("attachments"),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_UPGRADE),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM),
             "test@example.com"
@@ -41,16 +51,9 @@ class Geary.ImapDB.DatabaseTest : TestCase {
 
         // Need to close it again to stop the GC process running
         db.close();
-
-        db.file.delete();
-        tmp_dir.delete();
     }
 
     public void upgrade_0_6() throws Error {
-        GLib.File tmp_dir = GLib.File.new_for_path(
-            GLib.DirUtils.make_tmp("geary-db-database-test-XXXXXX")
-        );
-
         // Since the upgrade process also messes around with
         // attachments on disk which we want to be able to test, we
         // need to have a complete-ish database and attachments
@@ -65,11 +68,11 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         GLib.File db_archive = GLib.File
             .new_for_uri(RESOURCE_URI)
             .resolve_relative_path(DB_0_6_RESOURCE);
-        GLib.File db_dir = tmp_dir.get_child(DB_0_6_DIR);
+        GLib.File db_dir = this.tmp_dir.get_child(DB_0_6_DIR);
         GLib.File db_file = db_dir.get_child("geary.db");
         GLib.File attachments_dir = db_dir.get_child("attachments");
 
-        unpack_archive(db_archive, tmp_dir);
+        unpack_archive(db_archive, this.tmp_dir);
 
         // This number is the id of the last known message in the
         // database
@@ -120,12 +123,6 @@ class Geary.ImapDB.DatabaseTest : TestCase {
 
         // Need to close it again to stop the GC process running
         db.close();
-
-        Files.recursive_delete_async.begin(
-            tmp_dir, GLib.Priority.DEFAULT, null,
-            (obj, res) => { async_complete(res); }
-        );
-        Files.recursive_delete_async.end(async_result());
     }
 
 

@@ -81,7 +81,7 @@ private class Geary.ImapDB.GC {
      */
     public bool is_running { get; private set; default = false; }
 
-    private ImapDB.Database db;
+    private weak ImapDB.Database db;
     private int priority;
 
     public GC(ImapDB.Database db, int priority) {
@@ -107,11 +107,15 @@ private class Geary.ImapDB.GC {
             (last_vacuum_time != null) ? last_vacuum_time.to_string() : "never",
             reaped_messages_since_last_vacuum,
             free_page_bytes.to_string());
-        
+
         RecommendedOperation op = RecommendedOperation.NONE;
-        DateTime now = new DateTime.now_local();
-        
+        if (!yield has_message_rows(cancellable)) {
+            // No message rows exist, so don't bother vacuuming
+            return op;
+        }
+
         // Reap every REAP_DAYS_SPAN unless never executed, in which case run now
+        DateTime now = new DateTime.now_local();
         int64 days;
         if (last_reap_time == null) {
             // null means reaping has never executed
@@ -613,7 +617,24 @@ private class Geary.ImapDB.GC {
         
         return deleted;
     }
-    
+
+    private async bool has_message_rows(GLib.Cancellable? cancellable) {
+        bool ret = false;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+                Db.Result result = cx.query(
+                    "SELECT count(*) FROM MessageTable LIMIT 1"
+                );
+
+                Db.TransactionOutcome txn_ret = FAILURE;
+                if (!result.finished) {
+                    txn_ret = SUCCESS;
+                    ret = result.int64_at(0) > 0;
+                }
+                return txn_ret;
+            }, cancellable);
+        return ret;
+    }
+
     private async void fetch_gc_info_async(Cancellable? cancellable, out DateTime? last_reap_time,
         out DateTime? last_vacuum_time, out int reaped_messages_since_last_vacuum, out int64 free_page_bytes)
         throws Error {
