@@ -81,7 +81,7 @@ private class Geary.ImapDB.GC {
      */
     public bool is_running { get; private set; default = false; }
 
-    private ImapDB.Database db;
+    private weak ImapDB.Database db;
     private int priority;
 
     public GC(ImapDB.Database db, int priority) {
