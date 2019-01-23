@@ -73,7 +73,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         base_ref();
         this.config = config;
 
-        Components.PlaceholderPane no_conversations = new Components.PlaceholderPane();
+        Components.PlaceholderPane no_conversations =
+            new Components.PlaceholderPane();
         no_conversations.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when no
         // conversations have been selected.
@@ -85,8 +86,9 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         );
         this.no_conversations_page.add(no_conversations);
 
-        Components.PlaceholderPane multi_conversations = new Components.PlaceholderPane();
-        no_conversations.icon_name = "folder-symbolic";
+        Components.PlaceholderPane multi_conversations =
+            new Components.PlaceholderPane();
+        multi_conversations.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when multiple
         // conversations have been selected.
         multi_conversations.title = _("Multiple conversations selected");
@@ -97,8 +99,9 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         );
         this.multiple_conversations_page.add(multi_conversations);
 
-        Components.PlaceholderPane empty_folder = new Components.PlaceholderPane();
-        no_conversations.icon_name = "folder-symbolic";
+        Components.PlaceholderPane empty_folder =
+            new Components.PlaceholderPane();
+        empty_folder.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when no
         // conversations have exist in a folder.
         empty_folder.title = _("No conversations found");
@@ -109,8 +112,9 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         );
         this.empty_folder_page.add(empty_folder);
 
-        Components.PlaceholderPane empty_search = new Components.PlaceholderPane();
-        no_conversations.icon_name = "folder-symbolic";
+        Components.PlaceholderPane empty_search =
+            new Components.PlaceholderPane();
+        empty_search.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when no
         // conversations have been found in a search.
         empty_search.title = _("No conversations found");
