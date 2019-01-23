@@ -727,14 +727,14 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     // Loads full version of an email, adds it to the listbox
     private async void load_full_email(Geary.EmailIdentifier id)
-        throws Error {
+        throws GLib.Error {
+        // Even though it would save a around-trip, don't load the
+        // full email here so that ConverationEmail can handle it if
+        // the full email isn't actually available in the same way as
+        // any other.
         Geary.Email full_email = yield this.email_store.fetch_email_async(
             id,
-            (
-                REQUIRED_FIELDS |
-                ConversationEmail.REQUIRED_FOR_CONSTRUCT |
-                ConversationEmail.REQUIRED_FOR_LOAD
-            ),
+            REQUIRED_FIELDS | ConversationEmail.REQUIRED_FOR_CONSTRUCT,
             Geary.Folder.ListFlags.NONE,
             this.cancellable
         );

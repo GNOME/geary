@@ -30,6 +30,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     /** Fields that must be available for loading the body. */
     internal const Geary.Email.Field REQUIRED_FOR_LOAD = (
+        // Include those needed by the constructor since we'll replace
+        // the ctor's email arg value once the body has been fully
+        // loaded
+        REQUIRED_FOR_CONSTRUCT |
         Geary.Email.REQUIRED_FOR_MESSAGE
     );
 
@@ -558,17 +562,16 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         // Ensure we have required data to load the message
 
-        Geary.Email? email = null;
-        if (this.email.fields.fulfills(REQUIRED_FOR_LOAD)) {
-            email = this.email;
-        } else {
+        bool loaded = this.email.fields.fulfills(REQUIRED_FOR_LOAD);
+        if (!loaded) {
             try {
-                email = yield this.email_store.fetch_email_async(
+                this.email = yield this.email_store.fetch_email_async(
                     this.email.id,
-                    Geary.Email.REQUIRED_FOR_MESSAGE,
-                    LOCAL_ONLY, // Throw an error if not downloaded
+                    REQUIRED_FOR_LOAD,
+                    LOCAL_ONLY, // Throws an error if not downloaded
                     this.load_cancellable
                 );
+                loaded = true;
             } catch (Geary.EngineError.INCOMPLETE_MESSAGE err) {
                 // Don't have the complete message at the moment, so
                 // download it in the background.
@@ -576,8 +579,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             }
         }
 
-        if (email != null) {
-            this.email = email;
+        if (loaded) {
             yield update_body();
             yield this.message_bodies_loaded_lock.wait_async(
                 this.load_cancellable
@@ -717,11 +719,11 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         // XXX Need proper progress reporting here, rather than just
         // doing a pulse
         this.primary_message.start_progress_pulse();
-        Geary.Email? email = null;
+        Geary.Email? loaded = null;
         try {
-            email = yield this.email_store.fetch_email_async(
+            loaded = yield this.email_store.fetch_email_async(
                 this.email.id,
-                Geary.Email.REQUIRED_FOR_MESSAGE,
+                REQUIRED_FOR_LOAD,
                 FORCE_UPDATE,
                 this.load_cancellable
             );
@@ -735,10 +737,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             this.primary_message.stop_progress_pulse();
         }
 
-        if (email != null) {
+        if (loaded != null) {
             this.primary_message.stop_progress_pulse();
             try {
-                this.email = email;
+                this.email = loaded;
                 yield update_body();
             } catch (GLib.Error err) {
                 debug("Remote message update failed: %s", err.message);
