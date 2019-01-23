@@ -618,7 +618,8 @@ private class Geary.ImapDB.GC {
         return deleted;
     }
 
-    private async bool has_message_rows(GLib.Cancellable? cancellable) {
+    private async bool has_message_rows(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         bool ret = false;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
                 Db.Result result = cx.query(
