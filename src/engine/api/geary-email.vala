@@ -235,15 +235,36 @@ public class Geary.Email : BaseObject {
     public Email(Geary.EmailIdentifier id) {
         this.id = id;
     }
-    
+
+    /**
+     * Determines if this message is unread from its flags.
+     *
+     * If {@link email_flags} is not null, returns the value of {@link
+     * EmailFlags.is_unread}, otherwise returns {@link
+     * Trillian.UNKNOWN}.
+     */
     public inline Trillian is_unread() {
         return email_flags != null ? Trillian.from_boolean(email_flags.is_unread()) : Trillian.UNKNOWN;
     }
 
+    /**
+     * Determines if this message is flagged from its flags.
+     *
+     * If {@link email_flags} is not null, returns the value of {@link
+     * EmailFlags.is_flagged}, otherwise returns {@link
+     * Trillian.UNKNOWN}.
+     */
     public inline Trillian is_flagged() {
         return email_flags != null ? Trillian.from_boolean(email_flags.is_flagged()) : Trillian.UNKNOWN;
     }
-    
+
+    /**
+     * Determines if this message is flagged from its flags.
+     *
+     * If {@link email_flags} is not null, returns the value of {@link
+     * EmailFlags.load_remote_images}, otherwise returns {@link
+     * Trillian.UNKNOWN}.
+     */
     public inline Trillian load_remote_images() {
         return email_flags != null ? Trillian.from_boolean(email_flags.load_remote_images()) : Trillian.UNKNOWN;
     }
