@@ -37,6 +37,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         Geary.Email.REQUIRED_FOR_MESSAGE
     );
 
+    // Time to wait loading the body before showing the progress meter
+    private const int BODY_LOAD_TIMEOUT_MSEC = 250;
+
 
     /**
      * Iterator that returns all message views in an email view.
@@ -299,6 +302,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     private Configuration config;
 
+    private Geary.TimeoutManager body_loading_timeout;
+
+
     /** Determines if all message's web views have finished loading. */
     private Geary.Nonblocking.Spinlock message_bodies_loaded_lock =
         new Geary.Nonblocking.Spinlock();
@@ -523,6 +529,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         this.primary_message.infobars.add(this.not_saved_infobar);
 
+        this.body_loading_timeout = new Geary.TimeoutManager.milliseconds(
+            BODY_LOAD_TIMEOUT_MSEC, this.primary_message.start_progress_pulse
+        );
+
         pack_start(this.primary_message, true, true, 0);
         update_email_state();
     }
@@ -564,6 +574,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         bool loaded = this.email.fields.fulfills(REQUIRED_FOR_LOAD);
         if (!loaded) {
+            this.body_loading_timeout.start();
             try {
                 this.email = yield this.email_store.fetch_email_async(
                     this.email.id,
@@ -577,6 +588,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 // download it in the background.
                 this.fetch_body_remote.begin();
             }
+            this.body_loading_timeout.reset();
         }
 
         if (loaded) {
