@@ -596,7 +596,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             } catch (Geary.EngineError.INCOMPLETE_MESSAGE err) {
                 // Don't have the complete message at the moment, so
                 // download it in the background.
-                this.fetch_body_remote.begin();
+                this.fetch_remote_body.begin();
             }
             this.body_loading_timeout.reset();
         }
@@ -736,27 +736,48 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             });
     }
 
-    private async void fetch_body_remote()
+    private async void fetch_remote_body()
         throws GLib.Error {
+        // Retry the remote fetch once if the first time fails, so if
+        // the connection has timed out we will establish a new one.
+        const int MAX_RETRIES = 2;
+
         // XXX Need proper progress reporting here, rather than just
         // doing a pulse
         this.primary_message.start_progress_pulse();
+
+        int retries = 0;
         Geary.Email? loaded = null;
-        try {
-            loaded = yield this.email_store.fetch_email_async(
-                this.email.id,
-                REQUIRED_FOR_LOAD,
-                FORCE_UPDATE,
-                this.load_cancellable
-            );
-        } catch (GLib.IOError.CANCELLED err) {
-            // Don't stop message progress pulse here since if
-            // cancelled, this could be well after the widgets have
-            // been removed and destroyed
-        } catch (GLib.Error err) {
-            // XXX Notify user of a problem here
-            debug("Remote message download failed: %s", err.message);
-            this.primary_message.stop_progress_pulse();
+        while (retries < MAX_RETRIES) {
+            retries++;
+            try {
+                loaded = yield this.email_store.fetch_email_async(
+                    this.email.id,
+                    REQUIRED_FOR_LOAD,
+                    FORCE_UPDATE,
+                    this.load_cancellable
+                );
+            } catch (GLib.IOError.CANCELLED err) {
+                // Don't stop message progress pulse here since if
+                // cancelled, this could be well after the widgets have
+                // been removed and destroyed
+                throw err;
+            } catch (Geary.ImapError.TIMED_OUT err) {
+                if (retries < MAX_RETRIES) {
+                    debug("Remote message download timed out, retrying: %s",
+                          err.message);
+                } else {
+                    debug("Remote message download timed out, giving up %s",
+                          err.message);
+                    this.primary_message.stop_progress_pulse();
+                    throw err;
+                }
+            } catch (GLib.Error err) {
+                // XXX Notify user of a problem here
+                debug("Remote message download failed: %s", err.message);
+                this.primary_message.stop_progress_pulse();
+                throw err;
+            }
         }
 
         if (loaded != null) {
