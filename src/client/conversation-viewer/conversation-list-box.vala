@@ -147,7 +147,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             throws GLib.Error {
             this.is_expanded = true;
             update_row_expansion();
-            if (!this.view.message_body_load_started) {
+            if (this.view.message_body_state == NOT_STARTED) {
                 yield this.view.load_body();
             }
             foreach (ConversationMessage message in this.view) {
@@ -840,7 +840,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // size of the body will be off, affecting the visibility
             // of emails further down the conversation.
             if (email_view.email.is_unread().is_certain() &&
-                email_view.message_bodies_loaded &&
+                email_view.message_body_state == COMPLETED &&
                 !email_view.is_manually_read) {
                  int body_top = 0;
                  int body_left = 0;
@@ -881,10 +881,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
     private void apply_search_terms(EmailRow row) {
-        if (row.view.message_bodies_loaded) {
+        if (row.view.message_body_state == COMPLETED) {
             this.apply_search_terms_impl.begin(row);
         } else {
-            row.view.notify["message-bodies-loaded"].connect(() => {
+            row.view.notify["message-body-state"].connect(() => {
                     this.apply_search_terms_impl.begin(row);
                 });
         }

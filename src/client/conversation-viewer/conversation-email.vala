@@ -41,6 +41,19 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private const int BODY_LOAD_TIMEOUT_MSEC = 250;
 
 
+    /** Specifies the loading state for a message part. */
+    public enum LoadState {
+
+        /** Loading has not started. */
+        NOT_STARTED,
+
+        /** Loading has started, but not completed. */
+        STARTED,
+
+        /** Loading has started and completed. */
+        COMPLETED;
+     }
+
     /**
      * Iterator that returns all message views in an email view.
      */
@@ -282,11 +295,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private Gee.List<ConversationMessage> _attached_messages =
         new Gee.LinkedList<ConversationMessage>();
 
-    /** Determines if message bodies have started loading. */
-    public bool message_body_load_started { get; private set; default = false; }
-
-    /** Determines if all message have had loaded their bodies. */
-    public bool message_bodies_loaded { get; private set; default = false; }
+    /** Determines the message body loading state. */
+    public LoadState message_body_state { get; private set; default = NOT_STARTED; }
 
     // Store from which to load message content, if needed
     private Geary.App.EmailStore email_store;
@@ -568,7 +578,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      */
     public async void load_body()
         throws GLib.Error {
-        this.message_body_load_started = true;
+        this.message_body_state = STARTED;
 
         // Ensure we have required data to load the message
 
@@ -993,8 +1003,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 break;
             }
         }
-        if (all_loaded && !this.message_bodies_loaded) {
-            this.message_bodies_loaded = true;
+        if (all_loaded && this.message_body_state != COMPLETED) {
+            this.message_body_state = COMPLETED;
             this.message_bodies_loaded_lock.blind_notify();
 
             // Update attachments once the web views have finished
