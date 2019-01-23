@@ -758,9 +758,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                     this.load_cancellable
                 );
             } catch (GLib.IOError.CANCELLED err) {
-                // Don't stop message progress pulse here since if
-                // cancelled, this could be well after the widgets have
-                // been removed and destroyed
                 throw err;
             } catch (Geary.ImapError.TIMED_OUT err) {
                 if (retries < MAX_RETRIES) {
@@ -769,19 +766,16 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 } else {
                     debug("Remote message download timed out, giving up %s",
                           err.message);
-                    this.primary_message.stop_progress_pulse();
                     throw err;
                 }
             } catch (GLib.Error err) {
                 // XXX Notify user of a problem here
                 debug("Remote message download failed: %s", err.message);
-                this.primary_message.stop_progress_pulse();
                 throw err;
             }
         }
 
         if (loaded != null) {
-            this.primary_message.stop_progress_pulse();
             try {
                 this.email = loaded;
                 yield update_body();

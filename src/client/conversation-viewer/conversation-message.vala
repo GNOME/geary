@@ -25,6 +25,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
 
+    private const int SHOW_PROGRESS_TIMEOUT_SEC = 1;
+    private const int HIDE_PROGRESS_TIMEOUT_SEC = 1;
     private const int PULSE_TIMEOUT_MSEC = 250;
 
 
@@ -460,10 +462,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.body_container.set_has_tooltip(true); // Used to show link URLs
         this.body_container.add(this.web_view);
         this.show_progress_timeout = new Geary.TimeoutManager.seconds(
-            1, () => { this.body_progress.show(); }
+            SHOW_PROGRESS_TIMEOUT_SEC, this.on_show_progress_timeout
         );
         this.hide_progress_timeout = new Geary.TimeoutManager.seconds(
-            1, () => { this.body_progress.hide(); }
+            HIDE_PROGRESS_TIMEOUT_SEC, this.on_hide_progress_timeout
         );
 
         this.progress_pulse = new Geary.TimeoutManager.milliseconds(
@@ -808,6 +810,15 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         revealer.set_transition_type(transition);
     }
 
+    private void on_show_progress_timeout() {
+        this.progress_pulse.start();
+    }
+
+    private void on_hide_progress_timeout() {
+        this.progress_pulse.reset();
+        this.body_progress.hide();
+    }
+
     private void on_load_changed(WebKit.LoadEvent load_event) {
         if (load_event != WebKit.LoadEvent.FINISHED) {
             this.hide_progress_timeout.reset();
@@ -829,8 +840,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         // in on_load_changed.
         if (this.is_loading_images &&
             !res.get_uri().has_prefix(ClientWebView.INTERNAL_URL_PREFIX)) {
+            double min_step = this.body_progress.get_pulse_step();
+            this.progress_pulse.reset();
             this.show_progress_timeout.start();
-            this.body_progress.pulse();
+            this.body_progress.set_fraction(min_step);
             if (!this.web_view.is_loading) {
                 // The initial page load has finished, so we must be
                 // loading a remote image afterwards at the user's
@@ -842,8 +855,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                         this.remote_resources_loaded++;
                         this.body_progress.set_fraction(
                             (this.remote_resources_loaded /
-                             this.remote_resources_requested) +
-                            this.body_progress.get_pulse_step()
+                             this.remote_resources_requested) * (1.0 - min_step)
                         );
                         if (this.remote_resources_loaded >=
                             this.remote_resources_requested) {
