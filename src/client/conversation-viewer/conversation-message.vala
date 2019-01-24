@@ -215,6 +215,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     [GtkChild]
     private Gtk.InfoBar remote_images_infobar;
 
+    private Gtk.Widget? body_placeholder = null;
+
     // The web_view's context menu
     private Gtk.Menu? context_menu = null;
 
@@ -505,6 +507,59 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         body_revealer.set_reveal_child(false);
     }
 
+    /** Shows an error panel when email loading failed. */
+    public void show_load_error_pane() {
+        Components.PlaceholderPane pane = new Components.PlaceholderPane();
+        pane.icon_name = "network-error-symbolic";
+        pane.title = "";
+        pane.subtitle = "";
+
+        // Don't want to break the announced freeze for 0.13, so just
+        // hope the icon gets the message across for now and replace
+        // them with the ones below for 0.14.
+
+        // Translators: Title label for placeholder when multiple
+        // an error occurs loading a message for display.
+        //pane.title = _("A problem occurred");
+        // Translators: Sub-title label for placeholder when multiple
+        // an error occurs loading a message for display.
+        //pane.subtitle = _(
+        //    "This email cannot currently be displayed"
+        //);
+        this.body_placeholder = pane;
+        this.web_view.hide();
+        this.body_container.add(pane);
+        show_message_body(true);
+        stop_progress_pulse();
+    }
+
+    /** Shows an error panel when offline. */
+    public void show_offline_pane() {
+        show_message_body(true);
+        Components.PlaceholderPane pane = new Components.PlaceholderPane();
+        pane.icon_name = "network-offline-symbolic";
+        pane.title = "";
+        pane.subtitle = "";
+
+        // Don't want to break the announced freeze for 0.13, so just
+        // hope the icon gets the message across for now and replace
+        // them with the ones below for 0.14.
+
+        // // Translators: Title label for placeholder when loading a
+        // // message for display but the account is offline.
+        // pane.title = _("Offline");
+        // // Translators: Sub-title label for placeholder when loading a
+        // // message for display but the account is offline.
+        // pane.subtitle = _(
+        //     "This email will be downloaded when reconnected to the Internet"
+        // );
+        this.body_placeholder = pane;
+        this.web_view.hide();
+        this.body_container.add(pane);
+        show_message_body(true);
+        stop_progress_pulse();
+    }
+
     /** Shows and starts pulsing the progress meter. */
     public void start_progress_pulse() {
         this.body_progress.show();
@@ -559,6 +614,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         throws GLib.Error {
         if (load_cancelled.is_cancelled()) {
             throw new GLib.IOError.CANCELLED("Conversation load cancelled");
+        }
+
+        this.web_view.show();
+        if (this.body_placeholder != null) {
+            this.body_placeholder.hide();
         }
 
         string? body_text = null;

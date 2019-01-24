@@ -926,10 +926,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     private void handle_load_failure() {
         this.message_body_state = FAILED;
+        this.primary_message.show_load_error_pane();
     }
 
     private void handle_load_offline() {
         this.message_body_state = FAILED;
+        this.primary_message.show_offline_pane();
     }
 
     private inline bool is_online() {
