@@ -1185,20 +1185,17 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         check_open("fetch_email_async");
         check_flags("fetch_email_async", flags);
         check_id("fetch_email_async", id);
-        
-        FetchEmail op = new FetchEmail(this, (ImapDB.EmailIdentifier) id, required_fields, flags,
-            cancellable);
+
+        FetchEmail op = new FetchEmail(
+            this,
+            (ImapDB.EmailIdentifier) id,
+            required_fields,
+            flags,
+            cancellable
+        );
         replay_queue.schedule(op);
-        
+
         yield op.wait_for_ready_async(cancellable);
-        
-        if (op.email == null) {
-            throw new EngineError.NOT_FOUND("Email %s not found in %s", id.to_string(), to_string());
-        } else if (!op.email.fields.fulfills(required_fields)) {
-            throw new EngineError.INCOMPLETE_MESSAGE("Email %s in %s does not fulfill required fields %Xh (has %Xh)",
-                id.to_string(), to_string(), required_fields, op.email.fields);
-        }
-        
         return op.email;
     }
 
