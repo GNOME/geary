@@ -51,8 +51,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         STARTED,
 
         /** Loading has started and completed. */
-        COMPLETED;
-     }
+        COMPLETED,
+
+        /** Loading has started but encountered an error. */
+        FAILED;
+
+    }
 
     /**
      * Iterator that returns all message views in an email view.
@@ -539,6 +543,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         this.primary_message.infobars.add(this.not_saved_infobar);
 
+        email_store.account.incoming.notify["current-status"].connect(
+            on_service_status_change
+        );
+
         this.body_loading_timeout = new Geary.TimeoutManager.milliseconds(
             BODY_LOAD_TIMEOUT_MSEC, this.primary_message.start_progress_pulse
         );
@@ -597,12 +605,20 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 // Don't have the complete message at the moment, so
                 // download it in the background.
                 this.fetch_remote_body.begin();
+            } catch (GLib.Error err) {
+                handle_load_failure();
+                throw err;
             }
             this.body_loading_timeout.reset();
         }
 
         if (loaded) {
-            yield update_body();
+            try {
+                yield update_body();
+            } catch (GLib.Error err) {
+                handle_load_failure();
+                throw err;
+            }
             yield this.message_bodies_loaded_lock.wait_async(
                 this.load_cancellable
             );
@@ -742,46 +758,51 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         // the connection has timed out we will establish a new one.
         const int MAX_RETRIES = 2;
 
-        // XXX Need proper progress reporting here, rather than just
-        // doing a pulse
-        this.primary_message.start_progress_pulse();
+        if (is_online()) {
+            // XXX Need proper progress reporting here, rather than just
+            // doing a pulse
+            this.primary_message.start_progress_pulse();
 
-        int retries = 0;
-        Geary.Email? loaded = null;
-        while (retries < MAX_RETRIES) {
-            retries++;
-            try {
-                loaded = yield this.email_store.fetch_email_async(
-                    this.email.id,
-                    REQUIRED_FOR_LOAD,
-                    FORCE_UPDATE,
-                    this.load_cancellable
-                );
-            } catch (GLib.IOError.CANCELLED err) {
-                throw err;
-            } catch (Geary.ImapError.TIMED_OUT err) {
-                if (retries < MAX_RETRIES) {
-                    debug("Remote message download timed out, retrying: %s",
-                          err.message);
-                } else {
-                    debug("Remote message download timed out, giving up %s",
-                          err.message);
+            int retries = 0;
+            Geary.Email? loaded = null;
+            while (retries < MAX_RETRIES) {
+                retries++;
+                try {
+                    loaded = yield this.email_store.fetch_email_async(
+                        this.email.id,
+                        REQUIRED_FOR_LOAD,
+                        FORCE_UPDATE,
+                        this.load_cancellable
+                    );
+                } catch (GLib.IOError.CANCELLED err) {
+                    throw err;
+                } catch (Geary.ImapError.TIMED_OUT err) {
+                    if (retries < MAX_RETRIES) {
+                        debug("Remote message download timed out, retrying: %s",
+                              err.message);
+                    } else {
+                        debug("Remote message download timed out, giving up %s",
+                              err.message);
+                        throw err;
+                    }
+                } catch (GLib.Error err) {
+                    debug("Remote message download failed: %s", err.message);
+                    handle_load_failure();
                     throw err;
                 }
-            } catch (GLib.Error err) {
-                // XXX Notify user of a problem here
-                debug("Remote message download failed: %s", err.message);
-                throw err;
             }
-        }
 
-        if (loaded != null) {
-            try {
-                this.email = loaded;
-                yield update_body();
-            } catch (GLib.Error err) {
-                debug("Remote message update failed: %s", err.message);
+            if (loaded != null) {
+                try {
+                    this.email = loaded;
+                    yield update_body();
+                } catch (GLib.Error err) {
+                    debug("Remote message update failed: %s", err.message);
+                    handle_load_failure();
+                }
             }
+        } else {
+            handle_load_offline();
         }
     }
 
@@ -901,6 +922,18 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             selected.add(((AttachmentView) child.get_child()).attachment);
         }
         return selected;
+    }
+
+    private void handle_load_failure() {
+        this.message_body_state = FAILED;
+    }
+
+    private void handle_load_offline() {
+        this.message_body_state = FAILED;
+    }
+
+    private inline bool is_online() {
+        return (this.email_store.account.incoming.current_status == CONNECTED);
     }
 
     /**
@@ -1050,5 +1083,13 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         set_action_enabled(ACTION_SELECT_ALL_ATTACHMENTS,
                            len < this.displayed_attachments.size);
     }
+
+	private void on_service_status_change() {
+        if (this.message_body_state == FAILED &&
+            !this.load_cancellable.is_cancelled() &&
+            is_online()) {
+            this.fetch_remote_body.begin();
+        }
+	}
 
 }
