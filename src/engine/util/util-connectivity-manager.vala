@@ -155,6 +155,10 @@ public class Geary.ConnectivityManager : BaseObject {
         } finally {
 			if (!cancellable.is_cancelled()) {
 				set_reachable(is_reachable);
+
+                // Kick off another delayed check in case the network
+                // changes without the monitor noticing.
+                this.delayed_check.start();
 			}
             this.existing_check = null;
         }
