@@ -137,18 +137,21 @@ public class Geary.ConnectivityManager : BaseObject {
                       endpoint);
 				is_reachable = true;
             } else {
-                // The monitor throw an error, but only notify if it
+                // The monitor threw an error, but only notify if it
                 // looks like we *should* be able to connect
-                // (i.e. have full network connectivity), so we don't
-                // needlessly hassle the user with expected error messages.
+                // (i.e. have full network connectivity, or are
+                // connecting to a local service), so we don't
+                // needlessly hassle the user with expected error
+                // messages.
                 GLib.NetworkConnectivity connectivity = this.monitor.connectivity;
-                if (connectivity == GLib.NetworkConnectivity.FULL) {
+                if (connectivity == FULL ||
+                    (connectivity == LOCAL && is_local_address())) {
                     debug("Error checking %s [%s] reachable, treating unreachable: %s",
                           endpoint, connectivity.to_string(), err.message);
                     set_invalid();
                     remote_error_reported(err);
                 } else {
-                    debug("Error checking %s [%s] reachable, retrying: %s",
+                    debug("Error checking %s [%s] reachable, treating offline: %s",
                           endpoint, connectivity.to_string(), err.message);
                 }
             }
@@ -233,6 +236,28 @@ public class Geary.ConnectivityManager : BaseObject {
         if (this.is_valid != Trillian.FALSE) {
             this.is_valid = Trillian.FALSE;
         }
+    }
+
+    private bool is_local_address() {
+        GLib.NetworkAddress? name = this.remote as GLib.NetworkAddress;
+        if (name != null) {
+            return (
+                name.hostname == "localhost" ||
+                name.hostname.has_prefix("localhost.") ||
+                name.hostname == "127.0.0.1" ||
+                name.hostname == "::1"
+            );
+        }
+
+        GLib.InetSocketAddress? inet = this.remote as GLib.InetSocketAddress;
+        if (inet != null) {
+            return (
+                inet.address.is_loopback ||
+                inet.address.is_link_local
+            );
+        }
+
+        return false;
     }
 
 }
