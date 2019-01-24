@@ -311,6 +311,8 @@ public abstract class Geary.ClientService : BaseObject {
         this.is_running = true;
         if (this.remote.connectivity.is_reachable.is_certain()) {
             became_reachable();
+        } else if (this.remote.connectivity.is_reachable.is_impossible()) {
+            this.current_status = UNREACHABLE;
         } else {
             this.remote.connectivity.check_reachable.begin();
         }
