@@ -120,14 +120,13 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             engine.replay_notify_email_inserted(ids);
             engine.replay_notify_email_locally_inserted(ids);
         }
-        
-        // if remote_email doesn't fulfill all required, pull from local database, which should now
-        // be able to do all of that
-        if (!email.fields.fulfills(required_fields)) {
-            email = yield engine.local_folder.fetch_email_async(id, required_fields,
-                ImapDB.Folder.ListFlags.NONE, cancellable);
-            assert(email != null);
-        }
+
+        // Finally, pull again from the local database, to get the
+        // full set of required fields, and ensure attachments are
+        // created, if needed.
+        this.email = yield this.engine.local_folder.fetch_email_async(
+            this.id, this.required_fields, NONE, this.cancellable
+        );
     }
 
     public override string describe_state() {
