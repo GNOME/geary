@@ -857,8 +857,17 @@ public class Geary.App.ConversationMonitor : BaseObject {
             Conversation? conversation = this.conversations.get_by_email_identifier(id);
             if (conversation == null) {
                 if (folder == this.base_folder) {
-                    debug("Unflagging email %s for deletion resurrects conversation", id.to_string());
-                    inserted_ids.add(id);
+                    // Check to see if the incoming message is sorted later than the last message in the
+                    // window. If it is, don't resurrect it since it likely hasn't been loaded yet.
+                    Geary.EmailIdentifier? lowest = this.window_lowest;
+                    if (lowest != null) {
+                        if (lowest.natural_sort_comparator(id) < 0) {
+                            debug("Unflagging email %s for deletion resurrects conversation", id.to_string());
+                            inserted_ids.add(id);
+                        } else {
+                            debug("Not resurrecting undeleted email %s outside of window", id.to_string());
+                        }
+                    }
                 }
 
                 continue;
