@@ -893,7 +893,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
 
         // Notify about inserted messages
-        this.queue.add(new InsertOperation(this, inserted_ids));
+        if (inserted_ids.size > 0) {
+            this.queue.add(new InsertOperation(this, inserted_ids));
+        }
 
         // Notify self about removed conversations
         // NOTE: We are only notifying the conversation monitor about the removed conversations instead of
