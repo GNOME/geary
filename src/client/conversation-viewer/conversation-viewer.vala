@@ -316,8 +316,15 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         scroller.set_hexpand(true);
         scroller.set_vexpand(true);
         scroller.show();
+        scroller.scroll_event.connect(
+            on_conversation_scroll
+        );
+        scroller.get_vscrollbar().button_release_event.connect(
+            on_conversation_scroll
+        );
         this.conversation_scroller = scroller;
         this.conversation_page.add(scroller);
+
     }
 
     /**
@@ -421,5 +428,11 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         }
     }
 
-}
+    private bool on_conversation_scroll() {
+        if (this.current_list != null) {
+            this.current_list.mark_visible_read();
+        }
+        return Gdk.EVENT_PROPAGATE;
+    }
 
+}
