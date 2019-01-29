@@ -5,21 +5,21 @@
 # Frank Schiersner <fs9@live.de>, 2014.
 # Simon Linden <xhi2018@googlemail.com, 2015.
 # Andreas Wilhelm <info@avedo.net>, 2014.
-# Mario Blättermann <mario.blaettermann@gmail.com>, 2017-2018.
+# Mario Blättermann <mario.blaettermann@gmail.com>, 2017-2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Geary master\n"
-"POT-Creation-Date: 2018-07-20 07:08+0000\n"
-"PO-Revision-Date: 2018-08-03 13:03+0200\n"
+"POT-Creation-Date: 2019-01-29 05:49+0000\n"
+"PO-Revision-Date: 2019-01-29 08:28+0100\n"
 "Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
 "Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.9\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Gtranslator 3.30.0\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 msgctxt "_"
@@ -29,6 +29,480 @@ msgstr ""
 "Frank Schiersner <fs9@live.de>\n"
 "Simon Linden <xhi2018@googlemail.com\n"
 "Mario Blättermann <mario.blaettermann@gmail.com>"
+
+#. (itstool) path: page/title
+#: C/accounts.page:10
+msgid "Accounts"
+msgstr "Konten"
+
+#. (itstool) path: section/title
+#: C/accounts.page:13
+msgid "Adding accounts"
+msgstr "Konten hinzufügen"
+
+#. (itstool) path: section/p
+#: C/accounts.page:15
+msgid ""
+"The first time you start Geary, you will be prompted to add an email "
+"account. On this screen, select if your account is Gmail, Yahoo, Outlook."
+"com, or other. For other account types, you will need to enter your IMAP and "
+"SMTP login settings manually."
+msgstr ""
+"Wenn Sie Geary das erste Mal starten, werden Sie gebeten, ein E-Mail-Konto "
+"hinzuzufügen. In diesem Fenster wählen Sie aus, ob es sich um ein Gmail-, "
+"Yahoo-, Outlook.com oder ein anderes E-Mail-Konto handelt. Für andere Konto-"
+"Arten müssen Sie die IMAP- und SMTP-Angaben selbst eingetragen."
+
+#. (itstool) path: section/p
+#: C/accounts.page:19
+msgid ""
+"Additional accounts can be added from the Accounts dialog. The "
+"<gui>Accounts</gui> option is available in either Geary's application menu "
+"or the gear menu in the upper-right of the toolbar. (The location depends on "
+"the install desktop shell. For GNOME Shell and Unity, the application menu "
+"is available near the top-left corner of the screen.) To add an account, "
+"click the + button."
+msgstr ""
+"Weitere Konten können Sie im Konten-Dialogfenster hinzufügen. Sie erreichen "
+"<gui>Konten</gui> über Gearys Programm-Menü oder das Menü in der oberen "
+"rechten Ecke der Werkzeugleiste. Das hängt von Ihrer Arbeitsumgebung ab. Bei "
+"der GNOME Shell und Unity befindet sich das Programmmenü nahe der oberen "
+"linken Ecke des Bildschirms. Klicken Sie auf den + Knopf, um ein Konto "
+"hinzuzufügen."
+
+#. (itstool) path: section/title
+#: C/accounts.page:27
+msgid "Editing existing accounts"
+msgstr "Konten bearbeiten"
+
+#. (itstool) path: section/p
+#: C/accounts.page:29
+msgid ""
+"From the Accounts dialog, select an account and click the pencil icon to "
+"change various settings. Please note that Geary cannot change server "
+"settings on an existing account. If you need to change your IMAP or SMTP "
+"server, you will need to delete the account and re-add it."
+msgstr ""
+"Wählen Sie im Konten-Dialog ein Konto aus und klicken Sie auf das Stift-"
+"Symbol, um die Einstellungen zu bearbeiten. Bitte beachten Sie, dass Geary "
+"die Server-Einstellungen bestehender Konten nicht verändern kann. Wenn Sie "
+"den IMAP- oder SMTP-Server ändern wollen, müssen Sie das bereits "
+"existierende Konto löschen und neu anlegen."
+
+#. (itstool) path: section/p
+#: C/accounts.page:33
+msgid ""
+"To change the order that accounts are displayed in the folder list, drag the "
+"accounts in the Accounts dialog to the desired order."
+msgstr ""
+"Um die Reihenfolge zu ändern, in der die Konten in der Ordnerliste angezeigt "
+"werden, ziehen Sie die Konten im Konten-Dialog an die gewünschte Position."
+
+#. (itstool) path: section/p
+#: C/accounts.page:36
+msgid "There are some advanced options available when editing accounts:"
+msgstr "In den Konten-Einstellungen gibt es folgende erweiterte Möglichkeiten:"
+
+#. (itstool) path: item/p
+#: C/accounts.page:38
+msgid ""
+"The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
+"successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
+"For Gmail accounts, this happens automatically. Yahoo and some other "
+"accounts can be configured to do this automatically as well. For other "
+"accounts, if you disable this setting, you may be unable to view messages "
+"you've sent."
+msgstr ""
+"Das Ankreuzfeld <gui>Gesendete E-Mail speichern</gui> legt fest, ob Geary "
+"erfolgreich gesendete Nachrichten in den Ordner <gui>Gesendete E-Mails</gui> "
+"verschiebt. Für Gmail-Konten erfolgt das automatisch. Yahoo und einige "
+"andere können so eingestellt werden, dass sie gesendete E-Mails ebenfalls "
+"automatisch verschieben. Bei Konten, bei denen Sie diese Möglichkeit "
+"ausgeschaltet haben, können Sie die von Ihnen gesendeten E-Mails nicht mehr "
+"aufrufen."
+
+#. (itstool) path: item/p
+#: C/accounts.page:44
+msgid ""
+"The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
+"automatically inserted when a composer is opened. You may enter the "
+"signature into the box immediately below. You may use HTML tags to style the "
+"text. Switch to a preview of the signature using the buttons to the right."
+msgstr ""
+"Das Ankreuzfeld <gui>E-Mails unterzeichnen</gui> zeigt an ob beim öffnen des "
+"E-Mail-Editors automatisch eine Signatur in die E-Mail eingefügt wird. In "
+"dem Eingabefeld direkt darunter können Sie die Signatur eingeben. Um den "
+"Text hervorzuheben, können Sie auch HTML-Tags verwenden. Mit den Knöpfen auf "
+"der rechten Seite wechseln Sie zur Vorschau der Signatur."
+
+#. (itstool) path: item/p
+#: C/accounts.page:49
+msgid ""
+"If you leave the signature in the Accounts dialog blank, Geary will use the "
+"<file>.signature</file> file in your home directory, if it exists. This file "
+"may contain either plain text or HTML markup. In the latter case, the markup "
+"will be inserted directly into the composer, without any escaping."
+msgstr ""
+"Wenn Sie im Konten-Dialog kein Signatur einstellen, wird Geary den Inhalt "
+"der Datei <file>.signature</file> aus Ihrem Persönlicher Ordner verwenden, "
+"sofern diese vorhanden ist. Diese Datei kann sowohl reinen Text als auch "
+"HTML-Textauszeichnungen enthalten. Im letzteren Fall werden die "
+"Textauszeichnungen direkt und ohne Maskierung im E-Mail-Editor eingefügt."
+
+#. (itstool) path: item/p
+#: C/accounts.page:54
+msgid ""
+"The <gui>Download mail</gui> drop-down allows you to configure how much mail "
+"Geary will keep locally. Geary can only use locally available mail when "
+"searching and forming conversations."
+msgstr ""
+"Über das <gui>Mail herunterladen</gui>-Auswahlmenü können Sie festlegen, "
+"wieviel E-Mail Geary lokal behält. Geary kann nur lokal verfügbare E-Mails "
+"berücksichtigen, wenn es um das Durchsuchen oder das Bündeln von Nachrichten "
+"in Konversationen geht."
+
+#. (itstool) path: section/title
+#: C/accounts.page:62
+msgid "Removing accounts"
+msgstr "Konten löschen"
+
+#. (itstool) path: section/p
+#: C/accounts.page:64
+msgid ""
+"To delete an account, open the Accounts dialog, select the account, and "
+"press the - button. Geary will delete all information associated with the "
+"account."
+msgstr ""
+"Um ein Konto zu löschen, öffnen Sie den Konten-Dialog, wählen das "
+"betreffende Konto und klicken auf den - Knopf. Geary wird alle mit diesem "
+"Konto verknüpften Daten löschen."
+
+#. (itstool) path: page/title
+#: C/archive.page:10
+msgid "Delete or archive a message"
+msgstr "Eine Nachricht löschen oder archivieren"
+
+#. (itstool) path: page/p
+#: C/archive.page:12
+msgid ""
+"When you use Geary with a Gmail account, Geary lets you <em>archive</em> "
+"messages. The <gui>Archive</gui> toolbar button archives the selected "
+"conversation(s). Archived messages appear in the <gui>All Mail</gui> folder."
+msgstr ""
+"Wenn Sie Geary mit einem Gmail-Konto verwenden, können Sie Nachrichten "
+"<em>archivieren</em>. Der <gui>Archivieren</gui> Knopf in der Werkzeugleiste "
+"archiviert die ausgewählte(n) Konversation(en). Archivierte Nachrichten "
+"erscheinen im <gui>Alle E-Mails</gui> Ordner."
+
+#. (itstool) path: page/p
+#: C/archive.page:16
+msgid ""
+"With other mail servers, you can trash or delete, but not archive, messages. "
+"To move one or more conversations to the <gui>Trash</gui> folder, select "
+"them and press the <gui>Trash</gui> button on the toolbar. To permanently "
+"delete the conversations, hold down <key>Shift</key> and press the "
+"<gui>Delete</gui> button that appears in place of the <gui>Trash</gui> "
+"button."
+msgstr ""
+"Bei anderen E-Mail-Servern können Sie Nachrichten in den Papierkorb "
+"verschieben oder löschen, nicht aber archivieren. Um eine oder mehrere "
+"Konversationen in den <gui>Papierkorb</gui> zu verschieben, wählen Sie diese "
+"aus und klicken den <gui>Papierkorb</gui>-Knopf in der Werkzeugleiste. Um "
+"die Konversationen vollständig zu löschen, halten Sie die "
+"<key>Umschalttaste</key> gedrückt und klicken auf den <gui>Löschen</gui>-"
+"Knopf, der an Stelle von <gui>Papierkorb</gui> erscheint."
+
+#. (itstool) path: page/p
+#: C/archive.page:21
+msgid ""
+"Delete is not available from every folder, such as Search. Delete is also "
+"unavailable for Gmail. For Gmail, <gui>Trash</gui> will move messages to the "
+"Trash folder on the server, where the user can then manually delete them. "
+"The server will automatically remove trashed messages after 30 days."
+msgstr ""
+"Löschen ist in manchem Ordner, wie beispielsweise Suche, nicht möglich. "
+"Löschen ist auch bei Gmail nicht möglich. Bei Gmail verschiebt "
+"<gui>Papierkorb</gui> Nachrichten nur in den Papierkorb-Ordner des "
+"Verzeichnisses auf dem Server, von wo Sie sie von Hand löschen können. Der "
+"Server löscht sie automatisch nach 30 Tagen."
+
+#. (itstool) path: page/title
+#: C/bugs.page:10
+msgid "Found a bug?"
+msgstr "Einen Fehler gefunden?"
+
+#. (itstool) path: page/p
+#: C/bugs.page:12
+msgid ""
+"If you suspect you've found a bug in Geary, please <link href=\"https://wiki."
+"gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it can be "
+"fixed."
+msgstr ""
+"Falls Sie den Verdacht haben, einen Fehler in Geary gefunden zu haben, <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">nehmen Sie mit uns "
+"Kontakt auf</link>, damit der Fehler beseitigt werden kann."
+
+#. (itstool) path: page/p
+#: C/bugs.page:16
+msgid ""
+"To help diagnose the problem as fast as possible, please include the "
+"following information:"
+msgstr ""
+"Sie können dabei helfen, das Problem so schnell wie möglich zu "
+"diagnostizieren, indem Sie folgende Informationen übermitteln:"
+
+#. (itstool) path: item/p
+#: C/bugs.page:20
+msgid "Geary version and installation method (Package? Flathub? Source code?)"
+msgstr ""
+"Die Version von Geary und die Installationsmethode (Paket? Flathub? "
+"Quellcode?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:22
+msgid "Your desktop (GNOME? KDE? Something else?)"
+msgstr "Ihre Arbeitsumgebung (GNOME? KDE? Andere?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:23
+msgid ""
+"Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
+msgstr ""
+"Ihr Betriebssystem und dessen Version (Ubuntu 16.04? Fedora 28? Ihr eigenes?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:25
+msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
+msgstr "E-Mail-Dienstanbieter (Gmail, Yahoo!, Outlook.com oder etwas anderes?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:27
+msgid "Steps to reproduce the bug"
+msgstr "Schritte, um den Fehler zu reproduzieren"
+
+#. (itstool) path: item/p
+#: C/bugs.page:28
+msgid "What happened?"
+msgstr "Was ist passiert?"
+
+#. (itstool) path: item/p
+#: C/bugs.page:29
+msgid "What did you expect to happen?"
+msgstr "Was hätte erwartungsgemäß passieren sollen?"
+
+#. (itstool) path: page/p
+#: C/bugs.page:32
+msgid "Thanks for your help!"
+msgstr "Danke für Ihre Hilfe!"
+
+#. (itstool) path: page/title
+#: C/contributing.page:10
+msgid "Contribute to Geary"
+msgstr "Zu Geary beitragen"
+
+#. (itstool) path: page/p
+#: C/contributing.page:12
+msgid ""
+"Want to help improve Geary? There are a number of ways you can contribute:"
+msgstr ""
+"Wollen Sie dabei helfen, Geary zu verbessern? Es gibt verschiedene "
+"Möglichkeiten, etwas beizutragen:"
+
+#. (itstool) path: item/p
+#: C/contributing.page:16
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
+"reporting</link>—report new bugs or request new features"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Melden Sie "
+"Fehler</link> oder fragen Sie nach neuen Funktionsmerkmalen"
+
+#. (itstool) path: item/p
+#: C/contributing.page:19
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">User Experience "
+"Design</link>—research and develop Geary’s user experience"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">Design der "
+"Benutzeroberfläche</link> — verbessern Sie das Benutzererlebnis für Geary"
+
+#. (itstool) path: item/p
+#: C/contributing.page:20
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Development</"
+"link>—fix bugs and add new features"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Entwickler</"
+"link> — korrigieren Sie Fehler und fügen Sie neue Funktionsmerkmale hinzu"
+
+#. (itstool) path: item/p
+#: C/contributing.page:21
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
+"link>—translate Geary’s user interface and user manual into new languages"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Übersetzen</"
+"link> Sie die Benutzeroberfläche oder das Handbuch von Geary in weitere "
+"Sprachen"
+
+#. (itstool) path: item/p
+#: C/contributing.page:22
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Join the "
+"discussion</link>—on the mailing list or IRC channel"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Diskutieren Sie "
+"mit</link> – auf der Mailingliste oder im IRC-Kanal"
+
+#. (itstool) path: page/p
+#: C/contributing.page:25
+msgid "Thanks for your help making Geary better!"
+msgstr "Danke dass Sie mithelfen, Geary zu verbessern!"
+
+#. (itstool) path: title/media
+#. This is a reference to an external file such as an image or video. When
+#. the file changes, the md5 hash will change to let you know you need to
+#. update your localized copy. The msgstr is not used at all. Set it to
+#. whatever you like once you have updated your copy of the file.
+#: C/index.page:5
+msgctxt "_"
+msgid "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
+msgstr "original'"
+
+#. (itstool) path: page/title
+#: C/index.page:5
+msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+
+#. (itstool) path: section/title
+#: C/index.page:8
+msgid "Introduction"
+msgstr "Einführung"
+
+#. (itstool) path: section/title
+#: C/index.page:12
+msgid "Using Geary"
+msgstr "Geary verwenden"
+
+#. (itstool) path: section/title
+#: C/index.page:16
+msgid "Contributing and bug reporting"
+msgstr "Mitwirken und Fehler melden"
+
+#. (itstool) path: page/title
+#: C/label.page:10
+msgid "Label or move a conversation"
+msgstr "Eine Konversation mit einer Beschriftung versehen oder verschieben"
+
+#. (itstool) path: section/title
+#: C/label.page:12
+msgid "Label a conversation"
+msgstr "Eine Konversation mit einer Beschriftung versehen"
+
+#. (itstool) path: section/p
+#: C/label.page:13
+msgid ""
+"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
+"labels correspond to labels in Gmail, or ordinary folders in other mail "
+"services."
+msgstr ""
+"Mit Geary können Sie einer Konversation eine oder mehrere "
+"<em>Beschriftungen</em> zuweisen. Gearys Beschriftungen entsprechen Gmail-"
+"Markierungen oder normalen Ordnern anderer E-Mail-Dienste."
+
+#. (itstool) path: section/p
+#: C/label.page:15
+msgid ""
+"To label one or more conversations, first select the conversation(s), then "
+"do either of the following:"
+msgstr ""
+"Um eine oder mehrere Konversationen mit einer Beschriftung zu versehen, "
+"wählen Sie zuerst die Konversation(en) aus und können dann einen der "
+"folgenden Wege nutzen:"
+
+#. (itstool) path: item/p
+#: C/label.page:18
+msgid ""
+"Click the <gui>Label</gui> button on the toolbar and select a label from the "
+"resulting drop-down menu."
+msgstr ""
+"Klicken Sie den <gui>Beschriftung</gui>-Knopf in der Werkzeugleiste und "
+"wählen Sie eine Beschriftung aus dem erscheinenden Auswahlmenü."
+
+#. (itstool) path: item/p
+#: C/label.page:20
+msgid ""
+"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
+"conversation list to the label in the sidebar."
+msgstr ""
+"Drücken Sie die <key>Strg</key>-Taste und ziehen Sie die Konversation(en) "
+"aus der Konversationsliste auf die Beschriftung in der Seitenleiste."
+
+#. (itstool) path: section/title
+#: C/label.page:25
+msgid "Move a conversation to a folder or label"
+msgstr "Verschieben einer Konversation in einen Ordner oder eine Beschriftung"
+
+#. (itstool) path: section/p
+#: C/label.page:26
+msgid ""
+"To move one or more conversations to a folder or label, first select the "
+"conversation(s), then do either of the following:"
+msgstr ""
+"Um eine oder mehrere Konversationen in einen Ordner oder eine Beschriftung "
+"zu verschieben, wählen Sie zunächst die Konversation(en) aus und können dann "
+"einen der folgenden Wege nutzen:"
+
+#. (itstool) path: item/p
+#: C/label.page:29
+msgid ""
+"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
+"from the resulting drop-down menu."
+msgstr ""
+"Klicken Sie den <gui>Verschieben</gui> Knopf in der Werkzeugleiste und "
+"wählen Sie einen Ordner oder eine Beschriftung aus dem erscheinenden "
+"Auswahlmenü aus."
+
+#. (itstool) path: item/p
+#: C/label.page:31
+msgid ""
+"Drag the conversation(s) from the conversation list to the folder or label "
+"in the sidebar."
+msgstr ""
+"Ziehen Sie die Konversation(en) aus der Konversationsliste auf den Ordner "
+"oder die Beschriftung in der Seitenleiste."
+
+#. (itstool) path: page/title
+#: C/limits.page:9
+msgid "Limitations"
+msgstr "Einschränkungen"
+
+#. (itstool) path: page/p
+#: C/limits.page:11
+msgid ""
+"Geary is still in early development. Geary supports IMAP and has been tested "
+"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
+"for Outlook.com is provided. Geary may not yet work well with some IMAP "
+"servers. At this time Geary is still missing numerous features including "
+"offline mode."
+msgstr ""
+"Geary befindet sich noch in einem frühen Entwicklungsstadium. Es unterstützt "
+"IMAP und wurde mit Gmail, Yahoo und dem freien Dovecot E-Mail-Server "
+"getestet. Die Unterstützung von Outlook.com ist noch experimentell. Es kann "
+"sein, dass Geary mit einigen IMAP-Servern noch nicht gut zusammen arbeitet. "
+"Zum aktuellen Zeitpunkt fehlen Geary noch viele Leistungsmerkmale, wie "
+"beispielsweise ein Offline Modus."
+
+#. (itstool) path: page/p
+#: C/limits.page:17
+msgid ""
+"To learn more about the features we're working on and the future of Geary, "
+"please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
+"page</link>."
+msgstr ""
+"Um mehr über die angestrebten Funktionen und die Zukunft von Geary zu "
+"erfahren, besuchen Sie bitte <link href=\"https://wiki.gnome.org/Apps/Geary"
+"\">Gearys Wiki</link>."
 
 #. (itstool) path: page/title
 #: C/overview.page:8
@@ -194,355 +668,128 @@ msgstr ""
 "ein Benutzerbild des Absenders im Kopf jeder Nachricht anzuzeigen."
 
 #. (itstool) path: page/title
-#: C/archive.page:10
-msgid "Delete or archive a message"
-msgstr "Eine Nachricht löschen oder archivieren"
+#: C/preferences.page:10
+msgid "Preferences"
+msgstr "Einstellungen"
 
 #. (itstool) path: page/p
-#: C/archive.page:12
+#: C/preferences.page:11
 msgid ""
-"When you use Geary with a Gmail account, Geary lets you <em>archive</em> "
-"messages. The <gui>Archive</gui> toolbar button archives the selected "
-"conversation(s). Archived messages appear in the <gui>All Mail</gui> folder."
+"The <gui>Preferences</gui> option is available in either Geary's application "
+"menu or the gear menu in the upper-right of the toolbar. (The location "
+"depends on the install desktop shell. For GNOME Shell and Unity, the "
+"application menu is available near the top-left corner of the screen.)"
 msgstr ""
-"Wenn Sie Geary mit einem Gmail-Konto verwenden, können Sie Nachrichten "
-"<em>archivieren</em>. Der <gui>Archivieren</gui> Knopf in der Werkzeugleiste "
-"archiviert die ausgewählte(n) Konversation(en). Archivierte Nachrichten "
-"erscheinen im <gui>Alle E-Mails</gui> Ordner."
+"Das Fenster <gui>Einstellungen</gui> erreichen Sie über das Programm-Menü "
+"oder das Menü in der oberen rechten Ecke der Werkzeugleiste. Das hängt von "
+"Ihrer Arbeitsumgebung ab. Bei der GNOME Shell und Unity befindet sich das "
+"Programmmenü nahe der oberen linken Ecke des Bildschirms."
 
-#. (itstool) path: page/p
-#: C/archive.page:16
-msgid ""
-"With other mail servers, you can trash or delete, but not archive, messages. "
-"To move one or more conversations to the <gui>Trash</gui> folder, select "
-"them and press the <gui>Trash</gui> button on the toolbar. To permanently "
-"delete the conversations, hold down <key>Shift</key> and press the "
-"<gui>Delete</gui> button that appears in place of the <gui>Trash</gui> "
-"button."
-msgstr ""
-"Bei anderen E-Mail-Servern können Sie Nachrichten in den Papierkorb "
-"verschieben oder löschen, nicht aber archivieren. Um eine oder mehrere "
-"Konversationen in den <gui>Papierkorb</gui> zu verschieben, wählen Sie diese "
-"aus und klicken den <gui>Papierkorb</gui>-Knopf in der Werkzeugleiste. Um "
-"die Konversationen vollständig zu löschen, halten Sie die "
-"<key>Umschalttaste</key> gedrückt und klicken auf den <gui>Löschen</gui>-"
-"Knopf, der an Stelle von <gui>Papierkorb</gui> erscheint."
+# There may be a better translation, but I am missing a context.
+#. (itstool) path: section/title
+#: C/preferences.page:17
+msgid "Reading"
+msgstr "Lesen"
 
-#. (itstool) path: page/p
-#: C/archive.page:21
-msgid ""
-"Delete is not available from every folder, such as Search. Delete is also "
-"unavailable for Gmail. For Gmail, <gui>Trash</gui> will move messages to the "
-"Trash folder on the server, where the user can then manually delete them. "
-"The server will automatically remove trashed messages after 30 days."
-msgstr ""
-"Löschen ist in manchem Ordner, wie beispielsweise Suche, nicht möglich. "
-"Löschen ist auch bei Gmail nicht möglich. Bei Gmail verschiebt "
-"<gui>Papierkorb</gui> Nachrichten nur in den Papierkorb-Ordner des "
-"Verzeichnisses auf dem Server, von wo Sie sie von Hand löschen können. Der "
-"Server löscht sie automatisch nach 30 Tagen."
-
-#. (itstool) path: page/title
-#: C/contributing.page:5
-msgid "Contribute to Geary"
-msgstr "Zu Geary beitragen"
-
-#. (itstool) path: page/p
-#: C/contributing.page:12
-msgid ""
-"Want to help improve Geary? There are a number of ways you can contribute:"
-msgstr ""
-"Wollen Sie dabei helfen, Geary zu verbessern? Es gibt verschiedene "
-"Möglichkeiten, etwas beizutragen:"
+#. (itstool) path: item/title
+#: C/preferences.page:20
+msgid "<gui>Automatically select next message</gui>"
+msgstr "<gui>Automatisch die nächste Nachricht auswählen</gui>"
 
 #. (itstool) path: item/p
-#: C/contributing.page:16
+#: C/preferences.page:21
 msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
-"reporting</link>—report new bugs or request new features"
+"When this option is enabled, Geary automatically selects the latest message "
+"in a folder when you enter the folder. In addition, after archiving a "
+"message, Geary automatically selects an adjacent message."
 msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Melden Sie "
-"Fehler</link> oder fragen Sie nach neuen Funktionsmerkmalen"
+"Ist diese Option aktiviert, wählt Geary automatisch die letzte Nachricht im "
+"aktuellen Ordner aus. Wird eine Nachricht aktiviert, wählt Geary automatisch "
+"eine benachbarte Nachricht aus."
+
+#. (itstool) path: item/title
+#: C/preferences.page:26
+msgid "<gui>Display conversation preview</gui>"
+msgstr "<gui>Konversationsvorschau anzeigen</gui>"
 
 #. (itstool) path: item/p
-#: C/contributing.page:19
+#: C/preferences.page:27
 msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">User Experience "
-"Design</link>—research and develop Geary’s user experience"
+"Enables message previews in the conversation list. Previews show the first "
+"few lines of each message."
 msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">Design der "
-"Benutzeroberfläche</link> — verbessern Sie das Benutzererlebnis für Geary"
+"Aktiviert eine Nachrichten-Vorschau in der Konversationsliste. In einer "
+"Vorschau werden die ersten Zeilen einer Nachricht angezeigt."
+
+#. (itstool) path: item/title
+#: C/preferences.page:31
+msgid "<gui>Use three pane view</gui>"
+msgstr "<gui>Dreispaltige Ansicht verwenden</gui>"
 
 #. (itstool) path: item/p
-#: C/contributing.page:20
+#: C/preferences.page:32
 msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Development</"
-"link>—fix bugs and add new features"
+"Show the folder list, the conversation list, and the messages side-by-side-"
+"by-side in three panes. If not selected, the folder list and conversation "
+"list will be stacked vertically in a single pane."
 msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Entwickler</"
-"link> — korrigieren Sie Fehler und fügen Sie neue Funktionsmerkmale hinzu"
-
-#. (itstool) path: item/p
-#: C/contributing.page:21
-msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
-"link>—translate Geary’s user interface and user manual into new languages"
-msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Übersetzen</"
-"link> Sie die Benutzeroberfläche oder das Handbuch von Geary in weitere "
-"Sprachen"
-
-#. (itstool) path: item/p
-#: C/contributing.page:22
-msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Join the "
-"discussion</link>—on the mailing list or IRC channel"
-msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Diskutieren Sie "
-"mit</link> – auf der Mailingliste oder im IRC-Kanal"
-
-#. (itstool) path: page/p
-#: C/contributing.page:25
-msgid "Thanks for your help making Geary better!"
-msgstr "Danke dass Sie mithelfen, Geary zu verbessern!"
-
-#. (itstool) path: page/title
-#: C/limits.page:5
-msgid "Limitations"
-msgstr "Einschränkungen"
-
-#. (itstool) path: page/p
-#: C/limits.page:11
-msgid ""
-"Geary is still in early development. Geary supports IMAP and has been tested "
-"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
-"for Outlook.com is provided. Geary may not yet work well with some IMAP "
-"servers. At this time Geary is still missing numerous features including "
-"offline mode."
-msgstr ""
-"Geary befindet sich noch in einem frühen Entwicklungsstadium. Es unterstützt "
-"IMAP und wurde mit Gmail, Yahoo und dem freien Dovecot E-Mail-Server "
-"getestet. Die Unterstützung von Outlook.com ist noch experimentell. Es kann "
-"sein, dass Geary mit einigen IMAP-Servern noch nicht gut zusammen arbeitet. "
-"Zum aktuellen Zeitpunkt fehlen Geary noch viele Leistungsmerkmale, wie "
-"beispielsweise ein Offline Modus."
-
-#. (itstool) path: page/p
-#: C/limits.page:17
-msgid ""
-"To learn more about the features we're working on and the future of Geary, "
-"please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
-"page</link>."
-msgstr ""
-"Um mehr über die angestrebten Funktionen und die Zukunft von Geary zu "
-"erfahren, besuchen Sie bitte <link href=\"https://wiki.gnome.org/Apps/Geary"
-"\">Gearys Wiki</link>."
-
-#. (itstool) path: page/title
-#: C/bugs.page:5
-msgid "Found a bug?"
-msgstr "Einen Fehler gefunden?"
-
-#. (itstool) path: page/p
-#: C/bugs.page:12
-msgid ""
-"If you suspect you've found a bug in Geary, please <link href=\"https://wiki."
-"gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it can be "
-"fixed."
-msgstr ""
-"Falls Sie den Verdacht haben, einen Fehler in Geary gefunden zu haben, <link "
-"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">nehmen Sie mit uns "
-"Kontakt auf</link>, damit der Fehler beseitigt werden kann."
-
-#. (itstool) path: page/p
-#: C/bugs.page:16
-msgid ""
-"To help diagnose the problem as fast as possible, please include the "
-"following information:"
-msgstr ""
-"Sie können dabei helfen, das Problem so schnell wie möglich zu "
-"diagnostizieren, indem Sie folgende Informationen übermitteln:"
-
-#. (itstool) path: item/p
-#: C/bugs.page:20
-msgid "Geary version and installation method (Package? Flathub? Source code?)"
-msgstr ""
-"Die Version von Geary und die Installationsmethode (Paket? Flathub? "
-"Quellcode?)"
-
-#. (itstool) path: item/p
-#: C/bugs.page:22
-msgid "Your desktop (GNOME? KDE? Something else?)"
-msgstr "Ihre Arbeitsumgebung (GNOME? KDE? Andere?)"
-
-#. (itstool) path: item/p
-#: C/bugs.page:23
-msgid ""
-"Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
-msgstr ""
-"Ihr Betriebssystem und dessen Version (Ubuntu 16.04? Fedora 28? Ihr eigenes?)"
-
-#. (itstool) path: item/p
-#: C/bugs.page:25
-msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
-msgstr "E-Mail-Dienstanbieter (Gmail, Yahoo!, Outlook.com oder etwas anderes?)"
-
-#. (itstool) path: item/p
-#: C/bugs.page:27
-msgid "Steps to reproduce the bug"
-msgstr "Schritte, um den Fehler zu reproduzieren"
-
-#. (itstool) path: item/p
-#: C/bugs.page:28
-msgid "What happened?"
-msgstr "Was ist passiert?"
-
-#. (itstool) path: item/p
-#: C/bugs.page:29
-msgid "What did you expect to happen?"
-msgstr "Was hätte erwartungsgemäß passieren sollen?"
-
-#. (itstool) path: page/p
-#: C/bugs.page:32
-msgid "Thanks for your help!"
-msgstr "Danke für Ihre Hilfe!"
-
-#. (itstool) path: page/title
-#: C/write.page:9
-msgid "Write a message"
-msgstr "Eine Nachricht schreiben"
+"Zeigt die Ordnerliste, die Konversationsliste und die Nachrichten "
+"nebeneinander in drei Ansichten an. Falls nicht ausgewählt, werden die "
+"Ordnerliste und die Konversationsliste vertikal übereinander in einer "
+"Ansicht angezeigt."
 
 #. (itstool) path: section/title
-#: C/write.page:12
-msgid "Composing and replying"
-msgstr "Verfassen und antworten"
+#: C/preferences.page:40
+msgid "Notifications"
+msgstr "Benachrichtigungen"
 
-#. (itstool) path: section/p
-#: C/write.page:13
-msgid ""
-"To compose a new message in Geary, press the <gui>New Message</gui> button "
-"on the toolbar."
-msgstr ""
-"Um eine neue Nachricht in Geary zu erstellen, klicken Sie auf den Knopf "
-"<gui>Neue Nachricht</gui> in der Werkzeugleiste."
-
-#. (itstool) path: section/p
-#: C/write.page:16
-msgid ""
-"To reply to a message, open the message menu in the upper right corner of "
-"the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
-"<gui>Forward</gui>. You can also reply to the last message in a conversation "
-"via the <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui> buttons "
-"on the toolbar."
-msgstr ""
-"Um auf eine Nachricht zu antworten, öffnen Sie das Nachrichten-Menü in der "
-"oberen rechten Ecke der Nachricht und wählen Sie <gui>Antworten</gui>, "
-"<gui>Allen Antworten</gui> oder <gui>Weiterleiten</gui>. Sie können außerdem "
-"auf die letzte Nachricht einer Konversation mit Hilfe der Knöpfe "
-"<gui>Antworten</gui>, <gui>Allen Antworten</gui> und <gui>Weiterleiten</gui> "
-"in der Werkzeugleiste antworten."
-
-#. (itstool) path: section/title
-#: C/write.page:21
-msgid "Features"
-msgstr "Besonderheiten"
-
-#. (itstool) path: section/p
-#: C/write.page:23
-msgid ""
-"Geary's email composer lets you adjust the font, size and color of text. You "
-"can also insert hyperlinks into messages."
-msgstr ""
-"Der E-Mail-Editor von Geary ermöglicht es Ihnen, die Schriftart, die "
-"Schriftgröße und die Textfarbe anzupassen. Außerdem ist es möglich, Verweise "
-"in Nachrichten einzufügen."
-
-#. (itstool) path: section/p
-#: C/write.page:25
-msgid ""
-"Geary can also send plain text messages. In the drop-down menu, check or "
-"uncheck \"Rich Text\" to toggle between plain text and rich text mode."
-msgstr ""
-"Geary kann auch einfache Text-Nachrichten verschicken. Aktivieren oder "
-"deaktivieren Sie »Rich Text« im Auswahl-Menü, um zwischen einfachem Text- "
-"und Rich-Text-Modus zu wechseln."
-
-#. (itstool) path: section/p
-#: C/write.page:28
-msgid ""
-"You can attach a file to a message you're writing in either of these ways:"
-msgstr ""
-"Sie können eine Datei an eine gerade verfasste Nachricht wie folgt anhängen:"
+#. (itstool) path: item/title
+#: C/preferences.page:43
+msgid "<gui>Play notification sounds</gui>"
+msgstr "<gui>Benachrichtigungstöne abspielen</gui>"
 
 #. (itstool) path: item/p
-#: C/write.page:30
-msgid ""
-"Press the <gui>Attach File</gui> button at the lower left of the composer "
-"window, then select a file to attach."
+#: C/preferences.page:44
+msgid "When set, Geary plays a sound whenever a new message arrives."
 msgstr ""
-"Klicken Sie auf den Knopf <gui>Datei anhängen</gui> in der unteren linken "
-"Ecke des Editor-Fensters und wählen Sie anschließend die anzuhängende Datei."
+"Falls aktiviert, spielt Geary immer einen Ton wenn eine Nachricht ankommt."
+
+#. (itstool) path: item/title
+#: C/preferences.page:47
+msgid "<gui>Show notifications for new mail</gui>"
+msgstr "<gui>Benachrichtigung bei neuen E-Mails anzeigen</gui>"
 
 #. (itstool) path: item/p
-#: C/write.page:32
+#: C/preferences.page:48
 msgid ""
-"Drag the file from the Nautilus file manager to the composer window, and "
-"drop it either on the text fields at the top of the window or on the toolbar "
-"at the bottom."
+"When set, Geary displays a <em>notification</em> each time a new message "
+"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
+"Shell, notifications appear at the bottom of the display (older versions) or "
+"centered just below the top bar (newer versions). In Ubuntu Unity, "
+"notifications appear at the upper right of the display."
 msgstr ""
-"Ziehen Sie die Datei aus der Nautilus-Dateiverwaltung in das Editor-Fenster "
-"und legen Sie diese entweder im Textfeld oben im Fenster oder in der "
-"Werkzeugleiste im unteren Teil des Fensters ab."
+"Falls aktiviert, zeigt Geary jedes Mal eine <em>Benachrichtigung</em> an, "
+"wenn eine neue Nachricht eintrifft. Benachrichtigungen werden systemabhängig "
+"angezeigt. Unter der GNOME Shell werden Benachrichtigungen am unteren "
+"Bildschirmrand angezeigt. Unter Ubuntu Unity werden Benachrichtigungen in "
+"der oberen rechten Ecke des Bildschirms angezeigt."
 
-#. (itstool) path: section/p
-#: C/write.page:36
+#. (itstool) path: item/title
+#: C/preferences.page:54
+msgid "<gui>Watch for new mail when closed</gui>"
+msgstr "<gui>Ständig nach neuen E-Mails prüfen</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:55
 msgid ""
-"A number of keyboard shortcuts are available in the composer; see <link xref="
-"\"shortcuts\"/> for details."
+"Geary will watch your accounts for new mail even when the main window is not "
+"open. To do this, it will silently start when you log in to your computer, "
+"and it will continue to run after you close all windows."
 msgstr ""
-"Im Editor stehen eine große Zahl von Tastaturkürzeln zur Verfügung; Details "
-"unter <link xref=\"shortcuts\"/>."
-
-#. (itstool) path: section/p
-#: C/write.page:38
-msgid ""
-"You may specify a signature to be inserted into the composer in the <link "
-"xref=\"accounts\"/> dialog."
-msgstr ""
-"Sie können im <link xref=\"accounts\"/>-Dialog eine Signatur angeben, welche "
-"dann im E-Mail-Editor eingefügt wird."
-
-#. (itstool) path: section/title
-#: C/write.page:43
-msgid "Drafts"
-msgstr "Entwürfe"
-
-#. (itstool) path: section/p
-#: C/write.page:45
-msgid ""
-"For mail servers that support drafts, Geary will automatically save the "
-"message as you type. If you close the composer without sending, Geary will "
-"prompt you to keep the draft or to discard it."
-msgstr ""
-"Unterstützt ein E-Mail Server das Speichern von Entwürfen, speichert Geary "
-"die Nachricht automatisch während Sie schreiben. Schließen Sie den Editor, "
-"ohne die Nachricht zu senden, fragt Geary, ob die Nachricht als Entwurf "
-"gespeichert oder verworfen werden soll."
-
-#. (itstool) path: section/p
-#: C/write.page:48
-msgid ""
-"To edit an existing draft, select the Drafts folder in the folder list, "
-"select the message, and click \"Edit Draft\" in the message viewer."
-msgstr ""
-"Um einen bereits existierenden Entwurf zu bearbeiten, wählen Sie den "
-"Entwürfe-Ordner aus der Ordnerliste, wählen die Nachricht und wählen in der "
-"Nachrichten Ansicht <gui>Entwurf bearbeiten</gui>."
-
-#. (itstool) path: section/p
-#: C/write.page:51
-msgid "Geary deletes the draft when you send the message."
-msgstr "Geary löscht den Entwurf, wenn die Nachricht gesendet wird."
+"Geary wird in Ihren Konten nach neuen Nachrichten suchen, auch wenn das "
+"Hauptfenster nicht geöffnet ist. Damit dies möglich wird, startet es im "
+"Hintergrund, wenn Sie sich an Ihrem Rechner anmelden, und läuft auch dann "
+"weiter, wenn Sie das Hauptfenster schließen."
 
 #. (itstool) path: page/title
 #: C/search.page:10
@@ -692,10 +939,13 @@ msgstr "<input>to:<var>Empfänger</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:64
+#| msgid ""
+#| "Finds messages where <var>sender</var> matches the To, CC, or BCC header."
 msgid ""
-"Finds messages where <var>sender</var> matches the To, CC, or BCC header."
+"Finds messages where <var>recipient</var> matches the To, CC, or BCC header."
 msgstr ""
-"Findet Nachrichten mit <var>Absender</var> im An-Feld, CC-Feld oder BCC-Feld."
+"Findet Nachrichten mit <var>Empfänger</var> im An-Feld, CC-Feld oder BCC-"
+"Feld."
 
 #. (itstool) path: section/p
 #: C/search.page:68
@@ -710,35 +960,57 @@ msgstr ""
 "input>. Damit wird in den genannten Feldern nach der E-Mail-Adresse des "
 "Kontos gesucht."
 
-#. (itstool) path: title/media
-#. This is a reference to an external file such as an image or video. When
-#. the file changes, the md5 hash will change to let you know you need to
-#. update your localized copy. The msgstr is not used at all. Set it to
-#. whatever you like once you have updated your copy of the file.
-#: C/index.page:5
-msgctxt "_"
-msgid "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
-msgstr "original'"
-
 #. (itstool) path: page/title
-#: C/index.page:5
-msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
-msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+#: C/shortcuts.page:10
+msgid "Keyboard shortcuts"
+msgstr "Tastaturkürzel"
 
-#. (itstool) path: section/title
-#: C/index.page:8
-msgid "Introduction"
-msgstr "Einführung"
+#. (itstool) path: page/p
+#: C/shortcuts.page:12
+msgid ""
+"Geary has keyboard shortcuts for most common operations. Use the built-in "
+"keyboard shortcuts help in Geary to discover the full list. This can be "
+"accessed via the application menu: <guiseq><gui>Geary</gui><gui>Keyboard "
+"Shortcuts</gui></guiseq> or using the keyboard shortcuts listed below."
+msgstr ""
+"<app>Geary</app> verfügt über Tastenkombinationen für die am häufigsten "
+"verwendeten Operationen. Sie finden eine vollständige Liste in der Hilfe zu "
+"<app>Geary</app>. Sie erreichen diese über das Anwendungsmenü: "
+"<guiseq><gui>Geary</gui><gui>Tastenkombinationen</gui></guiseq> oder in den "
+"nachfolgend aufgelisteten Tastenkombinationen."
 
-#. (itstool) path: section/title
-#: C/index.page:12
-msgid "Using Geary"
-msgstr "Geary verwenden"
+#. (itstool) path: page/p
+#: C/shortcuts.page:18
+msgid ""
+"The following keyboard shortcuts can be used to access on-line help from "
+"Geary:"
+msgstr ""
+"Mit den folgenden Tastenkombinationen erreichen Sie die Online-Hilfe von "
+"<app>Geary</app>:"
 
-#. (itstool) path: section/title
-#: C/index.page:16
-msgid "Contributing and bug reporting"
-msgstr "Mitwirken und Fehler melden"
+#. (itstool) path: td/p
+#: C/shortcuts.page:22
+msgid "Display this User Manual"
+msgstr "Dieses Benutzerhandbuch anzeigen"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:23
+msgid "<keyseq><key>F1</key></keyseq>"
+msgstr "<keyseq><key>F1</key></keyseq>"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:26
+msgid "Display all keyboard shortcuts"
+msgstr "Alle Tastaturkürzel anzeigen"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:27
+msgid ""
+"<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
+"key><key>F1</key></keyseq>"
+msgstr ""
+"<keyseq><key>Strg</key><key>?</key></keyseq> oder <keyseq><key>Strg</"
+"key><key>F1</key></keyseq>"
 
 #. (itstool) path: page/title
 #: C/star.page:10
@@ -811,407 +1083,138 @@ msgstr ""
 "gelesen markieren</gui> aus dem Auswahlmenü."
 
 #. (itstool) path: page/title
-#: C/preferences.page:10
-msgid "Preferences"
-msgstr "Einstellungen"
-
-#. (itstool) path: page/p
-#: C/preferences.page:11
-msgid ""
-"The <gui>Preferences</gui> option is available in either Geary's application "
-"menu or the gear menu in the upper-right of the toolbar. (The location "
-"depends on the install desktop shell. For GNOME Shell and Unity, the "
-"application menu is available near the top-left corner of the screen.)"
-msgstr ""
-"Das Fenster <gui>Einstellungen</gui> erreichen Sie über das Programm-Menü "
-"oder das Menü in der oberen rechten Ecke der Werkzeugleiste. Das hängt von "
-"Ihrer Arbeitsumgebung ab. Bei der GNOME Shell und Unity befindet sich das "
-"Programmmenü nahe der oberen linken Ecke des Bildschirms."
-
-# There may be a better translation, but I am missing a context.
-#. (itstool) path: section/title
-#: C/preferences.page:17
-msgid "Reading"
-msgstr "Lesen"
-
-#. (itstool) path: item/title
-#: C/preferences.page:20
-msgid "<gui>Automatically select next message</gui>"
-msgstr "<gui>Automatisch die nächste Nachricht auswählen</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:21
-msgid ""
-"When this option is enabled, Geary automatically selects the latest message "
-"in a folder when you enter the folder. In addition, after archiving a "
-"message, Geary automatically selects an adjacent message."
-msgstr ""
-"Ist diese Option aktiviert, wählt Geary automatisch die letzte Nachricht im "
-"aktuellen Ordner aus. Wird eine Nachricht aktiviert, wählt Geary automatisch "
-"eine benachbarte Nachricht aus."
-
-#. (itstool) path: item/title
-#: C/preferences.page:26
-msgid "<gui>Display conversation preview</gui>"
-msgstr "<gui>Konversationsvorschau anzeigen</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:27
-msgid ""
-"Enables message previews in the conversation list. Previews show the first "
-"few lines of each message."
-msgstr ""
-"Aktiviert eine Nachrichten-Vorschau in der Konversationsliste. In einer "
-"Vorschau werden die ersten Zeilen einer Nachricht angezeigt."
-
-#. (itstool) path: item/title
-#: C/preferences.page:31
-msgid "<gui>Use three pane view</gui>"
-msgstr "<gui>Dreispaltige Ansicht verwenden</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:32
-msgid ""
-"Show the folder list, the conversation list, and the messages side-by-side-"
-"by-side in three panes. If not selected, the folder list and conversation "
-"list will be stacked vertically in a single pane."
-msgstr ""
-"Zeigt die Ordnerliste, die Konversationsliste und die Nachrichten "
-"nebeneinander in drei Ansichten an. Falls nicht ausgewählt, werden die "
-"Ordnerliste und die Konversationsliste vertikal übereinander in einer "
-"Ansicht angezeigt."
+#: C/write.page:9
+msgid "Write a message"
+msgstr "Eine Nachricht schreiben"
 
 #. (itstool) path: section/title
-#: C/preferences.page:40
-msgid "Notifications"
-msgstr "Benachrichtigungen"
+#: C/write.page:12
+msgid "Composing and replying"
+msgstr "Verfassen und antworten"
 
-#. (itstool) path: item/title
-#: C/preferences.page:43
-msgid "<gui>Play notification sounds</gui>"
-msgstr "<gui>Benachrichtigungstöne abspielen</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:44
-msgid "When set, Geary plays a sound whenever a new message arrives."
-msgstr ""
-"Falls aktiviert, spielt Geary immer einen Ton wenn eine Nachricht ankommt."
-
-#. (itstool) path: item/title
-#: C/preferences.page:47
-msgid "<gui>Show notifications for new mail</gui>"
-msgstr "<gui>Benachrichtigung bei neuen E-Mails anzeigen</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:48
+#. (itstool) path: section/p
+#: C/write.page:13
 msgid ""
-"When set, Geary displays a <em>notification</em> each time a new message "
-"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
-"Shell, notifications appear at the bottom of the display (older versions) or "
-"centered just below the top bar (newer versions). In Ubuntu Unity, "
-"notifications appear at the upper right of the display."
+"To compose a new message in Geary, press the <gui>New Message</gui> button "
+"on the toolbar."
 msgstr ""
-"Falls aktiviert, zeigt Geary jedes Mal eine <em>Benachrichtigung</em> an, "
-"wenn eine neue Nachricht eintrifft. Benachrichtigungen werden systemabhängig "
-"angezeigt. Unter der GNOME Shell werden Benachrichtigungen am unteren "
-"Bildschirmrand angezeigt. Unter Ubuntu Unity werden Benachrichtigungen in "
-"der oberen rechten Ecke des Bildschirms angezeigt."
+"Um eine neue Nachricht in Geary zu erstellen, klicken Sie auf den Knopf "
+"<gui>Neue Nachricht</gui> in der Werkzeugleiste."
 
-#. (itstool) path: item/title
-#: C/preferences.page:54
-msgid "<gui>Watch for new mail when closed</gui>"
-msgstr "<gui>Ständig nach neuen E-Mails prüfen</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:55
+#. (itstool) path: section/p
+#: C/write.page:16
 msgid ""
-"Geary will watch your accounts for new mail even when the main window is not "
-"open. To do this, it will silently start when you log in to your computer, "
-"and it will continue to run after you close all windows."
+"To reply to a message, open the message menu in the upper right corner of "
+"the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
+"<gui>Forward</gui>. You can also reply to the last message in a conversation "
+"via the <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui> buttons "
+"on the toolbar."
 msgstr ""
-"Geary wird in Ihren Konten nach neuen Nachrichten suchen, auch wenn das "
-"Hauptfenster nicht geöffnet ist. Damit dies möglich wird, startet es im "
-"Hintergrund, wenn Sie sich an Ihrem Rechner anmelden, und läuft auch dann "
-"weiter, wenn Sie das Hauptfenster schließen."
-
-#. (itstool) path: page/title
-#: C/accounts.page:10
-msgid "Accounts"
-msgstr "Konten"
+"Um auf eine Nachricht zu antworten, öffnen Sie das Nachrichten-Menü in der "
+"oberen rechten Ecke der Nachricht und wählen Sie <gui>Antworten</gui>, "
+"<gui>Allen Antworten</gui> oder <gui>Weiterleiten</gui>. Sie können außerdem "
+"auf die letzte Nachricht einer Konversation mit Hilfe der Knöpfe "
+"<gui>Antworten</gui>, <gui>Allen Antworten</gui> und <gui>Weiterleiten</gui> "
+"in der Werkzeugleiste antworten."
 
 #. (itstool) path: section/title
-#: C/accounts.page:13
-msgid "Adding accounts"
-msgstr "Konten hinzufügen"
+#: C/write.page:21
+msgid "Features"
+msgstr "Besonderheiten"
 
 #. (itstool) path: section/p
-#: C/accounts.page:15
+#: C/write.page:23
 msgid ""
-"The first time you start Geary, you will be prompted to add an email "
-"account. On this screen, select if your account is Gmail, Yahoo, Outlook."
-"com, or other. For other account types, you will need to enter your IMAP and "
-"SMTP login settings manually."
+"Geary's email composer lets you adjust the font, size and color of text. You "
+"can also insert hyperlinks into messages."
 msgstr ""
-"Wenn Sie Geary das erste Mal starten, werden Sie gebeten, ein E-Mail-Konto "
-"hinzuzufügen. In diesem Fenster wählen Sie aus, ob es sich um ein Gmail-, "
-"Yahoo-, Outlook.com oder ein anderes E-Mail-Konto handelt. Für andere Konto-"
-"Arten müssen Sie die IMAP- und SMTP-Angaben selbst eingetragen."
+"Der E-Mail-Editor von Geary ermöglicht es Ihnen, die Schriftart, die "
+"Schriftgröße und die Textfarbe anzupassen. Außerdem ist es möglich, Verweise "
+"in Nachrichten einzufügen."
 
 #. (itstool) path: section/p
-#: C/accounts.page:19
+#: C/write.page:25
 msgid ""
-"Additional accounts can be added from the Accounts dialog. The "
-"<gui>Accounts</gui> option is available in either Geary's application menu "
-"or the gear menu in the upper-right of the toolbar. (The location depends on "
-"the install desktop shell. For GNOME Shell and Unity, the application menu "
-"is available near the top-left corner of the screen.) To add an account, "
-"click the + button."
+"Geary can also send plain text messages. In the drop-down menu, check or "
+"uncheck \"Rich Text\" to toggle between plain text and rich text mode."
 msgstr ""
-"Weitere Konten können Sie im Konten-Dialogfenster hinzufügen. Sie erreichen "
-"<gui>Konten</gui> über Gearys Programm-Menü oder das Menü in der oberen "
-"rechten Ecke der Werkzeugleiste. Das hängt von Ihrer Arbeitsumgebung ab. Bei "
-"der GNOME Shell und Unity befindet sich das Programmmenü nahe der oberen "
-"linken Ecke des Bildschirms. Klicken Sie auf den + Knopf, um ein Konto "
-"hinzuzufügen."
+"Geary kann auch einfache Text-Nachrichten verschicken. Aktivieren oder "
+"deaktivieren Sie »Rich Text« im Auswahl-Menü, um zwischen einfachem Text- "
+"und Rich-Text-Modus zu wechseln."
+
+#. (itstool) path: section/p
+#: C/write.page:28
+msgid ""
+"You can attach a file to a message you're writing in either of these ways:"
+msgstr ""
+"Sie können eine Datei an eine gerade verfasste Nachricht wie folgt anhängen:"
+
+#. (itstool) path: item/p
+#: C/write.page:30
+msgid ""
+"Press the <gui>Attach File</gui> button at the lower left of the composer "
+"window, then select a file to attach."
+msgstr ""
+"Klicken Sie auf den Knopf <gui>Datei anhängen</gui> in der unteren linken "
+"Ecke des Editor-Fensters und wählen Sie anschließend die anzuhängende Datei."
+
+#. (itstool) path: item/p
+#: C/write.page:32
+msgid ""
+"Drag the file from the Nautilus file manager to the composer window, and "
+"drop it either on the text fields at the top of the window or on the toolbar "
+"at the bottom."
+msgstr ""
+"Ziehen Sie die Datei aus der Nautilus-Dateiverwaltung in das Editor-Fenster "
+"und legen Sie diese entweder im Textfeld oben im Fenster oder in der "
+"Werkzeugleiste im unteren Teil des Fensters ab."
+
+#. (itstool) path: section/p
+#: C/write.page:36
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link xref="
+"\"shortcuts\"/> for details."
+msgstr ""
+"Im Editor stehen eine große Zahl von Tastaturkürzeln zur Verfügung; Details "
+"unter <link xref=\"shortcuts\"/>."
+
+#. (itstool) path: section/p
+#: C/write.page:38
+msgid ""
+"You may specify a signature to be inserted into the composer in the <link "
+"xref=\"accounts\"/> dialog."
+msgstr ""
+"Sie können im <link xref=\"accounts\"/>-Dialog eine Signatur angeben, welche "
+"dann im E-Mail-Editor eingefügt wird."
 
 #. (itstool) path: section/title
-#: C/accounts.page:27
-msgid "Editing existing accounts"
-msgstr "Konten bearbeiten"
+#: C/write.page:43
+msgid "Drafts"
+msgstr "Entwürfe"
 
 #. (itstool) path: section/p
-#: C/accounts.page:29
+#: C/write.page:45
 msgid ""
-"From the Accounts dialog, select an account and click the pencil icon to "
-"change various settings. Please note that Geary cannot change server "
-"settings on an existing account. If you need to change your IMAP or SMTP "
-"server, you will need to delete the account and re-add it."
+"For mail servers that support drafts, Geary will automatically save the "
+"message as you type. If you close the composer without sending, Geary will "
+"prompt you to keep the draft or to discard it."
 msgstr ""
-"Wählen Sie im Konten-Dialog ein Konto aus und klicken Sie auf das Stift-"
-"Symbol, um die Einstellungen zu bearbeiten. Bitte beachten Sie, dass Geary "
-"die Server-Einstellungen bestehender Konten nicht verändern kann. Wenn Sie "
-"den IMAP- oder SMTP-Server ändern wollen, müssen Sie das bereits "
-"existierende Konto löschen und neu anlegen."
+"Unterstützt ein E-Mail Server das Speichern von Entwürfen, speichert Geary "
+"die Nachricht automatisch während Sie schreiben. Schließen Sie den Editor, "
+"ohne die Nachricht zu senden, fragt Geary, ob die Nachricht als Entwurf "
+"gespeichert oder verworfen werden soll."
 
 #. (itstool) path: section/p
-#: C/accounts.page:33
+#: C/write.page:48
 msgid ""
-"To change the order that accounts are displayed in the folder list, drag the "
-"accounts in the Accounts dialog to the desired order."
+"To edit an existing draft, select the Drafts folder in the folder list, "
+"select the message, and click \"Edit Draft\" in the message viewer."
 msgstr ""
-"Um die Reihenfolge zu ändern, in der die Konten in der Ordnerliste angezeigt "
-"werden, ziehen Sie die Konten im Konten-Dialog an die gewünschte Position."
+"Um einen bereits existierenden Entwurf zu bearbeiten, wählen Sie den "
+"Entwürfe-Ordner aus der Ordnerliste, wählen die Nachricht und wählen in der "
+"Nachrichten Ansicht <gui>Entwurf bearbeiten</gui>."
 
 #. (itstool) path: section/p
-#: C/accounts.page:36
-msgid "There are some advanced options available when editing accounts:"
-msgstr "In den Konten-Einstellungen gibt es folgende erweiterte Möglichkeiten:"
-
-#. (itstool) path: item/p
-#: C/accounts.page:38
-msgid ""
-"The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
-"successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
-"For Gmail accounts, this happens automatically. Yahoo and some other "
-"accounts can be configured to do this automatically as well. For other "
-"accounts, if you disable this setting, you may be unable to view messages "
-"you've sent."
-msgstr ""
-"Das Ankreuzfeld <gui>Gesendete E-Mail speichern</gui> legt fest, ob Geary "
-"erfolgreich gesendete Nachrichten in den Ordner <gui>Gesendete E-Mails</gui> "
-"verschiebt. Für Gmail-Konten erfolgt das automatisch. Yahoo und einige "
-"andere können so eingestellt werden, dass sie gesendete E-Mails ebenfalls "
-"automatisch verschieben. Bei Konten, bei denen Sie diese Möglichkeit "
-"ausgeschaltet haben, können Sie die von Ihnen gesendeten E-Mails nicht mehr "
-"aufrufen."
-
-#. (itstool) path: item/p
-#: C/accounts.page:44
-msgid ""
-"The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
-"automatically inserted when a composer is opened. You may enter the "
-"signature into the box immediately below. You may use HTML tags to style the "
-"text. Switch to a preview of the signature using the buttons to the right."
-msgstr ""
-"Das Ankreuzfeld <gui>E-Mails unterzeichnen</gui> zeigt an ob beim öffnen des "
-"E-Mail-Editors automatisch eine Signatur in die E-Mail eingefügt wird. In "
-"dem Eingabefeld direkt darunter können Sie die Signatur eingeben. Um den "
-"Text hervorzuheben, können Sie auch HTML-Tags verwenden. Mit den Knöpfen auf "
-"der rechten Seite wechseln Sie zur Vorschau der Signatur."
-
-#. (itstool) path: item/p
-#: C/accounts.page:49
-msgid ""
-"If you leave the signature in the Accounts dialog blank, Geary will use the "
-"<file>.signature</file> file in your home directory, if it exists. This file "
-"may contain either plain text or HTML markup. In the latter case, the markup "
-"will be inserted directly into the composer, without any escaping."
-msgstr ""
-"Wenn Sie im Konten-Dialog kein Signatur einstellen, wird Geary den Inhalt "
-"der Datei <file>.signature</file> aus Ihrem Persönlicher Ordner verwenden, "
-"sofern diese vorhanden ist. Diese Datei kann sowohl reinen Text als auch "
-"HTML-Textauszeichnungen enthalten. Im letzteren Fall werden die "
-"Textauszeichnungen direkt und ohne Maskierung im E-Mail-Editor eingefügt."
-
-#. (itstool) path: item/p
-#: C/accounts.page:54
-msgid ""
-"The <gui>Download mail</gui> drop-down allows you to configure how much mail "
-"Geary will keep locally. Geary can only use locally available mail when "
-"searching and forming conversations."
-msgstr ""
-"Über das <gui>Mail herunterladen</gui>-Auswahlmenü können Sie festlegen, "
-"wieviel E-Mail Geary lokal behält. Geary kann nur lokal verfügbare E-Mails "
-"berücksichtigen, wenn es um das Durchsuchen oder das Bündeln von Nachrichten "
-"in Konversationen geht."
-
-#. (itstool) path: section/title
-#: C/accounts.page:62
-msgid "Removing accounts"
-msgstr "Konten löschen"
-
-#. (itstool) path: section/p
-#: C/accounts.page:64
-msgid ""
-"To delete an account, open the Accounts dialog, select the account, and "
-"press the - button. Geary will delete all information associated with the "
-"account."
-msgstr ""
-"Um ein Konto zu löschen, öffnen Sie den Konten-Dialog, wählen das "
-"betreffende Konto und klicken auf den - Knopf. Geary wird alle mit diesem "
-"Konto verknüpften Daten löschen."
-
-#. (itstool) path: page/title
-#: C/label.page:10
-msgid "Label or move a conversation"
-msgstr "Eine Konversation mit einer Beschriftung versehen oder verschieben"
-
-#. (itstool) path: section/title
-#: C/label.page:12
-msgid "Label a conversation"
-msgstr "Eine Konversation mit einer Beschriftung versehen"
-
-#. (itstool) path: section/p
-#: C/label.page:13
-msgid ""
-"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
-"labels correspond to labels in Gmail, or ordinary folders in other mail "
-"services."
-msgstr ""
-"Mit Geary können Sie einer Konversation eine oder mehrere "
-"<em>Beschriftungen</em> zuweisen. Gearys Beschriftungen entsprechen Gmail-"
-"Markierungen oder normalen Ordnern anderer E-Mail-Dienste."
-
-#. (itstool) path: section/p
-#: C/label.page:15
-msgid ""
-"To label one or more conversations, first select the conversation(s), then "
-"do either of the following:"
-msgstr ""
-"Um eine oder mehrere Konversationen mit einer Beschriftung zu versehen, "
-"wählen Sie zuerst die Konversation(en) aus und können dann einen der "
-"folgenden Wege nutzen:"
-
-#. (itstool) path: item/p
-#: C/label.page:18
-msgid ""
-"Click the <gui>Label</gui> button on the toolbar and select a label from the "
-"resulting drop-down menu."
-msgstr ""
-"Klicken Sie den <gui>Beschriftung</gui>-Knopf in der Werkzeugleiste und "
-"wählen Sie eine Beschriftung aus dem erscheinenden Auswahlmenü."
-
-#. (itstool) path: item/p
-#: C/label.page:20
-msgid ""
-"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
-"conversation list to the label in the sidebar."
-msgstr ""
-"Drücken Sie die <key>Strg</key>-Taste und ziehen Sie die Konversation(en) "
-"aus der Konversationsliste auf die Beschriftung in der Seitenleiste."
-
-#. (itstool) path: section/title
-#: C/label.page:25
-msgid "Move a conversation to a folder or label"
-msgstr "Verschieben einer Konversation in einen Ordner oder eine Beschriftung"
-
-#. (itstool) path: section/p
-#: C/label.page:26
-msgid ""
-"To move one or more conversations to a folder or label, first select the "
-"conversation(s), then do either of the following:"
-msgstr ""
-"Um eine oder mehrere Konversationen in einen Ordner oder eine Beschriftung "
-"zu verschieben, wählen Sie zunächst die Konversation(en) aus und können dann "
-"einen der folgenden Wege nutzen:"
-
-#. (itstool) path: item/p
-#: C/label.page:29
-msgid ""
-"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
-"from the resulting drop-down menu."
-msgstr ""
-"Klicken Sie den <gui>Verschieben</gui> Knopf in der Werkzeugleiste und "
-"wählen Sie einen Ordner oder eine Beschriftung aus dem erscheinenden "
-"Auswahlmenü aus."
-
-#. (itstool) path: item/p
-#: C/label.page:31
-msgid ""
-"Drag the conversation(s) from the conversation list to the folder or label "
-"in the sidebar."
-msgstr ""
-"Ziehen Sie die Konversation(en) aus der Konversationsliste auf den Ordner "
-"oder die Beschriftung in der Seitenleiste."
-
-#. (itstool) path: page/title
-#: C/shortcuts.page:10
-msgid "Keyboard shortcuts"
-msgstr "Tastaturkürzel"
-
-#. (itstool) path: page/p
-#: C/shortcuts.page:12
-msgid ""
-"Geary has keyboard shortcuts for most common operations. Use the built-in "
-"keyboard shortcuts help in Geary to discover the full list. This can be "
-"accessed via the application menu: <guiseq><gui>Geary</gui><gui>Keyboard "
-"Shortcuts</gui></guiseq> or using the keyboard shortcuts listed below."
-msgstr ""
-"<app>Geary</app> verfügt über Tastenkombinationen für die am häufigsten "
-"verwendeten Operationen. Sie finden eine vollständige Liste in der Hilfe zu "
-"<app>Geary</app>. Sie erreichen diese über das Anwendungsmenü: "
-"<guiseq><gui>Geary</gui><gui>Tastenkombinationen</gui></guiseq> oder in den "
-"nachfolgend aufgelisteten Tastenkombinationen."
-
-#. (itstool) path: page/p
-#: C/shortcuts.page:18
-msgid ""
-"The following keyboard shortcuts can be used to access on-line help from "
-"Geary:"
-msgstr ""
-"Mit den folgenden Tastenkombinationen erreichen Sie die Online-Hilfe von "
-"<app>Geary</app>:"
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:22
-msgid "Display this User Manual"
-msgstr "Dieses Benutzerhandbuch anzeigen"
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:23
-msgid "<keyseq><key>F1</key></keyseq>"
-msgstr "<keyseq><key>F1</key></keyseq>"
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:26
-msgid "Display all keyboard shortcuts"
-msgstr "Alle Tastaturkürzel anzeigen"
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:27
-msgid ""
-"<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
-"key><key>F1</key></keyseq>"
-msgstr ""
-"<keyseq><key>Strg</key><key>?</key></keyseq> oder <keyseq><key>Strg</"
-"key><key>F1</key></keyseq>"
+#: C/write.page:51
+msgid "Geary deletes the draft when you send the message."
+msgstr "Geary löscht den Entwurf, wenn die Nachricht gesendet wird."
