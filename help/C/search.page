@@ -61,10 +61,10 @@
 	</tr>
 	<tr>
 		<td><p><input>to:<var>recipient</var></input></p></td>
-		<td><p>Finds messages where <var>sender</var> matches the To, CC, or BCC header.</p></td>
+		<td><p>Finds messages where <var>recipient</var> matches the To, CC, or BCC header.</p></td>
 	</tr>
 	</table>
-	
+
 	<p>As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</input>, and
 	<input>to</input> operators support <input>me</input> as their argument, which searches for the
 	account's email address in the appropriate context.</p>
