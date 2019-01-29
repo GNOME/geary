@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2018-10-09 18:18+0000\n"
-"PO-Revision-Date: 2019-01-22 22:09+0100\n"
+"POT-Creation-Date: 2019-01-29 05:49+0000\n"
+"PO-Revision-Date: 2019-01-29 17:58+0100\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 msgctxt "_"
@@ -351,7 +351,6 @@ msgstr "Tack för att du hjälper till att göra Geary bättre!"
 #. update your localized copy. The msgstr is not used at all. Set it to
 #. whatever you like once you have updated your copy of the file.
 #: C/index.page:5
-#| msgid "@@image: 'figures/geary.svg'; md5=18b50c9e10fe5256ae1cb12aaa3a7600"
 msgctxt "_"
 msgid "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
 msgstr ""
@@ -911,13 +910,12 @@ msgstr "Hittar meddelanden vars ämne innehåller <var>text</var>."
 msgid "<input>to:<var>recipient</var></input>"
 msgstr "<input>till:<var>mottagare</var></input>"
 
-# TODO: correct with previous line?
 #. (itstool) path: td/p
 #: C/search.page:64
 msgid ""
-"Finds messages where <var>sender</var> matches the To, CC, or BCC header."
+"Finds messages where <var>recipient</var> matches the To, CC, or BCC header."
 msgstr ""
-"Hittar meddelanden där <var>avsändare</var> matchar någon av rubrikerna "
+"Hittar meddelanden där <var>mottagare</var> matchar någon av rubrikerna "
 "till, cc eller bcc."
 
 #. (itstool) path: section/p
@@ -968,7 +966,6 @@ msgstr "Visa denna användarhandbok"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:23
-#| msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
 msgid "<keyseq><key>F1</key></keyseq>"
 msgstr "<keyseq><key>F1</key></keyseq>"
 
@@ -979,9 +976,6 @@ msgstr "Visa alla tangentbordsgenvägar"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:27
-#| msgid ""
-#| "<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
-#| "key><key>Up</key></keyseq>"
 msgid ""
 "<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
 "key><key>F1</key></keyseq>"
