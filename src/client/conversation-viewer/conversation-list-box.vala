@@ -159,11 +159,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             if (this.view.message_body_state == NOT_STARTED) {
                 yield this.view.load_body();
             }
-            foreach (ConversationMessage message in this.view) {
-                if (!message.web_view.has_valid_height) {
-                    message.web_view.queue_resize();
-                }
-            };
         }
 
         public override void collapse() {
