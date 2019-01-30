@@ -491,14 +491,14 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
             // Translators: Label used for the display name part of an
             // email address when editing a user's sender address
             // preferences for an account.
-            _("Sender name:"),
+            _("Sender name"),
             this.name_entry
         );
         add_labelled_row(
             // Translators: Label used for the address part of an
             // email address when editing a user's sender address
             // preferences for an account.
-            _("Email address:"),
+            _("Email address"),
             this.address_entry
         );
 
