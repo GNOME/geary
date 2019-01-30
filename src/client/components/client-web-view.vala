@@ -202,9 +202,6 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     /** Determines if the view has any selected text */
     public bool has_selection { get; private set; default = false; }
 
-    /** Determines if the view has started rendering the HTML */
-    public bool has_valid_height { get; private set; default = false; }
-
     /** The HTML content's current preferred height in window pixels. */
     public int preferred_height {
         get {
@@ -603,7 +600,6 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         double height = this.webkit_reported_height;
         try {
             height = WebKitUtil.to_number(result);
-            this.has_valid_height = true;
         } catch (Geary.JS.Error err) {
             debug("Could not get preferred height: %s", err.message);
         }
