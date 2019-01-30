@@ -755,12 +755,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             });
     }
 
-    private async void fetch_remote_body()
-        throws GLib.Error {
-        // Retry the remote fetch once if the first time fails, so if
-        // the connection has timed out we will establish a new one.
-        const int MAX_RETRIES = 2;
-
+    private async void fetch_remote_body() {
         if (is_online()) {
             // XXX Need proper progress reporting here, rather than just
             // doing a pulse
@@ -768,33 +763,20 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 this.body_loading_timeout.start();
             }
 
-            int retries = 0;
             Geary.Email? loaded = null;
-            while (retries < MAX_RETRIES) {
-                retries++;
-                try {
-                    loaded = yield this.email_store.fetch_email_async(
-                        this.email.id,
-                        REQUIRED_FOR_LOAD,
-                        FORCE_UPDATE,
-                        this.load_cancellable
-                    );
-                } catch (GLib.IOError.CANCELLED err) {
-                    throw err;
-                } catch (Geary.ImapError.TIMED_OUT err) {
-                    if (retries < MAX_RETRIES) {
-                        debug("Remote message download timed out, retrying: %s",
-                              err.message);
-                    } else {
-                        debug("Remote message download timed out, giving up %s",
-                              err.message);
-                        throw err;
-                    }
-                } catch (GLib.Error err) {
-                    debug("Remote message download failed: %s", err.message);
-                    handle_load_failure();
-                    throw err;
-                }
+            try {
+                debug("Downloading remote message: %s", this.email.to_string());
+                loaded = yield this.email_store.fetch_email_async(
+                    this.email.id,
+                    REQUIRED_FOR_LOAD,
+                    FORCE_UPDATE,
+                    this.load_cancellable
+                );
+            } catch (GLib.IOError.CANCELLED err) {
+                // All good
+            } catch (GLib.Error err) {
+                debug("Remote message download failed: %s", err.message);
+                handle_load_failure();
             }
 
             this.body_loading_timeout.reset();
