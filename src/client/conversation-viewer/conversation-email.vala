@@ -601,15 +601,18 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                     this.load_cancellable
                 );
                 loaded = true;
+                this.body_loading_timeout.reset();
             } catch (Geary.EngineError.INCOMPLETE_MESSAGE err) {
                 // Don't have the complete message at the moment, so
-                // download it in the background.
+                // download it in the background. Don't reset the body
+                // load timeout here since this will attempt to fetch
+                // from the remote
                 this.fetch_remote_body.begin();
             } catch (GLib.Error err) {
+                this.body_loading_timeout.reset();
                 handle_load_failure();
                 throw err;
             }
-            this.body_loading_timeout.reset();
         }
 
         if (loaded) {
@@ -761,7 +764,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         if (is_online()) {
             // XXX Need proper progress reporting here, rather than just
             // doing a pulse
-            this.primary_message.start_progress_pulse();
+            if (!this.body_loading_timeout.is_running) {
+                this.body_loading_timeout.start();
+            }
 
             int retries = 0;
             Geary.Email? loaded = null;
@@ -792,6 +797,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 }
             }
 
+            this.body_loading_timeout.reset();
+
             if (loaded != null) {
                 try {
                     this.email = loaded;
@@ -802,6 +809,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 }
             }
         } else {
+            this.body_loading_timeout.reset();
             handle_load_offline();
         }
     }
