@@ -12,24 +12,24 @@
 # noxan <noxan@byteweaver.net>, 2013
 # rageltus <rageltus@gmail.com>, 2012
 # Benjamin Steinwender <b@stbe.at>, 2014.
-# Mario Blättermann <mario.blaettermann@gmail.com>, 2016-2019.
 # Wolfgang Stöggl <c72578@yahoo.de>, 2016.
 # Tim Sabsch <tim@sabsch.com>, 2019.
+# Mario Blättermann <mario.blaettermann@gmail.com>, 2016-2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-01-21 17:59+0000\n"
-"PO-Revision-Date: 2019-01-25 10:47+0100\n"
+"POT-Creation-Date: 2019-01-30 12:37+0000\n"
+"PO-Revision-Date: 2019-01-30 14:40+0100\n"
 "Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
-"Language-Team: Deutsch <gnome-de@gnome.org>\n"
+"Language-Team: Deutsch <translation-team-de@lists.sourceforge.net>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"X-Generator: Gtranslator 3.30.0\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -415,7 +415,11 @@ msgstr "Konto wurde nicht erstellt: %s"
 msgid "Your name"
 msgstr "Ihr Name"
 
+#. Translators: Label used for the address part of an
+#. email address when editing a user's sender address
+#. preferences for an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:569
+#: src/client/accounts/accounts-editor-edit-pane.vala:501
 msgid "Email address"
 msgstr "E-Mail-Adresse"
 
@@ -520,15 +524,8 @@ msgstr "Entfernen"
 #. email address when editing a user's sender address
 #. preferences for an account.
 #: src/client/accounts/accounts-editor-edit-pane.vala:494
-msgid "Sender name:"
-msgstr "Absendername:"
-
-#. Translators: Label used for the address part of an
-#. email address when editing a user's sender address
-#. preferences for an account.
-#: src/client/accounts/accounts-editor-edit-pane.vala:501
-msgid "Email address:"
-msgstr "E-Mail-Adresse:"
+msgid "Sender name"
+msgstr "Absendername"
 
 #. Translators: Label used as the undo tooltip after adding an
 #. new sender email address to an account. The string
@@ -786,8 +783,8 @@ msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/geary-application.vala:24
-msgid "Copyright 2016-2018 Geary Development Team."
-msgstr "Copyright 2016-2018 Geary-Entwicklerteam."
+msgid "Copyright 2016-2019 Geary Development Team."
+msgstr "Copyright 2016-2019 Geary-Entwicklerteam."
 
 #: src/client/application/geary-application.vala:26
 msgid "Visit the Geary web site"
@@ -3403,279 +3400,3 @@ msgstr "Details:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Aktualisierung von Geary wird durchgeführt …"
-
-#~ msgid "Additional addresses for %s"
-#~ msgstr "Zusätzliche Adressen für %s"
-
-#~ msgid "First Last"
-#~ msgstr "Vorname Nachname"
-
-#~ msgid "Enter your account information to get started."
-#~ msgstr "Tragen Sie zu Beginn bitte Ihre Kontodaten ein."
-
-#~ msgid "Edit"
-#~ msgstr "Bearbeiten"
-
-#~ msgid "Preview"
-#~ msgstr "Vorschau"
-
-#~ msgid "Remem_ber passwords"
-#~ msgstr "Passwörter _merken"
-
-#~ msgid "Remem_ber password"
-#~ msgstr "Passwort _merken"
-
-#~ msgid "Unable to validate:\n"
-#~ msgstr "Bestätigung nicht möglich:\n"
-
-#~ msgid "        • Invalid account nickname.\n"
-#~ msgstr "        • Ungültiger Konto-Nickname.\n"
-
-#~ msgid "        • Email address already added to Geary.\n"
-#~ msgstr "        • E-Mail-Adresse wurde bereits zu Geary hinzugefügt.\n"
-
-#~ msgid "        • IMAP connection error.\n"
-#~ msgstr "        • IMAP-Verbindungsfehler.\n"
-
-#~ msgid "        • IMAP username or password incorrect.\n"
-#~ msgstr "        • IMAP-Benutzername oder Passwort ungültig.\n"
-
-#~ msgid "        • SMTP connection error.\n"
-#~ msgstr "        • SMTP-Verbindungsfehler.\n"
-
-#~ msgid "        • SMTP username or password incorrect.\n"
-#~ msgstr "        • SMTP-Benutzername oder Passwort ungültig.\n"
-
-#~ msgid "        • Connection error.\n"
-#~ msgstr "        • Verbindungsfehler.\n"
-
-#~ msgid "        • Username or password incorrect.\n"
-#~ msgstr "        • IMAP-Benutzername oder Passwort ungültig.\n"
-
-#~ msgid "Unable to store server trust exception"
-#~ msgstr "Ausnahme für Serververtrauen konnte nicht gespeichert werden"
-
-#~ msgid "Your settings are insecure"
-#~ msgstr "Ihre Einstellungen sind unsicher"
-
-#~ msgid ""
-#~ "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means "
-#~ "your username and password could be read by another person on the "
-#~ "network.  Are you sure you want to do this?"
-#~ msgstr ""
-#~ "In Ihren IMAP- und/oder SMTP-Einstellungen sind weder SSL noch TLS "
-#~ "festgelegt. Dies bedeutet, dass Ihr Benutzername und Ihr Passwort von "
-#~ "anderen Personen im selben Netzwerk gelesen werden können. Sind Sie "
-#~ "sicher, dass Sie dies tun möchten?"
-
-#~ msgid "Co_ntinue"
-#~ msgstr "_Weiter"
-
-#~ msgid ""
-#~ "Geary encountered an error sending an email.  If the problem persists, "
-#~ "please manually delete the email from your Outbox folder."
-#~ msgstr ""
-#~ "Beim Senden einer E-Mail trat ein Fehler auf. Wenn dieses Problem auch "
-#~ "weiterhin besteht, löschen Sie bitte die E-Mail aus dem Postausgang."
-
-#~ msgid ""
-#~ "Geary encountered an error saving a sent message to Sent Mail.  The "
-#~ "message will stay in your Outbox folder until you delete it."
-#~ msgstr ""
-#~ "Beim Speichern einer gesendeten E-Mail trat ein Fehler auf. Die Nachricht "
-#~ "bleibt im Postausgang, bis Sie sie löschen."
-
-#~ msgid "Unable to open local mailbox for %s"
-#~ msgstr "Das lokale Postfach für %s konnte nicht geöffnet werden"
-
-#~ msgid ""
-#~ "There was an error opening the local mail database for this account. This "
-#~ "is possibly due to a file permissions problem.\n"
-#~ "\n"
-#~ "Please check that you have read/write permissions for all files in this "
-#~ "directory:\n"
-#~ "\n"
-#~ "%s"
-#~ msgstr ""
-#~ "Beim Öffnen der lokalen E-Mail-Datenbank trat ein Fehler auf. Die Ursache "
-#~ "ist möglicherweise ein Dateizugriffsproblem.\n"
-#~ "\n"
-#~ "Bitte überprüfen Sie die Lese-/Schreib-Rechte für alle Dateien in diesem "
-#~ "Ordner:\n"
-#~ "\n"
-#~ "%s"
-
-#~ msgid ""
-#~ "The version number of the local mail database is formatted for a newer "
-#~ "version of Geary. Unfortunately, the database cannot be “rolled back” to "
-#~ "work with this version of Geary.\n"
-#~ "\n"
-#~ "Please install the latest version of Geary and try again."
-#~ msgstr ""
-#~ "Die Versionsnummer der lokalen E-Mail-Datenbank ist für eine neuere "
-#~ "Version formatiert. Unglücklicherweise kann die Datenbank nicht "
-#~ "»zurückgesetzt« werden, damit sie mit dieser Version von Geary "
-#~ "funktioniert.\n"
-#~ "\n"
-#~ "Bitte installieren Sie die neueste Version von Geary und versuchen Sie es "
-#~ "erneut."
-
-#~ msgid ""
-#~ "There was an error opening the local account. This is probably due to "
-#~ "connectivity issues.\n"
-#~ "\n"
-#~ "Please check your network connection and restart Geary."
-#~ msgstr ""
-#~ "Beim Öffnen des lokalen Kontos ist ein Fehler aufgetreten. Die Ursache "
-#~ "ist vermutlich ein Netzwerkfehler.\n"
-#~ "\n"
-#~ "Bitte überprüfen Sie Ihre Verbindung und starten Sie Geary neu."
-
-#~ msgid "Geary will exit if you have no other open email accounts."
-#~ msgstr ""
-#~ "Geary wird beendet, falls Sie keine anderen offenen E-Mail-Konten haben."
-
-#~ msgid "IMAP"
-#~ msgstr "IMAP"
-
-#~ msgid "SMTP"
-#~ msgstr "SMTP"
-
-#~ msgid "Other"
-#~ msgstr "Andere"
-
-#~ msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-#~ msgstr ""
-#~ "<span weight=\"bold\" size=\"larger\">Konto konnte nicht entfernt werden</"
-#~ "span> "
-
-#~ msgid ""
-#~ "A composer window associated with this account is currently open. Send or "
-#~ "discard the message and try again."
-#~ msgstr ""
-#~ "Ein Fenster, in dem eine mit diesem Konto verknüpfte E-Mail verfasst "
-#~ "wird, ist bereits offen.\n"
-#~ "Senden Sie diese Nachricht oder verwerfen Sie sie, und versuchen Sie es "
-#~ "dann erneut."
-
-#~ msgid "Please wait while Geary validates your account."
-#~ msgstr "Bitte warten, bis Geary Ihr Konto bestätigt hat."
-
-#~ msgid ""
-#~ "Some email services require additional addresses be configured on the "
-#~ "server.  Contact your email provider for more information."
-#~ msgstr ""
-#~ "Einige E-Mail-Dienste verlangen das Einrichten von zusätzlichen Adressen "
-#~ "auf dem Server. Kontaktieren Sie Ihren E-Mail-Anbieter für weitere "
-#~ "Informationen."
-
-#~ msgid "_Update"
-#~ msgstr "_Aktualisieren"
-
-#~ msgid "E_mail address"
-#~ msgstr "E-_Mail-Adresse"
-
-#~ msgid "_Password"
-#~ msgstr "_Passwort"
-
-#~ msgid "S_ervice"
-#~ msgstr "Di_enst"
-
-#~ msgid "N_ame"
-#~ msgstr "N_ame"
-
-#~ msgid "N_ickname"
-#~ msgstr "N_ickname"
-
-#~ msgid "Work, Home, etc."
-#~ msgstr "Arbeit, Zuhause, etc."
-
-#~ msgid "_Save sent mail"
-#~ msgstr "Gesendete E-Mail _speichern"
-
-#~ msgid "Addi_tional email addresses…"
-#~ msgstr "Zusätzliche _E-Mail-Adressen …"
-
-#~ msgid "IMAP settings"
-#~ msgstr "IMAP-Einstellungen"
-
-#~ msgid "Se_rver"
-#~ msgstr "Se_rver"
-
-#~ msgid "P_ort"
-#~ msgstr "P_ort"
-
-#~ msgid "Ser_ver"
-#~ msgstr "Ser_ver"
-
-#~ msgid "Por_t"
-#~ msgstr "Por_t"
-
-#~ msgid "User_name"
-#~ msgstr "Be_nutzername"
-
-#~ msgid "Pass_word"
-#~ msgstr "Pass_wort"
-
-#~ msgid "SMTP password"
-#~ msgstr "SMTP-Passwort"
-
-#~ msgid "_Username"
-#~ msgstr "Ben_utzername"
-
-#~ msgid "IMAP password"
-#~ msgstr "IMAP-Passwort"
-
-#~ msgid "Encr_yption"
-#~ msgstr "_Verschlüsselung"
-
-#~ msgid "Encrypt_ion"
-#~ msgstr "_Verschlüsselung"
-
-#~ msgid "STARTTLS"
-#~ msgstr "STARTTLS"
-
-#~ msgid "No authentication re_quired"
-#~ msgstr "Keine Authentifizierung nötig"
-
-#~ msgid "Use IMAP cre_dentials"
-#~ msgstr "_IMAP-Zugangsinformationen verwenden"
-
-#~ msgid "Composer"
-#~ msgstr "Verfassen"
-
-#~ msgid "Si_gn emails (HTML allowed):"
-#~ msgstr "E-Mails _unterzeichnen (HTML erlaubt):"
-
-#~ msgid "Storage"
-#~ msgstr "Speicher"
-
-#~ msgid ""
-#~ "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove "
-#~ "this account?</span> "
-#~ msgstr ""
-#~ "<span weight=\"bold\" size=\"larger\">Sind Sie sicher, dass Sie dieses "
-#~ "Konto löschen wollen?</span> "
-
-#~ msgid ""
-#~ "All email associated with this account will be removed from your "
-#~ "computer. This will not affect email on the server."
-#~ msgstr ""
-#~ "Alle E-Mails, die mit diesem Konto verknüpft sind, werden von Ihrem "
-#~ "Rechner entfernt.\n"
-#~ "Die auf dem Server gespeicherten E-Mails bleiben erhalten."
-
-#~ msgid "Nickname:"
-#~ msgstr "Spitzname:"
-
-#~ msgid "Default attachments directory"
-#~ msgstr "Vorgabeordner für Anhänge"
-
-#~ msgid "Location used when opening and saving attachments."
-#~ msgstr "Beim Öffnen und Speichern von Anhängen zu verwendender Speicherort."
-
-#~ msgid "Default print output directory"
-#~ msgstr "Vorgegebener Ordner zum Drucken"
-
-#~ msgid "Location used when printing to a file."
-#~ msgstr "Zu verwendender Ort, wenn in eine Datei ausgedruckt werden soll."
