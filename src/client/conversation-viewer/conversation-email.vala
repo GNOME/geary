@@ -1025,13 +1025,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void on_resource_loaded(string id) {
         Gee.Iterator<Geary.Attachment> displayed =
             this.displayed_attachments.iterator();
-        displayed.next();
         while (displayed.has_next()) {
+            displayed.next();
             Geary.Attachment? attachment = displayed.get();
             if (attachment.content_id == id) {
                 displayed.remove();
             }
-            displayed.next();
         }
     }
 
