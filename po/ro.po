@@ -10,10 +10,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=geary&k"
-"eywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-06-19 12:29+0000\n"
-"PO-Revision-Date: 2016-06-20 19:30+0200\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
+"POT-Creation-Date: 2019-01-31 10:32+0000\n"
+"PO-Revision-Date: 2019-01-31 19:51+0100\n"
 "Last-Translator: Daniel Șerbănescu <daniel [at] serbanescu [dot] dk>\n"
 "Language-Team: Gnome Romanian Translation Team\n"
 "Language: ro\n"
@@ -21,497 +20,880 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2);;\n"
-"X-Generator: Virtaal 0.7.1\n"
+"20)) ? 1 : 2);\n"
+"X-Generator: Poedit 2.2.1\n"
 "X-Project-Style: gnome\n"
 
-#: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
-msgid "Geary"
-msgstr "Geary"
-
-#: ../desktop/geary.desktop.in.h:2 ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:18
-msgid "Mail Client"
-msgstr "Client de email"
-
-#: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
-msgid "Geary Mail"
-msgstr "Geary Mail"
-
-#: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
-msgid "Send and receive email"
-msgstr "Trimite și primește emailuri"
-
-#: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
-msgid "Email;E-mail;Mail;"
-msgstr "Email;E-mail;Mail;Poștă;Electronică;"
-
-#: ../desktop/geary.desktop.in.h:6
-msgid "Compose Message"
-msgstr "Compune un mesaj"
-
-#: ../desktop/geary-attach.contract.in.h:1
+#: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
 msgstr "Trimite prin email"
 
-#: ../desktop/geary-attach.contract.in.h:2
+#. Translators: Do NOT translate or transliterate this text (this is an icon file name)!
+#: desktop/geary-attach.contract.desktop.in:5
+msgid "mail-send"
+msgstr "mail-send"
+
+#: desktop/geary-attach.contract.desktop.in:6
 msgid "Send files using Geary"
 msgstr "Trimite fișiere folosind Geary"
 
-#: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
-#: ../src/client/components/stock.vala:31
-msgid "_Save"
-msgstr "_Salvează"
+#. Translators: The application name
+#: desktop/geary-autostart.desktop.in:3
+#: desktop/org.gnome.Geary.appdata.xml.in:11
+#: desktop/org.gnome.Geary.desktop.in:3
+#: src/client/accounts/accounts-editor-servers-pane.vala:539
+msgid "Geary"
+msgstr "Geary"
 
-#: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
-#: ../src/client/components/stock.vala:22
-msgid "_Add"
-msgstr "_Adaugă"
+#: desktop/geary-autostart.desktop.in:4 desktop/org.gnome.Geary.desktop.in:4
+msgid "Email"
+msgstr "Email"
 
-#. reset/clear widgets
-#: ../src/client/accounts/account-dialog-edit-alternate-emails-pane.vala:124
+#. Translators: The application's summary / tagline
+#: desktop/geary-autostart.desktop.in:5
+#: desktop/org.gnome.Geary.appdata.xml.in:15
+#: desktop/org.gnome.Geary.desktop.in:5
+#: src/client/application/geary-application.vala:22
+msgid "Send and receive email"
+msgstr "Trimite și primește emailuri"
+
+#. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
+#: desktop/geary-autostart.desktop.in:7
+msgid "Email;E-mail;Mail;"
+msgstr "Email;E-mail;Mail;Poștă;Electronică;"
+
+#. Translators: Do NOT translate or transliterate this text (this is an icon file name)!
+#: desktop/geary-autostart.desktop.in:9 desktop/org.gnome.Geary.desktop.in:9
+msgid "org.gnome.Geary"
+msgstr "org.gnome.Geary"
+
+#. Translators: The development team's name
+#: desktop/org.gnome.Geary.appdata.xml.in:13
+msgid "Geary Development Team"
+msgstr "Echipa de dezvoltare Geary"
+
+#: desktop/org.gnome.Geary.appdata.xml.in:17
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary este o aplicație de email construită în jurul conversațiilor pentru "
+"desktopul GNOME 3. Vă permite să citiți, găsiți și trimite email-uri dintr-o "
+"interfață modernă și simplă."
+
+#: desktop/org.gnome.Geary.appdata.xml.in:22
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Conversațiile vă permit să citiți o discuție completă fără a trebui să "
+"căutați și să navigați de la mesaj la mesaj."
+
+#: desktop/org.gnome.Geary.appdata.xml.in:26
+msgid "Geary’s features include:"
+msgstr "Funcționalitățile lui Geary includ:"
+
+#: desktop/org.gnome.Geary.appdata.xml.in:28
+msgid "Quick email account setup"
+msgstr "Configurare rapidă a contului de email"
+
+#: desktop/org.gnome.Geary.appdata.xml.in:29
+msgid "Shows related messages together in conversations"
+msgstr "Arată mesajele înrudite în conversații"
+
+#: desktop/org.gnome.Geary.appdata.xml.in:30
+msgid "Fast, full text and keyword search"
+msgstr "Căutare rapidă după un termen în tot textul"
+
+#: desktop/org.gnome.Geary.appdata.xml.in:31
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Compunător de mesaje text și HTML cu multiple funcționalități"
+
+#: desktop/org.gnome.Geary.appdata.xml.in:32
+msgid "Desktop notification of new mail"
+msgstr "Notificări desktop pentru noile emailuri"
+
+#: desktop/org.gnome.Geary.appdata.xml.in:33
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr "Compatibil cu GMail, Yahoo! Mail, Outlook.com și alte servere IMAP"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.appdata.xml.in:47
+msgid "Geary displaying a conversation"
+msgstr "Geary afișând o conversație"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.appdata.xml.in:52
+msgid "Geary showing the rich text composer"
+msgstr "Geary afișând compunătorul de text bogat"
+
+#. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
+#: desktop/org.gnome.Geary.desktop.in:7
+msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr "Mesaje;Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+
+#: desktop/org.gnome.Geary.desktop.in:21 ui/gtk/menus.ui:7
+msgid "Compose Message"
+msgstr "Compune un mesaj"
+
+#: desktop/org.gnome.Geary.gschema.xml:8
+msgid "Maximize window"
+msgstr "Maximizează fereastra"
+
+#: desktop/org.gnome.Geary.gschema.xml:9
+msgid "True if the application window is maximized, false otherwise."
+msgstr ""
+"Adevărat dacă fereastra aplicației este maximizată, fals în mod contrar."
+
+#: desktop/org.gnome.Geary.gschema.xml:14
+msgid "Width of window"
+msgstr "Lățimea ferestrei"
+
+#: desktop/org.gnome.Geary.gschema.xml:15
+msgid "The last recorded width of the application window."
+msgstr "Ultima lățime memorată a ferestrei aplicației."
+
+#: desktop/org.gnome.Geary.gschema.xml:20
+msgid "Height of window"
+msgstr "Înălțimea ferestrei"
+
+#: desktop/org.gnome.Geary.gschema.xml:21
+msgid "The last recorded height of the application window."
+msgstr "Ultima înălțime memorată a ferestrei aplicației."
+
+#: desktop/org.gnome.Geary.gschema.xml:26
+msgid "Position of folder list pane"
+msgstr "Poziția panoului cu lista dosarelor"
+
+#: desktop/org.gnome.Geary.gschema.xml:27
+msgid "Position of the folder list Paned grabber."
+msgstr "Poziția mânerului panoului cu lista dosarelor"
+
+#: desktop/org.gnome.Geary.gschema.xml:32
+msgid "Position of folder list pane when horizontal"
+msgstr "Poziția panoului cu lista dosarelor când este orizontal"
+
+#: desktop/org.gnome.Geary.gschema.xml:33
+msgid ""
+"Position of the folder list Paned grabber in the horizontal orientation."
+msgstr ""
+"Poziția mânerului panoului cu lista dosarelor în orientarea orizontală."
+
+#: desktop/org.gnome.Geary.gschema.xml:38
+msgid "Position of folder list pane when vertical"
+msgstr "Poziția panoului cu lista dosarelor când este vertical"
+
+#: desktop/org.gnome.Geary.gschema.xml:39
+msgid "Position of the folder list Paned grabber in the vertical orientation."
+msgstr "Poziția mânerului panoului cu lista dosarelor în orientarea verticală."
+
+#: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Orientation of the folder list pane"
+msgstr "Orientarea panoului cu lista dosarelor"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "True if the folder list Paned is in the horizontal orientation."
+msgstr ""
+"Adevărat dacă mânerul panoului cu lista dosarelor este în orientare "
+"orizontală."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
+msgid "Position of message list pane"
+msgstr "Poziția panoului cu lista mesajelor"
+
+#: desktop/org.gnome.Geary.gschema.xml:51
+msgid "Position of the message list Paned grabber."
+msgstr "Poziția mânerului panoului cu lista mesajelor."
+
+#: desktop/org.gnome.Geary.gschema.xml:56
+msgid "Autoselect next message"
+msgstr "Autoselectează noul mesaj"
+
+#: desktop/org.gnome.Geary.gschema.xml:57
+msgid "True if we should autoselect the next available conversation."
+msgstr "Adevărat dacă ar trebui detectată următoarea conversație disponibilă."
+
+#: desktop/org.gnome.Geary.gschema.xml:62
+msgid "Display message previews"
+msgstr "Afișează previzualizări pentru mesaje"
+
+#: desktop/org.gnome.Geary.gschema.xml:63
+msgid "True if we should display a short preview of each message."
+msgstr ""
+"Adevărat dacă ar trebui să arătăm o previzualizare scurtă pentru fiecare "
+"mesaj."
+
+#: desktop/org.gnome.Geary.gschema.xml:68
+msgid "Languages that shall be used in the spell checker"
+msgstr "Limbi care ar trebui folosite în corectorul ortografic"
+
+#: desktop/org.gnome.Geary.gschema.xml:69
+msgid "List of the languages to use in the spell checker."
+msgstr "Listă de limbi de folosit în corectorul ortografic."
+
+#: desktop/org.gnome.Geary.gschema.xml:74
+msgid "Languages that are displayed in the spell checker popover"
+msgstr "Limbi care sunt afișate în fereastra popup a corectorului ortografic."
+
+#: desktop/org.gnome.Geary.gschema.xml:75
+msgid ""
+"List of languages that are always displayed in the popover of the spell "
+"checker."
+msgstr ""
+"Listă de limbi care sunt afișate întotdeauna în fereastra popup a "
+"corectorului ortografic."
+
+#: desktop/org.gnome.Geary.gschema.xml:80
+msgid "Enable notification sounds"
+msgstr "Activează notificările sonore"
+
+#: desktop/org.gnome.Geary.gschema.xml:81
+msgid "True to play sounds for notifications and sending."
+msgstr "Adevărat pentru a reda sunete pentru notificări și trimitere."
+
+#: desktop/org.gnome.Geary.gschema.xml:86
+msgid "Show notifications for new mail"
+msgstr "Arată notificările pentru emailurile noi"
+
+#: desktop/org.gnome.Geary.gschema.xml:87
+msgid "True to show notification bubbles."
+msgstr "Adevărat pentru a arăta bule de notificare."
+
+#: desktop/org.gnome.Geary.gschema.xml:92
+msgid "Notify of new mail at startup"
+msgstr "Notifică despre emailuri noi la pornire"
+
+#: desktop/org.gnome.Geary.gschema.xml:93
+msgid "True to notify of new mail at startup."
+msgstr "Adevărat pentru a notifica despre noile emailuri la pornire."
+
+#: desktop/org.gnome.Geary.gschema.xml:98
+msgid "Ask when opening an attachment"
+msgstr "Întreabă când se deschide un atașament"
+
+#: desktop/org.gnome.Geary.gschema.xml:99
+msgid "True to ask when opening an attachment."
+msgstr "Adevărat pentru a întreba la deschiderea unui fișier atașat."
+
+#: desktop/org.gnome.Geary.gschema.xml:104
+msgid "Whether to compose emails in HTML"
+msgstr "Dacă să se compună email-uri în HTML"
+
+#: desktop/org.gnome.Geary.gschema.xml:105
+msgid "True to compose emails in HTML; false for plain text."
+msgstr "Adevărat pentru a compune email-uri În HTML; fals pentru text simplu."
+
+#: desktop/org.gnome.Geary.gschema.xml:110
+msgid "Advisory strategy for full-text searching"
+msgstr "Strategie consultativă pentru căutarea în întreg textul"
+
+#: desktop/org.gnome.Geary.gschema.xml:111
+msgid ""
+"Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
+msgstr ""
+"Valorile acceptabile sunt „exact”, „conservative”, „aggressive” și „horizon”."
+
+#: desktop/org.gnome.Geary.gschema.xml:116
+msgid "Zoom of conversation viewer"
+msgstr "Nivelul de zoom al vizualizatorului conversației"
+
+#: desktop/org.gnome.Geary.gschema.xml:117
+msgid "The zoom to apply on the conservation view."
+msgstr "Nivelul de zoom de aplicat vizualizării conversației."
+
+#: desktop/org.gnome.Geary.gschema.xml:122
+msgid "Size of detached composer window"
+msgstr "Dimensiunea ferestrei detașată a compozitorului"
+
+#: desktop/org.gnome.Geary.gschema.xml:123
+msgid "The last recorded size of the detached composer window."
+msgstr "Ultima dimensiune înregistrată a ferestrei detașate a compozitorului."
+
+#: desktop/org.gnome.Geary.gschema.xml:128
+msgid "Base URL to look up contact avatars"
+msgstr "URL-ul de bază pentru verificarea după avatare de contact"
+
+#: desktop/org.gnome.Geary.gschema.xml:129
+msgid ""
+"A Gravatar or Libravatar compatible URL, set to the empty string to disable."
+msgstr ""
+"Un URL compatibil cu Gravatar sau Libravatar, stabiliți la șir gol pentru a "
+"dezactiva."
+
+#: desktop/org.gnome.Geary.gschema.xml:134
+msgid "Whether we migrated the old settings"
+msgstr "Dacă am migrat configurările vechi"
+
+#: desktop/org.gnome.Geary.gschema.xml:135
+msgid ""
+"False to check for the old “org.yorba.geary”-schema and copy its values."
+msgstr ""
+"Fals pentru a verifica vechea schemă „org.yorba.geary” și copia valorile "
+"sale."
+
+#. Translators: In-app notification label, when
+#. the app had a problem pinning an otherwise
+#. untrusted TLS certificate
+#: src/client/accounts/accounts-editor.vala:203
+msgid "Failed to store certificate"
+msgstr "Eșec la stocarea certificatului"
+
+#. Translators: Label for adding an email account
+#. account for a generic IMAP service provider.
+#: src/client/accounts/accounts-editor-add-pane.vala:109
+msgid "All others"
+msgstr "Toate celelalte"
+
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:196
+#: src/client/accounts/accounts-editor-servers-pane.vala:300
+msgid "Check your receiving login and password"
+msgstr "Verificați numele și parola contului de primire"
+
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:211
+#: src/client/accounts/accounts-editor-servers-pane.vala:313
+msgid "Check your receiving server details"
+msgstr "Verificați detaliile serverului de primire"
+
+#. Translators: In-app notification label
+#. There was an SMTP auth error, but IMAP already
+#. succeeded, so the user probably needs to
+#. specify custom creds here
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:233
+#: src/client/accounts/accounts-editor-servers-pane.vala:334
+msgid "Check your sending login and password"
+msgstr "Verificați numele și parola contului de trimitere"
+
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:247
+#: src/client/accounts/accounts-editor-servers-pane.vala:347
+msgid "Check your sending server details"
+msgstr "Verificați detaliile serverului de trimitere"
+
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:262
+msgid "Check your email address and password"
+msgstr "Verificați adresa de email și parola"
+
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:273
+msgid "Could not connect, check your network"
+msgstr "Nu s-a putut conecta, verificați rețeaua"
+
+#. Translators: In-app notification label for a
+#. generic error creating an account
+#: src/client/accounts/accounts-editor-add-pane.vala:286
+msgid "An unexpected problem occurred"
+msgstr "A apărut o problemă neașteptată"
+
+#. Translators: In-app notification label, the
+#. string substitution is a more detailed reason.
+#: src/client/accounts/accounts-editor-add-pane.vala:304
 #, c-format
-msgid "Additional addresses for %s"
-msgstr "Adrese adiționale pentru %s"
+msgid "Account not created: %s"
+msgstr "Contul nu a fost creeat: %s"
 
-#. Sets min size.
-#: ../src/client/accounts/account-dialog.vala:21
-msgid "Accounts"
-msgstr "Conturi"
+#. Translators: Label for the person's actual name when adding
+#. an account
+#: src/client/accounts/accounts-editor-add-pane.vala:552
+msgid "Your name"
+msgstr "Numele dumneavoastră"
 
-#. Copyright 2016 Software Freedom Conservancy Inc.
-#. *
-#. * This software is licensed under the GNU Lesser General Public License
-#. * (version 2.1 or later).  See the COPYING file in this distribution.
-#.
-#. Page for adding or editing an account.
-#. / Placeholder text indicating that the user should type their first name and last name
-#: ../src/client/accounts/add-edit-page.vala:10
-msgid "First Last"
-msgstr "Prenume Nume"
+#. Translators: Label used for the address part of an
+#. email address when editing a user's sender address
+#. preferences for an account.
+#: src/client/accounts/accounts-editor-add-pane.vala:569
+#: src/client/accounts/accounts-editor-edit-pane.vala:501
+msgid "Email address"
+msgstr "Adresă de email"
 
-#: ../src/client/accounts/add-edit-page.vala:233
-msgid "Welcome to Geary."
-msgstr "Bine ați venit la Geary."
+#. Translators: Placeholder for the default sender address
+#. when adding an account
+#. Translators: This is used as a placeholder for the
+#. address part of an email address when editing a user's
+#. sender address preferences for an account.
+#: src/client/accounts/accounts-editor-add-pane.vala:572
+#: src/client/accounts/accounts-editor-edit-pane.vala:469
+msgid "person@example.com"
+msgstr "persoană@exemplu.ro"
 
-#: ../src/client/accounts/add-edit-page.vala:233
-msgid "Enter your account information to get started."
-msgstr "Introduceți detaliile contului pentru a începe."
+#. Translators: Label for an IMAP/SMTP service login/user name
+#. when adding an account
+#. Translators: Label for the user's login name for an
+#. IMAP, SMTP, etc service
+#: src/client/accounts/accounts-editor-add-pane.vala:586
+#: src/client/accounts/accounts-editor-servers-pane.vala:809
+msgid "Login name"
+msgstr "Nume de autentificare"
 
-#: ../src/client/accounts/add-edit-page.vala:253
-msgid "2 weeks back"
-msgstr "acum 2 săptămâni"
+#. Translators: Label for the user's password for an IMAP,
+#. SMTP, etc service
+#: src/client/accounts/accounts-editor-add-pane.vala:600
+#: src/client/accounts/accounts-editor-servers-pane.vala:928
+#: ui/password-dialog.glade:108
+msgid "Password"
+msgstr "Parolă"
 
-#. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:254
-msgid "1 month back"
-msgstr "acum o lună"
+#. Translators: Label for the IMAP server hostname when
+#. adding an account.
+#. Translators: This label describes the host name or IP
+#. address and port used by an account's IMAP service.
+#: src/client/accounts/accounts-editor-add-pane.vala:622
+#: src/client/accounts/accounts-editor-servers-pane.vala:656
+msgid "IMAP server"
+msgstr "Server IMAP"
 
-#: ../src/client/accounts/add-edit-page.vala:255
-msgid "3 months back"
-msgstr "acum 3 luni"
+#. Translators: Placeholder for the IMAP server hostname
+#. when adding an account.
+#: src/client/accounts/accounts-editor-add-pane.vala:625
+msgid "imap.example.com"
+msgstr "imap.exemplu.ro"
 
-#: ../src/client/accounts/add-edit-page.vala:256
-msgid "6 months back"
-msgstr "acum 6 luni"
+#. Translators: Label for the SMTP server hostname when
+#. adding an account.
+#. Translators: This label describes the host name or IP
+#. address and port used by an account's SMTP service.
+#: src/client/accounts/accounts-editor-add-pane.vala:631
+#: src/client/accounts/accounts-editor-servers-pane.vala:662
+msgid "SMTP server"
+msgstr "Server SMTP"
 
-#: ../src/client/accounts/add-edit-page.vala:257
-msgid "1 year back"
-msgstr "acum 1 an"
+#. Translators: Placeholder for the SMTP server hostname
+#. when adding an account.
+#: src/client/accounts/accounts-editor-add-pane.vala:634
+msgid "smtp.example.com"
+msgstr "smtp.exemplu.ro"
 
-#: ../src/client/accounts/add-edit-page.vala:258
-msgid "2 years back"
-msgstr "acum 2 ani"
+#. Translators: Label in the account editor for the user's
+#. custom name for an account.
+#: src/client/accounts/accounts-editor-edit-pane.vala:278
+#: ui/accounts_editor_remove_pane.ui:123
+msgid "Account name"
+msgstr "Nume de cont"
 
-#: ../src/client/accounts/add-edit-page.vala:259
-msgid "4 years back"
-msgstr "acum 4 ani"
+#. Translators: Tooltip used to undo changing
+#. the name of an account. The string
+#. substitution is the old name of the
+#. account.
+#: src/client/accounts/accounts-editor-edit-pane.vala:312
+#, c-format
+msgid "Change account name back to “%s”"
+msgstr "Schimbă numele contului înapoi la „%s”"
 
-#. Separator
-#: ../src/client/accounts/add-edit-page.vala:261
+#. Translators: Tooltip for adding a new email sender/from
+#. address's address to an account
+#: src/client/accounts/accounts-editor-edit-pane.vala:336
+msgid "Add a new sender email address"
+msgstr "Adaugă o nouă adresă de email pentru expeditor"
+
+#. Translators: Label used to indicate the user has
+#. provided no display name for one of their sender
+#. email addresses in their account settings.
+#: src/client/accounts/accounts-editor-edit-pane.vala:417
+msgid "Name not set"
+msgstr "Numele nu este configurat"
+
+#. Translators: This is used as a placeholder for the
+#. display name for an email address when editing a user's
+#. sender address preferences for an account.
+#: src/client/accounts/accounts-editor-edit-pane.vala:456
+msgid "Sender Name"
+msgstr "Numele expeditorului"
+
+#: src/client/accounts/accounts-editor-edit-pane.vala:479
+msgid "Remove"
+msgstr "Elimină"
+
+#. Translators: Label used for the display name part of an
+#. email address when editing a user's sender address
+#. preferences for an account.
+#: src/client/accounts/accounts-editor-edit-pane.vala:494
+msgid "Sender name"
+msgstr "Nume expeditor"
+
+#. Translators: Label used as the undo tooltip after adding an
+#. new sender email address to an account. The string
+#. substitution is the email address added.
+#: src/client/accounts/accounts-editor-edit-pane.vala:561
+#, c-format
+msgid "Remove “%s”"
+msgstr "Elimină „%s”"
+
+#. Translators: Label used as the undo tooltip after editing a
+#. sender address for an account. The string substitution is
+#. the email address edited.
+#: src/client/accounts/accounts-editor-edit-pane.vala:601
+#, c-format
+msgid "Undo changes to “%s”"
+msgstr "Anulează modificările la „%s”"
+
+#. Translators: Label used as the undo tooltip after removing
+#. a sender address from an account. The string substitution
+#. is the email address edited.
+#: src/client/accounts/accounts-editor-edit-pane.vala:690
+#, c-format
+msgid "Add “%s” back"
+msgstr "Adaugă înapoi „%s”"
+
+#. Translators: Label used as the undo tooltip after removing
+#. a sender address from an account. The string substitution
+#. is the email address edited.
+#: src/client/accounts/accounts-editor-edit-pane.vala:728
+msgid "Undo signature changes"
+msgstr "Anulează modificările de semnătură"
+
+#. Translators: This label describes the account
+#. preference for the length of time (weeks, months or
+#. years) that past email should be downloaded.
+#: src/client/accounts/accounts-editor-edit-pane.vala:772
+msgid "Download mail"
+msgstr "Descarcă email"
+
+#. Translators: Tooltip for undoing a change
+#. to the length of time that past email
+#. should be downloaded for an account. The
+#. string substitution is the duration,
+#. e.g. "1 month back".
+#: src/client/accounts/accounts-editor-edit-pane.vala:804
+#, c-format
+msgid "Change download period back to: %s"
+msgstr "Modifică perioada de descărcare înapoi la: %s"
+
+#: src/client/accounts/accounts-editor-edit-pane.vala:825
 msgid "Everything"
 msgstr "Totul"
 
-#: ../src/client/accounts/add-edit-page.vala:280
-msgid "Edit"
-msgstr "Editare"
+#: src/client/accounts/accounts-editor-edit-pane.vala:829
+msgid "2 weeks back"
+msgstr "acum 2 săptămâni"
 
-#: ../src/client/accounts/add-edit-page.vala:282
-msgid "Preview"
-msgstr "Previzualizează"
+#: src/client/accounts/accounts-editor-edit-pane.vala:833
+msgid "1 month back"
+msgstr "acum o lună"
 
-#: ../src/client/accounts/add-edit-page.vala:723
-msgid "Remem_ber passwords"
-msgstr "_Memorează parolele"
+#: src/client/accounts/accounts-editor-edit-pane.vala:837
+msgid "3 months back"
+msgstr "acum 3 luni"
 
-#: ../src/client/accounts/add-edit-page.vala:730 ../ui/login.glade.h:6
-msgid "Remem_ber password"
-msgstr "_Memorează parola"
+#: src/client/accounts/accounts-editor-edit-pane.vala:841
+msgid "6 months back"
+msgstr "acum 6 luni"
 
-#: ../src/client/accounts/add-edit-page.vala:764
-msgid "Unable to validate:\n"
-msgstr "Nu s-a putut valida:\n"
+#: src/client/accounts/accounts-editor-edit-pane.vala:845
+msgid "1 year back"
+msgstr "acum 1 an"
 
-#: ../src/client/accounts/add-edit-page.vala:766
-msgid "        &#8226; Invalid account nickname.\n"
-msgstr "        &#8226; Pseudonimul nu este valid.\n"
+#: src/client/accounts/accounts-editor-edit-pane.vala:849
+msgid "2 years back"
+msgstr "acum 2 ani"
 
-#: ../src/client/accounts/add-edit-page.vala:769
-msgid "        &#8226; Email address already added to Geary.\n"
-msgstr "        &#8226; Adresa de email este deja adăugată în Geary.\n"
+#: src/client/accounts/accounts-editor-edit-pane.vala:853
+msgid "4 years back"
+msgstr "acum 4 ani"
 
-#: ../src/client/accounts/add-edit-page.vala:773
-msgid "        &#8226; IMAP connection error.\n"
-msgstr "        &#8226; Eroare la conexiunea IMAP.\n"
+#: src/client/accounts/accounts-editor-edit-pane.vala:859
+#, c-format
+msgid "%d day back"
+msgid_plural "%d days back"
+msgstr[0] "acum %d zi"
+msgstr[1] "acum %d zile"
+msgstr[2] "acum %d de zile"
 
-#: ../src/client/accounts/add-edit-page.vala:776
-msgid "        &#8226; IMAP username or password incorrect.\n"
-msgstr "        &#8226; Nume utilizator sau parolă IMAP incorecte.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:243
+msgid "Undo"
+msgstr "Anulează"
 
-#: ../src/client/accounts/add-edit-page.vala:779
-msgid "        &#8226; SMTP connection error.\n"
-msgstr "        &#8226; Eroare la conexiunea SMTP.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:251
+msgid "Redo"
+msgstr "Refă"
 
-#: ../src/client/accounts/add-edit-page.vala:782
-msgid "        &#8226; SMTP username or password incorrect.\n"
-msgstr "        &#8226; Numele de utilizator sau parola SMTP sunt incorecte.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:345
+#: src/client/accounts/accounts-editor-list-pane.vala:433
+#: src/client/accounts/accounts-editor-row.vala:278
+msgid "Gmail"
+msgstr "Gmail"
 
-#: ../src/client/accounts/add-edit-page.vala:786
-msgid "        &#8226; Connection error.\n"
-msgstr "        &#8226; Eroare de conexiune.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:349
+#: src/client/accounts/accounts-editor-list-pane.vala:437
+#: src/client/accounts/accounts-editor-row.vala:282
+msgid "Outlook.com"
+msgstr "Outlook.com"
 
-#: ../src/client/accounts/add-edit-page.vala:790
-msgid "        &#8226; Username or password incorrect.\n"
-msgstr "        &#8226; Numele de utilizator sau parola sunt incorecte.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:353
+#: src/client/accounts/accounts-editor-list-pane.vala:441
+#: src/client/accounts/accounts-editor-row.vala:286
+msgid "Yahoo"
+msgstr "Yahoo"
 
-#: ../src/client/application/geary-application.vala:19
+#. Translators: Tooltip for accounts that have been
+#. loaded but disabled by the user.
+#: src/client/accounts/accounts-editor-list-pane.vala:371
+msgid "This account has been disabled"
+msgstr "Acest cont a fost dezactivat"
+
+#. Translators: Tooltip for accounts that have been
+#. loaded but because of some error are not able to be
+#. used.
+#: src/client/accounts/accounts-editor-list-pane.vala:380
+msgid "This account has encountered a problem and is unavailable"
+msgstr "Acest cont a întâmpinat o problemă și este indisponibil"
+
+#. Translators: Label for adding a generic email account
+#: src/client/accounts/accounts-editor-list-pane.vala:430
+msgid "Other email providers"
+msgstr "Alți furnizori de email"
+
+#. Translators: Notification shown after removing an
+#. account. The string substitution is the name of the
+#. account.
+#: src/client/accounts/accounts-editor-list-pane.vala:547
+#, c-format
+msgid "Account “%s” removed"
+msgstr "Contul „%s” a fost eliminat"
+
+#. Translators: Notification shown after removing an account
+#. is undone. The string substitution is the name of the
+#. account.
+#: src/client/accounts/accounts-editor-list-pane.vala:554
+#, c-format
+msgid "Account “%s” restored"
+msgstr "Contul „%s” a fost restaurat"
+
+#. Translators: Tooltip for dragging list items
+#: src/client/accounts/accounts-editor-row.vala:49
+msgid "Drag to move this item"
+msgstr "Trageți pentru a muta acest element"
+
+#. Translators: Label describes the service provider
+#. hosting the email account, e.g. Gmail, Yahoo, or some
+#. other generic IMAP service.
+#: src/client/accounts/accounts-editor-row.vala:294
+msgid "Service provider"
+msgstr "Furnizor servicii"
+
+#. Translators: This label describes what form of transport
+#. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
+#. service.
+#: src/client/accounts/accounts-editor-row.vala:467
+msgid "Connection security"
+msgstr "Securitatea conexiunii"
+
+#. Translators: Label used when no auth scheme is used
+#. by an account's IMAP or SMTP service.
+#: src/client/accounts/accounts-editor-row.vala:478
+#: src/client/accounts/accounts-editor-servers-pane.vala:681
+#: src/client/accounts/accounts-editor-servers-pane.vala:893
+#: src/engine/api/geary-special-folder-type.vala:58
+msgid "None"
+msgstr "Niciuna"
+
+#: src/client/accounts/accounts-editor-row.vala:485
+msgid "StartTLS"
+msgstr "StartTLS"
+
+#: src/client/accounts/accounts-editor-row.vala:492
+msgid "TLS"
+msgstr "TLS"
+
+#. Translators: Label for source of SMTP authentication
+#. credentials (none, use IMAP, custom) when adding a new
+#. account
+#. Button label for retrying when a login error has occurred
+#: src/client/accounts/accounts-editor-row.vala:533 ui/main-window.ui:455
+msgid "Login"
+msgstr "Autentificare"
+
+#. Translators: ComboBox value for source of SMTP
+#. authentication credentials (none) when adding a new
+#. account
+#: src/client/accounts/accounts-editor-row.vala:540
+msgid "No login needed"
+msgstr "Nicio autentificare necesară"
+
+#. Translators: ComboBox value for source of SMTP
+#. authentication credentials (use IMAP) when adding a new
+#. account
+#: src/client/accounts/accounts-editor-row.vala:548
+msgid "Use same login as receiving"
+msgstr "Utilizează aceeași autentificare ca la primire"
+
+#. Translators: ComboBox value for source of SMTP
+#. authentication credentials (custom) when adding a new
+#. account
+#: src/client/accounts/accounts-editor-row.vala:556
+msgid "Use a different login"
+msgstr "Utilizează o autentificare diferită"
+
+#. Translators: In-app notification label, the
+#. string substitution is a more detailed reason.
+#: src/client/accounts/accounts-editor-servers-pane.vala:361
+#, c-format
+msgid "Account not updated: %s"
+msgstr "Contul nu a fost actualizat: %s"
+
+#. Translators: This label describes the program that
+#. created the account, e.g. an SSO service like GOA, or
+#. locally by Geary.
+#: src/client/accounts/accounts-editor-servers-pane.vala:524
+msgid "Account source"
+msgstr "Sursa contului"
+
+#: src/client/accounts/accounts-editor-servers-pane.vala:536
+msgid "GNOME Online Accounts"
+msgstr "Conturi online GNOME"
+
+#. Translators: This label describes an account
+#. preference.
+#: src/client/accounts/accounts-editor-servers-pane.vala:595
+msgid "Save drafts on server"
+msgstr "Salvează ciornele pe server"
+
+#. Add a suffix for OAuth2 auth so people know they
+#. shouldn't expect to be prompted for a password
+#. Translators: Label used when an account's IMAP or
+#. SMTP service uses OAuth2. The string replacement is
+#. the service's login name.
+#: src/client/accounts/accounts-editor-servers-pane.vala:879
+#, c-format
+msgid "%s using OAuth2"
+msgstr "%s folosind OAuth2"
+
+#: src/client/accounts/accounts-editor-servers-pane.vala:889
+msgid "Use receiving server login"
+msgstr "Utilizează autentificarea serverului de primire"
+
+#: src/client/application/geary-application.vala:23
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Drepturi de autor 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:21
+#: src/client/application/geary-application.vala:24
+msgid "Copyright 2016-2019 Geary Development Team."
+msgstr "Drepturi de autor 2016-2019 Echipa de dezvoltare a lui Geary."
+
+#: src/client/application/geary-application.vala:26
 msgid "Visit the Geary web site"
 msgstr "Vizitează situl Geary"
 
-#: ../src/client/application/geary-args.vala:10
+#: src/client/application/geary-application.vala:413
+#, c-format
+msgid "About %s"
+msgstr "Despre %s"
+
+#. Translators: add your name and email address to receive
+#. credit in the About dialog For example: Yamada Taro
+#. <yamada.taro@example.com>
+#: src/client/application/geary-application.vala:417
+msgid "translator-credits"
+msgstr ""
+"CoolGoose <melipse AT gmail DOT com>\n"
+"Corneliu Dascălu <corneliu DOT dascalu AT gmail DOT com>\n"
+"Viorel-Cătălin Răpițeanu <rapiteanu DOT catalin AT gmail DOT com>\n"
+"Daniel Șerbănescu <daniel [at] serbanescu [dot] dk>, 2019"
+
+#: src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
 msgstr "Pornește Geary cu fereastra principală ascunsă"
 
-#: ../src/client/application/geary-args.vala:11
+#: src/client/application/geary-args.vala:11
 msgid "Output debugging information"
 msgstr "Afișează informații de depanare"
 
-#: ../src/client/application/geary-args.vala:12
+#: src/client/application/geary-args.vala:12
 msgid "Log conversation monitoring"
 msgstr "Înregistrează monitorizarea conversațiilor"
 
-#: ../src/client/application/geary-args.vala:13
+#: src/client/application/geary-args.vala:13
 msgid "Log network deserialization"
 msgstr "Înregistrează deserializarea rețelei"
 
-#: ../src/client/application/geary-args.vala:14
+#: src/client/application/geary-args.vala:14
 msgid "Log network activity"
 msgstr "Îregistrează activitatea rețelei"
 
 #. / The IMAP replay queue is how changes on the server are replicated on the client.
 #. / It could also be called the IMAP events queue.
-#: ../src/client/application/geary-args.vala:17
+#: src/client/application/geary-args.vala:17
 msgid "Log IMAP replay queue"
 msgstr "Înregistrează coada de evenimente IMAP"
 
 #. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
-#: ../src/client/application/geary-args.vala:20
+#: src/client/application/geary-args.vala:20
 msgid "Log network serialization"
 msgstr "Înregistrează serializarea rețelei"
 
-#: ../src/client/application/geary-args.vala:21
+#: src/client/application/geary-args.vala:21
 msgid "Log periodic activity"
 msgstr "Înregistrează activitatea periodică"
 
-#: ../src/client/application/geary-args.vala:22
+#: src/client/application/geary-args.vala:22
 msgid "Log database queries (generates lots of messages)"
 msgstr "Înregistrează interogările bazei de date (generează multe mesajee)"
 
 #. / "Normalization" can also be called "synchronization"
-#: ../src/client/application/geary-args.vala:24
+#: src/client/application/geary-args.vala:24
 msgid "Log folder normalization"
 msgstr "Înregistrează normalizarea directorului"
 
-#: ../src/client/application/geary-args.vala:25
+#: src/client/application/geary-args.vala:25
 msgid "Allow inspection of WebView"
 msgstr "Permite inspecția WebView-ului"
 
-#: ../src/client/application/geary-args.vala:26
+#: src/client/application/geary-args.vala:26
 msgid "Revoke all server certificates with TLS warnings"
 msgstr "Revocă toate certificatele serverelor cu avertizări TLS"
 
-#: ../src/client/application/geary-args.vala:27
+#: src/client/application/geary-args.vala:27
+msgid "Perform a graceful quit"
+msgstr "Efectuează o ieșire elegantă"
+
+#: src/client/application/geary-args.vala:28
 msgid "Display program version"
 msgstr "Afișează versiunea programului"
 
 #. This gives a command-line hint on how to open new composer windows with mailto:
-#: ../src/client/application/geary-args.vala:51
+#: src/client/application/geary-args.vala:53
 #, c-format
 msgid "Use %s to open a new composer window"
 msgstr "Utilizați %s pentru a deschide o nouă fereastră de compunere"
 
-#: ../src/client/application/geary-args.vala:52
+#: src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Raportați comentarii, sugestii și defecte la:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:59
+#: src/client/application/geary-args.vala:63
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Eroare la parsarea opțiunilor din linia de comandă: %s\n"
 
-#: ../src/client/application/geary-args.vala:70
+#: src/client/application/geary-args.vala:74
 #, c-format
-msgid "Unrecognized command line option \"%s\"\n"
-msgstr "Opțiune de linie de comandă nerecunoscută \"%s\"\n"
+msgid "Unrecognized command line option “%s”\n"
+msgstr "Opțiune de linie de comandă nerecunoscută „%s”\n"
 
-#: ../src/client/application/geary-controller.vala:60
-msgid "Delete conversation"
-msgstr "Șterge conversația"
+#. Translators: File name used in save chooser when saving
+#. attachments that do not otherwise have a name.
+#: src/client/application/geary-controller.vala:61
+msgid "Untitled"
+msgstr "Nedenumit"
 
-#: ../src/client/application/geary-controller.vala:61
-msgid "Delete conversation (Shift+Delete)"
-msgstr "Șterge conversația (Shift+Delete)"
-
-#: ../src/client/application/geary-controller.vala:62
-msgid "Delete conversations (Shift+Delete)"
-msgstr "Șterge conversațiile (Shift+Delete)"
-
-#. This refers to the action ("move email to the trash"), not the Trash folder itself
-#: ../src/client/application/geary-controller.vala:66
-msgid "Move conversation to Trash (Delete, Backspace)"
-msgstr "Mută conversația la Gunoi (Delete, Backspace)"
-
-#: ../src/client/application/geary-controller.vala:67
-msgid "Move conversations to Trash (Delete, Backspace)"
-msgstr "Mută conversațiile la Gunoi (Delete, Backspace)"
-
-#. This refers to the action ("archive an email"), not the Archive folder itself
-#: ../src/client/application/geary-controller.vala:71
-msgid "_Archive"
-msgstr "_Arhivează"
-
-#: ../src/client/application/geary-controller.vala:72
-msgid "Archive conversation (A)"
-msgstr "Arhivează conversația (A)"
-
-#: ../src/client/application/geary-controller.vala:73
-msgid "Archive conversations (A)"
-msgstr "Arhivează conversațiile (A)"
-
-#: ../src/client/application/geary-controller.vala:76
-msgid "Mark as S_pam"
-msgstr "Marchează ca s_pam"
-
-#: ../src/client/application/geary-controller.vala:77
-msgid "Mark as not S_pam"
-msgstr "Marchează ca non-s_pam"
-
-#: ../src/client/application/geary-controller.vala:79
-#: ../src/client/application/geary-controller.vala:393
-msgid "Mark conversation"
-msgstr "Marchează conversația"
-
-#: ../src/client/application/geary-controller.vala:80
-msgid "Mark conversations"
-msgstr "Marchează conversațiile"
-
-#: ../src/client/application/geary-controller.vala:81
-msgid "Add label to conversation"
-msgstr "Adaugă etichetă conversației"
-
-#: ../src/client/application/geary-controller.vala:82
-msgid "Add label to conversations"
-msgstr "Adaugă etichetă conversațiilor"
-
-#: ../src/client/application/geary-controller.vala:83
-#: ../src/client/application/geary-controller.vala:432
-msgid "Move conversation"
-msgstr "Mută conversația"
-
-#: ../src/client/application/geary-controller.vala:84
-msgid "Move conversations"
-msgstr "Mută conversațiile"
-
-#: ../src/client/application/geary-controller.vala:373
-#: ../ui/app_menu.interface.h:1
-msgid "A_ccounts"
-msgstr "_Conturi"
-
-#: ../src/client/application/geary-controller.vala:378
-#: ../src/client/components/stock.vala:27 ../ui/app_menu.interface.h:2
-msgid "_Preferences"
-msgstr "_Preferințe"
-
-#: ../src/client/application/geary-controller.vala:382
-#: ../src/client/components/stock.vala:25 ../ui/app_menu.interface.h:3
-msgid "_Help"
-msgstr "_Ajutor"
-
-#: ../src/client/application/geary-controller.vala:386
-#: ../src/client/components/stock.vala:21 ../ui/app_menu.interface.h:4
-msgid "_About"
-msgstr "_Despre"
-
-#: ../src/client/application/geary-controller.vala:390
-#: ../src/client/components/stock.vala:29 ../ui/app_menu.interface.h:5
-msgid "_Quit"
-msgstr "_Ieșire"
-
-#: ../src/client/application/geary-controller.vala:395
-msgid "_Mark as..."
-msgstr "_Marchează ca..."
-
-#: ../src/client/application/geary-controller.vala:401
-msgid "Mark as _Read"
-msgstr "Ma_rchează ca citit"
-
-#: ../src/client/application/geary-controller.vala:407
-msgid "Mark as _Unread"
-msgstr "Marchează ca _necitit"
-
-#: ../src/client/application/geary-controller.vala:413
-msgid "_Star"
-msgstr "Marchează cu o _stea"
-
-#: ../src/client/application/geary-controller.vala:418
-msgid "U_nstar"
-msgstr "Eliminați _steaua"
-
-#: ../src/client/application/geary-controller.vala:428
-msgid "Add label"
-msgstr "Adaugă etichetă"
-
-#: ../src/client/application/geary-controller.vala:429
-msgid "_Label"
-msgstr "_Etichetă"
-
-#: ../src/client/application/geary-controller.vala:433
-msgid "_Move"
-msgstr "_Mută"
-
-#: ../src/client/application/geary-controller.vala:437
-msgid "Compose new message (Ctrl+N, N)"
-msgstr "Compune un mesaj nou (Ctrl+N, N)"
-
-#. Reply to a message.
-#: ../src/client/application/geary-controller.vala:441
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1884
-msgid "_Reply"
-msgstr "_Răspunde"
-
-#: ../src/client/application/geary-controller.vala:442
-msgid "Reply (Ctrl+R, R)"
-msgstr "Răspunde (Ctrl+R, R)"
-
-#: ../src/client/application/geary-controller.vala:446
-msgid "R_eply All"
-msgstr "Răspund_e tuturor"
-
-#: ../src/client/application/geary-controller.vala:447
-msgid "Reply all (Ctrl+Shift+R, Shift+R)"
-msgstr "Răspunde tuturor (Ctrl+Shift+R, Shift+R)"
-
-#. Forward a message.
-#: ../src/client/application/geary-controller.vala:452
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1894
-msgid "_Forward"
-msgstr "Î_naintează"
-
-#: ../src/client/application/geary-controller.vala:453
-msgid "Forward (Ctrl+L, F)"
-msgstr "Înaintează (Ctrl+L, F)"
-
-#: ../src/client/application/geary-controller.vala:492
-msgid "Empty"
-msgstr "Golește"
-
-#: ../src/client/application/geary-controller.vala:493
-msgid "Empty Spam or Trash folders"
-msgstr "Golește dosarele Spam sau Gunoi"
-
-#: ../src/client/application/geary-controller.vala:497
-msgid "Empty _Spam…"
-msgstr "Golește _Spam…"
-
-#: ../src/client/application/geary-controller.vala:501
-msgid "Empty _Trash…"
-msgstr "Golește _Gunoi…"
-
-#. No callback is connected, since we bind the toggle button to the search bar visibility
-#: ../src/client/application/geary-controller.vala:530
-msgid "Toggle search bar"
-msgstr "Comută bara de căutare"
-
-#: ../src/client/application/geary-controller.vala:725
-msgid "Unable to store server trust exception"
-msgstr "Nu s-a putut stoca excepția la servere de încredere"
-
-#: ../src/client/application/geary-controller.vala:962
-msgid "Your settings are insecure"
-msgstr "Configurările tale sunt nesigure"
-
-#: ../src/client/application/geary-controller.vala:963
-msgid ""
-"Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
-"username and password could be read by another person on the network.  Are "
-"you sure you want to do this?"
-msgstr ""
-"Configurările IMAP și/sau SMTP nu specifică SSL sau TLS. Acest lucru permite "
-"unei alte persoane de pe rețea să îți citească utilizatorul și parola. "
-"Sunteți sigur că vreți să faceți asta?"
-
-#: ../src/client/application/geary-controller.vala:964
-msgid "Co_ntinue"
-msgstr "Co_ntinuă"
-
-#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:1042
-#: ../src/client/components/status-bar.vala:29
-msgid "Error sending email"
-msgstr "Eroare la trimiterea emailului"
-
-#: ../src/client/application/geary-controller.vala:1043
-msgid ""
-"Geary encountered an error sending an email.  If the problem persists, "
-"please manually delete the email from your Outbox folder."
-msgstr ""
-"Geary a întâmpinat o eroare la trimiterea unui email. Dacă problema "
-"persistă, ștergeți manual emailul din directorul Outbox."
-
-#. Displayed in the space-limited status bar when a message fails to be uploaded
-#. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:1047
-#: ../src/client/components/status-bar.vala:33
-msgid "Error saving sent mail"
-msgstr "Eroare la salvarea emailului trimis"
-
-#: ../src/client/application/geary-controller.vala:1048
-msgid ""
-"Geary encountered an error saving a sent message to Sent Mail.  The message "
-"will stay in your Outbox folder until you delete it."
-msgstr ""
-"Geary a întâmpinat o eroare la salvarea unui mesaj trimis în dosarul „Mesaje "
-"trimise”. Mesajul va rămâne în dosarul Outbox până îl veți șterge."
-
-#: ../src/client/application/geary-controller.vala:1117
+#: src/client/application/geary-controller.vala:899
 msgid "Labels"
 msgstr "Etichete"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:1129
+#: src/client/application/geary-controller.vala:911
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nu s-a reușit deschiderea bazei de date pentru %s"
 
-#: ../src/client/application/geary-controller.vala:1130
+#: src/client/application/geary-controller.vala:912
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -536,20 +918,20 @@ msgstr ""
 "Reconstrucția bazei de date va șterge toate emailurile locale și fișierele "
 "lor atașate. <b>Emailurile de pe server nu vor fi afectate.</b>"
 
-#: ../src/client/application/geary-controller.vala:1132
+#: src/client/application/geary-controller.vala:914
 msgid "_Rebuild"
 msgstr "_Reconstruiește"
 
-#: ../src/client/application/geary-controller.vala:1132
+#: src/client/application/geary-controller.vala:914
 msgid "E_xit"
 msgstr "_Ieșire"
 
-#: ../src/client/application/geary-controller.vala:1141
+#: src/client/application/geary-controller.vala:923
 #, c-format
-msgid "Unable to rebuild database for \"%s\""
-msgstr "Nu s-a reușit reconstrucția bazei de date pentru „%s”"
+msgid "Unable to rebuild database for “%s”"
+msgstr "Nu s-a reușit reconstruirea bazei de date pentru „%s”"
 
-#: ../src/client/application/geary-controller.vala:1142
+#: src/client/application/geary-controller.vala:924
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -560,85 +942,15 @@ msgstr ""
 "\n"
 "%s"
 
-#. some other problem opening the account ... as with other flow path, can't run
-#. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:1164
-#: ../src/client/application/geary-controller.vala:1174
-#: ../src/client/application/geary-controller.vala:1185
-#, c-format
-msgid "Unable to open local mailbox for %s"
-msgstr "Nu s-a reușit deschiderea cutiei poștale locale pentru %s"
-
-#: ../src/client/application/geary-controller.vala:1165
-#, c-format
-msgid ""
-"There was an error opening the local mail database for this account. This is "
-"possibly due to a file permissions problem.\n"
-"\n"
-"Please check that you have read/write permissions for all files in this "
-"directory:\n"
-"\n"
-"%s"
-msgstr ""
-"S-a întâmpinat o eroare la deschiderea bazei de date locală pentru email. "
-"Aceasta este probabil cauzată de o problemă cu permisiunile pentru fișiere.\n"
-"\n"
-"Verificați dacă aveți drepturi de citire/scriere pentru toate fișierele din "
-"director.\n"
-"\n"
-"%s"
-
-#: ../src/client/application/geary-controller.vala:1175
-msgid ""
-"The version number of the local mail database is formatted for a newer "
-"version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
-"work with this version of Geary.\n"
-"\n"
-"Please install the latest version of Geary and try again."
-msgstr ""
-"Numărul versiunii bazei de date locală pentru email este formatată pentru o "
-"versiune mai nouă de Geary. Din nefericire, baza de date nu poate fi "
-"„restaurată” pentru a funcționa cu această versiune de Geary.\n"
-"\n"
-"Instalați ultima versiune de Geary și încercați din nou."
-
-#: ../src/client/application/geary-controller.vala:1186
-msgid ""
-"There was an error opening the local account. This is probably due to "
-"connectivity issues.\n"
-"\n"
-"Please check your network connection and restart Geary."
-msgstr ""
-"Am întâmpinat o eroare la deschiderea contului local. Aceasta este probabil "
-"din cauza problemelor de conectivitate.\n"
-"\n"
-"Te rog verifică-ți conexiunea la internet și repornește Geary."
-
-#: ../src/client/application/geary-controller.vala:1698
-#, c-format
-msgid "About %s"
-msgstr "Despre %s"
-
-#. / Translators: add your name and email address to receive credit in the About dialog
-#. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1701
-msgid "translator-credits"
-msgstr ""
-"CoolGoose <melipse AT gmail DOT com>\n"
-"Corneliu Dascălu <corneliu DOT dascalu AT gmail DOT com>\n"
-"Viorel-Cătălin Răpițeanu <rapiteanu DOT catalin AT gmail DOT com>\n"
-"Daniel Șerbănescu <daniel [at] serbanescu [dot] dk>"
-
-#: ../src/client/application/geary-controller.vala:1958
+#: src/client/application/geary-controller.vala:1765
 msgid "Undo move (Ctrl+Z)"
 msgstr "Refă mutarea (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:1968
-#, c-format
-msgid "Are you sure you want to open \"%s\"?"
-msgstr "Sigur doriți să deschideți „%s”?"
+#: src/client/application/geary-controller.vala:1775
+msgid "Are you sure you want to open these attachments?"
+msgstr "Sigur doriți să deschideți aceste atașamente?"
 
-#: ../src/client/application/geary-controller.vala:1969
+#: src/client/application/geary-controller.vala:1776
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -646,192 +958,506 @@ msgstr ""
 "Fișierele atașate pot cauza probleme sistemului dumneavoastră dacă sunt "
 "deschise. Deschideți doar fișierele atașate din surse sigure."
 
-#: ../src/client/application/geary-controller.vala:1970
-msgid "Don't _ask me again"
+#: src/client/application/geary-controller.vala:1777
+msgid "Don’t _ask me again"
 msgstr "Nu întreb_a din nou"
 
-#: ../src/client/application/geary-controller.vala:1988
+#. Translators: Dialog primary label when prompting to
+#. overwrite a file. The string substitution is the file'sx
+#. name.
+#: src/client/application/geary-controller.vala:1906
 #, c-format
-msgid "A file named \"%s\" already exists.  Do you want to replace it?"
-msgstr "Un fișier numit „%s” există deja. Doriți să-l înlocuiți?"
+msgid "A file named “%s” already exists.  Do you want to replace it?"
+msgstr "Un fișier numit „%s” există deja.  Doriți să-l înlocuiți?"
 
-#: ../src/client/application/geary-controller.vala:1990
+#. Translators: Dialog secondary label when prompting to
+#. overwrite a file. The string substitution is the parent
+#. folder's name.
+#: src/client/application/geary-controller.vala:1913
 #, c-format
 msgid ""
-"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+"The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
 "Fișierul deja există în „%s”.  Înlocuirea va suprascrie conținutul lui."
 
-#: ../src/client/application/geary-controller.vala:1993
+#: src/client/application/geary-controller.vala:1917
 msgid "_Replace"
 msgstr "Î_nlocuiește"
 
-#. Find out what to do with the inline composers.
-#. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2291
-msgid "Close open draft messages?"
-msgstr "Închideți mesajele deschise de tip ciornă?"
+#: src/client/application/geary-controller.vala:2193
+msgid "Close the draft message?"
+msgid_plural "Close all draft messages?"
+msgstr[0] "Închideți mesajul de tip ciornă?"
+msgstr[1] "Închideți mesajele de tip ciornă?"
+msgstr[2] "Închideți mesajele de tip ciornă?"
 
-#: ../src/client/application/geary-controller.vala:2421
+#: src/client/application/geary-controller.vala:2319
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Goliți toate emailurile din dosarul %s?"
 
-#: ../src/client/application/geary-controller.vala:2422
+#: src/client/application/geary-controller.vala:2320
 msgid "This removes the email from Geary and your email server."
 msgstr "Aceasta elimină emailul din Geary și de pe serverul de email."
 
-#: ../src/client/application/geary-controller.vala:2423
+#: src/client/application/geary-controller.vala:2321
 msgid "This cannot be undone."
 msgstr "Aceasta nu poate fi anulată."
 
-#: ../src/client/application/geary-controller.vala:2424
+#: src/client/application/geary-controller.vala:2322
 #, c-format
 msgid "Empty %s"
 msgstr "Golește %s"
 
-#: ../src/client/application/geary-controller.vala:2441
+#: src/client/application/geary-controller.vala:2339
 #, c-format
 msgid "Error emptying %s"
 msgstr "Eroare la golirea %s"
 
-#: ../src/client/application/geary-controller.vala:2471
+#: src/client/application/geary-controller.vala:2371
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Doriți să ștergeți permanent acest mesaj?"
 msgstr[1] "Doriți să ștergeți permanent aceste mesaje?"
 msgstr[2] "Doriți să ștergeți permanent aceste mesaje?"
 
-#: ../src/client/application/geary-controller.vala:2473
+#: src/client/application/geary-controller.vala:2373
 msgid "Delete"
 msgstr "Șterge"
 
-#: ../src/client/application/geary-controller.vala:2504
-msgid "Undo archive (Ctrl+Z)"
-msgstr "Refă arhiva (Ctrl+Z)"
-
-#: ../src/client/application/geary-controller.vala:2519
+#: src/client/application/geary-controller.vala:2387
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Refă gunoiul (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2572
+#: src/client/application/geary-controller.vala:2437
+msgid "Undo archive (Ctrl+Z)"
+msgstr "Refă arhiva (Ctrl+Z)"
+
+#: src/client/application/geary-controller.vala:2482
 msgid "Undo (Ctrl+Z)"
 msgstr "Refă (Ctrl+Z)"
 
-#: ../src/client/components/conversation-find-bar.vala:214
+#. Translators: The label for an in-app notification. The
+#. string substitution is a list of recipients of the email.
+#: src/client/application/geary-controller.vala:2559
 #, c-format
-msgid "%i match"
-msgid_plural "%i matches"
-msgstr[0] "%i potrivire"
-msgstr[1] "%i potriviri"
-msgstr[2] "%i de potriviri"
+msgid "Successfully sent mail to %s."
+msgstr "S-a trimis email cu succes către %s."
 
-#: ../src/client/components/conversation-find-bar.vala:216
-#, c-format
-msgid "%i match (wrapped)"
-msgid_plural "%i matches (wrapped)"
-msgstr[0] "%i potrivire (wrapped)"
-msgstr[1] "%i potriviri (wrapped)"
-msgstr[2] "%i de potriviri (wrapped)"
+#: src/client/application/geary-controller.vala:2640
+msgid "Failed to open default text editor."
+msgstr "Eroare la deschiderea editorului de text implicit."
 
-#: ../src/client/components/conversation-find-bar.vala:218
-msgid "not found"
-msgstr "nu a fost găsit"
+#. Translators: Tooltip used when an entry requires a valid
+#. email address to be entered, but one is not provided.
+#: src/client/components/components-validator.vala:341
+msgid "An email address is required"
+msgstr "Adresa de email este obligatorie"
 
-#: ../src/client/components/main-window.vala:359
+#. Translators: Tooltip used when an entry requires a valid
+#. email address to be entered, but the address is invalid.
+#: src/client/components/components-validator.vala:345
+msgid "Not a valid email address"
+msgstr "Adresa de email este nevalidă"
+
+#. Translators: Tooltip used when an entry requires a valid,
+#. resolvable server name to be entered, but one is not
+#. provided.
+#: src/client/components/components-validator.vala:391
+msgid "A server name is required"
+msgstr "Numele de server este obligatoriu"
+
+#. Translators: Tooltip used when an entry requires a valid
+#. server name to be entered, but it was unable to be
+#. looked-up in the DNS.
+#: src/client/components/components-validator.vala:396
+msgid "Could not look up server name"
+msgstr "Nu s-a putut detecta numele serverului"
+
+#. Tooltips
+#: src/client/components/main-toolbar.vala:69
+msgid "Delete conversation (Shift+Delete)"
+msgstr "Șterge conversația (Shift+Delete)"
+
+#: src/client/components/main-toolbar.vala:70
+msgid "Delete conversations (Shift+Delete)"
+msgstr "Șterge conversațiile (Shift+Delete)"
+
+#: src/client/components/main-toolbar.vala:71
+msgid "Move conversation to Trash (Delete, Backspace)"
+msgstr "Mută conversația la Gunoi (Delete, Backspace)"
+
+#: src/client/components/main-toolbar.vala:72
+msgid "Move conversations to Trash (Delete, Backspace)"
+msgstr "Mută conversațiile la Gunoi (Delete, Backspace)"
+
+#: src/client/components/main-toolbar.vala:73
+msgid "Archive conversation (A)"
+msgstr "Arhivează conversația (A)"
+
+#: src/client/components/main-toolbar.vala:74
+msgid "Archive conversations (A)"
+msgstr "Arhivează conversațiile (A)"
+
+#: src/client/components/main-toolbar.vala:75
+msgid "Mark conversation"
+msgstr "Marchează conversația"
+
+#: src/client/components/main-toolbar.vala:76
+msgid "Mark conversations"
+msgstr "Marchează conversațiile"
+
+#: src/client/components/main-toolbar.vala:77
+msgid "Add label to conversation"
+msgstr "Adaugă etichetă conversației"
+
+#: src/client/components/main-toolbar.vala:78
+msgid "Add label to conversations"
+msgstr "Adaugă etichetă conversațiilor"
+
+#: src/client/components/main-toolbar.vala:79
+msgid "Move conversation"
+msgstr "Mută conversația"
+
+#: src/client/components/main-toolbar.vala:80
+msgid "Move conversations"
+msgstr "Mută conversațiile"
+
+#: src/client/components/main-window.vala:500
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
 
-#: ../src/client/components/search-bar.vala:10
-#: ../src/client/folder-list/folder-list-search-branch.vala:38
-#: ../src/engine/api/geary-special-folder-type.vala:51
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:47
+#, c-format
+msgid "Problem connecting to incoming server for %s"
+msgstr "Problemă la conectarea serverului de primire pentru %s"
+
+#. Translators: String substitution is the server name
+#: src/client/components/main-window-info-bar.vala:49
+#: src/client/components/main-window-info-bar.vala:57
+#, c-format
+msgid ""
+"Could not connect to %s, check your Internet access and the server name and "
+"try again"
+msgstr ""
+"Nu s-a putut conecta la %s, verificați conexiunea la Internet și numele "
+"serverului apoi încercați din nou."
+
+#. Button tooltip for retrying an account problem
+#: src/client/components/main-window-info-bar.vala:50
+#: src/client/components/main-window-info-bar.vala:59 ui/main-window.ui:265
+msgid "Retry connecting now"
+msgstr "Reîncearcă conexiunea acum"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:55
+#, c-format
+msgid "Problem connecting to outgoing server for %s"
+msgstr "Problemă la contactarea serverului de trimitere pentru %s"
+
+#: src/client/components/main-window-info-bar.vala:58
+msgid "Try reconnecting now"
+msgstr "Încearcă reconectarea acum"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:64
+#, c-format
+msgid "Problem with connection to incoming server for %s"
+msgstr "Problemă la conectarea la serverul de primire pentru %s"
+
+#. Translators: String substitution is the server name
+#: src/client/components/main-window-info-bar.vala:66
+#: src/client/components/main-window-info-bar.vala:74
+#, c-format
+msgid "Network error talking to %s, check your Internet access and try again"
+msgstr ""
+"Eroare de rețea la comunicarea cu %s, verificați accesul la internet și "
+"încercați din nou"
+
+#: src/client/components/main-window-info-bar.vala:67
+#: src/client/components/main-window-info-bar.vala:75
+#: src/client/components/main-window-info-bar.vala:83
+#: src/client/components/main-window-info-bar.vala:91
+#: src/client/components/main-window-info-bar.vala:126
+msgid "Try reconnecting"
+msgstr "Încearcă reconectarea"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:72
+#, c-format
+msgid "Problem with connection to outgoing server for %s"
+msgstr "Problemă la conectarea la la serverul de trimitere pentru %s"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:80
+#, c-format
+msgid "Problem communicating with incoming server for %s"
+msgstr "Problemă la comunicarea cu serverul de primire pentru %s"
+
+#. Translators: String substitution is the server name
+#: src/client/components/main-window-info-bar.vala:82
+#, c-format
+msgid ""
+"Geary did not understand a message from %s or vice versa, please file a bug "
+"report"
+msgstr ""
+"Geary nu a înțeles mesajul de la %s sau vice versa, completați un report de "
+"defecțiune"
+
+#: src/client/components/main-window-info-bar.vala:87
+msgid "Problem communicating with outgoing mail server"
+msgstr "Problemă la comunicarea cu serverul de trimitere email"
+
+#. Translators: First string substitution is the server
+#. name, second is the account name
+#: src/client/components/main-window-info-bar.vala:90
+#, c-format
+msgid ""
+"Could not communicate with %s for %s, check the server name and try again in "
+"a moment"
+msgstr ""
+"Nu s-a putut comunica cu %s pentru %s, verificați numele serverului și "
+"încercați din nu imediat"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:96
+#, c-format
+msgid "Incoming mail server password required for %s"
+msgstr "Parolă necesară pentru serverul de primire email pentru %s"
+
+#: src/client/components/main-window-info-bar.vala:97
+msgid "Messages cannot be received without the correct password."
+msgstr "Mesajele nu pot fi primite fără parola corectă."
+
+#: src/client/components/main-window-info-bar.vala:98
+msgid "Retry receiving email, you will be prompted for a password"
+msgstr "Reîncercați primirea de emailuri, vi se va cere o parolă"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:103
+#, c-format
+msgid "Outgoing mail server password required for %s"
+msgstr "Parolă necesară pentru serverul de trimitere email pentru %s"
+
+#: src/client/components/main-window-info-bar.vala:104
+msgid "Messages cannot be sent without the correct password."
+msgstr "Mesajele nu pot fi trimise fără parola corectă."
+
+#: src/client/components/main-window-info-bar.vala:105
+msgid "Retry sending queued messages, you will be prompted for a password"
+msgstr "Reîncercați trimiterea mesajelor de la coadă, vi se va cere o parolă"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:110
+#, c-format
+msgid "Incoming mail server security is not trusted for %s"
+msgstr "Securitatea serverului de primire email nu este de încredere pentru %s"
+
+#: src/client/components/main-window-info-bar.vala:111
+msgid "Messages will not be received until checked."
+msgstr "Mesajele nu vor fi primite până când va fi verificată."
+
+#: src/client/components/main-window-info-bar.vala:112
+#: src/client/components/main-window-info-bar.vala:119
+msgid "Check security details"
+msgstr "Verifică detaliile de securitate"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:117
+#, c-format
+msgid "Outgoing mail server security is not trusted for %s"
+msgstr ""
+"Securitatea serverului de trimitere email nu este de înceredere pentru %s"
+
+#: src/client/components/main-window-info-bar.vala:118
+msgid "Messages cannot be sent until checked."
+msgstr "Mesajele nu pot fi trimise până este verificată."
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:124
+#, c-format
+msgid "A problem occurred checking mail for %s"
+msgstr "A apărut o problemă la verificarea email-urilor pentru %s"
+
+#: src/client/components/main-window-info-bar.vala:125
+#: src/client/components/main-window-info-bar.vala:132
+msgid "Something went wrong, please file a bug report if the problem persists"
+msgstr ""
+"Ceva nu a funcționat cum trebuie, completați un raport de defecțiune dacă "
+"problema persistă"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:131
+#, c-format
+msgid "A problem occurred sending mail for %s"
+msgstr "A apărut o problemă la verificarea email-urilor pentru %s"
+
+#: src/client/components/main-window-info-bar.vala:133
+msgid "Retry sending queued messages"
+msgstr "Reîncearcă trimiterea mesajelor de la coadă"
+
+#: src/client/components/main-window-info-bar.vala:144
+msgid "A database problem has occurred"
+msgstr "A apărut o problemă la baza de date"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:146
+#, c-format
+msgid "Messages for %s must be downloaded again."
+msgstr "Mesajele pentru %s trebuiesc descărcate din nou."
+
+#: src/client/components/main-window-info-bar.vala:159
+msgid "Geary has encountered a problem"
+msgstr "Geary a întâmpinat o problemă"
+
+#: src/client/components/main-window-info-bar.vala:160
+msgid ""
+"Please check the technical details and report the problem if it persists."
+msgstr "Verificați detaliile tehnice și raportați problema dacă persistă."
+
+#: src/client/components/main-window-info-bar.vala:168
+msgid "_Details"
+msgstr "_Detalii"
+
+#. Button tooltip for displaying technical details about an account problem
+#: src/client/components/main-window-info-bar.vala:169 ui/main-window.ui:250
+msgid "View technical details about the error"
+msgstr "Vizualizează detaliile tehnice despre eroare"
+
+#: src/client/components/main-window-info-bar.vala:173
+msgid "_Retry"
+msgstr "_Reîncearcă"
+
+#: src/client/components/search-bar.vala:8
+#: src/client/folder-list/folder-list-search-branch.vala:38
+#: src/engine/api/geary-special-folder-type.vala:51
 msgid "Search"
 msgstr "Caută"
 
 #. Search entry.
-#: ../src/client/components/search-bar.vala:25
+#: src/client/components/search-bar.vala:23
 msgid "Search all mail in account for keywords (Ctrl+S)"
 msgstr "Caută cuvintele cheie în toate emailurile din cont (Ctrl+S)"
 
-#: ../src/client/components/search-bar.vala:118
+#: src/client/components/search-bar.vala:101
 #, c-format
 msgid "Indexing %s account"
 msgstr "Se indexează contul %s"
 
-#: ../src/client/components/search-bar.vala:129
-#: ../src/client/folder-list/folder-list-search-branch.vala:39
+#: src/client/components/search-bar.vala:112
+#: src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
 msgstr "Caută în contul %s"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
-#: ../src/client/components/status-bar.vala:26
-msgid "Sending..."
-msgstr "Se trimite..."
+#: src/client/components/status-bar.vala:26
+msgid "Sending…"
+msgstr "Se trimite…"
 
-#: ../src/client/components/stock.vala:18 ../ui/account_cannot_remove.glade.h:3
+#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
+#: src/client/components/status-bar.vala:29
+msgid "Error sending email"
+msgstr "Eroare la trimiterea emailului"
+
+#. Displayed in the space-limited status bar when a message fails to be uploaded
+#. to Sent Mail after being sent.
+#: src/client/components/status-bar.vala:33
+msgid "Error saving sent mail"
+msgstr "Eroare la salvarea emailului trimis"
+
+#: src/client/components/stock.vala:18
 msgid "_OK"
 msgstr "_OK"
 
-#: ../src/client/components/stock.vala:19 ../ui/edit_alternate_emails.glade.h:3
-#: ../ui/password-dialog.glade.h:5 ../ui/remove_confirm.glade.h:5
+#: src/client/components/stock.vala:19 ui/password-dialog.glade:196
 msgid "_Cancel"
 msgstr "_Anulează"
 
-#: ../src/client/components/stock.vala:23
+#: src/client/components/stock.vala:21 ui/gtk/menus.ui:34
+msgid "_About"
+msgstr "_Despre"
+
+#: src/client/components/stock.vala:22
+msgid "_Add"
+msgstr "_Adaugă"
+
+#: src/client/components/stock.vala:23
 msgid "_Close"
 msgstr "În_chide"
 
-#: ../src/client/components/stock.vala:24
+#: src/client/components/stock.vala:24
 msgid "_Discard"
 msgstr "_Renunță"
 
-#: ../src/client/components/stock.vala:26
+#: src/client/components/stock.vala:25 ui/gtk/menus.ui:29
+msgid "_Help"
+msgstr "_Ajutor"
+
+#: src/client/components/stock.vala:26 ui/conversation-email-menus.ui:77
 msgid "_Open"
 msgstr "_Deschide"
 
-#: ../src/client/components/stock.vala:28
-msgid "_Print..."
-msgstr "Ti_părește..."
+#: src/client/components/stock.vala:27 ui/gtk/menus.ui:17
+msgid "_Preferences"
+msgstr "_Preferințe"
 
-#: ../src/client/components/stock.vala:30 ../ui/remove_confirm.glade.h:6
+#. Translators: Menu item to print a single, specific message
+#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:64
+msgid "_Print…"
+msgstr "Ti_părește…"
+
+#: src/client/components/stock.vala:29 ui/gtk/menus.ui:38
+msgid "_Quit"
+msgstr "_Ieșire"
+
+#: src/client/components/stock.vala:30
 msgid "_Remove"
 msgstr "_Șterge"
 
-#. Select all.
-#: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1350
-msgid "Select _All"
-msgstr "Selectează t_ot"
+#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:83
+msgid "_Save"
+msgstr "_Salvează"
 
-#: ../src/client/components/stock.vala:33
+#: src/client/components/stock.vala:32
 msgid "_Keep"
 msgstr "_Păstrează"
 
-#: ../src/client/composer/composer-widget.vala:73
+#: src/client/composer/composer-link-popover.vala:149
+msgid "Link URL is not correctly formatted, e.g. http://example.com"
+msgstr "Legătura URL nu este formatată corect; ex. http://exemplu.ro"
+
+#: src/client/composer/composer-link-popover.vala:156
+msgid "Invalid link URL"
+msgstr "Legătură URL nevalidă"
+
+#: src/client/composer/composer-link-popover.vala:156
+msgid "Invalid email address"
+msgstr "Adresă de email nevalidă"
+
+#: src/client/composer/composer-widget.vala:158
 msgid "Saved"
 msgstr "Salvat"
 
-#: ../src/client/composer/composer-widget.vala:74
+#: src/client/composer/composer-widget.vala:159
 msgid "Saving"
 msgstr "Se salvează"
 
-#: ../src/client/composer/composer-widget.vala:75
+#: src/client/composer/composer-widget.vala:160
 msgid "Error saving"
 msgstr "Salvare eșuată"
 
-#: ../src/client/composer/composer-widget.vala:76
+#: src/client/composer/composer-widget.vala:161
 msgid "Press Backspace to delete quote"
 msgstr "Apăsați Backspace pentru a șterge citatul"
 
-#: ../src/client/composer/composer-widget.vala:77
-msgid "New Message"
-msgstr "Mesaj nou"
-
-#. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
-#. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:138
+#. Translators: This is list of keywords, separated by pipe ("|")
+#. characters, that suggest an attachment; since this is full-word
+#. checking, include all variants of each word.  No spaces are
+#. allowed.
+#: src/client/composer/composer-widget.vala:170
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -840,329 +1466,331 @@ msgstr ""
 "enclosing|encloses|enclosure|enclosures|atașament|atașamente|atașamentele|"
 "fișier|fișiere|fișierele"
 
-#: ../src/client/composer/composer-widget.vala:1114
-#: ../src/client/composer/composer-widget.vala:1118
-msgid "Do you want to discard this message?"
-msgstr "Renunțați la acest mesaj?"
+#. Translators: This dialog text is displayed to the
+#. user when closing a composer where the options are
+#. Keep, Discard or Cancel.
+#: src/client/composer/composer-widget.vala:1103
+msgid "Do you want to keep or discard this draft message?"
+msgstr "Păstrați sau renunțați la acest mesaj de tip ciornă?"
 
-#: ../src/client/composer/composer-widget.vala:1274
+#. Translators: This dialog text is displayed to the
+#. user when closing a composer where the options are
+#. only Discard or Cancel.
+#: src/client/composer/composer-widget.vala:1131
+msgid "Do you want to discard this draft message?"
+msgstr "Renunțați la acest mesaj de tip ciornă?"
+
+#: src/client/composer/composer-widget.vala:1248
 msgid "Send message with an empty subject and body?"
 msgstr "Trimiteți mesajul fără subiect și conținut?"
 
-#: ../src/client/composer/composer-widget.vala:1276
+#: src/client/composer/composer-widget.vala:1250
 msgid "Send message with an empty subject?"
 msgstr "Trimiteți mesajul fără subiect?"
 
-#: ../src/client/composer/composer-widget.vala:1278
+#: src/client/composer/composer-widget.vala:1252
 msgid "Send message with an empty body?"
 msgstr "Trimiteți mesajul fără conținut?"
 
-#: ../src/client/composer/composer-widget.vala:1280
+#: src/client/composer/composer-widget.vala:1256
 msgid "Send message without an attachment?"
 msgstr "Trimiteți mesajul fără niciun fișier atașat?"
 
-#: ../src/client/composer/composer-widget.vala:1542
-msgid "Cannot add attachment"
-msgstr "Nu se poate atașa fișierul"
-
-#: ../src/client/composer/composer-widget.vala:1553
+#: src/client/composer/composer-widget.vala:1561
 #, c-format
-msgid "\"%s\" could not be found."
-msgstr "„%s” nu a putut fi găsit."
-
-#: ../src/client/composer/composer-widget.vala:1560
-#, c-format
-msgid "\"%s\" is a folder."
-msgstr "„%s” este un dosar."
-
-#: ../src/client/composer/composer-widget.vala:1567
-#, c-format
-msgid "\"%s\" is an empty file."
-msgstr "„%s” este un fișier gol."
-
-#: ../src/client/composer/composer-widget.vala:1581
-#, c-format
-msgid "\"%s\" could not be opened for reading."
-msgstr "„%s” nu a putut fi deschis pentru citire."
-
-#: ../src/client/composer/composer-widget.vala:1588
-#, c-format
-msgid "\"%s\" already attached for delivery."
+msgid "“%s” already attached for delivery."
 msgstr "„%s” este deja atașat pentru trimitere."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1597
+#. Translators: The first argument will be a
+#. description of the document type, the second will
+#. be a human-friendly size string. For example:
+#. Document (100.9MB)
+#: src/client/composer/composer-widget.vala:1569
+#: src/client/conversation-viewer/conversation-email.vala:149
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1658
+#: src/client/composer/composer-widget.vala:1606
+#, c-format
+msgid "“%s” could not be found."
+msgstr "„%s” nu a putut fi găsit."
+
+#: src/client/composer/composer-widget.vala:1612
+#, c-format
+msgid "“%s” is a folder."
+msgstr "„%s” este un dosar."
+
+#: src/client/composer/composer-widget.vala:1618
+#, c-format
+msgid "“%s” is an empty file."
+msgstr "„%s” este un fișier gol."
+
+#: src/client/composer/composer-widget.vala:1631
+#, c-format
+msgid "“%s” could not be opened for reading."
+msgstr "„%s” nu a putut fi deschis pentru citire."
+
+#: src/client/composer/composer-widget.vala:1639
+msgid "Cannot add attachment"
+msgstr "Nu se poate atașa fișierul"
+
+#: src/client/composer/composer-widget.vala:1688
 msgid "To: "
 msgstr "Către: "
 
-#: ../src/client/composer/composer-widget.vala:1661
+#: src/client/composer/composer-widget.vala:1691
 msgid "Cc: "
 msgstr "Cc: "
 
-#: ../src/client/composer/composer-widget.vala:1664
+#: src/client/composer/composer-widget.vala:1694
 msgid "Bcc: "
 msgstr "Bcc: "
 
-#: ../src/client/composer/composer-widget.vala:1667
+#: src/client/composer/composer-widget.vala:1697
 msgid "Reply-To: "
 msgstr "Răspunde la:"
 
-#: ../src/client/composer/composer-widget.vala:1900
+#: src/client/composer/composer-widget.vala:1835
 msgid "Select Color"
 msgstr "Selectează culoarea"
 
-#. Displayed in the From dropdown to indicate an "alternate email address"
-#. for an account.  The first printf argument will be the alternate email
-#. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2347
+#. Displayed in the From dropdown to indicate an
+#. "alternate email address" for an account.  The first
+#. printf argument will be the alternate email address,
+#. and the second will be the account's primary email
+#. address.
+#: src/client/composer/composer-widget.vala:2030
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2389
+#: src/client/composer/composer-widget.vala:2090
 msgid "_From:"
 msgstr "_De la:"
 
-#: ../src/client/composer/spell-check-popover.vala:210
+#. Translators: This is the name of the file chooser filter
+#. when inserting an image in the composer.
+#: src/client/composer/composer-widget.vala:2315
+msgid "Images"
+msgstr "Imagini"
+
+#: src/client/composer/composer-window.vala:14
+msgid "New Message"
+msgstr "Mesaj nou"
+
+#: src/client/composer/spell-check-popover.vala:117
+msgid "Remove this language from the preferred list"
+msgstr "Elimină această limbă de pe lista de preferate"
+
+#: src/client/composer/spell-check-popover.vala:121
+msgid "Add this language to the preferred list"
+msgstr "Adaugă această limbă la lista de preferate"
+
+#: src/client/composer/spell-check-popover.vala:217
 msgid "Search for more languages"
 msgstr "Caută după mai multe limbi"
 
-#: ../src/client/conversation-list/formatted-conversation-data.vala:11
+#: src/client/conversation-list/conversation-list-view.vala:283
+msgid "Delete conversation"
+msgstr "Șterge conversația"
+
+#: src/client/conversation-list/conversation-list-view.vala:286
+#: ui/main-toolbar-menus.ui:16
+msgid "Mark as _Read"
+msgstr "Ma_rchează ca citit"
+
+#: src/client/conversation-list/conversation-list-view.vala:289
+#: ui/main-toolbar-menus.ui:20
+msgid "Mark as _Unread"
+msgstr "Marchează ca _necitit"
+
+#: src/client/conversation-list/conversation-list-view.vala:292
+#: ui/main-toolbar-menus.ui:28
+msgid "U_nstar"
+msgstr "Eliminați _steaua"
+
+#: src/client/conversation-list/conversation-list-view.vala:294
+#: ui/main-toolbar-menus.ui:24
+msgid "_Star"
+msgstr "Marchează cu o _stea"
+
+#. Translators: Menu item to reply to a specific message.
+#: src/client/conversation-list/conversation-list-view.vala:297
+#: ui/conversation-email-menus.ui:9
+msgid "_Reply"
+msgstr "_Răspunde"
+
+#: src/client/conversation-list/conversation-list-view.vala:298
+msgid "R_eply All"
+msgstr "Răspund_e tuturor"
+
+#. Translators: Menu item to forward a specific message.
+#: src/client/conversation-list/conversation-list-view.vala:299
+#: ui/conversation-email-menus.ui:21
+msgid "_Forward"
+msgstr "Î_naintează"
+
+#: src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
 msgstr "Eu"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:413
-msgid "No conversations selected."
-msgstr "Nicio conversație selectată."
+#. Translators: This is the file type displayed for
+#. attachments with unknown file types.
+#: src/client/conversation-viewer/conversation-email.vala:135
+msgid "Unknown"
+msgstr "Necunoscut"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:415
-#, c-format
-msgid "%u conversation selected."
-msgid_plural "%u conversations selected."
-msgstr[0] "%u discuție selectată."
-msgstr[1] "%u discuții selectate."
-msgstr[2] "%u de discuții selectate."
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:444
-msgid "No search results found."
-msgstr "Niciun rezultat la căutare."
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:446
-msgid "No conversations in folder."
-msgstr "Nicio conversație în dosar."
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:713
-msgid "This message contains remote images."
-msgstr "Acest mesaj conține imagini de pe un alt server."
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:713
-msgid "Show Images"
-msgstr "Arată imagini"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:714
-msgid "Always Show From Sender"
-msgstr "Afișează întotdeauna de la acest expeditor"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:738
-msgid "Edit Draft"
-msgstr "Editează ciorna"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:831
+#: src/client/conversation-viewer/conversation-email.vala:890
 msgid "From:"
 msgstr "De la:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:834
+#: src/client/conversation-viewer/conversation-email.vala:894
+#: ui/conversation-message.ui:313
 msgid "To:"
 msgstr "Către:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:837
+#: src/client/conversation-viewer/conversation-email.vala:898
+#: ui/conversation-message.ui:358
 msgid "Cc:"
 msgstr "Cc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:840
+#: src/client/conversation-viewer/conversation-email.vala:902
+#: ui/conversation-message.ui:403
 msgid "Bcc:"
 msgstr "Bcc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:843
-msgid "Subject:"
-msgstr "Subiect:"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:846
+#: src/client/conversation-viewer/conversation-email.vala:906
 msgid "Date:"
 msgstr "Data:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1165
-#, c-format
-msgid "%u read message"
-msgid_plural "%u read messages"
-msgstr[0] "%u mesaj citit"
-msgstr[1] "%u mesaje citite"
-msgstr[2] "%u de mesaje citite"
+#: src/client/conversation-viewer/conversation-email.vala:910
+msgid "Subject:"
+msgstr "Subiect:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1297
-#, c-format
-msgid "This message was sent successfully, but could not be saved to %s."
-msgstr "Acest mesaj a fost trimis cu succes, dar nu a putut fi salvat în %s."
+#: src/client/conversation-viewer/conversation-message.vala:62
+msgid "This email address may have been forged"
+msgstr "Această adresă de email poate fi falsificată"
 
-#. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1323
-#: ../ui/composer.glade.h:4
-msgid "_Copy"
-msgstr "_Copiază"
+#. Compact headers
+#. Translators: This is displayed in place of the from address
+#. when the message has no from address.
+#: src/client/conversation-viewer/conversation-message.vala:388
+msgid "No sender"
+msgstr "Fără expeditor"
 
-#. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1331
-msgid "Copy _Email Address"
-msgstr "Copiază adresa de _email"
+#. Translators: This separates multiple 'from'
+#. addresses in the compact header for a message.
+#: src/client/conversation-viewer/conversation-message.vala:676
+msgid ", "
+msgstr ", "
 
-#. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1336
-#: ../ui/composer.glade.h:17
-msgid "Copy _Link"
-msgstr "Copiază _legătura"
+#. Translators: This string is used as the HTML IMG ALT
+#. attribute value when displaying an inline image in an email
+#. that did not specify a file name. E.g. <IMG ALT="Image" ...
+#: src/client/conversation-viewer/conversation-message.vala:779
+msgid "Image"
+msgstr "Imagine"
 
-#. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1344
-msgid "Select _Message"
-msgstr "Selectează _mesajul"
+#. Translators: Title label for placeholder when no
+#. conversations have been selected.
+#: src/client/conversation-viewer/conversation-viewer.vala:80
+msgid "No conversations selected"
+msgstr "Nicio conversație selectată"
 
-#. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1356
-msgid "_Inspect"
-msgstr "_Inspectează"
+#. Translators: Sub-title label for placeholder when no
+#. conversations have been selected.
+#: src/client/conversation-viewer/conversation-viewer.vala:84
+msgid "Selecting a conversation from the list will display it here"
+msgstr "Selectând o conversație din listă o va afișa aici"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1583
-msgid "This link appears to go to"
-msgstr "Acestă legătură pare să indice spre"
+#. Translators: Title label for placeholder when multiple
+#. conversations have been selected.
+#: src/client/conversation-viewer/conversation-viewer.vala:92
+msgid "Multiple conversations selected"
+msgstr "Conversații multiple selectate"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1584
-msgid "but actually goes to"
-msgstr "dar de fapt trimite la"
+#. Translators: Sub-title label for placeholder when multiple
+#. conversations have been selected.
+#: src/client/conversation-viewer/conversation-viewer.vala:96
+msgid "Choosing an action will apply to all selected conversations"
+msgstr "Alegând o acțiune se va aplica tuturor conversațiilor selectate"
 
-#. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1639
-msgid " (Invalid?)"
-msgstr " (Nevalid?)"
+#. Translators: Title label for placeholder when no
+#. conversations have exist in a folder.
+#. Translators: Title label for placeholder when no
+#. conversations have been found in a search.
+#: src/client/conversation-viewer/conversation-viewer.vala:104
+#: src/client/conversation-viewer/conversation-viewer.vala:116
+msgid "No conversations found"
+msgstr "Nicio conversație în dosar"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1745
-msgid "_Save Image As..."
-msgstr "_Salvează imaginea ca..."
+#. Translators: Sub-title label for placeholder when no
+#. conversations have exist in a folder.
+#: src/client/conversation-viewer/conversation-viewer.vala:108
+msgid "This folder does not contain any conversations"
+msgstr "Acest dosar nu conține nicio conversație"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1849
-msgid "_Save As..."
-msgstr "_Salvează ca..."
+#. Translators: Sub-title label for placeholder when no
+#. conversations have been found in a search.
+#: src/client/conversation-viewer/conversation-viewer.vala:120
+msgid "Your search returned no results, try refining your search terms"
+msgstr ""
+"Căutarea dumneavoastră nu a produs rezultate, încercați să îmbunătățiți "
+"termenii de căutare"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1854
-msgid "Save All A_ttachments..."
-msgstr "Salvează toate fișierele a_tașate..."
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1874
-msgid "Save A_ttachment..."
-msgid_plural "Save All A_ttachments..."
-msgstr[0] "Salvează fișierul a_tașat..."
-msgstr[1] "Salvează toate fișierele a_tașate..."
-msgstr[2] "Salvează toate fișierele a_tașate..."
-
-#. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1889
-msgid "Reply to _All"
-msgstr "Răspunde _tuturor"
-
-#. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1906
-msgid "_Mark as Read"
-msgstr "_Marchează ca citit"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1910
-msgid "_Mark as Unread"
-msgstr "_Marchează ca necitit"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1916
-msgid "Mark Unread From _Here"
-msgstr "Marc_hează ca necitit de aici"
-
-#. Separator.
-#. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1931
-msgid "_View Source"
-msgstr "_Vizualizare sursă"
-
-#. Generate the attachment table.
-#. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2255
-#: ../src/engine/rfc822/rfc822-utils.vala:392
-msgid "none"
-msgstr "fără"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2390
-msgid "Failed to open default text editor."
-msgstr "Eroare la deschiderea editorului de text implicit."
-
-#: ../src/client/conversation-viewer/conversation-web-view.vala:322
-#, c-format
-msgid "%s - Conversation Inspector"
-msgstr "%s - Inspector conversație"
-
-#: ../src/client/dialogs/attachment-dialog.vala:18
+#: src/client/dialogs/attachment-dialog.vala:25
 msgid "Choose a file"
 msgstr "Alegeți un fișier"
 
-#: ../src/client/dialogs/attachment-dialog.vala:23
+#: src/client/dialogs/attachment-dialog.vala:25
 msgid "_Attach"
 msgstr "_Atașează"
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:33
+#: src/client/dialogs/certificate-warning-dialog.vala:36
 #, c-format
 msgid "Untrusted Connection: %s"
 msgstr "Conexiune fără încredere: %s"
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:36
+#: src/client/dialogs/certificate-warning-dialog.vala:38
 #, c-format
 msgid "The identity of the %s mail server at %s:%u could not be verified."
 msgstr ""
 "Identitatea serverului de mail %s de la %s:%u nu a putut fi verificată."
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:44
+#: src/client/dialogs/certificate-warning-dialog.vala:48
 msgid ""
-"Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
-"your username and password to be transmitted insecurely."
+"Selecting “Trust This Server” or “Always Trust This Server” may cause your "
+"username and password to be transmitted insecurely."
 msgstr ""
 "Selectând „Am încredere în acest server” sau „Am încredere întotdeauna în "
-"acest server” poate cauza ca utilizatorul și parola să fie trasmise în mod "
+"acest server” poate cauza ca utilizatorul și parola să fie transmise în mod "
 "nesigur."
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:52
+#: src/client/dialogs/certificate-warning-dialog.vala:56
 msgid ""
-"Selecting \"Don't Trust This Server\" will cause Geary not to access this "
+"Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
 msgstr ""
 "Selectând „Nu am încredere în acest server” va cauza ca Geary să nu acceseze "
 "acest server."
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:54
+#: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
 msgstr "Geary ni va adăuga sau nu va actualiza acest cont de email."
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:59
+#: src/client/dialogs/certificate-warning-dialog.vala:63
 msgid ""
-"Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
-"this account."
+"Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
+"account."
 msgstr ""
 "Selectând „Nu am încredere în acest server” va cauza ca Geary să nu mai "
 "acceseze acest cont."
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:61
-msgid "Geary will exit if you have no other open email accounts."
-msgstr "Geary se va închide dacă nu aveți alte conturi de email."
-
-#: ../src/client/dialogs/certificate-warning-dialog.vala:66
+#: src/client/dialogs/certificate-warning-dialog.vala:69
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
@@ -1170,43 +1798,43 @@ msgstr ""
 "Contactați administratorul de sistem sau furnizorul de servicii email dacă "
 "aveți întrebări despre aceste probleme."
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:73
-msgid "The server's certificate is not signed by a known authority"
+#: src/client/dialogs/certificate-warning-dialog.vala:76
+msgid "The server’s certificate is not signed by a known authority"
 msgstr "Certificatul serverului nu este semnat de o autoritate cunoscută"
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:76
-msgid "The server's identity does not match the identity in the certificate"
-msgstr "Identitatea serveruluin nu se potrivește cu identitatea certificatului"
+#: src/client/dialogs/certificate-warning-dialog.vala:79
+msgid "The server’s identity does not match the identity in the certificate"
+msgstr "Identitatea serverului nu se potrivește cu identitatea certificatului"
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:79
-msgid "The server's certificate has expired"
+#: src/client/dialogs/certificate-warning-dialog.vala:82
+msgid "The server’s certificate has expired"
 msgstr "Certificatul serverului a expirat"
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:82
-msgid "The server's certificate has not been activated"
+#: src/client/dialogs/certificate-warning-dialog.vala:85
+msgid "The server’s certificate has not been activated"
 msgstr "Certificatul serverului nu a fost activat"
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:85
-msgid "The server's certificate has been revoked and is now invalid"
+#: src/client/dialogs/certificate-warning-dialog.vala:88
+msgid "The server’s certificate has been revoked and is now invalid"
 msgstr "Certificatul serverului a fost revocat și este nevalid"
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:88
-msgid "The server's certificate is considered insecure"
+#: src/client/dialogs/certificate-warning-dialog.vala:91
+msgid "The server’s certificate is considered insecure"
 msgstr "Certificatul serverului este considerat nesigur"
 
-#: ../src/client/dialogs/certificate-warning-dialog.vala:91
-msgid "An error has occurred processing the server's certificate"
+#: src/client/dialogs/certificate-warning-dialog.vala:94
+msgid "An error has occurred processing the server’s certificate"
 msgstr "S-a produs o eroare la procesarea certificatului serverului"
 
 #. We can't keep these in the glade file, because Gnome doesn't want markup in translatable
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
-#: ../src/client/dialogs/password-dialog.vala:16
+#: src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
 msgstr "Geary necesită parola dumneavoastra de email pentru a continua"
 
 #. Label displaying total number of email messages in a folder
-#: ../src/client/folder-list/folder-list-folder-entry.vala:32
+#: src/client/folder-list/folder-list-folder-entry.vala:32
 #, c-format
 msgid "%d message"
 msgid_plural "%d messages"
@@ -1215,7 +1843,7 @@ msgstr[1] "%d mesaje"
 msgstr[2] "%d de mesaje"
 
 #. / Label displaying number of unread email messages in a folder
-#: ../src/client/folder-list/folder-list-folder-entry.vala:39
+#: src/client/folder-list/folder-list-folder-entry.vala:39
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
@@ -1226,16 +1854,16 @@ msgstr[2] "%d necitite"
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
 #. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
-#: ../src/client/folder-list/folder-list-folder-entry.vala:45
+#: src/client/folder-list/folder-list-folder-entry.vala:45
 #, c-format
 msgid "%s, %s"
 msgstr "%s, %s"
 
-#: ../src/client/folder-list/folder-list-inboxes-branch.vala:14
+#: src/client/folder-list/folder-list-inboxes-branch.vala:14
 msgid "Inboxes"
 msgstr "Toate mesajele primite"
 
-#: ../src/client/folder-list/folder-list-search-branch.vala:44
+#: src/client/folder-list/folder-list-search-branch.vala:44
 #, c-format
 msgid "%d result"
 msgid_plural "%d results"
@@ -1243,12 +1871,12 @@ msgstr[0] "%d rezultat"
 msgstr[1] "%d rezultate"
 msgstr[2] "%d de rezultate"
 
-#: ../src/client/notification/libmessagingmenu.vala:75
+#: src/client/notification/libmessagingmenu.vala:75
 #, c-format
-msgid "%s - New Messages"
-msgstr "%s - Mesaje noi"
+msgid "%s — New Messages"
+msgstr "%s — Mesaje noi"
 
-#: ../src/client/notification/libnotify.vala:72
+#: src/client/notification/libnotify.vala:75
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
@@ -1256,7 +1884,7 @@ msgstr[0] "%d mesaj nou"
 msgstr[1] "%d mesaje noi"
 msgstr[2] "%d de mesaje noi"
 
-#: ../src/client/notification/libnotify.vala:75
+#: src/client/notification/libnotify.vala:78
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
@@ -1264,7 +1892,7 @@ msgstr[0] "%s, %d mesaj nou în total"
 msgstr[1] "%s, %d mesaje noi în total"
 msgstr[2] "%s, %d de mesaje noi în total"
 
-#: ../src/client/notification/libnotify.vala:107
+#: src/client/notification/libnotify.vala:110
 #, c-format
 msgid ""
 "%s\n"
@@ -1282,66 +1910,66 @@ msgstr[2] ""
 "%s\n"
 "(%d de alte mesaje noi pentru %s)"
 
-#: ../src/client/notification/libnotify.vala:160
+#: src/client/notification/libnotify.vala:149
 msgid "Open"
 msgstr "Deschide"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:68
+#: src/client/util/util-date.vala:68
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:71
+#: src/client/util/util-date.vala:71
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:74
+#: src/client/util/util-date.vala:74
 msgctxt "Default clock format"
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Date format for dates within the current year, i.e. Nov 8
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:78
+#: src/client/util/util-date.vala:78
 msgid "%b %-e"
 msgstr "%-e %b"
 
 #. / Date format for dates within a different year, i.e. 02/04/10
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:83
+#: src/client/util/util-date.vala:83
 #, no-c-format
 msgid "%x"
 msgstr "%x"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:88
+#: src/client/util/util-date.vala:88
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%-e %B %Y %-l:%M %P"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:91
+#: src/client/util/util-date.vala:91
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%-e %B %Y %-H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:94
+#: src/client/util/util-date.vala:94
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%-e %B %Y %-l:%M %P"
 
-#: ../src/client/util/util-date.vala:164
+#: src/client/util/util-date.vala:164
 msgid "Now"
 msgstr "Acum"
 
-#: ../src/client/util/util-date.vala:167
+#: src/client/util/util-date.vala:167
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
@@ -1349,7 +1977,7 @@ msgstr[0] "acum %dm"
 msgstr[1] "acum %dm"
 msgstr[2] "acum %dm"
 
-#: ../src/client/util/util-date.vala:171
+#: src/client/util/util-date.vala:171
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
@@ -1357,113 +1985,104 @@ msgstr[0] "acum %dh"
 msgstr[1] "acum %dh"
 msgstr[2] "acum %dh"
 
-#: ../src/client/util/util-date.vala:178
+#: src/client/util/util-date.vala:178
 msgid "Yesterday"
 msgstr "Ieri"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:183
+#: src/client/util/util-date.vala:183
 #, c-format
 msgid "%A"
 msgstr "%A"
 
-#: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:796
+#: src/client/util/util-email.vala:30 src/engine/rfc822/rfc822-message.vala:846
 msgid "(no subject)"
 msgstr "(fără titlu)"
 
-#: ../src/client/util/util-files.vala:16
+#. Translators: This is shown for displaying a list of
+#. email recipients that happens to be empty,
+#. i.e. contains no email addresses.
+#: src/client/util/util-email.vala:49
+msgid "(No recipients)"
+msgstr "(fără destinatari)"
+
+#. Translators: This is used for displaying a short list of
+#. email recipients lists with two or more addresses. The
+#. first (string) substitution is address of the first, the
+#. second substitution is the number of n - 1 remaining
+#. recipients.
+#: src/client/util/util-email.vala:63
+#, c-format
+msgid "%s and %d other"
+msgid_plural "%s and %d others"
+msgstr[0] "%s și %d altul"
+msgstr[1] "%s și %d alții"
+msgstr[2] "%s și %d alții"
+
+#: src/client/util/util-files.vala:16
 msgid "bytes"
 msgstr "bytes"
 
-#: ../src/client/util/util-files.vala:19
+#: src/client/util/util-files.vala:19
 msgctxt "Abbreviation for terabyte"
 msgid "TB"
 msgstr "TB"
 
-#: ../src/client/util/util-files.vala:22
+#: src/client/util/util-files.vala:22
 msgctxt "Abbreviation for gigabyte"
 msgid "GB"
 msgstr "GB"
 
-#: ../src/client/util/util-files.vala:25
+#: src/client/util/util-files.vala:25
 msgctxt "Abbreviation for megabyte"
 msgid "MB"
 msgstr "MB"
 
-#: ../src/client/util/util-files.vala:28
+#: src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
 
-#: ../src/engine/api/geary-service-provider.vala:52
-msgid "Gmail"
-msgstr "Gmail"
-
-#: ../src/engine/api/geary-service-provider.vala:55
-msgid "Yahoo! Mail"
-msgstr "Yahoo! Mail"
-
-#: ../src/engine/api/geary-service-provider.vala:58
-msgid "Outlook.com"
-msgstr "Outlook.com"
-
-#: ../src/engine/api/geary-service-provider.vala:61
-msgid "Other"
-msgstr "Altele"
-
-#: ../src/engine/api/geary-service.vala:20
-msgid "IMAP"
-msgstr "IMAP"
-
-#: ../src/engine/api/geary-service.vala:23
-msgid "SMTP"
-msgstr "SMTP"
-
-#: ../src/engine/api/geary-special-folder-type.vala:24
+#: src/engine/api/geary-special-folder-type.vala:24
 msgid "Inbox"
 msgstr "Mesaje primite"
 
-#: ../src/engine/api/geary-special-folder-type.vala:27
+#: src/engine/api/geary-special-folder-type.vala:27
 msgid "Drafts"
 msgstr "Ciorne"
 
-#: ../src/engine/api/geary-special-folder-type.vala:30
+#: src/engine/api/geary-special-folder-type.vala:30
 msgid "Sent Mail"
 msgstr "Mesaje trimise"
 
-#: ../src/engine/api/geary-special-folder-type.vala:33
+#: src/engine/api/geary-special-folder-type.vala:33
 msgid "Starred"
 msgstr "Cu stea"
 
-#: ../src/engine/api/geary-special-folder-type.vala:36
+#: src/engine/api/geary-special-folder-type.vala:36
 msgid "Important"
 msgstr "Importante"
 
-#: ../src/engine/api/geary-special-folder-type.vala:39
+#: src/engine/api/geary-special-folder-type.vala:39
 msgid "All Mail"
 msgstr "Toate mesajele"
 
-#: ../src/engine/api/geary-special-folder-type.vala:42
+#: src/engine/api/geary-special-folder-type.vala:42
 msgid "Spam"
 msgstr "Spam"
 
-#: ../src/engine/api/geary-special-folder-type.vala:45
+#: src/engine/api/geary-special-folder-type.vala:45
 msgid "Trash"
 msgstr "Gunoi"
 
-#: ../src/engine/api/geary-special-folder-type.vala:48
+#: src/engine/api/geary-special-folder-type.vala:48
 msgid "Outbox"
 msgstr "Mesaje în curs de trimitere"
 
-#: ../src/engine/api/geary-special-folder-type.vala:54
+#: src/engine/api/geary-special-folder-type.vala:54
 msgid "Archive"
 msgstr "Arhivă"
-
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:26
-msgid "None"
-msgstr "Niciuna"
 
 #. Map of possibly translated search operator names and values
 #. to English/internal names and values. We include the
@@ -1478,8 +2097,7 @@ msgstr "Niciuna"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:99
-#| msgid "attachment"
+#: src/engine/imap-db/imap-db-account.vala:125
 msgctxt "Search operator"
 msgid "attachment"
 msgstr "atașament"
@@ -1492,8 +2110,7 @@ msgstr "atașament"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:108
-#| msgid "bcc"
+#: src/engine/imap-db/imap-db-account.vala:134
 msgctxt "Search operator"
 msgid "bcc"
 msgstr "bcc"
@@ -1505,8 +2122,7 @@ msgstr "bcc"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:116
-#| msgid "body"
+#: src/engine/imap-db/imap-db-account.vala:142
 msgctxt "Search operator"
 msgid "body"
 msgstr "conținut"
@@ -1519,8 +2135,7 @@ msgstr "conținut"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:125
-#| msgid "cc"
+#: src/engine/imap-db/imap-db-account.vala:151
 msgctxt "Search operator"
 msgid "cc"
 msgstr "cc"
@@ -1533,8 +2148,7 @@ msgstr "cc"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:134
-#| msgid "from"
+#: src/engine/imap-db/imap-db-account.vala:160
 msgctxt "Search operator"
 msgid "from"
 msgstr "de-la"
@@ -1546,8 +2160,7 @@ msgstr "de-la"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:142
-#| msgid "is"
+#: src/engine/imap-db/imap-db-account.vala:168
 msgctxt "Search operator"
 msgid "is"
 msgstr "este"
@@ -1559,8 +2172,7 @@ msgstr "este"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary
 #. User Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:150
-#| msgid "subject"
+#: src/engine/imap-db/imap-db-account.vala:176
 msgctxt "Search operator"
 msgid "subject"
 msgstr "subiect"
@@ -1573,8 +2185,7 @@ msgstr "subiect"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:159
-#| msgid "to"
+#: src/engine/imap-db/imap-db-account.vala:185
 msgctxt "Search operator"
 msgid "to"
 msgstr "către"
@@ -1587,8 +2198,7 @@ msgstr "către"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:180
-#| msgid "me"
+#: src/engine/imap-db/imap-db-account.vala:206
 msgctxt "Search operator value - mail addressed to the user"
 msgid "me"
 msgstr "mine"
@@ -1600,8 +2210,7 @@ msgstr "mine"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:192
-#| msgid "me"
+#: src/engine/imap-db/imap-db-account.vala:218
 msgctxt "Search operator value - mail sent by the user"
 msgid "me"
 msgstr "mine"
@@ -1613,8 +2222,7 @@ msgstr "mine"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:204
-#| msgid "read"
+#: src/engine/imap-db/imap-db-account.vala:230
 msgctxt "'is:' search operator value"
 msgid "read"
 msgstr "citit"
@@ -1627,8 +2235,7 @@ msgstr "citit"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:215
-#| msgid "starred"
+#: src/engine/imap-db/imap-db-account.vala:241
 msgctxt "'is:' search operator value"
 msgid "starred"
 msgstr "cu-stea"
@@ -1640,8 +2247,7 @@ msgstr "cu-stea"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:225
-#| msgid "unread"
+#: src/engine/imap-db/imap-db-account.vala:251
 msgctxt "'is:' search operator value"
 msgid "unread"
 msgstr "necitit"
@@ -1650,7 +2256,7 @@ msgstr "necitit"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:626
+#: src/engine/imap-engine/imap-engine-generic-account.vala:936
 msgid "Drafts | Draft"
 msgstr "Drafts | Draft | Ciorne | Ciornă"
 
@@ -1658,14 +2264,14 @@ msgstr "Drafts | Draft | Ciorne | Ciornă"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:635
+#: src/engine/imap-engine/imap-engine-generic-account.vala:945
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Sent | Sent Mail | Sent Email | Sent E-Mail | Trimise | Emailuri Trimise"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:640
+#: src/engine/imap-engine/imap-engine-generic-account.vala:950
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Elemente trimise"
@@ -1674,7 +2280,7 @@ msgstr "Elemente trimise"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:650
+#: src/engine/imap-engine/imap-engine-generic-account.vala:960
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1686,14 +2292,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:660
+#: src/engine/imap-engine/imap-engine-generic-account.vala:970
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Trash | Rubbish | Rubbish Bin | Gunoi | Coșul de guni"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:665
-#| msgid "Delete"
+#: src/engine/imap-engine/imap-engine-generic-account.vala:975
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Elemente șterse"
@@ -1702,626 +2307,1490 @@ msgstr "Elemente șterse"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:675
+#: src/engine/imap-engine/imap-engine-generic-account.vala:985
 msgid "Archive | Archives"
 msgstr "Archive | Archives | Arhivă | Arhive"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/engine/rfc822/rfc822-utils.vala:215
+#: src/engine/rfc822/rfc822-utils.vala:236
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %-e %b %Y la %-l:%M %p"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:221
+#: src/engine/rfc822/rfc822-utils.vala:242
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "La %1$s, %2$s a scris:"
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:228
+#: src/engine/rfc822/rfc822-utils.vala:249
 #, c-format
 msgid "%s wrote:"
 msgstr "%s a scris:"
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
-#: ../src/engine/rfc822/rfc822-utils.vala:234
+#: src/engine/rfc822/rfc822-utils.vala:255
 #, c-format
 msgid "On %s:"
 msgstr "La %s:"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:263
+#: src/engine/rfc822/rfc822-utils.vala:282
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Mesaj înaintat ----------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:267
+#: src/engine/rfc822/rfc822-utils.vala:286
 #, c-format
 msgid "From: %s\n"
 msgstr "De la: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:268
+#: src/engine/rfc822/rfc822-utils.vala:287
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Subiect: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:269
+#: src/engine/rfc822/rfc822-utils.vala:288
 #, c-format
 msgid "Date: %s\n"
 msgstr "Data: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:272
+#: src/engine/rfc822/rfc822-utils.vala:291
 #, c-format
 msgid "To: %s\n"
 msgstr "Către: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:275
+#: src/engine/rfc822/rfc822-utils.vala:294
 #, c-format
 msgid "Cc: %s\n"
 msgstr "Cc: %s\n"
 
-#: ../ui/account_cannot_remove.glade.h:1
-msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-msgstr ""
-"<span weight=\"bold\" size=\"larger\">Contul nu poate fi eliminat</span> "
-
-#: ../ui/account_cannot_remove.glade.h:2
-msgid ""
-"A composer window associated with this account is currently open. Send or "
-"discard the message and try again."
-msgstr ""
-"O fereastră de compunere asociată cu acest cont este deschisă. Trimiteți sau "
-"anulați mesajul și încearcați din nou."
-
-#: ../ui/account_list.glade.h:1
-msgid "Add account"
+#: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:127
+msgid "Add an account"
 msgstr "Adaugă un cont"
 
-#: ../ui/account_list.glade.h:2
-msgid "Edit account"
+#: ui/accounts_editor_add_pane.ui:53
+msgid "Create"
+msgstr "Creează"
+
+#: ui/accounts_editor_add_pane.ui:130 ui/accounts_editor_servers_pane.ui:125
+msgid "Receiving"
+msgstr "Primire"
+
+#: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
+msgid "Sending"
+msgstr "Se trimite"
+
+#: ui/accounts_editor_edit_pane.ui:8
+msgid "Edit Account"
 msgstr "Editează contul"
 
-#: ../ui/account_list.glade.h:3
+#: ui/accounts_editor_edit_pane.ui:9 ui/accounts_editor_servers_pane.ui:9
+msgid "Account Name"
+msgstr "Numele contului"
+
+#: ui/accounts_editor_edit_pane.ui:124
+msgid "Email addresses"
+msgstr "Adrese de email"
+
+#: ui/accounts_editor_edit_pane.ui:164
+msgid "Signature"
+msgstr "Semnătură"
+
+#: ui/accounts_editor_edit_pane.ui:201
+msgid "Settings"
+msgstr "Configurări"
+
+#. This is a button in the account settings to show server settings.
+#: ui/accounts_editor_edit_pane.ui:243 ui/accounts_editor_servers_pane.ui:8
+msgid "Server Settings"
+msgstr "Configurări server"
+
+#. This is the remove account button in the account settings.
+#: ui/accounts_editor_edit_pane.ui:258 ui/accounts_editor_remove_pane.ui:23
+msgid "Remove Account"
+msgstr "Elimină contul"
+
+#: ui/accounts_editor_edit_pane.ui:262 ui/accounts_editor_remove_pane.ui:27
+msgid "Remove this account from Geary"
+msgstr "Elimină acest cont din Geary"
+
+#: ui/accounts_editor_list_pane.ui:8
+msgid "Accounts"
+msgstr "Conturi"
+
+#: ui/accounts_editor_list_pane.ui:63
+msgid "To get started, select an email provider below."
+msgstr "Pentru a începe, selectați furnizorul de email de mai jos."
+
+#: ui/accounts_editor_list_pane.ui:76
+msgid "Welcome to Geary"
+msgstr "Bine ați venit la Geary"
+
+#. This title is shown to users when confirming if they want to remove an account. The string substitution is replaced with the account's name.
+#: ui/accounts_editor_remove_pane.ui:73
+#, c-format
+msgid "Confirm removing: %s"
+msgstr "Confirmați eliminarea: %s"
+
+#: ui/accounts_editor_remove_pane.ui:91
+msgid ""
+"Removing an account will remove it from Geary and delete locally cached "
+"email data from your computer, but not from your service provider."
+msgstr ""
+"Eliminând un cont îl va elimina din Geary și șterge datele de email salvate "
+"local în calculator, dar nu de la furnizorul de serviciu."
+
+#: ui/accounts_editor_remove_pane.ui:122
 msgid "Remove account"
 msgstr "Șterge contul"
 
-#: ../ui/account_spinner.glade.h:1
-msgid "Please wait while Geary validates your account."
-msgstr "Așteptați cât timp Geary vă validează contul."
+#: ui/accounts_editor_servers_pane.ui:17
+msgid "Cancel"
+msgstr "Anulează"
 
-#: ../ui/certificate_warning_dialog.glade.h:1
+#: ui/accounts_editor_servers_pane.ui:47
+msgid "Apply"
+msgstr "Aplică"
+
+#: ui/certificate_warning_dialog.glade:7
 msgid "Untrusted Connection"
 msgstr "Conexiune fără încredere"
 
-#: ../ui/certificate_warning_dialog.glade.h:2
+#: ui/certificate_warning_dialog.glade:29
 msgid "_Always Trust This Server"
 msgstr "Am încredere întotdeauna în _acest server"
 
-#: ../ui/certificate_warning_dialog.glade.h:3
+#: ui/certificate_warning_dialog.glade:43
 msgid "_Trust This Server"
 msgstr "Am încredere în aces_t server"
 
-#: ../ui/certificate_warning_dialog.glade.h:4
-msgid "_Don't Trust This Server"
-msgstr "Nu am încre_fdere în acest server"
+#: ui/certificate_warning_dialog.glade:57
+msgid "_Don’t Trust This Server"
+msgstr "Nu am încre_dere în acest server"
 
-#: ../ui/composer.glade.h:1
-msgid "_Undo"
-msgstr "An_ulează"
-
-#: ../ui/composer.glade.h:2
-msgid "_Redo"
-msgstr "_Refă"
-
-#: ../ui/composer.glade.h:3
-msgid "Cu_t"
-msgstr "_Taie"
-
-#: ../ui/composer.glade.h:5
-msgid "_Paste"
-msgstr "Li_pește"
-
-#: ../ui/composer.glade.h:6
-msgid "_Left"
-msgstr "_Stânga"
-
-#: ../ui/composer.glade.h:7
-msgid "_Right"
-msgstr "_Dreapta"
-
-#: ../ui/composer.glade.h:8
-msgid "_Center"
-msgstr "_Centru"
-
-#: ../ui/composer.glade.h:9
-msgid "_Justify"
-msgstr "_Aliniază la margini"
-
-#: ../ui/composer.glade.h:10
-msgid "Link (Ctrl+L)"
-msgstr "Legătură (Ctrl+L)"
-
-#: ../ui/composer.glade.h:11
-msgid "C_olor"
-msgstr "Cul_oare"
-
-#: ../ui/composer.glade.h:12
-msgid "More options"
-msgstr "Mai multe opțiuni"
-
-#: ../ui/composer.glade.h:13
-msgid "Quote text  (Ctrl+])"
-msgstr "Citează text (Ctrl+])"
-
-#: ../ui/composer.glade.h:14
-msgid "Unquote text (Ctrl+[)"
-msgstr "Anulează citatul (Ctrl+[)"
-
-#: ../ui/composer.glade.h:15
-msgid "Remove formatting (Ctrl+Space)"
-msgstr "Elimină fomatarea (Ctrl+Space)"
-
-#: ../ui/composer.glade.h:16
-msgctxt "Clipboard paste with rich text"
-msgid "Paste _With Formatting"
-msgstr "Lipește cu _formatare"
-
-#: ../ui/composer.glade.h:18
-msgid "Bold (Ctrl+B)"
-msgstr "Îngroșat (Ctrl+B)"
-
-#: ../ui/composer.glade.h:19
-msgid "Italic (Ctrl+I)"
-msgstr "Italic (Ctrl+I)"
-
-#: ../ui/composer.glade.h:20
-msgid "Underline (Ctrl+U)"
-msgstr "Subliniat (Ctrl+U)"
-
-#: ../ui/composer.glade.h:21
-msgid "Strikethrough (Ctrl+K)"
-msgstr "Tăiat (Ctrl+K)"
-
-#: ../ui/composer.glade.h:22
-msgid "_Rich Text"
-msgstr "Text cu fo_rmatare"
-
-#: ../ui/composer.glade.h:23
-msgid "Show Extended Fields"
-msgstr "Arată câmpurile extinse"
-
-#: ../ui/composer.glade.h:24
-msgctxt "Label"
-msgid "Close and Save"
-msgstr "Închide și salvează"
-
-#: ../ui/composer.glade.h:25
-msgctxt "Short Label"
-msgid "Close and Save"
-msgstr "Închide și salvează"
-
-#: ../ui/composer.glade.h:26
-msgctxt "Tooltip"
-msgid "Close and Save"
-msgstr "Închide și salvează"
-
-#: ../ui/composer.glade.h:27
-msgctxt "Label"
-msgid "Close and Discard"
-msgstr "Închide și anulează"
-
-#: ../ui/composer.glade.h:28
-msgctxt "Short Label"
-msgid "Close and Discard"
-msgstr "Închide și anulează"
-
-#: ../ui/composer.glade.h:29
-msgctxt "Tooltip"
-msgid "Close and Discard"
-msgstr "Închide și anulează"
-
-#: ../ui/composer.glade.h:30
-msgid "Lar_ge"
-msgstr "Ma_re"
-
-#: ../ui/composer.glade.h:31
-msgid "Large"
-msgstr "Mare"
-
-#: ../ui/composer.glade.h:32
-msgid "_Medium"
-msgstr "_Mediu"
-
-#: ../ui/composer.glade.h:33
-msgid "Medium"
-msgstr "Mediu"
-
-#: ../ui/composer.glade.h:34
-msgid "_Small"
-msgstr "_Mic"
-
-#: ../ui/composer.glade.h:35
-msgid "Small"
-msgstr "Mic"
-
-#: ../ui/composer.glade.h:36
-msgid "S_ans Serif"
-msgstr "Fără s_erife"
-
-#: ../ui/composer.glade.h:37
-msgid "Sans Serif"
-msgstr "Fără serife"
-
-#: ../ui/composer.glade.h:38
-msgid "S_erif"
-msgstr "Cu s_erife"
-
-#: ../ui/composer.glade.h:39
-msgid "Serif"
-msgstr "Cu serife"
-
-#: ../ui/composer.glade.h:40
-msgid "_Fixed Width"
-msgstr "Lățime _fixă"
-
-#: ../ui/composer.glade.h:41
-msgid "Fixed Width"
-msgstr "Lățime fixă"
-
-#: ../ui/composer.glade.h:42
-msgid "Detach"
-msgstr "Detașează"
-
-#: ../ui/composer.glade.h:43
+#: ui/composer-headerbar.ui:17 ui/composer-headerbar.ui:174
 msgid "Detach (Ctrl+D)"
 msgstr "Detașează (Ctrl+D)"
 
-#: ../ui/composer.glade.h:44
-msgid "_Send"
-msgstr "_Trimite"
-
-#: ../ui/composer.glade.h:45
-msgid "Send"
-msgstr "Trimite"
-
-#: ../ui/composer.glade.h:46
-msgid "Send (Ctrl+Enter)"
-msgstr "Trimite (Ctrl+Enter)"
-
-#: ../ui/composer.glade.h:47
-msgid "_Attach File"
-msgstr "_Atașează fișier"
-
-#: ../ui/composer.glade.h:48
-msgid "Attach File"
-msgstr "Atașează fișier"
-
-#: ../ui/composer.glade.h:49
-#| msgid "Attach File"
+#: ui/composer-headerbar.ui:57 ui/composer-headerbar.ui:83
 msgid "Attach File (Ctrl+T)"
 msgstr "Atașează fișier (Ctrl+T)"
 
-#: ../ui/composer.glade.h:50
-msgid "_Include Original Attachments"
-msgstr "_Include fișierele atașate originale"
-
-#: ../ui/composer.glade.h:51
+#: ui/composer-headerbar.ui:107
 msgid "Include Original Attachments"
 msgstr "Include atașamentele originale"
 
-#: ../ui/composer.glade.h:52
-#| msgid "Enable _spell checking"
-msgid "Select spell checking language"
-msgstr "Selectează limba pentru corectarea ortografică"
+#: ui/composer-headerbar.ui:202
+msgid "_Send"
+msgstr "_Trimite"
 
-#: ../ui/composer.glade.h:53
-msgid "Spelling language"
-msgstr "Limba pentru corectarea ortografică"
+#: ui/composer-headerbar.ui:207
+msgid "Send (Ctrl+Enter)"
+msgstr "Trimite (Ctrl+Enter)"
+
+#: ui/composer-headerbar.ui:230
+msgid "Discard and Close"
+msgstr "Anulează și închide"
+
+#: ui/composer-headerbar.ui:254
+msgid "Save and Close"
+msgstr "Salvează și închide"
+
+#. Note that this button and the Update button will never be shown at the same time to the user.
+#: ui/composer-link-popover.ui:41
+msgid "Insert the new link with this URL"
+msgstr "Introduceți noua legătură cu acest URL"
+
+#: ui/composer-link-popover.ui:52
+msgid "Link URL"
+msgstr "Legătură URL"
+
+#. Note that this button and the Insert button will never be shown at the same time to the user.
+#: ui/composer-link-popover.ui:66
+msgid "Update this link’s URL"
+msgstr "Actualizați URL-ul legăturii"
+
+#: ui/composer-link-popover.ui:86
+msgid "Delete this link"
+msgstr "Șterge această legătură"
+
+#: ui/composer-link-popover.ui:106
+msgid "Open this link"
+msgstr "Deschide această legătură"
+
+#: ui/composer-menus.ui:7
+msgid "S_ans Serif"
+msgstr "Fără s_erife"
+
+#: ui/composer-menus.ui:12
+msgid "S_erif"
+msgstr "Cu s_erife"
+
+#: ui/composer-menus.ui:17
+msgid "_Fixed Width"
+msgstr "Lățime _fixă"
+
+#: ui/composer-menus.ui:24
+msgid "_Small"
+msgstr "_Mic"
+
+#: ui/composer-menus.ui:29
+msgid "_Medium"
+msgstr "_Mediu"
+
+#: ui/composer-menus.ui:34
+msgid "Lar_ge"
+msgstr "Ma_re"
+
+#: ui/composer-menus.ui:41
+msgid "C_olor"
+msgstr "Cul_oare"
+
+#: ui/composer-menus.ui:47 ui/composer-menus.ui:62
+msgid "_Rich Text"
+msgstr "Text cu fo_rmatare"
+
+#: ui/composer-menus.ui:53 ui/composer-menus.ui:68
+msgid "Show Extended Fields"
+msgstr "Arată câmpurile extinse"
+
+#: ui/composer-menus.ui:78
+msgid "_Undo"
+msgstr "An_ulează"
+
+#: ui/composer-menus.ui:82
+msgid "_Redo"
+msgstr "_Refă"
+
+#: ui/composer-menus.ui:88 ui/composer-menus.ui:106
+msgid "Cu_t"
+msgstr "_Taie"
+
+#: ui/composer-menus.ui:92 ui/composer-menus.ui:110
+#: ui/conversation-message-menus.ui:37
+msgid "_Copy"
+msgstr "_Copiază"
+
+#: ui/composer-menus.ui:96 ui/composer-menus.ui:114
+msgid "_Paste"
+msgstr "Li_pește"
+
+#: ui/composer-menus.ui:100
+msgctxt "Clipboard paste as plain text"
+msgid "Paste _Without Formatting"
+msgstr "Lipește _fără formatare"
+
+#: ui/composer-menus.ui:120
+msgid "Select _All"
+msgstr "Selectează t_ot"
+
+#: ui/composer-menus.ui:127 ui/conversation-message-menus.ui:49
+msgid "_Inspect…"
+msgstr "_Inspectează…"
 
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:55
+#: ui/composer-widget.ui:56
 msgid "_To"
 msgstr "Că_tre"
 
-#: ../ui/composer.glade.h:56
+#: ui/composer-widget.ui:75
 msgid "_Cc"
 msgstr "_Cc"
 
-#: ../ui/composer.glade.h:57
+#: ui/composer-widget.ui:130
 msgid "_Subject"
 msgstr "_Subiect"
 
-#: ../ui/composer.glade.h:58
+#: ui/composer-widget.ui:149
 msgid "_Bcc"
 msgstr "_Bcc"
 
-#: ../ui/composer.glade.h:59
+#: ui/composer-widget.ui:179
 msgid "_Reply-To"
 msgstr "_Răspunde la"
 
 #. Geary account mail will be sent from
-#: ../ui/composer.glade.h:61
+#: ui/composer-widget.ui:208
 msgid "From"
 msgstr "De la"
 
-#: ../ui/composer.glade.h:62
+#: ui/composer-widget.ui:293
 msgid "Drop files here"
 msgstr "Trage fișiere aici"
 
-#: ../ui/composer.glade.h:63
+#: ui/composer-widget.ui:309
 msgid "To add them as attachments"
 msgstr "Pentru a le atașa"
 
-#: ../ui/edit_alternate_emails.glade.h:1
-msgid "Remove email address"
-msgstr "Elimină adresa de email"
+#: ui/composer-widget.ui:348
+msgid "Undo last edit (Ctrl+Z)"
+msgstr "Refă ultima editare (Ctrl+Z)"
 
-#: ../ui/edit_alternate_emails.glade.h:2
-msgid ""
-"Some email services require additional addresses be configured on the "
-"server.  Contact your email provider for more information."
+#: ui/composer-widget.ui:372
+msgid "Redo last edit  (Ctrl+Shift+Z)"
+msgstr "Refă ultima editare (Ctrl+Shift+Z)"
+
+#: ui/composer-widget.ui:410
+msgid "Bold (Ctrl+B)"
+msgstr "Îngroșat (Ctrl+B)"
+
+#: ui/composer-widget.ui:434
+msgid "Italic (Ctrl+I)"
+msgstr "Italic (Ctrl+I)"
+
+#: ui/composer-widget.ui:458
+msgid "Underline (Ctrl+U)"
+msgstr "Subliniat (Ctrl+U)"
+
+#: ui/composer-widget.ui:482
+msgid "Strikethrough (Ctrl+K)"
+msgstr "Tăiat (Ctrl+K)"
+
+#: ui/composer-widget.ui:520
+msgid "Insert unordered list"
+msgstr "Introdu listă neordonată"
+
+#: ui/composer-widget.ui:544
+msgid "Insert ordered list"
+msgstr "Introdu listă ordonată"
+
+#: ui/composer-widget.ui:582
+msgid "Quote text  (Ctrl+])"
+msgstr "Citează text (Ctrl+])"
+
+#: ui/composer-widget.ui:606
+msgid "Unquote text  (Ctrl+[)"
+msgstr "Anulează citatul (Ctrl+[)"
+
+#: ui/composer-widget.ui:644
+msgid "Insert or update selection link (Ctrl+L)"
+msgstr "Introdu sau actualizează selecția legăturii (Ctrl+L)"
+
+#: ui/composer-widget.ui:668
+msgid "Insert an image (Ctrl+G)"
+msgstr "Introdu o imagine (Ctrl+G)"
+
+#: ui/composer-widget.ui:702
+msgid "Remove selection formatting (Ctrl+Space)"
+msgstr "Elimină formatarea selecției (Ctrl+Spațiu)"
+
+#: ui/composer-widget.ui:726
+msgid "Select spell checking languages"
+msgstr "Selectați limbile pentru corectarea ortografică"
+
+#: ui/conversation-email.ui:27
+msgid "Save all attachments"
+msgstr "Salvează toate fișierele atașate"
+
+#. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
+#: ui/conversation-email.ui:50
+msgid "Mark this message as starred"
+msgstr "Marchează acest mesaj cu stea"
+
+#. Note: The application will never show this button at the same time as star_button, one will always be hidden.
+#: ui/conversation-email.ui:72
+msgid "Mark this message as not starred"
+msgstr "Demarchează acest mesaj cu stea"
+
+#: ui/conversation-email.ui:95
+msgid "Display the message menu"
+msgstr "Afișează meniul mesajului"
+
+#: ui/conversation-email.ui:161
+msgid "Open selected attachments"
+msgstr "Deschide fișierele atașate selectate"
+
+#: ui/conversation-email.ui:178
+msgid "Save selected attachments"
+msgstr "Salvează fișierele atașate selectate"
+
+#: ui/conversation-email.ui:195
+msgid "Select all attachments"
+msgstr "Salvează toate fișierele atașate"
+
+#: ui/conversation-email.ui:240
+msgid "Edit Draft"
+msgstr "Editează ciorna"
+
+#: ui/conversation-email.ui:267
+msgid "Draft message"
+msgstr "Mesaj ciornă"
+
+#: ui/conversation-email.ui:283
+msgid "This message has not yet been sent."
+msgstr "Acest mesaj nu a fost trimis încă."
+
+#: ui/conversation-email.ui:329
+msgid "Message not saved"
+msgstr "Mesaj nesalvat"
+
+#: ui/conversation-email.ui:345
+msgid "This message was sent, but has not been saved to your account."
 msgstr ""
-"Unele servicii de email necesită ca adrese adiționale să fie configurate pe "
-"server.  Contactați furnizorul de email pentru mai multe informații."
+"Acest mesaj a fost trimis cu succes, dar nu a fost salvat în contul "
+"dumneavoastră."
 
-#: ../ui/edit_alternate_emails.glade.h:4
-msgid "_Update"
-msgstr "Act_ualizează"
+#. Translators: Menu item to reply to a specific message.
+#: ui/conversation-email-menus.ui:15
+msgid "Reply to _All"
+msgstr "Răspunde _tuturor"
 
-#: ../ui/find_bar.glade.h:1
+#. Translators: Menu item to mark a specific message as
+#. read.
+#: ui/conversation-email-menus.ui:30
+msgid "_Mark Read"
+msgstr "_Marchează ca citit"
+
+#: ui/conversation-email-menus.ui:36
+msgid "_Mark Unread"
+msgstr "_Marchează ca necitit"
+
+#. Translators: Menu item to mark all messages in a
+#. conversation from this one as unread.
+#: ui/conversation-email-menus.ui:42
+msgid "Mark Unread From _Here"
+msgstr "Marc_hează ca necitit de aici"
+
+#. Translators: Menu item to move a single, specific message
+#. to the trash
+#: ui/conversation-email-menus.ui:50
+msgid "_Trash"
+msgstr "Mu_tă la gunoi"
+
+#. Translators: Menu item to delete a single, specific message
+#: ui/conversation-email-menus.ui:57
+msgid "_Delete…"
+msgstr "Ș_terge…"
+
+#. Translators: Menu item to view the source for a message
+#: ui/conversation-email-menus.ui:69
+msgid "_View Source"
+msgstr "_Vizualizare sursă"
+
+#: ui/conversation-email-menus.ui:87
+msgid "_Save All"
+msgstr "_Salvează tot"
+
+#: ui/conversation-message-menus.ui:7
+msgid "_Open Link"
+msgstr "Deschide legătura"
+
+#: ui/conversation-message-menus.ui:11
+msgid "Copy Link _Address"
+msgstr "Copiază _adresa legăturii"
+
+#: ui/conversation-message-menus.ui:17
+msgid "Send New _Message…"
+msgstr "Trimite mesaj nou…"
+
+#: ui/conversation-message-menus.ui:21
+msgid "Copy Email _Address"
+msgstr "Copiază _adresa de email"
+
+#: ui/conversation-message-menus.ui:27
+msgid "Save _Image As…"
+msgstr "Salvează _imaginea ca…"
+
+#: ui/conversation-message-menus.ui:33
+msgid "_Select All"
+msgstr "_Selectează tot"
+
+#: ui/conversation-message-menus.ui:43
+msgid "Search for messages from"
+msgstr "Caută după mesaje de la"
+
+#: ui/conversation-message.ui:64
+msgid "From <email>"
+msgstr "De la <email>"
+
+#: ui/conversation-message.ui:80 ui/conversation-message.ui:179
+msgid "1/1/1970\t"
+msgstr "1/1/1970\t"
+
+#: ui/conversation-message.ui:103
+msgid "Preview body text."
+msgstr "Previzualizează textul conținutului."
+
+#: ui/conversation-message.ui:203
+msgid "Sent by:"
+msgstr "Trimis de:"
+
+#: ui/conversation-message.ui:248
+msgid "Reply to:"
+msgstr "Răspunde către:"
+
+#: ui/conversation-message.ui:292
+msgid "Subject"
+msgstr "Subiect"
+
+#: ui/conversation-message.ui:502
+msgid "Show Images"
+msgstr "Arată imagini"
+
+#: ui/conversation-message.ui:515
+msgid "Always Show From Sender"
+msgstr "Afișează întotdeauna de la acest expeditor"
+
+#: ui/conversation-message.ui:543
+msgid "Remote images not shown"
+msgstr "Imaginile de la distanță nu sunt afișate"
+
+#: ui/conversation-message.ui:560
+msgid "Only show remote images from senders you trust."
+msgstr ""
+"Afișează imaginile de la distanță numai pentru expeditorii de încredere."
+
+#: ui/conversation-message.ui:693
+msgid "But actually goes to:"
+msgstr "Dar de fapt trimite la:"
+
+#: ui/conversation-message.ui:724
+msgid "The link appears to go to:"
+msgstr "Acestă legătură pare să indice spre:"
+
+#: ui/conversation-message.ui:736
+msgid "Deceptive link found"
+msgstr "Legătură înșelătoare detectată"
+
+#: ui/conversation-message.ui:751
+msgid "The email sender may be leading you to the wrong web site."
+msgstr "Expeditorul email-ului vă poate îndrepta către un site capcană."
+
+#: ui/conversation-message.ui:764
+msgid "If unsure, contact the sender and ask before continuing."
+msgstr ""
+"Dacă sunteți nesigur, contactați expeditorul și întrebați înainte de a "
+"continua."
+
+#: ui/conversation-viewer.ui:60
+msgid "Find in conversation"
+msgstr "Caută în conversație"
+
+#: ui/conversation-viewer.ui:74
+msgid "Find the previous occurrence of the search string."
+msgstr "Găsește aparența anterioară a șirului căutat."
+
+#: ui/conversation-viewer.ui:95
+msgid "Find the next occurrence of the search string."
+msgstr "Găsește aparența următoare a șirului căutat."
+
+#: ui/find_bar.glade:66
 msgid "Find:"
 msgstr "Caută:"
 
-#: ../ui/find_bar.glade.h:2
+#: ui/find_bar.glade:89
 msgid "_Previous"
 msgstr "_Precedentul"
 
-#: ../ui/find_bar.glade.h:3
+#: ui/find_bar.glade:107
 msgid "_Next"
 msgstr "_Următorul"
 
-#: ../ui/find_bar.glade.h:4
+#: ui/find_bar.glade:125
 msgid "_Case sensitive"
 msgstr "Majus_cule semnificative"
 
-#: ../ui/find_bar.glade.h:5
+#: ui/find_bar.glade:145
 msgid "label"
 msgstr "etichetă"
 
-#: ../ui/login.glade.h:1 ../ui/password-dialog.glade.h:3
-msgid "Password"
-msgstr "Parolă"
+#: ui/gtk/help-overlay.ui:9
+msgid "Conversation Shortcuts"
+msgstr "Scurtături conversație"
 
-#: ../ui/login.glade.h:2
-msgid "E_mail address"
-msgstr "Adresă de e_mail"
+#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:254
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Generale"
 
-#: ../ui/login.glade.h:3
-msgid "_Password"
-msgstr "_Parolă"
+#: ui/gtk/help-overlay.ui:17
+msgctxt "shortcut window"
+msgid "Move focus to the next/previous pane"
+msgstr "Mută focusul la panoul următor/anterior"
 
-#: ../ui/login.glade.h:4
-msgid "S_ervice"
-msgstr "S_erviciu"
+#: ui/gtk/help-overlay.ui:24
+msgctxt "shortcut window"
+msgid "Move focus to conversation list"
+msgstr "Mută focusul la lista de conversații"
 
-#: ../ui/login.glade.h:5
-msgid "N_ame"
-msgstr "N_ume"
+#: ui/gtk/help-overlay.ui:31
+msgctxt "shortcut window"
+msgid "Detach composer window"
+msgstr "Detașează fereastra compozitorului"
 
-#: ../ui/login.glade.h:7
-msgid "N_ickname"
-msgstr "Pseu_donim"
+#: ui/gtk/help-overlay.ui:38
+msgctxt "shortcut window"
+msgid "Close composer window"
+msgstr "Închide fereastra compozitorului"
 
-#: ../ui/login.glade.h:8
-msgid "Work, Home, etc."
-msgstr "Muncă, Acasă, etc."
+#: ui/gtk/help-overlay.ui:45
+msgctxt "shortcut window"
+msgid "Show keyboard shortcuts"
+msgstr "Arată scurtături de tastatură"
 
-#: ../ui/login.glade.h:9
-msgid "_Save sent mail"
-msgstr "_Salvează mailul trimis"
+#: ui/gtk/help-overlay.ui:52
+msgctxt "shortcut window"
+msgid "Show help"
+msgstr "Arată ajutoruñ"
 
-#: ../ui/login.glade.h:10
-msgid "Addi_tional email addresses…"
-msgstr "Adrese email a_diționale…"
+#: ui/gtk/help-overlay.ui:59
+msgctxt "shortcut window"
+msgid "Quit the application"
+msgstr "Închide aplicația"
 
-#: ../ui/login.glade.h:11
-msgid "IMAP settings"
-msgstr "Configurări IMAP"
+#: ui/gtk/help-overlay.ui:68
+msgctxt "shortcut window"
+msgid "Search"
+msgstr "Căutare"
 
-#: ../ui/login.glade.h:12
-msgid "Se_rver"
-msgstr "Se_rver"
+#: ui/gtk/help-overlay.ui:72
+msgctxt "shortcut window"
+msgid "Jump to search box"
+msgstr "Navighează la caseta de căutare"
 
-#: ../ui/login.glade.h:13
-msgid "P_ort"
-msgstr "P_ort"
+#: ui/gtk/help-overlay.ui:79
+msgctxt "shortcut window"
+msgid "Find in current conversation"
+msgstr "Caută în conversația curentă"
 
-#: ../ui/login.glade.h:14
-msgid "Ser_ver"
-msgstr "Ser_ver"
+#: ui/gtk/help-overlay.ui:86
+msgctxt "shortcut window"
+msgid "Find next/previous in current conversation"
+msgstr "Găsește următorul/anteriorul în conversația curentă"
 
-#: ../ui/login.glade.h:15
-msgid "Por_t"
-msgstr "Por_t"
+#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:274
+msgctxt "shortcut window"
+msgid "Actions"
+msgstr "Acțiuni"
 
-#: ../ui/login.glade.h:16
-msgid "SMTP settings"
-msgstr "Configurări SMTP"
+#: ui/gtk/help-overlay.ui:99
+msgctxt "shortcut window"
+msgid "Compose a new message"
+msgstr "Compune un mesaj nou"
 
-#: ../ui/login.glade.h:17
-msgid "User_name"
-msgstr "_Nume utilizator"
+#: ui/gtk/help-overlay.ui:106
+msgctxt "shortcut window"
+msgid "Reply to sender "
+msgstr "Răspunde expeditorului"
 
-#: ../ui/login.glade.h:18
-msgid "Pass_word"
-msgstr "Pa_rolă"
+#: ui/gtk/help-overlay.ui:113
+msgctxt "shortcut window"
+msgid "Reply to all"
+msgstr "Răspunde tuturor"
 
-#: ../ui/login.glade.h:19
-msgid "SMTP username"
-msgstr "Nume utilizator SMTP"
+#: ui/gtk/help-overlay.ui:120
+msgctxt "shortcut window"
+msgid "Forward"
+msgstr "Înaintează"
 
-#: ../ui/login.glade.h:20
-msgid "SMTP password"
-msgstr "Parolă SMTP"
+#: ui/gtk/help-overlay.ui:127
+msgctxt "shortcut window"
+msgid "Archive"
+msgstr "Arhivează"
 
-#: ../ui/login.glade.h:21
-msgid "_Username"
-msgstr "Nume _utilizator"
+#: ui/gtk/help-overlay.ui:134
+msgctxt "shortcut window"
+msgid "Move to trash"
+msgstr "Mută la gunoi"
 
-#: ../ui/login.glade.h:22
-msgid "IMAP username"
-msgstr "Nume utilizator IMAP"
+#: ui/gtk/help-overlay.ui:141
+msgctxt "shortcut window"
+msgid "Toggle spam"
+msgstr "Comută spam"
 
-#: ../ui/login.glade.h:23
-msgid "IMAP password"
-msgstr "Parolă IMAP"
+#: ui/gtk/help-overlay.ui:148
+msgctxt "shortcut window"
+msgid "Move the conversation"
+msgstr "Mută conversația"
 
-#: ../ui/login.glade.h:24
-msgid "Encr_yption"
-msgstr "Crip_tare"
+#: ui/gtk/help-overlay.ui:155
+msgctxt "shortcut window"
+msgid "Label the conversation"
+msgstr "Etichetează conversația"
 
-#: ../ui/login.glade.h:25
-msgid "Encrypt_ion"
-msgstr "Cri_ptare"
+#: ui/gtk/help-overlay.ui:163
+msgctxt "shortcut window"
+msgid "Mark read"
+msgstr "Marchează ca citit"
 
-#: ../ui/login.glade.h:27
-msgid "SSL/TLS"
-msgstr "SSL/TLS"
+#: ui/gtk/help-overlay.ui:170
+msgctxt "shortcut window"
+msgid "Mark unread"
+msgstr "Marchează ca necitit"
 
-#: ../ui/login.glade.h:28
-msgid "STARTTLS"
-msgstr "STARTTLS"
+#: ui/gtk/help-overlay.ui:179
+msgctxt "shortcut window"
+msgid "View"
+msgstr "Vizualizează"
 
-#: ../ui/login.glade.h:29
-msgid "No authentication re_quired"
-msgstr "Nu este necesară autentificarea"
+#: ui/gtk/help-overlay.ui:183
+msgctxt "shortcut window"
+msgid "Zoom in"
+msgstr "Mărește"
 
-#: ../ui/login.glade.h:30
-msgid "Use IMAP cre_dentials"
-msgstr "Folosește cre_dențiale IMAP"
+#: ui/gtk/help-overlay.ui:190
+msgctxt "shortcut window"
+msgid "Zoom out"
+msgstr "Micșorează"
 
-#: ../ui/login.glade.h:31 ../ui/preferences.glade.h:5
-msgid "Composer"
-msgstr "Compunere"
+#: ui/gtk/help-overlay.ui:197
+msgctxt "shortcut window"
+msgid "Reset zoom"
+msgstr "Restabilește zoom-ul"
 
-#: ../ui/login.glade.h:32
-msgid "Save dra_fts on server"
-msgstr "Salvează cior_nele pe server"
+#: ui/gtk/help-overlay.ui:206
+msgctxt "shortcut window"
+msgid "Additional Shortcuts"
+msgstr "Scurtături adiționale"
 
-#: ../ui/login.glade.h:33
-msgid "Si_gn emails (HTML allowed):"
-msgstr "Se_mnează emailuri (HTML permis):"
+#: ui/gtk/help-overlay.ui:210
+msgctxt "shortcut window"
+msgid "Star"
+msgstr "Marchează cu o stea"
 
-#: ../ui/login.glade.h:34
-msgid "Storage"
-msgstr "Păstrare"
+#: ui/gtk/help-overlay.ui:217
+msgctxt "shortcut window"
+msgid "Unstar"
+msgstr "Eliminați steaua"
 
-#: ../ui/login.glade.h:35
-msgid "_Download mail"
-msgstr "_Descarcă email"
+#: ui/gtk/help-overlay.ui:224
+msgctxt "shortcut window"
+msgid "Delete"
+msgstr "Șterge"
 
-#: ../ui/password-dialog.glade.h:1
+#: ui/gtk/help-overlay.ui:231
+msgctxt "shortcut window"
+msgid "Jump to next (older) conversation"
+msgstr "Navighează la următoarea (mai veche) conversație"
+
+#: ui/gtk/help-overlay.ui:238
+msgctxt "shortcut window"
+msgid "Jump to previous (newer) conversation"
+msgstr "Navighează la anterioara (mai recentă) conversație"
+
+#: ui/gtk/help-overlay.ui:250
+msgid "Composer Shortcuts"
+msgstr "Scurtături compunător"
+
+#: ui/gtk/help-overlay.ui:258
+msgctxt "shortcut window"
+msgid "Quote text"
+msgstr "Citează textul"
+
+#: ui/gtk/help-overlay.ui:265
+msgctxt "shortcut window"
+msgid "Unquote text"
+msgstr "Anulează citatul"
+
+#: ui/gtk/help-overlay.ui:278
+msgctxt "shortcut window"
+msgid "Send"
+msgstr "Trimite"
+
+#: ui/gtk/help-overlay.ui:285
+msgctxt "shortcut window"
+msgid "Add attachment"
+msgstr "Adaugă atașament"
+
+#: ui/gtk/help-overlay.ui:294
+msgctxt "shortcut window"
+msgid "Rich text mode"
+msgstr "Text cu formatare"
+
+#: ui/gtk/help-overlay.ui:298
+msgctxt "shortcut window"
+msgid "Bold text"
+msgstr "Face textul aldin"
+
+#: ui/gtk/help-overlay.ui:305
+msgctxt "shortcut window"
+msgid "Italicize text"
+msgstr "Face textul cursiv"
+
+#: ui/gtk/help-overlay.ui:312
+msgctxt "shortcut window"
+msgid "Underline text"
+msgstr "Subliniază textul"
+
+#: ui/gtk/help-overlay.ui:319
+msgctxt "shortcut window"
+msgid "Strike text"
+msgstr "Face textul tăiat"
+
+#: ui/gtk/help-overlay.ui:326
+msgctxt "shortcut window"
+msgid "Insert a link"
+msgstr "Introduce o legătură"
+
+#: ui/gtk/help-overlay.ui:333
+msgctxt "shortcut window"
+msgid "Remove formatting"
+msgstr "Elimină fomatarea"
+
+#: ui/gtk/menus.ui:13
+msgid "A_ccounts"
+msgstr "_Conturi"
+
+#: ui/gtk/menus.ui:23
+msgid "_Keyboard Shortcuts"
+msgstr "Scurtături de _tastatură"
+
+#: ui/main-toolbar.ui:51
+msgid "Toggle search bar"
+msgstr "Comută bara de căutare"
+
+#: ui/main-toolbar.ui:72
+msgid "Empty Spam or Trash folders"
+msgstr "Golește dosarele Spam sau Gunoi"
+
+#: ui/main-toolbar.ui:112
+msgid "Reply"
+msgstr "Răspunde"
+
+#: ui/main-toolbar.ui:135
+msgid "Reply All"
+msgstr "Răspunde tuturor"
+
+#: ui/main-toolbar.ui:158
+msgid "Forward"
+msgstr "Înaintează"
+
+#: ui/main-toolbar.ui:264
+msgid "Toggle find bar"
+msgstr "Comută bara de căutare"
+
+#: ui/main-toolbar.ui:306
+msgid "_Archive"
+msgstr "_Arhivează"
+
+#: ui/main-toolbar-menus.ui:5
+msgid "Empty _Spam…"
+msgstr "Golește _Spam…"
+
+#: ui/main-toolbar-menus.ui:9
+msgid "Empty _Trash…"
+msgstr "Golește _Gunoi…"
+
+#: ui/main-toolbar-menus.ui:32
+msgid "Mark as S_pam"
+msgstr "Marchează ca s_pam"
+
+#: ui/main-toolbar-menus.ui:36
+msgid "Mark as not S_pam"
+msgstr "Marchează ca non-s_pam"
+
+#. Infobar title when one or more accounts are offline
+#: ui/main-window.ui:183
+msgid "Working offline"
+msgstr "Se lucrează deconectat"
+
+#. Label and tooltip for offline infobar
+#: ui/main-window.ui:197
+msgid ""
+"Your computer does not appear to be connected to the Internet.\n"
+"You will not be able to send or receive email until it is re-connected."
+msgstr ""
+"Calculatorul dumneavoastră nu pare a fi conectat la Internet\n"
+"Nu veți putea trimite sau primi email-uri până când este reconectat."
+
+#. Label and tooltip for offline infobar
+#: ui/main-window.ui:200
+msgid "You will not be able to send or receive email until re-connected."
+msgstr "Nu veți putea trimite sau primi email-uri până la reconectare."
+
+#. Button label for displaying technical details about an account problem
+#. Dialog title for displaying technical details of a problem. Same as the button that invokes it.
+#: ui/main-window.ui:247 ui/problem-details-dialog.ui:13
+msgid "Details"
+msgstr "Detalii"
+
+#. Button label for retrying an account problem
+#: ui/main-window.ui:261
+msgid "Retry"
+msgstr "Reîncearcă"
+
+#. Infobar title when one or more accounts have encounted an error
+#: ui/main-window.ui:294
+msgid "Account problem"
+msgstr "Problemă cu contul"
+
+#. Label and tooltip for account service problem infobar
+#: ui/main-window.ui:308
+msgid ""
+"Geary encountered a problem connecting to an account.\n"
+"Please check your Internet connection, the server configuration and try "
+"again."
+msgstr ""
+"Geary a întâmpinat o problemă la conectarea la un cont.\n"
+"Verificați conexiunea la Internet, configurația serverului și încercați din "
+"nou."
+
+#. Label and tooltip for account service problem infobar
+#: ui/main-window.ui:311
+msgid "Geary encountered a problem connecting to an account."
+msgstr "Geary a întâmpinat o problemă la conectarea la un cont."
+
+#. Button label for retrying TLS cert validation
+#: ui/main-window.ui:358
+msgid "Check"
+msgstr "Verifică"
+
+#. Button tooltip for retrying TLS cert validation
+#: ui/main-window.ui:362
+msgid "Check the security details for the connection"
+msgstr "Verifică detaliile de securitate pentru conexiune"
+
+#. Infobar title when one or more accounts have a TLS cert validation error
+#: ui/main-window.ui:391
+msgid "Security problem"
+msgstr "Problemă de securitate"
+
+#. Label and tooltip for TLS cert validation error infobar
+#: ui/main-window.ui:405
+msgid ""
+"An account has reported an untrusted server.\n"
+"Please check the server configuration and try again."
+msgstr ""
+"Un cont a raportat un server de neîncredere.\n"
+"Verificați configurația serverului și încercați din nou."
+
+#. Label and tooltip for TLS cert validation error infobar
+#: ui/main-window.ui:408
+msgid "An account has reported an untrusted server."
+msgstr "Un cont a raportat un server de neîncredere."
+
+#. Button tooltip for retrying when a login error has occurred
+#: ui/main-window.ui:459
+msgid "Retry login, you will be prompted for your password"
+msgstr "Reîncercați autentificarea, vi se va cere parola"
+
+#. Infobar title when one or more accounts have a login error
+#: ui/main-window.ui:488
+msgid "Login problem"
+msgstr "Problemă de autentificare"
+
+#. Label and tooltip for authentication problem infobar
+#: ui/main-window.ui:502
+msgid ""
+"An account has reported an incorrect login or password.\n"
+"Please check your login name and try again."
+msgstr ""
+"Un cont a raportat o autentificare sau parolă incorectă.\n"
+"Verificați numele de autentificare și încercați din nou."
+
+#. Label and tooltip for authentication problem infobar
+#: ui/main-window.ui:505
+msgid "An account has reported an incorrect login or password."
+msgstr "Un cont a raportat o autentificare sau parolă incorectă."
+
+#: ui/password-dialog.glade:74
 msgid "SMTP Credentials"
 msgstr "Detalii cont SMTP"
 
-#: ../ui/password-dialog.glade.h:2
+#: ui/password-dialog.glade:91
 msgid "Username"
 msgstr "Nume de utilizator"
 
-#: ../ui/password-dialog.glade.h:4
+#: ui/password-dialog.glade:152
 msgid "_Remember password"
 msgstr "_Memorează parola"
 
-#: ../ui/password-dialog.glade.h:6
+#: ui/password-dialog.glade:210
 msgid "_Authenticate"
 msgstr "_Autentificare"
 
-#: ../ui/preferences.glade.h:1
+#: ui/preferences-dialog.ui:38
 msgid "Reading"
 msgstr "Citire"
 
-#: ../ui/preferences.glade.h:2
+#: ui/preferences-dialog.ui:51
 msgid "_Automatically select next message"
 msgstr "_Selectează automat următorul mesaj"
 
-#: ../ui/preferences.glade.h:3
+#: ui/preferences-dialog.ui:70
 msgid "_Display conversation preview"
 msgstr "_Afișează previzualizarea conversației"
 
-#: ../ui/preferences.glade.h:4
+#: ui/preferences-dialog.ui:89
 msgid "Use _three pane view"
 msgstr "Utilizează vizualizarea pe _trei panouri"
 
-#: ../ui/preferences.glade.h:6
-msgid "Enable _spell checking"
-msgstr "Activează _verificarea ortografică"
-
-#: ../ui/preferences.glade.h:7
+#: ui/preferences-dialog.ui:113
 msgid "Notifications"
 msgstr "Notificări"
 
-#: ../ui/preferences.glade.h:8
+#: ui/preferences-dialog.ui:126
 msgid "_Play notification sounds"
 msgstr "_Redă notificările sonore"
 
-#: ../ui/preferences.glade.h:9
+#: ui/preferences-dialog.ui:145
 msgid "Show _notifications for new mail"
 msgstr "Afișează _notificări pentru emailuri noi"
 
-#: ../ui/preferences.glade.h:10
-msgid "Always _watch for new mail"
-msgstr "_Verifică întotdeauna după emailuri noi"
+#: ui/preferences-dialog.ui:164
+msgid "_Watch for new mail when closed"
+msgstr "_Verifică după emailuri noi când este închis"
 
-#: ../ui/preferences.glade.h:11
-msgid "Geary will run in the background and notify of new mail"
-msgstr "Geary va rula în fundal și vă va notifica când sunt emailuri noi"
+#: ui/preferences-dialog.ui:168
+msgid "Geary will keep running after all windows are closed"
+msgstr "Geary va continua rularea după ce toate ferestrele sunt închise"
 
-#: ../ui/preferences.glade.h:12
+#: ui/preferences-dialog.ui:195
 msgid "Preferences"
 msgstr "Preferințe"
 
-#: ../ui/remove_confirm.glade.h:1
+#. Button label for copying technical information to the clipboard
+#: ui/problem-details-dialog.ui:17
+msgid "Copy to Clipboard"
+msgstr "Copiază în clipboard"
+
+#. Button tooltip for copying technical information to the clipboard
+#: ui/problem-details-dialog.ui:21
 msgid ""
-"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
-"account?</span> "
+"Copy technical details to clipboard for pasting into an email or bug report"
 msgstr ""
-"<span weight=\"bold\" size=\"larger\">Sigur vreți să eliminați acest cont?</"
-"span> "
+"Copiază detaliile tehnice în clipboard pentru a le lipi într-un email sau "
+"raport de defect."
 
-#: ../ui/remove_confirm.glade.h:2
+#: ui/problem-details-dialog.ui:73
 msgid ""
-"All email associated with this account will be removed from your computer. "
-"This will not affect email on the server."
+"If the problem is serious or persists, please copy and send these details to "
+"the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">mailing list</a> "
+"or file a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">new "
+"bug report</a>."
 msgstr ""
-"Toate emailurile asociate cu acest cont vor fi eliminate de pe computerul "
-"dumneavoastra. Emailurile de pe server nu vor fi afectate."
+"Dacă problema este gravă sau dacă persistă, copiați și trimiteți aceste "
+"detalii pe <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">lista de "
+"discuții</a> sau completați un <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">nou raport de defecte</a>."
 
-#: ../ui/remove_confirm.glade.h:3
-msgid "Nickname:"
-msgstr "Pseudonim:"
+#: ui/problem-details-dialog.ui:89
+msgid "Details:"
+msgstr "Detalii:"
 
-#: ../ui/remove_confirm.glade.h:4
-msgid "Email address:"
-msgstr "Adresă de email:"
-
-#: ../ui/upgrade_dialog.glade.h:1
+#: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "În curs de actualizare Geary…"
+
+#~ msgid "Email address:"
+#~ msgstr "Adresă de email:"
+
+#~ msgid "Mail Client"
+#~ msgstr "Client de email"
+
+#~ msgid "Geary Mail"
+#~ msgstr "Geary Mail"
+
+#~ msgid "Additional addresses for %s"
+#~ msgstr "Adrese adiționale pentru %s"
+
+#~ msgid "First Last"
+#~ msgstr "Prenume Nume"
+
+#~ msgid "Enter your account information to get started."
+#~ msgstr "Introduceți detaliile contului pentru a începe."
+
+#~ msgid "Edit"
+#~ msgstr "Editare"
+
+#~ msgid "Preview"
+#~ msgstr "Previzualizează"
+
+#~ msgid "Remem_ber passwords"
+#~ msgstr "_Memorează parolele"
+
+#~ msgid "Remem_ber password"
+#~ msgstr "_Memorează parola"
+
+#~ msgid "Unable to validate:\n"
+#~ msgstr "Nu s-a putut valida:\n"
+
+#~ msgid "        &#8226; Invalid account nickname.\n"
+#~ msgstr "        &#8226; Pseudonimul nu este valid.\n"
+
+#~ msgid "        &#8226; Email address already added to Geary.\n"
+#~ msgstr "        &#8226; Adresa de email este deja adăugată în Geary.\n"
+
+#~ msgid "        &#8226; IMAP connection error.\n"
+#~ msgstr "        &#8226; Eroare la conexiunea IMAP.\n"
+
+#~ msgid "        &#8226; IMAP username or password incorrect.\n"
+#~ msgstr "        &#8226; Nume utilizator sau parolă IMAP incorecte.\n"
+
+#~ msgid "        &#8226; SMTP connection error.\n"
+#~ msgstr "        &#8226; Eroare la conexiunea SMTP.\n"
+
+#~ msgid "        &#8226; SMTP username or password incorrect.\n"
+#~ msgstr ""
+#~ "        &#8226; Numele de utilizator sau parola SMTP sunt incorecte.\n"
+
+#~ msgid "        &#8226; Connection error.\n"
+#~ msgstr "        &#8226; Eroare de conexiune.\n"
+
+#~ msgid "        &#8226; Username or password incorrect.\n"
+#~ msgstr "        &#8226; Numele de utilizator sau parola sunt incorecte.\n"
+
+#~ msgid "_Mark as..."
+#~ msgstr "_Marchează ca..."
+
+#~ msgid "Add label"
+#~ msgstr "Adaugă etichetă"
+
+#~ msgid "_Label"
+#~ msgstr "_Etichetă"
+
+#~ msgid "_Move"
+#~ msgstr "_Mută"
+
+#~ msgid "Compose new message (Ctrl+N, N)"
+#~ msgstr "Compune un mesaj nou (Ctrl+N, N)"
+
+#~ msgid "Reply (Ctrl+R, R)"
+#~ msgstr "Răspunde (Ctrl+R, R)"
+
+#~ msgid "Reply all (Ctrl+Shift+R, Shift+R)"
+#~ msgstr "Răspunde tuturor (Ctrl+Shift+R, Shift+R)"
+
+#~ msgid "Forward (Ctrl+L, F)"
+#~ msgstr "Înaintează (Ctrl+L, F)"
+
+#~ msgid "Empty"
+#~ msgstr "Golește"
+
+#~ msgid "Unable to store server trust exception"
+#~ msgstr "Nu s-a putut stoca excepția la servere de încredere"
+
+#~ msgid "Your settings are insecure"
+#~ msgstr "Configurările tale sunt nesigure"
+
+#~ msgid ""
+#~ "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means "
+#~ "your username and password could be read by another person on the "
+#~ "network.  Are you sure you want to do this?"
+#~ msgstr ""
+#~ "Configurările IMAP și/sau SMTP nu specifică SSL sau TLS. Acest lucru "
+#~ "permite unei alte persoane de pe rețea să îți citească utilizatorul și "
+#~ "parola. Sunteți sigur că vreți să faceți asta?"
+
+#~ msgid "Co_ntinue"
+#~ msgstr "Co_ntinuă"
+
+#~ msgid ""
+#~ "Geary encountered an error sending an email.  If the problem persists, "
+#~ "please manually delete the email from your Outbox folder."
+#~ msgstr ""
+#~ "Geary a întâmpinat o eroare la trimiterea unui email. Dacă problema "
+#~ "persistă, ștergeți manual emailul din directorul Outbox."
+
+#~ msgid ""
+#~ "Geary encountered an error saving a sent message to Sent Mail.  The "
+#~ "message will stay in your Outbox folder until you delete it."
+#~ msgstr ""
+#~ "Geary a întâmpinat o eroare la salvarea unui mesaj trimis în dosarul "
+#~ "„Mesaje trimise”. Mesajul va rămâne în dosarul Outbox până îl veți șterge."
+
+#~ msgid "Unable to open local mailbox for %s"
+#~ msgstr "Nu s-a reușit deschiderea cutiei poștale locale pentru %s"
+
+#~ msgid ""
+#~ "There was an error opening the local mail database for this account. This "
+#~ "is possibly due to a file permissions problem.\n"
+#~ "\n"
+#~ "Please check that you have read/write permissions for all files in this "
+#~ "directory:\n"
+#~ "\n"
+#~ "%s"
+#~ msgstr ""
+#~ "S-a întâmpinat o eroare la deschiderea bazei de date locală pentru email. "
+#~ "Aceasta este probabil cauzată de o problemă cu permisiunile pentru "
+#~ "fișiere.\n"
+#~ "\n"
+#~ "Verificați dacă aveți drepturi de citire/scriere pentru toate fișierele "
+#~ "din director.\n"
+#~ "\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "The version number of the local mail database is formatted for a newer "
+#~ "version of Geary. Unfortunately, the database cannot be \"rolled back\" "
+#~ "to work with this version of Geary.\n"
+#~ "\n"
+#~ "Please install the latest version of Geary and try again."
+#~ msgstr ""
+#~ "Numărul versiunii bazei de date locală pentru email este formatată pentru "
+#~ "o versiune mai nouă de Geary. Din nefericire, baza de date nu poate fi "
+#~ "„restaurată” pentru a funcționa cu această versiune de Geary.\n"
+#~ "\n"
+#~ "Instalați ultima versiune de Geary și încercați din nou."
+
+#~ msgid ""
+#~ "There was an error opening the local account. This is probably due to "
+#~ "connectivity issues.\n"
+#~ "\n"
+#~ "Please check your network connection and restart Geary."
+#~ msgstr ""
+#~ "Am întâmpinat o eroare la deschiderea contului local. Aceasta este "
+#~ "probabil din cauza problemelor de conectivitate.\n"
+#~ "\n"
+#~ "Te rog verifică-ți conexiunea la internet și repornește Geary."
+
+#~ msgid "%i match"
+#~ msgid_plural "%i matches"
+#~ msgstr[0] "%i potrivire"
+#~ msgstr[1] "%i potriviri"
+#~ msgstr[2] "%i de potriviri"
+
+#~ msgid "%i match (wrapped)"
+#~ msgid_plural "%i matches (wrapped)"
+#~ msgstr[0] "%i potrivire (wrapped)"
+#~ msgstr[1] "%i potriviri (wrapped)"
+#~ msgstr[2] "%i de potriviri (wrapped)"
+
+#~ msgid "not found"
+#~ msgstr "nu a fost găsit"
+
+#~ msgid "No search results found."
+#~ msgstr "Niciun rezultat la căutare."
+
+#~ msgid "Copy _Link"
+#~ msgstr "Copiază _legătura"
+
+#~ msgid "Select _Message"
+#~ msgstr "Selectează _mesajul"
+
+#~ msgid " (Invalid?)"
+#~ msgstr " (Nevalid?)"
+
+#~ msgid "_Save As..."
+#~ msgstr "_Salvează ca..."
+
+#~ msgid "Save A_ttachment..."
+#~ msgid_plural "Save All A_ttachments..."
+#~ msgstr[0] "Salvează fișierul a_tașat..."
+#~ msgstr[1] "Salvează toate fișierele a_tașate..."
+#~ msgstr[2] "Salvează toate fișierele a_tașate..."
+
+#~ msgid "none"
+#~ msgstr "fără"
+
+#~ msgid "Geary will exit if you have no other open email accounts."
+#~ msgstr "Geary se va închide dacă nu aveți alte conturi de email."
+
+#~ msgid "Other"
+#~ msgstr "Altele"
+
+#~ msgid "IMAP"
+#~ msgstr "IMAP"
+
+#~ msgid "SMTP"
+#~ msgstr "SMTP"
+
+#~ msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
+#~ msgstr ""
+#~ "<span weight=\"bold\" size=\"larger\">Contul nu poate fi eliminat</span> "
+
+#~ msgid ""
+#~ "A composer window associated with this account is currently open. Send or "
+#~ "discard the message and try again."
+#~ msgstr ""
+#~ "O fereastră de compunere asociată cu acest cont este deschisă. Trimiteți "
+#~ "sau anulați mesajul și încearcați din nou."
+
+#~ msgid "Please wait while Geary validates your account."
+#~ msgstr "Așteptați cât timp Geary vă validează contul."
+
+#~ msgid "_Left"
+#~ msgstr "_Stânga"
+
+#~ msgid "_Right"
+#~ msgstr "_Dreapta"
+
+#~ msgid "_Center"
+#~ msgstr "_Centru"
+
+#~ msgid "_Justify"
+#~ msgstr "_Aliniază la margini"
+
+#~ msgid "Link (Ctrl+L)"
+#~ msgstr "Legătură (Ctrl+L)"
+
+#~ msgid "More options"
+#~ msgstr "Mai multe opțiuni"
+
+#~ msgctxt "Label"
+#~ msgid "Close and Save"
+#~ msgstr "Închide și salvează"
+
+#~ msgctxt "Short Label"
+#~ msgid "Close and Save"
+#~ msgstr "Închide și salvează"
+
+#~ msgctxt "Tooltip"
+#~ msgid "Close and Save"
+#~ msgstr "Închide și salvează"
+
+#~ msgctxt "Label"
+#~ msgid "Close and Discard"
+#~ msgstr "Închide și anulează"
+
+#~ msgctxt "Short Label"
+#~ msgid "Close and Discard"
+#~ msgstr "Închide și anulează"
+
+#~ msgctxt "Tooltip"
+#~ msgid "Close and Discard"
+#~ msgstr "Închide și anulează"
+
+#~ msgid "Large"
+#~ msgstr "Mare"
+
+#~ msgid "Medium"
+#~ msgstr "Mediu"
+
+#~ msgid "Small"
+#~ msgstr "Mic"
+
+#~ msgid "Sans Serif"
+#~ msgstr "Fără serife"
+
+#~ msgid "Serif"
+#~ msgstr "Cu serife"
+
+#~ msgid "Fixed Width"
+#~ msgstr "Lățime fixă"
+
+#~ msgid "Detach"
+#~ msgstr "Detașează"
+
+#~ msgid "_Attach File"
+#~ msgstr "_Atașează fișier"
+
+#~ msgid "Attach File"
+#~ msgstr "Atașează fișier"
+
+#~ msgid "_Include Original Attachments"
+#~ msgstr "_Include fișierele atașate originale"
+
+#~ msgid "Spelling language"
+#~ msgstr "Limba pentru corectarea ortografică"
+
+#~ msgid ""
+#~ "Some email services require additional addresses be configured on the "
+#~ "server.  Contact your email provider for more information."
+#~ msgstr ""
+#~ "Unele servicii de email necesită ca adrese adiționale să fie configurate "
+#~ "pe server.  Contactați furnizorul de email pentru mai multe informații."
+
+#~ msgid "_Update"
+#~ msgstr "Act_ualizează"
+
+#~ msgid "E_mail address"
+#~ msgstr "Adresă de e_mail"
+
+#~ msgid "_Password"
+#~ msgstr "_Parolă"
+
+#~ msgid "S_ervice"
+#~ msgstr "S_erviciu"
+
+#~ msgid "N_ame"
+#~ msgstr "N_ume"
+
+#~ msgid "N_ickname"
+#~ msgstr "Pseu_donim"
+
+#~ msgid "Work, Home, etc."
+#~ msgstr "Muncă, Acasă, etc."
+
+#~ msgid "_Save sent mail"
+#~ msgstr "_Salvează mailul trimis"
+
+#~ msgid "Addi_tional email addresses…"
+#~ msgstr "Adrese email a_diționale…"
+
+#~ msgid "IMAP settings"
+#~ msgstr "Configurări IMAP"
+
+#~ msgid "Se_rver"
+#~ msgstr "Se_rver"
+
+#~ msgid "P_ort"
+#~ msgstr "P_ort"
+
+#~ msgid "Ser_ver"
+#~ msgstr "Ser_ver"
+
+#~ msgid "Por_t"
+#~ msgstr "Por_t"
+
+#~ msgid "User_name"
+#~ msgstr "_Nume utilizator"
+
+#~ msgid "Pass_word"
+#~ msgstr "Pa_rolă"
+
+#~ msgid "SMTP password"
+#~ msgstr "Parolă SMTP"
+
+#~ msgid "_Username"
+#~ msgstr "Nume _utilizator"
+
+#~ msgid "IMAP password"
+#~ msgstr "Parolă IMAP"
+
+#~ msgid "Encr_yption"
+#~ msgstr "Crip_tare"
+
+#~ msgid "Encrypt_ion"
+#~ msgstr "Cri_ptare"
+
+#~ msgid "STARTTLS"
+#~ msgstr "STARTTLS"
+
+#~ msgid "No authentication re_quired"
+#~ msgstr "Nu este necesară autentificarea"
+
+#~ msgid "Use IMAP cre_dentials"
+#~ msgstr "Folosește cre_dențiale IMAP"
+
+#~ msgid "Si_gn emails (HTML allowed):"
+#~ msgstr "Se_mnează emailuri (HTML permis):"
+
+#~ msgid "Storage"
+#~ msgstr "Păstrare"
+
+#~ msgid "Enable _spell checking"
+#~ msgstr "Activează _verificarea ortografică"
+
+#~ msgid "Geary will run in the background and notify of new mail"
+#~ msgstr "Geary va rula în fundal și vă va notifica când sunt emailuri noi"
+
+#~ msgid ""
+#~ "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove "
+#~ "this account?</span> "
+#~ msgstr ""
+#~ "<span weight=\"bold\" size=\"larger\">Sigur vreți să eliminați acest cont?"
+#~ "</span> "
+
+#~ msgid ""
+#~ "All email associated with this account will be removed from your "
+#~ "computer. This will not affect email on the server."
+#~ msgstr ""
+#~ "Toate emailurile asociate cu acest cont vor fi eliminate de pe computerul "
+#~ "dumneavoastra. Emailurile de pe server nu vor fi afectate."
+
+#~ msgid "Nickname:"
+#~ msgstr "Pseudonim:"
 
 #~ msgid "Application Menu"
 #~ msgstr "Meniul aplicației"
 
 #~ msgid "Copyright 2011-2014 Yorba Foundation"
 #~ msgstr "Drepturi de autor 2011-2014 Fundația Yorba"
-
-#~ msgid "_Delete"
-#~ msgstr "Ș_terge"
-
-#~ msgid "_Trash"
-#~ msgstr "Mu_tă la gunoi"
 
 #~ msgid "_Donate"
 #~ msgstr "_Donează"
@@ -2335,23 +3804,14 @@ msgstr "În curs de actualizare Geary…"
 #~ msgid "Please enter your password"
 #~ msgstr "Introduceți parola"
 
-#~ msgid "Username:"
-#~ msgstr "Nume utilizator:"
-
 #~ msgid "Password:"
 #~ msgstr "Parolă:"
-
-#~ msgid "Notify of new mail at start_up"
-#~ msgstr "Notifică despre emailuri noi la _pornire"
 
 #~ msgid "C_lose"
 #~ msgstr "În_chide"
 
 #~ msgid "Archive conversation (Delete, Backspace, A)"
 #~ msgstr "Arhivează conversația (Delete, Backspace, A)"
-
-#~ msgid "General"
-#~ msgstr "General"
 
 #~ msgid "Port:"
 #~ msgstr "Port:"
@@ -2373,6 +3833,3 @@ msgstr "În curs de actualizare Geary…"
 
 #~ msgid "Unable to login to email server"
 #~ msgstr "Nu ma pot autentifica pe serverul de email"
-
-#~ msgid "_Details"
-#~ msgstr "_Detalii"
