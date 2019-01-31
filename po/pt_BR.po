@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-01-30 12:37+0000\n"
-"PO-Revision-Date: 2019-01-30 22:39-0200\n"
+"POT-Creation-Date: 2019-01-31 01:41+0000\n"
+"PO-Revision-Date: 2019-01-31 08:26-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Portuguese - Brazil <www-pt-br-general@gnu.org>\n"
 "Language: pt_BR\n"
@@ -1656,7 +1656,7 @@ msgstr "_Encaminhar"
 
 #: src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
-msgstr "Mim"
+msgstr "Eu"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
