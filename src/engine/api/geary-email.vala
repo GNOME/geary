@@ -36,10 +36,15 @@ public class Geary.Email : BaseObject {
     /**
      * Indicates email fields that may change over time.
      *
-     * Currently only one field is mutable: FLAGS. All others never
-     * change once stored in the database.
+     * The mutable fields are: FLAGS -- since these change as for
+     * example messages are marked as read, and PREVIEW -- since the
+     * preview is updated when the full message body is
+     * available. All others never change once stored in the
+     * database.
      */
-    public const Field MUTABLE_FIELDS = Geary.Email.Field.FLAGS;
+    public const Field MUTABLE_FIELDS = (
+        Geary.Email.Field.FLAGS | Geary.Email.Field.PREVIEW
+    );
 
     /**
      * Indicates the email fields required to build an RFC822.Message.
