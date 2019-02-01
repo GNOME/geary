@@ -4,18 +4,18 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# masami chikahiro <cmasa.z321@gmail.com>, 2013
-# pikatenor <pikatenor@gmail.com>, 2013
+# masami chikahiro <cmasa.z321@gmail.com>, 2013.
+# pikatenor <pikatenor@gmail.com>, 2013.
+# UTUMI Hirosi <utuhiro78@yahoo.co.jp>, 2018.
+# sicklylife <translation@sicklylife.jp>, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
-"product=geary&keywords=I18N+L10N&component=internationalization\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2017-11-16 05:25+0000\n"
-"PO-Revision-Date: 2019-02-02 02:40+0900\n"
-"Last-Translator: yorbajim <jim@yorba.org>\n"
-"Language-Team: Japanese (Japan) (http://www.transifex.com/projects/p/geary/"
-"language/ja_JP/)\n"
+"PO-Revision-Date: 2019-02-02 02:48+0000\n"
+"Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
+"Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,10 +26,8 @@ msgstr ""
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
-#, fuzzy
-#| msgid "Geary Mail"
 msgid "Geary"
-msgstr "Geary Mail"
+msgstr "Geary"
 
 #. Translators: The development team's name
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
@@ -42,7 +40,7 @@ msgstr ""
 #: ../desktop/geary-autostart.desktop.in.h:4
 #: ../src/client/application/geary-application.vala:21
 msgid "Send and receive email"
-msgstr "送受信"
+msgstr "メールの送信と受信"
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid ""
@@ -228,75 +226,59 @@ msgstr ""
 
 #: ../src/client/accounts/add-edit-page.vala:751
 msgid "Remem_ber passwords"
-msgstr ""
+msgstr "パスワードを記憶(_B)"
 
 #: ../src/client/accounts/add-edit-page.vala:758 ../ui/login.glade.h:7
 msgid "Remem_ber password"
-msgstr ""
+msgstr "パスワードを記憶(_B)"
 
 #: ../src/client/accounts/add-edit-page.vala:792
 msgid "Unable to validate:\n"
 msgstr "検証できません: \n"
 
 #: ../src/client/accounts/add-edit-page.vala:794
-#, fuzzy
-#| msgid "        &#8226; Invalid account nickname.\n"
 msgid "        • Invalid account nickname.\n"
-msgstr "        &#8226; アカウントのニックネームが不正\n"
+msgstr "        • アカウントのニックネームが不正です。\n"
 
 #: ../src/client/accounts/add-edit-page.vala:797
 msgid "        • Email address already added to Geary.\n"
-msgstr ""
+msgstr "        • メールアドレスが Geary に追加済みです。\n"
 
 #: ../src/client/accounts/add-edit-page.vala:801
-#, fuzzy
-#| msgid "        &#8226; IMAP connection error.\n"
 msgid "        • IMAP connection error.\n"
-msgstr "        &#8226; IMAP 接続エラー\n"
+msgstr "        • IMAP の接続エラーです。\n"
 
 #: ../src/client/accounts/add-edit-page.vala:804
-#, fuzzy
-#| msgid "        &#8226; IMAP username or password incorrect.\n"
 msgid "        • IMAP username or password incorrect.\n"
-msgstr "        &#8226; IMAP ユーザー名もしくはパスワードが不正\n"
+msgstr "        • IMAP のユーザー名またはパスワードが不正です。\n"
 
 #: ../src/client/accounts/add-edit-page.vala:807
-#, fuzzy
-#| msgid "        &#8226; SMTP connection error.\n"
 msgid "        • SMTP connection error.\n"
-msgstr "        &#8226; SMTP 接続エラー\n"
+msgstr "        • SMTP の接続エラーです。\n"
 
 #: ../src/client/accounts/add-edit-page.vala:810
-#, fuzzy
-#| msgid "        &#8226; SMTP username or password incorrect.\n"
 msgid "        • SMTP username or password incorrect.\n"
-msgstr "        &#8226; SMTP ユーザー名もしくはパスワードが不正\n"
+msgstr "        • SMTP のユーザー名またはパスワードが不正です。\n"
 
 #: ../src/client/accounts/add-edit-page.vala:814
-#, fuzzy
-#| msgid "        &#8226; Connection error.\n"
 msgid "        • Connection error.\n"
-msgstr "        &#8226; 接続エラー\n"
+msgstr "        • 接続エラーです。\n"
 
 #: ../src/client/accounts/add-edit-page.vala:818
-#, fuzzy
-#| msgid "        &#8226; Username or password incorrect.\n"
 msgid "        • Username or password incorrect.\n"
-msgstr "        &#8226; ユーザー名もしくはパスワードが不正\n"
+msgstr "        • ユーザー名またはパスワードが不正です。\n"
 
 #: ../src/client/application/geary-application.vala:22
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
-msgstr ""
+msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
 #: ../src/client/application/geary-application.vala:23
 msgid "Copyright 2016-2017 Geary Development Team."
-msgstr ""
+msgstr "Copyright 2016-2017 Geary Development Team."
 
 #: ../src/client/application/geary-application.vala:25
-#, fuzzy
-#| msgid "Visit the Yorba web site"
 msgid "Visit the Geary web site"
-msgstr "Yorba のウェブサイト"
+msgstr "Geary のウェブサイト"
 
 #: ../src/client/application/geary-application.vala:466
 #, c-format
@@ -308,7 +290,12 @@ msgstr "%s について"
 #. <yamada.taro@example.com>
 #: ../src/client/application/geary-application.vala:470
 msgid "translator-credits"
-msgstr "Minato Kanzaki <pikadcolon@gmail.com>"
+msgstr ""
+"Minato Kanzaki <pikadcolon@gmail.com>\n"
+"masami chikahiro <cmasa.z321@gmail.com>\n"
+"pikatenor <pikatenor@gmail.com>\n"
+"UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
+"sicklylife <translation@sicklylife.jp>"
 
 #: ../src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
@@ -563,7 +550,7 @@ msgstr ""
 
 #: ../src/client/application/geary-controller.vala:992
 msgid "Your settings are insecure"
-msgstr "設定がセキュアでありません"
+msgstr "設定がセキュアではありません"
 
 #: ../src/client/application/geary-controller.vala:993
 msgid ""
@@ -571,8 +558,8 @@ msgid ""
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
 msgstr ""
-"IMAP/SMTP の通信に SSL/TLS が指定されていません. ユーザー名やパスワードはネッ"
-"トワーク上の他人に読み取られる可能性があります. よろしいですか?"
+"IMAP/SMTP の通信に SSL/TLS が指定されていません。ユーザー名やパスワードがネッ"
+"トワーク上の他人に読み取られる可能性があります。よろしいですか?"
 
 #: ../src/client/application/geary-controller.vala:994
 msgid "Co_ntinue"
@@ -2560,55 +2547,43 @@ msgstr "アカウント(_C)"
 
 #: ../ui/gtk/menus.ui.h:4
 msgid "_Keyboard Shortcuts"
-msgstr ""
+msgstr "キーボードショートカット(_K)"
 
 #: ../ui/login.glade.h:1
 msgid "email@example.com"
-msgstr ""
+msgstr "email@example.com"
 
 #: ../ui/login.glade.h:2 ../ui/password-dialog.glade.h:3
 msgid "Password"
-msgstr ""
+msgstr "パスワード"
 
 #: ../ui/login.glade.h:3
-#, fuzzy
-#| msgid "Email address:"
 msgid "E_mail address"
-msgstr "メールアドレス:"
+msgstr "メールアドレス(_M)"
 
 #: ../ui/login.glade.h:4
-#, fuzzy
-#| msgid "_Password:"
 msgid "_Password"
-msgstr "パスワード(_P):"
+msgstr "パスワード(_P)"
 
 #: ../ui/login.glade.h:5
-#, fuzzy
-#| msgid "Service:"
 msgid "S_ervice"
-msgstr "メールサービス:"
+msgstr "メールサービス(_E)"
 
 #: ../ui/login.glade.h:6
-#, fuzzy
-#| msgid "N_ame:"
 msgid "N_ame"
-msgstr "名前(_A):"
+msgstr "名前(_A)"
 
 #: ../ui/login.glade.h:8
-#, fuzzy
-#| msgid "N_ickname:"
 msgid "N_ickname"
-msgstr "ニックネーム(_I):"
+msgstr "ニックネーム(_I)"
 
 #: ../ui/login.glade.h:9
 msgid "Work, Home, etc."
-msgstr ""
+msgstr "仕事用、自宅用、など。"
 
 #: ../ui/login.glade.h:10
-#, fuzzy
-#| msgid "Sent Mail"
 msgid "_Save sent mail"
-msgstr "送信済みメール"
+msgstr ""
 
 #: ../ui/login.glade.h:11
 msgid "Addi_tional email addresses…"
@@ -2619,90 +2594,72 @@ msgid "IMAP settings"
 msgstr "IMAP 設定"
 
 #: ../ui/login.glade.h:13
-#, fuzzy
-#| msgid "Se_rver:"
 msgid "Se_rver"
-msgstr "サーバー(_R):"
+msgstr "サーバー(_R)"
 
 #: ../ui/login.glade.h:14
 msgid "imap.example.com"
-msgstr ""
+msgstr "imap.example.com"
 
 #: ../ui/login.glade.h:15
-#, fuzzy
-#| msgid "P_ort:"
 msgid "P_ort"
-msgstr "ポート(_O):"
+msgstr "ポート(_O)"
 
 #: ../ui/login.glade.h:16
 msgid "smtp.example.com"
-msgstr ""
+msgstr "smtp.example.com"
 
 #: ../ui/login.glade.h:17
-#, fuzzy
-#| msgid "Ser_ver:"
 msgid "Ser_ver"
-msgstr "サーバー(_V):"
+msgstr "サーバー(_V)"
 
 #: ../ui/login.glade.h:18
-#, fuzzy
-#| msgid "Por_t:"
 msgid "Por_t"
-msgstr "ポート(_T):"
+msgstr "ポート(_T)"
 
 #: ../ui/login.glade.h:19
 msgid "SMTP settings"
 msgstr "SMTP 設定"
 
 #: ../ui/login.glade.h:20
-#, fuzzy
-#| msgid "User_name:"
 msgid "User_name"
-msgstr "ユーザー名(_N):"
+msgstr "ユーザー名(_N)"
 
 #: ../ui/login.glade.h:21
-#, fuzzy
-#| msgid "Pass_word:"
 msgid "Pass_word"
-msgstr "パスワード(_W):"
+msgstr "パスワード(_W)"
 
 #: ../ui/login.glade.h:22
 msgid "SMTP username"
-msgstr ""
+msgstr "SMTP のユーザー名"
 
 #: ../ui/login.glade.h:23
 msgid "SMTP password"
-msgstr ""
+msgstr "SMTP のパスワード"
 
 #: ../ui/login.glade.h:24
-#, fuzzy
-#| msgid "_Username:"
 msgid "_Username"
-msgstr "ユーザー名(_U):"
+msgstr "ユーザー名(_U)"
 
 #: ../ui/login.glade.h:25
 msgid "IMAP username"
-msgstr ""
+msgstr "IMAP のユーザー名"
 
 #: ../ui/login.glade.h:26
 msgid "IMAP password"
-msgstr ""
+msgstr "IMAP のパスワード"
 
 #: ../ui/login.glade.h:27
-#, fuzzy
-#| msgid "Encr_yption:"
 msgid "Encr_yption"
-msgstr "暗号化(_Y):"
+msgstr "暗号化(_Y)"
 
 #: ../ui/login.glade.h:28
-#, fuzzy
-#| msgid "Encrypt_ion:"
 msgid "Encrypt_ion"
-msgstr "暗号化(_I):"
+msgstr "暗号化(_I)"
 
 #: ../ui/login.glade.h:30
 msgid "SSL/TLS"
-msgstr ""
+msgstr "SSL/TLS"
 
 #: ../ui/login.glade.h:31
 msgid "STARTTLS"
@@ -2713,10 +2670,8 @@ msgid "No authentication re_quired"
 msgstr "認証は必要とされていません(_Q)"
 
 #: ../ui/login.glade.h:33
-#, fuzzy
-#| msgid "IMAP Credentials"
 msgid "Use IMAP cre_dentials"
-msgstr "IMAP 証明書"
+msgstr "IMAP の情報を使う(_D)"
 
 #: ../ui/login.glade.h:34
 msgid "Composer"
@@ -2735,10 +2690,8 @@ msgid "Storage"
 msgstr "ストレージ"
 
 #: ../ui/login.glade.h:38
-#, fuzzy
-#| msgid "_Download mail:"
 msgid "_Download mail"
-msgstr "メールをダウンロード(_D):"
+msgstr "メールをダウンロード(_D)"
 
 #: ../ui/main-toolbar.ui.h:1
 msgid "Empty Spam or Trash folders"
@@ -2749,14 +2702,10 @@ msgid "SMTP Credentials"
 msgstr "SMTP 証明書"
 
 #: ../ui/password-dialog.glade.h:2
-#, fuzzy
-#| msgid "Username:"
 msgid "Username"
-msgstr "ユーザー名:"
+msgstr "ユーザー名"
 
 #: ../ui/password-dialog.glade.h:4
-#, fuzzy
-#| msgid "_Remember passwords"
 msgid "_Remember password"
 msgstr "パスワードを保存(_R)"
 
@@ -2770,15 +2719,15 @@ msgstr "表示画面"
 
 #: ../ui/preferences-dialog.ui.h:2
 msgid "_Automatically select next message"
-msgstr "自動的に次のメッセージを選択(_A)"
+msgstr "自動的に次のメッセージを選択する(_A)"
 
 #: ../ui/preferences-dialog.ui.h:3
 msgid "_Display conversation preview"
-msgstr ""
+msgstr "スレッドプレビューを表示する(_D)"
 
 #: ../ui/preferences-dialog.ui.h:4
 msgid "Use _three pane view"
-msgstr ""
+msgstr "3ペインビューを使用する(_T)"
 
 #: ../ui/preferences-dialog.ui.h:5
 msgid "Notifications"
@@ -2786,27 +2735,23 @@ msgstr "通知"
 
 #: ../ui/preferences-dialog.ui.h:6
 msgid "_Play notification sounds"
-msgstr "通知音を再生(_P)"
+msgstr "通知音を鳴らす(_P)"
 
 #: ../ui/preferences-dialog.ui.h:7
 msgid "Show _notifications for new mail"
-msgstr "新着メールに通知を表示(_N)"
+msgstr "新着メールの通知を表示する(_N)"
 
 #: ../ui/preferences-dialog.ui.h:8
-#, fuzzy
-#| msgid "Show _notifications for new mail"
 msgid "Always _watch for new mail"
-msgstr "新着メールに通知を表示(_N)"
+msgstr "常に新着メールを監視する(_W)"
 
 #: ../ui/preferences-dialog.ui.h:9
 msgid "Geary will run in the background and notify of new mail"
-msgstr ""
+msgstr "Geary をバックグラウンドで実行して新着メールを通知します"
 
 #: ../ui/preferences-dialog.ui.h:10
-#, fuzzy
-#| msgid "_Preferences"
 msgid "Preferences"
-msgstr "設定(_P)"
+msgstr "設定"
 
 #: ../ui/remove_confirm.glade.h:1
 msgid ""
