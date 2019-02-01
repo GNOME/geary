@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2019-02-01 17:59+0000\n"
-"PO-Revision-Date: 2019-02-02 04:00+0000\n"
+"PO-Revision-Date: 2019-02-02 06:10+0000\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -76,10 +76,8 @@ msgid "Full-featured HTML and plain text message composer"
 msgstr ""
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:14
-#, fuzzy
-#| msgid "Show _notifications for new mail"
 msgid "Desktop notification of new mail"
-msgstr "新着メールに通知を表示(_N)"
+msgstr ""
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:15
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
@@ -87,10 +85,8 @@ msgstr ""
 
 #. Translators: A screenshot description.
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
-#, fuzzy
-#| msgid "Mark conversation"
 msgid "Geary displaying a conversation"
-msgstr "スレッドをマーク"
+msgstr ""
 
 #. Translators: A screenshot description.
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:19
@@ -99,21 +95,17 @@ msgstr ""
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
 #: ../desktop/geary-autostart.desktop.in.h:2
-#, fuzzy
-#| msgid "Gmail"
 msgid "Email"
-msgstr "Gmail"
+msgstr "メール"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:3
-#, fuzzy
-#| msgid "Geary Mail"
 msgid "Geary Email"
-msgstr "Geary Mail"
+msgstr "Geary メール"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: ../desktop/org.gnome.Geary.desktop.in.h:6
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
-msgstr ""
+msgstr "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;メール;Eメール;E-メール;"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
@@ -121,21 +113,19 @@ msgstr "メッセージを作成"
 
 #: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
-msgstr "Geary Mail"
+msgstr "Geary メール"
 
 #: ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr ""
+msgstr "Email;E-mail;Mail;メール;Eメール;E-メール;"
 
 #: ../desktop/geary-attach.contract.in.h:1
-#, fuzzy
-#| msgid "Send and receive email"
 msgid "Send by email"
-msgstr "送受信"
+msgstr "メールで送信"
 
 #: ../desktop/geary-attach.contract.in.h:2
 msgid "Send files using Geary"
-msgstr ""
+msgstr "Geary でファイルを送信"
 
 #: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
 #: ../src/client/components/stock.vala:31
@@ -168,7 +158,7 @@ msgstr "アカウント"
 #. / Placeholder text indicating that the user should type their first name and last name
 #: ../src/client/accounts/add-edit-page.vala:10
 msgid "First Last"
-msgstr ""
+msgstr "氏名"
 
 #: ../src/client/accounts/add-edit-page.vala:235
 msgid "Welcome to Geary."
@@ -376,35 +366,25 @@ msgid "Unrecognized command line option “%s”\n"
 msgstr "不明なコマンドラインオプション“%s”\n"
 
 #: ../src/client/application/geary-controller.vala:57
-#, fuzzy
-#| msgid "Move conversation"
 msgid "Delete conversation"
-msgstr "スレッドを移動"
+msgstr "スレッドを削除"
 
 #: ../src/client/application/geary-controller.vala:58
-#, fuzzy
-#| msgid "Delete conversation (Delete, Backspace, A)"
 msgid "Delete conversation (Shift+Delete)"
-msgstr "スレッドを削除 (Delete, Backspace, A)"
+msgstr "スレッドを削除(Shift+Delete)"
 
 #: ../src/client/application/geary-controller.vala:59
-#, fuzzy
-#| msgid "Delete conversations (Delete, Backspace, A)"
 msgid "Delete conversations (Shift+Delete)"
-msgstr "スレッドを削除 (Delete, Backspace, A)"
+msgstr "スレッドを削除(Shift+Delete)"
 
 #. This refers to the action ("move email to the trash"), not the Trash folder itself
 #: ../src/client/application/geary-controller.vala:63
-#, fuzzy
-#| msgid "Archive conversations (Delete, Backspace, A)"
 msgid "Move conversation to Trash (Delete, Backspace)"
-msgstr "スレッドをアーカイブ (Delete, Backspace, A)"
+msgstr "スレッドをごみ箱に移動(Delete, Backspace)"
 
 #: ../src/client/application/geary-controller.vala:64
-#, fuzzy
-#| msgid "Archive conversations (Delete, Backspace, A)"
 msgid "Move conversations to Trash (Delete, Backspace)"
-msgstr "スレッドをアーカイブ (Delete, Backspace, A)"
+msgstr "スレッドをごみ箱に移動(Delete, Backspace)"
 
 #. This refers to the action ("archive an email"), not the Archive folder itself
 #: ../src/client/application/geary-controller.vala:68
@@ -412,24 +392,20 @@ msgid "_Archive"
 msgstr "アーカイブ(_A)"
 
 #: ../src/client/application/geary-controller.vala:69
-#, fuzzy
-#| msgid "Move conversation"
 msgid "Archive conversation (A)"
-msgstr "スレッドを移動"
+msgstr "スレッドをアーカイブに移動(A)"
 
 #: ../src/client/application/geary-controller.vala:70
-#, fuzzy
-#| msgid "Move conversations"
 msgid "Archive conversations (A)"
-msgstr "スレッドを移動"
+msgstr "スレッドをアーカイブに移動(A)"
 
 #: ../src/client/application/geary-controller.vala:73
 msgid "Mark as S_pam"
-msgstr ""
+msgstr "迷惑メールとしてマーク(_P)"
 
 #: ../src/client/application/geary-controller.vala:74
 msgid "Mark as not S_pam"
-msgstr ""
+msgstr "迷惑メールマークを外す(_P)"
 
 #: ../src/client/application/geary-controller.vala:76
 #: ../src/client/application/geary-controller.vala:445
@@ -442,11 +418,11 @@ msgstr "スレッドをマーク"
 
 #: ../src/client/application/geary-controller.vala:78
 msgid "Add label to conversation"
-msgstr "スレッドにラベルを付ける"
+msgstr "スレッドにラベル付け"
 
 #: ../src/client/application/geary-controller.vala:79
 msgid "Add label to conversations"
-msgstr "スレッドにラベルを付ける"
+msgstr "スレッドにラベル付け"
 
 #: ../src/client/application/geary-controller.vala:80
 #: ../src/client/application/geary-controller.vala:484
@@ -465,19 +441,19 @@ msgstr "名前を付けてマーク(_M)"
 
 #: ../src/client/application/geary-controller.vala:453
 msgid "Mark as _Read"
-msgstr ""
+msgstr "既読としてマーク(_R)"
 
 #: ../src/client/application/geary-controller.vala:459
 msgid "Mark as _Unread"
-msgstr ""
+msgstr "未読としてマーク(_U)"
 
 #: ../src/client/application/geary-controller.vala:465
 msgid "_Star"
-msgstr "スター(_S)"
+msgstr "星を付ける(_S)"
 
 #: ../src/client/application/geary-controller.vala:470
 msgid "U_nstar"
-msgstr "スターをはずす(_N)"
+msgstr "星をはずす(_N)"
 
 #: ../src/client/application/geary-controller.vala:480
 msgid "Add label"
@@ -502,15 +478,15 @@ msgstr "返信(_R)"
 
 #: ../src/client/application/geary-controller.vala:494
 msgid "Reply (Ctrl+R, R)"
-msgstr ""
+msgstr "返信(Ctrl+R, R)"
 
 #: ../src/client/application/geary-controller.vala:498
 msgid "R_eply All"
-msgstr ""
+msgstr "全員に返信(_E)"
 
 #: ../src/client/application/geary-controller.vala:499
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
-msgstr ""
+msgstr "全員に返信(Ctrl+Shift+R, Shift+R)"
 
 #: ../src/client/application/geary-controller.vala:504
 #: ../ui/conversation-email-menus.ui.h:3
@@ -519,15 +495,15 @@ msgstr "転送(_F)"
 
 #: ../src/client/application/geary-controller.vala:505
 msgid "Forward (Ctrl+L, F)"
-msgstr ""
+msgstr "転送(Ctrl+L, F)"
 
 #: ../src/client/application/geary-controller.vala:535
 msgid "Empty _Spam…"
-msgstr ""
+msgstr "迷惑メールを空にする(_S)…"
 
 #: ../src/client/application/geary-controller.vala:539
 msgid "Empty _Trash…"
-msgstr ""
+msgstr "ごみ箱を空にする(_T)…"
 
 #. No callback is connected, since we bind the toggle button to the search bar visibility
 #: ../src/client/application/geary-controller.vala:571
@@ -623,16 +599,16 @@ msgstr ""
 
 #: ../src/client/application/geary-controller.vala:1166
 msgid "_Rebuild"
-msgstr ""
+msgstr "再構築(_R)"
 
 #: ../src/client/application/geary-controller.vala:1166
 msgid "E_xit"
-msgstr ""
+msgstr "終了(_X)"
 
 #: ../src/client/application/geary-controller.vala:1175
 #, c-format
 msgid "Unable to rebuild database for “%s”"
-msgstr ""
+msgstr "“%s”のデータベースを再構築できません"
 
 #: ../src/client/application/geary-controller.vala:1176
 #, c-format
@@ -641,6 +617,9 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
+"再構築エラー:\n"
+"\n"
+"%s"
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
@@ -649,7 +628,7 @@ msgstr ""
 #: ../src/client/application/geary-controller.vala:1219
 #, c-format
 msgid "Unable to open local mailbox for %s"
-msgstr ""
+msgstr "%s のローカルメールボックスを開けません"
 
 #: ../src/client/application/geary-controller.vala:1199
 #, c-format
@@ -687,39 +666,31 @@ msgid "Undo move (Ctrl+Z)"
 msgstr "下線(Ctrl+U)"
 
 #: ../src/client/application/geary-controller.vala:2026
-#, fuzzy
-#| msgid "Are you sure you want to open \"%s\"?"
 msgid "Are you sure you want to open these attachments?"
-msgstr "\"%s\" を開きますか?"
+msgstr "これらの添付ファイルをを開きますか?"
 
 #: ../src/client/application/geary-controller.vala:2027
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
 msgstr ""
-"添付ファイルはシステムにダメージを与える恐れがあります. 信頼できる送信元から"
-"のみ開くようにしてください."
+"添付ファイルはシステムにダメージを与える可能性があります。送信元が信頼できる場合"
+"のみ開くようにしてください。"
 
 #: ../src/client/application/geary-controller.vala:2028
-#, fuzzy
-#| msgid "Don't _ask me again"
 msgid "Don’t _ask me again"
 msgstr "次回から表示しない(_A)"
 
 #: ../src/client/application/geary-controller.vala:2132
-#, fuzzy, c-format
-#| msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+#, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
-msgstr "\"%s\" は既に存在します. 上書きしますか?"
+msgstr "“%s”はすでに存在します。置き換えますか?"
 
 #: ../src/client/application/geary-controller.vala:2134
-#, fuzzy, c-format
-#| msgid ""
-#| "The file already exists in \"%s\".  Replacing it will overwrite its "
-#| "contents."
+#, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
-msgstr "\"%s\" は既に存在します. 上書きしますか?"
+msgstr "ファイルはすでに“%s”に存在します。置き換えると内容を上書きします。"
 
 #: ../src/client/application/geary-controller.vala:2137
 msgid "_Replace"
@@ -729,7 +700,7 @@ msgstr "置換(_R)"
 #. TODO: Remove this in favor of automatically saving drafts
 #: ../src/client/application/geary-controller.vala:2385
 msgid "Close open draft messages?"
-msgstr ""
+msgstr "開いた下書きメッセージを閉じますか?"
 
 #: ../src/client/application/geary-controller.vala:2507
 #, c-format
@@ -955,54 +926,44 @@ msgid "%s (%s)"
 msgstr ""
 
 #: ../src/client/composer/composer-widget.vala:1589
-#, fuzzy, c-format
-#| msgid "\"%s\" could not be found."
+#, c-format
 msgid "“%s” could not be found."
-msgstr "\"%s\" は見つかりませんでした"
+msgstr "“%s”が見つかりませんでした。"
 
 #: ../src/client/composer/composer-widget.vala:1595
-#, fuzzy, c-format
-#| msgid "\"%s\" is a folder."
+#, c-format
 msgid "“%s” is a folder."
-msgstr "\"%s\" はフォルダーです"
+msgstr "“%s”はフォルダーです。"
 
 #: ../src/client/composer/composer-widget.vala:1601
-#, fuzzy, c-format
-#| msgid "\"%s\" is an empty file."
+#, c-format
 msgid "“%s” is an empty file."
-msgstr "\"%s\" は空ファイルです"
+msgstr "“%s”は空ファイルです。"
 
 #: ../src/client/composer/composer-widget.vala:1614
-#, fuzzy, c-format
-#| msgid "\"%s\" could not be opened for reading."
+#, c-format
 msgid "“%s” could not be opened for reading."
-msgstr "\"%s\" を開くことができませんでした"
+msgstr "“%s”を読み取り用に開けませんでした。"
 
 #: ../src/client/composer/composer-widget.vala:1622
 msgid "Cannot add attachment"
 msgstr "添付できません"
 
 #: ../src/client/composer/composer-widget.vala:1675
-#, fuzzy
-#| msgid "To: %s\n"
 msgid "To: "
-msgstr "宛先: %s\n"
+msgstr "宛先: "
 
 #: ../src/client/composer/composer-widget.vala:1678
 msgid "Cc: "
-msgstr ""
+msgstr "Cc: "
 
 #: ../src/client/composer/composer-widget.vala:1681
-#, fuzzy
-#| msgid "Bcc:"
 msgid "Bcc: "
-msgstr "Bcc:"
+msgstr "Bcc: "
 
 #: ../src/client/composer/composer-widget.vala:1684
-#, fuzzy
-#| msgid "_Reply"
 msgid "Reply-To: "
-msgstr "返信(_R)"
+msgstr "返信先: "
 
 #: ../src/client/composer/composer-widget.vala:1816
 msgid "Select Color"
@@ -1019,16 +980,14 @@ msgstr ""
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #: ../src/client/composer/composer-widget.vala:2058
-#, fuzzy
-#| msgid "From:"
 msgid "_From:"
-msgstr "差出人:"
+msgstr "差出人(_F):"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
 #: ../src/client/composer/composer-widget.vala:2269
 msgid "Images"
-msgstr ""
+msgstr "画像"
 
 #: ../src/client/composer/spell-check-popover.vala:117
 msgid "Remove this language from the preferred list"
@@ -1083,25 +1042,21 @@ msgid "Selecting a conversation from the list will display it here"
 msgstr ""
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:81
-#, fuzzy
-#| msgid "%u conversations selected."
 msgid "Multiple conversations selected"
-msgstr "%u 件が選択されています"
+msgstr "複数のスレッドを選択しています"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:83
 msgid "Choosing an action will apply to all selected conversations"
-msgstr ""
+msgstr "選択したすべてのスレッドにアクションを適用します"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:88
 #: ../src/client/conversation-viewer/conversation-viewer.vala:95
-#, fuzzy
-#| msgid "No conversations selected."
 msgid "No conversations found"
-msgstr "メッセージが選択されていません"
+msgstr "スレッドが見つかりません"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:90
 msgid "This folder does not contain any conversations"
-msgstr ""
+msgstr "このフォルダーにはスレッドがありません"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:97
 msgid "Your search returned no results, try refining your search terms"
@@ -1201,14 +1156,14 @@ msgstr "パスワードを入力してください"
 #, c-format
 msgid "%d message"
 msgid_plural "%d messages"
-msgstr[0] ""
+msgstr[0] "%d 件のメッセージ"
 
 #. / Label displaying number of unread email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:39
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
-msgstr[0] ""
+msgstr[0] "%d 件の未読"
 
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
@@ -1226,13 +1181,12 @@ msgstr "受信トレイ"
 #, c-format
 msgid "%d result"
 msgid_plural "%d results"
-msgstr[0] ""
+msgstr[0] "%d 件の結果"
 
 #: ../src/client/notification/libmessagingmenu.vala:75
-#, fuzzy, c-format
-#| msgid "%s - New Messages"
+#, c-format
 msgid "%s — New Messages"
-msgstr "%s - 新着メッセージ"
+msgstr "%s — 新着メッセージ"
 
 #: ../src/client/notification/libnotify.vala:74
 #, c-format
@@ -1244,7 +1198,7 @@ msgstr[0] "%d 件の新着メッセージ"
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
-msgstr[0] ""
+msgstr[0] "%s, 合計 %d 件の新着メッセージ"
 
 #: ../src/client/notification/libnotify.vala:109
 #, c-format
@@ -1313,30 +1267,30 @@ msgstr "%Y年 %B %-e日, %-l:%M %P"
 
 #: ../src/client/util/util-date.vala:164
 msgid "Now"
-msgstr ""
+msgstr "今"
 
 #: ../src/client/util/util-date.vala:167
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
-msgstr[0] ""
+msgstr[0] "%d分前"
 
 #: ../src/client/util/util-date.vala:171
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
-msgstr[0] ""
+msgstr[0] "%d時間前"
 
 #: ../src/client/util/util-date.vala:178
 msgid "Yesterday"
-msgstr ""
+msgstr "昨日"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/client/util/util-date.vala:183
 #, c-format
 msgid "%A"
-msgstr ""
+msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
 #: ../src/engine/rfc822/rfc822-message.vala:908
@@ -1377,7 +1331,7 @@ msgstr "Yahoo! Mail"
 
 #: ../src/engine/api/geary-service-provider.vala:58
 msgid "Outlook.com"
-msgstr ""
+msgstr "Outlook.com"
 
 #: ../src/engine/api/geary-service-provider.vala:61
 msgid "Other"
@@ -1385,11 +1339,11 @@ msgstr "その他"
 
 #: ../src/engine/api/geary-service.vala:20
 msgid "IMAP"
-msgstr ""
+msgstr "IMAP"
 
 #: ../src/engine/api/geary-service.vala:23
 msgid "SMTP"
-msgstr ""
+msgstr "SMTP"
 
 #: ../src/engine/api/geary-special-folder-type.vala:24
 msgid "Inbox"
@@ -1405,7 +1359,7 @@ msgstr "送信済みメール"
 
 #: ../src/engine/api/geary-special-folder-type.vala:33
 msgid "Starred"
-msgstr "スター"
+msgstr "星"
 
 #: ../src/engine/api/geary-special-folder-type.vala:36
 msgid "Important"
@@ -1832,27 +1786,27 @@ msgstr ""
 
 #: ../ui/composer-menus.ui.h:1
 msgid "S_ans Serif"
-msgstr ""
+msgstr "Sans Serif(_A)"
 
 #: ../ui/composer-menus.ui.h:2
 msgid "S_erif"
-msgstr ""
+msgstr "Serif(_E)"
 
 #: ../ui/composer-menus.ui.h:3
 msgid "_Fixed Width"
-msgstr ""
+msgstr "等幅(_F)"
 
 #: ../ui/composer-menus.ui.h:4
 msgid "_Small"
-msgstr ""
+msgstr "小(_S)"
 
 #: ../ui/composer-menus.ui.h:5
 msgid "_Medium"
-msgstr ""
+msgstr "中(_M)"
 
 #: ../ui/composer-menus.ui.h:6
 msgid "Lar_ge"
-msgstr ""
+msgstr "大(_G)"
 
 #: ../ui/composer-menus.ui.h:7
 msgid "C_olor"
@@ -1860,7 +1814,7 @@ msgstr "色(_O)"
 
 #: ../ui/composer-menus.ui.h:8
 msgid "_Rich Text"
-msgstr ""
+msgstr "リッチテキスト(_R)"
 
 #: ../ui/composer-menus.ui.h:9
 msgid "Show Extended Fields"
@@ -1868,15 +1822,15 @@ msgstr ""
 
 #: ../ui/composer-menus.ui.h:10
 msgid "_Undo"
-msgstr ""
+msgstr "元に戻す(_U)"
 
 #: ../ui/composer-menus.ui.h:11
 msgid "_Redo"
-msgstr ""
+msgstr "やり直す(_R)"
 
 #: ../ui/composer-menus.ui.h:12
 msgid "Cu_t"
-msgstr ""
+msgstr "切り取り(_T)"
 
 #: ../ui/composer-menus.ui.h:13 ../ui/conversation-message-menus.ui.h:7
 msgid "_Copy"
@@ -1884,12 +1838,12 @@ msgstr "コピー(_C)"
 
 #: ../ui/composer-menus.ui.h:14
 msgid "_Paste"
-msgstr ""
+msgstr "貼り付け(_P)"
 
 #: ../ui/composer-menus.ui.h:15
 msgctxt "Clipboard paste with rich text"
 msgid "Paste _With Formatting"
-msgstr ""
+msgstr "書式なしで貼り付け(_W)"
 
 #: ../ui/composer-menus.ui.h:16
 msgid "Select _All"
@@ -1903,39 +1857,29 @@ msgstr "検証(_I)"
 
 #. Address(es) e-mail is to be sent to
 #: ../ui/composer-widget.ui.h:2
-#, fuzzy
-#| msgid "To:"
 msgid "_To"
-msgstr "宛先:"
+msgstr "宛先(_T)"
 
 #: ../ui/composer-widget.ui.h:3
-#, fuzzy
-#| msgid "Cc:"
 msgid "_Cc"
-msgstr "Cc:"
+msgstr "Cc(_C)"
 
 #: ../ui/composer-widget.ui.h:4
-#, fuzzy
-#| msgid "Subject:"
 msgid "_Subject"
-msgstr "件名:"
+msgstr "件名(_S)"
 
 #: ../ui/composer-widget.ui.h:5
 msgid "_Bcc"
-msgstr ""
+msgstr "Bcc(_B)"
 
 #: ../ui/composer-widget.ui.h:6
-#, fuzzy
-#| msgid "_Reply"
 msgid "_Reply-To"
-msgstr "返信(_R)"
+msgstr "返信先(_R)"
 
 #. Geary account mail will be sent from
 #: ../ui/composer-widget.ui.h:8
-#, fuzzy
-#| msgid "From:"
 msgid "From"
-msgstr "差出人:"
+msgstr "差出人"
 
 #: ../ui/composer-widget.ui.h:9
 msgid "Drop files here"
@@ -2012,128 +1956,105 @@ msgstr "全ての添付ファイルを保存(_T)"
 #. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
 #: ../ui/conversation-email.ui.h:3
 msgid "Mark this message as starred"
-msgstr ""
+msgstr "このメッセージに星をつける"
 
 #. Note: The application will never show this button at the same time as star_button, one will always be hidden.
 #: ../ui/conversation-email.ui.h:5
 msgid "Mark this message as not starred"
-msgstr ""
+msgstr "このメッセージの星を外す"
 
 #: ../ui/conversation-email.ui.h:6
 msgid "Display the message menu"
-msgstr ""
+msgstr "メッセージメニューを表示"
 
 #: ../ui/conversation-email.ui.h:7
-#, fuzzy
-#| msgid "Cannot add attachment"
 msgid "Open selected attachments"
-msgstr "添付できません"
+msgstr "選択した添付ファイルを開く"
 
 #: ../ui/conversation-email.ui.h:8
-#, fuzzy
-#| msgid "Save All A_ttachments..."
 msgid "Save selected attachments"
-msgstr "全ての添付ファイルを保存(_T)"
+msgstr "選択した添付ファイルを保存"
 
 #: ../ui/conversation-email.ui.h:9
-#, fuzzy
-#| msgid "Save All A_ttachments..."
 msgid "Select all attachments"
-msgstr "全ての添付ファイルを保存(_T)"
+msgstr "すべての添付ファイルを選択"
 
 #: ../ui/conversation-email.ui.h:10
 msgid "Edit Draft"
-msgstr ""
+msgstr "下書きを編集"
 
 #: ../ui/conversation-email.ui.h:11
-#, fuzzy
-#| msgid "%u read messages"
 msgid "Draft message"
-msgstr "%u 件の既読メッセージ"
+msgstr "下書きメッセージ"
 
 #: ../ui/conversation-email.ui.h:12
 msgid "This message has not yet been sent."
-msgstr ""
+msgstr "このメッセージはまだ送信していません。"
 
 #: ../ui/conversation-email.ui.h:13
 msgid "Message not saved"
-msgstr ""
+msgstr "メッセージが保存されませんでした"
 
 #: ../ui/conversation-email.ui.h:14
 msgid "This message was sent, but has not been saved to your account."
 msgstr ""
+"このメッセージは送信されましたが、お使いのアカウントに保存されませんでした。"
 
 #: ../ui/conversation-email-menus.ui.h:2
 msgid "Reply to _All"
 msgstr "全員に返信(_A)"
 
 #: ../ui/conversation-email-menus.ui.h:4
-#, fuzzy
-#| msgid "_Mark as Read"
 msgid "_Mark Read"
 msgstr "既読としてマーク(_M)"
 
 #: ../ui/conversation-email-menus.ui.h:5
-#, fuzzy
-#| msgid "_Mark as Unread"
 msgid "_Mark Unread"
 msgstr "未読としてマーク(_M)"
 
 #: ../ui/conversation-email-menus.ui.h:6
 msgid "Mark Unread From _Here"
-msgstr ""
+msgstr "ここから未読としてマーク(_H)"
 
 #: ../ui/conversation-email-menus.ui.h:8
 msgid "_View Source"
 msgstr "ソースを表示(_V)"
 
 #: ../ui/conversation-email-menus.ui.h:11
-#, fuzzy
-#| msgid "_Save"
 msgid "_Save All"
-msgstr "保存(_S)"
+msgstr "すべて保存(_S)"
 
 #: ../ui/conversation-message-menus.ui.h:1
-#, fuzzy
-#| msgid "Copy _Link"
 msgid "_Open Link"
-msgstr "リンクのアドレスをコピー(_L)"
+msgstr "リンクを開く(_O)"
 
 #: ../ui/conversation-message-menus.ui.h:2
-#, fuzzy
-#| msgid "Copy _Email Address"
 msgid "Copy Link _Address"
-msgstr "アドレスをコピー(_E)"
+msgstr "リンクのアドレスをコピー(_A)"
 
 #: ../ui/conversation-message-menus.ui.h:3
-#, fuzzy
-#| msgid "New Message"
 msgid "Send New _Message…"
-msgstr "新規メッセージ"
+msgstr "新規メッセージを送信(_M)…"
 
 #: ../ui/conversation-message-menus.ui.h:4
-#, fuzzy
-#| msgid "Copy _Email Address"
 msgid "Copy Email _Address"
-msgstr "アドレスをコピー(_E)"
+msgstr "メールアドレスをコピー(_A)"
 
 #: ../ui/conversation-message-menus.ui.h:5
 msgid "Save _Image As…"
-msgstr ""
+msgstr "画像に名前を付けて保存(_I)…"
 
 #: ../ui/conversation-message-menus.ui.h:6
-#, fuzzy
-#| msgid "Select _All"
 msgid "_Select All"
-msgstr "すべて選択(_A)"
+msgstr "すべて選択(_S)"
 
 #: ../ui/conversation-message-menus.ui.h:8
 msgid "Search for messages from"
-msgstr ""
+msgstr "次の場所からメッセージを検索"
 
 #: ../ui/conversation-message.ui.h:1
 msgid "From <email>"
-msgstr ""
+msgstr "送信者 <email>"
 
 #: ../ui/conversation-message.ui.h:2
 msgid "1/1/1970\t"
@@ -2145,19 +2066,15 @@ msgstr ""
 
 #: ../ui/conversation-message.ui.h:4
 msgid "Sent by:"
-msgstr ""
+msgstr "送信者:"
 
 #: ../ui/conversation-message.ui.h:5
-#, fuzzy
-#| msgid "Reply to _All"
 msgid "Reply to:"
-msgstr "全員に返信(_A)"
+msgstr "返信:"
 
 #: ../ui/conversation-message.ui.h:6
-#, fuzzy
-#| msgid "Subject:"
 msgid "Subject"
-msgstr "件名:"
+msgstr "件名"
 
 #: ../ui/conversation-message.ui.h:7
 msgid "To:"
@@ -2173,19 +2090,19 @@ msgstr "Bcc:"
 
 #: ../ui/conversation-message.ui.h:10
 msgid "Show Images"
-msgstr ""
+msgstr "画像を表示"
 
 #: ../ui/conversation-message.ui.h:11
 msgid "Always Show From Sender"
-msgstr ""
+msgstr "この送信者のものは常に表示"
 
 #: ../ui/conversation-message.ui.h:12
 msgid "Remote images not shown"
-msgstr ""
+msgstr "リモート画像は表示しません"
 
 #: ../ui/conversation-message.ui.h:13
 msgid "Only show remote images from senders you trust."
-msgstr ""
+msgstr "信頼できる送信者のリモート画像のみ表示するようにしてください。"
 
 #: ../ui/conversation-message.ui.h:14
 msgid "But actually goes to:"
@@ -2208,10 +2125,8 @@ msgid "If unsure, contact the sender and ask before continuing."
 msgstr ""
 
 #: ../ui/conversation-viewer.ui.h:1
-#, fuzzy
-#| msgid "Mark conversation"
 msgid "Find in conversation"
-msgstr "スレッドをマーク"
+msgstr "スレッド内を検索"
 
 #: ../ui/conversation-viewer.ui.h:2
 msgid "Find the previous occurrence of the search string."
@@ -2254,8 +2169,6 @@ msgid "_Case sensitive"
 msgstr ""
 
 #: ../ui/find_bar.glade.h:5
-#, fuzzy
-#| msgid "Labels"
 msgid "label"
 msgstr "ラベル"
 
@@ -2717,8 +2630,8 @@ msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
 msgstr ""
-"このアカウントに関連づけされた全てのメールは、コンピューターから削除されます."
-"これは、サーバー上のメールには影響を与えません."
+"このアカウントに関連したすべてのメールを、コンピューターから削除します。サーバー"
+"上のメールには影響しません。"
 
 #: ../ui/remove_confirm.glade.h:3
 msgid "Nickname:"
@@ -2730,7 +2643,7 @@ msgstr "メールアドレス:"
 
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
-msgstr ""
+msgstr "Geary をアップデートしています…"
 
 #~ msgid "Archive conversation (Delete, Backspace, A)"
 #~ msgstr "スレッドをアーカイブ (Delete, Backspace, A)"
