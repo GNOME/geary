@@ -51,7 +51,9 @@ public class Geary.Email : BaseObject {
      *
      * @see get_message
      */
-    public const Field REQUIRED_FOR_MESSAGE = Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
+    public const Field REQUIRED_FOR_MESSAGE = (
+        Geary.Email.Field.HEADER | Geary.Email.Field.BODY
+    );
 
     /**
      * Specifies specific parts of an email message.
