@@ -64,7 +64,11 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
         );
         if (this.account != null) {
             details.append_printf(
-                "Account type: %s\n",
+                "Account id: %s\n",
+                this.account.id
+            );
+            details.append_printf(
+                "Account provider: %s\n",
                 this.account.service_provider.to_string()
             );
         }
