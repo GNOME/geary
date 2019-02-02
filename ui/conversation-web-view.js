@@ -82,7 +82,7 @@ ConversationPageState.prototype = {
 
             // Only insert into a quote container if the element is a
             // top level blockquote
-            if (!ConversationPageState.isDescendantOf(blockquote, "BLOCKQUOTE")) {
+            if (!ConversationPageState.isDescendantOf(blockquote, "blockquote")) {
                 let quoteHeight = blockquote.offsetHeight;
 
                 // Only make the quote it controllable if it is tall enough
@@ -171,7 +171,7 @@ ConversationPageState.prototype = {
             let div = possibleSigs.item(i);
             let innerHTML = div.innerHTML;
             if ((sigRegex.test(innerHTML) || alternateSigRegex.test(innerHTML)) &&
-                !ConversationPageState.isDescendantOf(div, "BLOCKQUOTE")) {
+                !ConversationPageState.isDescendantOf(div, "blockquote")) {
                 break;
             }
         }
@@ -206,7 +206,7 @@ ConversationPageState.prototype = {
             // so that new lines are preserved.
             let dummy = document.createElement("DIV");
             let includeDummy = false;
-            if (ConversationPageState.isDescendantOf(ancestor, ".plaintext")) {
+            if (ConversationPageState.isDescendantOf(ancestor, "div", "plaintext")) {
                 dummy.classList.add("plaintext");
                 dummy.setAttribute("style", "white-space: pre-wrap;");
                 includeDummy = true;
@@ -321,11 +321,20 @@ ConversationPageState.isDeceptiveText = function(text, href) {
     return ConversationPageState.NOT_DECEPTIVE;
 };
 
-ConversationPageState.isDescendantOf = function(node, ancestorTag) {
+/**
+ * See if this element has an ancestor with the given tag and class.
+ *
+ * ancestorTag must be all lowercase.
+ *
+ * If ancestorClass is null, no class checking is done.
+ */
+ConversationPageState.isDescendantOf = function(node, ancestorTag, ancestorClass = null) {
     let ancestor = node.parentNode;
     while (ancestor != null) {
-        if (ancestor.tagName == ancestorTag) {
-            return true;
+        if (ancestor.tagName.toLowerCase() == ancestorTag) {
+            if (!ancestorClass || ancestor.classList.contains(ancestorClass)) {
+                return true;
+            }
         }
         ancestor = ancestor.parentNode;
     }
