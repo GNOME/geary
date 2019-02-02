@@ -685,8 +685,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
             if (!job.emails.has_key(email.id)) {
                 job.emails.set(email.id, email);
 
+                // Expand conversations whose messages have ancestors, and aren't marked
+                // for deletion.
+                Geary.EmailFlags? flags = email.email_flags;
+                bool marked_for_deletion = (flags != null) ? flags.is_deleted() : false;
+
                 Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
-                if (ancestors != null) {
+                if (ancestors != null && !marked_for_deletion) {
                     Geary.traverse<RFC822.MessageID>(ancestors)
                         .filter(id => !new_message_ids.contains(id))
                         .add_all_to(new_message_ids);
@@ -845,10 +850,28 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
     private void on_account_email_flags_changed(Geary.Folder folder,
                                                 Gee.Map<EmailIdentifier,EmailFlags> map) {
+        Gee.HashSet<EmailIdentifier> inserted_ids = new Gee.HashSet<EmailIdentifier>();
+        Gee.HashSet<EmailIdentifier> removed_ids = new Gee.HashSet<EmailIdentifier>();
+        Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
         foreach (EmailIdentifier id in map.keys) {
             Conversation? conversation = this.conversations.get_by_email_identifier(id);
-            if (conversation == null)
+            if (conversation == null) {
+                if (folder == this.base_folder) {
+                    // Check to see if the incoming message is sorted later than the last message in the
+                    // window. If it is, don't resurrect it since it likely hasn't been loaded yet.
+                    Geary.EmailIdentifier? lowest = this.window_lowest;
+                    if (lowest != null) {
+                        if (lowest.natural_sort_comparator(id) < 0) {
+                            debug("Unflagging email %s for deletion resurrects conversation", id.to_string());
+                            inserted_ids.add(id);
+                        } else {
+                            debug("Not resurrecting undeleted email %s outside of window", id.to_string());
+                        }
+                    }
+                }
+
                 continue;
+            }
 
             Email? email = conversation.get_email_by_id(id);
             if (email == null)
@@ -856,7 +879,33 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
             email.set_flags(map.get(id));
             notify_email_flags_changed(conversation, email);
+
+            // Remove conversation if get_emails yields an empty collection -- this probably means
+            // the conversation was deleted.
+            if (conversation.get_emails(Geary.App.Conversation.Ordering.NONE).size == 0) {
+                debug("Flagging email %s for deletion evaporates conversation %s", 
+                    id.to_string(), conversation.to_string());
+                
+                this.conversations.remove_conversation(conversation);
+                removed_conversations.add(conversation);
+                removed_ids.add(id);
+            } 
         }
+
+        // Notify about inserted messages
+        if (inserted_ids.size > 0) {
+            this.queue.add(new InsertOperation(this, inserted_ids));
+        }
+
+        // Notify self about removed conversations
+        // NOTE: We are only notifying the conversation monitor about the removed conversations instead of
+        // enqueuing a RemoveOperation, because these messages haven't actually been removed. They're only
+        // hidden at the conversation-level for being marked as deleted.
+        removed(
+            removed_conversations,
+            new Gee.HashMultiMap<Conversation, Email>(),
+            (folder == this.base_folder) ? removed_ids : null
+        );
     }
 
     private void on_operation_error(ConversationOperation op, Error err) {

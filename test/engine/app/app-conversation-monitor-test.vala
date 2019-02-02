@@ -26,6 +26,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         add_test("base_folder_message_appended", base_folder_message_appended);
         add_test("base_folder_message_removed", base_folder_message_removed);
         add_test("external_folder_message_appended", external_folder_message_appended);
+        add_test("conversation_marked_as_deleted", conversation_marked_as_deleted);
     }
 
     public override void set_up() {
@@ -341,6 +342,30 @@ class Geary.App.ConversationMonitorTest : TestCase {
         assert_int(2, c1.get_count(), "Conversation message count");
         assert_equal(e3, c1.get_email_by_id(e3.id),
                      "Appended email not present in conversation");
+    }
+
+    public void conversation_marked_as_deleted() throws Error {
+        Email e1 = setup_email(1);
+
+        Gee.MultiMap<EmailIdentifier,FolderPath> paths =
+            new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
+        paths.set(e1.id, this.base_folder.path);
+
+        ConversationMonitor monitor = setup_monitor({e1}, paths);
+        assert_int(1, monitor.size, "Conversation count");
+
+        // Mark message as deleted
+        Gee.HashMap<EmailIdentifier,EmailFlags> flags_changed =
+            new Gee.HashMap<EmailIdentifier,EmailFlags>();
+        flags_changed.set(e1.id, new EmailFlags.with(EmailFlags.DELETED));
+        this.account.email_flags_changed(this.base_folder, flags_changed);
+        
+        this.base_folder.expect_call("list_email_by_sparse_id_async");
+        this.base_folder.expect_call("list_email_by_id_async");
+
+        wait_for_signal(monitor, "email-flags-changed"); 
+
+        assert_int(0, monitor.size, "Conversation count should now be zero after being marked deleted.");
     }
 
     private Email setup_email(int id, Email? references = null) {

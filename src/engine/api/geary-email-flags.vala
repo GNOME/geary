@@ -30,6 +30,10 @@ public class Geary.EmailFlags : Geary.NamedFlags {
     public static NamedFlag DRAFT { owned get {
         return new NamedFlag("DRAFT");
     } }
+
+    public static NamedFlag DELETED { owned get {
+        return new NamedFlag("DELETED");
+    } }
     
     /// Signifies a message in our outbox that has been sent but we're still
     /// keeping around for other purposes, i.e. pushing up to Sent Mail.
@@ -72,6 +76,10 @@ public class Geary.EmailFlags : Geary.NamedFlags {
     
     public inline bool is_outbox_sent() {
         return contains(OUTBOX_SENT);
+    }
+
+    public inline bool is_deleted() {
+        return contains(DELETED);
     }
 }
 

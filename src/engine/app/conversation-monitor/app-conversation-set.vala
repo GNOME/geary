@@ -191,7 +191,14 @@ private class Geary.App.ConversationSet : BaseObject {
      * Removes a conversation from the set.
      */
     public void remove_conversation(Conversation conversation) {
-        foreach (Geary.Email conversation_email in conversation.get_emails(Conversation.Ordering.NONE))
+        Gee.Collection<Email> conversation_emails = conversation.get_emails(
+            Conversation.Ordering.NONE,     // ordering
+            Conversation.Location.ANYWHERE, // location
+            null,                           // blacklist
+            false                           // filter deleted (false, so we remove emails that are flagged for deletion too)
+        );
+
+        foreach (Geary.Email conversation_email in conversation_emails)
             remove_email_from_conversation(conversation, conversation_email);
 
         if (!_conversations.remove(conversation))
