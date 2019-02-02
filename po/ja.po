@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-02 13:14+0000\n"
-"PO-Revision-Date: 2019-02-02 22:56+0000\n"
+"POT-Creation-Date: 2019-02-02 13:57+0000\n"
+"PO-Revision-Date: 2019-02-02 23:21+0000\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -512,7 +512,7 @@ msgstr "“%s”を削除"
 #: src/client/accounts/accounts-editor-edit-pane.vala:601
 #, c-format
 msgid "Undo changes to “%s”"
-msgstr "“%s”への変更を元に戻す"
+msgstr "変更を“%s”に戻す"
 
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
