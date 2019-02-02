@@ -184,7 +184,7 @@ grid.geary-message-summary {
 
 /* PlaceholderPane  */
 
-.geary-placeholder-pane > image {
+.geary-placeholder-pane.geary-has-text > image {
   margin-bottom: 12px;
 }
 .geary-placeholder-pane > .title {
