@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-02 10:51+0000\n"
-"PO-Revision-Date: 2019-02-02 22:11+0000\n"
+"POT-Creation-Date: 2019-02-02 13:14+0000\n"
+"PO-Revision-Date: 2019-02-02 22:56+0000\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -1119,7 +1119,8 @@ msgid ""
 "Could not connect to %s, check your Internet access and the server name and "
 "try again"
 msgstr ""
-"%s に接続できなかったため、インターネット接続とサーバー名を確認して再試行してください"
+"%s に接続できなかったため、インターネット接続とサーバー名を確認して再試行して"
+"ください"
 
 #. Button tooltip for retrying an account problem
 #: src/client/components/main-window-info-bar.vala:50
@@ -1435,7 +1436,7 @@ msgstr ""
 #. Keep, Discard or Cancel.
 #: src/client/composer/composer-widget.vala:1103
 msgid "Do you want to keep or discard this draft message?"
-msgstr "この下書きメッセージを破棄しますか? それとも保持しますか?"
+msgstr "この下書きメッセージを保持または破棄しますか?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
