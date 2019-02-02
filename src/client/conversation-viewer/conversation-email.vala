@@ -551,7 +551,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         );
 
         this.body_loading_timeout = new Geary.TimeoutManager.milliseconds(
-            BODY_LOAD_TIMEOUT_MSEC, this.primary_message.start_progress_pulse
+            BODY_LOAD_TIMEOUT_MSEC, this.on_body_loading_timeout
         );
 
         pack_start(this.primary_message, true, true, 0);
@@ -1004,6 +1004,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         op.set_print_settings(settings);
         op.run_dialog(window);
+    }
+
+    private void on_body_loading_timeout() {
+        this.primary_message.show_loading_pane();
     }
 
     private void on_flag_remote_images(ConversationMessage view) {
