@@ -166,10 +166,14 @@ grid.geary-message-summary {
   margin-right: 6px;
 }
 
-
 .geary-submessages .geary-message {
   background-image: linear-gradient(rgba(0,0,0,0.2), @bg_color 6px);
 }
+
+.geary-message .geary-placeholder-pane {
+  margin: 36px 16px;
+}
+
 
 /* Composer */
 
@@ -180,7 +184,7 @@ grid.geary-message-summary {
 
 /* PlaceholderPane  */
 
-.geary-placeholder-pane > image {
+.geary-placeholder-pane.geary-has-text > image {
   margin-bottom: 12px;
 }
 .geary-placeholder-pane > .title {

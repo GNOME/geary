@@ -688,15 +688,23 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void update_account_status() {
-        Geary.Account.Status effective_status = 0;
+        // Start off assuming all accounts are online and error free
+        // (i.e. no status issues to indicate) and proceed until
+        // proven incorrect.
+        Geary.Account.Status effective_status = ONLINE;
         bool has_auth_error = false;
         bool has_cert_error = false;
         Geary.Account? service_problem_source = null;
         foreach (AccountContext context in this.accounts.values) {
-            effective_status |= context.get_effective_status();
-            if (effective_status.has_service_problem() &&
-                service_problem_source == null) {
-                service_problem_source = context.account;
+            Geary.Account.Status status = context.get_effective_status();
+            if (!status.is_online()) {
+                effective_status &= ~Geary.Account.Status.ONLINE;
+            }
+            if (status.has_service_problem()) {
+                effective_status |= SERVICE_PROBLEM;
+                if (service_problem_source == null) {
+                    service_problem_source = context.account;
+                }
             }
             has_auth_error |= context.authentication_failed;
             has_cert_error |= context.tls_validation_failed;
@@ -898,6 +906,7 @@ public class GearyController : Geary.BaseObject {
 
         main_window.folder_list.set_user_folders_root_name(account, _("Labels"));
         display_main_window_if_ready();
+        update_account_status();
     }
 
     // Returns true if the caller should try opening the account again
@@ -2570,9 +2579,10 @@ public class GearyController : Geary.BaseObject {
 
     private void on_conversation_viewer_email_added(ConversationEmail view) {
         view.attachments_activated.connect(on_attachments_activated);
+        view.forward_message.connect(on_forward_message);
+        view.load_error.connect(on_email_load_error);
         view.reply_to_message.connect(on_reply_to_message);
         view.reply_all_message.connect(on_reply_all_message);
-        view.forward_message.connect(on_forward_message);
 
         Geary.App.Conversation conversation = main_window.conversation_viewer.current_list.conversation;
         bool in_current_folder = (conversation.is_in_base_folder(view.email.id) &&
@@ -3006,6 +3016,18 @@ public class GearyController : Geary.BaseObject {
                 Geary.ProblemType.GENERIC_ERROR,
                 account,
                 account.incoming,
+                err
+            )
+        );
+    }
+
+    private void on_email_load_error(ConversationEmail view, GLib.Error err) {
+        // XXX determine the problem better here
+        report_problem(
+            new Geary.ServiceProblemReport(
+                Geary.ProblemType.GENERIC_ERROR,
+                this.current_account.information,
+                this.current_account.information.incoming,
                 err
             )
         );

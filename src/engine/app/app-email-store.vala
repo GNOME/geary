@@ -178,23 +178,28 @@ public class Geary.App.EmailStore : BaseObject {
 
             bool open = false;
             Gee.Collection<Geary.EmailIdentifier>? used_ids = null;
+            GLib.Error? op_error = null;
             try {
                 yield folder.open_async(Folder.OpenFlags.NONE, cancellable);
                 open = true;
                 used_ids = yield operation.execute_async(folder, ids, cancellable);
-            } catch (Error e) {
-                debug("Error performing an operation on messages in %s: %s", folder.to_string(), e.message);
-            } finally {
-                if (open) {
-                    try {
-                        // Don't use the cancellable here, if it's been
-                        // opened we need to try to close it.
-                        yield folder.close_async(null);
-                    } catch (Error e) {
-                        debug("Error closing folder %s: %s",
-                              folder.to_string(), e.message);
-                    }
+            } catch (GLib.Error err) {
+                op_error = err;
+            }
+
+            if (open) {
+                try {
+                    // Don't use the cancellable here, if it's been opened
+                    // we need to try to close it.
+                    yield folder.close_async(null);
+                } catch (Error e) {
+                    warning("Error closing folder %s: %s",
+                            folder.to_string(), e.message);
                 }
+            }
+
+            if (op_error != null) {
+                throw op_error;
             }
 
             // We don't want to operate on any mails twice.

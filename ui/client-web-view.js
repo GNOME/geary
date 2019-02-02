@@ -36,6 +36,10 @@ PageState.prototype = {
             }
         });
 
+        document.addEventListener("DOMContentLoaded", function(e) {
+            state.loaded();
+        });
+
         // Coalesce multiple calls to updatePreferredHeight using a
         // timeout to avoid the overhead of multiple JS messages sent
         // to the app and hence view multiple resizes being queued.
@@ -45,22 +49,9 @@ PageState.prototype = {
                 clearTimeout(queueTimeout);
             }
             queueTimeout = setTimeout(
-                function() { state.updatePreferredHeight(); }, 10
+                function() { state.updatePreferredHeight(); }, 100
             );
         };
-
-        // Queues an update after the DOM has been initially loaded
-        // and had any changes made to it by derived classes.
-        document.addEventListener("DOMContentLoaded", function(e) {
-            // Always fire a prefered height update first so that it
-            // will be vaguegly correct when notifying of the HTML
-            // load completing.
-            state.updatePreferredHeight();
-            state.loaded();
-            // Still need to queue an update though since it still may
-            // be updated after this event has been fired.
-            queuePreferredHeightUpdate();
-        });
 
         // Queues an update when the complete document is loaded.
         //
@@ -92,13 +83,17 @@ PageState.prototype = {
         }, false); // load does not bubble
     },
     getPreferredHeight: function() {
-        return window.document.documentElement.scrollHeight;
+        return window.document.body.scrollHeight;
     },
     getHtml: function() {
         return document.body.innerHTML;
     },
     loaded: function() {
         this.isLoaded = true;
+        // Always fire a prefered height update first so that it will
+        // be vaguegly correct when notifying of the HTML load
+        // completing.
+        this.updatePreferredHeight();
         window.webkit.messageHandlers.contentLoaded.postMessage(null);
     },
     loadRemoteImages: function() {
@@ -145,15 +140,19 @@ PageState.prototype = {
             height = this.getPreferredHeight();
         }
 
-        let updated = false;
-        if (height > 0 && height != this.lastPreferredHeight) {
+        // Don't send the message until after the DOM has been fully
+        // loaded and processed by any derived classes. Since
+        // ConversationPageState may collapse any quotes, sending the
+        // current preferred height before then may send a value that
+        // is too large, causing the message body view to grow then
+        // shrink again, leading to visual flicker.
+        if (this.isLoaded && height > 0 && height != this.lastPreferredHeight) {
             updated = true;
             this.lastPreferredHeight = height;
             window.webkit.messageHandlers.preferredHeightChanged.postMessage(
                 height
             );
         }
-        return updated;
     },
     checkCommandStack: function() {
         let canUndo = document.queryCommandEnabled("undo");

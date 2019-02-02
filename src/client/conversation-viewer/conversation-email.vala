@@ -30,9 +30,33 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     /** Fields that must be available for loading the body. */
     internal const Geary.Email.Field REQUIRED_FOR_LOAD = (
+        // Include those needed by the constructor since we'll replace
+        // the ctor's email arg value once the body has been fully
+        // loaded
+        REQUIRED_FOR_CONSTRUCT |
         Geary.Email.REQUIRED_FOR_MESSAGE
     );
 
+    // Time to wait loading the body before showing the progress meter
+    private const int BODY_LOAD_TIMEOUT_MSEC = 250;
+
+
+    /** Specifies the loading state for a message part. */
+    public enum LoadState {
+
+        /** Loading has not started. */
+        NOT_STARTED,
+
+        /** Loading has started, but not completed. */
+        STARTED,
+
+        /** Loading has started and completed. */
+        COMPLETED,
+
+        /** Loading has started but encountered an error. */
+        FAILED;
+
+    }
 
     /**
      * Iterator that returns all message views in an email view.
@@ -275,11 +299,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private Gee.List<ConversationMessage> _attached_messages =
         new Gee.LinkedList<ConversationMessage>();
 
-    /** Determines if message bodies have started loading. */
-    public bool message_body_load_started { get; private set; default = false; }
-
-    /** Determines if all message have had loaded their bodies. */
-    public bool message_bodies_loaded { get; private set; default = false; }
+    /** Determines the message body loading state. */
+    public LoadState message_body_state { get; private set; default = NOT_STARTED; }
 
     // Store from which to load message content, if needed
     private Geary.App.EmailStore email_store;
@@ -294,6 +315,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private GLib.Cancellable load_cancellable;
 
     private Configuration config;
+
+    private Geary.TimeoutManager body_loading_timeout;
+
 
     /** Determines if all message's web views have finished loading. */
     private Geary.Nonblocking.Spinlock message_bodies_loaded_lock =
@@ -351,6 +375,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private Menu email_menu_delete;
     private bool shift_key_down;
 
+
+    /** Fired when an error occurs loading the message body. */
+    public signal void load_error(GLib.Error err);
 
     /** Fired when the user clicks "reply" in the message menu. */
     public signal void reply_to_message();
@@ -519,6 +546,14 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         this.primary_message.infobars.add(this.not_saved_infobar);
 
+        email_store.account.incoming.notify["current-status"].connect(
+            on_service_status_change
+        );
+
+        this.body_loading_timeout = new Geary.TimeoutManager.milliseconds(
+            BODY_LOAD_TIMEOUT_MSEC, this.on_body_loading_timeout
+        );
+
         pack_start(this.primary_message, true, true, 0);
         update_email_state();
     }
@@ -554,31 +589,42 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      */
     public async void load_body()
         throws GLib.Error {
-        this.message_body_load_started = true;
+        this.message_body_state = STARTED;
 
         // Ensure we have required data to load the message
 
-        Geary.Email? email = null;
-        if (this.email.fields.fulfills(REQUIRED_FOR_LOAD)) {
-            email = this.email;
-        } else {
+        bool loaded = this.email.fields.fulfills(REQUIRED_FOR_LOAD);
+        if (!loaded) {
+            this.body_loading_timeout.start();
             try {
-                email = yield this.email_store.fetch_email_async(
+                this.email = yield this.email_store.fetch_email_async(
                     this.email.id,
-                    Geary.Email.REQUIRED_FOR_MESSAGE,
-                    LOCAL_ONLY, // Throw an error if not downloaded
+                    REQUIRED_FOR_LOAD,
+                    LOCAL_ONLY, // Throws an error if not downloaded
                     this.load_cancellable
                 );
+                loaded = true;
+                this.body_loading_timeout.reset();
             } catch (Geary.EngineError.INCOMPLETE_MESSAGE err) {
                 // Don't have the complete message at the moment, so
-                // download it in the background.
-                this.fetch_body_remote.begin();
+                // download it in the background. Don't reset the body
+                // load timeout here since this will attempt to fetch
+                // from the remote
+                this.fetch_remote_body.begin();
+            } catch (GLib.Error err) {
+                this.body_loading_timeout.reset();
+                handle_load_failure(err);
+                throw err;
             }
         }
 
-        if (email != null) {
-            this.email = email;
-            yield update_body();
+        if (loaded) {
+            try {
+                yield update_body();
+            } catch (GLib.Error err) {
+                handle_load_failure(err);
+                throw err;
+            }
             yield this.message_bodies_loaded_lock.wait_async(
                 this.load_cancellable
             );
@@ -712,37 +758,44 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             });
     }
 
-    private async void fetch_body_remote()
-        throws GLib.Error {
-        // XXX Need proper progress reporting here, rather than just
-        // doing a pulse
-        this.primary_message.start_progress_pulse();
-        Geary.Email? email = null;
-        try {
-            email = yield this.email_store.fetch_email_async(
-                this.email.id,
-                Geary.Email.REQUIRED_FOR_MESSAGE,
-                FORCE_UPDATE,
-                this.load_cancellable
-            );
-        } catch (GLib.IOError.CANCELLED err) {
-            // Don't stop message progress pulse here since if
-            // cancelled, this could be well after the widgets have
-            // been removed and destroyed
-        } catch (GLib.Error err) {
-            // XXX Notify user of a problem here
-            debug("Remote message download failed: %s", err.message);
-            this.primary_message.stop_progress_pulse();
-        }
-
-        if (email != null) {
-            this.primary_message.stop_progress_pulse();
-            try {
-                this.email = email;
-                yield update_body();
-            } catch (GLib.Error err) {
-                debug("Remote message update failed: %s", err.message);
+    private async void fetch_remote_body() {
+        if (is_online()) {
+            // XXX Need proper progress reporting here, rather than just
+            // doing a pulse
+            if (!this.body_loading_timeout.is_running) {
+                this.body_loading_timeout.start();
             }
+
+            Geary.Email? loaded = null;
+            try {
+                debug("Downloading remote message: %s", this.email.to_string());
+                loaded = yield this.email_store.fetch_email_async(
+                    this.email.id,
+                    REQUIRED_FOR_LOAD,
+                    FORCE_UPDATE,
+                    this.load_cancellable
+                );
+            } catch (GLib.IOError.CANCELLED err) {
+                // All good
+            } catch (GLib.Error err) {
+                debug("Remote message download failed: %s", err.message);
+                handle_load_failure(err);
+            }
+
+            this.body_loading_timeout.reset();
+
+            if (loaded != null) {
+                try {
+                    this.email = loaded;
+                    yield update_body();
+                } catch (GLib.Error err) {
+                    debug("Remote message update failed: %s", err.message);
+                    handle_load_failure(err);
+                }
+            }
+        } else {
+            this.body_loading_timeout.reset();
+            handle_load_offline();
         }
     }
 
@@ -864,6 +917,21 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         return selected;
     }
 
+    private void handle_load_failure(GLib.Error err) {
+        load_error(err);
+        this.message_body_state = FAILED;
+        this.primary_message.show_load_error_pane();
+    }
+
+    private void handle_load_offline() {
+        this.message_body_state = FAILED;
+        this.primary_message.show_offline_pane();
+    }
+
+    private inline bool is_online() {
+        return (this.email_store.account.incoming.current_status == CONNECTED);
+    }
+
     /**
      * Updates the email menu if it is open.
      */
@@ -938,6 +1006,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         op.run_dialog(window);
     }
 
+    private void on_body_loading_timeout() {
+        this.primary_message.show_loading_pane();
+    }
+
     private void on_flag_remote_images(ConversationMessage view) {
         // XXX check we aren't already auto loading the image
         mark_email(Geary.EmailFlags.LOAD_REMOTE_IMAGES, null);
@@ -961,13 +1033,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void on_resource_loaded(string id) {
         Gee.Iterator<Geary.Attachment> displayed =
             this.displayed_attachments.iterator();
-        displayed.next();
         while (displayed.has_next()) {
+            displayed.next();
             Geary.Attachment? attachment = displayed.get();
             if (attachment.content_id == id) {
                 displayed.remove();
             }
-            displayed.next();
         }
     }
 
@@ -979,8 +1050,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 break;
             }
         }
-        if (all_loaded && !this.message_bodies_loaded) {
-            this.message_bodies_loaded = true;
+        if (all_loaded && this.message_body_state != COMPLETED) {
+            this.message_body_state = COMPLETED;
             this.message_bodies_loaded_lock.blind_notify();
 
             // Update attachments once the web views have finished
@@ -1011,5 +1082,13 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         set_action_enabled(ACTION_SELECT_ALL_ATTACHMENTS,
                            len < this.displayed_attachments.size);
     }
+
+	private void on_service_status_change() {
+        if (this.message_body_state == FAILED &&
+            !this.load_cancellable.is_cancelled() &&
+            is_online()) {
+            this.fetch_remote_body.begin();
+        }
+	}
 
 }

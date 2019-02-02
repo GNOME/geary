@@ -214,7 +214,7 @@ public abstract class Geary.ClientService : BaseObject {
 
         connect_handlers();
 
-        this.notify["running"].connect(on_running_notify);
+        this.notify["is-running"].connect(on_running_notify);
         this.notify["current-status"].connect(on_current_status_notify);
     }
 
@@ -311,6 +311,8 @@ public abstract class Geary.ClientService : BaseObject {
         this.is_running = true;
         if (this.remote.connectivity.is_reachable.is_certain()) {
             became_reachable();
+        } else if (this.remote.connectivity.is_reachable.is_impossible()) {
+            this.current_status = UNREACHABLE;
         } else {
             this.remote.connectivity.check_reachable.begin();
         }
@@ -405,11 +407,21 @@ public abstract class Geary.ClientService : BaseObject {
     }
 
     private void on_running_notify() {
-        debug(this.is_running ? "started" : "stopped");
+        debug(
+            "%s:%s %s",
+            this.account.id,
+            this.configuration.protocol.to_value(),
+            this.is_running ? "started" : "stopped"
+        );
     }
 
     private void on_current_status_notify() {
-        debug(this.current_status.to_value());
+        debug(
+            "%s:%s: status changed to: %s",
+            this.account.id,
+            this.configuration.protocol.to_value(),
+            this.current_status.to_value()
+        );
     }
 
 	private void on_connectivity_change() {

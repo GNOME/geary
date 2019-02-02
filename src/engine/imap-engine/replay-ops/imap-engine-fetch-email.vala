@@ -49,6 +49,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             return CONTINUE;
         }
 
+        Geary.Email? email = null;
         try {
             email = yield engine.local_folder.fetch_email_async(id, required_fields,
                 ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
@@ -57,15 +58,17 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             if (!(err is Geary.EngineError.NOT_FOUND) && !(err is Geary.EngineError.INCOMPLETE_MESSAGE))
                 throw err;
         }
-        
+
         // If returned in full, done
-        if (email != null && email.fields.fulfills(required_fields))
+        if (email.fields.fulfills(required_fields)) {
+            this.email = email;
             return ReplayOperation.Status.COMPLETED;
+        }
 
         // If local only, ensure the email has all required fields
         if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY)) {
             throw new EngineError.INCOMPLETE_MESSAGE(
-                "Email %s with fields %Xh not found in %s",
+                "Email %s with fields %Xh locally incomplete %s",
                 id.to_string(),
                 required_fields,
                 to_string()
@@ -104,30 +107,26 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             new Imap.MessageSet.uid(uid), remaining_fields, cancellable);
         if (list == null || list.size != 1)
             throw new EngineError.NOT_FOUND("Unable to fetch %s in %s", id.to_string(), engine.to_string());
-        
-        // save to local store
-        email = list[0];
-        assert(email != null);
-        
+
         Gee.Map<Geary.Email, bool> created_or_merged =
             yield engine.local_folder.create_or_merge_email_async(
-                Geary.iterate<Geary.Email>(email).to_array_list(), cancellable);
-        
-        // true means created
+                list, cancellable
+            );
+
+        Geary.Email email = list[0];
         if (created_or_merged.get(email)) {
             Gee.Collection<Geary.EmailIdentifier> ids
                 = Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list();
             engine.replay_notify_email_inserted(ids);
             engine.replay_notify_email_locally_inserted(ids);
         }
-        
-        // if remote_email doesn't fulfill all required, pull from local database, which should now
-        // be able to do all of that
-        if (!email.fields.fulfills(required_fields)) {
-            email = yield engine.local_folder.fetch_email_async(id, required_fields,
-                ImapDB.Folder.ListFlags.NONE, cancellable);
-            assert(email != null);
-        }
+
+        // Finally, pull again from the local database, to get the
+        // full set of required fields, and ensure attachments are
+        // created, if needed.
+        this.email = yield this.engine.local_folder.fetch_email_async(
+            this.id, this.required_fields, NONE, this.cancellable
+        );
     }
 
     public override string describe_state() {

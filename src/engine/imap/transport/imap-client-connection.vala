@@ -539,6 +539,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
     private void on_status_response(StatusResponse status)
         throws ImapError {
+        // Emit this first since the code blow may throw errors
+        received_status_response(status);
+
         if (status.is_completion) {
             Command? sent = get_sent_command(status.tag);
             if (sent == null) {
@@ -551,8 +554,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
             // This could throw an error so call it after cleaning up
             sent.completed(status);
         }
-
-        received_status_response(status);
     }
 
     private void on_server_data(ServerData data)

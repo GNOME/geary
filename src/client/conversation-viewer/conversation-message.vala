@@ -25,6 +25,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
 
+    private const int SHOW_PROGRESS_TIMEOUT_MSEC = 1000;
+    private const int HIDE_PROGRESS_TIMEOUT_MSEC = 1000;
     private const int PULSE_TIMEOUT_MSEC = 250;
 
 
@@ -201,7 +203,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     [GtkChild]
     public Gtk.Grid body_container;
     [GtkChild]
-    public Gtk.ProgressBar body_progress;
+    private Gtk.ProgressBar body_progress;
 
     [GtkChild]
     private Gtk.Popover link_popover;
@@ -212,6 +214,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     [GtkChild]
     private Gtk.InfoBar remote_images_infobar;
+
+    private Gtk.Widget? body_placeholder = null;
 
     // The web_view's context menu
     private Gtk.Menu? context_menu = null;
@@ -443,11 +447,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.web_view.link_activated.connect((link) => {
                 link_activated(link);
             });
-        this.web_view.load_changed.connect(on_load_changed);
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
-        this.web_view.notify["estimated-load-progress"].connect(() => {
-                this.body_progress.set_fraction(this.web_view.estimated_load_progress);
-            });
+        this.web_view.notify["is-loading"].connect(on_is_loading_notify);
         this.web_view.resource_load_started.connect(on_resource_load_started);
         this.web_view.remote_image_load_blocked.connect(() => {
                 this.remote_images_infobar.show();
@@ -459,11 +460,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         this.body_container.set_has_tooltip(true); // Used to show link URLs
         this.body_container.add(this.web_view);
-        this.show_progress_timeout = new Geary.TimeoutManager.seconds(
-            1, () => { this.body_progress.show(); }
+        this.show_progress_timeout = new Geary.TimeoutManager.milliseconds(
+            SHOW_PROGRESS_TIMEOUT_MSEC, this.on_show_progress_timeout
         );
-        this.hide_progress_timeout = new Geary.TimeoutManager.seconds(
-            1, () => { this.body_progress.hide(); }
+        this.hide_progress_timeout = new Geary.TimeoutManager.milliseconds(
+            HIDE_PROGRESS_TIMEOUT_MSEC, this.on_hide_progress_timeout
         );
 
         this.progress_pulse = new Geary.TimeoutManager.milliseconds(
@@ -501,6 +502,100 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         compact_revealer.set_reveal_child(true);
         header_revealer.set_reveal_child(false);
         body_revealer.set_reveal_child(false);
+    }
+
+    /** Shows a panel when an email is being loaded. */
+    public void show_loading_pane() {
+        Components.PlaceholderPane pane = new Components.PlaceholderPane();
+        pane.icon_name = "content-loading-symbolic";
+        pane.title = "";
+        pane.subtitle = "";
+
+        // Don't want to break the announced freeze for 0.13, so just
+        // hope the icon gets the message across for now and replace
+        // them with the ones below for 0.14.
+
+        // Translators: Title label for placeholder when multiple
+        // an error occurs loading a message for display.
+        //pane.title = _("A problem occurred");
+        // Translators: Sub-title label for placeholder when multiple
+        // an error occurs loading a message for display.
+        //pane.subtitle = _(
+        //    "This email cannot currently be displayed"
+        //);
+        this.body_placeholder = pane;
+        this.web_view.hide();
+        this.body_container.add(pane);
+        show_message_body(true);
+        start_progress_pulse();
+    }
+
+    /** Shows an error panel when email loading failed. */
+    public void show_load_error_pane() {
+        Components.PlaceholderPane pane = new Components.PlaceholderPane();
+        pane.icon_name = "network-error-symbolic";
+        pane.title = "";
+        pane.subtitle = "";
+
+        // Don't want to break the announced freeze for 0.13, so just
+        // hope the icon gets the message across for now and replace
+        // them with the ones below for 0.14.
+
+        // Translators: Title label for placeholder when multiple
+        // an error occurs loading a message for display.
+        //pane.title = _("A problem occurred");
+        // Translators: Sub-title label for placeholder when multiple
+        // an error occurs loading a message for display.
+        //pane.subtitle = _(
+        //    "This email cannot currently be displayed"
+        //);
+        this.body_placeholder = pane;
+        this.web_view.hide();
+        this.body_container.add(pane);
+        show_message_body(true);
+        stop_progress_pulse();
+    }
+
+    /** Shows an error panel when offline. */
+    public void show_offline_pane() {
+        show_message_body(true);
+        Components.PlaceholderPane pane = new Components.PlaceholderPane();
+        pane.icon_name = "network-offline-symbolic";
+        pane.title = "";
+        pane.subtitle = "";
+
+        // Don't want to break the announced freeze for 0.13, so just
+        // hope the icon gets the message across for now and replace
+        // them with the ones below for 0.14.
+
+        // // Translators: Title label for placeholder when loading a
+        // // message for display but the account is offline.
+        // pane.title = _("Offline");
+        // // Translators: Sub-title label for placeholder when loading a
+        // // message for display but the account is offline.
+        // pane.subtitle = _(
+        //     "This email will be downloaded when reconnected to the Internet"
+        // );
+        this.body_placeholder = pane;
+        this.web_view.hide();
+        this.body_container.add(pane);
+        show_message_body(true);
+        stop_progress_pulse();
+    }
+
+    /** Shows and initialises the progress meter. */
+    public void start_progress_loading( ) {
+        this.progress_pulse.reset();
+        this.body_progress.fraction = 0.1;
+        this.show_progress_timeout.start();
+        this.hide_progress_timeout.reset();
+    }
+
+    /** Hides the progress meter. */
+    public void stop_progress_loading( ) {
+        this.body_progress.fraction = 1.0;
+        this.show_progress_timeout.reset();
+        this.hide_progress_timeout.start();
     }
 
     /** Shows and starts pulsing the progress meter. */
@@ -557,6 +652,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         throws GLib.Error {
         if (load_cancelled.is_cancelled()) {
             throw new GLib.IOError.CANCELLED("Conversation load cancelled");
+        }
+
+        this.web_view.show();
+        if (this.body_placeholder != null) {
+            this.body_placeholder.hide();
         }
 
         string? body_text = null;
@@ -790,7 +890,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void show_images(bool remember) {
+        start_progress_loading();
         this.is_loading_images = true;
+        this.remote_resources_requested = 0;
+        this.remote_resources_loaded = 0;
         this.web_view.load_remote_images();
         if (remember) {
             flag_remote_images();
@@ -808,13 +911,23 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         revealer.set_transition_type(transition);
     }
 
-    private void on_load_changed(WebKit.LoadEvent load_event) {
-        if (load_event != WebKit.LoadEvent.FINISHED) {
-            this.hide_progress_timeout.reset();
-            this.body_progress.pulse();
+    private void on_show_progress_timeout() {
+        if (this.body_progress.fraction < 0.99) {
+            this.progress_pulse.reset();
+            this.body_progress.show();
+        }
+    }
+
+    private void on_hide_progress_timeout() {
+        this.progress_pulse.reset();
+        this.body_progress.hide();
+    }
+
+    private void on_is_loading_notify() {
+        if (this.web_view.is_loading) {
+            start_progress_loading();
         } else {
-            this.show_progress_timeout.reset();
-            this.hide_progress_timeout.start();
+            stop_progress_loading();
         }
     }
 
@@ -826,33 +939,20 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         // We only want to show the body loading progress meter if we
         // are actually loading some images, so do it here rather than
-        // in on_load_changed.
-        if (this.is_loading_images &&
-            !res.get_uri().has_prefix(ClientWebView.INTERNAL_URL_PREFIX)) {
-            this.show_progress_timeout.start();
-            this.body_progress.pulse();
-            if (!this.web_view.is_loading) {
-                // The initial page load has finished, so we must be
-                // loading a remote image afterwards at the user's
-                // request. We can't rely on the load_changed signal
-                // to stop the timer or estimated-load-progress
-                // changing, so manually manage it here.
-                this.remote_resources_requested++;
-                res.finished.connect(() => {
-                        this.remote_resources_loaded++;
-                        this.body_progress.set_fraction(
-                            (this.remote_resources_loaded /
-                             this.remote_resources_requested) +
-                            this.body_progress.get_pulse_step()
-                        );
-                        if (this.remote_resources_loaded >=
-                            this.remote_resources_requested) {
-                            this.show_progress_timeout.start();
-                            this.hide_progress_timeout.start();
-                        }
-                    });
-            }
-        }
+        // in on_is_loading_notify.
+        this.remote_resources_requested++;
+        res.finished.connect(() => {
+                this.remote_resources_loaded++;
+                this.body_progress.fraction = (
+                    (float) this.remote_resources_loaded /
+                    (float) this.remote_resources_requested
+                );
+
+                if (this.remote_resources_loaded ==
+                    this.remote_resources_requested) {
+                    stop_progress_loading();
+                }
+            });
     }
 
     [GtkCallback]

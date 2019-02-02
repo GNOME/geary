@@ -78,6 +78,8 @@ public class Geary.Imap.Command : BaseObject {
     private Geary.Nonblocking.Semaphore complete_lock =
         new Geary.Nonblocking.Semaphore();
 
+    private bool timed_out = false;
+
     private Geary.Nonblocking.Spinlock? literal_spinlock = null;
     private GLib.Cancellable? literal_cancellable = null;
 
@@ -224,6 +226,14 @@ public class Geary.Imap.Command : BaseObject {
     public async void wait_until_complete(GLib.Cancellable cancellable)
         throws GLib.Error {
         yield this.complete_lock.wait_async(cancellable);
+
+        if (this.timed_out) {
+            throw new ImapError.TIMED_OUT(
+                "%s: No command response was received",
+                to_brief_string()
+            );
+        }
+
         // Since this is part of the public API, perform a strict
         // check on the status code.
         check_status(true);
@@ -353,6 +363,7 @@ public class Geary.Imap.Command : BaseObject {
     }
 
     private void on_response_timeout() {
+        this.timed_out = true;
         cancel_command();
         response_timed_out();
     }

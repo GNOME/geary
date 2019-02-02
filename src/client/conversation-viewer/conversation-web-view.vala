@@ -157,9 +157,6 @@ public class ConversationWebView : ClientWebView {
     }
 
 
-    // XXX Surely since we are doing height-for-width, we should be
-    // overriding get_preferred_height_for_width here, but that
-    // doesn't seem to work.
     public override void get_preferred_height(out int minimum_height,
                                               out int natural_height) {
         // XXX clamp height to something not too outrageous so we

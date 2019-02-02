@@ -38,6 +38,15 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // account.
     private const int EMAIL_TOP_OFFSET = 32;
 
+    // Amount of time to wait after the user took some action that may
+    // be interpreted as marking the email as read before actually
+    // checking
+    private const int MARK_READ_TIMEOUT_MSEC = 250;
+
+    // Amount of pixels that need to be shown of an email's body to
+    // mark it as read
+    private const int MARK_READ_PADDING = 50;
+
 
     // Base class for list rows it the list box
     private abstract class ConversationRow : Gtk.ListBoxRow, Geary.BaseInterface {
@@ -147,14 +156,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             throws GLib.Error {
             this.is_expanded = true;
             update_row_expansion();
-            if (!this.view.message_body_load_started) {
+            if (this.view.message_body_state == NOT_STARTED) {
                 yield this.view.load_body();
             }
-            foreach (ConversationMessage message in this.view) {
-                if (!message.web_view.has_valid_height) {
-                    message.web_view.queue_resize();
-                }
-            };
         }
 
         public override void collapse() {
@@ -305,6 +309,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // Total number of search matches found
     private uint search_matches_found = 0;
 
+    private Geary.TimeoutManager mark_read_timer;
+
 
     /** Keyboard action to scroll the conversation. */
     [Signal (action=true)]
@@ -332,18 +338,21 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             break;
         }
         adj.set_value(value);
+        this.mark_read_timer.start();
     }
 
     /** Keyboard action to shift focus to the next message, if any. */
     [Signal (action=true)]
     public virtual signal void focus_next() {
         this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, 1);
+        this.mark_read_timer.start();
     }
 
     /** Keyboard action to shift focus to the prev message, if any. */
     [Signal (action=true)]
     public virtual signal void focus_prev() {
         this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, -1);
+        this.mark_read_timer.start();
     }
 
     /** Fired when an email view is added to the conversation list. */
@@ -374,18 +383,19 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.avatar_store = avatar_store;
         this.config = config;
 
+        this.mark_read_timer = new Geary.TimeoutManager.milliseconds(
+            MARK_READ_TIMEOUT_MSEC, this.check_mark_read
+        );
+
+        this.selection_mode = NONE;
+
         get_style_context().add_class("background");
         get_style_context().add_class("conversation-listbox");
 
         set_adjustment(adjustment);
-        set_selection_mode(Gtk.SelectionMode.NONE);
         set_sort_func(ConversationListBox.on_sort);
 
-        this.realize.connect(() => {
-                adjustment.value_changed.connect(() => { check_mark_read(); });
-            });
         this.row_activated.connect(on_row_activated);
-        this.size_allocate.connect(() => { check_mark_read(); });
 
         this.conversation.appended.connect(on_conversation_appended);
         this.conversation.trimmed.connect(on_conversation_trimmed);
@@ -399,6 +409,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     public override void destroy() {
         this.cancellable.cancel();
         this.email_rows.clear();
+        this.mark_read_timer.reset();
         base.destroy();
     }
 
@@ -452,6 +463,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.finish_loading.begin(
             query, uninteresting, post_interesting
         );
+
+        this.mark_read_timer.start();
     }
 
     /** Cancels loading the current conversation, if still in progress */
@@ -529,6 +542,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                     load_full_email.begin(row.email.id);
                 }
             });
+    }
+
+    /**
+     * Marks all email with a visible body read.
+     */
+    public void mark_visible_read() {
+        this.mark_read_timer.start();
     }
 
     /**
@@ -727,14 +747,14 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     // Loads full version of an email, adds it to the listbox
     private async void load_full_email(Geary.EmailIdentifier id)
-        throws Error {
+        throws GLib.Error {
+        // Even though it would save a around-trip, don't load the
+        // full email here so that ConverationEmail can handle it if
+        // the full email isn't actually available in the same way as
+        // any other.
         Geary.Email full_email = yield this.email_store.fetch_email_async(
             id,
-            (
-                REQUIRED_FIELDS |
-                ConversationEmail.REQUIRED_FOR_CONSTRUCT |
-                ConversationEmail.REQUIRED_FOR_LOAD
-            ),
+            REQUIRED_FIELDS | ConversationEmail.REQUIRED_FOR_CONSTRUCT,
             Geary.Folder.ListFlags.NONE,
             this.cancellable
         );
@@ -773,6 +793,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         view.body_selection_changed.connect((email, has_selection) => {
                 this.body_selected_view = has_selection ? email : null;
             });
+        view.notify["message-body-state"].connect(
+            on_message_body_state_notify
+        );
 
         ConversationMessage conversation_message = view.primary_message;
         conversation_message.body_container.button_release_event.connect_after((event) => {
@@ -826,22 +849,25 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Finds any currently visible messages, marks them as being read.
      */
     private void check_mark_read() {
-        Gee.ArrayList<Geary.EmailIdentifier> email_ids =
-            new Gee.ArrayList<Geary.EmailIdentifier>();
-
+        Gee.List<Geary.EmailIdentifier> email_ids =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
         Gtk.Adjustment adj = get_adjustment();
         int top_bound = (int) adj.value;
         int bottom_bound = top_bound + (int) adj.page_size;
 
-        email_view_iterator().foreach((email_view) => {
-            const int TEXT_PADDING = 50;
-            ConversationMessage conversation_message = email_view.primary_message;
+        this.foreach((child) => {
             // Don't bother with not-yet-loaded emails since the
             // size of the body will be off, affecting the visibility
             // of emails further down the conversation.
-            if (email_view.email.is_unread().is_certain() &&
-                email_view.message_bodies_loaded &&
-                !email_view.is_manually_read) {
+            EmailRow? row = child as EmailRow;
+            ConversationEmail? view = (row != null) ? row.view : null;
+            Geary.Email? email = (view != null) ? view.email : null;
+            if (row != null &&
+                row.is_expanded &&
+                view.message_body_state == COMPLETED &&
+                !view.is_manually_read &&
+                email.is_unread().is_certain()) {
+                ConversationMessage conversation_message = view.primary_message;
                  int body_top = 0;
                  int body_left = 0;
                  ConversationWebView web_view = conversation_message.web_view;
@@ -857,23 +883,18 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                  // Only mark the email as read if it's actually visible
                  if (body_height > 0 &&
                      body_bottom > top_bound &&
-                     body_top + TEXT_PADDING < bottom_bound) {
-                     email_ids.add(email_view.email.id);
+                     body_top + MARK_READ_PADDING < bottom_bound) {
+                     email_ids.add(view.email.id);
 
                      // Since it can take some time for the new flags
                      // to round-trip back to our signal handlers,
                      // mark as manually read here
-                     email_view.is_manually_read = true;
+                     view.is_manually_read = true;
                  }
              }
-            return true;
         });
 
-        // Only-automark if the window is currently focused
-        Gtk.Window? top_level = get_toplevel() as Gtk.Window;
-        if (top_level != null &&
-            top_level.is_active &&
-            email_ids.size > 0) {
+        if (email_ids.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.UNREAD);
             mark_emails(email_ids, null, flags);
@@ -881,10 +902,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
     private void apply_search_terms(EmailRow row) {
-        if (row.view.message_bodies_loaded) {
+        if (row.view.message_body_state == COMPLETED) {
             this.apply_search_terms_impl.begin(row);
         } else {
-            row.view.notify["message-bodies-loaded"].connect(() => {
+            row.view.notify["message-body-state"].connect(() => {
                     this.apply_search_terms_impl.begin(row);
                 });
         }
@@ -1014,6 +1035,14 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 }
             });
         mark_emails(ids, flag_to_flags(to_add), flag_to_flags(to_remove));
+    }
+
+    private void on_message_body_state_notify(GLib.Object obj,
+                                              GLib.ParamSpec param) {
+        ConversationEmail? view = obj as ConversationEmail;
+        if (view != null && view.message_body_state == COMPLETED) {
+            this.mark_read_timer.start();
+        }
     }
 
     private Geary.EmailFlags? flag_to_flags(Geary.NamedFlag? flag) {

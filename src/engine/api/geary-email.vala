@@ -36,17 +36,24 @@ public class Geary.Email : BaseObject {
     /**
      * Indicates email fields that may change over time.
      *
-     * Currently only one field is mutable: FLAGS. All others never
-     * change once stored in the database.
+     * The mutable fields are: FLAGS -- since these change as for
+     * example messages are marked as read, and PREVIEW -- since the
+     * preview is updated when the full message body is
+     * available. All others never change once stored in the
+     * database.
      */
-    public const Field MUTABLE_FIELDS = Geary.Email.Field.FLAGS;
+    public const Field MUTABLE_FIELDS = (
+        Geary.Email.Field.FLAGS | Geary.Email.Field.PREVIEW
+    );
 
     /**
      * Indicates the email fields required to build an RFC822.Message.
      *
      * @see get_message
      */
-    public const Field REQUIRED_FOR_MESSAGE = Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
+    public const Field REQUIRED_FOR_MESSAGE = (
+        Geary.Email.Field.HEADER | Geary.Email.Field.BODY
+    );
 
     /**
      * Specifies specific parts of an email message.
@@ -235,15 +242,36 @@ public class Geary.Email : BaseObject {
     public Email(Geary.EmailIdentifier id) {
         this.id = id;
     }
-    
+
+    /**
+     * Determines if this message is unread from its flags.
+     *
+     * If {@link email_flags} is not null, returns the value of {@link
+     * EmailFlags.is_unread}, otherwise returns {@link
+     * Trillian.UNKNOWN}.
+     */
     public inline Trillian is_unread() {
         return email_flags != null ? Trillian.from_boolean(email_flags.is_unread()) : Trillian.UNKNOWN;
     }
 
+    /**
+     * Determines if this message is flagged from its flags.
+     *
+     * If {@link email_flags} is not null, returns the value of {@link
+     * EmailFlags.is_flagged}, otherwise returns {@link
+     * Trillian.UNKNOWN}.
+     */
     public inline Trillian is_flagged() {
         return email_flags != null ? Trillian.from_boolean(email_flags.is_flagged()) : Trillian.UNKNOWN;
     }
-    
+
+    /**
+     * Determines if this message is flagged from its flags.
+     *
+     * If {@link email_flags} is not null, returns the value of {@link
+     * EmailFlags.load_remote_images}, otherwise returns {@link
+     * Trillian.UNKNOWN}.
+     */
     public inline Trillian load_remote_images() {
         return email_flags != null ? Trillian.from_boolean(email_flags.load_remote_images()) : Trillian.UNKNOWN;
     }
