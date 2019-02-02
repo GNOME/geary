@@ -50,7 +50,7 @@ public class Geary.Imap.ClientSession : BaseObject {
      * new messages or status updates, this is a useful timeout for
      * polling for changes.
      */
-    public const uint AGGRESSIVE_KEEPALIVE_SEC = 5 * 60;
+    public const uint AGGRESSIVE_KEEPALIVE_SEC = 2 * 60;
 
     /**
      * Default keep-alive interval in the Selected state.
