@@ -9,9 +9,6 @@
 private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
 
 
-    private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? special_map = null;
-
-
     public static void setup_service(ServiceInformation service) {
         switch (service.protocol) {
         case Protocol.IMAP:
@@ -34,33 +31,26 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
                         Endpoint incoming_remote,
                         Endpoint outgoing_remote) {
         base(config, local, incoming_remote, outgoing_remote);
-
-        if (special_map == null) {
-            special_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>();
-
-            FolderRoot root = this.local.imap_folder_root;
-            special_map.set(
-                this.local.imap_folder_root.inbox, Geary.SpecialFolderType.INBOX
-            );
-            special_map.set(
-                root.get_child("Sent"), Geary.SpecialFolderType.SENT
-            );
-            special_map.set(
-                root.get_child("Draft"), Geary.SpecialFolderType.DRAFTS
-            );
-            special_map.set(
-                root.get_child("Bulk Mail"), Geary.SpecialFolderType.SPAM
-            );
-            special_map.set(
-                root.get_child("Trash"), Geary.SpecialFolderType.TRASH
-            );
-        }
     }
 
     protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {
-        Geary.FolderPath path = local_folder.get_path();
-        SpecialFolderType special_folder_type = special_map.has_key(path) ? special_map.get(path)
-            : Geary.SpecialFolderType.NONE;
-        return new YahooFolder(this, local_folder, special_folder_type);
+        FolderPath path = local_folder.get_path();
+        SpecialFolderType type;
+        if (Imap.MailboxSpecifier.folder_path_is_inbox(path)) {
+            type = SpecialFolderType.INBOX;
+        } else {
+            // Despite Yahoo not advertising that it supports
+            // SPECIAL-USE via its CAPABILITIES, it lists the
+            // appropriate attributes in LIST results anyway, so we
+            // can just consult that. :|
+            type = local_folder.get_properties().attrs.get_special_folder_type();
+            // There can be only one Inbox
+            if (type == SpecialFolderType.INBOX) {
+                type = SpecialFolderType.NONE;
+            }
+        }
+
+        return new YahooFolder(this, local_folder, type);
     }
+
 }
