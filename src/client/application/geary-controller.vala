@@ -2579,9 +2579,10 @@ public class GearyController : Geary.BaseObject {
 
     private void on_conversation_viewer_email_added(ConversationEmail view) {
         view.attachments_activated.connect(on_attachments_activated);
+        view.forward_message.connect(on_forward_message);
+        view.load_error.connect(on_email_load_error);
         view.reply_to_message.connect(on_reply_to_message);
         view.reply_all_message.connect(on_reply_all_message);
-        view.forward_message.connect(on_forward_message);
 
         Geary.App.Conversation conversation = main_window.conversation_viewer.current_list.conversation;
         bool in_current_folder = (conversation.is_in_base_folder(view.email.id) &&
@@ -3015,6 +3016,18 @@ public class GearyController : Geary.BaseObject {
                 Geary.ProblemType.GENERIC_ERROR,
                 account,
                 account.incoming,
+                err
+            )
+        );
+    }
+
+    private void on_email_load_error(ConversationEmail view, GLib.Error err) {
+        // XXX determine the problem better here
+        report_problem(
+            new Geary.ServiceProblemReport(
+                Geary.ProblemType.GENERIC_ERROR,
+                this.current_account.information,
+                this.current_account.information.incoming,
                 err
             )
         );

@@ -376,6 +376,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private bool shift_key_down;
 
 
+    /** Fired when an error occurs loading the message body. */
+    public signal void load_error(GLib.Error err);
+
     /** Fired when the user clicks "reply" in the message menu. */
     public signal void reply_to_message();
 
@@ -610,7 +613,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 this.fetch_remote_body.begin();
             } catch (GLib.Error err) {
                 this.body_loading_timeout.reset();
-                handle_load_failure();
+                handle_load_failure(err);
                 throw err;
             }
         }
@@ -619,7 +622,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             try {
                 yield update_body();
             } catch (GLib.Error err) {
-                handle_load_failure();
+                handle_load_failure(err);
                 throw err;
             }
             yield this.message_bodies_loaded_lock.wait_async(
@@ -776,7 +779,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 // All good
             } catch (GLib.Error err) {
                 debug("Remote message download failed: %s", err.message);
-                handle_load_failure();
+                handle_load_failure(err);
             }
 
             this.body_loading_timeout.reset();
@@ -787,7 +790,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                     yield update_body();
                 } catch (GLib.Error err) {
                     debug("Remote message update failed: %s", err.message);
-                    handle_load_failure();
+                    handle_load_failure(err);
                 }
             }
         } else {
@@ -914,7 +917,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         return selected;
     }
 
-    private void handle_load_failure() {
+    private void handle_load_failure(GLib.Error err) {
+        load_error(err);
         this.message_body_state = FAILED;
         this.primary_message.show_load_error_pane();
     }
