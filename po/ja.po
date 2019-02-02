@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2019-02-01 17:59+0000\n"
-"PO-Revision-Date: 2019-02-02 06:10+0000\n"
+"PO-Revision-Date: 2019-02-02 19:48+0000\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -469,7 +469,7 @@ msgstr "移動(_M)"
 
 #: ../src/client/application/geary-controller.vala:489
 msgid "Compose new message (Ctrl+N, N)"
-msgstr ""
+msgstr "新規メッセージを作成(Ctrl+N, N)"
 
 #: ../src/client/application/geary-controller.vala:493
 #: ../ui/conversation-email-menus.ui.h:1
@@ -508,16 +508,16 @@ msgstr "ごみ箱を空にする(_T)…"
 #. No callback is connected, since we bind the toggle button to the search bar visibility
 #: ../src/client/application/geary-controller.vala:571
 msgid "Toggle search bar"
-msgstr ""
+msgstr "アカウント内を検索"
 
 #. No callback is connected, since we bind the toggle button to the find bar visibility
 #: ../src/client/application/geary-controller.vala:576
 msgid "Toggle find bar"
-msgstr ""
+msgstr "スレッド内を検索"
 
 #: ../src/client/application/geary-controller.vala:754
 msgid "Unable to store server trust exception"
-msgstr ""
+msgstr "サーバーの信頼に関する例外を保存できません"
 
 #: ../src/client/application/geary-controller.vala:989
 msgid "Your settings are insecure"
@@ -538,38 +538,43 @@ msgstr "継続(_N)"
 
 #: ../src/client/application/geary-controller.vala:1038
 msgid "Error connecting to the server"
-msgstr ""
+msgstr "サーバーへの接続時にエラーが発生しました"
 
 #: ../src/client/application/geary-controller.vala:1039
 msgid ""
 "Geary encountered an error while connecting to the server.  Please try again "
 "in a few moments."
 msgstr ""
+"サーバーへの接続時にエラーが発生しました。しばらく時間をあけてから再試行してください。"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
 #: ../src/client/application/geary-controller.vala:1076
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
-msgstr ""
+msgstr "メール送信時にエラーが発生しました"
 
 #: ../src/client/application/geary-controller.vala:1077
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
 msgstr ""
+"メール送信時にエラーが発生しました。問題を解決できない場合は、メールを手動で"
+"送信済みトレイから削除してください。"
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
 #: ../src/client/application/geary-controller.vala:1081
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
-msgstr ""
+msgstr "送信メール保存時にエラーが発生しました"
 
 #: ../src/client/application/geary-controller.vala:1082
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
 msgstr ""
+"メールを送信済みトレイに保存するときにエラーが発生しました。削除するまで"
+"このメッセージを送信済みトレイに表示します。"
 
 #: ../src/client/application/geary-controller.vala:1151
 msgid "Labels"
@@ -581,7 +586,7 @@ msgstr "ラベル"
 #: ../src/client/application/geary-controller.vala:1163
 #, c-format
 msgid "Unable to open the database for %s"
-msgstr ""
+msgstr "%s のデータベースを開けません"
 
 #: ../src/client/application/geary-controller.vala:1164
 #, c-format
@@ -596,6 +601,16 @@ msgid ""
 "Rebuilding the database will destroy all local email and its attachments. "
 "<b>The mail on the your server will not be affected.</b>"
 msgstr ""
+"このアカウントのローカルメールデータベースを開くときにエラーが発生しました。"
+"このディレクトリのデータベースファイルはおそらく破損しています:\n"
+"\n"
+"%s\n"
+"\n"
+"Geary はデータベースを再構築し、サーバーと再同期するか終了することができま"
+"す。\n"
+"\n"
+"データベースを再構築すると、すべてのローカルメールと添付ファイルが破棄されま"
+"す。<b>サーバー上のメールは影響を受けません。</b>"
 
 #: ../src/client/application/geary-controller.vala:1166
 msgid "_Rebuild"
@@ -641,6 +656,12 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
+"このアカウントのローカルメールデータベースを開くときにエラーが発生しました。"
+"おそらくファイルのアクセス権に問題があります。\n"
+"\n"
+"このディレクトリのすべてのファイルの読み取り/書き込み権限を確認してください:\n"
+"\n"
+"%s"
 
 #: ../src/client/application/geary-controller.vala:1209
 msgid ""
@@ -650,6 +671,11 @@ msgid ""
 "\n"
 "Please install the latest version of Geary and try again."
 msgstr ""
+"ローカルメールデータベースは新しいバージョンの Geary 用にフォーマットされてい"
+"ます。残念ですが、このバージョンの Geary で動作するようデータベースを“ロール"
+"バック”することはできません。\n"
+"\n"
+"Geary の最新バージョンをインストールして再試行してください。"
 
 #: ../src/client/application/geary-controller.vala:1220
 msgid ""
@@ -658,12 +684,14 @@ msgid ""
 "\n"
 "Please check your network connection and restart Geary."
 msgstr ""
+"ローカルアカウントを開くときにエラーが発生しました。おそらく接続の問題による"
+"ものです。\n"
+"\n"
+"ネットワーク接続を確認し、Geary を再起動してください。"
 
 #: ../src/client/application/geary-controller.vala:2016
-#, fuzzy
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo move (Ctrl+Z)"
-msgstr "下線(Ctrl+U)"
+msgstr "移動を元に戻す(Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2026
 msgid "Are you sure you want to open these attachments?"
@@ -705,78 +733,66 @@ msgstr "開いた下書きメッセージを閉じますか?"
 #: ../src/client/application/geary-controller.vala:2507
 #, c-format
 msgid "Empty all email from your %s folder?"
-msgstr ""
+msgstr "%s フォルダーのすべてのメールを空にしますか?"
 
 #: ../src/client/application/geary-controller.vala:2508
 msgid "This removes the email from Geary and your email server."
-msgstr ""
+msgstr "メールを Geary とメールサーバーから削除します。"
 
 #: ../src/client/application/geary-controller.vala:2509
-#, fuzzy
-#| msgid "\"%s\" could not be found."
 msgid "This cannot be undone."
-msgstr "\"%s\" は見つかりませんでした"
+msgstr "これは元に戻すことができません。"
 
 #: ../src/client/application/geary-controller.vala:2510
 #, c-format
 msgid "Empty %s"
-msgstr ""
+msgstr "%s を空にする"
 
 #: ../src/client/application/geary-controller.vala:2527
 #, c-format
 msgid "Error emptying %s"
-msgstr ""
+msgstr "%s を空にする際にエラーが発生しました"
 
 #: ../src/client/application/geary-controller.vala:2557
-#, fuzzy
-#| msgid "Do you want to discard the unsaved message?"
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
-msgstr[0] "未保存のメッセージを破棄しますか?"
+msgstr[0] "このメッセージを完全に削除しますか?"
 
 #: ../src/client/application/geary-controller.vala:2559
-#, fuzzy
-#| msgid "_Delete"
 msgid "Delete"
-msgstr "削除(_D)"
+msgstr "削除"
 
 #: ../src/client/application/geary-controller.vala:2591
-#, fuzzy
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo archive (Ctrl+Z)"
-msgstr "下線(Ctrl+U)"
+msgstr "アーカイブから戻す(Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2606
-#, fuzzy
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo trash (Ctrl+Z)"
-msgstr "下線(Ctrl+U)"
+msgstr "ごみ箱から戻す(Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2660
-#, fuzzy
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo (Ctrl+Z)"
-msgstr "下線(Ctrl+U)"
+msgstr "元に戻す(Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2785
 msgid "Failed to open default text editor."
-msgstr "テキストエディターの起動に失敗しました"
+msgstr "デフォルトのテキストエディターの起動に失敗しました。"
 
 #: ../src/client/components/main-window.vala:417
 #, c-format
 msgid "%s (%d)"
-msgstr ""
+msgstr "%s (%d)"
 
 #: ../src/client/components/search-bar.vala:8
 #: ../src/client/folder-list/folder-list-search-branch.vala:38
 #: ../src/engine/api/geary-special-folder-type.vala:51
 msgid "Search"
-msgstr ""
+msgstr "検索"
 
 #. Search entry.
 #: ../src/client/components/search-bar.vala:23
 msgid "Search all mail in account for keywords (Ctrl+S)"
-msgstr ""
+msgstr "アカウント内のすべてのメールをキーワードで検索(Ctrl+S)"
 
 #: ../src/client/components/search-bar.vala:100
 #, c-format
@@ -787,7 +803,7 @@ msgstr ""
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
-msgstr ""
+msgstr "アカウント %s を検索"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
@@ -809,7 +825,7 @@ msgstr "このアプリケーションについて(_A)"
 
 #: ../src/client/components/stock.vala:23
 msgid "_Close"
-msgstr "閉じる(_D)"
+msgstr "閉じる(_C)"
 
 #: ../src/client/components/stock.vala:24
 msgid "_Discard"
@@ -845,33 +861,31 @@ msgstr "保持(_K)"
 
 #: ../src/client/composer/composer-link-popover.vala:150
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
-msgstr ""
+msgstr "リンク URL の書式が間違っています (例: http://example.com )"
 
 #: ../src/client/composer/composer-link-popover.vala:157
 msgid "Invalid link URL"
-msgstr ""
+msgstr "無効なリンク URL"
 
 #: ../src/client/composer/composer-link-popover.vala:157
-#, fuzzy
-#| msgid "Email address:"
 msgid "Invalid email address"
-msgstr "メールアドレス:"
+msgstr "無効なメールアドレス"
 
 #: ../src/client/composer/composer-widget.vala:154
 msgid "Saved"
-msgstr ""
+msgstr "保存済み"
 
 #: ../src/client/composer/composer-widget.vala:155
 msgid "Saving"
-msgstr ""
+msgstr "保存中"
 
 #: ../src/client/composer/composer-widget.vala:156
 msgid "Error saving"
-msgstr ""
+msgstr "保存エラー"
 
 #: ../src/client/composer/composer-widget.vala:157
 msgid "Press Backspace to delete quote"
-msgstr ""
+msgstr "Backspace を押すと引用を削除できます"
 
 #: ../src/client/composer/composer-widget.vala:158
 msgid "New Message"
@@ -894,25 +908,24 @@ msgstr "このメッセージを破棄しますか?"
 
 #: ../src/client/composer/composer-widget.vala:1235
 msgid "Send message with an empty subject and body?"
-msgstr ""
+msgstr "メッセージを件名と本文なしで送信しますか?"
 
 #: ../src/client/composer/composer-widget.vala:1237
 msgid "Send message with an empty subject?"
-msgstr ""
+msgstr "メッセージを件名なしで送信しますか?"
 
 #: ../src/client/composer/composer-widget.vala:1239
 msgid "Send message with an empty body?"
-msgstr ""
+msgstr "メッセージを本文なしで送信しますか?"
 
 #: ../src/client/composer/composer-widget.vala:1243
 msgid "Send message without an attachment?"
-msgstr ""
+msgstr "メッセージを添付ファイルなしで送信しますか?"
 
 #: ../src/client/composer/composer-widget.vala:1544
-#, fuzzy, c-format
-#| msgid "\"%s\" already attached for delivery."
+#, c-format
 msgid "“%s” already attached for delivery."
-msgstr "\"%s\" は既に添付されています"
+msgstr "“%s”はすでに添付されています。"
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #. Translators: The first argument will be a
@@ -923,7 +936,7 @@ msgstr "\"%s\" は既に添付されています"
 #: ../src/client/conversation-viewer/conversation-email.vala:136
 #, c-format
 msgid "%s (%s)"
-msgstr ""
+msgstr "%s (%s)"
 
 #: ../src/client/composer/composer-widget.vala:1589
 #, c-format
@@ -963,7 +976,7 @@ msgstr "Bcc: "
 
 #: ../src/client/composer/composer-widget.vala:1684
 msgid "Reply-To: "
-msgstr "返信先: "
+msgstr "Reply-To: "
 
 #: ../src/client/composer/composer-widget.vala:1816
 msgid "Select Color"
@@ -975,7 +988,7 @@ msgstr "色を選択"
 #: ../src/client/composer/composer-widget.vala:2016
 #, c-format
 msgid "%1$s via %2$s"
-msgstr ""
+msgstr "%1$s (%2$s を通して使用)"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
@@ -991,15 +1004,15 @@ msgstr "画像"
 
 #: ../src/client/composer/spell-check-popover.vala:117
 msgid "Remove this language from the preferred list"
-msgstr ""
+msgstr "この言語を優先リストから削除"
 
 #: ../src/client/composer/spell-check-popover.vala:121
 msgid "Add this language to the preferred list"
-msgstr ""
+msgstr "この言語を優先リストに追加"
 
 #: ../src/client/composer/spell-check-popover.vala:217
 msgid "Search for more languages"
-msgstr ""
+msgstr "言語を検索"
 
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
@@ -1009,37 +1022,35 @@ msgstr "自分"
 #. attachments with unknown file types.
 #: ../src/client/conversation-viewer/conversation-email.vala:122
 msgid "Unknown"
-msgstr ""
+msgstr "不明"
 
 #. Preview headers
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
 #: ../src/client/conversation-viewer/conversation-message.vala:332
 msgid "No sender"
-msgstr ""
+msgstr "送信者なし"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the header preview for a message.
 #: ../src/client/conversation-viewer/conversation-message.vala:590
 msgid ", "
-msgstr ""
+msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
 #: ../src/client/conversation-viewer/conversation-message.vala:689
 msgid "Image"
-msgstr ""
+msgstr "画像"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:74
-#, fuzzy
-#| msgid "No conversations selected."
 msgid "No conversations selected"
-msgstr "メッセージが選択されていません"
+msgstr "スレッドを選択していません"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:76
 msgid "Selecting a conversation from the list will display it here"
-msgstr ""
+msgstr "リストからスレッドを選択すると、ここに表示します"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:81
 msgid "Multiple conversations selected"
@@ -1060,7 +1071,7 @@ msgstr "このフォルダーにはスレッドがありません"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:97
 msgid "Your search returned no results, try refining your search terms"
-msgstr ""
+msgstr "検索結果がないため条件を変えて再検索してください"
 
 #: ../src/client/dialogs/attachment-dialog.vala:28
 #: ../src/client/dialogs/attachment-dialog.vala:30
@@ -1075,81 +1086,86 @@ msgstr "添付(_A)"
 #: ../src/client/dialogs/certificate-warning-dialog.vala:33
 #, c-format
 msgid "Untrusted Connection: %s"
-msgstr ""
+msgstr "信頼できない接続: %s"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:36
 #, c-format
 msgid "The identity of the %s mail server at %s:%u could not be verified."
-msgstr ""
+msgstr "%s メールサーバー (%s:%u) の ID を確認できませんでした。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:44
 msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
+"“このサーバーを信頼する”、“常にこのサーバーを信頼する”を選択すると、ユーザー名"
+"とパスワードが安全に送信されない可能性があります。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:52
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
 msgstr ""
+"“このサーバーを信頼しない”を選択すると、Geary はこのサーバーにアクセスしません。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:54
 msgid "Geary will not add or update this email account."
 msgstr ""
+"Geary はこのメールアカウントの追加または更新をしません。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:59
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
 msgstr ""
+"“このサーバーを信頼しない”を選択すると、Geary はこのアカウントへのアクセスを止めます。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:61
 msgid "Geary will exit if you have no other open email accounts."
-msgstr ""
+msgstr "他に開いているメールアカウントがなければ終了します。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:66
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
 msgstr ""
+"これらの問題について質問がある場合は、システム管理者またはメールサービスプロ"
+"バイダーに問い合わせてください。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:73
 msgid "The server’s certificate is not signed by a known authority"
-msgstr ""
+msgstr "サーバーの証明書が既知の認証局によって署名されていません"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s identity does not match the identity in the certificate"
-msgstr ""
+msgstr "サーバーの ID が証明書の ID と一致しません"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:79
 msgid "The server’s certificate has expired"
-msgstr ""
+msgstr "サーバーの証明書が期限切れです"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:82
 msgid "The server’s certificate has not been activated"
-msgstr ""
+msgstr "サーバーの証明書が有効になっていません"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:85
 msgid "The server’s certificate has been revoked and is now invalid"
-msgstr ""
+msgstr "このサーバーの証明書は失効しているため現在無効です"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:88
 msgid "The server’s certificate is considered insecure"
-msgstr ""
+msgstr "このサーバーの証明書は安全ではないと思われます"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:91
 msgid "An error has occurred processing the server’s certificate"
-msgstr ""
+msgstr "サーバーの証明書を処理中にエラーが発生しました"
 
 #. We can't keep these in the glade file, because Gnome doesn't want markup in translatable
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-#, fuzzy
-#| msgid "Please enter your email password"
 msgid "Geary requires your email password to continue"
-msgstr "パスワードを入力してください"
+msgstr "続けるにはメールのパスワードが必要です"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1171,7 +1187,7 @@ msgstr[0] "%d 件の未読"
 #: ../src/client/folder-list/folder-list-folder-entry.vala:45
 #, c-format
 msgid "%s, %s"
-msgstr ""
+msgstr "%s, %s"
 
 #: ../src/client/folder-list/folder-list-inboxes-branch.vala:14
 msgid "Inboxes"
@@ -1209,6 +1225,8 @@ msgid_plural ""
 "%s\n"
 "(%d other new messages for %s)"
 msgstr[0] ""
+"%s\n"
+"(他に %d 件の新着メッセージ %s)"
 
 #: ../src/client/notification/libnotify.vala:165
 msgid "Open"
@@ -1383,7 +1401,7 @@ msgstr "送信トレイ"
 
 #: ../src/engine/api/geary-special-folder-type.vala:54
 msgid "Archive"
-msgstr ""
+msgstr "アーカイブ"
 
 #: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:29
 msgid "None"
@@ -1403,12 +1421,9 @@ msgstr "なし"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: ../src/engine/imap-db/imap-db-account.vala:99
-#, fuzzy
-#| msgid "Save A_ttachment..."
-#| msgid_plural "Save All A_ttachments..."
 msgctxt "Search operator"
 msgid "attachment"
-msgstr "添付ファイルを保存(_T)"
+msgstr ""
 
 #. Can be typed in the search box like
 #. "bcc:johndoe@example.com" to find messages bcc'd to a
@@ -1444,11 +1459,9 @@ msgstr ""
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: ../src/engine/imap-db/imap-db-account.vala:125
-#, fuzzy
-#| msgid "Bcc:"
 msgctxt "Search operator"
 msgid "cc"
-msgstr "Bcc:"
+msgstr ""
 
 #. Can be typed in the search box like
 #. "from:johndoe@example.com" to find messages from a
@@ -1483,11 +1496,9 @@ msgstr ""
 #. also match the translation in "search.page" of the Geary
 #. User Guide.
 #: ../src/engine/imap-db/imap-db-account.vala:150
-#, fuzzy
-#| msgid "Subject:"
 msgctxt "Search operator"
 msgid "subject"
-msgstr "件名:"
+msgstr ""
 
 #. Can be typed in the search box like
 #. "to:johndoe@example.com" to find messages received by a
@@ -1548,11 +1559,9 @@ msgstr ""
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: ../src/engine/imap-db/imap-db-account.vala:215
-#, fuzzy
-#| msgid "Starred"
 msgctxt "'is:' search operator value"
 msgid "starred"
-msgstr "スター"
+msgstr ""
 
 #. Can be typed in the search box after "is:" i.e.:
 #. "is:unread". Matches conversations that are flagged unread.
@@ -1571,10 +1580,8 @@ msgstr ""
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:626
-#, fuzzy
-#| msgid "Drafts"
 msgid "Drafts | Draft"
-msgstr "下書き"
+msgstr ""
 
 #. List of general possible folder names to match for the
 #. Sent mailbox. Separate names using a vertical bar and
@@ -1612,11 +1619,9 @@ msgstr ""
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:665
-#, fuzzy
-#| msgid "_Delete"
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
-msgstr "削除(_D)"
+msgstr ""
 
 #. List of general possible folder names to match for the
 #. Archive mailbox. Separate names using a vertical bar
@@ -1681,19 +1686,19 @@ msgstr "宛先: %s\n"
 #: ../src/engine/rfc822/rfc822-utils.vala:294
 #, c-format
 msgid "Cc: %s\n"
-msgstr ""
+msgstr "Cc: %s\n"
 
 #: ../ui/account_cannot_remove.glade.h:1
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
 msgstr ""
-"<span weight=\"bold\" size=\"larger\">アカウントを削除できません</span>"
+"<span weight=\"bold\" size=\"larger\">アカウントを削除できません</span> "
 
 #: ../ui/account_cannot_remove.glade.h:2
 msgid ""
 "A composer window associated with this account is currently open. Send or "
 "discard the message and try again."
 msgstr ""
-"アカウントと関連づけられた作成画面が既に開いています. メッセージを送信するか"
+"アカウントと関連づけられた作成画面がすでに開いています. メッセージを送信するか"
 "破棄してからもう一度試してください"
 
 #: ../ui/account_list.glade.h:1
@@ -1714,41 +1719,35 @@ msgstr "アカウントを検証しています..."
 
 #: ../ui/certificate_warning_dialog.glade.h:1
 msgid "Untrusted Connection"
-msgstr ""
+msgstr "信頼できない接続"
 
 #: ../ui/certificate_warning_dialog.glade.h:2
 msgid "_Always Trust This Server"
-msgstr ""
+msgstr "常にこのサーバーを信頼する(_A)"
 
 #: ../ui/certificate_warning_dialog.glade.h:3
 msgid "_Trust This Server"
-msgstr ""
+msgstr "このサーバーを信頼する(_T)"
 
 #: ../ui/certificate_warning_dialog.glade.h:4
 msgid "_Don’t Trust This Server"
-msgstr ""
+msgstr "このサーバーを信頼しない(_D)"
 
 #: ../ui/composer-headerbar.ui.h:1
-#, fuzzy
-#| msgid "Italic (Ctrl+I)"
 msgid "Detach (Ctrl+D)"
-msgstr "斜体(Ctrl+I)"
+msgstr "分離(Ctrl+D)"
 
 #: ../ui/composer-headerbar.ui.h:2
-#, fuzzy
-#| msgid "_Attach File"
 msgid "Attach File (Ctrl+T)"
-msgstr "ファイルを添付(_A)"
+msgstr "ファイルを添付(Ctrl+T)"
 
 #: ../ui/composer-headerbar.ui.h:3
 msgid "Include Original Attachments"
-msgstr ""
+msgstr "元の添付ファイルを含める"
 
 #: ../ui/composer-headerbar.ui.h:4
-#, fuzzy
-#| msgid "Bold (Ctrl+B)"
 msgid "Send (Ctrl+Enter)"
-msgstr "太字(Ctrl+B)"
+msgstr "送信(Ctrl+Enter)"
 
 #: ../ui/composer-headerbar.ui.h:5
 msgid "_Send"
@@ -1756,33 +1755,33 @@ msgstr "送信(_S)"
 
 #: ../ui/composer-headerbar.ui.h:6
 msgid "Discard and Close"
-msgstr ""
+msgstr "破棄して閉じる"
 
 #: ../ui/composer-headerbar.ui.h:7
 msgid "Save and Close"
-msgstr ""
+msgstr "保存して閉じる"
 
 #. Note that this button and the Update button will never be shown at the same time to the user.
 #: ../ui/composer-link-popover.ui.h:2
 msgid "Insert the new link with this URL"
-msgstr ""
+msgstr "この URL の新規リンクを挿入"
 
 #: ../ui/composer-link-popover.ui.h:3
 msgid "Link URL"
-msgstr ""
+msgstr "リンクの URL"
 
 #. Note that this button and the Insert button will never be shown at the same time to the user.
 #: ../ui/composer-link-popover.ui.h:5
 msgid "Update this link’s URL"
-msgstr ""
+msgstr "このリンクの URL を更新"
 
 #: ../ui/composer-link-popover.ui.h:6
 msgid "Delete this link"
-msgstr ""
+msgstr "このリンクを削除"
 
 #: ../ui/composer-link-popover.ui.h:7
 msgid "Open this link"
-msgstr ""
+msgstr "このリンクを開く"
 
 #: ../ui/composer-menus.ui.h:1
 msgid "S_ans Serif"
@@ -1818,7 +1817,7 @@ msgstr "リッチテキスト(_R)"
 
 #: ../ui/composer-menus.ui.h:9
 msgid "Show Extended Fields"
-msgstr ""
+msgstr "拡張フィールドを表示"
 
 #: ../ui/composer-menus.ui.h:10
 msgid "_Undo"
@@ -1850,10 +1849,8 @@ msgid "Select _All"
 msgstr "すべて選択(_A)"
 
 #: ../ui/composer-menus.ui.h:17 ../ui/conversation-message-menus.ui.h:9
-#, fuzzy
-#| msgid "_Inspect"
 msgid "_Inspect…"
-msgstr "検証(_I)"
+msgstr "検証(_I)…"
 
 #. Address(es) e-mail is to be sent to
 #: ../ui/composer-widget.ui.h:2
@@ -1874,7 +1871,7 @@ msgstr "Bcc(_B)"
 
 #: ../ui/composer-widget.ui.h:6
 msgid "_Reply-To"
-msgstr "返信先(_R)"
+msgstr "Reply-To(_R)"
 
 #. Geary account mail will be sent from
 #: ../ui/composer-widget.ui.h:8
@@ -1890,14 +1887,12 @@ msgid "To add them as attachments"
 msgstr "添付ファイルとして追加"
 
 #: ../ui/composer-widget.ui.h:11
-#, fuzzy
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo last edit (Ctrl+Z)"
-msgstr "下線(Ctrl+U)"
+msgstr "元に戻す(Ctrl+Z)"
 
 #: ../ui/composer-widget.ui.h:12
 msgid "Redo last edit  (Ctrl+Shift+Z)"
-msgstr ""
+msgstr "やり直す(Ctrl+Shift+Z)"
 
 #: ../ui/composer-widget.ui.h:13
 msgid "Bold (Ctrl+B)"
@@ -1917,41 +1912,31 @@ msgstr "取り消し線(Ctrl+K)"
 
 #: ../ui/composer-widget.ui.h:17
 msgid "Quote text  (Ctrl+])"
-msgstr ""
+msgstr "引用(Ctrl+])"
 
 #: ../ui/composer-widget.ui.h:18
-#, fuzzy
-#| msgid "Underline (Ctrl+U)"
 msgid "Unquote text  (Ctrl+[)"
-msgstr "下線(Ctrl+U)"
+msgstr "引用解除(Ctrl+[)"
 
 #: ../ui/composer-widget.ui.h:19
 msgid "Insert or update selection link (Ctrl+L)"
-msgstr ""
+msgstr "選択部分にリンクを挿入/更新(Ctrl+L)"
 
 #: ../ui/composer-widget.ui.h:20
-#, fuzzy
-#| msgid "Underline (Ctrl+U)"
 msgid "Insert an image (Ctrl+G)"
-msgstr "下線(Ctrl+U)"
+msgstr "画像を挿入(Ctrl+G)"
 
 #: ../ui/composer-widget.ui.h:21
-#, fuzzy
-#| msgid "Remove formatting (Ctrl+Space)"
 msgid "Remove selection formatting (Ctrl+Space)"
-msgstr "書式をリセット(Ctrl+Space)"
+msgstr "選択部分の書式を削除(Ctrl+Space)"
 
 #: ../ui/composer-widget.ui.h:22
-#, fuzzy
-#| msgid "Enable _spell checking"
 msgid "Select spell checking languages"
-msgstr "スペルチェックを有効(_S)"
+msgstr "スペルチェックする言語を選択"
 
 #: ../ui/conversation-email.ui.h:1
-#, fuzzy
-#| msgid "Save All A_ttachments..."
 msgid "Save all attachments"
-msgstr "全ての添付ファイルを保存(_T)"
+msgstr "すべての添付ファイルを保存"
 
 #. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
 #: ../ui/conversation-email.ui.h:3
@@ -2062,7 +2047,7 @@ msgstr ""
 
 #: ../ui/conversation-message.ui.h:3
 msgid "Preview body text."
-msgstr ""
+msgstr "本文をプレビューします。"
 
 #: ../ui/conversation-message.ui.h:4
 msgid "Sent by:"
@@ -2114,15 +2099,15 @@ msgstr ""
 
 #: ../ui/conversation-message.ui.h:16
 msgid "Deceptive link found"
-msgstr ""
+msgstr "虚偽リンクが見つかりました"
 
 #: ../ui/conversation-message.ui.h:17
 msgid "The email sender may be leading you to the wrong web site."
-msgstr ""
+msgstr "このメールの送信者は間違ったウェブサイトに誘導している可能性があります。"
 
 #: ../ui/conversation-message.ui.h:18
 msgid "If unsure, contact the sender and ask before continuing."
-msgstr ""
+msgstr "不明な場合は、続行する前に送信者に連絡して確認してください。"
 
 #: ../ui/conversation-viewer.ui.h:1
 msgid "Find in conversation"
@@ -2130,11 +2115,11 @@ msgstr "スレッド内を検索"
 
 #: ../ui/conversation-viewer.ui.h:2
 msgid "Find the previous occurrence of the search string."
-msgstr ""
+msgstr "検索文字列が前に出現した場所を見つけます。"
 
 #: ../ui/conversation-viewer.ui.h:3
 msgid "Find the next occurrence of the search string."
-msgstr ""
+msgstr "検索文字列が次に出現する場所を見つけます。"
 
 #: ../ui/edit_alternate_emails.glade.h:1
 msgid "Remove email address"
@@ -2154,19 +2139,19 @@ msgstr "更新(_U)"
 
 #: ../ui/find_bar.glade.h:1
 msgid "Find:"
-msgstr ""
+msgstr "検索:"
 
 #: ../ui/find_bar.glade.h:2
 msgid "_Previous"
-msgstr ""
+msgstr "前へ(_P)"
 
 #: ../ui/find_bar.glade.h:3
 msgid "_Next"
-msgstr ""
+msgstr "次へ(_N)"
 
 #: ../ui/find_bar.glade.h:4
 msgid "_Case sensitive"
-msgstr ""
+msgstr "大文字小文字を区別(_C)"
 
 #: ../ui/find_bar.glade.h:5
 msgid "label"
@@ -2269,7 +2254,7 @@ msgstr "アーカイブに移動する"
 #: ../ui/gtk/help-overlay.ui.h:20
 msgctxt "shortcut window"
 msgid "Move to trash"
-msgstr "ゴミ箱に移動する"
+msgstr "ごみ箱に移動する"
 
 #: ../ui/gtk/help-overlay.ui.h:21
 msgctxt "shortcut window"
@@ -2531,7 +2516,7 @@ msgstr "STARTTLS"
 
 #: ../ui/login.glade.h:32
 msgid "No authentication re_quired"
-msgstr "認証は必要ありません(_Q)"
+msgstr "認証の必要はない(_Q)"
 
 #: ../ui/login.glade.h:33
 msgid "Use IMAP cre_dentials"
@@ -2559,7 +2544,7 @@ msgstr "メールをダウンロード(_D)"
 
 #: ../ui/main-toolbar.ui.h:1
 msgid "Empty Spam or Trash folders"
-msgstr ""
+msgstr "迷惑メールかごみ箱を空にする"
 
 #: ../ui/password-dialog.glade.h:1
 msgid "SMTP Credentials"
@@ -2575,7 +2560,7 @@ msgstr "パスワードを記憶する(_R)"
 
 #: ../ui/password-dialog.glade.h:6
 msgid "_Authenticate"
-msgstr ""
+msgstr "認証(_A)"
 
 #: ../ui/preferences-dialog.ui.h:1
 msgid "Reading"
