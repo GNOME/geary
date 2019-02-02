@@ -20,6 +20,7 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
         add_test("is_descendant_of", is_descendant_of);
         add_test("is_descendant_of_with_class", is_descendant_of_with_class);
         add_test("is_descendant_of_no_match", is_descendant_of_no_match);
+        add_test("is_descendant_of_lax", is_descendant_of_lax);
 
         try {
             ConversationWebView.load_resources(File.new_for_path(""));
@@ -109,6 +110,19 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
                 run_javascript("""
                     ConversationPageState.isDescendantOf(
                         document.getElementById('test'), "DIV"
+                    );
+                """)
+           )
+        );
+    }
+
+    public void is_descendant_of_lax() throws GLib.Error {
+        load_body_fixture("<blockquote class='test-class'><div id='test'>ohhai</div></blockquote>");
+        assert(
+            WebKitUtil.to_bool(
+                run_javascript("""
+                    ConversationPageState.isDescendantOf(
+                        document.getElementById('test'), "DIV", null, false
                     );
                 """)
            )
