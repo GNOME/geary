@@ -82,7 +82,7 @@ ConversationPageState.prototype = {
 
             // Only insert into a quote container if the element is a
             // top level blockquote
-            if (!ConversationPageState.isDescendantOf(blockquote, "blockquote")) {
+            if (!ConversationPageState.isDescendantOf(blockquote, "BLOCKQUOTE")) {
                 let quoteHeight = blockquote.offsetHeight;
 
                 // Only make the quote it controllable if it is tall enough
@@ -171,7 +171,7 @@ ConversationPageState.prototype = {
             let div = possibleSigs.item(i);
             let innerHTML = div.innerHTML;
             if ((sigRegex.test(innerHTML) || alternateSigRegex.test(innerHTML)) &&
-                !ConversationPageState.isDescendantOf(div, "blockquote")) {
+                !ConversationPageState.isDescendantOf(div, "BLOCKQUOTE")) {
                 break;
             }
         }
@@ -201,12 +201,15 @@ ConversationPageState.prototype = {
                 ancestor = ancestor.parentNode;
             }
 
-            // If the selection is part of a plain text message,
-            // we have to stick it in an appropriately styled div,
-            // so that new lines are preserved.
+            // If the selection is part of a plain text message, we
+            // have to stick it in an appropriately styled div, so
+            // that new lines are preserved. Do a non-strict ancestor
+            // check since the common ancestor may well be the plain
+            // text DIV itself
             let dummy = document.createElement("DIV");
             let includeDummy = false;
-            if (ConversationPageState.isDescendantOf(ancestor, "div", "plaintext")) {
+            if (ConversationPageState.isDescendantOf(
+                ancestor, "DIV", "plaintext", false)) {
                 dummy.classList.add("plaintext");
                 dummy.setAttribute("style", "white-space: pre-wrap;");
                 includeDummy = true;
@@ -324,17 +327,21 @@ ConversationPageState.isDeceptiveText = function(text, href) {
 /**
  * See if this element has an ancestor with the given tag and class.
  *
- * ancestorTag must be all lowercase.
+ * The value of ancestorTag must be all uppercase.
  *
  * If ancestorClass is null, no class checking is done.
+ * If strict is is true, the given node will not be checked.
  */
-ConversationPageState.isDescendantOf = function(node, ancestorTag, ancestorClass = null) {
-    let ancestor = node.parentNode;
+ConversationPageState.isDescendantOf = function(node,
+                                                ancestorTag,
+                                                ancestorClass = null,
+                                                strict = true) {
+    let ancestor = strict ? node.parentNode : node;
     while (ancestor != null) {
-        if (ancestor.tagName.toLowerCase() == ancestorTag) {
-            if (!ancestorClass || ancestor.classList.contains(ancestorClass)) {
-                return true;
-            }
+        if (ancestor.nodeName.toUpperCase() == ancestorTag &&
+            (ancestorClass == null ||
+             ancestor.classList.contains(ancestorClass))) {
+            return true;
         }
         ancestor = ancestor.parentNode;
     }

@@ -17,6 +17,10 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
         add_test("is_deceptive_text_deceptive_href", is_deceptive_text_deceptive_href);
         add_test("is_deceptive_text_non_matching_subdomain", is_deceptive_text_non_matching_subdomain);
         add_test("is_deceptive_text_different_domain", is_deceptive_text_different_domain);
+        add_test("is_descendant_of", is_descendant_of);
+        add_test("is_descendant_of_with_class", is_descendant_of_with_class);
+        add_test("is_descendant_of_no_match", is_descendant_of_no_match);
+        add_test("is_descendant_of_lax", is_descendant_of_lax);
 
         try {
             ConversationWebView.load_resources(File.new_for_path(""));
@@ -72,6 +76,59 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
         assert(exec_is_deceptive_text("www.example.com", "phishing.net") ==
                ConversationWebView.DeceptiveText.DECEPTIVE_DOMAIN);
     }
+
+    public void is_descendant_of() throws GLib.Error {
+        load_body_fixture("<blockquote><div id='test'>ohhai</div></blockquote>");
+        assert(
+            WebKitUtil.to_bool(
+                run_javascript("""
+                    ConversationPageState.isDescendantOf(
+                        document.getElementById('test'), "BLOCKQUOTE"
+                    );
+                """)
+           )
+        );
+    }
+
+    public void is_descendant_of_with_class() throws GLib.Error {
+        load_body_fixture("<blockquote class='test-class'><div id='test'>ohhai</div></blockquote>");
+        assert(
+            WebKitUtil.to_bool(
+                run_javascript("""
+                    ConversationPageState.isDescendantOf(
+                        document.getElementById('test'), "BLOCKQUOTE", "test-class"
+                    );
+                """)
+           )
+        );
+    }
+
+    public void is_descendant_of_no_match() throws GLib.Error {
+        load_body_fixture("<blockquote class='test-class'><div id='test'>ohhai</div></blockquote>");
+        assert(
+            WebKitUtil.to_bool(
+                run_javascript("""
+                    ConversationPageState.isDescendantOf(
+                        document.getElementById('test'), "DIV"
+                    );
+                """)
+           )
+        );
+    }
+
+    public void is_descendant_of_lax() throws GLib.Error {
+        load_body_fixture("<blockquote class='test-class'><div id='test'>ohhai</div></blockquote>");
+        assert(
+            WebKitUtil.to_bool(
+                run_javascript("""
+                    ConversationPageState.isDescendantOf(
+                        document.getElementById('test'), "DIV", null, false
+                    );
+                """)
+           )
+        );
+    }
+
 
     protected override ConversationWebView set_up_test_view() {
         return new ConversationWebView(this.config);
