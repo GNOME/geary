@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-01 17:59+0000\n"
+"POT-Creation-Date: 2019-02-02 10:51+0000\n"
 "PO-Revision-Date: 2019-02-02 19:48+0000\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
@@ -545,7 +545,8 @@ msgid ""
 "Geary encountered an error while connecting to the server.  Please try again "
 "in a few moments."
 msgstr ""
-"サーバーへの接続時にエラーが発生しました。しばらく時間をあけてから再試行してください。"
+"サーバーへの接続時にエラーが発生しました。しばらく時間をあけてから再試行して"
+"ください。"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
 #: ../src/client/application/geary-controller.vala:1076
@@ -573,8 +574,8 @@ msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
 msgstr ""
-"メールを送信済みトレイに保存するときにエラーが発生しました。削除するまで"
-"このメッセージを送信済みトレイに表示します。"
+"メールを送信済みトレイに保存するときにエラーが発生しました。削除するまでこの"
+"メッセージを送信済みトレイに表示します。"
 
 #: ../src/client/application/geary-controller.vala:1151
 msgid "Labels"
@@ -659,7 +660,8 @@ msgstr ""
 "このアカウントのローカルメールデータベースを開くときにエラーが発生しました。"
 "おそらくファイルのアクセス権に問題があります。\n"
 "\n"
-"このディレクトリのすべてのファイルの読み取り/書き込み権限を確認してください:\n"
+"このディレクトリのすべてのファイルの読み取り/書き込み権限を確認してくださ"
+"い:\n"
 "\n"
 "%s"
 
@@ -702,8 +704,8 @@ msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
 msgstr ""
-"添付ファイルはシステムにダメージを与える可能性があります。送信元が信頼できる場合"
-"のみ開くようにしてください。"
+"添付ファイルはシステムにダメージを与える可能性があります。送信元が信頼できる"
+"場合のみ開くようにしてください。"
 
 #: ../src/client/application/geary-controller.vala:2028
 msgid "Don’t _ask me again"
@@ -1098,27 +1100,28 @@ msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
-"“このサーバーを信頼する”、“常にこのサーバーを信頼する”を選択すると、ユーザー名"
-"とパスワードが安全に送信されない可能性があります。"
+"“このサーバーを信頼する”、“常にこのサーバーを信頼する”を選択すると、ユーザー"
+"名とパスワードが安全に送信されない可能性があります。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:52
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
 msgstr ""
-"“このサーバーを信頼しない”を選択すると、Geary はこのサーバーにアクセスしません。"
+"“このサーバーを信頼しない”を選択すると、Geary はこのサーバーにアクセスしませ"
+"ん。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:54
 msgid "Geary will not add or update this email account."
-msgstr ""
-"Geary はこのメールアカウントの追加または更新をしません。"
+msgstr "Geary はこのメールアカウントの追加または更新をしません。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:59
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
 msgstr ""
-"“このサーバーを信頼しない”を選択すると、Geary はこのアカウントへのアクセスを止めます。"
+"“このサーバーを信頼しない”を選択すると、Geary はこのアカウントへのアクセスを"
+"止めます。"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:61
 msgid "Geary will exit if you have no other open email accounts."
@@ -1698,8 +1701,8 @@ msgid ""
 "A composer window associated with this account is currently open. Send or "
 "discard the message and try again."
 msgstr ""
-"アカウントと関連づけられた作成画面がすでに開いています. メッセージを送信するか"
-"破棄してからもう一度試してください"
+"アカウントと関連づけられた作成画面がすでに開いています. メッセージを送信する"
+"か破棄してからもう一度試してください"
 
 #: ../ui/account_list.glade.h:1
 msgid "Add account"
@@ -1842,7 +1845,7 @@ msgstr "貼り付け(_P)"
 #: ../ui/composer-menus.ui.h:15
 msgctxt "Clipboard paste with rich text"
 msgid "Paste _With Formatting"
-msgstr "書式なしで貼り付け(_W)"
+msgstr "書式付きで貼り付け(_W)"
 
 #: ../ui/composer-menus.ui.h:16
 msgid "Select _All"
@@ -2103,7 +2106,8 @@ msgstr "虚偽リンクが見つかりました"
 
 #: ../ui/conversation-message.ui.h:17
 msgid "The email sender may be leading you to the wrong web site."
-msgstr "このメールの送信者は間違ったウェブサイトに誘導している可能性があります。"
+msgstr ""
+"このメールの送信者は間違ったウェブサイトに誘導している可能性があります。"
 
 #: ../ui/conversation-message.ui.h:18
 msgid "If unsure, contact the sender and ask before continuing."
@@ -2130,8 +2134,8 @@ msgid ""
 "Some email services require additional addresses be configured on the "
 "server.  Contact your email provider for more information."
 msgstr ""
-"一部のメールサービスでは、サーバーの設定に追加のアドレスが必要になりま"
-"す。詳細についてはメールプロバイダーに問い合わせてください。"
+"一部のメールサービスでは、サーバーの設定に追加のアドレスが必要になります。詳"
+"細についてはメールプロバイダーに問い合わせてください。"
 
 #: ../ui/edit_alternate_emails.glade.h:4
 msgid "_Update"
@@ -2615,8 +2619,8 @@ msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
 msgstr ""
-"このアカウントに関連したすべてのメールを、コンピューターから削除します。サーバー"
-"上のメールには影響しません。"
+"このアカウントに関連したすべてのメールを、コンピューターから削除します。サー"
+"バー上のメールには影響しません。"
 
 #: ../ui/remove_confirm.glade.h:3
 msgid "Nickname:"
