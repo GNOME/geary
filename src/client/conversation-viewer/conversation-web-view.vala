@@ -101,7 +101,14 @@ public class ConversationWebView : ClientWebView {
      *
      * Returns the number of matching search terms.
      */
-    public async uint highlight_search_terms(Gee.Collection<string> search_matches) {
+    public async uint highlight_search_terms(Gee.Collection<string> terms,
+                                             GLib.Cancellable cancellable)
+        throws GLib.IOError.CANCELLED {
+        WebKit.FindController controller = get_find_controller();
+
+        // Remove existing highlights
+        controller.search_finish();
+
         // XXX WK2 doesn't deal with the multiple highlighting
         // required by search folder matches, only single highlighting
         // for a fine-like interface. For now, just highlight the
@@ -109,31 +116,36 @@ public class ConversationWebView : ClientWebView {
 
         uint found = 0;
 
-        WebKit.FindController controller = get_find_controller();
         SourceFunc callback = this.highlight_search_terms.callback;
-        ulong found_handler = 0;
-        ulong not_found_handler = 0;
-
-        found_handler = controller.found_text.connect((count) => {
+        ulong found_handler = controller.found_text.connect((count) => {
                 found = count;
-                controller.disconnect(found_handler);
-                controller.disconnect(not_found_handler);
                 callback();
             });
-        not_found_handler = controller.failed_to_find_text.connect(() => {
-                controller.disconnect(found_handler);
-                controller.disconnect(not_found_handler);
+        ulong not_found_handler = controller.failed_to_find_text.connect(() => {
+                callback();
+            });
+        ulong cancelled_handler = cancellable.cancelled.connect(() => {
                 callback();
             });
 
         controller.search(
-            Geary.Collection.get_first(search_matches),
+            Geary.Collection.get_first(terms),
             WebKit.FindOptions.CASE_INSENSITIVE |
             WebKit.FindOptions.WRAP_AROUND,
             128
         );
 
         yield;
+
+        controller.disconnect(found_handler);
+        controller.disconnect(not_found_handler);
+        cancellable.disconnect(cancelled_handler);
+
+        if (cancellable.is_cancelled()) {
+            throw new IOError.CANCELLED(
+                "ConversationWebView highlight search terms cancelled"
+            );
+        }
 
         return found;
     }

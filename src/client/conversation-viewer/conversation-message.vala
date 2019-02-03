@@ -678,10 +678,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
      * Highlighting includes both in the message headers, and the
      * mesage body. returns the number of matching search terms.
      */
-    public async uint highlight_search_terms(Gee.Set<string> search_matches) {
-        // Remove existing highlights
-        this.web_view.get_find_controller().search_finish();
-
+    public async uint highlight_search_terms(Gee.Set<string> search_matches,
+                                             GLib.Cancellable cancellable)
+        throws GLib.IOError.CANCELLED {
         uint headers_found = 0;
         uint webkit_found = 0;
         foreach(string raw_match in search_matches) {
@@ -701,7 +700,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
         }
 
-        webkit_found += yield this.web_view.highlight_search_terms(search_matches);
+        webkit_found += yield this.web_view.highlight_search_terms(
+            search_matches, cancellable
+        );
         return headers_found + webkit_found;
     }
 
