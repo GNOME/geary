@@ -1271,7 +1271,13 @@ public class GearyController : Geary.BaseObject {
                 Geary.App.EmailStore? store = get_store_for_folder(
                     convo.base_folder
                 );
-                if (store != null) {
+
+                // It's possible for a conversation with zero email to
+                // be selected, when it has just evaporated after its
+                // last email was removed but the conversation monitor
+                // hasn't signalled its removal yet. In this case,
+                // just don't load it since it will soon disappear.
+                if (store != null && convo.get_count() > 0) {
                     viewer.load_conversation.begin(
                         convo,
                         store,
