@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-02 13:57+0000\n"
-"PO-Revision-Date: 2019-02-02 23:21+0000\n"
+"POT-Creation-Date: 2019-02-02 14:23+0000\n"
+"PO-Revision-Date: 2019-02-05 00:15+0000\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -259,7 +259,7 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:98
 msgid "Ask when opening an attachment"
-msgstr ""
+msgstr "添付ファイルを開くときに確認する"
 
 #: desktop/org.gnome.Geary.gschema.xml:99
 msgid "True to ask when opening an attachment."
@@ -281,6 +281,7 @@ msgstr ""
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
+"許容できる値は“exact”, “conservative”, “aggressive”, “horizon”です。"
 
 #: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Zoom of conversation viewer"
@@ -300,12 +301,13 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Base URL to look up contact avatars"
-msgstr ""
+msgstr "アバター画像検索用のベース URL"
 
 #: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "A Gravatar or Libravatar compatible URL, set to the empty string to disable."
 msgstr ""
+"Gravatar または Libravatar 対応の URL。無効にする場合は空にしてください。"
 
 #: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
@@ -333,13 +335,13 @@ msgstr ""
 #: src/client/accounts/accounts-editor-add-pane.vala:196
 #: src/client/accounts/accounts-editor-servers-pane.vala:300
 msgid "Check your receiving login and password"
-msgstr ""
+msgstr "受信のログイン名とパスワードを確認してください"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:211
 #: src/client/accounts/accounts-editor-servers-pane.vala:313
 msgid "Check your receiving server details"
-msgstr ""
+msgstr "受信サーバーの詳細を確認してください"
 
 #. Translators: In-app notification label
 #. There was an SMTP auth error, but IMAP already
@@ -349,36 +351,36 @@ msgstr ""
 #: src/client/accounts/accounts-editor-add-pane.vala:233
 #: src/client/accounts/accounts-editor-servers-pane.vala:334
 msgid "Check your sending login and password"
-msgstr ""
+msgstr "送信のログイン名とパスワードを確認してください"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:247
 #: src/client/accounts/accounts-editor-servers-pane.vala:347
 msgid "Check your sending server details"
-msgstr ""
+msgstr "送信サーバーの詳細を確認してください"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:262
 msgid "Check your email address and password"
-msgstr ""
+msgstr "メールアドレスとパスワードを確認してください"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:273
 msgid "Could not connect, check your network"
-msgstr ""
+msgstr "接続できなかったためネットワークを確認してください"
 
 #. Translators: In-app notification label for a
 #. generic error creating an account
 #: src/client/accounts/accounts-editor-add-pane.vala:286
 msgid "An unexpected problem occurred"
-msgstr ""
+msgstr "予想外の問題が発生しました"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
 #: src/client/accounts/accounts-editor-add-pane.vala:304
 #, c-format
 msgid "Account not created: %s"
-msgstr ""
+msgstr "アカウントを作成しません: %s"
 
 #. Translators: Label for the person's actual name when adding
 #. an account
@@ -471,7 +473,7 @@ msgstr ""
 #. address's address to an account
 #: src/client/accounts/accounts-editor-edit-pane.vala:336
 msgid "Add a new sender email address"
-msgstr "新規送信者のメールアドレスを追加"
+msgstr "新規送信者メールアドレスを追加"
 
 #. Translators: Label used to indicate the user has
 #. provided no display name for one of their sender
@@ -714,7 +716,7 @@ msgstr "他の情報を使う"
 #: src/client/accounts/accounts-editor-servers-pane.vala:361
 #, c-format
 msgid "Account not updated: %s"
-msgstr ""
+msgstr "アカウントを更新しません: %s"
 
 #. Translators: This label describes the program that
 #. created the account, e.g. an SSO service like GOA, or
@@ -930,7 +932,7 @@ msgstr "移動を元に戻す(Ctrl+Z)"
 
 #: src/client/application/geary-controller.vala:1784
 msgid "Are you sure you want to open these attachments?"
-msgstr "これらの添付ファイルをを開きますか?"
+msgstr "これらの添付ファイルを開いてもよろしいですか?"
 
 #: src/client/application/geary-controller.vala:1785
 msgid ""
@@ -991,7 +993,7 @@ msgstr "%s を空にする"
 #: src/client/application/geary-controller.vala:2348
 #, c-format
 msgid "Error emptying %s"
-msgstr "%s を空にする際にエラーが発生しました"
+msgstr "%s を空にするときにエラーが発生しました"
 
 #: src/client/application/geary-controller.vala:2380
 msgid "Do you want to permanently delete this message?"
@@ -1249,7 +1251,7 @@ msgstr ""
 #: src/client/components/main-window-info-bar.vala:124
 #, c-format
 msgid "A problem occurred checking mail for %s"
-msgstr ""
+msgstr "%s のメールを確認中に問題が発生しました"
 
 #: src/client/components/main-window-info-bar.vala:125
 #: src/client/components/main-window-info-bar.vala:132
@@ -1260,7 +1262,7 @@ msgstr ""
 #: src/client/components/main-window-info-bar.vala:131
 #, c-format
 msgid "A problem occurred sending mail for %s"
-msgstr ""
+msgstr "%s のメールを送信中に問題が発生しました"
 
 #: src/client/components/main-window-info-bar.vala:133
 msgid "Retry sending queued messages"
@@ -1268,7 +1270,7 @@ msgstr ""
 
 #: src/client/components/main-window-info-bar.vala:144
 msgid "A database problem has occurred"
-msgstr ""
+msgstr "データベースに問題が発生しました"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:146
@@ -1957,7 +1959,7 @@ msgstr ""
 #, c-format
 msgid "%s and %d other"
 msgid_plural "%s and %d others"
-msgstr[0] ""
+msgstr[0] "%s とその他 %d 人"
 
 #: src/client/util/util-files.vala:16
 msgid "bytes"
@@ -2377,7 +2379,7 @@ msgid ""
 "Removing an account will remove it from Geary and delete locally cached "
 "email data from your computer, but not from your service provider."
 msgstr ""
-"Geary でアカウントを削除すると、コンピューターに保存されたメールデータの"
+"Geary からアカウントを削除すると、コンピューターに保存されたメールデータの"
 "キャッシュが削除されますが、メールサービスプロバイダー側では削除されません。"
 
 #: ui/accounts_editor_remove_pane.ui:122
@@ -3249,7 +3251,7 @@ msgstr "スレッドプレビューを表示する(_D)"
 
 #: ui/preferences-dialog.ui:89
 msgid "Use _three pane view"
-msgstr "3ペインビューを使用する(_T)"
+msgstr "3ペインビューを使う(_T)"
 
 #: ui/preferences-dialog.ui:113
 msgid "Notifications"
