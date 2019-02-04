@@ -1347,9 +1347,11 @@ private class Geary.ImapDB.Account : BaseObject {
                 do_get_search_matches(cx, query, id_map, cancellable);
             if (match_map == null || match_map.size == 0)
                 return Db.TransactionOutcome.DONE;
-            
-            strip_greedy_results(query, match_map);
-            
+
+            if (should_strip_greedy_results(query)) {
+                strip_greedy_results(query, ids, match_map);
+            }
+
             search_matches = new Gee.HashSet<string>();
             foreach (Gee.Set<string> matches in match_map.values)
                 search_matches.add_all(matches);
