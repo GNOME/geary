@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2019-02-02 14:23+0000\n"
-"PO-Revision-Date: 2019-02-05 02:45+0000\n"
+"PO-Revision-Date: 2019-02-05 02:55+0000\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -529,7 +529,7 @@ msgstr "“%s”を元に戻す"
 #. is the email address edited.
 #: src/client/accounts/accounts-editor-edit-pane.vala:728
 msgid "Undo signature changes"
-msgstr ""
+msgstr "署名の変更を元に戻す"
 
 #. Translators: This label describes the account
 #. preference for the length of time (weeks, months or
@@ -1953,7 +1953,7 @@ msgstr "(件名なし)"
 #. i.e. contains no email addresses.
 #: src/client/util/util-email.vala:49
 msgid "(No recipients)"
-msgstr ""
+msgstr "(受信者なし)"
 
 #. Translators: This is used for displaying a short list of
 #. email recipients lists with two or more addresses. The
@@ -2342,7 +2342,7 @@ msgstr "メールアドレス"
 
 #: ui/accounts_editor_edit_pane.ui:164
 msgid "Signature"
-msgstr ""
+msgstr "署名"
 
 #: ui/accounts_editor_edit_pane.ui:201
 msgid "Settings"
