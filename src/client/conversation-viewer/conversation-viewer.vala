@@ -220,6 +220,12 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         set_visible_child(this.empty_search_page);
     }
 
+    /** Shows and focuses the find entry. */
+    public void enable_find() {
+        this.conversation_find_bar.set_search_mode(true);
+        this.conversation_find_entry.grab_focus();
+    }
+
     /**
      * Shows a conversation in the viewer.
      */

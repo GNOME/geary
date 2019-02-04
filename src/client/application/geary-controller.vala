@@ -2273,7 +2273,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_find_in_conversation_action(SimpleAction action) {
-        this.main_window.conversation_viewer.conversation_find_bar.set_search_mode(true);
+        this.main_window.conversation_viewer.enable_find();
     }
 
     private void on_search_activated(SimpleAction action) {
