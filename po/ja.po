@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2019-02-02 14:23+0000\n"
-"PO-Revision-Date: 2019-02-05 00:15+0000\n"
+"PO-Revision-Date: 2019-02-05 02:45+0000\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -197,11 +197,11 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Autoselect next message"
-msgstr ""
+msgstr "次のメッセージを自動的に選択する"
 
 #: desktop/org.gnome.Geary.gschema.xml:57
 msgid "True if we should autoselect the next available conversation."
-msgstr ""
+msgstr "次の利用可能なスレッドを自動的に選択する場合は true にしてください。"
 
 #: desktop/org.gnome.Geary.gschema.xml:62
 #, fuzzy
@@ -263,7 +263,7 @@ msgstr "添付ファイルを開くときに確認する"
 
 #: desktop/org.gnome.Geary.gschema.xml:99
 msgid "True to ask when opening an attachment."
-msgstr ""
+msgstr "添付ファイルを開くときに確認します。"
 
 #: desktop/org.gnome.Geary.gschema.xml:104
 msgid "Whether to compose emails in HTML"
@@ -367,7 +367,7 @@ msgstr "メールアドレスとパスワードを確認してください"
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:273
 msgid "Could not connect, check your network"
-msgstr "接続できなかったためネットワークを確認してください"
+msgstr "接続できなかったため、ネットワークを確認してください"
 
 #. Translators: In-app notification label for a
 #. generic error creating an account
@@ -467,7 +467,7 @@ msgstr "アカウント名"
 #: src/client/accounts/accounts-editor-edit-pane.vala:312
 #, c-format
 msgid "Change account name back to “%s”"
-msgstr ""
+msgstr "変更したアカウント名を“%s”に戻す"
 
 #. Translators: Tooltip for adding a new email sender/from
 #. address's address to an account
@@ -546,7 +546,7 @@ msgstr "メールのダウンロード"
 #: src/client/accounts/accounts-editor-edit-pane.vala:804
 #, c-format
 msgid "Change download period back to: %s"
-msgstr "変更したダウンロード期間を元に戻す: %s"
+msgstr "変更したダウンロード期間を次に戻す: %s"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:825
 msgid "Everything"
@@ -623,7 +623,7 @@ msgstr "このアカウントは無効になっています"
 #. used.
 #: src/client/accounts/accounts-editor-list-pane.vala:380
 msgid "This account has encountered a problem and is unavailable"
-msgstr "このアカウントは問題が発生したため無効です"
+msgstr "このアカウントは問題が発生したため利用できません"
 
 #. Translators: Label for adding a generic email account
 #: src/client/accounts/accounts-editor-list-pane.vala:430
@@ -649,7 +649,7 @@ msgstr "アカウント“%s”を復元しました"
 #. Translators: Tooltip for dragging list items
 #: src/client/accounts/accounts-editor-row.vala:49
 msgid "Drag to move this item"
-msgstr "このアイテムをドラッグして移動"
+msgstr "このアイテムを移動するにはドラッグしてください"
 
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
@@ -843,7 +843,7 @@ msgstr "プログラムのバージョンを表示する"
 #: src/client/application/geary-args.vala:53
 #, c-format
 msgid "Use %s to open a new composer window"
-msgstr "%s を使用して新規作成ウィンドウを開く"
+msgstr "%s を使って新規作成ウィンドウを開く"
 
 #: src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
@@ -979,7 +979,7 @@ msgstr "%s フォルダーのすべてのメールを空にしますか?"
 
 #: src/client/application/geary-controller.vala:2329
 msgid "This removes the email from Geary and your email server."
-msgstr "メールを Geary とメールサーバーから削除します。"
+msgstr "これはメールを Geary とメールサーバーから削除します。"
 
 #: src/client/application/geary-controller.vala:2330
 msgid "This cannot be undone."
@@ -1031,7 +1031,7 @@ msgstr "デフォルトのテキストエディターの起動に失敗しまし
 #. email address to be entered, but one is not provided.
 #: src/client/components/components-validator.vala:341
 msgid "An email address is required"
-msgstr "メールアドレスが必要です"
+msgstr "メールアドレスは必須です"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but the address is invalid.
@@ -1044,7 +1044,7 @@ msgstr "有効なメールアドレスではありません"
 #. provided.
 #: src/client/components/components-validator.vala:391
 msgid "A server name is required"
-msgstr "サーバー名が必要です"
+msgstr "サーバー名は必須です"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. server name to be entered, but it was unable to be
@@ -1128,7 +1128,7 @@ msgstr ""
 #: src/client/components/main-window-info-bar.vala:50
 #: src/client/components/main-window-info-bar.vala:59 ui/main-window.ui:265
 msgid "Retry connecting now"
-msgstr "今すぐ接続を再試行する"
+msgstr "今すぐ接続を再試行"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:55
@@ -1138,20 +1138,21 @@ msgstr "%s の送信サーバーとの接続時に問題があります"
 
 #: src/client/components/main-window-info-bar.vala:58
 msgid "Try reconnecting now"
-msgstr ""
+msgstr "今すぐ再接続を試行"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:64
 #, c-format
 msgid "Problem with connection to incoming server for %s"
-msgstr ""
+msgstr "%s の受信サーバーとの接続に問題があります"
 
 #. Translators: String substitution is the server name
 #: src/client/components/main-window-info-bar.vala:66
 #: src/client/components/main-window-info-bar.vala:74
 #, c-format
 msgid "Network error talking to %s, check your Internet access and try again"
-msgstr ""
+msgstr "%s との接続でネットワークエラーが発生したため、インターネット接続を確認"
+"して再試行してください"
 
 #: src/client/components/main-window-info-bar.vala:67
 #: src/client/components/main-window-info-bar.vala:75
@@ -1159,7 +1160,7 @@ msgstr ""
 #: src/client/components/main-window-info-bar.vala:91
 #: src/client/components/main-window-info-bar.vala:126
 msgid "Try reconnecting"
-msgstr ""
+msgstr "再接続を試行"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:72
@@ -1180,10 +1181,12 @@ msgid ""
 "Geary did not understand a message from %s or vice versa, please file a bug "
 "report"
 msgstr ""
+"Geary か %s のどちらかがメッセージを理解できないバグに遭遇したため、"
+"可能でしたらバグ報告を提出してください"
 
 #: src/client/components/main-window-info-bar.vala:87
 msgid "Problem communicating with outgoing mail server"
-msgstr ""
+msgstr "送信メールサーバーとの通信に問題があります"
 
 #. Translators: First string substitution is the server
 #. name, second is the account name
@@ -1193,59 +1196,60 @@ msgid ""
 "Could not communicate with %s for %s, check the server name and try again in "
 "a moment"
 msgstr ""
+"%2$s の %1$s と通信できなかったため、サーバー名を確認して後ほど再試行してください"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:96
 #, c-format
 msgid "Incoming mail server password required for %s"
-msgstr ""
+msgstr "%s の受信メールサーバーのパスワードが必要です"
 
 #: src/client/components/main-window-info-bar.vala:97
 msgid "Messages cannot be received without the correct password."
-msgstr ""
+msgstr "正しいパスワードがないとメッセージを受信できません。"
 
 #: src/client/components/main-window-info-bar.vala:98
 msgid "Retry receiving email, you will be prompted for a password"
-msgstr ""
+msgstr "メール受信の再試行にはパスワードが必要です"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:103
 #, c-format
 msgid "Outgoing mail server password required for %s"
-msgstr ""
+msgstr "%s の送信メールサーバーのパスワードが必要です"
 
 #: src/client/components/main-window-info-bar.vala:104
 msgid "Messages cannot be sent without the correct password."
-msgstr ""
+msgstr "正しいパスワードがないとメッセージを送信できません。"
 
 #: src/client/components/main-window-info-bar.vala:105
 msgid "Retry sending queued messages, you will be prompted for a password"
-msgstr ""
+msgstr "待機メッセージ送信の再試行にはパスワードが必要です"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:110
 #, c-format
 msgid "Incoming mail server security is not trusted for %s"
-msgstr ""
+msgstr "%s の受信メールサーバーのセキュリティは信頼していません"
 
 #: src/client/components/main-window-info-bar.vala:111
 msgid "Messages will not be received until checked."
-msgstr ""
+msgstr "確認するまでメッセージを受信しません。"
 
 #: src/client/components/main-window-info-bar.vala:112
 #: src/client/components/main-window-info-bar.vala:119
 msgid "Check security details"
-msgstr ""
+msgstr "セキュリティの詳細を確認"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:117
 #, c-format
 msgid "Outgoing mail server security is not trusted for %s"
-msgstr ""
+msgstr "%s の送信メールサーバーのセキュリティは信頼していません"
 
 #: src/client/components/main-window-info-bar.vala:118
 msgid "Messages cannot be sent until checked."
-msgstr ""
+msgstr "確認するまでメッセージを送信できません。"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:124
@@ -1256,7 +1260,7 @@ msgstr "%s のメールを確認中に問題が発生しました"
 #: src/client/components/main-window-info-bar.vala:125
 #: src/client/components/main-window-info-bar.vala:132
 msgid "Something went wrong, please file a bug report if the problem persists"
-msgstr ""
+msgstr "何らかの不具合が発生しているため、問題が解決しない場合はバグ報告を提出してください"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:131
@@ -1266,7 +1270,7 @@ msgstr "%s のメールを送信中に問題が発生しました"
 
 #: src/client/components/main-window-info-bar.vala:133
 msgid "Retry sending queued messages"
-msgstr ""
+msgstr "待機メッセージの送信を再試行"
 
 #: src/client/components/main-window-info-bar.vala:144
 msgid "A database problem has occurred"
@@ -1276,16 +1280,17 @@ msgstr "データベースに問題が発生しました"
 #: src/client/components/main-window-info-bar.vala:146
 #, c-format
 msgid "Messages for %s must be downloaded again."
-msgstr ""
+msgstr "%s のメッセージを再ダウンロードする必要があります。"
 
 #: src/client/components/main-window-info-bar.vala:159
 msgid "Geary has encountered a problem"
-msgstr ""
+msgstr "Geary に問題が発生しました"
 
 #: src/client/components/main-window-info-bar.vala:160
 msgid ""
 "Please check the technical details and report the problem if it persists."
 msgstr ""
+"問題が解決しない場合は、技術的な詳細情報を確認して報告してください。"
 
 #: src/client/components/main-window-info-bar.vala:168
 msgid "_Details"
@@ -1294,7 +1299,7 @@ msgstr "詳細(_D)"
 #. Button tooltip for displaying technical details about an account problem
 #: src/client/components/main-window-info-bar.vala:169 ui/main-window.ui:250
 msgid "View technical details about the error"
-msgstr ""
+msgstr "エラーについての技術的な詳細情報を表示"
 
 #: src/client/components/main-window-info-bar.vala:173
 msgid "_Retry"
@@ -1578,12 +1583,12 @@ msgstr "未読としてマーク(_U)"
 #: src/client/conversation-list/conversation-list-view.vala:292
 #: ui/main-toolbar-menus.ui:28
 msgid "U_nstar"
-msgstr "星をはずす(_N)"
+msgstr "星を外す(_N)"
 
 #: src/client/conversation-list/conversation-list-view.vala:294
 #: ui/main-toolbar-menus.ui:24
 msgid "_Star"
-msgstr "星を付ける(_S)"
+msgstr "星をつける(_S)"
 
 #. Translators: Menu item to reply to a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:297
@@ -1640,7 +1645,7 @@ msgstr "件名:"
 
 #: src/client/conversation-viewer/conversation-message.vala:64
 msgid "This email address may have been forged"
-msgstr ""
+msgstr "これは偽装メールアドレスである可能性があります"
 
 #. Compact headers
 #. Translators: This is displayed in place of the from address
@@ -1999,7 +2004,7 @@ msgstr "送信済みメール"
 
 #: src/engine/api/geary-special-folder-type.vala:33
 msgid "Starred"
-msgstr "星"
+msgstr "星つき"
 
 #: src/engine/api/geary-special-folder-type.vala:36
 msgid "Important"
@@ -2019,7 +2024,7 @@ msgstr "ごみ箱"
 
 #: src/engine/api/geary-special-folder-type.vala:48
 msgid "Outbox"
-msgstr "送信トレイ"
+msgstr "送信済みトレイ"
 
 #: src/engine/api/geary-special-folder-type.vala:54
 msgid "Archive"
@@ -2199,7 +2204,7 @@ msgstr ""
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:936
 msgid "Drafts | Draft"
-msgstr ""
+msgstr "下書き"
 
 #. List of general possible folder names to match for the
 #. Sent mailbox. Separate names using a vertical bar and
@@ -2207,14 +2212,14 @@ msgstr ""
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:945
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
-msgstr ""
+msgstr "送信 | 送信メール | 送信済みメール | 送信済メール"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:950
 msgctxt "Outlook localised name"
 msgid "Sent Items"
-msgstr ""
+msgstr "送信したアイテム"
 
 #. List of general possible folder names to match for the
 #. Spam mailbox. Separate names using a vertical bar and
@@ -2225,6 +2230,7 @@ msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
 msgstr ""
+"迷惑メール | スパム | スパムメール | ごみ | ゴミ"
 
 #. List of general possible folder names to match for the
 #. Trash mailbox. Separate names using a vertical bar and
@@ -2232,14 +2238,14 @@ msgstr ""
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:970
 msgid "Trash | Rubbish | Rubbish Bin"
-msgstr ""
+msgstr "ごみ箱 | ゴミ箱"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:975
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
-msgstr ""
+msgstr "削除したアイテム"
 
 #. List of general possible folder names to match for the
 #. Archive mailbox. Separate names using a vertical bar
@@ -2247,7 +2253,7 @@ msgstr ""
 #. the default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:985
 msgid "Archive | Archives"
-msgstr ""
+msgstr "アーカイブ"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -2362,7 +2368,7 @@ msgstr "アカウント"
 
 #: ui/accounts_editor_list_pane.ui:63
 msgid "To get started, select an email provider below."
-msgstr "以下の中からメールプロバイダーを選択してください。"
+msgstr "以下からメールプロバイダーを選択してください。"
 
 #: ui/accounts_editor_list_pane.ui:76
 msgid "Welcome to Geary"
@@ -2742,7 +2748,7 @@ msgstr "次の場所からメッセージを検索"
 
 #: ui/conversation-message.ui:64
 msgid "From <email>"
-msgstr "送信者 <email>"
+msgstr "差出人 <email>"
 
 #: ui/conversation-message.ui:80 ui/conversation-message.ui:179
 msgid "1/1/1970\t"
@@ -2782,11 +2788,11 @@ msgstr "信頼できる送信者のリモート画像のみ表示するように
 
 #: ui/conversation-message.ui:693
 msgid "But actually goes to:"
-msgstr ""
+msgstr "実際の行き先:"
 
 #: ui/conversation-message.ui:724
 msgid "The link appears to go to:"
-msgstr ""
+msgstr "リンクの表示上の行き先:"
 
 #: ui/conversation-message.ui:736
 msgid "Deceptive link found"
@@ -3129,8 +3135,8 @@ msgid ""
 "Your computer does not appear to be connected to the Internet.\n"
 "You will not be able to send or receive email until it is re-connected."
 msgstr ""
-"コンピューターのインターネット接続が有効ではありません。\n"
-"有効になるまでメールの送受信はできません。"
+"コンピューターがインターネットに接続していません。\n"
+"再接続するまでメールの送受信はできません。"
 
 #. Label and tooltip for offline infobar
 #: ui/main-window.ui:200
@@ -3286,7 +3292,7 @@ msgstr "クリップボードにコピー"
 #: ui/problem-details-dialog.ui:21
 msgid ""
 "Copy technical details to clipboard for pasting into an email or bug report"
-msgstr "バグ報告用の技術的な詳細情報をクリップボードにコピーします"
+msgstr "バグ報告用の技術的な詳細情報をクリップボードにコピー"
 
 #: ui/problem-details-dialog.ui:73
 msgid ""
