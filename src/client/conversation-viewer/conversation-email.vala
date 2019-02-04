@@ -625,6 +625,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             try {
                 yield update_body();
             } catch (GLib.Error err) {
+                this.body_loading_timeout.reset();
                 handle_load_failure(err);
                 throw err;
             }
