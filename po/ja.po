@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-02 10:51+0000\n"
-"PO-Revision-Date: 2019-02-02 19:48+0000\n"
+"POT-Creation-Date: 2019-02-03 15:42+0000\n"
+"PO-Revision-Date: 2019-02-06 07:16+0900\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -162,11 +162,11 @@ msgstr "氏名"
 
 #: ../src/client/accounts/add-edit-page.vala:235
 msgid "Welcome to Geary."
-msgstr "Geary へようこそ"
+msgstr "Geary へようこそ。"
 
 #: ../src/client/accounts/add-edit-page.vala:235
 msgid "Enter your account information to get started."
-msgstr "アカウント情報を入力してください"
+msgstr "アカウント情報を入力してください。"
 
 #: ../src/client/accounts/add-edit-page.vala:255
 msgid "2 weeks back"
@@ -297,11 +297,11 @@ msgstr "スレッドのモニタリングを記録する"
 
 #: ../src/client/application/geary-args.vala:13
 msgid "Log network deserialization"
-msgstr "ネットワークログをデシリアライズする"
+msgstr "ネットワークのデシリアライズを記録する"
 
 #: ../src/client/application/geary-args.vala:14
 msgid "Log network activity"
-msgstr "ネットワーク情報を記録する"
+msgstr "ネットワークのアクティビティを記録する"
 
 #. / The IMAP replay queue is how changes on the server are replicated on the client.
 #. / It could also be called the IMAP events queue.
@@ -317,7 +317,7 @@ msgstr "ネットワークのストリームを記録する"
 
 #: ../src/client/application/geary-args.vala:21
 msgid "Log periodic activity"
-msgstr "定期的な行動を記録する"
+msgstr "定期的なアクティビティを記録する"
 
 #: ../src/client/application/geary-args.vala:22
 msgid "Log database queries (generates lots of messages)"
@@ -334,7 +334,7 @@ msgstr "WebView での検証を有効にする"
 
 #: ../src/client/application/geary-args.vala:26
 msgid "Revoke all server certificates with TLS warnings"
-msgstr "TLS の警告ですべてのサーバー証明書を失効させる"
+msgstr "TLS 警告のあるサーバー証明書をすべて失効させる"
 
 #: ../src/client/application/geary-args.vala:27
 msgid "Perform a graceful quit"
@@ -348,7 +348,7 @@ msgstr "プログラムのバージョンを表示する"
 #: ../src/client/application/geary-args.vala:53
 #, c-format
 msgid "Use %s to open a new composer window"
-msgstr "%s を使用して新規作成ウィンドウを開く"
+msgstr "%s を使って新規作成ウィンドウを開くことができます"
 
 #: ../src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
@@ -449,11 +449,11 @@ msgstr "未読としてマーク(_U)"
 
 #: ../src/client/application/geary-controller.vala:465
 msgid "_Star"
-msgstr "星を付ける(_S)"
+msgstr "星をつける(_S)"
 
 #: ../src/client/application/geary-controller.vala:470
 msgid "U_nstar"
-msgstr "星をはずす(_N)"
+msgstr "星を外す(_N)"
 
 #: ../src/client/application/geary-controller.vala:480
 msgid "Add label"
@@ -560,7 +560,7 @@ msgid ""
 "please manually delete the email from your Outbox folder."
 msgstr ""
 "メール送信時にエラーが発生しました。問題を解決できない場合は、メールを手動で"
-"送信済みトレイから削除してください。"
+"送信トレイから削除してください。"
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
@@ -574,8 +574,8 @@ msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
 msgstr ""
-"メールを送信済みトレイに保存するときにエラーが発生しました。削除するまでこの"
-"メッセージを送信済みトレイに表示します。"
+"メールを送信済みメールとして保存するときにエラーが発生しました。このメッセージは"
+"手動で削除するまで送信トレイに残ります。"
 
 #: ../src/client/application/geary-controller.vala:1151
 msgid "Labels"
@@ -697,7 +697,7 @@ msgstr "移動を元に戻す(Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2026
 msgid "Are you sure you want to open these attachments?"
-msgstr "これらの添付ファイルをを開きますか?"
+msgstr "これらの添付ファイルを開いてもよろしいですか?"
 
 #: ../src/client/application/geary-controller.vala:2027
 msgid ""
@@ -753,7 +753,7 @@ msgstr "%s を空にする"
 #: ../src/client/application/geary-controller.vala:2527
 #, c-format
 msgid "Error emptying %s"
-msgstr "%s を空にする際にエラーが発生しました"
+msgstr "%s を空にするときにエラーが発生しました"
 
 #: ../src/client/application/geary-controller.vala:2557
 msgid "Do you want to permanently delete this message?"
@@ -863,7 +863,7 @@ msgstr "保持(_K)"
 
 #: ../src/client/composer/composer-link-popover.vala:150
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
-msgstr "リンク URL の書式が間違っています (例: http://example.com )"
+msgstr "リンク URL の書式が間違っています (例: http://example.com)"
 
 #: ../src/client/composer/composer-link-popover.vala:157
 msgid "Invalid link URL"
@@ -1153,11 +1153,11 @@ msgstr "サーバーの証明書が有効になっていません"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:85
 msgid "The server’s certificate has been revoked and is now invalid"
-msgstr "このサーバーの証明書は失効しているため現在無効です"
+msgstr "サーバーの証明書は失効しているため現在無効です"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:88
 msgid "The server’s certificate is considered insecure"
-msgstr "このサーバーの証明書は安全ではないと思われます"
+msgstr "サーバーの証明書が安全ではありません"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:91
 msgid "An error has occurred processing the server’s certificate"
@@ -1239,7 +1239,7 @@ msgstr "開く"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/client/util/util-date.vala:68
 msgid "%l:%M %P"
-msgstr "%l:%M %P"
+msgstr "%p %I:%M"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -1252,13 +1252,13 @@ msgstr "%H:%M"
 #: ../src/client/util/util-date.vala:74
 msgctxt "Default clock format"
 msgid "%l:%M %P"
-msgstr "%l:%M %P"
+msgstr "%p %I:%M"
 
 #. / Date format for dates within the current year, i.e. Nov 8
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/client/util/util-date.vala:78
 msgid "%b %-e"
-msgstr "%b %-e日"
+msgstr "%B%-e日"
 
 #. / Date format for dates within a different year, i.e. 02/04/10
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -1271,20 +1271,20 @@ msgstr "%x"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/client/util/util-date.vala:88
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%Y年 %B %-e日, %-l:%M %P"
+msgstr "%Y年%m月%d日, %p %I:%M"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/client/util/util-date.vala:91
 msgid "%B %-e, %Y %-H:%M"
-msgstr "%Y年 %B %-e日, %-H:%M"
+msgstr "%Y年%m月%d日, %H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/client/util/util-date.vala:94
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%Y年 %B %-e日, %-l:%M %P"
+msgstr "%Y年%m月%d日, %p %I:%M"
 
 #: ../src/client/util/util-date.vala:164
 msgid "Now"
@@ -1380,7 +1380,7 @@ msgstr "送信済みメール"
 
 #: ../src/engine/api/geary-special-folder-type.vala:33
 msgid "Starred"
-msgstr "星"
+msgstr "星つき"
 
 #: ../src/engine/api/geary-special-folder-type.vala:36
 msgid "Important"
@@ -1584,7 +1584,7 @@ msgstr ""
 #. default. English names do not need to be included.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:626
 msgid "Drafts | Draft"
-msgstr ""
+msgstr "下書き"
 
 #. List of general possible folder names to match for the
 #. Sent mailbox. Separate names using a vertical bar and
@@ -1592,14 +1592,14 @@ msgstr ""
 #. default. English names do not need to be included.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:635
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
-msgstr ""
+msgstr "送信済み | 送信 | 送信メール | 送信済みメール | 送信済メール"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:640
 msgctxt "Outlook localised name"
 msgid "Sent Items"
-msgstr ""
+msgstr "送信したアイテム"
 
 #. List of general possible folder names to match for the
 #. Spam mailbox. Separate names using a vertical bar and
@@ -1609,7 +1609,7 @@ msgstr ""
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
-msgstr ""
+msgstr "迷惑メール | スパム | スパムメール | ごみ | ゴミ"
 
 #. List of general possible folder names to match for the
 #. Trash mailbox. Separate names using a vertical bar and
@@ -1617,14 +1617,14 @@ msgstr ""
 #. default. English names do not need to be included.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:660
 msgid "Trash | Rubbish | Rubbish Bin"
-msgstr ""
+msgstr "ごみ箱 | ゴミ箱"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:665
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
-msgstr ""
+msgstr "削除したアイテム"
 
 #. List of general possible folder names to match for the
 #. Archive mailbox. Separate names using a vertical bar
@@ -1632,13 +1632,13 @@ msgstr ""
 #. the default. English names do not need to be included.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:675
 msgid "Archive | Archives"
-msgstr ""
+msgstr "アーカイブ"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/engine/rfc822/rfc822-utils.vala:236
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%Y %b %-e日 (%a), %l:%M %p"
+msgstr "%Y年%m月%d日(%a), %p %I:%M"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
@@ -1653,7 +1653,7 @@ msgstr ""
 #: ../src/engine/rfc822/rfc822-utils.vala:249
 #, c-format
 msgid "%s wrote:"
-msgstr "%s wrote:"
+msgstr ""
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
@@ -1883,11 +1883,11 @@ msgstr "差出人"
 
 #: ../ui/composer-widget.ui.h:9
 msgid "Drop files here"
-msgstr "ここにファイルをドロップ"
+msgstr "ここにファイルをドロップしてください"
 
 #: ../ui/composer-widget.ui.h:10
 msgid "To add them as attachments"
-msgstr "添付ファイルとして追加"
+msgstr "添付ファイルとして追加します"
 
 #: ../ui/composer-widget.ui.h:11
 msgid "Undo last edit (Ctrl+Z)"
@@ -1986,7 +1986,7 @@ msgstr "メッセージが保存されませんでした"
 #: ../ui/conversation-email.ui.h:14
 msgid "This message was sent, but has not been saved to your account."
 msgstr ""
-"このメッセージは送信されましたが、お使いのアカウントに保存されませんでした。"
+"このメッセージを送信しましたが、お使いのアカウントに保存されませんでした。"
 
 #: ../ui/conversation-email-menus.ui.h:2
 msgid "Reply to _All"
@@ -2038,11 +2038,11 @@ msgstr "すべて選択(_S)"
 
 #: ../ui/conversation-message-menus.ui.h:8
 msgid "Search for messages from"
-msgstr "次の場所からメッセージを検索"
+msgstr "この差出人からのメッセージを検索"
 
 #: ../ui/conversation-message.ui.h:1
 msgid "From <email>"
-msgstr "送信者 <email>"
+msgstr "差出人 <email>"
 
 #: ../ui/conversation-message.ui.h:2
 msgid "1/1/1970\t"
@@ -2094,11 +2094,11 @@ msgstr "信頼できる送信者のリモート画像のみ表示するように
 
 #: ../ui/conversation-message.ui.h:14
 msgid "But actually goes to:"
-msgstr ""
+msgstr "実際の行き先:"
 
 #: ../ui/conversation-message.ui.h:15
 msgid "The link appears to go to:"
-msgstr ""
+msgstr "リンクの表示上の行き先:"
 
 #: ../ui/conversation-message.ui.h:16
 msgid "Deceptive link found"
@@ -2107,7 +2107,7 @@ msgstr "虚偽リンクが見つかりました"
 #: ../ui/conversation-message.ui.h:17
 msgid "The email sender may be leading you to the wrong web site."
 msgstr ""
-"このメールの送信者は間違ったウェブサイトに誘導している可能性があります。"
+"このメールの送信者は不適切なウェブサイトに誘導している可能性があります。"
 
 #: ../ui/conversation-message.ui.h:18
 msgid "If unsure, contact the sender and ask before continuing."
@@ -2367,22 +2367,22 @@ msgstr "リッチテキストモード"
 #: ../ui/gtk/help-overlay.ui.h:42
 msgctxt "shortcut window"
 msgid "Bold text"
-msgstr "太字"
+msgstr "テキストを太字にする"
 
 #: ../ui/gtk/help-overlay.ui.h:43
 msgctxt "shortcut window"
 msgid "Italicize text"
-msgstr "斜体"
+msgstr "テキストを斜体にする"
 
 #: ../ui/gtk/help-overlay.ui.h:44
 msgctxt "shortcut window"
 msgid "Underline text"
-msgstr "下線"
+msgstr "テキストに下線を引く"
 
 #: ../ui/gtk/help-overlay.ui.h:45
 msgctxt "shortcut window"
 msgid "Strike text"
-msgstr "取り消し線"
+msgstr "テキストに取り消し線を引く"
 
 #: ../ui/gtk/help-overlay.ui.h:46
 msgctxt "shortcut window"
@@ -2580,7 +2580,7 @@ msgstr "スレッドプレビューを表示する(_D)"
 
 #: ../ui/preferences-dialog.ui.h:4
 msgid "Use _three pane view"
-msgstr "3ペインビューを使用する(_T)"
+msgstr "3ペインビューを使う(_T)"
 
 #: ../ui/preferences-dialog.ui.h:5
 msgid "Notifications"
@@ -2632,7 +2632,7 @@ msgstr "メールアドレス:"
 
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
-msgstr "Geary をアップデートしています…"
+msgstr "Geary を更新しています…"
 
 #~ msgid "Archive conversation (Delete, Backspace, A)"
 #~ msgstr "スレッドをアーカイブ (Delete, Backspace, A)"
