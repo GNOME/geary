@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-04 17:57+0000\n"
-"PO-Revision-Date: 2019-02-05 07:00+0000\n"
+"POT-Creation-Date: 2019-02-04 23:02+0000\n"
+"PO-Revision-Date: 2019-02-06 07:55+0000\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -132,27 +132,28 @@ msgstr "メッセージを作成"
 
 #: desktop/org.gnome.Geary.gschema.xml:8
 msgid "Maximize window"
-msgstr ""
+msgstr "ウィンドウの最大化"
 
 #: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
-msgstr ""
+msgstr "アプリケーションウィンドウが最大化されている場合は true、"
+"そうでない場合は false です。"
 
 #: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
-msgstr ""
+msgstr "ウィンドウの幅"
 
 #: desktop/org.gnome.Geary.gschema.xml:15
 msgid "The last recorded width of the application window."
-msgstr ""
+msgstr "最後に記録したアプリケーションウィンドウの幅です。"
 
 #: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Height of window"
-msgstr ""
+msgstr "ウィンドウの高さ"
 
 #: desktop/org.gnome.Geary.gschema.xml:21
 msgid "The last recorded height of the application window."
-msgstr ""
+msgstr "最後に記録したアプリケーションウィンドウの高さです。"
 
 #: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Position of folder list pane"
@@ -2026,7 +2027,7 @@ msgstr "ごみ箱"
 
 #: src/engine/api/geary-special-folder-type.vala:48
 msgid "Outbox"
-msgstr "送信済みトレイ"
+msgstr "送信トレイ"
 
 #: src/engine/api/geary-special-folder-type.vala:54
 msgid "Archive"
@@ -2214,7 +2215,7 @@ msgstr "下書き"
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:945
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
-msgstr "送信 | 送信メール | 送信済みメール | 送信済メール"
+msgstr "送信済み | 送信 | 送信メール | 送信済みメール | 送信済メール"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
