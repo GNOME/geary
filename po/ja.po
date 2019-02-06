@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-03 15:42+0000\n"
-"PO-Revision-Date: 2019-02-06 07:16+0900\n"
+"POT-Creation-Date: 2019-02-05 22:43+0000\n"
+"PO-Revision-Date: 2019-02-06 19:00+0900\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -574,8 +574,8 @@ msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
 msgstr ""
-"メールを送信済みメールとして保存するときにエラーが発生しました。このメッセージは"
-"手動で削除するまで送信トレイに残ります。"
+"送信したメッセージを送信済みメールとして保存するときにエラーが発生しました。"
+"このメッセージは手動で削除するまで送信トレイに残ります。"
 
 #: ../src/client/application/geary-controller.vala:1151
 msgid "Labels"
@@ -1638,7 +1638,7 @@ msgstr "アーカイブ"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/engine/rfc822/rfc822-utils.vala:236
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%Y年%m月%d日(%a), %p %I:%M"
+msgstr "%Y/%m/%d, %H:%M"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
@@ -1664,7 +1664,7 @@ msgstr ""
 
 #: ../src/engine/rfc822/rfc822-utils.vala:282
 msgid "---------- Forwarded message ----------"
-msgstr "---------- 転送されたメッセージ ----------"
+msgstr ""
 
 #: ../src/engine/rfc822/rfc822-utils.vala:286
 #, c-format
