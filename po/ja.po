@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-04 23:02+0000\n"
-"PO-Revision-Date: 2019-02-06 07:55+0000\n"
+"POT-Creation-Date: 2019-02-05 22:59+0000\n"
+"PO-Revision-Date: 2019-02-06 19:00+0900\n"
 "Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -136,8 +136,9 @@ msgstr "ウィンドウの最大化"
 
 #: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
-msgstr "アプリケーションウィンドウが最大化されている場合は true、"
-"そうでない場合は false です。"
+msgstr ""
+"アプリケーションウィンドウが最大化されている場合は true、そうでない場合は "
+"false です。"
 
 #: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
@@ -205,42 +206,39 @@ msgid "True if we should autoselect the next available conversation."
 msgstr "次の利用可能なスレッドを自動的に選択する場合は true にしてください。"
 
 #: desktop/org.gnome.Geary.gschema.xml:62
-#, fuzzy
-#| msgid "_Display conversation preview"
 msgid "Display message previews"
-msgstr "スレッドプレビューを表示する(_D)"
+msgstr "メッセージのプレビューを表示する"
 
 #: desktop/org.gnome.Geary.gschema.xml:63
 msgid "True if we should display a short preview of each message."
-msgstr ""
+msgstr "各メッセージの短いプレビューを表示する場合は true にしてください。"
 
 #: desktop/org.gnome.Geary.gschema.xml:68
 msgid "Languages that shall be used in the spell checker"
-msgstr ""
+msgstr "スペルチェックする言語"
 
 #: desktop/org.gnome.Geary.gschema.xml:69
 msgid "List of the languages to use in the spell checker."
-msgstr ""
+msgstr "スペルをチェックする言語の一覧です。"
 
 #: desktop/org.gnome.Geary.gschema.xml:74
 msgid "Languages that are displayed in the spell checker popover"
-msgstr ""
+msgstr "スペルチェッカーのポップオーバーメニューに表示する言語"
 
 #: desktop/org.gnome.Geary.gschema.xml:75
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr ""
+"スペルチェッカーのポップオーバーメニューに常に表示する言語の一覧です。"
 
 #: desktop/org.gnome.Geary.gschema.xml:80
-#, fuzzy
-#| msgid "_Play notification sounds"
 msgid "Enable notification sounds"
-msgstr "通知音を鳴らす(_P)"
+msgstr "通知音を有効にする"
 
 #: desktop/org.gnome.Geary.gschema.xml:81
 msgid "True to play sounds for notifications and sending."
-msgstr ""
+msgstr "true にすると通知時と送信時に音を鳴らします。"
 
 #: desktop/org.gnome.Geary.gschema.xml:86
 msgid "Show notifications for new mail"
@@ -252,11 +250,11 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:92
 msgid "Notify of new mail at startup"
-msgstr ""
+msgstr "起動時に新着メールを通知する"
 
 #: desktop/org.gnome.Geary.gschema.xml:93
 msgid "True to notify of new mail at startup."
-msgstr ""
+msgstr "true にすると起動時に新着メールを通知します。"
 
 #: desktop/org.gnome.Geary.gschema.xml:98
 msgid "Ask when opening an attachment"
@@ -264,15 +262,15 @@ msgstr "添付ファイルを開くときに確認する"
 
 #: desktop/org.gnome.Geary.gschema.xml:99
 msgid "True to ask when opening an attachment."
-msgstr "添付ファイルを開くときに確認します。"
+msgstr "true にすると添付ファイルを開くときに確認します。"
 
 #: desktop/org.gnome.Geary.gschema.xml:104
 msgid "Whether to compose emails in HTML"
-msgstr ""
+msgstr "HTML メールを作成するかどうか"
 
 #: desktop/org.gnome.Geary.gschema.xml:105
 msgid "True to compose emails in HTML; false for plain text."
-msgstr ""
+msgstr "true にすると HTML メール、false にするとテキストメールを作成します。"
 
 #: desktop/org.gnome.Geary.gschema.xml:110
 msgid "Advisory strategy for full-text searching"
@@ -281,7 +279,7 @@ msgstr ""
 #: desktop/org.gnome.Geary.gschema.xml:111
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
-msgstr "許容できる値は“exact”, “conservative”, “aggressive”, “horizon”です。"
+msgstr "許容できる値は“exact”、“conservative”、“aggressive”、“horizon”です。"
 
 #: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Zoom of conversation viewer"
@@ -293,11 +291,11 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:122
 msgid "Size of detached composer window"
-msgstr ""
+msgstr "分離した作成ウィンドウのサイズ"
 
 #: desktop/org.gnome.Geary.gschema.xml:123
 msgid "The last recorded size of the detached composer window."
-msgstr ""
+msgstr "最後に記録した、分離した作成ウィンドウのサイズです。"
 
 #: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Base URL to look up contact avatars"
@@ -307,7 +305,7 @@ msgstr "アバター画像検索用のベース URL"
 msgid ""
 "A Gravatar or Libravatar compatible URL, set to the empty string to disable."
 msgstr ""
-"Gravatar または Libravatar 対応の URL。無効にする場合は空にしてください。"
+"Gravatar または Libravatar 対応の URLです。無効にする場合は空にしてください。"
 
 #: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
@@ -1183,7 +1181,7 @@ msgid ""
 "report"
 msgstr ""
 "Geary か %s のどちらかがメッセージを理解できないバグに遭遇したため、可能でし"
-"たらバグ報告を提出してください"
+"たらバグ報告してください"
 
 #: src/client/components/main-window-info-bar.vala:87
 msgid "Problem communicating with outgoing mail server"
@@ -1263,8 +1261,7 @@ msgstr "%s のメール確認時に問題が発生しました"
 #: src/client/components/main-window-info-bar.vala:132
 msgid "Something went wrong, please file a bug report if the problem persists"
 msgstr ""
-"何らかの不具合が発生しているため、問題が解決しない場合はバグ報告を提出してく"
-"ださい"
+"何らかの不具合が発生しているため、問題が解決しない場合はバグ報告してください"
 
 #. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:131
@@ -2261,7 +2258,7 @@ msgstr "アーカイブ"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/engine/rfc822/rfc822-utils.vala:236
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%Y年%m月%d日(%a), %p %I:%M"
+msgstr "%Y/%m/%d, %H:%M"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
@@ -2276,7 +2273,7 @@ msgstr ""
 #: src/engine/rfc822/rfc822-utils.vala:249
 #, c-format
 msgid "%s wrote:"
-msgstr "%s wrote:"
+msgstr ""
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
@@ -2287,7 +2284,7 @@ msgstr ""
 
 #: src/engine/rfc822/rfc822-utils.vala:282
 msgid "---------- Forwarded message ----------"
-msgstr "---------- 転送されたメッセージ ----------"
+msgstr ""
 
 #: src/engine/rfc822/rfc822-utils.vala:286
 #, c-format
@@ -3303,6 +3300,10 @@ msgid ""
 "or file a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">new "
 "bug report</a>."
 msgstr ""
+"問題が深刻な場合や継続して発生している場合は、詳細をコピーして"
+"<a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">メーリングリスト</a>"
+"に投稿するか、<a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">"
+"バグとして報告</a>してください。"
 
 #: ui/problem-details-dialog.ui:89
 msgid "Details:"
