@@ -89,7 +89,8 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     private Nonblocking.Queue<ClientSession> free_queue =
         new Nonblocking.Queue<ClientSession>.fifo();
 
-    private Cancellable? pool_cancellable = null;
+    private GLib.Cancellable? pool_cancellable = null;
+    private GLib.Cancellable? close_cancellable = null;
 
 
     public ClientService(AccountInformation account,
@@ -109,7 +110,8 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             );
         }
 
-        this.pool_cancellable = new Cancellable();
+        this.pool_cancellable = new GLib.Cancellable();
+        this.close_cancellable = new GLib.Cancellable();
         notify_started();
     }
 
@@ -125,7 +127,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         notify_stopped();
 
         this.pool_cancellable.cancel();
-        yield close_pool();
+        yield close_pool(true);
 
         // TODO: This isn't the best (deterministic) way to deal with
         // this, but it's easy and works for now
@@ -138,6 +140,12 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             // give up after three seconds
             if (++attempts > 12)
                 break;
+        }
+
+        if (this.all_sessions.size > 0) {
+            debug("[%s] Cancelling remaining client sessions...",
+                  this.account.id);
+            this.close_cancellable.cancel();
         }
     }
 
@@ -216,7 +224,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         );
 
         if (!this.is_running || this.discard_returned_sessions || too_many_free) {
-            yield force_disconnect(session);
+            yield disconnect_session(session);
         } else if (yield check_session(session, false)) {
             bool free = true;
             MailboxSpecifier? mailbox = null;
@@ -227,18 +235,30 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                 proto == ClientSession.ProtocolState.SELECTING) {
                 // always close mailbox to return to authorized state
                 try {
-                    yield session.close_mailbox_async(pool_cancellable);
+                    yield session.close_mailbox_async(this.close_cancellable);
                 } catch (ImapError imap_error) {
                     debug("Error attempting to close released session %s: %s",
                           session.to_string(), imap_error.message);
                     free = false;
                 }
 
-                if (session.get_protocol_state(null) !=
-                    ClientSession.ProtocolState.AUTHORIZED) {
-                    // Closing it didn't work, so drop it
-                    yield force_disconnect(session);
+                // Double check the session after closing it
+                switch (session.get_protocol_state(null)) {
+                case AUTHORIZED:
+                    // This is the desired state, so all good
+                    break;
+
+                case NOT_CONNECTED:
+                    // No longer connected, so just drop it
                     free = false;
+                    break;
+
+                default:
+                    // Closing it didn't leave it in the desired
+                    // state, so log out and drop it
+                    yield disconnect_session(session);
+                    free = false;
+                    break;
                 }
             }
 
@@ -256,7 +276,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
     /** Closes the client session pool. */
     protected override void became_unreachable() {
-        this.close_pool.begin();
+        this.close_pool.begin(false);
     }
 
     private async void check_pool(bool is_claiming) {
@@ -340,7 +360,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
         if (new_session == null) {
             // An error was thrown, so close the pool
-            this.close_pool.begin();
+            this.close_pool.begin(true);
         } else {
             try {
                 yield this.sessions_mutex.execute_locked(() => {
@@ -354,7 +374,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                       context.format_full_error());
                 notify_connection_failed(context);
                 new_session.disconnect_async.begin(null);
-                this.close_pool.begin();
+                this.close_pool.begin(true);
             }
         }
     }
@@ -371,7 +391,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         case ClientSession.ProtocolState.SELECTED:
         case ClientSession.ProtocolState.SELECTING:
             if (claiming) {
-                yield force_disconnect(target);
+                yield disconnect_session(target);
             } else {
                 valid = true;
             }
@@ -387,7 +407,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             break;
 
         default:
-            yield force_disconnect(target);
+            yield disconnect_session(target);
             break;
         }
 
@@ -408,7 +428,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             try {
                 debug("Sending NOOP when claiming a session");
                 yield target.send_command_async(
-                    new NoopCommand(), this.pool_cancellable
+                    new NoopCommand(), this.close_cancellable
                 );
             } catch (Error err) {
                 debug("Error sending NOOP: %s", err.message);
@@ -455,7 +475,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         return new_session;
     }
 
-    private async void close_pool() {
+    private async void close_pool(bool clean_disconnect) {
         debug("Closing the pool, disconnecting %d sessions",
               this.all_sessions.size);
 
@@ -475,12 +495,34 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         // waiting for any since we don't want to delay closing the
         // others.
         foreach (ClientSession session in to_close) {
-            session.disconnect_async.begin(null);
+            if (clean_disconnect) {
+                this.disconnect_session.begin(session);
+            } else {
+                this.force_disconnect_session.begin(session);
+            }
         }
     }
 
-    private async void force_disconnect(ClientSession session) {
-        debug("Dropping session %s", session.to_string());
+    private async void disconnect_session(ClientSession session) {
+        debug("[%s] Logging out session %s",
+              this.account.id, session.to_string());
+
+        // Log out before removing the session since close() only
+        // hangs around until all sessions have been removed before
+        // exiting.
+        try {
+            yield session.logout_async(this.close_cancellable);
+            yield remove_session_async(session);
+        } catch (GLib.Error err) {
+            debug("[%s] Error logging out of session: %s",
+                  this.account.id, err.message);
+            yield force_disconnect_session(session);
+        }
+
+    }
+
+    private async void force_disconnect_session(ClientSession session) {
+        debug("[%s] Dropping session %s", this.account.id, session.to_string());
 
         try {
             yield remove_session_async(session);
