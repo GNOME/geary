@@ -327,6 +327,25 @@ public class Geary.Imap.ClientConnection : BaseObject {
         );
     }
 
+    /**
+     * Returns the command that has been sent with the given tag.
+     *
+     * This should be private, but is internal for the
+     * ClientSession.on_received_status_response IDLE workaround.
+     */
+    internal Command? get_sent_command(Tag tag) {
+        Command? sent = null;
+        if (tag.is_tagged()) {
+            foreach (Command queued in this.sent_queue) {
+                if (tag.equal_to(queued.tag)) {
+                    sent = queued;
+                    break;
+                }
+            }
+        }
+        return sent;
+    }
+
     private async void open_channels_async() throws Error {
         assert(ios != null);
         assert(ser == null);
@@ -476,19 +495,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
             this.sent_queue.remove(command);
             throw ser_error;
         }
-    }
-
-    private Command? get_sent_command(Tag tag) {
-        Command? sent = null;
-        if (tag.is_tagged()) {
-            foreach (Command queued in this.sent_queue) {
-                if (tag.equal_to(queued.tag)) {
-                    sent = queued;
-                    break;
-                }
-            }
-        }
-        return sent;
     }
 
     private void check_connection() throws ImapError {
