@@ -24,7 +24,7 @@ internal abstract class Geary.App.ConversationOperation : BaseObject {
 
 
     public ConversationOperation(ConversationMonitor? monitor,
-                                 bool allow_duplicates = false) {
+                                 bool allow_duplicates = true) {
         this.monitor = monitor;
         this.allow_duplicates = allow_duplicates;
     }

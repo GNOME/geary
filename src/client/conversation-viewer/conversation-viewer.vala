@@ -220,6 +220,12 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         set_visible_child(this.empty_search_page);
     }
 
+    /** Shows and focuses the find entry. */
+    public void enable_find() {
+        this.conversation_find_bar.set_search_mode(true);
+        this.conversation_find_entry.grab_focus();
+    }
+
     /**
      * Shows a conversation in the viewer.
      */
@@ -246,7 +252,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         // are expanded and highlighted as they are added.
         this.conversation_find_next.set_sensitive(false);
         this.conversation_find_prev.set_sensitive(false);
-        new_list.search_matches_updated.connect((count) => {
+        new_list.search.matches_updated.connect((count) => {
                 bool found = count > 0;
                 this.conversation_find_entry.set_icon_from_icon_name(
                     Gtk.EntryIconPosition.PRIMARY,
@@ -383,7 +389,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                 }
             } else {
                 // Find became disabled, re-show search terms if any
-                this.current_list.unmark_search_terms();
+                this.current_list.search.unmark_terms();
                 Geary.SearchFolder? search_folder = (
                     this.current_list.conversation.base_folder
                     as Geary.SearchFolder
@@ -391,7 +397,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                 if (search_folder != null) {
                     Geary.SearchQuery? search_query = search_folder.search_query;
                     if (search_query != null) {
-                        this.current_list.highlight_matching_email.begin(
+                        this.current_list.search.highlight_matching_email.begin(
                             search_query
                         );
                     }
@@ -409,7 +415,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                 this.current_list.conversation.base_folder.account
             );
             if (query != null) {
-                this.current_list.highlight_matching_email.begin(query);
+                this.current_list.search.highlight_matching_email.begin(query);
             }
         }
     }

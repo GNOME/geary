@@ -1092,7 +1092,8 @@ private class Geary.ImapDB.Account : BaseObject {
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null)
         throws Error {
 
-        debug("Search: %s", q.to_string());
+        debug("Search terms, offset/limit: %s %d/%d",
+              q.to_string(), offset, limit);
 
         check_open();
         ImapDB.SearchQuery query = check_search_query(q);
@@ -1121,28 +1122,11 @@ private class Geary.ImapDB.Account : BaseObject {
 
         // Do this outside of transaction to catch invalid search ids up-front
         string? search_ids_sql = get_search_ids_sql(search_ids);
-        
-        // for some searches, results are stripped if they're too "greedy", but this requires
-        // examining the matched text, which has an expense to fetch, so avoid doing so unless
-        // necessary
-        bool strip_results = true;
-        
-        // HORIZON strategy is configured in such a way to allow all stemmed variants to match,
-        // so don't do any stripping in that case
-        //
-        // If any of the search terms is exact-match (no prefix matching) or none have stemmed
-        // variants, then don't do stripping of "greedy" stemmed matching (because in both cases,
-        // there are none)
-        if (query.strategy == Geary.SearchQuery.Strategy.HORIZON)
-            strip_results = false;
-        else if (traverse<SearchTerm>(query.get_all_terms()).any(term => term.stemmed == null || term.is_exact))
-            strip_results = false;
 
-        debug(strip_results ? "Stripping results..." : "Not stripping results...");
+        bool strip_greedy = should_strip_greedy_results(query);
+        Gee.Set<EmailIdentifier> matching_ids = new Gee.HashSet<EmailIdentifier>();
+        Gee.Map<EmailIdentifier,Gee.Set<string>>? search_matches = null;
 
-        Gee.Set<ImapDB.EmailIdentifier> unstripped_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
-        Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>>? search_results = null;
-        
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             string blacklisted_ids_sql = do_get_blacklisted_message_ids_sql(
                 folder_blacklist, cx, cancellable);
@@ -1198,47 +1182,38 @@ private class Geary.ImapDB.Account : BaseObject {
                 int64 internaldate_time_t = result.int64_at(1);
                 DateTime? internaldate = (internaldate_time_t == -1
                     ? null : new DateTime.from_unix_local(internaldate_time_t));
-                
+
                 ImapDB.EmailIdentifier id = new ImapDB.SearchEmailIdentifier(message_id, internaldate);
-                
-                unstripped_ids.add(id);
+                matching_ids.add(id);
                 id_map.set(message_id, id);
-                
+
                 result.next(cancellable);
             }
-            
-            if (!strip_results)
-                return Db.TransactionOutcome.DONE;
-            
-            search_results = do_get_search_matches(cx, query, id_map, cancellable);
-            
+
+
+            if (strip_greedy && !id_map.is_empty) {
+                search_matches = do_get_search_matches(
+                    cx, query, id_map, cancellable
+                );
+            }
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
-        if (unstripped_ids == null || unstripped_ids.size == 0)
-            return null;
-        
-        // at this point, there should be some "full" search results to strip from
-        if (strip_results)
-            assert(search_results != null && search_results.size > 0);
-        
+
+        debug("Matching emails found: %d", matching_ids.size);
+
         if (!removal_conditions.is_empty) {
-            if (!strip_results) {
-                search_results = new Gee.HashMap<ImapDB.EmailIdentifier, Gee.Set<string>>();
-                foreach (ImapDB.EmailIdentifier id in unstripped_ids)
-                    search_results.set(id, new Gee.HashSet<string>());
-            }
-            yield remove_results(query, search_results, removal_conditions, cancellable);
-            if (!strip_results)
-                return search_results.size == 0 ? null : search_results.keys;
+            yield strip_removal_conditions(
+                query, matching_ids, removal_conditions, cancellable
+            );
         }
-        
-        if (!strip_results)
-            return unstripped_ids;
-        
-        strip_greedy_results(query, search_results);
-        
-        return search_results.size == 0 ? null : search_results.keys;
+
+        if (strip_greedy && search_matches != null) {
+            strip_greedy_results(query, matching_ids, search_matches);
+        }
+
+        debug("Final search matches: %d", matching_ids.size);
+        return matching_ids.is_empty ? null : matching_ids;
     }
 
     private Gee.Map<Geary.NamedFlag, bool> get_removal_conditions(ImapDB.SearchQuery query) {
@@ -1258,18 +1233,21 @@ private class Geary.ImapDB.Account : BaseObject {
         return removal_conditions;
     }
 
-    private async void remove_results(ImapDB.SearchQuery query,
-        Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>> search_results,
-        Gee.Map<Geary.NamedFlag, bool> removal_conditions, Cancellable? cancellable = null) {
-        Geary.Email.Field required_fields = Geary.Email.Field.FLAGS;
-        Gee.MapIterator<ImapDB.EmailIdentifier, Gee.Set<string>> iter = search_results.map_iterator();
+    // Strip out from the given collection any email that matches the
+    // given removal conditions
+    private async void strip_removal_conditions(ImapDB.SearchQuery query,
+                                                Gee.Collection<EmailIdentifier> matches,
+                                                Gee.Map<Geary.NamedFlag, bool> conditions,
+                                                GLib.Cancellable? cancellable = null) {
+        Email.Field required_fields = Geary.Email.Field.FLAGS;
+        Gee.Iterator<EmailIdentifier> iter = matches.iterator();
         while (iter.next()) {
             try {
-                ImapDB.EmailIdentifier id = iter.get_key();
+                ImapDB.EmailIdentifier id = iter.get();
                 Geary.Email email = yield fetch_email_async(id, required_fields, cancellable);
-                foreach (Geary.NamedFlag flag in removal_conditions.keys)
-                    if (email.email_flags.contains(flag) == removal_conditions.get(flag)) {
-                        iter.unset();
+                foreach (Geary.NamedFlag flag in conditions.keys)
+                    if (email.email_flags.contains(flag) == conditions.get(flag)) {
+                        iter.remove();
                         break;
                     }
             } catch (Error e) {
@@ -1277,51 +1255,82 @@ private class Geary.ImapDB.Account : BaseObject {
             }
         }
     }
-    
-    // Strip out search results that only contain a hit due to "greedy" matching of the stemmed
-    // variants on all search terms
-    private void strip_greedy_results(ImapDB.SearchQuery query,
-        Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>> search_results) {
-        int prestripped_results = search_results.size;
-        Gee.MapIterator<ImapDB.EmailIdentifier, Gee.Set<string>> iter = search_results.map_iterator();
+
+    // For some searches, results are stripped if they're too
+    // "greedy", but this requires examining the matched text, which
+    // has an expense to fetch, so avoid doing so unless necessary
+    private bool should_strip_greedy_results(SearchQuery query) {
+        // HORIZON strategy is configured in such a way to allow all
+        // stemmed variants to match, so don't do any stripping in
+        // that case
+        //
+        // If any of the search terms is exact-match (no prefix
+        // matching) or none have stemmed variants, then don't do
+        // stripping of "greedy" stemmed matching (because in both
+        // cases, there are none)
+
+        bool strip_results = true;
+        if (query.strategy == Geary.SearchQuery.Strategy.HORIZON)
+            strip_results = false;
+        else if (traverse<SearchTerm>(query.get_all_terms()).any(
+                     term => term.stemmed == null || term.is_exact)) {
+            strip_results = false;
+        }
+        return strip_results;
+    }
+
+    // Strip out from the given collection of matching ids and results
+    // for any search results that only contain a hit due to "greedy"
+    // matching of the stemmed variants on all search terms.
+    private void strip_greedy_results(SearchQuery query,
+                                      Gee.Collection<EmailIdentifier> matches,
+                                      Gee.Map<EmailIdentifier,Gee.Set<string>> results) {
+        int prestripped_results = matches.size;
+        Gee.Iterator<EmailIdentifier> iter = matches.iterator();
         while (iter.next()) {
             // For each matched string in this message, retain the message in the search results
             // if it prefix-matches any of the straight-up parsed terms or matches a stemmed
             // variant (with only max. difference in their lengths allowed, i.e. not a "greedy"
             // match)
+            EmailIdentifier id = iter.get();
             bool good_match_found = false;
-            foreach (string match in iter.get_value()) {
-                foreach (SearchTerm term in query.get_all_terms()) {
-                    // if prefix-matches parsed term, then don't strip
-                    if (match.has_prefix(term.parsed)) {
-                        good_match_found = true;
-                        
-                        break;
-                    }
-                    
-                    // if prefix-matches stemmed term w/o doing so greedily, then don't strip
-                    if (term.stemmed != null && match.has_prefix(term.stemmed)) {
-                        int diff = match.length - term.stemmed.length;
-                        if (diff <= query.max_difference_match_stem_lengths) {
+            Gee.Set<string>? result = results.get(id);
+            if (result != null) {
+                foreach (string match in result) {
+                    foreach (SearchTerm term in query.get_all_terms()) {
+                        // if prefix-matches parsed term, then don't strip
+                        if (match.has_prefix(term.parsed)) {
                             good_match_found = true;
-                            
                             break;
+                        }
+
+                        // if prefix-matches stemmed term w/o doing so
+                        // greedily, then don't strip
+                        if (term.stemmed != null && match.has_prefix(term.stemmed)) {
+                            int diff = match.length - term.stemmed.length;
+                            if (diff <= query.max_difference_match_stem_lengths) {
+                                good_match_found = true;
+                                break;
+                            }
                         }
                     }
                 }
-                
-                if (good_match_found)
+
+                if (good_match_found) {
                     break;
+                }
             }
-            
-            if (!good_match_found)
-                iter.unset();
+
+            if (!good_match_found) {
+                iter.remove();
+                matches.remove(id);
+            }
         }
-        
+
         debug("Stripped %d emails from search for [%s] due to greedy stem matching",
-            prestripped_results - search_results.size, query.raw);
+              prestripped_results - matches.size, query.raw);
     }
-    
+
     public async Gee.Set<string>? get_search_matches_async(Geary.SearchQuery q,
         Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         check_open();
@@ -1338,9 +1347,11 @@ private class Geary.ImapDB.Account : BaseObject {
                 do_get_search_matches(cx, query, id_map, cancellable);
             if (match_map == null || match_map.size == 0)
                 return Db.TransactionOutcome.DONE;
-            
-            strip_greedy_results(query, match_map);
-            
+
+            if (should_strip_greedy_results(query)) {
+                strip_greedy_results(query, ids, match_map);
+            }
+
             search_matches = new Gee.HashSet<string>();
             foreach (Gee.Set<string> matches in match_map.values)
                 search_matches.add_all(matches);

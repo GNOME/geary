@@ -611,6 +611,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 // load timeout here since this will attempt to fetch
                 // from the remote
                 this.fetch_remote_body.begin();
+            } catch (GLib.IOError.CANCELLED err) {
+                this.body_loading_timeout.reset();
+                throw err;
             } catch (GLib.Error err) {
                 this.body_loading_timeout.reset();
                 handle_load_failure(err);
@@ -622,6 +625,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             try {
                 yield update_body();
             } catch (GLib.Error err) {
+                this.body_loading_timeout.reset();
                 handle_load_failure(err);
                 throw err;
             }

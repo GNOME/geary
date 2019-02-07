@@ -15,7 +15,7 @@ private class Geary.App.InsertOperation : ConversationOperation {
 
     public InsertOperation(ConversationMonitor monitor,
                            Gee.Collection<EmailIdentifier> inserted_ids) {
-        base(monitor, false);
+        base(monitor);
         this.inserted_ids = inserted_ids;
     }
 

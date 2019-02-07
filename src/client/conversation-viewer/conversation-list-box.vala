@@ -48,8 +48,189 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     private const int MARK_READ_PADDING = 50;
 
 
+    /** Manages find/search term matching in a conversation. */
+    public class SearchManager : Geary.BaseObject {
+
+
+        // The list that owns this manager
+        private weak ConversationListBox list;
+
+        // Conversation being managed
+        private Geary.App.Conversation conversation;
+
+        // Cached search terms to apply to new messages
+        private Gee.Set<string>? terms = null;
+
+        // Total number of search matches found
+        private uint matches_found = 0;
+
+        // Cancellable used when highlighting search matches
+        private GLib.Cancellable highlight_cancellable = new GLib.Cancellable();
+
+
+        /** Fired when the number of matching emails has changed. */
+        public signal void matches_updated(uint matches);
+
+
+        internal SearchManager(ConversationListBox list,
+                               Geary.App.Conversation conversation) {
+            this.list = list;
+            this.conversation = conversation;
+        }
+
+
+        /**
+         * Loads search term matches for this list's emails.
+         */
+        public async void highlight_matching_email(Geary.SearchQuery query)
+            throws GLib.Error {
+            cancel();
+
+            // Keep a copy of the current cancellable so it can't get
+            // changed out from underneath the execution of this method
+            GLib.Cancellable cancellable = this.highlight_cancellable;
+
+            Geary.Account account = this.conversation.base_folder.account;
+            Gee.Collection<Geary.EmailIdentifier>? matching =
+            yield account.local_search_async(
+                query,
+                this.conversation.get_count(),
+                0,
+                null,
+                this.conversation.get_email_ids(),
+                cancellable
+            );
+
+            if (matching != null) {
+                Gee.Set<string>? terms =
+                    yield account.get_search_matches_async(
+                        query, matching, cancellable
+                    );
+
+                if (cancellable.is_cancelled()) {
+                    throw new GLib.IOError.CANCELLED(
+                        "Search term highlighting cancelled"
+                    );
+                }
+
+                if (terms != null && !terms.is_empty) {
+                    this.terms = terms;
+
+                    // Scroll to the first matching row first
+                    EmailRow? first = null;
+                    foreach (Geary.EmailIdentifier id in matching) {
+                        EmailRow? row = this.list.get_email_row_by_id(id);
+                        if (row != null &&
+                            (first == null || row.get_index() < first.get_index())) {
+                            first = row;
+                        }
+                    }
+                    if (first != null) {
+                        this.list.scroll_to(first);
+                    }
+
+                    // Now expand them all
+                    foreach (Geary.EmailIdentifier id in matching) {
+                        EmailRow? row = this.list.get_email_row_by_id(id);
+                        if (row != null) {
+                            apply_terms(row, terms, cancellable);
+                            row.expand.begin();
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * Highlights matching terms in the given email row, if any.
+         */
+        internal void highlight_row_if_matching(EmailRow row) {
+            if (this.terms != null) {
+                apply_terms(row, this.terms, this.highlight_cancellable);
+            }
+        }
+
+        /**
+         * Removes search term highlighting from all messages.
+         */
+        public void unmark_terms() {
+            cancel();
+
+            this.list.foreach((child) => {
+                    EmailRow? row = child as EmailRow;
+                    if (row != null) {
+                        if (row.is_search_match) {
+                            row.is_search_match = false;
+                            foreach (ConversationMessage msg_view in row.view) {
+                                msg_view.unmark_search_terms();
+                            }
+                        }
+                    }
+                });
+        }
+
+        public void cancel() {
+            this.highlight_cancellable.cancel();
+            this.highlight_cancellable = new Cancellable();
+            this.terms = null;
+            this.matches_found = 0;
+            notify_matches_updated();
+        }
+
+        private void apply_terms(EmailRow row,
+                                 Gee.Set<string>? terms,
+                                 GLib.Cancellable cancellable) {
+            if (row.view.message_body_state == COMPLETED) {
+                this.apply_terms_impl.begin(
+                    row, terms, cancellable, apply_terms_impl_finished
+                );
+            } else {
+                row.view.notify["message-body-state"].connect(() => {
+                        this.apply_terms_impl.begin(
+                            row, terms, cancellable, apply_terms_impl_finished
+                        );
+                    });
+            }
+        }
+
+        // This should only be called from apply_terms above
+        private async uint apply_terms_impl(EmailRow row,
+                                            Gee.Set<string>? terms,
+                                            GLib.Cancellable cancellable)
+            throws GLib.IOError.CANCELLED {
+            uint count = 0;
+            foreach (ConversationMessage view in row.view) {
+                if (cancellable.is_cancelled()) {
+                    throw new GLib.IOError.CANCELLED(
+                        "Applying search terms cancelled"
+                    );
+                }
+                count += yield view.highlight_search_terms(terms, cancellable);
+            }
+
+            row.is_search_match = (count > 0);
+            return count;
+        }
+
+        private void apply_terms_impl_finished(GLib.Object? obj,
+                                               GLib.AsyncResult res) {
+            try {
+                this.matches_found += this.apply_terms_impl.end(res);
+                notify_matches_updated();
+            } catch (GLib.IOError.CANCELLED err) {
+                // All good
+            }
+        }
+
+        private inline void notify_matches_updated() {
+            matches_updated(this.matches_found);
+        }
+
+    }
+
+
     // Base class for list rows it the list box
-    private abstract class ConversationRow : Gtk.ListBoxRow, Geary.BaseInterface {
+    internal abstract class ConversationRow : Gtk.ListBoxRow, Geary.BaseInterface {
 
 
         protected const string EXPANDED_CLASS = "geary-expanded";
@@ -76,7 +257,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         public signal void should_scroll();
 
 
-        public ConversationRow(Geary.Email? email) {
+        protected ConversationRow(Geary.Email? email) {
             base_ref();
             this.email = email;
             show();
@@ -122,7 +303,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
 
     // Displays a single ConversationEmail in the list box
-    private class EmailRow : ConversationRow {
+    internal class EmailRow : ConversationRow {
 
 
         private const string MATCH_CLASS = "geary-matched";
@@ -181,7 +362,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
 
     // Displays a loading widget in the list box
-    private class LoadingRow : ConversationRow {
+    internal class LoadingRow : ConversationRow {
 
 
         protected const string LOADING_CLASS = "geary-loading";
@@ -203,7 +384,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
 
     // Displays a single embedded composer in the list box
-    private class ComposerRow : ConversationRow {
+    internal class ComposerRow : ConversationRow {
 
         // The embedded composer for this row
         public ComposerEmbed view { get; private set; }
@@ -281,6 +462,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /** Conversation being displayed. */
     public Geary.App.Conversation conversation { get; private set; }
 
+    /** Search manager for highlighting search terms in this list. */
+    public SearchManager search { get; private set; }
+
     // Used to load messages in conversation.
     private Geary.App.EmailStore email_store;
 
@@ -302,12 +486,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     // The id of the draft referred to by the current composer.
     private Geary.EmailIdentifier? draft_id = null;
-
-    // Cached search terms to apply to new messages
-    private Gee.Set<string>? search_terms = null;
-
-    // Total number of search matches found
-    private uint search_matches_found = 0;
 
     private Geary.TimeoutManager mark_read_timer;
 
@@ -365,9 +543,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     public signal void mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
-    /** Fired when an email that matches the current search terms is found. */
-    public signal void search_matches_updated(uint matches);
-
 
     /**
      * Constructs a new conversation list box instance.
@@ -382,6 +557,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.email_store = email_store;
         this.avatar_store = avatar_store;
         this.config = config;
+
+        this.search = new SearchManager(this, conversation);
 
         this.mark_read_timer = new Geary.TimeoutManager.milliseconds(
             MARK_READ_TIMEOUT_MSEC, this.check_mark_read
@@ -407,6 +584,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
     public override void destroy() {
+        this.search.cancel();
         this.cancellable.cancel();
         this.email_rows.clear();
         this.mark_read_timer.reset();
@@ -572,75 +750,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
     /**
-     * Loads search term matches for this list's emails.
-     */
-    public async void highlight_matching_email(Geary.SearchQuery query)
-        throws GLib.Error {
-        this.search_terms = null;
-        this.search_matches_found = 0;
-
-        Geary.Account account = this.conversation.base_folder.account;
-        Gee.Collection<Geary.EmailIdentifier>? matching =
-            yield account.local_search_async(
-                query,
-                this.conversation.get_count(),
-                0,
-                null,
-                this.conversation.get_email_ids(),
-                this.cancellable
-            );
-
-        if (matching != null) {
-            this.search_terms = yield account.get_search_matches_async(
-                query, matching, this.cancellable
-            );
-
-            if (this.search_terms != null) {
-                EmailRow? first = null;
-                foreach (Geary.EmailIdentifier id in matching) {
-                    EmailRow? row = this.email_rows.get(id);
-                    if (row != null &&
-                        (first == null || row.get_index() < first.get_index())) {
-                        first = row;
-                    }
-                }
-                if (first != null) {
-                    scroll_to(first);
-                }
-
-                foreach (Geary.EmailIdentifier id in matching) {
-                    EmailRow? row = this.email_rows.get(id);
-                    if (row != null) {
-                        apply_search_terms(row);
-                        row.expand.begin();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Removes search term highlighting from all messages.
-     */
-    public void unmark_search_terms() {
-        this.search_terms = null;
-        this.search_matches_found = 0;
-
-        this.foreach((child) => {
-                EmailRow? row = child as EmailRow;
-                if (row != null) {
-                    if (row.is_search_match) {
-                        row.is_search_match = false;
-                        foreach (ConversationMessage msg_view in row.view) {
-                            msg_view.unmark_search_terms();
-                        }
-                    }
-                }
-            });
-        search_matches_updated(this.search_matches_found);
-    }
-
-    /**
      * Increases the magnification level used for displaying messages.
      */
     public void zoom_in() {
@@ -668,6 +777,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 msg_view.web_view.zoom_reset();
                 return true;
             });
+    }
+
+    /** Returns the email row for the given id, if any. */
+    internal EmailRow? get_email_row_by_id(Geary.EmailIdentifier id) {
+        return this.email_rows.get(id);
     }
 
     private async void finish_loading(Geary.SearchQuery? query,
@@ -721,7 +835,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // XXX this sucks for large conversations because it can take
             // a long time for the load to complete and hence for
             // matches to show up.
-            yield highlight_matching_email(query);
+            yield this.search.highlight_matching_email(query);
         }
     }
 
@@ -762,6 +876,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
             row.view.load_avatar.begin(this.avatar_store);
+            this.search.highlight_row_if_matching(row);
             yield row.expand();
         }
     }
@@ -814,11 +929,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             insert(row, 0);
         }
         email_added(view);
-
-        // Apply any existing search terms to the new row
-        if (this.search_terms != null) {
-            apply_search_terms(row);
-        }
 
         return row;
     }
@@ -899,33 +1009,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             flags.add(Geary.EmailFlags.UNREAD);
             mark_emails(email_ids, null, flags);
         }
-    }
-
-    private void apply_search_terms(EmailRow row) {
-        if (row.view.message_body_state == COMPLETED) {
-            this.apply_search_terms_impl.begin(row);
-        } else {
-            row.view.notify["message-body-state"].connect(() => {
-                    this.apply_search_terms_impl.begin(row);
-                });
-        }
-    }
-
-    // This should only be called from apply_search_terms above
-    private async void apply_search_terms_impl(EmailRow row) {
-        bool found = false;
-        foreach (ConversationMessage view in row.view) {
-            if (this.search_terms == null) {
-                break;
-            }
-            uint count = yield view.highlight_search_terms(this.search_terms);
-            if (count > 0) {
-                found = true;
-            }
-            this.search_matches_found += count;
-        }
-        row.is_search_match = found;
-        search_matches_updated(this.search_matches_found);
     }
 
     /**
