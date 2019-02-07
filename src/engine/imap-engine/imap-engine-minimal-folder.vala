@@ -961,7 +961,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return;
         } catch (Error err) {
             ErrorContext context = new ErrorContext(err);
-            if (is_unrecoverable_failure(err)) {
+            if (!is_recoverable_failure(err)) {
                 debug("Unrecoverable failure opening remote, forcing closed: %s",
                       context.format_full_error());
                 yield force_close(

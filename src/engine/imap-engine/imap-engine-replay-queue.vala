@@ -532,7 +532,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                     // remote replay and not closing, re-schedule now
                     if (op.on_remote_error == RETRY &&
                         op.remote_retry_count <= MAX_OP_RETRIES &&
-                        !is_unrecoverable_failure(replay_err) &&
+                        is_recoverable_failure(replay_err) &&
                         state == State.OPEN) {
                         debug("Schedule op retry %s on %s", op.to_string(), to_string());
                         
