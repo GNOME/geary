@@ -1561,9 +1561,6 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (!reserve_state_change_cmd(params, state, event))
             return state;
 
-        // Leaving AUTHORIZED state, turn off IDLE
-        this.cx.enable_idle_when_quiet(false);
-
         return State.LOGGING_OUT;
     }
 
