@@ -198,8 +198,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 this.idle_timer.start();
             }
         } else {
-            this.idle_timer.reset();
-            exit_idle();
+            cancel_idle();
         }
     }
 
@@ -317,7 +316,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         this.pending_queue.send(new_command);
 
         // Exit IDLE so we can get on with life
-        exit_idle();
+        cancel_idle();
     }
 
     public string to_string() {
@@ -394,7 +393,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
         }
     }
 
-    private inline void exit_idle() {
+    private inline void cancel_idle() {
+        this.idle_timer.reset();
         IdleCommand? idle = this.current_command as IdleCommand;
         if (idle != null) {
             idle.exit_idle();
@@ -425,8 +425,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
                 // Only send IDLE commands if they are the last in the
                 // queue, there's no point otherwise.
-                bool pending_idle = pending is IdleCommand;
-                if (!pending_idle || this.pending_queue.is_empty) {
+                if (!(pending is IdleCommand) || this.pending_queue.is_empty) {
                     yield flush_command(pending, cancellable);
                 }
 
@@ -434,9 +433,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 // command, since that might have changed.
                 if (this.pending_queue.is_empty) {
                     yield this.ser.flush_stream(cancellable);
-                    if (this.idle_when_quiet && !pending_idle) {
-                        this.idle_timer.start();
-                    }
                 }
             } catch (GLib.Error err) {
                 if (!(err is GLib.IOError.CANCELLED)) {
@@ -504,37 +500,34 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
 
     private void on_parameters_ready(RootParameters root) {
-        ServerResponse response;
         try {
-            response = ServerResponse.migrate_from_server(root);
-
-            StatusResponse? status = response as StatusResponse;
-            if (status != null) {
-                on_status_response(status);
-                return;
-            }
-
-            ServerData? data = response as ServerData;
-            if (data != null) {
-                on_server_data(data);
-                return;
-            }
-
-            ContinuationResponse? continuation = response as ContinuationResponse;
-            if (continuation != null) {
-                on_continuation_response(continuation);
-                return;
+            ServerResponse response = ServerResponse.migrate_from_server(root);
+            GLib.Type type = response.get_type();
+            if (type == typeof(StatusResponse)) {
+                on_status_response((StatusResponse) response);
+            } else if (type == typeof(ServerData)) {
+                on_server_data((ServerData) response);
+            } else if (type == typeof(ContinuationResponse)) {
+                on_continuation_response((ContinuationResponse) response);
+            } else {
+                warning(
+                    "[%s] Unknown ServerResponse of type %s received: %s:",
+                    to_string(), response.get_type().name(),
+                    response.to_string()
+                );
             }
         } catch (ImapError err) {
             received_bad_response(root, err);
-            return;
         }
 
-        warning(
-            "[%s] Unknown ServerResponse of type %s received: %s:",
-            to_string(), response.get_type().name(),
-            response.to_string()
-        );
+
+        if (this.pending_queue.is_empty && this.sent_queue.is_empty) {
+            // There's nothing remaining to send, and every sent
+            // command has been dealt with, so ready an IDLE command.
+            if (this.idle_when_quiet) {
+                this.idle_timer.start();
+            }
+        }
     }
 
     private void on_status_response(StatusResponse status)
