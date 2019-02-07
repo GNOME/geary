@@ -490,6 +490,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     ~ClientSession() {
         switch (fsm.get_state()) {
             case State.NOT_CONNECTED:
+            case State.LOGGED_OUT:
             case State.CLOSED:
                 // no problem-o
             break;
