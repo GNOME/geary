@@ -452,7 +452,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.LOGGING_OUT, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.LOGOUT, Geary.State.nop),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_STATUS, on_dropped_response),
+            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_STATUS, on_logging_out_recv_status),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_COMPLETION, on_logging_out_recv_completion),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_ERROR, on_recv_error),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.SEND_ERROR, on_send_error),
@@ -1352,7 +1352,8 @@ public class Geary.Imap.ClientSession : BaseObject {
             break;
 
             case Status.BYE:
-                debug("[%s] Received BYE from server: %s", to_string(), status_response.to_string());
+                debug("[%s] Received unilateral BYE from server: %s",
+                      to_string(), status_response.to_string());
 
                 // nothing more we can do; drop connection and report disconnect to user
                 cx.disconnect_async.begin(null, on_bye_disconnect_completed);
@@ -1554,6 +1555,34 @@ public class Geary.Imap.ClientSession : BaseObject {
         this.cx.enable_idle_when_quiet(false);
 
         return State.LOGGING_OUT;
+    }
+
+    private uint on_logging_out_recv_status(uint state,
+                                            uint event,
+                                            void *user,
+                                            Object? object) {
+        StatusResponse status_response = (StatusResponse) object;
+
+        switch (status_response.status) {
+            case Status.OK:
+                // some good-feeling text that doesn't need to be
+                // handled when in this state
+            break;
+
+            case Status.BYE:
+                // We're expecting this bye, but don't disconnect yet
+                // since we'll do that when the command is complete
+                debug("[%s] Received bye from server on logout: %s",
+                      to_string(), status_response.to_string());
+            break;
+
+            default:
+                debug("[%s] Received error from server on logout: %s",
+                      to_string(), status_response.to_string());
+            break;
+        }
+
+        return state;
     }
 
     private uint on_logging_out_recv_completion(uint state, uint event, void *user, Object? object) {
