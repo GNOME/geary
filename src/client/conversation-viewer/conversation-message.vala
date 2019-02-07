@@ -523,10 +523,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         //pane.subtitle = _(
         //    "This email cannot currently be displayed"
         //);
-        this.body_placeholder = pane;
-        this.web_view.hide();
-        this.body_container.add(pane);
-        show_message_body(true);
+        show_placeholder_pane(pane);
         start_progress_pulse();
     }
 
@@ -549,10 +546,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         //pane.subtitle = _(
         //    "This email cannot currently be displayed"
         //);
-        this.body_placeholder = pane;
-        this.web_view.hide();
-        this.body_container.add(pane);
-        show_message_body(true);
+        show_placeholder_pane(pane);
         stop_progress_pulse();
     }
 
@@ -576,10 +570,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         // pane.subtitle = _(
         //     "This email will be downloaded when reconnected to the Internet"
         // );
-        this.body_placeholder = pane;
-        this.web_view.hide();
-        this.body_container.add(pane);
-        show_message_body(true);
+        show_placeholder_pane(pane);
         stop_progress_pulse();
     }
 
@@ -654,10 +645,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             throw new GLib.IOError.CANCELLED("Conversation load cancelled");
         }
 
-        this.web_view.show();
-        if (this.body_placeholder != null) {
-            this.body_placeholder.hide();
-        }
+        show_placeholder_pane(null);
 
         string? body_text = null;
         try {
@@ -897,6 +885,23 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.web_view.load_remote_images();
         if (remember) {
             flag_remote_images();
+        }
+    }
+
+    private void show_placeholder_pane(Gtk.Widget? placeholder) {
+        if (this.body_placeholder != null) {
+            this.body_placeholder.hide();
+            this.body_container.remove(this.body_placeholder);
+            this.body_placeholder = null;
+        }
+
+        if (placeholder != null) {
+            this.body_placeholder = placeholder;
+            this.web_view.hide();
+            this.body_container.add(placeholder);
+            show_message_body(true);
+        } else {
+            this.web_view.show();
         }
     }
 
