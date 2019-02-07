@@ -42,7 +42,7 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
     public enum OnError {
         THROW,
         RETRY,
-        IGNORE
+        IGNORE_REMOTE
     }
 
     public string name { get; set; }

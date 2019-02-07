@@ -37,7 +37,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
 
         public CloseReplayQueue() {
             // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe
-            base ("CloseReplayQueue", ReplayOperation.Scope.LOCAL_AND_REMOTE, OnError.IGNORE);
+            base ("CloseReplayQueue", ReplayOperation.Scope.LOCAL_AND_REMOTE, OnError.IGNORE_REMOTE);
         }
 
         public override async ReplayOperation.Status replay_local_async()
@@ -530,7 +530,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
 
                     // If a recoverable failure and operation allows
                     // remote replay and not closing, re-schedule now
-                    if (op.on_remote_error == ReplayOperation.OnError.RETRY &&
+                    if (op.on_remote_error == RETRY &&
                         op.remote_retry_count <= MAX_OP_RETRIES &&
                         !is_unrecoverable_failure(replay_err) &&
                         state == State.OPEN) {
@@ -541,15 +541,16 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                         // normalized
                         op.remote_retry_count++;
                         remote_queue.send(op);
-                        
+
                         continue;
-                    } else if (op.on_remote_error == ReplayOperation.OnError.IGNORE) {
+                    } else if (op.on_remote_error == IGNORE_REMOTE &&
+                               is_remote_error(replay_err)) {
                         // ignoring error, simply notify as completed and continue
-                        debug("Ignoring op %s on %s", op.to_string(), to_string());
+                        debug("Ignoring remote error op %s on %s", op.to_string(), to_string());
                     } else {
-                        debug("Throwing remote error for op %s on %s: %s", op.to_string(), to_string(),
+                        debug("Throwing error for op %s on %s: %s", op.to_string(), to_string(),
                             replay_err.message);
-                        
+
                         // store for notification
                         remote_err = replay_err;
                     }
