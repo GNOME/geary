@@ -188,34 +188,32 @@ public class ConversationListStore : Gtk.ListStore {
             emails.add_all(yield do_get_previews_async(needing_previews));
         if (emails.size < 1)
             return;
-        
-        debug("Displaying %d previews for %s...", emails.size, conversation_monitor.base_folder.to_string());
+
         foreach (Geary.Email email in emails) {
             Geary.App.Conversation? conversation = conversation_monitor.get_by_email_identifier(email.id);
-            if (conversation != null)
+            // The conversation can be null if e.g. a search is
+            // changing quickly and the original has evaporated
+            // already.
+            if (conversation != null) {
                 set_preview_for_conversation(conversation, email);
-            else
-                debug("Couldn't find conversation for %s", email.id.to_string());
+            }
         }
-        debug("Displayed %d previews for %s", emails.size, conversation_monitor.base_folder.to_string());
     }
-    
+
     private async Gee.Collection<Geary.Email> do_get_previews_async(
         Gee.Collection<Geary.EmailIdentifier> emails_needing_previews) {
         Geary.Folder.ListFlags flags = (loading_local_only) ? Geary.Folder.ListFlags.LOCAL_ONLY
             : Geary.Folder.ListFlags.NONE;
         Gee.Collection<Geary.Email>? emails = null;
         try {
-            debug("Loading %d previews...", emails_needing_previews.size);
             emails = yield email_store.list_email_by_sparse_id_async(emails_needing_previews,
                 ConversationListStore.WITH_PREVIEW_FIELDS, flags, cancellable);
-            debug("Loaded %d previews...", emails_needing_previews.size);
         } catch (Error err) {
             // Ignore NOT_FOUND, as that's entirely possible when waiting for the remote to open
             if (!(err is Geary.EngineError.NOT_FOUND))
-                debug("Unable to fetch preview: %s", err.message);
+                warning("Unable to fetch preview: %s", err.message);
         }
-        
+
         return emails ?? new Gee.ArrayList<Geary.Email>();
     }
     

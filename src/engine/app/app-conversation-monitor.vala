@@ -297,10 +297,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         this.base_folder.account.email_removed.connect(on_account_email_removed);
         this.base_folder.account.email_flags_changed.connect(on_account_email_flags_changed);
 
-        this.progress_monitor.start.connect(() => { debug("Monitor started"); });
-        this.progress_monitor.update.connect(() => { debug("Monitor progress"); });
-        this.progress_monitor.finish.connect(() => { debug("Monitor stopped"); });
-
         this.queue = new ConversationOperationQueue(this.progress_monitor);
         this.queue.operation_error.connect(on_operation_error);
         this.queue.add(new FillWindowOperation(this));
@@ -534,7 +530,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
 
         if (emails != null && !emails.is_empty) {
-            debug("Fetched %d relevant emails locally", emails.size);
+            Logging.debug(
+                Logging.Flag.CONVERSATIONS,
+                "Fetched %d relevant emails locally", emails.size
+            );
             yield process_email_async(emails, ProcessJobContext());
         }
     }
@@ -573,8 +572,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 this.operation_cancellable
             );
             if (count == 0) {
-                debug("Evaporating conversation %s because it has no emails in %s",
-                      conversation.to_string(), this.base_folder.to_string());
+                Logging.debug(
+                    Logging.Flag.CONVERSATIONS,
+                    "Evaporating conversation %s because it has no emails in %s",
+                    conversation.to_string(), this.base_folder.to_string()
+                );
                 this.conversations.remove_conversation(conversation);
                 evaporated.add(conversation);
             }
@@ -862,10 +864,18 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     Geary.EmailIdentifier? lowest = this.window_lowest;
                     if (lowest != null) {
                         if (lowest.natural_sort_comparator(id) < 0) {
-                            debug("Unflagging email %s for deletion resurrects conversation", id.to_string());
+                            Logging.debug(
+                                Logging.Flag.CONVERSATIONS,
+                                "Unflagging email %s for deletion resurrects conversation",
+                                id.to_string()
+                            );
                             inserted_ids.add(id);
                         } else {
-                            debug("Not resurrecting undeleted email %s outside of window", id.to_string());
+                            Logging.debug(
+                                Logging.Flag.CONVERSATIONS,
+                                "Not resurrecting undeleted email %s outside of window",
+                                id.to_string()
+                            );
                         }
                     }
                 }
@@ -883,13 +893,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // Remove conversation if get_emails yields an empty collection -- this probably means
             // the conversation was deleted.
             if (conversation.get_emails(Geary.App.Conversation.Ordering.NONE).size == 0) {
-                debug("Flagging email %s for deletion evaporates conversation %s", 
-                    id.to_string(), conversation.to_string());
-                
+                Logging.debug(
+                    Logging.Flag.CONVERSATIONS,
+                    "Flagging email %s for deletion evaporates conversation %s",
+                    id.to_string(), conversation.to_string()
+                );
                 this.conversations.remove_conversation(conversation);
                 removed_conversations.add(conversation);
                 removed_ids.add(id);
-            } 
+            }
         }
 
         // Notify about inserted messages
