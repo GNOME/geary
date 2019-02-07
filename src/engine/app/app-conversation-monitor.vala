@@ -307,7 +307,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             try {
                 yield stop_monitoring_internal(false, null);
             } catch (Error stop_error) {
-                debug("Error cleaning up after folder open error: %s", err.message);
+                warning(
+                    "Error cleaning up after folder open error: %s", err.message
+                );
             }
             throw err;
         }
@@ -516,14 +518,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
             yield folder.close_async(null);
             opened = false;
         } catch (Error err) {
-            debug("Error loading external emails: %s", err.message);
             if (opened) {
                 // Always try to close the opened folder
                 try {
                     yield folder.close_async(null);
                 } catch (Error close_err) {
-                    debug("Error closing folder %s: %s",
-                          folder.to_string(), close_err.message);
+                    warning("Error closing folder %s: %s",
+                            folder.to_string(), close_err.message);
                 }
             }
             throw err;
@@ -658,8 +659,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 // Always close the folder to prevent open leaks
                 closing = yield this.base_folder.close_async(null);
             } catch (Error err) {
-                debug("Unable to close monitored folder %s: %s",
-                      this.base_folder.to_string(), err.message);
+                warning("Unable to close monitored folder %s: %s",
+                        this.base_folder.to_string(), err.message);
                 close_err = err;
             }
         }
@@ -729,10 +730,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     out added, out appended, out removed_due_to_merge
                 );
             }
-        } catch (Error err) {
-            debug("Unable to add emails to conversation: %s", err.message);
-
-            // fall-through
+        } catch (GLib.IOError.CANCELLED err) {
+            // All good
+        } catch (GLib.Error err) {
+            warning("Unable to add emails to conversation: %s", err.message);
+            // Fall-through anyway
         }
 
         if (removed_due_to_merge != null && removed_due_to_merge.size > 0) {
@@ -921,7 +923,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
 
     private void on_operation_error(ConversationOperation op, Error err) {
-        debug("Error executing %s: %s", op.get_type().name(), err.message);
+        if (!(err is GLib.IOError.CANCELLED)) {
+            warning("Error executing %s: %s", op.get_type().name(), err.message);
+        }
         notify_scan_error(err);
     }
 
