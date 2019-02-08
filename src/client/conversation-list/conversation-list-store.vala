@@ -208,10 +208,13 @@ public class ConversationListStore : Gtk.ListStore {
         try {
             emails = yield email_store.list_email_by_sparse_id_async(emails_needing_previews,
                 ConversationListStore.WITH_PREVIEW_FIELDS, flags, cancellable);
-        } catch (Error err) {
-            // Ignore NOT_FOUND, as that's entirely possible when waiting for the remote to open
-            if (!(err is Geary.EngineError.NOT_FOUND))
-                warning("Unable to fetch preview: %s", err.message);
+        } catch (GLib.IOError.CANCELLED err) {
+            // All good
+        } catch (Geary.EngineError.NOT_FOUND err) {
+            // All good also, as that's entirely possible when waiting
+            // for the remote to open
+        } catch (GLib.Error err) {
+            warning("Unable to fetch preview: %s", err.message);
         }
 
         return emails ?? new Gee.ArrayList<Geary.Email>();
