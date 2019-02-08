@@ -160,8 +160,10 @@ int main(string[] args) {
     if (arg_debug) {
         Geary.Logging.init();
         Geary.Logging.log_to(stdout);
+        Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
+        GLib.Log.set_default_handler(Geary.Logging.default_handler);
     }
-    
+
     Geary.RFC822.init();
 
     credentials = new Geary.Credentials(
