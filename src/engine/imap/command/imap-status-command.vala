@@ -6,13 +6,17 @@
  */
 
 /**
+ * The IMAP STATUS command.
+ *
  * See [[http://tools.ietf.org/html/rfc3501#section-6.3.10]]
  *
  * @see StatusData
  */
 public class Geary.Imap.StatusCommand : Command {
 
-    public const string NAME = "status";
+
+    public const string NAME = "STATUS";
+
 
     public StatusCommand(MailboxSpecifier mailbox, StatusDataType[] data_items) {
         base (NAME);

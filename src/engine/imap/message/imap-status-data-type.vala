@@ -11,7 +11,6 @@
  *
  * @see StatusData
  */
-
 public enum Geary.Imap.StatusDataType {
     MESSAGES,
     RECENT,
@@ -26,20 +25,20 @@ public enum Geary.Imap.StatusDataType {
     public string to_string() {
         switch (this) {
             case MESSAGES:
-                return "messages";
-            
+                return "MESSAGES";
+
             case RECENT:
-                return "recent";
-            
+                return "RECENT";
+
             case UIDNEXT:
-                return "uidnext";
-            
+                return "UIDNEXT";
+
             case UIDVALIDITY:
-                return "uidvalidity";
-            
+                return "UIDVALIDITY";
+
             case UNSEEN:
-                return "unseen";
-            
+                return "UNSEEN";
+
             default:
                 assert_not_reached();
         }

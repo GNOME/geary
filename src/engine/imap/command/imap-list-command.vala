@@ -6,6 +6,8 @@
  */
 
 /**
+ * The IMAP LIST and proprietary XLIST commands.
+ *
  * See [[http://tools.ietf.org/html/rfc3501#section-6.3.8]]
  *
  * Some implementations may return the mailbox name itself when using wildcarding.  For example:
@@ -17,8 +19,10 @@
  */
 public class Geary.Imap.ListCommand : Command {
 
-    public const string NAME = "list";
+
+    public const string NAME = "LIST";
     public const string XLIST_NAME = "xlist";
+
 
     /**
      * LIST a particular mailbox by {@link MailboxSpecifier}.
