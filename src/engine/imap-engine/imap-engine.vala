@@ -18,8 +18,8 @@ namespace Geary.ImapEngine {
      * succeed if tried again unless some action is taken, such as
      * authentication failures, protocol parsing errors, and so on.
      */
-    private static bool is_unrecoverable_failure(GLib.Error err) {
-        return !(
+    private static bool is_recoverable_failure(GLib.Error err) {
+        return (
             err is EngineError.SERVER_UNAVAILABLE ||
             err is IOError.BROKEN_PIPE ||
             err is IOError.BUSY ||

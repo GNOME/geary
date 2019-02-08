@@ -82,7 +82,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
     
     public AbstractListEmail(string name, MinimalFolder owner, Geary.Email.Field required_fields,
         Folder.ListFlags flags, Cancellable? cancellable) {
-        base(name, OnError.IGNORE);
+        base(name, OnError.IGNORE_REMOTE);
         
         this.owner = owner;
         this.required_fields = required_fields;

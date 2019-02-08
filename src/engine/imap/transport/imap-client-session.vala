@@ -1735,38 +1735,48 @@ public class Geary.Imap.ClientSession : BaseObject {
 
     private void on_received_status_response(StatusResponse status_response) {
         this.last_seen = GLib.get_real_time();
-
-        // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
 
-        // If a CAPABILITIES ResponseCode, decode and update capabilities ...
-        // some servers do this to prevent a second round-trip
-        ResponseCode? response_code = status_response.response_code;
-        if (response_code != null) {
-            try {
-                if (response_code.get_response_code_type().is_value(ResponseCodeType.CAPABILITY)) {
-                    capabilities = response_code.get_capabilities(ref next_capabilities_revision);
-                    debug("[%s] %s %s", to_string(), status_response.status.to_string(),
-                        capabilities.to_string());
-                    
-                    capability(capabilities);
+        // XXX Need to ignore emitted IDLE status responses. They are
+        // emitted by ClientConnection because it doesn't make any
+        // sense not to, and so they get logged by that class's
+        // default handlers, but because they are snooped on here (and
+        // even worse are used to push FSM transitions, rather relying
+        // on the actual commands themselves), we need to check for
+        // IDLE responses and ignore them.
+        Command? command = this.cx.get_sent_command(status_response.tag);
+        if (command == null || !(command is IdleCommand)) {
+            // If a CAPABILITIES ResponseCode, decode and update
+            // capabilities ...  some servers do this to prevent a
+            // second round-trip
+            ResponseCode? response_code = status_response.response_code;
+            if (response_code != null) {
+                try {
+                    if (response_code.get_response_code_type().is_value(ResponseCodeType.CAPABILITY)) {
+                        capabilities = response_code.get_capabilities(ref next_capabilities_revision);
+                        debug("[%s] %s %s", to_string(), status_response.status.to_string(),
+                              capabilities.to_string());
+
+                        capability(capabilities);
+                    }
+                } catch (Error err) {
+                    debug("[%s] Unable to convert response code to capabilities: %s", to_string(),
+                          err.message);
                 }
-            } catch (Error err) {
-                debug("[%s] Unable to convert response code to capabilities: %s", to_string(),
-                    err.message);
             }
-        }
 
-        // update state machine before notifying subscribers, who may turn around and query ClientSession
-        if (status_response.is_completion) {
-            fsm.issue(Event.RECV_COMPLETION, null, status_response, null);
-        } else {
-            fsm.issue(Event.RECV_STATUS, null, status_response, null);
-        }
+            // update state machine before notifying subscribers, who
+            // may turn around and query ClientSession
+            if (status_response.is_completion) {
+                fsm.issue(Event.RECV_COMPLETION, null, status_response, null);
+            } else {
+                fsm.issue(Event.RECV_STATUS, null, status_response, null);
+            }
 
-        status_response_received(status_response);
+            status_response_received(status_response);
+        }
     }
-    
+
     private void notify_received_data(ServerData server_data) throws ImapError {
         switch (server_data.server_data_type) {
             case ServerDataType.CAPABILITY:

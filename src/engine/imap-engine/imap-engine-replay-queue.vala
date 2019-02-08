@@ -12,10 +12,18 @@
  * ensure the execution of the operations maintains consistent.
  */
 private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
-    // this value is high because delays between back-to-back unsolicited notifications have been
-    // see as high as 250ms
+
+    // Maximum number of times a retry-able operation should be
+    // retried before failing. It's set to 1 since we only attempt to
+    // retry if there's some transient error, so if it doesn't work
+    // second time around, it probably won't work at all.
+    private const int MAX_OP_RETRIES = 1;
+
+    // This value is high because delays between back-to-back
+    // unsolicited notifications have been see as high as 250ms
     private const int NOTIFICATION_QUEUE_WAIT_MSEC = 1000;
-    
+
+
     private enum State {
         OPEN,
         CLOSING,
@@ -29,7 +37,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
 
         public CloseReplayQueue() {
             // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe
-            base ("CloseReplayQueue", ReplayOperation.Scope.LOCAL_AND_REMOTE, OnError.IGNORE);
+            base ("CloseReplayQueue", ReplayOperation.Scope.LOCAL_AND_REMOTE, OnError.IGNORE_REMOTE);
         }
 
         public override async ReplayOperation.Status replay_local_async()
@@ -522,9 +530,10 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
 
                     // If a recoverable failure and operation allows
                     // remote replay and not closing, re-schedule now
-                    if ((op.on_remote_error == ReplayOperation.OnError.RETRY)
-                        && !is_unrecoverable_failure(replay_err)
-                        && state == State.OPEN) {
+                    if (op.on_remote_error == RETRY &&
+                        op.remote_retry_count <= MAX_OP_RETRIES &&
+                        is_recoverable_failure(replay_err) &&
+                        state == State.OPEN) {
                         debug("Schedule op retry %s on %s", op.to_string(), to_string());
                         
                         // the Folder will disconnect and reconnect due to the hard error and
@@ -532,15 +541,16 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                         // normalized
                         op.remote_retry_count++;
                         remote_queue.send(op);
-                        
+
                         continue;
-                    } else if (op.on_remote_error == ReplayOperation.OnError.IGNORE) {
+                    } else if (op.on_remote_error == IGNORE_REMOTE &&
+                               is_remote_error(replay_err)) {
                         // ignoring error, simply notify as completed and continue
-                        debug("Ignoring op %s on %s", op.to_string(), to_string());
+                        debug("Ignoring remote error op %s on %s", op.to_string(), to_string());
                     } else {
-                        debug("Throwing remote error for op %s on %s: %s", op.to_string(), to_string(),
+                        debug("Throwing error for op %s on %s: %s", op.to_string(), to_string(),
                             replay_err.message);
-                        
+
                         // store for notification
                         remote_err = replay_err;
                     }

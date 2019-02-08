@@ -22,7 +22,7 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
                         Cancellable? cancellable) {
         // IGNORE remote errors because the reconnect will re-normalize the folder, making this
         // append moot
-        base ("Append", Scope.REMOTE_ONLY, OnError.IGNORE);
+        base ("Append", Scope.REMOTE_ONLY, OnError.IGNORE_REMOTE);
 
         this.owner = owner;
         this.remote_count = remote_count;
