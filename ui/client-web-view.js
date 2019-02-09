@@ -176,6 +176,7 @@ PageState.prototype = {
             window.webkit.messageHandlers.selectionChanged.postMessage(hasSelection);
         }
     }
+
 };
 
 var geary = new PageState();

@@ -97,6 +97,16 @@ public class ConversationWebView : ClientWebView {
     }
 
     /**
+     * Returns the y value for a element, by its id
+     */
+    public async uint? get_anchor_target_y(string id) throws Error {
+        WebKit.JavascriptResult result = yield call(
+            Geary.JS.callable("geary.getAnchorTargetY").string(id), null
+        );
+        return (uint) WebKitUtil.to_number(result);
+    }
+
+    /**
      * Highlights user search terms in the message view.
      *
      * Returns the number of matching search terms.

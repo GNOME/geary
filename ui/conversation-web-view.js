@@ -244,6 +244,10 @@ ConversationPageState.prototype = {
         }
         return value;
     },
+    getAnchorTargetY: function(id) {
+        let anchorTarget = document.getElementById(id);
+        return anchorTarget.getBoundingClientRect().top+document.documentElement.scrollTop;
+    },
     linkClicked: function(link) {
         let cancelClick = false;
         let href = link.href;

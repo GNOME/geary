@@ -20,6 +20,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private const string FROM_CLASS = "geary-from";
     private const string MATCH_CLASS = "geary-match";
+    private const string INTERNAL_ANCHOR_PREFIX = "geary:body#";
     private const string REPLACED_CID_TEMPLATE = "replaced_%02u@geary";
     private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
 
@@ -261,6 +262,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** Fired when the user clicks a link in the email. */
     public signal void link_activated(string link);
 
+    /** Fired when the user clicks a internal link in the email. */
+    public signal void internal_link_activated(string link, uint y);
+
     /** Fired when the user requests remote images be loaded. */
     public signal void flag_remote_images();
 
@@ -445,7 +449,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.web_view.context_menu.connect(on_context_menu);
         this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
         this.web_view.link_activated.connect((link) => {
-                link_activated(link);
+                if (link.contains(INTERNAL_ANCHOR_PREFIX)) {
+                    on_internal_link_activated(link);
+                } else {
+                    link_activated(link);
+                }
             });
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
         this.web_view.notify["is-loading"].connect(on_is_loading_notify);
@@ -1156,6 +1164,18 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     );
                 }
             });
+    }
+
+    private void on_internal_link_activated(string link) {
+        //internal link handling
+        debug("Internal Link Handling Not Implentmented Yet");
+        long start = INTERNAL_ANCHOR_PREFIX.length;
+        long end = link.length;
+        this.web_view.get_anchor_target_y.begin(link.substring(start, end - start), (obj, res) => {
+            uint y = this.web_view.get_anchor_target_y.end(res);
+            stdout.printf("The y is %u\n", y);
+            internal_link_activated(link, y);
+        });
     }
 
 }
