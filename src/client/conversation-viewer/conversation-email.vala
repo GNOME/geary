@@ -420,6 +420,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /** Fired when the view source action is activated. */
     public signal void view_source();
 
+    /** Fired when a internal link is activated */
+    public signal void internal_link_activated(string link, uint y);
+
     /** Fired when the user selects text in a message. */
     internal signal void body_selection_changed(bool has_selection);
 
@@ -688,6 +691,13 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     /**
+     * Get the summary's height of the primary message
+     */
+    public uint get_summary_height() {
+        return this.primary_message.get_summary_height();
+    }
+
+    /**
      * Returns user-selected body HTML from a message, if any.
      */
     public async string? get_selection_for_quoting() {
@@ -754,6 +764,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void connect_message_view_signals(ConversationMessage view) {
         view.flag_remote_images.connect(on_flag_remote_images);
         view.remember_remote_images.connect(on_remember_remote_images);
+        view.internal_link_activated.connect((link, y) => {
+            internal_link_activated(link, y);
+        });
         view.web_view.internal_resource_loaded.connect(on_resource_loaded);
         view.web_view.content_loaded.connect(on_content_loaded);
         view.web_view.selection_changed.connect((has_selection) => {

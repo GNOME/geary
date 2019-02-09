@@ -360,7 +360,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             });
         add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
             .activate.connect((param) => {
-                link_activated(param.get_string());
+                on_link_activated(param.get_string());
             });
         add_action(ACTION_SAVE_IMAGE, true, new VariantType("(sms)"))
             .activate.connect(on_save_image);
@@ -448,13 +448,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         }
         this.web_view.context_menu.connect(on_context_menu);
         this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
-        this.web_view.link_activated.connect((link) => {
-                if (link.contains(INTERNAL_ANCHOR_PREFIX)) {
-                    on_internal_link_activated(link);
-                } else {
-                    link_activated(link);
-                }
-            });
+        this.web_view.link_activated.connect(on_link_activated);
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
         this.web_view.notify["is-loading"].connect(on_is_loading_notify);
         this.web_view.resource_load_started.connect(on_resource_load_started);
@@ -607,6 +601,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public void stop_progress_pulse() {
         this.body_progress.hide();
         this.progress_pulse.reset();
+    }
+
+    /** Get the height of the summary part */
+    public uint get_summary_height() {
+        return summary.get_allocated_height();
     }
 
     /**
@@ -1166,16 +1165,18 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             });
     }
 
-    private void on_internal_link_activated(string link) {
-        //internal link handling
-        debug("Internal Link Handling Not Implentmented Yet");
-        long start = INTERNAL_ANCHOR_PREFIX.length;
-        long end = link.length;
-        this.web_view.get_anchor_target_y.begin(link.substring(start, end - start), (obj, res) => {
-            uint y = this.web_view.get_anchor_target_y.end(res);
-            stdout.printf("The y is %u\n", y);
-            internal_link_activated(link, y);
-        });
+    private void on_link_activated(string link) {
+        if (link.contains(INTERNAL_ANCHOR_PREFIX)) {
+            long start = INTERNAL_ANCHOR_PREFIX.length;
+            long end = link.length;
+            this.web_view.get_anchor_target_y.begin(link.substring(start, end - start), (obj, res) => {
+                uint y = this.web_view.get_anchor_target_y.end(res);
+                stdout.printf("The y is %u\n", y);
+                internal_link_activated(link, y);
+            });
+        } else {
+            link_activated(link);
+        }
     }
 
 }

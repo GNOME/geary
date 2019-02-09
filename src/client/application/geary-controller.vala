@@ -2608,7 +2608,6 @@ public class GearyController : Geary.BaseObject {
             });
         foreach (ConversationMessage msg_view in view) {
             msg_view.link_activated.connect(on_link_activated);
-            msg_view.internal_link_activated.connect(on_internal_link_activated);
             msg_view.save_image.connect((url, alt_text, buf) => {
                     on_save_image_extended(view, url, alt_text, buf);
                 });
@@ -3062,10 +3061,6 @@ public class GearyController : Geary.BaseObject {
         } else {
             open_uri(uri);
         }
-    }
-
-    private void on_internal_link_activated(string uri, uint y) {
-
     }
 
     private void on_save_image_extended(ConversationEmail view,

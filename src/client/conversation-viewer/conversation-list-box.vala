@@ -229,7 +229,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
 
-    // Base class for list rows it the list box
+    // Base class for list rows in the list box
     internal abstract class ConversationRow : Gtk.ListBoxRow, Geary.BaseInterface {
 
 
@@ -327,10 +327,15 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         public ConversationEmail view { get; private set; }
 
 
+        /** Fired when a internal link is activated */
+        public signal void internal_link_activated(EmailRow view, uint y);
+
+
         public EmailRow(ConversationEmail view) {
             base(view.email);
             this.view = view;
             add(view);
+            connect_email_signals(view);
         }
 
         public override async void expand()
@@ -356,6 +361,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 get_style_context().remove_class(EXPANDED_CLASS);
                 this.view.collapse_email();
             }
+        }
+
+        private void connect_email_signals(ConversationEmail email) {
+            email.internal_link_activated.connect((link, y) => {
+                stdout.printf("Reached ConversationEmail\n");
+                internal_link_activated(this, y);
+            });
         }
 
     }
@@ -930,6 +942,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
         email_added(view);
 
+        row.internal_link_activated.connect(on_internal_link_activated);
+
         return row;
     }
 
@@ -953,6 +967,26 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // Use set_value rather than clamp_value since we want to
         // scroll to the top of the window.
         get_adjustment().set_value(y);
+    }
+
+    private void scroll_to_anchor(EmailRow row, uint anchor_y) {
+        Gtk.Allocation? alloc = null;
+        row.get_allocation(out alloc);
+
+        Gtk.Adjustment adj = get_adjustment();
+        uint page_size = (uint) adj.get_page_size();
+
+        uint summary_height = row.view.get_summary_height();
+        uint y = 0;
+        uint necessary_y_offset = summary_height + anchor_y;
+        if (necessary_y_offset <= page_size) {
+        //The anchor can be seen with in the page, just scroll to the row.
+            scroll_to(row);
+        } else {
+        //The anchor require further scrolling
+            y = alloc.y + necessary_y_offset;
+            adj.set_value(y);
+        }
     }
 
     /**
@@ -1152,6 +1186,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 row.expand.begin();
             }
         }
+    }
+
+    private void on_internal_link_activated(EmailRow row, uint y) {
+        scroll_to_anchor(row, y);
     }
 
 }
