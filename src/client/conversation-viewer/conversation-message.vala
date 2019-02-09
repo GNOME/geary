@@ -263,7 +263,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public signal void link_activated(string link);
 
     /** Fired when the user clicks a internal link in the email. */
-    public signal void internal_link_activated(string link, uint y);
+    public signal void internal_link_activated(uint y);
 
     /** Fired when the user requests remote images be loaded. */
     public signal void flag_remote_images();
@@ -1171,8 +1171,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             long end = link.length;
             this.web_view.get_anchor_target_y.begin(link.substring(start, end - start), (obj, res) => {
                 uint y = this.web_view.get_anchor_target_y.end(res);
-                stdout.printf("The y is %u\n", y);
-                internal_link_activated(link, y);
+                internal_link_activated(y);
             });
         } else {
             link_activated(link);

@@ -421,7 +421,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     public signal void view_source();
 
     /** Fired when a internal link is activated */
-    public signal void internal_link_activated(string link, uint y);
+    public signal void internal_link_activated(uint y);
 
     /** Fired when the user selects text in a message. */
     internal signal void body_selection_changed(bool has_selection);
@@ -764,9 +764,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void connect_message_view_signals(ConversationMessage view) {
         view.flag_remote_images.connect(on_flag_remote_images);
         view.remember_remote_images.connect(on_remember_remote_images);
-        view.internal_link_activated.connect((link, y) => {
-            internal_link_activated(link, y);
-        });
+        view.internal_link_activated.connect((y) => {
+            internal_link_activated(y);
+            });
         view.web_view.internal_resource_loaded.connect(on_resource_loaded);
         view.web_view.content_loaded.connect(on_content_loaded);
         view.web_view.selection_changed.connect((has_selection) => {

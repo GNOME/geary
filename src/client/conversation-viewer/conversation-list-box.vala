@@ -364,8 +364,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
 
         private void connect_email_signals(ConversationEmail email) {
-            email.internal_link_activated.connect((link, y) => {
-                stdout.printf("Reached ConversationEmail\n");
+            email.internal_link_activated.connect((y) => {
                 internal_link_activated(this, y);
             });
         }
