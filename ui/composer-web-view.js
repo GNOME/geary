@@ -489,7 +489,9 @@ ComposerPageState.htmlToText = function(root) {
                 }
                 break;
             case "a":
-                if (node.textContent == node.href) {
+                if (node.closest("body.plain")) {
+                    text += ComposerPageState.htmlToText(node);
+                } else if (node.textContent == node.href) {
                     text += "<" + node.href + ">";
                 } else {
                     text += ComposerPageState.htmlToText(node);
@@ -498,7 +500,11 @@ ComposerPageState.htmlToText = function(root) {
                 break;
             case "b":
             case "strong":
-                text += "*" + ComposerPageState.htmlToText(node) + "*";
+                if (node.closest("body.plain")) {
+                    text += ComposerPageState.htmlToText(node);
+                } else {
+                    text += "*" + ComposerPageState.htmlToText(node) + "*";
+                }
                 break;
             case "blockquote":
                 let bqText = ComposerPageState.htmlToText(node);
@@ -515,10 +521,18 @@ ComposerPageState.htmlToText = function(root) {
                 break;
             case "i":
             case "em":
-                text += "/" + ComposerPageState.htmlToText(node) + "/";
+                if (node.closest("body.plain")) {
+                    text += ComposerPageState.htmlToText(node);
+                } else {
+                    text += "/" + ComposerPageState.htmlToText(node) + "/";
+                }
                 break;
             case "u":
-                text += "_" + ComposerPageState.htmlToText(node) + "_";
+                if (node.closest("body.plain")) {
+                    text += ComposerPageState.htmlToText(node);
+                } else {
+                    text += "_" + ComposerPageState.htmlToText(node) + "_";
+                }
                 break;
             case "#comment":
                 break;
