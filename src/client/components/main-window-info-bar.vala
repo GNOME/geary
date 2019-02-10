@@ -47,7 +47,8 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 title = _("Problem connecting to incoming server for %s".printf(account));
                 // Translators: String substitution is the server name
                 descr = _("Could not connect to %s, check your Internet access and the server name and try again").printf(server);
-                retry = _("Retry connecting now");
+                // Translators: Tooltip label for Retry button
+                retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.CONNECTION_ERROR &&
                        service_report.service.protocol == Geary.Protocol.SMTP) {
@@ -55,8 +56,8 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 title = _("Problem connecting to outgoing server for %s".printf(account));
                 // Translators: String substitution is the server name
                 descr = _("Could not connect to %s, check your Internet access and the server name and try again").printf(server);
-                retry = _("Try reconnecting now");
-                retry = _("Retry connecting now");
+                // Translators: Tooltip label for Retry button
+                retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.NETWORK_ERROR &&
                        service_report.service.protocol == Geary.Protocol.IMAP) {
@@ -64,6 +65,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 title = _("Problem with connection to incoming server for %s").printf(account);
                 // Translators: String substitution is the server name
                 descr = _("Network error talking to %s, check your Internet access and try again").printf(server);
+                // Translators: Tooltip label for Retry button
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.NETWORK_ERROR &&
@@ -72,6 +74,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 title = _("Problem with connection to outgoing server for %s").printf(account);
                 // Translators: String substitution is the server name
                 descr = _("Network error talking to %s, check your Internet access and try again").printf(server);
+                // Translators: Tooltip label for Retry button
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.SERVER_ERROR &&
@@ -80,6 +83,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 title = _("Problem communicating with incoming server for %s").printf(account);
                 // Translators: String substitution is the server name
                 descr = _("Geary did not understand a message from %s or vice versa, please file a bug report").printf(server);
+                // Translators: Tooltip label for Retry button
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.SERVER_ERROR &&
@@ -88,6 +92,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 // Translators: First string substitution is the server
                 // name, second is the account name
                 descr = _("Could not communicate with %s for %s, check the server name and try again in a moment").printf(server, account);
+                // Translators: Tooltip label for Retry button
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.AUTHENTICATION &&
@@ -95,6 +100,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 // Translators: String substitution is the account name
                 title = _("Incoming mail server password required for %s").printf(account);
                 descr = _("Messages cannot be received without the correct password.");
+                // Translators: Tooltip label for Retry button
                 retry = _("Retry receiving email, you will be prompted for a password");
 
             } else if (report.problem_type == Geary.ProblemType.AUTHENTICATION &&
@@ -102,6 +108,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 // Translators: String substitution is the account name
                 title = _("Outgoing mail server password required for %s").printf(account);
                 descr = _("Messages cannot be sent without the correct password.");
+                // Translators: Tooltip label for Retry button
                 retry = _("Retry sending queued messages, you will be prompted for a password");
 
             } else if (report.problem_type == Geary.ProblemType.UNTRUSTED &&
@@ -109,6 +116,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 // Translators: String substitution is the account name
                 title = _("Incoming mail server security is not trusted for %s").printf(account);
                 descr = _("Messages will not be received until checked.");
+                // Translators: Tooltip label for Retry button
                 retry = _("Check security details");
 
             } else if (report.problem_type == Geary.ProblemType.UNTRUSTED &&
@@ -116,6 +124,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 // Translators: String substitution is the account name
                 title = _("Outgoing mail server security is not trusted for %s").printf(account);
                 descr = _("Messages cannot be sent until checked.");
+                // Translators: Tooltip label for Retry button
                 retry = _("Check security details");
 
             } else if (report.problem_type == Geary.ProblemType.GENERIC_ERROR &&
@@ -123,6 +132,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 // Translators: String substitution is the account name
                 title = _("A problem occurred checking mail for %s").printf(account);
                 descr = _("Something went wrong, please file a bug report if the problem persists");
+                // Translators: Tooltip label for Retry button
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.GENERIC_ERROR &&
@@ -130,6 +140,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 // Translators: String substitution is the account name
                 title = _("A problem occurred sending mail for %s").printf(account);
                 descr = _("Something went wrong, please file a bug report if the problem persists");
+                // Translators: Tooltip label for Retry button
                 retry = _("Retry sending queued messages");
 
             } else {

@@ -262,7 +262,7 @@ You will not be able to send or receive email until it is re-connected.</propert
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                                <property name="tooltip_text" translatable="yes" comments="Button tooltip for retrying an account problem">Retry connecting now</property>
+                                <property name="tooltip_text" translatable="yes" comments="Button tooltip for retrying an account problem">Try reconnecting</property>
                                 <signal name="clicked" handler="on_service_problem_retry" swapped="no"/>
                               </object>
                               <packing>
