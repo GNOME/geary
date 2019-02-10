@@ -13,7 +13,7 @@ private errordomain AttachmentError {
 
 // The actual widget for sending messages. Should be put in a ComposerContainer
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
-public class ComposerWidget : Gtk.EventBox {
+public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
 
     public enum ComposeType {
@@ -397,6 +397,7 @@ public class ComposerWidget : Gtk.EventBox {
                           ContactListStoreCache contact_list_store_cache,
                           ComposeType compose_type,
                           Configuration config) {
+        base_ref();
         this.account = account;
         this.contact_list_store_cache = contact_list_store_cache;
         this.config = config;
@@ -523,6 +524,10 @@ public class ComposerWidget : Gtk.EventBox {
 
         update_composer_view();
         load_entry_completions();
+    }
+
+    ~ComposerWidget() {
+        base_unref();
     }
 
     public override void destroy() {
@@ -2005,22 +2010,13 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private bool add_account_emails_to_from_list(Geary.Account other_account, bool set_active = false) {
-        Geary.RFC822.MailboxAddresses primary_address = new Geary.RFC822.MailboxAddresses.single(
-            other_account.information.primary_mailbox);
-        this.from_multiple.append_text(primary_address.to_full_display());
-        this.from_list.add(new FromAddressMap(other_account, primary_address));
-        if (!set_active && this.from.equal_to(primary_address)) {
-            this.from_multiple.set_active(this.from_list.size - 1);
-            set_active = true;
-        }
-
         bool is_primary = true;
-        foreach (Geary.RFC822.MailboxAddress alternate_mailbox in
+        foreach (Geary.RFC822.MailboxAddress mailbox in
                  other_account.information.sender_mailboxes) {
             Geary.RFC822.MailboxAddresses addresses =
-            new Geary.RFC822.MailboxAddresses.single(alternate_mailbox);
+                new Geary.RFC822.MailboxAddresses.single(mailbox);
 
-            string display = primary_address.to_full_display();
+            string display = mailbox.to_full_display();
             if (!is_primary) {
                 // Displayed in the From dropdown to indicate an
                 // "alternate email address" for an account.  The first
@@ -2030,9 +2026,8 @@ public class ComposerWidget : Gtk.EventBox {
                 display = _("%1$s via %2$s").printf(
                     display, other_account.information.display_name
                 );
-            } else {
-                is_primary = false;
             }
+            is_primary = false;
 
             this.from_multiple.append_text(display);
             this.from_list.add(new FromAddressMap(other_account, addresses));

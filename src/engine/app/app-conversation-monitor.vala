@@ -297,10 +297,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         this.base_folder.account.email_removed.connect(on_account_email_removed);
         this.base_folder.account.email_flags_changed.connect(on_account_email_flags_changed);
 
-        this.progress_monitor.start.connect(() => { debug("Monitor started"); });
-        this.progress_monitor.update.connect(() => { debug("Monitor progress"); });
-        this.progress_monitor.finish.connect(() => { debug("Monitor stopped"); });
-
         this.queue = new ConversationOperationQueue(this.progress_monitor);
         this.queue.operation_error.connect(on_operation_error);
         this.queue.add(new FillWindowOperation(this));
@@ -311,7 +307,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             try {
                 yield stop_monitoring_internal(false, null);
             } catch (Error stop_error) {
-                debug("Error cleaning up after folder open error: %s", err.message);
+                warning(
+                    "Error cleaning up after folder open error: %s", err.message
+                );
             }
             throw err;
         }
@@ -520,21 +518,23 @@ public class Geary.App.ConversationMonitor : BaseObject {
             yield folder.close_async(null);
             opened = false;
         } catch (Error err) {
-            debug("Error loading external emails: %s", err.message);
             if (opened) {
                 // Always try to close the opened folder
                 try {
                     yield folder.close_async(null);
                 } catch (Error close_err) {
-                    debug("Error closing folder %s: %s",
-                          folder.to_string(), close_err.message);
+                    warning("Error closing folder %s: %s",
+                            folder.to_string(), close_err.message);
                 }
             }
             throw err;
         }
 
         if (emails != null && !emails.is_empty) {
-            debug("Fetched %d relevant emails locally", emails.size);
+            Logging.debug(
+                Logging.Flag.CONVERSATIONS,
+                "Fetched %d relevant emails locally", emails.size
+            );
             yield process_email_async(emails, ProcessJobContext());
         }
     }
@@ -573,8 +573,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 this.operation_cancellable
             );
             if (count == 0) {
-                debug("Evaporating conversation %s because it has no emails in %s",
-                      conversation.to_string(), this.base_folder.to_string());
+                Logging.debug(
+                    Logging.Flag.CONVERSATIONS,
+                    "Evaporating conversation %s because it has no emails in %s",
+                    conversation.to_string(), this.base_folder.to_string()
+                );
                 this.conversations.remove_conversation(conversation);
                 evaporated.add(conversation);
             }
@@ -656,8 +659,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 // Always close the folder to prevent open leaks
                 closing = yield this.base_folder.close_async(null);
             } catch (Error err) {
-                debug("Unable to close monitored folder %s: %s",
-                      this.base_folder.to_string(), err.message);
+                warning("Unable to close monitored folder %s: %s",
+                        this.base_folder.to_string(), err.message);
                 close_err = err;
             }
         }
@@ -727,10 +730,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     out added, out appended, out removed_due_to_merge
                 );
             }
-        } catch (Error err) {
-            debug("Unable to add emails to conversation: %s", err.message);
-
-            // fall-through
+        } catch (GLib.IOError.CANCELLED err) {
+            // All good
+        } catch (GLib.Error err) {
+            warning("Unable to add emails to conversation: %s", err.message);
+            // Fall-through anyway
         }
 
         if (removed_due_to_merge != null && removed_due_to_merge.size > 0) {
@@ -862,10 +866,18 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     Geary.EmailIdentifier? lowest = this.window_lowest;
                     if (lowest != null) {
                         if (lowest.natural_sort_comparator(id) < 0) {
-                            debug("Unflagging email %s for deletion resurrects conversation", id.to_string());
+                            Logging.debug(
+                                Logging.Flag.CONVERSATIONS,
+                                "Unflagging email %s for deletion resurrects conversation",
+                                id.to_string()
+                            );
                             inserted_ids.add(id);
                         } else {
-                            debug("Not resurrecting undeleted email %s outside of window", id.to_string());
+                            Logging.debug(
+                                Logging.Flag.CONVERSATIONS,
+                                "Not resurrecting undeleted email %s outside of window",
+                                id.to_string()
+                            );
                         }
                     }
                 }
@@ -883,13 +895,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // Remove conversation if get_emails yields an empty collection -- this probably means
             // the conversation was deleted.
             if (conversation.get_emails(Geary.App.Conversation.Ordering.NONE).size == 0) {
-                debug("Flagging email %s for deletion evaporates conversation %s", 
-                    id.to_string(), conversation.to_string());
-                
+                Logging.debug(
+                    Logging.Flag.CONVERSATIONS,
+                    "Flagging email %s for deletion evaporates conversation %s",
+                    id.to_string(), conversation.to_string()
+                );
                 this.conversations.remove_conversation(conversation);
                 removed_conversations.add(conversation);
                 removed_ids.add(id);
-            } 
+            }
         }
 
         // Notify about inserted messages
@@ -909,7 +923,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
 
     private void on_operation_error(ConversationOperation op, Error err) {
-        debug("Error executing %s: %s", op.get_type().name(), err.message);
+        if (!(err is GLib.IOError.CANCELLED)) {
+            warning("Error executing %s: %s", op.get_type().name(), err.message);
+        }
         notify_scan_error(err);
     }
 

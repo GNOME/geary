@@ -553,6 +553,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             on_service_status_change
         );
 
+        this.load_cancellable.cancelled.connect(on_load_cancelled);
+
         this.body_loading_timeout = new Geary.TimeoutManager.milliseconds(
             BODY_LOAD_TIMEOUT_MSEC, this.on_body_loading_timeout
         );
@@ -1025,6 +1027,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     private void on_body_loading_timeout() {
         this.primary_message.show_loading_pane();
+    }
+
+    private void on_load_cancelled() {
+        this.body_loading_timeout.reset();
     }
 
     private void on_flag_remote_images(ConversationMessage view) {

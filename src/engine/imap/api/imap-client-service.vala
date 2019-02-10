@@ -397,7 +397,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             // honor Cancellable here, it's important to disconnect
             // the client before dropping the ref
             try {
-                yield new_session.disconnect_async();
+                yield new_session.disconnect_async(null);
             } catch (Error disconnect_err) {
                 debug("[%s] Error disconnecting due to session initiation failure, ignored: %s",
                     new_session.to_string(), disconnect_err.message);
@@ -436,7 +436,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         // waiting for any since we don't want to delay closing the
         // others.
         foreach (ClientSession session in to_close) {
-            session.disconnect_async.begin();
+            session.disconnect_async.begin(null);
         }
     }
 
@@ -452,7 +452,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
         // Don't wait for this to finish because we don't want to
         // block claiming a new session, shutdown, etc.
-        session.disconnect_async.begin();
+        session.disconnect_async.begin(null);
     }
 
     private async bool remove_session_async(ClientSession session) throws Error {
