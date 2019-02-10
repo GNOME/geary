@@ -12,9 +12,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-05 22:59+0000\n"
-"PO-Revision-Date: 2019-02-06 19:00+0900\n"
-"Last-Translator: UTUMI Hirosi <utuhiro78@yahoo.co.jp>\n"
+"POT-Creation-Date: 2019-02-07 06:10+0000\n"
+"PO-Revision-Date: 2019-02-10 23:26+0900\n"
+"Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -76,40 +76,45 @@ msgid ""
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
+"Geary は会話に重きを置いて構築された、GNOME 3 デスクトップ用のメールアプリケー"
+"ションです。明快かつモダンなインターフェースで、メールを読んだり、探したり、送っ"
+"たりすることができます。"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:22
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
 msgstr ""
+"やり取りしたメッセージを一々探し出すことなく、抜けのないディスカッションを読むこ"
+"とが可能です。"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:26
 msgid "Geary’s features include:"
-msgstr ""
+msgstr "Geary には以下の機能があります"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:28
 msgid "Quick email account setup"
-msgstr ""
+msgstr "メールアカウントの素早いセットアップ"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:29
 msgid "Shows related messages together in conversations"
-msgstr ""
+msgstr "関連したメッセージをまとめてスレッドに表示"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:30
 msgid "Fast, full text and keyword search"
-msgstr ""
+msgstr "高速な全文検索とキーワード検索"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:31
 msgid "Full-featured HTML and plain text message composer"
-msgstr ""
+msgstr "十分なテキスト/HTML メール作成機能"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:32
 msgid "Desktop notification of new mail"
-msgstr ""
+msgstr "新着メールのデスクトップ通知"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:33
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr ""
+msgstr "Gmail、Yahoo! Mail (Yahoo.com)、Outlook.com、その他の IMAP 対応サービスとの互換性"
 
 #. Translators: A screenshot description.
 #: desktop/org.gnome.Geary.appdata.xml.in:47
@@ -229,8 +234,7 @@ msgstr "スペルチェッカーのポップオーバーメニューに表示す
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
-msgstr ""
-"スペルチェッカーのポップオーバーメニューに常に表示する言語の一覧です。"
+msgstr "スペルチェッカーのポップオーバーメニューに常に表示する言語の一覧です。"
 
 #: desktop/org.gnome.Geary.gschema.xml:80
 msgid "Enable notification sounds"
@@ -283,11 +287,11 @@ msgstr "許容できる値は“exact”、“conservative”、“aggressive”
 
 #: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Zoom of conversation viewer"
-msgstr ""
+msgstr "スレッドビューアーのズーム"
 
 #: desktop/org.gnome.Geary.gschema.xml:117
 msgid "The zoom to apply on the conservation view."
-msgstr ""
+msgstr "スレッドビューを指定した倍率で拡大または縮小します。"
 
 #: desktop/org.gnome.Geary.gschema.xml:122
 msgid "Size of detached composer window"
@@ -1656,14 +1660,14 @@ msgstr "送信者なし"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:776
+#: src/client/conversation-viewer/conversation-message.vala:764
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:879
+#: src/client/conversation-viewer/conversation-message.vala:867
 msgid "Image"
 msgstr "画像"
 
@@ -3300,10 +3304,10 @@ msgid ""
 "or file a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">new "
 "bug report</a>."
 msgstr ""
-"問題が深刻な場合や継続して発生している場合は、詳細をコピーして"
-"<a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">メーリングリスト</a>"
-"に投稿するか、<a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">"
-"バグとして報告</a>してください。"
+"問題が深刻な場合や継続して発生している場合は、詳細をコピーして<a href="
+"\"https://wiki.gnome.org/Apps/Geary/Contact\">メーリングリスト</a>に投稿する"
+"か、<a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">バグとして報"
+"告</a>してください。"
 
 #: ui/problem-details-dialog.ui:89
 msgid "Details:"
