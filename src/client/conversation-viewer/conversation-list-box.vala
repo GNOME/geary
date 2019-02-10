@@ -707,7 +707,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         ComposerRow row = new ComposerRow(embed);
         row.enable_should_scroll();
-        row.should_scroll.connect(() => { scroll_to(row); });
+        // Use row param rather than row var from closure to avoid a
+        // circular ref.
+        row.should_scroll.connect((row) => { scroll_to(row); });
         add(row);
 
         embed.composer.draft_id_changed.connect((id) => { this.draft_id = id; });
