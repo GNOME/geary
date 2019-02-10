@@ -263,7 +263,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public signal void link_activated(string link);
 
     /** Fired when the user clicks a internal link in the email. */
-    public signal void internal_link_activated(uint y);
+    public signal void internal_link_activated(int y);
 
     /** Fired when the user requests remote images be loaded. */
     public signal void flag_remote_images();
@@ -1169,10 +1169,20 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         if (link.contains(INTERNAL_ANCHOR_PREFIX)) {
             long start = INTERNAL_ANCHOR_PREFIX.length;
             long end = link.length;
-            this.web_view.get_anchor_target_y.begin(link.substring(start, end - start), (obj, res) => {
-                uint y = this.web_view.get_anchor_target_y.end(res);
-                internal_link_activated(y);
-            });
+            string anchor_body = link.substring(start, end - start);
+            this.web_view.get_anchor_target_y.begin(anchor_body, (obj, res) => {
+                    try {
+                        int y = this.web_view.get_anchor_target_y.end(res);
+                        //Workaround for JS.Error does not work well with primitive type.
+                        if (y > 0) {
+                            internal_link_activated(y);
+                        } else {
+                            debug("Failed to get anchor destination");
+                        }
+                    } catch (Error err) {
+                        debug("Failed to get anchor destination");
+                    }
+                });
         } else {
             link_activated(link);
         }

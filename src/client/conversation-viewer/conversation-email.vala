@@ -421,7 +421,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     public signal void view_source();
 
     /** Fired when a internal link is activated */
-    public signal void internal_link_activated(uint y);
+    public signal void internal_link_activated(int y);
 
     /** Fired when the user selects text in a message. */
     internal signal void body_selection_changed(bool has_selection);

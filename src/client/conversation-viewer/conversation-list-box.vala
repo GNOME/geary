@@ -327,15 +327,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         public ConversationEmail view { get; private set; }
 
 
-        /** Fired when a internal link is activated */
-        public signal void internal_link_activated(EmailRow view, uint y);
-
-
         public EmailRow(ConversationEmail view) {
             base(view.email);
             this.view = view;
             add(view);
-            connect_email_signals(view);
         }
 
         public override async void expand()
@@ -361,12 +356,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 get_style_context().remove_class(EXPANDED_CLASS);
                 this.view.collapse_email();
             }
-        }
-
-        private void connect_email_signals(ConversationEmail email) {
-            email.internal_link_activated.connect((y) => {
-                internal_link_activated(this, y);
-            });
         }
 
     }
@@ -916,6 +905,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         );
         view.mark_email.connect(on_mark_email);
         view.mark_email_from_here.connect(on_mark_email_from_here);
+        view.internal_link_activated.connect((y) => {
+            EmailRow row = get_email_row_by_id(view.email.id);
+            on_internal_link_activated(row, y);
+        });
         view.body_selection_changed.connect((email, has_selection) => {
                 this.body_selected_view = has_selection ? email : null;
             });
@@ -940,8 +933,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             insert(row, 0);
         }
         email_added(view);
-
-        row.internal_link_activated.connect(on_internal_link_activated);
 
         return row;
     }
@@ -1187,7 +1178,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
     }
 
-    private void on_internal_link_activated(EmailRow row, uint y) {
+    private void on_internal_link_activated(EmailRow row, int y) {
         scroll_to_anchor(row, y);
     }
 

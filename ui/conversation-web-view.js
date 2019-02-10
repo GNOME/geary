@@ -244,9 +244,21 @@ ConversationPageState.prototype = {
         }
         return value;
     },
-    getAnchorTargetY: function(id) {
-        let anchorTarget = document.getElementById(id);
-        return anchorTarget.getBoundingClientRect().top+document.documentElement.scrollTop;
+    getAnchorTargetY: function(anchor) {
+        let targetById = document.getElementById(anchor);
+        let targetByName = document.getElementsByName(anchor);
+        let finalTarget = null;
+        if (targetById != null) {
+            finalTarget = targetById;
+        } else if (targetByNmae.length > 0) {
+            finalTarget = targetByName[0];
+        }
+        if (finalTarget != null) {
+            return finalTarget.getBoundingClientRect().top +
+                document.documentElement.scrollTop;
+        } else {
+            return -1;
+        }
     },
     linkClicked: function(link) {
         let cancelClick = false;
