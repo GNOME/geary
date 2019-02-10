@@ -961,16 +961,16 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         get_adjustment().set_value(y);
     }
 
-    private void scroll_to_anchor(EmailRow row, uint anchor_y) {
+    private void scroll_to_anchor(EmailRow row, int anchor_y) {
         Gtk.Allocation? alloc = null;
         row.get_allocation(out alloc);
 
         Gtk.Adjustment adj = get_adjustment();
-        uint page_size = (uint) adj.get_page_size();
+        int page_size = (int) adj.get_page_size();
 
-        uint summary_height = row.view.get_summary_height();
-        uint y = 0;
-        uint necessary_y_offset = summary_height + anchor_y;
+        int summary_height = row.view.get_summary_height();
+        int y = 0;
+        int necessary_y_offset = summary_height + anchor_y;
         if (necessary_y_offset <= page_size) {
         //The anchor can be seen with in the page, just scroll to the row.
             scroll_to(row);

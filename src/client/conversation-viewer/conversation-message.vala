@@ -604,7 +604,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     /** Get the height of the summary part */
-    public uint get_summary_height() {
+    public int get_summary_height() {
         return summary.get_allocated_height();
     }
 

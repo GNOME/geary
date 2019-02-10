@@ -695,7 +695,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /**
      * Get the summary's height of the primary message
      */
-    public uint get_summary_height() {
+    public int get_summary_height() {
         return this.primary_message.get_summary_height();
     }
 
