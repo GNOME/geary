@@ -13,7 +13,7 @@ private errordomain AttachmentError {
 
 // The actual widget for sending messages. Should be put in a ComposerContainer
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
-public class ComposerWidget : Gtk.EventBox {
+public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
 
     public enum ComposeType {
@@ -397,6 +397,7 @@ public class ComposerWidget : Gtk.EventBox {
                           ContactListStoreCache contact_list_store_cache,
                           ComposeType compose_type,
                           Configuration config) {
+        base_ref();
         this.account = account;
         this.contact_list_store_cache = contact_list_store_cache;
         this.config = config;
@@ -523,6 +524,10 @@ public class ComposerWidget : Gtk.EventBox {
 
         update_composer_view();
         load_entry_completions();
+    }
+
+    ~ComposerWidget() {
+        base_unref();
     }
 
     public override void destroy() {
