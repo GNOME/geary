@@ -250,7 +250,7 @@ ConversationPageState.prototype = {
         let finalTarget = null;
         if (targetById != null) {
             finalTarget = targetById;
-        } else if (targetByNmae.length > 0) {
+        } else if (targetByName.length > 0) {
             finalTarget = targetByName[0];
         }
         if (finalTarget != null) {
