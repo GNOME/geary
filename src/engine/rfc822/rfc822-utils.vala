@@ -279,19 +279,29 @@ public string quote_email_for_forward(Geary.Email email, string? quote, TextForm
     if (email.body == null && quote == null)
         return "";
 
+    const string HEADER_FORMAT = "%s %s\n";
+
     string quoted = _("---------- Forwarded message ----------");
     quoted += "\n";
     string from_line = email_addresses_for_reply(email.from, format);
-    if (!String.is_empty_or_whitespace(from_line))
-        quoted += _("From: %s\n").printf(from_line);
-    quoted += _("Subject: %s\n").printf(email.subject != null ? email.subject.to_string() : "");
-    quoted += _("Date: %s\n").printf(email.date != null ? email.date.to_string() : "");
+    if (!String.is_empty_or_whitespace(from_line)) {
+        // Translators: Human-readable version of the RFC 822 From header
+        quoted += HEADER_FORMAT.printf(_("From:"), from_line);
+    }
+    // Translators: Human-readable version of the RFC 822 Subject header
+    quoted += HEADER_FORMAT.printf(_("Subject:"), email.subject != null ? email.subject.to_string() : "");
+    // Translators: Human-readable version of the RFC 822 Date header
+    quoted += HEADER_FORMAT.printf(_("Date:"), email.date != null ? email.date.to_string() : "");
     string to_line = email_addresses_for_reply(email.to, format);
-    if (!String.is_empty_or_whitespace(to_line))
-        quoted += _("To: %s\n").printf(to_line);
+    if (!String.is_empty_or_whitespace(to_line)) {
+        // Translators: Human-readable version of the RFC 822 To header
+        quoted += HEADER_FORMAT.printf(_("To:"), to_line);
+    }
     string cc_line = email_addresses_for_reply(email.cc, format);
-    if (!String.is_empty_or_whitespace(cc_line))
-        quoted += _("Cc: %s\n").printf(cc_line);
+    if (!String.is_empty_or_whitespace(cc_line)) {
+        // Translators: Human-readable version of the RFC 822 CC header
+        quoted += HEADER_FORMAT.printf(_("Cc:"), cc_line);
+    }
     quoted += "\n";  // A blank line between headers and body
     quoted = quoted.replace("\n", "<br />");
     try {

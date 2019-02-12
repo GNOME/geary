@@ -1688,18 +1688,30 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         string label = this.to_entry.buffer.text + (tocc ? ", " : "")
             + this.cc_entry.buffer.text + (ccbcc ? ", " : "") + this.bcc_entry.buffer.text;
         StringBuilder tooltip = new StringBuilder();
-        if (to_entry.addresses != null)
-            foreach(Geary.RFC822.MailboxAddress addr in this.to_entry.addresses)
-                tooltip.append(_("To: ") + addr.to_full_display() + "\n");
-        if (cc_entry.addresses != null)
-            foreach(Geary.RFC822.MailboxAddress addr in this.cc_entry.addresses)
-                tooltip.append(_("Cc: ") + addr.to_full_display() + "\n");
-        if (bcc_entry.addresses != null)
-            foreach(Geary.RFC822.MailboxAddress addr in this.bcc_entry.addresses)
-                tooltip.append(_("Bcc: ") + addr.to_full_display() + "\n");
-        if (reply_to_entry.addresses != null)
-            foreach(Geary.RFC822.MailboxAddress addr in this.reply_to_entry.addresses)
-                tooltip.append(_("Reply-To: ") + addr.to_full_display() + "\n");
+        if (to_entry.addresses != null) {
+            foreach(Geary.RFC822.MailboxAddress addr in this.to_entry.addresses) {
+                // Translators: Human-readable version of the RFC 822 To header
+                tooltip.append("%s %s\n".printf(_("To:"), addr.to_full_display()));
+            }
+        }
+        if (cc_entry.addresses != null) {
+            foreach(Geary.RFC822.MailboxAddress addr in this.cc_entry.addresses) {
+                // Translators: Human-readable version of the RFC 822 CC header
+                tooltip.append("%s %s\n".printf(_("Cc:"), addr.to_full_display()));
+            }
+        }
+        if (bcc_entry.addresses != null) {
+            foreach(Geary.RFC822.MailboxAddress addr in this.bcc_entry.addresses) {
+                // Translators: Human-readable version of the RFC 822 BCC header
+                tooltip.append("%s %s\n".printf(_("Bcc:"), addr.to_full_display()));
+            }
+        }
+        if (reply_to_entry.addresses != null) {
+            foreach(Geary.RFC822.MailboxAddress addr in this.reply_to_entry.addresses) {
+                // Translators: Human-readable version of the RFC 822 Reply-To header
+                tooltip.append("%s %s\n".printf(_("Reply-To:"), addr.to_full_display()));
+            }
+        }
         this.header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
     }
 

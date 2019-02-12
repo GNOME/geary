@@ -965,22 +965,27 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             builder.add_string_value(this.email.from.to_string());
         }
         if (this.email.to != null) {
+            // Translators: Human-readable version of the RFC 822 To header
             builder.set_member_name(_("To:"));
             builder.add_string_value(this.email.to.to_string());
         }
         if (this.email.cc != null) {
+            // Translators: Human-readable version of the RFC 822 CC header
             builder.set_member_name(_("Cc:"));
             builder.add_string_value(this.email.cc.to_string());
         }
         if (this.email.bcc != null) {
+            // Translators: Human-readable version of the RFC 822 BCC header
             builder.set_member_name(_("Bcc:"));
             builder.add_string_value(this.email.bcc.to_string());
         }
         if (this.email.date != null) {
+            // Translators: Human-readable version of the RFC 822 Date header
             builder.set_member_name(_("Date:"));
             builder.add_string_value(this.email.date.to_string());
         }
         if (this.email.subject != null) {
+            // Translators: Human-readable version of the RFC 822 Subject header
             builder.set_member_name(_("Subject:"));
             builder.add_string_value(this.email.subject.to_string());
         }
