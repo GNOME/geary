@@ -1709,7 +1709,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         if (reply_to_entry.addresses != null) {
             foreach(Geary.RFC822.MailboxAddress addr in this.reply_to_entry.addresses) {
                 // Translators: Human-readable version of the RFC 822 Reply-To header
-                tooltip.append("%s %s\n".printf(_("Reply-To:"), addr.to_full_display()));
+                tooltip.append("%s%s\n".printf(_("Reply-To: "), addr.to_full_display()));
             }
         }
         this.header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n

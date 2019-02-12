@@ -71,7 +71,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
             } else if (report.problem_type == Geary.ProblemType.NETWORK_ERROR &&
                        service_report.service.protocol == Geary.Protocol.SMTP) {
                 // Translators: String substitution is the account name
-                title = _("Problem communicating with outgoing server for %s").printf(account);
+                title = _("Problem communicating with outgoing mail server");
                 // Translators: String substitution is the server name
                 descr = _("Network error talking to %s, check your Internet access and try again").printf(server);
                 // Translators: Tooltip label for Retry button
