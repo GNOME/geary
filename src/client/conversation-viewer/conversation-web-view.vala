@@ -99,9 +99,11 @@ public class ConversationWebView : ClientWebView {
     /**
      * Returns the y value for a element, by its id
      */
-    public async int? get_anchor_target_y(string anchor_body) throws Error {
+    public async int? get_anchor_target_y(string anchor_body)
+        throws GLib.Error {
         WebKit.JavascriptResult result = yield call(
-            Geary.JS.callable("geary.getAnchorTargetY").string(anchor_body), null
+            Geary.JS.callable("geary.getAnchorTargetY")
+            .string(anchor_body), null
         );
         return (int) WebKitUtil.to_number(result);
     }

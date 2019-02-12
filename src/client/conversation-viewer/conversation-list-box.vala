@@ -907,10 +907,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         );
         view.mark_email.connect(on_mark_email);
         view.mark_email_from_here.connect(on_mark_email_from_here);
-        view.internal_link_activated.connect((y) => {
-            EmailRow row = get_email_row_by_id(view.email.id);
-            on_internal_link_activated(row, y);
-        });
+        view.internal_link_activated.connect(on_internal_link_activated);
         view.body_selection_changed.connect((email, has_selection) => {
                 this.body_selected_view = has_selection ? email : null;
             });
@@ -965,20 +962,14 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         Gtk.Allocation? alloc = null;
         row.get_allocation(out alloc);
 
-        Gtk.Adjustment adj = get_adjustment();
-        int page_size = (int) adj.get_page_size();
+        int x = 0, y = 0;
+        ConversationWebView web_view = row.view.primary_message.web_view;
+        web_view.translate_coordinates(row, x, anchor_y, out x, out y);
 
-        int summary_height = row.view.get_summary_height();
-        int y = 0;
-        int necessary_y_offset = summary_height + anchor_y;
-        if (necessary_y_offset <= page_size) {
-        //The anchor can be seen with in the page, just scroll to the row.
-            scroll_to(row);
-        } else {
-        //The anchor require further scrolling
-            y = alloc.y + necessary_y_offset;
-            adj.set_value(y);
-        }
+        Gtk.Adjustment adj = get_adjustment();
+        y = alloc.y + y;
+        adj.set_value(y);
+
     }
 
     /**
@@ -1180,7 +1171,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
     }
 
-    private void on_internal_link_activated(EmailRow row, int y) {
+    private void on_internal_link_activated(ConversationEmail email, int y) {
+        EmailRow row = get_email_row_by_id(email.email.id);
         scroll_to_anchor(row, y);
     }
 

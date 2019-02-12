@@ -693,13 +693,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     /**
-     * Get the summary's height of the primary message
-     */
-    public int get_summary_height() {
-        return this.primary_message.get_summary_height();
-    }
-
-    /**
      * Returns user-selected body HTML from a message, if any.
      */
     public async string? get_selection_for_quoting() {
@@ -767,7 +760,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         view.flag_remote_images.connect(on_flag_remote_images);
         view.remember_remote_images.connect(on_remember_remote_images);
         view.internal_link_activated.connect((y) => {
-            internal_link_activated(y);
+                internal_link_activated(y);
             });
         view.web_view.internal_resource_loaded.connect(on_resource_loaded);
         view.web_view.content_loaded.connect(on_content_loaded);

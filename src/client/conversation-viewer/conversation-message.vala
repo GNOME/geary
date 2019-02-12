@@ -359,9 +359,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.web_view.get_inspector().show();
             });
         add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
-            .activate.connect((param) => {
-                on_link_activated(param.get_string());
-            });
+            .activate.connect(on_link_activated);
         add_action(ACTION_SAVE_IMAGE, true, new VariantType("(sms)"))
             .activate.connect(on_save_image);
         add_action(ACTION_SEARCH_FROM, true, VariantType.STRING)
@@ -448,7 +446,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         }
         this.web_view.context_menu.connect(on_context_menu);
         this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
-        this.web_view.link_activated.connect(on_link_activated);
+        this.web_view.link_activated.connect((link) => {
+                on_link_activated(new GLib.Variant("s", link));
+            });
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
         this.web_view.notify["is-loading"].connect(on_is_loading_notify);
         this.web_view.resource_load_started.connect(on_resource_load_started);
@@ -601,11 +601,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public void stop_progress_pulse() {
         this.body_progress.hide();
         this.progress_pulse.reset();
-    }
-
-    /** Get the height of the summary part */
-    public int get_summary_height() {
-        return summary.get_allocated_height();
     }
 
     /**
@@ -1165,21 +1160,22 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             });
     }
 
-    private void on_link_activated(string link) {
-        if (link.contains(INTERNAL_ANCHOR_PREFIX)) {
+    private void on_link_activated(GLib.Variant? param) {
+        string link = param.get_string();
+
+        if (link.has_prefix(INTERNAL_ANCHOR_PREFIX)) {
             long start = INTERNAL_ANCHOR_PREFIX.length;
             long end = link.length;
             string anchor_body = link.substring(start, end - start);
             this.web_view.get_anchor_target_y.begin(anchor_body, (obj, res) => {
                     try {
                         int y = this.web_view.get_anchor_target_y.end(res);
-                        //Workaround for JS.Error does not work well with primitive type.
                         if (y > 0) {
                             internal_link_activated(y);
                         } else {
-                            debug("Failed to get anchor destination");
+                        	debug("Failed to get anchor destination");
                         }
-                    } catch (Error err) {
+                    } catch (GLib.Error err) {
                         debug("Failed to get anchor destination");
                     }
                 });

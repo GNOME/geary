@@ -245,16 +245,15 @@ ConversationPageState.prototype = {
         return value;
     },
     getAnchorTargetY: function(anchor) {
-        let targetById = document.getElementById(anchor);
-        let targetByName = document.getElementsByName(anchor);
-        let finalTarget = null;
-        if (targetById != null) {
-            finalTarget = targetById;
-        } else if (targetByName.length > 0) {
-            finalTarget = targetByName[0];
+        let target = document.getElementById(anchor);
+        if (target == null) {
+            target = document.getElementsByName(anchor);
+            if (target.length > 0) {
+                target = target[0];
+            }
         }
-        if (finalTarget != null) {
-            return finalTarget.getBoundingClientRect().top +
+        if (target != null) {
+            return target.getBoundingClientRect().top +
                 document.documentElement.scrollTop;
         } else {
             return -1;
