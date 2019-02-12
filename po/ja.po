@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-07 06:10+0000\n"
-"PO-Revision-Date: 2019-02-10 23:26+0900\n"
+"POT-Creation-Date: 2019-02-12 00:25+0000\n"
+"PO-Revision-Date: 2019-02-12 19:40+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -76,17 +76,17 @@ msgid ""
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Geary は会話に重きを置いて構築された、GNOME 3 デスクトップ用のメールアプリケー"
-"ションです。明快かつモダンなインターフェースで、メールを読んだり、探したり、送っ"
-"たりすることができます。"
+"Geary は会話に重きを置いて構築された、GNOME 3 デスクトップ用のメールアプリ"
+"ケーションです。明快かつモダンなインターフェースで、メールを読んだり、探した"
+"り、送ったりできます。"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:22
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
 msgstr ""
-"やり取りしたメッセージを一々探し出すことなく、抜けのないディスカッションを読むこ"
-"とが可能です。"
+"やり取りしたメッセージを一々探し出すことなく、抜けのないディスカッションを読"
+"むことが可能です。"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:26
 msgid "Geary’s features include:"
@@ -94,7 +94,7 @@ msgstr "Geary には以下の機能があります"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:28
 msgid "Quick email account setup"
-msgstr "メールアカウントの素早いセットアップ"
+msgstr "メールアカウントを素早くセットアップ"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:29
 msgid "Shows related messages together in conversations"
@@ -114,17 +114,19 @@ msgstr "新着メールのデスクトップ通知"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:33
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr "Gmail、Yahoo! Mail (Yahoo.com)、Outlook.com、その他の IMAP 対応サービスとの互換性"
+msgstr ""
+"Gmail、Yahoo! Mail (Yahoo.com)、Outlook.com、その他の IMAP 対応サービスとの互"
+"換"
 
 #. Translators: A screenshot description.
 #: desktop/org.gnome.Geary.appdata.xml.in:47
 msgid "Geary displaying a conversation"
-msgstr ""
+msgstr "スレッド表示中の Geary"
 
 #. Translators: A screenshot description.
 #: desktop/org.gnome.Geary.appdata.xml.in:52
 msgid "Geary showing the rich text composer"
-msgstr ""
+msgstr "HTML メール作成中の Geary"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in:7
@@ -291,7 +293,7 @@ msgstr "スレッドビューアーのズーム"
 
 #: desktop/org.gnome.Geary.gschema.xml:117
 msgid "The zoom to apply on the conservation view."
-msgstr "スレッドビューを指定した倍率で拡大または縮小します。"
+msgstr "指定した倍率でスレッドビューを拡大または縮小します。"
 
 #: desktop/org.gnome.Geary.gschema.xml:122
 msgid "Size of detached composer window"
@@ -928,15 +930,15 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1774
+#: src/client/application/geary-controller.vala:1780
 msgid "Undo move (Ctrl+Z)"
 msgstr "移動を元に戻す(Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:1784
+#: src/client/application/geary-controller.vala:1790
 msgid "Are you sure you want to open these attachments?"
 msgstr "これらの添付ファイルを開いてもよろしいですか?"
 
-#: src/client/application/geary-controller.vala:1785
+#: src/client/application/geary-controller.vala:1791
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -944,14 +946,14 @@ msgstr ""
 "添付ファイルはシステムにダメージを与える可能性があります。送信元が信頼できる"
 "場合のみ開くようにしてください。"
 
-#: src/client/application/geary-controller.vala:1786
+#: src/client/application/geary-controller.vala:1792
 msgid "Don’t _ask me again"
 msgstr "次回から表示しない(_A)"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/geary-controller.vala:1915
+#: src/client/application/geary-controller.vala:1921
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "“%s”はすでに存在します。置き換えますか?"
@@ -959,73 +961,73 @@ msgstr "“%s”はすでに存在します。置き換えますか?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/geary-controller.vala:1922
+#: src/client/application/geary-controller.vala:1928
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "ファイルはすでに“%s”に存在します。置き換えると内容を上書きします。"
 
-#: src/client/application/geary-controller.vala:1926
+#: src/client/application/geary-controller.vala:1932
 msgid "_Replace"
 msgstr "置換(_R)"
 
-#: src/client/application/geary-controller.vala:2202
+#: src/client/application/geary-controller.vala:2208
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "下書きメッセージを閉じますか?"
 
-#: src/client/application/geary-controller.vala:2328
+#: src/client/application/geary-controller.vala:2334
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s フォルダーのすべてのメールを空にしますか?"
 
-#: src/client/application/geary-controller.vala:2329
+#: src/client/application/geary-controller.vala:2335
 msgid "This removes the email from Geary and your email server."
 msgstr "メールを Geary とメールサーバーから削除します。"
 
-#: src/client/application/geary-controller.vala:2330
+#: src/client/application/geary-controller.vala:2336
 msgid "This cannot be undone."
 msgstr "これは元に戻すことができません。"
 
-#: src/client/application/geary-controller.vala:2331
+#: src/client/application/geary-controller.vala:2337
 #, c-format
 msgid "Empty %s"
 msgstr "%s を空にする"
 
-#: src/client/application/geary-controller.vala:2348
+#: src/client/application/geary-controller.vala:2354
 #, c-format
 msgid "Error emptying %s"
 msgstr "%s を空にするときにエラーが発生しました"
 
-#: src/client/application/geary-controller.vala:2380
+#: src/client/application/geary-controller.vala:2386
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "このメッセージを完全に削除しますか?"
 
-#: src/client/application/geary-controller.vala:2382
+#: src/client/application/geary-controller.vala:2388
 msgid "Delete"
 msgstr "削除"
 
-#: src/client/application/geary-controller.vala:2396
+#: src/client/application/geary-controller.vala:2402
 msgid "Undo trash (Ctrl+Z)"
 msgstr "ごみ箱から戻す(Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2446
+#: src/client/application/geary-controller.vala:2452
 msgid "Undo archive (Ctrl+Z)"
 msgstr "アーカイブから戻す(Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2491
+#: src/client/application/geary-controller.vala:2497
 msgid "Undo (Ctrl+Z)"
 msgstr "元に戻す(Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2568
+#: src/client/application/geary-controller.vala:2574
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "%s にメールを送信しました。"
 
-#: src/client/application/geary-controller.vala:2650
+#: src/client/application/geary-controller.vala:2656
 msgid "Failed to open default text editor."
 msgstr "デフォルトのテキストエディターの起動に失敗しました。"
 
@@ -1117,7 +1119,7 @@ msgstr "%s の受信サーバーとの接続時に問題があります"
 
 #. Translators: String substitution is the server name
 #: src/client/components/main-window-info-bar.vala:49
-#: src/client/components/main-window-info-bar.vala:57
+#: src/client/components/main-window-info-bar.vala:58
 #, c-format
 msgid ""
 "Could not connect to %s, check your Internet access and the server name and "
@@ -1126,59 +1128,48 @@ msgstr ""
 "%s に接続できなかったため、インターネット接続とサーバー名を確認して再試行して"
 "ください"
 
+#. Translators: Tooltip label for Retry button
 #. Button tooltip for retrying an account problem
-#: src/client/components/main-window-info-bar.vala:50
-#: src/client/components/main-window-info-bar.vala:59 ui/main-window.ui:265
-msgid "Retry connecting now"
-msgstr "今すぐ接続を再試行"
+#: src/client/components/main-window-info-bar.vala:51
+#: src/client/components/main-window-info-bar.vala:60
+#: src/client/components/main-window-info-bar.vala:69
+#: src/client/components/main-window-info-bar.vala:78
+#: src/client/components/main-window-info-bar.vala:87
+#: src/client/components/main-window-info-bar.vala:96
+#: src/client/components/main-window-info-bar.vala:136 ui/main-window.ui:265
+msgid "Try reconnecting"
+msgstr "再接続を試行"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:55
+#: src/client/components/main-window-info-bar.vala:56
 #, c-format
 msgid "Problem connecting to outgoing server for %s"
 msgstr "%s の送信サーバーとの接続時に問題があります"
 
-#: src/client/components/main-window-info-bar.vala:58
-msgid "Try reconnecting now"
-msgstr "今すぐ再接続を試行"
-
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:64
+#: src/client/components/main-window-info-bar.vala:65
+#: src/client/components/main-window-info-bar.vala:83
 #, c-format
-msgid "Problem with connection to incoming server for %s"
-msgstr "%s の受信サーバーとの接続に問題があります"
+msgid "Problem communicating with incoming server for %s"
+msgstr "%s の受信サーバーとの通信に問題があります"
 
 #. Translators: String substitution is the server name
-#: src/client/components/main-window-info-bar.vala:66
-#: src/client/components/main-window-info-bar.vala:74
+#: src/client/components/main-window-info-bar.vala:67
+#: src/client/components/main-window-info-bar.vala:76
 #, c-format
 msgid "Network error talking to %s, check your Internet access and try again"
 msgstr ""
 "%s との接続でネットワークエラーが発生したため、インターネット接続を確認して再"
 "試行してください"
 
-#: src/client/components/main-window-info-bar.vala:67
-#: src/client/components/main-window-info-bar.vala:75
-#: src/client/components/main-window-info-bar.vala:83
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:74
 #: src/client/components/main-window-info-bar.vala:91
-#: src/client/components/main-window-info-bar.vala:126
-msgid "Try reconnecting"
-msgstr "再接続を試行"
-
-#. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:72
-#, c-format
-msgid "Problem with connection to outgoing server for %s"
-msgstr "%s の送信サーバーとの接続に問題があります"
-
-#. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:80
-#, c-format
-msgid "Problem communicating with incoming server for %s"
-msgstr "%s の受信サーバーとの通信に問題があります"
+msgid "Problem communicating with outgoing mail server"
+msgstr "送信メールサーバーとの通信に問題があります"
 
 #. Translators: String substitution is the server name
-#: src/client/components/main-window-info-bar.vala:82
+#: src/client/components/main-window-info-bar.vala:85
 #, c-format
 msgid ""
 "Geary did not understand a message from %s or vice versa, please file a bug "
@@ -1187,13 +1178,9 @@ msgstr ""
 "Geary か %s のどちらかがメッセージを理解できないバグに遭遇したため、可能でし"
 "たらバグ報告してください"
 
-#: src/client/components/main-window-info-bar.vala:87
-msgid "Problem communicating with outgoing mail server"
-msgstr "送信メールサーバーとの通信に問題があります"
-
 #. Translators: First string substitution is the server
 #. name, second is the account name
-#: src/client/components/main-window-info-bar.vala:90
+#: src/client/components/main-window-info-bar.vala:94
 #, c-format
 msgid ""
 "Could not communicate with %s for %s, check the server name and try again in "
@@ -1203,109 +1190,113 @@ msgstr ""
 "さい"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:96
+#: src/client/components/main-window-info-bar.vala:101
 #, c-format
 msgid "Incoming mail server password required for %s"
 msgstr "%s の受信メールサーバーのパスワードが必要です"
 
-#: src/client/components/main-window-info-bar.vala:97
+#: src/client/components/main-window-info-bar.vala:102
 msgid "Messages cannot be received without the correct password."
 msgstr "正しいパスワードがないとメッセージを受信できません。"
 
-#: src/client/components/main-window-info-bar.vala:98
+#. Translators: Tooltip label for Retry button
+#: src/client/components/main-window-info-bar.vala:104
 msgid "Retry receiving email, you will be prompted for a password"
 msgstr "メール受信の再試行にはパスワードが必要です"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:103
+#: src/client/components/main-window-info-bar.vala:109
 #, c-format
 msgid "Outgoing mail server password required for %s"
 msgstr "%s の送信メールサーバーのパスワードが必要です"
 
-#: src/client/components/main-window-info-bar.vala:104
+#: src/client/components/main-window-info-bar.vala:110
 msgid "Messages cannot be sent without the correct password."
 msgstr "正しいパスワードがないとメッセージを送信できません。"
 
-#: src/client/components/main-window-info-bar.vala:105
+#. Translators: Tooltip label for Retry button
+#: src/client/components/main-window-info-bar.vala:112
 msgid "Retry sending queued messages, you will be prompted for a password"
 msgstr "待機メッセージ送信の再試行にはパスワードが必要です"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:110
+#: src/client/components/main-window-info-bar.vala:117
 #, c-format
 msgid "Incoming mail server security is not trusted for %s"
 msgstr "%s の受信メールサーバーのセキュリティを信頼していません"
 
-#: src/client/components/main-window-info-bar.vala:111
+#: src/client/components/main-window-info-bar.vala:118
 msgid "Messages will not be received until checked."
 msgstr "確認するまでメッセージを受信しません。"
 
-#: src/client/components/main-window-info-bar.vala:112
-#: src/client/components/main-window-info-bar.vala:119
+#. Translators: Tooltip label for Retry button
+#: src/client/components/main-window-info-bar.vala:120
+#: src/client/components/main-window-info-bar.vala:128
 msgid "Check security details"
 msgstr "セキュリティの詳細を確認"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:117
+#: src/client/components/main-window-info-bar.vala:125
 #, c-format
 msgid "Outgoing mail server security is not trusted for %s"
 msgstr "%s の送信メールサーバーのセキュリティを信頼していません"
 
-#: src/client/components/main-window-info-bar.vala:118
+#: src/client/components/main-window-info-bar.vala:126
 msgid "Messages cannot be sent until checked."
 msgstr "確認するまでメッセージを送信できません。"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:124
+#: src/client/components/main-window-info-bar.vala:133
 #, c-format
 msgid "A problem occurred checking mail for %s"
 msgstr "%s のメール確認時に問題が発生しました"
 
-#: src/client/components/main-window-info-bar.vala:125
-#: src/client/components/main-window-info-bar.vala:132
+#: src/client/components/main-window-info-bar.vala:134
+#: src/client/components/main-window-info-bar.vala:142
 msgid "Something went wrong, please file a bug report if the problem persists"
 msgstr ""
 "何らかの不具合が発生しているため、問題が解決しない場合はバグ報告してください"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:131
+#: src/client/components/main-window-info-bar.vala:141
 #, c-format
 msgid "A problem occurred sending mail for %s"
 msgstr "%s のメール送信時に問題が発生しました"
 
-#: src/client/components/main-window-info-bar.vala:133
+#. Translators: Tooltip label for Retry button
+#: src/client/components/main-window-info-bar.vala:144
 msgid "Retry sending queued messages"
 msgstr "待機メッセージの送信を再試行"
 
-#: src/client/components/main-window-info-bar.vala:144
+#: src/client/components/main-window-info-bar.vala:155
 msgid "A database problem has occurred"
 msgstr "データベースに問題が発生しました"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:146
+#: src/client/components/main-window-info-bar.vala:157
 #, c-format
 msgid "Messages for %s must be downloaded again."
 msgstr "%s のメッセージを再ダウンロードする必要があります。"
 
-#: src/client/components/main-window-info-bar.vala:159
+#: src/client/components/main-window-info-bar.vala:170
 msgid "Geary has encountered a problem"
 msgstr "Geary に問題が発生しました"
 
-#: src/client/components/main-window-info-bar.vala:160
+#: src/client/components/main-window-info-bar.vala:171
 msgid ""
 "Please check the technical details and report the problem if it persists."
 msgstr "問題が解決しない場合は、技術的な詳細情報を確認して報告してください。"
 
-#: src/client/components/main-window-info-bar.vala:168
+#: src/client/components/main-window-info-bar.vala:179
 msgid "_Details"
 msgstr "詳細(_D)"
 
 #. Button tooltip for displaying technical details about an account problem
-#: src/client/components/main-window-info-bar.vala:169 ui/main-window.ui:250
+#: src/client/components/main-window-info-bar.vala:180 ui/main-window.ui:250
 msgid "View technical details about the error"
 msgstr "エラーについての技術的な詳細情報を表示"
 
-#: src/client/components/main-window-info-bar.vala:173
+#: src/client/components/main-window-info-bar.vala:184
 msgid "_Retry"
 msgstr "再試行(_R)"
 
@@ -1445,34 +1436,34 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1103
+#: src/client/composer/composer-widget.vala:1108
 msgid "Do you want to keep or discard this draft message?"
 msgstr "この下書きメッセージを保持または破棄しますか?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1131
+#: src/client/composer/composer-widget.vala:1136
 msgid "Do you want to discard this draft message?"
 msgstr "この下書きメッセージを破棄しますか?"
 
-#: src/client/composer/composer-widget.vala:1248
+#: src/client/composer/composer-widget.vala:1253
 msgid "Send message with an empty subject and body?"
 msgstr "メッセージを件名と本文なしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1250
+#: src/client/composer/composer-widget.vala:1255
 msgid "Send message with an empty subject?"
 msgstr "メッセージを件名なしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1252
+#: src/client/composer/composer-widget.vala:1257
 msgid "Send message with an empty body?"
 msgstr "メッセージを本文なしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1256
+#: src/client/composer/composer-widget.vala:1261
 msgid "Send message without an attachment?"
 msgstr "メッセージを添付ファイルなしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1561
+#: src/client/composer/composer-widget.vala:1566
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s”はすでに添付されています。"
@@ -1482,53 +1473,63 @@ msgstr "“%s”はすでに添付されています。"
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1569
+#: src/client/composer/composer-widget.vala:1574
 #: src/client/conversation-viewer/conversation-email.vala:173
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1606
+#: src/client/composer/composer-widget.vala:1611
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s”が見つかりませんでした。"
 
-#: src/client/composer/composer-widget.vala:1612
+#: src/client/composer/composer-widget.vala:1617
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s”はフォルダーです。"
 
-#: src/client/composer/composer-widget.vala:1618
+#: src/client/composer/composer-widget.vala:1623
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s”は空ファイルです。"
 
-#: src/client/composer/composer-widget.vala:1631
+#: src/client/composer/composer-widget.vala:1636
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s”を読み取り用に開けませんでした。"
 
-#: src/client/composer/composer-widget.vala:1639
+#: src/client/composer/composer-widget.vala:1644
 msgid "Cannot add attachment"
 msgstr "添付できません"
 
-#: src/client/composer/composer-widget.vala:1688
-msgid "To: "
-msgstr "宛先: "
-
-#: src/client/composer/composer-widget.vala:1691
-msgid "Cc: "
-msgstr "Cc: "
-
+#. Translators: Human-readable version of the RFC 822 To header
 #: src/client/composer/composer-widget.vala:1694
-msgid "Bcc: "
-msgstr "Bcc: "
+#: src/client/conversation-viewer/conversation-email.vala:969
+#: src/engine/rfc822/rfc822-utils.vala:298 ui/conversation-message.ui:313
+msgid "To:"
+msgstr "宛先:"
 
-#: src/client/composer/composer-widget.vala:1697
+#. Translators: Human-readable version of the RFC 822 CC header
+#: src/client/composer/composer-widget.vala:1700
+#: src/client/conversation-viewer/conversation-email.vala:974
+#: src/engine/rfc822/rfc822-utils.vala:303 ui/conversation-message.ui:358
+msgid "Cc:"
+msgstr "Cc:"
+
+#. Translators: Human-readable version of the RFC 822 BCC header
+#: src/client/composer/composer-widget.vala:1706
+#: src/client/conversation-viewer/conversation-email.vala:979
+#: ui/conversation-message.ui:403
+msgid "Bcc:"
+msgstr "Bcc:"
+
+#. Translators: Human-readable version of the RFC 822 Reply-To header
+#: src/client/composer/composer-widget.vala:1712
 msgid "Reply-To: "
 msgstr "Reply-To: "
 
-#: src/client/composer/composer-widget.vala:1835
+#: src/client/composer/composer-widget.vala:1852
 msgid "Select Color"
 msgstr "色を選択"
 
@@ -1537,20 +1538,20 @@ msgstr "色を選択"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2030
+#: src/client/composer/composer-widget.vala:2038
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s (%2$s を通して使用)"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2090
+#: src/client/composer/composer-widget.vala:2097
 msgid "_From:"
 msgstr "差出人(_F):"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2315
+#: src/client/composer/composer-widget.vala:2322
 msgid "Images"
 msgstr "画像"
 
@@ -1620,30 +1621,21 @@ msgstr "自分"
 msgid "Unknown"
 msgstr "不明"
 
-#: src/client/conversation-viewer/conversation-email.vala:958
+#. Translators: Human-readable version of the RFC 822 From header
+#: src/client/conversation-viewer/conversation-email.vala:964
+#: src/engine/rfc822/rfc822-utils.vala:289
 msgid "From:"
 msgstr "差出人:"
 
-#: src/client/conversation-viewer/conversation-email.vala:962
-#: ui/conversation-message.ui:313
-msgid "To:"
-msgstr "宛先:"
-
-#: src/client/conversation-viewer/conversation-email.vala:966
-#: ui/conversation-message.ui:358
-msgid "Cc:"
-msgstr "Cc:"
-
-#: src/client/conversation-viewer/conversation-email.vala:970
-#: ui/conversation-message.ui:403
-msgid "Bcc:"
-msgstr "Bcc:"
-
-#: src/client/conversation-viewer/conversation-email.vala:974
+#. Translators: Human-readable version of the RFC 822 Date header
+#: src/client/conversation-viewer/conversation-email.vala:984
+#: src/engine/rfc822/rfc822-utils.vala:294
 msgid "Date:"
 msgstr "日時:"
 
-#: src/client/conversation-viewer/conversation-email.vala:978
+#. Translators: Human-readable version of the RFC 822 Subject header
+#: src/client/conversation-viewer/conversation-email.vala:989
+#: src/engine/rfc822/rfc822-utils.vala:292
 msgid "Subject:"
 msgstr "件名:"
 
@@ -1660,14 +1652,14 @@ msgstr "送信者なし"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:764
+#: src/client/conversation-viewer/conversation-message.vala:765
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:867
+#: src/client/conversation-viewer/conversation-message.vala:868
 msgid "Image"
 msgstr "画像"
 
@@ -2286,34 +2278,9 @@ msgstr ""
 msgid "On %s:"
 msgstr ""
 
-#: src/engine/rfc822/rfc822-utils.vala:282
+#: src/engine/rfc822/rfc822-utils.vala:284
 msgid "---------- Forwarded message ----------"
 msgstr ""
-
-#: src/engine/rfc822/rfc822-utils.vala:286
-#, c-format
-msgid "From: %s\n"
-msgstr "差出人: %s\n"
-
-#: src/engine/rfc822/rfc822-utils.vala:287
-#, c-format
-msgid "Subject: %s\n"
-msgstr "件名: %s\n"
-
-#: src/engine/rfc822/rfc822-utils.vala:288
-#, c-format
-msgid "Date: %s\n"
-msgstr "日時: %s\n"
-
-#: src/engine/rfc822/rfc822-utils.vala:291
-#, c-format
-msgid "To: %s\n"
-msgstr "宛先: %s\n"
-
-#: src/engine/rfc822/rfc822-utils.vala:294
-#, c-format
-msgid "Cc: %s\n"
-msgstr "Cc: %s\n"
 
 #: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:127
 msgid "Add an account"
@@ -3316,6 +3283,42 @@ msgstr "詳細:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary を更新しています…"
+
+#~ msgid "Retry connecting now"
+#~ msgstr "今すぐ接続を再試行"
+
+#~ msgid "Try reconnecting now"
+#~ msgstr "今すぐ再接続を試行"
+
+#~ msgid "Problem with connection to incoming server for %s"
+#~ msgstr "%s の受信サーバーとの接続に問題があります"
+
+#~ msgid "Problem with connection to outgoing server for %s"
+#~ msgstr "%s の送信サーバーとの接続に問題があります"
+
+#~ msgid "To: "
+#~ msgstr "宛先: "
+
+#~ msgid "Cc: "
+#~ msgstr "Cc: "
+
+#~ msgid "Bcc: "
+#~ msgstr "Bcc: "
+
+#~ msgid "From: %s\n"
+#~ msgstr "差出人: %s\n"
+
+#~ msgid "Subject: %s\n"
+#~ msgstr "件名: %s\n"
+
+#~ msgid "Date: %s\n"
+#~ msgstr "日時: %s\n"
+
+#~ msgid "To: %s\n"
+#~ msgstr "宛先: %s\n"
+
+#~ msgid "Cc: %s\n"
+#~ msgstr "Cc: %s\n"
 
 #~ msgid "Geary Email"
 #~ msgstr "Geary メール"
