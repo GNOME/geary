@@ -1711,15 +1711,24 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             "UPDATE MessageTable SET flags=?, fields = fields | ? WHERE id=?");
         
         foreach (ImapDB.EmailIdentifier id in map.keys) {
-            LocationIdentifier? location = do_get_location_for_id(cx, id, ListFlags.NONE,
-                cancellable);
-            if (location == null)
-                continue;
-            
-            Geary.Imap.MessageFlags flags = ((Geary.Imap.EmailFlags) map.get(id)).message_flags;
-            
+            LocationIdentifier? location = do_get_location_for_id(
+                cx, id, ListFlags.NONE, cancellable
+            );
+            if (location == null) {
+                throw new EngineError.NOT_FOUND(
+                    "Email not found: %s", id.to_string()
+                );
+            }
+
+            Geary.Imap.EmailFlags? flags = map.get(id) as Geary.Imap.EmailFlags;
+            if (flags == null) {
+                throw new EngineError.BAD_PARAMETERS(
+                    "Email with Geary.Imap.EmailFlags required"
+                );
+            }
+
             update_stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
-            update_stmt.bind_string(0, flags.serialize());
+            update_stmt.bind_string(0, flags.message_flags.serialize());
             update_stmt.bind_int(1, Geary.Email.Field.FLAGS);
             update_stmt.bind_rowid(2, id.message_id);
             
