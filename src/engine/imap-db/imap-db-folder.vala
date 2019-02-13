@@ -2008,12 +2008,20 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 unread_count_change += email.email_flags.is_unread() ? 1 : -1;
             }
 
-            Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags> map =
-               new Gee.HashMap<ImapDB.EmailIdentifier, Geary.EmailFlags>();
-            map.set((ImapDB.EmailIdentifier) email.id, email.email_flags);
-            do_set_email_flags(cx, map, cancellable);
+            // do_set_email_flags requires a valid message location,
+            // but doesn't accept one as an arg, so despite knowing
+            // the location here, make sure we pass an id with a
+            // message_id in so it can look the location back up.
+            do_set_email_flags(
+                cx,
+                Collection.single_map<ImapDB.EmailIdentifier,Geary.EmailFlags>(
+                    (ImapDB.EmailIdentifier) row_email.id, email.email_flags
+                ),
+                cancellable
+            );
 
             post_fields |= Geary.Email.Field.FLAGS;
+
         }
     }
 
