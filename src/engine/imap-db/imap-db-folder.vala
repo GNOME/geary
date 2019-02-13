@@ -1360,7 +1360,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (email_id == null ||
             email_id.message_id != Db.INVALID_ROWID ||
             email_id.uid == null) {
-            throw new EngineError.INCOMPLETE_MESSAGE(
+            throw new EngineError.BAD_PARAMETERS(
                 "IMAP message with UID required"
             );
         }
