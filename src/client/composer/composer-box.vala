@@ -37,17 +37,10 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
 
         add(this.composer);
         this.main_toolbar.set_conversation_header(composer.header);
-        this.composer.editor.focus_in_event.connect(on_focus_in);
-        this.composer.editor.focus_out_event.connect(on_focus_out);
         show();
     }
 
     public void remove_composer() {
-        if (this.composer.editor.has_focus)
-            on_focus_out();
-        this.composer.editor.focus_in_event.disconnect(on_focus_in);
-        this.composer.editor.focus_out_event.disconnect(on_focus_out);
-
         remove(this.composer);
         close_container();
     }
@@ -56,8 +49,6 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
         hide();
         this.main_toolbar.remove_conversation_header(composer.header);
         this.composer.state = ComposerWidget.ComposerState.DETACHED;
-        this.composer.editor.focus_in_event.disconnect(on_focus_in);
-        this.composer.editor.focus_out_event.disconnect(on_focus_out);
         vanished();
     }
 
@@ -66,5 +57,5 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
             vanish();
         destroy();
     }
-}
 
+}

@@ -125,7 +125,7 @@ public class ComposerWebView : ClientWebView {
         // XXX this is a bit of a hack given the docs for is_empty,
         // above
         this.command_stack_changed.connect((can_undo, can_redo) => {
-                this.is_empty = !can_redo;
+                this.is_empty = !can_undo;
             });
     }
 

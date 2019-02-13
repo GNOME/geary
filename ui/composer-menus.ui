@@ -5,53 +5,53 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">S_ans Serif</attribute>
-        <attribute name="action">cmp.font-family</attribute>
+        <attribute name="action">win.font-family</attribute>
         <attribute name="target">sans</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">S_erif</attribute>
-        <attribute name="action">cmp.font-family</attribute>
+        <attribute name="action">win.font-family</attribute>
         <attribute name="target">serif</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Fixed Width</attribute>
-        <attribute name="action">cmp.font-family</attribute>
+        <attribute name="action">win.font-family</attribute>
         <attribute name="target">monospace</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">_Small</attribute>
-        <attribute name="action">cmp.font-size</attribute>
+        <attribute name="action">win.font-size</attribute>
         <attribute name="target">small</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Medium</attribute>
-        <attribute name="action">cmp.font-size</attribute>
+        <attribute name="action">win.font-size</attribute>
         <attribute name="target">medium</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Lar_ge</attribute>
-        <attribute name="action">cmp.font-size</attribute>
+        <attribute name="action">win.font-size</attribute>
         <attribute name="target">large</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">C_olor</attribute>
-        <attribute name="action">cmp.color</attribute>
+        <attribute name="action">win.color</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">_Rich Text</attribute>
-        <attribute name="action">cmp.compose-as-html</attribute>
+        <attribute name="action">win.compose-as-html</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Show Extended Fields</attribute>
-        <attribute name="action">cmp.show-extended</attribute>
+        <attribute name="action">win.show-extended</attribute>
       </item>
     </section>
   </menu>
@@ -60,13 +60,13 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">_Rich Text</attribute>
-        <attribute name="action">cmp.compose-as-html</attribute>
+        <attribute name="action">win.compose-as-html</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Show Extended Fields</attribute>
-        <attribute name="action">cmp.show-extended</attribute>
+        <attribute name="action">win.show-extended</attribute>
       </item>
     </section>
   </menu>
@@ -76,56 +76,56 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">_Undo</attribute>
-        <attribute name="action">cmp.undo</attribute>
+        <attribute name="action">win.undo</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Redo</attribute>
-        <attribute name="action">cmp.redo</attribute>
+        <attribute name="action">win.redo</attribute>
       </item>
     </section>
     <section id="context_menu_rich_text">
       <item>
         <attribute name="label" translatable="yes">Cu_t</attribute>
-        <attribute name="action">cmp.cut</attribute>
+        <attribute name="action">win.cut</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Copy</attribute>
-        <attribute name="action">cmp.copy</attribute>
+        <attribute name="action">win.copy</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Paste</attribute>
-        <attribute name="action">cmp.paste</attribute>
+        <attribute name="action">win.paste</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes" context="Clipboard paste as plain text">Paste _Without Formatting</attribute>
-        <attribute name="action">cmp.paste-without-formatting</attribute>
+        <attribute name="action">win.paste-without-formatting</attribute>
       </item>
     </section>
     <section id="context_menu_plain_text">
       <item>
         <attribute name="label" translatable="yes">Cu_t</attribute>
-        <attribute name="action">cmp.cut</attribute>
+        <attribute name="action">win.cut</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Copy</attribute>
-        <attribute name="action">cmp.copy</attribute>
+        <attribute name="action">win.copy</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Paste</attribute>
-        <attribute name="action">cmp.paste</attribute>
+        <attribute name="action">win.paste</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Select _All</attribute>
-        <attribute name="action">cmp.select-all</attribute>
+        <attribute name="action">win.select-all</attribute>
       </item>
     </section>
     <section id="context_menu_webkit_text_entry"/>
     <section id="context_menu_inspector">
       <item>
         <attribute name="label" translatable="yes">_Inspect…</attribute>
-        <attribute name="action">cmp.open_inspector</attribute>
+        <attribute name="action">win.open_inspector</attribute>
       </item>
     </section>
   </menu>

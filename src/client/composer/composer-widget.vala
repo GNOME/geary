@@ -47,8 +47,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private SimpleActionGroup actions = new SimpleActionGroup();
-
     private const string ACTION_UNDO = "undo";
     private const string ACTION_REDO = "redo";
     private const string ACTION_CUT = "cut";
@@ -90,11 +88,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH,
         ACTION_FONT_SIZE, ACTION_FONT_FAMILY, ACTION_COLOR, ACTION_JUSTIFY,
         ACTION_INSERT_IMAGE, ACTION_COPY_LINK,
-	ACTION_OLIST, ACTION_ULIST
+        ACTION_OLIST, ACTION_ULIST
     };
 
-    private const ActionEntry[] action_entries = {
-        // Editor commands
+    private const ActionEntry[] editor_action_entries = {
         {ACTION_UNDO,                     on_undo                                       },
         {ACTION_REDO,                     on_redo                                       },
         {ACTION_CUT,                      on_cut                                        },
@@ -118,41 +115,43 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         {ACTION_COLOR,                    on_select_color                               },
         {ACTION_INSERT_IMAGE,             on_insert_image                               },
         {ACTION_INSERT_LINK,              on_insert_link                                },
-        // Composer commands
-        {ACTION_COMPOSE_AS_HTML,          on_toggle_action,        null,   "true",  on_compose_as_html_toggled },
-        {ACTION_SHOW_EXTENDED,            on_toggle_action,        null,  "false",  on_show_extended_toggled   },
-        {ACTION_CLOSE,                    on_close                                                             },
-        {ACTION_CLOSE_AND_SAVE,           on_close_and_save                                                    },
-        {ACTION_CLOSE_AND_DISCARD,        on_close_and_discard                                                 },
-        {ACTION_DETACH,                   on_detach                                                            },
-        {ACTION_SEND,                     on_send                                                              },
+        {ACTION_OPEN_INSPECTOR,           on_open_inspector                             },
+    };
+
+    private const ActionEntry[] composer_action_entries = {
         {ACTION_ADD_ATTACHMENT,           on_add_attachment                                                    },
         {ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments                                               },
+        {ACTION_CLOSE,                    on_close                                                             },
+        {ACTION_CLOSE_AND_DISCARD,        on_close_and_discard                                                 },
+        {ACTION_CLOSE_AND_SAVE,           on_close_and_save                                                    },
+        {ACTION_COMPOSE_AS_HTML,          on_toggle_action,        null,   "true",  on_compose_as_html_toggled },
+        {ACTION_DETACH,                   on_detach                                                            },
         {ACTION_SELECT_DICTIONARY,        on_select_dictionary                                                 },
-        {ACTION_OPEN_INSPECTOR,           on_open_inspector                                                    },
+        {ACTION_SEND,                     on_send                                                              },
+        {ACTION_SHOW_EXTENDED,            on_toggle_action,        null,  "false",  on_show_extended_toggled   },
     };
 
     public static Gee.MultiMap<string, string> action_accelerators = new Gee.HashMultiMap<string, string>();
-    static construct {
-        action_accelerators.set(ACTION_UNDO, "<Ctrl>z");
-        action_accelerators.set(ACTION_REDO, "<Ctrl><Shift>z");
-        action_accelerators.set(ACTION_CUT, "<Ctrl>x");
-        action_accelerators.set(ACTION_COPY, "<Ctrl>c");
-        action_accelerators.set(ACTION_PASTE, "<Ctrl>v");
-        action_accelerators.set(ACTION_PASTE_WITHOUT_FORMATTING, "<Ctrl><Shift>v");
-        action_accelerators.set(ACTION_INSERT_IMAGE, "<Ctrl>g");
-        action_accelerators.set(ACTION_INSERT_LINK, "<Ctrl>l");
-        action_accelerators.set(ACTION_INDENT, "<Ctrl>bracketright");
-        action_accelerators.set(ACTION_OUTDENT, "<Ctrl>bracketleft");
-        action_accelerators.set(ACTION_REMOVE_FORMAT, "<Ctrl>space");
-        action_accelerators.set(ACTION_BOLD, "<Ctrl>b");
-        action_accelerators.set(ACTION_ITALIC, "<Ctrl>i");
-        action_accelerators.set(ACTION_UNDERLINE, "<Ctrl>u");
-        action_accelerators.set(ACTION_STRIKETHROUGH, "<Ctrl>k");
-        action_accelerators.set(ACTION_CLOSE, "<Ctrl>w");
-        action_accelerators.set(ACTION_CLOSE, "Escape");
-        action_accelerators.set(ACTION_ADD_ATTACHMENT, "<Ctrl>t");
-        action_accelerators.set(ACTION_DETACH, "<Ctrl>d");
+
+    public static void add_window_accelerators(GearyApplication application) {
+        application.add_window_accelerators(ACTION_UNDO, { "<Ctrl>z" } );
+        application.add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>z" } );
+        application.add_window_accelerators(ACTION_CUT, { "<Ctrl>x" } );
+        application.add_window_accelerators(ACTION_COPY, { "<Ctrl>c" } );
+        application.add_window_accelerators(ACTION_PASTE, { "<Ctrl>v" } );
+        application.add_window_accelerators(ACTION_PASTE_WITHOUT_FORMATTING, { "<Ctrl><Shift>v" } );
+        application.add_window_accelerators(ACTION_INSERT_IMAGE, { "<Ctrl>g" } );
+        application.add_window_accelerators(ACTION_INSERT_LINK, { "<Ctrl>l" } );
+        application.add_window_accelerators(ACTION_INDENT, { "<Ctrl>bracketright" } );
+        application.add_window_accelerators(ACTION_OUTDENT, { "<Ctrl>bracketleft" } );
+        application.add_window_accelerators(ACTION_REMOVE_FORMAT, { "<Ctrl>space" } );
+        application.add_window_accelerators(ACTION_BOLD, { "<Ctrl>b" } );
+        application.add_window_accelerators(ACTION_ITALIC, { "<Ctrl>i" } );
+        application.add_window_accelerators(ACTION_UNDERLINE, { "<Ctrl>u" } );
+        application.add_window_accelerators(ACTION_STRIKETHROUGH, { "<Ctrl>k" } );
+        application.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
+        application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );
+        application.add_window_accelerators(ACTION_DETACH, { "<Ctrl>d" } );
     }
 
     private const string DRAFT_SAVED_TEXT = _("Saved");
@@ -253,6 +252,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     internal Gtk.Grid editor_container;
 
     [GtkChild]
+    internal Gtk.Grid body_container;
+
+    [GtkChild]
     private Gtk.Label from_label;
     [GtkChild]
     private Gtk.Label from_single;
@@ -321,6 +323,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     [GtkChild]
     private Gtk.Box message_area;
+
+    private SimpleActionGroup composer_actions = new SimpleActionGroup();
+    private SimpleActionGroup editor_actions = new SimpleActionGroup();
 
     private Menu html_menu;
     private Menu plain_menu;
@@ -457,7 +462,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.set_vexpand(true);
         this.editor.show();
 
-        this.editor_container.add(this.editor);
+        this.body_container.add(this.editor);
 
         // Initialize menus
         Gtk.Builder builder = new Gtk.Builder.from_resource(
@@ -807,16 +812,31 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     // Initializes all actions and adds them to the action group
     private void initialize_actions() {
-        this.actions.add_action_entries(action_entries, this);
+        // Composer actions
+        this.composer_actions.add_action_entries(
+            ComposerWidget.composer_action_entries, this
+        );
+        // Main actions use 'win' prefix so they override main window
+        // action. But for some reason, we can't use the same prefix
+        // for the headerbar.
+        insert_action_group("win", this.composer_actions);
+        this.header.insert_action_group("cmh", this.composer_actions);
 
-        // for some reason, we can't use the same prefix.
-        insert_action_group("cmp", this.actions);
-        this.header.insert_action_group("cmh", this.actions);
+        // Editor actions - scoped to the editor only. Need to include
+        // composer actions however since if not found in this group,
+        // ancestors (including the composer's) will not be consulted.
+        this.editor_actions.add_action_entries(
+            ComposerWidget.composer_action_entries, this
+        );
+        this.editor_actions.add_action_entries(
+            ComposerWidget.editor_action_entries, this
+        );
+        this.editor_container.insert_action_group("win", this.editor_actions);
 
-        this.actions.change_action_state(
+        this.composer_actions.change_action_state(
             ACTION_SHOW_EXTENDED, false
         );
-        this.actions.change_action_state(
+        this.composer_actions.change_action_state(
             ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
         );
 
@@ -1181,7 +1201,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // conversation back in the main window. The workaround here
         // sets a new menu model and hence the menu_button constructs
         // a new popover.
-        this.actions.change_action_state(ACTION_COMPOSE_AS_HTML,
+        this.composer_actions.change_action_state(ACTION_COMPOSE_AS_HTML,
             GearyApplication.instance.config.compose_as_html);
 
         this.state = ComposerWidget.ComposerState.DETACHED;
@@ -1670,7 +1690,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 // the Enter leaking through to the controls, but only
                 // send if send is available
                 if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
-                    this.actions.activate_action(ACTION_SEND, null);
+                    this.composer_actions.activate_action(ACTION_SEND, null);
                     ret = Gdk.EVENT_STOP;
                 }
             break;
@@ -2017,8 +2037,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
      * Helper method, returns a composer action.
      * @param action_name - The name of the action (as found in action_entries)
      */
-    public SimpleAction? get_action(string action_name) {
-        return this.actions.lookup_action(action_name) as SimpleAction;
+    public GLib.SimpleAction? get_action(string action_name) {
+        GLib.Action? action = this.composer_actions.lookup_action(action_name);
+        if (action == null) {
+            action = this.editor_actions.lookup_action(action_name);
+        }
+        return action as SimpleAction;
     }
 
     private bool add_account_emails_to_from_list(Geary.Account other_account, bool set_active = false) {
@@ -2238,7 +2262,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // without the popover immediately appearing and raining on
         // their text selection parade.
         if (this.pointer_url != null &&
-            this.actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean()) {
+            this.composer_actions.get_action_state(ACTION_COMPOSE_AS_HTML)
+                .get_boolean()) {
             Gdk.EventButton? button = (Gdk.EventButton) event;
             Gdk.Rectangle location = Gdk.Rectangle();
             location.x = (int) button.x;
@@ -2260,31 +2285,33 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.cursor_url = context.is_link ? context.link_url : null;
         update_cursor_actions();
 
-        this.actions.change_action_state(ACTION_FONT_FAMILY, context.font_family);
+        this.editor_actions.change_action_state(
+            ACTION_FONT_FAMILY, context.font_family
+        );
 
         if (context.font_size < 11)
-            this.actions.change_action_state(ACTION_FONT_SIZE, "small");
+            this.editor_actions.change_action_state(ACTION_FONT_SIZE, "small");
         else if (context.font_size > 20)
-            this.actions.change_action_state(ACTION_FONT_SIZE, "large");
+            this.editor_actions.change_action_state(ACTION_FONT_SIZE, "large");
         else
-            this.actions.change_action_state(ACTION_FONT_SIZE, "medium");
+            this.editor_actions.change_action_state(ACTION_FONT_SIZE, "medium");
     }
 
     private void on_typing_attributes_changed() {
         uint mask = this.editor.get_editor_state().get_typing_attributes();
-        this.actions.change_action_state(
+        this.editor_actions.change_action_state(
             ACTION_BOLD,
             (mask & WebKit.EditorTypingAttributes.BOLD) == WebKit.EditorTypingAttributes.BOLD
         );
-        this.actions.change_action_state(
+        this.editor_actions.change_action_state(
             ACTION_ITALIC,
             (mask & WebKit.EditorTypingAttributes.ITALIC) == WebKit.EditorTypingAttributes.ITALIC
         );
-        this.actions.change_action_state(
+        this.editor_actions.change_action_state(
             ACTION_UNDERLINE,
             (mask & WebKit.EditorTypingAttributes.UNDERLINE) == WebKit.EditorTypingAttributes.UNDERLINE
         );
-        this.actions.change_action_state(
+        this.editor_actions.change_action_state(
             ACTION_STRIKETHROUGH,
             (mask & WebKit.EditorTypingAttributes.STRIKETHROUGH) == WebKit.EditorTypingAttributes.STRIKETHROUGH
         );

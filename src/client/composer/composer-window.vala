@@ -36,8 +36,6 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
         set_property("name", "GearyComposerWindow");
 
         add(this.composer);
-        focus_in_event.connect(on_focus_in);
-        focus_out_event.connect(on_focus_out);
 
         if (composer.config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
             composer.embed_header();
@@ -105,10 +103,6 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
     }
 
     public void close_container() {
-        on_focus_out();
-        this.composer.editor.focus_in_event.disconnect(on_focus_in);
-        this.composer.editor.focus_out_event.disconnect(on_focus_out);
-
         this.closing = true;
         destroy();
     }
