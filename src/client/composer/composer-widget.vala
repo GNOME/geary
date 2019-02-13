@@ -149,7 +149,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         application.add_window_accelerators(ACTION_ITALIC, { "<Ctrl>i" } );
         application.add_window_accelerators(ACTION_UNDERLINE, { "<Ctrl>u" } );
         application.add_window_accelerators(ACTION_STRIKETHROUGH, { "<Ctrl>k" } );
-        application.add_window_accelerators(ACTION_CLOSE, { "<Ctrl>w", "Escape" } );
+        application.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );
         application.add_window_accelerators(ACTION_DETACH, { "<Ctrl>d" } );
     }
