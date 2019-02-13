@@ -229,7 +229,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
 
-    // Base class for list rows it the list box
+    // Base class for list rows in the list box
     internal abstract class ConversationRow : Gtk.ListBoxRow, Geary.BaseInterface {
 
 
@@ -907,6 +907,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         );
         view.mark_email.connect(on_mark_email);
         view.mark_email_from_here.connect(on_mark_email_from_here);
+        view.internal_link_activated.connect(on_internal_link_activated);
         view.body_selection_changed.connect((email, has_selection) => {
                 this.body_selected_view = has_selection ? email : null;
             });
@@ -955,6 +956,20 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // Use set_value rather than clamp_value since we want to
         // scroll to the top of the window.
         get_adjustment().set_value(y);
+    }
+
+    private void scroll_to_anchor(EmailRow row, int anchor_y) {
+        Gtk.Allocation? alloc = null;
+        row.get_allocation(out alloc);
+
+        int x = 0, y = 0;
+        ConversationWebView web_view = row.view.primary_message.web_view;
+        web_view.translate_coordinates(row, x, anchor_y, out x, out y);
+
+        Gtk.Adjustment adj = get_adjustment();
+        y = alloc.y + y;
+        adj.set_value(y);
+
     }
 
     /**
@@ -1154,6 +1169,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 row.expand.begin();
             }
         }
+    }
+
+    private void on_internal_link_activated(ConversationEmail email, int y) {
+        EmailRow row = get_email_row_by_id(email.email.id);
+        scroll_to_anchor(row, y);
     }
 
 }

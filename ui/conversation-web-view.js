@@ -244,6 +244,21 @@ ConversationPageState.prototype = {
         }
         return value;
     },
+    getAnchorTargetY: function(anchor) {
+        let target = document.getElementById(anchor);
+        if (target == null) {
+            target = document.getElementsByName(anchor);
+            if (target.length > 0) {
+                target = target[0];
+            }
+        }
+        if (target != null) {
+            return target.getBoundingClientRect().top +
+                document.documentElement.scrollTop;
+        } else {
+            return -1;
+        }
+    },
     linkClicked: function(link) {
         let cancelClick = false;
         let href = link.href;

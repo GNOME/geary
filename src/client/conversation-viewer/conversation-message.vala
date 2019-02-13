@@ -20,6 +20,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private const string FROM_CLASS = "geary-from";
     private const string MATCH_CLASS = "geary-match";
+    private const string INTERNAL_ANCHOR_PREFIX = "geary:body#";
     private const string REPLACED_CID_TEMPLATE = "replaced_%02u@geary";
     private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
 
@@ -261,6 +262,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** Fired when the user clicks a link in the email. */
     public signal void link_activated(string link);
 
+    /** Fired when the user clicks a internal link in the email. */
+    public signal void internal_link_activated(int y);
+
     /** Fired when the user requests remote images be loaded. */
     public signal void flag_remote_images();
 
@@ -355,9 +359,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.web_view.get_inspector().show();
             });
         add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
-            .activate.connect((param) => {
-                link_activated(param.get_string());
-            });
+            .activate.connect(on_link_activated);
         add_action(ACTION_SAVE_IMAGE, true, new VariantType("(sms)"))
             .activate.connect(on_save_image);
         add_action(ACTION_SEARCH_FROM, true, VariantType.STRING)
@@ -445,7 +447,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.web_view.context_menu.connect(on_context_menu);
         this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
         this.web_view.link_activated.connect((link) => {
-                link_activated(link);
+                on_link_activated(new GLib.Variant("s", link));
             });
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
         this.web_view.notify["is-loading"].connect(on_is_loading_notify);
@@ -1156,6 +1158,30 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     );
                 }
             });
+    }
+
+    private void on_link_activated(GLib.Variant? param) {
+        string link = param.get_string();
+
+        if (link.has_prefix(INTERNAL_ANCHOR_PREFIX)) {
+            long start = INTERNAL_ANCHOR_PREFIX.length;
+            long end = link.length;
+            string anchor_body = link.substring(start, end - start);
+            this.web_view.get_anchor_target_y.begin(anchor_body, (obj, res) => {
+                    try {
+                        int y = this.web_view.get_anchor_target_y.end(res);
+                        if (y > 0) {
+                            internal_link_activated(y);
+                        } else {
+                        	debug("Failed to get anchor destination");
+                        }
+                    } catch (GLib.Error err) {
+                        debug("Failed to get anchor destination");
+                    }
+                });
+        } else {
+            link_activated(link);
+        }
     }
 
 }
