@@ -1712,7 +1712,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         foreach (ImapDB.EmailIdentifier id in map.keys) {
             LocationIdentifier? location = do_get_location_for_id(
-                cx, id, ListFlags.NONE, cancellable
+                cx,
+                id,
+                // Could be setting a flag on a deleted message
+                ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+                cancellable
             );
             if (location == null) {
                 throw new EngineError.NOT_FOUND(
