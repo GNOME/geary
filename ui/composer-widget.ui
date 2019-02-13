@@ -329,33 +329,71 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="composer_toolbar">
+          <object class="GtkGrid" id="editor_container">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_start">6</property>
-            <property name="margin_end">6</property>
-            <property name="spacing">6</property>
             <child>
-              <object class="GtkBox" id="command_buttons">
+              <object class="GtkBox" id="composer_toolbar">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_start">6</property>
+                <property name="margin_end">6</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkBox" id="command_buttons">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Undo last edit (Ctrl+Z)</property>
-                    <property name="action_name">win.undo</property>
-                    <property name="always_show_image">True</property>
+                    <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImage">
+                      <object class="GtkButton">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">edit-undo-symbolic</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Undo last edit (Ctrl+Z)</property>
+                        <property name="action_name">win.undo</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">edit-undo-symbolic</property>
+                          </object>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Redo last edit  (Ctrl+Shift+Z)</property>
+                        <property name="action_name">win.redo</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">edit-redo-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="linked"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -364,22 +402,108 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkBox" id="font_style_buttons">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Redo last edit  (Ctrl+Shift+Z)</property>
-                    <property name="action_name">win.redo</property>
-                    <property name="always_show_image">True</property>
+                    <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImage">
+                      <object class="GtkToggleButton" id="bold_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">edit-redo-symbolic</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Bold (Ctrl+B)</property>
+                        <property name="action_name">win.bold</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="bold_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">format-text-bold-symbolic</property>
+                          </object>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
+                    <child>
+                      <object class="GtkToggleButton" id="italics_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Italic (Ctrl+I)</property>
+                        <property name="action_name">win.italic</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="italics_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">format-text-italic-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="underline_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Underline (Ctrl+U)</property>
+                        <property name="action_name">win.underline</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="underline_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">format-text-underline-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="strikethrough_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Strikethrough (Ctrl+K)</property>
+                        <property name="action_name">win.strikethrough</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="strikethrough_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">format-text-strikethrough-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="linked"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -387,85 +511,61 @@
                     <property name="position">1</property>
                   </packing>
                 </child>
-                <style>
-                  <class name="linked"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="font_style_buttons">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkToggleButton" id="bold_button">
+                  <object class="GtkBox" id="list_buttons">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Bold (Ctrl+B)</property>
-                    <property name="action_name">win.bold</property>
-                    <property name="always_show_image">True</property>
+                    <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImage" id="bold_image">
+                      <object class="GtkButton" id="ulist_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">format-text-bold-symbolic</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Insert unordered list</property>
+                        <property name="action_name">win.ulist</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="ulist_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">format-unordered-list-symbolic</property>
+                          </object>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="italics_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Italic (Ctrl+I)</property>
-                    <property name="action_name">win.italic</property>
-                    <property name="always_show_image">True</property>
                     <child>
-                      <object class="GtkImage" id="italics_image">
+                      <object class="GtkButton" id="olist_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">format-text-italic-symbolic</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Insert ordered list</property>
+                        <property name="action_name">win.olist</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="olist_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">format-ordered-list-symbolic</property>
+                          </object>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="underline_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Underline (Ctrl+U)</property>
-                    <property name="action_name">win.underline</property>
-                    <property name="always_show_image">True</property>
-                    <child>
-                      <object class="GtkImage" id="underline_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">format-text-underline-symbolic</property>
-                      </object>
-                    </child>
+                    <style>
+                      <class name="linked"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -474,22 +574,60 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="strikethrough_button">
+                  <object class="GtkBox" id="indentation_buttons">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Strikethrough (Ctrl+K)</property>
-                    <property name="action_name">win.strikethrough</property>
-                    <property name="always_show_image">True</property>
+                    <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImage" id="strikethrough_image">
+                      <object class="GtkButton" id="indent_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">format-text-strikethrough-symbolic</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Quote text  (Ctrl+])</property>
+                        <property name="action_name">win.indent</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="indent_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">format-indent-more-symbolic</property>
+                          </object>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
+                    <child>
+                      <object class="GtkButton" id="outdent_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Unquote text  (Ctrl+[)</property>
+                        <property name="action_name">win.outdent</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="outdent_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">format-indent-less-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="linked"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -497,284 +635,240 @@
                     <property name="position">3</property>
                   </packing>
                 </child>
-                <style>
-                  <class name="linked"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="list_buttons">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkButton" id="ulist_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Insert unordered list</property>
-                    <property name="action_name">win.ulist</property>
-                    <property name="always_show_image">True</property>
-                    <child>
-                      <object class="GtkImage" id="ulist_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">format-unordered-list-symbolic</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="olist_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Insert ordered list</property>
-                    <property name="action_name">win.olist</property>
-                    <property name="always_show_image">True</property>
-                    <child>
-                      <object class="GtkImage" id="olist_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">format-ordered-list-symbolic</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <style>
-                  <class name="linked"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="indentation_buttons">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkButton" id="indent_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Quote text  (Ctrl+])</property>
-                    <property name="action_name">win.indent</property>
-                    <property name="always_show_image">True</property>
-                    <child>
-                      <object class="GtkImage" id="indent_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">format-indent-more-symbolic</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="outdent_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Unquote text  (Ctrl+[)</property>
-                    <property name="action_name">win.outdent</property>
-                    <property name="always_show_image">True</property>
-                    <child>
-                      <object class="GtkImage" id="outdent_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">format-indent-less-symbolic</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <style>
-                  <class name="linked"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="insert_buttons">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkButton" id="insert_link_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Insert or update selection link (Ctrl+L)</property>
-                    <property name="action_name">win.insert-link</property>
-                    <property name="always_show_image">True</property>
-                    <child>
-                      <object class="GtkImage" id="insert_link_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">insert-link-symbolic</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="insert_image_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Insert an image (Ctrl+G)</property>
-                    <property name="action_name">win.insert-image</property>
-                    <property name="always_show_image">True</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">insert-image-symbolic</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <style>
-                  <class name="linked"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="remove_format_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="focus_on_click">False</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Remove selection formatting (Ctrl+Space)</property>
-                <property name="action_name">win.remove-format</property>
-                <property name="always_show_image">True</property>
-                <child>
-                  <object class="GtkImage" id="remove_format_image">
+                  <object class="GtkBox" id="insert_buttons">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="pixel_size">16</property>
-                    <property name="icon_name">format-text-remove-symbolic</property>
+                    <child>
+                      <object class="GtkButton" id="insert_link_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Insert or update selection link (Ctrl+L)</property>
+                        <property name="action_name">win.insert-link</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="insert_link_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">insert-link-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="insert_image_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Insert an image (Ctrl+G)</property>
+                        <property name="action_name">win.insert-image</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixel_size">16</property>
+                            <property name="icon_name">insert-image-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="linked"/>
+                    </style>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
                 </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="select_dictionary_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="focus_on_click">False</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Select spell checking languages</property>
-                <property name="action_name">win.select-dictionary</property>
-                <property name="always_show_image">True</property>
                 <child>
-                  <object class="GtkImage" id="select_dictionary_image">
+                  <object class="GtkButton" id="remove_format_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Remove selection formatting (Ctrl+Space)</property>
+                    <property name="action_name">win.remove-format</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage" id="remove_format_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
+                        <property name="icon_name">format-text-remove-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="select_dictionary_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Select spell checking languages</property>
+                    <property name="action_name">win.select-dictionary</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage" id="select_dictionary_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
+                        <property name="icon_name">accessories-dictionary-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkMenuButton" id="menu_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="pixel_size">16</property>
-                    <property name="icon_name">accessories-dictionary-symbolic</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <child>
+                      <placeholder/>
+                    </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="info_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="ellipsize">end</property>
+                    <property name="width_chars">6</property>
+                    <property name="xalign">0</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">8</property>
+                  </packing>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">6</property>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkMenuButton" id="menu_button">
+              <object class="GtkFrame">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="focus_on_click">False</property>
-                <property name="receives_default">False</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">in</property>
                 <child>
-                  <placeholder/>
+                  <object class="GtkBox" id="message_area">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkOverlay" id="message_overlay">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkGrid" id="body_container">
+                            <property name="height_request">250</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="index">-1</property>
+                          </packing>
+                        </child>
+                        <child type="overlay">
+                          <object class="GtkLabel" id="message_overlay_label">
+                            <property name="can_focus">False</property>
+                            <property name="no_show_all">True</property>
+                            <property name="halign">start</property>
+                            <property name="valign">end</property>
+                            <property name="ellipsize">middle</property>
+                            <style>
+                              <class name="geary-overlay"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                  </object>
                 </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">7</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="info_label">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="ellipsize">end</property>
-                <property name="width_chars">6</property>
-                <property name="xalign">0</property>
                 <style>
-                  <class name="dim-label"/>
+                  <class name="geary-composer-body"/>
                 </style>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">8</property>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -784,91 +878,11 @@
           </packing>
         </child>
         <child>
-          <object class="GtkFrame">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label_xalign">0</property>
-            <property name="shadow_type">in</property>
-            <child>
-              <object class="GtkBox" id="message_area">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkOverlay" id="message_overlay">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkGrid" id="editor_container">
-                        <property name="height_request">250</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="index">-1</property>
-                      </packing>
-                    </child>
-                    <child type="overlay">
-                      <object class="GtkLabel" id="message_overlay_label">
-                        <property name="can_focus">False</property>
-                        <property name="no_show_all">True</property>
-                        <property name="halign">start</property>
-                        <property name="valign">end</property>
-                        <property name="ellipsize">middle</property>
-                        <style>
-                          <class name="geary-overlay"/>
-                        </style>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-              </object>
-            </child>
-            <style>
-              <class name="geary-composer-body"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox" id="attachments_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="margin_left">6</property>
+            <property name="margin_right">6</property>
             <property name="margin_start">6</property>
             <property name="margin_end">6</property>
             <property name="margin_top">6</property>
@@ -882,7 +896,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">5</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>
