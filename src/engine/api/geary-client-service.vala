@@ -439,10 +439,9 @@ public abstract class Geary.ClientService : BaseObject {
 
 	private void on_connectivity_error(Error error) {
         if (this.is_running) {
-            this.current_status = CONNECTION_FAILED;
             this.became_reachable_timer.reset();
             this.became_unreachable_timer.reset();
-            became_unreachable();
+            notify_connection_failed(new ErrorContext(error));
         }
 	}
 

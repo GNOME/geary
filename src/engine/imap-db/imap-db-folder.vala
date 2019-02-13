@@ -1360,7 +1360,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (email_id == null ||
             email_id.message_id != Db.INVALID_ROWID ||
             email_id.uid == null) {
-            throw new EngineError.INCOMPLETE_MESSAGE(
+            throw new EngineError.BAD_PARAMETERS(
                 "IMAP message with UID required"
             );
         }
@@ -1711,15 +1711,28 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             "UPDATE MessageTable SET flags=?, fields = fields | ? WHERE id=?");
         
         foreach (ImapDB.EmailIdentifier id in map.keys) {
-            LocationIdentifier? location = do_get_location_for_id(cx, id, ListFlags.NONE,
-                cancellable);
-            if (location == null)
-                continue;
-            
-            Geary.Imap.MessageFlags flags = ((Geary.Imap.EmailFlags) map.get(id)).message_flags;
-            
+            LocationIdentifier? location = do_get_location_for_id(
+                cx,
+                id,
+                // Could be setting a flag on a deleted message
+                ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+                cancellable
+            );
+            if (location == null) {
+                throw new EngineError.NOT_FOUND(
+                    "Email not found: %s", id.to_string()
+                );
+            }
+
+            Geary.Imap.EmailFlags? flags = map.get(id) as Geary.Imap.EmailFlags;
+            if (flags == null) {
+                throw new EngineError.BAD_PARAMETERS(
+                    "Email with Geary.Imap.EmailFlags required"
+                );
+            }
+
             update_stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
-            update_stmt.bind_string(0, flags.serialize());
+            update_stmt.bind_string(0, flags.message_flags.serialize());
             update_stmt.bind_int(1, Geary.Email.Field.FLAGS);
             update_stmt.bind_rowid(2, id.message_id);
             
@@ -1995,12 +2008,20 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 unread_count_change += email.email_flags.is_unread() ? 1 : -1;
             }
 
-            Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags> map =
-               new Gee.HashMap<ImapDB.EmailIdentifier, Geary.EmailFlags>();
-            map.set((ImapDB.EmailIdentifier) email.id, email.email_flags);
-            do_set_email_flags(cx, map, cancellable);
+            // do_set_email_flags requires a valid message location,
+            // but doesn't accept one as an arg, so despite knowing
+            // the location here, make sure we pass an id with a
+            // message_id in so it can look the location back up.
+            do_set_email_flags(
+                cx,
+                Collection.single_map<ImapDB.EmailIdentifier,Geary.EmailFlags>(
+                    (ImapDB.EmailIdentifier) row_email.id, email.email_flags
+                ),
+                cancellable
+            );
 
             post_fields |= Geary.Email.Field.FLAGS;
+
         }
     }
 
