@@ -39,6 +39,7 @@ geary_test_engine_sources = [
   'engine/imap-db/imap-db-account-test.vala',
   'engine/imap-db/imap-db-attachment-test.vala',
   'engine/imap-db/imap-db-database-test.vala',
+  'engine/imap-db/imap-db-folder-test.vala',
   'engine/imap-engine/account-processor-test.vala',
   'engine/mime-content-type-test.vala',
   'engine/rfc822-mailbox-address-test.vala',

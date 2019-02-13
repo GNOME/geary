@@ -50,6 +50,7 @@ int main(string[] args) {
     engine.add_suite(new Geary.ImapDB.AttachmentTest().get_suite());
     engine.add_suite(new Geary.ImapDB.AttachmentIoTest().get_suite());
     engine.add_suite(new Geary.ImapDB.DatabaseTest().get_suite());
+    engine.add_suite(new Geary.ImapDB.FolderTest().get_suite());
     engine.add_suite(new Geary.ImapEngine.AccountProcessorTest().get_suite());
     engine.add_suite(new Geary.Inet.Test().get_suite());
     engine.add_suite(new Geary.JS.Test().get_suite());
