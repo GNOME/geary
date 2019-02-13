@@ -47,8 +47,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private SimpleActionGroup actions = new SimpleActionGroup();
-
     private const string ACTION_UNDO = "undo";
     private const string ACTION_REDO = "redo";
     private const string ACTION_CUT = "cut";
@@ -90,7 +88,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH,
         ACTION_FONT_SIZE, ACTION_FONT_FAMILY, ACTION_COLOR, ACTION_JUSTIFY,
         ACTION_INSERT_IMAGE, ACTION_COPY_LINK,
-	ACTION_OLIST, ACTION_ULIST
+        ACTION_OLIST, ACTION_ULIST
     };
 
     private const ActionEntry[] action_entries = {
@@ -133,26 +131,26 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     };
 
     public static Gee.MultiMap<string, string> action_accelerators = new Gee.HashMultiMap<string, string>();
-    static construct {
-        action_accelerators.set(ACTION_UNDO, "<Ctrl>z");
-        action_accelerators.set(ACTION_REDO, "<Ctrl><Shift>z");
-        action_accelerators.set(ACTION_CUT, "<Ctrl>x");
-        action_accelerators.set(ACTION_COPY, "<Ctrl>c");
-        action_accelerators.set(ACTION_PASTE, "<Ctrl>v");
-        action_accelerators.set(ACTION_PASTE_WITHOUT_FORMATTING, "<Ctrl><Shift>v");
-        action_accelerators.set(ACTION_INSERT_IMAGE, "<Ctrl>g");
-        action_accelerators.set(ACTION_INSERT_LINK, "<Ctrl>l");
-        action_accelerators.set(ACTION_INDENT, "<Ctrl>bracketright");
-        action_accelerators.set(ACTION_OUTDENT, "<Ctrl>bracketleft");
-        action_accelerators.set(ACTION_REMOVE_FORMAT, "<Ctrl>space");
-        action_accelerators.set(ACTION_BOLD, "<Ctrl>b");
-        action_accelerators.set(ACTION_ITALIC, "<Ctrl>i");
-        action_accelerators.set(ACTION_UNDERLINE, "<Ctrl>u");
-        action_accelerators.set(ACTION_STRIKETHROUGH, "<Ctrl>k");
-        action_accelerators.set(ACTION_CLOSE, "<Ctrl>w");
-        action_accelerators.set(ACTION_CLOSE, "Escape");
-        action_accelerators.set(ACTION_ADD_ATTACHMENT, "<Ctrl>t");
-        action_accelerators.set(ACTION_DETACH, "<Ctrl>d");
+
+    public static void add_window_accelerators(GearyApplication application) {
+        application.add_window_accelerators(ACTION_UNDO, { "<Ctrl>z" } );
+        application.add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>z" } );
+        application.add_window_accelerators(ACTION_CUT, { "<Ctrl>x" } );
+        application.add_window_accelerators(ACTION_COPY, { "<Ctrl>c" } );
+        application.add_window_accelerators(ACTION_PASTE, { "<Ctrl>v" } );
+        application.add_window_accelerators(ACTION_PASTE_WITHOUT_FORMATTING, { "<Ctrl><Shift>v" } );
+        application.add_window_accelerators(ACTION_INSERT_IMAGE, { "<Ctrl>g" } );
+        application.add_window_accelerators(ACTION_INSERT_LINK, { "<Ctrl>l" } );
+        application.add_window_accelerators(ACTION_INDENT, { "<Ctrl>bracketright" } );
+        application.add_window_accelerators(ACTION_OUTDENT, { "<Ctrl>bracketleft" } );
+        application.add_window_accelerators(ACTION_REMOVE_FORMAT, { "<Ctrl>space" } );
+        application.add_window_accelerators(ACTION_BOLD, { "<Ctrl>b" } );
+        application.add_window_accelerators(ACTION_ITALIC, { "<Ctrl>i" } );
+        application.add_window_accelerators(ACTION_UNDERLINE, { "<Ctrl>u" } );
+        application.add_window_accelerators(ACTION_STRIKETHROUGH, { "<Ctrl>k" } );
+        application.add_window_accelerators(ACTION_CLOSE, { "<Ctrl>w", "Escape" } );
+        application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );
+        application.add_window_accelerators(ACTION_DETACH, { "<Ctrl>d" } );
     }
 
     private const string DRAFT_SAVED_TEXT = _("Saved");
@@ -321,6 +319,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     [GtkChild]
     private Gtk.Box message_area;
+
+    private SimpleActionGroup actions = new SimpleActionGroup();
 
     private Menu html_menu;
     private Menu plain_menu;
@@ -809,8 +809,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private void initialize_actions() {
         this.actions.add_action_entries(action_entries, this);
 
-        // for some reason, we can't use the same prefix.
-        insert_action_group("cmp", this.actions);
+        // Main actions should use 'win' prefix so they override main
+        // window action. But for some reason, we can't use the same
+        // prefix for the headerbar.
+        insert_action_group("win", this.actions);
         this.header.insert_action_group("cmh", this.actions);
 
         this.actions.change_action_state(

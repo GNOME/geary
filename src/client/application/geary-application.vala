@@ -235,10 +235,11 @@ public class GearyApplication : Gtk.Application {
         // the other instances called when sending commands to the app via the command-line)
         message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
             exec_dir.get_path(), is_installed().to_string());
-        
+
         config = new Configuration(APP_ID);
+        ComposerWidget.add_window_accelerators(this);
         yield controller.open_async(null);
-        
+
         release();
     }
     
@@ -251,6 +252,12 @@ public class GearyApplication : Gtk.Application {
         release();
         
         is_destroyed = true;
+    }
+
+    public void add_window_accelerators(string action,
+                                        string[] accelerators,
+                                        Variant? param = null) {
+        set_accels_for_action("win." + action, accelerators);
     }
 
     public void show_accounts() {
