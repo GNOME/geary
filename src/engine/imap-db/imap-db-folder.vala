@@ -20,7 +20,16 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     /**
      * Fields required for a message to be stored in the database.
      */
-    public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.PROPERTIES|Email.Field.REFERENCES;
+    public const Geary.Email.Field REQUIRED_FIELDS = (
+        // Required for primary duplicate detection done with properties
+        Email.Field.PROPERTIES |
+        // Required for secondary duplicate detection via UID
+        Email.Field.REFERENCES |
+        // Required to ensure the unread count is up to date and so
+        // that when moving a message, the new copy turns back up as
+        // being not deleted.
+        Email.Field.FLAGS
+    );
 
     /**
      * Fields required for a message to be considered for full-text indexing.
