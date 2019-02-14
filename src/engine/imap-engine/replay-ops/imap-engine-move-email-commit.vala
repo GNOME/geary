@@ -58,6 +58,21 @@ private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOper
                     );
                 }
 
+                // The copy is implemented as follows:
+                // 1. Have an open connection to source folder
+                // 2. IMAP COPY from source to destination folder
+                // 3. IMAP STORE \Deleted
+                // 4. IMAP EXPUNGE
+                //
+                // The net result is that since the source folder will
+                // notify that the email has been marked as deleted
+                // then actually removed, the email will be flagged as
+                // deleted, and will need to be unflagged as such once
+                // it is noticed in the destination folder. This
+                // happens via the account synchroniser being notified
+                // that the destination has had its contents altered,
+                // so it goes off and checks.
+
                 Imap.MessageSet msg_set = iter.get();
 
                 Gee.Map<Imap.UID, Imap.UID>? map = yield remote.copy_email_async(
@@ -65,7 +80,7 @@ private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOper
                 );
                 if (map != null)
                     destination_uids.add_all(map.values);
-
+ 
                 yield remote.remove_email_async(msg_set.to_list(), null);
 
                 // completed successfully, remove from list in case of retry
