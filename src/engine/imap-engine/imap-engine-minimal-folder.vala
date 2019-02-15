@@ -530,10 +530,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         Gee.Set<ImapDB.EmailIdentifier> inserted_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         Gee.Set<ImapDB.EmailIdentifier> locally_inserted_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         if (to_create.size > 0) {
-            Gee.Map<Email, bool>? created_or_merged = yield local_folder.create_or_merge_email_async(
-                to_create, cancellable);
+            // Don't update the unread count here, since it'll get
+            // updated once normalisation has finished anyway. See
+            // also Issue #213.
+            Gee.Map<Email, bool>? created_or_merged =
+                yield local_folder.create_or_merge_email_async(
+                    to_create, false, cancellable
+                );
             assert(created_or_merged != null);
-            
+
             // it's possible a large number of messages have come in, so process them in the
             // background
             yield Nonblocking.Concurrent.global.schedule_async(() => {
@@ -1486,7 +1491,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             Gee.List<Geary.Email>? list_remote = yield list_email_by_sparse_id_async(
                 local_map.keys,
                 Email.Field.FLAGS,
-                Geary.Folder.ListFlags.FORCE_UPDATE,
+                Folder.ListFlags.FORCE_UPDATE |
+                // Updating read/unread count here breaks the unread
+                // count, so don't do it. See issue #213.
+                Folder.ListFlags.NO_UNREAD_UPDATE,
                 cancellable
             );
             if (list_remote == null || list_remote.is_empty)

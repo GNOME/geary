@@ -17,7 +17,9 @@ class Geary.ImapDB.FolderTest : TestCase {
 
     public FolderTest() {
         base("Geary.ImapDB.FolderTest");
-        add_test("create_email", create_email);
+        add_test("create_read_email", create_read_email);
+        add_test("create_unread_email", create_unread_email);
+        add_test("create_no_unread_update", create_no_unread_update);
         add_test("merge_email", merge_email);
         add_test("merge_add_flags", merge_add_flags);
         add_test("merge_remove_flags", merge_remove_flags);
@@ -75,11 +77,12 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.tmp_dir = null;
     }
 
-    public void create_email() throws GLib.Error {
+    public void create_read_email() throws GLib.Error {
         Email mock = new_mock_remote_email(1, "test");
 
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
+            true,
             null,
             (obj, ret) => { async_complete(ret); }
         );
@@ -88,6 +91,45 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         assert_int(1, results.size);
         assert(results.get(mock));
+        assert_int(0, this.folder.get_properties().email_unread);
+    }
+
+    public void create_unread_email() throws GLib.Error {
+        Email mock = new_mock_remote_email(
+            1, "test", new EmailFlags.with(EmailFlags.UNREAD)
+        );
+
+        this.folder.create_or_merge_email_async.begin(
+            Collection.single(mock),
+            true,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        Gee.Map<Email,bool> results =
+            this.folder.create_or_merge_email_async.end(async_result());
+
+        assert_int(1, results.size);
+        assert(results.get(mock));
+        assert_int(1, this.folder.get_properties().email_unread);
+    }
+
+    public void create_no_unread_update() throws GLib.Error {
+        Email mock = new_mock_remote_email(
+            1, "test", new EmailFlags.with(EmailFlags.UNREAD)
+        );
+
+        this.folder.create_or_merge_email_async.begin(
+            Collection.single(mock),
+            false,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        Gee.Map<Email,bool> results =
+            this.folder.create_or_merge_email_async.end(async_result());
+
+        assert_int(1, results.size);
+        assert(results.get(mock));
+        assert_int(0, this.folder.get_properties().email_unread);
     }
 
     public void merge_email() throws GLib.Error {
@@ -107,6 +149,7 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
+            true,
             null,
             (obj, ret) => { async_complete(ret); }
         );
@@ -137,10 +180,7 @@ class Geary.ImapDB.FolderTest : TestCase {
     }
 
     public void merge_add_flags() throws GLib.Error {
-        // Note: Flags in the DB are expected to be Imap.MessageFlags,
-        // and flags passed in to ImapDB.Folder are expected to be
-        // Imap.EmailFlags
-
+        // Flags in the DB are expected to be Imap.MessageFlags
         Email.Field fixture_fields = Email.Field.FLAGS;
         Imap.MessageFlags fixture_flags =
             new Imap.MessageFlags(Collection.single(Imap.MessageFlag.SEEN));
@@ -155,13 +195,11 @@ class Geary.ImapDB.FolderTest : TestCase {
                 VALUES (1, 1, 1, 1);
         """);
 
-        Imap.EmailFlags test_flags = Imap.EmailFlags.from_api_email_flags(
-            new EmailFlags.with(EmailFlags.UNREAD)
-        ) ;
+        EmailFlags test_flags = new EmailFlags.with(EmailFlags.UNREAD);
         Email test = new_mock_remote_email(1, null, test_flags);
-
         this.folder.create_or_merge_email_async.begin(
             Collection.single(test),
+            true,
             null,
             (obj, ret) => { async_complete(ret); }
         );
@@ -175,10 +213,7 @@ class Geary.ImapDB.FolderTest : TestCase {
     }
 
     public void merge_remove_flags() throws GLib.Error {
-        // Note: Flags in the DB are expected to be Imap.MessageFlags,
-        // and flags passed in to ImapDB.Folder are expected to be
-        // Imap.EmailFlags
-
+        // Flags in the DB are expected to be Imap.MessageFlags
         Email.Field fixture_fields = Email.Field.FLAGS;
         Imap.MessageFlags fixture_flags =
             new Imap.MessageFlags(Gee.Collection.empty<Geary.Imap.MessageFlag>());
@@ -193,12 +228,11 @@ class Geary.ImapDB.FolderTest : TestCase {
                 VALUES (1, 1, 1, 1);
         """);
 
-        Imap.EmailFlags test_flags = Imap.EmailFlags.from_api_email_flags(
-            new EmailFlags()
-        ) ;
+        EmailFlags test_flags = new EmailFlags();
         Email test = new_mock_remote_email(1, null, test_flags);
         this.folder.create_or_merge_email_async.begin(
             Collection.single(test),
+            true,
             null,
             (obj, ret) => { async_complete(ret); }
         );
@@ -283,15 +317,17 @@ class Geary.ImapDB.FolderTest : TestCase {
 
     private Email new_mock_remote_email(int64 uid,
                                         string? subject = null,
-                                        EmailFlags? flags = null) {
+                                        Geary.EmailFlags? flags = null) {
         Email mock = new Email(
             new EmailIdentifier.no_message_id(new Imap.UID(uid))
         );
         if (subject != null) {
             mock.set_message_subject(new RFC822.Subject(subject));
         }
+        // Flags passed in to ImapDB.Folder are expected to be
+        // Imap.EmailFlags
         if (flags != null) {
-            mock.set_flags(flags);
+            mock.set_flags(Imap.EmailFlags.from_api_email_flags(flags));
         }
         return mock;
     }

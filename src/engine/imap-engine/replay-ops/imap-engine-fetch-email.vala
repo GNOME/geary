@@ -110,8 +110,8 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             throw new EngineError.NOT_FOUND("Unable to fetch %s in %s", id.to_string(), engine.to_string());
 
         Gee.Map<Geary.Email, bool> created_or_merged =
-            yield engine.local_folder.create_or_merge_email_async(
-                list, cancellable
+            yield this.engine.local_folder.create_or_merge_email_async(
+                list, true, this.cancellable
             );
 
         Geary.Email email = list[0];
