@@ -233,7 +233,6 @@ src/engine/imap-engine/gmail/imap-engine-gmail-spam-trash-folder.vala
 src/engine/imap-engine/imap-engine-account-operation.vala
 src/engine/imap-engine/imap-engine-account-processor.vala
 src/engine/imap-engine/imap-engine-account-synchronizer.vala
-src/engine/imap-engine/imap-engine-batch-operations.vala
 src/engine/imap-engine/imap-engine-contact-store.vala
 src/engine/imap-engine/imap-engine-email-prefetcher.vala
 src/engine/imap-engine/imap-engine-generic-account.vala

@@ -188,7 +188,6 @@ geary_engine_vala_sources = files(
   'imap-engine/imap-engine-account-operation.vala',
   'imap-engine/imap-engine-account-processor.vala',
   'imap-engine/imap-engine-account-synchronizer.vala',
-  'imap-engine/imap-engine-batch-operations.vala',
   'imap-engine/imap-engine-contact-store.vala',
   'imap-engine/imap-engine-email-prefetcher.vala',
   'imap-engine/imap-engine-generic-account.vala',
