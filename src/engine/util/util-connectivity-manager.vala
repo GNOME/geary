@@ -124,6 +124,11 @@ public class Geary.ConnectivityManager : BaseObject {
             debug("DBus error checking %s reachable, treating as reachable: %s",
                   endpoint, err.message);
             is_reachable = true;
+        } catch (GLib.ResolverError.TEMPORARY_FAILURE err) {
+            // Host name could not be resolved since name servers
+            // could not be reached, so treat as being offline.
+            debug("Transient error checking %s reachable, treating offline: %s",
+                  endpoint, err.message);
         } catch (GLib.Error err) {
             if (err is IOError.NETWORK_UNREACHABLE &&
 				this.monitor.network_available) {
