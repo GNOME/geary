@@ -18,6 +18,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         public Imap.MessageSet msg_set;
         public Geary.Email.Field unfulfilled_fields;
         public Geary.Email.Field required_fields;
+        public bool update_unread;
 
         // OUT
         public Gee.Set<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>();
@@ -26,12 +27,14 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                                     ImapDB.Folder local,
                                     Imap.MessageSet msg_set,
                                     Geary.Email.Field unfulfilled_fields,
-                                    Geary.Email.Field required_fields) {
+                                    Geary.Email.Field required_fields,
+                                    bool update_unread) {
             this.remote = remote;
             this.local = local;
             this.msg_set = msg_set;
             this.unfulfilled_fields = unfulfilled_fields;
             this.required_fields = required_fields;
+            this.update_unread = update_unread;
         }
 
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
@@ -43,8 +46,12 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                 return null;
 
             // TODO: create_or_merge_email_async() should only write if something has changed
-            Gee.Map<Geary.Email, bool> created_or_merged = yield this.local.create_or_merge_email_async(
-                list, cancellable);
+            Gee.Map<Email, bool> created_or_merged =
+                yield this.local.create_or_merge_email_async(
+                    list,
+                    this.update_unread,
+                    cancellable
+                );
             for (int ctr = 0; ctr < list.size; ctr++) {
                 Geary.Email email = list[ctr];
 
@@ -171,7 +178,8 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                     this.owner.local_folder,
                     msg_set,
                     unfulfilled_fields,
-                    required_fields
+                    required_fields,
+                    !this.flags.is_any_set(NO_UNREAD_UPDATE)
                 );
                 batch.add(remote_op);
             }

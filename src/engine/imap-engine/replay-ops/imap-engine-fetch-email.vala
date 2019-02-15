@@ -62,6 +62,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         // If returned in full, done
         if (email.fields.fulfills(required_fields)) {
             this.email = email;
+            this.remaining_fields = Email.Field.NONE;
             return ReplayOperation.Status.COMPLETED;
         }
 
@@ -109,8 +110,8 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             throw new EngineError.NOT_FOUND("Unable to fetch %s in %s", id.to_string(), engine.to_string());
 
         Gee.Map<Geary.Email, bool> created_or_merged =
-            yield engine.local_folder.create_or_merge_email_async(
-                list, cancellable
+            yield this.engine.local_folder.create_or_merge_email_async(
+                list, true, this.cancellable
             );
 
         Geary.Email email = list[0];
@@ -130,7 +131,12 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     }
 
     public override string describe_state() {
-        return "id=%s required_fields=%Xh remaining_fields=%Xh flags=%Xh".printf(id.to_string(),
-            required_fields, remaining_fields, flags);
+        return "id=%s required_fields=%Xh remaining_fields=%Xh flags=%Xh has_email=%s".printf(
+            this.id.to_string(),
+            this.required_fields,
+            this.remaining_fields,
+            this.flags,
+            (this.email == null).to_string()
+        );
     }
 }

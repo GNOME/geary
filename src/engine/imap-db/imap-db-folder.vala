@@ -20,7 +20,16 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     /**
      * Fields required for a message to be stored in the database.
      */
-    public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.PROPERTIES|Email.Field.REFERENCES;
+    public const Geary.Email.Field REQUIRED_FIELDS = (
+        // Required for primary duplicate detection done with properties
+        Email.Field.PROPERTIES |
+        // Required for secondary duplicate detection via UID
+        Email.Field.REFERENCES |
+        // Required to ensure the unread count is up to date and so
+        // that when moving a message, the new copy turns back up as
+        // being not deleted.
+        Email.Field.FLAGS
+    );
 
     /**
      * Fields required for a message to be considered for full-text indexing.
@@ -276,8 +285,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     // function (see ImapDB.EmailIdentifier.promote_with_message_id).  This
     // means if you've hashed the collection of EmailIdentifiers prior, you may
     // not be able to find them after this function.  Be warned.
-    public async Gee.Map<Geary.Email, bool> create_or_merge_email_async(Gee.Collection<Geary.Email> emails,
-        Cancellable? cancellable) throws Error {
+    public async Gee.Map<Email, bool>
+        create_or_merge_email_async(Gee.Collection<Email> emails,
+                                    bool update_totals,
+                                    GLib.Cancellable? cancellable)
+        throws GLib.Error {
         Gee.HashMap<Geary.Email, bool> results = new Gee.HashMap<Geary.Email, bool>();
         
         Gee.ArrayList<Geary.Email> list = traverse<Geary.Email>(emails).to_array_list();
@@ -307,22 +319,27 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     // have all the fields but after the create/merge now does
                     if (post_fields.is_all_set(Geary.Email.Field.ALL) && !pre_fields.is_all_set(Geary.Email.Field.ALL))
                         complete_ids.add(email.id);
-                    
-                    // Update unread count in DB.
-                    do_add_to_unread_count(cx, unread_change, cancellable);
-                    
-                    total_unread_change += unread_change;
+
+                    if (update_totals) {
+                        // Update unread count in DB.
+                        do_add_to_unread_count(cx, unread_change, cancellable);
+                        total_unread_change += unread_change;
+                    }
                 }
-                
+
                 return Db.TransactionOutcome.COMMIT;
             }, cancellable);
             
             if (updated_contacts.size > 0)
                 contact_store.update_contacts(updated_contacts);
-            
-            // Update the email_unread properties.
-            properties.set_status_unseen((properties.email_unread + total_unread_change).clamp(0, int.MAX));
-            
+
+            if (update_totals) {
+                // Update the email_unread properties.
+                properties.set_status_unseen(
+                    (properties.email_unread + total_unread_change).clamp(0, int.MAX)
+                );
+            }
+
             if (complete_ids.size > 0)
                 email_complete(complete_ids);
             
