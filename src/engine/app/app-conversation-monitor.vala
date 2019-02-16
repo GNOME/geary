@@ -555,36 +555,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
     }
 
-    /**
-     * Check conversations to see if they still exist in the base folder.
-     *
-     * Returns the set of emails that were removed due to not being in
-     * the base folder.
-     */
-    internal async Gee.Collection<Conversation>
-        check_conversations_in_base_folder(Gee.Collection<Conversation> conversations)
-        throws Error {
-        Gee.ArrayList<Conversation> evaporated = new Gee.ArrayList<Conversation>();
-        foreach (Conversation conversation in conversations) {
-            int count = yield conversation.get_count_in_folder_async(
-                this.base_folder.account,
-                this.base_folder.path,
-                this.operation_cancellable
-            );
-            if (count == 0) {
-                Logging.debug(
-                    Logging.Flag.CONVERSATIONS,
-                    "Evaporating conversation %s because it has no emails in %s",
-                    conversation.to_string(), this.base_folder.to_string()
-                );
-                this.conversations.remove_conversation(conversation);
-                evaporated.add(conversation);
-            }
-        }
-
-        return evaporated;
-    }
-
     protected virtual void notify_scan_started() {
         scan_started();
     }

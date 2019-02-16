@@ -24,6 +24,7 @@ class Geary.App.ConversationTest : TestCase {
         add_test("get_emails_by_location", get_emails_by_location);
         add_test("get_emails_blacklist", get_emails_blacklist);
         add_test("get_emails_marked_for_deletion", get_emails_marked_for_deletion);
+        add_test("count_email_in_folder", count_email_in_folder);
     }
 
     public override void set_up() {
@@ -255,6 +256,21 @@ class Geary.App.ConversationTest : TestCase {
                                     Conversation.Location.ANYWHERE
             ).size,
             "Message marked for deletion still present in conversation"
+        );
+    }
+
+    public void count_email_in_folder() throws GLib.Error {
+        Geary.Email e1 = setup_email(1);
+        this.test.add(e1, singleton(this.base_folder.path));
+
+        assert_uint(
+            1, this.test.get_count_in_folder(this.base_folder.path),
+            "In-folder count"
+        );
+        assert_uint(
+            0,
+            this.test.get_count_in_folder(this.folder_root.get_child("other")),
+            "Out-folder count"
         );
     }
 

@@ -24,6 +24,7 @@ class Geary.App.ConversationSetTest : TestCase {
         add_test("remove_all_removed", remove_all_removed);
         add_test("remove_all_trimmed", remove_all_trimmed);
         add_test("remove_all_remove_path", remove_all_remove_path);
+        add_test("remove_all_base_folder", remove_all_base_folder);
     }
 
     public override void set_up() {
@@ -379,10 +380,11 @@ class Geary.App.ConversationSetTest : TestCase {
             new Gee.LinkedList<EmailIdentifier>();
         ids.add(e1.id);
 
-        Gee.Collection<Conversation>? removed = null;
-        Gee.MultiMap<Conversation,Email>? trimmed = null;
+        Gee.Set<Conversation> removed = new Gee.HashSet<Conversation>();
+        Gee.MultiMap<Conversation,Email> trimmed =
+            new Gee.HashMultiMap<Conversation, Geary.Email>();
         this.test.remove_all_emails_by_identifier(
-            this.base_folder.path, ids, out removed, out trimmed
+            this.base_folder.path, ids, removed, trimmed
         );
 
         assert(this.test.size == 0);
@@ -408,17 +410,15 @@ class Geary.App.ConversationSetTest : TestCase {
             new Gee.LinkedList<EmailIdentifier>();
         ids.add(e1.id);
 
-        Gee.Collection<Conversation>? removed = null;
-        Gee.MultiMap<Conversation,Email>? trimmed = null;
+        Gee.Set<Conversation> removed = new Gee.HashSet<Conversation>();
+        Gee.MultiMap<Conversation,Email> trimmed =
+            new Gee.HashMultiMap<Conversation, Geary.Email>();
         this.test.remove_all_emails_by_identifier(
-            this.base_folder.path, ids, out removed, out trimmed
+            this.base_folder.path, ids, removed, trimmed
         );
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 1);
-
-        assert(removed != null);
-        assert(trimmed != null);
 
         assert(removed.is_empty == true);
         assert(trimmed.contains(convo) == true);
@@ -437,23 +437,43 @@ class Geary.App.ConversationSetTest : TestCase {
             new Gee.LinkedList<EmailIdentifier>();
         ids.add(e1.id);
 
-        Gee.Collection<Conversation>? removed = null;
-        Gee.MultiMap<Conversation,Email>? trimmed = null;
+        Gee.Set<Conversation> removed = new Gee.HashSet<Conversation>();
+        Gee.MultiMap<Conversation,Email> trimmed =
+            new Gee.HashMultiMap<Conversation, Geary.Email>();
         this.test.remove_all_emails_by_identifier(
-            other_path, ids, out removed, out trimmed
+            other_path, ids, removed, trimmed
         );
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 1);
 
-        assert(removed != null);
         assert(removed.is_empty == true);
-
-        assert(trimmed != null);
         assert(trimmed.size == 0);
-
         assert(convo.is_in_base_folder(e1.id) == true);
         assert(convo.get_folder_count(e1.id) == 1);
+    }
+
+    public void remove_all_base_folder() throws Error {
+        FolderPath other_path = this.folder_root.get_child("other");
+        Email e1 = setup_email(1);
+        add_email_to_test_set(e1, other_path);
+
+        Gee.LinkedList<EmailIdentifier> ids =
+            new Gee.LinkedList<EmailIdentifier>();
+        ids.add(e1.id);
+
+        Gee.List<Conversation> removed = new Gee.LinkedList<Conversation>();
+        Gee.MultiMap<Conversation,Email> trimmed =
+            new Gee.HashMultiMap<Conversation, Geary.Email>();
+        this.test.remove_all_emails_by_identifier(
+            this.base_folder.path, ids, removed, trimmed
+        );
+
+        assert_int(0, this.test.size, "ConversationSet size");
+        assert_int(0, this.test.get_email_count(), "ConversationSet email size");
+
+        assert_int(1, removed.size, "Removed size");
+        assert_int(0, trimmed.size, "Trimmed size");
     }
 
     private Email setup_email(int id, Email? references = null) {
