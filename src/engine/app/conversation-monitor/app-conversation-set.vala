@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -10,6 +10,10 @@
  * Creates and maintains set of conversations by adding and removing email.
  */
 private class Geary.App.ConversationSet : BaseObject {
+
+
+    /** The base folder for this set of conversations. */
+    public Folder base_folder { get; private set; }
 
     /** Determines the number of conversations in the set. */
     public int size { get { return _conversations.size; } }
@@ -34,6 +38,16 @@ private class Geary.App.ConversationSet : BaseObject {
     private Gee.HashMap<Geary.RFC822.MessageID, Conversation> logical_message_id_map
         = new Gee.HashMap<Geary.RFC822.MessageID, Conversation>();
 
+
+    /**
+     * Constructs a new conversation set.
+     *
+     * The `base_folder` argument is the base folder for the
+     * conversation monitor that owns this set.
+     */
+    public ConversationSet(Folder base_folder) {
+        this.base_folder = base_folder;
+    }
 
     public int get_email_count() {
         return email_id_map.size;
@@ -60,8 +74,7 @@ private class Geary.App.ConversationSet : BaseObject {
      * needed. The collection `emails` contains the messages to be
      * added, and for each email in the collection, there should be an
      * entry in `id_to_paths` that indicates the folders each message
-     * is known to belong to. The folder `base_folder` is the base
-     * folder for the conversation monitor that owns this set.
+     * is known to belong to.
      *
      * The three collections returned include any conversation that
      * were created, any that had email appended to them (and the
@@ -70,7 +83,6 @@ private class Geary.App.ConversationSet : BaseObject {
      */
     public void add_all_emails(Gee.Collection<Email> emails,
                                Gee.MultiMap<EmailIdentifier, FolderPath> id_to_paths,
-                               Folder base_folder,
                                out Gee.Collection<Conversation> added,
                                out Gee.MultiMap<Conversation, Email> appended,
                                out Gee.Collection<Conversation> removed_due_to_merge) {
@@ -124,8 +136,7 @@ private class Geary.App.ConversationSet : BaseObject {
                 // Don't add an email with no known paths - it may
                 // have been removed after being listed for adding.
                 conversation = add_email(
-                    email, base_folder, known_paths,
-                    out added_conversation
+                    email, known_paths, out added_conversation
                 );
             }
 
@@ -157,34 +168,74 @@ private class Geary.App.ConversationSet : BaseObject {
      * respectively.
      */
     public void remove_all_emails_by_identifier(FolderPath source_path,
-                                                Gee.Collection<Geary.EmailIdentifier> ids,
-                                                out Gee.Collection<Conversation> removed,
-                                                out Gee.MultiMap<Conversation, Geary.Email> trimmed) {
-        Gee.HashSet<Conversation> _removed = new Gee.HashSet<Conversation>();
-        Gee.HashMultiMap<Conversation, Geary.Email> _trimmed
-            = new Gee.HashMultiMap<Conversation, Geary.Email>();
+                                                Gee.Collection<EmailIdentifier> ids,
+                                                Gee.Collection<Conversation> removed,
+                                                Gee.MultiMap<Conversation,Email> trimmed) {
+        Gee.Set<Conversation> remaining = new Gee.HashSet<Conversation>();
 
         foreach (Geary.EmailIdentifier id in ids) {
-            Geary.Email email;
-            bool removed_conversation;
-            Conversation? conversation = remove_email_by_identifier(
-                source_path, id, out email, out removed_conversation
-            );
+            Conversation? conversation = email_id_map.get(id);
+            // The conversation could be null if the conversation
+            // monitor only goes back a few emails, but something old
+            // gets removed.  It's especially likely when changing
+            // search terms in the search folder.
+            if (conversation != null) {
+                // Conditionally remove email from its conversation
+                Geary.Email? email = conversation.get_email_by_id(id);
+                if (email != null) {
+                    switch (conversation.get_folder_count(id)) {
+                    case 0:
+                        warning("Email %s conversation %s not in any folders",
+                                id.to_string(), conversation.to_string());
+                        break;
 
-            if (conversation == null)
-                continue;
+                    case 1:
+                        remove_email_from_conversation(conversation, email);
+                        trimmed.set(conversation, email);
+                        break;
 
-            if (removed_conversation) {
-                if (_trimmed.contains(conversation))
-                    _trimmed.remove_all(conversation);
-                _removed.add(conversation);
-            } else if (!conversation.contains_email_by_id(id)) {
-                _trimmed.set(conversation, email);
+                    default:
+                        conversation.remove_path(id, source_path);
+                        break;
+                    }
+                }
+
+                if (conversation.get_count() == 0) {
+                    Logging.debug(
+                        Logging.Flag.CONVERSATIONS,
+                        "Conversation %s evaporated: No messages remains",
+                        conversation.to_string()
+                    );
+                    removed.add(conversation);
+                    trimmed.remove_all(conversation);
+                    remove_conversation(conversation);
+                } else {
+                    remaining.add(conversation);
+                }
             }
         }
 
-        removed = _removed;
-        trimmed = _trimmed;
+        if (source_path.equal_to(this.base_folder.path)) {
+            // Now that all email have been processed, check reach
+            // remaining conversation to ensure it has at least one
+            // email in the base folder. It might not if remaining
+            // email in the conversation also exists in another
+            // folder, and so is especially likely for servers that
+            // have an All Email folder, since email will likely be in
+            // two different folders.
+            foreach (Conversation conversation in remaining) {
+                if (conversation.get_count_in_folder(source_path) == 0) {
+                    Logging.debug(
+                        Logging.Flag.CONVERSATIONS,
+                        "Conversation %s dropped: No messages in base folder remain",
+                        conversation.to_string()
+                    );
+                    removed.add(conversation);
+                    trimmed.remove_all(conversation);
+                    remove_conversation(conversation);
+                }
+            }
+        }
     }
 
     /**
@@ -235,7 +286,6 @@ private class Geary.App.ConversationSet : BaseObject {
      * was created, else it is set to `false`.
      */
     private Conversation? add_email(Geary.Email email,
-                                    Folder base_folder,
                                     Gee.Collection<FolderPath>? known_paths,
                                     out bool added_conversation) {
         added_conversation = false;
@@ -255,7 +305,7 @@ private class Geary.App.ConversationSet : BaseObject {
             if (conversation == null) {
                 // Not in or related to any existing conversations, so
                 // create one
-                conversation = new Conversation(base_folder);
+                conversation = new Conversation(this.base_folder);
                 _conversations.add(conversation);
                 added_conversation = true;
             }
@@ -330,12 +380,13 @@ private class Geary.App.ConversationSet : BaseObject {
      * Unconditionally removes an email from a conversation.
      */
     private void remove_email_from_conversation(Conversation conversation, Geary.Email email) {
-        // Be very strict about our internal state getting out of whack, since
-        // it would indicate a nasty error in our logic that we need to fix.
-        if (!email_id_map.unset(email.id))
-            error("Email %s already removed from conversation set", email.id.to_string());
+        if (!this.email_id_map.unset(email.id)) {
+            warning("Email %s already removed from conversation set",
+                    email.id.to_string());
+        }
 
         Gee.Set<Geary.RFC822.MessageID>? removed_message_ids = conversation.remove(email);
+        debug("Removed %d messages from conversation", removed_message_ids != null ? removed_message_ids.size : 0);
         if (removed_message_ids != null) {
             foreach (Geary.RFC822.MessageID removed_message_id in removed_message_ids) {
                 if (!logical_message_id_map.unset(removed_message_id)) {
@@ -344,55 +395,6 @@ private class Geary.App.ConversationSet : BaseObject {
                 }
             }
         }
-    }
-
-    /**
-     * Conditionally removes an email from a conversation.
-     *
-     * The given email will only be removed from the conversation if
-     * it is associated with a path, i.e. if it is present in more
-     * than one folder. Otherwise `source_path` is removed from the
-     * email's set of known paths.
-     */
-    private Conversation? remove_email_by_identifier(FolderPath source_path,
-                                                     EmailIdentifier id,
-                                                     out Geary.Email? removed_email,
-                                                     out bool removed_conversation) {
-        removed_email = null;
-        removed_conversation = false;
-
-        Conversation? conversation = email_id_map.get(id);
-        // This can happen when the conversation monitor only goes back a few
-        // emails, but something old gets removed.  It's especially likely when
-        // changing search terms in the search folder.
-        if (conversation == null)
-            return null;
-
-        Geary.Email? email = conversation.get_email_by_id(id);
-        switch (conversation.get_folder_count(id)) {
-        case 0:
-            error("Email %s conversation %s not in any folders",
-                  id.to_string(), conversation.to_string());
-
-        case 1:
-            removed_email = email;
-            remove_email_from_conversation(conversation, email);
-            break;
-
-        default:
-            conversation.remove_path(id, source_path);
-            break;
-        }
-
-        // Evaporate conversations with no more messages.
-        if (conversation.get_count() == 0) {
-            debug("Removing email %s evaporates conversation %s", id.to_string(), conversation.to_string());
-            remove_conversation(conversation);
-
-            removed_conversation = true;
-        }
-
-        return conversation;
     }
 
 }

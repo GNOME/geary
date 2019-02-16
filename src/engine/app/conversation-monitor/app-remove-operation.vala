@@ -23,24 +23,16 @@ private class Geary.App.RemoveOperation : ConversationOperation {
               this.removed_ids.size, this.source_folder.to_string()
         );
 
-        Gee.Collection<Conversation> removed;
-        Gee.MultiMap<Conversation,Email> trimmed;
+        Gee.Set<Conversation> removed = new Gee.HashSet<Conversation>();
+        Gee.MultiMap<Conversation,Email> trimmed =
+            new Gee.HashMultiMap<Conversation, Geary.Email>();
         this.monitor.conversations.remove_all_emails_by_identifier(
             source_folder.path,
             removed_ids,
-            out removed,
-            out trimmed
+            removed,
+            trimmed
         );
 
-        // Check for conversations that have been evaporated as a
-        // result, update removed and trimmed collections to reflect
-        // any that evaporated
-        Gee.Collection<Conversation> evaporated =
-            yield this.monitor.check_conversations_in_base_folder(trimmed.get_keys());
-        removed.add_all(evaporated);
-        foreach (Conversation target in evaporated) {
-            trimmed.remove_all(target);
-        }
 
         // Fire signals, clean up
         this.monitor.removed(
