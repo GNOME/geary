@@ -33,6 +33,31 @@ public class Geary.TimeoutManager : BaseObject {
     public delegate void TimeoutFunc(TimeoutManager manager);
 
 
+    // Instances of this are passed to GLib.Timeout to execute the
+    // callback. This holds a weak ref to the manager itself allowing
+    // it to be destroyed if all of its references are broken, even if
+    // it is still queued via GLib.Timeout.
+    private class HandlerRef : GLib.Object {
+
+        private GLib.WeakRef manager;
+
+
+        public HandlerRef(TimeoutManager manager) {
+            this.manager = GLib.WeakRef(manager);
+        }
+
+        public bool execute() {
+            bool ret = Source.REMOVE;
+            TimeoutManager? manager = this.manager.get() as TimeoutManager;
+            if (manager != null) {
+                ret = manager.execute();
+            }
+            return ret;
+        }
+
+    }
+
+
     /** Determines if {@link interval} represent seconds. */
     public bool use_seconds;
 
@@ -50,10 +75,8 @@ public class Geary.TimeoutManager : BaseObject {
         get { return this.source_id >= 0; }
     }
 
-    // Callback must be unowned to avoid reference loop with owner's
-    // class when a closure is used as the callback.
     private unowned TimeoutFunc callback;
-    private int source_id = -1;
+    private int64 source_id = -1;
 
 
     /**
@@ -91,10 +114,16 @@ public class Geary.TimeoutManager : BaseObject {
      */
     public void start() {
         reset();
+
+        HandlerRef handler = new HandlerRef(this);
         this.source_id = (int) (
             (this.use_seconds)
-            ? GLib.Timeout.add_seconds(this.interval, on_trigger, this.priority)
-            : GLib.Timeout.add(this.interval, on_trigger, this.priority)
+            ? GLib.Timeout.add_seconds(
+                this.interval, handler.execute, this.priority
+            )
+            : GLib.Timeout.add(
+                this.interval, handler.execute, this.priority
+            )
         );
     }
 
@@ -107,25 +136,26 @@ public class Geary.TimeoutManager : BaseObject {
      * @return `true` if the timeout was already running, else `false`
      */
     public bool reset() {
-        bool is_running = this.is_running;
-        if (is_running) {
-            Source.remove(this.source_id);
+        if (this.is_running) {
+            Source.remove((uint) this.source_id);
             this.source_id = -1;
         }
-        return is_running;
+        return this.is_running;
     }
 
-    private bool on_trigger() {
+    private bool execute() {
         bool ret = Source.CONTINUE;
+
         // If running only once, reset the source id now in case the
         // callback resets the timer while it is executing, so we
         // avoid removing the source just before it would be removed
-        // after this call anyway
+        // after this call anyway.
         if (this.repetition == Repeat.ONCE) {
             this.source_id = -1;
             ret = Source.REMOVE;
         }
-        callback(this);
+
+        this.callback(this);
         return ret;
     }
 
