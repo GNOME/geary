@@ -7,10 +7,50 @@
 
 class Geary.IdleManagerTest : TestCase {
 
+
+    private class WeakRefTest : GLib.Object {
+
+        public IdleManager test { get; private set; }
+
+        public WeakRefTest() {
+            // Pass in an arg to ensure the closure is non-trivial
+            string arg = "my hovercraft is full of eels";
+            this.test = new IdleManager(
+                () => {
+                    do_stuff(arg);
+                }
+            );
+
+            // Pass
+            this.test.schedule();
+        }
+
+        private void do_stuff(string arg) {
+            assert(false);
+        }
+
+    }
+
+
     public IdleManagerTest() {
         base("Geary.IdleManagerTest");
+        add_test("weak_ref", callback_weak_ref);
         add_test("start_reset", start_reset);
         add_test("test_run", test_run);
+    }
+
+    public void callback_weak_ref() throws GLib.Error {
+        WeakRefTest? owner = new WeakRefTest();
+        GLib.WeakRef weak_ref = GLib.WeakRef(owner.test);
+
+        // Should make both objects null even though the even loop
+        // hasn't run and hence the callback hasn't been called.
+        owner = null;
+        assert_null(weak_ref.get());
+
+        // Pump the loop a few times so the callback can get called.
+        this.main_loop.iteration(false);
+        this.main_loop.iteration(false);
     }
 
     public void start_reset() throws Error {

@@ -12,13 +12,58 @@ class Geary.TimeoutManagerTest : TestCase {
 
     private const double MILLISECONDS_EPSILON = 0.1;
 
+
+    private class WeakRefTest : GLib.Object {
+
+        public TimeoutManager test { get; private set; }
+
+        public WeakRefTest() {            // Pass in an arg to ensure the closure is non-trivial
+            string arg = "my hovercraft is full of eels";
+            this.test = new TimeoutManager.milliseconds(
+                10, () => {
+                    do_stuff(arg);
+                }
+            );
+
+            // Pass
+            this.test.start();
+        }
+
+        private void do_stuff(string arg) {
+            // This should never get called
+            assert(false);
+        }
+
+    }
+
+
     public TimeoutManagerTest() {
         base("Geary.TimeoutManagerTest");
+        add_test("weak_ref", callback_weak_ref);
         add_test("start_reset", start_reset);
         if (Test.slow()) {
             add_test("seconds", seconds);
             add_test("milliseconds", milliseconds);
             add_test("repeat_forever", repeat_forever);
+        }
+    }
+
+    public void callback_weak_ref() throws GLib.Error {
+        WeakRefTest? owner = new WeakRefTest();
+        double duration = owner.test.interval;
+        GLib.WeakRef weak_ref = GLib.WeakRef(owner.test);
+
+        // Should make both objects null even though the even loop
+        // hasn't run and hence the callback hasn't been called.
+        owner = null;
+        assert_null(weak_ref.get());
+
+        // Pump the loop until the timeout has passed so that the
+        // callback can get called.
+        Timer timer = new Timer();
+        timer.start();
+        while (timer.elapsed() < (duration / 1000) * 2) {
+            this.main_loop.iteration(false);
         }
     }
 
