@@ -35,7 +35,7 @@ class Geary.App.ConversationSetTest : TestCase {
             SpecialFolderType.NONE,
             null
         );
-        this.test = new ConversationSet();
+        this.test = new ConversationSet(this.base_folder);
     }
 
     public override void tear_down() {
@@ -62,7 +62,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Gee.Collection<Conversation>? removed = null;
 
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
+            emails, email_paths,
             out added, out appended, out removed
         );
 
@@ -108,8 +108,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
-            out added, out appended, out removed
+            emails, email_paths, out added, out appended, out removed
         );
 
         assert(this.test.size == 1);
@@ -127,8 +126,7 @@ class Geary.App.ConversationSetTest : TestCase {
         appended = null;
         removed = null;
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
-            out added, out appended, out removed
+            emails, email_paths, out added, out appended, out removed
         );
 
         assert(this.test.size == 1);
@@ -158,8 +156,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
-            out added, out appended, out removed
+            emails, email_paths, out added, out appended, out removed
         );
 
         assert(this.test.size == 1);
@@ -188,8 +185,7 @@ class Geary.App.ConversationSetTest : TestCase {
         appended = null;
         removed = null;
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
-            out added, out appended, out removed
+            emails, email_paths, out added, out appended, out removed
         );
 
         assert(this.test.size == 1);
@@ -228,8 +224,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
-            out added, out appended, out removed
+            emails, email_paths, out added, out appended, out removed
         );
 
         assert(this.test.size == 1);
@@ -278,8 +273,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
-            out added, out appended, out removed
+            emails, email_paths, out added, out appended, out removed
         );
 
         assert(this.test.size == 1);
@@ -332,8 +326,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
-            out added, out appended, out removed
+            emails, email_paths, out added, out appended, out removed
         );
 
         assert(this.test.size == 1);
@@ -361,8 +354,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
-            out added, out appended, out removed
+            emails, email_paths, out added, out appended, out removed
         );
 
         assert(this.test.size == 1);
@@ -499,8 +491,7 @@ class Geary.App.ConversationSetTest : TestCase {
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
         this.test.add_all_emails(
-            emails, email_paths, this.base_folder,
-            out added, out appended, out removed
+            emails, email_paths, out added, out appended, out removed
         );
     }
 

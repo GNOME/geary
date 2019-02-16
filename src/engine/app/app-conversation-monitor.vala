@@ -101,9 +101,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
 
     /** The set of all conversations loaded by the monitor. */
-    internal ConversationSet conversations {
-        get; private set; default = new ConversationSet();
-    }
+    internal ConversationSet conversations { get; private set; }
 
     /** The oldest message from the base folder in the loaded window. */
     internal EmailIdentifier? window_lowest {
@@ -263,6 +261,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         this.open_flags = open_flags;
         this.required_fields = required_fields | REQUIRED_FIELDS;
         this._min_window_count = min_window_count;
+        this.conversations = new ConversationSet(base_folder);
     }
 
     /**
@@ -726,7 +725,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // Add them to the conversation set
             if (email_paths != null) {
                 this.conversations.add_all_emails(
-                    job.emails.values, email_paths, this.base_folder,
+                    job.emails.values, email_paths,
                     out added, out appended, out removed_due_to_merge
                 );
             }

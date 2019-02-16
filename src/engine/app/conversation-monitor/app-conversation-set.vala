@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -10,6 +10,10 @@
  * Creates and maintains set of conversations by adding and removing email.
  */
 private class Geary.App.ConversationSet : BaseObject {
+
+
+    /** The base folder for this set of conversations. */
+    public Folder base_folder { get; private set; }
 
     /** Determines the number of conversations in the set. */
     public int size { get { return _conversations.size; } }
@@ -34,6 +38,16 @@ private class Geary.App.ConversationSet : BaseObject {
     private Gee.HashMap<Geary.RFC822.MessageID, Conversation> logical_message_id_map
         = new Gee.HashMap<Geary.RFC822.MessageID, Conversation>();
 
+
+    /**
+     * Constructs a new conversation set.
+     *
+     * The `base_folder` argument is the base folder for the
+     * conversation monitor that owns this set.
+     */
+    public ConversationSet(Folder base_folder) {
+        this.base_folder = base_folder;
+    }
 
     public int get_email_count() {
         return email_id_map.size;
@@ -60,8 +74,7 @@ private class Geary.App.ConversationSet : BaseObject {
      * needed. The collection `emails` contains the messages to be
      * added, and for each email in the collection, there should be an
      * entry in `id_to_paths` that indicates the folders each message
-     * is known to belong to. The folder `base_folder` is the base
-     * folder for the conversation monitor that owns this set.
+     * is known to belong to.
      *
      * The three collections returned include any conversation that
      * were created, any that had email appended to them (and the
@@ -70,7 +83,6 @@ private class Geary.App.ConversationSet : BaseObject {
      */
     public void add_all_emails(Gee.Collection<Email> emails,
                                Gee.MultiMap<EmailIdentifier, FolderPath> id_to_paths,
-                               Folder base_folder,
                                out Gee.Collection<Conversation> added,
                                out Gee.MultiMap<Conversation, Email> appended,
                                out Gee.Collection<Conversation> removed_due_to_merge) {
@@ -124,8 +136,7 @@ private class Geary.App.ConversationSet : BaseObject {
                 // Don't add an email with no known paths - it may
                 // have been removed after being listed for adding.
                 conversation = add_email(
-                    email, base_folder, known_paths,
-                    out added_conversation
+                    email, known_paths, out added_conversation
                 );
             }
 
@@ -235,7 +246,6 @@ private class Geary.App.ConversationSet : BaseObject {
      * was created, else it is set to `false`.
      */
     private Conversation? add_email(Geary.Email email,
-                                    Folder base_folder,
                                     Gee.Collection<FolderPath>? known_paths,
                                     out bool added_conversation) {
         added_conversation = false;
@@ -255,7 +265,7 @@ private class Geary.App.ConversationSet : BaseObject {
             if (conversation == null) {
                 // Not in or related to any existing conversations, so
                 // create one
-                conversation = new Conversation(base_folder);
+                conversation = new Conversation(this.base_folder);
                 _conversations.add(conversation);
                 added_conversation = true;
             }
