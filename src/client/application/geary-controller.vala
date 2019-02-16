@@ -743,14 +743,31 @@ public class GearyController : Geary.BaseObject {
             : account.get_outgoing_credentials();
 
         bool handled = true;
-        if (this.account_manager.is_goa_account(account) ||
-            context.authentication_attempts > MAX_AUTH_ATTEMPTS ||
+        if (context.authentication_attempts > MAX_AUTH_ATTEMPTS ||
             credentials == null) {
-            // A managed account has had a problem, we have run out of
-            // authentication attempts, or have been asked for creds
-            // but don't even have a login. So just bail out
-            // immediately and flag the account as needing attention.
+            // We have run out of authentication attempts or have
+            // been asked for creds but don't even have a login. So
+            // just bail out immediately and flag the account as
+            // needing attention.
             handled = false;
+        } else if (this.account_manager.is_goa_account(account)) {
+            context.authentication_prompting = true;
+            try {
+                account.load_incoming_credentials(context.cancellable);
+                account.load_outgoing_credentials(context.cancellable);
+            } catch (GLib.Error err) {
+                // Bail out right away, but probably should be opening
+                // the GOA control panel.
+                handled = false;
+                report_problem(
+                    new Geary.AccountProblemReport(
+                        Geary.ProblemType.GENERIC_ERROR,
+                        account,
+                        err
+                    )
+                );
+            }
+            context.authentication_prompting = false;
         } else {
             context.authentication_prompting = true;
             this.application.present();
