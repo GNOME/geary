@@ -76,7 +76,7 @@ test-client: $(BUILD_DIR)
 	cd $(BUILD_DIR) && meson test client-tests
 
 .PHONY: dist
-dist: tests
+dist: test
 	@$(MAKE) -C $(BUILD_DIR) $@
 	@cp -v $(BUILD_DIR)/meson-dist/*.xz* ..
 
