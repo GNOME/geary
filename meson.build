@@ -1,7 +1,7 @@
 project('geary', [ 'vala', 'c' ],
   version: '3.32-dev',
   license: 'LGPL2.1+',
-  meson_version: '>= 0.43',
+  meson_version: '>= 0.47',
 )
 
 gnome = import('gnome')
@@ -70,8 +70,8 @@ libmath = cc.find_library('m')
 libnotify = dependency('libnotify', version: '>= 0.7.5')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
 libsoup = dependency('libsoup-2.4', version: '>= 2.48')
-libunwind_dep = dependency('libunwind', version: '>= 1.1')
-libunwind_generic_dep = dependency('libunwind-generic', version: '>= 1.1')
+libunwind_dep = dependency('libunwind', version: '>= 1.1', required: get_option('libunwind'))
+libunwind_generic_dep = dependency('libunwind-generic', version: '>= 1.1', required: get_option('libunwind'))
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 posix = valac.find_library('posix')
 webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
@@ -81,19 +81,20 @@ if not enchant.found()
   enchant = dependency('enchant', version: '>=1.6')
 endif
 
-
-# Libunwind system dependencies above ensures appropriate versions,
-# but this declared depencency is what we actually build against so we
-# can include the custom VAPI correctly. We need to add unwind_lib to
-# the search path for these so Flatpak builds can find the C lib.
-unwind_lib = libunwind_dep.get_pkgconfig_variable('libdir')
-libunwind = declare_dependency(
-   dependencies: [
-     valac.find_library('libunwind', dirs: [vapi_dir, unwind_lib]),
-     cc.find_library('libunwind', dirs: unwind_lib),
-     cc.find_library('libunwind-generic', dirs: unwind_lib)
-   ],
- )
+if libunwind_dep.found()
+  # Libunwind system dependencies above ensures appropriate versions,
+  # but this declared depencency is what we actually build against so we
+  # can include the custom VAPI correctly. We need to add unwind_lib to
+  # the search path for these so Flatpak builds can find the C lib.
+  unwind_lib = libunwind_dep.get_pkgconfig_variable('libdir')
+  libunwind = declare_dependency(
+     dependencies: [
+       valac.find_library('libunwind', dirs: [vapi_dir, unwind_lib]),
+       cc.find_library('libunwind', dirs: unwind_lib),
+       cc.find_library('libunwind-generic', dirs: unwind_lib)
+     ],
+   )
+endif
 
 # Optional libraries
 libunity = dependency('unity', version: '>= 5.12.0', required: false)

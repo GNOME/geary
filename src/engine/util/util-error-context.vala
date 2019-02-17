@@ -28,6 +28,7 @@ public class Geary.ErrorContext : BaseObject {
         public string name = "unknown";
 
 
+#if HAVE_LIBUNWIND
         internal StackFrame(Unwind.Cursor frame) {
             uint8 proc_name[256];
             int ret = -frame.get_proc_name(proc_name);
@@ -36,6 +37,7 @@ public class Geary.ErrorContext : BaseObject {
                 this.name = (string) proc_name;
             }
         }
+#endif
 
         public string to_string() {
             return this.name;
@@ -56,6 +58,7 @@ public class Geary.ErrorContext : BaseObject {
     public ErrorContext(GLib.Error thrown) {
         this.thrown = thrown;
 
+#if HAVE_LIBUNWIND
         Unwind.Context trace = Unwind.Context();
         Unwind.Cursor cursor = Unwind.Cursor.local(trace);
 
@@ -64,6 +67,7 @@ public class Geary.ErrorContext : BaseObject {
         while (cursor.step() != 0) {
             this.backtrace.add(new StackFrame(cursor));
         }
+#endif
     }
 
     /** Returns a string representation of the error type, for debugging. */
