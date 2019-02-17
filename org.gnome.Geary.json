@@ -1,12 +1,24 @@
-/* flatpak-builder config for Geary. */
+/*
+ * Flatpak builder manifest for Geary.
+ *
+ * When updating this file after branching a new stable release,
+ * the following should be updated:
+ *
+ * - app branch and geary source branches
+ * - remove app tags and desktop-file-name-prefix
+ *
+ * When updating the Flathub manifest, copy the stable manifest over
+ * it and pin each source to a specific tarball.
+ */
+
 {
     "app-id": "org.gnome.Geary",
+    "branch": "master",
     "runtime": "org.gnome.Platform",
     "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
 
-    /* Nightly build args, remove these when creating a new stable branch */
     "tags": ["nightly"],
     "desktop-file-name-prefix": "(Nightly) ",
 
@@ -46,7 +58,7 @@
     "cleanup": ["/include", "/lib/pkgconfig",
                 "/share/pkgconfig", "/share/aclocal",
                 "/man", "/share/man", "/share/gtk-doc",
-                "/share/vala",
+                "/share/vala", "/share/girepository-1", "/share/gir-1.0",
                 "*.la", "*.a"],
     "modules": [
         {
@@ -67,7 +79,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/gmime.git",
+                    "url": "https://github.com/jstedfast/gmime.git",
                     "branch": "gmime-2-6"
                 }
             ]
