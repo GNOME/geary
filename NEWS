@@ -1,3 +1,104 @@
+Version 0.13
+~~~~~~~~~~~~
+Released: 2019-02-17
+
+Enhancements included in this release:
+ * Unread email count is now updated correctly
+ * Conversations load faster, smoother with better feedback
+ * Support for email accounts added via GNOME Online Accounts
+ * Improved account creation and management user interface
+ * Email flagged as deleted but not removed by other apps now hidden
+ * Individual messages in a conversation can be deleted
+ * Internal links in HTML email now work
+ * Supported ordered and unordered lists in the composer
+ * Rich text pasting improvements in the composer
+ * Plain text versions of rich text mail includes formatting
+ * Detached composers now remember their last used size
+ * Better reporting when a login, security or other problem occurs
+ * Reduced background synchronisation CPU use
+ * Improved handling when going online and offline
+ * Show an in-application notification when email has been sent
+ * Flag possibly spoofed email addresses
+ * Improve privacy when sending email using an alias
+ * Subject, sender and date are being shown when printed again
+ * Server compatibility improvements
+ * Build, testing and other infrastructure improvements
+ * Numerous bug fixes and minor user interface improvements
+ * Numerous user interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release, including a number of new contributors:
+
+ * Adrien Plazas
+ * Alex Henrie
+ * Andre Klapper
+ * Erik Faye-Lund
+ * Federico Bruni
+ * Gautier Pelloux-Prayer
+ * Georges Basile Stavracas Neto
+ * Greg V
+ * James Magahern
+ * Jan Tojnar
+ * Jiri Cerny
+ * Joel Duncan
+ * john
+ * Jordan Petridis
+ * Juraj Fiala
+ * Kacper Bielecki
+ * Michael Catanzaro
+ * nick richards
+ * Niels De Graef
+ * Nikolas Tapia
+ * Oskar Viljasaar
+ * Piotr Drąg
+ * Rico Tzschichholz
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Alan Mortensen (da)
+ * Anders Jonsson (sv)
+ * Ask Hjorth Larsen (da)
+ * Balázs Meskó (hu)
+ * Balázs Úr (hu)
+ * Baurzhan Muftakhidinov (kk)
+ * Carlos Abel Córdova Sáenz (es)
+ * Christian Schröder (de)
+ * Claude Paroz (fr)
+ * Daniel Mustieles (es)
+ * Daniel Șerbănescu (ro)
+ * Dušan Kazik (sk)
+ * Emin Tufan Çetin (tr)
+ * Federico Bruni (it)
+ * Frank Brütting (de)
+ * GNOME Translation Robot (nl)
+ * Isaac Ferreira Filho (pt_BR)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Josef Andersson (sv)
+ * Kristjan SCHMIDT (eo)
+ * Kukuh Syafaat (id)
+ * Marek Cernocky (cs)
+ * Mario Blättermann (de)
+ * Matej Urbančič (sl)
+ * Nathan Follens (nl)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * Ryuta Fujii (ja)
+ * Sabri Ünal (tr)
+ * Stas Solovey (ru)
+ * Tim Sabsch (de)
+ * Yuras Shumovich (be)
+
+And for the user manual:
+ * Anders Jonsson (sv)
+ * Emin Tufan Çetin (tr)
+ * Federico Bruni (it)
+ * Marek Černocký (cs)
+ * Mario Blättermann (de)
+ * Muhammet Kara (tr)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+
 Version 0.12
 ~~~~~~~~~~~~
 Released: 2017-10-02

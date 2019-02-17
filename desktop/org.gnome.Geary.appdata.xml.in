@@ -77,6 +77,35 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="0.13" date="2019-02-17">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Unread email count is now updated correctly</li>
+          <li>Conversations load faster, smoother with better feedback</li>
+          <li>Support for email accounts added via GNOME Online Accounts</li>
+          <li>Improved account creation and management user interface</li>
+          <li>Email flagged as deleted but not removed by other apps now hidden</li>
+          <li>Individual messages in a conversation can be deleted</li>
+          <li>Internal links in HTML email now work</li>
+          <li>Supported ordered and unordered lists in the composer</li>
+          <li>Rich text pasting improvements in the composer</li>
+          <li>Plain text versions of rich text mail includes formatting</li>
+          <li>Detached composers now remember their last used size</li>
+          <li>Better reporting when a login, security or other problem occurs</li>
+          <li>Reduced background synchronisation CPU use</li>
+          <li>Improved handling when going online and offline</li>
+          <li>Show an in-application notification when email has been sent</li>
+          <li>Flag possibly spoofed email addresses</li>
+          <li>Improve privacy when sending email using an alias</li>
+          <li>Subject, sender and date are being shown when printed again</li>
+          <li>Server compatibility improvements</li>
+          <li>Build, testing and other infrastructure improvements</li>
+          <li>Numerous bug fixes and minor user interface improvements</li>
+          <li>Numerous user interface translation updates</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.12" date="2017-10-02">
       <description>
         <p>Enhancements included in this release:</p>

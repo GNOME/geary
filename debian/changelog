@@ -1,8 +1,29 @@
-geary (0.13~~master-1~artful1) unstable; urgency=medium
+geary (0.13.0-1~bionic1) bionic; urgency=medium
 
-  * Begin 0.13 development
+  * Unread email count is now updated correctly
+  * Conversations load faster, smoother with better feedback
+  * Support for email accounts added via GNOME Online Accounts
+  * Improved account creation and management user interface
+  * Email flagged as deleted but not removed by other apps now hidden
+  * Individual messages in a conversation can be deleted
+  * Internal links in HTML email now work
+  * Supported ordered and unordered lists in the composer
+  * Rich text pasting improvements in the composer
+  * Plain text versions of rich text mail includes formatting
+  * Detached composers now remember their last used size
+  * Better reporting when a login, security or other problem occurs
+  * Reduced background synchronisation CPU use
+  * Improved handling when going online and offline
+  * Show an in-application notification when email has been sent
+  * Flag possibly spoofed email addresses
+  * Improve privacy when sending email using an alias
+  * Subject, sender and date are being shown when printed again
+  * Server compatibility improvements
+  * Build, testing and other infrastructure improvements
+  * Numerous bug fixes and minor user interface improvements
+  * Numerous user interface translation updates
 
- -- Michael Gratton <mike@vee.net>  Mon, 02 Oct 2017 22:36:13 +1100
+ -- Michael Gratton <mike@vee.net>  Sun, 17 Feb 2019 22:59:46 +1100
 
 geary (0.12.0-1~xenial1) xenial; urgency=medium
 
