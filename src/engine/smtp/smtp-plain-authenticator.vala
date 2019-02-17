@@ -18,7 +18,7 @@ public class Geary.Smtp.PlainAuthenticator : Geary.Smtp.Authenticator {
     }
     
     public override Request initiate() {
-        return new Request(Command.AUTH, { "plain" });
+        return new Request(Command.AUTH, { "PLAIN" });
     }
     
     public override Memory.Buffer? challenge(int step, Response response) throws SmtpError {

@@ -48,7 +48,7 @@ async void main_async() throws Error {
         
         stdout.printf("\n\n%s\n\n", msg.to_string());
         
-        yield session.send_email_async(msg.sender, msg);
+        yield session.send_email_async(msg.from.get(0), msg);
         
         stdout.printf("Sent email #%d\n", ctr);
     }
@@ -160,8 +160,10 @@ int main(string[] args) {
     if (arg_debug) {
         Geary.Logging.init();
         Geary.Logging.log_to(stdout);
+        Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
+        GLib.Log.set_default_handler(Geary.Logging.default_handler);
     }
-    
+
     Geary.RFC822.init();
 
     credentials = new Geary.Credentials(

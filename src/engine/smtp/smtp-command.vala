@@ -38,7 +38,7 @@ public enum Geary.Smtp.Command {
                 return "rset";
             
             case AUTH:
-                return "auth";
+                return "AUTH";
             
             case MAIL:
                 return "mail";
