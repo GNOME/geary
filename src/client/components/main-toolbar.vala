@@ -65,19 +65,6 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Image trash_image = new Gtk.Image.from_icon_name("user-trash-symbolic", Gtk.IconSize.MENU);
     private Gtk.Image delete_image = new Gtk.Image.from_icon_name("edit-delete-symbolic", Gtk.IconSize.MENU);
 
-    // Tooltips
-    private const string DELETE_CONVERSATION_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
-    private const string DELETE_CONVERSATION_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
-    private const string TRASH_CONVERSATION_TOOLTIP_SINGLE = _("Move conversation to Trash (Delete, Backspace)");
-    private const string TRASH_CONVERSATION_TOOLTIP_MULTIPLE = _("Move conversations to Trash (Delete, Backspace)");
-    private const string ARCHIVE_CONVERSATION_TOOLTIP_SINGLE = _("Archive conversation (A)");
-    private const string ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
-    private const string MARK_MESSAGE_MENU_TOOLTIP_SINGLE = _("Mark conversation");
-    private const string MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE = _("Mark conversations");
-    private const string LABEL_MESSAGE_TOOLTIP_SINGLE = _("Add label to conversation");
-    private const string LABEL_MESSAGE_TOOLTIP_MULTIPLE = _("Add label to conversations");
-    private const string MOVE_MESSAGE_TOOLTIP_SINGLE = _("Move conversation");
-    private const string MOVE_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations");
 
     public MainToolbar(Configuration config) {
         // Instead of putting a separator between the two headerbars, as other applications do,
@@ -160,31 +147,43 @@ public class MainToolbar : Gtk.Box {
 
     // Updates tooltip text depending on number of conversations selected.
     private void update_conversation_buttons() {
-        this.mark_message_button.tooltip_text = ngettext(MARK_MESSAGE_MENU_TOOLTIP_SINGLE,
-                                                         MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE,
-                                                         this.selected_conversations);
-        this.copy_message_button.tooltip_text = ngettext(LABEL_MESSAGE_TOOLTIP_SINGLE,
-                                                         LABEL_MESSAGE_TOOLTIP_MULTIPLE,
-                                                         this.selected_conversations);
-        this.move_message_button.tooltip_text = ngettext(MOVE_MESSAGE_TOOLTIP_SINGLE,
-                                                         MOVE_MESSAGE_TOOLTIP_MULTIPLE,
-                                                         this.selected_conversations);
-        this.archive_button.tooltip_text = ngettext(ARCHIVE_CONVERSATION_TOOLTIP_SINGLE,
-                                                    ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE,
-                                                    this.selected_conversations);
+        this.mark_message_button.tooltip_text = ngettext(
+            "Mark conversation",
+            "Mark conversations",
+            this.selected_conversations
+        );
+        this.copy_message_button.tooltip_text = ngettext(
+            "Add label to conversation",
+            "Add label to conversations",
+            this.selected_conversations
+        );
+        this.move_message_button.tooltip_text = ngettext(
+            "Move conversation",
+            "Move conversations",
+            this.selected_conversations
+        );
+        this.archive_button.tooltip_text = ngettext(
+            "Archive conversation (A)",
+            "Archive conversations (A)",
+            this.selected_conversations
+        );
 
         if (this.show_trash_button) {
             this.trash_delete_button.action_name = "win."+GearyController.ACTION_TRASH_CONVERSATION;
             this.trash_delete_button.image = trash_image;
-            this.trash_delete_button.tooltip_text = ngettext(TRASH_CONVERSATION_TOOLTIP_SINGLE,
-                                                             TRASH_CONVERSATION_TOOLTIP_MULTIPLE,
-                                                             this.selected_conversations);
+            this.trash_delete_button.tooltip_text = ngettext(
+                "Move conversation to Trash (Delete, Backspace)",
+                "Move conversations to Trash (Delete, Backspace)",
+                this.selected_conversations
+            );
         } else {
             this.trash_delete_button.action_name = "win."+GearyController.ACTION_DELETE_CONVERSATION;
             this.trash_delete_button.image = delete_image;
-            this.trash_delete_button.tooltip_text = ngettext(DELETE_CONVERSATION_TOOLTIP_SINGLE,
-                                                             DELETE_CONVERSATION_TOOLTIP_MULTIPLE,
-                                                             this.selected_conversations);
+            this.trash_delete_button.tooltip_text = ngettext(
+                "Delete conversation (Shift+Delete)",
+                "Delete conversations (Shift+Delete)",
+                this.selected_conversations
+            );
         }
     }
 }
