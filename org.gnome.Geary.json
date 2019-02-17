@@ -1,14 +1,11 @@
 /* flatpak-builder config for Geary. */
 {
     "app-id": "org.gnome.Geary",
+    "branch": "0.13",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "master",
+    "runtime-version": "3.30",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
-
-    /* Nightly build args, remove these when creating a new stable branch */
-    "tags": ["nightly"],
-    "desktop-file-name-prefix": "(Nightly) ",
 
     "finish-args": [
         /* X11 + XShm access */
@@ -67,7 +64,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/gmime.git",
+                    "url": "https://github.com/jstedfast/gmime.git",
                     "branch": "gmime-2-6"
                 }
             ]
@@ -111,7 +108,7 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/geary.git",
-                    "branch": "master"
+                    "branch": "geary-0.13"
                 }
             ]
         }
