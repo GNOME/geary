@@ -207,6 +207,7 @@ private class Geary.App.ConversationSet : BaseObject {
                         conversation.to_string()
                     );
                     removed.add(conversation);
+                    remaining.remove(conversation);
                     trimmed.remove_all(conversation);
                     remove_conversation(conversation);
                 } else {
