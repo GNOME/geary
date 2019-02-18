@@ -753,8 +753,8 @@ public class GearyController : Geary.BaseObject {
         } else if (this.account_manager.is_goa_account(account)) {
             context.authentication_prompting = true;
             try {
-                account.load_incoming_credentials(context.cancellable);
-                account.load_outgoing_credentials(context.cancellable);
+                yield account.load_incoming_credentials(context.cancellable);
+                yield account.load_outgoing_credentials(context.cancellable);
             } catch (GLib.Error err) {
                 // Bail out right away, but probably should be opening
                 // the GOA control panel.
