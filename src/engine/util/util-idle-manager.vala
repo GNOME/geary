@@ -32,6 +32,32 @@ public class Geary.IdleManager : BaseObject {
     /** The idle callback function prototype. */
     public delegate void IdleFunc(IdleManager manager);
 
+
+    // Instances of this are passed to GLib.Idle to execute the
+    // callback. This holds a weak ref to the manager itself allowing
+    // it to be destroyed if all of its references are broken, even if
+    // it is still queued via GLib.Idle.
+    private class HandlerRef : GLib.Object {
+
+        private GLib.WeakRef manager;
+
+
+        public HandlerRef(IdleManager manager) {
+            this.manager = GLib.WeakRef(manager);
+        }
+
+        public bool execute() {
+            bool ret = Source.REMOVE;
+            IdleManager? manager = this.manager.get() as IdleManager;
+            if (manager != null) {
+                ret = manager.execute();
+            }
+            return ret;
+        }
+
+    }
+
+
     /** Determines if the function will be re-scheduled after being run. */
     public Repeat repetition = Repeat.ONCE;
 
@@ -43,10 +69,8 @@ public class Geary.IdleManager : BaseObject {
         get { return this.source_id >= 0; }
     }
 
-    // Callback must be unowned to avoid reference loop with owner's
-    // class when a closure is used as the callback.
     private unowned IdleFunc callback;
-    private int source_id = -1;
+    private int64 source_id = -1;
 
 
     /**
@@ -70,7 +94,11 @@ public class Geary.IdleManager : BaseObject {
      */
     public void schedule() {
         reset();
-        this.source_id = (int) GLib.Idle.add_full(this.priority, on_trigger);
+
+        HandlerRef handler = new HandlerRef(this);
+        this.source_id = (int) GLib.Idle.add_full(
+            this.priority, handler.execute
+        );
     }
 
     /**
@@ -79,15 +107,14 @@ public class Geary.IdleManager : BaseObject {
      * @return `true` if function was already scheduled, else `false`
      */
     public bool reset() {
-        bool is_running = this.is_running;
-        if (is_running) {
-            Source.remove(this.source_id);
+        if (this.is_running) {
+            Source.remove((uint) this.source_id);
             this.source_id = -1;
         }
-        return is_running;
+        return this.is_running;
     }
 
-    private bool on_trigger() {
+    private bool execute() {
         bool ret = Source.CONTINUE;
         // If running only once, reset the source id now in case the
         // callback resets the timer while it is executing, so we
@@ -97,6 +124,14 @@ public class Geary.IdleManager : BaseObject {
             this.source_id = -1;
             ret = Source.REMOVE;
         }
+
+        unowned IdleFunc? callback = this.callback;
+        if (callback != null) {
+            callback(this);
+        } else {
+            ret = Source.REMOVE;
+        }
+
         callback(this);
         return ret;
     }
