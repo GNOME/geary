@@ -190,7 +190,9 @@ public class Geary.Endpoint : BaseObject {
     }
 
     private void prepare_tls_cx(GLib.TlsClientConnection tls_cx) {
-        tls_cx.server_identity = this.remote;
+        // Setting this on Ubuntu 18.04 breaks some TLS
+        // connections. See issue #217.
+        // tls_cx.server_identity = this.remote;
         tls_cx.validation_flags = this.tls_validation_flags;
         if (Endpoint.default_tls_database != null) {
             tls_cx.set_database(Endpoint.default_tls_database);
