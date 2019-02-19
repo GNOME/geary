@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-01-30 12:37+0000\n"
-"PO-Revision-Date: 2019-01-30 13:58+0100\n"
+"POT-Creation-Date: 2019-02-17 14:21+0000\n"
+"PO-Revision-Date: 2019-02-19 15:05+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: es <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 3.31.0\n"
+"X-Generator: Gtranslator 3.31.90\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -514,7 +514,6 @@ msgstr "Quitar"
 #. email address when editing a user's sender address
 #. preferences for an account.
 #: src/client/accounts/accounts-editor-edit-pane.vala:494
-#| msgid "Sender name:"
 msgid "Sender name"
 msgstr "Nombre del remitente"
 
@@ -762,18 +761,17 @@ msgstr "Guardar borradores en el servidor"
 #: src/client/accounts/accounts-editor-servers-pane.vala:879
 #, c-format
 msgid "%s using OAuth2"
-msgstr ""
+msgstr "%s usa OAuth2"
 
 #: src/client/accounts/accounts-editor-servers-pane.vala:889
 msgid "Use receiving server login"
-msgstr ""
+msgstr "Usar inicio de sesión del servidor para la recepción"
 
 #: src/client/application/geary-application.vala:23
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/geary-application.vala:24
-#| msgid "Copyright 2016-2018 Geary Development Team."
 msgid "Copyright 2016-2019 Geary Development Team."
 msgstr "Copyright 2016-2019 Equipo de desarrollo de Geary."
 
@@ -781,7 +779,7 @@ msgstr "Copyright 2016-2019 Equipo de desarrollo de Geary."
 msgid "Visit the Geary web site"
 msgstr "Visite el sitio web de Geary"
 
-#: src/client/application/geary-application.vala:413
+#: src/client/application/geary-application.vala:420
 #, c-format
 msgid "About %s"
 msgstr "Acerca de %s"
@@ -789,7 +787,7 @@ msgstr "Acerca de %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:417
+#: src/client/application/geary-application.vala:424
 msgid "translator-credits"
 msgstr ""
 "Daniel Mustieles <daniel.mustieles@gmail.com>, 2015 - 2017\n"
@@ -883,19 +881,19 @@ msgstr "Opción de la línea de comandos «%s» no reconocida\n"
 msgid "Untitled"
 msgstr "Sin título"
 
-#: src/client/application/geary-controller.vala:899
+#: src/client/application/geary-controller.vala:924
 msgid "Labels"
 msgstr "Etiquetas"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:911
+#: src/client/application/geary-controller.vala:937
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "No se pudo abrir la base de datos local para %s"
 
-#: src/client/application/geary-controller.vala:912
+#: src/client/application/geary-controller.vala:938
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -920,20 +918,20 @@ msgstr ""
 "Reconstruir la base de datos destruirá todo el correo guardado de forma "
 "local y sus adjuntos. <b>El correo del servidor permanecerá intacto.</b>"
 
-#: src/client/application/geary-controller.vala:914
+#: src/client/application/geary-controller.vala:940
 msgid "_Rebuild"
 msgstr "_Reconstruir"
 
-#: src/client/application/geary-controller.vala:914
+#: src/client/application/geary-controller.vala:940
 msgid "E_xit"
 msgstr "_Salir"
 
-#: src/client/application/geary-controller.vala:923
+#: src/client/application/geary-controller.vala:949
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "No se puede reconstruir la base de datos para «%s»"
 
-#: src/client/application/geary-controller.vala:924
+#: src/client/application/geary-controller.vala:950
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -944,15 +942,15 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1765
+#: src/client/application/geary-controller.vala:1797
 msgid "Undo move (Ctrl+Z)"
 msgstr "Deshacer mover (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:1775
+#: src/client/application/geary-controller.vala:1807
 msgid "Are you sure you want to open these attachments?"
 msgstr "¿Está seguro de que quiere abrir estos adjuntos?"
 
-#: src/client/application/geary-controller.vala:1776
+#: src/client/application/geary-controller.vala:1808
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -960,14 +958,14 @@ msgstr ""
 "Los archivos adjuntos podrían causar daños a su sistema. Abra solo los "
 "archivos que provengan de fuentes fiables."
 
-#: src/client/application/geary-controller.vala:1777
+#: src/client/application/geary-controller.vala:1809
 msgid "Don’t _ask me again"
 msgstr "No volver a _preguntarme"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/geary-controller.vala:1906
+#: src/client/application/geary-controller.vala:1938
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Ya existe un archivo llamado «%s». ¿Quiere reemplazarlo?"
@@ -975,77 +973,77 @@ msgstr "Ya existe un archivo llamado «%s». ¿Quiere reemplazarlo?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/geary-controller.vala:1913
+#: src/client/application/geary-controller.vala:1945
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
 "El archivo ya existe en «%s». Si lo reemplaza sobrescribirá su contenido."
 
-#: src/client/application/geary-controller.vala:1917
+#: src/client/application/geary-controller.vala:1949
 msgid "_Replace"
 msgstr "_Reemplazar"
 
-#: src/client/application/geary-controller.vala:2193
+#: src/client/application/geary-controller.vala:2225
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "¿Quiere cerrar el mensaje en borrador?"
 msgstr[1] "¿Quiere cerrar los mensajes en borrador?"
 
-#: src/client/application/geary-controller.vala:2319
+#: src/client/application/geary-controller.vala:2351
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "¿Quiere eliminar todos los mensajes de la carpeta «%s»?"
 
-#: src/client/application/geary-controller.vala:2320
+#: src/client/application/geary-controller.vala:2352
 msgid "This removes the email from Geary and your email server."
 msgstr ""
 "Esto eliminará el mensaje de Geary y del servidor de correo electrónico."
 
-#: src/client/application/geary-controller.vala:2321
+#: src/client/application/geary-controller.vala:2353
 msgid "This cannot be undone."
 msgstr "Esto no se puede deshacer."
 
-#: src/client/application/geary-controller.vala:2322
+#: src/client/application/geary-controller.vala:2354
 #, c-format
 msgid "Empty %s"
 msgstr "Vaciar %s"
 
-#: src/client/application/geary-controller.vala:2339
+#: src/client/application/geary-controller.vala:2371
 #, c-format
 msgid "Error emptying %s"
 msgstr "Error al vaciar «%s»"
 
-#: src/client/application/geary-controller.vala:2371
+#: src/client/application/geary-controller.vala:2403
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "¿Quiere eliminar permanentemente este mensaje?"
 msgstr[1] "¿Quiere eliminar permanentemente estos mensajes?"
 
-#: src/client/application/geary-controller.vala:2373
+#: src/client/application/geary-controller.vala:2405
 msgid "Delete"
 msgstr "Eliminar"
 
-#: src/client/application/geary-controller.vala:2387
+#: src/client/application/geary-controller.vala:2419
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Deshacer envío a la papelera (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2437
+#: src/client/application/geary-controller.vala:2469
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Deshacer archivado (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2482
+#: src/client/application/geary-controller.vala:2514
 msgid "Undo (Ctrl+Z)"
 msgstr "Deshacer (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2559
+#: src/client/application/geary-controller.vala:2591
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Correo enviado correctamente a %s."
 
-#: src/client/application/geary-controller.vala:2640
+#: src/client/application/geary-controller.vala:2673
 msgid "Failed to open default text editor."
 msgstr "Falló al abrir el editor de textos predeterminado."
 
@@ -1137,7 +1135,7 @@ msgstr "Problema al conectar al servidor de entrada para %s"
 
 #. Translators: String substitution is the server name
 #: src/client/components/main-window-info-bar.vala:49
-#: src/client/components/main-window-info-bar.vala:57
+#: src/client/components/main-window-info-bar.vala:58
 #, c-format
 msgid ""
 "Could not connect to %s, check your Internet access and the server name and "
@@ -1146,59 +1144,48 @@ msgstr ""
 "No se pudo conectar a %s, revise su conexión a Internet y el nombre del "
 "servidor e inténtelo de nuevo."
 
+#. Translators: Tooltip label for Retry button
 #. Button tooltip for retrying an account problem
-#: src/client/components/main-window-info-bar.vala:50
-#: src/client/components/main-window-info-bar.vala:59 ui/main-window.ui:265
-msgid "Retry connecting now"
-msgstr "Vuelva a intentar conectar ahora"
+#: src/client/components/main-window-info-bar.vala:51
+#: src/client/components/main-window-info-bar.vala:60
+#: src/client/components/main-window-info-bar.vala:69
+#: src/client/components/main-window-info-bar.vala:78
+#: src/client/components/main-window-info-bar.vala:87
+#: src/client/components/main-window-info-bar.vala:96
+#: src/client/components/main-window-info-bar.vala:136 ui/main-window.ui:265
+msgid "Try reconnecting"
+msgstr "Vuelva a intentar conectar"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:55
+#: src/client/components/main-window-info-bar.vala:56
 #, c-format
 msgid "Problem connecting to outgoing server for %s"
 msgstr "Problema al conectar al servidor de salida para %s"
 
-#: src/client/components/main-window-info-bar.vala:58
-msgid "Try reconnecting now"
-msgstr "Vuelva a intentar conectar ahora"
-
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:64
+#: src/client/components/main-window-info-bar.vala:65
+#: src/client/components/main-window-info-bar.vala:83
 #, c-format
-msgid "Problem with connection to incoming server for %s"
-msgstr "Problema al conectar al servidor de correo entrante %s"
+msgid "Problem communicating with incoming server for %s"
+msgstr "Problema al comunicarse con el servidor de correo entrante para %s"
 
 #. Translators: String substitution is the server name
-#: src/client/components/main-window-info-bar.vala:66
-#: src/client/components/main-window-info-bar.vala:74
+#: src/client/components/main-window-info-bar.vala:67
+#: src/client/components/main-window-info-bar.vala:76
 #, c-format
 msgid "Network error talking to %s, check your Internet access and try again"
 msgstr ""
 "Problema de red mientras se comunicaba con %s, revise su conexión a Internet "
 "e inténtelo nuevamente."
 
-#: src/client/components/main-window-info-bar.vala:67
-#: src/client/components/main-window-info-bar.vala:75
-#: src/client/components/main-window-info-bar.vala:83
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:74
 #: src/client/components/main-window-info-bar.vala:91
-#: src/client/components/main-window-info-bar.vala:126
-msgid "Try reconnecting"
-msgstr "Vuelva a intentar conectar"
-
-#. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:72
-#, c-format
-msgid "Problem with connection to outgoing server for %s"
-msgstr "Problema al conectar al servidor de salida para %s"
-
-#. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:80
-#, c-format
-msgid "Problem communicating with incoming server for %s"
-msgstr "Problema al comunicarse con el servidor de correo entrante para %s"
+msgid "Problem communicating with outgoing mail server"
+msgstr "Problema al comunicar con el servidor de correo saliente"
 
 #. Translators: String substitution is the server name
-#: src/client/components/main-window-info-bar.vala:82
+#: src/client/components/main-window-info-bar.vala:85
 #, c-format
 msgid ""
 "Geary did not understand a message from %s or vice versa, please file a bug "
@@ -1207,13 +1194,9 @@ msgstr ""
 "Geary no pudo entender un mensaje de %s o viceversa, porfavor envíe un "
 "informe de error."
 
-#: src/client/components/main-window-info-bar.vala:87
-msgid "Problem communicating with outgoing mail server"
-msgstr "Problema al comunicar con el servidor de correo saliente"
-
 #. Translators: First string substitution is the server
 #. name, second is the account name
-#: src/client/components/main-window-info-bar.vala:90
+#: src/client/components/main-window-info-bar.vala:94
 #, c-format
 msgid ""
 "Could not communicate with %s for %s, check the server name and try again in "
@@ -1223,116 +1206,116 @@ msgstr ""
 "de nuevo."
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:96
+#: src/client/components/main-window-info-bar.vala:101
 #, c-format
 msgid "Incoming mail server password required for %s"
 msgstr "Contraseña necesaria para el servidor de correo entrante para %s"
 
-#: src/client/components/main-window-info-bar.vala:97
+#: src/client/components/main-window-info-bar.vala:102
 msgid "Messages cannot be received without the correct password."
 msgstr "No se pueden recibir los mensajes sin la contraseña correcta."
 
-#: src/client/components/main-window-info-bar.vala:98
+#. Translators: Tooltip label for Retry button
+#: src/client/components/main-window-info-bar.vala:104
 msgid "Retry receiving email, you will be prompted for a password"
 msgstr "Reintentar recibir correo, se le pedirá una contraseña"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:103
+#: src/client/components/main-window-info-bar.vala:109
 #, c-format
 msgid "Outgoing mail server password required for %s"
 msgstr "Contraseña necesaria para el servidor de correo saliente para %s"
 
-#: src/client/components/main-window-info-bar.vala:104
+#: src/client/components/main-window-info-bar.vala:110
 msgid "Messages cannot be sent without the correct password."
 msgstr "No se pueden enviar los mensajes sin la contraseña correcta."
 
-#: src/client/components/main-window-info-bar.vala:105
+#. Translators: Tooltip label for Retry button
+#: src/client/components/main-window-info-bar.vala:112
 msgid "Retry sending queued messages, you will be prompted for a password"
 msgstr "Reintentar enviar los correos encolados, se le pedirá una contraseña"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:110
+#: src/client/components/main-window-info-bar.vala:117
 #, c-format
-#| msgid "Incoming mail server password required for %s"
 msgid "Incoming mail server security is not trusted for %s"
 msgstr ""
 "La seguridad del servidor de correo entrante no es de confianza para %s"
 
-#: src/client/components/main-window-info-bar.vala:111
-#, fuzzy
+#: src/client/components/main-window-info-bar.vala:118
 #| msgid "Messages cannot be received without the correct password."
 msgid "Messages will not be received until checked."
-msgstr "No se pueden recibir los mensajes sin la contraseña correcta."
+msgstr "Los mensajes no se recibirán hasta que se comprueben."
 
-#: src/client/components/main-window-info-bar.vala:112
-#: src/client/components/main-window-info-bar.vala:119
+#. Translators: Tooltip label for Retry button
+#: src/client/components/main-window-info-bar.vala:120
+#: src/client/components/main-window-info-bar.vala:128
 msgid "Check security details"
 msgstr "Comprobar los detalles de seguridad"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:117
+#: src/client/components/main-window-info-bar.vala:125
 #, c-format
-#| msgid "Outgoing mail server password required for %s"
 msgid "Outgoing mail server security is not trusted for %s"
 msgstr ""
 "La seguridad del servidor de correo saliente no es de confianza para %s"
 
-#: src/client/components/main-window-info-bar.vala:118
-#, fuzzy
+#: src/client/components/main-window-info-bar.vala:126
 #| msgid "Messages cannot be sent without the correct password."
 msgid "Messages cannot be sent until checked."
-msgstr "No se pueden enviar los mensajes sin la contraseña correcta."
+msgstr "No se podrán enviar los mensajes hasta que se comprueben."
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:124
+#: src/client/components/main-window-info-bar.vala:133
 #, c-format
 msgid "A problem occurred checking mail for %s"
 msgstr "ha ocurrido un problema al comprobar el correo para %s"
 
-#: src/client/components/main-window-info-bar.vala:125
-#: src/client/components/main-window-info-bar.vala:132
+#: src/client/components/main-window-info-bar.vala:134
+#: src/client/components/main-window-info-bar.vala:142
 msgid "Something went wrong, please file a bug report if the problem persists"
 msgstr "Algo ha fallado, envíe un informe de error si el problema persiste"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:131
+#: src/client/components/main-window-info-bar.vala:141
 #, c-format
 msgid "A problem occurred sending mail for %s"
 msgstr "Ha ocurrido un error al enviar el correo para %s"
 
-#: src/client/components/main-window-info-bar.vala:133
+#. Translators: Tooltip label for Retry button
+#: src/client/components/main-window-info-bar.vala:144
 msgid "Retry sending queued messages"
 msgstr "Reintentar enviar los correos encolados"
 
-#: src/client/components/main-window-info-bar.vala:144
+#: src/client/components/main-window-info-bar.vala:155
 msgid "A database problem has occurred"
 msgstr "Ha ocurrido un problema de base de datos"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:146
+#: src/client/components/main-window-info-bar.vala:157
 #, c-format
 msgid "Messages for %s must be downloaded again."
 msgstr "Los mensajes para %s se deben descargar de nuevo."
 
-#: src/client/components/main-window-info-bar.vala:159
+#: src/client/components/main-window-info-bar.vala:170
 msgid "Geary has encountered a problem"
 msgstr "Geary ha encontrado un problema"
 
-#: src/client/components/main-window-info-bar.vala:160
+#: src/client/components/main-window-info-bar.vala:171
 msgid ""
 "Please check the technical details and report the problem if it persists."
 msgstr "Compruebe los detalles técnicos e informe del problema si persiste."
 
-#: src/client/components/main-window-info-bar.vala:168
+#: src/client/components/main-window-info-bar.vala:179
 msgid "_Details"
 msgstr "_Detalles"
 
 #. Button tooltip for displaying technical details about an account problem
-#: src/client/components/main-window-info-bar.vala:169 ui/main-window.ui:250
+#: src/client/components/main-window-info-bar.vala:180 ui/main-window.ui:250
 msgid "View technical details about the error"
 msgstr "Ver detalles técnicos sobre el error"
 
-#: src/client/components/main-window-info-bar.vala:173
+#: src/client/components/main-window-info-bar.vala:184
 msgid "_Retry"
 msgstr "_Reintentar"
 
@@ -1443,19 +1426,19 @@ msgstr "Enlace a URL no válido"
 msgid "Invalid email address"
 msgstr "Dirección correo-e no válida"
 
-#: src/client/composer/composer-widget.vala:158
+#: src/client/composer/composer-widget.vala:157
 msgid "Saved"
 msgstr "Guardado"
 
-#: src/client/composer/composer-widget.vala:159
+#: src/client/composer/composer-widget.vala:158
 msgid "Saving"
 msgstr "Guardando"
 
-#: src/client/composer/composer-widget.vala:160
+#: src/client/composer/composer-widget.vala:159
 msgid "Error saving"
 msgstr "Error al guardar"
 
-#: src/client/composer/composer-widget.vala:161
+#: src/client/composer/composer-widget.vala:160
 msgid "Press Backspace to delete quote"
 msgstr "Pulse Retroceso para eliminar la cita"
 
@@ -1463,7 +1446,7 @@ msgstr "Pulse Retroceso para eliminar la cita"
 #. characters, that suggest an attachment; since this is full-word
 #. checking, include all variants of each word.  No spaces are
 #. allowed.
-#: src/client/composer/composer-widget.vala:170
+#: src/client/composer/composer-widget.vala:169
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1474,34 +1457,34 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1103
+#: src/client/composer/composer-widget.vala:1128
 msgid "Do you want to keep or discard this draft message?"
 msgstr "¿Quiere mantener o descartar este mensaje en borrador?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1131
+#: src/client/composer/composer-widget.vala:1156
 msgid "Do you want to discard this draft message?"
 msgstr "¿Quiere descartar este mensaje en borrador?"
 
-#: src/client/composer/composer-widget.vala:1248
+#: src/client/composer/composer-widget.vala:1273
 msgid "Send message with an empty subject and body?"
 msgstr "¿Quiere enviar el mensaje sin asunto ni cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1250
+#: src/client/composer/composer-widget.vala:1275
 msgid "Send message with an empty subject?"
 msgstr "¿Quiere enviar el mensaje sin asunto?"
 
-#: src/client/composer/composer-widget.vala:1252
+#: src/client/composer/composer-widget.vala:1277
 msgid "Send message with an empty body?"
 msgstr "¿Quiere enviar el mensaje sin cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1256
+#: src/client/composer/composer-widget.vala:1281
 msgid "Send message without an attachment?"
 msgstr "¿Quiere enviar el mensaje sin el archivo adjunto?"
 
-#: src/client/composer/composer-widget.vala:1561
+#: src/client/composer/composer-widget.vala:1586
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Ya se ha adjuntado «%s» para enviarlo."
@@ -1511,53 +1494,63 @@ msgstr "Ya se ha adjuntado «%s» para enviarlo."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1569
-#: src/client/conversation-viewer/conversation-email.vala:149
+#: src/client/composer/composer-widget.vala:1594
+#: src/client/conversation-viewer/conversation-email.vala:173
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1606
+#: src/client/composer/composer-widget.vala:1631
 #, c-format
 msgid "“%s” could not be found."
 msgstr "No se pudo encontrar «%s»."
 
-#: src/client/composer/composer-widget.vala:1612
+#: src/client/composer/composer-widget.vala:1637
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» es una carpeta."
 
-#: src/client/composer/composer-widget.vala:1618
+#: src/client/composer/composer-widget.vala:1643
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» es un archivo vacío."
 
-#: src/client/composer/composer-widget.vala:1631
+#: src/client/composer/composer-widget.vala:1656
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "No se pudo abrir «%s» para lectura."
 
-#: src/client/composer/composer-widget.vala:1639
+#: src/client/composer/composer-widget.vala:1664
 msgid "Cannot add attachment"
 msgstr "No se puede adjuntar el archivo"
 
-#: src/client/composer/composer-widget.vala:1688
-msgid "To: "
-msgstr "Para: "
+#. Translators: Human-readable version of the RFC 822 To header
+#: src/client/composer/composer-widget.vala:1714
+#: src/client/conversation-viewer/conversation-email.vala:975
+#: src/engine/rfc822/rfc822-utils.vala:298 ui/conversation-message.ui:313
+msgid "To:"
+msgstr "Para:"
 
-#: src/client/composer/composer-widget.vala:1691
-msgid "Cc: "
-msgstr "Cc: "
+#. Translators: Human-readable version of the RFC 822 CC header
+#: src/client/composer/composer-widget.vala:1720
+#: src/client/conversation-viewer/conversation-email.vala:980
+#: src/engine/rfc822/rfc822-utils.vala:303 ui/conversation-message.ui:358
+msgid "Cc:"
+msgstr "Cc:"
 
-#: src/client/composer/composer-widget.vala:1694
-msgid "Bcc: "
-msgstr "Cco: "
+#. Translators: Human-readable version of the RFC 822 BCC header
+#: src/client/composer/composer-widget.vala:1726
+#: src/client/conversation-viewer/conversation-email.vala:985
+#: ui/conversation-message.ui:403
+msgid "Bcc:"
+msgstr "Cco:"
 
-#: src/client/composer/composer-widget.vala:1697
+#. Translators: Human-readable version of the RFC 822 Reply-To header
+#: src/client/composer/composer-widget.vala:1732
 msgid "Reply-To: "
 msgstr "Responder a:"
 
-#: src/client/composer/composer-widget.vala:1835
+#: src/client/composer/composer-widget.vala:1872
 msgid "Select Color"
 msgstr "Seleccionar color"
 
@@ -1566,20 +1559,20 @@ msgstr "Seleccionar color"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2030
+#: src/client/composer/composer-widget.vala:2062
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s mediante %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2090
+#: src/client/composer/composer-widget.vala:2121
 msgid "_From:"
 msgstr "_De:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2315
+#: src/client/composer/composer-widget.vala:2349
 msgid "Images"
 msgstr "Imágenes"
 
@@ -1645,82 +1638,73 @@ msgstr "Yo"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/conversation-viewer/conversation-email.vala:135
+#: src/client/conversation-viewer/conversation-email.vala:159
 msgid "Unknown"
 msgstr "Desconocido"
 
-#: src/client/conversation-viewer/conversation-email.vala:890
+#. Translators: Human-readable version of the RFC 822 From header
+#: src/client/conversation-viewer/conversation-email.vala:970
+#: src/engine/rfc822/rfc822-utils.vala:289
 msgid "From:"
 msgstr "De:"
 
-#: src/client/conversation-viewer/conversation-email.vala:894
-#: ui/conversation-message.ui:313
-msgid "To:"
-msgstr "Para:"
-
-#: src/client/conversation-viewer/conversation-email.vala:898
-#: ui/conversation-message.ui:358
-msgid "Cc:"
-msgstr "Cc:"
-
-#: src/client/conversation-viewer/conversation-email.vala:902
-#: ui/conversation-message.ui:403
-msgid "Bcc:"
-msgstr "Cco:"
-
-#: src/client/conversation-viewer/conversation-email.vala:906
+#. Translators: Human-readable version of the RFC 822 Date header
+#: src/client/conversation-viewer/conversation-email.vala:990
+#: src/engine/rfc822/rfc822-utils.vala:294
 msgid "Date:"
 msgstr "Fecha:"
 
-#: src/client/conversation-viewer/conversation-email.vala:910
+#. Translators: Human-readable version of the RFC 822 Subject header
+#: src/client/conversation-viewer/conversation-email.vala:995
+#: src/engine/rfc822/rfc822-utils.vala:292
 msgid "Subject:"
 msgstr "Asunto:"
 
-#: src/client/conversation-viewer/conversation-message.vala:62
+#: src/client/conversation-viewer/conversation-message.vala:65
 msgid "This email address may have been forged"
 msgstr "Es posible que esta dirección de correo se haya falsificado"
 
 #. Compact headers
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:388
+#: src/client/conversation-viewer/conversation-message.vala:394
 msgid "No sender"
 msgstr "Sin remitente"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:676
+#: src/client/conversation-viewer/conversation-message.vala:767
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:779
+#: src/client/conversation-viewer/conversation-message.vala:870
 msgid "Image"
 msgstr "Imagen"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:80
+#: src/client/conversation-viewer/conversation-viewer.vala:81
 msgid "No conversations selected"
 msgstr "No hay ninguna conversación seleccionada."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:84
+#: src/client/conversation-viewer/conversation-viewer.vala:85
 msgid "Selecting a conversation from the list will display it here"
 msgstr "Al seleccionar una conversación de la lista se mostrará aquí"
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:92
+#: src/client/conversation-viewer/conversation-viewer.vala:94
 msgid "Multiple conversations selected"
 msgstr "Varias conversaciones seleccionadas"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:96
+#: src/client/conversation-viewer/conversation-viewer.vala:98
 msgid "Choosing an action will apply to all selected conversations"
 msgstr ""
 "Al elegir una acción ésta se aplicará a todas las conversaciones "
@@ -1730,20 +1714,20 @@ msgstr ""
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:104
-#: src/client/conversation-viewer/conversation-viewer.vala:116
+#: src/client/conversation-viewer/conversation-viewer.vala:107
+#: src/client/conversation-viewer/conversation-viewer.vala:120
 msgid "No conversations found"
 msgstr "No se han encontrado conversaciones"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:108
+#: src/client/conversation-viewer/conversation-viewer.vala:111
 msgid "This folder does not contain any conversations"
 msgstr "Esta carpeta no contiene conversaciones"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:120
+#: src/client/conversation-viewer/conversation-viewer.vala:124
 msgid "Your search returned no results, try refining your search terms"
 msgstr ""
 "La búsqueda no ha devuelto resultados, intente refinar los términos de la "
@@ -2336,34 +2320,9 @@ msgstr "%s escribió:"
 msgid "On %s:"
 msgstr "El %s:"
 
-#: src/engine/rfc822/rfc822-utils.vala:282
+#: src/engine/rfc822/rfc822-utils.vala:284
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Mensaje reenviado ----------"
-
-#: src/engine/rfc822/rfc822-utils.vala:286
-#, c-format
-msgid "From: %s\n"
-msgstr "De: %s\n"
-
-#: src/engine/rfc822/rfc822-utils.vala:287
-#, c-format
-msgid "Subject: %s\n"
-msgstr "Asunto: %s\n"
-
-#: src/engine/rfc822/rfc822-utils.vala:288
-#, c-format
-msgid "Date: %s\n"
-msgstr "Fecha: %s\n"
-
-#: src/engine/rfc822/rfc822-utils.vala:291
-#, c-format
-msgid "To: %s\n"
-msgstr "Para: %s\n"
-
-#: src/engine/rfc822/rfc822-utils.vala:294
-#, c-format
-msgid "Cc: %s\n"
-msgstr "Cc: %s\n"
 
 #: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:127
 msgid "Add an account"
@@ -2421,7 +2380,7 @@ msgstr "Cuentas"
 
 #: ui/accounts_editor_list_pane.ui:63
 msgid "To get started, select an email provider below."
-msgstr ""
+msgstr "Para empezar seleccione a continuación un proveedor de correo-e"
 
 #: ui/accounts_editor_list_pane.ui:76
 msgid "Welcome to Geary"
@@ -2438,6 +2397,8 @@ msgid ""
 "Removing an account will remove it from Geary and delete locally cached "
 "email data from your computer, but not from your service provider."
 msgstr ""
+"Quitar una cuenta la eliminará de Geary y también eliminará los datos en "
+"caché de su equipo, pero no de su proveedor de servicios."
 
 #: ui/accounts_editor_remove_pane.ui:122
 msgid "Remove account"
@@ -2621,59 +2582,59 @@ msgstr "Suelte los archivos aquí"
 msgid "To add them as attachments"
 msgstr "Para añadirlos como adjuntos"
 
-#: ui/composer-widget.ui:348
+#: ui/composer-widget.ui:352
 msgid "Undo last edit (Ctrl+Z)"
 msgstr "Deshacer la última edición (Ctrl+Z)"
 
-#: ui/composer-widget.ui:372
+#: ui/composer-widget.ui:376
 msgid "Redo last edit  (Ctrl+Shift+Z)"
 msgstr "Rehacer la última edición  (Ctrl+Mayús+Z)"
 
-#: ui/composer-widget.ui:410
+#: ui/composer-widget.ui:414
 msgid "Bold (Ctrl+B)"
 msgstr "Negrita (Ctrl+B)"
 
-#: ui/composer-widget.ui:434
+#: ui/composer-widget.ui:438
 msgid "Italic (Ctrl+I)"
 msgstr "Cursiva (Ctrl+I)"
 
-#: ui/composer-widget.ui:458
+#: ui/composer-widget.ui:462
 msgid "Underline (Ctrl+U)"
 msgstr "Subrayado (Ctrl+U)"
 
-#: ui/composer-widget.ui:482
+#: ui/composer-widget.ui:486
 msgid "Strikethrough (Ctrl+K)"
 msgstr "Tachado (Ctrl+K)"
 
-#: ui/composer-widget.ui:520
+#: ui/composer-widget.ui:524
 msgid "Insert unordered list"
 msgstr "Insertar lista no ordenada"
 
-#: ui/composer-widget.ui:544
+#: ui/composer-widget.ui:548
 msgid "Insert ordered list"
 msgstr "Insertar lista ordenada"
 
-#: ui/composer-widget.ui:582
+#: ui/composer-widget.ui:586
 msgid "Quote text  (Ctrl+])"
 msgstr "Citar el texto  (Ctrl+])"
 
-#: ui/composer-widget.ui:606
+#: ui/composer-widget.ui:610
 msgid "Unquote text  (Ctrl+[)"
 msgstr "Eliminar cita del texto (Ctrl+[)"
 
-#: ui/composer-widget.ui:644
+#: ui/composer-widget.ui:648
 msgid "Insert or update selection link (Ctrl+L)"
 msgstr "Insertar o actualizar el enlace seleccionado (Ctrl+L)"
 
-#: ui/composer-widget.ui:668
+#: ui/composer-widget.ui:672
 msgid "Insert an image (Ctrl+G)"
 msgstr "Insertar una imagen (Ctrl+G)"
 
-#: ui/composer-widget.ui:702
+#: ui/composer-widget.ui:706
 msgid "Remove selection formatting (Ctrl+Space)"
 msgstr "Quitar formato de la selección (Ctrl+Espacio)"
 
-#: ui/composer-widget.ui:726
+#: ui/composer-widget.ui:730
 msgid "Select spell checking languages"
 msgstr "Seleccione el idioma de la revisión ortográfica"
 
@@ -3192,7 +3153,7 @@ msgstr ""
 #. Label and tooltip for offline infobar
 #: ui/main-window.ui:200
 msgid "You will not be able to send or receive email until re-connected."
-msgstr ""
+msgstr "No podrá enviar ni recibir correo hasta que se vuelva a conectar."
 
 #. Button label for displaying technical details about an account problem
 #. Dialog title for displaying technical details of a problem. Same as the button that invokes it.
@@ -3212,7 +3173,6 @@ msgstr "Problema con la cuenta"
 
 #. Label and tooltip for account service problem infobar
 #: ui/main-window.ui:308
-#, fuzzy
 #| msgid ""
 #| "Could not connect to %s, check your Internet access and the server name "
 #| "and try again"
@@ -3221,8 +3181,9 @@ msgid ""
 "Please check your Internet connection, the server configuration and try "
 "again."
 msgstr ""
-"No se pudo conectar a %s, revise su conexión a Internet y el nombre del "
-"servidor e inténtelo de nuevo."
+"Geary ha encontrado un problema al conectarse a la cuenta.\n"
+"Revise su conexión a Internet, la configuración del servidor e inténtelo de "
+"nuevo."
 
 #. Label and tooltip for account service problem infobar
 #: ui/main-window.ui:311
@@ -3260,10 +3221,9 @@ msgstr "Una cuenta ha informado de un servidor que no es de confianza."
 
 #. Button tooltip for retrying when a login error has occurred
 #: ui/main-window.ui:459
-#, fuzzy
 #| msgid "Retry receiving email, you will be prompted for a password"
 msgid "Retry login, you will be prompted for your password"
-msgstr "Reintentar recibir correo, se le pedirá una contraseña"
+msgstr "Reintentar iniciar sesión, se le pedirá su contraseña"
 
 #. Infobar title when one or more accounts have a login error
 #: ui/main-window.ui:488
@@ -3276,6 +3236,8 @@ msgid ""
 "An account has reported an incorrect login or password.\n"
 "Please check your login name and try again."
 msgstr ""
+"Una cuenta ha informado de un nombre de usuario o contraseña incorrectos.\n"
+"Compruébelos e inténtelo de nuevo."
 
 #. Label and tooltip for authentication problem infobar
 #: ui/main-window.ui:505
@@ -3371,6 +3333,42 @@ msgstr "Detalles:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Actualización de Geary en proceso…"
+
+#~ msgid "Retry connecting now"
+#~ msgstr "Vuelva a intentar conectar ahora"
+
+#~ msgid "Try reconnecting now"
+#~ msgstr "Vuelva a intentar conectar ahora"
+
+#~ msgid "Problem with connection to incoming server for %s"
+#~ msgstr "Problema al conectar al servidor de correo entrante %s"
+
+#~ msgid "Problem with connection to outgoing server for %s"
+#~ msgstr "Problema al conectar al servidor de salida para %s"
+
+#~ msgid "To: "
+#~ msgstr "Para: "
+
+#~ msgid "Cc: "
+#~ msgstr "Cc: "
+
+#~ msgid "Bcc: "
+#~ msgstr "Cco: "
+
+#~ msgid "From: %s\n"
+#~ msgstr "De: %s\n"
+
+#~ msgid "Subject: %s\n"
+#~ msgstr "Asunto: %s\n"
+
+#~ msgid "Date: %s\n"
+#~ msgstr "Fecha: %s\n"
+
+#~ msgid "To: %s\n"
+#~ msgstr "Para: %s\n"
+
+#~ msgid "Cc: %s\n"
+#~ msgstr "Cc: %s\n"
 
 #~ msgid "Email address:"
 #~ msgstr "Dirección de correo:"
