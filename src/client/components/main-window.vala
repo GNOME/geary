@@ -85,7 +85,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
 
     public MainWindow(GearyApplication application) {
-        Object(application: application);
+        Object(
+            application: application,
+            show_menubar: false
+        );
         base_ref();
 
         load_config(application.config);
