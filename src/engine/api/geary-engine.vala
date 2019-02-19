@@ -18,6 +18,11 @@
 public class Geary.Engine : BaseObject {
 
 
+    // Set low to avoid leaving the user hanging too long when
+    // validating a service.
+    private const uint VALIDATION_TIMEOUT = 15;
+
+
     public static Engine instance {
         get {
             return (_instance != null) ? _instance : (_instance = new Engine());
@@ -197,8 +202,10 @@ public class Geary.Engine : BaseObject {
                                     GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_opened();
-        Endpoint endpoint = get_shared_endpoint(
-            account.service_provider, service
+
+        // Use a new endpoint since we use a different socket timeout
+        Endpoint endpoint = new_endpoint(
+            account.service_provider, service, VALIDATION_TIMEOUT
         );
         ulong untrusted_id = endpoint.untrusted_host.connect(
             (security, cx) => account.untrusted_host(service, security, cx)
@@ -246,8 +253,10 @@ public class Geary.Engine : BaseObject {
                                     GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_opened();
-        Endpoint endpoint = get_shared_endpoint(
-            account.service_provider, service
+
+        // Use a new endpoint since we use a different socket timeout
+        Endpoint endpoint = new_endpoint(
+            account.service_provider, service, VALIDATION_TIMEOUT
         );
         ulong untrusted_id = endpoint.untrusted_host.connect(
             (security, cx) => account.untrusted_host(service, security, cx)
@@ -440,11 +449,7 @@ public class Geary.Engine : BaseObject {
                 ? Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC
                 : Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC;
 
-            shared = new Endpoint(
-                new NetworkAddress(service.host, service.port),
-                service.transport_security,
-                timeout
-            );
+            shared = new_endpoint(provider, service, timeout);
 
             // XXX this is pretty hacky, move this back into the
             // OutlookAccount somehow
@@ -463,6 +468,16 @@ public class Geary.Engine : BaseObject {
         }
 
         return shared;
+    }
+
+    private inline Geary.Endpoint new_endpoint(ServiceProvider provider,
+                                               ServiceInformation service,
+                                               uint timeout) {
+        return new Endpoint(
+            new NetworkAddress(service.host, service.port),
+            service.transport_security,
+            timeout
+        );
     }
 
 }
