@@ -68,8 +68,31 @@ public abstract class Geary.Account : BaseObject {
 
     }
 
+    /**
+     * A utility method to sort a Gee.Collection of {@link Folder}s by
+     * their {@link FolderPath}s to ensure they comport with {@link
+     * folders_available_unavailable}, {@link folders_created}, {@link
+     * folders_deleted} signals' contracts.
+     */
+    public static Gee.BidirSortedSet<Folder>
+        sort_by_path(Gee.Collection<Folder> folders) {
+        Gee.TreeSet<Folder> sorted =
+            new Gee.TreeSet<Folder>(Account.folder_path_comparator);
+        sorted.add_all(folders);
+        return sorted;
+    }
 
-   /**
+    /**
+     * Comparator used to sort folders.
+     *
+     * @see sort_by_path
+     */
+    public static int folder_path_comparator(Geary.Folder a, Geary.Folder b) {
+        return a.path.compare_to(b.path);
+    }
+
+
+    /**
      * The account's current configuration.
      */
     public AccountInformation information { get; protected set; }
@@ -127,7 +150,7 @@ public abstract class Geary.Account : BaseObject {
     public signal void report_problem(Geary.ProblemReport problem);
 
     public signal void contacts_loaded();
-    
+
     /**
      * Fired when folders become available or unavailable in the account.
      *
@@ -135,14 +158,16 @@ public abstract class Geary.Account : BaseObject {
      * they're created later; they become unavailable when the account is
      * closed or they're deleted later.
      *
-     * Folders are ordered for the convenience of the caller from the top of the hierarchy to
-     * lower in the hierarchy.  In other words, parents are listed before children, assuming the
-     * lists are traversed in natural order.
+     * Folders are ordered for the convenience of the caller from the
+     * top of the hierarchy to lower in the hierarchy.  In other
+     * words, parents are listed before children, assuming the
+     * collections are traversed in natural order.
      *
      * @see sort_by_path
      */
-    public signal void folders_available_unavailable(Gee.List<Geary.Folder>? available,
-        Gee.List<Geary.Folder>? unavailable);
+    public signal void
+        folders_available_unavailable(Gee.BidirSortedSet<Folder>? available,
+                                      Gee.BidirSortedSet<Folder>? unavailable);
 
     /**
      * Fired when new folders have been created.
@@ -154,10 +179,10 @@ public abstract class Geary.Account : BaseObject {
      *
      * Folders are ordered for the convenience of the caller from the
      * top of the hierarchy to lower in the hierarchy.  In other
-     * words, parents are listed before children, assuming the lists
-     * are traversed in natural order.
+     * words, parents are listed before children, assuming the
+     * collection is traversed in natural order.
      */
-    public signal void folders_created(Gee.List<Geary.Folder> created);
+    public signal void folders_created(Gee.BidirSortedSet<Geary.Folder> created);
 
     /**
      * Fired when existing folders are deleted.
@@ -169,10 +194,10 @@ public abstract class Geary.Account : BaseObject {
      *
      * Folders are ordered for the convenience of the caller from the
      * top of the hierarchy to lower in the hierarchy.  In other
-     * words, parents are listed before children, assuming the lists
-     * are traversed in natural order.
+     * words, parents are listed before children, assuming the
+     * collection is traversed in natural order.
      */
-    public signal void folders_deleted(Gee.List<Geary.Folder> deleted);
+    public signal void folders_deleted(Gee.BidirSortedSet<Geary.Folder> deleted);
 
     /**
      * Fired when a Folder's contents is detected having changed.
@@ -239,23 +264,6 @@ public abstract class Geary.Account : BaseObject {
         );
     }
 
-    /**
-     * A utility method to sort a Gee.Collection of {@link Folder}s by
-     * their {@link FolderPath}s to ensure they comport with {@link
-     * folders_available_unavailable}, {@link folders_created}, {@link
-     * folders_deleted} signals' contracts.
-     */
-    protected Gee.List<Geary.Folder> sort_by_path(Gee.Collection<Geary.Folder> folders) {
-        Gee.TreeSet<Geary.Folder> sorted = new Gee.TreeSet<Geary.Folder>(folder_path_comparator);
-        sorted.add_all(folders);
-
-        return Collection.to_array_list<Geary.Folder>(sorted);
-    }
-
-    private int folder_path_comparator(Geary.Folder a, Geary.Folder b) {
-        return a.path.compare_to(b.path);
-    }
-    
     /**
      * Opens the {@link Account} and makes it and its {@link Folder}s available for use.
      *
@@ -458,18 +466,19 @@ public abstract class Geary.Account : BaseObject {
     }
 
     /** Fires a {@link folders_available_unavailable} signal. */
-    protected virtual void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
-                                                                Gee.List<Geary.Folder>? unavailable) {
+    protected virtual void
+        notify_folders_available_unavailable(Gee.BidirSortedSet<Folder>? available,
+                                             Gee.BidirSortedSet<Folder>? unavailable) {
         folders_available_unavailable(available, unavailable);
     }
 
     /** Fires a {@link folders_created} signal. */
-    protected virtual void notify_folders_created(Gee.List<Geary.Folder> created) {
+    protected virtual void notify_folders_created(Gee.BidirSortedSet<Geary.Folder> created) {
         folders_created(created);
     }
 
     /** Fires a {@link folders_deleted} signal. */
-    protected virtual void notify_folders_deleted(Gee.List<Geary.Folder> deleted) {
+    protected virtual void notify_folders_deleted(Gee.BidirSortedSet<Geary.Folder> deleted) {
         folders_deleted(deleted);
     }
 

@@ -36,6 +36,19 @@ public class Geary.FolderPath :
     /** The base name of this folder, excluding parents. */
     public string name { get; private set; }
 
+    /** The number of children under the root in this path. */
+    public uint length {
+        get {
+            uint length = 0;
+            FolderPath parent = this.parent;
+            while (parent != null) {
+                length++;
+                parent = parent.parent;
+            }
+            return length;
+        }
+    }
+
     /**
      * Whether this path is lexiographically case-sensitive.
      *
@@ -201,37 +214,7 @@ public class Geary.FolderPath :
 
     /** {@inheritDoc} */
     public bool equal_to(FolderPath other) {
-        if (this == other) {
-            return true;
-        }
-
-        FolderPath? a = this;
-        FolderPath? b = other;
-        while (a != null || b != null) {
-            if (a == b) {
-                return true;
-            }
-
-            if ((a != null && b == null) ||
-                (a == null && b != null)) {
-                return false;
-            }
-
-            if (a.case_sensitive || b.case_sensitive) {
-                if (a.name != b.name) {
-                    return false;
-                }
-            } else {
-                if (a.name.down() != b.name.down()) {
-                    return false;
-                }
-            }
-
-            a = a.parent;
-            b = b.parent;
-        }
-
-        return true;
+        return this.compare_internal(other, true, false) == 0;
     }
 
     /**
@@ -259,23 +242,29 @@ public class Geary.FolderPath :
     private int compare_internal(FolderPath other,
                                  bool allow_case_sensitive,
                                  bool normalize) {
-        if (this == other)
+        if (this == other) {
             return 0;
-
-        FolderPath a = this;
-        FolderPath b = other;
-
-        // Get the common-length prefix of both
-        while (a.path.length != b.path.length) {
-            if (a.path.length > b.path.length) {
-                a = a.parent;
-            } else if (b.path.length > a.path.length) {
-                b = b.parent;
-            }
         }
 
-        // Compare the common-length prefixes of both
-        while (a != null && b != null) {
+        int a_len = (int) this.length;
+        int b_len = (int) other.length;
+        if (a_len != b_len) {
+            return a_len - b_len;
+        }
+
+        return compare_names(this, other, allow_case_sensitive, normalize);
+    }
+
+    private static int compare_names(FolderPath a, FolderPath b,
+                                     bool allow_case_sensitive,
+                                     bool normalize) {
+        int cmp = 0;
+        if (a.parent != null && b.parent != null) {
+            cmp = compare_names(
+                a.parent, b.parent, allow_case_sensitive, normalize
+            );
+        }
+        if (cmp == 0) {
             string a_name = a.name;
             string b_name = b.name;
 
@@ -291,18 +280,9 @@ public class Geary.FolderPath :
                 b_name = b_name.casefold();
             }
 
-            int result = a_name.collate(b_name);
-            if (result != 0) {
-                return result;
-            }
-
-            a = a.parent;
-            b = b.parent;
+            return strcmp(a_name, b_name);
         }
-
-        // paths up to the min element count are equal, shortest path
-        // is less-than, otherwise equal paths
-        return this.path.length - other.path.length;
+        return cmp;
     }
 
 }
