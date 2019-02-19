@@ -1371,9 +1371,10 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_folders_available_unavailable(Geary.Account account,
-                                                  Gee.List<Geary.Folder>? available,
-                                                  Gee.List<Geary.Folder>? unavailable) {
+    private void on_folders_available_unavailable(
+        Geary.Account account,
+        Gee.BidirSortedSet<Geary.Folder>? available,
+        Gee.BidirSortedSet<Geary.Folder>? unavailable) {
         AccountContext context = this.accounts.get(account.information);
 
         if (available != null && available.size > 0) {
@@ -1438,8 +1439,13 @@ public class GearyController : Geary.BaseObject {
         }
 
         if (unavailable != null) {
-            for (int i = (unavailable.size - 1); i >= 0; i--) {
-                Geary.Folder folder = unavailable[i];
+            Gee.BidirIterator<Geary.Folder> unavailable_iterator =
+                unavailable.bidir_iterator();
+            unavailable_iterator.last();
+            while (unavailable_iterator.valid) {
+                Geary.Folder folder = unavailable_iterator.get();
+                unavailable_iterator.previous();
+
                 main_window.folder_list.remove_folder(folder);
                 if (folder.account == current_account) {
                     if (main_window.main_toolbar.copy_folder_menu.has_folder(folder))
@@ -2817,7 +2823,8 @@ public class GearyController : Geary.BaseObject {
         return context != null ? context.store : null;
     }
 
-    private bool should_add_folder(Gee.List<Geary.Folder>? all, Geary.Folder folder) {
+    private bool should_add_folder(Gee.Collection<Geary.Folder>? all,
+                                   Geary.Folder folder) {
         // if folder is openable, add it
         if (folder.properties.is_openable != Geary.Trillian.FALSE)
             return true;

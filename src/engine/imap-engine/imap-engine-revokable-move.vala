@@ -90,20 +90,21 @@ private class Geary.ImapEngine.RevokableMove : Revokable {
             set_invalid();
         }
     }
-    
-    private void on_folders_available_unavailable(Gee.List<Folder>? available, Gee.List<Folder>? unavailable) {
+
+    private void on_folders_available_unavailable(Gee.Collection<Folder>? available,
+                                                  Gee.Collection<Folder>? unavailable) {
         // look for either of the folders going away
         if (unavailable != null) {
             foreach (Folder folder in unavailable) {
-                if (folder.path.equal_to(source.path) || folder.path.equal_to(destination.path)) {
+                if (folder.path.equal_to(source.path) ||
+                    folder.path.equal_to(destination.path)) {
                     set_invalid();
-                    
                     break;
                 }
             }
         }
     }
-    
+
     private void on_source_email_removed(Gee.Collection<EmailIdentifier> ids) {
         // one-way switch
         if (!valid)
