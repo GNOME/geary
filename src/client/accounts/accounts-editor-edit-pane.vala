@@ -712,7 +712,10 @@ internal class Accounts.SignatureChangedCommand : Application.Command {
     private Geary.AccountInformation account;
 
     private string old_value;
+    private bool old_enabled;
+
     private string? new_value = null;
+    private bool new_enabled = false;
 
 
     public SignatureChangedCommand(ClientWebView signature_view,
@@ -721,6 +724,7 @@ internal class Accounts.SignatureChangedCommand : Application.Command {
         this.account = account;
 
         this.old_value = Geary.HTML.smart_escape(account.signature);
+        this.old_enabled = account.use_signature;
 
         // Translators: Label used as the undo tooltip after removing
         // a sender address from an account. The string substitution
@@ -731,21 +735,25 @@ internal class Accounts.SignatureChangedCommand : Application.Command {
     public async override void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
         this.new_value = yield this.signature_view.get_html();
-        update_account_signature(this.new_value);
+        this.new_enabled = !Geary.String.is_empty_or_whitespace(
+            Geary.HTML.html_to_text(this.new_value)
+        );
+        update_account_signature(this.new_value, this.new_enabled);
     }
 
     public async override void undo(GLib.Cancellable? cancellable) {
         this.signature_view.load_html(this.old_value);
-        update_account_signature(this.old_value);
+        update_account_signature(this.old_value, this.old_enabled);
     }
 
     public async override void redo(GLib.Cancellable? cancellable) {
         this.signature_view.load_html(this.new_value);
-        update_account_signature(this.new_value);
+        update_account_signature(this.new_value, this.new_enabled);
     }
 
-    private inline void update_account_signature(string value) {
-        this.account.signature = value;
+    private inline void update_account_signature(string sig, bool enabled) {
+        this.account.signature = sig;
+        this.account.use_signature = enabled;
         this.account.changed();
     }
 
