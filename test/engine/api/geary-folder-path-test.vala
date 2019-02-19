@@ -25,6 +25,7 @@ public class Geary.FolderPathTest : TestCase {
         add_test("path_hash", path_hash);
         add_test("path_compare", path_compare);
         add_test("path_compare_normalised", path_compare_normalised);
+        add_test("distinct_roots_compare", distinct_roots_compare);
     }
 
     public override void set_up() {
@@ -156,94 +157,174 @@ public class Geary.FolderPathTest : TestCase {
     public void path_compare() throws GLib.Error {
         assert_int(0, this.root.compare_to(this.root), "Root equality");
         assert_int(0,
-            this.root.get_child("test").compare_to(this.root.get_child("test")),
+            this.root.get_child("a").compare_to(this.root.get_child("a")),
             "Equal child comparison"
         );
 
+        // a is less than b
         assert_int(
             -1,
-            this.root.get_child("test1").compare_to(this.root.get_child("test2")),
+            this.root.get_child("a").compare_to(this.root.get_child("b")),
             "Greater than child comparison"
         );
+
+        // b is greater than than a
         assert_int(
             1,
-            this.root.get_child("test2").compare_to(this.root.get_child("test1")),
+            this.root.get_child("b").compare_to(this.root.get_child("a")),
             "Less than child comparison"
         );
 
         assert_int(
-            -1,
-            this.root.get_child("test1").get_child("test")
-            .compare_to(this.root.get_child("test2").get_child("test")),
-            "Greater than disjoint parents"
-        );
-        assert_int(
             1,
-            this.root.get_child("test2").get_child("test")
-            .compare_to(this.root.get_child("test1").get_child("test")),
-            "Less than disjoint parents"
-        );
-
-        assert_int(
-            1,
-            this.root.get_child("test1").get_child("test")
-            .compare_to(this.root.get_child("test1")),
+            this.root.get_child("a").get_child("test")
+            .compare_to(this.root.get_child("a")),
             "Greater than descendant"
         );
         assert_int(
             -1,
-            this.root.get_child("test1")
-            .compare_to(this.root.get_child("test1").get_child("test")),
+            this.root.get_child("a")
+            .compare_to(this.root.get_child("a").get_child("test")),
             "Less than descendant"
         );
+
+        assert_int(
+            0,
+            this.root.get_child("a").get_child("b")
+            .compare_to(this.root.get_child("a").get_child("b")),
+            "N-path equality"
+        );
+
+        assert_int(
+            -1,
+            this.root.get_child("a").get_child("test")
+            .compare_to(this.root.get_child("b").get_child("test")),
+            "Greater than disjoint paths"
+        );
+        assert_int(
+            1,
+            this.root.get_child("b").get_child("test")
+            .compare_to(this.root.get_child("a").get_child("test")),
+            "Less than disjoint paths"
+        );
+
+        assert_int(
+            -1,
+            this.root.get_child("a").get_child("d")
+            .compare_to(this.root.get_child("b").get_child("c")),
+            "Greater than double disjoint"
+        );
+        assert_int(
+            1,
+            this.root.get_child("b").get_child("c")
+            .compare_to(this.root.get_child("a").get_child("d")),
+            "Less than double disjoint"
+        );
+
     }
 
     public void path_compare_normalised() throws GLib.Error {
         assert_int(0, this.root.compare_normalized_ci(this.root), "Root equality");
         assert_int(0,
-            this.root.get_child("test")
-            .compare_normalized_ci(this.root.get_child("test")),
+            this.root.get_child("a").compare_normalized_ci(this.root.get_child("a")),
             "Equal child comparison"
         );
 
+        // a is less than b
         assert_int(
             -1,
-            this.root.get_child("test1")
-            .compare_normalized_ci(this.root.get_child("test2")),
+            this.root.get_child("a").compare_normalized_ci(this.root.get_child("b")),
             "Greater than child comparison"
         );
+
+        // b is greater than than a
         assert_int(
             1,
-            this.root.get_child("test2")
-            .compare_normalized_ci(this.root.get_child("test1")),
+            this.root.get_child("b").compare_normalized_ci(this.root.get_child("a")),
             "Less than child comparison"
         );
 
         assert_int(
             -1,
-            this.root.get_child("test1").get_child("test")
-            .compare_normalized_ci(this.root.get_child("test2").get_child("test")),
+            this.root.get_child("a").get_child("test")
+            .compare_normalized_ci(this.root.get_child("b").get_child("test")),
             "Greater than disjoint parents"
         );
         assert_int(
             1,
-            this.root.get_child("test2").get_child("test")
-            .compare_normalized_ci(this.root.get_child("test1").get_child("test")),
+            this.root.get_child("b").get_child("test")
+            .compare_normalized_ci(this.root.get_child("a").get_child("test")),
             "Less than disjoint parents"
         );
 
         assert_int(
             1,
-            this.root.get_child("test1").get_child("test")
-            .compare_normalized_ci(this.root.get_child("test1")),
+            this.root.get_child("a").get_child("test")
+            .compare_normalized_ci(this.root.get_child("a")),
             "Greater than descendant"
         );
         assert_int(
             -1,
-            this.root.get_child("test1")
-            .compare_normalized_ci(this.root.get_child("test1").get_child("test")),
+            this.root.get_child("a")
+            .compare_normalized_ci(this.root.get_child("a").get_child("test")),
             "Less than descendant"
         );
+    }
+
+    public void distinct_roots_compare() throws GLib.Error {
+        assert_int(0, this.root.compare_to(new FolderRoot(false)), "Root equality");
+        assert_int(0,
+            this.root.get_child("a").compare_to(new FolderRoot(false).get_child("a")),
+            "Equal child comparison"
+        );
+
+        // a is less than b
+        assert_int(
+            -1,
+            this.root.get_child("a").compare_to(new FolderRoot(false).get_child("b")),
+            "Greater than child comparison"
+        );
+
+        // b is greater than than a
+        assert_int(
+            1,
+            this.root.get_child("b").compare_to(new FolderRoot(false).get_child("a")),
+            "Less than child comparison"
+        );
+
+        assert_int(
+            1,
+            this.root.get_child("a").get_child("test")
+            .compare_to(new FolderRoot(false).get_child("a")),
+            "Greater than descendant"
+        );
+        assert_int(
+            -1,
+            this.root.get_child("a")
+            .compare_to(new FolderRoot(false).get_child("a").get_child("test")),
+            "Less than descendant"
+        );
+
+        assert_int(
+            0,
+            this.root.get_child("a").get_child("b")
+            .compare_to(new FolderRoot(false).get_child("a").get_child("b")),
+            "N-path equality"
+        );
+
+        assert_int(
+            -1,
+            this.root.get_child("a").get_child("a")
+            .compare_to(new FolderRoot(false).get_child("b").get_child("b")),
+            "Greater than double disjoint"
+        );
+        assert_int(
+            1,
+            this.root.get_child("b").get_child("a")
+            .compare_to(new FolderRoot(false).get_child("a").get_child("a")),
+            "Less than double disjoint"
+        );
+
     }
 
 }
