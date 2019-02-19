@@ -198,8 +198,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         // Close folders and ensure they do in fact close
 
-        Gee.List<Geary.Folder> locals = sort_by_path(this.local_only.values);
-        Gee.List<Geary.Folder> remotes = sort_by_path(this.folder_map.values);
+        Gee.BidirSortedSet<Folder> locals = sort_by_path(this.local_only.values);
+        Gee.BidirSortedSet<Folder> remotes = sort_by_path(this.folder_map.values);
 
         this.local_only.clear();
         this.folder_map.clear();
@@ -583,9 +583,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * seen before and the {@link Geary.Account.folders_created} signal is
      * not fired.
      */
-    internal Gee.List<Geary.Folder> add_folders(Gee.Collection<ImapDB.Folder> db_folders,
+    internal Gee.Collection<Folder> add_folders(Gee.Collection<ImapDB.Folder> db_folders,
                                                 bool are_existing) {
-        Gee.List<Geary.Folder> built_folders = new Gee.ArrayList<Geary.Folder>();
+        Gee.TreeSet<MinimalFolder> built_folders = new Gee.TreeSet<MinimalFolder>(
+            Account.folder_path_comparator
+        );
         foreach(ImapDB.Folder db_folder in db_folders) {
             if (!this.folder_map.has_key(db_folder.get_path())) {
                 MinimalFolder folder = new_folder(db_folder);
@@ -595,8 +597,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             }
         }
 
-        if (built_folders.size > 0) {
-            built_folders = sort_by_path(built_folders);
+        if (!built_folders.is_empty) {
             notify_folders_available_unavailable(built_folders, null);
             if (!are_existing) {
                 notify_folders_created(built_folders);
@@ -673,8 +674,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      *
      * A collection of folders that was actually removed is returned.
      */
-    internal Gee.List<MinimalFolder> remove_folders(Gee.Collection<Geary.Folder> folders) {
-        Gee.List<MinimalFolder> removed = new Gee.ArrayList<MinimalFolder>();
+    internal Gee.BidirSortedSet<MinimalFolder>
+        remove_folders(Gee.Collection<Folder> folders) {
+        Gee.TreeSet<MinimalFolder> removed = new Gee.TreeSet<MinimalFolder>(
+            Account.folder_path_comparator
+        );
         foreach(Geary.Folder folder in folders) {
             MinimalFolder? impl = this.folder_map.get(folder.path);
             if (impl != null) {
@@ -684,7 +688,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
 
         if (!removed.is_empty) {
-            removed = (Gee.List<MinimalFolder>) sort_by_path(removed);
             notify_folders_available_unavailable(null, removed);
             notify_folders_deleted(removed);
         }
@@ -809,8 +812,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    protected override void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
-        Gee.List<Geary.Folder>? unavailable) {
+    protected override void
+        notify_folders_available_unavailable(Gee.BidirSortedSet<Folder>? available,
+                                             Gee.BidirSortedSet<Folder>? unavailable) {
         base.notify_folders_available_unavailable(available, unavailable);
         if (available != null) {
             foreach (Geary.Folder folder in available) {
@@ -1313,14 +1317,16 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
         if (remote_folders_suspect) {
             debug("Skipping removing folders due to prior errors");
         } else {
-            Gee.List<MinimalFolder> removed =
+            Gee.BidirSortedSet<MinimalFolder> removed =
                 this.generic_account.remove_folders(to_remove);
 
-            // Sort by path length descending, so we always remove children first.
-            removed.sort(
-                (a, b) => b.path.as_array().length - a.path.as_array().length
-            );
-            foreach (Geary.Folder folder in removed) {
+            Gee.BidirIterator<MinimalFolder> removed_iterator =
+                removed.bidir_iterator();
+            removed_iterator.last();
+            while (removed_iterator.valid) {
+                MinimalFolder folder = removed_iterator.get();
+                removed_iterator.previous();
+
                 try {
                     debug("Locally deleting removed folder %s", folder.to_string());
                     yield local.delete_folder_async(folder.path, cancellable);
