@@ -81,7 +81,7 @@ namespace Geary.Stream {
                     double pct = (converted_bytes_read > converted_bytes_written)
                     ? (double) converted_bytes_written / (double) converted_bytes_read
                     : (double) converted_bytes_read / (double) converted_bytes_written;
-                    debug("%s read/written: %s/%s (%ld%%)", name, converted_bytes_read.to_string(),
+                    debug("%s read/written: %s/%s (%lld%%)", name, converted_bytes_read.to_string(),
                           converted_bytes_written.to_string(), (long) (pct * 100.0));
                 }
 
