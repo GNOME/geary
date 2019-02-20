@@ -532,7 +532,7 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
     }
 
     private void on_activate() {
-        if (this.address != "" && this.address_validator.is_valid) {
+        if (this.address_validator.state == Components.Validator.Validity.INDETERMINATE || this.address_validator.is_valid) {
             activated();
         }
     }
@@ -605,15 +605,13 @@ internal class Accounts.UpdateMailboxCommand : Application.Command {
 
     public async override void execute(GLib.Cancellable? cancellable) {
         this.row.mailbox = this.new_mailbox;
-        this.row.account.remove_sender(this.old_mailbox);
-        this.row.account.insert_sender(this.mailbox_index, this.new_mailbox);
+        this.row.account.replace_sender(this.mailbox_index, this.new_mailbox);
         this.row.account.changed();
     }
 
     public async override void undo(GLib.Cancellable? cancellable) {
         this.row.mailbox = this.old_mailbox;
-        this.row.account.remove_sender(this.new_mailbox);
-        this.row.account.insert_sender(this.mailbox_index, this.old_mailbox);
+        this.row.account.replace_sender(this.mailbox_index, this.old_mailbox);
         this.row.account.changed();
     }
 
