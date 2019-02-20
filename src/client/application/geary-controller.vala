@@ -1442,9 +1442,8 @@ public class GearyController : Geary.BaseObject {
             Gee.BidirIterator<Geary.Folder> unavailable_iterator =
                 unavailable.bidir_iterator();
             unavailable_iterator.last();
-            while (unavailable_iterator.valid) {
+            while (unavailable_iterator.previous()) {
                 Geary.Folder folder = unavailable_iterator.get();
-                unavailable_iterator.previous();
 
                 main_window.folder_list.remove_folder(folder);
                 if (folder.account == current_account) {
