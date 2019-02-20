@@ -332,11 +332,14 @@ geary_engine_dependencies = [
   glib,
   gmime,
   javascriptcoregtk,
-  libunwind,
   libxml,
   posix,
   sqlite
 ]
+
+if libunwind_dep.found()
+  geary_engine_dependencies += libunwind
+endif
 
 build_dir = meson.current_build_dir()
 
@@ -348,6 +351,12 @@ geary_engine_vala_options += [
   '--internal-header=@0@/geary-engine-internal.h'.format(build_dir),
   '--internal-vapi=@0@/geary-engine-internal.vapi'.format(build_dir)
 ]
+
+if libunwind_dep.found()
+  geary_engine_vala_options += [
+    '-D', 'HAVE_LIBUNWIND',
+  ]
+endif
 
 geary_engine_lib = static_library('geary-engine',
   geary_engine_sources,
