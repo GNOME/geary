@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-20 03:32+0000\n"
-"PO-Revision-Date: 2019-02-20 22:32+0100\n"
+"POT-Creation-Date: 2019-02-20 21:34+0000\n"
+"PO-Revision-Date: 2019-02-20 22:37+0100\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
 "Language: hu\n"
@@ -943,15 +943,15 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1803
+#: src/client/application/geary-controller.vala:1802
 msgid "Undo move (Ctrl+Z)"
 msgstr "Áthelyezés visszavonása (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:1813
+#: src/client/application/geary-controller.vala:1812
 msgid "Are you sure you want to open these attachments?"
 msgstr "Biztosan meg szeretné nyitni ezeket a mellékleteket?"
 
-#: src/client/application/geary-controller.vala:1814
+#: src/client/application/geary-controller.vala:1813
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -959,14 +959,14 @@ msgstr ""
 "A mellékletek kárt okozhatnak a rendszerében, ha meg vannak nyitva. Csak "
 "megbízható forrásokból nyisson meg fájlokat."
 
-#: src/client/application/geary-controller.vala:1815
+#: src/client/application/geary-controller.vala:1814
 msgid "Don’t _ask me again"
 msgstr "Ne _kérdezze újra"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/geary-controller.vala:1944
+#: src/client/application/geary-controller.vala:1943
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Már létezik „%s” nevű fájl. Le akarja cserélni?"
@@ -974,7 +974,7 @@ msgstr "Már létezik „%s” nevű fájl. Le akarja cserélni?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/geary-controller.vala:1951
+#: src/client/application/geary-controller.vala:1950
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -982,70 +982,70 @@ msgstr ""
 "A fájl már létezik a(z) „%s” helyen. Lecserélésével a tartalma felül lesz "
 "írva."
 
-#: src/client/application/geary-controller.vala:1955
+#: src/client/application/geary-controller.vala:1954
 msgid "_Replace"
 msgstr "_Csere"
 
-#: src/client/application/geary-controller.vala:2231
+#: src/client/application/geary-controller.vala:2230
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Bezárja a piszkozatlevelet?"
 msgstr[1] "Bezárja az összes piszkozatlevelet?"
 
-#: src/client/application/geary-controller.vala:2357
+#: src/client/application/geary-controller.vala:2356
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Minden levelet kiürít a(z) %s mappából?"
 
-#: src/client/application/geary-controller.vala:2358
+#: src/client/application/geary-controller.vala:2357
 msgid "This removes the email from Geary and your email server."
 msgstr ""
 "Ez eltávolítja a levelet a Geary programból és a levelezőkiszolgálóról."
 
-#: src/client/application/geary-controller.vala:2359
+#: src/client/application/geary-controller.vala:2358
 msgid "This cannot be undone."
 msgstr "Ez nem vonható vissza."
 
-#: src/client/application/geary-controller.vala:2360
+#: src/client/application/geary-controller.vala:2359
 #, c-format
 msgid "Empty %s"
 msgstr "%s ürítése"
 
-#: src/client/application/geary-controller.vala:2377
+#: src/client/application/geary-controller.vala:2376
 #, c-format
 msgid "Error emptying %s"
 msgstr "Hiba a(z) %s ürítésekor"
 
-#: src/client/application/geary-controller.vala:2409
+#: src/client/application/geary-controller.vala:2408
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Véglegesen törölni szeretné ezt a levelet?"
 msgstr[1] "Véglegesen törölni szeretné ezeket a leveleket?"
 
-#: src/client/application/geary-controller.vala:2411
+#: src/client/application/geary-controller.vala:2410
 msgid "Delete"
 msgstr "Törlés"
 
-#: src/client/application/geary-controller.vala:2425
+#: src/client/application/geary-controller.vala:2424
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Kukába helyezés visszavonása (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2475
+#: src/client/application/geary-controller.vala:2474
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Archiválás visszavonása (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2520
+#: src/client/application/geary-controller.vala:2519
 msgid "Undo (Ctrl+Z)"
 msgstr "Visszavonás (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2597
+#: src/client/application/geary-controller.vala:2596
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "A levél sikeresen elküldve ide: %s."
 
-#: src/client/application/geary-controller.vala:2679
+#: src/client/application/geary-controller.vala:2678
 msgid "Failed to open default text editor."
 msgstr "Nem sikerült megnyitni az alapértelmezett szövegszerkesztőt."
 
@@ -1075,54 +1075,41 @@ msgstr "Egy kiszolgálónév szükséges"
 msgid "Could not look up server name"
 msgstr "Nem sikerült megkeresni a kiszolgáló nevét"
 
-#. Tooltips
-#: src/client/components/main-toolbar.vala:69
-msgid "Delete conversation (Shift+Delete)"
-msgstr "Beszélgetés törlése (Shift+Delete)"
-
-#: src/client/components/main-toolbar.vala:70
-msgid "Delete conversations (Shift+Delete)"
-msgstr "Beszélgetések törlése (Shift+Delete)"
-
-#: src/client/components/main-toolbar.vala:71
-msgid "Move conversation to Trash (Delete, Backspace)"
-msgstr "Beszélgetés áthelyezése a kukába (Delete, Backspace)"
-
-#: src/client/components/main-toolbar.vala:72
-msgid "Move conversations to Trash (Delete, Backspace)"
-msgstr "Beszélgetések áthelyezése a kukába (Delete, Backspace)"
-
-#: src/client/components/main-toolbar.vala:73
-msgid "Archive conversation (A)"
-msgstr "Beszélgetés archiválása (A)"
-
-#: src/client/components/main-toolbar.vala:74
-msgid "Archive conversations (A)"
-msgstr "Beszélgetések archiválása (A)"
-
-#: src/client/components/main-toolbar.vala:75
+#: src/client/components/main-toolbar.vala:151
 msgid "Mark conversation"
-msgstr "Beszélgetés megjelölése"
+msgid_plural "Mark conversations"
+msgstr[0] "Beszélgetés megjelölése"
+msgstr[1] "Beszélgetések megjelölése"
 
-#: src/client/components/main-toolbar.vala:76
-msgid "Mark conversations"
-msgstr "Beszélgetések megjelölése"
-
-#: src/client/components/main-toolbar.vala:77
+#: src/client/components/main-toolbar.vala:156
 msgid "Add label to conversation"
-msgstr "Címke hozzáadása a beszélgetéshez"
+msgid_plural "Add label to conversations"
+msgstr[0] "Címke hozzáadása a beszélgetéshez"
+msgstr[1] "Címke hozzáadása a beszélgetésekhez"
 
-#: src/client/components/main-toolbar.vala:78
-msgid "Add label to conversations"
-msgstr "Címke hozzáadása a beszélgetésekhez"
-
-#: src/client/components/main-toolbar.vala:79
+#: src/client/components/main-toolbar.vala:161
 msgid "Move conversation"
-msgstr "Beszélgetés áthelyezése"
+msgid_plural "Move conversations"
+msgstr[0] "Beszélgetés áthelyezése"
+msgstr[1] "Beszélgetések áthelyezése"
 
-#: src/client/components/main-toolbar.vala:80
-msgid "Move conversations"
-msgstr "Beszélgetések áthelyezése"
+#: src/client/components/main-toolbar.vala:166
+msgid "Archive conversation (A)"
+msgid_plural "Archive conversations (A)"
+msgstr[0] "Beszélgetés archiválása (A)"
+msgstr[1] "Beszélgetések archiválása (A)"
+
+#: src/client/components/main-toolbar.vala:175
+msgid "Move conversation to Trash (Delete, Backspace)"
+msgid_plural "Move conversations to Trash (Delete, Backspace)"
+msgstr[0] "Beszélgetés áthelyezése a kukába (Delete, Backspace)"
+msgstr[1] "Beszélgetések áthelyezése a kukába (Delete, Backspace)"
+
+#: src/client/components/main-toolbar.vala:183
+msgid "Delete conversation (Shift+Delete)"
+msgid_plural "Delete conversations (Shift+Delete)"
+msgstr[0] "Beszélgetés törlése (Shift+Delete)"
+msgstr[1] "Beszélgetések törlése (Shift+Delete)"
 
 #: src/client/components/main-window.vala:503
 #, c-format
