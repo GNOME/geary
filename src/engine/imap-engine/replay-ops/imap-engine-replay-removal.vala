@@ -107,8 +107,8 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
             this.owner.replay_queue.notify_remote_removed_ids(
                 Geary.iterate<ImapDB.EmailIdentifier>(owned_id).to_array_list());
         } else {
-            debug("%s do_replay_removed_message: this.position=%ld unknown in local store "
-                + "(this.remote_count=%d local_position=%ld local_count=%d)",
+            debug("%s do_replay_removed_message: this.position=%lld unknown in local store "
+                + "(this.remote_count=%d local_position=%lld local_count=%d)",
                 to_string(), this.position.value, this.remote_count, local_position, local_count);
         }
 
@@ -148,7 +148,7 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
         }
 
         debug("%s ReplayRemoval: completed, "
-            + "(this.remote_count=%d local_count=%d starting local_count=%d this.position=%ld local_position=%ld marked=%s)",
+            + "(this.remote_count=%d local_count=%d starting local_count=%d this.position=%lld local_position=%lld marked=%s)",
               this.owner.to_string(),
               this.remote_count, new_local_count, local_count,
               this.position.value, local_position, marked.to_string());
