@@ -219,7 +219,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
      * start of the vector if the OLDEST_TO_NEWEST flag is set, else
      * from `initial_uid` (inclusive) back at most by `count` number
      * of messages. If `initial_uid` is null, the start or end of the
-     * remote is used, respectively.
+     * vector is used, respectively.
      *
      * The returned UIDs are those added to the vector, which can then
      * be examined and added to the messages to be fulfilled if

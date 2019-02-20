@@ -234,7 +234,7 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
             null,
             1,
             Email.Field.PROPERTIES,
-            ImapDB.Folder.ListFlags.NONE | ImapDB.Folder.ListFlags.OLDEST_TO_NEWEST,
+            ImapDB.Folder.ListFlags.OLDEST_TO_NEWEST,
             cancellable
         );
 
@@ -335,9 +335,11 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
             (id != null) ? " earlier than oldest local" : ""
         );
         yield this.folder.list_email_by_id_async(
-            id, 1,
+            id,
+            1,
             Geary.Email.Field.NONE,
-            Geary.Folder.ListFlags.NONE, cancellable
+            Geary.Folder.ListFlags.NONE,
+            cancellable
         );
     }
 
