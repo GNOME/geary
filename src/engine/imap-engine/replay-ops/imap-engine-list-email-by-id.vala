@@ -17,52 +17,53 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         this.initial_id = initial_id;
         this.count = count;
     }
-    
+
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (flags.is_force_update())
             return ReplayOperation.Status.CONTINUE;
-        
-        // get everything from local store, even partial matches, that fit range
-        ImapDB.Folder.ListFlags list_flags = ImapDB.Folder.ListFlags.from_folder_flags(flags);
-        list_flags |= ImapDB.Folder.ListFlags.PARTIAL_OK;
-        Gee.List<Geary.Email>? list = yield owner.local_folder.list_email_by_id_async(initial_id,
-            count, required_fields, list_flags, cancellable);
-        
-        // walk list, breaking out unfulfilled items from fulfilled items
+
+        // Fetch the initial ID to a) make sure it exists, and b) so
+        // its UID is available when expanding the vector
+        if (this.initial_id != null) {
+            Email email = yield owner.local_folder.fetch_email_async(
+                this.initial_id,
+                // Only need the id here
+                Email.Field.NONE,
+                ImapDB.Folder.ListFlags.NONE,
+                cancellable
+            );
+            this.initial_uid = ((ImapDB.EmailIdentifier) email.id).uid;
+        }
+
+        // List all locally known, desired email that fits the list
+        // range. Include partial matches so there's potentially less
+        // to fetch from the remote if not all are fulfilled.
+        ImapDB.Folder.ListFlags local_flags = (
+            ImapDB.Folder.ListFlags.from_folder_flags(flags) |
+            ImapDB.Folder.ListFlags.PARTIAL_OK
+        );
+        Gee.List<Geary.Email>? list =
+            yield owner.local_folder.list_email_by_id_async(
+                initial_id,
+                count,
+                required_fields,
+                local_flags,
+                cancellable
+            );
+
+        // Break out unfulfilled email from fulfilled ones
         Gee.ArrayList<Geary.Email> fulfilled = new Gee.ArrayList<Geary.Email>();
         if (list != null) {
             foreach (Geary.Email email in list) {
-                Imap.UID uid = ((ImapDB.EmailIdentifier) email.id).uid;
-                
-                // if INCLUDING_ID, then find the initial UID for the initial_id (if specified)
-                if (flags.is_including_id()) {
-                    if (initial_id != null && email.id.equal_to(initial_id))
-                        initial_uid = uid;
-                } else {
-                    // !INCLUDING_ID, so find the earliest UID (for oldest-to-newest) or latest
-                    // UID (newest-to-oldest)
-                    if (flags.is_oldest_to_newest()) {
-                        if (initial_uid == null || uid.compare_to(initial_uid) < 0)
-                            initial_uid = uid;
-                    } else {
-                        // newest-to-oldest
-                        if (initial_uid == null || uid.compare_to(initial_uid) > 0)
-                            initial_uid = uid;
-                    }
-                }
-                
-                if (email.fields.fulfills(required_fields))
+                if (email.fields.fulfills(required_fields)) {
                     fulfilled.add(email);
-                else
-                    add_unfulfilled_fields(uid, required_fields.clear(email.fields));
+                } else {
+                    Imap.UID uid = ((ImapDB.EmailIdentifier) email.id).uid;
+                    add_unfulfilled_fields(
+                        uid, required_fields.clear(email.fields)
+                    );
+                }
             }
-        }
-
-        if (this.flags.is_including_id() && this.initial_uid == null) {
-            throw new EngineError.NOT_FOUND(
-                "Initial id not found in local set: %s",
-                this.initial_id.to_string()
-            );
         }
 
         // report fulfilled items
@@ -103,26 +104,21 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         bool expansion_required = false;
         if (!(yield is_fully_expanded_async(remote))) {
             if (flags.is_oldest_to_newest()) {
-                if (initial_id != null) {
-                    // expand vector if not initial_id not discovered
-                    expansion_required = (initial_uid == null);
-                } else {
-                    // initial_id == null, expansion required if not fully already
-                    expansion_required = true;
-                }
+                // Expansion is required since there are
+                // unfulfilled email within the vector.
+                expansion_required = true;
             } else {
                 // newest-to-oldest
                 if (count == int.MAX) {
-                    // if infinite count, expansion required if not already
+                    // Infinite count, expand to fill in all
+                    // unfulfilled or not-yet-found email.
                     expansion_required = true;
-                } else if (initial_id != null) {
-                    // finite count, expansion required if initial not found *or* not enough
-                    // items were pulled in
-                    expansion_required = (initial_uid == null) || (fulfilled_count + get_unfulfilled_count() < count);
                 } else {
-                    // initial_id == null
-                    // finite count, expansion required if not enough found
-                    expansion_required = (fulfilled_count + get_unfulfilled_count() < count);
+                    // Finite count, expansion required only if not
+                    // enough items were pulled in, in total.
+                    expansion_required = (
+                        fulfilled_count + get_unfulfilled_count() < count
+                    );
                 }
             }
         }
