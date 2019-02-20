@@ -119,8 +119,41 @@ public class Geary.Endpoint : BaseObject {
         this.tls_method = method;
     }
 
-    public async SocketConnection connect_async(Cancellable? cancellable = null) throws Error {
-        return yield get_socket_client().connect_async(this.remote, cancellable);
+    public async GLib.SocketConnection connect_async(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        GLib.SocketClient client = get_socket_client();
+        GLib.IOError? connect_error = null;
+        try {
+            return yield client.connect_async(this.remote, cancellable);
+        } catch (GLib.IOError.NETWORK_UNREACHABLE err) {
+            connect_error = err;
+        }
+
+        // Ubuntu 18.04 for some reason started throwing
+        // NETWORK_UNREACHABLE when an AAAA record was resolved for
+        // host name but no valid IPv6 network was available. Work
+        // around by re-attempting manually resolving and selecting an
+        // address to use. See issue #217.
+        GLib.SocketAddressEnumerator addrs = this.remote.enumerate();
+        GLib.SocketAddress? addr = yield addrs.next_async(cancellable);
+        while (addr != null) {
+            GLib.InetSocketAddress? inet_addr = addr as GLib.InetSocketAddress;
+            if (inet_addr != null) {
+                try {
+                    return yield client.connect_async(
+                        new GLib.InetSocketAddress(
+                            inet_addr.address, (uint16) inet_addr.port
+                        ),
+                        cancellable
+                    );
+                } catch (GLib.IOError.NETWORK_UNREACHABLE err) {
+                    // Keep going
+                }
+            }
+            addr = yield addrs.next_async(cancellable);
+        }
+
+        throw connect_error;
     }
 
     public async TlsClientConnection starttls_handshake_async(IOStream base_stream,
@@ -157,7 +190,9 @@ public class Geary.Endpoint : BaseObject {
     }
 
     private void prepare_tls_cx(GLib.TlsClientConnection tls_cx) {
-        tls_cx.server_identity = this.remote;
+        // Setting this on Ubuntu 18.04 breaks some TLS
+        // connections. See issue #217.
+        // tls_cx.server_identity = this.remote;
         tls_cx.validation_flags = this.tls_validation_flags;
         if (Endpoint.default_tls_database != null) {
             tls_cx.set_database(Endpoint.default_tls_database);
