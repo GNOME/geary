@@ -127,18 +127,18 @@ public class Geary.AccountInformation : BaseObject {
         get; set; default = DEFAULT_PREFETCH_PERIOD_DAYS;
     }
 
-    /**
-     * Specifies if the user has requested that sent mail be saved.
-     *
-     * Note that Geary will only actively push sent mail when this AND
-     * {@link allow_save_sent} are both true.
-     */
+    /** Specifies if sent email should be saved to the Sent folder. */
     public bool save_sent {
-        // If we aren't allowed to save sent mail due to account type, we want
-        // to return true here on the assumption that the account will save
-        // sent mail for us, and thus the user can't disable sent mail from
-        // being saved.
-        get { return (allow_save_sent() ? this._save_sent : true); }
+        get {
+            bool save = _save_sent;
+            switch (this.service_provider) {
+            case GMAIL:
+            case OUTLOOK:
+                save = false;
+                break;
+            }
+            return save;
+        }
         set { this._save_sent = value; }
     }
     private bool _save_sent = true;
@@ -152,16 +152,10 @@ public class Geary.AccountInformation : BaseObject {
     public CredentialsMediator mediator { get; private set; }
 
     /* Incoming email service configuration. */
-    public ServiceInformation incoming {
-        get; set;
-        default = new ServiceInformation(Protocol.IMAP);
-    }
+    public ServiceInformation incoming { get; set; }
 
     /* Outgoing email service configuration. */
-    public ServiceInformation outgoing {
-        get; set;
-        default = new ServiceInformation(Protocol.SMTP);
-    }
+    public ServiceInformation outgoing { get; set; }
 
     /** A lock that can be used to ensure saving is serialised. */
     public Nonblocking.Mutex write_lock {
@@ -253,6 +247,11 @@ public class Geary.AccountInformation : BaseObject {
         this.id = id;
         this.mediator = mediator;
         this.service_provider = provider;
+        this.incoming = new ServiceInformation(Protocol.IMAP, provider);
+        this.outgoing = new ServiceInformation(Protocol.SMTP, provider);
+
+        provider.set_account_defaults(this);
+
         append_sender(primary_mailbox);
     }
 
@@ -354,18 +353,6 @@ public class Geary.AccountInformation : BaseObject {
             removed = this.mailboxes.remove(mailbox);
         }
         return removed;
-    }
-
-    /**
-     * Determines if {@link save_sent} property can be set.
-     *
-     * If not, that property will always be true and setting it will
-     * be ignored.
-     */
-    public bool allow_save_sent() {
-        // We should never push mail to Gmail, since its servers
-        // automatically push sent mail to the sent mail folder.
-        return this.service_provider != ServiceProvider.GMAIL;
     }
 
     /**

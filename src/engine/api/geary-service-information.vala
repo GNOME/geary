@@ -116,7 +116,7 @@ public class Geary.ServiceInformation : GLib.Object {
     /**
      * Constructs a new configuration for a specific service.
      */
-    public ServiceInformation(Protocol proto) {
+    public ServiceInformation(Protocol proto, ServiceProvider provider) {
         this.protocol = proto;
         // Prefer TLS by RFC 8314, but use START_TLS for SMTP for the
         // moment while its still more widely deployed.
@@ -126,13 +126,16 @@ public class Geary.ServiceInformation : GLib.Object {
         this.credentials_requirement = (proto == Protocol.SMTP)
             ? Credentials.Requirement.USE_INCOMING
             : Credentials.Requirement.CUSTOM;
+
+        provider.set_service_defaults(this);
     }
 
     /**
      * Constructs a copy of the given service configuration.
      */
     public ServiceInformation.copy(ServiceInformation other) {
-        this(other.protocol);
+        // Use OTHER here to get blank defaults
+        this(other.protocol, ServiceInformation.OTHER);
         this.host = other.host;
         this.port = other.port;
         this.transport_security = other.transport_security;
