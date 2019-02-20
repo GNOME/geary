@@ -31,7 +31,7 @@ class Geary.AccountInformationTest : TestCase {
                 new RFC822.MailboxAddress(null, "test1@example.com")
             ).save_sent
         );
-        assert_true(
+        assert_false(
             new AccountInformation(
                 "test",
                 ServiceProvider.OUTLOOK,
