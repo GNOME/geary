@@ -309,8 +309,9 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     }
 
     private Geary.ServiceInformation new_imap_service() {
-        Geary.ServiceInformation service =
-            new Geary.ServiceInformation(Geary.Protocol.IMAP);
+        Geary.ServiceInformation service = new Geary.ServiceInformation(
+            Geary.Protocol.IMAP, this.provider
+        );
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
             service.credentials = new Geary.Credentials(
@@ -331,7 +332,6 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                 service.port = service.get_default_port();
             }
         } else {
-            this.provider.setup_service(service);
             service.credentials = new Geary.Credentials(
                 Geary.Credentials.Method.PASSWORD,
                 this.email.value.get_text().strip(),
@@ -343,8 +343,9 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     }
 
     private Geary.ServiceInformation new_smtp_service() {
-        Geary.ServiceInformation service =
-            new Geary.ServiceInformation(Geary.Protocol.SMTP);
+        Geary.ServiceInformation service = new Geary.ServiceInformation(
+            Geary.Protocol.SMTP, this.provider
+        );
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
             service.credentials_requirement = this.smtp_auth.value.source;
@@ -369,8 +370,6 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             if (service.port == 0) {
                 service.port = service.get_default_port();
             }
-        } else {
-            this.provider.setup_service(service);
         }
 
         return service;

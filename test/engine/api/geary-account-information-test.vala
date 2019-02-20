@@ -10,7 +10,43 @@ class Geary.AccountInformationTest : TestCase {
 
     public AccountInformationTest() {
         base("Geary.AccountInformationTest");
+        add_test("test_save_sent_defaults", test_save_sent_defaults);
         add_test("test_sender_mailboxes", test_sender_mailboxes);
+    }
+
+    public void test_save_sent_defaults() throws GLib.Error {
+        assert_true(
+            new AccountInformation(
+                "test",
+                ServiceProvider.OTHER,
+                new MockCredentialsMediator(),
+                new RFC822.MailboxAddress(null, "test1@example.com")
+            ).save_sent
+        );
+        assert_false(
+            new AccountInformation(
+                "test",
+                ServiceProvider.GMAIL,
+                new MockCredentialsMediator(),
+                new RFC822.MailboxAddress(null, "test1@example.com")
+            ).save_sent
+        );
+        assert_true(
+            new AccountInformation(
+                "test",
+                ServiceProvider.OUTLOOK,
+                new MockCredentialsMediator(),
+                new RFC822.MailboxAddress(null, "test1@example.com")
+            ).save_sent
+        );
+        assert_true(
+            new AccountInformation(
+                "test",
+                ServiceProvider.YAHOO,
+                new MockCredentialsMediator(),
+                new RFC822.MailboxAddress(null, "test1@example.com")
+            ).save_sent
+        );
     }
 
     public void test_sender_mailboxes() throws GLib.Error {

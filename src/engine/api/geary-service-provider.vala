@@ -29,7 +29,22 @@ public enum Geary.ServiceProvider {
         );
     }
 
-    public void setup_service(ServiceInformation service) {
+
+    internal void set_account_defaults(AccountInformation service) {
+        switch (this) {
+        case GMAIL:
+            ImapEngine.GmailAccount.setup_account(service);
+            break;
+        case YAHOO:
+            ImapEngine.YahooAccount.setup_account(service);
+            break;
+        case OUTLOOK:
+            ImapEngine.OutlookAccount.setup_account(service);
+            break;
+        }
+    }
+
+    internal void set_service_defaults(ServiceInformation service) {
         switch (this) {
         case GMAIL:
             ImapEngine.GmailAccount.setup_service(service);

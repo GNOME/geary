@@ -152,16 +152,10 @@ public class Geary.AccountInformation : BaseObject {
     public CredentialsMediator mediator { get; private set; }
 
     /* Incoming email service configuration. */
-    public ServiceInformation incoming {
-        get; set;
-        default = new ServiceInformation(Protocol.IMAP);
-    }
+    public ServiceInformation incoming { get; set; }
 
     /* Outgoing email service configuration. */
-    public ServiceInformation outgoing {
-        get; set;
-        default = new ServiceInformation(Protocol.SMTP);
-    }
+    public ServiceInformation outgoing { get; set; }
 
     /** A lock that can be used to ensure saving is serialised. */
     public Nonblocking.Mutex write_lock {
@@ -253,6 +247,11 @@ public class Geary.AccountInformation : BaseObject {
         this.id = id;
         this.mediator = mediator;
         this.service_provider = provider;
+        this.incoming = new ServiceInformation(Protocol.IMAP, provider);
+        this.outgoing = new ServiceInformation(Protocol.SMTP, provider);
+
+        provider.set_account_defaults(this);
+
         append_sender(primary_mailbox);
     }
 

@@ -9,6 +9,10 @@
 private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
 
 
+    public static void setup_account(AccountInformation account) {
+        // noop
+    }
+
     public static void setup_service(ServiceInformation service) {
         switch (service.protocol) {
         case Protocol.IMAP:
