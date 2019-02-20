@@ -356,6 +356,13 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     /**
+     * Replace a mailbox at the specified index.
+     */
+    public void replace_sender(int index, Geary.RFC822.MailboxAddress mailbox) {
+        this.mailboxes.set(index, mailbox);
+    }
+
+     /**
      * Returns the configured path for a special folder type.
      *
      * This is used when Geary has found or created a special folder
