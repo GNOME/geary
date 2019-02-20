@@ -9,6 +9,10 @@
 private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount {
 
 
+    public static void setup_account(AccountInformation account) {
+        account.save_sent = false;
+    }
+
     public static void setup_service(ServiceInformation service) {
         switch (service.protocol) {
         case Protocol.IMAP:
