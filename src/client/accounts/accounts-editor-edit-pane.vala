@@ -532,7 +532,7 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
     }
 
     private void on_activate() {
-        if (this.address != "" && this.address_validator.is_valid) {
+        if (this.address_validator.state == Components.Validator.Validity.INDETERMINATE || this.address_validator.is_valid) {
             activated();
         }
     }
