@@ -1323,9 +1323,8 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             Gee.BidirIterator<MinimalFolder> removed_iterator =
                 removed.bidir_iterator();
             removed_iterator.last();
-            while (removed_iterator.valid) {
+            while (removed_iterator.previous()) {
                 MinimalFolder folder = removed_iterator.get();
-                removed_iterator.previous();
 
                 try {
                     debug("Locally deleting removed folder %s", folder.to_string());
