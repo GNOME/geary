@@ -77,6 +77,7 @@ internal class Accounts.EditorServersPane :
     private Gtk.Spinner apply_spinner;
 
     private SaveDraftsRow save_drafts;
+    private SaveSentRow save_sent;
 
     private ServiceLoginRow incoming_login;
     private ServicePasswordRow incoming_password;
@@ -117,6 +118,16 @@ internal class Accounts.EditorServersPane :
             this.account, this.commands, this.op_cancellable
         );
         add_row(this.details_list, this.save_drafts);
+
+        this.save_sent = new SaveSentRow(
+            this.account, this.commands, this.op_cancellable
+        );
+        switch (account.service_provider) {
+        case YAHOO:
+        case OTHER:
+            add_row(this.details_list, this.save_sent);
+            break;
+        }
 
         // Receiving
 
@@ -263,6 +274,10 @@ internal class Accounts.EditorServersPane :
                 has_changed = true;
             }
 
+            if (this.save_sent.value_changed) {
+                has_changed = true;
+            }
+
             if (has_changed) {
                 this.account.changed();
             }
@@ -274,9 +289,10 @@ internal class Accounts.EditorServersPane :
             // change something to re-enable it
             this.apply_button.set_sensitive(true);
 
-            // Undo save_drafts manually since it would have been
-            // updated already by the command
+            // Undo these manually since it would have been updated
+            // already by the command
             this.account.save_drafts = this.save_drafts.initial_value;
+            this.account.save_sent = this.save_sent.initial_value;
         }
     }
 
@@ -613,6 +629,61 @@ private class Accounts.SaveDraftsRow :
             this.commands.execute.begin(
                 new Application.PropertyCommand<bool>(
                     this.account, "save_drafts", this.value.state
+                ),
+                this.cancellable
+            );
+        }
+    }
+
+    private void on_account_changed() {
+        update();
+    }
+
+}
+
+
+private class Accounts.SaveSentRow :
+    AccountRow<EditorServersPane,Gtk.Switch> {
+
+
+    public bool value_changed {
+        get { return this.initial_value != this.value.state; }
+    }
+    public bool initial_value { get; private set; }
+
+    private Application.CommandStack commands;
+    private GLib.Cancellable? cancellable;
+
+
+    public SaveSentRow(Geary.AccountInformation account,
+                       Application.CommandStack commands,
+                       GLib.Cancellable? cancellable) {
+        Gtk.Switch value = new Gtk.Switch();
+        base(
+            account,
+            // Translators: This label describes an account
+            // preference.
+            _("Save sent email on server"),
+            value
+        );
+        update();
+        this.commands = commands;
+        this.cancellable = cancellable;
+        this.activatable = false;
+        this.initial_value = this.account.save_sent;
+        this.account.notify["save-sent"].connect(on_account_changed);
+        this.value.notify["active"].connect(on_activate);
+    }
+
+    public override void update() {
+        this.value.state = this.account.save_sent;
+    }
+
+    private void on_activate() {
+        if (this.value.state != this.account.save_sent) {
+            this.commands.execute.begin(
+                new Application.PropertyCommand<bool>(
+                    this.account, "save_sent", this.value.state
                 ),
                 this.cancellable
             );
