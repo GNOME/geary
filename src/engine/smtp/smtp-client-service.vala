@@ -238,7 +238,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         throws Error {
         Credentials? login = this.account.get_outgoing_credentials();
         if (login != null && !login.is_complete()) {
-            notify_authentication_failed();
+            throw new SmtpError.AUTHENTICATION_FAILED("Token not loaded");
         }
 
         Smtp.ClientSession smtp = new Geary.Smtp.ClientSession(this.remote);
