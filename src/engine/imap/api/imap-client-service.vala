@@ -385,6 +385,11 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         debug("[%s] Opening new session", this.account.id);
+        Credentials? login = this.configuration.credentials;
+        if (login != null && !login.is_complete()) {
+            notify_authentication_failed();
+        }
+
         ClientSession new_session = new ClientSession(remote);
         yield new_session.connect_async(cancellable);
 

@@ -236,15 +236,17 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
     private async void send_email(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
-        Smtp.ClientSession smtp = new Geary.Smtp.ClientSession(this.remote);
+        Credentials? login = this.account.get_outgoing_credentials();
+        if (login != null && !login.is_complete()) {
+            notify_authentication_failed();
+        }
 
+        Smtp.ClientSession smtp = new Geary.Smtp.ClientSession(this.remote);
         sending_monitor.notify_start();
 
         Error? smtp_err = null;
         try {
-            yield smtp.login_async(
-                this.account.get_outgoing_credentials(), cancellable
-            );
+            yield smtp.login_async(login, cancellable);
         } catch (Error login_err) {
             debug("SMTP login error: %s", login_err.message);
             smtp_err = login_err;
