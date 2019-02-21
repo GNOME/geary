@@ -828,6 +828,31 @@ public class Accounts.Manager : GLib.Object {
         }
     }
 
+    private async void update_goa_account(Geary.AccountInformation account,
+                                          GLib.Cancellable? cancellable) {
+        GoaMediator mediator = (GoaMediator) account.mediator;
+        try {
+            yield mediator.update(account, cancellable);
+
+            // Update will clear the creds, so make sure they get
+            // refreshed
+            yield account.load_outgoing_credentials(cancellable);
+            yield account.load_incoming_credentials(cancellable);
+        } catch (GLib.Error err) {
+            report_problem(
+                new Geary.AccountProblemReport(
+                    Geary.ProblemType.GENERIC_ERROR,
+                    account,
+                    err
+                ));
+        }
+
+        // XXX need to notify the engine that creds may have changed
+
+        set_available(account, mediator.is_available);
+    }
+
+
     private async void open_goa_settings(string action,
                                          string? param,
                                          GLib.Cancellable? cancellable)
@@ -894,25 +919,7 @@ public class Accounts.Manager : GLib.Object {
             // We already know about this account, so check that it is
             // still valid. If not, the account should be disabled,
             // not deleted, since it may be re-enabled at some point.
-            GoaMediator mediator = (GoaMediator) state.account.mediator;
-            mediator.update.begin(
-                state.account,
-                null, // XXX Get a cancellable to this somehow
-                (obj, res) => {
-                    try {
-                        mediator.update.end(res);
-                    } catch (GLib.Error err) {
-                        report_problem(
-                            new Geary.AccountProblemReport(
-                                Geary.ProblemType.GENERIC_ERROR,
-                                state.account,
-                                err
-                            ));
-                    }
-
-                    set_available(state.account, mediator.is_available);
-                }
-            );
+            this.update_goa_account.begin(state.account, null);
         } else {
             // We haven't created an account for this GOA account
             // before, so try doing so now.
