@@ -1217,10 +1217,13 @@ public class GearyController : Geary.BaseObject {
                 enable_message_buttons(false);
             } else {
                 // When not doing autoselect, we never get
-                // conversations_selected firing from the convo list, so
-                // we need to stop the loading spinner here
+                // conversations_selected firing from the convo list,
+                // so we need to stop the loading spinner here. Only
+                // do so if there isn't already a selection or a
+                // composer to avoid interrupting those.
                 if (!this.application.config.autoselect &&
-                    list.get_selection().count_selected_rows() == 0) {
+                    list.get_selection().count_selected_rows() == 0 &&
+                    !viewer.is_composer_visible) {
                     viewer.show_none_selected();
                     enable_message_buttons(false);
                 }
