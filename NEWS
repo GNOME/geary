@@ -1,3 +1,28 @@
+Version 0.13.1
+~~~~~~~~~~~~~~
+Released: 2019-02-21
+
+Enhancements included in this release:
+ * Ubuntu 18.04 connection problems resolved
+ * Numerous bug fixes and minor user interface improvements
+ * Numerous user interface translation updates
+
+See https://gitlab.gnome.org/GNOME/geary/milestones/6 for the full
+list.
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Joel Duncan
+ * Kristian Klausen
+ * Thomas Moschny
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Balázs Úr (hu)
+ * Daniel Mustieles (es)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+
 Version 0.13
 ~~~~~~~~~~~~
 Released: 2019-02-17

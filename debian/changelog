@@ -1,3 +1,11 @@
+geary (0.13.1-1~bionic1) bionic; urgency=medium
+
+  * Ubuntu 18.04 connection problems resolved
+  * Numerous bug fixes and minor user interface improvements
+  * Numerous user interface translation updates
+
+ -- Michael Gratton <mike@vee.net>  Thu, 21 Feb 2019 12:37:17 +1100
+
 geary (0.13.0-1~bionic1) bionic; urgency=medium
 
   * Unread email count is now updated correctly
