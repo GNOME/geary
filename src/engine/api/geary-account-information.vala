@@ -470,21 +470,12 @@ public class Geary.AccountInformation : BaseObject {
      * been previously loaded, or false the credentials could not be
      * loaded and the service's credentials are invalid.
      */
-    public async bool load_outgoing_credentials(GLib.Cancellable? cancellable)
+    public async void load_outgoing_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Credentials? creds = get_outgoing_credentials();
-        bool loaded = (creds == null || creds.is_complete());
-        if (!loaded && creds != null) {
-            ServiceInformation service = this.outgoing;
-            if (this.outgoing.credentials_requirement ==
-                Credentials.Requirement.USE_INCOMING) {
-                service = this.incoming;
-            }
-            loaded = yield this.mediator.load_token(
-                this, service, cancellable
-            );
+        Credentials? creds = this.outgoing.credentials;
+        if (creds != null) {
+            yield this.mediator.load_token(this, this.outgoing, cancellable);
         }
-        return loaded;
     }
 
     /**
@@ -493,21 +484,13 @@ public class Geary.AccountInformation : BaseObject {
      * Credentials are loaded from the mediator, which may cause the
      * user to be prompted for the secret, thus it may yield for some
      * time.
-     *
-     * Returns true if the credentials were successfully loaded or had
-     * been previously loaded, or false the credentials could not be
-     * loaded and the service's credentials are invalid.
      */
-    public async bool load_incoming_credentials(GLib.Cancellable? cancellable)
+    public async void load_incoming_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
         Credentials? creds = this.incoming.credentials;
-        bool loaded = creds.is_complete();
-        if (!loaded) {
-            loaded = yield this.mediator.load_token(
-                this, this.incoming, cancellable
-            );
+        if (creds != null) {
+            yield this.mediator.load_token(this, this.incoming, cancellable);
         }
-        return loaded;
     }
 
     public bool equal_to(AccountInformation other) {
