@@ -64,17 +64,13 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                 service.credentials =
                     service.credentials.copy_with_token(password);
                 loaded = true;
-            } else {
-                debug(
-                    "Unable to fetch libsecret password for %s: %s %s",
-                    account.id,
-                    to_proto_value(service.protocol),
-                    service.credentials.user
-                );
             }
-        } else {
+        }
+
+        if (!loaded) {
             loaded = yield prompt_token(account, service, cancellable);
         }
+
         return loaded;
     }
 
