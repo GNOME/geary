@@ -107,6 +107,7 @@ public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
         this.token = token;
     }
 
+    /** Determines if a token has been provided. */
     public bool is_complete() {
         return this.token != null;
     }
