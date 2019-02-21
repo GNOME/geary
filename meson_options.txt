@@ -4,4 +4,4 @@ option('poodle', type: 'boolean', value: true, description: 'Whether to apply th
 option('ref_tracking', type: 'boolean', value: false, description: 'Whether to use explicit reference tracking.')
 option('iso_639_xml', type: 'string', value: '', description: 'Full path to the ISO 639 XML file.')
 option('iso_3166_xml', type: 'string', value: '', description: 'Full path to the ISO 3166 XML file.')
-option('libunwind', type: 'boolean', value: true, description: 'Whether to depend on libunwind.')
+option('libunwind_optional', type: 'boolean', value: false, description: 'Determines if libunwind is required.')
