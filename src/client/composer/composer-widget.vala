@@ -2098,18 +2098,20 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         try {
             accounts = Geary.Engine.instance.get_accounts();
         } catch (Error e) {
-            debug("Could not fetch account info: %s", e.message);
-
+            warning("Could not fetch account info: %s", e.message);
             return false;
         }
 
-        // Don't show in inline, compact, or paned modes, unless the current
-        // account has multiple emails.
-        if ((this.state == ComposerState.INLINE || this.state == ComposerState.INLINE_COMPACT ||
-             this.state == ComposerState.PANED) && !this.account.information.has_sender_aliases)
+        // Don't show in inline unless the current account has
+        // multiple emails, since these will be replies to a
+        // conversation
+        if ((this.state == ComposerState.INLINE ||
+             this.state == ComposerState.INLINE_COMPACT) &&
+            !this.account.information.has_sender_aliases)
             return false;
 
-        // If there's only one account, show nothing. (From fields are hidden above.)
+        // If there's only one account and it not have any aliases,
+        // show nothing.
         if (accounts.size < 1 || (accounts.size == 1 && !Geary.traverse<Geary.AccountInformation>(
             accounts.values).first().has_sender_aliases))
             return false;
