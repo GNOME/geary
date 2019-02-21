@@ -907,14 +907,15 @@ public class Accounts.Manager : GLib.Object {
     }
 
     private void on_goa_account_added(Goa.Object account) {
+        debug("GOA account added: %s", account.get_account().id);
         // XXX get a cancellable for this.
         this.create_goa_account.begin(account, null);
     }
 
     private void on_goa_account_changed(Goa.Object account) {
-        string id = to_geary_id(account);
-        AccountState? state = this.accounts.get(id);
-
+        debug("GOA account changed: %s", account.get_account().id);
+        AccountState? state = this.accounts.get(to_geary_id(account));
+        // XXX get a cancellable to these
         if (state != null) {
             // We already know about this account, so check that it is
             // still valid. If not, the account should be disabled,
@@ -930,11 +931,11 @@ public class Accounts.Manager : GLib.Object {
     }
 
     private void on_goa_account_removed(Goa.Object account) {
-        AccountState? state = this.accounts.get(
-            to_geary_id(account)
-        );
-
+        debug("GOA account removed: %s", account.get_account().id);
+        AccountState? state = this.accounts.get(to_geary_id(account));
         if (state != null) {
+            // Just disabled it for now in case the GOA daemon as just
+            // shutting down.
             set_available(state.account, false);
         }
     }
