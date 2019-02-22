@@ -610,7 +610,7 @@ public class Accounts.Manager : GLib.Object {
                 throw new ConfigError.MANAGEMENT(err.message);
             }
 
-            if (goa_handle.get_mail() == null) {
+            if (!is_valid_goa_account(goa_handle)) {
                 // If we get here, the GOA account's mail service used
                 // to exist (we just loaded Geary's config for it) but
                 // no longer does. This indicates the mail service has
@@ -783,12 +783,21 @@ public class Accounts.Manager : GLib.Object {
             : id;
     }
 
-    private async void create_goa_account(Goa.Object account,
-                                          GLib.Cancellable? cancellable) {
+    private bool is_valid_goa_account(Goa.Object handle) {
         // Goa.Account.mail_disabled doesn't seem to reflect if we get
         // get a valid mail object here, so just rely on that instead.
-        Goa.Mail? mail = account.get_mail();
-        if (mail != null) {
+        Goa.Mail? mail = handle.get_mail();
+        return (
+            mail != null &&
+            !Geary.String.is_empty(mail.imap_host) &&
+            !Geary.String.is_empty(mail.smtp_host)
+        );
+    }
+
+    private async void create_goa_account(Goa.Object account,
+                                          GLib.Cancellable? cancellable) {
+        if (is_valid_goa_account(account)) {
+            Goa.Mail? mail = account.get_mail();
             string? name = mail.name;
             if (Geary.String.is_empty_or_whitespace(name)) {
                 name = get_account_name();
