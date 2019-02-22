@@ -12,6 +12,7 @@ class Geary.AccountInformationTest : TestCase {
         base("Geary.AccountInformationTest");
         add_test("test_save_sent_defaults", test_save_sent_defaults);
         add_test("test_sender_mailboxes", test_sender_mailboxes);
+        add_test("test_service_label", test_service_label);
     }
 
     public void test_save_sent_defaults() throws GLib.Error {
@@ -82,6 +83,53 @@ class Geary.AccountInformationTest : TestCase {
         assert_false(
             test.has_sender_mailbox(new RFC822.MailboxAddress(null, "unknowne@example.com")),
             "Unknown address found"
+        );
+    }
+
+    public void test_service_label() throws GLib.Error {
+        AccountInformation test = new_information();
+        assert_string("", test.service_label);
+
+        test = new_information();
+        test.incoming.host = "example.com";
+        assert_string(
+            "example.com", test.service_label, "Email domain equals host name"
+        );
+
+        test = new_information();
+        test.incoming.host = "test.example.com";
+        assert_string(
+            "example.com", test.service_label, "Email domain host name suffix"
+        );
+
+        test = new_information();
+        test.incoming.host = "other.com";
+        test.outgoing.host = "other.com";
+        assert_string("other.com", test.service_label);
+
+        test = new_information();
+        test.incoming.host = "mail.other.com";
+        test.outgoing.host = "mail.other.com";
+        assert_string("other.com", test.service_label);
+
+        test = new_information();
+        test.incoming.host = "imap.other.com";
+        test.outgoing.host = "smtp.other.com";
+        assert_string("other.com", test.service_label);
+
+        test = new_information();
+        test.incoming.host = "not-mail.other.com";
+        test.outgoing.host = "not-mail.other.com";
+        assert_string("other.com", test.service_label);
+    }
+
+    private AccountInformation new_information(ServiceProvider provider =
+                                               ServiceProvider.OTHER) {
+        return new AccountInformation(
+            "test",
+            provider,
+            new MockCredentialsMediator(),
+            new RFC822.MailboxAddress(null, "test1@example.com")
         );
     }
 
