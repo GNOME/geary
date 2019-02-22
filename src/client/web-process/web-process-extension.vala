@@ -87,7 +87,8 @@ public class GearyWebExtension : Object {
         bool should_load = false;
         WebKit.Frame frame = page.get_main_frame();
         // Explicit cast fixes build on s390x/ppc64. Bug 783882
-        unowned JS.GlobalContext context = frame.get_javascript_global_context();
+        unowned JS.GlobalContext context = (JS.GlobalContext)
+            frame.get_javascript_global_context();
         try {
             unowned JS.Value ret = execute_script(
                 context, "geary.allowRemoteImages", int.parse("__LINE__")
@@ -105,7 +106,8 @@ public class GearyWebExtension : Object {
     private void remote_image_load_blocked(WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
         // Explicit cast fixes build on s390x/ppc64. Bug 783882
-        unowned JS.GlobalContext context = frame.get_javascript_global_context();
+        unowned JS.GlobalContext context = (JS.GlobalContext)
+            frame.get_javascript_global_context();
         try {
             execute_script(
                 context, "geary.remoteImageLoadBlocked();", int.parse("__LINE__")
@@ -121,7 +123,8 @@ public class GearyWebExtension : Object {
     private void selection_changed(WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
         // Explicit cast fixes build on s390x/ppc64. Bug 783882
-        unowned JS.GlobalContext context = frame.get_javascript_global_context();
+        unowned JS.GlobalContext context = (JS.GlobalContext)
+            frame.get_javascript_global_context();
         try {
             execute_script(
                 context, "geary.selectionChanged();", int.parse("__LINE__")
