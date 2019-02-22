@@ -20,8 +20,8 @@
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
+            <property name="tooltip_text" translatable="yes" context="tooltip">Compose Message</property>
             <property name="action_name">win.new-message</property>
-            <property name="tooltip_text" translatable="yes">Compose Message</property>
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="compose_new_message_image">
