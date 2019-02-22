@@ -16,7 +16,7 @@ variables:
   INSTALL_CMD: ninja -v -C $BUILD_DIR install
 
   # Fedora packages
-  FEDORA_DEPS: vala gobject-introspection-devel
+  FEDORA_DEPS: vala
                meson desktop-file-utils libcanberra-devel libgee-devel
                glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel
                webkitgtk4-devel libsecret-devel libxml2-devel vala-tools
@@ -25,7 +25,7 @@ variables:
   FEDORA_TEST_DEPS: Xvfb tar xz
 
   # Ubuntu & Debian packages
-  UBUNTU_DEPS: valac libgirepository1.0-dev
+  UBUNTU_DEPS: valac
                meson desktop-file-utils libcanberra-dev
                libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev
                libsecret-1-dev libxml2-dev libnotify-dev libsqlite3-dev
