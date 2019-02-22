@@ -60,13 +60,19 @@ public class Geary.AccountInformation : BaseObject {
         owned get {
             string? value = this._service_label;
             if (value == null) {
-                string[] host_parts = this.incoming.host.split(".");
-                if (host_parts.length > 1) {
-                    host_parts = host_parts[1:host_parts.length];
+                string email_domain = this.primary_mailbox.domain;
+                if (this.incoming.host.has_suffix(email_domain)) {
+                    value = email_domain;
+                } else {
+                    string[] host_parts = this.incoming.host.split(".");
+                    if (host_parts.length > 2) {
+                        host_parts = host_parts[1:host_parts.length];
+                    }
+                    value = string.joinv(".", host_parts);
                 }
-                // don't stash this in _service_label since we want it
-                // updated if the service host names change
-                value = string.joinv(".", host_parts);
+                // Don't stash the calculated value in _service_label
+                // since we want it updated if the service host names
+                // change
             }
             return value;
         }
