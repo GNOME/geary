@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-21 12:30+0000\n"
-"PO-Revision-Date: 2019-02-23 18:05+0900\n"
+"POT-Creation-Date: 2019-02-23 09:39+0000\n"
+"PO-Revision-Date: 2019-02-23 22:40+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -939,15 +939,15 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1802
+#: src/client/application/geary-controller.vala:1805
 msgid "Undo move (Ctrl+Z)"
 msgstr "移動を元に戻す(Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:1812
+#: src/client/application/geary-controller.vala:1815
 msgid "Are you sure you want to open these attachments?"
 msgstr "これらの添付ファイルを開いてもよろしいですか?"
 
-#: src/client/application/geary-controller.vala:1813
+#: src/client/application/geary-controller.vala:1816
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -955,14 +955,14 @@ msgstr ""
 "添付ファイルはシステムにダメージを与える可能性があります。送信元が信頼できる"
 "場合のみ開くようにしてください。"
 
-#: src/client/application/geary-controller.vala:1814
+#: src/client/application/geary-controller.vala:1817
 msgid "Don’t _ask me again"
 msgstr "次回から表示しない(_A)"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/geary-controller.vala:1943
+#: src/client/application/geary-controller.vala:1946
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "“%s”はすでに存在します。置き換えますか?"
@@ -970,73 +970,73 @@ msgstr "“%s”はすでに存在します。置き換えますか?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/geary-controller.vala:1950
+#: src/client/application/geary-controller.vala:1953
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "ファイルはすでに“%s”に存在します。置き換えると内容を上書きします。"
 
-#: src/client/application/geary-controller.vala:1954
+#: src/client/application/geary-controller.vala:1957
 msgid "_Replace"
 msgstr "置換(_R)"
 
-#: src/client/application/geary-controller.vala:2230
+#: src/client/application/geary-controller.vala:2233
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "下書きメッセージを閉じますか?"
 
-#: src/client/application/geary-controller.vala:2356
+#: src/client/application/geary-controller.vala:2359
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s フォルダーのすべてのメールを空にしますか?"
 
-#: src/client/application/geary-controller.vala:2357
+#: src/client/application/geary-controller.vala:2360
 msgid "This removes the email from Geary and your email server."
 msgstr "メールを Geary とメールサーバーから削除します。"
 
-#: src/client/application/geary-controller.vala:2358
+#: src/client/application/geary-controller.vala:2361
 msgid "This cannot be undone."
 msgstr "これは元に戻すことができません。"
 
-#: src/client/application/geary-controller.vala:2359
+#: src/client/application/geary-controller.vala:2362
 #, c-format
 msgid "Empty %s"
 msgstr "%s を空にする"
 
-#: src/client/application/geary-controller.vala:2376
+#: src/client/application/geary-controller.vala:2379
 #, c-format
 msgid "Error emptying %s"
 msgstr "%s を空にするときにエラーが発生しました"
 
-#: src/client/application/geary-controller.vala:2408
+#: src/client/application/geary-controller.vala:2411
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "このメッセージを完全に削除しますか?"
 
-#: src/client/application/geary-controller.vala:2410
+#: src/client/application/geary-controller.vala:2413
 msgid "Delete"
 msgstr "削除"
 
-#: src/client/application/geary-controller.vala:2424
+#: src/client/application/geary-controller.vala:2427
 msgid "Undo trash (Ctrl+Z)"
 msgstr "ごみ箱から戻す(Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2474
+#: src/client/application/geary-controller.vala:2477
 msgid "Undo archive (Ctrl+Z)"
 msgstr "アーカイブから戻す(Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2519
+#: src/client/application/geary-controller.vala:2522
 msgid "Undo (Ctrl+Z)"
 msgstr "元に戻す(Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2596
+#: src/client/application/geary-controller.vala:2599
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "%s にメールを送信しました。"
 
-#: src/client/application/geary-controller.vala:2678
+#: src/client/application/geary-controller.vala:2681
 msgid "Failed to open default text editor."
 msgstr "デフォルトのテキストエディターの起動に失敗しました。"
 
@@ -1583,7 +1583,7 @@ msgstr "星を外す(_N)"
 #: src/client/conversation-list/conversation-list-view.vala:294
 #: ui/main-toolbar-menus.ui:24
 msgid "_Star"
-msgstr "星をつける(_S)"
+msgstr "星を付ける(_S)"
 
 #. Translators: Menu item to reply to a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:297
@@ -1990,7 +1990,7 @@ msgstr "送信済みメール"
 
 #: src/engine/api/geary-special-folder-type.vala:33
 msgid "Starred"
-msgstr "星つき"
+msgstr "星付き"
 
 #: src/engine/api/geary-special-folder-type.vala:36
 msgid "Important"
@@ -2593,7 +2593,7 @@ msgstr "すべての添付ファイルを保存"
 #. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
 #: ui/conversation-email.ui:50
 msgid "Mark this message as starred"
-msgstr "このメッセージに星をつける"
+msgstr "このメッセージに星を付ける"
 
 #. Note: The application will never show this button at the same time as star_button, one will always be hidden.
 #: ui/conversation-email.ui:72
@@ -2951,7 +2951,7 @@ msgstr "その他のショートカット"
 #: ui/gtk/help-overlay.ui:210
 msgctxt "shortcut window"
 msgid "Star"
-msgstr "星をつける"
+msgstr "星を付ける"
 
 #: ui/gtk/help-overlay.ui:217
 msgctxt "shortcut window"
