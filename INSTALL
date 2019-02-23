@@ -62,7 +62,7 @@ required libraries.
 
 Install them by running this command:
 
-    sudo apt-get install valac libgirepository1.0-dev \
+    sudo apt-get install valac \
         meson desktop-file-utils iso-codes libcanberra-dev \
         libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev \
         libsecret-1-dev libxml2-dev libnotify-dev libsqlite3-dev \
