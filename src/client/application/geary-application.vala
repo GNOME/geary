@@ -47,6 +47,7 @@ public class GearyApplication : Gtk.Application {
     // Common window actions
     public const string ACTION_CLOSE = "close";
     public const string ACTION_COPY = "copy";
+    public const string ACTION_HELP_OVERLAY = "show-help-overlay";
     public const string ACTION_REDO = "redo";
     public const string ACTION_UNDO = "undo";
 
@@ -54,8 +55,8 @@ public class GearyApplication : Gtk.Application {
     private const string ACTION_ABOUT = "about";
     private const string ACTION_ACCOUNTS = "accounts";
     private const string ACTION_COMPOSE = "compose";
-    private const string ACTION_MAILTO = "mailto";
     private const string ACTION_HELP = "help";
+    private const string ACTION_MAILTO = "mailto";
     private const string ACTION_PREFERENCES = "preferences";
     private const string ACTION_QUIT = "quit";
 
@@ -63,8 +64,8 @@ public class GearyApplication : Gtk.Application {
         {ACTION_ABOUT, on_activate_about},
         {ACTION_ACCOUNTS, on_activate_accounts},
         {ACTION_COMPOSE, on_activate_compose},
-        {ACTION_MAILTO, on_activate_mailto, "s"},
         {ACTION_HELP, on_activate_help},
+        {ACTION_MAILTO, on_activate_mailto, "s"},
         {ACTION_PREFERENCES, on_activate_preferences},
         {ACTION_QUIT, on_activate_quit},
     };
@@ -246,10 +247,18 @@ public class GearyApplication : Gtk.Application {
 
         config = new Configuration(APP_ID);
 
+        // Application accels
+        add_app_accelerators(ACTION_COMPOSE, { "<Ctrl>N", "N" });
+        add_app_accelerators(ACTION_HELP, { "F1" });
+        add_app_accelerators(ACTION_QUIT, { "<Ctrl>Q" });
+
+        // Common window accels
         add_window_accelerators(ACTION_CLOSE, { "<Ctrl>W" });
         add_window_accelerators(ACTION_COPY, { "<Ctrl>C" });
+        add_window_accelerators(ACTION_HELP_OVERLAY, { "<Ctrl>F1", "<Ctrl>question" });
         add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>Z" });
         add_window_accelerators(ACTION_UNDO, { "<Ctrl>Z" });
+
         ComposerWidget.add_window_accelerators(this);
 
         yield controller.open_async(null);
@@ -271,7 +280,12 @@ public class GearyApplication : Gtk.Application {
     public void add_window_accelerators(string action,
                                         string[] accelerators,
                                         Variant? param = null) {
-        set_accels_for_action("win." + action, accelerators);
+        string name = "win." + action;
+        string[] all_accel = get_accels_for_action(name);
+        foreach (string accel in accelerators) {
+            all_accel += accel;
+        }
+        set_accels_for_action(name, all_accel);
     }
 
     public void show_accounts() {
@@ -418,6 +432,12 @@ public class GearyApplication : Gtk.Application {
         }
         
         Posix.exit(1);
+    }
+
+    public void add_app_accelerators(string action,
+                                     string[] accelerators,
+                                     Variant? param = null) {
+        set_accels_for_action("app." + action, accelerators);
     }
 
     private void on_activate_about() {

@@ -13,7 +13,6 @@
 public class GearyController : Geary.BaseObject {
 
     // Named actions.
-    public const string ACTION_NEW_MESSAGE = "new-message";
     public const string ACTION_REPLY_TO_MESSAGE = "reply-to-message";
     public const string ACTION_REPLY_ALL_MESSAGE = "reply-all-message";
     public const string ACTION_FORWARD_MESSAGE = "forward-message";
@@ -160,13 +159,14 @@ public class GearyController : Geary.BaseObject {
     private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
 
     private const ActionEntry[] win_action_entries = {
-        {ACTION_NEW_MESSAGE,           on_new_message                  },
+        {GearyApplication.ACTION_CLOSE, on_close                       },
+        {GearyApplication.ACTION_UNDO,  on_revoke                      },
+
         {ACTION_CONVERSATION_LIST,     on_conversation_list            },
         {ACTION_FIND_IN_CONVERSATION,  on_find_in_conversation_action  },
         {ACTION_SEARCH,                on_search_activated             },
         {ACTION_EMPTY_SPAM,            on_empty_spam                   },
         {ACTION_EMPTY_TRASH,           on_empty_trash                  },
-        {GearyApplication.ACTION_UNDO, on_revoke                       },
         // Message actions
         {ACTION_REPLY_TO_MESSAGE,      on_reply_to_message_action   },
         {ACTION_REPLY_ALL_MESSAGE,     on_reply_all_message_action  },
@@ -603,7 +603,6 @@ public class GearyController : Geary.BaseObject {
         add_window_accelerators(ACTION_MARK_AS_NOT_SPAM, { "<Ctrl>J", "exclam" });
         add_window_accelerators(ACTION_COPY_MENU, { "L" });
         add_window_accelerators(ACTION_MOVE_MENU, { "M" });
-        add_window_accelerators(ACTION_NEW_MESSAGE, { "<Ctrl>N", "N" });
         add_window_accelerators(ACTION_REPLY_TO_MESSAGE, { "<Ctrl>R", "R" });
         add_window_accelerators(ACTION_REPLY_ALL_MESSAGE, { "<Ctrl><Shift>R", "<Shift>R" });
         add_window_accelerators(ACTION_FORWARD_MESSAGE, { "<Ctrl>L", "F" });
@@ -1246,9 +1245,9 @@ public class GearyController : Geary.BaseObject {
 
     private void on_indicator_activated_composer(uint32 timestamp) {
         on_indicator_activated_application(timestamp);
-        on_new_message(null);
+        compose();
     }
-    
+
     private void on_indicator_activated_inbox(Geary.Folder folder, uint32 timestamp) {
         on_indicator_activated_application(timestamp);
         main_window.folder_list.select_folder(folder);
@@ -2264,9 +2263,9 @@ public class GearyController : Geary.BaseObject {
                 this.application.exit();
         }
     }
-    
-    private void on_new_message(SimpleAction? action) {
-        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE);
+
+    private void on_close() {
+        this.application.exit();
     }
 
     private void on_reply_to_message(ConversationEmail target_view) {
