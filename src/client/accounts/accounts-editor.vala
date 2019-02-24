@@ -19,8 +19,8 @@ public class Accounts.Editor : Gtk.Dialog {
 
 
     private const ActionEntry[] ACTION_ENTRIES = {
-        { GearyController.ACTION_REDO, on_redo },
-        { GearyController.ACTION_UNDO, on_undo },
+        { GearyApplication.ACTION_REDO, on_redo },
+        { GearyApplication.ACTION_UNDO, on_undo },
     };
 
 
@@ -226,8 +226,8 @@ public class Accounts.Editor : Gtk.Dialog {
             can_redo = pane.commands.can_redo;
         }
 
-        get_action(GearyController.ACTION_UNDO).set_enabled(can_undo);
-        get_action(GearyController.ACTION_REDO).set_enabled(can_redo);
+        get_action(GearyApplication.ACTION_UNDO).set_enabled(can_undo);
+        get_action(GearyApplication.ACTION_REDO).set_enabled(can_redo);
     }
 
     private inline EditorPane? get_current_pane() {

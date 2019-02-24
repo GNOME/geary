@@ -47,10 +47,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private const string ACTION_UNDO = "undo";
-    private const string ACTION_REDO = "redo";
     private const string ACTION_CUT = "cut";
-    private const string ACTION_COPY = "copy";
     private const string ACTION_COPY_LINK = "copy-link";
     private const string ACTION_PASTE = "paste";
     private const string ACTION_PASTE_WITHOUT_FORMATTING = "paste-without-formatting";
@@ -72,7 +69,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private const string ACTION_INSERT_LINK = "insert-link";
     private const string ACTION_COMPOSE_AS_HTML = "compose-as-html";
     private const string ACTION_SHOW_EXTENDED = "show-extended";
-    private const string ACTION_CLOSE = "close";
     private const string ACTION_CLOSE_AND_SAVE = "close-and-save";
     private const string ACTION_CLOSE_AND_DISCARD = "close-and-discard";
     private const string ACTION_DETACH = "detach";
@@ -92,10 +88,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     };
 
     private const ActionEntry[] editor_action_entries = {
-        {ACTION_UNDO,                     on_undo                                       },
-        {ACTION_REDO,                     on_redo                                       },
+        {GearyApplication.ACTION_UNDO,    on_undo                                       },
+        {GearyApplication.ACTION_REDO,    on_redo                                       },
+        {GearyApplication.ACTION_COPY,    on_copy                                       },
         {ACTION_CUT,                      on_cut                                        },
-        {ACTION_COPY,                     on_copy                                       },
         {ACTION_COPY_LINK,                on_copy_link                                  },
         {ACTION_PASTE,                    on_paste                                      },
         {ACTION_PASTE_WITHOUT_FORMATTING, on_paste_without_formatting                   },
@@ -119,9 +115,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     };
 
     private const ActionEntry[] composer_action_entries = {
+        {GearyApplication.ACTION_CLOSE,   on_close                                                         },
         {ACTION_ADD_ATTACHMENT,           on_add_attachment                                                    },
         {ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments                                               },
-        {ACTION_CLOSE,                    on_close                                                             },
         {ACTION_CLOSE_AND_DISCARD,        on_close_and_discard                                                 },
         {ACTION_CLOSE_AND_SAVE,           on_close_and_save                                                    },
         {ACTION_COMPOSE_AS_HTML,          on_toggle_action,        null,   "true",  on_compose_as_html_toggled },
@@ -134,10 +130,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public static Gee.MultiMap<string, string> action_accelerators = new Gee.HashMultiMap<string, string>();
 
     public static void add_window_accelerators(GearyApplication application) {
-        application.add_window_accelerators(ACTION_UNDO, { "<Ctrl>z" } );
-        application.add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>z" } );
+        application.add_window_accelerators(GearyApplication.ACTION_CLOSE, { "Escape" } );
         application.add_window_accelerators(ACTION_CUT, { "<Ctrl>x" } );
-        application.add_window_accelerators(ACTION_COPY, { "<Ctrl>c" } );
         application.add_window_accelerators(ACTION_PASTE, { "<Ctrl>v" } );
         application.add_window_accelerators(ACTION_PASTE_WITHOUT_FORMATTING, { "<Ctrl><Shift>v" } );
         application.add_window_accelerators(ACTION_INSERT_IMAGE, { "<Ctrl>g" } );
@@ -149,7 +143,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         application.add_window_accelerators(ACTION_ITALIC, { "<Ctrl>i" } );
         application.add_window_accelerators(ACTION_UNDERLINE, { "<Ctrl>u" } );
         application.add_window_accelerators(ACTION_STRIKETHROUGH, { "<Ctrl>k" } );
-        application.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );
         application.add_window_accelerators(ACTION_DETACH, { "<Ctrl>d" } );
     }
@@ -841,8 +834,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         );
 
         get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
-        get_action(ACTION_UNDO).set_enabled(false);
-        get_action(ACTION_REDO).set_enabled(false);
+        get_action(GearyApplication.ACTION_UNDO).set_enabled(false);
+        get_action(GearyApplication.ACTION_REDO).set_enabled(false);
 
         update_cursor_actions();
     }
@@ -850,7 +843,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private void update_cursor_actions() {
         bool has_selection = this.editor.has_selection;
         get_action(ACTION_CUT).set_enabled(has_selection);
-        get_action(ACTION_COPY).set_enabled(has_selection);
+        get_action(GearyApplication.ACTION_COPY).set_enabled(has_selection);
 
         get_action(ACTION_INSERT_LINK).set_enabled(
             this.editor.is_rich_text && (has_selection || this.cursor_url != null)
@@ -2223,8 +2216,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_command_state_changed(bool can_undo, bool can_redo) {
-        get_action(ACTION_UNDO).set_enabled(can_undo);
-        get_action(ACTION_REDO).set_enabled(can_redo);
+        get_action(GearyApplication.ACTION_UNDO).set_enabled(can_undo);
+        get_action(GearyApplication.ACTION_REDO).set_enabled(can_redo);
     }
 
     private void on_draft_id_changed() {

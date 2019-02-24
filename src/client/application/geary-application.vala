@@ -16,6 +16,7 @@ extern const string GETTEXT_PACKAGE;
  * The interface between Geary and the desktop environment.
  */
 public class GearyApplication : Gtk.Application {
+
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
     public const string APP_ID = "org.gnome.Geary";
@@ -43,6 +44,13 @@ public class GearyApplication : Gtk.Application {
         null
     };
 
+    // Common window actions
+    public const string ACTION_CLOSE = "close";
+    public const string ACTION_COPY = "copy";
+    public const string ACTION_REDO = "redo";
+    public const string ACTION_UNDO = "undo";
+
+    // App-wide actions
     private const string ACTION_ABOUT = "about";
     private const string ACTION_ACCOUNTS = "accounts";
     private const string ACTION_COMPOSE = "compose";
@@ -237,7 +245,13 @@ public class GearyApplication : Gtk.Application {
             exec_dir.get_path(), is_installed().to_string());
 
         config = new Configuration(APP_ID);
+
+        add_window_accelerators(ACTION_CLOSE, { "<Ctrl>W" });
+        add_window_accelerators(ACTION_COPY, { "<Ctrl>C" });
+        add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>Z" });
+        add_window_accelerators(ACTION_UNDO, { "<Ctrl>Z" });
         ComposerWidget.add_window_accelerators(this);
+
         yield controller.open_async(null);
 
         release();

@@ -22,8 +22,6 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_DELETE_CONVERSATION = "delete-conv";
     public const string ACTION_EMPTY_SPAM = "empty-spam";
     public const string ACTION_EMPTY_TRASH = "empty-trash";
-    public const string ACTION_UNDO = "undo";
-    public const string ACTION_REDO = "redo";
     public const string ACTION_FIND_IN_CONVERSATION = "conv-find";
     public const string ACTION_ZOOM = "zoom";
     public const string ACTION_SHOW_MARK_MENU = "mark-message-menu";
@@ -168,7 +166,7 @@ public class GearyController : Geary.BaseObject {
         {ACTION_SEARCH,                on_search_activated             },
         {ACTION_EMPTY_SPAM,            on_empty_spam                   },
         {ACTION_EMPTY_TRASH,           on_empty_trash                  },
-        {ACTION_UNDO,                  on_revoke                       },
+        {GearyApplication.ACTION_UNDO, on_revoke                       },
         // Message actions
         {ACTION_REPLY_TO_MESSAGE,      on_reply_to_message_action   },
         {ACTION_REPLY_ALL_MESSAGE,     on_reply_all_message_action  },
@@ -613,8 +611,6 @@ public class GearyController : Geary.BaseObject {
         add_window_accelerators(ACTION_ARCHIVE_CONVERSATION, { "A" });
         add_window_accelerators(ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" });
         add_window_accelerators(ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" });
-        add_window_accelerators(ACTION_UNDO, { "<Ctrl>Z" });
-        add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>Z" });
         add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "equal" });
         add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus", "minus" });
         add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0", "0" });
@@ -2525,7 +2521,11 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void update_revokable_action() {
-        get_window_action(ACTION_UNDO).set_enabled(this.revokable != null && this.revokable.valid && !this.revokable.in_process);
+        get_window_action(GearyApplication.ACTION_UNDO).set_enabled(
+            this.revokable != null &&
+            this.revokable.valid &&
+            !this.revokable.in_process
+        );
     }
 
     private void on_revokable_valid_changed() {
