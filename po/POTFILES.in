@@ -420,7 +420,6 @@ ui/conversation-viewer.ui
 ui/find_bar.glade
 ui/folder-popover.ui
 ui/gtk/help-overlay.ui
-ui/gtk/menus.ui
 ui/in-app-notification.ui
 ui/main-toolbar.ui
 ui/main-toolbar-menus.ui
