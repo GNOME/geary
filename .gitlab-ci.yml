@@ -25,7 +25,7 @@ variables:
   FEDORA_TEST_DEPS: Xvfb tar xz
 
   # Ubuntu & Debian packages
-  UBUNTU_DEPS: valac
+  UBUNTU_DEPS: valac build-essential
                meson desktop-file-utils libcanberra-dev
                libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev
                libsecret-1-dev libxml2-dev libnotify-dev libsqlite3-dev
