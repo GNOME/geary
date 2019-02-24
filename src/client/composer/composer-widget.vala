@@ -2258,9 +2258,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // so the user can still select text with a link in it,
         // without the popover immediately appearing and raining on
         // their text selection parade.
-        if (this.pointer_url != null &&
-            this.composer_actions.get_action_state(ACTION_COMPOSE_AS_HTML)
-                .get_boolean()) {
+        if (this.pointer_url != null && this.config.compose_as_html) {
             Gdk.EventButton? button = (Gdk.EventButton) event;
             Gdk.Rectangle location = Gdk.Rectangle();
             location.x = (int) button.x;
