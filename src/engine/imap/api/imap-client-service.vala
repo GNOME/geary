@@ -387,16 +387,14 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         debug("[%s] Opening new session", this.account.id);
         Credentials? login = this.configuration.credentials;
         if (login != null && !login.is_complete()) {
-            notify_authentication_failed();
+            throw new ImapError.UNAUTHENTICATED("Token not loaded");
         }
 
         ClientSession new_session = new ClientSession(remote);
         yield new_session.connect_async(cancellable);
 
         try {
-            yield new_session.initiate_session_async(
-                this.configuration.credentials, cancellable
-            );
+            yield new_session.initiate_session_async(login, cancellable);
         } catch (Error err) {
             // need to disconnect before throwing error ... don't
             // honor Cancellable here, it's important to disconnect

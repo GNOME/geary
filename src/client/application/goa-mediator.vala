@@ -107,15 +107,10 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
                                            Geary.ServiceInformation service,
                                            GLib.Cancellable? cancellable)
         throws GLib.Error {
-        // Prompt GOA to update the creds. This might involve some
-        // user interaction.
-        yield update(account, cancellable);
-
-        // XXX now open a dialog that says "Click here to change your
-        // GOA password" or "GOA credentials need renewing" or
+        // XXX Open a dialog that says "Click here to change your GOA
+        // password" or "GOA credentials need renewing" or
         // something. Connect to the GOA service and wait until we
         // hear that needs attention is no longer true.
-
         return this.is_available;
     }
 
