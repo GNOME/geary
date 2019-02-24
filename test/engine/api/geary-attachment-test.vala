@@ -10,10 +10,10 @@ extern const string _SOURCE_ROOT_DIR;
 
 class Geary.AttachmentTest : TestCase {
 
-    private const string CONTENT_TYPE = "image/png";
+    private const string CONTENT_TYPE = "image/svg+xml";
     private const string CONTENT_ID = "test-content-id";
     private const string CONTENT_DESC = "Mea navis volitans anguillis plena est";
-    private const string FILE_PATH = "icons/hicolor/16x16/apps/org.gnome.Geary.png";
+    private const string FILE_PATH = "icons/hicolor/scalable/apps/org.gnome.Geary.svg";
 
     private Mime.ContentType? content_type;
     private Mime.ContentType? default_type;
@@ -73,7 +73,7 @@ class Geary.AttachmentTest : TestCase {
     }
 
     public void get_safe_file_name_with_content_name() throws Error {
-        const string TEST_FILENAME = "test-filename.png";
+        const string TEST_FILENAME = "test-filename.svg";
         Attachment test = new TestAttachment(
             this.content_type,
             CONTENT_ID,
@@ -92,7 +92,7 @@ class Geary.AttachmentTest : TestCase {
 
     public void get_safe_file_name_with_bad_content_name() throws Error {
         const string TEST_FILENAME = "test-filename.jpg";
-        const string RESULT_FILENAME = "test-filename.jpg.png";
+        const string RESULT_FILENAME = "test-filename.jpg.svg";
         Attachment test = new TestAttachment(
             this.content_type,
             CONTENT_ID,
@@ -111,7 +111,7 @@ class Geary.AttachmentTest : TestCase {
 
     public void get_safe_file_name_with_bad_file_name() throws Error {
         const string TEST_FILENAME = "test-filename";
-        const string RESULT_FILENAME = "test-filename.png";
+        const string RESULT_FILENAME = "test-filename.svg";
         Attachment test = new TestAttachment(
             this.content_type,
             CONTENT_ID,
@@ -129,7 +129,7 @@ class Geary.AttachmentTest : TestCase {
     }
 
     public void get_safe_file_name_with_no_content_name() throws Error {
-        const string RESULT_FILENAME = CONTENT_ID + ".png";
+        const string RESULT_FILENAME = CONTENT_ID + ".svg";
         Attachment test = new TestAttachment(
             this.content_type,
             CONTENT_ID,
@@ -147,7 +147,7 @@ class Geary.AttachmentTest : TestCase {
     }
 
     public void get_safe_file_name_with_no_content_name_or_id() throws Error {
-        const string RESULT_FILENAME = "attachment.png";
+        const string RESULT_FILENAME = "attachment.svg";
         Attachment test = new TestAttachment(
             this.content_type,
             null,
@@ -166,7 +166,7 @@ class Geary.AttachmentTest : TestCase {
 
     public void get_safe_file_name_with_alt_file_name() throws Error {
         const string ALT_TEXT = "some text";
-        const string RESULT_FILENAME = "some text.png";
+        const string RESULT_FILENAME = "some text.svg";
         Attachment test = new TestAttachment(
             this.content_type,
             null,
@@ -184,7 +184,7 @@ class Geary.AttachmentTest : TestCase {
     }
 
     public void get_safe_file_name_with_default_content_type() throws Error {
-        const string TEST_FILENAME = "test-filename.png";
+        const string TEST_FILENAME = "test-filename.svg";
         Attachment test = new TestAttachment(
             this.default_type,
             CONTENT_ID,
@@ -204,7 +204,7 @@ class Geary.AttachmentTest : TestCase {
     public void get_safe_file_name_with_default_content_type_bad_file_name()
         throws Error {
         const string TEST_FILENAME = "test-filename.jpg";
-        const string RESULT_FILENAME = "test-filename.jpg.png";
+        const string RESULT_FILENAME = "test-filename.jpg.svg";
         Attachment test = new TestAttachment(
             this.default_type,
             CONTENT_ID,

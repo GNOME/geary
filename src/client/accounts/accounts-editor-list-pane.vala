@@ -240,7 +240,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     private void on_execute(Application.Command command) {
         if (command.executed_label != null) {
             InAppNotification ian = new InAppNotification(command.executed_label);
-            ian.set_button(_("Undo"), "win." + GearyController.ACTION_UNDO);
+            ian.set_button(_("Undo"), "win." + GearyApplication.ACTION_UNDO);
             this.editor.add_notification(ian);
         }
     }
@@ -248,7 +248,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     private void on_undo(Application.Command command) {
         if (command.undone_label != null) {
             InAppNotification ian = new InAppNotification(command.undone_label);
-            ian.set_button(_("Redo"), "win." + GearyController.ACTION_REDO);
+            ian.set_button(_("Redo"), "win." + GearyApplication.ACTION_REDO);
             this.editor.add_notification(ian);
         }
     }

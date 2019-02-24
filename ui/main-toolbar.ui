@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.2 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkImage" id="archive_image">
@@ -61,28 +61,27 @@
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
-          <object class="GtkMenuButton" id="empty_menu_button">
+          <object class="GtkMenuButton" id="main_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Empty Spam or Trash folders</property>
             <property name="always_show_image">True</property>
             <child>
-              <object class="GtkImage" id="empty_menu_image">
+              <object class="GtkImage" id="main_menu_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">edit-clear-all-symbolic</property>
+                <property name="icon_name">open-menu-symbolic</property>
               </object>
             </child>
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">3</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <style>
@@ -365,3 +364,4 @@
     </child>
   </template>
 </interface>
+
