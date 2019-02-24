@@ -826,12 +826,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.editor_container.insert_action_group("win", this.editor_actions);
 
-        this.composer_actions.change_action_state(
-            ACTION_SHOW_EXTENDED, false
-        );
-        this.composer_actions.change_action_state(
-            ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
-        );
+        SimpleActionGroup[] composer_action_entries_users
+            = {this.editor_actions, this.composer_actions};
+        foreach (SimpleActionGroup entries_users in composer_action_entries_users) {
+            entries_users.change_action_state(ACTION_SHOW_EXTENDED, false);
+            entries_users.change_action_state(
+                ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
+            );
+        }
 
         get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
         get_action(GearyApplication.ACTION_UNDO).set_enabled(false);
