@@ -1,5 +1,14 @@
-foreach desktop_file: [ 'org.gnome.Geary.desktop', 'geary-autostart.desktop' ]
-  i18n.merge_file(
+#
+# Desktop files
+#
+
+desktop_src = [
+  'org.gnome.Geary.desktop',
+  'geary-autostart.desktop'
+]
+
+foreach desktop_file: desktop_src
+  desktop_merged = i18n.merge_file(
     input: desktop_file + '.in',
     output: desktop_file,
     type: 'desktop',
@@ -7,19 +16,44 @@ foreach desktop_file: [ 'org.gnome.Geary.desktop', 'geary-autostart.desktop' ]
     install: true,
     install_dir: join_paths(datadir, 'applications')
   )
+  if desktop_file_validate.found()
+    test(
+      desktop_file + '-validate',
+      desktop_file_validate,
+      args: [ desktop_merged.full_path() ]
+    )
+  endif
 endforeach
 
-# The appdata file
-i18n.merge_file(
-  input: 'org.gnome.Geary.appdata.xml.in',
-  output: 'org.gnome.Geary.appdata.xml',
+#
+# Appdata file
+#
+
+appdata_file = 'org.gnome.Geary.appdata.xml'
+
+appdata_merged = i18n.merge_file(
+  input: appdata_file + '.in',
+  output: appdata_file,
   type: 'xml',
   po_dir: po_dir,
   install: true,
   install_dir: join_paths(datadir, 'metainfo')
 )
 
+if appstream_util.found()
+  test(
+    appdata_file + '-validate',
+    appstream_util,
+    args: [
+      'validate-relax', '--nonet', appdata_merged.full_path()
+    ]
+  )
+endif
+
+#
 # Contractor file (Elementary OS)
+#
+
 if install_contractor_file
   # Call msgfmt manually since gettext won't otherwise translate the
   # Description field. See merge req !50.

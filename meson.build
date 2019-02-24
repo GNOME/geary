@@ -100,7 +100,9 @@ if libunwind_dep.found()
    )
 endif
 
-# Optional libraries
+# Optional dependencies
+appstream_util = find_program('appstream-util', required: false)
+desktop_file_validate = find_program('desktop-file-validate', required: false)
 libunity = dependency('unity', version: '>= 5.12.0', required: false)
 libmessagingmenu = meson.get_compiler('c').find_library('libmessaging-menu', required: false)
 
