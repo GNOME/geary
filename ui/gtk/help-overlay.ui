@@ -97,7 +97,7 @@
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Compose a new message</property>
-                                <property name="accelerator">&lt;primary&gt;N N</property>
+                                <property name="accelerator">&lt;primary&gt;N</property>
                             </object>
                         </child>
                         <child>
