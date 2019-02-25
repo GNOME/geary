@@ -248,7 +248,7 @@ public class GearyApplication : Gtk.Application {
         config = new Configuration(APP_ID);
 
         // Application accels
-        add_app_accelerators(ACTION_COMPOSE, { "<Ctrl>N", "N" });
+        add_app_accelerators(ACTION_COMPOSE, { "<Ctrl>N" });
         add_app_accelerators(ACTION_HELP, { "F1" });
         add_app_accelerators(ACTION_QUIT, { "<Ctrl>Q" });
 
