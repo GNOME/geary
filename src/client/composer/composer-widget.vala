@@ -826,12 +826,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.editor_container.insert_action_group("win", this.editor_actions);
 
-        this.composer_actions.change_action_state(
-            ACTION_SHOW_EXTENDED, false
-        );
-        this.composer_actions.change_action_state(
-            ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
-        );
+        SimpleActionGroup[] composer_action_entries_users
+            = {this.editor_actions, this.composer_actions};
+        foreach (SimpleActionGroup entries_users in composer_action_entries_users) {
+            entries_users.change_action_state(ACTION_SHOW_EXTENDED, false);
+            entries_users.change_action_state(
+                ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
+            );
+        }
 
         get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
         get_action(GearyApplication.ACTION_UNDO).set_enabled(false);
@@ -2256,9 +2258,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // so the user can still select text with a link in it,
         // without the popover immediately appearing and raining on
         // their text selection parade.
-        if (this.pointer_url != null &&
-            this.composer_actions.get_action_state(ACTION_COMPOSE_AS_HTML)
-                .get_boolean()) {
+        if (this.pointer_url != null && this.config.compose_as_html) {
             Gdk.EventButton? button = (Gdk.EventButton) event;
             Gdk.Rectangle location = Gdk.Rectangle();
             location.x = (int) button.x;
