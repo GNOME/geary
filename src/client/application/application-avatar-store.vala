@@ -13,10 +13,25 @@ public class Application.AvatarStore : Geary.BaseObject {
 
 
     // Max age is low since we really only want to cache between
-    // conversation loads
+    // conversation loads.
     private const int64 MAX_CACHE_AGE_US = 5 * 1000 * 1000;
 
+    // Max size is low since most conversations don't get above the
+    // low hundreds of messages, and those that do will likely get
+    // many repeated participants
+    private const uint MAX_CACHE_SIZE = 128;
+
+
     private class CacheEntry {
+
+
+        public static int lru_compare(CacheEntry a, CacheEntry b) {
+            return (a.address == b.address)
+                ? 0 : (int) (a.last_used - b.last_used);
+        }
+
+
+        public string address;
 
         // Store nulls so we can also cache avatars not found
         public Folks.Individual? individual;
@@ -25,7 +40,10 @@ public class Application.AvatarStore : Geary.BaseObject {
 
         private Gee.List<Gdk.Pixbuf> pixbufs = new Gee.LinkedList<Gdk.Pixbuf>();
 
-        public CacheEntry(Folks.Individual? individual, int64 last_used) {
+        public CacheEntry(string address,
+                          Folks.Individual? individual,
+                          int64 last_used) {
+            this.address = address;
             this.individual = individual;
             this.last_used = last_used;
         }
@@ -61,8 +79,10 @@ public class Application.AvatarStore : Geary.BaseObject {
 
 
     private Folks.IndividualAggregator individuals;
-    private Gee.Map<string,CacheEntry?> cache =
-        new Gee.HashMap<string,CacheEntry?>();
+    private Gee.Map<string,CacheEntry> lru_cache =
+        new Gee.HashMap<string,CacheEntry>();
+    private Gee.SortedSet<CacheEntry> lru_ordering =
+        new Gee.TreeSet<CacheEntry>(CacheEntry.lru_compare);
 
 
     public AvatarStore(Folks.IndividualAggregator individuals) {
@@ -70,35 +90,53 @@ public class Application.AvatarStore : Geary.BaseObject {
     }
 
     public void close() {
-        this.cache.clear();
+        this.lru_cache.clear();
+        this.lru_ordering.clear();
     }
 
     public async Gdk.Pixbuf? load(Geary.RFC822.MailboxAddress mailbox,
                                   int pixel_size,
                                   GLib.Cancellable cancellable)
         throws GLib.Error {
-        CacheEntry match = yield get_match(mailbox.address);
+        // Normalise the address to improve caching
+        CacheEntry match = yield get_match(
+            mailbox.address.normalize().casefold()
+        );
         return yield match.load(pixel_size, cancellable);
     }
 
 
     private async CacheEntry get_match(string address)
         throws GLib.Error {
-        CacheEntry? entry = this.cache.get(address);
         int64 now = GLib.get_monotonic_time();
+        CacheEntry? entry = this.lru_cache.get(address);
         if (entry != null) {
             if (entry.last_used + MAX_CACHE_AGE_US >= now) {
+                // Need to remove the entry from the ordering before
+                // updating the last used time since doing so changes
+                // the ordering
+                this.lru_ordering.remove(entry);
                 entry.last_used = now;
+                this.lru_ordering.add(entry);
             } else {
+                this.lru_cache.unset(address);
+                this.lru_ordering.remove(entry);
                 entry = null;
-                this.cache.unset(address);
             }
         }
 
         if (entry == null) {
             Folks.Individual? match = yield search_match(address);
-            entry = new CacheEntry(match, now);
-            this.cache.set(address, entry);
+            entry = new CacheEntry(address, match, now);
+            this.lru_cache.set(address, entry);
+            this.lru_ordering.add(entry);
+
+            // Prune the cache if needed
+            if (this.lru_cache.size > MAX_CACHE_SIZE) {
+                CacheEntry oldest = this.lru_ordering.first();
+                this.lru_cache.unset(oldest.address);
+                this.lru_ordering.remove(oldest);
+            }
         }
 
         return entry;
