@@ -47,6 +47,13 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    // XXX need separate composer close action in addition to the
+    // default window close action so we can bind Esc to it without
+    // also binding the default window close action to Esc as
+    // well. This could probably be fixed by pulling both the main
+    // window's and composer's actions out of the 'win' action
+    // namespace, leaving only common window actions there.
+    private const string ACTION_CLOSE = "composer-close";
     private const string ACTION_CUT = "cut";
     private const string ACTION_COPY_LINK = "copy-link";
     private const string ACTION_PASTE = "paste";
@@ -115,7 +122,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     };
 
     private const ActionEntry[] composer_action_entries = {
-        {GearyApplication.ACTION_CLOSE,   on_close                                                         },
+        {GearyApplication.ACTION_CLOSE,   on_close                                                             },
+        {ACTION_CLOSE,                    on_close                                                             },
         {ACTION_ADD_ATTACHMENT,           on_add_attachment                                                    },
         {ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments                                               },
         {ACTION_CLOSE_AND_DISCARD,        on_close_and_discard                                                 },
@@ -130,7 +138,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public static Gee.MultiMap<string, string> action_accelerators = new Gee.HashMultiMap<string, string>();
 
     public static void add_window_accelerators(GearyApplication application) {
-        application.add_window_accelerators(GearyApplication.ACTION_CLOSE, { "Escape" } );
+        application.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         application.add_window_accelerators(ACTION_CUT, { "<Ctrl>x" } );
         application.add_window_accelerators(ACTION_PASTE, { "<Ctrl>v" } );
         application.add_window_accelerators(ACTION_PASTE_WITHOUT_FORMATTING, { "<Ctrl><Shift>v" } );
