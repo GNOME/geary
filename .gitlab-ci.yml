@@ -75,6 +75,7 @@ flatpak:
     MANIFEST_PATH: org.gnome.Geary.json
     MESON_ARGS: "-Dprofile=Devel"
     RUNTIME_REPO: "https://sdk.gnome.org/gnome-nightly.flatpakrepo"
+    TEST_BUILD_ARGS: "--env=CI_RUNNER_DESCRIPTION=${CI_RUNNER_DESCRIPTION}"
   extends: .flatpak
 
 review:
