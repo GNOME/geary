@@ -72,7 +72,7 @@ public class Libmessagingmenu : NewMessagesIndicator {
             app.set_source_count(source_id, count);
         else
             app.append_source_with_count(source_id, null,
-                _("%s — New Messages").printf(folder.account.information.nickname), count);
+                _("%s — New Messages").printf(folder.account.information.display_name), count);
         
         app.draw_attention(source_id);
     }
