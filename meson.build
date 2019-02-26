@@ -54,6 +54,7 @@ webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 
 # Secondary deps - keep sorted alphabetically
 enchant = dependency('enchant-2', version: '>=2.1', required: false) # see below
+folks = dependency('folks', version: '>=0.11')
 gck = dependency('gck-1')
 gcr = dependency('gcr-3', version: '>= 3.10.1')
 gdk = dependency('gdk-3.0', version: '>=' + target_gtk)

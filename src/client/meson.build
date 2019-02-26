@@ -110,6 +110,7 @@ geary_client_sources = [
 geary_client_dependencies = [
   libmath,
   enchant,
+  folks,
   gck,
   gcr,
   gee,
