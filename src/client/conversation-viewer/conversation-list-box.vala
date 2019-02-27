@@ -637,6 +637,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         // Load the interesting row completely up front, and load the
         // remaining in the background so we can return fast.
+        interesting_row.view.load_avatar.begin(this.avatar_store);
         yield interesting_row.expand();
         this.finish_loading.begin(
             query, uninteresting, post_interesting
@@ -795,6 +796,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // filling the empty space.
         foreach (Geary.Email email in to_append) {
             EmailRow row = add_email(email);
+            yield row.view.load_avatar(this.avatar_store);
             if (is_interesting(email)) {
                 yield row.expand();
             }
@@ -828,6 +830,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // Only adjust for the loading row going away once
             loading_height = 0;
 
+            yield row.view.load_avatar(this.avatar_store);
             yield throttle_loading();
         }
 
@@ -877,7 +880,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
-            row.view.load_avatar.begin(this.avatar_store);
+            yield row.view.load_avatar(this.avatar_store);
             this.search.highlight_row_if_matching(row);
             yield row.expand();
         }
