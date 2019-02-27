@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2016 Software Freedom Conservancy Inc. -->
 <!-- Copyright 2016 Michael Gratton <mike@vee.net> -->
-<component type="desktop">
-  <id>org.gnome.Geary.desktop</id>
+<component type="desktop-application">
+  <id>org.gnome.Geary</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LGPL-2.1+</project_license>
   <update_contact>geary-list@gnome.org</update_contact>
@@ -40,7 +40,7 @@
   <url type="bugtracker">https://wiki.gnome.org/Apps/Geary/ReportingABug</url>
   <url type="translate">https://wiki.gnome.org/Apps/Geary/Translating</url>
   <url type="donation">https://www.gnome.org/friends/</url>
-
+  
   <screenshots>
     <screenshot>
       <!-- Translators: A screenshot description. -->
@@ -55,14 +55,8 @@
   </screenshots>
 
   <project_group>GNOME</project_group>
-  <categories>
-    <category>Office</category>
-    <category>Network</category>
-    <category>Email</category>
-  ​</categories>
 
   <kudos>
-    <kudo>AppMenu</kudo>
     <kudo>HiDpiIcon</kudo>
     <kudo>HighContrast</kudo>
     <kudo>ModernToolkit</kudo>
@@ -71,9 +65,7 @@
   </kudos>
 
   <launchable type="desktop-id">org.gnome.Geary.desktop</launchable>
-  <provides>
-    <binary>geary</binary>
-  </provides>
+
   <translation type="gettext">geary</translation>
 
   <releases>
