@@ -60,7 +60,7 @@ class Geary.EngineTest : TestCase {
         );
     }
 
-	public override void tear_down () {
+    public override void tear_down () {
         this.account = null;
         try {
             this.res.delete();
@@ -69,7 +69,7 @@ class Geary.EngineTest : TestCase {
         } catch (Error err) {
             assert_not_reached();
         }
-	}
+    }
 
     public void add_account() throws GLib.Error {
         assert_false(this.engine.has_account(this.account.id));

@@ -372,11 +372,11 @@ public class ComposerWebView : ClientWebView {
     }
 
     public void insert_olist() {
-	this.call.begin(Geary.JS.callable("geary.insertOrderedList"), null);
+        this.call.begin(Geary.JS.callable("geary.insertOrderedList"), null);
     }
 
     public void insert_ulist() {
-	this.call.begin(Geary.JS.callable("geary.insertUnorderedList"), null);
+        this.call.begin(Geary.JS.callable("geary.insertUnorderedList"), null);
     }
 
     /**

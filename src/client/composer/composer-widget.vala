@@ -1887,11 +1887,11 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_olist(SimpleAction action, Variant? param) {
-	this.editor.insert_olist();
+        this.editor.insert_olist();
     }
 
     private void on_ulist(SimpleAction action, Variant? param) {
-	this.editor.insert_ulist();
+        this.editor.insert_ulist();
     }
 
     private void on_mouse_target_changed(WebKit.WebView web_view,

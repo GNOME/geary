@@ -63,13 +63,13 @@ class Accounts.ManagerTest : TestCase {
         this.test = new Manager(this.mediator, config, data);
     }
 
-	public override void tear_down() throws GLib.Error {
+    public override void tear_down() throws GLib.Error {
         this.account = null;
         this.mediator = null;
         this.test = null;
         this.primary_mailbox = null;
         @delete(this.tmp);
-	}
+    }
 
     public void create_account() throws GLib.Error {
         bool was_added = false;

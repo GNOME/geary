@@ -469,23 +469,23 @@ internal class Accounts.TlsComboBox : Gtk.ComboBox {
         Gtk.ListStore store = new Gtk.ListStore(
             3, typeof(string), typeof(string), typeof(string)
         );
-		Gtk.TreeIter iter;
-		store.append(out iter);
-		store.set(
+        Gtk.TreeIter iter;
+        store.append(out iter);
+        store.set(
             iter,
             0, Geary.TlsNegotiationMethod.NONE.to_value(),
             1, INSECURE_ICON,
             2, _("None")
         );
-		store.append(out iter);
-		store.set(
+        store.append(out iter);
+        store.set(
             iter,
             0, Geary.TlsNegotiationMethod.START_TLS.to_value(),
             1, SECURE_ICON,
             2, _("StartTLS")
         );
-		store.append(out iter);
-		store.set(
+        store.append(out iter);
+        store.set(
             iter,
             0, Geary.TlsNegotiationMethod.TRANSPORT.to_value(),
             1, SECURE_ICON,
@@ -496,12 +496,12 @@ internal class Accounts.TlsComboBox : Gtk.ComboBox {
         set_id_column(0);
 
         Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
-		pack_start(text_renderer, true);
-		add_attribute(text_renderer, "text", 2);
+        pack_start(text_renderer, true);
+        add_attribute(text_renderer, "text", 2);
 
         Gtk.CellRendererPixbuf icon_renderer = new Gtk.CellRendererPixbuf();
-		pack_start(icon_renderer, true);
-		add_attribute(icon_renderer, "icon_name", 1);
+        pack_start(icon_renderer, true);
+        add_attribute(icon_renderer, "icon_name", 1);
     }
 
 }

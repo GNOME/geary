@@ -1173,7 +1173,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                         if (y > 0) {
                             internal_link_activated(y);
                         } else {
-                        	debug("Failed to get anchor destination");
+                            debug("Failed to get anchor destination");
                         }
                     } catch (GLib.Error err) {
                         debug("Failed to get anchor destination");
