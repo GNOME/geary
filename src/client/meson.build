@@ -127,6 +127,8 @@ geary_client_dependencies = [
   geary_engine_dep,
 ]
 
+geary_client_vala_options = geary_vala_options
+
 if libmessagingmenu.found()
   messagingmenu_vapi = meson.get_compiler('vala').find_library(
       'MessagingMenu-1.0',
@@ -135,16 +137,18 @@ if libmessagingmenu.found()
   )
   geary_client_dependencies += libmessagingmenu
   geary_client_dependencies += messagingmenu_vapi
+  geary_client_vala_options += ['-D', 'HAVE_LIBMESSAGINGMENU']
 endif
 if libunity.found()
   geary_client_dependencies += libunity
+  geary_client_vala_options += ['-D', 'HAVE_LIBUNITY']
 endif
 
 geary_client_lib = static_library('geary-client',
   geary_client_sources,
   dependencies: geary_client_dependencies,
   include_directories: config_h_dir,
-  vala_args: geary_vala_options,
+  vala_args: geary_client_vala_options,
   c_args: geary_c_options,
 )
 
