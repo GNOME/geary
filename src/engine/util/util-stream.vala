@@ -128,13 +128,13 @@ namespace Geary.Stream {
             this.dest = dest;
         }
 
-		public override int64 length() {
+        public override int64 length() {
             // This is a bit of a kludge, but we use it in
             // ImapDB.Attachment
             return this.written;
         }
 
-		public override ssize_t write(string buf, size_t len) {
+        public override ssize_t write(string buf, size_t len) {
             ssize_t ret = -1;
             try {
                 ret = this.dest.write(buf.data[0:len]);
@@ -145,7 +145,7 @@ namespace Geary.Stream {
             return ret;
         }
 
-		public override int close() {
+        public override int close() {
             int ret = -1;
             try {
                 ret = this.dest.close() ? 0 : -1;
@@ -155,7 +155,7 @@ namespace Geary.Stream {
             return ret;
         }
 
-		public override int flush () {
+        public override int flush () {
             int ret = -1;
             try {
                 ret = this.dest.flush() ? 0 : -1;
@@ -165,7 +165,7 @@ namespace Geary.Stream {
             return ret;
         }
 
-		public override bool eos () {
+        public override bool eos () {
             return this.dest.is_closed() || this.dest.is_closing();
         }
     }

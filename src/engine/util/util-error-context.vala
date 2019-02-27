@@ -32,7 +32,7 @@ public class Geary.ErrorContext : BaseObject {
         internal StackFrame(Unwind.Cursor frame) {
             uint8 proc_name[256];
             int ret = -frame.get_proc_name(proc_name);
-			if (ret == Unwind.Error.SUCCESS ||
+            if (ret == Unwind.Error.SUCCESS ||
                 ret == Unwind.Error.NOMEM) {
                 this.name = (string) proc_name;
             }

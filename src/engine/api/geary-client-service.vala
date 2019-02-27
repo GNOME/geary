@@ -387,7 +387,7 @@ public abstract class Geary.ClientService : BaseObject {
     }
 
     private void connect_handlers() {
-		this.remote.connectivity.notify["is-reachable"].connect(
+        this.remote.connectivity.notify["is-reachable"].connect(
             on_connectivity_change
         );
         this.remote.connectivity.remote_error_reported.connect(
@@ -397,7 +397,7 @@ public abstract class Geary.ClientService : BaseObject {
     }
 
     private void disconnect_handlers() {
-		this.remote.connectivity.notify["is-reachable"].disconnect(
+        this.remote.connectivity.notify["is-reachable"].disconnect(
             on_connectivity_change
         );
         this.remote.connectivity.remote_error_reported.disconnect(
@@ -424,7 +424,7 @@ public abstract class Geary.ClientService : BaseObject {
         );
     }
 
-	private void on_connectivity_change() {
+    private void on_connectivity_change() {
         if (this.is_running && this.current_status.automatically_reconnect()) {
             if (this.remote.connectivity.is_reachable.is_certain()) {
                 this.became_reachable_timer.start();
@@ -435,15 +435,15 @@ public abstract class Geary.ClientService : BaseObject {
                 this.became_reachable_timer.reset();
             }
         }
-	}
+    }
 
-	private void on_connectivity_error(Error error) {
+    private void on_connectivity_error(Error error) {
         if (this.is_running) {
             this.became_reachable_timer.reset();
             this.became_unreachable_timer.reset();
             notify_connection_failed(new ErrorContext(error));
         }
-	}
+    }
 
     private void on_untrusted_host(Endpoint remote,
                                    GLib.TlsConnection cx) {

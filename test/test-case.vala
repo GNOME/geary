@@ -201,21 +201,21 @@ public abstract class TestCase : Object {
 
     protected MainContext main_loop = MainContext.default();
 
-	private GLib.TestSuite suite;
-	private Adaptor[] adaptors = new Adaptor[0];
+    private GLib.TestSuite suite;
+    private Adaptor[] adaptors = new Adaptor[0];
     private AsyncQueue<AsyncResult> async_results = new AsyncQueue<AsyncResult>();
 
-	public delegate void TestMethod() throws Error;
+    public delegate void TestMethod() throws Error;
 
-	public TestCase(string name) {
-		this.suite = new GLib.TestSuite(name);
-	}
+    public TestCase(string name) {
+        this.suite = new GLib.TestSuite(name);
+    }
 
-	public void add_test(string name, owned TestMethod test) {
-		var adaptor = new Adaptor(name, (owned) test, this);
-		this.adaptors += adaptor;
+    public void add_test(string name, owned TestMethod test) {
+        var adaptor = new Adaptor(name, (owned) test, this);
+        this.adaptors += adaptor;
 
-		this.suite.add(
+        this.suite.add(
             new GLib.TestCase(
                 adaptor.name,
                 adaptor.set_up,
@@ -223,17 +223,17 @@ public abstract class TestCase : Object {
                 adaptor.tear_down
             )
         );
-	}
+    }
 
-	public virtual void set_up() throws Error {
-	}
+    public virtual void set_up() throws Error {
+    }
 
-	public virtual void tear_down() throws Error {
-	}
+    public virtual void tear_down() throws Error {
+    }
 
-	public GLib.TestSuite get_suite() {
-		return this.suite;
-	}
+    public GLib.TestSuite get_suite() {
+        return this.suite;
+    }
 
     protected void async_complete(AsyncResult result) {
         this.async_results.push(result);
@@ -296,44 +296,44 @@ public abstract class TestCase : Object {
         return handler.was_fired;
     }
 
-	private class Adaptor {
+    private class Adaptor {
 
-		public string name { get; private set; }
-		private TestMethod test;
-		private TestCase test_case;
+        public string name { get; private set; }
+        private TestMethod test;
+        private TestCase test_case;
 
-		public Adaptor(string name,
+        public Adaptor(string name,
                        owned TestMethod test,
                        TestCase test_case) {
-			this.name = name;
-			this.test = (owned) test;
-			this.test_case = test_case;
-		}
+            this.name = name;
+            this.test = (owned) test;
+            this.test_case = test_case;
+        }
 
-		public void set_up(void* fixture) {
+        public void set_up(void* fixture) {
             try {
                 this.test_case.set_up();
             } catch (Error err) {
                 assert_no_error(err);
             }
-		}
+        }
 
-		public void run(void* fixture) {
+        public void run(void* fixture) {
             try {
                 this.test();
             } catch (Error err) {
                 assert_no_error(err);
             }
-		}
+        }
 
-		public void tear_down(void* fixture) {
+        public void tear_down(void* fixture) {
             try {
                 this.test_case.tear_down();
             } catch (Error err) {
                 assert_no_error(err);
             }
-		}
+        }
 
-	}
+    }
 
 }

@@ -1104,12 +1104,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                            len < this.displayed_attachments.size);
     }
 
-	private void on_service_status_change() {
+    private void on_service_status_change() {
         if (this.message_body_state == FAILED &&
             !this.load_cancellable.is_cancelled() &&
             is_online()) {
             this.fetch_remote_body.begin();
         }
-	}
+    }
 
 }

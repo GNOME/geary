@@ -26,24 +26,24 @@ public class Geary.ConnectivityManager : BaseObject {
     /** The endpoint being monitored. */
     public GLib.SocketConnectable remote { get; private set; default = null; }
 
-	/** Determines if the managed endpoint is currently reachable. */
-	public Trillian is_reachable {
+    /** Determines if the managed endpoint is currently reachable. */
+    public Trillian is_reachable {
         get; private set; default = Geary.Trillian.UNKNOWN;
     }
 
-	/**
+    /**
      * Determines if the remote endpoint could be resolved.
      *
      * This will become certain if the remote becomes reachable, and
      * will become impossible if a fatal error is reported.
      */
-	public Trillian is_valid {
+    public Trillian is_valid {
         get; private set; default = Geary.Trillian.UNKNOWN;
     }
 
     private NetworkMonitor monitor;
 
-	private Cancellable? existing_check = null;
+    private Cancellable? existing_check = null;
 
     // Wall time the next already-connected check should not occur before
     private int64 next_check = 0;
@@ -66,7 +66,7 @@ public class Geary.ConnectivityManager : BaseObject {
      * Constructs a new manager for a specific remote.
      */
     public ConnectivityManager(GLib.SocketConnectable remote) {
-		this.remote = remote;
+        this.remote = remote;
 
         this.monitor = NetworkMonitor.get_default();
         this.monitor.network_changed.connect(on_network_changed);
@@ -83,33 +83,33 @@ public class Geary.ConnectivityManager : BaseObject {
         this.monitor.network_changed.disconnect(on_network_changed);
     }
 
-	/**
+    /**
      * Starts checking if the manager's remote is reachable.
      *
      * This will cancel any existing check, and start a new one
      * running, updating the `is_reachable` property on completion.
      */
     public async void check_reachable() {
-		// We use a cancellable here as a guard instead of a boolean
-		// "is_checking" var since when a series of checks are
-		// requested in quick succession (as is the case when
-		// e.g. connecting or disconnecting from a network), the
-		// result of the *last* check is authoritative, not the first
-		// one.
-		cancel_check();
+        // We use a cancellable here as a guard instead of a boolean
+        // "is_checking" var since when a series of checks are
+        // requested in quick succession (as is the case when
+        // e.g. connecting or disconnecting from a network), the
+        // result of the *last* check is authoritative, not the first
+        // one.
+        cancel_check();
 
-		Cancellable cancellable = new Cancellable();
-		this.existing_check = cancellable;
+        Cancellable cancellable = new Cancellable();
+        this.existing_check = cancellable;
 
         string endpoint = this.remote.to_string();
-		bool is_reachable = false;
+        bool is_reachable = false;
         try {
             // Check first, and ask questions only if an error occurs,
             // because if we can connect, then we can connect.
-			debug("Checking if %s reachable...", endpoint);
+            debug("Checking if %s reachable...", endpoint);
             is_reachable = yield this.monitor.can_reach_async(
-				this.remote, cancellable
-			);
+                this.remote, cancellable
+            );
             this.next_check = (
                 GLib.get_real_time() + (CHECK_QUIESCENCE_MS * 1000)
             );
@@ -131,16 +131,16 @@ public class Geary.ConnectivityManager : BaseObject {
                   endpoint, err.message);
         } catch (GLib.Error err) {
             if (err is IOError.NETWORK_UNREACHABLE &&
-				this.monitor.network_available) {
-				// If we get a network unreachable error, but the monitor
-				// says there actually is a network available, we may be
-				// running in a Flatpak and hitting Bug 777706. If so,
-				// just assume the service is reachable is for now. :(
+                this.monitor.network_available) {
+                // If we get a network unreachable error, but the monitor
+                // says there actually is a network available, we may be
+                // running in a Flatpak and hitting Bug 777706. If so,
+                // just assume the service is reachable is for now. :(
                 // Pull this put once xdg-desktop-portal 1.x is widely
                 // installed.
-				debug("Assuming %s is reachable, despite network unavailability",
+                debug("Assuming %s is reachable, despite network unavailability",
                       endpoint);
-				is_reachable = true;
+                is_reachable = true;
             } else {
                 // The monitor threw an error, but only notify if it
                 // looks like we *should* be able to connect
@@ -161,37 +161,37 @@ public class Geary.ConnectivityManager : BaseObject {
                 }
             }
         } finally {
-			if (!cancellable.is_cancelled()) {
-				set_reachable(is_reachable);
+            if (!cancellable.is_cancelled()) {
+                set_reachable(is_reachable);
 
                 // Kick off another delayed check in case the network
                 // changes without the monitor noticing.
                 this.delayed_check.start();
-			}
+            }
             this.existing_check = null;
         }
     }
 
-	/**
+    /**
      * Cancels any running or future reachability check, if any.
      */
     public void cancel_check() {
-		if (this.existing_check != null) {
-			this.existing_check.cancel();
-			this.existing_check = null;
-		}
+        if (this.existing_check != null) {
+            this.existing_check.cancel();
+            this.existing_check = null;
+        }
         this.delayed_check.reset();
-	}
+    }
 
     private void on_network_changed(bool some_available) {
         // Always check if reachable because IMAP server could be on
         // localhost.  (This is a Linux program, after all...)
-		debug("Network changed: %s",
+        debug("Network changed: %s",
               some_available ? "some available" : "none available");
-		if (some_available) {
-			// Some networks may have dropped out despite some being
-			// still available, so need to check again. Only run the
-			// check if we are either currently:
+        if (some_available) {
+            // Some networks may have dropped out despite some being
+            // still available, so need to check again. Only run the
+            // check if we are either currently:
             //
             // 1. Unreachable
             // 2. An existing check is already running (i.e. the
@@ -207,23 +207,23 @@ public class Geary.ConnectivityManager : BaseObject {
             } else if (!this.delayed_check.is_running) {
                 this.delayed_check.start();
             }
-		} else {
-			// None available, so definitely not reachable.
-			set_reachable(false);
-		}
+        } else {
+            // None available, so definitely not reachable.
+            set_reachable(false);
+        }
     }
 
-	private inline void set_reachable(bool reachable) {
-		// Coalesce changes to is_reachable, since Vala <= 0.34 always
-		// fires notify signals on set, even if the value doesn't
-		// change. 0.36 fixes that, so pull this test out when we can
-		// depend on that as a minimum.
-		if ((reachable && !this.is_reachable.is_certain()) ||
+    private inline void set_reachable(bool reachable) {
+        // Coalesce changes to is_reachable, since Vala <= 0.34 always
+        // fires notify signals on set, even if the value doesn't
+        // change. 0.36 fixes that, so pull this test out when we can
+        // depend on that as a minimum.
+        if ((reachable && !this.is_reachable.is_certain()) ||
             (!reachable && !this.is_reachable.is_impossible())) {
             debug("Remote %s became %s",
                   this.remote.to_string(), reachable ? "reachable" : "unreachable");
-			this.is_reachable = reachable ? Trillian.TRUE : Trillian.FALSE;
-		}
+            this.is_reachable = reachable ? Trillian.TRUE : Trillian.FALSE;
+        }
 
         // We only work out if the name is valid (or becomes valid
         // again) if the remote becomes reachable.
@@ -231,13 +231,13 @@ public class Geary.ConnectivityManager : BaseObject {
             this.is_valid = Trillian.TRUE;
         }
 
-	}
+    }
 
-	private inline void set_invalid() {
-		// Coalesce changes to is_reachable, since Vala <= 0.34 always
-		// fires notify signals on set, even if the value doesn't
-		// change. 0.36 fixes that, so pull this method out when we can
-		// depend on that as a minimum.
+    private inline void set_invalid() {
+        // Coalesce changes to is_reachable, since Vala <= 0.34 always
+        // fires notify signals on set, even if the value doesn't
+        // change. 0.36 fixes that, so pull this method out when we can
+        // depend on that as a minimum.
         if (this.is_valid != Trillian.FALSE) {
             this.is_valid = Trillian.FALSE;
         }
