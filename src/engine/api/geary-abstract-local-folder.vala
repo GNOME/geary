@@ -10,7 +10,7 @@
 public abstract class Geary.AbstractLocalFolder : Geary.Folder {
     private ProgressMonitor _opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
     public override Geary.ProgressMonitor opening_monitor { get { return _opening_monitor; } }
-    
+
     private int open_count = 0;
     private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
 
@@ -23,12 +23,12 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
     public override Geary.Folder.OpenState get_open_state() {
         return open_count > 0 ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
     }
-    
+
     protected void check_open() throws EngineError {
         if (open_count == 0)
             throw new EngineError.OPEN_REQUIRED("%s not open", to_string());
     }
-    
+
     protected bool is_open() {
         return open_count > 0;
     }
@@ -37,26 +37,26 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
         throws Error {
         if (open_count++ > 0)
             return false;
-        
+
         closed_semaphore.reset();
-        
+
         notify_opened(Geary.Folder.OpenState.LOCAL, properties.email_total);
-        
+
         return true;
     }
-    
+
     public override async bool close_async(Cancellable? cancellable = null) throws Error {
         if (open_count == 0 || --open_count > 0)
             return false;
-        
+
         closed_semaphore.blind_notify();
-        
+
         notify_closed(Geary.Folder.CloseReason.LOCAL_CLOSE);
         notify_closed(Geary.Folder.CloseReason.FOLDER_CLOSED);
-        
+
         return false;
     }
-    
+
     public override async void wait_for_close_async(Cancellable? cancellable = null) throws Error {
         yield closed_semaphore.wait_async(cancellable);
     }

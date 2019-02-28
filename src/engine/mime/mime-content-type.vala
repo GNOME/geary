@@ -72,7 +72,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
             throw new MimeError.PARSE("Empty MIME Content-Type");
 
         if (!str.contains("/"))
-            throw new MimeError.PARSE("Invalid MIME Content-Type: %s", str); 
+            throw new MimeError.PARSE("Invalid MIME Content-Type: %s", str);
 
         return new ContentType.from_gmime(new GMime.ContentType.from_string(str));
     }
@@ -125,7 +125,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
      * @see has_media_type
      */
     public string media_type { get; private set; }
-    
+
     /**
      * The subtype (extension-token or iana-token) portion of the Content-Type field.
      *
@@ -137,7 +137,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
      * @see has_media_subtype
      */
     public string media_subtype { get; private set; }
-    
+
     /**
      * Content parameters, if any, in the Content-Type field.
      *
@@ -145,7 +145,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
      * no parameters.
      */
     public ContentParameters params { get; private set; }
-    
+
     /**
      * Create a MIME Content-Type representative object.
      */
@@ -154,7 +154,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
         this.media_subtype = media_subtype.strip();
         this.params = params ?? new ContentParameters();
     }
-    
+
     internal ContentType.from_gmime(GMime.ContentType content_type) {
         media_type = content_type.get_media_type().strip();
         media_subtype = content_type.get_media_subtype().strip();
@@ -171,7 +171,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     public bool has_media_type(string media_type) {
         return (media_type != WILDCARD) ? Ascii.stri_equal(this.media_type, media_type) : true;
     }
-    
+
     /**
      * Compares the {@link media_subtype} with the supplied subtype.
      *
@@ -182,7 +182,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     public bool has_media_subtype(string media_subtype) {
         return (media_subtype != WILDCARD) ? Ascii.stri_equal(this.media_subtype, media_subtype) : true;
     }
-    
+
     /**
      * Returns the {@link ContentType}'s media content type (its "MIME type").
      *
@@ -212,7 +212,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     public bool is_type(string media_type, string media_subtype) {
         return has_media_type(media_type) && has_media_subtype(media_subtype);
     }
-    
+
     /**
      * Compares this {@link ContentType} with another instance.
      *
@@ -224,7 +224,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     public bool is_same(ContentType other) {
         return is_type(other.media_type, other.media_subtype);
     }
-    
+
     /**
      * Compares the supplied MIME type (i.e. "image/jpeg") with this instance.
      *
@@ -237,52 +237,52 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
         int index = mime_type.index_of_char('/');
         if (index < 0)
             throw new MimeError.PARSE("Invalid MIME type: %s", mime_type);
-        
+
         string mime_media_type = mime_type.substring(0, index).strip();
-        
+
         string mime_media_subtype = mime_type.substring(index + 1);
         index = mime_media_subtype.index_of_char(';');
         if (index >= 0)
             mime_media_subtype = mime_media_subtype.substring(0, index);
         mime_media_subtype = mime_media_subtype.strip();
-        
+
         if (String.is_empty(mime_media_type) || String.is_empty(mime_media_subtype))
             throw new MimeError.PARSE("Invalid MIME type: %s", mime_type);
-        
+
         return is_type(mime_media_type, mime_media_subtype);
     }
 
     public string serialize() {
         StringBuilder builder = new StringBuilder();
         builder.append_printf("%s/%s", media_type, media_subtype);
-        
+
         if (params != null && params.size > 0) {
             foreach (string attribute in params.attributes) {
                 string value = params.get_value(attribute);
-                
+
                 switch (DataFormat.get_encoding_requirement(value)) {
                     case DataFormat.Encoding.QUOTING_OPTIONAL:
                         builder.append_printf("; %s=%s", attribute, value);
                     break;
-                    
+
                     case DataFormat.Encoding.QUOTING_REQUIRED:
                         builder.append_printf("; %s=\"%s\"", attribute, value);
                     break;
-                    
+
                     case DataFormat.Encoding.UNALLOWED:
                         message("Cannot encode ContentType param value %s=\"%s\": unallowed",
                             attribute, value);
                     break;
-                    
+
                     default:
                         assert_not_reached();
                 }
             }
         }
-        
+
         return builder.str;
     }
-    
+
     public string to_string() {
         return serialize();
     }

@@ -17,11 +17,11 @@ public enum Geary.Imap.StatusDataType {
     UIDNEXT,
     UIDVALIDITY,
     UNSEEN;
-    
+
     public static StatusDataType[] all() {
         return { MESSAGES, RECENT, UIDNEXT, UIDVALIDITY, UNSEEN };
     }
-    
+
     public string to_string() {
         switch (this) {
             case MESSAGES:
@@ -43,29 +43,29 @@ public enum Geary.Imap.StatusDataType {
                 assert_not_reached();
         }
     }
-    
+
     public static StatusDataType from_parameter(StringParameter stringp) throws ImapError {
         switch (stringp.as_lower()) {
             case "messages":
                 return MESSAGES;
-            
+
             case "recent":
                 return RECENT;
-            
+
             case "uidnext":
                 return UIDNEXT;
-            
+
             case "uidvalidity":
                 return UIDVALIDITY;
-            
+
             case "unseen":
                 return UNSEEN;
-            
+
             default:
                 throw new ImapError.PARSE_ERROR("Unknown status data type \"%s\"", stringp.to_string());
         }
     }
-    
+
     public StringParameter to_parameter() {
         return new AtomParameter(to_string());
     }

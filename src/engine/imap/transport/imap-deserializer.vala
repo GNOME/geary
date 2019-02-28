@@ -12,7 +12,7 @@
  * The Deserializer will only begin reading from the stream when {@link start_async} is called.
  * Calling {@link stop_async} will halt reading without closing the stream itself.  A Deserializer
  * may not be reused once stop_async has been invoked.
- * 
+ *
  * Since all results from the Deserializer are reported via signals, those signals should be
  * connected to prior to calling start_async, or the caller risks missing early messages.  (Note
  * that since Deserializer uses async I/O, this isn't technically possible unless the signals are
@@ -25,14 +25,14 @@
 
 public class Geary.Imap.Deserializer : BaseObject {
     private const size_t MAX_BLOCK_READ_SIZE = 4096;
-    
+
     private enum Mode {
         LINE,
         BLOCK,
         FAILED,
         CLOSED
     }
-    
+
     private enum State {
         TAG,
         START_PARAM,
@@ -49,11 +49,11 @@ public class Geary.Imap.Deserializer : BaseObject {
         CLOSED,
         COUNT
     }
-    
+
     private static string state_to_string(uint state) {
         return ((State) state).to_string();
     }
-    
+
     private enum Event {
         CHAR,
         EOL,
@@ -62,15 +62,15 @@ public class Geary.Imap.Deserializer : BaseObject {
         ERROR,
         COUNT
     }
-    
+
     private static string event_to_string(uint event) {
         return ((Event) event).to_string();
     }
-    
+
     private static Geary.State.MachineDescriptor machine_desc = new Geary.State.MachineDescriptor(
         "Geary.Imap.Deserializer", State.TAG, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
-    
+
     private string identifier;
     private DataInputStream dins;
     private Geary.State.Machine fsm;
@@ -152,47 +152,47 @@ public class Geary.Imap.Deserializer : BaseObject {
             new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_char),
             new Geary.State.Mapping(State.TAG, Event.EOS, on_eos),
             new Geary.State.Mapping(State.TAG, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.START_PARAM, Event.CHAR, on_first_param_char),
             new Geary.State.Mapping(State.START_PARAM, Event.EOL, on_eol),
             new Geary.State.Mapping(State.START_PARAM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.START_PARAM, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.ATOM, Event.CHAR, on_atom_char),
             new Geary.State.Mapping(State.ATOM, Event.EOL, on_atom_eol),
             new Geary.State.Mapping(State.ATOM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.ATOM, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.FLAG, Event.CHAR, on_first_flag_char),
             new Geary.State.Mapping(State.FLAG, Event.EOL, on_atom_eol),
             new Geary.State.Mapping(State.FLAG, Event.EOS, on_eos),
             new Geary.State.Mapping(State.FLAG, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.QUOTED, Event.CHAR, on_quoted_char),
             new Geary.State.Mapping(State.QUOTED, Event.EOS, on_eos),
             new Geary.State.Mapping(State.QUOTED, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.QUOTED_ESCAPE, Event.CHAR, on_quoted_escape_char),
             new Geary.State.Mapping(State.QUOTED_ESCAPE, Event.EOS, on_eos),
             new Geary.State.Mapping(State.QUOTED_ESCAPE, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.PARTIAL_BODY_ATOM, Event.CHAR, on_partial_body_atom_char),
             new Geary.State.Mapping(State.PARTIAL_BODY_ATOM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.PARTIAL_BODY_ATOM, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.PARTIAL_BODY_ATOM_TERMINATING, Event.CHAR,
                 on_partial_body_atom_terminating_char),
             new Geary.State.Mapping(State.PARTIAL_BODY_ATOM_TERMINATING, Event.EOS, on_eos),
             new Geary.State.Mapping(State.PARTIAL_BODY_ATOM_TERMINATING, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.LITERAL, Event.CHAR, on_literal_char),
             new Geary.State.Mapping(State.LITERAL, Event.EOS, on_eos),
             new Geary.State.Mapping(State.LITERAL, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.LITERAL_DATA_BEGIN, Event.EOL, on_literal_data_begin_eol),
             new Geary.State.Mapping(State.LITERAL_DATA_BEGIN, Event.EOS, on_eos),
             new Geary.State.Mapping(State.LITERAL_DATA_BEGIN, Event.ERROR, on_error),
-            
+
             new Geary.State.Mapping(State.LITERAL_DATA, Event.DATA, on_literal_data),
             new Geary.State.Mapping(State.LITERAL_DATA, Event.EOS, on_eos),
             new Geary.State.Mapping(State.LITERAL_DATA, Event.ERROR, on_error),
@@ -218,7 +218,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     public bool install_converter(Converter converter) {
         return midstream.install(converter);
     }
-    
+
     /**
      * Begin deserializing IMAP responses from the input stream.
      *
@@ -227,29 +227,29 @@ public class Geary.Imap.Deserializer : BaseObject {
     public async void start_async(int priority = GLib.Priority.DEFAULT_IDLE) throws Error {
         if (cancellable != null)
             throw new EngineError.ALREADY_OPEN("Deserializer already open");
-        
+
         Mode mode = get_mode();
-        
+
         if (mode == Mode.FAILED)
             throw new EngineError.ALREADY_CLOSED("Deserializer failed");
-        
+
         if ((mode == Mode.CLOSED) || (cancellable != null && cancellable.is_cancelled()))
             throw new EngineError.ALREADY_CLOSED("Deserializer closed");
-        
+
         cancellable = new Cancellable();
         ins_priority = priority;
-        
+
         next_deserialize_step();
     }
-    
+
     public async void stop_async() throws Error {
         // quietly fail when not opened or already closed
         if (cancellable == null || cancellable.is_cancelled() || is_halted())
             return;
-        
+
         // cancel any outstanding I/O
         cancellable.cancel();
-        
+
         // wait for outstanding I/O to exit
         yield closed_semaphore.wait_async();
         debug("[%s] Deserializer closed", to_string());
@@ -281,40 +281,40 @@ public class Geary.Imap.Deserializer : BaseObject {
             case Mode.LINE:
                 dins.read_line_async.begin(ins_priority, cancellable, on_read_line);
             break;
-            
+
             case Mode.BLOCK:
                 // Can't merely skip zero-byte literal, need to go through async transaction to
                 // properly send events to the FSM
                 assert(literal_length_remaining >= 0);
-                
+
                 if (block_buffer == null)
                     block_buffer = new Geary.Memory.GrowableBuffer();
-                
+
                 current_buffer = block_buffer.allocate(
                     size_t.min(MAX_BLOCK_READ_SIZE, literal_length_remaining));
-                
+
                 dins.read_async.begin(current_buffer, ins_priority, cancellable, on_read_block);
             break;
-            
+
             case Mode.FAILED:
             case Mode.CLOSED:
                 // do nothing; Deserializer is effectively closed
             break;
-            
+
             default:
                 assert_not_reached();
         }
     }
-    
+
     private void on_read_line(Object? source, AsyncResult result) {
         try {
             size_t bytes_read;
             string? line = dins.read_line_async.end(result, out bytes_read);
             if (line == null) {
                 Logging.debug(Logging.Flag.DESERIALIZER, "[%s] line EOS", to_string());
-                
+
                 push_eos();
-                
+
                 return;
             }
 
@@ -325,10 +325,10 @@ public class Geary.Imap.Deserializer : BaseObject {
             push_error(err);
             return;
         }
-        
+
         next_deserialize_step();
     }
-    
+
     private void on_read_block(Object? source, AsyncResult result) {
         try {
             // Zero-byte literals are legal (see note in next_deserialize_step()), so EOS only
@@ -336,12 +336,12 @@ public class Geary.Imap.Deserializer : BaseObject {
             size_t bytes_read = dins.read_async.end(result);
             if (bytes_read == 0 && literal_length_remaining > 0) {
                 Logging.debug(Logging.Flag.DESERIALIZER, "[%s] block EOS", to_string());
-                
+
                 push_eos();
-                
+
                 return;
             }
-            
+
             Logging.debug(Logging.Flag.DESERIALIZER, "[%s] block %lub", to_string(), bytes_read);
             bytes_received(bytes_read);
 
@@ -351,10 +351,10 @@ public class Geary.Imap.Deserializer : BaseObject {
             push_data(bytes_read);
         } catch (Error err) {
             push_error(err);
-            
+
             return;
         }
-        
+
         next_deserialize_step();
     }
 
@@ -392,23 +392,23 @@ public class Geary.Imap.Deserializer : BaseObject {
     private void push_eos() {
         fsm.issue(Event.EOS);
     }
-    
+
     // Push an Error event
     private void push_error(Error err) {
         fsm.issue(Event.ERROR, null, null, err);
     }
-    
+
     private Mode get_mode() {
         switch (fsm.get_state()) {
             case State.LITERAL_DATA:
                 return Mode.BLOCK;
-            
+
             case State.FAILED:
                 return Mode.FAILED;
-            
+
             case State.CLOSED:
                 return Mode.CLOSED;
-            
+
             default:
                 return Mode.LINE;
         }
@@ -417,37 +417,37 @@ public class Geary.Imap.Deserializer : BaseObject {
     private bool is_current_string_empty() {
         return (current_string == null) || String.is_empty(current_string.str);
     }
-    
+
     // Case-insensitive compare
     private bool is_current_string_ci(string cmp) {
         if (current_string == null || String.is_empty(current_string.str))
             return false;
-        
+
         return Ascii.stri_equal(current_string.str, cmp);
     }
-    
+
     private void append_to_string(char ch) {
         if (current_string == null)
             current_string = new StringBuilder();
-        
+
         current_string.append_c(ch);
     }
-    
+
     private void save_string_parameter(bool quoted) {
         // deal with empty strings
         if (!quoted && is_current_string_empty())
             return;
-        
+
         // deal with empty quoted strings
         string str = (quoted && current_string == null) ? "" : current_string.str;
-        
+
         if (quoted)
             save_parameter(new QuotedStringParameter(str));
         else if (NumberParameter.is_ascii_numeric(str, null))
             save_parameter(new NumberParameter.from_ascii(str));
         else
             save_parameter(new UnquotedStringParameter(str));
-        
+
         current_string = null;
     }
 
@@ -455,7 +455,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         save_parameter(new LiteralParameter(block_buffer));
         block_buffer = null;
     }
-    
+
     private void save_parameter(Parameter param) {
         context.add(param);
     }
@@ -578,24 +578,24 @@ public class Geary.Imap.Deserializer : BaseObject {
                 return State.FAILED;
         }
     }
-    
+
     private uint on_tag_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
-        
+
         // drop if not allowed for tags (allowing for continuations and watching for spaces, which
         // indicate a change of state)
         if (DataFormat.is_tag_special(ch, " +"))
             return State.TAG;
-        
+
         // space indicates end of tag
         if (ch == ' ') {
             save_string_parameter(false);
-            
+
             return State.START_PARAM;
         }
-        
+
         append_to_string(ch);
-        
+
         return State.TAG;
     }
 
@@ -688,30 +688,30 @@ public class Geary.Imap.Deserializer : BaseObject {
 
     private uint on_quoted_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
-        
+
         // drop anything above 0x7F, NUL, CR, and LF
         if (ch > 0x7F || ch == '\0' || ch == '\r' || ch == '\n')
             return State.QUOTED;
-        
+
         // look for escaped characters
         if (ch == '\\')
             return State.QUOTED_ESCAPE;
-        
+
         // DQUOTE ends quoted string and return to parsing atoms
         if (ch == '\"') {
             save_string_parameter(true);
-            
+
             return State.START_PARAM;
         }
-        
+
         append_to_string(ch);
-        
+
         return State.QUOTED;
     }
-    
+
     private uint on_quoted_escape_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
-        
+
         // only two accepted escaped characters: double-quote and backslash
         // everything else dropped on the floor
         switch (ch) {
@@ -720,19 +720,19 @@ public class Geary.Imap.Deserializer : BaseObject {
                 append_to_string(ch);
             break;
         }
-        
+
         return State.QUOTED;
     }
-    
+
     private uint on_partial_body_atom_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
-        
+
         // decoding the partial body parameter ("BODY[section]" et al.) is simply to locate the
         // terminating space after the closing square bracket or closing angle bracket
         // TODO: stricter testing of atom special characters and such (much like on_tag_or_atom_char)
         // but keeping in mind the looser rules and such with this variation
         append_to_string(ch);
-        
+
         // Can't terminate the atom with a close square bracket because the partial span
         // ("<...>") might be next
         //
@@ -743,27 +743,27 @@ public class Geary.Imap.Deserializer : BaseObject {
             case ']':
             case '>':
                 return State.PARTIAL_BODY_ATOM_TERMINATING;
-            
+
             default:
                 return state;
         }
     }
-    
+
     private uint on_partial_body_atom_terminating_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
-        
+
         // anything but a space indicates the atom is continuing, therefore return to prior state
         if (ch != ' ')
             return on_partial_body_atom_char(State.PARTIAL_BODY_ATOM, event, user);
-        
+
         save_string_parameter(false);
-        
+
         return State.START_PARAM;
     }
-    
+
     private uint on_literal_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
-        
+
         // if close-bracket, end of literal length field -- next event must be EOL
         if (ch == '}') {
             // empty literal treated as garbage
@@ -779,31 +779,31 @@ public class Geary.Imap.Deserializer : BaseObject {
 
             return State.LITERAL_DATA_BEGIN;
         }
-        
+
         // drop anything non-numeric
         if (!ch.isdigit())
             return State.LITERAL;
-        
+
         append_to_string(ch);
-        
+
         return State.LITERAL;
     }
-    
+
     private uint on_literal_data_begin_eol(uint state, uint event, void *user) {
         return State.LITERAL_DATA;
     }
-    
+
     private uint on_literal_data(uint state, uint event, void *user) {
         size_t *bytes_read = (size_t *) user;
-        
+
         assert(*bytes_read <= literal_length_remaining);
         literal_length_remaining -= *bytes_read;
-        
+
         if (literal_length_remaining > 0)
             return State.LITERAL_DATA;
-            
+
         save_literal_parameter();
-        
+
         return State.START_PARAM;
     }
 
@@ -835,13 +835,13 @@ public class Geary.Imap.Deserializer : BaseObject {
         // always signal as closed and notify
         closed_semaphore.blind_notify();
         eos();
-        
+
         return State.CLOSED;
     }
-    
+
     private uint on_bad_transition(uint state, uint event, void *user) {
         warning("Bad event %s at state %s", event_to_string(event), state_to_string(state));
-        
+
         return State.FAILED;
     }
 }

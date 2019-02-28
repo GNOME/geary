@@ -13,7 +13,7 @@
 
 public class Geary.Nonblocking.Concurrent : BaseObject {
     public const int DEFAULT_MAX_THREADS = 4;
-    
+
     /**
      * A callback invoked from a {@link Concurrent} background thread.
      *
@@ -24,33 +24,33 @@ public class Geary.Nonblocking.Concurrent : BaseObject {
      * foreground caller on behalf of the callback.
      */
     public delegate void ConcurrentCallback(Cancellable? cancellable) throws Error;
-    
+
     private class ConcurrentOperation : BaseObject {
         private unowned ConcurrentCallback cb;
         private Cancellable? cancellable;
         private Error? caught_err = null;
         private Event event = new Event();
-        
+
         public ConcurrentOperation(ConcurrentCallback cb, Cancellable? cancellable) {
             this.cb = cb;
             this.cancellable = cancellable;
         }
-        
+
         // Called from the foreground thread to wait for the background to complete.
         //
         // Can't cancel here because we *must* wait for the operation to be executed by the
         // thread and complete
         public async void wait_async() throws Error {
             yield event.wait_async();
-            
+
             if (caught_err != null)
                 throw caught_err;
-            
+
             // now deal with cancellation
             if (cancellable != null && cancellable.is_cancelled())
                 throw new IOError.CANCELLED("Geary.Nonblocking.Concurrent cancelled");
         }
-        
+
         // Called from a background thread
         public void execute() {
             // only execute if not already cancelled
@@ -61,28 +61,28 @@ public class Geary.Nonblocking.Concurrent : BaseObject {
                     caught_err = err;
                 }
             }
-            
+
             // can't notify event here, Nonblocking.Event is not thread safe
             //
             // artificially increment the ref count of this object, schedule a completion callback
             // on the forground thread, and signal there
             ref();
-            
+
             Idle.add(on_notify_completed);
         }
-        
+
         // Called in the context of the Event loop in the foreground thread
         private bool on_notify_completed() {
             // alert waiters
             event.blind_notify();
-            
+
             // unref; do not touch "self" from here on, it's possibly deallocated
             unref();
-            
+
             return false;
         }
     }
-    
+
     private static Concurrent? _global = null;
     /**
      * Returns the global instance of a {@link Concurrent} scheduler.
@@ -95,10 +95,10 @@ public class Geary.Nonblocking.Concurrent : BaseObject {
             return (_global != null) ? _global : _global = new Concurrent();
         }
     }
-    
+
     private ThreadPool<ConcurrentOperation>? thread_pool = null;
     private ThreadError? init_err = null;
-    
+
     /**
      * Creates a new Concurrent pool for scheduling background work.
      *
@@ -111,11 +111,11 @@ public class Geary.Nonblocking.Concurrent : BaseObject {
                 max_threads, false);
         } catch (ThreadError err) {
             init_err = err;
-            
+
             warning("Unable to create Geary.Nonblocking.Concurrent: %s", err.message);
         }
     }
-    
+
     /**
      * Schedule a callback to be invoked in a background thread.
      *
@@ -128,14 +128,14 @@ public class Geary.Nonblocking.Concurrent : BaseObject {
         throws Error {
         if (init_err != null)
             throw init_err;
-        
+
         // hold ConcurrentOperation ref until thread completes
         ConcurrentOperation op = new ConcurrentOperation(cb, cancellable);
         thread_pool.add(op);
-        
+
         yield op.wait_async();
     }
-    
+
     private void on_work_ready(owned ConcurrentOperation op) {
         op.execute();
     }

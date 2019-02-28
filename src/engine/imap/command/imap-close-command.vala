@@ -10,7 +10,7 @@
 
 public class Geary.Imap.CloseCommand : Command {
     public const string NAME = "close";
-    
+
     public CloseCommand() {
         base (NAME);
     }

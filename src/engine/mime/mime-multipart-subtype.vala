@@ -39,7 +39,7 @@ public enum Geary.Mime.MultipartSubtype {
       * See [[http://tools.ietf.org/html/rfc2387]]
       */
     RELATED;
-    
+
     /**
      * Converts a {@link ContentType} into a {@link MultipartSubtype}.
      *
@@ -48,24 +48,24 @@ public enum Geary.Mime.MultipartSubtype {
     public static MultipartSubtype from_content_type(ContentType? content_type, out bool is_unknown) {
         if (content_type == null || !content_type.has_media_type("multipart")) {
             is_unknown = true;
-            
+
             return MIXED;
         }
-        
+
         is_unknown = false;
         switch (Ascii.strdown(content_type.media_subtype)) {
             case "mixed":
                 return MIXED;
-            
+
             case "alternative":
                 return ALTERNATIVE;
-            
+
             case "related":
                 return RELATED;
-            
+
             default:
                 is_unknown = true;
-                
+
                 return MIXED;
         }
     }

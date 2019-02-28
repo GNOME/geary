@@ -36,30 +36,30 @@
  */
 public interface Geary.ReferenceSemantics : BaseObject {
     protected abstract int manual_ref_count { get; protected set; }
-    
+
     /**
      * A ReferenceSemantics object can fire this signal for force all SmartReferences to drop their
      * reference to it.
      */
     public signal void release_now();
-    
+
     /**
      * This signal is fired when all SmartReferences to the ReferenceSemantics object have dropped
      * their reference.
      */
     public signal void freed();
-    
+
     internal void claim() {
         manual_ref_count++;
     }
-    
+
     internal void release() {
         assert(manual_ref_count > 0);
-        
+
         if (--manual_ref_count == 0)
             freed();
     }
-    
+
     public bool is_freed() {
         return (manual_ref_count == 0);
     }
@@ -71,7 +71,7 @@ public interface Geary.ReferenceSemantics : BaseObject {
  */
 public abstract class Geary.SmartReference : BaseObject {
     private ReferenceSemantics? reffed;
-    
+
     /**
      * This signal is fired when the SmartReference drops its reference to a ReferenceSemantics
      * object due to it firing "release-now".
@@ -80,28 +80,28 @@ public abstract class Geary.SmartReference : BaseObject {
      */
     public virtual signal void reference_broken() {
     }
-    
+
     public SmartReference(ReferenceSemantics reffed) {
         this.reffed = reffed;
-        
+
         reffed.release_now.connect(on_release_now);
-        
+
         reffed.claim();
     }
-    
+
     ~SmartReference() {
         if (reffed != null)
             reffed.release();
     }
-    
+
     public ReferenceSemantics? get_reference() {
         return reffed;
     }
-    
+
     private void on_release_now() {
         reffed.release();
         reffed = null;
-        
+
         reference_broken();
     }
 }

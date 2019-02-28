@@ -52,9 +52,9 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
     public int remote_retry_count { get; set; default = 0; }
     public Error? err { get; private set; default = null; }
     public bool notified { get { return semaphore.can_pass; } }
-    
+
     private Nonblocking.Semaphore semaphore = new Nonblocking.Semaphore();
-    
+
     public ReplayOperation(string name, Scope scope, OnError on_remote_error = OnError.THROW) {
         this.name = name;
         this.scope = scope;
@@ -169,38 +169,38 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
      */
     public async void wait_for_ready_async(Cancellable? cancellable = null) throws Error {
         yield semaphore.wait_async(cancellable);
-        
+
         if (err != null)
             throw err;
     }
-    
+
     // Can only be called once
     internal void notify_ready(Error? err) {
         assert(!semaphore.can_pass);
-        
+
         this.err = err;
-        
+
         try {
             semaphore.notify();
         } catch (Error notify_err) {
             debug("Unable to notify replay operation as ready: [%s] %s", name, notify_err.message);
         }
     }
-    
+
     public abstract string describe_state();
-    
+
     // The Comparable interface is merely to ensure the ReplayQueue sorts operations by their
     // submission order, ensuring that retry operations are retried in order of submissions
     public int compare_to(ReplayOperation other) {
         assert(submission_number >= 0);
         assert(other.submission_number >= 0);
-        
+
         return (int) (submission_number - other.submission_number).clamp(-1, 1);
     }
-    
+
     public string to_string() {
         string state = describe_state();
-        
+
         return String.is_empty(state)
             ? "[%s] %s remote_retry_count=%d".printf(submission_number.to_string(), name, remote_retry_count)
             : "[%s] %s: %s remote_retry_count=%d".printf(submission_number.to_string(), name, state,

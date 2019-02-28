@@ -10,24 +10,24 @@
 
 private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOperation {
     public Gee.Set<Imap.UID> destination_uids = new Gee.HashSet<Imap.UID>();
-    
+
     private MinimalFolder engine;
     private Gee.List<ImapDB.EmailIdentifier> to_move = new Gee.ArrayList<ImapDB.EmailIdentifier>();
     private Geary.FolderPath destination;
     private Cancellable? cancellable;
     private Gee.List<Imap.MessageSet>? remaining_msg_sets = null;
-    
+
     public MoveEmailCommit(MinimalFolder engine, Gee.Collection<ImapDB.EmailIdentifier> to_move,
         Geary.FolderPath destination, Cancellable? cancellable) {
         base.only_remote("MoveEmailCommit", OnError.RETRY);
-        
+
         this.engine = engine;
-        
+
         this.to_move.add_all(to_move);
         this.destination = destination;
         this.cancellable = cancellable;
     }
-    
+
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         to_move.remove_all(ids);
     }
@@ -80,7 +80,7 @@ private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOper
                 );
                 if (map != null)
                     destination_uids.add_all(map.values);
- 
+
                 yield remote.remove_email_async(msg_set.to_list(), null);
 
                 // completed successfully, remove from list in case of retry

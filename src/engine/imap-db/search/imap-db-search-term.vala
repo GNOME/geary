@@ -15,14 +15,14 @@ private class Geary.ImapDB.SearchTerm : BaseObject {
      * For example, punctuation might be removed, but no casefolding has occurred.
      */
     public string original { get; private set; }
-    
+
     /**
      * The parsed tokenized search term.
      *
      * Casefolding and other normalizing text operations have been performed.
      */
     public string parsed { get; private set; }
-    
+
     /**
      * The stemmed search term.
      *
@@ -30,7 +30,7 @@ private class Geary.ImapDB.SearchTerm : BaseObject {
      * term.
      */
     public string? stemmed { get; private set; }
-    
+
     /**
      * A list of terms ready for binding to an SQLite statement.
      *
@@ -38,23 +38,23 @@ private class Geary.ImapDB.SearchTerm : BaseObject {
      * are guaranteed not to be null or empty strings.
      */
     public Gee.List<string> sql { get; private set; default = new Gee.ArrayList<string>(); }
-    
+
     /**
      * Returns true if the {@link parsed} term is exact-match only (i.e. starts with quotes) and
      * there is no {@link stemmed} variant.
      */
     public bool is_exact { get { return parsed.has_prefix("\"") && stemmed == null; } }
-    
+
     public SearchTerm(string original, string parsed, string? stemmed, string? sql_parsed, string? sql_stemmed) {
         this.original = original;
         this.parsed = parsed;
         this.stemmed = stemmed;
-        
+
         // for now, only two variations: the parsed string and the stemmed; since stem is usually
         // shorter (and will be first in the OR statement), include it first
         if (!String.is_empty(sql_stemmed))
             sql.add(sql_stemmed);
-        
+
         if (!String.is_empty(sql_parsed))
             sql.add(sql_parsed);
     }

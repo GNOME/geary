@@ -12,26 +12,26 @@
 
 public class Geary.NamedFlag : BaseObject, Gee.Hashable<Geary.NamedFlag> {
     public string name { get; private set; }
-    
+
     public NamedFlag(string name) {
         this.name = name;
     }
-    
+
     public bool equal_to(Geary.NamedFlag other) {
         if (this == other)
             return true;
-        
+
         return name.down() == other.name.down();
     }
-    
+
     public uint hash() {
         return name.down().hash();
     }
-    
+
     public string serialize() {
         return name;
     }
-    
+
     public string to_string() {
         return name;
     }

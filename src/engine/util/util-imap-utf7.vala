@@ -100,7 +100,7 @@ public string utf8_to_imap_utf7(string str) {
         /* no characters that need to be encoded */
         return str;
     }
-    
+
     /* at least one encoded character */
     StringBuilder dest = new StringBuilder();
     dest.append_len(str, p);
@@ -115,7 +115,7 @@ public string utf8_to_imap_utf7(string str) {
             p++;
             continue;
         }
-        
+
         uint8[] utf16 = {};
         while ((uint8) str[p] >= 0x80) {
             int next_p = p;
@@ -143,7 +143,7 @@ public string utf8_to_imap_utf7(string str) {
 private void utf16buf_to_utf8(StringBuilder dest, uint8[] output, ref int pos, int len) throws ConvertError {
     if (len % 2 != 0)
         throw new ConvertError.ILLEGAL_SEQUENCE("Odd number of bytes in UTF-16 data");
-    
+
     uint16 high = (output[pos % 4] << 8) | output[(pos+1) % 4];
     if (high < UTF16_SURROGATE_HIGH_FIRST ||
         high > UTF16_SURROGATE_HIGH_MAX) {
@@ -155,18 +155,18 @@ private void utf16buf_to_utf8(StringBuilder dest, uint8[] output, ref int pos, i
         pos = (pos + 2) % 4;
         return;
     }
-    
+
     if (high > UTF16_SURROGATE_HIGH_LAST)
         throw new ConvertError.ILLEGAL_SEQUENCE("UTF-16 data out of range");
     if (len != 4) {
         /* missing the second character */
         throw new ConvertError.ILLEGAL_SEQUENCE("Truncated UTF-16 data");
     }
-    
+
     uint16 low = (output[(pos+2)%4] << 8) | output[(pos+3) % 4];
     if (low < UTF16_SURROGATE_LOW_FIRST || low > UTF16_SURROGATE_LOW_LAST)
         throw new ConvertError.ILLEGAL_SEQUENCE("Illegal UTF-16 surrogate");
-    
+
     unichar chr = UTF16_SURROGATE_BASE +
         (((high & UTF16_SURROGATE_MASK) << UTF16_SURROGATE_SHIFT) |
          (low & UTF16_SURROGATE_MASK));
@@ -179,52 +179,52 @@ private void utf16buf_to_utf8(StringBuilder dest, uint8[] output, ref int pos, i
 private void mbase64_decode_to_utf8(StringBuilder dest, string str, ref int p) throws ConvertError {
     uint8 input[4], output[4];
     int outstart = 0, outpos = 0;
-    
+
     while (str[p] != '-') {
         input[0] = imap_b64dec[(uint8) str[p + 0]];
         input[1] = imap_b64dec[(uint8) str[p + 1]];
         if (input[0] == 0xff || input[1] == 0xff)
             throw new ConvertError.ILLEGAL_SEQUENCE("Illegal character in IMAP base-64 encoded sequence");
-        
+
         output[outpos % 4] = (input[0] << 2) | (input[1] >> 4);
         if (++outpos % 4 == outstart) {
             utf16buf_to_utf8(dest, output, ref outstart, 4);
         }
-        
+
         input[2] = imap_b64dec[(uint8) str[p + 2]];
         if (input[2] == 0xff) {
             if (str[p + 2] != '-')
                 throw new ConvertError.ILLEGAL_SEQUENCE("Illegal character in IMAP base-64 encoded sequence");
-            
+
             p += 2;
             break;
         }
-        
+
         output[outpos % 4] = (input[1] << 4) | (input[2] >> 2);
         if (++outpos % 4 == outstart) {
             utf16buf_to_utf8(dest, output, ref outstart, 4);
         }
-        
+
         input[3] = imap_b64dec[(uint8) str[p + 3]];
         if (input[3] == 0xff) {
             if (str[p + 3] != '-')
                 throw new ConvertError.ILLEGAL_SEQUENCE("Illegal character in IMAP base-64 encoded sequence");
-            
+
             p += 3;
             break;
         }
-        
+
         output[outpos % 4] = ((input[2] << 6) & 0xc0) | input[3];
         if (++outpos % 4 == outstart) {
             utf16buf_to_utf8(dest, output, ref outstart, 4);
         }
-        
+
         p += 4;
     }
     if (outstart != outpos % 4) {
         utf16buf_to_utf8(dest, output, ref outstart, (4 + outpos - outstart) % 4);
     }
-    
+
     /* found ending '-' */
     p++;
 }
@@ -243,7 +243,7 @@ public string imap_utf7_to_utf8(string str) throws ConvertError {
         /* 8bit characters - the input is broken */
         throw new ConvertError.ILLEGAL_SEQUENCE("IMAP UTF-7 input string contains 8-bit data");
     }
-    
+
     /* at least one encoded character */
     StringBuilder dest = new StringBuilder();
     dest.append_len(str, p);

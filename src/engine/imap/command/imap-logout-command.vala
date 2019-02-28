@@ -10,7 +10,7 @@
 
 public class Geary.Imap.LogoutCommand : Command {
     public const string NAME = "logout";
-    
+
     public LogoutCommand() {
         base (NAME);
     }

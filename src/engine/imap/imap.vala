@@ -11,7 +11,7 @@ private int init_count = 0;
 internal void init() {
     if (init_count++ != 0)
         return;
-    
+
     MessageFlag.init();
     MailboxAttribute.init();
     Tag.init();

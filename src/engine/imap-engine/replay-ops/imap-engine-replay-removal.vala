@@ -18,25 +18,25 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
     public ReplayRemoval(MinimalFolder owner, int remote_count, Imap.SequenceNumber position) {
         // remote error will cause folder to reconnect and re-normalize, making this remove moot
         base ("Removal", Scope.LOCAL_AND_REMOTE, OnError.IGNORE_REMOTE);
-        
+
         this.owner = owner;
         this.remote_count = remote_count;
         this.position = position;
     }
-    
+
     public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
         // although using positional addressing, don't update state; EXPUNGEs that happen after
         // other EXPUNGEs have no affect on those ahead of it
     }
-    
+
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         // this operation deals only in positional addressing
     }
-    
+
     public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         // this ReplayOperation doesn't do remote removes, it reacts to them
     }
-    
+
     public override async ReplayOperation.Status replay_local_async() throws Error {
         // Although technically a local-only operation, must treat as remote to ensure it's
         // processed in-order with ReplayAppend operations

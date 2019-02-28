@@ -79,34 +79,34 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
     // The accumulated Email from the list operation.  Should only be accessed once the operation
     // has completed.
     public Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
-    
+
     protected MinimalFolder owner;
     protected Geary.Email.Field required_fields;
     protected Cancellable? cancellable;
     protected Folder.ListFlags flags;
-    
+
     private Gee.HashMap<Imap.UID, Geary.Email.Field> unfulfilled = new Gee.HashMap<Imap.UID, Geary.Email.Field>();
-    
+
     public AbstractListEmail(string name, MinimalFolder owner, Geary.Email.Field required_fields,
         Folder.ListFlags flags, Cancellable? cancellable) {
         base(name, OnError.IGNORE_REMOTE);
-        
+
         this.owner = owner;
         this.required_fields = required_fields;
         this.cancellable = cancellable;
         this.flags = flags;
     }
-    
+
     protected void add_unfulfilled_fields(Imap.UID? uid, Geary.Email.Field unfulfilled_fields) {
         assert(uid != null);
         assert(uid.is_valid());
-        
+
         if (!unfulfilled.has_key(uid))
             unfulfilled.set(uid, unfulfilled_fields);
         else
             unfulfilled.set(uid, unfulfilled.get(uid) | unfulfilled_fields);
     }
-    
+
     protected void add_many_unfulfilled_fields(Gee.Collection<Imap.UID>? uids,
         Geary.Email.Field unfulfilled_fields) {
         if (uids != null) {
@@ -114,18 +114,18 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                 add_unfulfilled_fields(uid, unfulfilled_fields);
         }
     }
-    
+
     protected int get_unfulfilled_count() {
         return unfulfilled.size;
     }
-    
+
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         // remove email already picked up from local store ... for email reported via the
         // callback, too late
         Collection.remove_if<Geary.Email>(accumulator, (email) => {
             return ids.contains((ImapDB.EmailIdentifier) email.id);
         });
-        
+
         // remove from unfulfilled list, as there's now nothing to fetch from the server
         // NOTE: Requires UID to work; this *should* always work, as the EmailIdentifier should
         // be originating from the database, not the Imap.Folder layer
@@ -147,7 +147,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         int fetches_avoided = yield remove_fulfilled_uids_async();
         if (fetches_avoided > 0) {
             total_fetches_avoided += fetches_avoided;
-            
+
             debug("[%s] %d previously-fulfilled fetches avoided in list operation, %d total",
                 owner.to_string(), fetches_avoided, total_fetches_avoided);
 
@@ -187,23 +187,23 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
 
         yield batch.execute_all_async(cancellable);
         batch.throw_first_exception();
-        
+
         Gee.ArrayList<Geary.Email> result_list = new Gee.ArrayList<Geary.Email>();
         Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>();
         foreach (int batch_id in batch.get_ids()) {
             Gee.List<Geary.Email>? list = (Gee.List<Geary.Email>?) batch.get_result(batch_id);
             if (list != null && list.size > 0) {
                 result_list.add_all(list);
-                
+
                 RemoteBatchOperation op = (RemoteBatchOperation) batch.get_operation(batch_id);
                 created_ids.add_all(op.created_ids);
             }
         }
-        
+
         // report merged emails
         if (result_list.size > 0)
             accumulator.add_all(result_list);
-        
+
         // signal
         if (created_ids.size > 0) {
             owner.replay_notify_email_inserted(created_ids);
@@ -311,7 +311,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             // is called) that the fields are downloaded and added to the database
             foreach (Geary.Email email in list)
                 uids.add(((ImapDB.EmailIdentifier) email.id).uid);
-            
+
             // remove any already stored locally
             Gee.Collection<ImapDB.EmailIdentifier>? ids =
                 yield owner.local_folder.get_ids_async(uids, ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE,
@@ -322,42 +322,42 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                     uids.remove(id.uid);
                 }
             }
-            
+
             // for the remainder (not in local store), fetch the required fields
             add_many_unfulfilled_fields(uids, ImapDB.Folder.REQUIRED_FIELDS);
         }
-        
+
         debug("%s: Vector expansion completed (%d new email)", owner.to_string(),
             (uids != null) ? uids.size : 0);
-        
+
         return uids != null && uids.size > 0 ? uids : null;
     }
-    
+
     private async int remove_fulfilled_uids_async() throws Error {
         // if the update is forced, don't rely on cached database, have to go to the horse's mouth
         if (flags.is_force_update())
             return 0;
-        
+
         ImapDB.Folder.ListFlags list_flags = ImapDB.Folder.ListFlags.from_folder_flags(flags);
-        
+
         Gee.Set<ImapDB.EmailIdentifier>? unfulfilled_ids = yield owner.local_folder.get_ids_async(
             unfulfilled.keys, list_flags, cancellable);
         if (unfulfilled_ids == null || unfulfilled_ids.size == 0)
             return 0;
-        
+
         Gee.Map<ImapDB.EmailIdentifier, Email.Field>? local_fields =
             yield owner.local_folder.list_email_fields_by_id_async(unfulfilled_ids, list_flags,
                 cancellable);
         if (local_fields == null || local_fields.size == 0)
             return 0;
-        
+
         // For each identifier, if now fulfilled in the database, fetch it, add it to the accumulator,
         // and remove it from the unfulfilled map -- one network operation saved
         int fetch_avoided = 0;
         foreach (ImapDB.EmailIdentifier id in local_fields.keys) {
             if (!local_fields.get(id).fulfills(required_fields))
                 continue;
-            
+
             try {
                 Email email = yield owner.local_folder.fetch_email_async(id, required_fields, list_flags,
                     cancellable);
@@ -365,16 +365,16 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             } catch (Error err) {
                 if (err is IOError.CANCELLED)
                     throw err;
-                
+
                 // some problem locally, do the network round-trip
                 continue;
             }
-            
+
             // got it, don't fetch from remote
             unfulfilled.unset(id.uid);
             fetch_avoided++;
         }
-        
+
         return fetch_avoided;
     }
 

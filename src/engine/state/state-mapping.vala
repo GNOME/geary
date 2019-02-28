@@ -14,7 +14,7 @@ public class Geary.State.Mapping : BaseObject {
     public uint state;
     public uint event;
     public unowned Transition transition;
-    
+
     public Mapping(uint state, uint event, Transition transition) {
         this.state = state;
         this.event = event;

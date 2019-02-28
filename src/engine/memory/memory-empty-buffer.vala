@@ -18,7 +18,7 @@ public class Geary.Memory.EmptyBuffer : Memory.Buffer, Memory.UnownedStringBuffe
             return (_instance != null) ? _instance : _instance = new EmptyBuffer();
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -27,7 +27,7 @@ public class Geary.Memory.EmptyBuffer : Memory.Buffer, Memory.UnownedStringBuffe
             return 0;
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -36,34 +36,34 @@ public class Geary.Memory.EmptyBuffer : Memory.Buffer, Memory.UnownedStringBuffe
             return 0;
         }
     }
-    
+
     private Bytes bytes = new Bytes(new uint8[0]);
     private ByteArray byte_array = new ByteArray();
-    
+
     private EmptyBuffer() {
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public override Bytes get_bytes() {
         return bytes;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public unowned uint8[] to_unowned_uint8_array() {
         return bytes.get_data();
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public unowned string to_unowned_string() {
         return "";
     }
-    
+
     /**
      * {@inheritDoc}
      */

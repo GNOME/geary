@@ -39,7 +39,7 @@ public bool contains_any_char(string str, unichar[] chars) {
         if (ch in chars)
             return true;
     }
-    
+
     return false;
 }
 
@@ -81,7 +81,7 @@ public string reduce_whitespace(string? str) {
 public string safe_byte_substring(string s, ssize_t max_length) {
     if (s.length < max_length)
         return s;
-    
+
     return glib_substring(s, 0, s.char_count(max_length));
 }
 

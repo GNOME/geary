@@ -37,18 +37,18 @@ public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCode
     public const string UIDNEXT = "uidnext";
     public const string UNAVAILABLE = "unavailable";
     public const string UNSEEN = "unseen";
-    
+
     /**
      * The original response code value submitted to the object (possibly off-the-wire).
      */
     public string original { get; private set; }
-    
+
     /**
      * The response code value set to lowercase, making it easy to compare to constant strings
      * in a uniform way.
      */
     public string value { get; private set; }
-    
+
     /**
      * Throws an {@link ImapError.INVALID} if the string cannot be represented as an
      * {link ResponseCodeType}.
@@ -56,7 +56,7 @@ public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCode
     public ResponseCodeType(string value) throws ImapError {
         init(value);
     }
-    
+
     /**
      * Throws an {@link ImapError.INVALID} if the {@link StringParameter} cannot be represented as
      * an {link ResponseCodeType}.
@@ -64,33 +64,33 @@ public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCode
     public ResponseCodeType.from_parameter(StringParameter stringp) throws ImapError {
         init(stringp.ascii);
     }
-    
+
     private void init(string ascii) throws ImapError {
         // note that is_quoting_required() also catches empty strings (as they require quoting)
         if (DataFormat.is_quoting_required(ascii) != DataFormat.Quoting.OPTIONAL)
             throw new ImapError.INVALID("\"%s\" cannot be represented as a ResponseCodeType", ascii);
-        
+
         // store lowercased so it's easily compared with const strings above
         original = ascii;
         value = Ascii.strdown(ascii);
     }
-    
+
     public bool is_value(string str) {
         return Ascii.stri_equal(value, str);
     }
-    
+
     public StringParameter to_parameter() {
         return new AtomParameter(original);
     }
-    
+
     public bool equal_to(ResponseCodeType other) {
         return (this == other) ? true : Ascii.stri_equal(value, other.value);
     }
-    
+
     public uint hash() {
         return Ascii.stri_hash(value);
     }
-    
+
     public string to_string() {
         return value;
     }

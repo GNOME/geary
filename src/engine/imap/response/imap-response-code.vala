@@ -13,11 +13,11 @@
 public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     public ResponseCode() {
     }
-    
+
     public ResponseCodeType get_response_code_type() throws ImapError {
         return new ResponseCodeType.from_parameter(get_as_string(0));
     }
-    
+
     /**
      * Converts the {@link ResponseCode} into a UIDNEXT {@link UID}, if possible.
      *
@@ -26,10 +26,10 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     public UID get_uid_next() throws ImapError {
         if (!get_response_code_type().is_value(ResponseCodeType.UIDNEXT))
             throw new ImapError.INVALID("Not UIDNEXT: %s", to_string());
-        
+
         return new UID.checked(get_as_string(1).as_int64());
     }
-    
+
     /**
      * Converts the {@link ResponseCode} into a {@link UIDValidity}, if possible.
      *
@@ -38,10 +38,10 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     public UIDValidity get_uid_validity() throws ImapError {
         if (!get_response_code_type().is_value(ResponseCodeType.UIDVALIDITY))
             throw new ImapError.INVALID("Not UIDVALIDITY: %s", to_string());
-        
+
         return new UIDValidity.checked(get_as_string(1).as_int64());
     }
-    
+
     /**
      * Converts the {@link ResponseCode} into an UNSEEN value, if possible.
      *
@@ -50,10 +50,10 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     public int get_unseen() throws ImapError {
         if (!get_response_code_type().is_value(ResponseCodeType.UNSEEN))
             throw new ImapError.INVALID("Not UNSEEN: %s", to_string());
-        
+
         return get_as_string(1).as_int32(0, int.MAX);
     }
-    
+
     /**
      * Converts the {@link ResponseCode} into PERMANENTFLAGS {@link MessageFlags}, if possible.
      *
@@ -62,10 +62,10 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     public MessageFlags get_permanent_flags() throws ImapError {
         if (!get_response_code_type().is_value(ResponseCodeType.PERMANENT_FLAGS))
             throw new ImapError.INVALID("Not PERMANENTFLAGS: %s", to_string());
-        
+
         return MessageFlags.from_list(get_as_list(1));
     }
-    
+
     /**
      * Parses the {@link ResponseCode} into {@link Capabilities}, if possible.
      *
@@ -78,17 +78,17 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     public Capabilities get_capabilities(ref int next_revision) throws ImapError {
         if (!get_response_code_type().is_value(ResponseCodeType.CAPABILITY))
             throw new ImapError.INVALID("Not CAPABILITY response code: %s", to_string());
-        
+
         Capabilities capabilities = new Capabilities(next_revision++);
         for (int ctr = 1; ctr < size; ctr++) {
             StringParameter? param = get_if_string(ctr);
             if (param != null)
                 capabilities.add_parameter(param);
         }
-        
+
         return capabilities;
     }
-    
+
     /**
      * Parses the {@link ResponseCode} into UIDPLUS' COPYUID response, if possible.
      *
@@ -103,12 +103,12 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
         out Gee.List<UID>? destination_uids) throws ImapError {
         if (!get_response_code_type().is_value(ResponseCodeType.COPYUID))
             throw new ImapError.INVALID("Not COPYUID response code: %s", to_string());
-        
+
         uidvalidity = new UIDValidity.checked(get_as_number(1).as_int64());
         source_uids = MessageSet.uid_parse(get_as_string(2).ascii);
         destination_uids = MessageSet.uid_parse(get_as_string(3).ascii);
     }
-    
+
     public override string to_string() {
         return "[%s]".printf(stringize_list());
     }

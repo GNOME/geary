@@ -29,12 +29,12 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
         Geary.Folder? all_mail = account.get_special_folder(Geary.SpecialFolderType.ALL_MAIL);
         if (all_mail != null)
             return yield move_email_async(email_ids, all_mail.path, cancellable);
-        
+
         // although this shouldn't happen, fall back on our traditional archive, which is simply
         // to remove the message from this label
         message("%s: Unable to perform revokable archive: All Mail not found", to_string());
         yield expunge_email_async(email_ids, cancellable);
-        
+
         return null;
     }
 
@@ -63,14 +63,14 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
         Geary.Folder? trash = folder.account.get_special_folder(SpecialFolderType.TRASH);
         if (trash == null)
             throw new EngineError.NOT_FOUND("%s: Trash folder not found for removal", folder.to_string());
-        
+
         // Copy to Trash, collect UIDs (note that copying to Trash is like a move; the copied
         // messages are removed from all labels)
         Gee.Set<Imap.UID>? uids = yield folder.copy_email_uids_async(email_ids, trash.path, cancellable);
         if (uids == null || uids.size == 0) {
             debug("%s: Can't true-remove %d emails, no COPYUIDs returned", folder.to_string(),
                 email_ids.size);
-            
+
             return;
         }
 

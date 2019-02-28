@@ -54,7 +54,7 @@ public class Geary.Db.Database : Geary.Db.Context {
                 return _is_open;
             }
         }
-        
+
         private set {
             lock (_is_open) {
                 _is_open = value;
@@ -149,20 +149,20 @@ public class Geary.Db.Database : Geary.Db.Context {
         // theirs (however improbable it is to name a table "CorruptionCheckTable")
         if ((flags & DatabaseFlags.READ_ONLY) == 0) {
             Connection cx = new Connection(this, Sqlite.OPEN_READWRITE, cancellable);
-            
+
             try {
                 // drop existing test table (in case created in prior failed open)
                 cx.exec("DROP TABLE IF EXISTS CorruptionCheckTable");
-                
+
                 // create dummy table with a "subtantial" column
                 cx.exec("CREATE TABLE CorruptionCheckTable (text_col TEXT)");
-                
+
                 // insert row
                 cx.exec("INSERT INTO CorruptionCheckTable (text_col) VALUES ('xyzzy')");
-                
+
                 // select row
                 cx.exec("SELECT * FROM CorruptionCheckTable");
-                
+
                 // drop table
                 cx.exec("DROP TABLE CorruptionCheckTable");
             } catch (Error err) {
@@ -186,13 +186,13 @@ public class Geary.Db.Database : Geary.Db.Context {
     public virtual void close(Cancellable? cancellable = null) throws Error {
         if (!is_open)
             return;
-        
+
         // drop the master connection, which holds a ref back to this object
         master_connection = null;
-        
+
         // As per the contract above, can't simply drop the thread and connection pools; that would
         // be bad.
-        
+
         is_open = false;
     }
 
@@ -233,10 +233,10 @@ public class Geary.Db.Database : Geary.Db.Context {
         Connection cx = new Connection(this, sqlite_flags, cancellable);
         if (prepare_cb != null)
             prepare_cb(cx, master);
-        
+
         return cx;
     }
-    
+
     /**
      * The master connection is a general-use connection many of the calls in Database (including
      * exec(), exec_file(), query(), prepare(), and exec_trnasaction()) use to perform their work.
@@ -247,10 +247,10 @@ public class Geary.Db.Database : Geary.Db.Context {
     public Connection get_master_connection() throws Error {
         if (master_connection == null)
             master_connection = internal_open_connection(true, null);
-        
+
         return master_connection;
     }
-    
+
     /**
      * Calls Connection.exec() on the master connection.
      *
@@ -259,7 +259,7 @@ public class Geary.Db.Database : Geary.Db.Context {
     public void exec(string sql, Cancellable? cancellable = null) throws Error {
         get_master_connection().exec(sql, cancellable);
     }
-    
+
     /**
      * Calls Connection.exec_file() on the master connection.
      *
@@ -268,7 +268,7 @@ public class Geary.Db.Database : Geary.Db.Context {
     public void exec_file(File file, Cancellable? cancellable = null) throws Error {
         get_master_connection().exec_file(file, cancellable);
     }
-    
+
     /**
      * Calls Connection.prepare() on the master connection.
      *
@@ -277,7 +277,7 @@ public class Geary.Db.Database : Geary.Db.Context {
     public Statement prepare(string sql) throws Error {
         return get_master_connection().prepare(sql);
     }
-    
+
     /**
      * Calls Connection.query() on the master connection.
      *
@@ -286,7 +286,7 @@ public class Geary.Db.Database : Geary.Db.Context {
     public Result query(string sql, Cancellable? cancellable = null) throws Error {
         return get_master_connection().query(sql, cancellable);
     }
-    
+
     /**
      * Calls Connection.exec_transaction() on the master connection.
      *
@@ -356,13 +356,13 @@ public class Geary.Db.Database : Geary.Db.Context {
             job.execute(cx);
         else
             job.failed(open_err);
-        
+
         lock (outstanding_async_jobs) {
             assert(outstanding_async_jobs > 0);
             --outstanding_async_jobs;
         }
     }
-    
+
     public override Database? get_database() {
         return this;
     }

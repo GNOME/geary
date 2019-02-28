@@ -34,7 +34,7 @@ public class Geary.RFC822.Message : BaseObject {
     private const string HEADER_REFERENCES = "References";
     private const string HEADER_MAILER = "X-Mailer";
     private const string HEADER_BCC = "Bcc";
-    
+
     // Internal note: If a field is added here, it *must* be set in stock_from_gmime().
     public RFC822.MailboxAddress? sender { get; private set; default = null; }
     public RFC822.MailboxAddresses? from { get; private set; default = null; }
@@ -56,30 +56,30 @@ public class Geary.RFC822.Message : BaseObject {
     // set these easily, so sometimes get_email() won't work.
     private Memory.Buffer? body_buffer = null;
     private size_t? body_offset = null;
-    
+
     public Message(Full full) throws RFC822Error {
         GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(full.buffer));
-        
+
         message = parser.construct_message();
         if (message == null)
             throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
-        
+
         // See the declaration of these fields for why we do this.
         body_buffer = full.buffer;
         body_offset = (size_t) parser.get_headers_end();
-        
+
         stock_from_gmime();
     }
-    
+
     public Message.from_gmime_message(GMime.Message message) {
         this.message = message;
         stock_from_gmime();
     }
-    
+
     public Message.from_buffer(Memory.Buffer full_email) throws RFC822Error {
         this(new Geary.RFC822.Full(full_email));
     }
-    
+
     public Message.from_parts(Header header, Text body) throws RFC822Error {
         GMime.StreamCat stream_cat = new GMime.StreamCat();
         stream_cat.add_source(new GMime.StreamMem.with_buffer(header.buffer.get_bytes().get_data()));
@@ -89,10 +89,10 @@ public class Geary.RFC822.Message : BaseObject {
         message = parser.construct_message();
         if (message == null)
             throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
-        
+
         body_buffer = body.buffer;
         body_offset = 0;
-        
+
         stock_from_gmime();
     }
 
@@ -295,7 +295,7 @@ public class Geary.RFC822.Message : BaseObject {
         } catch (Error e) {
             error("Error creating a memory buffer from a message: %s", e.message);
         }
-        
+
         // GMime also drops the ball for the *new* message.  When it comes out of the GMime
         // Parser, its "mime part" somehow isn't realizing it has a Content-Type header
         // already, so whenever you manipulate the headers, it adds a duplicate one.  This
@@ -306,10 +306,10 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.Object original_mime_part = message.get_mime_part();
         GMime.Message empty = new GMime.Message(true);
         message.set_mime_part(empty.get_mime_part());
-        
+
         message.remove_header(HEADER_BCC);
         bcc = null;
-        
+
         message.set_mime_part(original_mime_part);
     }
 
@@ -360,7 +360,7 @@ public class Geary.RFC822.Message : BaseObject {
         part.set_content_encoding(Geary.RFC822.Utils.get_best_encoding(stream));
         return part;
     }
-    
+
     /**
      * Construct a Geary.Email from a Message.  NOTE: this requires you to have created
      * the Message in such a way that its body_buffer and body_offset fields will be filled
@@ -370,9 +370,9 @@ public class Geary.RFC822.Message : BaseObject {
     public Geary.Email get_email(Geary.EmailIdentifier id) throws Error {
         assert(body_buffer != null);
         assert(body_offset != null);
-        
+
         Geary.Email email = new Geary.Email(id);
-        
+
         email.set_message_header(new Geary.RFC822.Header(new Geary.Memory.StringBuffer(
             message.get_headers())));
         email.set_send_date(date);
@@ -431,19 +431,19 @@ public class Geary.RFC822.Message : BaseObject {
 
     public Gee.List<RFC822.MailboxAddress>? get_recipients() {
         Gee.List<RFC822.MailboxAddress> addrs = new Gee.ArrayList<RFC822.MailboxAddress>();
-        
+
         if (to != null)
             addrs.add_all(to.get_all());
-        
+
         if (cc != null)
             addrs.add_all(cc.get_all());
-        
+
         if (bcc != null)
             addrs.add_all(bcc.get_all());
-        
+
         return (addrs.size > 0) ? addrs : null;
     }
-    
+
     /**
      * Returns the {@link Message} as a {@link Memory.Buffer} suitable for in-memory use (i.e.
      * with native linefeed characters).
@@ -451,7 +451,7 @@ public class Geary.RFC822.Message : BaseObject {
     public Memory.Buffer get_native_buffer() throws RFC822Error {
         return message_to_memory_buffer(false, false);
     }
-    
+
     /**
      * Returns the {@link Message} as a {@link Memory.Buffer} suitable for transmission or
      * storage (i.e. using protocol-specific linefeeds).
@@ -546,22 +546,22 @@ public class Geary.RFC822.Message : BaseObject {
                 Mime.MultipartSubtype.from_content_type(content_type, null);
 
             bool found_text_subtype = false;
-            
+
             StringBuilder builder = new StringBuilder();
             int count = multipart.get_count();
             for (int i = 0; i < count; ++i) {
                 GMime.Object child = multipart.get_part(i);
-                
+
                 string? child_body = null;
                 found_text_subtype |= construct_body_from_mime_parts(child, this_subtype, text_subtype,
                     to_html, replacer, ref child_body);
                 if (child_body != null)
                     builder.append(child_body);
             }
-            
+
             if (!String.is_empty(builder.str))
                 body = builder.str;
-            
+
             return found_text_subtype;
         }
 
@@ -670,10 +670,10 @@ public class Geary.RFC822.Message : BaseObject {
                 // Ignore.
             }
         }
-        
+
         if (body != null && html)
             body = Geary.HTML.html_to_text(body);
-        
+
         if (include_sub_messages) {
             foreach (Message sub_message in get_sub_messages()) {
                 // We index a rough approximation of what a client would be
@@ -701,7 +701,7 @@ public class Geary.RFC822.Message : BaseObject {
                 string? sub_body = sub_message.get_searchable_body(false);
                 if (sub_body != null)
                     sub_full.append(sub_body);
-                
+
                 if (sub_full.len > 0) {
                     if (body == null)
                         body = "";
@@ -709,7 +709,7 @@ public class Geary.RFC822.Message : BaseObject {
                 }
             }
         }
-        
+
         return body;
     }
 
@@ -835,7 +835,7 @@ public class Geary.RFC822.Message : BaseObject {
                 // This is often the case, and we'll treat these as attached
                 disposition = Mime.DispositionType.ATTACHMENT;
             }
-            
+
             if (requested_disposition == Mime.DispositionType.UNSPECIFIED || disposition == requested_disposition) {
                 GMime.Stream stream = new GMime.StreamMem();
                 message.write_to_stream(stream);
@@ -880,7 +880,7 @@ public class Geary.RFC822.Message : BaseObject {
         find_sub_messages(messages, message.get_mime_part());
         return messages;
     }
-    
+
     private void find_sub_messages(Gee.List<Geary.RFC822.Message> messages, GMime.Object root) {
         // If this is a multipart container, check each of its children.
         GMime.Multipart? multipart = root as GMime.Multipart;
@@ -891,7 +891,7 @@ public class Geary.RFC822.Message : BaseObject {
             }
             return;
         }
-        
+
         GMime.MessagePart? messagepart = root as GMime.MessagePart;
         if (messagepart != null) {
             GMime.Message sub_message = messagepart.get_message();
@@ -902,21 +902,21 @@ public class Geary.RFC822.Message : BaseObject {
             }
         }
     }
-    
+
     private Memory.Buffer message_to_memory_buffer(bool encoded, bool dotstuffed) throws RFC822Error {
         ByteArray byte_array = new ByteArray();
         GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
         stream.set_owner(false);
-        
+
         GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
         stream_filter.add(new GMime.FilterCRLF(encoded, dotstuffed));
-        
+
         if (message.write_to_stream(stream_filter) < 0)
             throw new RFC822Error.FAILED("Unable to write RFC822 message to memory buffer");
-        
+
         if (stream_filter.flush() != 0)
             throw new RFC822Error.FAILED("Unable to flush RFC822 message to memory buffer");
-        
+
         return new Memory.ByteBuffer.from_byte_array(byte_array);
     }
 

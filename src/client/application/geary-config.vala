@@ -67,41 +67,41 @@ public class Configuration {
     public int window_width {
         get { return settings.get_int(WINDOW_WIDTH_KEY); }
     }
-    
+
     public int window_height {
         get { return settings.get_int(WINDOW_HEIGHT_KEY); }
     }
-    
+
     public bool window_maximize {
         get { return settings.get_boolean(WINDOW_MAXIMIZE_KEY); }
     }
-    
+
     public int folder_list_pane_position_old {
         get { return settings.get_int(FOLDER_LIST_PANE_POSITION_KEY); }
     }
-    
+
     public int folder_list_pane_position_horizontal {
         get { return settings.get_int(FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY); }
         set { settings.set_int(FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY, value); }
     }
-    
+
     public int folder_list_pane_position_vertical {
         get { return settings.get_int(FOLDER_LIST_PANE_POSITION_VERTICAL_KEY); }
     }
-    
+
     public bool folder_list_pane_horizontal {
         get { return settings.get_boolean(FOLDER_LIST_PANE_HORIZONTAL_KEY); }
     }
-    
+
     public int messages_pane_position {
         get { return settings.get_int(MESSAGES_PANE_POSITION_KEY); }
         set { settings.set_int(MESSAGES_PANE_POSITION_KEY, value); }
     }
-    
+
     public bool autoselect {
         get { return settings.get_boolean(AUTOSELECT_KEY); }
     }
-    
+
     public bool display_preview {
         get { return settings.get_boolean(DISPLAY_PREVIEW_KEY); }
     }
@@ -136,7 +136,7 @@ public class Configuration {
         get { return settings.get_boolean(STARTUP_NOTIFICATIONS_KEY); }
         set { set_boolean(STARTUP_NOTIFICATIONS_KEY, value); }
     }
-    
+
     private const string CLOCK_FORMAT_KEY = "clock-format";
     public Date.ClockFormat clock_format {
         get {
@@ -146,12 +146,12 @@ public class Configuration {
                 return Date.ClockFormat.TWENTY_FOUR_HOURS;
         }
     }
-    
+
     public bool ask_open_attachment {
         get { return settings.get_boolean(ASK_OPEN_ATTACHMENT_KEY); }
         set { set_boolean(ASK_OPEN_ATTACHMENT_KEY, value); }
     }
-    
+
     public bool compose_as_html {
         get { return settings.get_boolean(COMPOSE_AS_HTML_KEY); }
         set { set_boolean(COMPOSE_AS_HTML_KEY, value); }
@@ -195,43 +195,43 @@ public class Configuration {
         SettingsBindFlags flags = GLib.SettingsBindFlags.DEFAULT) {
         settings.bind(key, object, property, flags);
     }
-    
+
     private void set_boolean(string name, bool value) {
         if (!settings.set_boolean(name, value))
             message("Unable to set configuration value %s = %s", name, value.to_string());
     }
-    
+
     public Geary.SearchQuery.Strategy get_search_strategy() {
         switch (settings.get_string(SEARCH_STRATEGY_KEY).down()) {
             case "exact":
                 return Geary.SearchQuery.Strategy.EXACT;
-            
+
             case "aggressive":
                 return Geary.SearchQuery.Strategy.AGGRESSIVE;
-            
+
             case "horizon":
                 return Geary.SearchQuery.Strategy.HORIZON;
-            
+
             case "conservative":
             default:
                 return Geary.SearchQuery.Strategy.CONSERVATIVE;
         }
     }
-    
+
     public void set_search_strategy(Geary.SearchQuery.Strategy strategy) {
         switch (strategy) {
             case Geary.SearchQuery.Strategy.EXACT:
                 settings.set_string(SEARCH_STRATEGY_KEY, "exact");
             break;
-            
+
             case Geary.SearchQuery.Strategy.AGGRESSIVE:
                 settings.set_string(SEARCH_STRATEGY_KEY, "aggressive");
             break;
-            
+
             case Geary.SearchQuery.Strategy.HORIZON:
                 settings.set_string(SEARCH_STRATEGY_KEY, "horizon");
             break;
-            
+
             case Geary.SearchQuery.Strategy.CONSERVATIVE:
             default:
                 settings.set_string(SEARCH_STRATEGY_KEY, "conservative");

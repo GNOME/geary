@@ -12,13 +12,13 @@ Geary.ComposedEmail? composed_email = null;
 
 async void main_async() throws Error {
     Geary.Smtp.ClientSession session = new Geary.Smtp.ClientSession(endpoint);
-    
+
     Geary.Smtp.Greeting? greeting = yield session.login_async(credentials);
     stdout.printf("%s\n", greeting.to_string());
-    
+
     for (int ctr = 0; ctr < arg_count; ctr++) {
         Geary.RFC822.Message msg;
-        
+
         if (arg_full_file != null) {
             debug("%s", arg_full_file);
             msg = new Geary.RFC822.Message.from_buffer(new Geary.Memory.FileBuffer(
@@ -26,33 +26,33 @@ async void main_async() throws Error {
         } else {
             string subj_msg = "#%d".printf(ctr + 1);
             composed_email.subject = subj_msg;
-            
+
             if (Geary.String.is_empty(arg_file)) {
                 composed_email.body_text = subj_msg;
             } else {
                 string contents;
                 FileUtils.get_contents(arg_file, out contents);
-                
+
                 composed_email.body_text = contents;
             }
-            
+
             if (!Geary.String.is_empty(arg_html)) {
                 string contents;
                 FileUtils.get_contents(arg_html, out contents);
-                
+
                 composed_email.body_html = contents;
             }
-            
+
             msg = new Geary.RFC822.Message.from_composed_email(composed_email, null);
         }
-        
+
         stdout.printf("\n\n%s\n\n", msg.to_string());
-        
+
         yield session.send_email_async(msg.from.get(0), msg);
-        
+
         stdout.printf("Sent email #%d\n", ctr);
     }
-    
+
     Geary.Smtp.Response? logout = yield session.logout_async(false);
     stdout.printf("%s\n", logout.to_string());
 }
@@ -64,7 +64,7 @@ void on_main_completed(Object? object, AsyncResult result) {
         stderr.printf("%s\n", err.message);
         ec = 1;
     }
-    
+
     if (main_loop != null)
         main_loop.quit();
 }
@@ -104,9 +104,9 @@ const int SMTP_TIMEOUT_SEC = 30;
 bool verify_required(string? arg, string name) {
     if (!Geary.String.is_empty(arg))
         return true;
-    
+
     stdout.printf("%s required\n", name);
-    
+
     return false;
 }
 
@@ -119,25 +119,25 @@ int main(string[] args) {
     } catch (Error err) {
         error ("Failed to parse command line: %s", err.message);
     }
-    
+
     if (!arg_gmail && !verify_required(arg_hostname, "Hostname"))
         return 1;
-    
+
     if (arg_full_file == null && !verify_required(arg_from, "From:"))
         return 1;
-    
+
     if (arg_full_file == null && !verify_required(arg_to, "To:"))
         return 1;
-    
+
     if (!verify_required(arg_user, "Username"))
         return 1;
-    
+
     if (!verify_required(arg_pass, "Password"))
         return 1;
-    
+
     if (arg_count < 1)
         arg_count = 1;
-    
+
     if (arg_gmail) {
         endpoint = new Geary.Endpoint(
             new GLib.NetworkAddress("smtp.gmail.com", Geary.Smtp.SUBMISSION_PORT),
@@ -176,13 +176,13 @@ int main(string[] args) {
         composed_email.to = new Geary.RFC822.MailboxAddresses.single(
             new Geary.RFC822.MailboxAddress(null, arg_to));
     }
-    
+
     main_loop = new MainLoop();
-    
+
     main_async.begin(on_main_completed);
-    
+
     main_loop.run();
-    
+
     return ec;
 }
 

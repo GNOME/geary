@@ -17,7 +17,7 @@ public class Geary.Memory.ByteBuffer : Memory.Buffer, Memory.UnownedBytesBuffer 
             return bytes.length;
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -26,10 +26,10 @@ public class Geary.Memory.ByteBuffer : Memory.Buffer, Memory.UnownedBytesBuffer 
             return allocated_bytes;
         }
     }
-    
+
     private Bytes bytes;
     private size_t allocated_bytes;
-    
+
     /**
      * filled is the number of usable bytes in the supplied buffer, allocated is the total size
      * of the buffer.
@@ -41,11 +41,11 @@ public class Geary.Memory.ByteBuffer : Memory.Buffer, Memory.UnownedBytesBuffer 
      */
     public ByteBuffer(uint8[] data, size_t filled) {
         assert(filled <= data.length);
-        
+
         bytes = new Bytes(data[0:filled]);
         allocated_bytes = bytes.length;
     }
-    
+
     /**
      * filled is the number of usable bytes in the supplied buffer, allocated is the total size
      * of the buffer.
@@ -54,11 +54,11 @@ public class Geary.Memory.ByteBuffer : Memory.Buffer, Memory.UnownedBytesBuffer 
      */
     public ByteBuffer.take(owned uint8[] data, size_t filled) {
         assert(filled <= data.length);
-        
+
         bytes = new Bytes.take(data[0:filled]);
         allocated_bytes = data.length;
     }
-    
+
     /**
      * Takes ownership and converts a ByteArray to a {@link ByteBuffer}.
      *
@@ -68,7 +68,7 @@ public class Geary.Memory.ByteBuffer : Memory.Buffer, Memory.UnownedBytesBuffer 
         bytes = ByteArray.free_to_bytes(byte_array);
         allocated_bytes = bytes.length;
     }
-    
+
     /**
      * Takes ownership and converts a MemoryOutputStream to a {@link ByteBuffer}.
      *
@@ -76,18 +76,18 @@ public class Geary.Memory.ByteBuffer : Memory.Buffer, Memory.UnownedBytesBuffer 
      */
     public ByteBuffer.from_memory_output_stream(MemoryOutputStream mouts) {
         assert(mouts.is_closed());
-        
+
         bytes = mouts.steal_as_bytes();
         allocated_bytes = bytes.length;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public override Bytes get_bytes() {
         return bytes;
     }
-    
+
     /**
      * {@inheritDoc}
      */

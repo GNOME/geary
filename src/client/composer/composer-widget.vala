@@ -22,7 +22,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         REPLY_ALL,
         FORWARD
     }
-    
+
     public enum CloseStatus {
         DO_CLOSE,
         PENDING_CLOSE,
@@ -551,7 +551,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         ContactListStoreCache contact_list_store_cache, string mailto, Configuration config) {
 
         this(account, contact_list_store_cache, ComposeType.NEW_MESSAGE, config);
-        
+
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {
             // Parse the mailto link.
@@ -920,11 +920,11 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     [GtkCallback]
     private void on_drag_data_received(Gtk.Widget sender, Gdk.DragContext context, int x, int y,
         Gtk.SelectionData selection_data, uint info, uint time_) {
-        
+
         bool dnd_success = false;
         if (selection_data.get_length() >= 0) {
             dnd_success = true;
-            
+
             string uri_list = (string) selection_data.get_data();
             string[] uris = uri_list.strip().split("\n");
             foreach (string uri in uris) {
@@ -939,7 +939,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 }
             }
         }
-        
+
         Gtk.drag_finish(context, dnd_success, false, time_);
     }
 
@@ -947,7 +947,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private bool on_drag_drop(Gtk.Widget sender, Gdk.DragContext context, int x, int y, uint time_) {
         if (context.list_targets() == null)
             return false;
-        
+
         uint length = context.list_targets().length();
         Gdk.Atom? target_type = null;
         for (uint i = 0; i < length; i++) {
@@ -955,10 +955,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             if (target.name() == URI_LIST_MIME_TYPE)
                 target_type = target;
         }
-        
+
         if (target_type == null)
             return false;
-        
+
         Gtk.drag_get_data(sender, context, target_type, time_);
         return true;
     }
@@ -1093,7 +1093,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
         if (!modify_headers)
             return;
-        
+
         bool recipients_modified = this.to_entry.modified || this.cc_entry.modified || this.bcc_entry.modified;
         if (!recipients_modified) {
             if (type == ComposeType.REPLY || type == ComposeType.REPLY_ALL)
@@ -1472,7 +1472,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         } catch (Error err) {
             GLib.message("Unable to discard draft: %s", err.message);
         }
-        
+
         return null;
     }
 

@@ -12,7 +12,7 @@
 
 public class Geary.Imap.NoopCommand : Command {
     public const string NAME = "noop";
-    
+
     public NoopCommand() {
         base (NAME);
     }

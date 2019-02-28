@@ -9,11 +9,11 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
     private int count;
     private int fulfilled_count = 0;
     private Imap.UID? initial_uid = null;
-    
+
     public ListEmailByID(MinimalFolder owner, ImapDB.EmailIdentifier? initial_id, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable) {
         base ("ListEmailByID", owner, required_fields, flags, cancellable);
-        
+
         this.initial_id = initial_id;
         this.count = count;
     }
@@ -70,7 +70,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         fulfilled_count = fulfilled.size;
         if (fulfilled_count > 0)
             accumulator.add_all(fulfilled);
-        
+
         // determine if everything was listed
         bool finished = false;
         if (flags.is_local_only()) {

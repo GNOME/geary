@@ -43,43 +43,43 @@ public class FolderList.AccountBranch : Sidebar.Branch {
     private static int special_grouping_comparator(Sidebar.Entry a, Sidebar.Entry b) {
         SpecialGrouping? grouping_a = a as SpecialGrouping;
         SpecialGrouping? grouping_b = b as SpecialGrouping;
-        
+
         assert(grouping_a != null || grouping_b != null);
-        
+
         int position_a = (grouping_a != null ? grouping_a.position : 0);
         int position_b = (grouping_b != null ? grouping_b.position : 0);
-        
+
         return position_a - position_b;
     }
-    
+
     private static int special_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
         if (a is Sidebar.Grouping || b is Sidebar.Grouping)
             return special_grouping_comparator(a, b);
-        
+
         assert(a is FolderEntry);
         assert(b is FolderEntry);
-        
+
         FolderEntry entry_a = (FolderEntry) a;
         FolderEntry entry_b = (FolderEntry) b;
         Geary.SpecialFolderType type_a = entry_a.folder.special_folder_type;
         Geary.SpecialFolderType type_b = entry_b.folder.special_folder_type;
-        
+
         assert(type_a != Geary.SpecialFolderType.NONE);
         assert(type_b != Geary.SpecialFolderType.NONE);
-        
+
         // Special folders are ordered by their enum value.
         return (int) type_a - (int) type_b;
     }
-        
+
     private static int normal_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
         // Non-special folders are compared based on name.
         return a.get_sidebar_name().collate(b.get_sidebar_name());
     }
-    
+
     public FolderEntry? get_entry_for_path(Geary.FolderPath folder_path) {
         return folder_entries.get(folder_path);
     }
-    
+
     public void add_folder(Geary.Folder folder) {
         Sidebar.Entry? graft_point = null;
         FolderEntry folder_entry = new FolderEntry(folder);
@@ -87,7 +87,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         if (special_folder_type != Geary.SpecialFolderType.NONE) {
             if (special_folder_type == Geary.SpecialFolderType.SEARCH)
                 return; // Don't show search folder under the account.
-            
+
             // Special folders go in the root of the account.
             graft_point = get_root();
         } else if (folder.path.is_top_level) {
@@ -123,18 +123,18 @@ public class FolderList.AccountBranch : Sidebar.Branch {
                 special_folder_type.to_string());
         }
     }
-    
+
     public void remove_folder(Geary.Folder folder) {
         Sidebar.Entry? entry = folder_entries.get(folder.path);
         if(entry == null) {
             debug("Could not remove folder %s", folder.to_string());
             return;
         }
-        
+
         prune(entry);
         folder_entries.unset(folder.path);
     }
-    
+
     private void on_entry_removed(Sidebar.Entry entry) {
         FolderEntry? folder_entry = entry as FolderEntry;
         if (folder_entry != null && folder_entries.has_key(folder_entry.folder.path))

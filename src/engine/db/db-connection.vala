@@ -23,13 +23,13 @@ public class Geary.Db.Connection : Geary.Db.Context {
      * Default value is for *no* timeout, that is, the Sqlite will not retry BUSY results.
      */
     public const int DEFAULT_BUSY_TIMEOUT_MSEC = 0;
-    
+
     /**
      * This value gives a generous amount of time for SQLite to finish a big write operation and
      * relinquish the lock to other waiting transactions.
      */
     public const int RECOMMENDED_BUSY_TIMEOUT_MSEC = 60 * 1000;
-    
+
     private const string PRAGMA_FOREIGN_KEYS = "foreign_keys";
     private const string PRAGMA_RECURSIVE_TRIGGERS = "recursive_triggers";
     private const string PRAGMA_USER_VERSION = "user_version";
@@ -39,45 +39,45 @@ public class Geary.Db.Connection : Geary.Db.Context {
     private const string PRAGMA_FREELIST_COUNT = "freelist_count";
     private const string PRAGMA_PAGE_COUNT = "page_count";
     private const string PRAGMA_PAGE_SIZE = "page_size";
-    
+
     // this is used for logging purposes only; connection numbers mean nothing to SQLite
     private static int next_cx_number = 0;
-    
+
     /**
      * See [[http://www.sqlite.org/c3ref/last_insert_rowid.html]]
      */
     public int64 last_insert_rowid { get {
         return db.last_insert_rowid();
     } }
-    
+
     /**
      * See [[http://www.sqlite.org/c3ref/changes.html]]
      */
     public int last_modified_rows { get {
         return db.changes();
     } }
-    
+
     /**
      * See [[http://www.sqlite.org/c3ref/total_changes.html]]
      */
     public int total_modified_rows { get {
         return db.total_changes();
     } }
-    
+
     public weak Database database { get; private set; }
-    
+
     internal Sqlite.Database db;
-    
+
     private int cx_number;
     private int busy_timeout_msec = DEFAULT_BUSY_TIMEOUT_MSEC;
-    
+
     internal Connection(Database database, int sqlite_flags, Cancellable? cancellable) throws Error {
         this.database = database;
-        
+
         lock (next_cx_number) {
             cx_number = next_cx_number++;
         }
-        
+
         check_cancelled("Connection.ctor", cancellable);
 
         try {
@@ -93,7 +93,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
                 throw derr;
         }
     }
-    
+
     /**
      * Execute a plain text SQL statement.  More than one SQL statement may be in the string.  See
      * [[http://www.sqlite.org/lang.html]] for more information on SQLite's SQL syntax.
@@ -107,13 +107,13 @@ public class Geary.Db.Connection : Geary.Db.Context {
      */
     public void exec(string sql, Cancellable? cancellable = null) throws Error {
         check_cancelled("Connection.exec", cancellable);
-        
+
         throw_on_error("Connection.exec", db.exec(sql), sql);
-        
+
         // Don't use Context.log(), which is designed for logging Results and Statements
         Logging.debug(Logging.Flag.SQL, "exec:\n\t%s", sql);
     }
-    
+
     /**
      * Loads a text file of SQL commands into memory and executes them at once with exec().
      *
@@ -124,13 +124,13 @@ public class Geary.Db.Connection : Geary.Db.Context {
      */
     public void exec_file(File file, Cancellable? cancellable = null) throws Error {
         check_cancelled("Connection.exec_file", cancellable);
-        
+
         string sql;
         FileUtils.get_contents(file.get_path(), out sql);
-        
+
         exec(sql, cancellable);
     }
-    
+
     /**
      * Executes a plain text SQL statement and returns a Result object directly.
      * This call creates an intermediate Statement object which may be fetched from Result.statement.
@@ -138,7 +138,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public Result query(string sql, Cancellable? cancellable = null) throws Error {
         return (new Statement(this, sql)).exec(cancellable);
     }
-    
+
     /**
      * Prepares a Statement which may have values bound to it and executed.  See
      * [[http://www.sqlite.org/c3ref/prepare.html]]
@@ -146,7 +146,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public Statement prepare(string sql) throws DatabaseError {
         return new Statement(this, sql);
     }
-    
+
     /**
      * See set_busy_timeout_msec().
      */
@@ -170,11 +170,11 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public void set_busy_timeout_msec(int busy_timeout_msec) throws Error {
         if (this.busy_timeout_msec == busy_timeout_msec)
             return;
-        
+
         throw_on_error("Database.set_busy_timeout", db.busy_timeout(busy_timeout_msec));
         this.busy_timeout_msec = busy_timeout_msec;
     }
-    
+
     /**
      * Returns the result of a PRAGMA as a boolean.  See [[http://www.sqlite.org/pragma.html]]
      *
@@ -189,28 +189,28 @@ public class Geary.Db.Connection : Geary.Db.Context {
             case "true":
             case "on":
                 return true;
-            
+
             case "0":
             case "no":
             case "false":
             case "off":
                 return false;
-            
+
             default:
                 debug("Db.Connection.get_pragma_bool: unknown PRAGMA boolean response \"%s\"",
                     response);
-                
+
                 return false;
         }
     }
-    
+
     /**
      * Sets a boolean PRAGMA value to either "true" or "false".
      */
     public void set_pragma_bool(string name, bool b) throws Error {
         exec("PRAGMA %s=%s".printf(name, b ? "true" : "false"));
     }
-    
+
     /**
      * Returns the result of a PRAGMA as an integer.  See [[http://www.sqlite.org/pragma.html]]
      *
@@ -221,14 +221,14 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public int get_pragma_int(string name) throws Error {
         return query("PRAGMA %s".printf(name)).int_at(0);
     }
-    
+
     /**
      * Sets an integer PRAGMA value.
      */
     public void set_pragma_int(string name, int d) throws Error {
         exec("PRAGMA %s=%d".printf(name, d));
     }
-    
+
     /**
      * Returns the result of a PRAGMA as a 64-bit integer. See [[http://www.sqlite.org/pragma.html]]
      *
@@ -239,28 +239,28 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public int64 get_pragma_int64(string name) throws Error {
         return query("PRAGMA %s".printf(name)).int64_at(0);
     }
-    
+
     /**
      * Sets a 64-bit integer PRAGMA value.
      */
     public void set_pragma_int64(string name, int64 ld) throws Error {
         exec("PRAGMA %s=%s".printf(name, ld.to_string()));
     }
-    
+
     /**
      * Returns the result of a PRAGMA as a string.  See [[http://www.sqlite.org/pragma.html]]
      */
     public string get_pragma_string(string name) throws Error {
         return query("PRAGMA %s".printf(name)).nonnull_string_at(0);
     }
-    
+
     /**
      * Sets a string PRAGMA value.
      */
     public void set_pragma_string(string name, string str) throws Error {
         exec("PRAGMA %s=%s".printf(name, str));
     }
-    
+
     /**
      * Returns the user_version number maintained by SQLite.
      *
@@ -271,7 +271,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public int get_user_version_number() throws Error {
         return get_pragma_int(PRAGMA_USER_VERSION);
     }
-    
+
     /**
      * Sets the user version number, which is a private number maintained by the user.
      * VersionedDatabase uses this to maintain the version number of the database.
@@ -281,7 +281,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public void set_user_version_number(int version) throws Error {
         set_pragma_int(PRAGMA_USER_VERSION, version);
     }
-    
+
     /**
      * Gets the schema version number, which is maintained by SQLite. See
      * [[http://www.sqlite.org/pragma.html#pragma_schema_version]]
@@ -291,84 +291,84 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public int get_schema_version_number() throws Error {
         return get_pragma_int(PRAGMA_SCHEMA_VERSION);
     }
-    
+
     /**
      * See [[http://www.sqlite.org/pragma.html#pragma_foreign_keys]]
      */
     public void set_foreign_keys(bool enabled) throws Error {
         set_pragma_bool(PRAGMA_FOREIGN_KEYS, enabled);
     }
-    
+
     /**
      * See [[http://www.sqlite.org/pragma.html#pragma_foreign_keys]]
      */
     public bool get_foreign_keys() throws Error {
         return get_pragma_bool(PRAGMA_FOREIGN_KEYS);
     }
-    
+
     /**
      * See [[http://www.sqlite.org/pragma.html#pragma_recursive_triggers]]
      */
     public void set_recursive_triggers(bool enabled) throws Error {
         set_pragma_bool(PRAGMA_RECURSIVE_TRIGGERS, enabled);
     }
-    
+
     /**
      * See [[http://www.sqlite.org/pragma.html#pragma_recursive_triggers]]
      */
     public bool get_recursive_triggers() throws Error {
         return get_pragma_bool(PRAGMA_RECURSIVE_TRIGGERS);
     }
-    
+
     /**
      * See [[http://www.sqlite.org/pragma.html#pragma_secure_delete]]
      */
     public void set_secure_delete(bool enabled) throws Error {
         set_pragma_bool(PRAGMA_SECURE_DELETE, enabled);
     }
-    
+
     /**
      * See [[http://www.sqlite.org/pragma.html#pragma_secure_delete]]
      */
     public bool get_secure_delete() throws Error {
         return get_pragma_bool(PRAGMA_SECURE_DELETE);
     }
-    
+
     /**
      * See [[http://www.sqlite.org/pragma.html#pragma_synchronous]]
      */
     public void set_synchronous(SynchronousMode mode) throws Error {
         set_pragma_string(PRAGMA_SYNCHRONOUS, mode.sql());
     }
-    
+
     /**
      * See [[http://www.sqlite.org/pragma.html#pragma_synchronous]]
      */
     public SynchronousMode get_synchronous() throws Error {
         return SynchronousMode.parse(get_pragma_string(PRAGMA_SYNCHRONOUS));
     }
-    
+
     /**
      * See [[https://www.sqlite.org/pragma.html#pragma_freelist_count]]
      */
     public int64 get_free_page_count() throws Error {
         return get_pragma_int64(PRAGMA_FREELIST_COUNT);
     }
-    
+
     /**
      * See [[https://www.sqlite.org/pragma.html#pragma_page_count]]
      */
     public int64 get_total_page_count() throws Error {
         return get_pragma_int64(PRAGMA_PAGE_COUNT);
     }
-    
+
     /**
      * See [[https://www.sqlite.org/pragma.html#pragma_page_size]]
      */
     public int get_page_size() throws Error {
         return get_pragma_int(PRAGMA_PAGE_SIZE);
     }
-    
+
     /**
      * Executes one or more queries inside an SQLite transaction.  This call will initiate a
      * transaction according to the TransactionType specified (although this is merely an
@@ -391,10 +391,10 @@ public class Geary.Db.Connection : Geary.Db.Context {
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
                 debug("Connection.exec_transaction: unable to %s: %s", type.sql(), err.message);
-            
+
             throw err;
         }
-        
+
         // If transaction throws an Error, must rollback, always
         TransactionOutcome outcome = TransactionOutcome.ROLLBACK;
         Error? caught_err = null;
@@ -404,10 +404,10 @@ public class Geary.Db.Connection : Geary.Db.Context {
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
                 debug("Connection.exec_transaction: transaction threw error: %s", err.message);
-            
+
             caught_err = err;
         }
-        
+
         // commit/rollback ... don't use Cancellable for TransactionOutcome because it's SQL *must*
         // execute in order to unlock the database
         try {
@@ -416,10 +416,10 @@ public class Geary.Db.Connection : Geary.Db.Context {
             debug("Connection.exec_transaction: Unable to %s transaction: %s", outcome.to_string(),
                 err.message);
         }
-        
+
         if (caught_err != null)
             throw caught_err;
-        
+
         return outcome;
     }
 

@@ -12,13 +12,13 @@
 
 public class Geary.Imap.ServerData : ServerResponse {
     public ServerDataType server_data_type { get; private set; }
-    
+
     private ServerData(Tag tag, ServerDataType server_data_type) {
         base (tag);
-        
+
         this.server_data_type = server_data_type;
     }
-    
+
     /**
      * Converts the {@link RootParameters} into {@link ServerData}.
      *
@@ -27,26 +27,26 @@ public class Geary.Imap.ServerData : ServerResponse {
      */
     public ServerData.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
-        
+
         server_data_type = ServerDataType.from_response(this);
     }
-    
+
     /**
      * Returns true if {@link RootParameters} is recognized by {@link ServerDataType.from_response}.
      */
     public static bool is_server_data(RootParameters root) {
         if (!root.has_tag())
             return false;
-        
+
         try {
             ServerDataType.from_response(root);
-            
+
             return true;
         } catch (ImapError ierr) {
             return false;
         }
     }
-    
+
     /**
      * Parses the {@link ServerData} into {@link Capabilities}, if possible.
      *
@@ -59,17 +59,17 @@ public class Geary.Imap.ServerData : ServerResponse {
     public Capabilities get_capabilities(ref int next_revision) throws ImapError {
         if (server_data_type != ServerDataType.CAPABILITY)
             throw new ImapError.INVALID("Not CAPABILITY data: %s", to_string());
-        
+
         Capabilities capabilities = new Capabilities(next_revision++);
         for (int ctr = 2; ctr < size; ctr++) {
             StringParameter? param = get_if_string(ctr);
             if (param != null)
                 capabilities.add_parameter(param);
         }
-        
+
         return capabilities;
     }
-    
+
     /**
      * Parses the {@link ServerData} into an {@link ServerDataType.EXISTS} value, if possible.
      *
@@ -78,10 +78,10 @@ public class Geary.Imap.ServerData : ServerResponse {
     public int get_exists() throws ImapError {
         if (server_data_type != ServerDataType.EXISTS)
             throw new ImapError.INVALID("Not EXISTS data: %s", to_string());
-        
+
         return get_as_string(1).as_int32(0);
     }
-    
+
     /**
      * Parses the {@link ServerData} into an expunged {@link SequenceNumber}, if possible.
      *
@@ -90,10 +90,10 @@ public class Geary.Imap.ServerData : ServerResponse {
     public SequenceNumber get_expunge() throws ImapError {
         if (server_data_type != ServerDataType.EXPUNGE)
             throw new ImapError.INVALID("Not EXPUNGE data: %s", to_string());
-        
+
         return new SequenceNumber.checked(get_as_string(1).as_int64());
     }
-    
+
     /**
      * Parses the {@link ServerData} into {@link FetchedData}, if possible.
      *
@@ -102,10 +102,10 @@ public class Geary.Imap.ServerData : ServerResponse {
     public FetchedData get_fetch() throws ImapError {
         if (server_data_type != ServerDataType.FETCH)
             throw new ImapError.INVALID("Not FETCH data: %s", to_string());
-        
+
         return FetchedData.decode(this);
     }
-    
+
     /**
      * Parses the {@link ServerData} into {@link MailboxAttributes}, if possible.
      *
@@ -114,10 +114,10 @@ public class Geary.Imap.ServerData : ServerResponse {
     public MailboxAttributes get_flags() throws ImapError {
         if (server_data_type != ServerDataType.FLAGS)
             throw new ImapError.INVALID("Not FLAGS data: %s", to_string());
-        
+
         return MailboxAttributes.from_list(get_as_list(2));
     }
-    
+
     /**
      * Parses the {@link ServerData} into {@link MailboxInformation}, if possible.
      *
@@ -126,7 +126,7 @@ public class Geary.Imap.ServerData : ServerResponse {
     public MailboxInformation get_list() throws ImapError {
         if (server_data_type != ServerDataType.LIST && server_data_type != ServerDataType.XLIST)
             throw new ImapError.INVALID("Not LIST/XLIST data: %s", to_string());
-        
+
         return MailboxInformation.decode(this, true);
     }
 
@@ -150,10 +150,10 @@ public class Geary.Imap.ServerData : ServerResponse {
     public int get_recent() throws ImapError {
         if (server_data_type != ServerDataType.RECENT)
             throw new ImapError.INVALID("Not RECENT data: %s", to_string());
-        
+
         return get_as_string(1).as_int32(0);
     }
-    
+
     /**
      * Parses the {@link ServerData} into a {@link ServerDataType.SEARCH} value, if possible.
      *
@@ -162,17 +162,17 @@ public class Geary.Imap.ServerData : ServerResponse {
     public int64[] get_search() throws ImapError {
         if (server_data_type != ServerDataType.SEARCH)
             throw new ImapError.INVALID("Not SEARCH data: %s", to_string());
-        
+
         if (size <= 2)
             return new int64[0];
-        
+
         int64[] results = new int64[size - 2];
         for (int ctr = 2; ctr < size; ctr++)
             results[ctr - 2] = get_as_string(ctr).as_int64(0);
-        
+
         return results;
     }
-    
+
     /**
      * Parses the {@link ServerData} into {@link StatusData}, if possible.
      *
@@ -181,7 +181,7 @@ public class Geary.Imap.ServerData : ServerResponse {
     public StatusData get_status() throws ImapError {
         if (server_data_type != ServerDataType.STATUS)
             throw new ImapError.INVALID("Not STATUS data: %s", to_string());
-        
+
         return StatusData.decode(this);
     }
 }

@@ -15,38 +15,38 @@
 
 private class Geary.ImapEngine.RevokableMove : Revokable {
     private const int COMMIT_TIMEOUT_SEC = 5;
-    
+
     private GenericAccount account;
     private MinimalFolder source;
     private Geary.Folder destination;
     private Gee.Set<ImapDB.EmailIdentifier> move_ids;
-    
+
     public RevokableMove(GenericAccount account, MinimalFolder source, Geary.Folder destination,
         Gee.Set<ImapDB.EmailIdentifier> move_ids) {
         base (COMMIT_TIMEOUT_SEC);
-        
+
         this.account = account;
         this.source = source;
         this.destination = destination;
         this.move_ids = move_ids;
-        
+
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         source.email_removed.connect(on_source_email_removed);
         source.marked_email_removed.connect(on_source_email_removed);
         source.closing.connect(on_source_closing);
     }
-    
+
     ~RevokableMove() {
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
         source.email_removed.disconnect(on_source_email_removed);
         source.marked_email_removed.disconnect(on_source_email_removed);
         source.closing.disconnect(on_source_closing);
-        
+
         // if still valid, schedule operation so its executed
         if (valid && source.get_open_state() != Folder.OpenState.CLOSED) {
             debug("Freeing revokable, scheduling move %d emails from %s to %s", move_ids.size,
                 source.path.to_string(), destination.to_string());
-            
+
             try {
                 source.schedule_op(new MoveEmailCommit(source, move_ids, destination.path, null));
             } catch (Error err) {
@@ -109,10 +109,10 @@ private class Geary.ImapEngine.RevokableMove : Revokable {
         // one-way switch
         if (!valid)
             return;
-        
+
         foreach (EmailIdentifier id in ids)
             move_ids.remove((ImapDB.EmailIdentifier) id);
-        
+
         if (move_ids.size <= 0)
             set_invalid();
     }

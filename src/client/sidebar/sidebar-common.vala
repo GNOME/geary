@@ -7,46 +7,46 @@
 // A simple grouping Entry that is only expandable
 public class Sidebar.Grouping : Geary.BaseObject, Sidebar.Entry, Sidebar.ExpandableEntry,
     Sidebar.RenameableEntry {
-    
+
     private string name;
     private string? tooltip;
     private string? icon;
-    
+
     public Grouping(string name, string? icon, string? tooltip = null) {
         this.name = name;
         this.icon = icon;
         this.tooltip = tooltip;
     }
-    
+
     public void rename(string name) {
         this.name = name;
         sidebar_name_changed(name);
     }
-    
+
     public bool is_user_renameable() {
         return false;
     }
-    
+
     public string get_sidebar_name() {
         return name;
     }
-    
+
     public string? get_sidebar_tooltip() {
         return tooltip;
     }
-    
+
     public string? get_sidebar_icon() {
         return icon;
     }
-    
+
     public int get_count() {
         return -1;
     }
-    
+
     public string to_string() {
         return name;
     }
-    
+
     public bool expand_on_select() {
         return true;
     }
@@ -57,7 +57,7 @@ public class Sidebar.RootOnlyBranch : Sidebar.Branch {
     public RootOnlyBranch(Sidebar.Entry root) {
         base (root, Sidebar.Branch.Options.NONE, null_comparator);
     }
-    
+
     private static int null_comparator(Sidebar.Entry a, Sidebar.Entry b) {
         return (a != b) ? -1 : 0;
     }
@@ -72,12 +72,12 @@ public class Sidebar.RootOnlyBranch : Sidebar.Branch {
  */
 public class Sidebar.Header : Sidebar.Grouping, Sidebar.EmphasizableEntry {
     private bool emphasized;
-    
+
     public Header(string name, bool emphasized = true) {
         base(name, null);
         this.emphasized = emphasized;
     }
-    
+
     public bool is_emphasized() {
         return emphasized;
     }

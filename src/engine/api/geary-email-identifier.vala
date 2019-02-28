@@ -19,22 +19,22 @@
 public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.EmailIdentifier> {
     // Warning: only change this if you know what you are doing.
     protected string unique;
-    
+
     protected EmailIdentifier(string unique) {
         this.unique = unique;
     }
-    
+
     public virtual uint hash() {
         return unique.hash();
     }
-    
+
     public virtual bool equal_to(Geary.EmailIdentifier other) {
         if (this == other)
             return true;
-        
+
         return unique == other.unique;
     }
-    
+
     /**
      * A comparator for stabilizing sorts.
      *
@@ -44,10 +44,10 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
     public virtual int stable_sort_comparator(Geary.EmailIdentifier other) {
         if (this == other)
             return 0;
-        
+
         return strcmp(unique, other.unique);
     }
-    
+
     /**
      * A comparator for finding which {@link EmailIdentifier} is earliest in the "natural"
      * sorting of a {@link Folder}'s list.
@@ -68,7 +68,7 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
      * @see Folder.list_email_by_id_async
      */
     public abstract int natural_sort_comparator(Geary.EmailIdentifier other);
-    
+
     /**
      * Sorts the supplied Collection of {@link EmailIdentifier} by their natural sort order.
      *
@@ -82,14 +82,14 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
                 int cmp = a.natural_sort_comparator(b);
                 if (cmp == 0)
                     cmp = a.stable_sort_comparator(b);
-                
+
                 return cmp;
             });
         sorted.add_all(ids);
-        
+
         return sorted;
     }
-    
+
     /**
      * Sorts the supplied Collection of {@link EmailIdentifier} by their natural sort order.
      *
@@ -103,14 +103,14 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
                 int cmp = a.id.natural_sort_comparator(b.id);
                 if (cmp == 0)
                     cmp = a.id.stable_sort_comparator(b.id);
-                
+
                 return cmp;
             });
         sorted.add_all(emails);
-        
+
         return sorted;
     }
-    
+
     public virtual string to_string() {
         return "[%s]".printf(unique.to_string());
     }

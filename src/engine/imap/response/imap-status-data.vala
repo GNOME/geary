@@ -16,41 +16,41 @@ public class Geary.Imap.StatusData : Object {
     // NOTE: This must be negative one; other values won't work well due to how the values are
     // decoded
     public const int UNSET = -1;
-    
+
     /**
      * Name of the mailbox.
      */
     public MailboxSpecifier mailbox { get; private set; }
-    
+
     /**
      * {@link UNSET} if not set.
      */
     public int messages { get; private set; }
-    
+
     /**
      * {@link UNSET} if not set.
      */
     public int recent { get; private set; }
-    
+
     /**
      * The UIDNEXT of the mailbox, if returned.
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-2.3.1.1]]
      */
     public UID? uid_next { get; private set; }
-    
+
     /**
      * The UIDVALIDITY of the mailbox, if returned.
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-2.3.1.1]]
      */
     public UIDValidity? uid_validity { get; private set; }
-    
+
     /**
      * {@link UNSET} if not set.
      */
     public int unseen { get; private set; }
-    
+
     public StatusData(MailboxSpecifier mailbox, int messages, int recent, UID? uid_next,
         UIDValidity? uid_validity, int unseen) {
         this.mailbox = mailbox;
@@ -60,7 +60,7 @@ public class Geary.Imap.StatusData : Object {
         this.uid_validity = uid_validity;
         this.unseen = unseen;
     }
-    
+
     /**
      * Decodes {@link ServerData} into a StatusData representation.
      *
@@ -82,37 +82,37 @@ public class Geary.Imap.StatusData : Object {
         UID? uid_next = null;
         UIDValidity? uid_validity = null;
         int unseen = UNSET;
-        
+
         ListParameter values = server_data.get_as_list(3);
         for (int ctr = 0; ctr < values.size; ctr += 2) {
             try {
                 StringParameter typep = values.get_as_string(ctr);
                 StringParameter valuep = values.get_as_string(ctr + 1);
-                
+
                 switch (StatusDataType.from_parameter(typep)) {
                     case StatusDataType.MESSAGES:
                         // see note at UNSET
                         messages = valuep.as_int32(-1, int.MAX);
                     break;
-                    
+
                     case StatusDataType.RECENT:
                         // see note at UNSET
                         recent = valuep.as_int32(-1, int.MAX);
                     break;
-                    
+
                     case StatusDataType.UIDNEXT:
                         uid_next = new UID.checked(valuep.as_int64());
                     break;
-                    
+
                     case StatusDataType.UIDVALIDITY:
                         uid_validity = new UIDValidity.checked(valuep.as_int64());
                     break;
-                    
+
                     case StatusDataType.UNSEEN:
                         // see note at UNSET
                         unseen = valuep.as_int32(-1, int.MAX);
                     break;
-                    
+
                     default:
                         message("Bad STATUS data type %s", typep.to_string());
                     break;
@@ -122,11 +122,11 @@ public class Geary.Imap.StatusData : Object {
                     server_data.to_string(), ierr.message);
             }
         }
-        
+
         return new StatusData(new MailboxSpecifier.from_parameter(mailbox_param), messages, recent,
             uid_next, uid_validity, unseen);
     }
-    
+
     public string to_string() {
         return "%s/%d/UIDNEXT=%s/UIDVALIDITY=%s".printf(mailbox.to_string(), messages,
             (uid_next != null) ? uid_next.to_string() : "(none)",

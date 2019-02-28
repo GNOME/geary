@@ -8,7 +8,7 @@
 
 private class Geary.ImapDB.Account : BaseObject {
     private const int POPULATE_SEARCH_TABLE_DELAY_SEC = 5;
-    
+
     // These characters are chosen for being commonly used to continue a single word (such as
     // extended last names, i.e. "Lars-Eric") or in terms commonly searched for in an email client,
     // i.e. unadorned mailbox addresses.  Note that characters commonly used for wildcards or that
@@ -55,10 +55,10 @@ private class Geary.ImapDB.Account : BaseObject {
 
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
-        
+
         public FolderReference(ImapDB.Folder folder, Geary.FolderPath path) {
             base (folder);
-            
+
             this.path = path;
         }
     }
@@ -265,12 +265,12 @@ private class Geary.ImapDB.Account : BaseObject {
         if (db == null)
             throw new EngineError.OPEN_REQUIRED("Database not open");
     }
-    
+
     private ImapDB.SearchQuery check_search_query(Geary.SearchQuery q) throws Error {
         ImapDB.SearchQuery? query = q as ImapDB.SearchQuery;
         if (query == null || query.account != this)
             throw new EngineError.BAD_PARAMETERS("Geary.SearchQuery not associated with %s", name);
-        
+
         return query;
     }
 
@@ -300,14 +300,14 @@ private class Geary.ImapDB.Account : BaseObject {
                 cancellable);
         } catch (Error err) {
             warning("Unable to open database: %s", err.message);
-            
+
             // close database before exiting
             db.close(null);
             db = null;
-            
+
             throw err;
         }
-        
+
         // have seen cases where multiple "Inbox" folders are created in the root with different
         // case names, leading to trouble ... this clears out all Inboxes that don't match our
         // "canonical" name
@@ -318,7 +318,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     FROM FolderTable
                     WHERE parent_id IS NULL
                 """);
-                
+
                 Db.Result results = stmt.exec(cancellable);
                 while (!results.finished) {
                     string name = results.string_for("name");
@@ -327,40 +327,40 @@ private class Geary.ImapDB.Account : BaseObject {
                         debug("%s: Removing duplicate INBOX \"%s\"", this.name, name);
                         do_delete_folder(cx, results.rowid_for("id"), cancellable);
                     }
-                    
+
                     results.next(cancellable);
                 }
-                
+
                 return Db.TransactionOutcome.COMMIT;
             }, cancellable);
         } catch (Error err) {
             debug("Error trimming duplicate INBOX from database: %s", err.message);
-            
+
             // drop database to indicate closed
             db = null;
-            
+
             throw err;
         }
 
         background_cancellable = new Cancellable();
-        
+
         // Kick off a background update of the search table, but since the database is getting
         // hammered at startup, wait a bit before starting the update ... use the ordinal to
         // stagger these being fired off (important for users with many accounts registered)
         int account_sec = account_information.ordinal.clamp(0, 10);
         Timeout.add_seconds(POPULATE_SEARCH_TABLE_DELAY_SEC + account_sec, () => {
             populate_search_table_async.begin(background_cancellable);
-            
+
             return false;
         });
-        
+
         initialize_contacts(cancellable);
     }
 
     public async void close_async(Cancellable? cancellable) throws Error {
         if (db == null)
             return;
-        
+
         // close and always drop reference
         try {
             db.close(cancellable);
@@ -404,10 +404,10 @@ private class Geary.ImapDB.Account : BaseObject {
             int64 parent_id = Db.INVALID_ROWID;
             if (!do_fetch_parent_id(cx, path, true, out parent_id, cancellable)) {
                 debug("Unable to find parent ID to %s clone folder", path.to_string());
-                
+
                 return Db.TransactionOutcome.ROLLBACK;
             }
-            
+
             // create the folder object
             Db.Statement stmt = cx.prepare(
                 "INSERT INTO FolderTable (name, parent_id, last_seen_total, last_seen_status_total, "
@@ -422,9 +422,9 @@ private class Geary.ImapDB.Account : BaseObject {
                 : Imap.UID.INVALID);
             stmt.bind_string(6, properties.attrs.serialize());
             stmt.bind_int(7, properties.email_unread);
-            
+
             stmt.exec(cancellable);
-            
+
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
 
@@ -460,14 +460,14 @@ private class Geary.ImapDB.Account : BaseObject {
 
     private void initialize_contacts(Cancellable? cancellable = null) throws Error {
         check_open();
-        
+
         Gee.Collection<Contact> contacts = new Gee.LinkedList<Contact>();
         Db.TransactionOutcome outcome = db.exec_transaction(Db.TransactionType.RO,
             (context) => {
             Db.Statement statement = context.prepare(
                 "SELECT email, real_name, highest_importance, normalized_email, flags " +
                 "FROM ContactTable");
-            
+
             Db.Result result = statement.exec(cancellable);
             while (!result.finished) {
                 try {
@@ -479,13 +479,13 @@ private class Geary.ImapDB.Account : BaseObject {
                     // problem with one.
                     debug("Problem loading contact: %s", err.message);
                 }
-                
+
                 result.next();
             }
-                
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
+
         if (outcome == Db.TransactionOutcome.DONE) {
             contact_store.update_contacts(contacts);
             contacts_loaded();
@@ -549,16 +549,16 @@ private class Geary.ImapDB.Account : BaseObject {
                 // folder, as the STATUS is the count that is known first
                 properties.set_status_message_count(result.int_for("last_seen_status_total"),
                     (properties.select_examine_messages == 0));
-                
+
                 id_map.set(path, result.rowid_for("id"));
                 prop_map.set(path, properties);
-                
+
                 result.next(cancellable);
             }
-            
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
+
         assert(id_map.size == prop_map.size);
 
         if (id_map.size == 0) {
@@ -572,36 +572,36 @@ private class Geary.ImapDB.Account : BaseObject {
             Geary.ImapDB.Folder? folder = get_local_folder(path);
             if (folder == null && id_map.has_key(path) && prop_map.has_key(path))
                 folder = create_local_folder(path, id_map.get(path), prop_map.get(path));
-            
+
             folders.add(folder);
         }
-        
+
         return folders;
     }
 
     public async Geary.ImapDB.Folder fetch_folder_async(Geary.FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();
-        
+
         // check references table first
         Geary.ImapDB.Folder? folder = get_local_folder(path);
         if (folder != null)
             return folder;
-        
+
         int64 folder_id = Db.INVALID_ROWID;
         Imap.FolderProperties? properties = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             if (!do_fetch_folder_id(cx, path, false, out folder_id, cancellable))
                 return Db.TransactionOutcome.DONE;
-            
+
             if (folder_id == Db.INVALID_ROWID)
                 return Db.TransactionOutcome.DONE;
-            
+
             Db.Statement stmt = cx.prepare(
                 "SELECT last_seen_total, unread_count, last_seen_status_total, uid_validity, uid_next, "
                 + "attributes FROM FolderTable WHERE id=?");
             stmt.bind_rowid(0, folder_id);
-            
+
             Db.Result results = stmt.exec(cancellable);
             if (!results.finished) {
                 properties = new Imap.FolderProperties.from_imapdb(
@@ -620,28 +620,28 @@ private class Geary.ImapDB.Account : BaseObject {
                     (properties.select_examine_messages == 0)
                 );
             }
-            
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
+
         if (folder_id == Db.INVALID_ROWID || properties == null)
             throw new EngineError.NOT_FOUND("%s not found in local database", path.to_string());
-        
+
         return create_local_folder(path, folder_id, properties);
     }
-    
+
     private Geary.ImapDB.Folder? get_local_folder(Geary.FolderPath path) {
         FolderReference? folder_ref = folder_refs.get(path);
         if (folder_ref == null)
             return null;
-        
+
         ImapDB.Folder? folder = (Geary.ImapDB.Folder?) folder_ref.get_reference();
         if (folder == null)
             return null;
-        
+
         return folder;
     }
-    
+
     private Geary.ImapDB.Folder create_local_folder(Geary.FolderPath path, int64 folder_id,
         Imap.FolderProperties properties) throws Error {
         // return current if already created
@@ -673,35 +673,35 @@ private class Geary.ImapDB.Account : BaseObject {
 
     private void on_folder_reference_broken(Geary.SmartReference reference) {
         FolderReference folder_ref = (FolderReference) reference;
-        
+
         // drop from folder references table, all cleaned up
         folder_refs.unset(folder_ref.path);
     }
-    
+
     public async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
         Cancellable? cancellable = null) throws Error {
         check_open();
-        
+
         Gee.HashMultiMap<Geary.Email, Geary.FolderPath?> messages
             = new Gee.HashMultiMap<Geary.Email, Geary.FolderPath?>();
-        
+
         if (flag_blacklist != null)
             requested_fields = requested_fields | Geary.Email.Field.FLAGS;
-        
+
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE message_id = ? OR in_reply_to = ?");
             stmt.bind_string(0, message_id.value);
             stmt.bind_string(1, message_id.value);
-            
+
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 id = result.int64_at(0);
                 Geary.Email.Field db_fields;
                 MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
                     cx, id, requested_fields, out db_fields, cancellable);
-                
+
                 // Ignore any messages that don't have the required fields.
                 if (partial_ok || row.fields.fulfills(requested_fields)) {
                     Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(id, null));
@@ -725,19 +725,19 @@ private class Geary.ImapDB.Account : BaseObject {
                             }
                         }
                     }
-                    
+
                     // Check for blacklisted flags.
                     if (flag_blacklist != null && email.email_flags != null &&
                         email.email_flags.contains_any(flag_blacklist))
                         messages.remove_all(email);
                 }
-                
+
                 result.next(cancellable);
             }
-            
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
+
         return (messages.size == 0 ? null : messages);
     }
 
@@ -803,11 +803,11 @@ private class Geary.ImapDB.Account : BaseObject {
     private string? stem_search_term(ImapDB.SearchQuery query, string term) {
         if (!query.allow_stemming)
             return null;
-        
+
         int term_length = term.length;
         if (term_length < query.min_term_length_for_stemming)
             return null;
-        
+
         string? stemmed = null;
         try {
             Db.Statement stmt = db.prepare("""
@@ -816,7 +816,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 WHERE input=?
             """);
             stmt.bind_string(0, term);
-            
+
             // get stemmed string; if no result, fall through
             Db.Result result = stmt.exec();
             if (!result.finished)
@@ -825,37 +825,37 @@ private class Geary.ImapDB.Account : BaseObject {
                 debug("No stemmed term returned for \"%s\"", term);
         } catch (Error err) {
             debug("Unable to query tokenizer table for stemmed term for \"%s\": %s", term, err.message);
-            
+
             // fall-through
         }
-        
+
         if (String.is_empty(stemmed)) {
             debug("Empty stemmed term returned for \"%s\"", term);
-            
+
             return null;
         }
-        
+
         // If same term returned, treat as non-stemmed
         if (stemmed == term)
             return null;
-        
+
         // Don't search for stemmed words that are significantly shorter than the user's search term
         if (term_length - stemmed.length > query.max_difference_term_stem_lengths) {
             debug("Stemmed \"%s\" dropped searching for \"%s\": too much distance in terms",
                 stemmed, term);
-            
+
             return null;
         }
-        
+
         debug("Search processing: term -> stem is \"%s\" -> \"%s\"", term, stemmed);
-        
+
         return stemmed;
     }
-    
+
     private void prepare_search_query(ImapDB.SearchQuery query) {
         if (query.parsed)
             return;
-        
+
         // A few goals here:
         //   1) Append an * after every term so it becomes a prefix search
         //      (see <https://www.sqlite.org/fts3.html#section_3>)
@@ -867,7 +867,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // We ignore everything inside quotes to give the user a way to
         // override our algorithm here.  The idea is to offer one search query
         // syntax for Geary that we can use locally and via IMAP, etc.
-        
+
         string quote_balanced = query.raw;
         if (Geary.String.count_char(query.raw, '"') % 2 != 0) {
             // Remove the last quote if it's not balanced.  This has the
@@ -876,20 +876,20 @@ private class Geary.ImapDB.Account : BaseObject {
             assert(last_quote >= 0);
             quote_balanced = query.raw.splice(last_quote, last_quote + 1, " ");
         }
-        
+
         string[] words = quote_balanced.split_set(" \t\r\n()%*\\");
         bool in_quote = false;
         foreach (string s in words) {
             string? field = null;
-            
+
             s = s.strip();
-            
+
             int quotes = Geary.String.count_char(s, '"');
             if (!in_quote && quotes > 0) {
                 in_quote = true;
                 --quotes;
             }
-            
+
             SearchTerm? term;
             if (in_quote) {
                 // HACK: this helps prevent a syntax error when the user types
@@ -911,19 +911,19 @@ private class Geary.ImapDB.Account : BaseObject {
                     case "not":
                     case "near":
                         continue;
-                    
+
                     default:
                         if (lower.has_prefix("near/"))
                             continue;
                     break;
                 }
-                
+
                 if (s.has_prefix("-"))
                     s = s.substring(1);
-                
+
                 if (s == "")
                     continue;
-                
+
                 // TODO: support quotes after :
                 string[] parts = s.split(":", 2);
                 if (parts.length > 1)
@@ -960,28 +960,28 @@ private class Geary.ImapDB.Account : BaseObject {
                     term = new SearchTerm(original, s, stemmed, sql_s, sql_stemmed);
                 }
             }
-            
+
             if (in_quote && quotes % 2 != 0)
                 in_quote = false;
-            
+
             query.add_search_term(field, term);
         }
-        
+
         assert(!in_quote);
-        
+
         query.parsed = true;
     }
-    
+
     // Return a map of column -> phrase, to use as WHERE column MATCH 'phrase'.
     private Gee.HashMap<string, string> get_query_phrases(ImapDB.SearchQuery query) {
         prepare_search_query(query);
-        
+
         Gee.HashMap<string, string> phrases = new Gee.HashMap<string, string>();
         foreach (string? field in query.get_fields()) {
             Gee.List<SearchTerm>? terms = query.get_search_terms(field);
             if (terms == null || terms.size == 0 || field == "is")
                 continue;
-            
+
             // Each SearchTerm is an AND but the SQL text within in are OR ... this allows for
             // each user term to be AND but the variants of each term are or.  So, if terms are
             // [party] and [eventful] and stems are [parti] and [event], the search would be:
@@ -1002,7 +1002,7 @@ private class Geary.ImapDB.Account : BaseObject {
             foreach (SearchTerm term in terms) {
                 if (term.sql.size == 0)
                     continue;
-                
+
                 if (term.is_exact) {
                     builder.append_printf("%s ", term.parsed);
                 } else {
@@ -1010,19 +1010,19 @@ private class Geary.ImapDB.Account : BaseObject {
                     foreach (string sql in term.sql) {
                         if (!is_first_sql)
                             builder.append(" OR ");
-                        
+
                         builder.append_printf("%s ", sql);
                         is_first_sql = false;
                     }
                 }
             }
-            
+
             phrases.set(field ?? "MessageSearchTable", builder.str);
         }
-        
+
         return phrases;
     }
-    
+
     private void sql_add_query_phrases(StringBuilder sql, Gee.HashMap<string, string> query_phrases,
         string operator, string columns, string condition) {
         bool is_first_field = true;
@@ -1041,7 +1041,7 @@ private class Geary.ImapDB.Account : BaseObject {
             is_first_field = false;
         }
     }
-    
+
     private int sql_bind_query_phrases(Db.Statement stmt, int start_index,
         Gee.HashMap<string, string> query_phrases) throws Geary.DatabaseError {
         int i = start_index;
@@ -1052,25 +1052,25 @@ private class Geary.ImapDB.Account : BaseObject {
             stmt.bind_string(i++, query_phrases.get(field));
         return i - start_index;
     }
-    
+
     // Append each id in the collection to the StringBuilder, in a format
     // suitable for use in an SQL statement IN (...) clause.
     private void sql_append_ids(StringBuilder s, Gee.Iterable<int64?> ids) {
         bool first = true;
         foreach (int64? id in ids) {
             assert(id != null);
-            
+
             if (!first)
                 s.append(", ");
             s.append(id.to_string());
             first = false;
         }
     }
-    
+
     private string? get_search_ids_sql(Gee.Collection<Geary.EmailIdentifier>? search_ids) throws Error {
         if (search_ids == null)
             return null;
-        
+
         Gee.ArrayList<int64?> ids = new Gee.ArrayList<int64?>();
         foreach (Geary.EmailIdentifier id in search_ids) {
             ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
@@ -1078,15 +1078,15 @@ private class Geary.ImapDB.Account : BaseObject {
                 throw new EngineError.BAD_PARAMETERS(
                     "search_ids must contain only Geary.ImapDB.EmailIdentifiers");
             }
-            
+
             ids.add(imapdb_id.message_id);
         }
-        
+
         StringBuilder sql = new StringBuilder();
         sql_append_ids(sql, ids);
         return sql.str;
     }
-    
+
     public async Gee.Collection<Geary.EmailIdentifier>? search_async(Geary.SearchQuery q,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null)
@@ -1130,7 +1130,7 @@ private class Geary.ImapDB.Account : BaseObject {
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             string blacklisted_ids_sql = do_get_blacklisted_message_ids_sql(
                 folder_blacklist, cx, cancellable);
-            
+
             // Every mutation of this query we could think of has been tried,
             // and this version was found to minimize running time.  We
             // discovered that just doing a JOIN between the MessageTable and
@@ -1157,7 +1157,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 sql.append(")");
             } else
                 sql.append(" WHERE 1=1");
-            
+
             if (blacklisted_ids_sql != "")
                 sql.append(" AND id NOT IN (%s)".printf(blacklisted_ids_sql));
             if (!Geary.String.is_empty(search_ids_sql))
@@ -1165,17 +1165,17 @@ private class Geary.ImapDB.Account : BaseObject {
             sql.append(" ORDER BY internaldate_time_t DESC");
             if (limit > 0)
                 sql.append(" LIMIT ? OFFSET ?");
-            
+
             Db.Statement stmt = cx.prepare(sql.str);
             int bind_index = sql_bind_query_phrases(stmt, 0, query_phrases);
             if (limit > 0) {
                 stmt.bind_int(bind_index++, limit);
                 stmt.bind_int(bind_index++, offset);
             }
-            
+
             Gee.HashMap<int64?, ImapDB.EmailIdentifier> id_map = new Gee.HashMap<int64?, ImapDB.EmailIdentifier>(
                 Collection.int64_hash_func, Collection.int64_equal_func);
-            
+
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 message_id = result.int64_at(0);
@@ -1335,14 +1335,14 @@ private class Geary.ImapDB.Account : BaseObject {
         Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         check_open();
         ImapDB.SearchQuery query = check_search_query(q);
-        
+
         Gee.Set<string>? search_matches = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Gee.HashMap<int64?, ImapDB.EmailIdentifier> id_map = new Gee.HashMap<
                 int64?, ImapDB.EmailIdentifier>(Collection.int64_hash_func, Collection.int64_equal_func);
             foreach (ImapDB.EmailIdentifier id in ids)
                 id_map.set(id.message_id, id);
-            
+
             Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>>? match_map =
                 do_get_search_matches(cx, query, id_map, cancellable);
             if (match_map == null || match_map.size == 0)
@@ -1355,17 +1355,17 @@ private class Geary.ImapDB.Account : BaseObject {
             search_matches = new Gee.HashSet<string>();
             foreach (Gee.Set<string> matches in match_map.values)
                 search_matches.add_all(matches);
-            
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
+
         return search_matches;
     }
-    
+
     public async Geary.Email fetch_email_async(ImapDB.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         check_open();
-        
+
         Geary.Email? email = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             // TODO: once we have a way of deleting messages, we won't be able
@@ -1374,7 +1374,7 @@ private class Geary.ImapDB.Account : BaseObject {
             Geary.Email.Field db_fields;
             MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
                 cx, email_id.message_id, required_fields, out db_fields, cancellable);
-            
+
             if (!row.fields.fulfills(required_fields))
                 throw new EngineError.INCOMPLETE_MESSAGE(
                     "Message %s only fulfills %Xh fields (required: %Xh)",
@@ -1387,22 +1387,22 @@ private class Geary.ImapDB.Account : BaseObject {
 
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
+
         assert(email != null);
         return email;
     }
-    
+
     public async void update_contact_flags_async(Geary.Contact contact, Cancellable? cancellable)
         throws Error{
         check_open();
-        
+
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
             Db.Statement update_stmt =
                 cx.prepare("UPDATE ContactTable SET flags=? WHERE email=?");
             update_stmt.bind_string(0, contact.contact_flags.serialize());
             update_stmt.bind_string(1, contact.email);
             update_stmt.exec(cancellable);
-            
+
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
     }
@@ -1452,13 +1452,13 @@ private class Geary.ImapDB.Account : BaseObject {
         } catch (Error e) {
             debug("Error populating %s search table: %s", account_information.id, e.message);
         }
-        
+
         if (search_index_monitor.is_in_progress)
             search_index_monitor.notify_finish();
-        
+
         debug("%s: Done populating search table", account_information.id);
     }
-    
+
     private static Gee.HashSet<int64?> do_build_rowid_set(Db.Result result, Cancellable? cancellable)
         throws Error {
         Gee.HashSet<int64?> rowid_set = new Gee.HashSet<int64?>(Collection.int64_hash_func,
@@ -1467,16 +1467,16 @@ private class Geary.ImapDB.Account : BaseObject {
             rowid_set.add(result.rowid_at(0));
             result.next(cancellable);
         }
-        
+
         return rowid_set;
     }
-    
+
     private async bool populate_search_table_batch_async(int limit, Cancellable? cancellable)
         throws Error {
         check_open();
         debug("%s: Searching for up to %d missing indexed messages...", account_information.id,
             limit);
-        
+
         int count = 0, total_unindexed = 0;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
             // Embedding a SELECT within a SELECT is painfully slow
@@ -1510,19 +1510,19 @@ private class Geary.ImapDB.Account : BaseObject {
             foreach (int64 message_id in message_ids) {
                 if (search_ids.contains(message_id))
                     continue;
-                
+
                 unindexed_message_ids.add(message_id);
                 if (unindexed_message_ids.size >= limit)
                     break;
             }
-            
+
             // For all remaining MessageTable rowid's, generate search table entry
             foreach (int64 message_id in unindexed_message_ids) {
                 try {
                     Geary.Email.Field search_fields = Geary.Email.REQUIRED_FOR_MESSAGE |
                         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.RECEIVERS |
                         Geary.Email.Field.SUBJECT;
-                    
+
                     Geary.Email.Field db_fields;
                     MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
                         cx, message_id, search_fields, out db_fields, cancellable);
@@ -1539,32 +1539,32 @@ private class Geary.ImapDB.Account : BaseObject {
                     warning("Error adding message %s to the search table: %s", message_id.to_string(),
                         e.message);
                 }
-                
+
                 ++count;
             }
-            
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
+
         if (count > 0) {
             debug("%s: Found %d/%d missing indexed messages, %d remaining...",
                 account_information.id, count, limit, total_unindexed);
-            
+
             if (!search_index_monitor.is_in_progress) {
                 search_index_monitor.set_interval(0, total_unindexed);
                 search_index_monitor.notify_start();
             }
-            
+
             search_index_monitor.increment(count);
         }
-        
+
         return (count < limit);
     }
-    
+
     //
     // Transaction helper methods
     //
-    
+
     private void do_delete_folder(Db.Connection cx, int64 folder_id, Cancellable? cancellable)
         throws Error {
         Db.Statement msg_loc_stmt = cx.prepare("""
@@ -1572,15 +1572,15 @@ private class Geary.ImapDB.Account : BaseObject {
             WHERE folder_id = ?
         """);
         msg_loc_stmt.bind_rowid(0, folder_id);
-        
+
         msg_loc_stmt.exec(cancellable);
-        
+
         Db.Statement folder_stmt = cx.prepare("""
             DELETE FROM FolderTable
             WHERE id = ?
         """);
         folder_stmt.bind_rowid(0, folder_id);
-        
+
         folder_stmt.exec(cancellable);
     }
 
@@ -1614,9 +1614,9 @@ private class Geary.ImapDB.Account : BaseObject {
                 stmt = cx.prepare("SELECT id FROM FolderTable WHERE parent_id IS NULL AND name=?");
                 stmt.bind_string(0, basename);
             }
-            
+
             int64 id = Db.INVALID_ROWID;
-            
+
             Db.Result result = stmt.exec(cancellable);
             if (!result.finished) {
                 id = result.rowid_at(0);
@@ -1628,25 +1628,25 @@ private class Geary.ImapDB.Account : BaseObject {
                     "INSERT INTO FolderTable (name, parent_id) VALUES (?, ?)");
                 create_stmt.bind_string(0, basename);
                 create_stmt.bind_rowid(1, parent_id);
-                
+
                 id = create_stmt.exec_insert(cancellable);
             }
-            
+
             // watch for path loops, real bad if it happens ... could be more thorough here, but at
             // least one level of checking is better than none
             if (id == parent_id) {
                 warning("Loop found in database: parent of %s is %s in FolderTable",
                     parent_id.to_string(), id.to_string());
-                
+
                 return false;
             }
-            
+
             parent_id = id;
         }
-        
+
         // parent_id is now the folder being searched for
         folder_id = parent_id;
-        
+
         return true;
     }
 
@@ -1677,7 +1677,7 @@ private class Geary.ImapDB.Account : BaseObject {
         Db.Result result = stmt.exec(cancellable);
         return !result.finished;
     }
-    
+
     // Turn the collection of folder paths into actual folder ids.  As a
     // special case, if "folderless" or orphan emails are to be blacklisted,
     // set the out bool to true.
@@ -1685,7 +1685,7 @@ private class Geary.ImapDB.Account : BaseObject {
         Db.Connection cx, out bool blacklist_folderless, Cancellable? cancellable) throws Error {
         blacklist_folderless = false;
         Gee.ArrayList<int64?> ids = new Gee.ArrayList<int64?>();
-        
+
         if (folder_blacklist != null) {
             foreach (Geary.FolderPath? folder_path in folder_blacklist) {
                 if (folder_path == null) {
@@ -1698,10 +1698,10 @@ private class Geary.ImapDB.Account : BaseObject {
                 }
             }
         }
-        
+
         return ids;
     }
-    
+
     // Return a parameterless SQL statement that selects any message ids that
     // are in a blacklisted folder.  This is used as a sub-select for the
     // search query to omit results from blacklisted folders.
@@ -1710,7 +1710,7 @@ private class Geary.ImapDB.Account : BaseObject {
         bool blacklist_folderless;
         Gee.Collection<int64?> blacklisted_ids = do_get_blacklisted_folder_ids(
             folder_blacklist, cx, out blacklist_folderless, cancellable);
-        
+
         StringBuilder sql = new StringBuilder();
         if (blacklisted_ids.size > 0) {
             sql.append("""
@@ -1721,7 +1721,7 @@ private class Geary.ImapDB.Account : BaseObject {
             """);
             sql_append_ids(sql, blacklisted_ids);
             sql.append(")");
-            
+
             if (blacklist_folderless)
                 sql.append(" UNION ");
         }
@@ -1736,10 +1736,10 @@ private class Geary.ImapDB.Account : BaseObject {
                 )
             """);
         }
-        
+
         return sql.str;
     }
-    
+
     // For a message row id, return a set of all folders it's in, or null if
     // it's not in any folders.
     private Gee.Set<Geary.FolderPath>?
@@ -1754,20 +1754,20 @@ private class Geary.ImapDB.Account : BaseObject {
         Db.Statement stmt = cx.prepare(sql);
         stmt.bind_int64(0, message_id);
         Db.Result result = stmt.exec(cancellable);
-        
+
         if (result.finished)
             return null;
-        
+
         Gee.HashSet<Geary.FolderPath> folder_paths = new Gee.HashSet<Geary.FolderPath>();
         while (!result.finished) {
             int64 folder_id = result.int64_at(0);
             Geary.FolderPath? path = do_find_folder_path(cx, folder_id, cancellable);
             if (path != null)
                 folder_paths.add(path);
-            
+
             result.next(cancellable);
         }
-        
+
         return (folder_paths.size == 0 ? null : folder_paths);
     }
 
@@ -1786,10 +1786,10 @@ private class Geary.ImapDB.Account : BaseObject {
 
         if (result.finished)
             return null;
-        
+
         int64 parent_id = result.int64_at(0);
         string name = result.nonnull_string_at(1);
-        
+
         // Here too, one level of loop detection is better than nothing.
         if (folder_id == parent_id) {
             warning("Loop found in database: parent of %s is %s in FolderTable",
@@ -1815,54 +1815,54 @@ private class Geary.ImapDB.Account : BaseObject {
         unread_status) {
         update_unread_async.begin(source, unread_status, null);
     }
-    
+
     // Updates unread count on all folders.
     private async void update_unread_async(ImapDB.Folder source, Gee.Map<ImapDB.EmailIdentifier, bool>
         unread_status, Cancellable? cancellable) throws Error {
         Gee.Map<Geary.FolderPath, int> unread_change = new Gee.HashMap<Geary.FolderPath, int>();
-        
+
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             foreach (ImapDB.EmailIdentifier id in unread_status.keys) {
                 Gee.Set<Geary.FolderPath>? paths = do_find_email_folders(
                     cx, id.message_id, true, cancellable);
                 if (paths == null)
                     continue;
-                
+
                 // Remove the folder that triggered this event.
                 paths.remove(source.get_path());
                 if (paths.size == 0)
                     continue;
-                
+
                 foreach (Geary.FolderPath path in paths) {
                     int current_unread = unread_change.has_key(path) ? unread_change.get(path) : 0;
                     current_unread += unread_status.get(id) ? 1 : -1;
                     unread_change.set(path, current_unread);
                 }
             }
-            
+
             // Update each folder's unread count in the database.
             foreach (Geary.FolderPath path in unread_change.keys) {
                 Geary.ImapDB.Folder? folder = get_local_folder(path);
                 if (folder == null)
                     continue;
-                
+
                 folder.do_add_to_unread_count(cx, unread_change.get(path), cancellable);
             }
-            
+
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
-        
+
         // Update each folder's unread count property.
         foreach (Geary.FolderPath path in unread_change.keys) {
             Geary.ImapDB.Folder? folder = get_local_folder(path);
             if (folder == null)
                 continue;
-            
+
             folder.get_properties().set_status_unseen(folder.get_properties().email_unread +
                 unread_change.get(path));
         }
     }
-    
+
     // Not using a MultiMap because when traversing want to process all values at once per iteration,
     // not per key-value
     public Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>>? do_get_search_matches(Db.Connection cx,
@@ -1870,11 +1870,11 @@ private class Geary.ImapDB.Account : BaseObject {
         throws Error {
         if (id_map.size == 0)
             return null;
-        
+
         Gee.HashMap<string, string> query_phrases = get_query_phrases(query);
         if (query_phrases.size == 0)
             return null;
-        
+
         StringBuilder sql = new StringBuilder();
         sql.append("""
             SELECT docid, offsets(MessageSearchTable), *
@@ -1883,25 +1883,25 @@ private class Geary.ImapDB.Account : BaseObject {
         """);
         sql_append_ids(sql, id_map.keys);
         sql.append(")");
-        
+
         StringBuilder condition = new StringBuilder("AND docid IN (");
         sql_append_ids(condition, id_map.keys);
         condition.append(")");
         sql_add_query_phrases(sql, query_phrases, "UNION", "docid, offsets(MessageSearchTable), *",
             condition.str);
-        
+
         Db.Statement stmt = cx.prepare(sql.str);
         sql_bind_query_phrases(stmt, 0, query_phrases);
-        
+
         Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>> search_matches = new Gee.HashMap<
             ImapDB.EmailIdentifier, Gee.Set<string>>();
-        
+
         Db.Result result = stmt.exec(cancellable);
         while (!result.finished) {
             int64 docid = result.rowid_at(0);
             assert(id_map.has_key(docid));
             ImapDB.EmailIdentifier id = id_map.get(docid);
-            
+
             // XXX Avoid a crash when "database disk image is
             // malformed" error occurs. Remove this when the SQLite
             // bug is fixed. See b.g.o #765515 for more info.
@@ -1910,36 +1910,36 @@ private class Geary.ImapDB.Account : BaseObject {
                 result.next(cancellable);
                 continue;
             }
-            
+
             // offsets() function returns a list of 4 strings that are ints indicating position
             // and length of match string in search table corpus
             string[] offset_array = result.nonnull_string_at(1).split(" ");
-            
+
             Gee.Set<string> matches = new Gee.HashSet<string>();
-            
+
             int j = 0;
             while (true) {
                 unowned string[] offset_string = offset_array[j:j+4];
-                
+
                 int column = int.parse(offset_string[0]);
                 int byte_offset = int.parse(offset_string[2]);
                 int size = int.parse(offset_string[3]);
-                
+
                 unowned string text = result.nonnull_string_at(column + 2);
                 matches.add(text[byte_offset : byte_offset + size].down());
-                
+
                 j += 4;
                 if (j >= offset_array.length)
                     break;
             }
-            
+
             if (search_matches.has_key(id))
                 matches.add_all(search_matches.get(id));
             search_matches.set(id, matches);
-            
+
             result.next(cancellable);
         }
-        
+
         return search_matches.size > 0 ? search_matches : null;
     }
 }

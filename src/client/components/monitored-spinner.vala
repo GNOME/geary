@@ -9,7 +9,7 @@
  */
 public class MonitoredSpinner : Gtk.Spinner {
     private Geary.ProgressMonitor? monitor = null;
-    
+
     public void set_progress_monitor(Geary.ProgressMonitor? monitor) {
         if (monitor != null) {
             this.monitor = monitor;
@@ -21,17 +21,17 @@ public class MonitoredSpinner : Gtk.Spinner {
             hide();
         }
     }
-    
+
     public override void show() {
         if (monitor != null && monitor.is_in_progress)
             base.show();
     }
-    
+
     private void on_start() {
         start();
         show();
     }
-    
+
     private void on_stop() {
         stop();
         hide();

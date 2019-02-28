@@ -6,11 +6,11 @@
 
 public class Geary.App.EmailStore : BaseObject {
     public weak Geary.Account account { get; private set; }
-    
+
     public EmailStore(Geary.Account account) {
         this.account = account;
     }
-    
+
     /**
      * Return a map of EmailIdentifiers to the special Geary.FolderSupport
      * interfaces each one supports.  For example, if an EmailIdentifier comes
@@ -24,7 +24,7 @@ public class Geary.App.EmailStore : BaseObject {
             = yield account.get_containing_folders_async(emails, cancellable);
         if (folders == null)
             return null;
-        
+
         Gee.HashSet<Type> all_support = new Gee.HashSet<Type>();
         all_support.add(typeof(Geary.FolderSupport.Archive));
         all_support.add(typeof(Geary.FolderSupport.Copy));
@@ -32,12 +32,12 @@ public class Geary.App.EmailStore : BaseObject {
         all_support.add(typeof(Geary.FolderSupport.Mark));
         all_support.add(typeof(Geary.FolderSupport.Move));
         all_support.add(typeof(Geary.FolderSupport.Remove));
-        
+
         Gee.HashMultiMap<Geary.EmailIdentifier, Type> map
             = new Gee.HashMultiMap<Geary.EmailIdentifier, Type>();
         foreach (Geary.EmailIdentifier email in folders.get_keys()) {
             Gee.HashSet<Type> support = new Gee.HashSet<Type>();
-            
+
             foreach (Geary.FolderPath path in folders.get(email)) {
                 Geary.Folder folder;
                 try {
@@ -46,7 +46,7 @@ public class Geary.App.EmailStore : BaseObject {
                     debug("Error getting a folder from path %s: %s", path.to_string(), e.message);
                     continue;
                 }
-                
+
                 foreach (Type type in all_support) {
                     if (folder.get_type().is_a(type))
                         support.add(type);
@@ -54,13 +54,13 @@ public class Geary.App.EmailStore : BaseObject {
                 if (support.contains_all(all_support))
                     break;
             }
-            
+
             Geary.Collection.multi_map_set_all<Geary.EmailIdentifier, Type>(map, email, support);
         }
-        
+
         return (map.size > 0 ? map : null);
     }
-    
+
     /**
      * Lists any set of EmailIdentifiers as if they were all in one folder.
      */
@@ -71,7 +71,7 @@ public class Geary.App.EmailStore : BaseObject {
         yield do_folder_operation_async(op, emails, cancellable);
         return (op.results.size > 0 ? op.results : null);
     }
-    
+
     /**
      * Fetches any EmailIdentifier regardless of what folder it's in.
      */
@@ -81,12 +81,12 @@ public class Geary.App.EmailStore : BaseObject {
         FetchOperation op = new Geary.App.FetchOperation(required_fields, flags);
         yield do_folder_operation_async(op,
             Geary.iterate<Geary.EmailIdentifier>(email_id).to_array_list(), cancellable);
-        
+
         if (op.result == null)
             throw new EngineError.NOT_FOUND("Couldn't fetch email ID %s", email_id.to_string());
         return op.result;
     }
-    
+
     /**
      * Marks any set of EmailIdentifiers as if they were all in one
      * Geary.FolderSupport.Mark folder.
@@ -97,7 +97,7 @@ public class Geary.App.EmailStore : BaseObject {
         yield do_folder_operation_async(new Geary.App.MarkOperation(flags_to_add, flags_to_remove),
             emails, cancellable);
     }
-    
+
     /**
      * Copies any set of EmailIdentifiers as if they were all in one
      * Geary.FolderSupport.Copy folder.
@@ -107,7 +107,7 @@ public class Geary.App.EmailStore : BaseObject {
         yield do_folder_operation_async(new Geary.App.CopyOperation(destination),
             emails, cancellable);
     }
-    
+
     private async Gee.HashMap<Geary.FolderPath, Geary.Folder> get_folder_instances_async(
         Gee.Collection<Geary.FolderPath> paths, Cancellable? cancellable) throws Error {
         Gee.HashMap<Geary.FolderPath, Geary.Folder> folders
@@ -118,7 +118,7 @@ public class Geary.App.EmailStore : BaseObject {
         }
         return folders;
     }
-    
+
     private Geary.FolderPath? next_folder_for_operation(AsyncFolderOperation operation,
         Gee.MultiMap<Geary.FolderPath, Geary.EmailIdentifier> folders_to_ids,
         Gee.Map<Geary.FolderPath, Geary.Folder> folders) throws Error {
@@ -129,11 +129,11 @@ public class Geary.App.EmailStore : BaseObject {
             assert(folders.has_key(path));
             if (!folders.get(path).get_type().is_a(operation.folder_type))
                 continue;
-            
+
             int count = folders_to_ids.get(path).size;
             if (count == 0)
                 continue;
-            
+
             if (folders.get(path).get_open_state() == Geary.Folder.OpenState.REMOTE) {
                 if (!best_is_open) {
                     best_is_open = true;
@@ -142,34 +142,34 @@ public class Geary.App.EmailStore : BaseObject {
             } else if (best_is_open) {
                 continue;
             }
-            
+
             if (count > best_count) {
                 best_count = count;
                 best = path;
             }
         }
-        
+
         return best;
     }
-    
+
     private async void do_folder_operation_async(AsyncFolderOperation operation,
         Gee.Collection<Geary.EmailIdentifier> emails, Cancellable? cancellable) throws Error {
         if (emails.size == 0)
             return;
-        
+
         debug("EmailStore %s running %s on %d emails", account.to_string(),
             operation.get_type().name(), emails.size);
-        
+
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? ids_to_folders
             = yield account.get_containing_folders_async(emails, cancellable);
         if (ids_to_folders == null)
             return;
-        
+
         Gee.MultiMap<Geary.FolderPath, Geary.EmailIdentifier> folders_to_ids
             = Geary.Collection.reverse_multi_map<Geary.EmailIdentifier, Geary.FolderPath>(ids_to_folders);
         Gee.HashMap<Geary.FolderPath, Geary.Folder> folders
             = yield get_folder_instances_async(folders_to_ids.get_keys(), cancellable);
-        
+
         Geary.FolderPath? path;
         while ((path = next_folder_for_operation(operation, folders_to_ids, folders)) != null) {
             Geary.Folder folder = folders.get(path);

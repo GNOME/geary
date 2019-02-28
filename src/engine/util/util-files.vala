@@ -23,11 +23,11 @@ public async void recursive_delete_async(GLib.File folder,
         file_type = yield query_file_type_async(folder, true, cancellable);
     } catch (Error err) {
         debug("Unable to get file type of %s: %s", folder.get_path(), err.message);
-        
+
         if (err is IOError.CANCELLED)
             return;
     }
-    
+
     if (file_type == FileType.DIRECTORY) {
         FileEnumerator? enumerator = null;
         try {
@@ -40,7 +40,7 @@ public async void recursive_delete_async(GLib.File folder,
         } catch (Error e) {
             debug("Error enumerating files for deletion: %s", e.message);
         }
-        
+
         // Iterate the enumerated files in batches.
         if (enumerator != null) {
             try {
@@ -64,7 +64,7 @@ public async void recursive_delete_async(GLib.File folder,
                 }
             } catch (Error e) {
                 debug("Error enumerating batch of files: %s", e.message);
-                
+
                 if (e is IOError.CANCELLED)
                     return;
             }
@@ -91,7 +91,7 @@ public async bool query_exists_async(File file, Cancellable? cancellable = null)
         else
             throw err;
     }
-    
+
     // exists if got this far
     return true;
 }
@@ -104,7 +104,7 @@ public async FileType query_file_type_async(File file, bool follow_symlinks, Can
     FileInfo info = yield file.query_info_async("standard::type",
         follow_symlinks ? FileQueryInfoFlags.NONE : FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
         Priority.DEFAULT, cancellable);
-    
+
     return info.get_file_type();
 }
 
@@ -152,10 +152,10 @@ public uint nullable_hash(File? file) {
 public bool nullable_equal(File? a, File? b) {
     if (a == null && b == null)
         return true;
-    
+
     if (a == null || b == null)
         return false;
-    
+
     return a.equal(b);
 }
 

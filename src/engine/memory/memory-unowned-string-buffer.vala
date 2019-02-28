@@ -21,13 +21,13 @@ public interface Geary.Memory.UnownedStringBuffer : Memory.Buffer {
      * The returned string should not be modified or freed.
      */
     public abstract unowned string to_unowned_string();
-    
+
     /**
      * An unowned version of {@link Memory.Buffer.get_valid_utf8}.
      */
     public virtual unowned string get_unowned_valid_utf8() {
         string str = to_unowned_string();
-        
+
         return str.validate() ? str : "";
     }
 }

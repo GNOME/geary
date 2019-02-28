@@ -23,22 +23,22 @@ public enum Encoding {
 public Encoding get_encoding_requirement(string str) {
     if (String.is_empty(str))
         return Encoding.QUOTING_REQUIRED;
-    
+
     Encoding encoding = Encoding.QUOTING_OPTIONAL;
     int index = 0;
     for (;;) {
         char ch = str[index++];
         if (ch == String.EOS)
             break;
-        
+
         if (ch.iscntrl())
             return Encoding.UNALLOWED;
-        
+
         // don't return immediately, it's possible unallowed characters may still be ahead
         if (ch.isspace() || ch in CONTENT_TYPE_TOKEN_SPECIALS)
             encoding = Encoding.QUOTING_REQUIRED;
     }
-    
+
     return encoding;
 }
 

@@ -97,7 +97,7 @@ public class Geary.Engine : BaseObject {
         if (!is_open)
             throw new EngineError.OPEN_REQUIRED("Geary.Engine instance not open");
     }
-    
+
     // This can't be called from within the ctor, as initialization code may want to access the
     // Engine instance to make their own calls and, in particular, subscribe to signals.
     //
@@ -107,7 +107,7 @@ public class Geary.Engine : BaseObject {
     private void initialize_library() {
         if (is_initialized)
             return;
-        
+
         is_initialized = true;
 
         Logging.init();

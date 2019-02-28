@@ -20,20 +20,20 @@
 
 public class Geary.Imap.NilParameter : Geary.Imap.Parameter {
     public const string VALUE = "NIL";
-    
+
     private static NilParameter? _instance = null;
     public static NilParameter instance {
         get {
              if (_instance == null)
                 _instance = new NilParameter();
-            
+
             return _instance;
         }
     }
-    
+
     private NilParameter() {
     }
-    
+
     /**
      * See note at {@link NilParameter} for comparison rules of "NIL".
      *

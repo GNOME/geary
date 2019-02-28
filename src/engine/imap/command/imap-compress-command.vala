@@ -10,9 +10,9 @@
 
 public class Geary.Imap.CompressCommand : Command {
     public const string NAME = "compress";
-    
+
     public const string ALGORITHM_DEFLATE = "deflate";
-    
+
     public CompressCommand(string algorithm) {
         base (NAME, { algorithm });
     }

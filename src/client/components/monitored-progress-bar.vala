@@ -9,24 +9,24 @@
  */
 public class MonitoredProgressBar : Gtk.ProgressBar {
     private Geary.ProgressMonitor? monitor = null;
-    
+
     public void set_progress_monitor(Geary.ProgressMonitor monitor) {
         this.monitor = monitor;
         monitor.start.connect(on_start);
         monitor.finish.connect(on_finish);
         monitor.update.connect(on_update);
-        
+
         fraction = monitor.progress;
     }
-    
+
     private void on_start() {
         fraction = 0.0;
     }
-    
+
     private void on_update(double total_progress, double change, Geary.ProgressMonitor monitor) {
         fraction = total_progress;
     }
-    
+
     private void on_finish() {
         fraction = 1.0;
     }

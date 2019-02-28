@@ -75,9 +75,9 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
 
     public SearchQuery(ImapDB.Account account, string query, Geary.SearchQuery.Strategy strategy) {
         base (query, strategy);
-        
+
         this.account = account;
-        
+
         switch (strategy) {
             case Strategy.EXACT:
                 allow_stemming = false;
@@ -85,49 +85,49 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
                 max_difference_term_stem_lengths = 0;
                 max_difference_match_stem_lengths = 0;
             break;
-            
+
             case Strategy.CONSERVATIVE:
                 allow_stemming = true;
                 min_term_length_for_stemming = 6;
                 max_difference_term_stem_lengths = 2;
                 max_difference_match_stem_lengths = 2;
             break;
-            
+
             case Strategy.AGGRESSIVE:
                 allow_stemming = true;
                 min_term_length_for_stemming = 4;
                 max_difference_term_stem_lengths = 4;
                 max_difference_match_stem_lengths = 3;
             break;
-            
+
             case Strategy.HORIZON:
                 allow_stemming = true;
                 min_term_length_for_stemming = 0;
                 max_difference_term_stem_lengths = int.MAX;
                 max_difference_match_stem_lengths = int.MAX;
             break;
-            
+
             default:
                 assert_not_reached();
         }
     }
-    
+
     public void add_search_term(string? field, SearchTerm term) {
         if (!field_map.has_key(field))
             field_map.set(field, new Gee.ArrayList<SearchTerm>());
-        
+
         field_map.get(field).add(term);
         all.add(term);
     }
-    
+
     public Gee.Collection<string?> get_fields() {
         return field_map.keys;
     }
-    
+
     public Gee.List<SearchTerm>? get_search_terms(string? field) {
         return field_map.has_key(field) ? field_map.get(field) : null;
     }
-    
+
     public Gee.List<SearchTerm>? get_all_terms() {
         return all;
     }

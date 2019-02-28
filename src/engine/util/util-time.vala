@@ -23,7 +23,7 @@ public time_t datetime_to_time_t(DateTime datetime) {
     // Time's year is number of years after 1900
     tm.year = Numeric.int_floor(datetime.get_year() - 1900, 0);
     tm.isdst = datetime.is_daylight_savings() ? 1 : 0;
-    
+
     return tm.mktime();
 }
 

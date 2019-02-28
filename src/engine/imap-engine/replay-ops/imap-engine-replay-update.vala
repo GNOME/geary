@@ -52,7 +52,7 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
             }
 
             if (id != null) {
-                Gee.Map<Geary.ImapDB.EmailIdentifier, Geary.EmailFlags> changed_map = 
+                Gee.Map<Geary.ImapDB.EmailIdentifier, Geary.EmailFlags> changed_map =
                 new Gee.HashMap<Geary.ImapDB.EmailIdentifier, Geary.EmailFlags>();
                 changed_map.set(id, new Imap.EmailFlags(message_flags));
 

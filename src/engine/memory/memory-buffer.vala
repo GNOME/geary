@@ -26,12 +26,12 @@ public abstract class Geary.Memory.Buffer : BaseObject {
      * Returns the number of valid (usable) bytes in the buffer.
      */
     public abstract size_t size { get; }
-    
+
     /**
      * Returns the number of bytes allocated (usable and unusable) for the buffer.
      */
     public abstract size_t allocated_size { get; }
-    
+
     /**
      * Returns a Bytes object holding the buffer's contents.
      *
@@ -39,7 +39,7 @@ public abstract class Geary.Memory.Buffer : BaseObject {
      * the data.
      */
     public abstract Bytes get_bytes();
-    
+
     /**
      * Returns an InputStream that can read the buffer in its current entirety.
      *
@@ -53,7 +53,7 @@ public abstract class Geary.Memory.Buffer : BaseObject {
     public virtual InputStream get_input_stream() {
         return new MemoryInputStream.from_bytes(get_bytes());
     }
-    
+
     /**
      * Returns a ByteArray storing the buffer in its entirety.
      *
@@ -65,10 +65,10 @@ public abstract class Geary.Memory.Buffer : BaseObject {
     public virtual ByteArray get_byte_array() {
         ByteArray byte_array = new ByteArray();
         byte_array.append(get_bytes().get_data());
-        
+
         return byte_array;
     }
-    
+
     /**
      * Returns an array of uint8 storing the buffer in its entirety.
      *
@@ -82,7 +82,7 @@ public abstract class Geary.Memory.Buffer : BaseObject {
     public virtual uint8[] get_uint8_array() {
         return get_bytes().get_data();
     }
-    
+
     /**
      * Returns a copy of the contents of the buffer as though it was a null terminated string.
      *
@@ -96,10 +96,10 @@ public abstract class Geary.Memory.Buffer : BaseObject {
     public virtual string to_string() {
         uint8[] buffer = get_uint8_array();
         buffer += (uint8) '\0';
-        
+
         return (string) buffer;
     }
-    
+
     /**
      * Returns a copy of the contents of the buffer as though it was a UTF-8 string.
      *
@@ -112,7 +112,7 @@ public abstract class Geary.Memory.Buffer : BaseObject {
      */
     public virtual string get_valid_utf8() {
         string str = to_string();
-        
+
         return str.validate() ? str : "";
     }
 }

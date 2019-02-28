@@ -12,16 +12,16 @@
  */
 private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractListEmail {
     private Imap.SearchCriteria criteria;
-    
+
     public ServerSearchEmail(MinimalFolder owner, Imap.SearchCriteria criteria, Geary.Email.Field required_fields,
         Cancellable? cancellable) {
         // OLDEST_TO_NEWEST used for vector expansion, if necessary
         base ("ServerSearchEmail", owner, required_fields, Geary.Folder.ListFlags.OLDEST_TO_NEWEST,
             cancellable);
-        
+
         // unlike list, need to retry this as there's no local component to return
         on_remote_error = OnError.RETRY;
-        
+
         this.criteria = criteria;
     }
 
@@ -58,17 +58,17 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
             if (id != null)
                 local_ids.add(id);
         }
-        
+
         Gee.List<Geary.Email>? local_list = yield owner.local_folder.list_email_by_sparse_id_async(
             local_ids, required_fields, ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
-        
+
         // Build list of local email
         Gee.Map<ImapDB.EmailIdentifier, Geary.Email> map = new Gee.HashMap<ImapDB.EmailIdentifier, Geary.Email>();
         if (local_list != null) {
             foreach (Geary.Email email in local_list)
                 map.set((ImapDB.EmailIdentifier) email.id, email);
         }
-        
+
         // Convert into fulfilled and unfulfilled email for the base class to complete
         foreach (ImapDB.EmailIdentifier id in map.keys) {
             Geary.Email? email = map.get(id);

@@ -26,7 +26,7 @@ public class Geary.EmailFlags : Geary.NamedFlags {
     public static NamedFlag LOAD_REMOTE_IMAGES { owned get {
         return new NamedFlag("LOADREMOTEIMAGES");
     } }
-    
+
     public static NamedFlag DRAFT { owned get {
         return new NamedFlag("DRAFT");
     } }
@@ -34,29 +34,29 @@ public class Geary.EmailFlags : Geary.NamedFlags {
     public static NamedFlag DELETED { owned get {
         return new NamedFlag("DELETED");
     } }
-    
+
     /// Signifies a message in our outbox that has been sent but we're still
     /// keeping around for other purposes, i.e. pushing up to Sent Mail.
     public static NamedFlag OUTBOX_SENT { owned get {
         // This shouldn't ever touch the wire, so make it invalid IMAP.
         return new NamedFlag(" OUTBOX SENT ");
     } }
-    
+
     public EmailFlags() {
     }
-    
+
     /**
      * Create a new {@link EmailFlags} container initialized with one or more flags.
      */
     public EmailFlags.with(Geary.NamedFlag flag1, ...) {
         va_list args = va_list();
         NamedFlag? flag = flag1;
-        
+
         do {
             add(flag);
         } while((flag = args.arg()) != null);
     }
-    
+
     // Convenience method to check if the unread flag is set.
     public inline bool is_unread() {
         return contains(UNREAD);
@@ -65,15 +65,15 @@ public class Geary.EmailFlags : Geary.NamedFlags {
     public inline bool is_flagged() {
         return contains(FLAGGED);
     }
-    
+
     public inline bool load_remote_images() {
         return contains(LOAD_REMOTE_IMAGES);
     }
-    
+
     public inline bool is_draft() {
         return contains(DRAFT);
     }
-    
+
     public inline bool is_outbox_sent() {
         return contains(OUTBOX_SENT);
     }

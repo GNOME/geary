@@ -11,7 +11,7 @@ namespace Geary {
     public Geary.Iterable<G> traverse<G>(Gee.Iterable<G> i) {
         return new Geary.Iterable<G>(i.iterator());
     }
-    
+
     /**
      * Take some non-null items (all must be of type G) and return a
      * Geary.Iterable for convenience.
@@ -19,15 +19,15 @@ namespace Geary {
     public Geary.Iterable<G> iterate<G>(G g, ...) {
         va_list args = va_list();
         G arg = g;
-        
+
         Gee.ArrayList<G> list = new Gee.ArrayList<G>();
         do {
             list.add(arg);
         } while((arg = args.arg()) != null);
-        
+
         return Geary.traverse<G>(list);
     }
-    
+
     /**
      * Take an array of items and return a Geary.Iterable for convenience.
      */
@@ -53,15 +53,15 @@ public class Geary.Iterable<G> : BaseObject {
      */
     private class GeeIterable<G> : Gee.Traversable<G>, Gee.Iterable<G>, BaseObject {
         private Gee.Iterator<G> i;
-        
+
         public GeeIterable(Gee.Iterator<G> iterator) {
             i = iterator;
         }
-        
+
         public Gee.Iterator<G> iterator() {
             return i;
         }
-        
+
         // Unfortunately necessary for Gee.Traversable.
         public virtual bool @foreach(Gee.ForallFunc<G> f) {
             foreach (G g in this) {
@@ -218,7 +218,7 @@ public class Geary.Iterable<G> : BaseObject {
     public Gee.ArrayList<G> to_array_list(owned Gee.EqualDataFunc<G>? equal_func = null) {
         return (Gee.ArrayList<G>) add_all_to(new Gee.ArrayList<G>((owned) equal_func));
     }
-    
+
     /** Returns a new linked list containing all elements. */
     public Gee.LinkedList<G> to_linked_list(owned Gee.EqualDataFunc<G>? equal_func = null) {
         return (Gee.LinkedList<G>) add_all_to(new Gee.LinkedList<G>((owned) equal_func));

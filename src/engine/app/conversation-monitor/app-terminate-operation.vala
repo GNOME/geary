@@ -8,7 +8,7 @@ private class Geary.App.TerminateOperation : ConversationOperation {
     public TerminateOperation() {
         base(null);
     }
-    
+
     public override async void execute_async() {
     }
 }
