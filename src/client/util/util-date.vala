@@ -71,7 +71,7 @@ public void init() {
     xlat_pretty_dates[ClockFormat.TWENTY_FOUR_HOURS] = _("%H:%M");
     /// Datetime format for the locale default, i.e. 8:31 am or 16:35,
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-    xlat_pretty_dates[ClockFormat.LOCALE_DEFAULT] = C_("Default clock format", "%l:%M %P");
+    xlat_pretty_dates[ClockFormat.LOCALE_DEFAULT] = C_("Default clock format", "%X");
 
     /// Date format for dates within the current year, i.e. Nov 8
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
