@@ -796,7 +796,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
             this.body_loading_timeout.reset();
 
-            if (loaded != null) {
+            if (loaded != null && !this.load_cancellable.is_cancelled()) {
                 try {
                     this.email = loaded;
                     yield update_body();
