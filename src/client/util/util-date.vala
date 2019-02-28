@@ -171,7 +171,7 @@ private string pretty_print_coarse(CoarseDate coarse_date, ClockFormat clock_for
             return ngettext("%dh ago", "%dh ago", (ulong) rounded).printf(rounded);
 
         case CoarseDate.TODAY:
-            fmt = xlat_pretty_clocks[clock_format.to_index()];
+            fmt = get_clock_format(clock_format);
         break;
 
         case CoarseDate.YESTERDAY:
@@ -207,6 +207,10 @@ public string pretty_print(DateTime datetime, ClockFormat clock_format) {
 
 public string pretty_print_verbose(DateTime datetime, ClockFormat clock_format) {
     return datetime.format(xlat_pretty_verbose_dates[clock_format.to_index()]);
+}
+
+public string get_clock_format(ClockFormat clock_format) {
+    return xlat_pretty_clocks[clock_format.to_index()];
 }
 
 }
