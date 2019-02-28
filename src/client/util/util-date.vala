@@ -32,7 +32,7 @@ public enum CoarseDate {
 }
 
 private int init_count = 0;
-private string[]? xlat_pretty_dates = null;
+private string[]? xlat_pretty_clocks = null;
 private string[]? xlat_pretty_verbose_dates = null;
 private string? xlat_same_year = null;
 private string? xlat_diff_year = null;
@@ -62,16 +62,16 @@ public void init() {
     if (time_locale != null)
         Intl.setlocale(LocaleCategory.MESSAGES, time_locale);
 
-    xlat_pretty_dates = new string[ClockFormat.TOTAL];
+    xlat_pretty_clocks = new string[ClockFormat.TOTAL];
     /// Datetime format for 12-hour time, i.e. 8:31 am
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-    xlat_pretty_dates[ClockFormat.TWELVE_HOURS] = _("%l:%M %P");
+    xlat_pretty_clocks[ClockFormat.TWELVE_HOURS] = _("%l:%M %P");
     /// Datetime format for 24-hour time, i.e. 16:35
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-    xlat_pretty_dates[ClockFormat.TWENTY_FOUR_HOURS] = _("%H:%M");
+    xlat_pretty_clocks[ClockFormat.TWENTY_FOUR_HOURS] = _("%H:%M");
     /// Datetime format for the locale default, i.e. 8:31 am or 16:35,
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-    xlat_pretty_dates[ClockFormat.LOCALE_DEFAULT] = C_("Default clock format", "%X");
+    xlat_pretty_clocks[ClockFormat.LOCALE_DEFAULT] = "%X";
 
     /// Date format for dates within the current year, i.e. Nov 8
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -105,7 +105,7 @@ private void terminate() {
     if (--init_count != 0)
         return;
 
-    xlat_pretty_dates = null;
+    xlat_pretty_clocks = null;
     xlat_same_year = null;
     xlat_diff_year = null;
     xlat_pretty_verbose_dates = null;
@@ -171,7 +171,7 @@ private string pretty_print_coarse(CoarseDate coarse_date, ClockFormat clock_for
             return ngettext("%dh ago", "%dh ago", (ulong) rounded).printf(rounded);
 
         case CoarseDate.TODAY:
-            fmt = xlat_pretty_dates[clock_format.to_index()];
+            fmt = xlat_pretty_clocks[clock_format.to_index()];
         break;
 
         case CoarseDate.YESTERDAY:
