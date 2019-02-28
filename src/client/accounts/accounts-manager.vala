@@ -1396,7 +1396,7 @@ public class Accounts.ServiceConfigV1 : ServiceConfig, GLib.Object {
         string? login = service_config.get_string(LOGIN, null);
         if (login != null) {
             service.credentials = new Geary.Credentials(
-                Credentials.PASSWORD, login
+                Geary.Credentials.Method.PASSWORD, login
             );
         }
         service.remember_password = service_config.get_bool(
@@ -1500,7 +1500,7 @@ public class Accounts.ServiceConfigLegacy : ServiceConfig, GLib.Object {
         );
         if (login != null) {
             service.credentials = new Geary.Credentials(
-                Credentials.PASSWORD, login
+                Geary.Credentials.Method.PASSWORD, login
             );
         }
         service.remember_password = service_config.get_bool(
