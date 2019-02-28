@@ -250,11 +250,11 @@ public class GearyController : Geary.BaseObject {
             Args.log_debug
         );
         try {
-            ClientWebView.load_scripts();
-            ComposerWebView.load_resources();
-            ConversationWebView.load_resources(
+            ClientWebView.load_resources(
                 this.application.get_user_config_directory()
             );
+            ComposerWebView.load_resources();
+            ConversationWebView.load_resources();
         } catch (Error err) {
             error("Error loading web resources: %s", err.message);
         }
