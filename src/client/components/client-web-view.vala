@@ -39,6 +39,10 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     private const double ZOOM_MAX = 2.0;
     private const double ZOOM_MIN = 0.5;
 
+    private const string USER_CSS = "user-style.css";
+    private const string USER_CSS_LEGACY = "user-message.css";
+
+
 
     // Workaround WK binding ctor not accepting any args
     private class WebsiteDataManager : WebKit.WebsiteDataManager {
@@ -58,8 +62,11 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
     private static WebKit.WebContext? default_context = null;
 
+    private static WebKit.UserStyleSheet? user_stylesheet = null;
+
     private static WebKit.UserScript? script = null;
     private static WebKit.UserScript? allow_remote_images = null;
+
 
     /**
      * Initialises WebKit.WebContext for use by the client.
@@ -109,19 +116,35 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     /**
      * Loads static resources used by ClientWebView.
      */
-    public static void load_scripts()
-        throws Error {
+    public static void load_resources(GLib.File user_dir)
+        throws GLib.Error {
         ClientWebView.script = load_app_script(
             "client-web-view.js"
         );
         ClientWebView.allow_remote_images = load_app_script(
             "client-web-view-allow-remote-images.js"
         );
+
+        foreach (string name in new string[] { USER_CSS, USER_CSS_LEGACY }) {
+            GLib.File stylesheet = user_dir.get_child(name);
+            try {
+                ClientWebView.user_stylesheet = load_user_stylesheet(stylesheet);
+                break;
+            } catch (GLib.IOError.NOT_FOUND err) {
+                // All good, try the next one or just exit
+            } catch (GLib.FileError.NOENT err) {
+                // Ditto
+            } catch (GLib.Error err) {
+                warning(
+                    "Could not load %s: %s", stylesheet.get_path(), err.message
+                );
+            }
+        }
     }
 
     /** Loads an application-specific WebKit stylesheet. */
     protected static WebKit.UserStyleSheet load_app_stylesheet(string name)
-        throws Error {
+        throws GLib.Error {
         return new WebKit.UserStyleSheet(
             GioUtil.read_resource(name),
             WebKit.UserContentInjectedFrames.TOP_FRAME,
@@ -131,24 +154,17 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         );
     }
 
-    /** Loads a user stylesheet, if any. */
-    protected static WebKit.UserStyleSheet? load_user_stylesheet(File name) {
-        WebKit.UserStyleSheet? user_stylesheet = null;
-        try {
-            Geary.Memory.FileBuffer buf = new Geary.Memory.FileBuffer(name, true);
-            user_stylesheet = new WebKit.UserStyleSheet(
-                buf.get_valid_utf8(),
-                WebKit.UserContentInjectedFrames.ALL_FRAMES,
-                WebKit.UserStyleLevel.USER,
-                null,
-                null
-            );
-        } catch (IOError.NOT_FOUND err) {
-            debug("User CSS file does not exist: %s", err.message);
-        } catch (Error err) {
-            debug("Failed to load user CSS file: %s", err.message);
-        }
-        return user_stylesheet;
+    /** Loads a user stylesheet from disk. */
+    protected static WebKit.UserStyleSheet? load_user_stylesheet(GLib.File name)
+        throws GLib.Error {
+        Geary.Memory.FileBuffer buf = new Geary.Memory.FileBuffer(name, true);
+        return new WebKit.UserStyleSheet(
+            buf.get_valid_utf8(),
+            WebKit.UserContentInjectedFrames.ALL_FRAMES,
+            WebKit.UserStyleLevel.USER,
+            null,
+            null
+        );
     }
 
     /** Loads an application-specific WebKit JavaScript script. */
@@ -299,6 +315,9 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         WebKit.UserContentManager content_manager =
              custom_manager ?? new WebKit.UserContentManager();
         content_manager.add_script(ClientWebView.script);
+        if (ClientWebView.user_stylesheet != null) {
+            content_manager.add_style_sheet(ClientWebView.user_stylesheet);
+        }
 
         Object(
             web_context: ClientWebView.default_context,

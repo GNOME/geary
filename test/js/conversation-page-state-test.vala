@@ -23,8 +23,8 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
         add_test("is_descendant_of_lax", is_descendant_of_lax);
 
         try {
-            ConversationWebView.load_resources(File.new_for_path(""));
-        } catch (Error err) {
+            ConversationWebView.load_resources();
+        } catch (GLib.Error err) {
             assert_not_reached();
         }
     }

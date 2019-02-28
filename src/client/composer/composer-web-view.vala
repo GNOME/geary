@@ -81,7 +81,7 @@ public class ComposerWebView : ClientWebView {
     private static WebKit.UserStyleSheet? app_style = null;
     private static WebKit.UserScript? app_script = null;
 
-    public static void load_resources()
+    public static new void load_resources()
         throws Error {
         ComposerWebView.app_style = ClientWebView.load_app_stylesheet(
             "composer-web-view.css"

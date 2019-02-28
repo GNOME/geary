@@ -23,10 +23,10 @@ public class ClientWebViewTest : TestCase {
         );
     }
 
-    public void load_resources() throws Error {
+    public void load_resources() throws GLib.Error {
         try {
-            ClientWebView.load_scripts();
-        } catch (Error err) {
+            ClientWebView.load_resources(GLib.File.new_for_path("/tmp"));
+        } catch (GLib.Error err) {
             assert_not_reached();
         }
     }

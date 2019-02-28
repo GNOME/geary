@@ -8,7 +8,6 @@
 
 public class ConversationWebView : ClientWebView {
 
-    private const string USER_CSS = "user-message.css";
 
     private const string DECEPTIVE_LINK_CLICKED = "deceptiveLinkClicked";
 
@@ -37,20 +36,16 @@ public class ConversationWebView : ClientWebView {
         DECEPTIVE_DOMAIN = 2;
     }
 
-    private static WebKit.UserStyleSheet? user_stylesheet = null;
     private static WebKit.UserStyleSheet? app_stylesheet = null;
     private static WebKit.UserScript? app_script = null;
 
-    public static void load_resources(File user_dir)
+    public static new void load_resources()
         throws Error {
         ConversationWebView.app_script = ClientWebView.load_app_script(
             "conversation-web-view.js"
         );
         ConversationWebView.app_stylesheet = ClientWebView.load_app_stylesheet(
             "conversation-web-view.css"
-        );
-        ConversationWebView.user_stylesheet = ClientWebView.load_user_stylesheet(
-            user_dir.get_child("user-message.css")
         );
     }
 
@@ -65,9 +60,6 @@ public class ConversationWebView : ClientWebView {
         base(config);
         this.user_content_manager.add_script(ConversationWebView.app_script);
         this.user_content_manager.add_style_sheet(ConversationWebView.app_stylesheet);
-        if (ConversationWebView.user_stylesheet != null) {
-            this.user_content_manager.add_style_sheet(ConversationWebView.user_stylesheet);
-        }
 
         register_message_handler(
             DECEPTIVE_LINK_CLICKED, on_deceptive_link_clicked
