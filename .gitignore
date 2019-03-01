@@ -3,6 +3,7 @@
 /Makefile
 /.stamp
 build/
+_build/
 debian/*.debhelper.log
 debian/*.substvars
 debian/.debhelper
