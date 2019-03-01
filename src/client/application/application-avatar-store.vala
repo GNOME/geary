@@ -81,9 +81,35 @@ public class Application.AvatarStore : Geary.BaseObject {
                     pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(
                         data, pixel_size, pixel_size, true, cancellable
                     );
+                    pixbuf = Util.Avatar.round_image(pixbuf);
                     this.pixbufs.add(pixbuf);
                 }
             }
+
+            if (pixbuf == null) {
+                string? name = null;
+                // XXX should really be using the folks display name
+                // here as below, but since we should the name from
+                // the email address if present in
+                // ConversationMessage, and since that might not match
+                // the folks display name, it is confusing when the
+                // initials are one thing and the name is
+                // another. Re-enable below when we start using the
+                // folks display name in ConversationEmail
+                name = this.mailbox.to_short_display();
+                // if (this.individual != null) {
+                //     name = this.individual.display_name;
+                // } else {
+                //     // Use short display because it will clean up the
+                //     // string, use the name if present and fall back
+                //     // on the address if not.
+                //     name = this.mailbox.to_short_display();
+                // }
+                pixbuf = Util.Avatar.generate_user_picture(name, pixel_size);
+                pixbuf = Util.Avatar.round_image(pixbuf);
+                this.pixbufs.add(pixbuf);
+            }
+
             return pixbuf;
         }
 
