@@ -25,13 +25,24 @@ public class Application.AvatarStore : Geary.BaseObject {
     private class CacheEntry {
 
 
+        public static string to_key(Geary.RFC822.MailboxAddress mailbox) {
+            // Use short name as the key, since it will use the name
+            // first, then the email address, which is especially
+            // important for things like GitLab email where the
+            // address is always the same, but the name changes. This
+            // ensures that each such user gets different initials.
+            return mailbox.to_short_display().normalize().casefold();
+        }
+
         public static int lru_compare(CacheEntry a, CacheEntry b) {
-            return (a.address == b.address)
+            return (a.key == b.key)
                 ? 0 : (int) (a.last_used - b.last_used);
         }
 
 
-        public string address;
+        public string key;
+
+        public Geary.RFC822.MailboxAddress mailbox;
 
         // Store nulls so we can also cache avatars not found
         public Folks.Individual? individual;
@@ -40,10 +51,11 @@ public class Application.AvatarStore : Geary.BaseObject {
 
         private Gee.List<Gdk.Pixbuf> pixbufs = new Gee.LinkedList<Gdk.Pixbuf>();
 
-        public CacheEntry(string address,
+        public CacheEntry(Geary.RFC822.MailboxAddress mailbox,
                           Folks.Individual? individual,
                           int64 last_used) {
-            this.address = address;
+            this.key = to_key(mailbox);
+            this.mailbox = mailbox;
             this.individual = individual;
             this.last_used = last_used;
         }
@@ -99,17 +111,16 @@ public class Application.AvatarStore : Geary.BaseObject {
                                   GLib.Cancellable cancellable)
         throws GLib.Error {
         // Normalise the address to improve caching
-        CacheEntry match = yield get_match(
-            mailbox.address.normalize().casefold()
-        );
+        CacheEntry match = yield get_match(mailbox);
         return yield match.load(pixel_size, cancellable);
     }
 
 
-    private async CacheEntry get_match(string address)
+    private async CacheEntry get_match(Geary.RFC822.MailboxAddress mailbox)
         throws GLib.Error {
+        string key = CacheEntry.to_key(mailbox);
         int64 now = GLib.get_monotonic_time();
-        CacheEntry? entry = this.lru_cache.get(address);
+        CacheEntry? entry = this.lru_cache.get(key);
         if (entry != null) {
             if (entry.last_used + MAX_CACHE_AGE_US >= now) {
                 // Need to remove the entry from the ordering before
@@ -119,22 +130,22 @@ public class Application.AvatarStore : Geary.BaseObject {
                 entry.last_used = now;
                 this.lru_ordering.add(entry);
             } else {
-                this.lru_cache.unset(address);
+                this.lru_cache.unset(key);
                 this.lru_ordering.remove(entry);
                 entry = null;
             }
         }
 
         if (entry == null) {
-            Folks.Individual? match = yield search_match(address);
-            entry = new CacheEntry(address, match, now);
-            this.lru_cache.set(address, entry);
+            Folks.Individual? match = yield search_match(mailbox.address);
+            entry = new CacheEntry(mailbox, match, now);
+            this.lru_cache.set(key, entry);
             this.lru_ordering.add(entry);
 
             // Prune the cache if needed
             if (this.lru_cache.size > MAX_CACHE_SIZE) {
                 CacheEntry oldest = this.lru_ordering.first();
-                this.lru_cache.unset(oldest.address);
+                this.lru_cache.unset(oldest.key);
                 this.lru_ordering.remove(oldest);
             }
         }
