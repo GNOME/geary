@@ -29,7 +29,6 @@ public class Configuration {
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
     public const string COMPOSER_WINDOW_SIZE_KEY = "composer-window-size";
-    public const string AVATAR_URL = "avatar-url";
 
 
     public enum DesktopEnvironment {
@@ -176,10 +175,6 @@ public class Configuration {
         set {
             settings.set_value(COMPOSER_WINDOW_SIZE_KEY, value);
         }
-    }
-
-    public string avatar_url {
-        owned get { return settings.get_string(AVATAR_URL); }
     }
 
     // Creates a configuration object.
