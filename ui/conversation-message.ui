@@ -20,7 +20,6 @@
             <property name="can_focus">False</property>
             <property name="valign">start</property>
             <property name="pixel_size">48</property>
-            <property name="icon_name">avatar-default-symbolic</property>
           </object>
           <packing>
             <property name="left_attach">0</property>
