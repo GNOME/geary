@@ -23,25 +23,25 @@ public class Geary.Imap.StatusResponse : ServerResponse {
      * {@link Status.OK}, {@link Status.NO}, or {@link Status.BAD}.
      */
     public bool is_completion { get; private set; default = false; }
-    
+
     /**
      * The {@link Status} being reported by the server in this {@link ServerResponse}.
      */
     public Status status { get; private set; }
-    
+
     /**
      * An optional {@link ResponseCode} reported by the server in this {@link ServerResponse}.
      */
     public ResponseCode? response_code { get; private set; }
-    
+
     private StatusResponse(Tag tag, Status status, ResponseCode? response_code) {
         base (tag);
-        
+
         this.status = status;
         this.response_code = response_code;
         update_is_completion();
     }
-    
+
     /**
      * Converts the {@link RootParameters} into a {@link StatusResponse}.
      *
@@ -50,12 +50,12 @@ public class Geary.Imap.StatusResponse : ServerResponse {
      */
     public StatusResponse.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
-        
+
         status = Status.from_parameter(get_as_string(1));
         response_code = get_if_list(2) as ResponseCode;
         update_is_completion();
     }
-    
+
     private void update_is_completion() {
         // TODO: Is this too stringent?  It means a faulty server could send back a completion
         // with another Status code and cause the client to treat the command as "unanswered",
@@ -68,14 +68,14 @@ public class Geary.Imap.StatusResponse : ServerResponse {
                 case Status.BAD:
                     is_completion = true;
                 break;
-                
+
                 default:
                     // fall through
                 break;
             }
         }
     }
-    
+
     /**
      * Returns optional text provided by the server.  Note that this text is not internationalized
      * and probably in English, and is not standard or uniformly declared.  It's not recommended
@@ -93,20 +93,20 @@ public class Geary.Imap.StatusResponse : ServerResponse {
                     builder.append_c(' ');
             }
         }
-        
+
         return !String.is_empty(builder.str) ? builder.str : null;
     }
-    
+
     /**
      * Returns true if {@link RootParameters} holds a {@link Status} parameter.
      */
     public static bool is_status_response(RootParameters root) {
         if (!root.has_tag())
             return false;
-        
+
         try {
             Status.from_parameter(root.get_as_string(1));
-            
+
             return true;
         } catch (ImapError err) {
             return false;

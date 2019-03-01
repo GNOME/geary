@@ -7,7 +7,7 @@
 public class ConversationListCellRenderer : Gtk.CellRenderer {
     private static FormattedConversationData? example_data = null;
     private static bool hover_selected = false;
-    
+
     // Mail message data.
     public FormattedConversationData data { get; set; }
 
@@ -37,29 +37,29 @@ public class ConversationListCellRenderer : Gtk.CellRenderer {
         minimum_size = natural_size = 1;
     }
 
-    public override void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
+    public override void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area,
         Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
         if (data != null)
             data.render(ctx, widget, background_area, cell_area, flags, hover_selected);
     }
-    
+
     // Recalculates size when the style changed.
     // Note: this must be called by the parent TreeView.
     public static void style_changed(Gtk.Widget widget) {
         if (example_data == null) {
             example_data = new FormattedConversationData.create_example();
         }
-        
+
         example_data.calculate_sizes(widget);
     }
-    
+
     // Shows hover effect on all selected cells.
     public static void set_hover_selected(bool hover) {
         hover_selected = hover;
     }
 
     // This is implemented because it's required; ignore it and look at get_preferred_height() instead.
-    public override void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset, 
+    public override void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset,
         out int y_offset, out int width, out int height) {
         // Set values to avoid compiler warning.
         x_offset = 0;

@@ -16,19 +16,19 @@ public class Geary.Smtp.LoginAuthenticator : Geary.Smtp.Authenticator {
     public LoginAuthenticator(Credentials credentials) {
         base ("LOGIN", credentials);
     }
-    
+
     public override Request initiate() {
         return new Request(Command.AUTH, { "login" });
     }
-    
+
     public override Memory.Buffer? challenge(int step, Response response) throws SmtpError {
         switch (step) {
             case 0:
                 return new Memory.StringBuffer(Base64.encode(credentials.user.data));
-            
+
             case 1:
                 return new Memory.StringBuffer(Base64.encode((credentials.token ?? "").data));
-            
+
             default:
                 return null;
         }

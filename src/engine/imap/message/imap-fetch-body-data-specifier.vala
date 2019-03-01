@@ -48,62 +48,62 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         HEADER_FIELDS_NOT,
         MIME,
         TEXT;
-        
+
         public string serialize() {
             switch (this) {
                 case NONE:
                     return "";
-                
+
                 case HEADER:
                     return "header";
-                
+
                 case HEADER_FIELDS:
                     return "header.fields";
-                
+
                 case HEADER_FIELDS_NOT:
                     return "header.fields.not";
-                
+
                 case MIME:
                     return "mime";
-                
+
                 case TEXT:
                     return "text";
-                
+
                 default:
                     assert_not_reached();
             }
         }
-        
+
         public static SectionPart deserialize(string value) throws ImapError {
             if (String.is_empty(value))
                 return NONE;
-            
+
             switch (Ascii.strdown(value)) {
                 case "header":
                     return HEADER;
-                
+
                 case "header.fields":
                     return HEADER_FIELDS;
-                
+
                 case "header.fields.not":
                     return HEADER_FIELDS_NOT;
-                
+
                 case "mime":
                     return MIME;
-                
+
                 case "text":
                     return TEXT;
-                
+
                 default:
                     throw new ImapError.PARSE_ERROR("Invalid SectionPart name \"%s\"", value);
             }
         }
-        
+
         public string to_string() {
             return serialize();
         }
     }
-    
+
     /**
      * The {@link SectionPart} for this FETCH BODY specifier.
      *
@@ -111,7 +111,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
      * well in the future, if necessary.
      */
     public SectionPart section_part { get; private set; }
-    
+
     /**
      * When false, indicates that the FETCH BODY specifier is using a hack to operate with
      * non-conformant servers.
@@ -122,14 +122,14 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
      * @see omit_request_header_fields_space
      */
     public bool request_header_fields_space { get; private set; default = true; }
-    
+
     private int[]? part_number;
     private int subset_start;
     private int subset_count;
     private Gee.TreeSet<string>? field_names;
     private bool is_peek;
     private string hashable;
-    
+
     /**
      * Create a FetchBodyDataType with the various required and optional parameters specified.
      *
@@ -143,7 +143,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         int subset_count, string[]? field_names) {
         init(section_part, part_number, subset_start, subset_count, field_names, false, false);
     }
-    
+
     /**
      * Like FetchBodyDataType, but the /Seen flag will not be set when used on a message.
      */
@@ -151,12 +151,12 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         int subset_count, string[]? field_names) {
         init(section_part, part_number, subset_start, subset_count, field_names, true, false);
     }
-    
+
     public FetchBodyDataSpecifier.response(SectionPart section_part, int[]? part_number,
         int subset_start, string[]? field_names) {
         init(section_part, part_number, subset_start, -1, field_names, false, true);
     }
-    
+
     private void init(SectionPart section_part, int[]? part_number, int subset_start, int subset_count,
         string[]? field_names, bool is_peek, bool is_response) {
         switch (section_part) {
@@ -164,37 +164,37 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
             case SectionPart.HEADER_FIELDS_NOT:
                 assert(field_names != null && field_names.length > 0);
             break;
-            
+
             default:
                 assert(field_names == null);
             break;
         }
-        
+
         if (subset_start >= 0 && !is_response)
             assert(subset_count > 0);
-        
+
         this.section_part = section_part;
         this.part_number = part_number;
         this.subset_start = subset_start;
         this.subset_count = subset_count;
         this.is_peek = is_peek;
-        
+
         if (field_names != null && field_names.length > 0) {
             this.field_names = new Gee.TreeSet<string>(Ascii.strcmp);
             foreach (string field_name in field_names) {
                 string converted = Ascii.strdown(field_name.strip());
-                
+
                 if (!String.is_empty(converted))
                     this.field_names.add(converted);
             }
         } else {
             this.field_names = null;
         }
-        
+
         // see equal_to() for why the response version is used
         hashable = serialize_response();
     }
-    
+
     /**
      * Returns the {@link FetchBodyDataSpecifier} in a string ready for a {@link Command}.
      *
@@ -208,7 +208,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
             serialize_field_names(),
             serialize_subset(true));
     }
-    
+
     /**
      * Returns the {@link FetchBodyDataSpecifier} in a string as it might appear in a
      * {@link ServerResponse}.
@@ -228,34 +228,34 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
             serialize_field_names(),
             serialize_subset(false));
     }
-    
+
     public Parameter to_request_parameter() {
         return new AtomParameter(serialize_request());
     }
-    
+
     private string serialize_part_number() {
         if (part_number == null || part_number.length == 0)
             return "";
-        
+
         StringBuilder builder = new StringBuilder();
         foreach (int part in part_number) {
             if (builder.len > 0)
                 builder.append_c('.');
-            
+
             builder.append_printf("%d", part);
         }
-        
+
         // if there's a SectionPart that follows, append a period as a separator
         if (section_part != SectionPart.NONE)
             builder.append_c('.');
-        
+
         return builder.str;
     }
-    
+
     private string serialize_field_names() {
         if (field_names == null || field_names.size == 0)
             return "";
-        
+
         // note that the leading space is supplied here
         StringBuilder builder = new StringBuilder(request_header_fields_space ? " (" : "(");
         Gee.Iterator<string> iter = field_names.iterator();
@@ -265,10 +265,10 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
                 builder.append_c(' ');
         }
         builder.append_c(')');
-        
+
         return builder.str;
     }
-    
+
     // See note at serialize_response for reason is_request is necessary.
     // Note that this could've been formed with the .response() ctor, which doesn't pass along
     // subset_count (because it's unknown), so this simply uses subset_start in that case
@@ -278,7 +278,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         else
             return (subset_start < 0) ? "" : "<%d>".printf(subset_start);
     }
-    
+
     /**
      * Returns true if the {@link StringParameter} is formatted like a
      * {@link FetchBodyDataSpecifier}.
@@ -291,10 +291,10 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
      */
     public static bool is_fetch_body_data_specifier(StringParameter stringp) {
         string strd = stringp.as_lower().strip();
-        
+
         return strd.has_prefix("body[") || strd.has_prefix("body.peek[");
     }
-    
+
     /**
      * Attempts to convert a {@link StringParameter} into a {@link FetchBodyDataSpecifier}.
      *
@@ -311,7 +311,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         // * Remove quoting (some servers return field names quoted, some don't, Geary never uses them
         //   when requesting)
         string strd = stringp.as_lower().replace("\"", "").strip();
-        
+
         // Convert full form into two sections: "body[SECTION_STRING]<OCTET_STRING>"
         //                                                           ^^^^^^^^^^^^^^ optional
         // response never contains ".peek", even if specified in request
@@ -326,17 +326,17 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
                 section_string = (string) section_chars;
                 octet_string = null;
             break;
-            
+
             case 2:
                 section_string = (string) section_chars;
                 octet_string = (string) octet_chars;
             break;
-            
+
             default:
                 throw new ImapError.PARSE_ERROR("%s is not a FETCH body data type %d", stringp.to_string(),
                     count);
         }
-        
+
         // convert section string into its parts:
         // "PART_STRING (FIELDS_STRING)"
         //             ^^^^^^^^^^^^^^^^ optional
@@ -347,14 +347,14 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         if (section_string.contains("(")) {
             if (section_string.scanf("%[^(](%[^)])", part_chars, fields_chars) != 2)
                 throw new ImapError.PARSE_ERROR("%s: malformed part/header names", stringp.to_string());
-            
+
             part_string = (string) part_chars;
             fields_string = (string?) fields_chars;
         } else {
             part_string = section_string;
             fields_string = null;
         }
-        
+
         // convert part_string into its part number and section part name
         // "#.#.#.SECTION_PART"
         //  ^^^^^^ optional
@@ -365,13 +365,13 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
             bool no_more = false;
             for (int ctr = 0; ctr < part_number_tokens.length; ctr++) {
                 string token = part_number_tokens[ctr];
-                
+
                 // stop treating as numbers when non-digit found (SectionParts contain periods
                 // too and must be preserved);
                 if (!no_more && Ascii.is_numeric(token)) {
                     if (part_number == null)
                         part_number = new int[0];
-                    
+
                     part_number += int.parse(token);
                 } else {
                     no_more = true;
@@ -383,9 +383,9 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         } else {
             section_part_builder.append(part_string);
         }
-        
+
         SectionPart section_part = SectionPart.deserialize(section_part_builder.str.strip());
-        
+
         // Convert optional fields_string into an array of field names
         string[]? field_names = null;
         if (fields_string != null) {
@@ -393,7 +393,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
             if (field_names.length == 0)
                 field_names = null;
         }
-        
+
         // If octet_string found, trim surrounding brackets and convert to integer
         // The span in the returned response is merely the offset ("1.15" becomes "1") because the
         // associated literal data specifies its own length)
@@ -403,17 +403,17 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
                 throw new ImapError.PARSE_ERROR("Improperly formed octet \"%s\" in %s", octet_string,
                     stringp.to_string());
             }
-            
+
             if (subset_start < 0) {
                 throw new ImapError.PARSE_ERROR("Invalid octet count %d in %s", subset_start,
                     stringp.to_string());
             }
         }
-        
+
         return new FetchBodyDataSpecifier.response(section_part, part_number, subset_start,
             field_names);
     }
-    
+
     /**
      * Omit the space between "header.fields" and the list of email headers.
      *
@@ -432,7 +432,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
     public void omit_request_header_fields_space() {
         request_header_fields_space = false;
     }
-    
+
     /**
      * {@link FetchBodyDataSpecifier}s are considered equal if they're serialized responses are
      * equal.
@@ -445,14 +445,14 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
     public bool equal_to(FetchBodyDataSpecifier other) {
         if (this == other)
             return true;
-        
+
         return hashable == other.hashable;
     }
-    
+
     public uint hash() {
         return str_hash(hashable);
     }
-    
+
     // Return serialize_request() because it's a more fuller representation than what the server returns
     public string to_string() {
         return serialize_request();

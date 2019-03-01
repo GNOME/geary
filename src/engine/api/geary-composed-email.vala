@@ -21,7 +21,7 @@ public class Geary.ComposedEmail : BaseObject {
         | Geary.Email.Field.REFERENCES
         | Geary.Email.Field.SUBJECT
         | Geary.Email.Field.DATE;
-    
+
     public DateTime date { get; set; }
     // TODO: sender goes here, but not beyond, as it's not properly supported by GMime yet.
     public RFC822.MailboxAddress? sender { get; set; default = null; }
@@ -47,7 +47,7 @@ public class Geary.ComposedEmail : BaseObject {
 
     public string img_src_prefix { get; set; default = ""; }
 
-    public ComposedEmail(DateTime date, RFC822.MailboxAddresses from, 
+    public ComposedEmail(DateTime date, RFC822.MailboxAddresses from,
         RFC822.MailboxAddresses? to = null, RFC822.MailboxAddresses? cc = null,
         RFC822.MailboxAddresses? bcc = null, string? subject = null,
         string? body_text = null, string? body_html = null) {
@@ -60,7 +60,7 @@ public class Geary.ComposedEmail : BaseObject {
         this.body_text = body_text;
         this.body_html = body_html;
     }
-    
+
     public Geary.RFC822.Message to_rfc822_message(string? message_id = null) {
         return new RFC822.Message.from_composed_email(this, message_id);
     }

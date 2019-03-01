@@ -24,14 +24,14 @@ public class Geary.RFC822.MessageID : Geary.MessageData.StringMessageData, Geary
         string? normalized = normalize(value);
         base (normalized ?? value);
     }
-    
+
     // Adds brackets if required, null if no change required
     private static string? normalize(string value) {
         bool needs_prefix = !value.has_prefix("<");
         bool needs_suffix = !value.has_suffix(">");
         if (!needs_prefix && !needs_suffix)
             return null;
-        
+
         return "%s%s%s".printf(needs_prefix ? "<" : "", value, needs_suffix ? ">" : "");
     }
 }
@@ -41,27 +41,27 @@ public class Geary.RFC822.MessageID : Geary.MessageData.StringMessageData, Geary
  */
 public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData, Geary.RFC822.MessageData {
     public Gee.List<MessageID> list { get; private set; }
-    
+
     public MessageIDList() {
         list = new Gee.ArrayList<MessageID>();
     }
-    
+
     public MessageIDList.from_collection(Gee.Collection<MessageID> collection) {
         this ();
-        
+
         foreach(MessageID msg_id in collection)
             this.list.add(msg_id);
     }
-    
+
     public MessageIDList.single(MessageID msg_id) {
         this ();
-        
+
         list.add(msg_id);
     }
-    
+
     public MessageIDList.from_rfc822_string(string value) {
         this ();
-        
+
         // Have seen some mailers use commas between Message-IDs and whitespace inside Message-IDs,
         // meaning that the standard whitespace tokenizer is not sufficient.  The only guarantee
         // made of a Message-ID is that it's surrounded by angle brackets, so save anything inside
@@ -87,7 +87,7 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
                     in_message_id = true;
                     bracketed = true;
                 break;
-                
+
                 case '(':
                     if (!in_message_id) {
                         in_message_id = true;
@@ -96,18 +96,18 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
                         add_char = true;
                     }
                 break;
-                
+
                 case '>':
                     in_message_id = false;
                 break;
-                
+
                 case ')':
                     if (in_message_id)
                         in_message_id = false;
                     else
                         add_char = true;
                 break;
-                
+
                 default:
                     // deal with Message-IDs without brackets ... bracketed is set to true the
                     // moment the first one is found, so this doesn't deal with combinations of
@@ -119,26 +119,26 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
                         else if (in_message_id && ch.isspace())
                             in_message_id = false;
                     }
-                    
+
                     // only add characters inside the brackets or, if not bracketed, work around
                     add_char = in_message_id;
                 break;
             }
-            
+
             if (add_char)
                 canonicalized.append_c(ch);
-            
+
             if (!in_message_id && !String.is_empty(canonicalized.str)) {
                 list.add(new MessageID(canonicalized.str));
-                
+
                 canonicalized = new StringBuilder();
             }
         }
-        
+
         // pick up anything that doesn't end with brackets
         if (!String.is_empty(canonicalized.str))
             list.add(new MessageID(canonicalized.str));
-        
+
         // don't assert that list.size > 0; even though this method should generated a decoded ID
         // from any non-empty string, an empty Message-ID (i.e. "<>") won't.
     }
@@ -156,12 +156,12 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
     public override string to_string() {
         return "MessageIDList (%d)".printf(list.size);
     }
-    
+
     public virtual string to_rfc822_string() {
         string[] strings = new string[list.size];
         for(int i = 0; i < list.size; ++i)
             strings[i] = list[i].value;
-        
+
         return string.joinv(" ", strings);
     }
 }
@@ -223,15 +223,15 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
     public virtual string serialize() {
         return to_iso_8601();
     }
-    
+
     public virtual bool equal_to(Geary.RFC822.Date other) {
         return (this != other) ? value.equal(other.value) : true;
     }
-    
+
     public virtual uint hash() {
         return value.hash();
     }
-    
+
     public override string to_string() {
         return original ?? value.to_string();
     }
@@ -247,37 +247,37 @@ public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
     Geary.MessageData.SearchableMessageData, Geary.RFC822.MessageData {
     public const string REPLY_PREFACE = "Re:";
     public const string FORWARD_PREFACE = "Fwd:";
-    
+
     public string original { get; private set; }
-    
+
     public Subject(string value) {
         base (value);
         original = value;
     }
-    
+
     public Subject.decode(string value) {
         base (GMime.utils_header_decode_text(value));
         original = value;
     }
-    
+
     public bool is_reply() {
         return value.down().has_prefix(REPLY_PREFACE.down());
     }
-    
+
     public Subject create_reply() {
         return is_reply() ? new Subject(value) : new Subject("%s %s".printf(REPLY_PREFACE,
             value));
     }
-    
+
     public bool is_forward() {
         return value.down().has_prefix(FORWARD_PREFACE.down());
     }
-    
+
     public Subject create_forward() {
         return is_forward() ? new Subject(value) : new Subject("%s %s".printf(FORWARD_PREFACE,
             value));
     }
-    
+
     /**
      * Returns the Subject: line stripped of reply and forwarding prefixes.
      *
@@ -293,23 +293,23 @@ public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
             try {
                 Regex re_regex = new Regex("^(?i:Re:\\s*)+");
                 stripped = re_regex.replace(subject_base, -1, 0, "");
-                
+
                 Regex fwd_regex = new Regex("^(?i:Fwd:\\s*)+");
                 stripped = fwd_regex.replace(stripped, -1, 0, "");
             } catch (RegexError e) {
                 debug("Failed to clean up subject line \"%s\": %s", value, e.message);
-                
+
                 break;
             }
-            
+
             changed = (stripped != subject_base);
             if (changed)
                 subject_base = stripped;
         } while (changed);
-        
+
         return String.reduce_whitespace(subject_base);
     }
-    
+
     /**
      * See Geary.MessageData.SearchableMessageData.
      */
@@ -321,44 +321,44 @@ public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
 public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC822.MessageData {
     private GMime.Message? message = null;
     private string[]? names = null;
-    
+
     public Header(Memory.Buffer buffer) {
         base ("RFC822.Header", buffer);
     }
-    
+
     private unowned GMime.HeaderList get_headers() throws RFC822Error {
         if (message != null)
             return message.get_header_list();
-        
+
         GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(buffer));
         parser.set_respect_content_length(false);
         parser.set_scan_from(false);
-        
+
         message = parser.construct_message();
         if (message == null)
             throw new RFC822Error.INVALID("Unable to parse RFC 822 headers");
-        
+
         return message.get_header_list();
     }
-    
+
     public string? get_header(string name) throws RFC822Error {
         return get_headers().get(name);
     }
-    
+
     public string[] get_header_names() throws RFC822Error {
         if (names != null)
             return names;
-        
+
         names = new string[0];
-        
+
         unowned GMime.HeaderIter iter;
         if (!get_headers().get_iter(out iter))
             return names;
-        
+
         do {
             names += iter.get_name();
         } while (iter.next());
-        
+
         return names;
     }
 }

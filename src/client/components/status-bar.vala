@@ -18,7 +18,7 @@ public class StatusBar : Gtk.Statusbar {
         OUTBOX_SENDING,
         OUTBOX_SEND_FAILURE,
         OUTBOX_SAVE_SENT_MAIL_FAILED;
-        
+
         internal string get_text() {
             switch (this) {
                 case Message.OUTBOX_SENDING:
@@ -35,7 +35,7 @@ public class StatusBar : Gtk.Statusbar {
                     assert_not_reached();
             }
         }
-        
+
         internal Context get_context() {
             switch (this) {
                 case Message.OUTBOX_SENDING:
@@ -49,36 +49,36 @@ public class StatusBar : Gtk.Statusbar {
             }
         }
     }
-    
+
     internal enum Context {
         OUTBOX,
     }
-    
+
     private Gee.HashMap<Context, uint> context_ids = new Gee.HashMap<Context, uint>();
     private Gee.HashMap<Message, uint> message_ids = new Gee.HashMap<Message, uint>();
     private Gee.HashMap<Message, int> message_counts = new Gee.HashMap<Message, int>();
-    
+
     public StatusBar() {
         set_context_id(Context.OUTBOX);
     }
-    
+
     private void set_context_id(Context context) {
         context_ids.set(context, get_context_id(context.to_string()));
     }
-    
+
     private int get_count(Message message) {
         return (message_counts.has_key(message) ? message_counts.get(message) : 0);
     }
-    
+
     private void push_message(Message message) {
         message_ids.set(message, push(context_ids.get(message.get_context()), message.get_text()));
     }
-    
+
     private void remove_message(Message message) {
         remove(context_ids.get(message.get_context()), message_ids.get(message));
         message_ids.unset(message);
     }
-    
+
     /**
      * Return whether the message has been activated more times than it has
      * been deactivated.
@@ -86,19 +86,19 @@ public class StatusBar : Gtk.Statusbar {
     public bool is_message_active(Message message) {
         return message_ids.has_key(message);
     }
-    
+
     public void activate_message(Message message) {
         if (is_message_active(message))
             remove_message(message);
-        
+
         push_message(message);
         message_counts.set(message, get_count(message) + 1);
     }
-    
+
     public void deactivate_message(Message message) {
         if (!is_message_active(message))
             return;
-        
+
         int count = get_count(message);
         if (count == 1)
             remove_message(message);

@@ -10,11 +10,11 @@ public class FolderList.SpecialGrouping : Sidebar.Grouping {
     // Must be != 0 and unique among SpecialGroupings.  Bigger comes later
     // in the list.  If < 0, it comes before non-SpecialGroupings.
     public int position { get; private set; }
-    
+
     public SpecialGrouping(int position, string name, string? icon,
         string? tooltip = null) {
         base(name, icon, tooltip);
-        
+
         this.position = position;
     }
 }

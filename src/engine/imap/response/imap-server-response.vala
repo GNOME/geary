@@ -15,11 +15,11 @@
 
 public abstract class Geary.Imap.ServerResponse : RootParameters {
     public Tag tag { get; private set; }
-    
+
     protected ServerResponse(Tag tag) {
         this.tag = tag;
     }
-    
+
     /**
      * Converts the {@link RootParameters} into a ServerResponse.
      *
@@ -27,13 +27,13 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
      */
     public ServerResponse.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
-        
+
         if (!has_tag())
             throw new ImapError.INVALID("Server response does not have a tag token: %s", to_string());
-        
+
         tag = get_tag();
     }
-    
+
     /**
      * Migrate the contents of RootParameters into a new, properly-typed ServerResponse.
      *
@@ -47,13 +47,13 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
     public static ServerResponse migrate_from_server(RootParameters root) throws ImapError {
         if (ContinuationResponse.is_continuation_response(root))
             return new ContinuationResponse.migrate(root);
-        
+
         if (StatusResponse.is_status_response(root))
             return new StatusResponse.migrate(root);
-        
+
         if (ServerData.is_server_data(root))
             return new ServerData.migrate(root);
-        
+
         throw new ImapError.PARSE_ERROR("Unknown server response: %s", root.to_string());
     }
 }

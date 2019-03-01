@@ -8,7 +8,7 @@ private class Geary.ImapDB.SearchFolderProperties : Geary.FolderProperties {
     public SearchFolderProperties(int total, int unread) {
         base(total, unread, Trillian.FALSE, Trillian.FALSE, Trillian.TRUE, true, true, false);
     }
-    
+
     public void set_total(int total) {
         this.email_total = total;
     }

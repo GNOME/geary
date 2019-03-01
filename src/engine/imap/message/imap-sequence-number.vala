@@ -20,12 +20,12 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Gea
      * See [[http://tools.ietf.org/html/rfc3501#section-2.3.1.2]]
      */
     public const int64 MIN = 1;
-    
+
     /**
      * Upper limit of a valid {@link SequenceNumber}.
      */
     public const int64 MAX = 0xFFFFFFFF;
-    
+
     /**
      * Create a new {@link SequenceNumber}.
      *
@@ -37,7 +37,7 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Gea
     public SequenceNumber(int64 value) {
         base (value);
     }
-    
+
     /**
      * Create a new {@link SequenceNumber}, throwing {@link ImapError.INVALID} if an invalid value
      * is passed in.
@@ -48,24 +48,24 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Gea
     public SequenceNumber.checked(int64 value) throws ImapError {
         if (!is_value_valid(value))
             throw new ImapError.INVALID("Invalid sequence number %s", value.to_string());
-        
+
         base (value);
     }
-    
+
     /**
      * Defined as {@link MessageData.Int64MessageData.value} >= {@link MIN} and <= {@link MAX}.
      */
     public static bool is_value_valid(int64 value) {
         return value >= MIN && value <= MAX;
     }
-    
+
     /**
      * Defined as {@link MessageData.Int64MessageData.value} >= {@link MIN} and <= {@link MAX}.
      */
     public bool is_valid() {
         return is_value_valid(value);
     }
-    
+
     /**
      * Returns a new {@link SequenceNumber} that is one lower than this value.
      *
@@ -74,7 +74,7 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Gea
     public SequenceNumber? dec() {
         return (value > MIN) ? new SequenceNumber(value - 1) : null;
     }
-    
+
     /**
      * Returns a new {@link SequenceNumber} that is one lower than this value.
      *
@@ -83,7 +83,7 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Gea
     public SequenceNumber dec_clamped() {
         return (value > MIN) ? new SequenceNumber(value - 1) : new SequenceNumber(MIN);
     }
-    
+
     /**
      * Returns the {@link SequenceNumber} after the suppled SequenceNumber has been removed from
      * the vector of messages.
@@ -98,21 +98,21 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Gea
             // shifts downward ... dec() returns null if dropping below 1, which is suitable here
             return dec();
         }
-        
+
         if (comparison == 0) {
             // the appended message was removed outright, so drop from new list
             return null;
         }
-        
+
         // otherwise, removed position was higher than appended message's, so it doesn't
         // shift
         return this;
     }
-    
+
     public virtual int compare_to(SequenceNumber other) {
         return (int) (value - other.value).clamp(-1, 1);
     }
-    
+
     public string serialize() {
         return value.to_string();
     }

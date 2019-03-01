@@ -9,7 +9,7 @@
 public class NullIndicator : NewMessagesIndicator {
     public NullIndicator(NewMessagesMonitor monitor) {
         base (monitor);
-        
+
         debug("No messaging menu support in this build");
     }
 }

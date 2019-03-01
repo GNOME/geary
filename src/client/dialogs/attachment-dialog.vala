@@ -61,17 +61,17 @@ public class AttachmentDialog : Object {
             chooser.set_preview_widget_active(false);
             return;
         }
-        
+
         // read the image format data first
         int width = 0;
         int height = 0;
         Gdk.PixbufFormat? format = Gdk.Pixbuf.get_file_info(filename, out width, out height);
-        
+
         if (format == null) {
             chooser.set_preview_widget_active(false);
             return;
         }
-        
+
         // if the image is too big, resize it
         Gdk.Pixbuf pixbuf;
         try {
@@ -80,23 +80,23 @@ public class AttachmentDialog : Object {
             chooser.set_preview_widget_active(false);
             return;
         }
-        
+
         if (pixbuf == null) {
             chooser.set_preview_widget_active(false);
             return;
         }
-        
+
         pixbuf = pixbuf.apply_embedded_orientation();
-        
+
         // distribute the extra space around the image
         int extra_space = PREVIEW_SIZE - pixbuf.width;
         int smaller_half = extra_space/2;
         int larger_half = extra_space - smaller_half;
-        
+
         // pad the image manually (avoids rounding errors)
         preview_image.set_margin_start(PREVIEW_PADDING + smaller_half);
         preview_image.set_margin_end(PREVIEW_PADDING + larger_half);
-        
+
         // show the preview
         preview_image.set_from_pixbuf(pixbuf);
         chooser.set_preview_widget_active(true);

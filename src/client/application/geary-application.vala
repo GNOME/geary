@@ -152,13 +152,13 @@ public class GearyApplication : Gtk.Application {
     public override bool local_command_line(ref unowned string[] args, out int exit_status) {
         bin = args[0];
         exec_dir = (File.new_for_path(Posix.realpath(Environment.find_program_in_path(bin)))).get_parent();
-        
+
         try {
             register();
         } catch (Error e) {
             error("Error registering GearyApplication: %s", e.message);
         }
-        
+
         if (!Args.parse(args)) {
             exit_status = 1;
             return true;
@@ -186,10 +186,10 @@ public class GearyApplication : Gtk.Application {
         exit_status = 0;
         return true;
     }
-    
+
     public override void startup() {
         Configuration.init(is_installed(), GSETTINGS_DIR);
-        
+
         Environment.set_application_name(NAME);
         Environment.set_prgname(PRGNAME);
         International.init(GETTEXT_PACKAGE, bin);
@@ -208,10 +208,10 @@ public class GearyApplication : Gtk.Application {
 
         add_action_entries(action_entries, this);
     }
-    
+
     public override void activate() {
         base.activate();
-        
+
         if (!present())
             create_async.begin();
     }
@@ -238,7 +238,7 @@ public class GearyApplication : Gtk.Application {
         // Without this, the main loop will exit as soon as we hit the yield
         // below, before we create the main window.
         hold();
-        
+
         // do *after* parsing args, as they dicate where logging is sent to, if anywhere, and only
         // after activate (which means this is only logged for the one user-visible instance, not
         // the other instances called when sending commands to the app via the command-line)
@@ -265,15 +265,15 @@ public class GearyApplication : Gtk.Application {
 
         release();
     }
-    
+
     private async void destroy_async() {
         // see create_async() for reasoning hold/release is used
         hold();
-        
+
         yield controller.close_async();
-        
+
         release();
-        
+
         is_destroyed = true;
     }
 
@@ -309,7 +309,7 @@ public class GearyApplication : Gtk.Application {
     public File get_user_config_directory() {
         return File.new_for_path(Environment.get_user_config_dir()).get_child("geary");
     }
-    
+
     /**
      * Returns the base directory that the application's various resource files are stored.  If the
      * application is running from its installed directory, this will point to
@@ -346,25 +346,25 @@ public class GearyApplication : Gtk.Application {
         File desktop_file = (install_dir != null)
             ? install_dir.get_child("share").get_child("applications").get_child("org.gnome.Geary.desktop")
             : File.new_for_path(SOURCE_ROOT_DIR).get_child("build").get_child("desktop").get_child("org.gnome.Geary.desktop");
-        
+
         return desktop_file.query_exists() ? desktop_file : null;
     }
-    
+
     public bool is_installed() {
         return exec_dir.has_prefix(get_install_prefix_dir());
     }
-    
+
     // Returns the configure installation prefix directory, which does not imply Geary is installed
     // or that it's running from this directory.
     public File get_install_prefix_dir() {
         return File.new_for_path(INSTALL_PREFIX);
     }
-    
+
     // Returns the installation directory, or null if we're running outside of the installation
     // directory.
     public File? get_install_dir() {
         File prefix_dir = get_install_prefix_dir();
-        
+
         return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
     }
 
@@ -384,17 +384,17 @@ public class GearyApplication : Gtk.Application {
     public void exit(int exitcode = 0) {
         if (exiting_fired)
             return;
-        
+
         this.exitcode = exitcode;
-        
+
         exiting_fired = true;
         if (!exiting(false)) {
             exiting_fired = false;
             this.exitcode = 0;
-            
+
             return;
         }
-        
+
         // Give asynchronous destroy_async() a chance to complete, but to avoid bug(s) where
         // Geary hangs at exit, shut the whole thing down if destroy_async() takes too long to
         // complete
@@ -402,7 +402,7 @@ public class GearyApplication : Gtk.Application {
         destroy_async.begin();
         while (!is_destroyed || Gtk.events_pending()) {
             Gtk.main_iteration();
-            
+
             int64 delta_usec = get_monotonic_time() - start_usec;
             if (delta_usec >= FORCE_SHUTDOWN_USEC) {
                 debug("Forcing shutdown of Geary, %ss passed...", (delta_usec / USEC_PER_SEC).to_string());
@@ -422,7 +422,7 @@ public class GearyApplication : Gtk.Application {
         Signal.stop_emission_by_name(this, "exiting");
         return false;
     }
-    
+
     // This call will fire "exiting" only if it's not already been fired and halt the application
     // in its tracks.
     public void panic() {
@@ -430,7 +430,7 @@ public class GearyApplication : Gtk.Application {
             exiting_fired = true;
             exiting(true);
         }
-        
+
         Posix.exit(1);
     }
 

@@ -6,7 +6,7 @@
 
 private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation {
     public Email? email = null;
-    
+
     private MinimalFolder engine;
     private ImapDB.EmailIdentifier id;
     private Email.Field required_fields;
@@ -15,26 +15,26 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     private Cancellable? cancellable;
     private Imap.UID? uid = null;
     private bool remote_removed = false;
-    
+
     public FetchEmail(MinimalFolder engine, ImapDB.EmailIdentifier id, Email.Field required_fields,
         Folder.ListFlags flags, Cancellable? cancellable) {
         // Unlike the list operations, fetch needs to retry remote
         base ("FetchEmail", OnError.RETRY);
-        
+
         this.engine = engine;
         this.id = id;
         this.required_fields = required_fields;
         this.flags = flags;
         this.cancellable = cancellable;
-        
+
         // always fetch the required fields unless a modified list, in which case want to do exactly
         // what's required, no more and no less
         if (!flags.is_all_set(Folder.ListFlags.LOCAL_ONLY) && !flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
             this.required_fields |= ImapDB.Folder.REQUIRED_FIELDS;
-        
+
         remaining_fields = required_fields;
     }
-    
+
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         remote_removed = ids.contains(id);
     }
@@ -81,17 +81,17 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             remaining_fields = required_fields.clear(email.fields);
         else
             remaining_fields = required_fields;
-        
+
         assert(remaining_fields != 0);
-        
+
         if (email != null)
             uid = ((ImapDB.EmailIdentifier) email.id).uid;
         else
             uid = yield engine.local_folder.get_uid_async(id, ImapDB.Folder.ListFlags.NONE, cancellable);
-        
+
         if (uid == null)
             throw new EngineError.NOT_FOUND("Unable to find %s in %s", id.to_string(), engine.to_string());
-        
+
         return ReplayOperation.Status.CONTINUE;
     }
 

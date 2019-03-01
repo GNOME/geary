@@ -21,7 +21,7 @@ public enum Geary.Mime.DispositionType {
     UNSPECIFIED = -1,
     ATTACHMENT = 0,
     INLINE = 1;
-    
+
     /**
      * Convert the disposition-type field into an internal representation.
      *
@@ -31,24 +31,24 @@ public enum Geary.Mime.DispositionType {
      */
     public static DispositionType deserialize(string? str, out bool is_unknown) {
         is_unknown = false;
-        
+
         if (String.is_empty_or_whitespace(str))
             return UNSPECIFIED;
-        
+
         switch (Ascii.strdown(str)) {
             case "inline":
                 return INLINE;
-            
+
             case "attachment":
                 return ATTACHMENT;
-            
+
             default:
                 is_unknown = true;
-                
+
                 return ATTACHMENT;
         }
     }
-    
+
     /**
      * Returns null if value is {@link UNSPECIFIED}
      */
@@ -56,26 +56,26 @@ public enum Geary.Mime.DispositionType {
         switch (this) {
             case UNSPECIFIED:
                 return null;
-            
+
             case ATTACHMENT:
                 return "attachment";
-            
+
             case INLINE:
                 return "inline";
-            
+
             default:
                 assert_not_reached();
         }
     }
-    
+
     internal static DispositionType from_int(int i) {
         switch (i) {
             case INLINE:
                 return INLINE;
-            
+
             case UNSPECIFIED:
                 return UNSPECIFIED;
-            
+
             // see note in class description for why unknown content-dispositions are treated as
             // attachments
             case ATTACHMENT:

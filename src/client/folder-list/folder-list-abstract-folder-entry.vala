@@ -11,19 +11,19 @@
  */
 public abstract class FolderList.AbstractFolderEntry : Geary.BaseObject, Sidebar.Entry, Sidebar.SelectableEntry {
     public Geary.Folder folder { get; private set; }
-    
+
     public AbstractFolderEntry(Geary.Folder folder) {
         this.folder = folder;
     }
-    
+
     public abstract string get_sidebar_name();
-    
+
     public abstract string? get_sidebar_tooltip();
-    
+
     public abstract string? get_sidebar_icon();
-    
+
     public abstract int get_count();
-    
+
     public virtual string to_string() {
         return "AbstractFolderEntry: " + get_sidebar_name();
     }

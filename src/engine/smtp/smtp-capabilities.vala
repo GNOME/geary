@@ -15,11 +15,11 @@ public class Geary.Smtp.Capabilities : Geary.GenericCapabilities {
 
     public const string NAME_SEPARATOR = " ";
     public const string VALUE_SEPARATOR = " ";
-    
+
     public Capabilities() {
         base (NAME_SEPARATOR, VALUE_SEPARATOR);
     }
-    
+
     /**
      * Returns number of response lines added.
      */
@@ -30,10 +30,10 @@ public class Geary.Smtp.Capabilities : Geary.GenericCapabilities {
             if (add_response_line(response.lines[ctr]))
                 count++;
         }
-        
+
         return count;
     }
-    
+
     public bool add_response_line(ResponseLine line) {
         return !String.is_empty(line.explanation) ? parse_and_add_capability(line.explanation) : false;
     }

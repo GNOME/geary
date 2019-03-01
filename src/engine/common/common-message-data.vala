@@ -33,30 +33,30 @@ public interface Geary.MessageData.SearchableMessageData {
 public abstract class Geary.MessageData.StringMessageData : AbstractMessageData,
     Gee.Hashable<StringMessageData> {
     public string value { get; private set; }
-    
+
     private uint stored_hash = uint.MAX;
-    
+
     public StringMessageData(string value) {
         this.value = value;
     }
-    
+
     /**
      * Default definition of equals is case-sensitive comparison.
      */
     public virtual bool equal_to(StringMessageData other) {
         if (this == other)
             return true;
-        
+
         if (hash() != other.hash())
             return false;
-        
+
         return (value == other.value);
     }
-    
+
     public virtual uint hash() {
         return (stored_hash != uint.MAX) ? stored_hash : (stored_hash = str_hash(value));
     }
-    
+
     public override string to_string() {
         return value;
     }
@@ -65,19 +65,19 @@ public abstract class Geary.MessageData.StringMessageData : AbstractMessageData,
 public abstract class Geary.MessageData.IntMessageData : AbstractMessageData,
     Gee.Hashable<IntMessageData> {
     public int value { get; private set; }
-    
+
     public IntMessageData(int value) {
         this.value = value;
     }
-    
+
     public virtual bool equal_to(IntMessageData other) {
         return (value == other.value);
     }
-    
+
     public virtual uint hash() {
         return value;
     }
-    
+
     public override string to_string() {
         return value.to_string();
     }
@@ -86,24 +86,24 @@ public abstract class Geary.MessageData.IntMessageData : AbstractMessageData,
 public abstract class Geary.MessageData.Int64MessageData : AbstractMessageData,
     Gee.Hashable<Int64MessageData> {
     public int64 value { get; private set; }
-    
+
     private uint stored_hash = uint.MAX;
-    
+
     public Int64MessageData(int64 value) {
         this.value = value;
     }
-    
+
     public virtual bool equal_to(Int64MessageData other) {
         if (this == other)
             return true;
-        
+
         return (value == other.value);
     }
-    
+
     public virtual uint hash() {
         return (stored_hash != uint.MAX) ? stored_hash : (stored_hash = int64_hash(value));
     }
-    
+
     public override string to_string() {
         return value.to_string();
     }
@@ -112,12 +112,12 @@ public abstract class Geary.MessageData.Int64MessageData : AbstractMessageData,
 public abstract class Geary.MessageData.BlockMessageData : AbstractMessageData {
     public string data_name { get; private set; }
     public Geary.Memory.Buffer buffer { get; private set; }
-    
+
     public BlockMessageData(string data_name, Geary.Memory.Buffer buffer) {
         this.data_name = data_name;
         this.buffer = buffer;
     }
-    
+
     public override string to_string() {
         return "%s (%lub)".printf(data_name, buffer.size);
     }

@@ -32,7 +32,7 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
     public bool is_cancelled() {
         return cancellable.is_cancelled();
     }
-    
+
     // Called in background thread context
     internal void execute(Connection cx) {
         // execute transaction
@@ -40,36 +40,36 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
             // possible was cancelled during interim of scheduling and execution
             if (is_cancelled())
                 throw new IOError.CANCELLED("Async transaction cancelled");
-            
+
             outcome = cx.exec_transaction(type, cb, cancellable);
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
                 debug("AsyncJob: transaction completed with error: %s", err.message);
-            
+
             caught_err = err;
         }
-        
+
         schedule_completion();
     }
-    
+
     // Called in background thread context
     internal void failed(Error err) {
         // store as a caught thread to report to original caller
         caught_err = err;
-        
+
         schedule_completion();
     }
-    
+
     private void schedule_completion() {
         // notify foreground thread of completion
         // because Idle doesn't hold a ref, manually keep this object alive
         ref();
-        
+
         // NonblockingSemaphore and its brethren are not thread-safe, so need to signal notification
         // of completion in the main thread
         Idle.add(on_notify_completed);
     }
-    
+
     private bool on_notify_completed() {
         try {
             completed.notify();
@@ -81,10 +81,10 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
                 debug("Unable to notify AsyncTransaction has completed w/o err: %s", err.message);
             }
         }
-        
+
         // manually unref; do NOT touch "this" once unref() returns, as this object may be freed
         unref();
-        
+
         return false;
     }
 

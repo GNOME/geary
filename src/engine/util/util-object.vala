@@ -9,7 +9,7 @@ namespace Geary.ObjectUtils {
 /**
  * Creates a set of property bindings from source to dest with the given binding flags.
  */
-public Gee.List<Binding>? mirror_properties(Object source, Object dest, BindingFlags 
+public Gee.List<Binding>? mirror_properties(Object source, Object dest, BindingFlags
     flags = GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE) {
     // Make sets of both object's properties.
     Gee.HashSet<ParamSpec> source_properties = new Gee.HashSet<ParamSpec>();
@@ -18,17 +18,17 @@ public Gee.List<Binding>? mirror_properties(Object source, Object dest, BindingF
     Gee.HashSet<ParamSpec> dest_properties = new Gee.HashSet<ParamSpec>();
     Collection.add_all_array<ParamSpec>(dest_properties,
         dest.get_class().list_properties());
-    
+
     // Remove properties from source_properties that are not in both sets.
     source_properties.retain_all(dest_properties);
-    
+
     // Create all bindings.
     Gee.List<Binding> bindings = new Gee.ArrayList<Binding>();
     foreach(ParamSpec ps in source_properties) {
         if ((ps.flags & ParamFlags.WRITABLE) != 0)
             bindings.add(source.bind_property(ps.name, dest, ps.name, flags));
     }
-    
+
     return bindings.size > 0 ? bindings : null;
 }
 
@@ -38,7 +38,7 @@ public Gee.List<Binding>? mirror_properties(Object source, Object dest, BindingF
 public void unmirror_properties(Gee.List<Binding> bindings) {
     foreach(Binding b in bindings)
         b.unref();
-    
+
     bindings.clear();
 }
 

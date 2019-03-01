@@ -32,7 +32,7 @@ public class ConversationListStore : Gtk.ListStore {
         CONVERSATION_DATA,
         CONVERSATION_OBJECT,
         ROW_WRAPPER;
-        
+
         public static Type[] get_types() {
             return {
                 typeof (FormattedConversationData), // CONVERSATION_DATA
@@ -40,37 +40,37 @@ public class ConversationListStore : Gtk.ListStore {
                 typeof (RowWrapper)                 // ROW_WRAPPER
             };
         }
-        
+
         public string to_string() {
             switch (this) {
                 case CONVERSATION_DATA:
                     return "data";
-                
+
                 case CONVERSATION_OBJECT:
                     return "envelope";
-                
+
                 case ROW_WRAPPER:
                     return "wrapper";
-                
+
                 default:
                     assert_not_reached();
             }
         }
     }
-    
+
     private class RowWrapper : Geary.BaseObject {
         public Geary.App.Conversation conversation;
         public Gtk.TreeRowReference row;
-        
+
         public RowWrapper(Gtk.TreeModel model, Geary.App.Conversation conversation, Gtk.TreePath path) {
             this.conversation = conversation;
             this.row = new Gtk.TreeRowReference(model, path);
         }
-        
+
         public Gtk.TreePath get_path() {
             return row.get_path();
         }
-        
+
         public bool get_iter(out Gtk.TreeIter iter) {
             return row.get_model().get_iter(out iter, get_path());
         }
@@ -145,10 +145,10 @@ public class ConversationListStore : Gtk.ListStore {
         Gtk.TreeIter iter;
         if (!get_iter(out iter, path))
             return null;
-        
+
         return get_conversation_at_iter(iter);
     }
-    
+
     private async void refresh_previews_async(Geary.App.ConversationMonitor conversation_monitor) {
         // Use a mutex because it's possible for the conversation monitor to fire multiple
         // "scan-started" signals as messages come in fast and furious, but only want to process
@@ -159,30 +159,30 @@ public class ConversationListStore : Gtk.ListStore {
             token = yield refresh_mutex.claim_async(this.cancellable);
         } catch (Error err) {
             debug("Unable to claim refresh mutex: %s", err.message);
-            
+
             return;
         }
-        
+
         preview_monitor.notify_start();
-        
+
         yield do_refresh_previews_async(conversation_monitor);
-        
+
         preview_monitor.notify_finish();
-        
+
         try {
             refresh_mutex.release(ref token);
         } catch (Error err) {
             debug("Unable to release refresh mutex: %s", err.message);
         }
     }
-    
+
     // should only be called by refresh_previews_async()
     private async void do_refresh_previews_async(Geary.App.ConversationMonitor conversation_monitor) {
         if (conversation_monitor == null || !GearyApplication.instance.config.display_preview)
             return;
-        
+
         Gee.Set<Geary.EmailIdentifier> needing_previews = get_emails_needing_previews();
-        
+
         Gee.ArrayList<Geary.Email> emails = new Gee.ArrayList<Geary.Email>();
         if (needing_previews.size > 0)
             emails.add_all(yield do_get_previews_async(needing_previews));
@@ -219,10 +219,10 @@ public class ConversationListStore : Gtk.ListStore {
 
         return emails ?? new Gee.ArrayList<Geary.Email>();
     }
-    
+
     private Gee.Set<Geary.EmailIdentifier> get_emails_needing_previews() {
         Gee.Set<Geary.EmailIdentifier> needing = new Gee.HashSet<Geary.EmailIdentifier>();
-        
+
         // sort the conversations so the previews are fetched from the newest to the oldest, matching
         // the user experience
         Gee.TreeSet<Geary.App.Conversation> sorted_conversations = new Gee.TreeSet<Geary.App.Conversation>(
@@ -234,11 +234,11 @@ public class ConversationListStore : Gtk.ListStore {
             foreach (Geary.Email email in conversation.get_emails(Geary.App.Conversation.Ordering.RECV_DATE_ASCENDING)) {
                 if (email.email_flags.is_unread()) {
                     need_preview = email;
-                    
+
                     break;
                 }
             }
-            
+
             // if all are read, use newest in-folder message, then newest out-of-folder if not
             // present
             if (need_preview == null) {
@@ -246,34 +246,34 @@ public class ConversationListStore : Gtk.ListStore {
                 if (need_preview == null)
                     continue;
             }
-            
+
             Geary.Email? current_preview = get_preview_for_conversation(conversation);
-            
+
             // if all preview fields present and it's the same email, don't need to refresh
             if (current_preview != null
                 && need_preview.id.equal_to(current_preview.id)
                 && current_preview.fields.is_all_set(ConversationListStore.WITH_PREVIEW_FIELDS)) {
                 continue;
             }
-            
+
             needing.add(need_preview.id);
         }
-        
+
         return needing;
     }
-    
+
     private Geary.Email? get_preview_for_conversation(Geary.App.Conversation conversation) {
         Gtk.TreeIter iter;
         if (!get_iter_for_conversation(conversation, out iter)) {
             debug("Unable to find preview for conversation");
-            
+
             return null;
         }
-        
+
         FormattedConversationData? message_data = get_message_data_at_iter(iter);
         return message_data == null ? null : message_data.preview;
     }
-    
+
     private void set_preview_for_conversation(Geary.App.Conversation conversation, Geary.Email preview) {
         Gtk.TreeIter iter;
         if (get_iter_for_conversation(conversation, out iter))
@@ -293,16 +293,16 @@ public class ConversationListStore : Gtk.ListStore {
         Gtk.TreePath? path = get_path(iter);
         assert(path != null);
         RowWrapper wrapper = new RowWrapper(this, conversation, path);
-        
+
         set(iter,
             Column.CONVERSATION_DATA, conversation_data,
             Column.CONVERSATION_OBJECT, conversation,
             Column.ROW_WRAPPER, wrapper
         );
-        
+
         row_map.set(conversation, wrapper);
     }
-    
+
     private void refresh_conversation(Geary.App.Conversation conversation) {
         Gtk.TreeIter iter;
         if (!get_iter_for_conversation(conversation, out iter)) {
@@ -310,11 +310,11 @@ public class ConversationListStore : Gtk.ListStore {
             add_conversation(conversation);
             return;
         }
-        
+
         Geary.Email? last_email = conversation.get_latest_recv_email(Geary.App.Conversation.Location.ANYWHERE);
         if (last_email == null) {
             debug("Cannot refresh conversation: last email is null");
-            
+
 #if VALA_0_36
             remove(ref iter);
 #else
@@ -322,16 +322,16 @@ public class ConversationListStore : Gtk.ListStore {
 #endif
             return;
         }
-        
+
         set_row(iter, conversation, last_email);
-        
+
         Gtk.TreePath? path = get_path(iter);
         if (path != null)
             row_changed(path, iter);
         else
             debug("Cannot refresh conversation: no path for iterator");
     }
-    
+
     private void refresh_flags(Geary.App.Conversation conversation) {
         Gtk.TreeIter iter;
         if (!get_iter_for_conversation(conversation, out iter)) {
@@ -339,55 +339,55 @@ public class ConversationListStore : Gtk.ListStore {
             add_conversation(conversation);
             return;
         }
-        
+
         FormattedConversationData? existing_message_data = get_message_data_at_iter(iter);
         if (existing_message_data == null)
             return;
-        
+
         existing_message_data.is_unread = conversation.is_unread();
         existing_message_data.is_flagged = conversation.is_flagged();
-        
+
         Gtk.TreePath? path = get_path(iter);
         if (path != null)
             row_changed(path, iter);
     }
-    
+
     public Gtk.TreePath? get_path_for_conversation(Geary.App.Conversation conversation) {
         RowWrapper? wrapper = row_map.get(conversation);
-        
+
         return (wrapper != null) ? wrapper.get_path() : null;
     }
-    
+
     private bool get_iter_for_conversation(Geary.App.Conversation conversation, out Gtk.TreeIter iter) {
         RowWrapper? wrapper = row_map.get(conversation);
         if (wrapper != null)
             return wrapper.get_iter(out iter);
-        
+
         // use get_iter_first() because boxing Gtk.TreeIter with a nullable is problematic with
         // current bindings
         get_iter_first(out iter);
-        
+
         return false;
     }
-    
+
     private bool has_conversation(Geary.App.Conversation conversation) {
         return row_map.has_key(conversation);
     }
-    
+
     private Geary.App.Conversation? get_conversation_at_iter(Gtk.TreeIter iter) {
         Geary.App.Conversation? conversation;
         get(iter, Column.CONVERSATION_OBJECT, out conversation);
-        
+
         return conversation;
     }
-    
+
     private FormattedConversationData? get_message_data_at_iter(Gtk.TreeIter iter) {
         FormattedConversationData? message_data;
         get(iter, Column.CONVERSATION_DATA, out message_data);
-        
+
         return message_data;
     }
-    
+
     private void remove_conversation(Geary.App.Conversation conversation) {
         Gtk.TreeIter iter;
         if (get_iter_for_conversation(conversation, out iter))
@@ -396,44 +396,44 @@ public class ConversationListStore : Gtk.ListStore {
 #else
             remove(iter);
 #endif
-        
+
         row_map.unset(conversation);
     }
-    
+
     private bool add_conversation(Geary.App.Conversation conversation) {
         Geary.Email? last_email = conversation.get_latest_recv_email(Geary.App.Conversation.Location.ANYWHERE);
         if (last_email == null) {
             debug("Cannot add conversation: last email is null");
-            
+
             return false;
         }
-        
+
         if (has_conversation(conversation)) {
             debug("Conversation already present; not adding");
-            
+
             return false;
         }
-        
+
         Gtk.TreeIter iter;
         append(out iter);
         set_row(iter, conversation, last_email);
-        
+
         return true;
     }
-    
+
     private void on_scan_completed(Geary.App.ConversationMonitor sender) {
         refresh_previews_async.begin(sender);
         loading_local_only = false;
     }
-    
+
     private void on_conversations_added(Gee.Collection<Geary.App.Conversation> conversations) {
         // this handler is used to initialize the display, so it's possible for an empty list to
         // be passed in (the ConversationMonitor signal should never do this)
         if (conversations.size == 0)
             return;
-        
+
         conversations_added(true);
-        
+
         debug("Adding %d conversations.", conversations.size);
         int added = 0;
         foreach (Geary.App.Conversation conversation in conversations) {
@@ -441,10 +441,10 @@ public class ConversationListStore : Gtk.ListStore {
                 added++;
         }
         debug("Added %d/%d conversations.", added, conversations.size);
-        
+
         conversations_added(false);
     }
-    
+
     private void on_conversations_removed(Gee.Collection<Geary.App.Conversation> conversations) {
         conversations_removed(true);
         foreach (Geary.App.Conversation removed in conversations)
@@ -459,18 +459,18 @@ public class ConversationListStore : Gtk.ListStore {
             debug("Unable to append conversation; conversation not present in list store");
         }
     }
-    
+
     private void on_conversation_trimmed(Geary.App.Conversation conversation) {
         refresh_conversation(conversation);
     }
-    
+
     private void on_display_preview_changed() {
         refresh_previews_async.begin(this.conversations);
     }
-    
+
     private void on_email_flags_changed(Geary.App.Conversation conversation) {
         refresh_flags(conversation);
-        
+
         // refresh previews because the oldest unread message is displayed as the preview, and if
         // that's changed, need to change the preview
         // TODO: need support code to load preview for single conversation, not scan all
@@ -485,10 +485,10 @@ public class ConversationListStore : Gtk.ListStore {
     private bool update_date_string(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
         FormattedConversationData? message_data;
         model.get(iter, Column.CONVERSATION_DATA, out message_data);
-        
+
         if (message_data != null && message_data.update_date_string())
             row_changed(path, iter);
-        
+
         // Continue iterating, don't stop
         return false;
     }

@@ -16,25 +16,25 @@
 
 public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
     private Memory.Buffer buffer;
-    
+
     public LiteralParameter(Memory.Buffer buffer) {
         this.buffer = buffer;
     }
-    
+
     /**
      * Returns the number of bytes in the literal parameter's buffer.
      */
     public size_t get_size() {
         return buffer.size;
     }
-    
+
     /**
      * Returns the literal paremeter's buffer.
      */
     public Memory.Buffer get_buffer() {
         return buffer;
     }
-    
+
     /**
      * Returns the {@link LiteralParameter} as though it had been a {@link StringParameter} on the
      * wire.
@@ -47,7 +47,7 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
     public StringParameter coerce_to_string_parameter() {
         return new UnquotedStringParameter(buffer.get_valid_utf8());
     }
-    
+
     /**
      * {@inheritDoc}
      */

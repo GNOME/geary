@@ -15,13 +15,13 @@ namespace Geary.Synchronization {
 
 public class SpinWaiter : BaseObject {
     public delegate bool PollService();
-    
+
     private int poll_msec;
     private PollService cb;
     private Mutex mutex = Mutex();
     private Cond cond = Cond();
     private bool notified = false;
-    
+
     /**
      * Create a {@link SpinWaiter}.
      *
@@ -50,15 +50,15 @@ public class SpinWaiter : BaseObject {
     public bool wait(Cancellable? cancellable = null) throws Error {
         // normalize poll_msec; negative values are zeroed
         int64 actual_poll_msec = Numeric.int64_floor(0, poll_msec);
-        
+
         bool result;
-        
+
         mutex.lock();
-        
+
         while (!notified) {
             if (cancellable != null && cancellable.is_cancelled())
                 break;
-            
+
             int64 end_time = get_monotonic_time() + (actual_poll_msec * TimeSpan.MILLISECOND);
             if (!cond.wait_until(mutex, end_time)) {
                 // timeout passed, allow the callback to run
@@ -66,23 +66,23 @@ public class SpinWaiter : BaseObject {
                 if (!cb()) {
                     // PollService returned false, abort
                     mutex.lock();
-                    
+
                     break;
                 }
                 mutex.lock();
             }
         }
-        
+
         result = notified;
-        
+
         mutex.unlock();
-        
+
         if (cancellable.is_cancelled())
             throw new IOError.CANCELLED("SpinWaiter.wait cancelled");
-        
+
         return result;
     }
-    
+
     /**
      * Signals a completion state to a thread calling {@link wait}.
      *
@@ -91,13 +91,13 @@ public class SpinWaiter : BaseObject {
      */
     public new void notify() {
         mutex.lock();
-        
+
         notified = true;
         cond.broadcast();
-        
+
         mutex.unlock();
     }
-    
+
     /**
      * Indicates if the {@link SpinWaiter} has been notified.
      *
@@ -110,13 +110,13 @@ public class SpinWaiter : BaseObject {
      */
     public bool is_notified() {
         bool result;
-        
+
         mutex.lock();
-        
+
         result = notified;
-        
+
         mutex.unlock();
-        
+
         return result;
     }
 }

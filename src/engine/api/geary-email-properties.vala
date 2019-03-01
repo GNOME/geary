@@ -20,17 +20,17 @@ public abstract class Geary.EmailProperties : BaseObject {
      * the INTERNALDATE supplied by the server.
      */
     public DateTime date_received { get; protected set; }
-    
+
     /**
      * Total size of the email (header and body) in bytes.
      */
     public int64 total_bytes { get; protected set; }
-    
+
     public EmailProperties(DateTime date_received, int64 total_bytes) {
         this.date_received = date_received;
         this.total_bytes = total_bytes;
     }
-    
+
     public abstract string to_string();
 }
 

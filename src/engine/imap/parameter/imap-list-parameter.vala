@@ -16,7 +16,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
      * in the StringParameter getters.
      */
     public const int MAX_STRING_LITERAL_LENGTH = 4096;
-    
+
     /**
      * Returns the number of {@link Parameter}s held in this {@link ListParameter}.
      */
@@ -90,7 +90,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     //
     // Parameter retrieval
     //
-    
+
     /**
      * Returns the {@link Parameter} at the index in the list, null if index is out of range.
      *
@@ -101,7 +101,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public new Parameter? get(int index) {
         return ((index >= 0) && (index < list.size)) ? list.get(index) : null;
     }
-    
+
     /**
      * Returns the Parameter at the index.  Throws an ImapError.TYPE_ERROR if the index is out of
      * range.
@@ -113,14 +113,14 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public Parameter get_required(int index) throws ImapError {
         if ((index < 0) || (index >= list.size))
             throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
-        
+
         Parameter? param = list.get(index);
         if (param == null)
             throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
-        
+
         return param;
     }
-    
+
     /**
      * Returns {@link Parameter} at index if in range and of Type type, otherwise throws an
      * {@link ImapError.TYPE_ERROR}.
@@ -130,16 +130,16 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public Parameter get_as(int index, Type type) throws ImapError {
         if (!type.is_a(typeof(Parameter)))
             throw new ImapError.TYPE_ERROR("Attempting to cast non-Parameter at index %d", index);
-        
+
         Parameter param = get_required(index);
         if (!param.get_type().is_a(type)) {
             throw new ImapError.TYPE_ERROR("Parameter %d is not of type %s (is %s)", index,
                 type.name(), param.get_type().name());
         }
-        
+
         return param;
     }
-    
+
     /**
      * Like {@link get_as}, but returns null if the {@link Parameter} at index is a
      * {@link NilParameter}.
@@ -149,25 +149,25 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public Parameter? get_as_nullable(int index, Type type) throws ImapError {
         if (!type.is_a(typeof(Parameter)))
             throw new ImapError.TYPE_ERROR("Attempting to cast non-Parameter at index %d", index);
-        
+
         Parameter param = get_required(index);
         if (param is NilParameter)
             return null;
-        
+
         // Because Deserializer doesn't produce NilParameters, check manually if this Parameter
         // can legally be NIL according to IMAP grammer.
         StringParameter? stringp = param as StringParameter;
         if (stringp != null && NilParameter.is_nil(stringp))
             return null;
-        
+
         if (!param.get_type().is_a(type)) {
             throw new ImapError.TYPE_ERROR("Parameter %d is not of type %s (is %s)", index,
                 type.name(), param.get_type().name());
         }
-        
+
         return param;
     }
-    
+
     /**
      * Like {@link get}, but returns null if {@link Parameter} at index is not of the specified type.
      *
@@ -176,18 +176,18 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public Parameter? get_if(int index, Type type) {
         if (!type.is_a(typeof(Parameter)))
             return null;
-        
+
         Parameter? param = get(index);
         if (param == null || !param.get_type().is_a(type))
             return null;
-        
+
         return param;
     }
-    
+
     //
     // String retrieval
     //
-    
+
     /**
      * Returns a {@link StringParameter} only if the {@link Parameter} at index is a StringParameter.
      *
@@ -196,7 +196,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public StringParameter? get_if_string(int index) {
         return (StringParameter?) get_if(index, typeof(StringParameter));
     }
-    
+
     /**
      * Returns a {@link StringParameter} for the value at the index only if the {@link Parameter}
      * is a StringParameter or a {@link LiteralParameter} with a length less than or equal to
@@ -211,19 +211,19 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
      */
     public StringParameter get_as_string(int index) throws ImapError {
         Parameter param = get_required(index);
-        
+
         StringParameter? stringp = param as StringParameter;
         if (stringp != null)
             return stringp;
-        
+
         LiteralParameter? literalp = param as LiteralParameter;
         if (literalp != null && literalp.get_size() <= MAX_STRING_LITERAL_LENGTH)
             return literalp.coerce_to_string_parameter();
-        
+
         throw new ImapError.TYPE_ERROR("Parameter %d not of type string or literal (is %s)", index,
             param.get_type().name());
     }
-    
+
     /**
      * Returns a {@link StringParameter} for the value at the index only if the {@link Parameter}
      * is a StringParameter or a {@link LiteralParameter} with a length less than or equal to
@@ -240,33 +240,33 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         Parameter? param = get_as_nullable(index, typeof(Parameter));
         if (param == null)
             return null;
-        
+
         StringParameter? stringp = param as StringParameter;
         if (stringp != null)
             return stringp;
-        
+
         LiteralParameter? literalp = param as LiteralParameter;
         if (literalp != null && literalp.get_size() <= MAX_STRING_LITERAL_LENGTH)
             return literalp.coerce_to_string_parameter();
-        
+
         throw new ImapError.TYPE_ERROR("Parameter %d not of type string or literal (is %s)", index,
             param.get_type().name());
     }
-    
+
     /**
      * Much like get_as_nullable_string() but returns an empty StringParameter (rather than null)
      * if the parameter at index is a NilParameter.
      */
     public StringParameter get_as_empty_string(int index) throws ImapError {
         StringParameter? stringp = get_as_nullable_string(index);
-        
+
         return stringp ?? StringParameter.get_best_for("");
     }
-    
+
     //
     // Number retrieval
     //
-    
+
     /**
      * Returns a {@link NumberParameter} at index, null if not of that type.
      *
@@ -275,7 +275,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public NumberParameter? get_if_number(int index) {
         return (NumberParameter?) get_if(index, typeof(NumberParameter));
     }
-    
+
     /**
      * Returns a {@link NumberParameter} at index.
      *
@@ -285,26 +285,26 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
      */
     public NumberParameter get_as_number(int index) throws ImapError {
         Parameter param = get_required(index);
-        
+
         NumberParameter? numberp = param as NumberParameter;
         if (numberp != null)
             return numberp;
-        
+
         StringParameter? stringp = param as StringParameter;
         if (stringp != null) {
             numberp = stringp.coerce_to_number_parameter();
             if (numberp != null)
                 return numberp;
         }
-        
+
         throw new ImapError.TYPE_ERROR("Parameter %d not of type number or string (is %s)", index,
             param.get_type().name());
     }
-    
+
     //
     // List retrieval
     //
-    
+
     /**
      * Returns a {@link ListParameter} at index.
      *
@@ -313,7 +313,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public ListParameter get_as_list(int index) throws ImapError {
         return (ListParameter) get_as(index, typeof(ListParameter));
     }
-    
+
     /**
      * Returns a {@link ListParameter} at index, null if NIL.
      *
@@ -340,11 +340,11 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public ListParameter? get_if_list(int index) {
         return (ListParameter?) get_if(index, typeof(ListParameter));
     }
-    
+
     //
     // Literal retrieval
     //
-    
+
     /**
      * Returns a {@link LiteralParameter} at index.
      *
@@ -353,7 +353,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public LiteralParameter get_as_literal(int index) throws ImapError {
         return (LiteralParameter) get_as(index, typeof(LiteralParameter));
     }
-    
+
     /**
      * Returns a {@link LiteralParameter} at index, null if NIL.
      *
@@ -362,7 +362,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public LiteralParameter? get_as_nullable_literal(int index) throws ImapError {
         return (LiteralParameter?) get_as_nullable(index, typeof(LiteralParameter));
     }
-    
+
     /**
      * Returns a {@link LiteralParameter} at index, null if not a list.
      *
@@ -371,16 +371,16 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public LiteralParameter? get_if_literal(int index) {
         return (LiteralParameter?) get_if(index, typeof(LiteralParameter));
     }
-    
+
     /**
      * Returns [@link LiteralParameter} at index, an empty list if NIL.
      */
     public LiteralParameter get_as_empty_literal(int index) throws ImapError {
         LiteralParameter? param = get_as_nullable_literal(index);
-        
+
         return param ?? new LiteralParameter(Geary.Memory.EmptyBuffer.instance);
     }
-    
+
     /**
      * Returns a {@link Memory.Buffer} for the {@link Parameter} at position index.
      *
@@ -391,14 +391,14 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         LiteralParameter? literalp = get_if_literal(index);
         if (literalp != null)
             return literalp.get_buffer();
-        
+
         StringParameter? stringp = get_if_string(index);
         if (stringp != null)
             return stringp.as_buffer();
-        
+
         return null;
     }
-    
+
     /**
      * Returns a {@link Memory.Buffer} for the {@link Parameter} at position index.
      *
@@ -408,14 +408,14 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public Memory.Buffer get_as_empty_buffer(int index) throws ImapError {
         return get_as_nullable_buffer(index) ?? Memory.EmptyBuffer.instance;
     }
-    
+
     /**
      * Returns a read-only List of {@link Parameter}s.
      */
     public Gee.List<Parameter> get_all() {
         return list.read_only_view;
     }
-    
+
     /**
      * Returns the replaced Paramater.  Throws ImapError.TYPE_ERROR if no Parameter exists at the
      * index.
@@ -437,27 +437,27 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
      */
     public void adopt_children(ListParameter src) {
         clear();
-        
+
         Gee.List<Parameter> src_children = new Gee.ArrayList<Parameter>();
         src_children.add_all(src.list);
         src.clear();
-        
+
         add_all(src_children);
     }
-    
+
     protected string stringize_list() {
         StringBuilder builder = new StringBuilder();
-        
+
         int length = list.size;
         for (int ctr = 0; ctr < length; ctr++) {
             builder.append(list[ctr].to_string());
             if (ctr < (length - 1))
                 builder.append_c(' ');
         }
-        
+
         return builder.str;
     }
-    
+
     /**
      * {@inheritDoc}
      */

@@ -16,7 +16,7 @@
 public abstract class Geary.Revokable : BaseObject {
     public const string PROP_VALID = "valid";
     public const string PROP_IN_PROCESS = "in-process";
-    
+
     /**
      * Indicates if {@link revoke_async} or {@link commit_async} are valid operations for this
      * {@link Revokable}.
@@ -27,7 +27,7 @@ public abstract class Geary.Revokable : BaseObject {
      * @see set_invalid
      */
     public bool valid { get; private set; default = true; }
-    
+
     /**
      * Indicates a {@link revoke_async} or {@link commit_async} operation is underway.
      *
@@ -37,16 +37,16 @@ public abstract class Geary.Revokable : BaseObject {
      * @see valid
      */
     public bool in_process { get; protected set; default = false; }
-    
+
     private uint commit_timeout_id = 0;
-    
+
     /**
      * Fired when the {@link Revokable} has been revoked.
      *
      * {@link valid} will stil be true when this is fired.
      */
     public signal void revoked();
-    
+
     /**
      * Fired when the {@link Revokable} has been committed.
      *
@@ -55,7 +55,7 @@ public abstract class Geary.Revokable : BaseObject {
      * {@link valid} will stil be true when this is fired.
      */
     public signal void committed(Geary.Revokable? commit_revokable);
-    
+
     /**
      * Create a {@link Revokable} with optional parameters.
      *
@@ -65,11 +65,11 @@ public abstract class Geary.Revokable : BaseObject {
     protected Revokable(int commit_timeout_sec = 0) {
         if (commit_timeout_sec == 0)
             return;
-        
+
         // This holds a reference to the Revokable, meaning cancelling the timeout in the dtor is
         // largely symbolic, but so be it
         commit_timeout_id = Timeout.add_seconds(commit_timeout_sec, on_timed_commit);
-        
+
         // various events that cancel the need for a timed commit; this is important to drop the
         // ref to this object within the event loop
         revoked.connect(cancel_timed_commit);
@@ -79,19 +79,19 @@ public abstract class Geary.Revokable : BaseObject {
                 cancel_timed_commit();
         });
     }
-    
+
     ~Revokable() {
         cancel_timed_commit();
     }
-    
+
     protected virtual void notify_revoked() {
         revoked();
     }
-    
+
     protected virtual void notify_committed(Geary.Revokable? commit_revokable) {
         committed(commit_revokable);
     }
-    
+
     /**
      * Mark the {@link Revokable} as invalid.
      *
@@ -102,7 +102,7 @@ public abstract class Geary.Revokable : BaseObject {
     protected void set_invalid() {
         valid = false;
     }
-    
+
     /**
      * Revoke (undo) the operation.
      *
@@ -115,10 +115,10 @@ public abstract class Geary.Revokable : BaseObject {
     public virtual async void revoke_async(Cancellable? cancellable = null) throws Error {
         if (in_process)
             throw new EngineError.ALREADY_OPEN("Already revoking or committing operation");
-        
+
         if (!valid)
             throw new EngineError.ALREADY_CLOSED("Revokable not valid");
-        
+
         in_process = true;
         try {
             yield internal_revoke_async(cancellable);
@@ -126,7 +126,7 @@ public abstract class Geary.Revokable : BaseObject {
             in_process = false;
         }
     }
-    
+
     /**
      * The child class's implementation of {@link revoke_async}.
      *
@@ -138,7 +138,7 @@ public abstract class Geary.Revokable : BaseObject {
      * if successful.
      */
     protected abstract async void internal_revoke_async(Cancellable? cancellable) throws Error;
-    
+
     /**
      * Commits (completes) the operation immediately.
      *
@@ -155,10 +155,10 @@ public abstract class Geary.Revokable : BaseObject {
     public virtual async void commit_async(Cancellable? cancellable = null) throws Error {
         if (in_process)
             throw new EngineError.ALREADY_OPEN("Already revoking or committing operation");
-        
+
         if (!valid)
             throw new EngineError.ALREADY_CLOSED("Revokable not valid");
-        
+
         in_process = true;
         try {
             yield internal_commit_async(cancellable);
@@ -166,7 +166,7 @@ public abstract class Geary.Revokable : BaseObject {
             in_process = false;
         }
     }
-    
+
     /**
      * The child class's implementation of {@link commit_async}.
      *
@@ -178,20 +178,20 @@ public abstract class Geary.Revokable : BaseObject {
      * if successful.
      */
     protected abstract async void internal_commit_async(Cancellable? cancellable) throws Error;
-    
+
     private bool on_timed_commit() {
         commit_timeout_id = 0;
-        
+
         if (valid && !in_process)
             commit_async.begin();
-        
+
         return false;
     }
-    
+
     private void cancel_timed_commit() {
         if (commit_timeout_id == 0)
             return;
-        
+
         Source.remove(commit_timeout_id);
         commit_timeout_id = 0;
     }

@@ -17,7 +17,7 @@
 public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
     public RootParameters() {
     }
-    
+
     /**
      * Moves all contained {@link Parameter} objects inside the supplied RootParameters into a
      * new RootParameters.
@@ -27,7 +27,7 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
     public RootParameters.migrate(RootParameters root) {
         adopt_children(root);
     }
-    
+
     /**
      * Returns null if the first parameter is not a StringParameter that resembles a Tag.
      */
@@ -35,13 +35,13 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
         StringParameter? strparam = get_if_string(0);
         if (strparam == null)
             return null;
-        
+
         if (!Tag.is_tag(strparam))
             return null;
-        
+
         return new Tag.from_parameter(strparam);
     }
-    
+
     /**
      * Returns true if the first parameter is a StringParameter that resembles a Tag.
      */
@@ -49,10 +49,10 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
         StringParameter? strparam = get_if_string(0);
         if (strparam == null)
             return false;
-        
+
         return (strparam != null) ? Tag.is_tag(strparam) : false;
     }
-    
+
     /**
      * {@inheritDoc}
      */

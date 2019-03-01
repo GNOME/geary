@@ -34,12 +34,12 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
             return (_inbox != null) ? _inbox : _inbox = new MailboxSpecifier(CANONICAL_INBOX_NAME);
         }
     }
-    
+
     /**
      * Decoded mailbox path name.
      */
     public string name { get; private set; }
-    
+
     /**
      * Indicates this is the {@link StatusData} for Inbox.
      *
@@ -100,7 +100,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     public static bool is_inbox_name(string name) {
         return Ascii.stri_equal(name, CANONICAL_INBOX_NAME);
     }
-    
+
     /**
      * Returns true if the string is the ''canonical'' name of the IMAP Inbox.
      *
@@ -163,7 +163,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
         name = decoded;
         is_inbox = is_inbox_name(decoded);
     }
-    
+
     /**
      * The mailbox's path as a list of strings.
      *
@@ -172,7 +172,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
      */
     public Gee.List<string> to_list(string? delim) {
         Gee.List<string> path = new Gee.LinkedList<string>();
-        
+
         if (!String.is_empty(delim)) {
             string[] split = name.split(delim);
             foreach (string str in split) {
@@ -180,10 +180,10 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
                     path.add(str);
             }
         }
-        
+
         if (path.size == 0)
             path.add(name);
-        
+
         return path;
     }
 
@@ -225,13 +225,13 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     public string get_basename(string? delim) {
         if (String.is_empty(delim))
             return name;
-        
+
         int index = name.last_index_of(delim);
         if (index < 0)
             return name;
-        
+
         string basename = name.substring(index + 1);
-        
+
         return !String.is_empty(basename) ? basename : name;
     }
 
@@ -249,27 +249,27 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     public uint hash() {
         return is_inbox ? Ascii.stri_hash(name) : Ascii.str_hash(name);
     }
-    
+
     public bool equal_to(MailboxSpecifier other) {
         if (this == other)
             return true;
-        
+
         if (is_inbox)
             return Ascii.stri_equal(name, other.name);
-        
+
         return Ascii.str_equal(name, other.name);
     }
-    
+
     public int compare_to(MailboxSpecifier other) {
         if (this == other)
             return 0;
-        
+
         if (is_inbox && other.is_inbox)
             return 0;
-        
+
         return Ascii.strcmp(name, other.name);
     }
-    
+
     public string to_string() {
         return name;
     }

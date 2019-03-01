@@ -61,28 +61,28 @@ public bool is_tag_special(char ch, string? exceptions = null) {
 public Quoting is_quoting_required(string str) {
     if (String.is_empty(str))
         return Quoting.REQUIRED;
-    
+
     int index = 0;
     for (;;) {
         char ch = str[index++];
         if (ch == String.EOS)
             break;
-        
+
         if (ch > 0x7F)
             return Quoting.UNALLOWED;
-        
+
         switch (ch) {
             case '\n':
             case '\r':
                 return Quoting.UNALLOWED;
-            
+
             default:
                 if (is_atom_special(ch))
                     return Quoting.REQUIRED;
             break;
         }
     }
-    
+
     return Quoting.OPTIONAL;
 }
 

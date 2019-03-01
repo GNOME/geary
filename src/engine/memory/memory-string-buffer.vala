@@ -15,50 +15,50 @@ public class Geary.Memory.StringBuffer : Memory.Buffer, Memory.UnownedStringBuff
             return length;
         }
     }
-    
+
     public override size_t allocated_size {
         get {
             return length;
         }
     }
-    
+
     private string str;
     private size_t length;
     private Bytes? bytes = null;
-    
+
     public StringBuffer(string str) {
         this.str = str;
         length = str.data.length;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public override Bytes get_bytes() {
         return (bytes != null) ? bytes : bytes = new Bytes(str.data);
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public override string to_string() {
         return str;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public override string get_valid_utf8() {
         return str.validate() ? str : "";
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public unowned string to_unowned_string() {
         return str;
     }
-    
+
     /**
      * {@inheritDoc}
      */

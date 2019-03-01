@@ -16,36 +16,36 @@ public enum Geary.Smtp.Command {
     RCPT,
     DATA,
     STARTTLS;
-    
+
     public string serialize() {
         switch (this) {
             case HELO:
                 return "helo";
-            
+
             case EHLO:
                 return "ehlo";
-            
+
             case QUIT:
                 return "quit";
-            
+
             case HELP:
                 return "help";
-            
+
             case NOOP:
                 return "noop";
-            
+
             case RSET:
                 return "rset";
-            
+
             case AUTH:
                 return "AUTH";
-            
+
             case MAIL:
                 return "mail";
-            
+
             case RCPT:
                 return "rcpt";
-            
+
             case DATA:
                 return "data";
 
@@ -56,36 +56,36 @@ public enum Geary.Smtp.Command {
                 assert_not_reached();
         }
     }
-    
+
     public static Command deserialize(string str) throws SmtpError {
         switch (Ascii.strdown(str)) {
             case "helo":
                 return HELO;
-            
+
             case "ehlo":
                 return EHLO;
-            
+
             case "quit":
                 return QUIT;
-            
+
             case "help":
                 return HELP;
-            
+
             case "noop":
                 return NOOP;
-            
+
             case "rset":
                 return RSET;
-            
+
             case "auth":
                 return AUTH;
-            
+
             case "mail":
                 return MAIL;
-            
+
             case "rcpt":
                 return RCPT;
-            
+
             case "data":
                 return DATA;
 

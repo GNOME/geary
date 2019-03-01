@@ -83,7 +83,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         Logging.debug(Logging.Flag.NETWORK, "[%s] connected to %s", to_string(),
             endpoint.to_string());
     }
-    
+
     public virtual signal void disconnected() {
         Logging.debug(Logging.Flag.NETWORK, "[%s] disconnected from %s", to_string(),
             endpoint.to_string());
@@ -100,37 +100,37 @@ public class Geary.Imap.ClientConnection : BaseObject {
     public virtual signal void received_server_data(ServerData server_data) {
         Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), server_data.to_string());
     }
-    
+
     public virtual signal void received_continuation_response(ContinuationResponse continuation_response) {
         Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), continuation_response.to_string());
     }
-    
+
     public virtual signal void received_bytes(size_t bytes) {
         // this generates a *lot* of debug logging if one was placed here, so it's not
     }
-    
+
     public virtual signal void received_bad_response(RootParameters root, ImapError err) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] recv bad response %s: %s", to_string(),
             root.to_string(), err.message);
     }
-    
+
     public virtual signal void recv_closed() {
         Logging.debug(Logging.Flag.NETWORK, "[%s] recv closed", to_string());
     }
-    
+
     public virtual signal void send_failure(Error err) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] send failure: %s", to_string(), err.message);
     }
-    
+
     public virtual signal void receive_failure(Error err) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] recv failure: %s", to_string(), err.message);
     }
-    
+
     public virtual signal void deserialize_failure(Error err) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] deserialize failure: %s", to_string(),
             err.message);
     }
-    
+
     public virtual signal void close_error(Error err) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] close error: %s", to_string(), err.message);
     }
@@ -151,26 +151,26 @@ public class Geary.Imap.ClientConnection : BaseObject {
     public SocketAddress? get_remote_address() {
         if (cx == null)
             return null;
-        
+
         try {
             return cx.get_remote_address();
         } catch (Error err) {
             debug("Unable to retrieve remote address: %s", err.message);
         }
-        
+
         return null;
     }
-    
+
     public SocketAddress? get_local_address() {
         if (cx == null)
             return null;
-        
+
         try {
             return cx.get_local_address();
         } catch (Error err) {
             debug("Unable to retrieve local address: %s", err.message);
         }
-        
+
         return null;
     }
 
@@ -289,11 +289,11 @@ public class Geary.Imap.ClientConnection : BaseObject {
     public async void starttls_async(Cancellable? cancellable = null) throws Error {
         if (cx == null)
             throw new ImapError.NOT_SUPPORTED("[%s] Unable to enable TLS: no connection", to_string());
-        
+
         // (mostly) silent fail in this case
         if (cx is TlsClientConnection) {
             debug("[%s] Already TLS connection", to_string());
-            
+
             return;
         }
 
@@ -303,9 +303,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
         // wrap connection with TLS connection
         TlsClientConnection tls_cx = yield endpoint.starttls_handshake_async(cx, cancellable);
-        
+
         ios = tls_cx;
-        
+
         // re-open Serializer/Deserializer with the new streams
         yield open_channels_async();
     }

@@ -80,7 +80,7 @@ public abstract class Application.Command : GLib.Object {
      */
     public abstract async void undo(GLib.Cancellable? cancellable)
         throws GLib.Error;
-        
+
     /**
      * Called by {@link CommandStack} to redo the executed command.
      *

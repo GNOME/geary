@@ -27,7 +27,7 @@ public class Geary.Imap.SearchCriteria : ListParameter {
         if (first != null)
             add_all(first.to_parameters());
     }
-    
+
     /**
      * Clears the {@link SearchCriteria} and sets the supplied {@link SearchCriterion} to the first
      * in the list.
@@ -37,10 +37,10 @@ public class Geary.Imap.SearchCriteria : ListParameter {
     public unowned SearchCriteria is_(SearchCriterion first) {
         clear();
         add_all(first.to_parameters());
-        
+
         return this;
     }
-    
+
     /**
      * AND another {@link SearchCriterion} to the {@link SearchCriteria}.
      *
@@ -48,10 +48,10 @@ public class Geary.Imap.SearchCriteria : ListParameter {
      */
     public unowned SearchCriteria and(SearchCriterion next) {
         add_all(next.to_parameters());
-        
+
         return this;
     }
-    
+
     /**
      * OR two {@link SearchCriterion}s to the {@link SearchCriteria}.
      *
@@ -59,10 +59,10 @@ public class Geary.Imap.SearchCriteria : ListParameter {
      */
     public unowned SearchCriteria or(SearchCriterion a, SearchCriterion b) {
         add_all(SearchCriterion.or(a, b).to_parameters());
-        
+
         return this;
     }
-    
+
     /**
      * NOT another {@link SearchCriterion} to the {@link SearchCriteria}.
      *
@@ -70,7 +70,7 @@ public class Geary.Imap.SearchCriteria : ListParameter {
      */
     public unowned SearchCriteria not(SearchCriterion next) {
         add_all(SearchCriterion.not(next).to_parameters());
-        
+
         return this;
     }
 }

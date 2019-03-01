@@ -34,18 +34,18 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
         Gee.List<Imap.SequenceNumber> new_positions = new Gee.ArrayList<Imap.SequenceNumber>();
         foreach (Imap.SequenceNumber? position in positions) {
             Imap.SequenceNumber old_position = position;
-            
+
             // adjust depending on relation to removed message
             position = position.shift_for_removed(removed);
             if (position != null)
                 new_positions.add(position);
-            
+
             debug("%s: ReplayAppend remote unsolicited remove: %s -> %s", owner.to_string(),
                 old_position.to_string(), (position != null) ? position.to_string() : "(null)");
         }
-        
+
         positions = new_positions;
-        
+
         // DON'T update remote_count, it is intended to report the remote count at the time the
         // appended messages arrived
     }

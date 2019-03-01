@@ -17,50 +17,50 @@ public class Geary.Mime.ContentDisposition : Geary.BaseObject {
      * See [[https://tools.ietf.org/html/rfc2183#section-2.3]]
      */
     public const string FILENAME = "filename";
-    
+
     /**
      * Creation-Date parameter name.
      *
      * See [[https://tools.ietf.org/html/rfc2183#section-2.4]]
      */
     public const string CREATION_DATE = "creation-date";
-    
+
     /**
      * Modification-Date parameter name.
      *
      * See [[https://tools.ietf.org/html/rfc2183#section-2.5]]
      */
     public const string MODIFICATION_DATE = "modification-date";
-    
+
     /**
      * Read-Date parameter name.
      *
      * See [[https://tools.ietf.org/html/rfc2183#section-2.6]]
      */
     public const string READ_DATE = "read-date";
-    
+
     /**
      * Size parameter name.
      *
      * See [[https://tools.ietf.org/html/rfc2183#section-2.7]]
      */
     public const string SIZE = "size";
-    
+
     /**
      * The {@link DispositionType}, which is {@link DispositionType.UNSPECIFIED} if not specified.
      */
     public DispositionType disposition_type { get; private set; }
-    
+
     /**
      * True if the original DispositionType was unknown.
      */
     public bool is_unknown_disposition_type { get; private set; }
-    
+
     /**
      * The original disposition type string.
      */
     public string? original_disposition_type_string { get; private set; }
-    
+
     /**
      * Various parameters associated with the content's disposition.
      *
@@ -74,7 +74,7 @@ public class Geary.Mime.ContentDisposition : Geary.BaseObject {
      * @see SIZE
      */
     public ContentParameters params { get; private set; }
-    
+
     /**
      * Create a Content-Disposition representation
      */
@@ -85,7 +85,7 @@ public class Geary.Mime.ContentDisposition : Geary.BaseObject {
         original_disposition_type_string = disposition;
         this.params = params ?? new ContentParameters();
     }
-    
+
     /**
      * Create a simplified Content-Disposition representation.
      */
@@ -95,7 +95,7 @@ public class Geary.Mime.ContentDisposition : Geary.BaseObject {
         original_disposition_type_string = null;
         this.params = new ContentParameters();
     }
-    
+
     internal ContentDisposition.from_gmime(GMime.ContentDisposition content_disposition) {
         bool is_unknown;
         disposition_type = DispositionType.deserialize(content_disposition.get_disposition(),

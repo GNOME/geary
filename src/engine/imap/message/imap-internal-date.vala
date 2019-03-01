@@ -22,30 +22,30 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
     private const string[] EN_US_MON = {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     };
-    
+
     private const string[] EN_US_MON_DOWN = {
         "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
     };
-    
+
     public DateTime value { get; private set; }
     public string? original { get; private set; default = null; }
-    
+
     private InternalDate(string original, DateTime datetime) {
         this.original = original;
         value = datetime;
     }
-    
+
     public InternalDate.from_date_time(DateTime datetime) throws ImapError {
         value = datetime;
     }
-    
+
     public static InternalDate decode(string internaldate) throws ImapError {
         if (String.is_empty(internaldate))
             throw new ImapError.PARSE_ERROR("Invalid INTERNALDATE: empty string");
-        
+
         if (internaldate.length > 64)
             throw new ImapError.PARSE_ERROR("Invalid INTERNALDATE: too long (%d)", internaldate.length);
-        
+
         // Alas, GMime.utils_header_decode_date() is too forgiving for our needs, so do it manually
         int day, year, hour, min, sec;
         char mon[4] = { 0 };
@@ -54,7 +54,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
             out min, out sec, tz);
         if (count != 6 && count != 7)
             throw new ImapError.PARSE_ERROR("Invalid INTERNALDATE \"%s\": too few fields (%d)", internaldate, count);
-        
+
         // check numerical ranges; this does not verify this is an actual date, DateTime will do
         // that (and round upward, which has to be accepted)
         if (!Numeric.int_in_range_inclusive(day, 1, 31)
@@ -64,30 +64,30 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
             || year < 1970) {
             throw new ImapError.PARSE_ERROR("Invalid INTERNALDATE \"%s\": bad numerical range", internaldate);
         }
-        
+
         // check month (this catches localization problems)
         int month = -1;
         string mon_down = Ascii.strdown(((string) mon));
         for (int ctr = 0; ctr < EN_US_MON_DOWN.length; ctr++) {
             if (mon_down == EN_US_MON_DOWN[ctr]) {
                 month = ctr;
-                
+
                 break;
             }
         }
-        
+
         if (month < 0)
             throw new ImapError.PARSE_ERROR("Invalid INTERNALDATE \"%s\": bad month", internaldate);
-        
+
         // TODO: verify timezone
-        
+
         // if no timezone listed, ISO 8601 says to use local time
         TimeZone timezone = (tz[0] != '\0') ? new TimeZone((string) tz) : new TimeZone.local();
-        
+
         // assemble into DateTime, which validates the time as well (this is why we want to keep
         // original around, for other reasons) ... month is 1-based in DateTime
         DateTime datetime = new DateTime(timezone, year, month + 1, day, hour, min, sec);
-        
+
         return new InternalDate(internaldate, datetime);
     }
 
@@ -97,14 +97,14 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
     public time_t to_time_t () {
         return Time.datetime_to_time_t(this.value);
     }
-    
+
     /**
      * Returns the {@link InternalDate} as a {@link Parameter}.
      */
     public Parameter to_parameter() {
         return Parameter.get_for_string(serialize());
     }
-    
+
     /**
      * Returns the {@link InternalDate} as a {@link Parameter} for a {@link SearchCriterion}.
      *
@@ -113,7 +113,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
     public Parameter to_search_parameter() {
         return Parameter.get_for_string(serialize_for_search());
     }
-    
+
     /**
      * Returns the {@link InternalDate}'s string representation.
      *
@@ -122,7 +122,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
     public string serialize() {
         return original ?? value.format("%d-%%s-%Y %H:%M:%S %z").printf(get_en_us_mon());
     }
-    
+
     /**
      * Returns the {@link InternalDate}'s string representation for a SEARCH command.
      *
@@ -135,7 +135,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
     public string serialize_for_search() {
         return value.format("%d-%%s-%Y").printf(get_en_us_mon());
     }
-    
+
     /**
      * Because IMAP's INTERNALDATE strings are ''never'' localized (as best as I can gather), so
      * need to use en_US appreviated month names, as that's the only value in INTERNALDATE that is
@@ -144,22 +144,22 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
     private string get_en_us_mon() {
         // month is 1-based inside of DateTime
         int mon = (value.get_month() - 1).clamp(0, EN_US_MON.length - 1);
-        
+
         return EN_US_MON[mon];
     }
-    
+
     public uint hash() {
         return value.hash();
     }
-    
+
     public bool equal_to(InternalDate other) {
         return value.equal(other.value);
     }
-    
+
     public int compare_to(InternalDate other) {
         return value.compare(other.value);
     }
-    
+
     public override string to_string() {
         return serialize();
     }

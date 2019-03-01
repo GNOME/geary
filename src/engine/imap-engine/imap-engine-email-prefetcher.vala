@@ -13,10 +13,10 @@
  */
 private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     public const int PREFETCH_DELAY_SEC = 1;
-    
+
     private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
     private const int PREFETCH_CHUNK_BYTES = 32 * 1024;
-    
+
     public Nonblocking.CountingSemaphore active_sem { get; private set;
         default = new Nonblocking.CountingSemaphore(null); }
 
@@ -142,10 +142,10 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
             if (!(err is IOError.CANCELLED))
                 debug("Error while prefetching emails for %s: %s", folder.to_string(), err.message);
         }
-        
+
         // this round is done
         active_sem.blind_notify();
-        
+
         if (token != Nonblocking.Mutex.INVALID_TOKEN) {
             try {
                 mutex.release(ref token);
@@ -154,15 +154,15 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
             }
         }
     }
-    
+
     private async void do_prefetch_batch_async() throws Error {
         // snarf up all requested Emails for this round
         Gee.TreeSet<Geary.Email> emails = prefetch_emails;
         prefetch_emails = new Gee.TreeSet<Geary.Email>(Email.compare_recv_date_descending);
-        
+
         if (emails.size == 0)
             return;
-        
+
         debug("do_prefetch_batch_async %s start_total=%d", folder.to_string(), emails.size);
 
         // Big TODO: The engine needs to be able to synthesize
@@ -177,52 +177,52 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>();
         int64 chunk_bytes = 0;
         int count = 0;
-        
+
         while (emails.size > 0) {
             // dequeue emails by date received, newest to oldest
             Geary.Email email = emails.first();
-            
+
             // only add to this chunk if the email is smaller than one chunk or there's nothing
             // in this chunk so far ... this means an oversized email will be pulled all by itself
             // in the next round if there's stuff already ahead of it
             if (email.properties.total_bytes < PREFETCH_CHUNK_BYTES || ids.size == 0) {
                 bool removed = emails.remove(email);
                 assert(removed);
-                
+
                 ids.add(email.id);
                 chunk_bytes += email.properties.total_bytes;
                 count++;
-                
+
                 // if not enough stuff is in this chunk, keep going
                 if (chunk_bytes < PREFETCH_CHUNK_BYTES)
                     continue;
             }
-            
+
             bool keep_going = yield do_prefetch_email_async(ids, chunk_bytes);
-            
+
             // clear out for next chunk ... this also prevents the final prefetch_async() from trying
             // to pull twice if !keep_going
             ids.clear();
             chunk_bytes = 0;
-            
+
             if (!keep_going)
                 break;
-            
+
             yield Scheduler.sleep_ms_async(200);
         }
-        
+
         // get any remaining
         if (ids.size > 0)
             yield do_prefetch_email_async(ids, chunk_bytes);
-        
+
         debug("finished do_prefetch_batch_async %s end_total=%d", folder.to_string(), count);
     }
-    
+
     // Return true to continue, false to stop prefetching (cancelled or not open)
     private async bool do_prefetch_email_async(Gee.Collection<Geary.EmailIdentifier> ids, int64 chunk_bytes) {
         debug("do_prefetch_email_async: %s prefetching %d emails (%sb)", folder.to_string(),
             ids.size, chunk_bytes.to_string());
-        
+
         try {
             yield folder.list_email_by_sparse_id_async(ids, PREFETCH_FIELDS, Folder.ListFlags.NONE,
                 cancellable);
@@ -236,7 +236,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
                 return false;
             }
         }
-        
+
         return true;
     }
 }

@@ -18,7 +18,7 @@ public class Geary.Imap.ContinuationResponse : ServerResponse {
     private ContinuationResponse() {
         base (Tag.get_continuation());
     }
-    
+
     /**
      * Converts the {@link RootParameters} into a {@link ContinuationResponse}.
      *
@@ -27,17 +27,17 @@ public class Geary.Imap.ContinuationResponse : ServerResponse {
      */
     public ContinuationResponse.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
-        
+
         if (!tag.is_continuation())
             throw new ImapError.INVALID("Tag %s is not a continuation", tag.to_string());
     }
-    
+
     /**
      * Returns true if the {@link RootParameters}'s {@link Tag} is a continuation character ("+").
      */
     public static bool is_continuation_response(RootParameters root) {
         Tag? tag = root.get_tag();
-        
+
         return tag != null ? tag.is_continuation() : false;
     }
 }

@@ -14,7 +14,7 @@ private class Geary.ImapEngine.RevokableCommittedMove : Revokable {
     private FolderPath source;
     private FolderPath destination;
     private Gee.Set<Imap.UID> destination_uids;
-    
+
     public RevokableCommittedMove(GenericAccount account, FolderPath source, FolderPath destination,
         Gee.Set<Imap.UID> destination_uids) {
         this.account = account;

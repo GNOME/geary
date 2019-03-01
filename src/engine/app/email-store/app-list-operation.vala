@@ -6,17 +6,17 @@
 
 private class Geary.App.ListOperation : Geary.App.AsyncFolderOperation {
     public override Type folder_type { get { return typeof(Geary.Folder); } }
-    
+
     public Gee.HashSet<Geary.Email> results;
     public Geary.Email.Field required_fields;
     public Geary.Folder.ListFlags flags;
-    
+
     public ListOperation(Geary.Email.Field required_fields, Geary.Folder.ListFlags flags) {
         results = new Gee.HashSet<Geary.Email>();
         this.required_fields = required_fields;
         this.flags = flags;
     }
-    
+
     public override async Gee.Collection<Geary.EmailIdentifier> execute_async(
         Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids,
         Cancellable? cancellable) throws Error {

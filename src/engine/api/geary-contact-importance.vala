@@ -17,7 +17,7 @@
  * || CC || appeared in the 'CC' or 'BCC' fields OR did not appear in any field (assuming BCC) ||
  *
  * "Examples:"
- * 
+ *
  * || "Enum Value" || "Account Owner" || "Contact" ||
  * || FROM_TO || Appeared in 'from' or 'sender' || Appeared in 'to' ||
  * || CC_FROM || Appeared in 'CC', 'BCC', or did not appear || Appeared in 'from' or 'sender'. ||

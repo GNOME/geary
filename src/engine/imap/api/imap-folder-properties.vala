@@ -37,7 +37,7 @@
  * The base class' email_total is updated when either *_messages is updated; however, SELECT/EXAMINE
  * is considered more authoritative than STATUS.
  */
- 
+
 public class Geary.Imap.FolderProperties : Geary.FolderProperties {
     /**
      * -1 if the Folder was not opened via SELECT or EXAMINE.  Updated as EXISTS server data
@@ -155,19 +155,19 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
         if (uid_next != null && other.uid_next != null && !uid_next.equal_to(other.uid_next)) {
             debug("%s FolderProperties changed: UIDNEXT=%s other.UIDNEXT=%s", name,
                 uid_next.to_string(), other.uid_next.to_string());
-            
+
             return true;
         }
-        
+
         // UIDVALIDITY changes indicate the entire folder's contents have potentially altered and
         // the client needs to reset its local vector
         if (uid_validity != null && other.uid_validity != null && !uid_validity.equal_to(other.uid_validity)) {
             debug("%s FolderProperties changed: UIDVALIDITY=%s other.UIDVALIDITY=%s", name,
                 uid_validity.to_string(), other.uid_validity.to_string());
-            
+
             return true;
         }
-        
+
         // Gmail includes Chat messages in STATUS results but not in SELECT/EXAMINE
         // results, so message count comparison has to be from the same origin ... use SELECT/EXAMINE
         // first, as it's more authoritative in many ways
@@ -176,21 +176,21 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
             if (diff != 0) {
                 debug("%s FolderProperties changed: SELECT/EXAMINE=%d other.SELECT/EXAMINE=%d diff=%d",
                     name, select_examine_messages, other.select_examine_messages, diff);
-                
+
                 return true;
             }
         }
-        
+
         if (status_messages >= 0 && other.status_messages >= 0) {
             int diff = status_messages - other.status_messages;
             if (diff != 0) {
                 debug("%s FolderProperties changed: STATUS=%d other.STATUS=%d diff=%d", name,
                     status_messages, other.status_messages, diff);
-                
+
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -207,39 +207,39 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
         uid_validity = status.uid_validity;
         uid_next = status.uid_next;
     }
-    
+
     public void set_status_message_count(int messages, bool force) {
         if (messages < 0)
             return;
-        
+
         status_messages = messages;
-        
+
         // select/examine more authoritative than status, unless the caller knows otherwise
         if (force || (select_examine_messages < 0))
             email_total = messages;
     }
-    
+
     public void set_select_examine_message_count(int messages) {
         if (messages < 0)
             return;
-        
+
         select_examine_messages = messages;
-        
+
         // select/examine more authoritative than status
         email_total = messages;
     }
-    
+
     public void set_status_unseen(int count) {
         // drop unknown counts, especially if known is held here
         if (count < 0)
             return;
-        
+
         unseen = count;
-        
+
         // update base class value (which clients see)
         email_unread = count;
     }
-    
+
     public void set_from_session_capabilities(Capabilities capabilities) {
         create_never_returns_id = !capabilities.supports_uidplus();
     }

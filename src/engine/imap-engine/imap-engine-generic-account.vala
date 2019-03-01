@@ -246,9 +246,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public override async void rebuild_async(Cancellable? cancellable = null) throws Error {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account cannot be open during rebuild");
-        
+
         message("%s: Rebuilding account local data", to_string());
-        
+
         // get all the storage locations associated with this Account
         File db_file;
         File attachments_dir;
@@ -434,7 +434,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Gee.HashSet<Geary.Folder> all_folders = new Gee.HashSet<Geary.Folder>();
         all_folders.add_all(folder_map.values);
         all_folders.add_all(local_only.values);
-        
+
         return all_folders;
     }
 
@@ -510,25 +510,25 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private void on_email_sent(Geary.RFC822.Message rfc822) {
         notify_email_sent(rfc822);
     }
-    
+
     private ImapDB.EmailIdentifier check_id(Geary.EmailIdentifier id) throws EngineError {
         ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
         if (imapdb_id == null)
             throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not from ImapDB folder", id.to_string());
-        
+
         return imapdb_id;
     }
-    
+
     private Gee.Collection<ImapDB.EmailIdentifier> check_ids(Gee.Collection<Geary.EmailIdentifier> ids)
         throws EngineError {
         foreach (Geary.EmailIdentifier id in ids) {
             if (!(id is ImapDB.EmailIdentifier))
                 throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not from ImapDB folder", id.to_string());
         }
-        
+
         return (Gee.Collection<ImapDB.EmailIdentifier>) ids;
     }
-    
+
     public override async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
@@ -536,25 +536,25 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return yield local.search_message_id_async(
             message_id, requested_fields, partial_ok, folder_blacklist, flag_blacklist, cancellable);
     }
-    
+
     public override async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         return yield local.fetch_email_async(check_id(email_id), required_fields, cancellable);
     }
-    
+
     public override Geary.SearchQuery open_search(string query, SearchQuery.Strategy strategy) {
         return new ImapDB.SearchQuery(local, query, strategy);
     }
-    
+
     public override async Gee.Collection<Geary.EmailIdentifier>? local_search_async(Geary.SearchQuery query,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         if (offset < 0)
             throw new EngineError.BAD_PARAMETERS("Offset must not be negative");
-        
+
         return yield local.search_async(query, limit, offset, folder_blacklist, search_ids, cancellable);
     }
-    
+
     public override async Gee.Set<string>? get_search_matches_async(Geary.SearchQuery query,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         return yield local.get_search_matches_async(query, check_ids(ids), cancellable);

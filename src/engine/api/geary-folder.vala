@@ -123,12 +123,12 @@ public abstract class Geary.Folder : BaseObject {
         REMOTE_CLOSE,
         REMOTE_ERROR,
         FOLDER_CLOSED;
-        
+
         public bool is_error() {
             return (this == LOCAL_ERROR) || (this == REMOTE_ERROR);
         }
     }
-    
+
     [Flags]
     public enum CountChangeReason {
         NONE = 0,
@@ -197,27 +197,27 @@ public abstract class Geary.Folder : BaseObject {
         public bool is_any_set(ListFlags flags) {
             return (this & flags) != 0;
         }
-        
+
         public bool is_all_set(ListFlags flags) {
             return (this & flags) == flags;
         }
-        
+
         public bool is_local_only() {
             return is_all_set(LOCAL_ONLY);
         }
-        
+
         public bool is_force_update() {
             return is_all_set(FORCE_UPDATE);
         }
-        
+
         public bool is_including_id() {
             return is_all_set(INCLUDING_ID);
         }
-        
+
         public bool is_oldest_to_newest() {
             return is_all_set(OLDEST_TO_NEWEST);
         }
-        
+
         public bool is_newest_to_oldest() {
             return !is_oldest_to_newest();
         }
@@ -278,7 +278,7 @@ public abstract class Geary.Folder : BaseObject {
      * Error.
      *
      * This signal may be fired more than once before the Folder is
-     * closed, especially in the case of a remote session 
+     * closed, especially in the case of a remote session
      */
     public signal void open_failed(OpenFailed failure, Error? err);
 
@@ -302,7 +302,7 @@ public abstract class Geary.Folder : BaseObject {
      * @see email_locally_appended
      */
     public signal void email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when previously unknown messages have been appended to the list of email in the folder.
      *
@@ -315,7 +315,7 @@ public abstract class Geary.Folder : BaseObject {
      * @see email_appended
      */
     public signal void email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when email has been inserted into the list of messages in the folder.
      *
@@ -327,7 +327,7 @@ public abstract class Geary.Folder : BaseObject {
      * @see email_locally_inserted
      */
     public signal void email_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when previously unknown messages have been appended to the list of email in the folder.
      *
@@ -341,7 +341,7 @@ public abstract class Geary.Folder : BaseObject {
      * @see email_locally_inserted
      */
     public signal void email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when email has been removed (deleted or moved) from the folder.
      *
@@ -354,7 +354,7 @@ public abstract class Geary.Folder : BaseObject {
      * signal will ''not'' fire, although {@link email_count_changed} will.
      */
     public signal void email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when the total count of email in a folder has changed in any way.
      *
@@ -362,19 +362,19 @@ public abstract class Geary.Folder : BaseObject {
      * and {@link email_removed} (although see the note at email_removed).
      */
     public signal void email_count_changed(int new_count, CountChangeReason reason);
-    
+
     /**
      * Fired when the supplied email flags have changed, whether due to local action or reported by
      * the server.
      */
     public signal void email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
-    
+
     /**
      * Fired when one or more emails have been locally saved with the full set
      * of Fields.
      */
     public signal void email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
     * Fired when the {@link SpecialFolderType} has changed.
     *
@@ -383,58 +383,58 @@ public abstract class Geary.Folder : BaseObject {
     */
     public signal void special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type);
-    
+
     /**
      * Fired when the Folder's display name has changed.
      *
      * @see get_display_name
      */
     public signal void display_name_changed();
-    
+
     protected Folder() {
     }
-    
+
     protected virtual void notify_opened(Geary.Folder.OpenState state, int count) {
         opened(state, count);
     }
-    
+
     protected virtual void notify_open_failed(Geary.Folder.OpenFailed failure, Error? err) {
         open_failed(failure, err);
     }
-    
+
     protected virtual void notify_closed(Geary.Folder.CloseReason reason) {
         closed(reason);
     }
-    
+
     protected virtual void notify_email_appended(Gee.Collection<Geary.EmailIdentifier> ids) {
         email_appended(ids);
     }
-    
+
     protected virtual void notify_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids) {
         email_locally_appended(ids);
     }
-    
+
     protected virtual void notify_email_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
         email_inserted(ids);
     }
-    
+
     protected virtual void notify_email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
         email_locally_inserted(ids);
     }
-    
+
     protected virtual void notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids) {
         email_removed(ids);
     }
-    
+
     protected virtual void notify_email_count_changed(int new_count, Folder.CountChangeReason reason) {
         email_count_changed(new_count, reason);
     }
-    
+
     protected virtual void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
         Geary.EmailFlags> flag_map) {
         email_flags_changed(flag_map);
     }
-    
+
     protected virtual void notify_email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids) {
         email_locally_complete(ids);
     }
@@ -639,7 +639,7 @@ public abstract class Geary.Folder : BaseObject {
     public abstract async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, ListFlags flags,
         Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Returns the locally available Geary.Email.Field fields for the specified emails.  If a
      * list or fetch operation occurs on the emails that specifies a field not returned here,
@@ -652,7 +652,7 @@ public abstract class Geary.Folder : BaseObject {
      */
     public abstract async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Returns a single email that fulfills the required_fields flag at the ordered position in
      * the folder.  If the email_id is invalid for the folder's contents, an EngineError.NOT_FOUND

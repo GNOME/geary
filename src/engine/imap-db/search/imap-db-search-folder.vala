@@ -36,20 +36,20 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.email_locally_complete.connect(on_email_locally_complete);
         account.email_removed.connect(on_account_email_removed);
-        
+
         clear_search_results();
-        
+
         // We always want to exclude emails that don't live anywhere from
         // search results.
         exclude_orphan_emails();
     }
-    
+
     ~SearchFolder() {
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
         account.email_locally_complete.disconnect(on_email_locally_complete);
         account.email_removed.disconnect(on_account_email_removed);
     }
-    
+
     private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
         Gee.Collection<Geary.Folder>? unavailable) {
         if (available != null) {
@@ -63,20 +63,20 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
     private async void append_new_email_async(Geary.SearchQuery query, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         int result_mutex_token = yield result_mutex.claim_async();
-        
+
         Error? error = null;
         try {
             yield do_search_async(query, ids, null, cancellable);
         } catch(Error e) {
             error = e;
         }
-        
+
         result_mutex.release(ref result_mutex_token);
-        
+
         if (error != null)
             throw error;
     }
-    
+
     private void on_append_new_email_complete(Object? source, AsyncResult result) {
         try {
             append_new_email_async.end(result);
@@ -84,17 +84,17 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             debug("Error appending new email to search results: %s", e.message);
         }
     }
-    
+
     private void on_email_locally_complete(Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids) {
         if (search_query != null)
             append_new_email_async.begin(search_query, folder, ids, null, on_append_new_email_complete);
     }
-    
+
     private async void handle_removed_email_async(Geary.SearchQuery query, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         int result_mutex_token = yield result_mutex.claim_async();
-        
+
         Error? error = null;
         try {
             Gee.ArrayList<ImapDB.SearchEmailIdentifier> relevant_ids
@@ -102,19 +102,19 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
                 .map_nonnull<ImapDB.SearchEmailIdentifier>(
                     id => ImapDB.SearchEmailIdentifier.collection_get_email_identifier(search_results, id))
                 .to_array_list();
-            
+
             if (relevant_ids.size > 0)
                 yield do_search_async(query, null, relevant_ids, cancellable);
         } catch(Error e) {
             error = e;
         }
-        
+
         result_mutex.release(ref result_mutex_token);
-        
+
         if (error != null)
             throw error;
     }
-    
+
     private void on_handle_removed_email_complete(Object? source, AsyncResult result) {
         try {
             handle_removed_email_async.end(result);
@@ -122,13 +122,13 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             debug("Error removing removed email from search results: %s", e.message);
         }
     }
-    
+
     private void on_account_email_removed(Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids) {
         if (search_query != null)
             handle_removed_email_async.begin(search_query, folder, ids, null, on_handle_removed_email_complete);
     }
-    
+
     /**
      * Clears the search query and results.
      */
@@ -137,20 +137,20 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         clear_search_results();
         notify_email_removed(local_results);
         notify_email_count_changed(0, Geary.Folder.CountChangeReason.REMOVED);
-        
+
         if (search_query != null) {
             search_query = null;
             notify_search_query_changed(null);
         }
     }
-    
+
     /**
      * Sets the keyword string for this search.
      */
     public override void search(string query, Geary.SearchQuery.Strategy strategy, Cancellable? cancellable = null) {
         set_search_query_async.begin(query, strategy, cancellable, on_set_search_query_complete);
     }
-    
+
     private void on_set_search_query_complete(Object? source, AsyncResult result) {
         try {
             set_search_query_async.end(result);
@@ -158,29 +158,29 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             debug("Search error: %s", e.message);
         }
     }
-    
+
     private async void set_search_query_async(string query, Geary.SearchQuery.Strategy strategy,
         Cancellable? cancellable) throws Error {
         Geary.SearchQuery search_query = account.open_search(query, strategy);
-        
+
         int result_mutex_token = yield result_mutex.claim_async();
-        
+
         Error? error = null;
         try {
             yield do_search_async(search_query, null, null, cancellable);
         } catch(Error e) {
             error = e;
         }
-        
+
         result_mutex.release(ref result_mutex_token);
-        
+
         this.search_query = search_query;
         notify_search_query_changed(search_query);
-        
+
         if (error != null)
             throw error;
     }
-    
+
     // NOTE: you must call this ONLY after locking result_mutex_token.
     // If both *_ids parameters are null, the results of this search are
     // considered to be the full new set.  If non-null, the results are
@@ -194,7 +194,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         // remove_ids is null, and 3) remove from result set, where just
         // add_ids is null.  We can't add and remove at the same time.
         assert(add_ids == null || remove_ids == null);
-        
+
         // TODO: don't limit this to MAX_RESULT_EMAILS.  Instead, we could be
         // smarter about only fetching the search results in list_email_async()
         // etc., but this leads to some more complications when redoing the
@@ -202,12 +202,12 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         Gee.ArrayList<ImapDB.SearchEmailIdentifier> results
             = ImapDB.SearchEmailIdentifier.array_list_from_results(yield account.local_search_async(
             query, MAX_RESULT_EMAILS, 0, exclude_folders, add_ids ?? remove_ids, cancellable));
-        
+
         Gee.List<ImapDB.SearchEmailIdentifier> added
             = Gee.List.empty<ImapDB.SearchEmailIdentifier>();
         Gee.List<ImapDB.SearchEmailIdentifier> removed
             = Gee.List.empty<ImapDB.SearchEmailIdentifier>();
-        
+
         if (remove_ids == null) {
             added = Geary.traverse<ImapDB.SearchEmailIdentifier>(results)
                 .filter(id => !(id in search_results))
@@ -218,17 +218,17 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
                 .filter(id => !(id in results))
                 .to_array_list();
         }
-        
+
         search_results.remove_all(removed);
         search_results.add_all(added);
-        
+
         ((ImapDB.SearchFolderProperties) properties).set_total(search_results.size);
-        
+
         // Note that we probably shouldn't be firing these signals from inside
         // our mutex lock.  Keep an eye on it, and if there's ever a case where
         // it might cause problems, it shouldn't be too hard to move the
         // firings outside.
-        
+
         Geary.Folder.CountChangeReason reason = CountChangeReason.NONE;
         if (added.size > 0) {
             // TODO: we'd like to be able to use APPENDED here when applicable,
@@ -245,16 +245,16 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         if (reason != CountChangeReason.NONE)
             notify_email_count_changed(search_results.size, reason);
     }
-    
+
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
         int count, Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
         if (count <= 0)
             return null;
-        
+
         // TODO: as above, this is incomplete and inefficient.
         int result_mutex_token = yield result_mutex.claim_async();
-        
+
         Geary.EmailIdentifier[] ids = new Geary.EmailIdentifier[search_results.size];
         int initial_index = 0;
         int i = 0;
@@ -263,10 +263,10 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
                 initial_index = i;
             ids[i++] = id;
         }
-        
+
         if (initial_id == null && flags.is_all_set(Geary.Folder.ListFlags.OLDEST_TO_NEWEST))
             initial_index = ids.length - 1;
-        
+
         Gee.List<Geary.Email> results = new Gee.ArrayList<Geary.Email>();
         Error? fetch_err = null;
         if (initial_index >= 0) {
@@ -275,7 +275,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             if (!flags.is_including_id() && initial_id != null)
                 i += increment;
             int end = i + (count * increment);
-            
+
             for (; i >= 0 && i < search_results.size && i != end; i += increment) {
                 try {
                     results.add(yield fetch_email_async(ids[i], required_fields, flags, cancellable));
@@ -284,21 +284,21 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
                     // different symantics from fetch
                     if (!(err is EngineError.NOT_FOUND) && !(err is EngineError.INCOMPLETE_MESSAGE)) {
                         fetch_err = err;
-                        
+
                         break;
                     }
                 }
             }
         }
-        
+
         result_mutex.release(ref result_mutex_token);
-        
+
         if (fetch_err != null)
             throw fetch_err;
-        
+
         return (results.size == 0 ? null : results);
     }
-    
+
     public override async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields,
         Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
@@ -306,17 +306,17 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         Gee.List<Geary.Email> result = new Gee.ArrayList<Geary.Email>();
         foreach(Geary.EmailIdentifier id in ids)
             result.add(yield fetch_email_async(id, required_fields, flags, cancellable));
-        
+
         return (result.size == 0 ? null : result);
     }
-    
+
     public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         // TODO: This method is not currently called, but is required by the interface.  Before completing
-        // this feature, it should either be implemented either here or in AbstractLocalFolder. 
+        // this feature, it should either be implemented either here or in AbstractLocalFolder.
         error("Search folder does not implement list_local_email_fields_async");
     }
-    
+
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
@@ -331,19 +331,19 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             = yield account.get_containing_folders_async(email_ids, cancellable);
         if (ids_to_folders == null)
             return;
-        
+
         Gee.MultiMap<Geary.FolderPath, Geary.EmailIdentifier> folders_to_ids
             = Geary.Collection.reverse_multi_map<Geary.EmailIdentifier, Geary.FolderPath>(ids_to_folders);
-        
+
         foreach (Geary.FolderPath path in folders_to_ids.get_keys()) {
             Geary.Folder folder = yield account.fetch_folder_async(path, cancellable);
             Geary.FolderSupport.Remove? remove = folder as Geary.FolderSupport.Remove;
             if (remove == null)
                 continue;
-            
+
             Gee.Collection<Geary.EmailIdentifier> ids = folders_to_ids.get(path);
             assert(ids.size > 0);
-            
+
             debug("Search folder removing %d emails from %s", ids.size, folder.to_string());
 
             bool open = false;
@@ -374,18 +374,18 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         if (search_query == null)
             return null;
-        
+
         return yield account.get_search_matches_async(search_query, ids, cancellable);
     }
-    
+
     private void exclude_folder(Geary.Folder folder) {
         exclude_folders.add(folder.path);
     }
-    
+
     private void exclude_orphan_emails() {
         exclude_folders.add(null);
     }
-    
+
     private void clear_search_results() {
         search_results = new Gee.TreeSet<ImapDB.SearchEmailIdentifier>(
             ImapDB.SearchEmailIdentifier.compare_descending);

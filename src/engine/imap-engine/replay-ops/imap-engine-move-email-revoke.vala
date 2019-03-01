@@ -12,25 +12,25 @@ private class Geary.ImapEngine.MoveEmailRevoke : Geary.ImapEngine.SendReplayOper
     private MinimalFolder engine;
     private Gee.List<ImapDB.EmailIdentifier> to_revoke = new Gee.ArrayList<ImapDB.EmailIdentifier>();
     private Cancellable? cancellable;
-    
+
     public MoveEmailRevoke(MinimalFolder engine, Gee.Collection<ImapDB.EmailIdentifier> to_revoke,
         Cancellable? cancellable) {
         base.only_local("MoveEmailRevoke", OnError.RETRY);
-        
+
         this.engine = engine;
-        
+
         this.to_revoke.add_all(to_revoke);
         this.cancellable = cancellable;
     }
-    
+
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         to_revoke.remove_all(ids);
     }
-    
+
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (to_revoke.size == 0)
             return ReplayOperation.Status.COMPLETED;
-        
+
         Gee.Set<ImapDB.EmailIdentifier>? revoked = yield engine.local_folder.mark_removed_async(
             to_revoke, false, cancellable);
         if (revoked == null || revoked.size == 0)
@@ -44,7 +44,7 @@ private class Geary.ImapEngine.MoveEmailRevoke : Geary.ImapEngine.SendReplayOper
         engine.replay_notify_email_inserted(revoked);
         engine.replay_notify_email_count_changed(count + revoked.size,
             Geary.Folder.CountChangeReason.INSERTED);
-        
+
         return ReplayOperation.Status.COMPLETED;
     }
 

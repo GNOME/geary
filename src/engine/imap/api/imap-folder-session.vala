@@ -346,11 +346,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     private bool retry_bad_header_fields_response(Command cmd, StatusResponse response) {
         if (response.status != Status.BAD)
             return false;
-        
+
         FetchCommand? fetch = cmd as FetchCommand;
         if (fetch == null)
             return false;
-        
+
         foreach (FetchBodyDataSpecifier body_specifier in fetch.for_body_data_specifiers) {
             switch (body_specifier.section_part) {
                 case FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS:
@@ -363,21 +363,21 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 break;
             }
         }
-        
+
         return false;
     }
-    
+
     private void throw_on_failed_status(StatusResponse response, Command cmd) throws Error {
         assert(response.is_completion);
-        
+
         switch (response.status) {
             case Status.OK:
                 return;
-            
+
             case Status.NO:
                 throw new ImapError.SERVER_ERROR("Request %s failed on %s: %s", cmd.to_string(),
                     to_string(), response.to_string());
-            
+
             case Status.BAD: {
                 // if a FetchBodyDataSpecifier is used to request for a header field BAD is returned,
                 // could be a specific formatting mistake some servers make of not allowing a space
@@ -388,20 +388,20 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 // If so, then enable a hack to work around this and retry the FETCH
                 if (retry_bad_header_fields_response(cmd, response)) {
                     imap_header_fields_hack = true;
-                    
+
                     throw new FolderError.RETRY("BAD response to header.fields FETCH BODY, retry with hack");
                 }
-                
+
                 throw new ImapError.INVALID("Bad request %s on %s: %s", cmd.to_string(),
                     to_string(), response.to_string());
             }
-            
+
             default:
                 throw new ImapError.NOT_SUPPORTED("Unknown response status to %s on %s: %s",
                     cmd.to_string(), to_string(), response.to_string());
         }
     }
-    
+
     // Utility method for listing UIDs on the remote within the supplied range
     public async Gee.Set<Imap.UID>? list_uids_async(MessageSet msg_set, Cancellable? cancellable)
         throws Error {
@@ -420,7 +420,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         return (search_results.size > 0) ? search_results : null;
     }
-    
+
     private Gee.Collection<FetchCommand> assemble_list_commands(Imap.MessageSet msg_set,
         Geary.Email.Field fields, out FetchBodyDataSpecifier? header_specifier,
         out FetchBodyDataSpecifier? body_specifier, out FetchBodyDataSpecifier? preview_specifier,
@@ -428,7 +428,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         // getting all the fields can require multiple FETCH commands (some servers don't handle
         // well putting every required data item into single command), so aggregate FetchCommands
         Gee.Collection<FetchCommand> cmds = new Gee.ArrayList<FetchCommand>();
-        
+
         // if not a UID FETCH, request UIDs for all messages so their EmailIdentifier can be
         // created without going back to the database (assuming the messages have already been
         // pulled down, not a guarantee); if request is for NONE, that guarantees that the
@@ -436,30 +436,30 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         // listing a range for contents: UID FETCH x:y UID)
         if (!msg_set.is_uid || fields == Geary.Email.Field.NONE)
             cmds.add(new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID));
-        
+
         // convert bulk of the "basic" fields into a one or two FETCH commands (some servers have
         // exhibited bugs or return NO when too many FETCH data types are combined on a single
         // command)
         if (fields.requires_any(BASIC_FETCH_FIELDS)) {
             Gee.List<FetchDataSpecifier> data_types = new Gee.ArrayList<FetchDataSpecifier>();
             fields_to_fetch_data_types(fields, data_types, out header_specifier);
-            
+
             // Add all simple data types as one FETCH command
             if (data_types.size > 0)
                 cmds.add(new FetchCommand(msg_set, data_types, null));
-            
+
             // Add all body data types as separate FETCH command
             if (header_specifier != null)
                 cmds.add(new FetchCommand.body_data_type(msg_set, header_specifier));
         } else {
             header_specifier = null;
         }
-        
+
         // RFC822 BODY is a separate command
         if (fields.require(Email.Field.BODY)) {
             body_specifier = new FetchBodyDataSpecifier.peek(FetchBodyDataSpecifier.SectionPart.TEXT,
                 null, -1, -1, null);
-            
+
             cmds.add(new FetchCommand.body_data_type(msg_set, body_specifier));
         } else {
             body_specifier = null;
@@ -493,21 +493,21 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         // PROPERTIES and FLAGS are a separate command
         if (fields.requires_any(Email.Field.PROPERTIES | Email.Field.FLAGS)) {
             Gee.List<FetchDataSpecifier> data_types = new Gee.ArrayList<FetchDataSpecifier>();
-            
+
             if (fields.require(Geary.Email.Field.PROPERTIES)) {
                 data_types.add(FetchDataSpecifier.INTERNALDATE);
                 data_types.add(FetchDataSpecifier.RFC822_SIZE);
             }
-            
+
             if (fields.require(Geary.Email.Field.FLAGS))
                 data_types.add(FetchDataSpecifier.FLAGS);
-            
+
             cmds.add(new FetchCommand(msg_set, data_types, null));
         }
-        
+
         return cmds;
     }
-    
+
     // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
     public async Gee.List<Geary.Email>? list_email_async(MessageSet msg_set,
                                                          Geary.Email.Field fields,
@@ -527,20 +527,20 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 throw new ImapError.INVALID("No FETCH commands generate for list request %s %s",
                     msg_set.to_string(), fields.to_list_string());
             }
-            
+
             // Commands prepped, do the fetch and accumulate all the responses
             try {
                 yield exec_commands_async(cmds, fetched, null, cancellable);
             } catch (Error err) {
                 if (err is FolderError.RETRY) {
                     debug("Retryable server failure detected for %s: %s", to_string(), err.message);
-                    
+
                     continue;
                 }
-                
+
                 throw err;
             }
-            
+
             break;
         }
 
@@ -553,27 +553,27 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         yield Nonblocking.Concurrent.global.schedule_async(() => {
             foreach (SequenceNumber seq_num in fetched.keys) {
                 FetchedData fetched_data = fetched.get(seq_num);
-                
+
                 // the UID should either have been fetched (if using positional addressing) or should
                 // have come back with the response (if using UID addressing)
                 UID? uid = fetched_data.data_map.get(FetchDataSpecifier.UID) as UID;
                 if (uid == null) {
                     message("Unable to list message #%s on %s: No UID returned from server",
                         seq_num.to_string(), to_string());
-                    
+
                     continue;
                 }
-                
+
                 try {
                     Geary.Email email = fetched_data_to_email(to_string(), uid, fetched_data, fields,
                         header_specifier, body_specifier, preview_specifier, preview_charset_specifier);
                     if (!email.fields.fulfills(fields)) {
                         message("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
                             fields.clear(email.fields).to_list_string(), fetched_data.to_string());
-                        
+
                         continue;
                     }
-                    
+
                     email_list.add(email);
                 } catch (Error err) {
                     debug("%s: Unable to convert email for %s %s: %s", to_string(), uid.to_string(),
@@ -581,7 +581,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 }
             }
         }, cancellable);
-        
+
         return (email_list.size > 0) ? email_list : null;
     }
 
@@ -624,18 +624,18 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         ClientSession session = claim_session();
         Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
         flags.add(MessageFlag.DELETED);
-        
+
         Gee.List<Command> cmds = new Gee.ArrayList<Command>();
-        
+
         // Build STORE command for all MessageSets, see if all are UIDs so we can use UID EXPUNGE
         bool all_uid = true;
         foreach (MessageSet msg_set in msg_sets) {
             if (!msg_set.is_uid)
                 all_uid = false;
-            
+
             cmds.add(new StoreCommand(msg_set, flags, StoreCommand.Option.ADD_FLAGS));
         }
-        
+
         // TODO: Only use old-school EXPUNGE when closing folder (or rely on CLOSE to do that work
         // for us).  See:
         // http://redmine.yorba.org/issues/7532
@@ -649,32 +649,32 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         } else {
             cmds.add(new ExpungeCommand());
         }
-        
+
         yield exec_commands_async(cmds, null, null, cancellable);
     }
-    
+
     public async void mark_email_async(Gee.List<MessageSet> msg_sets, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove, Cancellable? cancellable) throws Error {
         Gee.List<MessageFlag> msg_flags_add = new Gee.ArrayList<MessageFlag>();
         Gee.List<MessageFlag> msg_flags_remove = new Gee.ArrayList<MessageFlag>();
-        MessageFlag.from_email_flags(flags_to_add, flags_to_remove, out msg_flags_add, 
+        MessageFlag.from_email_flags(flags_to_add, flags_to_remove, out msg_flags_add,
             out msg_flags_remove);
-        
+
         if (msg_flags_add.size == 0 && msg_flags_remove.size == 0)
             return;
-        
+
         Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
         foreach (MessageSet msg_set in msg_sets) {
             if (msg_flags_add.size > 0)
                 cmds.add(new StoreCommand(msg_set, msg_flags_add, StoreCommand.Option.ADD_FLAGS));
-            
+
             if (msg_flags_remove.size > 0)
                 cmds.add(new StoreCommand(msg_set, msg_flags_remove, StoreCommand.Option.REMOVE_FLAGS));
         }
-        
+
         yield exec_commands_async(cmds, null, null, cancellable);
     }
-    
+
     // Returns a mapping of the source UID to the destination UID.  If the MessageSet is not for
     // UIDs, then null is returned.  If the server doesn't support COPYUID, null is returned.
     public async Gee.Map<UID, UID>? copy_email_async(MessageSet msg_set, FolderPath destination,
@@ -686,10 +686,10 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         Gee.Map<Command, StatusResponse>? responses = yield exec_commands_async(
             Geary.iterate<Command>(cmd).to_array_list(), null, null, cancellable);
-        
+
         if (!responses.has_key(cmd))
             return null;
-        
+
         StatusResponse response = responses.get(cmd);
         if (response.response_code != null && msg_set.is_uid) {
             Gee.List<UID>? src_uids = null;
@@ -699,30 +699,30 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             } catch (ImapError ierr) {
                 debug("Unable to retrieve COPYUID UIDs: %s", ierr.message);
             }
-            
+
             if (!Collection.is_empty(src_uids) && !Collection.is_empty(dst_uids)) {
                 Gee.Map<UID, UID> copyuids = new Gee.HashMap<UID, UID>();
                 int ctr = 0;
                 for (;;) {
                     UID? src_uid = (ctr < src_uids.size) ? src_uids[ctr] : null;
                     UID? dst_uid = (ctr < dst_uids.size) ? dst_uids[ctr] : null;
-                    
+
                     if (src_uid != null && dst_uid != null)
                         copyuids.set(src_uid, dst_uid);
                     else
                         break;
-                    
+
                     ctr++;
                 }
-                
+
                 if (copyuids.size > 0)
                     return copyuids;
             }
         }
-        
+
         return null;
     }
-    
+
     public async Gee.SortedSet<Imap.UID>? search_async(SearchCriteria criteria, Cancellable? cancellable)
         throws Error {
         // always perform a UID SEARCH
@@ -746,7 +746,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         Gee.List<FetchDataSpecifier> data_types_list, out FetchBodyDataSpecifier? header_specifier) {
         // pack all the needed headers into a single FetchBodyDataType
         string[] field_names = new string[0];
-        
+
         // The assumption here is that because ENVELOPE is such a common fetch command, the
         // server will have optimizations for it, whereas if we called for each header in the
         // envelope separately, the server has to chunk harder parsing the RFC822 header ... have
@@ -755,45 +755,45 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         if (fields.is_all_set(Geary.Email.Field.ENVELOPE)) {
             data_types_list.add(FetchDataSpecifier.ENVELOPE);
             field_names += "References";
-            
+
             // remove those flags and process any remaining
             fields = fields.clear(Geary.Email.Field.ENVELOPE);
         }
-        
+
         foreach (Geary.Email.Field field in Geary.Email.Field.all()) {
             switch (fields & field) {
                 case Geary.Email.Field.DATE:
                     field_names += "Date";
                 break;
-                
+
                 case Geary.Email.Field.ORIGINATORS:
                     field_names += "From";
                     field_names += "Sender";
                     field_names += "Reply-To";
                 break;
-                
+
                 case Geary.Email.Field.RECEIVERS:
                     field_names += "To";
                     field_names += "Cc";
                     field_names += "Bcc";
                 break;
-                
+
                 case Geary.Email.Field.REFERENCES:
                     field_names += "References";
                     field_names += "Message-ID";
                     field_names += "In-Reply-To";
                 break;
-                
+
                 case Geary.Email.Field.SUBJECT:
                     field_names += "Subject";
                 break;
-                
+
                 case Geary.Email.Field.HEADER:
                     // TODO: If the entire header is being pulled, then no need to pull down partial
                     // headers; simply get them all and decode what is needed directly
                     data_types_list.add(FetchDataSpecifier.RFC822_HEADER);
                 break;
-                
+
                 case Geary.Email.Field.NONE:
                 case Geary.Email.Field.BODY:
                 case Geary.Email.Field.PROPERTIES:
@@ -801,12 +801,12 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 case Geary.Email.Field.PREVIEW:
                     // not set or fetched separately
                 break;
-                
+
                 default:
                     assert_not_reached();
             }
         }
-        
+
         // convert field names into single FetchBodyDataType object
         if (field_names.length > 0) {
             header_specifier = new FetchBodyDataSpecifier.peek(
@@ -817,7 +817,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             header_specifier = null;
         }
     }
-    
+
     private static Geary.Email fetched_data_to_email(string folder_name, UID uid,
         FetchedData fetched_data, Geary.Email.Field required_fields,
         FetchBodyDataSpecifier? header_specifier, FetchBodyDataSpecifier? body_specifier,
@@ -826,22 +826,22 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         // database) is unknown at this time; this means ImapDB *must* create a new EmailIdentifier
         // for this email after create/merge is completed
         Geary.Email email = new Geary.Email(new ImapDB.EmailIdentifier.no_message_id(uid));
-        
+
         // accumulate these to submit Imap.EmailProperties all at once
         InternalDate? internaldate = null;
         RFC822.Size? rfc822_size = null;
-        
+
         // accumulate these to submit References all at once
         RFC822.MessageID? message_id = null;
         RFC822.MessageIDList? in_reply_to = null;
         RFC822.MessageIDList? references = null;
-        
+
         // loop through all available FetchDataTypes and gather converted data
         foreach (FetchDataSpecifier data_type in fetched_data.data_map.keys) {
             MessageData? data = fetched_data.data_map.get(data_type);
             if (data == null)
                 continue;
-            
+
             switch (data_type) {
                 case FetchDataSpecifier.ENVELOPE:
                     Envelope envelope = (Envelope) data;
@@ -859,37 +859,37 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     message_id = envelope.message_id;
                     in_reply_to = envelope.in_reply_to;
                 break;
-                
+
                 case FetchDataSpecifier.RFC822_HEADER:
                     email.set_message_header((RFC822.Header) data);
                 break;
-                
+
                 case FetchDataSpecifier.RFC822_TEXT:
                     email.set_message_body((RFC822.Text) data);
                 break;
-                
+
                 case FetchDataSpecifier.RFC822_SIZE:
                     rfc822_size = (RFC822.Size) data;
                 break;
-                
+
                 case FetchDataSpecifier.FLAGS:
                     email.set_flags(new Imap.EmailFlags((MessageFlags) data));
                 break;
-                
+
                 case FetchDataSpecifier.INTERNALDATE:
                     internaldate = (InternalDate) data;
                 break;
-                
+
                 default:
                     // everything else dropped on the floor (not applicable to Geary.Email)
                 break;
             }
         }
-        
+
         // Only set PROPERTIES if all have been found
         if (internaldate != null && rfc822_size != null)
             email.set_email_properties(new Geary.Imap.EmailProperties(internaldate, rfc822_size));
-        
+
         // if the header was requested, convert its fields now
         bool has_header_specifier = fetched_data.body_data_map.has_key(header_specifier);
         if (header_specifier != null && !has_header_specifier) {
@@ -944,20 +944,20 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 string? value = headers.get_header("To");
                 if (!String.is_empty(value))
                     to = new RFC822.MailboxAddresses.from_rfc822_string(value);
-                
+
                 RFC822.MailboxAddresses? cc = null;
                 value = headers.get_header("Cc");
                 if (!String.is_empty(value))
                     cc = new RFC822.MailboxAddresses.from_rfc822_string(value);
-                
+
                 RFC822.MailboxAddresses? bcc = null;
                 value = headers.get_header("Bcc");
                 if (!String.is_empty(value))
                     bcc = new RFC822.MailboxAddresses.from_rfc822_string(value);
-                
+
                 email.set_receivers(to, cc, bcc);
             }
-            
+
             // REFERENCES
             // (Note that it's possible the request used an IMAP ENVELOPE, in which case only the
             // References header will be present if REFERENCES were required, which is why
@@ -967,19 +967,19 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 if (!String.is_empty(value))
                     message_id = new RFC822.MessageID(value);
             }
-            
+
             if (in_reply_to == null) {
                 string? value = headers.get_header("In-Reply-To");
                 if (!String.is_empty(value))
                     in_reply_to = new RFC822.MessageIDList.from_rfc822_string(value);
             }
-            
+
             if (references == null) {
                 string? value = headers.get_header("References");
                 if (!String.is_empty(value))
                     references = new RFC822.MessageIDList.from_rfc822_string(value);
             }
-            
+
             // SUBJECT
             // Unlike DATE, allow for empty subjects
             if (required_but_not_set(Geary.Email.Field.SUBJECT, required_fields, email)) {
@@ -990,7 +990,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     email.set_message_subject(null);
             }
         }
-        
+
         // It's possible for all these fields to be null even though they were requested from
         // the server, so use requested fields for determination
         if (required_but_not_set(Geary.Email.Field.REFERENCES, required_fields, email))
@@ -1086,10 +1086,10 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         if (response.status == Status.OK && response.response_code != null &&
             response.response_code.get_response_code_type().is_value("appenduid")) {
             UID new_id = new UID.checked(response.response_code.get_as_string(2).as_int64());
-            
+
             return new ImapDB.EmailIdentifier.no_message_id(new_id);
         }
-        
+
         // We didn't get a UID back from the server.
         return null;
     }

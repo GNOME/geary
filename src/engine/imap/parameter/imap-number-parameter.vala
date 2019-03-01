@@ -15,27 +15,27 @@ public class Geary.Imap.NumberParameter : UnquotedStringParameter {
     public NumberParameter(int num) {
         base (num.to_string());
     }
-    
+
     public NumberParameter.uint(uint num) {
         base (num.to_string());
     }
-    
+
     public NumberParameter.int32(int32 num) {
         base (num.to_string());
     }
-    
+
     public NumberParameter.uint32(uint32 num) {
         base (num.to_string());
     }
-    
+
     public NumberParameter.int64(int64 num) {
         base (num.to_string());
     }
-    
+
     public NumberParameter.uint64(uint64 num) {
         base (num.to_string());
     }
-    
+
     /**
      * Creates a {@link NumberParameter} for a string representation of a number.
      *
@@ -45,7 +45,7 @@ public class Geary.Imap.NumberParameter : UnquotedStringParameter {
     public NumberParameter.from_ascii(string ascii) {
         base (ascii);
     }
-    
+
     /**
      * Returns true if the string is composed of numeric 7-bit characters.
      *
@@ -61,40 +61,40 @@ public class Geary.Imap.NumberParameter : UnquotedStringParameter {
      */
     public static bool is_ascii_numeric(string ascii, out bool is_negative) {
         is_negative = false;
-        
+
         string str = ascii.strip();
-        
+
         if (String.is_empty(str))
             return false;
-        
+
         bool has_nonzero = false;
         int index = 0;
         for (;;) {
             char ch = str[index++];
             if (ch == String.EOS)
                 break;
-            
+
             if (index == 1 && ch == '-') {
                 is_negative = true;
-                
+
                 continue;
             }
-            
+
             if (!ch.isdigit())
                 return false;
-            
+
             if (ch != '0')
                 has_nonzero = true;
         }
-        
+
         // watch for negative but no numeric portion
         if (is_negative && str.length == 1)
             return false;
-        
+
         // no such thing as negative zero
         if (is_negative && !has_nonzero)
             is_negative = false;
-        
+
         return true;
     }
 }

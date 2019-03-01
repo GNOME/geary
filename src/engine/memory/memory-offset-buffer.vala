@@ -13,22 +13,22 @@ public class Geary.Memory.OffsetBuffer : Geary.Memory.Buffer, Geary.Memory.Unown
      * {@inheritDoc}
      */
     public override size_t size { get { return buffer.size - offset; } }
-    
+
     /**
      * {@inheritDoc}
      */
     public override size_t allocated_size { get { return size; } }
-    
+
     private Geary.Memory.Buffer buffer;
     private size_t offset;
     private Bytes? bytes = null;
-    
+
     public OffsetBuffer(Geary.Memory.Buffer buffer, size_t offset) {
         assert(offset < buffer.size);
         this.buffer = buffer;
         this.offset = offset;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -37,7 +37,7 @@ public class Geary.Memory.OffsetBuffer : Geary.Memory.Buffer, Geary.Memory.Unown
             bytes = new Bytes.from_bytes(buffer.get_bytes(), offset, buffer.size - offset);
         return bytes;
     }
-    
+
     /**
      * {@inheritDoc}
      */

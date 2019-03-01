@@ -36,7 +36,7 @@ public Gee.ArrayList<G> array_list_wrap<G>(G[] a, owned Gee.EqualDataFunc<G>? eq
 public Gee.ArrayList<G> to_array_list<G>(Gee.Collection<G> c) {
     Gee.ArrayList<G> list = new Gee.ArrayList<G>();
     list.add_all(c);
-    
+
     return list;
 }
 
@@ -55,7 +55,7 @@ public void add_all_array<G>(Gee.Collection<G> c, G[] ar) {
 
 public G? get_first<G>(Gee.Collection<G> c) {
     Gee.Iterator<G> iter = c.iterator();
-    
+
     return iter.next() ? iter.get() : null;
 }
 
@@ -70,19 +70,19 @@ public G? find_first<G>(Gee.Collection<G> c, owned Gee.Predicate<G> pred) {
         if (pred(iter.get()))
             return iter.get();
     }
-    
+
     return null;
 }
 
 public bool are_sets_equal<G>(Gee.Set<G> a, Gee.Set<G> b) {
     if (a.size != b.size)
         return false;
-    
+
     foreach (G element in a) {
         if (!b.contains(element))
             return false;
     }
-    
+
     return true;
 }
 
@@ -97,7 +97,7 @@ public Gee.Collection<G> remove_if<G>(Gee.Collection<G> c, owned Gee.Predicate<G
         if (pred(iter.get()))
             iter.remove();
     }
-    
+
     return c;
 }
 
@@ -134,7 +134,7 @@ public Gee.MultiMap<V, K> reverse_multi_map<K, V>(Gee.MultiMap<K, V> map) {
         foreach (V value in map.get(key))
             reverse.set(value, key);
     }
-    
+
     return reverse;
 }
 
@@ -158,7 +158,7 @@ public inline uint int64_hash_func(int64? n) {
 public bool int64_equal_func(int64? a, int64? b) {
     int64 *bia = (int64 *) a;
     int64 *bib = (int64 *) b;
-    
+
     return (*bia) == (*bib);
 }
 
@@ -168,14 +168,14 @@ public bool int64_equal_func(int64? a, int64? b) {
 public uint hash_memory(void *ptr, size_t bytes) {
     if (ptr == null || bytes == 0)
         return 0;
-    
+
     uint8 *u8 = (uint8 *) ptr;
-    
+
     // initialize hash to first byte value and then rotate-XOR from there
     uint hash = *u8;
     for (int ctr = 1; ctr < bytes; ctr++)
         hash = (hash << 4) ^ (hash >> 28) ^ (*u8++);
-    
+
     return hash;
 }
 
@@ -189,19 +189,19 @@ public uint hash_memory(void *ptr, size_t bytes) {
  */
 public uint hash_memory_stream(void *ptr, uint8 terminator, ByteTransformer? cb) {
     uint8 *u8 = (uint8 *) ptr;
-    
+
     uint hash = 0;
     for (;;) {
         uint8 b = *u8++;
         if (b == terminator)
             break;
-        
+
         if (cb != null)
             b = cb(b);
-        
+
         hash = (hash << 4) ^ (hash >> 28) ^ b;
     }
-    
+
     return hash;
 }
 

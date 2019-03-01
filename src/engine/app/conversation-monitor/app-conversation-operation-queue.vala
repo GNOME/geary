@@ -56,7 +56,7 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
 
     public async void run_process_async() {
         is_processing = true;
-        
+
         for (;;) {
             ConversationOperation op;
             try {
@@ -67,7 +67,7 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
             }
             if (op is TerminateOperation)
                 break;
-            
+
             if (!progress_monitor.is_in_progress)
                 progress_monitor.notify_start();
 
@@ -80,7 +80,7 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
             if (mailbox.size == 0)
                 progress_monitor.notify_finish();
         }
-        
+
         is_processing = false;
         processing_done_spinlock.blind_notify();
     }

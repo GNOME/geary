@@ -29,14 +29,14 @@ public class Libnotify : Geary.BaseObject {
         this.avatars = avatars;
 
         monitor.add_required_fields(REQUIRED_FIELDS);
-        
+
         if (!Notify.is_initted()) {
             if (!Notify.init(GearyApplication.PRGNAME))
                 message("Failed to initialize libnotify.");
         }
-        
+
         init_sound();
-        
+
         // This will return null if no notification server is present
         this.caps = Notify.get_server_caps();
 
@@ -47,7 +47,7 @@ public class Libnotify : Geary.BaseObject {
         if (sound_context == null)
             Canberra.Context.create(out sound_context);
     }
-    
+
     private void on_new_messages_arrived(Geary.Folder folder, int total, int added) {
         if (added == 1 && monitor.last_new_message_folder != null &&
             monitor.last_new_message != null) {
@@ -57,21 +57,21 @@ public class Libnotify : Geary.BaseObject {
             notify_new_mail(folder, added);
         }
     }
-    
+
     private void on_default_action(Notify.Notification notification, string action) {
         invoked(folder, email);
         GearyApplication.instance.activate();
     }
-    
+
     private void notify_new_mail(Geary.Folder folder, int added) {
         // don't pass email if invoked
         this.folder = null;
         email = null;
-        
+
         if (!GearyApplication.instance.config.show_notifications ||
             !monitor.should_notify_new_messages(folder))
             return;
-        
+
         string body = ngettext("%d new message", "%d new messages", added).printf(added);
         int total = monitor.get_new_message_count(folder);
         if (total > added) {
@@ -85,23 +85,23 @@ public class Libnotify : Geary.BaseObject {
     private async void notify_one_message_async(Geary.Folder folder, Geary.Email email,
         GLib.Cancellable? cancellable) throws GLib.Error {
         assert(email.fields.fulfills(REQUIRED_FIELDS));
-        
+
         // used if notification is invoked
         this.folder = folder;
         this.email = email;
-        
+
         if (!GearyApplication.instance.config.show_notifications ||
             !monitor.should_notify_new_messages(folder))
             return;
-        
+
         // possible to receive email with no originator
         Geary.RFC822.MailboxAddress? primary = email.get_primary_originator();
         if (primary == null) {
             notify_new_mail(folder, 1);
-            
+
             return;
         }
-        
+
         string body;
         int count = monitor.get_new_message_count(folder);
         if (count <= 1) {
@@ -126,14 +126,14 @@ public class Libnotify : Geary.BaseObject {
             } catch (Error err) {
                 debug("Unable to close current libnotify notification: %s", err.message);
             }
-            
+
             current_notification = null;
         }
-        
+
         current_notification = issue_notification("email.arrived", summary, body, icon, "message-new_email");
-        
+
     }
-    
+
     private Notify.Notification? issue_notification(string category, string summary,
         string body, Gdk.Pixbuf? icon, string? sound) {
         if (this.caps == null)
@@ -147,38 +147,38 @@ public class Libnotify : Geary.BaseObject {
         notification.set_hint_string("desktop-entry", "org.gnome.Geary");
         if (caps.find_custom("actions", GLib.strcmp) != null)
             notification.add_action("default", _("Open"), on_default_action);
-        
+
         notification.set_category(category);
         notification.set("summary", summary);
         notification.set("body", body);
-        
+
         if (icon != null)
             notification.set_image_from_pixbuf(icon);
-        
+
         if (sound != null) {
             if (caps.find("sound") != null)
                 notification.set_hint_string("sound-name", sound);
             else
                 play_sound(sound);
         }
-        
+
         try {
             notification.show();
         } catch (Error err) {
             message("Unable to show notification: %s", err.message);
         }
-        
+
         return notification;
     }
-    
+
     public static void play_sound(string sound) {
         if (!GearyApplication.instance.config.play_sounds)
             return;
-        
+
         init_sound();
         sound_context.play(0, Canberra.PROP_EVENT_ID, sound);
     }
-    
+
     public void set_error_notification(string summary, string body) {
         // Only one error at a time, guys.  (This means subsequent errors will
         // be dropped.  Since this is only used for one thing now, that's ok,
@@ -196,7 +196,7 @@ public class Libnotify : Geary.BaseObject {
             } catch (Error err) {
                 debug("Unable to close libnotify error notification: %s", err.message);
             }
-            
+
             error_notification = null;
         }
     }

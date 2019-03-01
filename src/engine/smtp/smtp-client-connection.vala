@@ -7,56 +7,56 @@
 public class Geary.Smtp.ClientConnection {
 
     public const uint DEFAULT_TIMEOUT_SEC = 20;
-    
+
     public Geary.Smtp.Capabilities? capabilities { get; private set; default = null; }
-    
+
     private Geary.Endpoint endpoint;
     private IOStream? cx = null;
     private SocketConnection? socket_cx = null;
     private DataInputStream? dins = null;
     private DataOutputStream douts = null;
-    
+
     public ClientConnection(Geary.Endpoint endpoint) {
         this.endpoint = endpoint;
     }
-    
+
     public bool is_connected() {
         return (cx != null);
     }
-    
+
     public async Greeting? connect_async(Cancellable? cancellable = null) throws Error {
         if (cx != null) {
             debug("Already connected to %s", to_string());
-            
+
             return null;
         }
-        
+
         cx = socket_cx = yield endpoint.connect_async(cancellable);
         set_data_streams(cx);
-        
+
         // read and deserialize the greeting
         Greeting greeting = new Greeting(yield recv_response_lines_async(cancellable));
         Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Greeting: %s", to_string(), greeting.to_string());
-        
+
         return greeting;
     }
-    
+
     public async bool disconnect_async(Cancellable? cancellable = null) throws Error {
         if (cx == null)
             return false;
-        
+
         Error? disconnect_error = null;
         try {
             yield cx.close_async(Priority.DEFAULT, cancellable);
         } catch (Error err) {
             disconnect_error = err;
         }
-        
+
         cx = null;
-        
+
         if (disconnect_error != null)
             throw disconnect_error;
-        
+
         return true;
     }
 
@@ -66,12 +66,12 @@ public class Geary.Smtp.ClientConnection {
     public async Response authenticate_async(Authenticator authenticator, Cancellable? cancellable = null)
         throws Error {
         check_connected();
-        
+
         Response response = yield transaction_async(authenticator.initiate(), cancellable);
-        
+
         Logging.debug(Logging.Flag.NETWORK, "[%s] Initiated SMTP %s authentication", to_string(),
             authenticator.to_string());
-        
+
         // Possible for initiate() Request to:
         // (a) immediately generate success (due to valid authentication being passed in Request);
         // (b) immediately fails;
@@ -84,16 +84,16 @@ public class Geary.Smtp.ClientConnection {
             Memory.Buffer? data = authenticator.challenge(step++, response);
             if (data == null || data.size == 0)
                 data = new Memory.StringBuffer(DataFormat.CANCEL_AUTHENTICATION);
-            
+
             Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP AUTH Challenge recvd", to_string());
-            
+
             yield Stream.write_all_async(douts, data, cancellable);
             douts.put_string(DataFormat.LINE_TERMINATOR);
             yield douts.flush_async(Priority.DEFAULT, cancellable);
-            
+
             response = yield recv_response_async(cancellable);
         }
-        
+
         return response;
     }
 
@@ -110,7 +110,7 @@ public class Geary.Smtp.ClientConnection {
     public async Response send_data_async(Memory.Buffer data, bool already_dotstuffed,
         Cancellable? cancellable = null) throws Error {
         check_connected();
-        
+
         // In the case of DATA, want to receive an intermediate response code, specifically 354
         Response response = yield transaction_async(new Request(Command.DATA), cancellable);
         if (!response.code.is_start_data())
@@ -123,18 +123,18 @@ public class Geary.Smtp.ClientConnection {
             // a proper line terminator for SMTP
             DataInputStream dins = new DataInputStream(data.get_input_stream());
             dins.set_newline_type(DataStreamNewlineType.ANY);
-            
+
             // Read each line and dot-stuff if necessary
             for (;;) {
                 size_t length;
                 string? line = yield dins.read_line_async(Priority.DEFAULT, cancellable, out length);
                 if (line == null)
                     break;
-                
+
                 // stuffing
                 if (line[0] == '.')
                     yield Stream.write_string_async(douts, ".", cancellable);
-                
+
                 yield Stream.write_string_async(douts, line, cancellable);
                 yield Stream.write_string_async(douts, DataFormat.LINE_TERMINATOR, cancellable);
             }
@@ -142,50 +142,50 @@ public class Geary.Smtp.ClientConnection {
             // ready to go, send and commit
             yield Stream.write_all_async(douts, data, cancellable);
         }
-        
+
         // terminate buffer and flush to server
         yield Stream.write_string_async(douts, DataFormat.DATA_TERMINATOR, cancellable);
         yield douts.flush_async(Priority.DEFAULT, cancellable);
-        
+
         return yield recv_response_async(cancellable);
     }
-    
+
     public async void send_request_async(Request request, Cancellable? cancellable = null) throws Error {
         check_connected();
-        
+
         Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Request: %s", to_string(), request.to_string());
-        
+
         douts.put_string(request.serialize());
         douts.put_string(DataFormat.LINE_TERMINATOR);
         yield douts.flush_async(Priority.DEFAULT, cancellable);
     }
-    
+
     private async Gee.List<ResponseLine> recv_response_lines_async(Cancellable? cancellable) throws Error {
         check_connected();
-        
+
         Gee.List<ResponseLine> lines = new Gee.ArrayList<ResponseLine>();
         for (;;) {
             ResponseLine line = ResponseLine.deserialize(yield read_line_async(cancellable));
             lines.add(line);
-            
+
             if (!line.continued)
                 break;
         }
-        
+
         // lines should never be empty; if it is, then somebody didn't throw an exception
         assert(lines.size > 0);
-        
+
         return lines;
     }
-    
+
     public async Response recv_response_async(Cancellable? cancellable = null) throws Error {
         Response response = new Response(yield recv_response_lines_async(cancellable));
-        
+
         Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Response: %s", to_string(), response.to_string());
-        
+
         return response;
     }
-    
+
     /**
      * Sends the appropriate HELO/EHLO command and returns the response of the one that worked.
      * Also saves the server's capabilities in the capabilities property (overwriting any that may
@@ -195,7 +195,7 @@ public class Geary.Smtp.ClientConnection {
         // get local address as FQDN to greet server ... note that this merely returns the DHCP address
         // for machines behind a NAT
         InetAddress local_addr = ((InetSocketAddress) socket_cx.get_local_address()).get_address();
-        
+
         // only attempt to produce a FQDN if not a local address and use the local address if
         // unavailable
         string? fqdn = null;
@@ -207,7 +207,7 @@ public class Geary.Smtp.ClientConnection {
                     local_addr.to_string(), err.message);
             }
         }
-        
+
         // try EHLO first, then fall back on HELO
         EhloRequest ehlo = !String.is_empty(fqdn) ? new EhloRequest(fqdn) : new EhloRequest.for_local_address(local_addr);
         Response response = yield transaction_async(ehlo, cancellable);
@@ -224,10 +224,10 @@ public class Geary.Smtp.ClientConnection {
                     response.to_string().strip());
             }
         }
-        
+
         return response;
     }
-    
+
     /**
      * Sends the appropriate hello command to the server (EHLO / HELO) and establishes whatever
      * additional connection features are available (STARTTLS, compression).  For general-purpose
@@ -277,25 +277,25 @@ public class Geary.Smtp.ClientConnection {
     public async Response transaction_async(Request request, Cancellable? cancellable = null)
         throws Error {
         yield send_request_async(request, cancellable);
-        
+
         return yield recv_response_async(cancellable);
     }
-    
+
     private async string read_line_async(Cancellable? cancellable) throws Error {
         size_t length;
         string? line = yield dins.read_line_async(Priority.DEFAULT, cancellable, out length);
-        
+
         if (String.is_empty(line))
             throw new IOError.CLOSED("End of stream detected on %s", to_string());
-        
+
         return line;
     }
-    
+
     private void check_connected() throws Error {
         if (cx == null)
             throw new SmtpError.NOT_CONNECTED("Not connected to %s", to_string());
     }
-    
+
     public string to_string() {
         return endpoint.to_string();
     }

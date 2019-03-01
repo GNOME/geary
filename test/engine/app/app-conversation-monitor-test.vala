@@ -356,11 +356,11 @@ class Geary.App.ConversationMonitorTest : TestCase {
             new Gee.HashMap<EmailIdentifier,EmailFlags>();
         flags_changed.set(e1.id, new EmailFlags.with(EmailFlags.DELETED));
         this.account.email_flags_changed(this.base_folder, flags_changed);
-        
+
         this.base_folder.expect_call("list_email_by_sparse_id_async");
         this.base_folder.expect_call("list_email_by_id_async");
 
-        wait_for_signal(monitor, "email-flags-changed"); 
+        wait_for_signal(monitor, "email-flags-changed");
 
         assert_int(0, monitor.size, "Conversation count should now be zero after being marked deleted.");
     }
@@ -427,7 +427,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             foreach (Email base_email in base_folder_email) {
                 base_email_ids.add(base_email.message_id);
             }
-                
+
             int base_i = 0;
             bool has_related = (
                 base_folder_email.length == related_paths.length

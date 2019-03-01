@@ -15,17 +15,17 @@ public class Geary.Mime.ContentParameters : BaseObject {
             return params.size;
         }
     }
-    
+
     public Gee.Collection<string> attributes {
         owned get {
             return params.keys;
         }
     }
-    
+
     // See get_parameters() for why the keys but not the values are stored case-insensitive
     private Gee.HashMap<string, string> params = new Gee.HashMap<string, string>(
         Ascii.stri_hash, Ascii.stri_equal);
-    
+
     /**
      * Create a mapping of content parameters.
      *
@@ -73,7 +73,7 @@ public class Geary.Mime.ContentParameters : BaseObject {
     public Gee.Map<string, string> get_parameters() {
         return params.read_only_view;
     }
-    
+
     /**
      * Returns the parameter value for the attribute name.
      *
@@ -82,7 +82,7 @@ public class Geary.Mime.ContentParameters : BaseObject {
     public string? get_value(string attribute) {
         return params.get(attribute);
     }
-    
+
     /**
      * Returns true if the attribute has the supplied value (case-insensitive comparison).
      *
@@ -90,10 +90,10 @@ public class Geary.Mime.ContentParameters : BaseObject {
      */
     public bool has_value_ci(string attribute, string value) {
         string? stored = params.get(attribute);
-        
+
         return (stored != null) ? Ascii.stri_equal(stored, value) : false;
     }
-    
+
     /**
      * Returns true if the attribute has the supplied value (case-sensitive comparison).
      *
@@ -101,7 +101,7 @@ public class Geary.Mime.ContentParameters : BaseObject {
      */
     public bool has_value_cs(string attribute, string value) {
         string? stored = params.get(attribute);
-        
+
         return (stored != null) ? Ascii.str_equal(stored, value) : false;
     }
 

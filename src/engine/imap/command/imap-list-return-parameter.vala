@@ -20,7 +20,7 @@ public class Geary.Imap.ListReturnParameter : ListParameter {
      * See [[https://tools.ietf.org/html/rfc6154]]
      */
     public const string SPECIAL_USE = "special-use";
-    
+
     /**
      * Creates an empty {@link ListReturnParameter}.
      *
@@ -28,7 +28,7 @@ public class Geary.Imap.ListReturnParameter : ListParameter {
      */
     public ListReturnParameter() {
     }
-    
+
     public void add_special_use() {
         add(StringParameter.get_best_for_unchecked(SPECIAL_USE));
     }

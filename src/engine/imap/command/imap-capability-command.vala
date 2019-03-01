@@ -12,7 +12,7 @@
 
 public class Geary.Imap.CapabilityCommand : Command {
     public const string NAME = "capability";
-    
+
     public CapabilityCommand() {
         base (NAME);
     }

@@ -405,29 +405,29 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     SELECT id, internaldate, fields
                     FROM MessageTable
                 """);
-                
+
                 Gee.HashMap<int64?, Geary.Email.Field> invalid_ids = new Gee.HashMap<
                     int64?, Geary.Email.Field>();
-                
+
                 Db.Result results = stmt.exec();
                 while (!results.finished) {
                     string? internaldate = results.string_at(1);
-                    
+
                     try {
                         if (!String.is_empty(internaldate))
                             Imap.InternalDate.decode(internaldate);
                     } catch (Error err) {
                         int64 invalid_id = results.rowid_at(0);
-                        
+
                         debug("Invalid INTERNALDATE \"%s\" found at row %s in %s: %s",
                             internaldate != null ? internaldate : "(null)",
                             invalid_id.to_string(), this.path, err.message);
                         invalid_ids.set(invalid_id, (Geary.Email.Field) results.int_at(2));
                     }
-                    
+
                     results.next();
                 }
-                
+
                 // used prepared statement for iterating over list
                 stmt = cx.prepare("""
                     UPDATE MessageTable
@@ -437,13 +437,13 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 stmt.bind_null(1);
                 stmt.bind_null(2);
                 stmt.bind_null(3);
-                
+
                 foreach (int64 invalid_id in invalid_ids.keys) {
                     stmt.bind_int(0, invalid_ids.get(invalid_id).clear(Geary.Email.Field.PROPERTIES));
                     stmt.bind_rowid(4, invalid_id);
-                    
+
                     stmt.exec();
-                    
+
                     // reuse statment, overwrite invalid_id, fields only
                     stmt.reset(Db.ResetScope.SAVE_BINDINGS);
                 }
@@ -461,15 +461,15 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     string email = result.string_at(1);
                     if (!RFC822.MailboxAddress.is_valid_address(email)) {
                         int64 id = result.rowid_at(0);
-                        
+
                         Db.Statement stmt = cx.prepare("DELETE FROM ContactTable WHERE id = ?");
                         stmt.bind_rowid(0, id);
                         stmt.exec();
                     }
-                    
+
                     result.next();
                 }
-                
+
                 return Db.TransactionOutcome.COMMIT;
             }, cancellable);
     }
@@ -485,7 +485,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     """);
                 stmt.bind_int(0, Geary.Email.REQUIRED_FOR_MESSAGE);
                 stmt.bind_int(1, Geary.Email.REQUIRED_FOR_MESSAGE);
-                
+
                 Db.Result results = stmt.exec();
                 if (results.finished)
                     return Db.TransactionOutcome.ROLLBACK;
@@ -529,7 +529,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         );
                     } catch (Error err) {
                         debug("Error saving attachments: %s", err.message);
-                        
+
                         // fallthrough
                     }
                 } while (results.next());

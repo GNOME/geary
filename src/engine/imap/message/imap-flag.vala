@@ -28,11 +28,11 @@ public abstract class Geary.Imap.Flag : BaseObject, Gee.Hashable<Geary.Imap.Flag
     public bool is_system() {
         return value[0] == '\\';
     }
-    
+
     public bool equals_string(string value) {
         return Ascii.stri_equal(this.value, value);
     }
-    
+
     public bool equal_to(Geary.Imap.Flag flag) {
         return (flag == this) ? true : flag.equals_string(value);
     }
@@ -47,7 +47,7 @@ public abstract class Geary.Imap.Flag : BaseObject, Gee.Hashable<Geary.Imap.Flag
     public uint hash() {
         return Ascii.stri_hash(value);
     }
-    
+
     public string to_string() {
         return value;
     }

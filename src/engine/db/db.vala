@@ -108,7 +108,7 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
         case Sqlite.ROW:
             return result;
     }
-    
+
     string location = !String.is_empty(method)
         ? "(%s %s) ".printf(method, ctx.get_database().path)
         : "(%s) ".printf(ctx.get_database().path);
@@ -120,14 +120,14 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
         sql = " (%s)".printf(raw);
     else
         sql = "";
-    
+
     string msg = "%s[err=%d]%s%s".printf(location, result, errmsg, sql);
-    
+
     switch (result) {
         case Sqlite.BUSY:
         case Sqlite.LOCKED:
             throw new DatabaseError.BUSY(msg);
-        
+
         case Sqlite.IOERR:
         case Sqlite.PERM:
         case Sqlite.READONLY:
@@ -135,32 +135,32 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
         case Sqlite.NOLFS:
         case Sqlite.AUTH:
             throw new DatabaseError.ACCESS(msg);
-        
+
         case Sqlite.CORRUPT:
         case Sqlite.FORMAT:
         case Sqlite.NOTADB:
             throw new DatabaseError.CORRUPT(msg);
-        
+
         case Sqlite.NOMEM:
             throw new DatabaseError.MEMORY(msg);
-        
+
         case Sqlite.ABORT:
             throw new DatabaseError.ABORT(msg);
-        
+
         case Sqlite.INTERRUPT:
             throw new DatabaseError.INTERRUPT(msg);
-        
+
         case Sqlite.FULL:
         case Sqlite.EMPTY:
         case Sqlite.TOOBIG:
         case Sqlite.CONSTRAINT:
         case Sqlite.RANGE:
             throw new DatabaseError.LIMITS(msg);
-        
+
         case Sqlite.SCHEMA:
         case Sqlite.MISMATCH:
             throw new DatabaseError.TYPESPEC(msg);
-        
+
         case Sqlite.ERROR:
         case Sqlite.INTERNAL:
         case Sqlite.MISUSE:

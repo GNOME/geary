@@ -1,7 +1,7 @@
 /* Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -19,23 +19,23 @@ public class Geary.Imap.MailboxInformation : BaseObject {
      * Name of the mailbox.
      */
     public MailboxSpecifier mailbox { get; private set; }
-    
+
     /**
      * The (optional) delimiter specified by the server.
      */
     public string? delim { get; private set; }
-    
+
     /**
      * Folder attributes returned by the server.
      */
     public MailboxAttributes attrs { get; private set; }
-    
+
     public MailboxInformation(MailboxSpecifier mailbox, string? delim, MailboxAttributes attrs) {
         this.mailbox = mailbox;
         this.delim = delim;
         this.attrs = attrs;
     }
-    
+
     /**
      * Decodes {@link ServerData} into a MailboxInformation representation.
      *
@@ -52,7 +52,7 @@ public class Geary.Imap.MailboxInformation : BaseObject {
         StringParameter cmd = server_data.get_as_string(1);
         if (!cmd.equals_ci(ListCommand.NAME) && !cmd.equals_ci(ListCommand.XLIST_NAME))
             throw new ImapError.PARSE_ERROR("Not LIST or XLIST data: %s", server_data.to_string());
-        
+
         // Build list of attributes
         ListParameter attrs = server_data.get_as_list(2);
         Gee.Collection<MailboxAttribute> attrlist = new Gee.ArrayList<MailboxAttribute>();
@@ -61,13 +61,13 @@ public class Geary.Imap.MailboxInformation : BaseObject {
             if (stringp == null) {
                 debug("Bad list attribute \"%s\": Attribute not a string value",
                     server_data.to_string());
-                
+
                 continue;
             }
-            
+
             attrlist.add(new MailboxAttribute(stringp.ascii));
         }
-        
+
         // decode everything
         MailboxAttributes attributes = new MailboxAttributes(attrlist);
         StringParameter? delim = server_data.get_as_nullable_string(3);

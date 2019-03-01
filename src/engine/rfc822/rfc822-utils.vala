@@ -54,10 +54,10 @@ public GMime.StreamMem create_stream_mem(Memory.Buffer buffer) {
         // the best of all possible worlds, assuming the Memory.Buffer is not destroyed first
         GMime.StreamMem stream = new GMime.StreamMem();
         stream.set_byte_array(unowned_bytes_array_buffer.to_unowned_byte_array());
-        
+
         return stream;
     }
-    
+
     Memory.UnownedBytesBuffer? unowned_bytes_buffer = buffer as Memory.UnownedBytesBuffer;
     if (unowned_bytes_buffer != null) {
         // StreamMem.with_buffer does do a buffer copy (there's not set_buffer() call like
@@ -65,7 +65,7 @@ public GMime.StreamMem create_stream_mem(Memory.Buffer buffer) {
         // Memory.Buffer
         return new GMime.StreamMem.with_buffer(unowned_bytes_buffer.to_unowned_uint8_array());
     }
-    
+
     // do plain-old buffer copy
     return new GMime.StreamMem.with_buffer(buffer.get_uint8_array());
 }
@@ -102,7 +102,7 @@ public Geary.RFC822.MailboxAddresses create_to_addresses_for_reply(Geary.Email e
     Gee.List< Geary.RFC822.MailboxAddress>? sender_addresses = null) {
     Gee.List<Geary.RFC822.MailboxAddress> new_to =
         new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
-    
+
     // If we're replying to something we sent, send it to the same people we originally did.
     // Otherwise, we'll send to the reply-to address or the from address.
     if (email.to != null && email_is_from_sender(email, sender_addresses))
@@ -111,35 +111,35 @@ public Geary.RFC822.MailboxAddresses create_to_addresses_for_reply(Geary.Email e
         new_to.add_all(email.reply_to.get_all());
     else if (email.from != null)
         new_to.add_all(email.from.get_all());
-    
+
     // Exclude the current sender.  No need to receive the mail they're sending.
     if (sender_addresses != null) {
         foreach (RFC822.MailboxAddress address in sender_addresses)
             remove_address(new_to, address);
     }
-    
+
     return new Geary.RFC822.MailboxAddresses(new_to);
 }
 
 public Geary.RFC822.MailboxAddresses create_cc_addresses_for_reply_all(Geary.Email email,
     Gee.List<Geary.RFC822.MailboxAddress>? sender_addresses = null) {
     Gee.List<Geary.RFC822.MailboxAddress> new_cc = new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
-    
+
     // If we're replying to something we received, also add other recipients.  Don't do this for
     // emails we sent, since everyone we sent it to is already covered in
     // create_to_addresses_for_reply().
     if (email.to != null && !email_is_from_sender(email, sender_addresses))
         new_cc.add_all(email.to.get_all());
-    
+
     if (email.cc != null)
         new_cc.add_all(email.cc.get_all());
-    
+
     // Again, exclude the current sender.
     if (sender_addresses != null) {
         foreach (RFC822.MailboxAddress address in sender_addresses)
             remove_address(new_cc, address, true);
     }
-    
+
     return new Geary.RFC822.MailboxAddresses(new_cc);
 }
 
@@ -156,7 +156,7 @@ public Geary.RFC822.MailboxAddresses merge_addresses(Geary.RFC822.MailboxAddress
     } else if (second != null) {
         result.add_all(second.get_all());
     }
-    
+
     return new Geary.RFC822.MailboxAddresses(result);
 }
 
@@ -175,11 +175,11 @@ public Geary.RFC822.MailboxAddresses remove_addresses(Geary.RFC822.MailboxAddres
 public string reply_references(Geary.Email source) {
     // generate list for References
     Gee.ArrayList<RFC822.MessageID> list = new Gee.ArrayList<RFC822.MessageID>();
-    
+
     // 1. Start with the source's References list
     if (source.references != null && source.references.list.size > 0)
         list.add_all(source.references.list);
-    
+
     // 2. If there are In-Reply-To Message-IDs and they're not in the References list, append them
     if (source.in_reply_to != null) {
         foreach (RFC822.MessageID reply_id in source.in_reply_to.list) {
@@ -187,29 +187,29 @@ public string reply_references(Geary.Email source) {
                 list.add(reply_id);
         }
     }
-    
+
     // 3. Append the source's Message-ID, if available.
     if (source.message_id != null)
         list.add(source.message_id);
-    
+
     string[] strings = new string[list.size];
     for(int i = 0; i < list.size; ++i)
         strings[i] = list[i].value;
-    
+
     return (list.size > 0) ? string.joinv(" ", strings) : "";
 }
 
 public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses, TextFormat format) {
     if (addresses == null)
         return "";
-    
+
     switch (format) {
         case TextFormat.HTML:
             return HTML.escape_markup(addresses.to_string());
-        
+
         case TextFormat.PLAIN:
             return addresses.to_string();
-        
+
         default:
             assert_not_reached();
     }
@@ -221,7 +221,7 @@ public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses
  *
  * If there's no message body in the supplied email or quote text, this
  * function will return the empty string.
- * 
+ *
  * If html_format is true, the message will be quoted in HTML format.
  * Otherwise it will be in plain text.
  */
@@ -349,7 +349,7 @@ public bool comp_char_arr_slice(char[] array, uint start, string comp) {
         if (array[start + i] != comp[i])
             return false;
     }
-    
+
     return true;
 }
 

@@ -17,7 +17,7 @@ public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.
      * Minimum valid value for a {@link UIDValidity}.
      */
     public const int64 MIN = 1;
-    
+
     /**
      * Maximum valid value for a {@link UIDValidity}.
      *
@@ -31,7 +31,7 @@ public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.
      * Invalid (placeholder) {@link UIDValidity} value.
      */
     public const int64 INVALID = -1;
-    
+
     /**
      * Creates a new {@link UIDValidity} without checking for valid values.
      *
@@ -40,7 +40,7 @@ public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.
     public UIDValidity(int64 value) {
         base (value);
     }
-    
+
     /**
      * Creates a new {@link UIDValidity}, throwing {@link ImapError.INVALID} if the supplied value
      * is invalid.
@@ -50,17 +50,17 @@ public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.
     public UIDValidity.checked(int64 value) throws ImapError {
         if (!is_value_valid(value))
             throw new ImapError.INVALID("Invalid UIDVALIDITY %s", value.to_string());
-        
+
         base (value);
     }
-    
+
     /**
      * @see is_value_valid
      */
     public bool is_valid() {
         return is_value_valid(value);
     }
-    
+
     /**
      * Returns true if the supplied value is between {@link MIN} and {@link MAX}, inclusive.
      */

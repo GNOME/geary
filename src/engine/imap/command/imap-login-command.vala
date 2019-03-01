@@ -10,11 +10,11 @@
 
 public class Geary.Imap.LoginCommand : Command {
     public const string NAME = "login";
-    
+
     public LoginCommand(string user, string pass) {
         base (NAME, { user, pass });
     }
-    
+
     public override string to_string() {
         return "%s %s <user> <pass>".printf(tag.to_string(), name);
     }

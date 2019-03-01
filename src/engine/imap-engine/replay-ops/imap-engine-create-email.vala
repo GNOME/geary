@@ -6,19 +6,19 @@
 
 private class Geary.ImapEngine.CreateEmail : Geary.ImapEngine.SendReplayOperation {
     public Geary.EmailIdentifier? created_id { get; private set; default = null; }
-    
+
     private MinimalFolder engine;
     private RFC822.Message? rfc822;
     private Geary.EmailFlags? flags;
     private DateTime? date_received;
     private Cancellable? cancellable;
-    
+
     public CreateEmail(MinimalFolder engine, RFC822.Message rfc822, Geary.EmailFlags? flags,
         DateTime? date_received, Cancellable? cancellable) {
         base.only_remote("CreateEmail", OnError.RETRY);
-        
+
         this.engine = engine;
-        
+
         this.rfc822 = rfc822;
         this.flags = flags;
         this.date_received = date_received;

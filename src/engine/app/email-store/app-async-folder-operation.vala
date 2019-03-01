@@ -6,7 +6,7 @@
 
 private abstract class Geary.App.AsyncFolderOperation : BaseObject {
     public abstract Type folder_type { get; }
-    
+
     public abstract async Gee.Collection<Geary.EmailIdentifier> execute_async(
         Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids,
         Cancellable? cancellable) throws Error;

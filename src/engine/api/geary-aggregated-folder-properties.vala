@@ -17,7 +17,7 @@ private class Geary.AggregatedFolderProperties : Geary.FolderProperties {
     // Map of child FolderProperties to their bindings.
     private Gee.Map<FolderProperties, Gee.List<Binding>> child_bindings
         = new Gee.HashMap<FolderProperties, Gee.List<Binding>>();
-    
+
     /**
      * Creates an aggregate FolderProperties.
      */
@@ -25,7 +25,7 @@ private class Geary.AggregatedFolderProperties : Geary.FolderProperties {
         // Set defaults.
         base(0, 0, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN, is_local_only, is_virtual, false);
     }
-    
+
     /**
      * Adds a child FolderProperties.  The child's property values will overwrite
      * this class's property values.
@@ -36,7 +36,7 @@ private class Geary.AggregatedFolderProperties : Geary.FolderProperties {
         assert(bindings != null);
         child_bindings.set(child, bindings);
     }
-    
+
     /**
      * Removes a child FolderProperties.
      */
@@ -44,10 +44,10 @@ private class Geary.AggregatedFolderProperties : Geary.FolderProperties {
         Gee.List<Binding> bindings;
         if (child_bindings.unset(child, out bindings)) {
             Geary.ObjectUtils.unmirror_properties(bindings);
-            
+
             return true;
         }
-        
+
         return false;
     }
 }

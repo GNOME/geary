@@ -24,7 +24,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      * The unquoted, decoded string as 7-bit ASCII.
      */
     public string ascii { get; private set; }
-    
+
     /**
      * Returns {@link ascii} or null if value is empty (zero-length).
      */
@@ -33,11 +33,11 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
             return String.is_empty(ascii) ? null : ascii;
         }
     }
-    
+
     protected StringParameter(string ascii) {
         this.ascii = ascii;
     }
-    
+
     /**
      * Returns a {@link StringParameter} appropriate for the contents of value.
      *
@@ -54,22 +54,22 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     public static StringParameter get_best_for(string value) throws ImapError {
         if (NumberParameter.is_ascii_numeric(value, null))
             return new NumberParameter.from_ascii(value);
-        
+
         switch (DataFormat.is_quoting_required(value)) {
             case DataFormat.Quoting.REQUIRED:
                 return new QuotedStringParameter(value);
-            
+
             case DataFormat.Quoting.OPTIONAL:
                 return new UnquotedStringParameter(value);
-            
+
             case DataFormat.Quoting.UNALLOWED:
                 throw new ImapError.NOT_SUPPORTED("String must be a literal parameter");
-            
+
             default:
                 assert_not_reached();
         }
     }
-    
+
     /**
      * Like {@link get_best_for} but the library will panic if the value cannot be turned into
      * a {@link StringParameter}.
@@ -83,7 +83,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
             error("Unable to create StringParameter for \"%s\": %s", value, ierr.message);
         }
     }
-    
+
     /**
      * Like {@link get_best_for} but returns null if the value cannot be stored as a
      * {@link StringParameter}.
@@ -97,7 +97,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
             return null;
         }
     }
-    
+
     /**
      * Can be used by subclasses to properly serialize the string value according to quoting rules.
      *
@@ -117,54 +117,54 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
 
             case DataFormat.Quoting.UNALLOWED:
                 error("Unable to serialize literal data");
-            
+
             default:
                 assert_not_reached();
         }
     }
-    
+
     /**
      * Returns the string as a {@link Memory.Buffer}.
      */
     public Memory.Buffer as_buffer() {
         return new Memory.StringBuffer(ascii);
     }
-    
+
     /**
      * Returns true if the string is empty (zero-length).
      */
     public bool is_empty() {
         return String.is_empty(ascii);
     }
-    
+
     /**
      * Case-sensitive comparison.
      */
     public bool equals_cs(string value) {
         return Ascii.str_equal(ascii, value);
     }
-    
+
     /**
      * Case-insensitive comparison.
      */
     public bool equals_ci(string value) {
         return Ascii.stri_equal(ascii, value);
     }
-    
+
     /**
      * Returns the string lowercased.
      */
     public string as_lower() {
         return Ascii.strdown(ascii);
     }
-    
+
     /**
      * Returns the string uppercased.
      */
     public string as_upper() {
         return Ascii.strup(ascii);
     }
-    
+
     /**
      * Converts the {@link ascii} to a signed 32-bit integer, clamped between clamp_min and
      * clamp_max.
@@ -175,10 +175,10 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     public int32 as_int32(int32 clamp_min = int32.MIN, int32 clamp_max = int32.MAX) throws ImapError {
         if (!NumberParameter.is_ascii_numeric(ascii, null))
             throw new ImapError.INVALID("Cannot convert \"%s\" to int32: not numeric", ascii);
-        
+
         return (int32) int64.parse(ascii).clamp(clamp_min, clamp_max);
     }
-    
+
     /**
      * Converts the {@link ascii} to a signed 64-bit integer, clamped between clamp_min and
      * clamp_max.
@@ -189,10 +189,10 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     public int64 as_int64(int64 clamp_min = int64.MIN, int64 clamp_max = int64.MAX) throws ImapError {
         if (!NumberParameter.is_ascii_numeric(ascii, null))
             throw new ImapError.INVALID("Cannot convert \"%s\" to int64: not numeric", ascii);
-        
+
         return int64.parse(ascii).clamp(clamp_min, clamp_max);
     }
-    
+
     /**
      * Attempts to coerce a {@link StringParameter} into a {@link NumberParameter}.
      *
@@ -204,10 +204,10 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
         NumberParameter? numberp = this as NumberParameter;
         if (numberp != null)
             return numberp;
-        
+
         if (NumberParameter.is_ascii_numeric(ascii, null))
             return new NumberParameter.from_ascii(ascii);
-        
+
         return null;
     }
 }

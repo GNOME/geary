@@ -56,9 +56,9 @@ public class Geary.Nonblocking.Batch : BaseObject {
      * An invalid {@link BatchOperation} identifier.
      */
     public const int INVALID_ID = -1;
-    
+
     private const int START_ID = 1;
-    
+
     private class BatchContext : BaseObject {
         public int id;
         public Nonblocking.BatchOperation op;
@@ -66,77 +66,77 @@ public class Geary.Nonblocking.Batch : BaseObject {
         public bool completed = false;
         public Object? returned = null;
         public Error? threw = null;
-        
+
         public BatchContext(int id, Nonblocking.BatchOperation op) {
             this.id = id;
             this.op = op;
         }
-        
+
         public void schedule(Nonblocking.Batch owner, Cancellable? cancellable) {
             // hold a strong ref to the owner until the operation is completed
             this.owner = owner;
-            
+
             op.execute_async.begin(cancellable, on_op_completed);
         }
-        
+
         private void on_op_completed(Object? source, AsyncResult result) {
             completed = true;
-            
+
             try {
                 returned = op.execute_async.end(result);
             } catch (Error err) {
                 threw = err;
             }
-            
+
             owner.on_context_completed(this);
-            
+
             // drop the reference to the owner to prevent a reference loop
             owner = null;
         }
     }
-    
+
     /**
      * Returns the number of {@link BatchOperation}s added to the batch.
      */
     public int size {
         get { return contexts.size; }
     }
-    
+
     /**
      * Returns the first exception encountered after completing {@link execute_all_async}.
      */
     public Error? first_exception { get; private set; default = null; }
-    
+
     private Gee.HashMap<int, BatchContext> contexts = new Gee.HashMap<int, BatchContext>();
     private Nonblocking.Semaphore sem = new Nonblocking.Semaphore();
     private int next_result_id = START_ID;
     private bool locked = false;
     private int completed_ops = 0;
-    
+
     /**
      * Fired when a {@link BatchOperation} is added to the batch.
      */
     public signal void added(Nonblocking.BatchOperation op, int id);
-    
+
     /**
      * Fired when batch execution has started.
      */
     public signal void started(int count);
-    
+
     /**
      * Fired when a {@link BatchOperation} has completed.
      */
     public signal void operation_completed(Nonblocking.BatchOperation op, Object? returned,
         Error? threw);
-    
+
     /**
      * Fired when all {@link BatchOperation}s have completed.
      */
     public signal void completed(int count, Error? first_error);
-    
+
     public Batch() {
     }
-    
+
     /**
      * Adds a {@link BatchOperation} for later execution.
      *
@@ -151,18 +151,18 @@ public class Geary.Nonblocking.Batch : BaseObject {
     public int add(Nonblocking.BatchOperation op) {
         if (locked) {
             warning("NonblockingBatch already executed or executing");
-            
+
             return INVALID_ID;
         }
-        
+
         int id = next_result_id++;
         contexts.set(id, new BatchContext(id, op));
-        
+
         added(op, id);
-        
+
         return id;
     }
-    
+
     /**
      * Executes all the {@link BatchOperation}s added to the batch.
      *
@@ -180,42 +180,42 @@ public class Geary.Nonblocking.Batch : BaseObject {
     public async void execute_all_async(Cancellable? cancellable = null) throws Error {
         if (locked)
             throw new IOError.PENDING("NonblockingBatch already executed or executing");
-        
+
         locked = true;
-        
+
         // if empty, quietly exit (leaving the object locked; NonblockingBatch is a one-shot deal)
         if (contexts.size == 0)
             return;
-        
+
         // if already cancelled, not-so-quietly exit
         if (cancellable != null && cancellable.is_cancelled())
             throw new IOError.CANCELLED("NonblockingBatch cancelled before executing");
-        
+
         started(contexts.size);
-        
+
         // fire them off in order they were submitted; this may hide bugs, but it also makes other
         // bugs reproducible
         int count = 0;
         for (int id = START_ID; id < next_result_id; id++) {
             BatchContext? context = contexts.get(id);
             assert(context != null);
-            
+
             context.schedule(this, cancellable);
             count++;
         }
-        
+
         assert(count == contexts.size);
-        
+
         yield sem.wait_async(cancellable);
     }
-    
+
     /**
      * Returns a Set of identifiers for all added {@link BatchOperation}s.
      */
     public Gee.Set<int> get_ids() {
         return contexts.keys;
     }
-    
+
     /**
      * Returns the NonblockingBatchOperation for the supplied identifier.
      *
@@ -223,10 +223,10 @@ public class Geary.Nonblocking.Batch : BaseObject {
      */
     public Nonblocking.BatchOperation? get_operation(int id) {
         BatchContext? context = contexts.get(id);
-        
+
         return (context != null) ? context.op : null;
     }
-    
+
     /**
      * Returns the resulting Object from the operation for the supplied identifier.
      *
@@ -242,16 +242,16 @@ public class Geary.Nonblocking.Batch : BaseObject {
         BatchContext? context = contexts.get(id);
         if (context == null)
             return null;
-        
+
         if (!context.completed)
             throw new IOError.BUSY("NonblockingBatchOperation %d not completed", id);
-        
+
         if (context.threw != null)
             throw context.threw;
-        
+
         return context.returned;
     }
-    
+
     /**
      * If no results are examined via {@link get_result}, this method can be used to manually throw
      * the first seen Error from the operations.
@@ -260,20 +260,20 @@ public class Geary.Nonblocking.Batch : BaseObject {
         if (first_exception != null)
             throw first_exception;
     }
-    
+
     /**
      * Returns the Error message if an exception was encountered, null otherwise.
      */
     public string? get_first_exception_message() {
         return (first_exception != null) ? first_exception.message : null;
     }
-    
+
     private void on_context_completed(BatchContext context) {
         if (first_exception == null && context.threw != null)
             first_exception = context.threw;
-        
+
         operation_completed(context.op, context.returned, context.threw);
-        
+
         assert(completed_ops < contexts.size);
         if (++completed_ops == contexts.size) {
             try {
@@ -281,7 +281,7 @@ public class Geary.Nonblocking.Batch : BaseObject {
             } catch (Error err) {
                 debug("Unable to notify NonblockingBatch semaphore: %s", err.message);
             }
-            
+
             completed(completed_ops, first_exception);
         }
     }

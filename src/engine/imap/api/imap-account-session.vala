@@ -396,9 +396,9 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
             status_results,
             cancellable
         );
-        
+
         assert(responses.size == 1);
-        
+
         return Geary.Collection.get_first(responses.values);
     }
 

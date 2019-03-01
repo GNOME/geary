@@ -21,17 +21,17 @@ public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.Lock {
      * The number of tasks which have {@link acquire} the semaphore.
      */
     public int count { get; private set; default = 0; }
-    
+
     /**
      * Indicates that the {@link count} has changed due to either {@link acquire} or
      * {@link notify} being invoked.
      */
     public signal void count_changed(int count);
-    
+
     public CountingSemaphore(Cancellable? cancellable) {
         base (true, true, cancellable);
     }
-    
+
     /**
      * Called by a task to acquire (and, hence, lock) the semaphore.
      *
@@ -39,15 +39,15 @@ public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.Lock {
      */
     public int acquire() {
         count++;
-        
+
         // store on stack in case of reentrancy from signal handler; also note that Vala doesn't
         // deal well with properties, pre/post-inc, and assignment on same line
         int new_count = count;
         count_changed(new_count);
-        
+
         return new_count;
     }
-    
+
     /**
      * Called by a task which has previously {@link acquire}d the semaphore.
      *
@@ -60,18 +60,18 @@ public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.Lock {
     public override void notify() throws Error {
         if (count == 0)
             throw new NonblockingError.INVALID("notify() on a zeroed CountingSemaphore");
-        
+
         count--;
-        
+
         // store on stack in case of reentrancy from signal handler; also note that Vala doesn't
         // deal well with properties, pre/post-inc, and assignment on same line
         int new_count = count;
         count_changed(new_count);
-        
+
         if (new_count == 0)
             base.notify();
     }
-    
+
     /**
      * Wait for all tasks which have {@link acquire}d this semaphore to release it.
      *

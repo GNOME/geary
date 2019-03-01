@@ -55,7 +55,7 @@ public bool parse(string[] args) {
         GearyApplication.COPYRIGHT_2,
         _("Please report comments, suggestions and bugs to:"),
         GearyApplication.BUGREPORT));
-    
+
     try {
         context.parse(ref args);
     } catch (OptionError error) {
@@ -64,46 +64,46 @@ public bool parse(string[] args) {
         stdout.printf("\n%s", context.get_help(true, null));
         return false;
     }
-    
+
     // other than the OptionEntry command-line arguments, the only acceptable arguments are
     // mailto:'s
     for (int ctr = 1; ctr < args.length; ctr++) {
         string arg = args[ctr];
-        
+
         if (!arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
             stdout.printf(_("Unrecognized command line option “%s”\n").printf(arg));
             stdout.printf("\n%s", context.get_help(true, null));
-            
+
             return false;
         }
     }
-    
+
     if (version) {
         stdout.printf("%s %s\n", GearyApplication.PRGNAME, GearyApplication.VERSION);
         Process.exit(0);
     }
-    
+
     if (log_network)
         Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
-    
+
     if (log_serializer)
         Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
-    
+
     if (log_replay_queue)
         Geary.Logging.enable_flags(Geary.Logging.Flag.REPLAY);
-    
+
     if (log_conversations)
         Geary.Logging.enable_flags(Geary.Logging.Flag.CONVERSATIONS);
-    
+
     if (log_periodic)
         Geary.Logging.enable_flags(Geary.Logging.Flag.PERIODIC);
-    
+
     if (log_sql)
         Geary.Logging.enable_flags(Geary.Logging.Flag.SQL);
-    
+
     if (log_folder_normalization)
         Geary.Logging.enable_flags(Geary.Logging.Flag.FOLDER_NORMALIZATION);
-    
+
     if (log_deserializer)
         Geary.Logging.enable_flags(Geary.Logging.Flag.DESERIALIZER);
 

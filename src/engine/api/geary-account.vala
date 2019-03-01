@@ -134,9 +134,9 @@ public abstract class Geary.Account : BaseObject {
 
 
     public signal void opened();
-    
+
     public signal void closed();
-    
+
     public signal void email_sent(Geary.RFC822.Message rfc822);
 
     /**
@@ -203,42 +203,42 @@ public abstract class Geary.Account : BaseObject {
      * Fired when a Folder's contents is detected having changed.
      */
     public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
-    
+
     /**
      * Fired when a Folder's type is detected having changed.
      */
     public signal void folders_special_type(Gee.Collection<Geary.Folder> altered);
-    
+
     /**
      * Fired when emails are appended to a folder in this account.
      */
     public signal void email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when emails are inserted to a folder in this account.
      *
      * @see Folder.email_inserted
      */
     public signal void email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when emails are removed from a folder in this account.
      */
     public signal void email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when one or more emails have been locally saved to a folder with
      * the full set of Fields.
      */
     public signal void email_locally_complete(Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when one or more emails have been discovered (added) to the Folder, but not necessarily
      * appended (i.e. old email pulled down due to user request or background fetching).
      */
     public signal void email_discovered(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
-    
+
     /**
      * Fired when the supplied email flags have changed from any folder.
      */
@@ -273,7 +273,7 @@ public abstract class Geary.Account : BaseObject {
      *         version of Geary.
      */
     public abstract async void open_async(Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Closes the {@link Account}, which makes most its operations unavailable.
      *
@@ -282,12 +282,12 @@ public abstract class Geary.Account : BaseObject {
      * Returns without error if the Account is already closed.
      */
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Returns true if this account is open, else false.
      */
     public abstract bool is_open();
-    
+
     /**
      * Rebuild the local data stores for this {@link Account}.
      *
@@ -319,13 +319,13 @@ public abstract class Geary.Account : BaseObject {
      */
     public abstract Gee.Collection<Geary.Folder> list_matching_folders(Geary.FolderPath? parent)
         throws Error;
-    
+
     /**
      * Lists all currently-available folders.  See caveats under
      * list_matching_folders().
      */
     public abstract Gee.Collection<Geary.Folder> list_folders() throws Error;
-    
+
     /**
      * Gets a perpetually update-to-date collection of autocompletion contacts.
      */
@@ -338,7 +338,7 @@ public abstract class Geary.Account : BaseObject {
      */
     public abstract async bool folder_exists_async(Geary.FolderPath path, Cancellable? cancellable = null)
         throws Error;
-    
+
     /**
      * Fetches a Folder object corresponding to the supplied path.  If the backing medium does
      * not have a record of a folder at the path, EngineError.NOT_FOUND will be thrown.
@@ -350,7 +350,7 @@ public abstract class Geary.Account : BaseObject {
      */
     public abstract async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Returns the folder representing the given special folder type.  If no such folder exists,
      * null is returned.
@@ -359,7 +359,7 @@ public abstract class Geary.Account : BaseObject {
         return traverse<Folder>(list_folders())
             .first_matching(f => f.special_folder_type == special);
     }
-    
+
     /**
      * Returns the Folder object with the given special folder type.  The folder will be
      * created on the server if it doesn't already exist.  An error will be thrown if the
@@ -368,7 +368,7 @@ public abstract class Geary.Account : BaseObject {
      */
     public abstract async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
         Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Submits a ComposedEmail for delivery.  Messages may be scheduled for later delivery or immediately
      * sent.  Subscribe to the "email-sent" signal to be notified of delivery.  Note that that signal
@@ -377,7 +377,7 @@ public abstract class Geary.Account : BaseObject {
      */
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error;
-    
+
     /**
      * Search the local account for emails referencing a Message-ID value
      * (which can appear in the Message-ID header itself, as well as the
@@ -392,7 +392,7 @@ public abstract class Geary.Account : BaseObject {
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
         Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Return a single email fulfilling the required fields.  The email to pull
      * is identified by an EmailIdentifier from a previous call to
@@ -402,7 +402,7 @@ public abstract class Geary.Account : BaseObject {
      */
     public abstract async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Create a new {@link SearchQuery} for this {@link Account}.
      *
@@ -419,7 +419,7 @@ public abstract class Geary.Account : BaseObject {
      * Dropping the last reference to the SearchQuery will close it.
      */
     public abstract Geary.SearchQuery open_search(string query, Geary.SearchQuery.Strategy strategy);
-    
+
     /**
      * Performs a search with the given query.  Optionally, a list of folders not to search
      * can be passed as well as a list of email identifiers to restrict the search to only those messages.
@@ -431,13 +431,13 @@ public abstract class Geary.Account : BaseObject {
     public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(Geary.SearchQuery query,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Given a list of mail IDs, returns a set of casefolded words that match for the query.
      */
     public abstract async Gee.Set<string>? get_search_matches_async(Geary.SearchQuery query,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Return a map of each passed-in email identifier to the set of folders
      * that contain it.  If an email id doesn't appear in the resulting map,
@@ -447,7 +447,7 @@ public abstract class Geary.Account : BaseObject {
      */
     public abstract async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error;
-    
+
     /**
      * Used only for debugging.  Should not be used for user-visible strings.
      */

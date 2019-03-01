@@ -6,18 +6,18 @@
 
 private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation {
     public Gee.Set<Imap.UID> destination_uids = new Gee.HashSet<Imap.UID>();
-    
+
     private MinimalFolder engine;
     private Gee.HashSet<ImapDB.EmailIdentifier> to_copy = new Gee.HashSet<ImapDB.EmailIdentifier>();
     private Geary.FolderPath destination;
     private Cancellable? cancellable;
 
-    public CopyEmail(MinimalFolder engine, Gee.List<ImapDB.EmailIdentifier> to_copy, 
+    public CopyEmail(MinimalFolder engine, Gee.List<ImapDB.EmailIdentifier> to_copy,
         Geary.FolderPath destination, Cancellable? cancellable = null) {
         base("CopyEmail", OnError.RETRY);
-        
+
         this.engine = engine;
-        
+
         this.to_copy.add_all(to_copy);
         this.destination = destination;
         this.cancellable = cancellable;
@@ -30,7 +30,7 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (to_copy.size == 0)
             return ReplayOperation.Status.COMPLETED;
-        
+
         // The local DB will be updated when the remote folder is opened and we see a new message
         // existing there.
         return ReplayOperation.Status.CONTINUE;

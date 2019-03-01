@@ -192,17 +192,17 @@ public class GearyController : Geary.BaseObject {
      * Fired when the currently selected account has changed.
      */
     public signal void account_selected(Geary.Account? account);
-    
+
     /**
      * Fired when the currently selected folder has changed.
      */
     public signal void folder_selected(Geary.Folder? folder);
-    
+
     /**
      * Fired when the number of conversations changes.
      */
     public signal void conversation_count_changed(int count);
-    
+
     /**
      * Fired when the search text is changed according to the controller.  This accounts
      * for a brief typmatic delay.
@@ -866,11 +866,11 @@ public class GearyController : Geary.BaseObject {
             libnotify.clear_error_notification();
         }
     }
-    
+
     private void on_sending_started() {
         main_window.status_bar.activate_message(StatusBar.Message.OUTBOX_SENDING);
     }
-    
+
     private void on_sending_finished() {
         main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SENDING);
     }
@@ -924,7 +924,7 @@ public class GearyController : Geary.BaseObject {
     // Returns true if the caller should try opening the account again
     private async bool account_database_error_async(Geary.Account account) {
         bool retry = true;
-        
+
         // give the user two options: reset the Account local store, or exit Geary.  A third
         // could be done to leave the Account in an unopened state, but we don't currently
         // have provisions for that.
@@ -944,11 +944,11 @@ public class GearyController : Geary.BaseObject {
                         _("Unable to rebuild database for “%s”").printf(account.information.id),
                         _("Error during rebuild:\n\n%s").printf(err.message));
                     errdialog.run();
-                    
+
                     retry = false;
                 }
             break;
-            
+
             default:
                 retry = false;
             break;
@@ -1010,10 +1010,10 @@ public class GearyController : Geary.BaseObject {
         } catch(Error e) {
             error("Could not open accounts: %s", e.message);
         }
-        
+
         return true;
     }
-    
+
     /**
      * Displays the main window if we're ready.  Otherwise does nothing.
      */
@@ -1024,7 +1024,7 @@ public class GearyController : Geary.BaseObject {
             !Args.hidden_startup)
             main_window.show();
     }
-    
+
     /**
      * Returns the number of accounts that exist in Geary.  Note that not all accounts may be
      * open.  Zero is returned on an error.
@@ -1035,7 +1035,7 @@ public class GearyController : Geary.BaseObject {
         } catch (Error e) {
             debug("Error getting number of accounts: %s", e.message);
         }
-        
+
         return 0; // on error
     }
 
@@ -1110,9 +1110,9 @@ public class GearyController : Geary.BaseObject {
 
     private async void do_select_folder(Geary.Folder folder) throws Error {
         debug("Switching to %s...", folder.to_string());
-        
+
         closed_folder();
-        
+
         // This function is not reentrant.  It should be, because it can be
         // called reentrant-ly if you select folders quickly enough.  This
         // mutex lock is a bandaid solution to make the function safe to
@@ -1121,13 +1121,13 @@ public class GearyController : Geary.BaseObject {
 
         // clear Revokable, as Undo is only available while a folder is selected
         save_revokable(null, null);
-        
+
         // stop monitoring for conversations and close the folder
         if (current_conversations != null) {
             yield current_conversations.stop_monitoring_async(null);
             current_conversations = null;
         }
-        
+
         // re-enable copy/move to the last selected folder
         if (current_folder != null) {
             main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, true);
@@ -1144,7 +1144,7 @@ public class GearyController : Geary.BaseObject {
             if (pending_mailtos.size > 0) {
                 foreach(string mailto in pending_mailtos)
                     compose_mailto(mailto);
-                
+
                 pending_mailtos.clear();
             }
 
@@ -1155,16 +1155,16 @@ public class GearyController : Geary.BaseObject {
                 main_window.main_toolbar.move_folder_menu.add_folder(f);
             }
         }
-        
+
         folder_selected(current_folder);
-        
+
         if (!(current_folder is Geary.SearchFolder))
             previous_non_search_folder = current_folder;
-        
+
         // disable copy/move to the new folder
         main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
         main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
-        
+
         update_ui();
 
         current_conversations = new Geary.App.ConversationMonitor(
@@ -1193,7 +1193,7 @@ public class GearyController : Geary.BaseObject {
         );
 
         select_folder_mutex.release(ref mutex_token);
-        
+
         debug("Switched to %s", folder.to_string());
     }
 
@@ -1229,10 +1229,10 @@ public class GearyController : Geary.BaseObject {
 
     private void on_libnotify_invoked(Geary.Folder? folder, Geary.Email? email) {
         new_messages_monitor.clear_all_new_messages();
-        
+
         if (folder == null || email == null || !can_switch_conversation_view())
             return;
-        
+
         main_window.folder_list.select_folder(folder);
         Geary.App.Conversation? conversation = current_conversations.get_by_email_identifier(email.id);
         if (conversation != null)
@@ -1252,12 +1252,12 @@ public class GearyController : Geary.BaseObject {
         on_indicator_activated_application(timestamp);
         main_window.folder_list.select_folder(folder);
     }
-    
+
     private void on_load_more() {
         debug("on_load_more");
         current_conversations.min_window_count += MIN_CONVERSATION_COUNT;
     }
-    
+
     private void on_select_folder_completed(Object? source, AsyncResult result) {
         try {
             do_select_folder.end(result);
@@ -1474,10 +1474,10 @@ public class GearyController : Geary.BaseObject {
     private void cancel_folder() {
         Cancellable old_cancellable = cancellable_folder;
         cancellable_folder = new Cancellable();
-        
+
         old_cancellable.cancel();
     }
-    
+
     // Like cancel_folder() but doesn't cancel outstanding operations, allowing them to complete
     // in the background
     private void closed_folder() {
@@ -1494,16 +1494,16 @@ public class GearyController : Geary.BaseObject {
     private void cancel_context_dependent_buttons() {
         Cancellable old_cancellable = cancellable_context_dependent_buttons;
         cancellable_context_dependent_buttons = new Cancellable();
-        
+
         old_cancellable.cancel();
     }
-    
+
     // We need to include the second parameter, or valac doesn't recognize the function as matching
     // GearyApplication.exiting's signature.
     private bool on_application_exiting(GearyApplication sender, bool panicked) {
         if (close_composition_windows())
             return true;
-        
+
         return sender.cancel_exit();
     }
 
@@ -1602,7 +1602,7 @@ public class GearyController : Geary.BaseObject {
         foreach (Geary.App.Conversation conversation in selected_conversations) {
             if (conversation.is_unread())
                 unread_selected = true;
-            
+
             // Only check the messages that "Mark as Unread" would mark, so we
             // don't add the menu option and have it not do anything.
             //
@@ -1635,7 +1635,7 @@ public class GearyController : Geary.BaseObject {
     private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
         clear_new_messages("on_visible_conversations_changed", visible);
     }
-    
+
     private bool should_notify_new_messages(Geary.Folder folder) {
         // A monitored folder must be selected to squelch notifications;
         // if conversation list is at top of display, don't display
@@ -1644,22 +1644,22 @@ public class GearyController : Geary.BaseObject {
             || main_window.conversation_list_view.vadjustment.value != 0.0
             || !main_window.has_toplevel_focus;
     }
-    
+
     // Clears messages if conditions are true: anything in should_notify_new_messages() is
     // false and the supplied visible messages are visible in the conversation list view
     private void clear_new_messages(string caller, Gee.Set<Geary.App.Conversation>? supplied) {
         if (current_folder == null || !new_messages_monitor.get_folders().contains(current_folder)
             || should_notify_new_messages(current_folder))
             return;
-        
+
         Gee.Set<Geary.App.Conversation> visible =
             supplied ?? main_window.conversation_list_view.get_visible_conversations();
-        
+
         foreach (Geary.App.Conversation conversation in visible) {
             if (new_messages_monitor.are_any_new_messages(current_folder, conversation.get_email_ids())) {
                 debug("Clearing new messages: %s", caller);
                 new_messages_monitor.clear_new_messages(current_folder);
-                
+
                 break;
             }
         }
@@ -1769,12 +1769,12 @@ public class GearyController : Geary.BaseObject {
     private void on_copy_conversation(Geary.Folder destination) {
         copy_email(get_selected_email_ids(false), destination.path);
     }
-    
+
     private void on_move_conversation(Geary.Folder destination) {
         // Nothing to do if nothing selected.
         if (selected_conversations == null || selected_conversations.size == 0)
             return;
-        
+
         Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (ids.size == 0)
             return;
@@ -2052,21 +2052,21 @@ public class GearyController : Geary.BaseObject {
         // Safely destroy windows.
         foreach(ComposerWidget cw in composers_to_destroy)
             ((ComposerContainer) cw.parent).close_container();
-        
+
         // If we cancelled the quit we can bail here.
         if (quit_cancelled) {
             waiting_to_close.clear();
-            
+
             return false;
         }
-        
+
         // If there's still windows saving, we can't exit just yet.  Hide the main window and wait.
         if (waiting_to_close.size > 0) {
             main_window.hide();
-            
+
             return false;
         }
-        
+
         // If we deleted all composer windows without the user cancelling, we can exit.
         return true;
     }
@@ -2114,7 +2114,7 @@ public class GearyController : Geary.BaseObject {
         bool is_draft = false) {
         if (current_account == null)
             return;
-        
+
         bool inline;
         if (!should_create_new_composer(compose_type, referred, quote, is_draft, out inline))
             return;
@@ -2175,7 +2175,7 @@ public class GearyController : Geary.BaseObject {
     private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
         Geary.Email? referred, string? quote, bool is_draft, out bool inline) {
         inline = true;
-        
+
         // In we're replying, see whether we already have a reply for that message.
         if (compose_type != null && compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
@@ -2189,17 +2189,17 @@ public class GearyController : Geary.BaseObject {
             inline = !any_inline_composers();
             return true;
         }
-        
+
         // If there are no inline composers, go ahead!
         if (!any_inline_composers())
             return true;
-        
+
         // If we're resuming a draft with open composers, open in a new window.
         if (is_draft) {
             inline = false;
             return true;
         }
-        
+
         // If we're creating a new message, and there's already a new message open, focus on
         // it if it hasn't been modified; otherwise open a new composer in a new window.
         if (compose_type == ComposerWidget.ComposeType.NEW_MESSAGE) {
@@ -2215,7 +2215,7 @@ public class GearyController : Geary.BaseObject {
                 }
             }
         }
-        
+
         // Find out what to do with the inline composers.
         // TODO: Remove this in favor of automatically saving drafts
         this.application.present();
@@ -2239,24 +2239,24 @@ public class GearyController : Geary.BaseObject {
         }
         return false;
     }
-    
+
     public bool can_switch_conversation_view() {
         bool inline;
         return should_create_new_composer(null, null, null, false, out inline);
     }
-    
+
     public bool any_inline_composers() {
         foreach (ComposerWidget cw in composer_widgets)
             if (cw.state != ComposerWidget.ComposerState.DETACHED)
                 return true;
         return false;
     }
-    
+
     private void on_composer_widget_destroy(Gtk.Widget sender) {
         composer_widgets.remove((ComposerWidget) sender);
         debug(@"Destroying composer of type $(((ComposerWidget) sender).compose_type); "
             + @"$(composer_widgets.size) composers remaining");
-        
+
         if (waiting_to_close.remove((ComposerWidget) sender)) {
             // If we just removed the last window in the waiting to close list, it's time to exit!
             if (waiting_to_close.size == 0)
@@ -2328,28 +2328,28 @@ public class GearyController : Geary.BaseObject {
         // must support Empty in order for this command to proceed
         if (current_account == null)
             return;
-        
+
         Geary.Folder? folder = null;
         try {
             folder = current_account.get_special_folder(special_folder_type);
         } catch (Error err) {
             debug("%s: Unable to get special folder %s: %s", current_account.to_string(),
                 special_folder_type.to_string(), err.message);
-            
+
             // fall through
         }
-        
+
         if (folder == null)
             return;
-        
+
         Geary.FolderSupport.Empty? emptyable = folder as Geary.FolderSupport.Empty;
         if (emptyable == null) {
             debug("%s: Special folder %s (%s) does not support emptying", current_account.to_string(),
                 folder.path.to_string(), special_folder_type.to_string());
-            
+
             return;
         }
-        
+
         ConfirmationDialog dialog = new ConfirmationDialog(main_window,
             _("Empty all email from your %s folder?").printf(special_folder_type.get_display_name()),
             _("This removes the email from Geary and your email server.")
@@ -2357,11 +2357,11 @@ public class GearyController : Geary.BaseObject {
             _("Empty %s").printf(special_folder_type.get_display_name()), "destructive-action");
         dialog.use_secondary_markup(true);
         dialog.set_focus_response(Gtk.ResponseType.CANCEL);
-        
+
         if (dialog.run() == Gtk.ResponseType.OK)
             empty_folder_async.begin(emptyable, cancellable_folder);
     }
-    
+
     private async void empty_folder_async(Geary.FolderSupport.Empty emptyable, Cancellable? cancellable) {
         try {
             yield do_empty_folder_async(emptyable, cancellable);
@@ -2369,7 +2369,7 @@ public class GearyController : Geary.BaseObject {
             // don't report to user if cancelled
             if (err is IOError.CANCELLED)
                 return;
-            
+
             ErrorDialog dialog = new ErrorDialog(main_window,
                 _("Error emptying %s").printf(emptyable.get_display_name()), err.message);
             dialog.run();
@@ -2463,7 +2463,7 @@ public class GearyController : Geary.BaseObject {
         Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (archive) {
             debug("Archiving selected messages");
-            
+
             Geary.FolderSupport.Archive? supports_archive = current_folder as Geary.FolderSupport.Archive;
             if (supports_archive == null) {
                 debug("Folder %s doesn't support archive", current_folder.to_string());
@@ -2471,10 +2471,10 @@ public class GearyController : Geary.BaseObject {
                 save_revokable(yield supports_archive.archive_email_async(ids, cancellable),
                     _("Undo archive (Ctrl+Z)"));
             }
-            
+
             return;
         }
-        
+
         if (trash) {
             yield trash_messages_async(ids, cancellable);
         } else {
@@ -2497,13 +2497,13 @@ public class GearyController : Geary.BaseObject {
             revokable.notify[Geary.Revokable.PROP_VALID].disconnect(on_revokable_valid_changed);
             revokable.notify[Geary.Revokable.PROP_IN_PROCESS].disconnect(update_revokable_action);
             revokable.committed.disconnect(on_revokable_committed);
-            
+
             revokable.commit_async.begin();
         }
-        
+
         // store new revokable
         revokable = new_revokable;
-        
+
         // connect to new revokable
         if (revokable != null) {
             revokable.notify[Geary.Revokable.PROP_VALID].connect(on_revokable_valid_changed);
@@ -2532,7 +2532,7 @@ public class GearyController : Geary.BaseObject {
         if (revokable != null && !revokable.valid)
             save_revokable(null, null);
     }
-    
+
     private void on_revokable_committed(Geary.Revokable? committed_revokable) {
         if (committed_revokable == null)
             return;
@@ -2545,14 +2545,14 @@ public class GearyController : Geary.BaseObject {
         if (revokable != null && revokable.valid)
             revokable.revoke_async.begin(null, on_revoke_completed);
     }
-    
+
     private void on_revoke_completed(Object? object, AsyncResult result) {
         // Don't use the "revokable" instance because it might have gone null before this callback
         // was reached
         Geary.Revokable? origin = object as Geary.Revokable;
         if (origin == null)
             return;
-        
+
         try {
             origin.revoke_async.end(result);
         } catch (Error err) {
@@ -2742,11 +2742,11 @@ public class GearyController : Geary.BaseObject {
             debug("Error checking for what operations are supported in the selected conversations: %s",
                 e.message);
         }
-        
+
         // Exit here if the user has cancelled.
         if (cancellable != null && cancellable.is_cancelled())
             return;
-        
+
         Gee.HashSet<Type> supported_operations = new Gee.HashSet<Type>();
         if (selected_operations != null)
             supported_operations.add_all(selected_operations.get_values());
@@ -2760,7 +2760,7 @@ public class GearyController : Geary.BaseObject {
         Gee.LinkedList<ComposerWidget> ret = Geary.traverse<ComposerWidget>(composer_widgets)
             .filter(w => w.account.information == account)
             .to_linked_list();
-        
+
         return ret.size >= 1 ? ret : null;
     }
 

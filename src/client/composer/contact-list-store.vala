@@ -55,7 +55,7 @@ public class ContactListStore : Gtk.ListStore, Geary.BaseInterface {
     public enum Column {
         CONTACT_OBJECT,
         PRIOR_KEYS;
-        
+
         public static Type[] get_types() {
             return {
                 typeof (Geary.Contact), // CONTACT_OBJECT
@@ -63,7 +63,7 @@ public class ContactListStore : Gtk.ListStore, Geary.BaseInterface {
             };
         }
     }
-    
+
     public Geary.ContactStore contact_store { get; private set; }
 
     public ContactListStore(Geary.ContactStore contact_store) {
@@ -103,7 +103,7 @@ public class ContactListStore : Gtk.ListStore, Geary.BaseInterface {
     public Geary.Contact get_contact(Gtk.TreeIter iter) {
         GLib.Value contact_value;
         get_value(iter, Column.CONTACT_OBJECT, out contact_value);
-        
+
         return (Geary.Contact) contact_value.get_object();
     }
 
@@ -125,24 +125,24 @@ public class ContactListStore : Gtk.ListStore, Geary.BaseInterface {
         Gtk.TreeIter iter;
         if (!get_iter_first(out iter))
             return;
-        
+
         do {
             if (get_contact(iter) != updated_contact)
                 continue;
-            
+
             Gtk.TreePath? path = get_path(iter);
             if (path != null)
                 row_changed(path, iter);
-            
+
             return;
         } while (iter_next(ref iter));
     }
-    
+
     private void on_contacts_added(Gee.Collection<Geary.Contact> contacts) {
         foreach (Geary.Contact contact in contacts)
             add_contact(contact);
     }
-    
+
     private void on_contacts_updated(Gee.Collection<Geary.Contact> contacts) {
         foreach (Geary.Contact contact in contacts)
             update_contact(contact);

@@ -32,7 +32,7 @@ public class Geary.App.DraftManager : BaseObject {
     public const string PROP_VERSIONS_SAVED = "versions-saved";
     public const string PROP_VERSIONS_DROPPED = "versions-dropped";
     public const string PROP_DISCARD_ON_CLOSE = "discard-on-close";
-    
+
     /**
      * Current saved state of the draft.
      */
@@ -56,19 +56,19 @@ public class Geary.App.DraftManager : BaseObject {
          */
         ERROR
     }
-    
+
     private enum OperationType {
         PUSH,
         CLOSE
     }
-    
+
     private class Operation : BaseObject {
         public OperationType op_type;
         public RFC822.Message? draft;
         public EmailFlags? flags;
         public DateTime? date_received;
         public Nonblocking.Semaphore? semaphore;
-        
+
         public Operation(OperationType op_type, RFC822.Message? draft, EmailFlags? flags,
             DateTime? date_received, Nonblocking.Semaphore? semaphore) {
             this.op_type = op_type;
@@ -78,7 +78,7 @@ public class Geary.App.DraftManager : BaseObject {
             this.semaphore = semaphore;
         }
     }
-    
+
     /**
      * Indicates the {@link DraftManager} is open and ready for service.
      *
@@ -86,17 +86,17 @@ public class Geary.App.DraftManager : BaseObject {
      * {@link open_async} completes, not when this property changes to true.
      */
     public bool is_open { get; private set; default = false; }
-    
+
     /**
      * The current saved state of the draft.
      */
     public DraftState draft_state { get; private set; default = DraftState.NOT_STORED; }
-    
+
     /**
      * The {@link Geary.EmailIdentifier} of the last saved draft.
      */
     public Geary.EmailIdentifier? current_draft_id { get; private set; default = null; }
-    
+
     /**
      * The version number of the most recently saved draft.
      *
@@ -106,21 +106,21 @@ public class Geary.App.DraftManager : BaseObject {
      * A {@link discard} operation will reset this counter to zero.
      */
     public int versions_saved { get; private set; default = 0; }
-    
+
     /**
      * The number of drafts dropped as new ones are added to the queue.
      *
      * @see dropped
      */
     public int versions_dropped { get; private set; default = 0; }
-    
+
     /**
      * When set, the draft will be discarded when {@link close_async} is called.
      *
      * In addition, when set all future {@link update}s will result in the draft being dropped.
      */
     public bool discard_on_close { get; set; default = false; }
-    
+
     private Account account;
     private Folder? drafts_folder = null;
     private FolderSupport.Create? create_support = null;
@@ -129,17 +129,17 @@ public class Geary.App.DraftManager : BaseObject {
         new Nonblocking.Queue<Operation?>.fifo();
     private bool was_opened = false;
     private Error? fatal_err = null;
-    
+
     /**
      * Fired when a draft is successfully saved.
      */
     public signal void stored(Geary.RFC822.Message draft);
-    
+
     /**
      * Fired when a draft is discarded.
      */
     public signal void discarded();
-    
+
     /**
      * Fired when a draft is dropped.
      *
@@ -147,7 +147,7 @@ public class Geary.App.DraftManager : BaseObject {
      * to be pushed to the server.  The queued draft is dropped in favor of the new one.
      */
     public signal void dropped(Geary.RFC822.Message draft);
-    
+
     /**
      * Fired when unable to save a draft but the {@link DraftManager} remains open.
      *
@@ -158,7 +158,7 @@ public class Geary.App.DraftManager : BaseObject {
     public virtual signal void draft_failed(Geary.RFC822.Message draft, Error err) {
         debug("%s: Unable to create draft: %s", to_string(), err.message);
     }
-    
+
     /**
      * Fired if an unrecoverable error occurs while processing drafts.
      *
@@ -166,24 +166,24 @@ public class Geary.App.DraftManager : BaseObject {
      */
     public virtual signal void fatal(Error err) {
         fatal_err = err;
-        
+
         debug("%s: Irrecoverable failure: %s", to_string(), err.message);
     }
-    
+
     public DraftManager(Geary.Account account) {
         this.account = account;
     }
-    
+
     protected virtual void notify_stored(Geary.RFC822.Message draft) {
         versions_saved++;
         stored(draft);
     }
-    
+
     protected virtual void notify_discarded() {
         versions_saved = 0;
         discarded();
     }
-    
+
     /**
      * Open the {@link DraftManager} and prepare it for handling composed messages.
      *
@@ -205,17 +205,17 @@ public class Geary.App.DraftManager : BaseObject {
             throw new EngineError.ALREADY_OPEN("%s is already open", to_string());
         else if (was_opened)
             throw new EngineError.UNSUPPORTED("%s cannot be re-opened", to_string());
-        
+
         was_opened = true;
-        
+
         current_draft_id = initial_draft_id;
         if (current_draft_id != null)
             draft_state = DraftState.STORED;
-        
+
         drafts_folder = account.get_special_folder(SpecialFolderType.DRAFTS);
         if (drafts_folder == null)
             throw new EngineError.NOT_FOUND("%s: No drafts folder found", to_string());
-        
+
         // if drafts folder doesn't support create and remove, call it quits
         create_support = drafts_folder as Geary.FolderSupport.Create;
         remove_support = drafts_folder as Geary.FolderSupport.Remove;
@@ -223,7 +223,7 @@ public class Geary.App.DraftManager : BaseObject {
             throw new EngineError.UNSUPPORTED("%s: Drafts folder %s does not support create and remove",
                 to_string(), drafts_folder.to_string());
         }
-        
+
         drafts_folder.closed.connect(on_folder_closed);
 
         yield drafts_folder.open_async(Folder.OpenFlags.NO_DELAY, cancellable);
@@ -236,25 +236,25 @@ public class Geary.App.DraftManager : BaseObject {
             } catch (Error err) {
                 // ignore
             }
-            
+
             throw new EngineError.UNSUPPORTED("%s: Drafts folder %s does not return created mail ID",
                 to_string(), drafts_folder.to_string());
         }
-        
+
         // start the operation message loop, which ensures commands are handled in orderly fashion
         operation_loop_async.begin();
-        
+
         // done
         is_open = true;
     }
-    
+
     private void on_folder_closed(Folder.CloseReason reason) {
         if (reason == Folder.CloseReason.FOLDER_CLOSED) {
             fatal(new EngineError.SERVER_UNAVAILABLE("%s: Unexpected drafts folder closed (%s)",
                 to_string(), reason.to_string()));
         }
     }
-    
+
     /**
      * Flush pending operations and close the {@link DraftManager}.
      *
@@ -266,10 +266,10 @@ public class Geary.App.DraftManager : BaseObject {
     public async void close_async(Cancellable? cancellable = null) throws Error {
         if (!is_open || drafts_folder == null)
             return;
-        
+
         // prevent further operations
         is_open = false;
-        
+
         // don't flush a CLOSE down the pipe if failed, the operation loop is closed for business
         if (fatal_err == null) {
             // if discarding on close, do so now
@@ -278,25 +278,25 @@ public class Geary.App.DraftManager : BaseObject {
                 // which doesn't
                 submit_push(null, null, null);
             }
-            
+
             // flush pending I/O
             Nonblocking.Semaphore semaphore = new Nonblocking.Semaphore(cancellable);
             mailbox.send(new Operation(OperationType.CLOSE, null, null, null, semaphore));
-            
+
             // wait for close to complete
             try {
                 yield semaphore.wait_async(cancellable);
             } catch (Error err) {
                 if (err is IOError.CANCELLED)
                     throw err;
-                
+
                 // fall through
             }
         }
-        
+
         // Disconnect before closing, as signal handler is for unexpected closes
         drafts_folder.closed.disconnect(on_folder_closed);
-        
+
         try {
             yield drafts_folder.close_async(cancellable);
         } finally {
@@ -305,12 +305,12 @@ public class Geary.App.DraftManager : BaseObject {
             remove_support = null;
         }
     }
-    
+
     private void check_open() throws EngineError {
         if (!is_open)
             throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
     }
-    
+
     /**
      * Save draft on the server, potentially replacing (deleting) an already-existing version.
      *
@@ -323,10 +323,10 @@ public class Geary.App.DraftManager : BaseObject {
     public Geary.Nonblocking.Semaphore? update(Geary.RFC822.Message draft, Geary.EmailFlags? flags,
         DateTime? date_received) throws Error {
         check_open();
-        
+
         return submit_push(draft, flags, date_received);
     }
-    
+
     /**
      * Delete all versions of the composed email from the server.
      *
@@ -341,10 +341,10 @@ public class Geary.App.DraftManager : BaseObject {
      */
     public Geary.Nonblocking.Semaphore? discard() throws Error {
         check_open();
-        
+
         return submit_push(null, null, null);
     }
-    
+
     // Note that this call doesn't check_open(), important when used within close_async()
     private Nonblocking.Semaphore? submit_push(RFC822.Message? draft, EmailFlags? flags,
         DateTime? date_received) {
@@ -352,10 +352,10 @@ public class Geary.App.DraftManager : BaseObject {
         if (draft != null && discard_on_close) {
             versions_dropped++;
             dropped(draft);
-            
+
             return null;
         }
-        
+
         // clear out pending pushes (which can be updates or discards)
         mailbox.revoke_matching((op) => {
             // count and notify of dropped drafts
@@ -363,18 +363,18 @@ public class Geary.App.DraftManager : BaseObject {
                 versions_dropped++;
                 dropped(op.draft);
             }
-            
+
             return op.op_type == OperationType.PUSH;
         });
-        
+
         Nonblocking.Semaphore semaphore = new Nonblocking.Semaphore();
-        
+
         // schedule this draft for update (if null, it's a discard)
         mailbox.send(new Operation(OperationType.PUSH, draft, flags, date_received, semaphore));
-        
+
         return semaphore;
     }
-    
+
     private async void operation_loop_async() {
         for (;;) {
             // if a fatal error occurred (it can happen outside the loop), shutdown without
@@ -391,34 +391,34 @@ public class Geary.App.DraftManager : BaseObject {
             }
 
             bool continue_loop = yield operation_loop_iteration_async(op);
-            
+
             // fire semaphore, if present
             if (op.semaphore != null)
                 op.semaphore.blind_notify();
-            
+
             if (!continue_loop)
                 break;
         }
     }
-    
+
     // Returns false if time to exit.
     private async bool operation_loop_iteration_async(Operation op) {
         // watch for CLOSE
         if (op.op_type == OperationType.CLOSE)
             return false;
-        
+
         // make sure there's a folder to work with
         if (drafts_folder == null || drafts_folder.get_open_state() == Folder.OpenState.CLOSED) {
             fatal(new EngineError.SERVER_UNAVAILABLE("%s: premature drafts folder close", to_string()));
-            
+
             return false;
         }
-        
+
         // at this point, only operation left is PUSH
         assert(op.op_type == OperationType.PUSH);
-        
+
         draft_state = DraftState.STORING;
-        
+
         // delete old draft for all PUSHes: best effort ... since create_email_async() will handle
         // replacement in a transactional-kinda-way, only outright delete if not using create
         if (current_draft_id != null && op.draft == null) {
@@ -431,35 +431,35 @@ public class Geary.App.DraftManager : BaseObject {
                 debug("%s: Unable to remove existing draft %s: %s", to_string(), current_draft_id.to_string(),
                     err.message);
             }
-            
+
             // always clear draft id (assuming that retrying a failed remove is unnecessary), but
             // only signal the discard if it actually was removed
             current_draft_id = null;
             if (success)
                 notify_discarded();
         }
-        
+
         // if draft supplied, save it
         if (op.draft != null) {
             try {
                 current_draft_id = yield create_support.create_email_async(op.draft, op.flags,
                     op.date_received, current_draft_id, null);
-                
+
                 draft_state = DraftState.STORED;
                 notify_stored(op.draft);
             } catch (Error err) {
                 draft_state = DraftState.ERROR;
-                
+
                 // notify subscribers
                 draft_failed(op.draft, err);
             }
         } else {
             draft_state = DraftState.NOT_STORED;
         }
-        
+
         return true;
     }
-    
+
     public string to_string() {
         return "%s DraftManager".printf(account.to_string());
     }

@@ -49,17 +49,17 @@ public abstract class Geary.SearchQuery : BaseObject {
          */
         HORIZON
     }
-    
+
     /**
      * The original user search text.
      */
     public string raw { get; private set; }
-    
+
     /**
      * The selected {@link Strategy} quality.
      */
     public Strategy strategy { get; private set; }
-    
+
     protected SearchQuery(string raw, Strategy strategy) {
         this.raw = raw;
         this.strategy = strategy;

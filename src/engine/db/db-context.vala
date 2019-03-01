@@ -16,31 +16,31 @@ public abstract class Geary.Db.Context : BaseObject {
     public virtual Database? get_database() {
         return get_connection() != null ? get_connection().database : null;
     }
-    
+
     public virtual Connection? get_connection() {
         return get_statement() != null ? get_statement().connection : null;
     }
-    
+
     public virtual Statement? get_statement() {
         return get_result() != null ? get_result().statement : null;
     }
-    
+
     public virtual Result? get_result() {
         return null;
     }
-    
+
     protected inline int throw_on_error(string? method, int result, string? raw = null) throws DatabaseError {
         return Db.throw_on_error(this, method, result, raw);
     }
-    
+
     [PrintfFormat]
     protected void log(string fmt, ...) {
         if (!Logging.are_all_flags_set(Logging.Flag.SQL))
             return;
-        
+
         Connection? cx = get_connection();
         Statement? stmt = get_statement();
-        
+
         if (stmt != null) {
             Logging.debug(Logging.Flag.SQL, "%s %s\n\t<%s>",
                 (cx != null) ? cx.to_string() : "[no cx]",

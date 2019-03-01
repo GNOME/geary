@@ -93,7 +93,7 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
 
         // get Connection for upgrade activity
         Connection cx = yield open_connection(cancellable);
-        
+
         int db_version = cx.get_user_version_number();
         debug("VersionedDatabase.upgrade: current database schema for %s: %d",
               this.path, db_version);
@@ -101,7 +101,7 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
         // If the DB doesn't exist yet, the version number will be zero, but also treat negative
         // values as new
         bool new_db = db_version <= 0;
-        
+
         // Initialize new database to version 1 (note the preincrement in the loop below)
         if (db_version < 0)
             db_version = 0;

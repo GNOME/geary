@@ -19,73 +19,73 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
     public static MessageFlag ANSWERED { get {
         if (_answered == null)
             _answered = new MessageFlag("\\answered");
-        
+
         return _answered;
     } }
-    
+
     private static MessageFlag? _deleted = null;
     public static MessageFlag DELETED { get {
         if (_deleted == null)
             _deleted = new MessageFlag("\\deleted");
-        
+
         return _deleted;
     } }
-    
+
     private static MessageFlag? _draft = null;
     public static MessageFlag DRAFT { get {
         if (_draft == null)
             _draft = new MessageFlag("\\draft");
-        
+
         return _draft;
     } }
-    
+
     private static MessageFlag? _flagged = null;
     public static MessageFlag FLAGGED { get {
         if (_flagged == null)
             _flagged = new MessageFlag("\\flagged");
-        
+
         return _flagged;
     } }
-    
+
     private static MessageFlag? _recent = null;
     public static MessageFlag RECENT { get {
         if (_recent == null)
             _recent = new MessageFlag("\\recent");
-        
+
         return _recent;
     } }
-    
+
     private static MessageFlag? _seen = null;
     public static MessageFlag SEEN { get {
         if (_seen == null)
             _seen = new MessageFlag("\\seen");
-        
+
         return _seen;
     } }
-    
+
     private static MessageFlag? _allows_new = null;
     public static MessageFlag ALLOWS_NEW { get {
         if (_allows_new == null)
             _allows_new = new MessageFlag("\\*");
-        
+
         return _allows_new;
     } }
-    
+
     private static MessageFlag? _load_remote_images = null;
     public static MessageFlag LOAD_REMOTE_IMAGES { get {
         if (_load_remote_images == null)
             _load_remote_images = new MessageFlag("LoadRemoteImages");
-        
+
         return _load_remote_images;
     } }
-    
+
     /**
      * Creates an IMAP message (email) named flag.
      */
     public MessageFlag(string value) {
         base (value);
     }
-    
+
     // Call these at init time to prevent thread issues
     internal static void init() {
         MessageFlag to_init = ANSWERED;
@@ -97,10 +97,10 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
         to_init = ALLOWS_NEW;
         to_init = LOAD_REMOTE_IMAGES;
     }
-    
+
     // Converts a list of email flags to add and remove to a list of message
     // flags to add and remove.
-    public static void from_email_flags(Geary.EmailFlags? email_flags_add, 
+    public static void from_email_flags(Geary.EmailFlags? email_flags_add,
         Geary.EmailFlags? email_flags_remove, out Gee.List<MessageFlag> msg_flags_add,
         out Gee.List<MessageFlag> msg_flags_remove) {
         msg_flags_add = new Gee.ArrayList<MessageFlag>();
@@ -132,7 +132,7 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
                 msg_flags_remove.add(MessageFlag.DELETED);
         }
     }
-    
+
     /**
      * Returns a keyword suitable for the IMAP SEARCH command.
      *
@@ -145,22 +145,22 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
     public string? get_search_keyword(bool present) {
         if (equal_to(ANSWERED))
             return present ? "answered" : "unanswered";
-        
+
         if (equal_to(DELETED))
             return present ? "deleted" : "undeleted";
-        
+
         if (equal_to(DRAFT))
             return present ? "draft" : "undraft";
-        
+
         if (equal_to(FLAGGED))
             return present ? "flagged" : "unflagged";
-        
+
         if (equal_to(RECENT))
             return present ? "recent" : null;
-        
+
         if (equal_to(SEEN))
             return present ? "seen" : "unseen";
-        
+
         return null;
     }
 }

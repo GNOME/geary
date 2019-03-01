@@ -6,19 +6,19 @@
 
 private class Geary.App.CopyOperation : Geary.App.AsyncFolderOperation {
     public override Type folder_type { get { return typeof(Geary.FolderSupport.Copy); } }
-    
+
     public Geary.FolderPath destination;
-    
+
     public CopyOperation(Geary.FolderPath destination) {
         this.destination = destination;
     }
-    
+
     public override async Gee.Collection<Geary.EmailIdentifier> execute_async(
         Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids,
         Cancellable? cancellable) throws Error {
         Geary.FolderSupport.Copy? copy = folder as Geary.FolderSupport.Copy;
         assert(copy != null);
-        
+
         Gee.List<Geary.EmailIdentifier> list
             = Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids);
         yield copy.copy_email_async(list, destination, cancellable);

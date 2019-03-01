@@ -50,7 +50,7 @@ public int last_index_of(string str, char ch) {
 
 public bool get_next_char(string str, ref int index, out char ch) {
     ch = str[index++];
-    
+
     return ch != String.EOS;
 }
 
@@ -73,11 +73,11 @@ public inline bool stri_equal(string a, string b) {
 public bool nullable_stri_equal(string? a, string? b) {
     if (a == null)
         return (b == null);
-    
+
     // a != null, so always false
     if (b == null)
         return false;
-    
+
     return stri_equal(a, b);
 }
 
@@ -111,16 +111,16 @@ public bool is_numeric(string str) {
     char *strptr = str;
     for (;;) {
         char ch = *strptr++;
-        
+
         if (ch == String.EOS)
             break;
-        
+
         if (ch.isdigit())
             numeric_found = true;
         else if (!ch.isspace())
             return false;
     }
-    
+
     return numeric_found;
 }
 
