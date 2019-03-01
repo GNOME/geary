@@ -135,7 +135,7 @@ public class Geary.ServiceInformation : GLib.Object {
      */
     public ServiceInformation.copy(ServiceInformation other) {
         // Use OTHER here to get blank defaults
-        this(other.protocol, ServiceInformation.OTHER);
+        this(other.protocol, ServiceProvider.OTHER);
         this.host = other.host;
         this.port = other.port;
         this.transport_security = other.transport_security;
