@@ -195,6 +195,11 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
                "example@example.com");
         assert(new MailboxAddress("Test", "example@example@example.com").to_full_display() ==
                "example@example@example.com");
+
+        assert_string(
+            "\"Testerson, Test\" <test@example.com>",
+            new MailboxAddress("Testerson, Test", "test@example.com").to_full_display()
+        );
     }
 
     public void to_short_display() throws Error {

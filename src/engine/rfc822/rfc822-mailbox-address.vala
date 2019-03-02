@@ -49,6 +49,15 @@ public class Geary.RFC822.MailboxAddress :
         return GMime.utils_header_decode_text(prepare_header_text_part(mailbox));
     }
 
+    private static bool display_name_needs_quoting(string name) {
+        // Currently we only care if the name contains a comma, since
+        // that will screw up the composer's address entry fields. See
+        // issue #282. This might be able to be removed when the
+        // composer doesn't parse recipients as a text list of
+        // addresses.
+        return (name.index_of(",") != -1);
+    }
+
     private static bool local_part_needs_quoting(string local_part) {
         bool needs_quote = false;
         bool is_dot = false;
@@ -74,13 +83,13 @@ public class Geary.RFC822.MailboxAddress :
         return needs_quote || is_dot; // no trailing dots
     }
 
-    private static string quote_local_part(string local_part) {
+    private static string quote_string(string needs_quoting) {
         StringBuilder builder = new StringBuilder();
-        if (!String.is_empty(local_part)) {
+        if (!String.is_empty(needs_quoting)) {
             builder.append_c('"');
             int index = 0;
             for (;;) {
-                char ch = local_part[index++];
+                char ch = needs_quoting[index++];
                 if (ch == String.EOS)
                     break;
 
@@ -251,7 +260,8 @@ public class Geary.RFC822.MailboxAddress :
      * address) and {@link address} parts, suitable for display to
      * people. The string will have white space reduced and
      * non-printable characters removed, and the address will be
-     * surrounded by angle brackets if a name is present.
+     * surrounded by angle brackets if a name is present, and if the
+     * name contains a reserved character, it will be quoted.
      *
      * If you need a form suitable for sending a message, see {@link
      * to_rfc822_string} instead.
@@ -269,6 +279,9 @@ public class Geary.RFC822.MailboxAddress :
      */
     public string to_full_display(string open = "<", string close = ">") {
         string clean_name = Geary.String.reduce_whitespace(this.name);
+        if (display_name_needs_quoting(clean_name)) {
+            clean_name = quote_string(clean_name);
+        }
         string clean_address = Geary.String.reduce_whitespace(this.address);
         return (!has_distinct_name() || is_spoofed())
             ? clean_address
@@ -430,7 +443,7 @@ public class Geary.RFC822.MailboxAddress :
         // manually.
         string local_part = GMime.utils_header_encode_text(this.mailbox);
         if (local_part_needs_quoting(local_part)) {
-            local_part = quote_local_part(local_part);
+            local_part = quote_string(local_part);
         }
         return "%s@%s".printf(
             local_part,
