@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -38,6 +38,8 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(Geary.RFC822.MailboxAddress.is_valid_address("test@") == false);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("@") == false);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("") == false);
+
+        assert(Geary.RFC822.MailboxAddress.is_valid_address("\"Surname, Name\" <mail@example.com>") == true);
     }
 
     public void unescaped_constructor() throws Error {
@@ -193,6 +195,11 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
                "example@example.com");
         assert(new MailboxAddress("Test", "example@example@example.com").to_full_display() ==
                "example@example@example.com");
+
+        assert_string(
+            "\"Testerson, Test\" <test@example.com>",
+            new MailboxAddress("Testerson, Test", "test@example.com").to_full_display()
+        );
     }
 
     public void to_short_display() throws Error {
@@ -260,6 +267,17 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
                "=?iso-8859-1?b?qQ==?= <example@example.com>");
         assert(new MailboxAddress("😸", "example@example.com").to_rfc822_string() ==
                "=?UTF-8?b?8J+YuA==?= <example@example.com>");
+
+        assert_string(
+            "\"Surname, Name\" <example@example.com>",
+            new MailboxAddress("Surname, Name", "example@example.com").to_rfc822_string()
+        );
+        assert_string(
+            "\"Surname, Name\" <example@example.com>",
+            new MailboxAddress
+            .from_rfc822_string("\"Surname, Name\" <example@example.com>")
+            .to_rfc822_string()
+        );
     }
 
     public void equal_to() throws GLib.Error {
