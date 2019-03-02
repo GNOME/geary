@@ -217,7 +217,7 @@ public class Geary.Smtp.ClientSession {
         
         // TODO: Support mailbox groups
         foreach (RFC822.MailboxAddress mailbox in addrlist) {
-            RcptRequest rcpt_request = new RcptRequest.plain(mailbox.address);
+            RcptRequest rcpt_request = new RcptRequest.plain(mailbox.to_rfc822_address());
             Response response = yield cx.transaction_async(rcpt_request, cancellable);
 
             if (!response.code.is_success_completed()) {
