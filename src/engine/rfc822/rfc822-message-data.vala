@@ -169,59 +169,64 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
 public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.AbstractMessageData,
     Gee.Hashable<Geary.RFC822.Date> {
 
-    private time_t as_time_t;
-
     public string? original { get; private set; }
     public DateTime value { get; private set; }
 
-    public Date(string iso8601) throws ImapError {
-        this.as_time_t = GMime.utils_header_decode_date(iso8601, null);
-        if (as_time_t == 0)
+    public Date(string rfc822) throws ImapError {
+        int offset = 0;
+        int64 time_t_utc = GMime.utils_header_decode_date(rfc822, out offset);
+        if (time_t_utc == 0)
             throw new ImapError.PARSE_ERROR(
-                "Unable to parse \"%s\": Not ISO-8601 date", iso8601
+                "Unable to parse \"%s\": Not ISO-8601 date", rfc822
             );
 
-        DateTime? value = new DateTime.from_unix_local(this.as_time_t);
+        DateTime? value = new DateTime.from_unix_utc(time_t_utc);
         if (value == null) {
             throw new ImapError.PARSE_ERROR(
-                "Unable to parse \"%s\": Outside supported range", iso8601
+                "Unable to parse \"%s\": Outside supported range", rfc822
             );
         }
         this.value = value;
-        this.original = iso8601;
+
+        if (offset != 0) {
+            this.value = value.to_timezone(
+                new GLib.TimeZone("%+05d".printf(offset))
+            );
+        }
+
+        this.original = rfc822;
     }
 
     public Date.from_date_time(DateTime datetime) {
-        original = null;
-        value = datetime;
-        this.as_time_t = Time.datetime_to_time_t(datetime);
+        this.original = null;
+        this.value = datetime;
     }
 
     /**
-     * Returns the {@link Date} in ISO-8601 format.
+     * Returns the {@link Date} in RFC 822 format.
      */
-    public string to_iso_8601() {
-        // Although GMime documents its conversion methods as requiring the tz offset in hours,
-        // it appears the number is handed directly to the string (i.e. an offset of -7 becomes
-        // "-0007", whereas we want "-0700").
-        return GMime.utils_header_format_date(this.as_time_t,
-            (int) (value.get_utc_offset() / TimeSpan.HOUR) * 100);
-    }
-
-    /**
-     * Returns {@link Date} as a time_t representation.
-     */
-    public time_t to_time_t() {
-        return this.as_time_t;
+    public string to_rfc822_string() {
+        // Although GMime documents its conversion methods as
+        // requiring the tz offset in hours, it appears the number is
+        // handed directly to the string (i.e. an offset of -7:30 becomes
+        // "-0007", whereas we want "-0730").
+        int hours = (int) GLib.Math.floor(value.get_utc_offset() / TimeSpan.HOUR);
+        int minutes = (int) (
+            (value.get_utc_offset() % TimeSpan.HOUR) / (double) TimeSpan.HOUR * 60
+        );
+        return GMime.utils_header_format_date(
+            (time_t) this.value.to_utc().to_unix(),
+            (hours * 100) + minutes
+        );
     }
 
     /**
      * Returns {@link Date} for transmission.
      *
-     * @see to_iso_8601
+     * @see to_rfc822_string
      */
     public virtual string serialize() {
-        return to_iso_8601();
+        return to_rfc822_string();
     }
 
     public virtual bool equal_to(Geary.RFC822.Date other) {

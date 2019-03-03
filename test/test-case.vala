@@ -88,6 +88,14 @@ public void assert_int(int expected, int actual, string? context = null)
     }
 }
 
+public void assert_int64(int64 expected, int64 actual, string? context = null)
+    throws Error {
+    if (expected != actual) {
+        print_assert("Expected: %lld, was: %lld".printf(expected, actual), context);
+        assert_not_reached();
+    }
+}
+
 public void assert_uint(uint expected, uint actual, string? context = null)
     throws GLib.Error {
     if (expected != actual) {

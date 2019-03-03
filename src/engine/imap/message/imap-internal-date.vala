@@ -92,13 +92,6 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
     }
 
     /**
-     * Returns the value of the InternalDate as a time_t representation.
-     */
-    public time_t to_time_t () {
-        return Time.datetime_to_time_t(this.value);
-    }
-
-    /**
      * Returns the {@link InternalDate} as a {@link Parameter}.
      */
     public Parameter to_parameter() {

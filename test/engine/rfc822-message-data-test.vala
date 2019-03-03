@@ -9,6 +9,8 @@ class Geary.RFC822.MessageDataTest : TestCase {
 
     public MessageDataTest() {
         base("Geary.RFC822.MessageDataTest");
+        add_test("date_from_rfc822", date_from_rfc822);
+        add_test("date_to_rfc822", date_to_rfc822);
         add_test("PreviewText.with_header", preview_text_with_header);
     }
 
@@ -39,6 +41,56 @@ class Geary.RFC822.MessageDataTest : TestCase {
         );
         assert_string(HTML_BODY2_EXPECTED, html_preview2.buffer.to_string());
     }
+
+    public void date_from_rfc822() throws GLib.Error {
+        const string FULL_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -0100";
+        Date full_hour_tz = new Date(FULL_HOUR_TZ);
+        assert_int64(
+            ((int64) (-1 * 3600)) * 1000 * 1000,
+            full_hour_tz.value.get_utc_offset(),
+            "full_hour_tz.value.get_utc_offset"
+        );
+        assert_int(0, full_hour_tz.value.get_hour(), "full_hour_tz hour");
+        assert_int(0, full_hour_tz.value.get_minute(), "full_hour_tz minute");
+        assert_int(0, full_hour_tz.value.get_second(), "full_hour_tz second");
+        assert_int(28, full_hour_tz.value.get_day_of_month(), "full_hour_tz day");
+        assert_int(2, full_hour_tz.value.get_month(), "full_hour_tz month");
+        assert_int(2019, full_hour_tz.value.get_year(), "full_hour_tz year");
+
+        assert_int64(
+            full_hour_tz.value.to_utc().to_unix(),
+            full_hour_tz.value.to_unix(),
+            "to_unix not UTC"
+        );
+
+        const string HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 +1030";
+        Date half_hour_tz = new Date(HALF_HOUR_TZ);
+        assert_int64(
+            ((int64) (10.5 * 3600)) * 1000 * 1000,
+            half_hour_tz.value.get_utc_offset()
+        );
+        assert_int(0, half_hour_tz.value.get_hour());
+        assert_int(0, half_hour_tz.value.get_minute());
+        assert_int(0, half_hour_tz.value.get_second());
+        assert_int(28, half_hour_tz.value.get_day_of_month());
+        assert_int(2, half_hour_tz.value.get_month());
+        assert_int(2019, half_hour_tz.value.get_year());
+    }
+
+    public void date_to_rfc822() throws GLib.Error {
+        const string FULL_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -0100";
+        Date full_hour_tz = new Date(FULL_HOUR_TZ);
+        assert_string(FULL_HOUR_TZ, full_hour_tz.to_rfc822_string());
+
+        const string HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 +1030";
+        Date half_hour_tz = new Date(HALF_HOUR_TZ);
+        assert_string(HALF_HOUR_TZ, half_hour_tz.to_rfc822_string());
+
+        const string NEG_HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -1030";
+        Date neg_half_hour_tz = new Date(NEG_HALF_HOUR_TZ);
+        assert_string(NEG_HALF_HOUR_TZ, neg_half_hour_tz.to_rfc822_string());
+    }
+
 
     public static string PLAIN_BODY1_HEADERS = "Content-Type: text/plain; charset=\"us-ascii\"\r\nContent-Transfer-Encoding: 7bit\r\n";
     public static string PLAIN_BODY1_ENCODED = "-----BEGIN PGP SIGNED MESSAGE-----\r\nHash: SHA512\r\n\r\n=============================================================================\r\nFreeBSD-EN-16:11.vmbus                                          Errata Notice\r\n                                                          The FreeBSD Project\r\n\r\nTopic:          Avoid using spin locks for channel message locks\r\n\r\nCategory:       core\r\nModule:         vmbus\r\nAnnounced:      2016-08-12\r\nCredits:        Microsoft OSTC\r\nAffects:        FreeBSD 10.3\r\nCorrected:      2016-06-15 09:52:01 UTC (stable/10, 10.3-STABLE)\r\n                2016-08-12 04:01:16 UTC (releng/10.3, 10.3-RELEASE-p7)\r\n\r\nFor general information regarding FreeBSD Errata Notices and Security\r\nAdvisories, including descriptions of the fields above, security\r\nbranches, and the following sections, please visit\r\n<URL:https://security.FreeBSD.org/>.\r\n";
