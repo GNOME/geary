@@ -188,6 +188,10 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
     // Returns true if email was successfully processed, else false
     private async void process_email(EmailIdentifier id, Cancellable cancellable)
         throws GLib.Error {
+        // To prevent spurious connection failures, ensure tokens are
+        // up-to-date before attempting to send the email
+        yield this.account.load_outgoing_credentials(cancellable);
+
         Email? email = null;
         try {
             email = yield this.outbox.fetch_email_async(
