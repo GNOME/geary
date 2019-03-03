@@ -46,28 +46,33 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             this.uid = yield engine.local_folder.get_uid_async(
                 this.id, NONE, this.cancellable
             );
-            return CONTINUE;
+            return Status.CONTINUE;
         }
 
+        bool local_only = flags.is_all_set(Folder.ListFlags.LOCAL_ONLY);
         Geary.Email? email = null;
         try {
-            email = yield engine.local_folder.fetch_email_async(id, required_fields,
-                ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
-        } catch (Error err) {
-            // If NOT_FOUND or INCOMPLETE_MESSAGE, then fall through, otherwise return to sender
-            if (!(err is Geary.EngineError.NOT_FOUND) && !(err is Geary.EngineError.INCOMPLETE_MESSAGE))
+            email = yield engine.local_folder.fetch_email_async(
+                id,
+                required_fields,
+                ImapDB.Folder.ListFlags.PARTIAL_OK,
+                cancellable
+            );
+        } catch (Geary.EngineError.NOT_FOUND err) {
+            if (local_only) {
                 throw err;
+            }
         }
 
         // If returned in full, done
-        if (email.fields.fulfills(required_fields)) {
+        if (email != null && email.fields.fulfills(required_fields)) {
             this.email = email;
             this.remaining_fields = Email.Field.NONE;
             return ReplayOperation.Status.COMPLETED;
-        }
-
-        // If local only, ensure the email has all required fields
-        if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY)) {
+        } else if (local_only) {
+            // Didn't have an email that fulfills the reqs, but the
+            // caller didn't want to go to the remote, so let them
+            // know
             throw new EngineError.INCOMPLETE_MESSAGE(
                 "Email %s with fields %Xh locally incomplete %s",
                 id.to_string(),
