@@ -2952,7 +2952,7 @@ public class GearyController : Geary.BaseObject {
                     break;
 
                 case Geary.Protocol.SMTP:
-                    context.account.outgoing.start.begin(context.cancellable);
+                    context.account.outgoing.restart.begin(context.cancellable);
                     break;
                 }
             }
