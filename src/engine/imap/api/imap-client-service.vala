@@ -265,6 +265,20 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         debug("Checking session pool with %d of %d free",
               this.free_queue.size, this.all_sessions.size);
 
+        if (!is_claiming) {
+            // To prevent spurious connection failures, ensure tokens
+            // are up-to-date before attempting a connection, but
+            // after we know we should be able to connect to it
+            try {
+                yield this.account.load_incoming_credentials(
+                    this.pool_cancellable
+                );
+            } catch (GLib.Error err) {
+                notify_connection_failed(new ErrorContext(err));
+                return;
+            }
+        }
+
         int needed = this.min_pool_size - this.all_sessions.size;
         if (needed <= 0 && is_claiming) {
             needed = 1;

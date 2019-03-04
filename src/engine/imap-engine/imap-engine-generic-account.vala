@@ -160,11 +160,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             new LoadFolders(this, this.local, get_supported_special_folders())
         );
 
-        // To prevent spurious connection failures, we make sure we
-        // have passwords before attempting a connection.
-        yield this.information.load_incoming_credentials(cancellable);
-        yield this.information.load_outgoing_credentials(cancellable);
-
         // Start the mail services. Start incoming directly, but queue
         // outgoing so local folders can be loaded first in case
         // queued mail gets sent and needs to get saved somewhere.
