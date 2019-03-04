@@ -115,6 +115,23 @@ public class Geary.ConnectivityManager : BaseObject {
             );
         } catch (GLib.IOError.CANCELLED err) {
             // User cancelled, so leave as unreachable
+        } catch (GLib.IOError.HOST_UNREACHABLE err) {
+            // Despite returning a boolean, per its API docs
+            // NetworkMonitor.can_reach() should never actually return
+            // false under Vala since it will throw an error instead,
+            // and usually this one. While that's not 100% always the
+            // case, we do need to treat this error as meaning
+            // unreachable.
+            //
+            // However if the monitor says there actually is a network
+            // available, we may be running under Flatpak with Network
+            // Manager connectivity checking enabled and hitting issue
+            // GNOME/glib#1705. Pull this debug logging out once that
+            // is fixed.
+            if (this.monitor.network_available) {
+                debug("Assuming %s is unreachable, despite network availability",
+                      endpoint);
+            }
         } catch (GLib.DBusError err) {
             // Running under Flatpak can cause a DBus error if the
             // portal is malfunctioning (e.g. Geary #97 & #82 and
