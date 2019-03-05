@@ -7,13 +7,13 @@
 #
 # Nikolaj64 <nikolajholmquist@gmail.com>, 2013, 2014.
 # Ask Hjorth Larsen <asklarsen@gmail.com>, 2016.
-# Alan Mortensen <alanmortensen.am@gmail.com>, 2016-18.
+# Alan Mortensen <alanmortensen.am@gmail.com>, 2016-19.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-10-24 16:18+0000\n"
-"PO-Revision-Date: 2018-10-27 16:32+0200\n"
+"POT-Creation-Date: 2019-01-10 06:53+0000\n"
+"PO-Revision-Date: 2019-01-24 19:56+0100\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish (http://www.transifex.com/projects/p/geary/language/"
 "da/)\n"
@@ -41,6 +41,7 @@ msgstr "Send filer med Geary"
 #: desktop/geary-autostart.desktop.in:3
 #: desktop/org.gnome.Geary.appdata.xml.in:11
 #: desktop/org.gnome.Geary.desktop.in:3
+#: src/client/accounts/accounts-editor-servers-pane.vala:539
 msgid "Geary"
 msgstr "Geary"
 
@@ -328,131 +329,444 @@ msgstr ""
 "Falsk (false) for at tjekke for det gamle “org.yorba.geary”-skema og kopiere "
 "dets værdier."
 
-#: src/client/accounts/account-dialog-add-edit-pane.vala:54
-#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:83
-msgid "_Save"
-msgstr "_Gem"
+#. Translators: In-app notification label, when
+#. the app had a problem pinning an otherwise
+#. untrusted TLS certificate
+#: src/client/accounts/accounts-editor.vala:203
+msgid "Failed to store certificate"
+msgstr "Kunne ikke gemme certifikatet"
 
-#: src/client/accounts/account-dialog-add-edit-pane.vala:54
-#: src/client/components/stock.vala:22
-msgid "_Add"
-msgstr "Til_føj"
+#. Translators: Label for adding an email account
+#. account for a generic IMAP service provider.
+#: src/client/accounts/accounts-editor-add-pane.vala:109
+msgid "All others"
+msgstr "Alle andre"
 
-#. reset/clear widgets
-#: src/client/accounts/account-dialog-edit-alternate-emails-pane.vala:120
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:196
+#: src/client/accounts/accounts-editor-servers-pane.vala:300
+msgid "Check your receiving login and password"
+msgstr "Tjek indgående login og adgangskode"
+
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:211
+#: src/client/accounts/accounts-editor-servers-pane.vala:313
+msgid "Check your receiving server details"
+msgstr "Gennemse detaljer for indgående server"
+
+#. Translators: In-app notification label
+#. There was an SMTP auth error, but IMAP already
+#. succeeded, so the user probably needs to
+#. specify custom creds here
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:233
+#: src/client/accounts/accounts-editor-servers-pane.vala:334
+msgid "Check your sending login and password"
+msgstr "Tjek udgående login og adgangskode"
+
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:247
+#: src/client/accounts/accounts-editor-servers-pane.vala:347
+msgid "Check your sending server details"
+msgstr "Gennemse detaljer for udgående server"
+
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:262
+msgid "Check your email address and password"
+msgstr "Tjek din e-mailadresse og adgangskode"
+
+#. Translators: In-app notification label
+#: src/client/accounts/accounts-editor-add-pane.vala:273
+msgid "Could not connect, check your network"
+msgstr "Kunne ikke forbinde, tjek dit netværk"
+
+#. Translators: In-app notification label for a
+#. generic error creating an account
+#: src/client/accounts/accounts-editor-add-pane.vala:286
+msgid "An unexpected problem occurred"
+msgstr "Der opstod et uventet problem"
+
+#. Translators: In-app notification label, the
+#. string substitution is a more detailed reason.
+#: src/client/accounts/accounts-editor-add-pane.vala:304
 #, c-format
-msgid "Additional addresses for %s"
-msgstr "Yderligere adresser for %s"
+msgid "Account not created: %s"
+msgstr "Konto ikke oprettet: %s"
 
-#. Sets min size.
-#: src/client/accounts/account-dialog.vala:28
-msgid "Accounts"
-msgstr "Konti"
+#. Translators: Label for the person's actual name when adding
+#. an account
+#: src/client/accounts/accounts-editor-add-pane.vala:552
+msgid "Your name"
+msgstr "Dit navn"
 
-#. Copyright 2016 Software Freedom Conservancy Inc.
-#. *
-#. * This software is licensed under the GNU Lesser General Public License
-#. * (version 2.1 or later).  See the COPYING file in this distribution.
-#.
-#. Page for adding or editing an account.
-#. / Placeholder text indicating that the user should type their first name and last name
-#: src/client/accounts/add-edit-page.vala:10
-msgid "First Last"
-msgstr "Fornavn Efternavn"
+#: src/client/accounts/accounts-editor-add-pane.vala:569
+msgid "Email address"
+msgstr "E-mailadresse"
 
-#: src/client/accounts/add-edit-page.vala:240
-msgid "Welcome to Geary."
-msgstr "Velkommen til Geary."
+#. Translators: Placeholder for the default sender address
+#. when adding an account
+#. Translators: This is used as a placeholder for the
+#. address part of an email address when editing a user's
+#. sender address preferences for an account.
+#: src/client/accounts/accounts-editor-add-pane.vala:572
+#: src/client/accounts/accounts-editor-edit-pane.vala:469
+msgid "person@example.com"
+msgstr "person@eksempel.dk"
 
-#: src/client/accounts/add-edit-page.vala:240
-msgid "Enter your account information to get started."
-msgstr "Indtast kontoinformation for at starte."
+#. Translators: Label for an IMAP/SMTP service login/user name
+#. when adding an account
+#. Translators: Label for the user's login name for an
+#. IMAP, SMTP, etc service
+#: src/client/accounts/accounts-editor-add-pane.vala:586
+#: src/client/accounts/accounts-editor-servers-pane.vala:809
+msgid "Login name"
+msgstr "Loginnavn"
 
-#: src/client/accounts/add-edit-page.vala:260
-msgid "2 weeks back"
-msgstr "2 uger siden"
+#. Translators: Label for the user's password for an IMAP,
+#. SMTP, etc service
+#: src/client/accounts/accounts-editor-add-pane.vala:600
+#: src/client/accounts/accounts-editor-servers-pane.vala:928
+#: ui/password-dialog.glade:108
+msgid "Password"
+msgstr "Adgangskode"
 
-#. IDs are # of days
-#: src/client/accounts/add-edit-page.vala:261
-msgid "1 month back"
-msgstr "1 måned siden"
+#. Translators: Label for the IMAP server hostname when
+#. adding an account.
+#. Translators: This label describes the host name or IP
+#. address and port used by an account's IMAP service.
+#: src/client/accounts/accounts-editor-add-pane.vala:622
+#: src/client/accounts/accounts-editor-servers-pane.vala:656
+msgid "IMAP server"
+msgstr "IMAP-server"
 
-#: src/client/accounts/add-edit-page.vala:262
-msgid "3 months back"
-msgstr "3 måneder siden"
+#. Translators: Placeholder for the IMAP server hostname
+#. when adding an account.
+#: src/client/accounts/accounts-editor-add-pane.vala:625
+msgid "imap.example.com"
+msgstr "imap.eksempel.dk"
 
-#: src/client/accounts/add-edit-page.vala:263
-msgid "6 months back"
-msgstr "6 måneder siden"
+#. Translators: Label for the SMTP server hostname when
+#. adding an account.
+#. Translators: This label describes the host name or IP
+#. address and port used by an account's SMTP service.
+#: src/client/accounts/accounts-editor-add-pane.vala:631
+#: src/client/accounts/accounts-editor-servers-pane.vala:662
+#| msgid "SMTP username"
+msgid "SMTP server"
+msgstr "SMTP-server"
 
-#: src/client/accounts/add-edit-page.vala:264
-msgid "1 year back"
-msgstr "1 år siden"
+#. Translators: Placeholder for the SMTP server hostname
+#. when adding an account.
+#: src/client/accounts/accounts-editor-add-pane.vala:634
+msgid "smtp.example.com"
+msgstr "smtp.eksempel.dk"
 
-#: src/client/accounts/add-edit-page.vala:265
-msgid "2 years back"
-msgstr "2 år siden"
+#. Translators: Label in the account editor for the user's
+#. custom name for an account.
+#: src/client/accounts/accounts-editor-edit-pane.vala:278
+#: ui/accounts_editor_remove_pane.ui:123
+msgid "Account name"
+msgstr "Kontonavn"
 
-#: src/client/accounts/add-edit-page.vala:266
-msgid "4 years back"
-msgstr "4 år siden"
+#. Translators: Tooltip used to undo changing
+#. the name of an account. The string
+#. substitution is the old name of the
+#. account.
+#: src/client/accounts/accounts-editor-edit-pane.vala:312
+#, c-format
+msgid "Change account name back to “%s”"
+msgstr "Skift kontonavnet tilbage til “%s”"
 
-#. Separator
-#: src/client/accounts/add-edit-page.vala:268
+#. Translators: Tooltip for adding a new email sender/from
+#. address's address to an account
+#: src/client/accounts/accounts-editor-edit-pane.vala:336
+msgid "Add a new sender email address"
+msgstr "Tilføj en ny e-mailadresse for afsender"
+
+#. Translators: Label used to indicate the user has
+#. provided no display name for one of their sender
+#. email addresses in their account settings.
+#: src/client/accounts/accounts-editor-edit-pane.vala:417
+msgid "Name not set"
+msgstr "Navn ikke angivet"
+
+#. Translators: This is used as a placeholder for the
+#. display name for an email address when editing a user's
+#. sender address preferences for an account.
+#: src/client/accounts/accounts-editor-edit-pane.vala:456
+msgid "Sender Name"
+msgstr "Navn på afsender"
+
+#: src/client/accounts/accounts-editor-edit-pane.vala:479
+msgid "Remove"
+msgstr "Fjern"
+
+#. Translators: Label used for the display name part of an
+#. email address when editing a user's sender address
+#. preferences for an account.
+#: src/client/accounts/accounts-editor-edit-pane.vala:494
+msgid "Sender name:"
+msgstr "Navn på afsender:"
+
+#. Translators: Label used for the address part of an
+#. email address when editing a user's sender address
+#. preferences for an account.
+#: src/client/accounts/accounts-editor-edit-pane.vala:501
+msgid "Email address:"
+msgstr "E-mailadresse:"
+
+#. Translators: Label used as the undo tooltip after adding an
+#. new sender email address to an account. The string
+#. substitution is the email address added.
+#: src/client/accounts/accounts-editor-edit-pane.vala:561
+#, c-format
+msgid "Remove “%s”"
+msgstr "Fjern “%s”"
+
+#. Translators: Label used as the undo tooltip after editing a
+#. sender address for an account. The string substitution is
+#. the email address edited.
+#: src/client/accounts/accounts-editor-edit-pane.vala:601
+#, c-format
+msgid "Undo changes to “%s”"
+msgstr "Fortryd ændringer af “%s”"
+
+#. Translators: Label used as the undo tooltip after removing
+#. a sender address from an account. The string substitution
+#. is the email address edited.
+#: src/client/accounts/accounts-editor-edit-pane.vala:690
+#, c-format
+msgid "Add “%s” back"
+msgstr "Tilføj “%s” igen"
+
+#. Translators: Label used as the undo tooltip after removing
+#. a sender address from an account. The string substitution
+#. is the email address edited.
+#: src/client/accounts/accounts-editor-edit-pane.vala:728
+msgid "Undo signature changes"
+msgstr "Fortryd ændringer af signatur"
+
+#. Translators: This label describes the account
+#. preference for the length of time (weeks, months or
+#. years) that past email should be downloaded.
+#: src/client/accounts/accounts-editor-edit-pane.vala:772
+msgid "Download mail"
+msgstr "Hent mail"
+
+#. Translators: Tooltip for undoing a change
+#. to the length of time that past email
+#. should be downloaded for an account. The
+#. string substitution is the duration,
+#. e.g. "1 month back".
+#: src/client/accounts/accounts-editor-edit-pane.vala:804
+#, c-format
+msgid "Change download period back to: %s"
+msgstr "Skift downloadperiode tilbage til: %s"
+
+#: src/client/accounts/accounts-editor-edit-pane.vala:825
 msgid "Everything"
-msgstr "Alt"
+msgstr "Alle"
 
-#: src/client/accounts/add-edit-page.vala:288
-msgid "Edit"
-msgstr "Redigér"
+#: src/client/accounts/accounts-editor-edit-pane.vala:829
+msgid "2 weeks back"
+msgstr "2 uger"
 
-#: src/client/accounts/add-edit-page.vala:290
-msgid "Preview"
-msgstr "Forhåndsvisning"
+#: src/client/accounts/accounts-editor-edit-pane.vala:833
+msgid "1 month back"
+msgstr "1 måned"
 
-#: src/client/accounts/add-edit-page.vala:778
-msgid "Remem_ber passwords"
-msgstr "Hus_k adgangskoder"
+#: src/client/accounts/accounts-editor-edit-pane.vala:837
+msgid "3 months back"
+msgstr "3 måneder"
 
-#: src/client/accounts/add-edit-page.vala:785 ui/login.glade:233
-msgid "Remem_ber password"
-msgstr "Hu_sk adgangskode"
+#: src/client/accounts/accounts-editor-edit-pane.vala:841
+msgid "6 months back"
+msgstr "6 måneder"
 
-#: src/client/accounts/add-edit-page.vala:819
-msgid "Unable to validate:\n"
-msgstr "Kunne ikke validere:\n"
+#: src/client/accounts/accounts-editor-edit-pane.vala:845
+msgid "1 year back"
+msgstr "1 år"
 
-#: src/client/accounts/add-edit-page.vala:821
-msgid "        • Invalid account nickname.\n"
-msgstr "        • Ugyldigt kaldenavn til bruger.\n"
+#: src/client/accounts/accounts-editor-edit-pane.vala:849
+msgid "2 years back"
+msgstr "2 år"
 
-#: src/client/accounts/add-edit-page.vala:824
-msgid "        • Email address already added to Geary.\n"
-msgstr "        • E-mailadressen er allerede tilføjet til Geary.\n"
+#: src/client/accounts/accounts-editor-edit-pane.vala:853
+msgid "4 years back"
+msgstr "4 år"
 
-#: src/client/accounts/add-edit-page.vala:828
-msgid "        • IMAP connection error.\n"
-msgstr "        • IMAP-forbindelsesfejl.\n"
+#: src/client/accounts/accounts-editor-edit-pane.vala:859
+#, c-format
+msgid "%d day back"
+msgid_plural "%d days back"
+msgstr[0] "%d dag"
+msgstr[1] "%d dage"
 
-#: src/client/accounts/add-edit-page.vala:831
-msgid "        • IMAP username or password incorrect.\n"
-msgstr "        • Forkert brugernavn eller adgangskode til IMAP.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:243
+msgid "Undo"
+msgstr "Fortryd"
 
-#: src/client/accounts/add-edit-page.vala:834
-msgid "        • SMTP connection error.\n"
-msgstr "        • SMTP-forbindelsesfejl.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:251
+msgid "Redo"
+msgstr "Genskab"
 
-#: src/client/accounts/add-edit-page.vala:837
-msgid "        • SMTP username or password incorrect.\n"
-msgstr "        • Forkert brugernavn eller adgangskode til SMTP.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:345
+#: src/client/accounts/accounts-editor-list-pane.vala:433
+#: src/client/accounts/accounts-editor-row.vala:278
+msgid "Gmail"
+msgstr "Gmail"
 
-#: src/client/accounts/add-edit-page.vala:841
-msgid "        • Connection error.\n"
-msgstr "        • Forbindelsesfejl.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:349
+#: src/client/accounts/accounts-editor-list-pane.vala:437
+#: src/client/accounts/accounts-editor-row.vala:282
+msgid "Outlook.com"
+msgstr "Outlook.com"
 
-#: src/client/accounts/add-edit-page.vala:845
-msgid "        • Username or password incorrect.\n"
-msgstr "        • Forkert brugernavn eller adgangskode.\n"
+#: src/client/accounts/accounts-editor-list-pane.vala:353
+#: src/client/accounts/accounts-editor-list-pane.vala:441
+#: src/client/accounts/accounts-editor-row.vala:286
+msgid "Yahoo"
+msgstr "Yahoo"
+
+#. Translators: Tooltip for accounts that have been
+#. loaded but disabled by the user.
+#: src/client/accounts/accounts-editor-list-pane.vala:371
+msgid "This account has been disabled"
+msgstr "Denne konto er deaktiveret"
+
+#. Translators: Tooltip for accounts that have been
+#. loaded but because of some error are not able to be
+#. used.
+#: src/client/accounts/accounts-editor-list-pane.vala:380
+msgid "This account has encountered a problem and is unavailable"
+msgstr "Denne konto er stødt på et problem og er utilgængelig"
+
+#. Translators: Label for adding a generic email account
+#: src/client/accounts/accounts-editor-list-pane.vala:430
+msgid "Other email providers"
+msgstr "Andre e-mailudbydere"
+
+#. Translators: Notification shown after removing an
+#. account. The string substitution is the name of the
+#. account.
+#: src/client/accounts/accounts-editor-list-pane.vala:547
+#, c-format
+msgid "Account “%s” removed"
+msgstr "Konto “%s” fjernet"
+
+#. Translators: Notification shown after removing an account
+#. is undone. The string substitution is the name of the
+#. account.
+#: src/client/accounts/accounts-editor-list-pane.vala:554
+#, c-format
+msgid "Account “%s” restored"
+msgstr "Konto “%s” genskabt"
+
+#. Translators: Tooltip for dragging list items
+#: src/client/accounts/accounts-editor-row.vala:49
+msgid "Drag to move this item"
+msgstr "Træk for at flytte dette element"
+
+#. Translators: Label describes the service provider
+#. hosting the email account, e.g. Gmail, Yahoo, or some
+#. other generic IMAP service.
+#: src/client/accounts/accounts-editor-row.vala:294
+msgid "Service provider"
+msgstr "Serviceudbyder"
+
+#. Translators: This label describes what form of transport
+#. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
+#. service.
+#: src/client/accounts/accounts-editor-row.vala:467
+msgid "Connection security"
+msgstr "Forbindelsessikkerhed"
+
+#. Translators: Label used when no auth scheme is used
+#. by an account's IMAP or SMTP service.
+#: src/client/accounts/accounts-editor-row.vala:478
+#: src/client/accounts/accounts-editor-servers-pane.vala:681
+#: src/client/accounts/accounts-editor-servers-pane.vala:893
+#: src/engine/api/geary-special-folder-type.vala:58
+msgid "None"
+msgstr "Ingen"
+
+#: src/client/accounts/accounts-editor-row.vala:485
+#| msgctxt "shortcut window"
+#| msgid "Star"
+msgid "StartTLS"
+msgstr "StartTLS"
+
+#: src/client/accounts/accounts-editor-row.vala:492
+#| msgid "SSL/TLS"
+msgid "TLS"
+msgstr "TLS"
+
+#. Translators: Label for source of SMTP authentication
+#. credentials (none, use IMAP, custom) when adding a new
+#. account
+#. Button label for retrying when a login error has occurred
+#: src/client/accounts/accounts-editor-row.vala:533 ui/main-window.ui:455
+msgid "Login"
+msgstr "Login"
+
+#. Translators: ComboBox value for source of SMTP
+#. authentication credentials (none) when adding a new
+#. account
+#: src/client/accounts/accounts-editor-row.vala:540
+msgid "No login needed"
+msgstr "Login ikke nødvendig"
+
+#. Translators: ComboBox value for source of SMTP
+#. authentication credentials (use IMAP) when adding a new
+#. account
+#: src/client/accounts/accounts-editor-row.vala:548
+msgid "Use same login as receiving"
+msgstr "Brug samme login som indgående"
+
+#. Translators: ComboBox value for source of SMTP
+#. authentication credentials (custom) when adding a new
+#. account
+#: src/client/accounts/accounts-editor-row.vala:556
+msgid "Use a different login"
+msgstr "Brug et andet login"
+
+#. Translators: In-app notification label, the
+#. string substitution is a more detailed reason.
+#: src/client/accounts/accounts-editor-servers-pane.vala:361
+#, c-format
+msgid "Account not updated: %s"
+msgstr "Konto ikke opdateret: %s"
+
+#. Translators: This label describes the program that
+#. created the account, e.g. an SSO service like GOA, or
+#. locally by Geary.
+#: src/client/accounts/accounts-editor-servers-pane.vala:524
+msgid "Account source"
+msgstr "Kontokilde"
+
+#: src/client/accounts/accounts-editor-servers-pane.vala:536
+msgid "GNOME Online Accounts"
+msgstr "GNOME Onlinekonti"
+
+#. Translators: This label describes an account
+#. preference.
+#: src/client/accounts/accounts-editor-servers-pane.vala:595
+msgid "Save drafts on server"
+msgstr "Gem kladder på serveren"
+
+#. Add a suffix for OAuth2 auth so people know they
+#. shouldn't expect to be prompted for a password
+#. Translators: Label used when an account's IMAP or
+#. SMTP service uses OAuth2. The string replacement is
+#. the service's login name.
+#: src/client/accounts/accounts-editor-servers-pane.vala:879
+#, c-format
+msgid "%s using OAuth2"
+msgstr "%s gennem OAuth2"
+
+#: src/client/accounts/accounts-editor-servers-pane.vala:889
+msgid "Use receiving server login"
+msgstr "Brug login til indgående server"
 
 #: src/client/application/geary-application.vala:22
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
@@ -466,7 +780,7 @@ msgstr "Ophavsret 2016-2018 Gearys udviklerhold."
 msgid "Visit the Geary web site"
 msgstr "Besøg Gearys hjemmeside"
 
-#: src/client/application/geary-application.vala:416
+#: src/client/application/geary-application.vala:414
 #, c-format
 msgid "About %s"
 msgstr "Om %s"
@@ -474,7 +788,7 @@ msgstr "Om %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:420
+#: src/client/application/geary-application.vala:418
 msgid "translator-credits"
 msgstr ""
 "Nikolaj Holmquist Pedersen <nikolajholmquist@gmail.com>\n"
@@ -568,74 +882,23 @@ msgstr "Ukendt kommandolinje-indstilling “%s”\n"
 
 #. Translators: File name used in save chooser when saving
 #. attachments that do not otherwise have a name.
-#: src/client/application/geary-controller.vala:68
+#: src/client/application/geary-controller.vala:61
 msgid "Untitled"
 msgstr "Unavngivet"
 
-#: src/client/application/geary-controller.vala:721
-msgid "Unable to store server trust exception"
-msgstr "Kan ikke gemme undtagelse for tillid til server"
-
-#: src/client/application/geary-controller.vala:972
-msgid "Your settings are insecure"
-msgstr "Dine indstillinger er usikre"
-
-#: src/client/application/geary-controller.vala:973
-msgid ""
-"Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
-"username and password could be read by another person on the network.  Are "
-"you sure you want to do this?"
-msgstr ""
-"Dine IMAP- og/eller SMTP-indstillinger anvender ikke SSL eller TLS. Dette "
-"betyder, at dit brugernavn og din adgangskode kan læses af andre på "
-"netværket. Er du sikker på, at du vil gære dette?"
-
-#: src/client/application/geary-controller.vala:974
-msgid "Co_ntinue"
-msgstr "F_ortsæt"
-
-#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/application/geary-controller.vala:1078
-#: src/client/components/status-bar.vala:29
-msgid "Error sending email"
-msgstr "Der opstod en fejl ved afsendelse af e-mail"
-
-#: src/client/application/geary-controller.vala:1079
-msgid ""
-"Geary encountered an error sending an email.  If the problem persists, "
-"please manually delete the email from your Outbox folder."
-msgstr ""
-"Geary stødte ind i en fejl under afsendelse af en e-mail. Hvis dette problem "
-"fortsætter, bør du manuelt slette beskeden fra din “Udbakke”-mappe."
-
-#. Displayed in the space-limited status bar when a message fails to be uploaded
-#. to Sent Mail after being sent.
-#: src/client/application/geary-controller.vala:1083
-#: src/client/components/status-bar.vala:33
-msgid "Error saving sent mail"
-msgstr "Der opstod en fejl ved lagring af den afsendte e-mail"
-
-#: src/client/application/geary-controller.vala:1084
-msgid ""
-"Geary encountered an error saving a sent message to Sent Mail.  The message "
-"will stay in your Outbox folder until you delete it."
-msgstr ""
-"Der opstod en fejl, da Geary forsøgte at gemme en sendt besked til mappen "
-"med afsendt e-mail.  Beskeden vil blive i din Udbakke, indtil du sletter den."
-
-#: src/client/application/geary-controller.vala:1151
+#: src/client/application/geary-controller.vala:899
 msgid "Labels"
 msgstr "Etiketter"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:1163
+#: src/client/application/geary-controller.vala:911
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Kunne ikke åbne databasen for %s"
 
-#: src/client/application/geary-controller.vala:1164
+#: src/client/application/geary-controller.vala:912
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -659,20 +922,20 @@ msgstr ""
 "Genopbygning af databasen vil slette al lokal e-mail og dets vedhæftede "
 "filer. <b>Mail'en på serveren vil ikke blive rørt.</b>"
 
-#: src/client/application/geary-controller.vala:1166
+#: src/client/application/geary-controller.vala:914
 msgid "_Rebuild"
 msgstr "_Genopbyg"
 
-#: src/client/application/geary-controller.vala:1166
+#: src/client/application/geary-controller.vala:914
 msgid "E_xit"
 msgstr "_Afslut"
 
-#: src/client/application/geary-controller.vala:1175
+#: src/client/application/geary-controller.vala:923
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Kunne ikke genopbygge databasen for “%s”"
 
-#: src/client/application/geary-controller.vala:1176
+#: src/client/application/geary-controller.vala:924
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -683,68 +946,15 @@ msgstr ""
 "\n"
 "%s"
 
-#. some other problem opening the account ... as with other flow path, can't run
-#. Geary today with an account in unopened state, so have to exit
-#: src/client/application/geary-controller.vala:1198
-#: src/client/application/geary-controller.vala:1208
-#: src/client/application/geary-controller.vala:1219
-#, c-format
-msgid "Unable to open local mailbox for %s"
-msgstr "Kunne ikke åbne den lokale postkasse for %s"
-
-#: src/client/application/geary-controller.vala:1199
-#, c-format
-msgid ""
-"There was an error opening the local mail database for this account. This is "
-"possibly due to a file permissions problem.\n"
-"\n"
-"Please check that you have read/write permissions for all files in this "
-"directory:\n"
-"\n"
-"%s"
-msgstr ""
-"Der opstod en fejl under åbningen af den lokale e-maildatabase til denne "
-"konto. Dette sker sikkert på grund af problemer med filrettigheder.\n"
-"\n"
-"Tjek at du har læse- og skriverettigheder for alle filer i denne mappe.\n"
-"\n"
-"%s"
-
-#: src/client/application/geary-controller.vala:1209
-msgid ""
-"The version number of the local mail database is formatted for a newer "
-"version of Geary. Unfortunately, the database cannot be “rolled back” to "
-"work with this version of Geary.\n"
-"\n"
-"Please install the latest version of Geary and try again."
-msgstr ""
-"Den lokale e-maildatabases versionsnummer er til en nyere version af Geary. "
-"Desværre kan databasen ikke blive “rullet tilbage”, så den virker med denne "
-"version of Geary.\n"
-"\n"
-"Installér venligst den nyeste version af Geary og prøv igen."
-
-#: src/client/application/geary-controller.vala:1220
-msgid ""
-"There was an error opening the local account. This is probably due to "
-"connectivity issues.\n"
-"\n"
-"Please check your network connection and restart Geary."
-msgstr ""
-"Der opstod en felj under åbning af den lokele konto. Dette sker sikkert på "
-"grund af forbindelsesproblemer.\n"
-"\n"
-"Tjek, at din internetforbindelse virker og genstart derefter Geary."
-
-#: src/client/application/geary-controller.vala:2038
+#: src/client/application/geary-controller.vala:1738
 msgid "Undo move (Ctrl+Z)"
 msgstr "Fortryd flyt (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2048
+#: src/client/application/geary-controller.vala:1748
 msgid "Are you sure you want to open these attachments?"
 msgstr "Er du sikker på, at du vil åbne disse vedhæftede filer?"
 
-#: src/client/application/geary-controller.vala:2049
+#: src/client/application/geary-controller.vala:1749
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -752,14 +962,14 @@ msgstr ""
 "Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra "
 "folk, du stoler på."
 
-#: src/client/application/geary-controller.vala:2050
+#: src/client/application/geary-controller.vala:1750
 msgid "Don’t _ask me again"
 msgstr "S_pørg mig ikke igen"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/geary-controller.vala:2179
+#: src/client/application/geary-controller.vala:1879
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Filen “%s” findes allerede. Vil du erstatte den?"
@@ -767,7 +977,7 @@ msgstr "Filen “%s” findes allerede. Vil du erstatte den?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/geary-controller.vala:2186
+#: src/client/application/geary-controller.vala:1886
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -775,71 +985,97 @@ msgstr ""
 "Filen findes allerede i “%s”. Hvis du erstatter den, overskrives dens "
 "indhold."
 
-#: src/client/application/geary-controller.vala:2190
+#: src/client/application/geary-controller.vala:1890
 msgid "_Replace"
 msgstr "_Erstat"
 
-#: src/client/application/geary-controller.vala:2460
+#: src/client/application/geary-controller.vala:2160
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Luk kladden?"
 msgstr[1] "Luk alle kladder?"
 
-#: src/client/application/geary-controller.vala:2586
+#: src/client/application/geary-controller.vala:2286
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Tøm al e-mail fra din %s-mappe?"
 
-#: src/client/application/geary-controller.vala:2587
+#: src/client/application/geary-controller.vala:2287
 msgid "This removes the email from Geary and your email server."
 msgstr "Dette fjerner e-mail fra Geary samt din e-mailserver."
 
-#: src/client/application/geary-controller.vala:2588
+#: src/client/application/geary-controller.vala:2288
 msgid "This cannot be undone."
 msgstr "Dette kan ikke fortrydes."
 
-#: src/client/application/geary-controller.vala:2589
+#: src/client/application/geary-controller.vala:2289
 #, c-format
 msgid "Empty %s"
 msgstr "Tøm %s"
 
-#: src/client/application/geary-controller.vala:2606
+#: src/client/application/geary-controller.vala:2306
 #, c-format
 msgid "Error emptying %s"
 msgstr "Fejl ved tømning af %s"
 
-#: src/client/application/geary-controller.vala:2638
+#: src/client/application/geary-controller.vala:2338
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Ønsker du at slette denne besked permanent?"
 msgstr[1] "Ønsker du at slette disse beskeder permanent?"
 
-#: src/client/application/geary-controller.vala:2640
+#: src/client/application/geary-controller.vala:2340
 msgid "Delete"
 msgstr "Slet"
 
-#: src/client/application/geary-controller.vala:2654
+#: src/client/application/geary-controller.vala:2354
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Fortryd smid i papirkurv (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2704
+#: src/client/application/geary-controller.vala:2404
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Fortryd arkivér (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2749
+#: src/client/application/geary-controller.vala:2449
 msgid "Undo (Ctrl+Z)"
 msgstr "Fortryd (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2826
+#: src/client/application/geary-controller.vala:2526
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Sendte mail til %s."
 
-#: src/client/application/geary-controller.vala:2907
+#: src/client/application/geary-controller.vala:2607
 msgid "Failed to open default text editor."
 msgstr "Kunne ikke åbne standardprogrammet til tekstredigéring."
+
+#. Translators: Tooltip used when an entry requires a valid
+#. email address to be entered, but one is not provided.
+#: src/client/components/components-validator.vala:341
+msgid "An email address is required"
+msgstr "En e-mailadresse er påkrævet"
+
+#. Translators: Tooltip used when an entry requires a valid
+#. email address to be entered, but the address is invalid.
+#: src/client/components/components-validator.vala:345
+msgid "Not a valid email address"
+msgstr "Ikke en gyldig e-mailadresse"
+
+#. Translators: Tooltip used when an entry requires a valid,
+#. resolvable server name to be entered, but one is not
+#. provided.
+#: src/client/components/components-validator.vala:391
+msgid "A server name is required"
+msgstr "Et servernavn er påkrævet"
+
+#. Translators: Tooltip used when an entry requires a valid
+#. server name to be entered, but it was unable to be
+#. looked-up in the DNS.
+#: src/client/components/components-validator.vala:396
+msgid "Could not look up server name"
+msgstr "Kunne ikke slå servernavnet op"
 
 #. Tooltips
 #: src/client/components/main-toolbar.vala:69
@@ -890,20 +1126,20 @@ msgstr "Flyt samtale"
 msgid "Move conversations"
 msgstr "Flyt samtaler"
 
-#: src/client/components/main-window.vala:440
+#: src/client/components/main-window.vala:497
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:54
+#: src/client/components/main-window-info-bar.vala:47
 #, c-format
 msgid "Problem connecting to incoming server for %s"
 msgstr "Problem med at forbinde til indgående server for %s"
 
 #. Translators: String substitution is the server name
-#: src/client/components/main-window-info-bar.vala:56
-#: src/client/components/main-window-info-bar.vala:64
+#: src/client/components/main-window-info-bar.vala:49
+#: src/client/components/main-window-info-bar.vala:57
 #, c-format
 msgid ""
 "Could not connect to %s, check your Internet access and the server name and "
@@ -913,57 +1149,58 @@ msgstr ""
 "igen"
 
 # Eller skal det være: Prøver nu at forbinde igen
-#: src/client/components/main-window-info-bar.vala:57
-#: src/client/components/main-window-info-bar.vala:66
+#. Button tooltip for retrying an account problem
+#: src/client/components/main-window-info-bar.vala:50
+#: src/client/components/main-window-info-bar.vala:59 ui/main-window.ui:265
 msgid "Retry connecting now"
 msgstr "Prøv igen at forbinde nu"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:62
+#: src/client/components/main-window-info-bar.vala:55
 #, c-format
 msgid "Problem connecting to outgoing server for %s"
 msgstr "Problem med at forbinde til udgående server for %s"
 
-#: src/client/components/main-window-info-bar.vala:65
+#: src/client/components/main-window-info-bar.vala:58
 msgid "Try reconnecting now"
 msgstr "Prøv at forbinde igen nu"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:71
+#: src/client/components/main-window-info-bar.vala:64
 #, c-format
 msgid "Problem with connection to incoming server for %s"
 msgstr "Problem med forbindelsen til indgående server for %s"
 
 #. Translators: String substitution is the server name
-#: src/client/components/main-window-info-bar.vala:73
-#: src/client/components/main-window-info-bar.vala:81
+#: src/client/components/main-window-info-bar.vala:66
+#: src/client/components/main-window-info-bar.vala:74
 #, c-format
 msgid "Network error talking to %s, check your Internet access and try again"
 msgstr ""
 "Netværksfejl ved kommunikation med %s. Tjek din internetadgang og prøv igen"
 
-#: src/client/components/main-window-info-bar.vala:74
-#: src/client/components/main-window-info-bar.vala:82
-#: src/client/components/main-window-info-bar.vala:90
-#: src/client/components/main-window-info-bar.vala:98
-#: src/client/components/main-window-info-bar.vala:119
+#: src/client/components/main-window-info-bar.vala:67
+#: src/client/components/main-window-info-bar.vala:75
+#: src/client/components/main-window-info-bar.vala:83
+#: src/client/components/main-window-info-bar.vala:91
+#: src/client/components/main-window-info-bar.vala:126
 msgid "Try reconnecting"
 msgstr "Prøv at forbinde igen"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:79
+#: src/client/components/main-window-info-bar.vala:72
 #, c-format
 msgid "Problem with connection to outgoing server for %s"
 msgstr "Problem med forbindelsen til udgående server for %s"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:87
+#: src/client/components/main-window-info-bar.vala:80
 #, c-format
 msgid "Problem communicating with incoming server for %s"
 msgstr "Problem med kommunikationen til indgående server for %s"
 
 #. Translators: String substitution is the server name
-#: src/client/components/main-window-info-bar.vala:89
+#: src/client/components/main-window-info-bar.vala:82
 #, c-format
 msgid ""
 "Geary did not understand a message from %s or vice versa, please file a bug "
@@ -972,13 +1209,13 @@ msgstr ""
 "Geary forstod ikke en besked fra %s eller omvendt. Indsend venligst en "
 "fejlrapport"
 
-#: src/client/components/main-window-info-bar.vala:94
+#: src/client/components/main-window-info-bar.vala:87
 msgid "Problem communicating with outgoing mail server"
 msgstr "Problem med kommunikationen til udgående mailserver"
 
 #. Translators: First string substitution is the server
 #. name, second is the account name
-#: src/client/components/main-window-info-bar.vala:97
+#: src/client/components/main-window-info-bar.vala:90
 #, c-format
 msgid ""
 "Could not communicate with %s for %s, check the server name and try again in "
@@ -987,109 +1224,116 @@ msgstr ""
 "Kunne ikke kommunikere med %s for %s. Tjek servernavnet og prøv igen om lidt"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:103
+#: src/client/components/main-window-info-bar.vala:96
 #, c-format
 msgid "Incoming mail server password required for %s"
 msgstr "Der kræves en adgangskode for %s til den indgående mailserver"
 
-#: src/client/components/main-window-info-bar.vala:104
+#: src/client/components/main-window-info-bar.vala:97
 msgid "Messages cannot be received without the correct password."
 msgstr "Beskeder kan ikke modtages uden den rigtige adgangskode."
 
-#: src/client/components/main-window-info-bar.vala:105
+#: src/client/components/main-window-info-bar.vala:98
 msgid "Retry receiving email, you will be prompted for a password"
 msgstr "Prøv igen at modtage e-mail; du vil blive bedt om en adgangskode"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:110
+#: src/client/components/main-window-info-bar.vala:103
 #, c-format
 msgid "Outgoing mail server password required for %s"
 msgstr "Der kræves en adgangskode for %s til den udgående mailserver"
 
-#: src/client/components/main-window-info-bar.vala:111
+#: src/client/components/main-window-info-bar.vala:104
 msgid "Messages cannot be sent without the correct password."
 msgstr "Beskeder kan ikke sendes uden den rigtige adgangskode."
 
-#: src/client/components/main-window-info-bar.vala:112
+#: src/client/components/main-window-info-bar.vala:105
 msgid "Retry sending queued messages, you will be prompted for a password"
 msgstr ""
 "Prøv igen at sende beskederne i køen; du vil blive bedt om en adgangskode"
 
 #. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:110
+#, c-format
+msgid "Incoming mail server security is not trusted for %s"
+msgstr "Indgående mailservers sikkerhed er ikke pålidelig for %s"
+
+# Går ud fra der henvises til sikkerheden i foregående
+#: src/client/components/main-window-info-bar.vala:111
+msgid "Messages will not be received until checked."
+msgstr "Beskeder vil ikke modtages, indtil den er undersøgt."
+
+#: src/client/components/main-window-info-bar.vala:112
+#: src/client/components/main-window-info-bar.vala:119
+msgid "Check security details"
+msgstr "Undersøg sikkerhedsdetaljer"
+
+#. Translators: String substitution is the account name
 #: src/client/components/main-window-info-bar.vala:117
+#, c-format
+msgid "Outgoing mail server security is not trusted for %s"
+msgstr "Udgående mailservers sikkerhed er ikke betroet for %s"
+
+#: src/client/components/main-window-info-bar.vala:118
+msgid "Messages cannot be sent until checked."
+msgstr "Beskeder kan ikke sendes, indtil den er undersøgt."
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:124
 #, c-format
 msgid "A problem occurred checking mail for %s"
 msgstr "Der opstod et problem, da der skulle tjekkes for mail for %s"
 
-#: src/client/components/main-window-info-bar.vala:118
 #: src/client/components/main-window-info-bar.vala:125
+#: src/client/components/main-window-info-bar.vala:132
 msgid "Something went wrong, please file a bug report if the problem persists"
 msgstr ""
 "Noget gik galt. Indsend venligst en fejlrapport, hvis der vedbliver at være "
 "et problem"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:124
+#: src/client/components/main-window-info-bar.vala:131
 #, c-format
 msgid "A problem occurred sending mail for %s"
 msgstr "Der opstod et problem, da der skulle sendes mail for %s"
 
-#: src/client/components/main-window-info-bar.vala:126
+#: src/client/components/main-window-info-bar.vala:133
 msgid "Retry sending queued messages"
 msgstr "Prøv igen at sende beskederne i køen"
 
-#: src/client/components/main-window-info-bar.vala:137
+#: src/client/components/main-window-info-bar.vala:144
 msgid "A database problem has occurred"
 msgstr "Der opstod et problem med databasen"
 
 #. Translators: String substitution is the account name
-#: src/client/components/main-window-info-bar.vala:139
+#: src/client/components/main-window-info-bar.vala:146
 #, c-format
 msgid "Messages for %s must be downloaded again."
 msgstr "Beskeder for %s skal hentes igen."
 
-#: src/client/components/main-window-info-bar.vala:152
+#: src/client/components/main-window-info-bar.vala:159
 msgid "Geary has encountered a problem"
 msgstr "Geary er stødt på et problem"
 
-#: src/client/components/main-window-info-bar.vala:153
+#: src/client/components/main-window-info-bar.vala:160
 msgid ""
 "Please check the technical details and report the problem if it persists."
 msgstr ""
 "Undersøg venligst de tekniske detaljer og rapportér, hvis der vedbliver at "
 "være et problem."
 
-#: src/client/components/main-window-info-bar.vala:161
+#: src/client/components/main-window-info-bar.vala:168
 msgid "_Details"
 msgstr "_Detaljer"
 
-#: src/client/components/main-window-info-bar.vala:162
+#. Button tooltip for displaying technical details about an account problem
+#: src/client/components/main-window-info-bar.vala:169 ui/main-window.ui:250
 msgid "View technical details about the error"
 msgstr "Vis tekniske detaljer om fejlen"
 
-#: src/client/components/main-window-info-bar.vala:166
+#: src/client/components/main-window-info-bar.vala:173
 msgid "_Retry"
 msgstr "_Prøv igen"
-
-#: src/client/components/main-window-info-bar.vala:253
-msgid "Details"
-msgstr "Detaljer"
-
-#: src/client/components/main-window-info-bar.vala:266
-#: src/client/components/stock.vala:23
-msgid "_Close"
-msgstr "_Luk"
-
-#: src/client/components/main-window-info-bar.vala:270
-msgid "Copy to Clipboard"
-msgstr "Kopiér til udklipsholderen"
-
-#: src/client/components/main-window-info-bar.vala:273
-msgid ""
-"Copy technical details to clipboard for pasting into an email or bug report"
-msgstr ""
-"Kopiér tekniske detaljer til udklipsholderen for at sætte dem ind i en e-"
-"mail eller en fejlrapport"
 
 #: src/client/components/search-bar.vala:8
 #: src/client/folder-list/folder-list-search-branch.vala:38
@@ -1102,12 +1346,12 @@ msgstr "Søg"
 msgid "Search all mail in account for keywords (Ctrl+S)"
 msgstr "Søg efter ord i al e-mail tilhørende kontoen (Ctrl+S)"
 
-#: src/client/components/search-bar.vala:100
+#: src/client/components/search-bar.vala:101
 #, c-format
 msgid "Indexing %s account"
 msgstr "Indeksérer %s konto"
 
-#: src/client/components/search-bar.vala:111
+#: src/client/components/search-bar.vala:112
 #: src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
@@ -1118,18 +1362,36 @@ msgstr "Søg %s-konto"
 msgid "Sending…"
 msgstr "Sender …"
 
-#: src/client/components/stock.vala:18 ui/account_cannot_remove.glade:74
+#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
+#: src/client/components/status-bar.vala:29
+msgid "Error sending email"
+msgstr "Der opstod en fejl ved afsendelse af e-mail"
+
+#. Displayed in the space-limited status bar when a message fails to be uploaded
+#. to Sent Mail after being sent.
+#: src/client/components/status-bar.vala:33
+msgid "Error saving sent mail"
+msgstr "Der opstod en fejl ved lagring af den afsendte e-mail"
+
+#: src/client/components/stock.vala:18
 msgid "_OK"
 msgstr "_OK"
 
-#: src/client/components/stock.vala:19 ui/edit_alternate_emails.glade:160
-#: ui/password-dialog.glade:196 ui/remove_confirm.glade:155
+#: src/client/components/stock.vala:19 ui/password-dialog.glade:196
 msgid "_Cancel"
 msgstr "_Annullér"
 
 #: src/client/components/stock.vala:21 ui/gtk/menus.ui:34
 msgid "_About"
 msgstr "_Om"
+
+#: src/client/components/stock.vala:22
+msgid "_Add"
+msgstr "Til_føj"
+
+#: src/client/components/stock.vala:23
+msgid "_Close"
+msgstr "_Luk"
 
 #: src/client/components/stock.vala:24
 msgid "_Discard"
@@ -1156,9 +1418,13 @@ msgstr "_Udskriv …"
 msgid "_Quit"
 msgstr "Af_slut"
 
-#: src/client/components/stock.vala:30 ui/remove_confirm.glade:170
+#: src/client/components/stock.vala:30
 msgid "_Remove"
 msgstr "_Fjern"
+
+#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:83
+msgid "_Save"
+msgstr "_Gem"
 
 #: src/client/components/stock.vala:32
 msgid "_Keep"
@@ -1208,34 +1474,34 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1102
+#: src/client/composer/composer-widget.vala:1103
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Ønsker du at beholde eller kassere denne kladde?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1130
+#: src/client/composer/composer-widget.vala:1131
 msgid "Do you want to discard this draft message?"
 msgstr "Ønsker du at kassere denne kladde?"
 
-#: src/client/composer/composer-widget.vala:1247
+#: src/client/composer/composer-widget.vala:1248
 msgid "Send message with an empty subject and body?"
 msgstr "Send beskeden uden tekst og emne?"
 
-#: src/client/composer/composer-widget.vala:1249
+#: src/client/composer/composer-widget.vala:1250
 msgid "Send message with an empty subject?"
 msgstr "Send beskeden uden et emne?"
 
-#: src/client/composer/composer-widget.vala:1251
+#: src/client/composer/composer-widget.vala:1252
 msgid "Send message with an empty body?"
 msgstr "Send beskeden uden nogen tekst?"
 
-#: src/client/composer/composer-widget.vala:1255
+#: src/client/composer/composer-widget.vala:1256
 msgid "Send message without an attachment?"
 msgstr "Send beskeden uden en vedhæftet fil?"
 
-#: src/client/composer/composer-widget.vala:1560
+#: src/client/composer/composer-widget.vala:1561
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s” er allerede vedhæftet."
@@ -1245,73 +1511,75 @@ msgstr "“%s” er allerede vedhæftet."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1568
+#: src/client/composer/composer-widget.vala:1569
 #: src/client/conversation-viewer/conversation-email.vala:136
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1605
+#: src/client/composer/composer-widget.vala:1606
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s” blev ikke fundet."
 
-#: src/client/composer/composer-widget.vala:1611
+#: src/client/composer/composer-widget.vala:1612
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s” er en mappe."
 
-#: src/client/composer/composer-widget.vala:1617
+#: src/client/composer/composer-widget.vala:1618
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s” er en tom fil."
 
-#: src/client/composer/composer-widget.vala:1630
+#: src/client/composer/composer-widget.vala:1631
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s” kunne ikke åbnes til læsning."
 
-#: src/client/composer/composer-widget.vala:1638
+#: src/client/composer/composer-widget.vala:1639
 msgid "Cannot add attachment"
 msgstr "Kan ikke tilføje filen"
 
-#: src/client/composer/composer-widget.vala:1687
+#: src/client/composer/composer-widget.vala:1688
 msgid "To: "
 msgstr "Til: "
 
-#: src/client/composer/composer-widget.vala:1690
+#: src/client/composer/composer-widget.vala:1691
 msgid "Cc: "
 msgstr "Cc: "
 
-#: src/client/composer/composer-widget.vala:1693
+#: src/client/composer/composer-widget.vala:1694
 msgid "Bcc: "
 msgstr "Bcc: "
 
-#: src/client/composer/composer-widget.vala:1696
+#: src/client/composer/composer-widget.vala:1697
 msgid "Reply-To: "
 msgstr "Svar-Til: "
 
-#: src/client/composer/composer-widget.vala:1834
+#: src/client/composer/composer-widget.vala:1835
 msgid "Select Color"
 msgstr "Vælg farve"
 
-#. Displayed in the From dropdown to indicate an "alternate email address"
-#. for an account.  The first printf argument will be the alternate email
-#. address, and the second will be the account's primary email address.
-#: src/client/composer/composer-widget.vala:2024
+#. Displayed in the From dropdown to indicate an
+#. "alternate email address" for an account.  The first
+#. printf argument will be the alternate email address,
+#. and the second will be the account's primary email
+#. address.
+#: src/client/composer/composer-widget.vala:2030
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2082
+#: src/client/composer/composer-widget.vala:2090
 msgid "_From:"
 msgstr "_Fra:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2307
+#: src/client/composer/composer-widget.vala:2315
 msgid "Images"
 msgstr "Billeder"
 
@@ -1469,7 +1737,7 @@ msgstr "Vælg en fil"
 msgid "_Attach"
 msgstr "_Vedhæft"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:35
+#: src/client/dialogs/certificate-warning-dialog.vala:36
 #, c-format
 msgid "Untrusted Connection: %s"
 msgstr "Ubetroet forbindelse: %s"
@@ -1507,44 +1775,40 @@ msgstr ""
 "Hvis du vælger “Stol ikke på serveren”, vil Geary holde op med at tilgå "
 "denne konto."
 
-#: src/client/dialogs/certificate-warning-dialog.vala:65
-msgid "Geary will exit if you have no other open email accounts."
-msgstr "Geary vil afsluttes, hvis du ikke har nogen andre åbne e-mailkonti."
-
-#: src/client/dialogs/certificate-warning-dialog.vala:70
+#: src/client/dialogs/certificate-warning-dialog.vala:69
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
 msgstr ""
-"Kontakt din systemadministrator eller e-mail-serviceudbyder, hvis du har "
+"Kontakt din systemadministrator eller e-mailudbyder, hvis du har "
 "spørgsmål vedrørende disse problemer."
 
-#: src/client/dialogs/certificate-warning-dialog.vala:77
+#: src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s certificate is not signed by a known authority"
 msgstr "Serverens certifikat er ikke signeret af en kendt autoritet"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:80
+#: src/client/dialogs/certificate-warning-dialog.vala:79
 msgid "The server’s identity does not match the identity in the certificate"
 msgstr ""
 "Serverens identitet stemmer ikke overens med identiteten i certifikatet"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:83
+#: src/client/dialogs/certificate-warning-dialog.vala:82
 msgid "The server’s certificate has expired"
 msgstr "Serverens certifikat er udløbet"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:86
+#: src/client/dialogs/certificate-warning-dialog.vala:85
 msgid "The server’s certificate has not been activated"
 msgstr "Serverens certifikat er ikke blevet aktiveret"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:89
+#: src/client/dialogs/certificate-warning-dialog.vala:88
 msgid "The server’s certificate has been revoked and is now invalid"
 msgstr "Serverens certifikat er blevet tilbagekaldt og er nu ugyldigt"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:92
+#: src/client/dialogs/certificate-warning-dialog.vala:91
 msgid "The server’s certificate is considered insecure"
 msgstr "Serverens certifikat anses som usikkert"
 
-#: src/client/dialogs/certificate-warning-dialog.vala:95
+#: src/client/dialogs/certificate-warning-dialog.vala:94
 msgid "An error has occurred processing the server’s certificate"
 msgstr "Der opstod en fejl ved indlæsningen af serverens certifikat"
 
@@ -1755,30 +2019,6 @@ msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
 
-#: src/engine/api/geary-service-information.vala:26
-msgid "IMAP"
-msgstr "IMAP"
-
-#: src/engine/api/geary-service-information.vala:29
-msgid "SMTP"
-msgstr "SMTP"
-
-#: src/engine/api/geary-service-provider.vala:52
-msgid "Gmail"
-msgstr "Gmail"
-
-#: src/engine/api/geary-service-provider.vala:55
-msgid "Yahoo! Mail"
-msgstr "Yahoo! Mail"
-
-#: src/engine/api/geary-service-provider.vala:58
-msgid "Outlook.com"
-msgstr "Outlook.com"
-
-#: src/engine/api/geary-service-provider.vala:61
-msgid "Other"
-msgstr "Andet"
-
 #: src/engine/api/geary-special-folder-type.vala:24
 msgid "Inbox"
 msgstr "Indbakke"
@@ -1819,11 +2059,6 @@ msgstr "Udbakke"
 msgid "Archive"
 msgstr "Arkiv"
 
-#: src/engine/api/geary-special-folder-type.vala:58 ui/login.glade:732
-#: ui/login.glade:750
-msgid "None"
-msgstr "Ingen"
-
 #. Map of possibly translated search operator names and values
 #. to English/internal names and values. We include the
 #. English version anyway so that when translations provide a
@@ -1837,7 +2072,7 @@ msgstr "Ingen"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:114
+#: src/engine/imap-db/imap-db-account.vala:110
 msgctxt "Search operator"
 msgid "attachment"
 msgstr "bilag"
@@ -1850,7 +2085,7 @@ msgstr "bilag"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:123
+#: src/engine/imap-db/imap-db-account.vala:119
 msgctxt "Search operator"
 msgid "bcc"
 msgstr "bcc"
@@ -1862,7 +2097,7 @@ msgstr "bcc"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:131
+#: src/engine/imap-db/imap-db-account.vala:127
 msgctxt "Search operator"
 msgid "body"
 msgstr "tekst"
@@ -1875,7 +2110,7 @@ msgstr "tekst"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:140
+#: src/engine/imap-db/imap-db-account.vala:136
 msgctxt "Search operator"
 msgid "cc"
 msgstr "cc"
@@ -1888,7 +2123,7 @@ msgstr "cc"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:149
+#: src/engine/imap-db/imap-db-account.vala:145
 msgctxt "Search operator"
 msgid "from"
 msgstr "fra"
@@ -1900,7 +2135,7 @@ msgstr "fra"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:157
+#: src/engine/imap-db/imap-db-account.vala:153
 msgctxt "Search operator"
 msgid "is"
 msgstr "er"
@@ -1912,7 +2147,7 @@ msgstr "er"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary
 #. User Guide.
-#: src/engine/imap-db/imap-db-account.vala:165
+#: src/engine/imap-db/imap-db-account.vala:161
 msgctxt "Search operator"
 msgid "subject"
 msgstr "emne"
@@ -1925,7 +2160,7 @@ msgstr "emne"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:174
+#: src/engine/imap-db/imap-db-account.vala:170
 msgctxt "Search operator"
 msgid "to"
 msgstr "til"
@@ -1938,7 +2173,7 @@ msgstr "til"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:195
+#: src/engine/imap-db/imap-db-account.vala:191
 msgctxt "Search operator value - mail addressed to the user"
 msgid "me"
 msgstr "mig"
@@ -1950,7 +2185,7 @@ msgstr "mig"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:207
+#: src/engine/imap-db/imap-db-account.vala:203
 msgctxt "Search operator value - mail sent by the user"
 msgid "me"
 msgstr "mig"
@@ -1962,7 +2197,7 @@ msgstr "mig"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:219
+#: src/engine/imap-db/imap-db-account.vala:215
 msgctxt "'is:' search operator value"
 msgid "read"
 msgstr "læst"
@@ -1977,7 +2212,7 @@ msgstr "læst"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:230
+#: src/engine/imap-db/imap-db-account.vala:226
 msgctxt "'is:' search operator value"
 msgid "starred"
 msgstr "stjerne"
@@ -1989,7 +2224,7 @@ msgstr "stjerne"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:240
+#: src/engine/imap-db/imap-db-account.vala:236
 msgctxt "'is:' search operator value"
 msgid "unread"
 msgstr "ulæst"
@@ -1998,7 +2233,7 @@ msgstr "ulæst"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:898
+#: src/engine/imap-engine/imap-engine-generic-account.vala:915
 msgid "Drafts | Draft"
 msgstr "Kladder | Drafts | Draft"
 
@@ -2006,7 +2241,7 @@ msgstr "Kladder | Drafts | Draft"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:907
+#: src/engine/imap-engine/imap-engine-generic-account.vala:924
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Sent | Sent Mail | Sent Email | Sent E-Mail | Sendt | Sendte | Sendt Mail | "
@@ -2014,7 +2249,7 @@ msgstr ""
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:912
+#: src/engine/imap-engine/imap-engine-generic-account.vala:929
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Sendt post"
@@ -2023,7 +2258,7 @@ msgstr "Sendt post"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:922
+#: src/engine/imap-engine/imap-engine-generic-account.vala:939
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2035,13 +2270,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:932
+#: src/engine/imap-engine/imap-engine-generic-account.vala:949
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Papirkurv | Affald | Trash | Rubbish | Rubbish Bin"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:937
+#: src/engine/imap-engine/imap-engine-generic-account.vala:954
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Slettede elementer"
@@ -2050,7 +2285,7 @@ msgstr "Slettede elementer"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:947
+#: src/engine/imap-engine/imap-engine-generic-account.vala:964
 msgid "Archive | Archives"
 msgstr "Arkiv | Arkiverede | Arkiveret| Arkiver | Archive | Archives"
 
@@ -2111,33 +2346,93 @@ msgstr "Til: %s\n"
 msgid "Cc: %s\n"
 msgstr "CC: %s\n"
 
-#: ui/account_cannot_remove.glade:40
-msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-msgstr "<span weight=\"bold\" size=\"larger\">Kan ikke fjerne konto</span> "
+#: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:127
+msgid "Add an account"
+msgstr "Tilføj en konto"
 
-#: ui/account_cannot_remove.glade:56
-msgid ""
-"A composer window associated with this account is currently open. Send or "
-"discard the message and try again."
-msgstr ""
-"Et beskedskrivningsvindue associéret med denne bruger er i forvejen åbent. "
-"Send eller kassér beskeden og prøv igen."
+#: ui/accounts_editor_add_pane.ui:53
+msgid "Create"
+msgstr "Opret"
 
-#: ui/account_list.glade:69
-msgid "Add account"
-msgstr "Tilføj konto"
+#: ui/accounts_editor_add_pane.ui:130 ui/accounts_editor_servers_pane.ui:125
+msgid "Receiving"
+msgstr "Modtager"
 
-#: ui/account_list.glade:82
-msgid "Edit account"
+#: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
+msgid "Sending"
+msgstr "Sender"
+
+#: ui/accounts_editor_edit_pane.ui:8
+msgid "Edit Account"
 msgstr "Redigér konto"
 
-#: ui/account_list.glade:95
+#: ui/accounts_editor_edit_pane.ui:9 ui/accounts_editor_servers_pane.ui:9
+msgid "Account Name"
+msgstr "Kontonavn"
+
+#: ui/accounts_editor_edit_pane.ui:124
+msgid "Email addresses"
+msgstr "E-mailadresse"
+
+#: ui/accounts_editor_edit_pane.ui:164
+msgid "Signature"
+msgstr "Signatur"
+
+#: ui/accounts_editor_edit_pane.ui:201
+msgid "Settings"
+msgstr "Indstillinger"
+
+#. This is a button in the account settings to show server settings.
+#: ui/accounts_editor_edit_pane.ui:243 ui/accounts_editor_servers_pane.ui:8
+msgid "Server Settings"
+msgstr "Serverindstillinger"
+
+#. This is the remove account button in the account settings.
+#: ui/accounts_editor_edit_pane.ui:258 ui/accounts_editor_remove_pane.ui:23
+msgid "Remove Account"
+msgstr "Fjern konto"
+
+#: ui/accounts_editor_edit_pane.ui:262 ui/accounts_editor_remove_pane.ui:27
+msgid "Remove this account from Geary"
+msgstr "Fjern denne konto fra Geary"
+
+#: ui/accounts_editor_list_pane.ui:8
+msgid "Accounts"
+msgstr "Konti"
+
+#: ui/accounts_editor_list_pane.ui:63
+msgid "To get started, select an email provider below."
+msgstr "Vælg en e-mailudbyder nedenfor for at komme i gang."
+
+#: ui/accounts_editor_list_pane.ui:76
+msgid "Welcome to Geary"
+msgstr "Velkommen til Geary"
+
+#. This title is shown to users when confirming if they want to remove an account. The string substitution is replaced with the account's name.
+#: ui/accounts_editor_remove_pane.ui:73
+#, c-format
+msgid "Confirm removing: %s"
+msgstr "Bekræft fjernelse: %s"
+
+#: ui/accounts_editor_remove_pane.ui:91
+msgid ""
+"Removing an account will remove it from Geary and delete locally cached "
+"email data from your computer, but not from your service provider."
+msgstr ""
+"Fjernes en konto, vil kontoen blive fjernet i Geary, og lokalt gemte e-"
+"maildata vil blive slettet fra computeren, men ikke hos serviceudbyderen."
+
+#: ui/accounts_editor_remove_pane.ui:122
 msgid "Remove account"
 msgstr "Fjern konto"
 
-#: ui/account_spinner.glade:41
-msgid "Please wait while Geary validates your account."
-msgstr "Vent venligst mens Geary validérer din konto."
+#: ui/accounts_editor_servers_pane.ui:17
+msgid "Cancel"
+msgstr "Annullér"
+
+#: ui/accounts_editor_servers_pane.ui:47
+msgid "Apply"
+msgstr "Anvend"
 
 #: ui/certificate_warning_dialog.glade:7
 msgid "Untrusted Connection"
@@ -2560,22 +2855,6 @@ msgstr "Find forrige forekomst af søgestrengen."
 msgid "Find the next occurrence of the search string."
 msgstr "Find næste forekomst af søgestrengen."
 
-#: ui/edit_alternate_emails.glade:112
-msgid "Remove email address"
-msgstr "Fjern e-mailadresse"
-
-#: ui/edit_alternate_emails.glade:136
-msgid ""
-"Some email services require additional addresses be configured on the "
-"server.  Contact your email provider for more information."
-msgstr ""
-"Visse e-mailtjenester kræver at der konfigureres yderligere adresser på "
-"serveren.  Kontakt din e-mailudbyder for at få yderligere information."
-
-#: ui/edit_alternate_emails.glade:175
-msgid "_Update"
-msgstr "_Opdatér"
-
 #: ui/find_bar.glade:66
 msgid "Find:"
 msgstr "Find:"
@@ -2837,150 +3116,6 @@ msgstr "_Konti"
 msgid "_Keyboard Shortcuts"
 msgstr "_Tastaturgenveje"
 
-#: ui/login.glade:88
-msgid "email@example.com"
-msgstr "e-mail@eksempel.dk"
-
-#: ui/login.glade:107 ui/password-dialog.glade:108
-msgid "Password"
-msgstr "Adgangskode"
-
-#: ui/login.glade:123
-msgid "E_mail address"
-msgstr "E-_mailadresse"
-
-#: ui/login.glade:144 ui/login.glade:635
-msgid "_Password"
-msgstr "_Adgangskode"
-
-#: ui/login.glade:178
-msgid "S_ervice"
-msgstr "_Tjeneste"
-
-#: ui/login.glade:199
-msgid "N_ame"
-msgstr "Na_vn"
-
-#: ui/login.glade:256
-msgid "N_ickname"
-msgstr "_Kaldenavn"
-
-#: ui/login.glade:280
-msgid "Work, Home, etc."
-msgstr "Arbejde, hjem osv."
-
-#: ui/login.glade:291
-msgid "_Save sent mail"
-msgstr "_Gem sendt mail"
-
-#: ui/login.glade:309
-msgid "Addi_tional email addresses…"
-msgstr "_Yderligere e-mailadresser …"
-
-#: ui/login.glade:353
-msgid "IMAP settings"
-msgstr "IMAP-indstillinger"
-
-#: ui/login.glade:372
-msgid "Se_rver"
-msgstr "_Server"
-
-#: ui/login.glade:393
-msgid "imap.example.com"
-msgstr "imap.eksempel.dk"
-
-#: ui/login.glade:409
-msgid "P_ort"
-msgstr "_Port"
-
-#: ui/login.glade:448
-msgid "smtp.example.com"
-msgstr "smtp.eksempel.dk"
-
-#: ui/login.glade:480
-msgid "Ser_ver"
-msgstr "Se_rver"
-
-#: ui/login.glade:501
-msgid "Por_t"
-msgstr "Por_t"
-
-#: ui/login.glade:522
-msgid "SMTP settings"
-msgstr "SMTP-indstillinger"
-
-#: ui/login.glade:541
-msgid "User_name"
-msgstr "Bruger_navn"
-
-#: ui/login.glade:562
-msgid "Pass_word"
-msgstr "A_dgangskode"
-
-#: ui/login.glade:582
-msgid "SMTP username"
-msgstr "SMTP-brugernavn"
-
-#: ui/login.glade:598
-msgid "SMTP password"
-msgstr "SMTP-adgangskode"
-
-#: ui/login.glade:614
-msgid "_Username"
-msgstr "_Brugernavn"
-
-#: ui/login.glade:655
-msgid "IMAP username"
-msgstr "IMAP-brugernavn"
-
-#: ui/login.glade:671
-msgid "IMAP password"
-msgstr "IMAP-adgangskode"
-
-#: ui/login.glade:688
-msgid "Encr_yption"
-msgstr "Kr_yptering"
-
-#: ui/login.glade:711
-msgid "Encrypt_ion"
-msgstr "Krypter_ing"
-
-#: ui/login.glade:733 ui/login.glade:751
-msgid "SSL/TLS"
-msgstr "SSL/TLS"
-
-#: ui/login.glade:734 ui/login.glade:752
-msgid "STARTTLS"
-msgstr "STARTTLS"
-
-#: ui/login.glade:764
-msgid "No authentication re_quired"
-msgstr "Ingen autentifikation kr_ævet"
-
-#: ui/login.glade:781
-msgid "Use IMAP cre_dentials"
-msgstr "Br_ug IMAP-akkreditiver"
-
-#: ui/login.glade:888
-msgid "Composer"
-msgstr "Beskedskriver"
-
-#: ui/login.glade:901
-msgid "Save dra_fts on server"
-msgstr "Gem kla_dder på serveren"
-
-#: ui/login.glade:918
-msgid "Si_gn emails (HTML allowed):"
-msgstr "Si_gnér e-mail (HTML er tilladt):"
-
-#: ui/login.glade:976
-msgid "Storage"
-msgstr "Lager"
-
-#: ui/login.glade:998
-msgid "_Download mail"
-msgstr "_Download mail"
-
 #: ui/main-toolbar.ui:51
 msgid "Toggle search bar"
 msgstr "Slå søgebjælke til/fra"
@@ -3025,21 +3160,112 @@ msgstr "Markér som s_pam"
 msgid "Mark as not S_pam"
 msgstr "Marker som ikke s_pam"
 
-#: ui/main-window-info-bar.ui:97
-msgid ""
-"If the problem is serious or persists, please copy and send these details to "
-"the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">mailing list</a> "
-"or file a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">new "
-"bug report</a>."
-msgstr ""
-"Hvis problemet er alvorligt eller vedbliver, så kopiér og send disse "
-"detaljer til <a href=\"https://wiki.gnome.org/Apps/Geary/Contact"
-"\">mailinglisten</a> eller registrér en <a href=\"https://wiki.gnome.org/"
-"Apps/Geary/ReportingABug\">ny fejlrapport</a>."
+#. Infobar title when one or more accounts are offline
+#: ui/main-window.ui:183
+msgid "Working offline"
+msgstr "Arbejder offline"
 
-#: ui/main-window-info-bar.ui:113
-msgid "Details:"
-msgstr "Detaljer:"
+#. Label and tooltip for offline infobar
+#: ui/main-window.ui:197
+msgid ""
+"Your computer does not appear to be connected to the Internet.\n"
+"You will not be able to send or receive email until it is re-connected."
+msgstr ""
+"Det lader ikke til, din computer er på internettet.\n"
+"Du kan ikke sende eller modtage e-mails, indtil forbindelsen er "
+"genoprettet."
+
+#. Label and tooltip for offline infobar
+#: ui/main-window.ui:200
+msgid "You will not be able to send or receive email until re-connected."
+msgstr ""
+"Du kan ikke sende eller modtage e-mails, indtil forbindelsen er "
+"genoprettet."
+
+#. Button label for displaying technical details about an account problem
+#. Dialog title for displaying technical details of a problem. Same as the button that invokes it.
+#: ui/main-window.ui:247 ui/problem-details-dialog.ui:13
+msgid "Details"
+msgstr "Detaljer"
+
+#. Button label for retrying an account problem
+#: ui/main-window.ui:261
+msgid "Retry"
+msgstr "Prøv igen"
+
+#. Infobar title when one or more accounts have encounted an error
+#: ui/main-window.ui:294
+msgid "Account problem"
+msgstr "Kontoproblem"
+
+#. Label and tooltip for account service problem infobar
+#: ui/main-window.ui:308
+msgid ""
+"Geary encountered a problem connecting to an account.\n"
+"Please check your Internet connection, the server configuration and try "
+"again."
+msgstr ""
+"Geary kunne ikke forbinde til en konto.\n"
+"Tjek din internetadgang og serverkonfiguration og prøv igen"
+
+#. Label and tooltip for account service problem infobar
+#: ui/main-window.ui:311
+msgid "Geary encountered a problem connecting to an account."
+msgstr "Geary kunne ikke forbinde til en konto."
+
+#. Button label for retrying TLS cert validation
+#: ui/main-window.ui:358
+msgid "Check"
+msgstr "Undersøg"
+
+#. Button tooltip for retrying TLS cert validation
+#: ui/main-window.ui:362
+msgid "Check the security details for the connection"
+msgstr "Undersøg forbindelsens sikkerhedsdetaljer"
+
+#. Infobar title when one or more accounts have a TLS cert validation error
+#: ui/main-window.ui:391
+msgid "Security problem"
+msgstr "Sikkerhedsproblem"
+
+#. Label and tooltip for TLS cert validation error infobar
+#: ui/main-window.ui:405
+msgid ""
+"An account has reported an untrusted server.\n"
+"Please check the server configuration and try again."
+msgstr ""
+"En konto har rapporteret en ubetroet server.\n"
+"Tjek serverkonfigurationen og prøv igen."
+
+#. Label and tooltip for TLS cert validation error infobar
+#: ui/main-window.ui:408
+msgid "An account has reported an untrusted server."
+msgstr "En konto har rapporteret en ubetroet server."
+
+#. Button tooltip for retrying when a login error has occurred
+#: ui/main-window.ui:459
+msgid "Retry login, you will be prompted for your password"
+msgstr "Prøv igen at logge på; du vil blive bedt om en adgangskode"
+
+#. Infobar title when one or more accounts have a login error
+#: ui/main-window.ui:488
+msgid "Login problem"
+msgstr "Loginproblem"
+
+#. Label and tooltip for authentication problem infobar
+#: ui/main-window.ui:502
+msgid ""
+"An account has reported an incorrect login or password.\n"
+"Please check your login name and try again."
+msgstr ""
+"En konto har rapporteret et forkert login eller en forkert adgangskode.\n"
+"Tjek dit loginnavn og prøv igen."
+
+#. Label and tooltip for authentication problem infobar
+#: ui/main-window.ui:505
+msgid "An account has reported an incorrect login or password."
+msgstr ""
+"En konto har rapporteret et forkert login eller en forkert adgangskode."
 
 #: ui/password-dialog.glade:74
 msgid "SMTP Credentials"
@@ -3098,33 +3324,293 @@ msgstr "Geary fortsætter med at køre, efter alle vinduer er blevet lukket"
 msgid "Preferences"
 msgstr "Indstillinger"
 
-#: ui/remove_confirm.glade:43
+#. Button label for copying technical information to the clipboard
+#: ui/problem-details-dialog.ui:17
+msgid "Copy to Clipboard"
+msgstr "Kopiér til udklipsholderen"
+
+#. Button tooltip for copying technical information to the clipboard
+#: ui/problem-details-dialog.ui:21
 msgid ""
-"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
-"account?</span> "
+"Copy technical details to clipboard for pasting into an email or bug report"
 msgstr ""
-"<span weight=\"bold\" size=\"larger\">Er du sikker på, at du vil fjerne "
-"denne konto?</span> "
+"Kopiér tekniske detaljer til udklipsholderen for at sætte dem ind i en e-"
+"mail eller en fejlrapport"
 
-#: ui/remove_confirm.glade:58
+#: ui/problem-details-dialog.ui:73
 msgid ""
-"All email associated with this account will be removed from your computer. "
-"This will not affect email on the server."
+"If the problem is serious or persists, please copy and send these details to "
+"the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">mailing list</a> "
+"or file a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">new "
+"bug report</a>."
 msgstr ""
-"Al e-mail, der tilhører denne konto vil blive fjernet fra din computer. "
-"Dette vil ikke fjerne e-mailen på serveren."
+"Hvis problemet er alvorligt eller vedbliver, så kopiér og send disse "
+"detaljer til <a href=\"https://wiki.gnome.org/Apps/Geary/Contact"
+"\">mailinglisten</a> eller registrér en <a href=\"https://wiki.gnome.org/"
+"Apps/Geary/ReportingABug\">ny fejlrapport</a>."
 
-#: ui/remove_confirm.glade:80
-msgid "Nickname:"
-msgstr "Kaldenavn:"
-
-#: ui/remove_confirm.glade:94
-msgid "Email address:"
-msgstr "E-mailadresse:"
+#: ui/problem-details-dialog.ui:89
+msgid "Details:"
+msgstr "Detaljer:"
 
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary er ved at blive opgraderet …"
+
+#~ msgid "Additional addresses for %s"
+#~ msgstr "Yderligere adresser for %s"
+
+#~ msgid "First Last"
+#~ msgstr "Fornavn Efternavn"
+
+#~ msgid "Enter your account information to get started."
+#~ msgstr "Indtast kontoinformation for at starte."
+
+#~ msgid "Edit"
+#~ msgstr "Redigér"
+
+#~ msgid "Preview"
+#~ msgstr "Forhåndsvisning"
+
+#~ msgid "Remem_ber passwords"
+#~ msgstr "Hus_k adgangskoder"
+
+#~ msgid "Remem_ber password"
+#~ msgstr "Hu_sk adgangskode"
+
+#~ msgid "Unable to validate:\n"
+#~ msgstr "Kunne ikke validere:\n"
+
+#~ msgid "        • Invalid account nickname.\n"
+#~ msgstr "        • Ugyldigt kaldenavn til bruger.\n"
+
+#~ msgid "        • Email address already added to Geary.\n"
+#~ msgstr "        • E-mailadressen er allerede tilføjet til Geary.\n"
+
+#~ msgid "        • IMAP connection error.\n"
+#~ msgstr "        • IMAP-forbindelsesfejl.\n"
+
+#~ msgid "        • IMAP username or password incorrect.\n"
+#~ msgstr "        • Forkert brugernavn eller adgangskode til IMAP.\n"
+
+#~ msgid "        • SMTP connection error.\n"
+#~ msgstr "        • SMTP-forbindelsesfejl.\n"
+
+#~ msgid "        • SMTP username or password incorrect.\n"
+#~ msgstr "        • Forkert brugernavn eller adgangskode til SMTP.\n"
+
+#~ msgid "        • Connection error.\n"
+#~ msgstr "        • Forbindelsesfejl.\n"
+
+#~ msgid "        • Username or password incorrect.\n"
+#~ msgstr "        • Forkert brugernavn eller adgangskode.\n"
+
+#~ msgid "Unable to store server trust exception"
+#~ msgstr "Kan ikke gemme undtagelse for tillid til server"
+
+#~ msgid "Your settings are insecure"
+#~ msgstr "Dine indstillinger er usikre"
+
+#~ msgid ""
+#~ "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means "
+#~ "your username and password could be read by another person on the "
+#~ "network.  Are you sure you want to do this?"
+#~ msgstr ""
+#~ "Dine IMAP- og/eller SMTP-indstillinger anvender ikke SSL eller TLS. Dette "
+#~ "betyder, at dit brugernavn og din adgangskode kan læses af andre på "
+#~ "netværket. Er du sikker på, at du vil gære dette?"
+
+#~ msgid "Co_ntinue"
+#~ msgstr "F_ortsæt"
+
+#~ msgid ""
+#~ "Geary encountered an error sending an email.  If the problem persists, "
+#~ "please manually delete the email from your Outbox folder."
+#~ msgstr ""
+#~ "Geary stødte ind i en fejl under afsendelse af en e-mail. Hvis dette "
+#~ "problem fortsætter, bør du manuelt slette beskeden fra din “Udbakke”-"
+#~ "mappe."
+
+#~ msgid ""
+#~ "Geary encountered an error saving a sent message to Sent Mail.  The "
+#~ "message will stay in your Outbox folder until you delete it."
+#~ msgstr ""
+#~ "Der opstod en fejl, da Geary forsøgte at gemme en sendt besked til mappen "
+#~ "med afsendt e-mail.  Beskeden vil blive i din Udbakke, indtil du sletter "
+#~ "den."
+
+#~ msgid "Unable to open local mailbox for %s"
+#~ msgstr "Kunne ikke åbne den lokale postkasse for %s"
+
+#~ msgid ""
+#~ "There was an error opening the local mail database for this account. This "
+#~ "is possibly due to a file permissions problem.\n"
+#~ "\n"
+#~ "Please check that you have read/write permissions for all files in this "
+#~ "directory:\n"
+#~ "\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Der opstod en fejl under åbningen af den lokale e-maildatabase til denne "
+#~ "konto. Dette sker sikkert på grund af problemer med filrettigheder.\n"
+#~ "\n"
+#~ "Tjek at du har læse- og skriverettigheder for alle filer i denne mappe.\n"
+#~ "\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "The version number of the local mail database is formatted for a newer "
+#~ "version of Geary. Unfortunately, the database cannot be “rolled back” to "
+#~ "work with this version of Geary.\n"
+#~ "\n"
+#~ "Please install the latest version of Geary and try again."
+#~ msgstr ""
+#~ "Den lokale e-maildatabases versionsnummer er til en nyere version af "
+#~ "Geary. Desværre kan databasen ikke blive “rullet tilbage”, så den virker "
+#~ "med denne version of Geary.\n"
+#~ "\n"
+#~ "Installér venligst den nyeste version af Geary og prøv igen."
+
+#~ msgid ""
+#~ "There was an error opening the local account. This is probably due to "
+#~ "connectivity issues.\n"
+#~ "\n"
+#~ "Please check your network connection and restart Geary."
+#~ msgstr ""
+#~ "Der opstod en felj under åbning af den lokele konto. Dette sker sikkert "
+#~ "på grund af forbindelsesproblemer.\n"
+#~ "\n"
+#~ "Tjek, at din internetforbindelse virker og genstart derefter Geary."
+
+#~ msgid "Geary will exit if you have no other open email accounts."
+#~ msgstr "Geary vil afsluttes, hvis du ikke har nogen andre åbne e-mailkonti."
+
+#~ msgid "IMAP"
+#~ msgstr "IMAP"
+
+#~ msgid "SMTP"
+#~ msgstr "SMTP"
+
+#~ msgid "Other"
+#~ msgstr "Andet"
+
+#~ msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
+#~ msgstr "<span weight=\"bold\" size=\"larger\">Kan ikke fjerne konto</span> "
+
+#~ msgid ""
+#~ "A composer window associated with this account is currently open. Send or "
+#~ "discard the message and try again."
+#~ msgstr ""
+#~ "Et beskedskrivningsvindue associéret med denne bruger er i forvejen "
+#~ "åbent. Send eller kassér beskeden og prøv igen."
+
+#~ msgid "Please wait while Geary validates your account."
+#~ msgstr "Vent venligst mens Geary validérer din konto."
+
+#~ msgid ""
+#~ "Some email services require additional addresses be configured on the "
+#~ "server.  Contact your email provider for more information."
+#~ msgstr ""
+#~ "Visse e-mailtjenester kræver at der konfigureres yderligere adresser på "
+#~ "serveren.  Kontakt din e-mailudbyder for at få yderligere information."
+
+#~ msgid "_Update"
+#~ msgstr "_Opdatér"
+
+#~ msgid "E_mail address"
+#~ msgstr "E-_mailadresse"
+
+#~ msgid "_Password"
+#~ msgstr "_Adgangskode"
+
+#~ msgid "S_ervice"
+#~ msgstr "_Tjeneste"
+
+#~ msgid "N_ame"
+#~ msgstr "Na_vn"
+
+#~ msgid "N_ickname"
+#~ msgstr "_Kaldenavn"
+
+#~ msgid "Work, Home, etc."
+#~ msgstr "Arbejde, hjem osv."
+
+#~ msgid "_Save sent mail"
+#~ msgstr "_Gem sendt mail"
+
+#~ msgid "Addi_tional email addresses…"
+#~ msgstr "_Yderligere e-mailadresser …"
+
+#~ msgid "IMAP settings"
+#~ msgstr "IMAP-indstillinger"
+
+#~ msgid "Se_rver"
+#~ msgstr "_Server"
+
+#~ msgid "P_ort"
+#~ msgstr "_Port"
+
+#~ msgid "Ser_ver"
+#~ msgstr "Se_rver"
+
+#~ msgid "Por_t"
+#~ msgstr "Por_t"
+
+#~ msgid "User_name"
+#~ msgstr "Bruger_navn"
+
+#~ msgid "Pass_word"
+#~ msgstr "A_dgangskode"
+
+#~ msgid "SMTP password"
+#~ msgstr "SMTP-adgangskode"
+
+#~ msgid "_Username"
+#~ msgstr "_Brugernavn"
+
+#~ msgid "IMAP password"
+#~ msgstr "IMAP-adgangskode"
+
+#~ msgid "Encr_yption"
+#~ msgstr "Kr_yptering"
+
+#~ msgid "Encrypt_ion"
+#~ msgstr "Krypter_ing"
+
+#~ msgid "STARTTLS"
+#~ msgstr "STARTTLS"
+
+#~ msgid "No authentication re_quired"
+#~ msgstr "Ingen autentifikation kr_ævet"
+
+#~ msgid "Use IMAP cre_dentials"
+#~ msgstr "Br_ug IMAP-akkreditiver"
+
+#~ msgid "Composer"
+#~ msgstr "Beskedskriver"
+
+#~ msgid "Si_gn emails (HTML allowed):"
+#~ msgstr "Si_gnér e-mail (HTML er tilladt):"
+
+#~ msgid "Storage"
+#~ msgstr "Lager"
+
+#~ msgid ""
+#~ "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove "
+#~ "this account?</span> "
+#~ msgstr ""
+#~ "<span weight=\"bold\" size=\"larger\">Er du sikker på, at du vil fjerne "
+#~ "denne konto?</span> "
+
+#~ msgid ""
+#~ "All email associated with this account will be removed from your "
+#~ "computer. This will not affect email on the server."
+#~ msgstr ""
+#~ "Al e-mail, der tilhører denne konto vil blive fjernet fra din computer. "
+#~ "Dette vil ikke fjerne e-mailen på serveren."
+
+#~ msgid "Nickname:"
+#~ msgstr "Kaldenavn:"
 
 #~ msgid "Default attachments directory"
 #~ msgstr "Standardmappe til vedhæftede filer"
