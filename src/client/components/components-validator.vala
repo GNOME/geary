@@ -453,30 +453,35 @@ public class Components.NetworkAddressValidator : Validator {
             debug("Error parsing host name \"%s\": %s", value, err.message);
         }
 
-        // Only re-validate if previously invalid or the host has
-        // changed
-        if (address != null && (
-                this.validated_address == null ||
-                this.validated_address.hostname != address.hostname)) {
-            this.cancellable = new GLib.Cancellable();
-            this.resolver.lookup_by_name_async.begin(
-                address.hostname, this.cancellable,
-                (obj, res) => {
-                    try {
-                        this.resolver.lookup_by_name_async.end(res);
-                        this.validated_address = address;
-                        update_state(Validator.Validity.VALID, reason);
-                    } catch (GLib.IOError.CANCELLED err) {
-                        this.validated_address = null;
-                    } catch (GLib.Error err) {
-                        this.validated_address = null;
-                        update_state(Validator.Validity.INVALID, reason);
+        if (address != null) {
+            // Re-validate if previously invalid or the host has
+            // changed
+            if (this.validated_address == null ||
+                this.validated_address.hostname != address.hostname) {
+                this.cancellable = new GLib.Cancellable();
+                this.resolver.lookup_by_name_async.begin(
+                    address.hostname, this.cancellable,
+                    (obj, res) => {
+                        try {
+                            this.resolver.lookup_by_name_async.end(res);
+                            this.validated_address = address;
+                            update_state(Validator.Validity.VALID, reason);
+                        } catch (GLib.IOError.CANCELLED err) {
+                            this.validated_address = null;
+                        } catch (GLib.Error err) {
+                            this.validated_address = null;
+                            update_state(Validator.Validity.INVALID, reason);
+                        }
+                        this.cancellable = null;
                     }
-                    this.cancellable = null;
-                }
-            );
-
-            ret = Validator.Validity.IN_PROGRESS;
+                );
+                ret = Validator.Validity.IN_PROGRESS;
+            } else {
+                // Update the validated address in case the port
+                // number is being edited and has changed
+                this.validated_address = address;
+                ret = Validator.Validity.VALID;
+            }
         }
 
         return ret;
