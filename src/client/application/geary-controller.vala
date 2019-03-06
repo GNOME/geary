@@ -773,8 +773,6 @@ public class GearyController : Geary.BaseObject {
                 credentials
             );
             if (password_dialog.run()) {
-                service.remember_password = password_dialog.remember_password;
-
                 // The update the credentials for the service that the
                 // credentials actually came from
                 Geary.ServiceInformation creds_service =
@@ -785,14 +783,27 @@ public class GearyController : Geary.BaseObject {
                     password_dialog.password
                 );
 
+                // Update the remember password pref if changed
+                bool remember = password_dialog.remember_password;
+                if (creds_service.remember_password != remember) {
+                    creds_service.remember_password = remember;
+                    account.changed();
+                }
+
                 SecretMediator libsecret = (SecretMediator) account.mediator;
                 try {
                     // Update the secret using the service where the
                     // credentials originated, since the service forms
                     // part of the key's identity
-                    yield libsecret.update_token(
-                        account, creds_service, context.cancellable
-                    );
+                    if (creds_service.remember_password) {
+                        yield libsecret.update_token(
+                            account, creds_service, context.cancellable
+                        );
+                    } else {
+                        yield libsecret.clear_token(
+                            account, creds_service, context.cancellable
+                        );
+                    }
                 } catch (GLib.IOError.CANCELLED err) {
                     // all good
                 } catch (GLib.Error err) {
@@ -805,6 +816,7 @@ public class GearyController : Geary.BaseObject {
                         )
                     );
                 }
+
                 context.authentication_attempts++;
             } else {
                 // User cancelled, bail out unconditionally

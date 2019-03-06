@@ -46,19 +46,25 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                          Cancellable? cancellable)
         throws GLib.Error {
         bool loaded = false;
-        if (service.credentials != null && service.remember_password) {
-            string? password = yield Secret.password_lookupv(
-                SecretMediator.schema, new_attrs(service), cancellable
-            );
+        if (service.credentials != null) {
+            if (service.remember_password) {
+                string? password = yield Secret.password_lookupv(
+                    SecretMediator.schema, new_attrs(service), cancellable
+                );
 
-            if (password == null) {
-                password = yield migrate_old_password(service, cancellable);
-            }
+                if (password == null) {
+                    password = yield migrate_old_password(service, cancellable);
+                }
 
-            if (password != null) {
-                service.credentials =
+                if (password != null) {
+                    service.credentials =
                     service.credentials.copy_with_token(password);
-                loaded = true;
+                    loaded = true;
+                }
+            } else {
+                // Not remembering the password, so just make sure it
+                // has been filled in
+                loaded = service.credentials.is_complete();
             }
         }
 
@@ -68,20 +74,9 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     public async void update_token(Geary.AccountInformation account,
                                    Geary.ServiceInformation service,
                                    Cancellable? cancellable)
-        throws Error {
-        if (service.credentials != null && service.remember_password) {
-            try {
-                yield do_store(service, service.credentials.token, cancellable);
-            } catch (Error e) {
-                debug(
-                    "Unable to store libsecret password for %s: %s %s",
-                    account.id,
-                    to_proto_value(service.protocol),
-                    service.credentials.user
-                );
-            }
-        } else {
-            yield clear_token(account, service, cancellable);
+        throws GLib.Error {
+        if (service.credentials != null) {
+            yield do_store(service, service.credentials.token, cancellable);
         }
     }
 
