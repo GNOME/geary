@@ -858,8 +858,6 @@ public class Accounts.Manager : GLib.Object {
                 ));
         }
 
-        // XXX need to notify the engine that creds may have changed
-
         set_available(account, is_available);
     }
 
