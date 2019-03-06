@@ -14,7 +14,7 @@
  * integration, Inspector support, and remote and inline image
  * handling.
  */
-public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
+public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
 
     /** URI Scheme and delimiter for internal resource loads. */

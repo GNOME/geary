@@ -147,7 +147,6 @@ PageState.prototype = {
         // is too large, causing the message body view to grow then
         // shrink again, leading to visual flicker.
         if (this.isLoaded && height > 0 && height != this.lastPreferredHeight) {
-            updated = true;
             this.lastPreferredHeight = height;
             window.webkit.messageHandlers.preferredHeightChanged.postMessage(
                 height
@@ -177,5 +176,3 @@ PageState.prototype = {
         }
     }
 };
-
-var geary = new PageState();
