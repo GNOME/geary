@@ -104,6 +104,9 @@ public class Components.Validator : GLib.Object {
 
     private Geary.TimeoutManager ui_update_timer;
 
+    private Geary.TimeoutManager pulse_timer;
+    bool did_pulse = false;
+
 
     /** Fired when the validation state changes. */
     public signal void state_changed(Trigger reason, Validity prev_state);
@@ -125,6 +128,11 @@ public class Components.Validator : GLib.Object {
             2, on_update_ui
         );
 
+        this.pulse_timer = new Geary.TimeoutManager.milliseconds(
+            200, on_pulse
+        );
+        this.pulse_timer.repetition = FOREVER;
+
         this.indeterminate_state = {
             target.get_icon_name(ICON_POS),
             target.get_icon_tooltip_text(ICON_POS)
@@ -133,7 +141,10 @@ public class Components.Validator : GLib.Object {
             target.get_icon_name(ICON_POS),
             target.get_icon_tooltip_text(ICON_POS)
         };
-        this.in_progress_state = { "process-working-symbolic", null};
+        this.in_progress_state = {
+            target.get_icon_name(ICON_POS),
+            null
+        };
         this.empty_state = { "dialog-warning-symbolic", null };
         this.invalid_state = { "dialog-error-symbolic", null };
 
@@ -148,6 +159,7 @@ public class Components.Validator : GLib.Object {
         this.target.changed.disconnect(on_changed);
         this.target.activate.disconnect(on_activate);
         this.ui_update_timer.reset();
+        this.pulse_timer.reset();
     }
 
     /**
@@ -233,6 +245,8 @@ public class Components.Validator : GLib.Object {
                 focus_lost();
                 break;
             }
+        } else if (!this.pulse_timer.is_running) {
+            this.pulse_timer.start();
         }
     }
 
@@ -257,6 +271,7 @@ public class Components.Validator : GLib.Object {
         style.remove_class(Gtk.STYLE_CLASS_WARNING);
 
         UiState ui = { null, null };
+        bool in_progress = false;
         switch (state) {
         case Validity.INDETERMINATE:
             ui = this.indeterminate_state;
@@ -267,6 +282,7 @@ public class Components.Validator : GLib.Object {
             break;
 
         case Validity.IN_PROGRESS:
+            in_progress = true;
             ui = this.in_progress_state;
             break;
 
@@ -279,6 +295,22 @@ public class Components.Validator : GLib.Object {
             style.add_class(Gtk.STYLE_CLASS_ERROR);
             ui = this.invalid_state;
             break;
+        }
+
+        if (in_progress) {
+            if (!this.pulse_timer.is_running) {
+                this.pulse_timer.start();
+            }
+        } else {
+            this.pulse_timer.reset();
+            // If a pulse hasn't been performed (and hence the
+            // progress bar is not visible), setting the fraction here
+            // to reset it will actually cause the progress bar to
+            // become visible. So only reset if needed.
+            if (this.did_pulse) {
+                this.target.progress_fraction = 0.0;
+                this.did_pulse = false;
+            }
         }
 
         this.target.set_icon_from_icon_name(ICON_POS, ui.icon_name);
@@ -301,6 +333,11 @@ public class Components.Validator : GLib.Object {
 
     private void on_update_ui() {
         update_ui(this.state);
+    }
+
+    private void on_pulse() {
+        this.target.progress_pulse();
+        this.did_pulse = true;
     }
 
     private void on_changed() {
