@@ -10,15 +10,6 @@
 public class GoaMediator : Geary.CredentialsMediator, Object {
 
 
-    public bool is_available {
-        get {
-            // Goa.Account.mail_disabled doesn't seem to reflect if we
-            // get can get a valid mail object or not, so just rely on
-            // actually getting one instead.
-            return this.handle.get_mail() != null;
-        }
-    }
-
     private Goa.Object handle;
 
 
@@ -111,7 +102,7 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         // password" or "GOA credentials need renewing" or
         // something. Connect to the GOA service and wait until we
         // hear that needs attention is no longer true.
-        return this.is_available;
+        return false;
     }
 
     private Geary.Credentials.Method get_auth_method() throws GLib.Error {
