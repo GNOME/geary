@@ -793,12 +793,6 @@ public class GearyController : Geary.BaseObject {
                     yield libsecret.update_token(
                         account, creds_service, context.cancellable
                     );
-                    // Update the engine using the original service
-                    // however, since that is the one waiting for the
-                    // credentials
-                    yield this.application.engine.update_account_service(
-                        account, service, context.cancellable
-                    );
                 } catch (GLib.IOError.CANCELLED err) {
                     // all good
                 } catch (GLib.Error err) {
@@ -819,7 +813,11 @@ public class GearyController : Geary.BaseObject {
             context.authentication_prompting = false;
         }
 
-        if (!handled) {
+        if (handled) {
+            yield this.application.engine.update_account_service(
+                account, service, context.cancellable
+            );
+        } else {
             context.authentication_attempts = 0;
             context.authentication_failed = true;
             update_account_status();
