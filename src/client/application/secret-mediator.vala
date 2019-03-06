@@ -35,14 +35,9 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         null
     );
 
-    private GearyApplication application;
-    private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
 
-
-    public async SecretMediator(GearyApplication application,
-                                GLib.Cancellable? cancellable)
+    public async SecretMediator(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        this.application = application;
         yield check_unlocked(cancellable);
     }
 
@@ -51,84 +46,37 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                          Cancellable? cancellable)
         throws GLib.Error {
         bool loaded = false;
-        if (service.credentials != null && service.remember_password) {
-            string? password = yield Secret.password_lookupv(
-                SecretMediator.schema, new_attrs(service), cancellable
-            );
+        if (service.credentials != null) {
+            if (service.remember_password) {
+                string? password = yield Secret.password_lookupv(
+                    SecretMediator.schema, new_attrs(service), cancellable
+                );
 
-            if (password == null) {
-                password = yield migrate_old_password(service, cancellable);
-            }
+                if (password == null) {
+                    password = yield migrate_old_password(service, cancellable);
+                }
 
-            if (password != null) {
-                service.credentials =
+                if (password != null) {
+                    service.credentials =
                     service.credentials.copy_with_token(password);
-                loaded = true;
+                    loaded = true;
+                }
+            } else {
+                // Not remembering the password, so just make sure it
+                // has been filled in
+                loaded = service.credentials.is_complete();
             }
-        }
-
-        if (!loaded) {
-            loaded = yield prompt_token(account, service, cancellable);
         }
 
         return loaded;
     }
 
-    public virtual async bool prompt_token(Geary.AccountInformation account,
-                                           Geary.ServiceInformation service,
-                                           GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        if (service.credentials != null) {
-            // to prevent multiple dialogs from popping up at the same
-            // time, use a nonblocking mutex to serialize the code
-            int token = yield dialog_mutex.claim_async(null);
-
-            // Ensure main window present to the window
-            this.application.present();
-
-            PasswordDialog password_dialog = new PasswordDialog(
-                this.application.get_active_window(),
-                account,
-                service
-            );
-            bool result = password_dialog.run();
-
-            dialog_mutex.release(ref token);
-
-            if (result) {
-                // password_dialog.password should never be null at this
-                // point. It will only be null when password_dialog.run()
-                // returns false, in which case we have already returned.
-                service.credentials = service.credentials.copy_with_token(
-                    password_dialog.password
-                );
-                service.remember_password = password_dialog.remember_password;
-
-                yield update_token(account, service, cancellable);
-
-                account.changed();
-            }
-        }
-        return true;
-    }
-
     public async void update_token(Geary.AccountInformation account,
                                    Geary.ServiceInformation service,
                                    Cancellable? cancellable)
-        throws Error {
-        if (service.credentials != null && service.remember_password) {
-            try {
-                yield do_store(service, service.credentials.token, cancellable);
-            } catch (Error e) {
-                debug(
-                    "Unable to store libsecret password for %s: %s %s",
-                    account.id,
-                    to_proto_value(service.protocol),
-                    service.credentials.user
-                );
-            }
-        } else {
-            yield clear_token(account, service, cancellable);
+        throws GLib.Error {
+        if (service.credentials != null) {
+            yield do_store(service, service.credentials.token, cancellable);
         }
     }
 

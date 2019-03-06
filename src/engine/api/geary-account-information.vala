@@ -468,35 +468,45 @@ public class Geary.AccountInformation : BaseObject {
     /**
      * Loads this account's outgoing service credentials, if needed.
      *
-     * Credentials are loaded from the mediator, which may cause the
-     * user to be prompted for the secret, thus it may yield for some
-     * time.
+     * Credentials are loaded from the mediator, thus it may yield for
+     * some time.
      *
-     * Returns true if the credentials were successfully loaded or had
-     * been previously loaded, or false the credentials could not be
-     * loaded and the service's credentials are invalid.
+     * Returns true if the credentials were successfully loaded, or
+     * false if the credentials could not be loaded and the service's
+     * credentials are invalid.
      */
-    public async void load_outgoing_credentials(GLib.Cancellable? cancellable)
+    public async bool load_outgoing_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
         Credentials? creds = this.outgoing.credentials;
+        bool loaded = false;
         if (creds != null) {
-            yield this.mediator.load_token(this, this.outgoing, cancellable);
+            loaded = yield this.mediator.load_token(
+                this, this.outgoing, cancellable
+            );
         }
+        return loaded;
     }
 
     /**
      * Loads this account's incoming service credentials, if needed.
      *
-     * Credentials are loaded from the mediator, which may cause the
-     * user to be prompted for the secret, thus it may yield for some
-     * time.
+     * Credentials are loaded from the mediator, thus it may yield for
+     * some time.
+     *
+     * Returns true if the credentials were successfully loaded, or
+     * false if the credentials could not be loaded and the service's
+     * credentials are invalid.
      */
-    public async void load_incoming_credentials(GLib.Cancellable? cancellable)
+    public async bool load_incoming_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
         Credentials? creds = this.incoming.credentials;
+        bool loaded = false;
         if (creds != null) {
-            yield this.mediator.load_token(this, this.incoming, cancellable);
+            loaded = yield this.mediator.load_token(
+                this, this.incoming, cancellable
+            );
         }
+        return loaded;
     }
 
     public bool equal_to(AccountInformation other) {
