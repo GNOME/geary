@@ -55,7 +55,7 @@ internal class Accounts.EditorEditPane :
     [GtkChild]
     private Gtk.Frame signature_frame;
 
-    private ClientWebView signature_preview;
+    private SignatureWebView signature_preview;
     private bool signature_changed = false;
 
     [GtkChild]
@@ -86,7 +86,7 @@ internal class Accounts.EditorEditPane :
         }
         this.senders_list.add(new AddMailboxRow());
 
-        this.signature_preview = new ClientWebView(
+        this.signature_preview = new SignatureWebView(
             ((GearyApplication) editor.application).config
         );
         this.signature_preview.events = (
