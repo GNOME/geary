@@ -25,7 +25,8 @@ public class PasswordDialog {
 
     public PasswordDialog(Gtk.Window? parent,
                           Geary.AccountInformation account,
-                          Geary.ServiceInformation service) {
+                          Geary.ServiceInformation service,
+                          Geary.Credentials? credentials) {
         Gtk.Builder builder = GioUtil.create_builder("password-dialog.glade");
         
         dialog = (Gtk.Dialog) builder.get_object("PasswordDialog");
@@ -43,18 +44,13 @@ public class PasswordDialog {
         Gtk.Label primary_text_label = (Gtk.Label) builder.get_object("primary_text_label");
         primary_text_label.set_markup(PRIMARY_TEXT_MARKUP.printf(PRIMARY_TEXT_FIRST_TRY));
 
-        bool is_smtp = service.protocol == Geary.Protocol.SMTP;
-
-        Geary.Credentials? credentials = (is_smtp)
-            ? account.get_outgoing_credentials() : account.incoming.credentials;
-
         if (credentials != null) {
             label_username.set_text(credentials.user);
             entry_password.set_text(credentials.token ?? "");
         }
         check_remember_password.active = service.remember_password;
 
-        if (is_smtp) {
+        if ((service.protocol == Geary.Protocol.SMTP)) {
             label_smtp.show();
         }
 

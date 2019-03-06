@@ -334,7 +334,7 @@ public class GearyController : Geary.BaseObject {
 
         SecretMediator? libsecret = null;
         try {
-            libsecret = yield new SecretMediator(this.application, cancellable);
+            libsecret = yield new SecretMediator(cancellable);
         } catch (GLib.Error err) {
             error("Error opening libsecret: %s", err.message);
         }
@@ -774,29 +774,41 @@ public class GearyController : Geary.BaseObject {
             PasswordDialog password_dialog = new PasswordDialog(
                 this.application.get_active_window(),
                 account,
-                service
+                service,
+                credentials
             );
             if (password_dialog.run()) {
-                service.credentials = service.credentials.copy_with_token(
-                    password_dialog.password
-                );
-                service.remember_password = password_dialog.remember_password;
-
                 // The update the credentials for the service that the
                 // credentials actually came from
                 Geary.ServiceInformation creds_service =
-                    credentials == account.incoming.credentials
+                    (credentials == account.incoming.credentials)
                     ? account.incoming
                     : account.outgoing;
+                creds_service.credentials = credentials.copy_with_token(
+                    password_dialog.password
+                );
+
+                // Update the remember password pref if changed
+                bool remember = password_dialog.remember_password;
+                if (creds_service.remember_password != remember) {
+                    creds_service.remember_password = remember;
+                    account.changed();
+                }
+
                 SecretMediator libsecret = (SecretMediator) account.mediator;
                 try {
-                    yield libsecret.update_token(
-                        account, creds_service, context.cancellable
-                    );
-                    // Update the actual service in the engine though
-                    yield this.application.engine.update_account_service(
-                        account, service, context.cancellable
-                    );
+                    // Update the secret using the service where the
+                    // credentials originated, since the service forms
+                    // part of the key's identity
+                    if (creds_service.remember_password) {
+                        yield libsecret.update_token(
+                            account, creds_service, context.cancellable
+                        );
+                    } else {
+                        yield libsecret.clear_token(
+                            account, creds_service, context.cancellable
+                        );
+                    }
                 } catch (GLib.IOError.CANCELLED err) {
                     // all good
                 } catch (GLib.Error err) {
@@ -809,6 +821,7 @@ public class GearyController : Geary.BaseObject {
                         )
                     );
                 }
+
                 context.authentication_attempts++;
             } else {
                 // User cancelled, bail out unconditionally
@@ -817,7 +830,11 @@ public class GearyController : Geary.BaseObject {
             context.authentication_prompting = false;
         }
 
-        if (!handled) {
+        if (handled) {
+            yield this.application.engine.update_account_service(
+                account, service, context.cancellable
+            );
+        } else {
             context.authentication_attempts = 0;
             context.authentication_failed = true;
             update_account_status();

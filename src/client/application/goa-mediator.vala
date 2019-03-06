@@ -94,17 +94,6 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         return loaded;
     }
 
-    public virtual async bool prompt_token(Geary.AccountInformation account,
-                                           Geary.ServiceInformation service,
-                                           GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        // XXX Open a dialog that says "Click here to change your GOA
-        // password" or "GOA credentials need renewing" or
-        // something. Connect to the GOA service and wait until we
-        // hear that needs attention is no longer true.
-        return false;
-    }
-
     private Geary.Credentials.Method get_auth_method() throws GLib.Error {
         if (this.handle.get_oauth2_based() != null) {
             return Geary.Credentials.Method.OAUTH2;
