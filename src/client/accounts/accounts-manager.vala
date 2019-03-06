@@ -784,11 +784,10 @@ public class Accounts.Manager : GLib.Object {
     }
 
     private bool is_valid_goa_account(Goa.Object handle) {
-        // Goa.Account.mail_disabled doesn't seem to reflect if we get
-        // get a valid mail object here, so just rely on that instead.
         Goa.Mail? mail = handle.get_mail();
         return (
             mail != null &&
+            !handle.get_account().mail_disabled &&
             !Geary.String.is_empty(mail.imap_host) &&
             !Geary.String.is_empty(mail.smtp_host)
         );
@@ -838,15 +837,18 @@ public class Accounts.Manager : GLib.Object {
     }
 
     private async void update_goa_account(Geary.AccountInformation account,
+                                          bool is_available,
                                           GLib.Cancellable? cancellable) {
         GoaMediator mediator = (GoaMediator) account.mediator;
         try {
             yield mediator.update(account, cancellable);
 
-            // Update will clear the creds, so make sure they get
-            // refreshed
-            yield account.load_outgoing_credentials(cancellable);
-            yield account.load_incoming_credentials(cancellable);
+            if (is_available) {
+                // Update will clear the creds, so make sure they get
+                // refreshed
+                yield account.load_outgoing_credentials(cancellable);
+                yield account.load_incoming_credentials(cancellable);
+            }
         } catch (GLib.Error err) {
             report_problem(
                 new Geary.AccountProblemReport(
@@ -858,7 +860,7 @@ public class Accounts.Manager : GLib.Object {
 
         // XXX need to notify the engine that creds may have changed
 
-        set_available(account, mediator.is_available);
+        set_available(account, is_available);
     }
 
 
@@ -929,7 +931,11 @@ public class Accounts.Manager : GLib.Object {
             // We already know about this account, so check that it is
             // still valid. If not, the account should be disabled,
             // not deleted, since it may be re-enabled at some point.
-            this.update_goa_account.begin(state.account, null);
+            this.update_goa_account.begin(
+                state.account,
+                is_valid_goa_account(account),
+                null
+            );
         } else {
             // We haven't created an account for this GOA account
             // before, so try doing so now.
