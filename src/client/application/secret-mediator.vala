@@ -67,10 +67,6 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             }
         }
 
-        if (!loaded) {
-            loaded = yield prompt_token(account, service, cancellable);
-        }
-
         return loaded;
     }
 

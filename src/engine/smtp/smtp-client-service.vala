@@ -190,7 +190,9 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         throws GLib.Error {
         // To prevent spurious connection failures, ensure tokens are
         // up-to-date before attempting to send the email
-        yield this.account.load_outgoing_credentials(cancellable);
+        if (!yield this.account.load_outgoing_credentials(cancellable)) {
+            throw new SmtpError.AUTHENTICATION_FAILED("Credentials not loaded");
+        }
 
         Email? email = null;
         try {

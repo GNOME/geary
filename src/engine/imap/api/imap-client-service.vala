@@ -270,9 +270,13 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             // are up-to-date before attempting a connection, but
             // after we know we should be able to connect to it
             try {
-                yield this.account.load_incoming_credentials(
+                bool loaded = yield this.account.load_incoming_credentials(
                     this.pool_cancellable
                 );
+                if (!loaded) {
+                    notify_authentication_failed();
+                    return;
+                }
             } catch (GLib.Error err) {
                 notify_connection_failed(new ErrorContext(err));
                 return;
