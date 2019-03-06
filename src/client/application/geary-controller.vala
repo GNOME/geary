@@ -332,7 +332,7 @@ public class GearyController : Geary.BaseObject {
 
         SecretMediator? libsecret = null;
         try {
-            libsecret = yield new SecretMediator(this.application, cancellable);
+            libsecret = yield new SecretMediator(cancellable);
         } catch (GLib.Error err) {
             error("Error opening libsecret: %s", err.message);
         }

@@ -35,14 +35,9 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         null
     );
 
-    private GearyApplication application;
-    private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
 
-
-    public async SecretMediator(GearyApplication application,
-                                GLib.Cancellable? cancellable)
+    public async SecretMediator(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        this.application = application;
         yield check_unlocked(cancellable);
     }
 
@@ -68,44 +63,6 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         }
 
         return loaded;
-    }
-
-    public virtual async bool prompt_token(Geary.AccountInformation account,
-                                           Geary.ServiceInformation service,
-                                           GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        if (service.credentials != null) {
-            // to prevent multiple dialogs from popping up at the same
-            // time, use a nonblocking mutex to serialize the code
-            int token = yield dialog_mutex.claim_async(null);
-
-            // Ensure main window present to the window
-            this.application.present();
-
-            PasswordDialog password_dialog = new PasswordDialog(
-                this.application.get_active_window(),
-                account,
-                service
-            );
-            bool result = password_dialog.run();
-
-            dialog_mutex.release(ref token);
-
-            if (result) {
-                // password_dialog.password should never be null at this
-                // point. It will only be null when password_dialog.run()
-                // returns false, in which case we have already returned.
-                service.credentials = service.credentials.copy_with_token(
-                    password_dialog.password
-                );
-                service.remember_password = password_dialog.remember_password;
-
-                yield update_token(account, service, cancellable);
-
-                account.changed();
-            }
-        }
-        return true;
     }
 
     public async void update_token(Geary.AccountInformation account,
