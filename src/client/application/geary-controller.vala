@@ -769,26 +769,33 @@ public class GearyController : Geary.BaseObject {
             PasswordDialog password_dialog = new PasswordDialog(
                 this.application.get_active_window(),
                 account,
-                service
+                service,
+                credentials
             );
             if (password_dialog.run()) {
-                service.credentials = service.credentials.copy_with_token(
-                    password_dialog.password
-                );
                 service.remember_password = password_dialog.remember_password;
 
                 // The update the credentials for the service that the
                 // credentials actually came from
                 Geary.ServiceInformation creds_service =
-                    credentials == account.incoming.credentials
+                    (credentials == account.incoming.credentials)
                     ? account.incoming
                     : account.outgoing;
+                creds_service.credentials = credentials.copy_with_token(
+                    password_dialog.password
+                );
+
                 SecretMediator libsecret = (SecretMediator) account.mediator;
                 try {
+                    // Update the secret using the service where the
+                    // credentials originated, since the service forms
+                    // part of the key's identity
                     yield libsecret.update_token(
                         account, creds_service, context.cancellable
                     );
-                    // Update the actual service in the engine though
+                    // Update the engine using the original service
+                    // however, since that is the one waiting for the
+                    // credentials
                     yield this.application.engine.update_account_service(
                         account, service, context.cancellable
                     );
