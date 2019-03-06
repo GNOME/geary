@@ -18,6 +18,7 @@ geary_client_vala_sources = files(
   'accounts/accounts-editor-remove-pane.vala',
   'accounts/accounts-editor-row.vala',
   'accounts/accounts-editor-servers-pane.vala',
+  'accounts/accounts-signature-web-view.vala',
   'accounts/accounts-manager.vala',
 
   'components/client-web-view.vala',

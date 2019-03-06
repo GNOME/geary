@@ -8,6 +8,15 @@
 class ClientPageStateTest : ClientWebViewTestCase<ClientWebView> {
 
 
+    private class TestClientWebView : ClientWebView {
+
+        public TestClientWebView(Configuration config) {
+            base(config);
+        }
+
+    }
+
+
     public ClientPageStateTest() {
         base("ClientPageStateTest");
         add_test("content_loaded", content_loaded);
@@ -46,7 +55,7 @@ class ClientPageStateTest : ClientWebViewTestCase<ClientWebView> {
             null
         );
 
-        ClientWebView view = new ClientWebView(this.config);
+        ClientWebView view = new TestClientWebView(this.config);
         view.get_user_content_manager().add_script(test_script);
         return view;
     }

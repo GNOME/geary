@@ -37,6 +37,7 @@
     <file compressed="true" preprocess="xml-stripblanks">password-dialog.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">preferences-dialog.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">problem-details-dialog.ui</file>
+    <file compressed="true">signature-web-view.js</file>
     <file compressed="true" preprocess="xml-stripblanks">upgrade_dialog.glade</file>
     <file compressed="true">geary.css</file>
   </gresource>

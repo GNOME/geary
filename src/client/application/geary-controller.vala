@@ -257,6 +257,7 @@ public class GearyController : Geary.BaseObject {
             ConversationWebView.load_resources(
                 this.application.get_user_config_directory()
             );
+            Accounts.SignatureWebView.load_resources();
         } catch (Error err) {
             error("Error loading web resources: %s", err.message);
         }
