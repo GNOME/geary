@@ -69,6 +69,17 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="3.32">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Application menu moved to the main window</li>
+          <li>Updated application icons</li>
+          <li>Improved server compatibility</li>
+          <li>Custom email CSS now applied to Composer view</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.13" date="2019-02-17">
       <description>
         <p>Enhancements included in this release:</p>
