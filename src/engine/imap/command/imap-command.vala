@@ -79,6 +79,7 @@ public class Geary.Imap.Command : BaseObject {
         new Geary.Nonblocking.Semaphore();
 
     private bool timed_out = false;
+    private bool cancelled = false;
 
     private Geary.Nonblocking.Spinlock? literal_spinlock = null;
     private GLib.Cancellable? literal_cancellable = null;
@@ -209,10 +210,12 @@ public class Geary.Imap.Command : BaseObject {
      * Cancels this command's execution.
      *
      * When this method is called, all locks will be released,
-     * including {@link wait_until_complete}.
+     * including {@link wait_until_complete}, which will then throw a
+     * `GLib.IOError.CANCELLED` error.
      */
     internal virtual void cancel_command() {
         cancel_send();
+        this.cancelled = true;
         this.response_timer.reset();
         this.complete_lock.blind_notify();
     }
@@ -220,17 +223,23 @@ public class Geary.Imap.Command : BaseObject {
     /**
      * Yields until the command has been completed or cancelled.
      *
-     * Throws an error if cancelled, if the command is cancelled, or
-     * if the command's response was bad.
+     * Throws an error if the command or the cancellable argument is
+     * cancelled, if the command timed out, or if the command's
+     * response was bad.
      */
     public async void wait_until_complete(GLib.Cancellable cancellable)
         throws GLib.Error {
         yield this.complete_lock.wait_async(cancellable);
 
+        if (this.cancelled) {
+            throw new GLib.IOError.CANCELLED(
+                "%s: Command was cancelled", to_brief_string()
+            );
+        }
+
         if (this.timed_out) {
             throw new ImapError.TIMED_OUT(
-                "%s: No command response was received",
-                to_brief_string()
+                "%s: Command timed out", to_brief_string()
             );
         }
 
