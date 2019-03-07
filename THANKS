@@ -1,93 +1,93 @@
 The Geary team would like to thank the following contributors:
 
-Robert Ancell <robert.ancell@canonical.com>
-Heiko Becker <heirecka@exherbo.org>
-Jeremy Bicha <jbicha@ubuntu.com>
-Kacper Bielecki <kazjote@gmail.com>
-Jürg Billeter <j@bitron.ch>
-Yosef Or Boczko <yoseforb@gmail.com>
-Martijn Braam <pizzamartijn@gmail.com>
-Federico Bruni <fede@inventati.org>
-Attila Bukor <r1pp3rj4ck@w4it.eu>
-Michael Catanzaro <mcatanzaro@igalia.com>
-Jiri Cerny <ji.cerny@gmail.com>
-Matthias Clasen <mclasen@redhat.com>
-Andrea Corbellini <corbellini.andrea@gmail.com>
-Gianfranco Costamagna <costamagnagianfranco@yahoo.it>
-Sergey Shnatsel Davidoff <sergey@elementaryos.org>
-Christopher Davis <brainblasted@disroot.org>
-Joanmarie Diggs <jdiggs@igalia.com>
 Adam Dingle <adam@medovina.org>
-Jon Dowland <jmtd@debian.org>
-Piotr Drąg <piotrdrag@gmail.com>
-Joel Duncan <joel@slethen.io>
-Chirstian Dywan <christian@twotoasts.de>
-Victor Eduardo <victor@elementaryos.org>
+Adrien Plazas <kekun.plazas@laposte.net>
+Alex Henrie <alexhenrie24@gmail.com>
+Alexander Wilms <alexander.wilms@zoho.com>
+Andre Klapper <a9016009@gmx.de>
+Andrea Corbellini <corbellini.andrea@gmail.com>
+Andreas Obergrusberger <tradiaz@yahoo.de>
+Angelo Marchesin <marchesin.angelo@gmail.com>
+Anirudh Sanjeev <skyronic@gmail.com>
+Attila Bukor <r1pp3rj4ck@w4it.eu>
+Avi Levy <avi.w.levy@gmail.com>
 Bilal Elmoussaoui <bil.elmoussaoui@gmail.com>
+Brendan Long <self@brendanlong.com>
+Charles Lehner <rdm.cel@celehner.com>
+Chirstian Dywan <christian@twotoasts.de>
+Christian Kellner <christian@kellner.me>
+Christopher Davis <brainblasted@disroot.org>
+Colin Walters <walters@verbum.org>
+Daniel Foré <daniel@elementaryos.org>
+Didier Roche <didrocks@ubuntu.com>
 Emersion <contact@emersion.fr>
 Erik Faye-Lund <erik.faye-lund@collabora.com>
-Juraj Fiala <jurf@riseup.net>
-Daniel Foré <daniel@elementaryos.org>
-Jens Georg <mail@jensge.org>
-Michael George <mdgeorge@cs.cornell.edu>
-Niels De Graef <nielsdegraef@gmail.com>
-Michael Gratton <mike@vee.net>
-Sven Hagemann <sven@rednose.nl>
-Mathias Hasselmann <mathias@openismus.com>
-Alex Henrie <alexhenrie24@gmail.com>
-Mohamed Ibrahim <mohamed.ib.md@gmail.com>
-Konstantin Kharlamov <Hi-Angel@yandex.ru>
-Christian Kellner <christian@kellner.me>
-Andre Klapper <a9016009@gmx.de>
-Kristian Klausen <kristian@klausen.dk>
-Timo Kluck <tkluck@infty.nl>
-Ville Korhonen <ville@xd.fi>
-Charles Lehner <rdm.cel@celehner.com>
-Avi Levy <avi.w.levy@gmail.com>
+Federico Bruni <fede@inventati.org>
 Florin Lipan <florinlipan@gmail.com>
-Simon Lipp <bugs-gnome@simon.lipp.name>
-Brendan Long <self@brendanlong.com>
-James Magahern <james@magahern.com>
-Angelo Marchesin <marchesin.angelo@gmail.com>
-mar-v-in <github@rvin.mooo.com>
-Kai Mast <mail@kai-mast.de>
-john <qq799433746@gmail.com>
-William Jon McCann <william.jon.mccann@gmail.com>
-Stephen Michel <stephen.michel@tufts.edu>
-Thomas Moschny <thomas.moschny@gmx.de>
-Tom Most <twm@freecog.net>
-Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
-Philipp Nordhus <philipp@nhus.de>
-Andreas Obergrusberger <tradiaz@yahoo.de>
-Martin Olsson <martin@minimum.se>
-Mark Pariente <markpariente@gmail.com>
-Robert Park <rbpark@exolucere.ca>
 Gautier Pelloux-Prayer <gautier@damsy.net>
-Jordan Petridis <jpetrids@gnome.org>
-Adrien Plazas <kekun.plazas@laposte.net>
-Ralph Plawetzki <ralph@purejava.org>
-p3732 <p3732@users.noreply.github.com>
-nick richards <nick.richards@gmail.com>
-Mario Sanchez Prada <msanchez@igalia.com>
-Tiago Quelhas <tiagoq@gmail.com>
-Viko Adi Rahmawan <vikoadi@gmail.com>
-ritchiew <rawilson52@gmail.com>
-Leonardo Robol <leo@robol.it>
-Didier Roche <didrocks@ubuntu.com>
-Janosch Rolles <janosch@rolles.org>
-Robert Roth <robert.roth.off@gmail.com>
-Gustavo Rubio <gus@ahivamos.net>
-Michel Alexandre Salim <salimma@fedoraproject.org>
-Anirudh Sanjeev <skyronic@gmail.com>
-Robert Schroll <rschroll@gmail.com>
-Jakub Steiner <jimmac@gmail.com>
-Wolfgang Steitz <wolfer7@web.de>
-Nikolas Tapia <ntapia@dim.uchile.cl>
-Jan Tojnar <jtojnar@gmail.com>
-Rico Tzschichholz <ricotz@ubuntu.com>
-Jakob Unterwurzacher <jakobunt@gmail.com>
+Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
+Gianfranco Costamagna <costamagnagianfranco@yahoo.it>
 Greg V <greg@unrelenting.technology>
-Oskar Viljasaar <oskar.viljasaar@gmail.com>
-Colin Walters <walters@verbum.org>
-Alexander Wilms <alexander.wilms@zoho.com>
+Gustavo Rubio <gus@ahivamos.net>
+Heiko Becker <heirecka@exherbo.org>
+Jakob Unterwurzacher <jakobunt@gmail.com>
+Jakub Steiner <jimmac@gmail.com>
+James Magahern <james@magahern.com>
+Jan Tojnar <jtojnar@gmail.com>
+Janosch Rolles <janosch@rolles.org>
+Jens Georg <mail@jensge.org>
+Jeremy Bicha <jbicha@ubuntu.com>
+Jiri Cerny <ji.cerny@gmail.com>
+Joanmarie Diggs <jdiggs@igalia.com>
+Joel Duncan <joel@slethen.io>
+Jon Dowland <jmtd@debian.org>
+john <qq799433746@gmail.com>
+Jordan Petridis <jpetrids@gnome.org>
+Juraj Fiala <jurf@riseup.net>
+Jürg Billeter <j@bitron.ch>
+Kacper Bielecki <kazjote@gmail.com>
+Kai Mast <mail@kai-mast.de>
+Konstantin Kharlamov <Hi-Angel@yandex.ru>
+Kristian Klausen <kristian@klausen.dk>
+Leonardo Robol <leo@robol.it>
+Mario Sanchez Prada <msanchez@igalia.com>
+Mark Pariente <markpariente@gmail.com>
+Martijn Braam <pizzamartijn@gmail.com>
+Martin Olsson <martin@minimum.se>
+mar-v-in <github@rvin.mooo.com>
+Mathias Hasselmann <mathias@openismus.com>
 Matthew Wong <wongma7@outlook.com>
+Matthias Clasen <mclasen@redhat.com>
+Michael Catanzaro <mcatanzaro@igalia.com>
+Michael George <mdgeorge@cs.cornell.edu>
+Michael Gratton <mike@vee.net>
+Michel Alexandre Salim <salimma@fedoraproject.org>
+Mohamed Ibrahim <mohamed.ib.md@gmail.com>
+nick richards <nick.richards@gmail.com>
+Niels De Graef <nielsdegraef@gmail.com>
+Nikolas Tapia <ntapia@dim.uchile.cl>
+Oskar Viljasaar <oskar.viljasaar@gmail.com>
+Philipp Nordhus <philipp@nhus.de>
+Piotr Drąg <piotrdrag@gmail.com>
+p3732 <p3732@users.noreply.github.com>
+Ralph Plawetzki <ralph@purejava.org>
+Rico Tzschichholz <ricotz@ubuntu.com>
+ritchiew <rawilson52@gmail.com>
+Robert Ancell <robert.ancell@canonical.com>
+Robert Park <rbpark@exolucere.ca>
+Robert Roth <robert.roth.off@gmail.com>
+Robert Schroll <rschroll@gmail.com>
+Sergey Shnatsel Davidoff <sergey@elementaryos.org>
+Simon Lipp <bugs-gnome@simon.lipp.name>
+Stephen Michel <stephen.michel@tufts.edu>
+Sven Hagemann <sven@rednose.nl>
+Thomas Moschny <thomas.moschny@gmx.de>
+Tiago Quelhas <tiagoq@gmail.com>
+Timo Kluck <tkluck@infty.nl>
+Tom Most <twm@freecog.net>
+Victor Eduardo <victor@elementaryos.org>
+Viko Adi Rahmawan <vikoadi@gmail.com>
+Ville Korhonen <ville@xd.fi>
+William Jon McCann <william.jon.mccann@gmail.com>
+Wolfgang Steitz <wolfer7@web.de>
+Yosef Or Boczko <yoseforb@gmail.com>
