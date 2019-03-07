@@ -1,3 +1,19 @@
+Version 0.13.2
+~~~~~~~~~~~~~~
+Released: 2019-03-07
+
+Enhancements included in this release:
+ * Bug fixes and minor user interface improvements
+ * User interface translation updates
+
+See https://gitlab.gnome.org/GNOME/geary/milestones/8 for the complete
+list.
+
+Thanks to all who contributed translations for the user interface:
+ * Bernd Homuth (de)
+ * Federico Bruni (it)
+ * Serdar Sağlam (tr)
+
 Version 0.13.1
 ~~~~~~~~~~~~~~
 Released: 2019-02-21
