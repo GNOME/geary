@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-02-23 09:39+0000\n"
-"PO-Revision-Date: 2019-02-23 22:40+0900\n"
+"POT-Creation-Date: 2019-03-07 03:56+0000\n"
+"PO-Revision-Date: 2019-03-07 19:05+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -51,7 +51,7 @@ msgstr "メール"
 #: desktop/geary-autostart.desktop.in:5
 #: desktop/org.gnome.Geary.appdata.xml.in:15
 #: desktop/org.gnome.Geary.desktop.in:5
-#: src/client/application/geary-application.vala:22
+#: src/client/application/geary-application.vala:23
 msgid "Send and receive email"
 msgstr "メールの送信と受信"
 
@@ -133,8 +133,7 @@ msgstr "HTML メール作成中の Geary"
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;メール;Eメール;E-メール;"
 
-#: desktop/org.gnome.Geary.desktop.in:21 ui/gtk/menus.ui:7
-#: ui/main-toolbar.ui:24
+#: desktop/org.gnome.Geary.desktop.in:21
 msgid "Compose Message"
 msgstr "メッセージを作成"
 
@@ -743,10 +742,8 @@ msgstr "下書きをサーバーに保存"
 #. Translators: This label describes an account
 #. preference.
 #: src/client/accounts/accounts-editor-servers-pane.vala:666
-#, fuzzy
-#| msgid "_Save sent mail"
 msgid "Save sent email on server"
-msgstr "送信メールを保存する(_S)"
+msgstr "送信メールをサーバーに保存"
 
 #. Add a suffix for OAuth2 auth so people know they
 #. shouldn't expect to be prompted for a password
@@ -762,19 +759,19 @@ msgstr "%s は OAuth2 を使用しています"
 msgid "Use receiving server login"
 msgstr "受信サーバーの情報を使う"
 
-#: src/client/application/geary-application.vala:23
+#: src/client/application/geary-application.vala:24
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
-#: src/client/application/geary-application.vala:24
+#: src/client/application/geary-application.vala:25
 msgid "Copyright 2016-2019 Geary Development Team."
 msgstr "Copyright 2016-2019 Geary Development Team."
 
-#: src/client/application/geary-application.vala:26
+#: src/client/application/geary-application.vala:27
 msgid "Visit the Geary web site"
 msgstr "Geary のウェブサイト"
 
-#: src/client/application/geary-application.vala:420
+#: src/client/application/geary-application.vala:454
 #, c-format
 msgid "About %s"
 msgstr "%s について"
@@ -782,7 +779,7 @@ msgstr "%s について"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:424
+#: src/client/application/geary-application.vala:458
 msgid "translator-credits"
 msgstr ""
 "masami chikahiro <cmasa.z321@gmail.com>\n"
@@ -875,23 +872,23 @@ msgstr "不明なコマンドラインオプション“%s”\n"
 
 #. Translators: File name used in save chooser when saving
 #. attachments that do not otherwise have a name.
-#: src/client/application/geary-controller.vala:61
+#: src/client/application/geary-controller.vala:58
 msgid "Untitled"
 msgstr "無題"
 
-#: src/client/application/geary-controller.vala:924
+#: src/client/application/geary-controller.vala:937
 msgid "Labels"
 msgstr "ラベル"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:937
+#: src/client/application/geary-controller.vala:950
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "%s のデータベースを開けません"
 
-#: src/client/application/geary-controller.vala:938
+#: src/client/application/geary-controller.vala:951
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -915,20 +912,20 @@ msgstr ""
 "データベースを再構築すると、すべてのローカルメールと添付ファイルが破棄されま"
 "す。<b>サーバー上のメールは影響を受けません。</b>"
 
-#: src/client/application/geary-controller.vala:940
+#: src/client/application/geary-controller.vala:953
 msgid "_Rebuild"
 msgstr "再構築(_R)"
 
-#: src/client/application/geary-controller.vala:940
+#: src/client/application/geary-controller.vala:953
 msgid "E_xit"
 msgstr "終了(_X)"
 
-#: src/client/application/geary-controller.vala:949
+#: src/client/application/geary-controller.vala:962
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "“%s”のデータベースを再構築できません"
 
-#: src/client/application/geary-controller.vala:950
+#: src/client/application/geary-controller.vala:963
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -939,15 +936,15 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1805
+#: src/client/application/geary-controller.vala:1818
 msgid "Undo move (Ctrl+Z)"
 msgstr "移動を元に戻す(Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:1815
+#: src/client/application/geary-controller.vala:1828
 msgid "Are you sure you want to open these attachments?"
 msgstr "これらの添付ファイルを開いてもよろしいですか?"
 
-#: src/client/application/geary-controller.vala:1816
+#: src/client/application/geary-controller.vala:1829
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -955,14 +952,14 @@ msgstr ""
 "添付ファイルはシステムにダメージを与える可能性があります。送信元が信頼できる"
 "場合のみ開くようにしてください。"
 
-#: src/client/application/geary-controller.vala:1817
+#: src/client/application/geary-controller.vala:1830
 msgid "Don’t _ask me again"
 msgstr "次回から表示しない(_A)"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/geary-controller.vala:1946
+#: src/client/application/geary-controller.vala:1959
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "“%s”はすでに存在します。置き換えますか?"
@@ -970,99 +967,99 @@ msgstr "“%s”はすでに存在します。置き換えますか?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/geary-controller.vala:1953
+#: src/client/application/geary-controller.vala:1966
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "ファイルはすでに“%s”に存在します。置き換えると内容を上書きします。"
 
-#: src/client/application/geary-controller.vala:1957
+#: src/client/application/geary-controller.vala:1970
 msgid "_Replace"
 msgstr "置換(_R)"
 
-#: src/client/application/geary-controller.vala:2233
+#: src/client/application/geary-controller.vala:2246
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "下書きメッセージを閉じますか?"
 
-#: src/client/application/geary-controller.vala:2359
+#: src/client/application/geary-controller.vala:2372
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s フォルダーのすべてのメールを空にしますか?"
 
-#: src/client/application/geary-controller.vala:2360
+#: src/client/application/geary-controller.vala:2373
 msgid "This removes the email from Geary and your email server."
 msgstr "メールを Geary とメールサーバーから削除します。"
 
-#: src/client/application/geary-controller.vala:2361
+#: src/client/application/geary-controller.vala:2374
 msgid "This cannot be undone."
 msgstr "これは元に戻すことができません。"
 
-#: src/client/application/geary-controller.vala:2362
+#: src/client/application/geary-controller.vala:2375
 #, c-format
 msgid "Empty %s"
 msgstr "%s を空にする"
 
-#: src/client/application/geary-controller.vala:2379
+#: src/client/application/geary-controller.vala:2392
 #, c-format
 msgid "Error emptying %s"
 msgstr "%s を空にするときにエラーが発生しました"
 
-#: src/client/application/geary-controller.vala:2411
+#: src/client/application/geary-controller.vala:2424
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "このメッセージを完全に削除しますか?"
 
-#: src/client/application/geary-controller.vala:2413
+#: src/client/application/geary-controller.vala:2426
 msgid "Delete"
 msgstr "削除"
 
-#: src/client/application/geary-controller.vala:2427
+#: src/client/application/geary-controller.vala:2440
 msgid "Undo trash (Ctrl+Z)"
 msgstr "ごみ箱から戻す(Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2477
+#: src/client/application/geary-controller.vala:2490
 msgid "Undo archive (Ctrl+Z)"
 msgstr "アーカイブから戻す(Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2522
+#: src/client/application/geary-controller.vala:2535
 msgid "Undo (Ctrl+Z)"
 msgstr "元に戻す(Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2599
+#: src/client/application/geary-controller.vala:2616
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "%s にメールを送信しました。"
 
-#: src/client/application/geary-controller.vala:2681
+#: src/client/application/geary-controller.vala:2698
 msgid "Failed to open default text editor."
 msgstr "デフォルトのテキストエディターの起動に失敗しました。"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but one is not provided.
-#: src/client/components/components-validator.vala:341
+#: src/client/components/components-validator.vala:378
 msgid "An email address is required"
 msgstr "メールアドレスは必須です"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but the address is invalid.
-#: src/client/components/components-validator.vala:345
+#: src/client/components/components-validator.vala:382
 msgid "Not a valid email address"
 msgstr "有効なメールアドレスではありません"
 
 #. Translators: Tooltip used when an entry requires a valid,
 #. resolvable server name to be entered, but one is not
 #. provided.
-#: src/client/components/components-validator.vala:391
+#: src/client/components/components-validator.vala:428
 msgid "A server name is required"
 msgstr "サーバー名は必須です"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. server name to be entered, but it was unable to be
 #. looked-up in the DNS.
-#: src/client/components/components-validator.vala:396
+#: src/client/components/components-validator.vala:433
 msgid "Could not look up server name"
 msgstr "サーバー名が見つかりませんでした"
 
@@ -1336,7 +1333,7 @@ msgstr "OK(_O)"
 msgid "_Cancel"
 msgstr "キャンセル(_C)"
 
-#: src/client/components/stock.vala:21 ui/gtk/menus.ui:34
+#: src/client/components/stock.vala:21
 msgid "_About"
 msgstr "このアプリケーションについて(_A)"
 
@@ -1352,7 +1349,7 @@ msgstr "閉じる(_C)"
 msgid "_Discard"
 msgstr "破棄(_D)"
 
-#: src/client/components/stock.vala:25 ui/gtk/menus.ui:29
+#: src/client/components/stock.vala:25 ui/main-toolbar-menus.ui:56
 msgid "_Help"
 msgstr "ヘルプ(_H)"
 
@@ -1360,7 +1357,7 @@ msgstr "ヘルプ(_H)"
 msgid "_Open"
 msgstr "開く(_O)"
 
-#: src/client/components/stock.vala:27 ui/gtk/menus.ui:17
+#: src/client/components/stock.vala:27 ui/main-toolbar-menus.ui:46
 msgid "_Preferences"
 msgstr "設定(_P)"
 
@@ -1369,7 +1366,7 @@ msgstr "設定(_P)"
 msgid "_Print…"
 msgstr "印刷(_P)…"
 
-#: src/client/components/stock.vala:29 ui/gtk/menus.ui:38
+#: src/client/components/stock.vala:29
 msgid "_Quit"
 msgstr "終了(_Q)"
 
@@ -1397,19 +1394,19 @@ msgstr "無効なリンク URL"
 msgid "Invalid email address"
 msgstr "無効なメールアドレス"
 
-#: src/client/composer/composer-widget.vala:157
+#: src/client/composer/composer-widget.vala:158
 msgid "Saved"
 msgstr "保存済み"
 
-#: src/client/composer/composer-widget.vala:158
+#: src/client/composer/composer-widget.vala:159
 msgid "Saving"
 msgstr "保存中"
 
-#: src/client/composer/composer-widget.vala:159
+#: src/client/composer/composer-widget.vala:160
 msgid "Error saving"
 msgstr "保存エラー"
 
-#: src/client/composer/composer-widget.vala:160
+#: src/client/composer/composer-widget.vala:161
 msgid "Press Backspace to delete quote"
 msgstr "Backspace を押すと引用を削除できます"
 
@@ -1417,7 +1414,7 @@ msgstr "Backspace を押すと引用を削除できます"
 #. characters, that suggest an attachment; since this is full-word
 #. checking, include all variants of each word.  No spaces are
 #. allowed.
-#: src/client/composer/composer-widget.vala:169
+#: src/client/composer/composer-widget.vala:170
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1426,34 +1423,34 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1128
+#: src/client/composer/composer-widget.vala:1131
 msgid "Do you want to keep or discard this draft message?"
 msgstr "この下書きメッセージを保持または破棄しますか?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1156
+#: src/client/composer/composer-widget.vala:1159
 msgid "Do you want to discard this draft message?"
 msgstr "この下書きメッセージを破棄しますか?"
 
-#: src/client/composer/composer-widget.vala:1273
+#: src/client/composer/composer-widget.vala:1276
 msgid "Send message with an empty subject and body?"
 msgstr "メッセージを件名と本文なしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1275
+#: src/client/composer/composer-widget.vala:1278
 msgid "Send message with an empty subject?"
 msgstr "メッセージを件名なしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1277
+#: src/client/composer/composer-widget.vala:1280
 msgid "Send message with an empty body?"
 msgstr "メッセージを本文なしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1281
+#: src/client/composer/composer-widget.vala:1284
 msgid "Send message without an attachment?"
 msgstr "メッセージを添付ファイルなしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1586
+#: src/client/composer/composer-widget.vala:1589
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s”はすでに添付されています。"
@@ -1463,63 +1460,63 @@ msgstr "“%s”はすでに添付されています。"
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1594
+#: src/client/composer/composer-widget.vala:1597
 #: src/client/conversation-viewer/conversation-email.vala:173
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1631
+#: src/client/composer/composer-widget.vala:1634
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s”が見つかりませんでした。"
 
-#: src/client/composer/composer-widget.vala:1637
+#: src/client/composer/composer-widget.vala:1640
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s”はフォルダーです。"
 
-#: src/client/composer/composer-widget.vala:1643
+#: src/client/composer/composer-widget.vala:1646
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s”は空ファイルです。"
 
-#: src/client/composer/composer-widget.vala:1656
+#: src/client/composer/composer-widget.vala:1659
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s”を読み取り用に開けませんでした。"
 
-#: src/client/composer/composer-widget.vala:1664
+#: src/client/composer/composer-widget.vala:1667
 msgid "Cannot add attachment"
 msgstr "添付できません"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1714
+#: src/client/composer/composer-widget.vala:1717
 #: src/client/conversation-viewer/conversation-email.vala:975
 #: src/engine/rfc822/rfc822-utils.vala:298 ui/conversation-message.ui:313
 msgid "To:"
 msgstr "宛先:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1720
+#: src/client/composer/composer-widget.vala:1723
 #: src/client/conversation-viewer/conversation-email.vala:980
 #: src/engine/rfc822/rfc822-utils.vala:303 ui/conversation-message.ui:358
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1726
+#: src/client/composer/composer-widget.vala:1729
 #: src/client/conversation-viewer/conversation-email.vala:985
 #: ui/conversation-message.ui:403
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:1732
+#: src/client/composer/composer-widget.vala:1735
 msgid "Reply-To: "
 msgstr "Reply-To: "
 
-#: src/client/composer/composer-widget.vala:1872
+#: src/client/composer/composer-widget.vala:1875
 msgid "Select Color"
 msgstr "色を選択"
 
@@ -1528,20 +1525,20 @@ msgstr "色を選択"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2062
+#: src/client/composer/composer-widget.vala:2065
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s (%2$s を通して使用)"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2123
+#: src/client/composer/composer-widget.vala:2126
 msgid "_From:"
 msgstr "差出人(_F):"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2351
+#: src/client/composer/composer-widget.vala:2352
 msgid "Images"
 msgstr "画像"
 
@@ -1566,22 +1563,22 @@ msgid "Delete conversation"
 msgstr "スレッドを削除"
 
 #: src/client/conversation-list/conversation-list-view.vala:286
-#: ui/main-toolbar-menus.ui:16
+#: ui/main-toolbar-menus.ui:5
 msgid "Mark as _Read"
 msgstr "既読としてマーク(_R)"
 
 #: src/client/conversation-list/conversation-list-view.vala:289
-#: ui/main-toolbar-menus.ui:20
+#: ui/main-toolbar-menus.ui:9
 msgid "Mark as _Unread"
 msgstr "未読としてマーク(_U)"
 
 #: src/client/conversation-list/conversation-list-view.vala:292
-#: ui/main-toolbar-menus.ui:28
+#: ui/main-toolbar-menus.ui:17
 msgid "U_nstar"
 msgstr "星を外す(_N)"
 
 #: src/client/conversation-list/conversation-list-view.vala:294
-#: ui/main-toolbar-menus.ui:24
+#: ui/main-toolbar-menus.ui:13
 msgid "_Star"
 msgstr "星を付ける(_S)"
 
@@ -2188,7 +2185,7 @@ msgstr ""
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:940
+#: src/engine/imap-engine/imap-engine-generic-account.vala:935
 msgid "Drafts | Draft"
 msgstr "下書き"
 
@@ -2196,13 +2193,13 @@ msgstr "下書き"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:949
+#: src/engine/imap-engine/imap-engine-generic-account.vala:944
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "送信済み | 送信 | 送信メール | 送信済みメール | 送信済メール"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:954
+#: src/engine/imap-engine/imap-engine-generic-account.vala:949
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "送信したアイテム"
@@ -2211,7 +2208,7 @@ msgstr "送信したアイテム"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:964
+#: src/engine/imap-engine/imap-engine-generic-account.vala:959
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2221,13 +2218,13 @@ msgstr "迷惑メール | スパム | スパムメール | ごみ | ゴミ"
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:974
+#: src/engine/imap-engine/imap-engine-generic-account.vala:969
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "ごみ箱 | ゴミ箱"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:979
+#: src/engine/imap-engine/imap-engine-generic-account.vala:974
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "削除したアイテム"
@@ -2236,7 +2233,7 @@ msgstr "削除したアイテム"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:989
+#: src/engine/imap-engine/imap-engine-generic-account.vala:984
 msgid "Archive | Archives"
 msgstr "アーカイブ"
 
@@ -3032,57 +3029,62 @@ msgctxt "shortcut window"
 msgid "Remove formatting"
 msgstr "書式を削除する"
 
-#: ui/gtk/menus.ui:13
-msgid "A_ccounts"
-msgstr "アカウント(_C)"
-
-#: ui/gtk/menus.ui:23
-msgid "_Keyboard Shortcuts"
-msgstr "キーボードショートカット(_K)"
+#: ui/main-toolbar.ui:23
+msgctxt "tooltip"
+msgid "Compose Message"
+msgstr "メッセージを作成"
 
 #: ui/main-toolbar.ui:52
 msgid "Toggle search bar"
 msgstr "アカウント内を検索"
 
-#: ui/main-toolbar.ui:73
-msgid "Empty Spam or Trash folders"
-msgstr "迷惑メールかごみ箱を空にする"
-
-#: ui/main-toolbar.ui:113
+#: ui/main-toolbar.ui:112
 msgid "Reply"
 msgstr "返信"
 
-#: ui/main-toolbar.ui:136
+#: ui/main-toolbar.ui:135
 msgid "Reply All"
 msgstr "全員に返信"
 
-#: ui/main-toolbar.ui:159
+#: ui/main-toolbar.ui:158
 msgid "Forward"
 msgstr "転送"
 
-#: ui/main-toolbar.ui:265
+#: ui/main-toolbar.ui:264
 msgid "Toggle find bar"
 msgstr "スレッド内を検索"
 
-#: ui/main-toolbar.ui:307
+#: ui/main-toolbar.ui:306
 msgid "_Archive"
 msgstr "アーカイブ(_A)"
 
-#: ui/main-toolbar-menus.ui:5
-msgid "Empty _Spam…"
-msgstr "迷惑メールを空にする(_S)…"
-
-#: ui/main-toolbar-menus.ui:9
-msgid "Empty _Trash…"
-msgstr "ごみ箱を空にする(_T)…"
-
-#: ui/main-toolbar-menus.ui:32
+#: ui/main-toolbar-menus.ui:21
 msgid "Mark as S_pam"
 msgstr "迷惑メールとしてマーク(_P)"
 
-#: ui/main-toolbar-menus.ui:36
+#: ui/main-toolbar-menus.ui:25
 msgid "Mark as not S_pam"
 msgstr "迷惑メールマークを外す(_P)"
+
+#: ui/main-toolbar-menus.ui:32
+msgid "Empty _Spam…"
+msgstr "迷惑メールを空にする(_S)…"
+
+#: ui/main-toolbar-menus.ui:36
+msgid "Empty _Trash…"
+msgstr "ごみ箱を空にする(_T)…"
+
+#: ui/main-toolbar-menus.ui:42
+msgid "_Accounts"
+msgstr "アカウント(_A)"
+
+#: ui/main-toolbar-menus.ui:50
+msgid "_Keyboard Shortcuts"
+msgstr "キーボードショートカット(_K)"
+
+#: ui/main-toolbar-menus.ui:61
+msgid "_About Geary"
+msgstr "Geary について(_A)"
 
 #. Infobar title when one or more accounts are offline
 #: ui/main-window.ui:183
@@ -3273,6 +3275,12 @@ msgstr "詳細:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary を更新しています…"
+
+#~ msgid "A_ccounts"
+#~ msgstr "アカウント(_C)"
+
+#~ msgid "Empty Spam or Trash folders"
+#~ msgstr "迷惑メールかごみ箱を空にする"
 
 #~ msgid "Delete conversations (Shift+Delete)"
 #~ msgstr "スレッドを削除(Shift+Delete)"
