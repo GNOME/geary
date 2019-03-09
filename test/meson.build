@@ -68,6 +68,7 @@ geary_test_client_sources = [
   # and the engine test sute needs to depend
   # geary-engine_internal.vapi, which leads to duplicate symbols when
   # linking
+  'engine/api/geary-email-identifier-mock.vala',
   'engine/api/geary-credentials-mediator-mock.vala',
 
   'client/accounts/accounts-manager-test.vala',
@@ -76,6 +77,7 @@ geary_test_client_sources = [
   'client/components/client-web-view-test-case.vala',
   'client/composer/composer-web-view-test.vala',
   'client/util/util-avatar-test.vala',
+  'client/util/util-email-test.vala',
 
   'js/client-page-state-test.vala',
   'js/composer-page-state-test.vala',

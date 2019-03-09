@@ -289,7 +289,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                           bool load_remote_images,
                                           Configuration config) {
         this(
-            email.get_primary_originator(),
+            Util.Email.get_primary_originator(email),
             email.from,
             email.reply_to,
             email.sender,
@@ -315,7 +315,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                             bool load_remote_images,
                                             Configuration config) {
         this(
-            message.get_primary_originator(),
+            Util.Email.get_primary_originator(message),
             message.from,
             message.reply_to,
             message.sender,

@@ -441,25 +441,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             : "";
     }
 
-    /**
-     * Returns the primary originator of an email, which is defined as the first mailbox address
-     * in From:, Sender:, or Reply-To:, in that order, depending on availability.
-     *
-     * Returns null if no originators are present.
-     */
-    public RFC822.MailboxAddress? get_primary_originator() {
-        if (from != null && from.size > 0)
-            return from[0];
-
-        if (sender != null)
-            return sender;
-
-        if (reply_to != null && reply_to.size > 0)
-            return reply_to[0];
-
-        return null;
-    }
-
     public Gee.List<RFC822.MailboxAddress>? get_recipients() {
         Gee.List<RFC822.MailboxAddress> addrs = new Gee.ArrayList<RFC822.MailboxAddress>();
 

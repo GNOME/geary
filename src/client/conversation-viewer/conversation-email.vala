@@ -289,6 +289,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /** Determines if the email is a draft message. */
     public bool is_draft { get; private set; }
 
+    /** The email's primary originator, if any. */
+    public Geary.RFC822.MailboxAddress? primary_originator { get; private set; }
+
     /** The view displaying the email's primary message headers and body. */
     public ConversationMessage primary_message { get; private set; }
 
@@ -444,6 +447,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         base_ref();
         this.email = email;
         this.is_draft = is_draft;
+        this.primary_originator = Util.Email.get_primary_originator(email);
         this.email_store = email_store;
         this.contact_store = email_store.account.get_contact_store();
         this.avatar_store = avatar_store;
@@ -507,9 +511,11 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         // Construct the view for the primary message, hook into it
 
         bool load_images = email.load_remote_images().is_certain();
-        Geary.Contact contact = this.contact_store.get_by_rfc822(
-            email.get_primary_originator()
-        );
+
+        Geary.Contact? contact = null;
+        if (this.primary_originator != null) {
+            contact = this.contact_store.get_by_rfc822(this.primary_originator);
+        }
         if (contact != null)  {
             load_images |= contact.always_load_remote_images();
         }
@@ -577,7 +583,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         } catch (IOError.CANCELLED err) {
             // okay
         } catch (Error err) {
-            Geary.RFC822.MailboxAddress? from = this.email.get_primary_originator();
+            Geary.RFC822.MailboxAddress? from = this.primary_originator;
             debug("Avatar load failed for \"%s\": %s",
                   from != null ? from.to_string() : "<unknown>", err.message);
         }
@@ -1038,7 +1044,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
 
     private void on_remember_remote_images(ConversationMessage view) {
-        Geary.RFC822.MailboxAddress? sender = this.email.get_primary_originator();
+        Geary.RFC822.MailboxAddress? sender = this.primary_originator;
         if (sender != null) {
             Geary.Contact? contact = this.contact_store.get_by_rfc822(sender);
             if (contact != null) {

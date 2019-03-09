@@ -95,7 +95,8 @@ public class Libnotify : Geary.BaseObject {
             return;
 
         // possible to receive email with no originator
-        Geary.RFC822.MailboxAddress? primary = email.get_primary_originator();
+        Geary.RFC822.MailboxAddress? primary =
+            Util.Email.get_primary_originator(email);
         if (primary == null) {
             notify_new_mail(folder, 1);
 
