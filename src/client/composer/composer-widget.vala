@@ -776,7 +776,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             case ComposeType.REPLY_ALL:
                 this.subject = reply_subject;
                 this.references = Geary.RFC822.Utils.reply_references(referred);
-                referred_quote = Geary.RFC822.Utils.quote_email_for_reply(referred, quote,
+                referred_quote = Util.Email.quote_email_for_reply(referred, quote,
                     Geary.RFC822.TextFormat.HTML);
                 if (!Geary.String.is_empty(quote)) {
                     this.top_posting = false;
@@ -787,7 +787,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
             case ComposeType.FORWARD:
                 this.subject = forward_subject;
-                referred_quote = Geary.RFC822.Utils.quote_email_for_forward(referred, quote,
+                referred_quote = Util.Email.quote_email_for_forward(referred, quote,
                     Geary.RFC822.TextFormat.HTML);
             break;
         }
@@ -1011,7 +1011,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.last_quote = quote;
             // Always use reply styling, since forward styling doesn't work for inline quotes
             this.editor.insert_html(
-                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, Geary.RFC822.TextFormat.HTML)
+                Util.Email.quote_email_for_reply(referred, quote, Geary.RFC822.TextFormat.HTML)
             );
 
             if (!referred_ids.contains(referred.id)) {
