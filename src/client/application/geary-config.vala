@@ -137,12 +137,12 @@ public class Configuration {
     }
 
     private const string CLOCK_FORMAT_KEY = "clock-format";
-    public Date.ClockFormat clock_format {
+    public Util.Date.ClockFormat clock_format {
         get {
             if (gnome_interface.get_string(CLOCK_FORMAT_KEY) == "12h")
-                return Date.ClockFormat.TWELVE_HOURS;
+                return Util.Date.ClockFormat.TWELVE_HOURS;
             else
-                return Date.ClockFormat.TWENTY_FOUR_HOURS;
+                return Util.Date.ClockFormat.TWENTY_FOUR_HOURS;
         }
     }
 

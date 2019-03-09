@@ -430,4 +430,3 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         base (new Geary.Memory.StringBuffer(preview));
     }
 }
-

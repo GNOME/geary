@@ -399,10 +399,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         string date_text = "";
         string date_tooltip = "";
         if (date != null) {
-            date_text = Date.pretty_print(
+            date_text = Util.Date.pretty_print(
                 date.value, config.clock_format
             );
-            date_tooltip = Date.pretty_print_verbose(
+            date_tooltip = Util.Date.pretty_print_verbose(
                 date.value, config.clock_format
             );
         }
