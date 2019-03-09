@@ -827,9 +827,20 @@ public class GearyController : Geary.BaseObject {
         }
 
         if (handled) {
-            yield this.application.engine.update_account_service(
-                account, service, context.cancellable
-            );
+            try {
+                yield this.application.engine.update_account_service(
+                    account, service, context.cancellable
+                );
+            } catch (GLib.Error err) {
+                report_problem(
+                    new Geary.ServiceProblemReport(
+                        Geary.ProblemType.GENERIC_ERROR,
+                        account,
+                        service,
+                        err
+                    )
+                );
+            }
         } else {
             context.authentication_attempts = 0;
             context.authentication_failed = true;
