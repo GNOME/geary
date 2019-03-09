@@ -26,7 +26,7 @@
  * property, and if the currently loaded fields are not sufficient,
  * then additional fields can be loaded via a folder.
  */
-public class Geary.Email : BaseObject {
+public class Geary.Email : BaseObject, EmailHeaderSet {
 
     /**
      * The maximum expected length of message body preview text.
@@ -183,42 +183,124 @@ public class Geary.Email : BaseObject {
      */
     public Geary.EmailIdentifier id { get; private set; }
 
-    // DATE
-    public Geary.RFC822.Date? date { get; private set; default = null; }
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.DATE} is set.
+     */
+    public Geary.RFC822.Date? date { get; protected set; default = null; }
 
-    // ORIGINATORS
-    public Geary.RFC822.MailboxAddresses? from { get; private set; default = null; }
-    public Geary.RFC822.MailboxAddress? sender { get; private set; default = null; }
-    public Geary.RFC822.MailboxAddresses? reply_to { get; private set; default = null; }
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.ORIGINATORS} is set.
+     */
+    public Geary.RFC822.MailboxAddresses? from { get; protected set; default = null; }
 
-    // RECEIVERS
-    public Geary.RFC822.MailboxAddresses? to { get; private set; default = null; }
-    public Geary.RFC822.MailboxAddresses? cc { get; private set; default = null; }
-    public Geary.RFC822.MailboxAddresses? bcc { get; private set; default = null; }
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.ORIGINATORS} is set.
+     */
+    public Geary.RFC822.MailboxAddress? sender { get; protected set; default = null; }
 
-    // REFERENCES
-    public Geary.RFC822.MessageID? message_id { get; private set; default = null; }
-    public Geary.RFC822.MessageIDList? in_reply_to { get; private set; default = null; }
-    public Geary.RFC822.MessageIDList? references { get; private set; default = null; }
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.ORIGINATORS} is set.
+     */
+    public Geary.RFC822.MailboxAddresses? reply_to { get; protected set; default = null; }
 
-    // SUBJECT
-    public Geary.RFC822.Subject? subject { get; private set; default = null; }
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.RECEIVERS} is set.
+     */
+    public Geary.RFC822.MailboxAddresses? to { get; protected set; default = null; }
 
-    // HEADER
-    public RFC822.Header? header { get; private set; default = null; }
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.RECEIVERS} is set.
+     */
+    public Geary.RFC822.MailboxAddresses? cc { get; protected set; default = null; }
 
-    // BODY
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.RECEIVERS} is set.
+     */
+    public Geary.RFC822.MailboxAddresses? bcc { get; protected set; default = null; }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.REFERENCES} is set.
+     */
+    public Geary.RFC822.MessageID? message_id { get; protected set; default = null; }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.REFERENCES} is set.
+     */
+    public Geary.RFC822.MessageIDList? in_reply_to { get; protected set; default = null; }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.REFERENCES} is set.
+     */
+    public Geary.RFC822.MessageIDList? references { get; protected set; default = null; }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.SUBJECT} is set.
+     */
+    public Geary.RFC822.Subject? subject { get; protected set; default = null; }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.HEADER} is set.
+     */
+    public RFC822.Header? header { get; protected set; default = null; }
+
+    /**
+     * The complete RFC 822 message body.
+     *
+     * Value will be valid if {@link Field.BODY} is set.
+     */
     public RFC822.Text? body { get; private set; default = null; }
+
+    /**
+     * MIME multipart body parts.
+     *
+     * Value will be valid if {@link Field.BODY} is set.
+     */
     public Gee.List<Geary.Attachment> attachments { get; private set;
         default = new Gee.ArrayList<Geary.Attachment>(); }
 
-    // PROPERTIES
-    public Geary.EmailProperties? properties { get; private set; default = null; }
-
-    // PREVIEW
+    /**
+     * A plain text prefix of the email's message body.
+     *
+     * Value will be valid if {@link Field.PREVIEW} is set.
+     */
     public RFC822.PreviewText? preview { get; private set; default = null; }
 
-    // FLAGS
+    /**
+     * Set of immutable properties for the email.
+     *
+     * Value will be valid if {@link Field.PROPERTIES} is set.
+     */
+    public Geary.EmailProperties? properties { get; private set; default = null; }
+
+    /**
+     * Set of mutable flags for the email.
+     *
+     * Value will be valid if {@link Field.FLAGS} is set.
+     */
     public Geary.EmailFlags? email_flags { get; private set; default = null; }
 
     /**

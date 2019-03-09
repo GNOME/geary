@@ -13,7 +13,7 @@
  * representation of an email message, and contain no information
  * other than what RFC-822 and its successor RFC documents specify.
  */
-public class Geary.RFC822.Message : BaseObject {
+public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
     /**
      * Callback for including non-text MIME entities in message bodies.
@@ -35,18 +35,46 @@ public class Geary.RFC822.Message : BaseObject {
     private const string HEADER_MAILER = "X-Mailer";
     private const string HEADER_BCC = "Bcc";
 
-    // Internal note: If a field is added here, it *must* be set in stock_from_gmime().
-    public RFC822.MailboxAddress? sender { get; private set; default = null; }
-    public RFC822.MailboxAddresses? from { get; private set; default = null; }
-    public RFC822.MailboxAddresses? to { get; private set; default = null; }
-    public RFC822.MailboxAddresses? cc { get; private set; default = null; }
-    public RFC822.MailboxAddresses? bcc { get; private set; default = null; }
-    public RFC822.MailboxAddresses? reply_to { get; private set; default = null; }
-    public RFC822.MessageIDList? in_reply_to { get; private set; default = null; }
-    public RFC822.MessageIDList? references { get; private set; default = null; }
-    public RFC822.Subject? subject { get; private set; default = null; }
-    public string? mailer { get; private set; default = null; }
-    public Geary.RFC822.Date? date { get; private set; default = null; }
+    // Internal note: If a header field is added here, it *must* be
+    // set in stock_from_gmime().
+
+    /** {@inheritDoc} */
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddress? sender { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? from { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? to { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? cc { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? bcc { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? reply_to { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MessageID? message_id { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MessageIDList? in_reply_to { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MessageIDList? references { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.Subject? subject { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public Geary.RFC822.Date? date { get; protected set; default = null; }
+
+    /** Value of the X-Mailer header. */
+    public string? mailer { get; protected set; default = null; }
 
     private GMime.Message message;
 
@@ -56,6 +84,7 @@ public class Geary.RFC822.Message : BaseObject {
     // set these easily, so sometimes get_email() won't work.
     private Memory.Buffer? body_buffer = null;
     private size_t? body_offset = null;
+
 
     public Message(Full full) throws RFC822Error {
         GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(full.buffer));
@@ -110,8 +139,10 @@ public class Geary.RFC822.Message : BaseObject {
         // supports a list of addresses
         message.set_sender(this.from.to_rfc822_string());
         message.set_date_as_string(this.date.serialize());
-        if (message_id != null)
+        if (message_id != null) {
+            this.message_id = new MessageID(message_id);
             message.set_message_id(message_id);
+        }
 
         // Optional headers
         if (email.to != null) {
@@ -378,7 +409,7 @@ public class Geary.RFC822.Message : BaseObject {
         email.set_send_date(date);
         email.set_originators(from, sender, reply_to);
         email.set_receivers(to, cc, bcc);
-        email.set_full_references(null, in_reply_to, references);
+        email.set_full_references(message_id, in_reply_to, references);
         email.set_message_subject(subject);
         email.set_message_body(new Geary.RFC822.Text(new Geary.Memory.OffsetBuffer(
             body_buffer, body_offset)));
@@ -776,6 +807,10 @@ public class Geary.RFC822.Message : BaseObject {
                     } catch (Error err) {
                         debug("Could not parse date: %s", err.message);
                     }
+                    break;
+
+                case "message-id":
+                    this.message_id = new MessageID(value);
                     break;
 
                 case "in-reply-to":

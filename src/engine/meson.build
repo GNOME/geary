@@ -16,6 +16,7 @@ geary_engine_vala_sources = files(
   'api/geary-credentials.vala',
   'api/geary-credentials-mediator.vala',
   'api/geary-email-flags.vala',
+  'api/geary-email-header-set.vala',
   'api/geary-email-identifier.vala',
   'api/geary-email-properties.vala',
   'api/geary-email.vala',

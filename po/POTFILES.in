@@ -115,6 +115,7 @@ src/engine/api/geary-contact.vala
 src/engine/api/geary-credentials-mediator.vala
 src/engine/api/geary-credentials.vala
 src/engine/api/geary-email-flags.vala
+src/engine/api/geary-email-header-set.vala
 src/engine/api/geary-email-identifier.vala
 src/engine/api/geary-email-properties.vala
 src/engine/api/geary-email.vala
