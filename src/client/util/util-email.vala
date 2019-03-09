@@ -142,15 +142,16 @@ namespace Util.Email {
      * If html_format is true, the message will be quoted in HTML format.
      * Otherwise it will be in plain text.
      */
-    public string quote_email_for_reply(Geary.Email email, string? quote, Geary.RFC822.TextFormat format) {
+    public string quote_email_for_reply(Geary.Email email,
+                                        string? quote,
+                                        Util.Date.ClockFormat clock_format,
+                                        Geary.RFC822.TextFormat format) {
         if (email.body == null && quote == null)
             return "";
 
         string quoted = "";
 
-        /// Format for the datetime that a message being replied to was received
-        /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-        string DATE_FORMAT = _("%a, %b %-e, %Y at %-l:%M %p");
+        string DATE_FORMAT = Util.Date.get_full_date(clock_format);
 
         if (email.date != null && email.from != null) {
             /// The quoted header for a message being replied to.

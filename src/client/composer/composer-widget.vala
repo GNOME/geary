@@ -777,6 +777,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 this.subject = reply_subject;
                 this.references = Geary.RFC822.Utils.reply_references(referred);
                 referred_quote = Util.Email.quote_email_for_reply(referred, quote,
+                    config.clock_format,
                     Geary.RFC822.TextFormat.HTML);
                 if (!Geary.String.is_empty(quote)) {
                     this.top_posting = false;
@@ -1011,7 +1012,11 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.last_quote = quote;
             // Always use reply styling, since forward styling doesn't work for inline quotes
             this.editor.insert_html(
-                Util.Email.quote_email_for_reply(referred, quote, Geary.RFC822.TextFormat.HTML)
+                Util.Email.quote_email_for_reply(referred,
+                                                 quote,
+                                                 config.clock_format,
+                                                 Geary.RFC822.TextFormat.HTML)
+
             );
 
             if (!referred_ids.contains(referred.id)) {
