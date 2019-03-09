@@ -466,41 +466,49 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     /**
-     * Loads this account's outgoing service credentials, if needed.
+     * Loads the authentication token for the outgoing service.
      *
      * Credentials are loaded from the mediator, thus it may yield for
      * some time.
      *
-     * Returns true if the credentials were successfully loaded, or
-     * false if the credentials could not be loaded and the service's
+     * Returns true if the credential's token was successfully loaded
+     * or are not needed (that is, if the credentials are null), or
+     * false if the token could not be loaded and the service's
      * credentials are invalid.
      */
     public async bool load_outgoing_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Credentials? creds = this.outgoing.credentials;
-        bool loaded = false;
+        Credentials? creds = get_outgoing_credentials();
+        bool loaded = true;
         if (creds != null) {
-            loaded = yield this.mediator.load_token(
-                this, this.outgoing, cancellable
-            );
+            if (this.outgoing.credentials_requirement == USE_INCOMING) {
+                loaded = yield this.mediator.load_token(
+                    this, this.incoming, cancellable
+                );
+            } else {
+                loaded = yield this.mediator.load_token(
+                    this, this.outgoing, cancellable
+                );
+            }
         }
         return loaded;
     }
 
     /**
-     * Loads this account's incoming service credentials, if needed.
+     * Loads the authentication token for the incoming service.
      *
      * Credentials are loaded from the mediator, thus it may yield for
      * some time.
      *
-     * Returns true if the credentials were successfully loaded, or
-     * false if the credentials could not be loaded and the service's
+     * Returns true if the credential's token was successfully loaded
+     * or are not needed (that is, if the credentials are null), or
+     * false if the token could not be loaded and the service's
      * credentials are invalid.
      */
     public async bool load_incoming_credentials(GLib.Cancellable? cancellable)
         throws GLib.Error {
         Credentials? creds = this.incoming.credentials;
-        bool loaded = false;
+        bool loaded = true;
         if (creds != null) {
             loaded = yield this.mediator.load_token(
                 this, this.incoming, cancellable
