@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2019-03-07 22:09+0000\n"
-"PO-Revision-Date: 2019-03-08 01:09+0100\n"
+"PO-Revision-Date: 2019-03-09 09:47+0100\n"
 "Language-Team: Friulian <fur@li.org>\n"
 "Language: fur\n"
 "MIME-Version: 1.0\n"
@@ -90,7 +90,7 @@ msgstr "Lis funzionalitâts di Geary a includin:"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:28
 msgid "Quick email account setup"
-msgstr "Configurazion veloce dai account e-mail"
+msgstr "Configurazion rapide dal account e-mail"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:29
 msgid "Shows related messages together in conversations"
@@ -98,11 +98,11 @@ msgstr "Al mostre adun i messaçs colegâts in conversazions"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:30
 msgid "Fast, full text and keyword search"
-msgstr ""
+msgstr "Ricercje veloce di peraulis clâf e test complet"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:31
 msgid "Full-featured HTML and plain text message composer"
-msgstr ""
+msgstr "Compositôr complet di messaçs in HTML e test sempliç"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:32
 msgid "Desktop notification of new mail"
@@ -157,60 +157,65 @@ msgstr "L'ultime altece regjistrade dal barcon de aplicazion."
 
 #: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Position of folder list pane"
-msgstr ""
+msgstr "Posizion dal ricuadri de liste des cartelis"
 
 #: desktop/org.gnome.Geary.gschema.xml:27
 msgid "Position of the folder list Paned grabber."
-msgstr ""
+msgstr "Posizion de mantie dal ricuadri de liste des cartelis."
 
 #: desktop/org.gnome.Geary.gschema.xml:32
 msgid "Position of folder list pane when horizontal"
-msgstr ""
+msgstr "Posizion dal ricuadri de liste des cartelis se al è orizontâl"
 
 #: desktop/org.gnome.Geary.gschema.xml:33
 msgid ""
 "Position of the folder list Paned grabber in the horizontal orientation."
 msgstr ""
+"Posizion de mantie dal ricuadri de liste des cartelis.cuant che al è "
+"orientât par orizontâl."
 
 #: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Position of folder list pane when vertical"
-msgstr ""
+msgstr "Posizion dal ricuadri de liste des cartelis se al è verticâl"
 
 #: desktop/org.gnome.Geary.gschema.xml:39
 msgid "Position of the folder list Paned grabber in the vertical orientation."
 msgstr ""
+"Posizion de mantie dal ricuadri de liste des cartelis.cuant che al è "
+"orientât par verticâl."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
 msgid "Orientation of the folder list pane"
-msgstr ""
+msgstr "Orientament dal ricuadri de liste des cartelis"
 
 #: desktop/org.gnome.Geary.gschema.xml:45
 msgid "True if the folder list Paned is in the horizontal orientation."
 msgstr ""
+"Vêr se la liste des cartelis ricuadrade e je tal orientament orizontâl."
 
 #: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Position of message list pane"
-msgstr ""
+msgstr "Posizion dal ricuadri de liste dai messaçs"
 
 #: desktop/org.gnome.Geary.gschema.xml:51
 msgid "Position of the message list Paned grabber."
-msgstr ""
+msgstr "Posizion de mantie dal ricuadri de liste dai messaçs."
 
 #: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Autoselect next message"
-msgstr ""
+msgstr "Selezione in automatic il prossim messaç"
 
 #: desktop/org.gnome.Geary.gschema.xml:57
 msgid "True if we should autoselect the next available conversation."
-msgstr ""
+msgstr "Vêr se o ven di auto-selezionâ la conversazion sucessive disponibile."
 
 #: desktop/org.gnome.Geary.gschema.xml:62
 msgid "Display message previews"
-msgstr ""
+msgstr "Mostre lis anteprimis dal messaç"
 
 #: desktop/org.gnome.Geary.gschema.xml:63
 msgid "True if we should display a short preview of each message."
-msgstr ""
+msgstr "Vêr se o ven di mostrâ une curte anteprime di ogni messaç."
 
 #: desktop/org.gnome.Geary.gschema.xml:68
 msgid "Languages that shall be used in the spell checker"
@@ -236,7 +241,7 @@ msgstr "Abilite suns di notifiche"
 
 #: desktop/org.gnome.Geary.gschema.xml:81
 msgid "True to play sounds for notifications and sending."
-msgstr ""
+msgstr "Vêr par riprodusi i suns pes notifichis e pe spedizion."
 
 #: desktop/org.gnome.Geary.gschema.xml:86
 msgid "Show notifications for new mail"
@@ -244,7 +249,7 @@ msgstr "Mostre lis notifichis pe gnove pueste"
 
 #: desktop/org.gnome.Geary.gschema.xml:87
 msgid "True to show notification bubbles."
-msgstr ""
+msgstr "Vêr par mostrâ i fumets."
 
 #: desktop/org.gnome.Geary.gschema.xml:92
 msgid "Notify of new mail at startup"
@@ -281,28 +286,30 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Zoom of conversation viewer"
-msgstr ""
+msgstr "Ingrandiment dal visualizadôr de conversazion"
 
 #: desktop/org.gnome.Geary.gschema.xml:117
 msgid "The zoom to apply on the conservation view."
-msgstr ""
+msgstr "L'ingrandiment di aplicâ te viodude de conversazion."
 
 #: desktop/org.gnome.Geary.gschema.xml:122
 msgid "Size of detached composer window"
-msgstr ""
+msgstr "Dimension dal barcon dal compositôr distacât"
 
 #: desktop/org.gnome.Geary.gschema.xml:123
 msgid "The last recorded size of the detached composer window."
-msgstr ""
+msgstr "L'ultime dimension regjistrade dal barcon dal compositôr distacât."
 
 #: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Base URL to look up contact avatars"
-msgstr ""
+msgstr "URL di base par cirî i avatar dai contats"
 
 #: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "A Gravatar or Libravatar compatible URL, set to the empty string to disable."
 msgstr ""
+"Un URL compatibil cun Gravatar o Libravatar, met une stringhe vueide par "
+"disabilitâ."
 
 #: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
@@ -318,25 +325,25 @@ msgstr ""
 #. untrusted TLS certificate
 #: src/client/accounts/accounts-editor.vala:203
 msgid "Failed to store certificate"
-msgstr ""
+msgstr "No si è rivâts a archiviâ il certificât"
 
 #. Translators: Label for adding an email account
 #. account for a generic IMAP service provider.
 #: src/client/accounts/accounts-editor-add-pane.vala:109
 msgid "All others"
-msgstr ""
+msgstr "Ducj chei altris"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:196
 #: src/client/accounts/accounts-editor-servers-pane.vala:316
 msgid "Check your receiving login and password"
-msgstr ""
+msgstr "Controle il non utent e la password pe ricezion"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:211
 #: src/client/accounts/accounts-editor-servers-pane.vala:329
 msgid "Check your receiving server details"
-msgstr ""
+msgstr "Controle i detais dal servidôr pe ricezion"
 
 #. Translators: In-app notification label
 #. There was an SMTP auth error, but IMAP already
@@ -346,23 +353,23 @@ msgstr ""
 #: src/client/accounts/accounts-editor-add-pane.vala:233
 #: src/client/accounts/accounts-editor-servers-pane.vala:350
 msgid "Check your sending login and password"
-msgstr ""
+msgstr "Controle il non utent e la password pe spedizion"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:247
 #: src/client/accounts/accounts-editor-servers-pane.vala:363
 msgid "Check your sending server details"
-msgstr ""
+msgstr "Controle i detais dal servidôr pe spedizion"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:262
 msgid "Check your email address and password"
-msgstr ""
+msgstr "Controle la direzion e-mail e la password"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:273
 msgid "Could not connect, check your network"
-msgstr ""
+msgstr "Impussibil conetisi, controle la tô rêt"
 
 #. Translators: In-app notification label for a
 #. generic error creating an account
@@ -375,13 +382,13 @@ msgstr "Al è vignût fûr un erôr inspietât"
 #: src/client/accounts/accounts-editor-add-pane.vala:304
 #, c-format
 msgid "Account not created: %s"
-msgstr ""
+msgstr "Account no creât: %s"
 
 #. Translators: Label for the person's actual name when adding
 #. an account
 #: src/client/accounts/accounts-editor-add-pane.vala:551
 msgid "Your name"
-msgstr ""
+msgstr "Il to non"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
@@ -399,7 +406,7 @@ msgstr "Direzion e-mail"
 #: src/client/accounts/accounts-editor-add-pane.vala:571
 #: src/client/accounts/accounts-editor-edit-pane.vala:469
 msgid "person@example.com"
-msgstr ""
+msgstr "persone@esempli.com"
 
 #. Translators: Label for an IMAP/SMTP service login/user name
 #. when adding an account
@@ -408,7 +415,7 @@ msgstr ""
 #: src/client/accounts/accounts-editor-add-pane.vala:585
 #: src/client/accounts/accounts-editor-servers-pane.vala:880
 msgid "Login name"
-msgstr ""
+msgstr "Non utent pal acès"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
@@ -431,7 +438,7 @@ msgstr "Servidôr IMAP"
 #. when adding an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:624
 msgid "imap.example.com"
-msgstr ""
+msgstr "imap.esempli.com"
 
 #. Translators: Label for the SMTP server hostname when
 #. adding an account.
@@ -446,7 +453,7 @@ msgstr "Servidôr SMTP"
 #. when adding an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:633
 msgid "smtp.example.com"
-msgstr ""
+msgstr "smtp.esempli.com"
 
 #. Translators: Label in the account editor for the user's
 #. custom name for an account.
@@ -462,27 +469,27 @@ msgstr "Non account"
 #: src/client/accounts/accounts-editor-edit-pane.vala:312
 #, c-format
 msgid "Change account name back to “%s”"
-msgstr ""
+msgstr "Torne met il non dal account a “%s”"
 
 #. Translators: Tooltip for adding a new email sender/from
 #. address's address to an account
 #: src/client/accounts/accounts-editor-edit-pane.vala:336
 msgid "Add a new sender email address"
-msgstr ""
+msgstr "Zonte une gnove direzion e-mail di mitent"
 
 #. Translators: Label used to indicate the user has
 #. provided no display name for one of their sender
 #. email addresses in their account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:417
 msgid "Name not set"
-msgstr ""
+msgstr "Non no configurât"
 
 #. Translators: This is used as a placeholder for the
 #. display name for an email address when editing a user's
 #. sender address preferences for an account.
 #: src/client/accounts/accounts-editor-edit-pane.vala:456
 msgid "Sender Name"
-msgstr ""
+msgstr "Non mitent"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:479
 msgid "Remove"
@@ -493,7 +500,7 @@ msgstr "Gjave"
 #. preferences for an account.
 #: src/client/accounts/accounts-editor-edit-pane.vala:494
 msgid "Sender name"
-msgstr ""
+msgstr "Non mitent"
 
 #. Translators: Label used as the undo tooltip after adding an
 #. new sender email address to an account. The string
@@ -501,7 +508,7 @@ msgstr ""
 #: src/client/accounts/accounts-editor-edit-pane.vala:561
 #, c-format
 msgid "Remove “%s”"
-msgstr ""
+msgstr "Gjave “%s”"
 
 #. Translators: Label used as the undo tooltip after editing a
 #. sender address for an account. The string substitution is
@@ -509,7 +516,7 @@ msgstr ""
 #: src/client/accounts/accounts-editor-edit-pane.vala:601
 #, c-format
 msgid "Undo changes to “%s”"
-msgstr ""
+msgstr "Anule modifichis a “%s”"
 
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
@@ -517,14 +524,14 @@ msgstr ""
 #: src/client/accounts/accounts-editor-edit-pane.vala:688
 #, c-format
 msgid "Add “%s” back"
-msgstr ""
+msgstr "Torne zonte “%s”"
 
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
 #: src/client/accounts/accounts-editor-edit-pane.vala:730
 msgid "Undo signature changes"
-msgstr ""
+msgstr "Anule modifichis ae firme"
 
 #. Translators: This label describes the account
 #. preference for the length of time (weeks, months or
@@ -612,19 +619,19 @@ msgstr "Yahoo"
 #. loaded but disabled by the user.
 #: src/client/accounts/accounts-editor-list-pane.vala:371
 msgid "This account has been disabled"
-msgstr ""
+msgstr "Chest account al è stât disabilitât"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
 #: src/client/accounts/accounts-editor-list-pane.vala:380
 msgid "This account has encountered a problem and is unavailable"
-msgstr ""
+msgstr "Chest account al à vût un probleme e nol è disponibil"
 
 #. Translators: Label for adding a generic email account
 #: src/client/accounts/accounts-editor-list-pane.vala:430
 msgid "Other email providers"
-msgstr ""
+msgstr "Altris furnidôrs di e-mail"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
@@ -632,7 +639,7 @@ msgstr ""
 #: src/client/accounts/accounts-editor-list-pane.vala:547
 #, c-format
 msgid "Account “%s” removed"
-msgstr ""
+msgstr "Account “%s” gjavât"
 
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
@@ -640,19 +647,19 @@ msgstr ""
 #: src/client/accounts/accounts-editor-list-pane.vala:554
 #, c-format
 msgid "Account “%s” restored"
-msgstr ""
+msgstr "Account “%s” ripristinât"
 
 #. Translators: Tooltip for dragging list items
 #: src/client/accounts/accounts-editor-row.vala:49
 msgid "Drag to move this item"
-msgstr ""
+msgstr "Strissine par spostâ chest element"
 
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
 #: src/client/accounts/accounts-editor-row.vala:294
 msgid "Service provider"
-msgstr ""
+msgstr "Furnidôr dal servizi"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
@@ -684,46 +691,46 @@ msgstr "TLS"
 #. Button label for retrying when a login error has occurred
 #: src/client/accounts/accounts-editor-row.vala:533 ui/main-window.ui:455
 msgid "Login"
-msgstr ""
+msgstr "Jentre"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
 #: src/client/accounts/accounts-editor-row.vala:540
 msgid "No login needed"
-msgstr ""
+msgstr "Nol covente nissun acès"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
 #: src/client/accounts/accounts-editor-row.vala:548
 msgid "Use same login as receiving"
-msgstr ""
+msgstr "Dopre l'istès acès di ricezion"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
 #: src/client/accounts/accounts-editor-row.vala:556
 msgid "Use a different login"
-msgstr ""
+msgstr "Dopre un acès diferent"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
 #: src/client/accounts/accounts-editor-servers-pane.vala:377
 #, c-format
 msgid "Account not updated: %s"
-msgstr ""
+msgstr "Account no inzornât: %s"
 
 #. Translators: This label describes the program that
 #. created the account, e.g. an SSO service like GOA, or
 #. locally by Geary.
 #: src/client/accounts/accounts-editor-servers-pane.vala:540
 msgid "Account source"
-msgstr ""
+msgstr "Sorzint account"
 
 #: src/client/accounts/accounts-editor-servers-pane.vala:552
 msgid "GNOME Online Accounts"
-msgstr ""
+msgstr "Account Online di GNOME"
 
 #. Translators: This label describes an account
 #. preference.
