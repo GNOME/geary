@@ -7,41 +7,45 @@
 
 namespace Util.Avatar {
 
-    // The following was ported from code written by Felipe Borges for
+    // The following was based on code written by Felipe Borges for
     // gnome-control-enter in panels/user-accounts/user-utils.c commit
     // 02c288ab6f069a0c106323a93400f192a63cb67e. The copyright in that
     // file is: "Copyright 2009-2010  Red Hat, Inc,"
 
     public Gdk.Pixbuf generate_user_picture(string name, int size) {
-        string initials = extract_initials_from_name(name);
-        string font = "Sans %d".printf((int) GLib.Math.ceil(size / 2.5));
-        Gdk.RGBA color = get_color_for_name(name);
-
         Cairo.Surface surface = new Cairo.ImageSurface(
             Cairo.Format.ARGB32, size, size
         );
         Cairo.Context cr = new Cairo.Context(surface);
         cr.rectangle(0, 0, size, size);
+
+        /* Fill the background with a colour for the name */
+        Gdk.RGBA color = get_color_for_name(name);
         cr.set_source_rgb(
             color.red / 255.0, color.green / 255.0, color.blue / 255.0
         );
         cr.fill();
 
         /* Draw the initials on top */
-        cr.set_source_rgb(1.0, 1.0, 1.0);
-        Pango.Layout layout = Pango.cairo_create_layout(cr);
-        layout.set_text(initials, -1);
-        layout.set_font_description(Pango.FontDescription.from_string(font));
+        string? initials = extract_initials_from_name(name);
+        if (initials != null) {
+            string font = "Sans %d".printf((int) GLib.Math.ceil(size / 2.5));
 
-        int width, height;
-        layout.get_size(out width, out height);
-        cr.translate(size / 2, size / 2);
-        cr.move_to(
-            -((double) width / Pango.SCALE) / 2,
-            -((double) height / Pango.SCALE) / 2
-        );
-        Pango.cairo_show_layout(cr, layout);
-        
+            cr.set_source_rgb(1.0, 1.0, 1.0);
+            Pango.Layout layout = Pango.cairo_create_layout(cr);
+            layout.set_text(initials, -1);
+            layout.set_font_description(Pango.FontDescription.from_string(font));
+
+            int width, height;
+            layout.get_size(out width, out height);
+            cr.translate(size / 2, size / 2);
+            cr.move_to(
+                -((double) width / Pango.SCALE) / 2,
+                -((double) height / Pango.SCALE) / 2
+            );
+            Pango.cairo_show_layout(cr, layout);
+        }
+
         return Gdk.pixbuf_get_from_surface(
             surface, 0, 0, size, size
         );
@@ -72,13 +76,29 @@ namespace Util.Avatar {
         string? initials = null;
         if (normalized != "") {
             GLib.StringBuilder buf = new GLib.StringBuilder();
-            buf.append_unichar(normalized.get_char(0));
+            unichar c = 0;
+            int index  = 0;
 
-            int index = normalized.last_index_of_char(' ');
-            if (index != -1 && (index + 1) < normalized.length) {
-                buf.append_unichar(normalized.get_char(index + 1));
+            // Get the first alphanumeric char of the string
+            for (int i = 0; normalized.get_next_char(ref index, out c); i++) {
+                if (c.isalnum()) {
+                    buf.append_unichar(c);
+                    break;
+                }
             }
-            initials = (string) buf.data;
+
+            // Get the first alphanumeric char of the last word of the string
+            index = normalized.last_index_of_char(' ');
+            for (int i = 0; normalized.get_next_char(ref index, out c); i++) {
+                if (c.isalnum()) {
+                    buf.append_unichar(c);
+                    break;
+                }
+            }
+
+            if (buf.data.length > 0) {
+                initials = (string) buf.data;
+            }
         }
         return initials;
     }
