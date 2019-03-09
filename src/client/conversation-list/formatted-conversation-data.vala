@@ -111,7 +111,7 @@ public class FormattedConversationData : Geary.BaseObject {
 
         // Load preview-related data.
         update_date_string();
-        this.subject = EmailUtil.strip_subject_prefixes(preview);
+        this.subject = Util.Email.strip_subject_prefixes(preview);
         this.body = Geary.String.reduce_whitespace(preview.get_preview_as_string());
         this.preview = preview;
 
