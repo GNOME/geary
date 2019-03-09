@@ -53,11 +53,17 @@ public void assert_string(string expected, string? actual, string? context = nul
         if (a.length > 32) {
             a = a[0:32] + "…";
         }
-        string b = actual;
-        if (b.length > 32) {
-            b = b[0:32] + "…";
+        string? b = actual;
+        if (b != null) {
+            if (b.length > 32) {
+                b = b[0:32] + "…";
+            }
         }
-        print_assert("Expected: \"%s\", was: \"%s\"".printf(a, b), context);
+        if (b != null) {
+            print_assert("Expected: \"%s\", was: \"%s\"".printf(a, b), context);
+        } else {
+            print_assert("Expected: \"%s\", was null".printf(a), context);
+        }
         assert_not_reached();
     }
 }

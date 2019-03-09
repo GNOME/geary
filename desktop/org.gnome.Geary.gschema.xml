@@ -123,12 +123,6 @@
         <description>The last recorded size of the detached composer window.</description>
     </key>
 
-    <key name="avatar-url" type="s">
-        <default>"https://secure.gravatar.com/avatar"</default>
-        <summary>Base URL to look up contact avatars</summary>
-        <description>A Gravatar or Libravatar compatible URL, set to the empty string to disable.</description>
-    </key>
-
     <key name="migrated-config" type="b">
         <default>false</default>
         <summary>Whether we migrated the old settings</summary>

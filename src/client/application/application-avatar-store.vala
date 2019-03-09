@@ -12,119 +12,201 @@
 public class Application.AvatarStore : Geary.BaseObject {
 
 
-    // Initiates and manages an avatar load using Gravatar
-    private class AvatarLoader : Geary.BaseObject {
+    // Max age is low since we really only want to cache between
+    // conversation loads.
+    private const int64 MAX_CACHE_AGE_US = 5 * 1000 * 1000;
 
-        internal Gdk.Pixbuf? avatar = null;
-        internal Geary.Nonblocking.Semaphore lock =
-            new Geary.Nonblocking.Semaphore();
-
-        private string base_url;
-        private Geary.RFC822.MailboxAddress address;
-        private int pixel_size;
+    // Max size is low since most conversations don't get above the
+    // low hundreds of messages, and those that do will likely get
+    // many repeated participants
+    private const uint MAX_CACHE_SIZE = 128;
 
 
-        internal AvatarLoader(Geary.RFC822.MailboxAddress address,
-                              string base_url,
-                              int pixel_size) {
-            this.address = address;
-            this.base_url = base_url;
-            this.pixel_size = pixel_size;
+    private class CacheEntry {
+
+
+        public static string to_key(Geary.RFC822.MailboxAddress mailbox) {
+            // Use short name as the key, since it will use the name
+            // first, then the email address, which is especially
+            // important for things like GitLab email where the
+            // address is always the same, but the name changes. This
+            // ensures that each such user gets different initials.
+            return mailbox.to_short_display().normalize().casefold();
         }
 
-        internal async void load(Soup.Session session,
-                                 Cancellable load_cancelled)
-            throws GLib.Error {
-            Error? workaround_err = null;
-            if (!Geary.String.is_empty_or_whitespace(this.base_url)) {
-                string md5 = GLib.Checksum.compute_for_string(
-                    GLib.ChecksumType.MD5, this.address.address.strip().down()
-                );
-                Soup.Message message = new Soup.Message(
-                    "GET",
-                    "%s/%s?d=%s&s=%d".printf(
-                        this.base_url, md5, "404", this.pixel_size
-                    )
-                );
+        public static int lru_compare(CacheEntry a, CacheEntry b) {
+            return (a.key == b.key)
+                ? 0 : (int) (a.last_used - b.last_used);
+        }
 
-                try {
-                    // We want to just pass load_cancelled to send_async
-                    // here, but per Bug 778720 this is causing some
-                    // crashy race in libsoup's cache implementation, so
-                    // for now just let the load go through and manually
-                    // check to see if the load has been cancelled before
-                    // setting the avatar
-                    InputStream data = yield session.send_async(
-                        message,
-                        null // should be 'load_cancelled'
-                    );
-                    if (message.status_code == 200 &&
-                        data != null &&
-                        !load_cancelled.is_cancelled()) {
-                        this.avatar = yield new Gdk.Pixbuf.from_stream_at_scale_async(
-                            data, pixel_size, pixel_size, true, load_cancelled
-                        );
-                    }
-                } catch (Error err) {
-                    workaround_err = err;
+
+        public string key;
+
+        public Geary.RFC822.MailboxAddress mailbox;
+
+        // Store nulls so we can also cache avatars not found
+        public Folks.Individual? individual;
+
+        public int64 last_used;
+
+        private Gee.List<Gdk.Pixbuf> pixbufs = new Gee.LinkedList<Gdk.Pixbuf>();
+
+        public CacheEntry(Geary.RFC822.MailboxAddress mailbox,
+                          Folks.Individual? individual,
+                          int64 last_used) {
+            this.key = to_key(mailbox);
+            this.mailbox = mailbox;
+            this.individual = individual;
+            this.last_used = last_used;
+        }
+
+        public async Gdk.Pixbuf? load(int pixel_size,
+                                      GLib.Cancellable cancellable)
+            throws GLib.Error {
+            Gdk.Pixbuf? pixbuf = null;
+            foreach (Gdk.Pixbuf cached in this.pixbufs) {
+                if ((cached.height == pixel_size && cached.width >= pixel_size) ||
+                    (cached.width == pixel_size && cached.height >= pixel_size)) {
+                    pixbuf = cached;
+                    break;
                 }
             }
 
-            this.lock.blind_notify();
-
-            if (workaround_err != null) {
-                throw workaround_err;
+            if (pixbuf == null) {
+                Folks.Individual? individual = this.individual;
+                if (individual != null && individual.avatar != null) {
+                    GLib.InputStream data = yield individual.avatar.load_async(
+                        pixel_size, cancellable
+                    );
+                    pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(
+                        data, pixel_size, pixel_size, true, cancellable
+                    );
+                    pixbuf = Util.Avatar.round_image(pixbuf);
+                    this.pixbufs.add(pixbuf);
+                }
             }
+
+            if (pixbuf == null) {
+                string? name = null;
+                // XXX should really be using the folks display name
+                // here as below, but since we should the name from
+                // the email address if present in
+                // ConversationMessage, and since that might not match
+                // the folks display name, it is confusing when the
+                // initials are one thing and the name is
+                // another. Re-enable below when we start using the
+                // folks display name in ConversationEmail
+                name = this.mailbox.to_short_display();
+                // if (this.individual != null) {
+                //     name = this.individual.display_name;
+                // } else {
+                //     // Use short display because it will clean up the
+                //     // string, use the name if present and fall back
+                //     // on the address if not.
+                //     name = this.mailbox.to_short_display();
+                // }
+                pixbuf = Util.Avatar.generate_user_picture(name, pixel_size);
+                pixbuf = Util.Avatar.round_image(pixbuf);
+                this.pixbufs.add(pixbuf);
+            }
+
+            return pixbuf;
         }
 
     }
 
 
-    private Configuration config;
+    private Folks.IndividualAggregator individuals;
+    private Gee.Map<string,CacheEntry> lru_cache =
+        new Gee.HashMap<string,CacheEntry>();
+    private Gee.SortedSet<CacheEntry> lru_ordering =
+        new Gee.TreeSet<CacheEntry>(CacheEntry.lru_compare);
 
-    private Soup.Session session;
-    private Soup.Cache cache;
-    private Gee.Map<string,AvatarLoader> loaders =
-        new Gee.HashMap<string,AvatarLoader>();
 
-
-    public AvatarStore(Configuration config, GLib.File cache_root) {
-        this.config = config;
-
-        File avatar_cache_dir = cache_root.get_child("avatars");
-        this.cache = new Soup.Cache(
-            avatar_cache_dir.get_path(),
-            Soup.CacheType.SINGLE_USER
-        );
-        this.cache.load();
-        this.cache.set_max_size(16 * 1024 * 1024); // 16MB
-        this.session = new Soup.Session();
-        this.session.add_feature(this.cache);
+    public AvatarStore(Folks.IndividualAggregator individuals) {
+        this.individuals = individuals;
     }
 
     public void close() {
-        this.cache.flush();
-        this.cache.dump();
+        this.lru_cache.clear();
+        this.lru_ordering.clear();
     }
 
-    public async Gdk.Pixbuf? load(Geary.RFC822.MailboxAddress address,
-                                    int pixel_size,
-                                    Cancellable load_cancelled)
-        throws Error {
-        string key = address.to_string();
-        AvatarLoader loader = this.loaders.get(key);
-        if (loader == null) {
-            // Haven't started loading the avatar, so do it now
-            loader = new AvatarLoader(
-                address, this.config.avatar_url, pixel_size
-            );
-            this.loaders.set(key, loader);
-            yield loader.load(this.session, load_cancelled);
-        } else {
-            // Load has already started, so wait for it to finish
-            yield loader.lock.wait_async();
+    public async Gdk.Pixbuf? load(Geary.RFC822.MailboxAddress mailbox,
+                                  int pixel_size,
+                                  GLib.Cancellable cancellable)
+        throws GLib.Error {
+        // Normalise the address to improve caching
+        CacheEntry match = yield get_match(mailbox);
+        return yield match.load(pixel_size, cancellable);
+    }
+
+
+    private async CacheEntry get_match(Geary.RFC822.MailboxAddress mailbox)
+        throws GLib.Error {
+        string key = CacheEntry.to_key(mailbox);
+        int64 now = GLib.get_monotonic_time();
+        CacheEntry? entry = this.lru_cache.get(key);
+        if (entry != null) {
+            if (entry.last_used + MAX_CACHE_AGE_US >= now) {
+                // Need to remove the entry from the ordering before
+                // updating the last used time since doing so changes
+                // the ordering
+                this.lru_ordering.remove(entry);
+                entry.last_used = now;
+                this.lru_ordering.add(entry);
+            } else {
+                this.lru_cache.unset(key);
+                this.lru_ordering.remove(entry);
+                entry = null;
+            }
         }
-        return loader.avatar;
+
+        if (entry == null) {
+            Folks.Individual? match = yield search_match(mailbox.address);
+            entry = new CacheEntry(mailbox, match, now);
+            this.lru_cache.set(key, entry);
+            this.lru_ordering.add(entry);
+
+            // Prune the cache if needed
+            if (this.lru_cache.size > MAX_CACHE_SIZE) {
+                CacheEntry oldest = this.lru_ordering.first();
+                this.lru_cache.unset(oldest.key);
+                this.lru_ordering.remove(oldest);
+            }
+        }
+
+        return entry;
+    }
+
+    private async Folks.Individual? search_match(string address)
+        throws GLib.Error {
+        Folks.SearchView view = new Folks.SearchView(
+            this.individuals,
+            new Folks.SimpleQuery(
+                address,
+                new string[] {
+                    Folks.PersonaStore.detail_key(
+                        Folks.PersonaDetail.EMAIL_ADDRESSES
+                    )
+                }
+            )
+        );
+
+        yield view.prepare();
+
+        Folks.Individual? match = null;
+        if (!view.individuals.is_empty) {
+            match = view.individuals.first();
+        }
+
+        try {
+            yield view.unprepare();
+        } catch (GLib.Error err) {
+            warning("Error unpreparing Folks search: %s", err.message);
+        }
+
+        return match;
     }
 
 }

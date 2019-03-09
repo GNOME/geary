@@ -88,6 +88,7 @@ src/client/sidebar/sidebar-common.vala
 src/client/sidebar/sidebar-count-cell-renderer.vala
 src/client/sidebar/sidebar-entry.vala
 src/client/sidebar/sidebar-tree.vala
+src/client/util/util-avatar.vala
 src/client/util/util-date.vala
 src/client/util/util-email.vala
 src/client/util/util-files.vala
@@ -114,6 +115,7 @@ src/engine/api/geary-contact.vala
 src/engine/api/geary-credentials-mediator.vala
 src/engine/api/geary-credentials.vala
 src/engine/api/geary-email-flags.vala
+src/engine/api/geary-email-header-set.vala
 src/engine/api/geary-email-identifier.vala
 src/engine/api/geary-email-properties.vala
 src/engine/api/geary-email.vala

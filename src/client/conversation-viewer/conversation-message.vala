@@ -289,7 +289,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                           bool load_remote_images,
                                           Configuration config) {
         this(
-            email.get_primary_originator(),
+            Util.Email.get_primary_originator(email),
             email.from,
             email.reply_to,
             email.sender,
@@ -315,7 +315,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                             bool load_remote_images,
                                             Configuration config) {
         this(
-            message.get_primary_originator(),
+            Util.Email.get_primary_originator(message),
             message.from,
             message.reply_to,
             message.sender,
@@ -613,15 +613,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             throw new GLib.IOError.CANCELLED("Conversation load cancelled");
         }
 
-        const int PIXEL_SIZE = 32;
+        // We occasionally get crashes calling as below
+        // Gtk.Image.get_pixel_size() when the image is null. There's
+        // perhaps some race going on there. So we need to hard-code
+        // the size here and keep it in sync with
+        // ui/conversation-message.ui. :(
+        const int PIXEL_SIZE = 48;
         if (this.primary_originator != null) {
             int window_scale = get_scale_factor();
-            // We occasionally get crashes calling as below
-            // Gtk.Image.get_pixel_size() when the image is
-            // null. There's perhaps some race going on there. So we
-            // need to hard-code the size and keep it in sync with
-            // ui/conversation-message.ui. :(
-            //
             //int pixel_size = this.avatar.get_pixel_size() * window_scale;
             int pixel_size = PIXEL_SIZE * window_scale;
             Gdk.Pixbuf? avatar_buf = yield loader.load(

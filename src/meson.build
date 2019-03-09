@@ -73,6 +73,7 @@ geary_bin_sources += [
   geary_resources # Included here so they show up in the executable.
 ]
 geary_bin_dependencies = [
+  folks,
   gdk,
   geary_client_dep,
   geary_engine_dep,

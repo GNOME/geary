@@ -83,7 +83,7 @@ public class ConversationListStore : Gtk.ListStore {
         Geary.App.Conversation a, b;
         model.get(aiter, Column.CONVERSATION_OBJECT, out a);
         model.get(biter, Column.CONVERSATION_OBJECT, out b);
-        return compare_conversation_ascending(a, b);
+        return Util.Email.compare_conversation_ascending(a, b);
     }
 
 
@@ -225,8 +225,10 @@ public class ConversationListStore : Gtk.ListStore {
 
         // sort the conversations so the previews are fetched from the newest to the oldest, matching
         // the user experience
-        Gee.TreeSet<Geary.App.Conversation> sorted_conversations = new Gee.TreeSet<Geary.App.Conversation>(
-            compare_conversation_descending);
+        Gee.TreeSet<Geary.App.Conversation> sorted_conversations =
+            new Gee.TreeSet<Geary.App.Conversation>(
+                Util.Email.compare_conversation_descending
+            );
         sorted_conversations.add_all(this.conversations.read_only_view);
         foreach (Geary.App.Conversation conversation in sorted_conversations) {
             // find oldest unread message for the preview

@@ -260,10 +260,16 @@ public class GearyController : Geary.BaseObject {
             error("Error loading web resources: %s", err.message);
         }
 
-        this.avatar_store = new Application.AvatarStore(
-            this.application.config,
-            this.application.get_user_cache_directory()
-        );
+        Folks.IndividualAggregator individuals =
+            Folks.IndividualAggregator.dup();
+        if (!individuals.is_prepared) {
+            try {
+                yield individuals.prepare();
+            } catch (GLib.Error err) {
+                error("Error preparing Folks: %s", err.message);
+            }
+        }
+        this.avatar_store = new Application.AvatarStore(individuals);
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
@@ -2625,7 +2631,7 @@ public class GearyController : Geary.BaseObject {
         // string substitution is a list of recipients of the email.
         string message = _(
             "Successfully sent mail to %s."
-        ).printf(EmailUtil.to_short_recipient_display(rfc822.to));
+        ).printf(Util.Email.to_short_recipient_display(rfc822.to));
         InAppNotification notification = new InAppNotification(message);
         this.main_window.add_notification(notification);
         Libnotify.play_sound("message-sent-email");
