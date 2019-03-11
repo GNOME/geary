@@ -1,3 +1,19 @@
+Version 0.13.3
+~~~~~~~~~~~~~~
+Released: 2019-03-11
+
+Enhancements included in this release:
+
+ * Fix authentication errors for certain accounts
+ * User interface translation updates
+
+See https://gitlab.gnome.org/GNOME/geary/milestones/9 for the complete
+list.
+
+Thanks to all who contributed translations, for the user interface:
+
+ * Nathan Follens (nl)
+
 Version 0.13.2
 ~~~~~~~~~~~~~~
 Released: 2019-03-07

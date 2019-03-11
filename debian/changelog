@@ -1,3 +1,10 @@
+geary (0.13.3-1~bionic1) bionic; urgency=medium
+
+  * Fix authentication errors for certain accounts
+  * User interface translation updates
+
+ -- Michael Gratton <mike@vee.net>  Mon, 11 Mar 2019 13:36:51 +1100
+
 geary (0.13.2-1~bionic1) bionic; urgency=medium
 
   * Bug fixes and minor user interface improvements

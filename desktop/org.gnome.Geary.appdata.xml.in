@@ -77,6 +77,17 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="0.13.3"
+             date="2019-03-11"
+             url="https://gitlab.gnome.org/GNOME/geary/milestones/9">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Fix authentication errors for certain accounts</li>
+          <li>User interface translation updates</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.13.2"
              date="2019-03-07"
              url="https://gitlab.gnome.org/GNOME/geary/milestones/8">
