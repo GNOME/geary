@@ -24,6 +24,10 @@ body.plain a {
   cursor: text;
 }
 
+body > *.geary-no-display {
+  display: none !important;
+}
+
 body > div#geary-body {
   margin: 0 !important;
   border: 0 !important;

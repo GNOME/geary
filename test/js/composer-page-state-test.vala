@@ -7,8 +7,9 @@
 
 class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
-    private const string COMPLETE_BODY_TEMPLATE = """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div>""";
-    private const string CLEAN_BODY_TEMPLATE = "%s<div><br></div><div><br></div>";
+    public const string COMPLETE_BODY_TEMPLATE =
+        """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div><div id="geary-signature" dir="auto"></div>""";
+    public const string CLEAN_BODY_TEMPLATE = "%s<div><br></div><div><br></div>";
 
     public ComposerPageStateTest() {
         base("ComposerPageStateTest");
@@ -89,7 +90,6 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
 some text
 """,
-                          "-- <br>sig",
                           "<p>outerquote text</p>",
                           true
             );
@@ -102,9 +102,6 @@ some text
             )));
             assert(!WebKitUtil.to_bool(run_javascript(
                 @"geary.containsAttachmentKeyword(\"innerquote\", \"subject text\");"
-            )));
-            assert(!WebKitUtil.to_bool(run_javascript(
-                @"geary.containsAttachmentKeyword(\"sig\", \"subject text\");"
             )));
             assert(!WebKitUtil.to_bool(run_javascript(
                 @"geary.containsAttachmentKeyword(\"outerquote\", \"subject text\");"
@@ -292,14 +289,13 @@ unknown://example6.com
     }
 
     protected override void load_body_fixture(string body = "") {
-        load_body_fixture_full(body, "", "", true);
+        load_body_fixture_full(body, "", true);
     }
 
     protected void load_body_fixture_full(string body,
-                                          string sig,
                                           string quote,
                                           bool top_posting) {
-        this.test_view.load_html(body, sig, quote, top_posting, false);
+        this.test_view.load_html(body, quote, top_posting, false);
         while (this.test_view.is_loading) {
             Gtk.main_iteration();
         }

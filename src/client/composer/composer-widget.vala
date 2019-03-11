@@ -461,6 +461,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.editor = new ComposerWebView(config);
         this.editor.set_hexpand(true);
         this.editor.set_vexpand(true);
+        this.editor.content_loaded.connect(on_editor_content_loaded);
         this.editor.show();
 
         this.body_container.add(this.editor);
@@ -628,10 +629,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         update_attachments_view();
         update_pending_attachments(this.pending_include, true);
 
-        string signature = yield load_signature(cancellable);
         this.editor.load_html(
             this.body_html,
-            signature,
             referred_quote,
             this.top_posting,
             is_referred_draft
@@ -2164,41 +2163,43 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
             if (selected.account != this.account) {
                 this.account = selected.account;
-                this.load_signature.begin(null, (obj, res) => {
-                        this.editor.update_signature(this.load_signature.end(res));
-                    });
+                this.update_signature.begin(null);
                 load_entry_completions();
                 this.reopen_draft_manager_async.begin();
             }
         }
     }
 
-    private async string load_signature(Cancellable? cancellable = null) {
-        string account_sig = "";
-
+    private async void update_signature(Cancellable? cancellable = null) {
+        string sig = "";
         if (this.account.information.use_signature) {
-            account_sig = account.information.signature;
-            if (Geary.String.is_empty_or_whitespace(account_sig)) {
+            sig = account.information.signature;
+            if (Geary.String.is_empty_or_whitespace(sig)) {
                 // No signature is specified in the settings, so use
                 // ~/.signature
                 File signature_file = File.new_for_path(Environment.get_home_dir()).get_child(".signature");
                 try {
                     uint8[] data;
                     yield signature_file.load_contents_async(cancellable, out data, null);
-                    account_sig = (string) data;
+                    sig = (string) data;
                 } catch (Error error) {
                     if (!(error is IOError.NOT_FOUND)) {
                         debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
                     }
                 }
             }
-
-            account_sig = (!Geary.String.is_empty_or_whitespace(account_sig))
-                ? Geary.HTML.smart_escape(account_sig)
-                : "";
         }
 
-        return account_sig;
+        // Still want to update the signature even if it is empty,
+        // since when changing the selected from account, if the
+        // previously selected account had a sig but the newly
+        // selected account does not, the old sig gets cleared out.
+        if (Geary.String.is_empty_or_whitespace(sig)) {
+            // Clear out multiple spaces etc so smart_escape
+            // doesn't create &nbsp;'s
+            sig = "";
+        }
+        this.editor.update_signature(Geary.HTML.smart_escape(sig));
     }
 
     private async ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,
@@ -2228,6 +2229,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private void on_command_state_changed(bool can_undo, bool can_redo) {
         get_action(GearyApplication.ACTION_UNDO).set_enabled(can_undo);
         get_action(GearyApplication.ACTION_REDO).set_enabled(can_redo);
+    }
+
+    private void on_editor_content_loaded() {
+        this.update_signature.begin(null);
     }
 
     private void on_draft_id_changed() {
