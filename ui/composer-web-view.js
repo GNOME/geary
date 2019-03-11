@@ -133,6 +133,7 @@ ComposerPageState.prototype = {
         if (!enabled) {
             this.stopBodyObserver();
         }
+
         this.bodyPart.contentEditable = true;
         if (this.signaturePart != null) {
             this.signaturePart.contentEditable = true;
@@ -140,6 +141,7 @@ ComposerPageState.prototype = {
         if (this.quotePart != null) {
             this.quotePart.contentEditable = true;
         }
+
         if (enabled) {
             // Enable modification observation only after the document
             // has been set editable as WebKit will alter some attrs
@@ -208,8 +210,13 @@ ComposerPageState.prototype = {
     },
     updateSignature: function(signature) {
         if (this.signaturePart != null) {
-            console.log(signature);
-            this.signaturePart.innerHTML = signature;
+            if (signature.trim()) {
+                this.signaturePart.innerHTML = signature;
+                this.signaturePart.classList.remove("geary-no-display");
+            } else {
+                this.signaturePart.innerHTML = "";
+                this.signaturePart.classList.add("geary-no-display");
+            }
         }
     },
     deleteQuotedMessage: function() {
@@ -315,13 +322,17 @@ ComposerPageState.prototype = {
 
         if (this.signaturePart != null) {
             parent.appendChild(
-                ComposerPageState.cleanPart(this.signaturePart.cloneNode(true), false)
+                ComposerPageState.cleanPart(
+                    this.signaturePart.cloneNode(true), false
+                )
             );
         }
 
         if (this.quotePart != null) {
             parent.appendChild(
-                ComposerPageState.cleanPart(this.quotePart.cloneNode(true), false)
+                ComposerPageState.cleanPart(
+                    this.quotePart.cloneNode(true), false
+                )
             );
         }
 

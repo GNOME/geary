@@ -133,7 +133,6 @@ public class ComposerWebView : ClientWebView {
      * Loads a message HTML body into the view.
      */
     public new void load_html(string body,
-                              string signature,
                               string quote,
                               bool top_posting,
                               bool is_draft) {
@@ -142,9 +141,7 @@ public class ComposerWebView : ClientWebView {
         const string BODY_PRE = """
 <div id="geary-body" dir="auto">""";
         const string BODY_POST = """</div>
-""";
-        const string SIGNATURE = """
-<div id="geary-signature" dir="auto">%s</div>
+<div id="geary-signature" class="geary-no-display" dir="auto"></div>
 """;
         const string QUOTE = """
 <div id="geary-quote" dir="auto"><br />%s</div>
@@ -170,10 +167,6 @@ public class ComposerWebView : ClientWebView {
 
             html.append(CURSOR);
             html.append(BODY_POST);
-
-            if (!Geary.String.is_empty(signature)) {
-                html.append_printf(SIGNATURE, signature);
-            }
 
             if (top_posting && !Geary.String.is_empty(quote)) {
                 html.append_printf(QUOTE, quote);

@@ -7,7 +7,6 @@
 
 public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
 
-    private const string BODY_TEMPLATE = """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div>""";
 
     public ComposerWebViewTest() {
         base("ComposerWebViewTest");
@@ -23,6 +22,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("get_text_with_named_link", get_text_with_named_link);
         add_test("get_text_with_url_link", get_text_with_named_link);
         add_test("get_text_with_surrounding_nbsps", get_text_with_surrounding_nbsps);
+        add_test("update_signature", update_signature);
     }
 
     public void load_resources() throws Error {
@@ -45,17 +45,12 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         assert(new ComposerWebView.EditContext("0,,,12").font_size == 12);
     }
 
-    public void get_html() throws Error {
-        string html = "<p>para</p>";
-        load_body_fixture(html);
+    public void get_html() throws GLib.Error {
+        string BODY = "<p>para</p>";
+        load_body_fixture(BODY);
         this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
-        try {
-            assert(this.test_view.get_html.end(async_result()) ==
-                   BODY_TEMPLATE.printf(html));
-        } catch (Error err) {
-            print("Error: %s\n", err.message);
-            assert_not_reached();
-        }
+        string html = this.test_view.get_html.end(async_result());
+        assert_string(ComposerPageStateTest.COMPLETE_BODY_TEMPLATE.printf(BODY), html);
     }
 
     public void get_text() throws Error {
@@ -210,12 +205,40 @@ long, long, long, long, long, long, long, long, long, long,
         }
     }
 
+    public void update_signature() throws GLib.Error {
+        const string BODY = "<p>para</p>";
+        load_body_fixture(BODY);
+        string html = "";
+
+        const string SIG1 = "signature text 1";
+        this.test_view.update_signature(SIG1);
+        this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
+        html = this.test_view.get_html.end(async_result());
+        assert_true(BODY in html, "Body not present");
+        assert_true(SIG1 in html, "Signature 1 not present");
+
+        const string SIG2 = "signature text 2";
+        this.test_view.update_signature(SIG2);
+        this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
+        html = this.test_view.get_html.end(async_result());
+        assert_true(BODY in html, "Body not present");
+        assert_false(SIG1 in html, "Signature 1 still present");
+        assert_true(SIG2 in html, "Signature 2 not present");
+
+        this.test_view.update_signature("");
+        this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
+        html = this.test_view.get_html.end(async_result());
+        assert_true(BODY in html, "Body not present");
+        assert_false(SIG1 in html, "Signature 1 still present");
+        assert_false(SIG2 in html, "Signature 2 still present");
+    }
+
     protected override ComposerWebView set_up_test_view() {
         return new ComposerWebView(this.config);
     }
 
     protected override void load_body_fixture(string html = "") {
-        this.test_view.load_html(html, "", "", false, false);
+        this.test_view.load_html(html, "", false, false);
         while (this.test_view.is_loading) {
             Gtk.main_iteration();
         }
