@@ -129,8 +129,10 @@ public class FormattedConversationData : Geary.BaseObject {
 
         // conversation list store sorts by date-received, so display that instead of sender's
         // Date:
-        string new_date = Util.Date.pretty_print(latest.properties.date_received,
-            GearyApplication.instance.config.clock_format);
+        string new_date = Util.Date.pretty_print(
+            latest.properties.date_received.to_local(),
+            GearyApplication.instance.config.clock_format
+        );
         if (new_date == date)
             return false;
 

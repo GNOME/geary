@@ -399,11 +399,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         string date_text = "";
         string date_tooltip = "";
         if (date != null) {
+            GLib.DateTime local_date = date.value.to_local();
             date_text = Util.Date.pretty_print(
-                date.value, config.clock_format
+                local_date, config.clock_format
             );
             date_tooltip = Util.Date.pretty_print_verbose(
-                date.value, config.clock_format
+                local_date, config.clock_format
             );
         }
         this.compact_date.set_text(date_text);
