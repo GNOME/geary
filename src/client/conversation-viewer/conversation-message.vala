@@ -158,7 +158,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** HTML view that displays the message body. */
     internal ConversationWebView web_view { get; private set; }
 
+    private Configuration config;
+
     private Geary.RFC822.MailboxAddress? primary_originator;
+
+    private GLib.DateTime? local_date = null;
 
     [GtkChild]
     private Gtk.Image avatar;
@@ -345,6 +349,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         base_ref();
         this.is_loading_images = load_remote_images;
         this.primary_originator = primary_originator;
+        this.config = config;
 
         // Actions
 
@@ -387,6 +392,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 (MenuModel) builder.get_object("context_menu_inspector");
         }
 
+        this.local_date = date.value.to_local();
+        update_display();
+
         // Compact headers
 
         // Translators: This is displayed in place of the from address
@@ -395,20 +403,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         this.compact_from.set_text(format_originator_compact(from, empty_from));
         this.compact_from.get_style_context().add_class(FROM_CLASS);
-
-        string date_text = "";
-        string date_tooltip = "";
-        if (date != null) {
-            GLib.DateTime local_date = date.value.to_local();
-            date_text = Util.Date.pretty_print(
-                local_date, config.clock_format
-            );
-            date_tooltip = Util.Date.pretty_print_verbose(
-                local_date, config.clock_format
-            );
-        }
-        this.compact_date.set_text(date_text);
-        this.compact_date.set_tooltip_text(date_tooltip);
 
         if (preview != null) {
             string clean_preview = preview;
@@ -427,8 +421,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         fill_originator_addresses(from, reply_to, sender, empty_from);
 
-        this.date.set_text(date_text);
-        this.date.set_tooltip_text(date_tooltip);
         if (subject != null) {
             this.subject.set_text(subject.value);
             this.subject.set_visible(true);
@@ -704,6 +696,28 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             address.unmark_search_terms();
         }
         this.web_view.unmark_search_terms();
+    }
+
+    /**
+     * Updates the displayed date for each conversation row.
+     */
+    public void update_display() {
+        string date_text = "";
+        string date_tooltip = "";
+        if (this.local_date != null) {
+            date_text = Util.Date.pretty_print(
+                this.local_date, this.config.clock_format
+            );
+            date_tooltip = Util.Date.pretty_print_verbose(
+                this.local_date, this.config.clock_format
+            );
+        }
+
+        this.compact_date.set_text(date_text);
+        this.compact_date.set_tooltip_text(date_tooltip);
+
+        this.date.set_text(date_text);
+        this.date.set_tooltip_text(date_tooltip);
     }
 
     private SimpleAction add_action(string name, bool enabled, VariantType? type = null) {
