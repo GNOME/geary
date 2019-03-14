@@ -26,7 +26,7 @@ public abstract class Geary.EmailProperties : BaseObject {
      */
     public int64 total_bytes { get; protected set; }
 
-    public EmailProperties(DateTime date_received, int64 total_bytes) {
+    protected EmailProperties(DateTime date_received, int64 total_bytes) {
         this.date_received = date_received;
         this.total_bytes = total_bytes;
     }

@@ -295,8 +295,8 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     public signal void remote_image_load_blocked();
 
 
-    public ClientWebView(Configuration config,
-                         WebKit.UserContentManager? custom_manager = null) {
+    protected ClientWebView(Configuration config,
+                            WebKit.UserContentManager? custom_manager = null) {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
         setts.default_charset = "UTF-8";
