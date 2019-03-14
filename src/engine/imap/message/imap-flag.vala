@@ -21,7 +21,7 @@ public abstract class Geary.Imap.Flag : BaseObject, Gee.Hashable<Geary.Imap.Flag
      *
      * The given keyword must be an IMAP atom.
      */
-    public Flag(string name) {
+    protected Flag(string name) {
         this.value = name;
     }
 

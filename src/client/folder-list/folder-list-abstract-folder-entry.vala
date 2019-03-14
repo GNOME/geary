@@ -12,7 +12,7 @@
 public abstract class FolderList.AbstractFolderEntry : Geary.BaseObject, Sidebar.Entry, Sidebar.SelectableEntry {
     public Geary.Folder folder { get; private set; }
     
-    public AbstractFolderEntry(Geary.Folder folder) {
+    protected AbstractFolderEntry(Geary.Folder folder) {
         this.folder = folder;
     }
     

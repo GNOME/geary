@@ -55,7 +55,7 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
     
     private Nonblocking.Semaphore semaphore = new Nonblocking.Semaphore();
     
-    public ReplayOperation(string name, Scope scope, OnError on_remote_error = OnError.THROW) {
+    protected ReplayOperation(string name, Scope scope, OnError on_remote_error = OnError.THROW) {
         this.name = name;
         this.scope = scope;
         this.on_remote_error = on_remote_error;
