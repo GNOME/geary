@@ -48,22 +48,27 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     // Widget used to display sender/recipient email addresses in
     // message header Gtk.FlowBox instances.
-    private class AddressFlowBoxChild : Gtk.FlowBoxChild {
+    private class ContactFlowBoxChild : Gtk.FlowBoxChild {
 
         private const string PRIMARY_CLASS = "geary-primary";
 
         public enum Type { FROM, OTHER; }
 
-        public Geary.RFC822.MailboxAddress address { get; private set; }
+        public Application.Contact contact { get; private set; }
+
+        public Geary.RFC822.MailboxAddress displayed { get; private set; }
+        public Geary.RFC822.MailboxAddress source { get; private set; }
 
         private string search_value;
 
-        public AddressFlowBoxChild(Geary.RFC822.MailboxAddress address,
+        public ContactFlowBoxChild(Application.Contact contact,
+                                   Geary.RFC822.MailboxAddress source,
                                    Type type = Type.OTHER) {
-            this.address = address;
-            this.search_value = address.to_searchable_string().casefold();
+            this.contact = contact;
+            this.source = source;
+            this.search_value = source.to_searchable_string().casefold();
 
-            // We use two label instances here when address has
+            // We use two GTK.Label instances here when address has
             // distinct parts so we can dim the secondary part, if
             // any. Ideally, it would be just one label instance in
             // both cases, but we can't yet include CSS classes in
@@ -71,7 +76,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
             Gtk.Grid address_parts = new Gtk.Grid();
 
-            bool is_spoofed = address.is_spoofed();
+            bool is_spoofed = source.is_spoofed();
             if (is_spoofed) {
                 Gtk.Image spoof_img = new Gtk.Image.from_icon_name(
                     "dialog-warning-symbolic", Gtk.IconSize.SMALL_TOOLBAR
@@ -91,12 +96,30 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
             address_parts.add(primary);
 
-            string display_address = address.to_address_display("", "");
+            string display_address = source.to_address_display("", "");
 
-            // Don't display the name if it looks spoofed, to reduce
-            // chance of the user of being tricked by malware.
-            if (address.has_distinct_name() && !is_spoofed) {
-                primary.set_text(address.to_short_display());
+            if (is_spoofed || contact.display_name_is_email) {
+                // Don't display the name to avoid duplication and/or
+                // reduce the chance of the user of being tricked by
+                // malware.
+                primary.set_text(display_address);
+                this.displayed = new Geary.RFC822.MailboxAddress(
+                    null, source.address
+                );
+            } else if (contact.display_name_is_trusted) {
+                // The contact's name is trusted, so no need to
+                // display the email address
+                primary.set_text(contact.display_name);
+                this.displayed = new Geary.RFC822.MailboxAddress(
+                    contact.display_name, source.address
+                );
+            } else {
+                // Display both the display name and the email address
+                // so that the user has the full information at hand
+                primary.set_text(contact.display_name);
+                this.displayed = new Geary.RFC822.MailboxAddress(
+                    contact.display_name, source.address
+                );
 
                 Gtk.Label secondary = new Gtk.Label(null);
                 secondary.ellipsize = Pango.EllipsizeMode.END;
@@ -104,8 +127,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 secondary.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
                 secondary.set_text(display_address);
                 address_parts.add(secondary);
-            } else {
-                primary.set_text(display_address);
             }
 
             // Update prelight state when mouse-overed.
@@ -252,8 +273,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private MenuModel? context_menu_inspector = null;
 
     // Address fields that can be search through
-    private Gee.List<AddressFlowBoxChild> searchable_addresses =
-        new Gee.LinkedList<AddressFlowBoxChild>();
+    private Gee.List<ContactFlowBoxChild> searchable_addresses =
+        new Gee.LinkedList<ContactFlowBoxChild>();
 
     // Resource that have been loaded by the web view
     private Gee.Map<string,WebKit.WebResource> resources =
@@ -707,7 +728,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.subject.get_style_context().remove_class(MATCH_CLASS);
             }
 
-            foreach (AddressFlowBoxChild address in this.searchable_addresses) {
+            foreach (ContactFlowBoxChild address in this.searchable_addresses) {
                 if (address.highlight_search_term(match)) {
                     ++headers_found;
                 }
@@ -724,7 +745,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
      * Disables highlighting of any search terms in the message view.
      */
     public void unmark_search_terms() {
-        foreach (AddressFlowBoxChild address in this.searchable_addresses) {
+        foreach (ContactFlowBoxChild address in this.searchable_addresses) {
             address.unmark_search_terms();
         }
         this.web_view.unmark_search_terms();
@@ -808,8 +829,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         // Show any From header addresses
         if (from != null && from.size > 0) {
             foreach (Geary.RFC822.MailboxAddress address in from) {
-                AddressFlowBoxChild child = new AddressFlowBoxChild(
-                    address, AddressFlowBoxChild.Type.FROM
+                ContactFlowBoxChild child = new ContactFlowBoxChild(
+                    this.contacts.get(address),
+                    address,
+                    ContactFlowBoxChild.Type.FROM
                 );
                 this.searchable_addresses.add(child);
                 this.from.add(child);
@@ -829,7 +852,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         // not already in the From header.
         if (sender != null &&
             (from == null || !from.contains_normalized(sender.address))) {
-            AddressFlowBoxChild child = new AddressFlowBoxChild(sender);
+            ContactFlowBoxChild child = new ContactFlowBoxChild(
+                this.contacts.get(sender),
+                sender
+            );
             this.searchable_addresses.add(child);
             this.sender_header.show();
             this.sender_address.add(child);
@@ -840,7 +866,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         if (reply_to != null) {
             foreach (Geary.RFC822.MailboxAddress address in reply_to) {
                 if (from == null || !from.contains_normalized(address.address)) {
-                    AddressFlowBoxChild child = new AddressFlowBoxChild(address);
+                    ContactFlowBoxChild child = new ContactFlowBoxChild(
+                        this.contacts.get(address),
+                        address
+                    );
                     this.searchable_addresses.add(child);
                     this.reply_to_addresses.add(child);
                     this.reply_to_header.show();
@@ -855,7 +884,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             Gtk.FlowBox box = header.get_children().nth(0).data as Gtk.FlowBox;
             if (box != null) {
                 foreach (Geary.RFC822.MailboxAddress address in addresses) {
-                    AddressFlowBoxChild child = new AddressFlowBoxChild(address);
+                    ContactFlowBoxChild child = new ContactFlowBoxChild(
+                        this.contacts.get(address),
+                        address
+                    );
                     this.searchable_addresses.add(child);
                     box.add(child);
                 }
@@ -994,11 +1026,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     [GtkCallback]
     private void on_address_box_child_activated(Gtk.FlowBox box,
                                                 Gtk.FlowBoxChild child) {
-        AddressFlowBoxChild address_child = child as AddressFlowBoxChild;
+        ContactFlowBoxChild address_child = child as ContactFlowBoxChild;
         if (address_child != null) {
             address_child.set_state_flags(Gtk.StateFlags.ACTIVE, false);
 
-            Geary.RFC822.MailboxAddress address = address_child.address;
+            Geary.RFC822.MailboxAddress address = address_child.displayed;
 
             Gee.Map<string,GLib.Variant> values =
                 new Gee.HashMap<string,GLib.Variant>();
@@ -1017,7 +1049,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
             Conversation.ContactPopover popover = new Conversation.ContactPopover(
                 address_child,
-                this.contacts.get(address),
+                address_child.contact,
                 address
             );
             popover.load_avatar.begin();
