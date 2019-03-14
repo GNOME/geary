@@ -2138,8 +2138,7 @@ public class GearyController : Geary.BaseObject {
         if (current_account == null)
             return;
 
-        bool inline;
-        if (!should_create_new_composer(compose_type, referred, quote, is_draft, out inline))
+        if (!should_create_new_composer(compose_type, referred, quote, is_draft))
             return;
 
         ComposerWidget widget;
@@ -2185,9 +2184,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
-        Geary.Email? referred, string? quote, bool is_draft, out bool inline) {
-        inline = true;
-
+                                            Geary.Email? referred,
+                                            string? quote,
+                                            bool is_draft) {
         // In we're replying, see whether we already have a reply for that message.
         if (compose_type != null && compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
@@ -2198,7 +2197,6 @@ public class GearyController : Geary.BaseObject {
                     return false;
                 }
             }
-            inline = !any_inline_composers();
             return true;
         }
 
@@ -2208,7 +2206,6 @@ public class GearyController : Geary.BaseObject {
 
         // If we're resuming a draft with open composers, open in a new window.
         if (is_draft) {
-            inline = false;
             return true;
         }
 
@@ -2218,7 +2215,6 @@ public class GearyController : Geary.BaseObject {
             foreach (ComposerWidget cw in composer_widgets) {
                 if (cw.state == ComposerWidget.ComposerState.PANED) {
                     if (!cw.is_blank) {
-                        inline = false;
                         return true;
                     } else {
                         cw.change_compose_type(compose_type);  // To refocus
@@ -2253,8 +2249,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     public bool can_switch_conversation_view() {
-        bool inline;
-        return should_create_new_composer(null, null, null, false, out inline);
+        return should_create_new_composer(null, null, null, false);
     }
 
     public bool any_inline_composers() {
