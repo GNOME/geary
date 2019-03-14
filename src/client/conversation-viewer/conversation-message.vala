@@ -46,7 +46,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private const string ACTION_SAVE_IMAGE = "save-image";
     private const string ACTION_SELECT_ALL = "select-all";
 
-
     // Widget used to display sender/recipient email addresses in
     // message header Gtk.FlowBox instances.
     private class AddressFlowBoxChild : Gtk.FlowBoxChild {
@@ -154,6 +153,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private static GLib.VariantType MAILBOX_TYPE = new GLib.VariantType("(ss)");
 
+    /** Originator used for contact lookup, avatar, and so on. */
+    internal Geary.RFC822.MailboxAddress? primary_originator {
+        get; private set;
+    }
 
     /** Box containing the preview and full header widgets.  */
     [GtkChild]
@@ -167,8 +170,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     internal ConversationWebView web_view { get; private set; }
 
     private Configuration config;
-
-    private Geary.RFC822.MailboxAddress? primary_originator;
 
     private GLib.DateTime? local_date = null;
 
@@ -618,25 +619,17 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /**
      * Starts loading the avatar for the message's sender.
      */
-    public async void load_avatar(Application.AvatarStore loader,
-                                  GLib.Cancellable load_cancelled)
+    public async void load_avatar(GLib.Cancellable cancellable)
         throws GLib.Error {
-        if (load_cancelled.is_cancelled()) {
-            throw new GLib.IOError.CANCELLED("Conversation load cancelled");
-        }
-
-        // We occasionally get crashes calling as below
-        // Gtk.Image.get_pixel_size() when the image is null. There's
-        // perhaps some race going on there. So we need to hard-code
-        // the size here and keep it in sync with
-        // ui/conversation-message.ui. :(
-        const int PIXEL_SIZE = 48;
-        if (this.primary_originator != null) {
+        MainWindow? main = this.get_toplevel() as MainWindow;
+        if (this.primary_originator != null &&
+            main != null &&
+            !cancellable.is_cancelled()) {
+            Application.AvatarStore loader = main.application.controller.avatars;
             int window_scale = get_scale_factor();
-            //int pixel_size = this.avatar.get_pixel_size() * window_scale;
-            int pixel_size = PIXEL_SIZE * window_scale;
+            int pixel_size = Application.AvatarStore.PIXEL_SIZE * window_scale;
             Gdk.Pixbuf? avatar_buf = yield loader.load(
-                this.primary_originator, pixel_size, load_cancelled
+                this.primary_originator, pixel_size, cancellable
             );
             if (avatar_buf != null) {
                 this.avatar.set_from_surface(

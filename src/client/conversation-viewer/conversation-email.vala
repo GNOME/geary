@@ -311,9 +311,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // Store from which to lookup contacts
     private Geary.ContactStore contact_store;
 
-    // Store from which to load avatars
-    private Application.AvatarStore avatar_store;
-
     // Cancellable to use when loading message content
     private GLib.Cancellable load_cancellable;
 
@@ -438,7 +435,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      */
     public ConversationEmail(Geary.Email email,
                              Geary.App.EmailStore email_store,
-                             Application.AvatarStore avatar_store,
                              Configuration config,
                              bool is_sent,
                              bool is_draft,
@@ -449,7 +445,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         this.primary_originator = Util.Email.get_primary_originator(email);
         this.email_store = email_store;
         this.contact_store = email_store.account.get_contact_store();
-        this.avatar_store = avatar_store;
         this.config = config;
         this.load_cancellable = load_cancellable;
         this.message_bodies_loaded_lock =
@@ -577,14 +572,15 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /**
      * Loads the avatar for the primary message.
      */
-    public async void load_avatar(Application.AvatarStore store)
+    public async void load_avatar()
         throws GLib.Error {
         try {
-            yield this.primary_message.load_avatar(store, this.load_cancellable);
+            yield this.primary_message.load_avatar(this.load_cancellable);
         } catch (IOError.CANCELLED err) {
             // okay
         } catch (Error err) {
-            Geary.RFC822.MailboxAddress? from = this.primary_originator;
+            Geary.RFC822.MailboxAddress? from =
+                this.primary_message.primary_originator;
             debug("Avatar load failed for \"%s\": %s",
                   from != null ? from.to_string() : "<unknown>", err.message);
         }
@@ -863,9 +859,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             attached_message.web_view.add_internal_resources(cid_resources);
             this.sub_messages.add(attached_message);
             this._attached_messages.add(attached_message);
-            attached_message.load_avatar.begin(
-                this.avatar_store, this.load_cancellable
-            );
+            attached_message.load_avatar.begin(this.load_cancellable);
             yield attached_message.load_message_body(
                 sub_message, this.load_cancellable
             );

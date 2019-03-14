@@ -1327,7 +1327,6 @@ public class GearyController : Geary.BaseObject {
                     viewer.load_conversation.begin(
                         convo,
                         store,
-                        this.avatars,
                         (obj, ret) => {
                             try {
                                 viewer.load_conversation.end(ret);
