@@ -230,13 +230,15 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      * Shows a conversation in the viewer.
      */
     public async void load_conversation(Geary.App.Conversation conversation,
-                                        Geary.App.EmailStore email_store)
+                                        Geary.App.EmailStore emails,
+                                        Application.ContactStore contacts)
         throws GLib.Error {
         remove_current_list();
 
         ConversationListBox new_list = new ConversationListBox(
             conversation,
-            email_store,
+            emails,
+            contacts,
             this.config,
             this.conversation_scroller.get_vadjustment()
         );

@@ -289,9 +289,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /** Determines if the email is a draft message. */
     public bool is_draft { get; private set; }
 
-    /** The email's primary originator, if any. */
-    public Geary.RFC822.MailboxAddress? primary_originator { get; private set; }
-
     /** The view displaying the email's primary message headers and body. */
     public ConversationMessage primary_message { get; private set; }
 
@@ -309,7 +306,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private Geary.App.EmailStore email_store;
 
     // Store from which to lookup contacts
-    private Geary.ContactStore contact_store;
+    private Application.ContactStore contacts;
 
     // Cancellable to use when loading message content
     private GLib.Cancellable load_cancellable;
@@ -435,6 +432,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      */
     public ConversationEmail(Geary.Email email,
                              Geary.App.EmailStore email_store,
+                             Application.ContactStore contacts,
                              Configuration config,
                              bool is_sent,
                              bool is_draft,
@@ -442,9 +440,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         base_ref();
         this.email = email;
         this.is_draft = is_draft;
-        this.primary_originator = Util.Email.get_primary_originator(email);
         this.email_store = email_store;
-        this.contact_store = email_store.account.get_contact_store();
+        this.contacts = contacts;
         this.config = config;
         this.load_cancellable = load_cancellable;
         this.message_bodies_loaded_lock =
@@ -506,18 +503,11 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         // Construct the view for the primary message, hook into it
 
-        bool load_images = email.load_remote_images().is_certain();
-
-        Geary.Contact? contact = null;
-        if (this.primary_originator != null) {
-            contact = this.contact_store.get_by_rfc822(this.primary_originator);
-        }
-        if (contact != null)  {
-            load_images |= contact.always_load_remote_images();
-        }
-
         this.primary_message = new ConversationMessage.from_email(
-            email, load_images, config
+            email,
+            email.load_remote_images().is_certain(),
+            this.contacts,
+            config
         );
         connect_message_view_signals(this.primary_message);
 
@@ -761,7 +751,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     private void connect_message_view_signals(ConversationMessage view) {
         view.flag_remote_images.connect(on_flag_remote_images);
-        view.remember_remote_images.connect(on_remember_remote_images);
         view.internal_link_activated.connect((y) => {
                 internal_link_activated(y);
             });
@@ -853,7 +842,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
                 new ConversationMessage.from_message(
-                    sub_message, false, this.config
+                    sub_message,
+                    this.email.load_remote_images().is_certain(),
+                    this.contacts,
+                    this.config
                 );
             connect_message_view_signals(attached_message);
             attached_message.web_view.add_internal_resources(cid_resources);
@@ -1038,22 +1030,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     private void on_flag_remote_images(ConversationMessage view) {
-        // XXX check we aren't already auto loading the image
-        mark_email(Geary.EmailFlags.LOAD_REMOTE_IMAGES, null);
-    }
-
-
-    private void on_remember_remote_images(ConversationMessage view) {
-        Geary.RFC822.MailboxAddress? sender = this.primary_originator;
-        if (sender != null) {
-            Geary.Contact? contact = this.contact_store.get_by_rfc822(sender);
-            if (contact != null) {
-                Geary.ContactFlags flags = new Geary.ContactFlags();
-                flags.add(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
-                this.contact_store.mark_contacts_async.begin(
-                    Geary.Collection.single(contact), flags, null
-                );
-            }
+        if (!email.email_flags.contains(Geary.EmailFlags.LOAD_REMOTE_IMAGES)) {
+            // Don't pass a cancellable in to make sure the flag is
+            // always saved
+            mark_email(Geary.EmailFlags.LOAD_REMOTE_IMAGES, null);
         }
     }
 

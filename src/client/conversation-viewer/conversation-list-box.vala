@@ -471,6 +471,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // Used to load messages in conversation.
     private Geary.App.EmailStore email_store;
 
+    // Store from which to lookup contacts
+    private Application.ContactStore contacts;
+
     // App config
     private Configuration config;
 
@@ -549,11 +552,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      */
     public ConversationListBox(Geary.App.Conversation conversation,
                                Geary.App.EmailStore email_store,
+                               Application.ContactStore contacts,
                                Configuration config,
                                Gtk.Adjustment adjustment) {
         base_ref();
         this.conversation = conversation;
         this.email_store = email_store;
+        this.contacts = contacts;
         this.config = config;
 
         this.search = new SearchManager(this, conversation);
@@ -915,6 +920,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         ConversationEmail view = new ConversationEmail(
             email,
             this.email_store,
+            this.contacts,
             this.config,
             is_sent,
             is_draft(email),

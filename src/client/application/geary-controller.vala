@@ -1336,6 +1336,7 @@ public class GearyController : Geary.BaseObject {
                     viewer.load_conversation.begin(
                         convo,
                         context.emails,
+                        context.contacts,
                         (obj, ret) => {
                             try {
                                 viewer.load_conversation.end(ret);

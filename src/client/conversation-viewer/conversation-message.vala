@@ -153,7 +153,13 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private static GLib.VariantType MAILBOX_TYPE = new GLib.VariantType("(ss)");
 
-    /** Originator used for contact lookup, avatar, and so on. */
+
+    /** Contact for the primary originator, if any. */
+    internal Application.Contact? primary_contact {
+        get; private set;
+    }
+
+    /** Mailbox assumed to be the primary sender. */
     internal Geary.RFC822.MailboxAddress? primary_originator {
         get; private set;
     }
@@ -170,6 +176,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     internal ConversationWebView web_view { get; private set; }
 
     private Configuration config;
+
+    private Application.ContactStore contacts;
 
     private GLib.DateTime? local_date = null;
 
@@ -257,7 +265,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private int next_replaced_buffer_number = 0;
 
     // Is the view set to allow remote image loads?
-    private bool is_loading_images;
+    private bool load_remote_resources;
 
     private int remote_resources_requested = 0;
 
@@ -282,9 +290,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** Fired when the user requests remote images be loaded. */
     public signal void flag_remote_images();
 
-    /** Fired when the user requests remote images be always loaded. */
-    public signal void remember_remote_images();
-
     /** Fired when the user saves an inline displayed image. */
     public signal void save_image(string? uri, string? alt_text, Geary.Memory.Buffer buffer);
 
@@ -297,7 +302,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
      * loading processes.
      */
     public ConversationMessage.from_email(Geary.Email email,
-                                          bool load_remote_images,
+                                          bool load_remote_resources,
+                                          Application.ContactStore contacts,
                                           Configuration config) {
         this(
             Util.Email.get_primary_originator(email),
@@ -310,7 +316,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             email.date,
             email.subject,
             email.preview != null ? email.preview.buffer.get_valid_utf8() : null,
-            load_remote_images,
+            load_remote_resources,
+            contacts,
             config
         );
     }
@@ -323,7 +330,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
      * loading processes.
      */
     public ConversationMessage.from_message(Geary.RFC822.Message message,
-                                            bool load_remote_images,
+                                            bool load_remote_resources,
+                                            Application.ContactStore contacts,
                                             Configuration config) {
         this(
             Util.Email.get_primary_originator(message),
@@ -336,7 +344,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             message.date,
             message.subject,
             message.get_preview(),
-            load_remote_images,
+            load_remote_resources,
+            contacts,
             config
         );
     }
@@ -351,10 +360,16 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                 Geary.RFC822.Date? date,
                                 Geary.RFC822.Subject? subject,
                                 string? preview,
-                                bool load_remote_images,
+                                bool load_remote_resources,
+                                Application.ContactStore contacts,
                                 Configuration config) {
         base_ref();
-        this.is_loading_images = load_remote_images;
+        this.load_remote_resources = load_remote_resources;
+        this.contacts = contacts;
+
+        if (primary_originator != null) {
+            this.primary_contact = contacts.get(primary_originator);
+        }
         this.primary_originator = primary_originator;
         this.config = config;
 
@@ -454,9 +469,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         // Web view
 
         this.web_view = new ConversationWebView(config);
-        if (load_remote_images) {
-            this.web_view.allow_remote_image_loading();
-        }
         this.web_view.context_menu.connect(on_context_menu);
         this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
         this.web_view.link_activated.connect((link) => {
@@ -649,6 +661,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         throws GLib.Error {
         if (load_cancelled.is_cancelled()) {
             throw new GLib.IOError.CANCELLED("Conversation load cancelled");
+        }
+
+        bool contact_load_images = (
+            this.primary_contact != null &&
+            this.primary_contact.load_remote_resources
+        );
+        if (this.load_remote_resources || contact_load_images) {
+            this.web_view.allow_remote_image_loading();
         }
 
         show_placeholder_pane(null);
@@ -890,7 +910,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private void show_images(bool remember) {
         start_progress_loading();
-        this.is_loading_images = true;
+        this.load_remote_resources = true;
         this.remote_resources_requested = 0;
         this.remote_resources_loaded = 0;
         this.web_view.load_remote_images();
@@ -997,6 +1017,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
             Conversation.ContactPopover popover = new Conversation.ContactPopover(
                 address_child,
+                this.contacts.get(address),
                 address
             );
             popover.load_avatar.begin();
@@ -1127,7 +1148,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         case 2:
             // Show images for sender
             show_images(false);
-            remember_remote_images();
+            if (this.primary_contact != null) {
+                this.primary_contact.set_remote_resource_loading.begin(
+                    true, null
+                );
+            }
             break;
         default:
             // Pass

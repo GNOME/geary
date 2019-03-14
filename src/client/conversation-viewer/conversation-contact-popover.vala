@@ -12,6 +12,8 @@
 public class Conversation.ContactPopover : Gtk.Popover {
 
 
+    public Application.Contact contact { get; private set; }
+
     public Geary.RFC822.MailboxAddress mailbox { get; private set; }
 
     private GLib.Cancellable load_cancellable = new GLib.Cancellable();
@@ -30,17 +32,21 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
 
     public ContactPopover(Gtk.Widget relative_to,
+                          Application.Contact contact,
                           Geary.RFC822.MailboxAddress mailbox) {
         this.relative_to = relative_to;
+        this.contact = contact;
         this.mailbox = mailbox;
-        if (Geary.String.is_empty_or_whitespace(mailbox.name)) {
-            this.contact_name.set_text(mailbox.address);
+
+        string? display_name = contact.display_name;
+        this.contact_name.set_text(display_name);
+
+        if (!contact.display_name_is_email) {
+            this.contact_address.set_text(mailbox.address);
+        } else {
             this.contact_name.vexpand = true;
             this.contact_name.valign = FILL;
             this.contact_address.hide();
-        } else {
-            this.contact_name.set_text(mailbox.name);
-            this.contact_address.set_text(mailbox.address);
         }
     }
 
@@ -82,7 +88,9 @@ public class Conversation.ContactPopover : Gtk.Popover {
             int pixel_size = Application.AvatarStore.PIXEL_SIZE * window_scale;
             try {
                 Gdk.Pixbuf? avatar_buf = yield loader.load(
-                    this.mailbox, pixel_size, this.load_cancellable
+                    this.mailbox,
+                    pixel_size,
+                    this.load_cancellable
                 );
                 if (avatar_buf != null) {
                     this.avatar.set_from_surface(
