@@ -18,6 +18,8 @@ src/client/accounts/accounts-signature-web-view.vala
 src/client/application/application-avatar-store.vala
 src/client/application/application-certificate-manager.vala
 src/client/application/application-command.vala
+src/client/application/application-contact-store.vala
+src/client/application/application-contact.vala
 src/client/application/autostart-manager.vala
 src/client/application/geary-application.vala
 src/client/application/geary-args.vala

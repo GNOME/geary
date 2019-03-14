@@ -63,7 +63,8 @@ public class GearyController : Geary.BaseObject {
 
         public Geary.Account account { get; private set; }
         public Geary.Folder? inbox = null;
-        public Geary.App.EmailStore store { get; private set; }
+        public Geary.App.EmailStore emails { get; private set; }
+        public Application.ContactStore contacts { get; private set; }
 
         public bool authentication_failed = false;
         public bool authentication_prompting = false;
@@ -74,9 +75,12 @@ public class GearyController : Geary.BaseObject {
 
         public Cancellable cancellable { get; private set; default = new Cancellable(); }
 
-        public AccountContext(Geary.Account account) {
+        public AccountContext(Geary.Account account,
+                              Geary.App.EmailStore emails,
+                              Application.ContactStore contacts) {
             this.account = account;
-            this.store = new Geary.App.EmailStore(account);
+            this.emails = emails;
+            this.contacts = contacts;
         }
 
         public Geary.Account.Status get_effective_status() {
@@ -908,7 +912,11 @@ public class GearyController : Geary.BaseObject {
     }
 
     private async void connect_account_async(Geary.Account account, Cancellable? cancellable = null) {
-        AccountContext context = new AccountContext(account);
+        AccountContext context = new AccountContext(
+            account,
+            new Geary.App.EmailStore(account),
+            new Application.ContactStore(account)
+        );
 
         // XXX Need to set this early since
         // on_folders_available_unavailable expects it to be there
@@ -1314,8 +1322,9 @@ public class GearyController : Geary.BaseObject {
                 Geary.App.Conversation convo = Geary.Collection.get_first(
                     selected
                 );
-                Geary.App.EmailStore? store = get_store_for_folder(
-                    convo.base_folder
+
+                AccountContext? context = this.accounts.get(
+                    convo.base_folder.account.information
                 );
 
                 // It's possible for a conversation with zero email to
@@ -1323,10 +1332,10 @@ public class GearyController : Geary.BaseObject {
                 // last email was removed but the conversation monitor
                 // hasn't signalled its removal yet. In this case,
                 // just don't load it since it will soon disappear.
-                if (store != null && convo.get_count() > 0) {
+                if (context != null && convo.get_count() > 0) {
                     viewer.load_conversation.begin(
                         convo,
-                        store,
+                        context.emails,
                         (obj, ret) => {
                             try {
                                 viewer.load_conversation.end(ret);
@@ -1615,7 +1624,7 @@ public class GearyController : Geary.BaseObject {
     private void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         if (ids.size > 0) {
-            Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
             if (store != null) {
                 store.mark_email_async.begin(
                     ids, flags_to_add, flags_to_remove, cancellable_folder
@@ -1787,7 +1796,7 @@ public class GearyController : Geary.BaseObject {
     private void copy_email(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.FolderPath destination) {
         if (ids.size > 0) {
-            Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
             if (store != null) {
                 store.copy_email_async.begin(
                     ids, destination, cancellable_folder
@@ -2163,7 +2172,7 @@ public class GearyController : Geary.BaseObject {
         // Load the widget's content
         Geary.Email? full = null;
         if (referred != null) {
-            Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
             if (store != null) {
                 try {
                     full = yield store.fetch_email_async(
@@ -2734,7 +2743,7 @@ public class GearyController : Geary.BaseObject {
         Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
         try {
             if (current_folder != null) {
-                Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+                Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
                 if (store != null) {
                     selected_operations = yield store
                         .get_supported_operations_async(get_selected_email_ids(false), cancellable);
@@ -2814,9 +2823,9 @@ public class GearyController : Geary.BaseObject {
         return selected_conversations.read_only_view;
     }
 
-    private inline Geary.App.EmailStore? get_store_for_folder(Geary.Folder target) {
+    private inline Geary.App.EmailStore? get_email_store_for_folder(Geary.Folder target) {
         AccountContext? context = this.accounts.get(target.account.information);
-        return context != null ? context.store : null;
+        return context != null ? context.emails : null;
     }
 
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,
