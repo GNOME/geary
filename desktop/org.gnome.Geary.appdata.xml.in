@@ -69,6 +69,14 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="3.34">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>TODO</li>
+        </ul>
+      </description>
+    </release>
     <release version="3.32">
       <description>
         <p>Enhancements included in this release:</p>
