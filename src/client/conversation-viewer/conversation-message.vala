@@ -152,6 +152,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
 
+    private static GLib.VariantType MAILBOX_TYPE = new GLib.VariantType("(ss)");
+
 
     /** Box containing the preview and full header widgets.  */
     [GtkChild]
@@ -363,14 +365,13 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         add_action(ACTION_CONTACT_OPEN, true, VariantType.STRING)
             // XXX
             ;
-        add_action(ACTION_CONTACT_SAVE, true, new VariantType("(ss)"))
+        add_action(ACTION_CONTACT_SAVE, true, ConversationMessage.MAILBOX_TYPE)
             // XXX
             ;
         add_action(ACTION_CONTACT_SHOW_CONVERSATIONS, true, VariantType.STRING)
             .activate.connect(on_contact_show_conversations);
-        add_action(ACTION_CONVERSATION_NEW, true, new VariantType("(ss)"))
-            // XXX
-            ;
+        add_action(ACTION_CONVERSATION_NEW, true, ConversationMessage.MAILBOX_TYPE)
+            .activate.connect(on_new_conversation);
         add_action(ACTION_COPY_EMAIL, true, VariantType.STRING)
             .activate.connect(on_copy_email_address);
         add_action(ACTION_COPY_LINK, true, VariantType.STRING)
@@ -1148,6 +1149,20 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         MainWindow? main = this.get_toplevel() as MainWindow;
         if (main != null && email != null) {
             main.show_search_bar("from:%s".printf(email));
+        }
+    }
+
+    private void on_new_conversation(Variant? param) {
+        MainWindow? main = this.get_toplevel() as MainWindow;
+        if (main != null &&
+            param.get_type().equal(ConversationMessage.MAILBOX_TYPE)) {
+            string? name = (string) param.get_child_value(0);
+            Geary.RFC822.MailboxAddress mailbox = new Geary.RFC822.MailboxAddress(
+                Geary.String.is_empty_or_whitespace(name) ? null : name,
+                (string) param.get_child_value(1)
+            );
+
+            main.open_composer_for_mailbox(mailbox);
         }
     }
 

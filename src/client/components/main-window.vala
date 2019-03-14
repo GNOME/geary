@@ -125,6 +125,20 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         base_unref();
     }
 
+    public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
+        GearyController controller = this.application.controller;
+        ComposerWidget composer = new ComposerWidget(
+            this.current_folder.account,
+            controller.contact_list_store_cache,
+            NEW_MESSAGE,
+            this.application.config
+        );
+        composer.to = to.to_full_display();
+        controller.add_composer(composer);
+        show_composer(composer);
+        composer.load.begin(null, null, false);
+    }
+
     /** Updates the window's account status info bars. */
     public void update_account_status(Geary.Account.Status status,
                                       bool has_auth_error,
@@ -172,6 +186,23 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public void show_infobar(MainWindowInfoBar info_bar) {
         this.info_bar_container.add(info_bar);
         this.info_bar_frame.show();
+    }
+
+    /** Displays a composer in the window if possible, else in a new window. */
+    public void show_composer(ComposerWidget composer) {
+        bool has_composer = (
+            this.conversation_viewer.is_composer_visible ||
+            (this.conversation_viewer.current_list != null &&
+             this.conversation_viewer.current_list.has_composer)
+        );
+
+        if (has_composer) {
+            composer.state = ComposerWidget.ComposerState.DETACHED;
+            new ComposerWindow(composer);
+        } else {
+            this.conversation_viewer.do_compose(composer);
+            get_action(GearyController.ACTION_FIND_IN_CONVERSATION).set_enabled(false);
+        }
     }
 
     private void load_config(Configuration config) {
@@ -581,6 +612,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             }
         }
         return service;
+    }
+
+    private SimpleAction get_action(string name) {
+        return (SimpleAction) lookup_action(name);
     }
 
     [GtkCallback]

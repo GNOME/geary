@@ -465,6 +465,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /** Search manager for highlighting search terms in this list. */
     public SearchManager search { get; private set; }
 
+    /** Specifies if this list box currently has an embedded composer. */
+    public bool has_composer { get; private set; default = false; }
+
     // Used to load messages in conversation.
     private Geary.App.EmailStore email_store;
 
@@ -712,9 +715,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // circular ref.
         row.should_scroll.connect((row) => { scroll_to(row); });
         add(row);
+        this.has_composer = true;
 
         embed.composer.draft_id_changed.connect((id) => { this.draft_id = id; });
         embed.vanished.connect(() => {
+                this.has_composer = false;
                 this.draft_id = null;
                 remove(row);
                 if (is_draft &&

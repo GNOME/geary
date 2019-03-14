@@ -124,6 +124,10 @@ public class GearyController : Geary.BaseObject {
         get; private set; default = null;
     }
 
+    public ContactListStoreCache contact_list_store_cache {
+        get; private set; default = new ContactListStoreCache();
+    }
+
     private Geary.Account? current_account = null;
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
@@ -137,7 +141,6 @@ public class GearyController : Geary.BaseObject {
     private Cancellable cancellable_search = new Cancellable();
     private Cancellable cancellable_open_account = new Cancellable();
     private Cancellable cancellable_context_dependent_buttons = new Cancellable();
-    private ContactListStoreCache contact_list_store_cache = new ContactListStoreCache();
     private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.App.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
@@ -569,6 +572,14 @@ public class GearyController : Geary.BaseObject {
         } else {
             create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, null, null, mailto);
         }
+    }
+
+    /** Adds a new composer to be kept track of. */
+    public void add_composer(ComposerWidget widget) {
+        debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");
+        widget.destroy.connect(this.on_composer_widget_destroy);
+        widget.link_activated.connect((uri) => { open_uri(uri); });
+        this.composer_widgets.add(widget);
     }
 
     /** Expunges removed accounts while the controller remains open. */
@@ -2138,28 +2149,17 @@ public class GearyController : Geary.BaseObject {
         } else {
             widget = new ComposerWidget(current_account, contact_list_store_cache, compose_type, application.config);
         }
-        widget.destroy.connect(on_composer_widget_destroy);
-        widget.link_activated.connect((uri) => { open_uri(uri); });
 
-        // We want to keep track of the open composer windows, so we can allow the user to cancel
-        // an exit without losing their data.
-        composer_widgets.add(widget);
-        debug(@"Creating composer of type $(widget.compose_type); $(composer_widgets.size) composers total");
+        add_composer(widget);
 
-        if (inline) {
-            if (widget.state == ComposerWidget.ComposerState.PANED) {
-                main_window.conversation_viewer.do_compose(widget);
-                get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
-            } else {
-                main_window.conversation_viewer.do_compose_embedded(
-                    widget,
-                    referred,
-                    is_draft
-                );
-            }
+        if (widget.state == INLINE || widget.state == INLINE_COMPACT) {
+            this.main_window.conversation_viewer.do_compose_embedded(
+                widget,
+                referred,
+                is_draft
+            );
         } else {
-            new ComposerWindow(widget);
-            widget.state = ComposerWidget.ComposerState.DETACHED;
+            this.main_window.show_composer(widget);
         }
 
         // Load the widget's content
