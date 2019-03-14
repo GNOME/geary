@@ -13,39 +13,51 @@
  * queried. Contacts are obtained from the {@link ContactStore} for an
  * account.
  */
-public class Application.Contact {
+public class Application.Contact : Geary.BaseObject {
 
 
     /** The human-readable name of the contact. */
     public string display_name { get; private set; }
 
-    /** Determines if {@link display_name} is trusted by the user. */
-    public bool display_name_is_trusted { get; private set; default = false; }
-
     /** Determines if {@link display_name} the same as its email address. */
     public bool display_name_is_email { get; private set; default = false; }
 
-    /** Determines if email from this contact should load remote resources. */
+    /** Determines if this contact was loaded from Folks. */
+    public bool is_desktop_contact { get; private set; default = false; }
+
+    /**
+     * Determines if email from this contact should load remote resources.
+     *
+     * Will automatically load resources from contacts in the desktop
+     * database, or if the Engine's contact has been flagged to do so.
+     */
     public bool load_remote_resources {
         get {
             return (
-                this.contact != null &&
-                this.contact.contact_flags.always_load_remote_images()
+                this.individual != null ||
+                (this.contact != null &&
+                 this.contact.always_load_remote_images())
             );
         }
     }
 
     private weak ContactStore store;
+    private Folks.Individual? individual;
     private Geary.Contact? contact;
 
 
     internal Contact(ContactStore store,
+                     Folks.Individual? individual,
                      Geary.Contact? contact,
                      Geary.RFC822.MailboxAddress source) {
         this.store = store;
+        this.individual = individual;
         this.contact = contact;
 
-        if (contact != null) {
+        if (individual != null) {
+            this.display_name = individual.display_name;
+            this.is_desktop_contact = true;
+        } else if (contact != null) {
             this.display_name = contact.real_name;
         } else {
             this.display_name = source.name;

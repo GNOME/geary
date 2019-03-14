@@ -140,6 +140,7 @@ public class GearyController : Geary.BaseObject {
     // when closed.
     private GLib.Cancellable? open_cancellable = null;
 
+    private Folks.IndividualAggregator? folks = null;
     private Geary.Folder? current_folder = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
@@ -267,21 +268,20 @@ public class GearyController : Geary.BaseObject {
             error("Error loading web resources: %s", err.message);
         }
 
-        Folks.IndividualAggregator individuals =
-            Folks.IndividualAggregator.dup();
-        if (!individuals.is_prepared) {
+        this.folks = Folks.IndividualAggregator.dup();
+        if (!this.folks.is_prepared) {
             // Do this in the background since it can take a long time
             // on some systems and the GUI shouldn't be blocked by it
-            individuals.prepare.begin((obj, res) => {
+            this.folks.prepare.begin((obj, res) => {
                     try {
-                        individuals.prepare.end(res);
+                        this.folks.prepare.end(res);
                     } catch (GLib.Error err) {
                         warning("Error preparing Folks: %s", err.message);
                     }
                 });
 
         }
-        this.avatars = new Application.AvatarStore(individuals);
+        this.avatars = new Application.AvatarStore(this.folks);
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
@@ -915,7 +915,7 @@ public class GearyController : Geary.BaseObject {
         AccountContext context = new AccountContext(
             account,
             new Geary.App.EmailStore(account),
-            new Application.ContactStore(account)
+            new Application.ContactStore(account, this.folks)
         );
 
         // XXX Need to set this early since
