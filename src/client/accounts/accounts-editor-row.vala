@@ -310,7 +310,7 @@ internal abstract class Accounts.AccountRow<PaneType,V> :
     internal Geary.AccountInformation account { get; private set; }
 
 
-    public AccountRow(Geary.AccountInformation account, string label, V value) {
+    protected AccountRow(Geary.AccountInformation account, string label, V value) {
         base(label, value);
         this.account = account;
         this.account.changed.connect(on_account_changed);
@@ -351,10 +351,10 @@ private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> 
     }
 
 
-    public ServiceRow(Geary.AccountInformation account,
-                      Geary.ServiceInformation service,
-                      string label,
-                      V value) {
+    protected ServiceRow(Geary.AccountInformation account,
+                         Geary.ServiceInformation service,
+                         string label,
+                         V value) {
         base(account, label, value);
         this.service = service;
         this.service.notify.connect_after(on_notify);

@@ -60,10 +60,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         new Gee.HashMap<Geary.SpecialFolderType, Gee.List<string>>();
 
 
-    public GenericAccount(AccountInformation config,
-                          ImapDB.Account local,
-                          Endpoint incoming_remote,
-                          Endpoint outgoing_remote) {
+    protected GenericAccount(AccountInformation config,
+                             ImapDB.Account local,
+                             Endpoint incoming_remote,
+                             Endpoint outgoing_remote) {
         Imap.ClientService imap = new Imap.ClientService(
             config,
             config.incoming,

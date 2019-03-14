@@ -19,7 +19,7 @@
 public abstract class Geary.Imap.FetchDataDecoder : BaseObject {
     public FetchDataSpecifier data_item { get; private set; }
     
-    public FetchDataDecoder(FetchDataSpecifier data_item) {
+    protected FetchDataDecoder(FetchDataSpecifier data_item) {
         this.data_item = data_item;
     }
     

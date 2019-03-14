@@ -36,7 +36,7 @@ public abstract class Geary.MessageData.StringMessageData : AbstractMessageData,
     
     private uint stored_hash = uint.MAX;
     
-    public StringMessageData(string value) {
+    protected StringMessageData(string value) {
         this.value = value;
     }
     
@@ -66,7 +66,7 @@ public abstract class Geary.MessageData.IntMessageData : AbstractMessageData,
     Gee.Hashable<IntMessageData> {
     public int value { get; private set; }
     
-    public IntMessageData(int value) {
+    protected IntMessageData(int value) {
         this.value = value;
     }
     
@@ -89,7 +89,7 @@ public abstract class Geary.MessageData.Int64MessageData : AbstractMessageData,
     
     private uint stored_hash = uint.MAX;
     
-    public Int64MessageData(int64 value) {
+    protected Int64MessageData(int64 value) {
         this.value = value;
     }
     
@@ -113,7 +113,7 @@ public abstract class Geary.MessageData.BlockMessageData : AbstractMessageData {
     public string data_name { get; private set; }
     public Geary.Memory.Buffer buffer { get; private set; }
     
-    public BlockMessageData(string data_name, Geary.Memory.Buffer buffer) {
+    protected BlockMessageData(string data_name, Geary.Memory.Buffer buffer) {
         this.data_name = data_name;
         this.buffer = buffer;
     }
