@@ -12,12 +12,15 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="800"
-   height="1500"
-   viewBox="0 0 211.66666 396.87501"
+   height="2000"
+   viewBox="0 0 211.66666 529.16668"
    version="1.1"
    id="svg5008"
    inkscape:version="0.92.4 5da689c313, 2019-01-14"
-   sodipodi:docname="contact-popover.svg">
+   sodipodi:docname="contact-popover.svg"
+   inkscape:export-filename="/home/mjog/Projects/GNOME/geary-ux/ux/conversations/contact-popover.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs5002">
     <clipPath
@@ -138,11 +141,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.0000001"
-     inkscape:cx="167.26758"
-     inkscape:cy="367.33619"
+     inkscape:zoom="2.8284274"
+     inkscape:cx="139.4821"
+     inkscape:cy="497.94508"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g15067-0-3-0"
      showgrid="false"
      inkscape:snap-bbox="true"
      inkscape:bbox-paths="false"
@@ -172,7 +175,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -180,10 +183,10 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,99.875008)">
+     transform="translate(0,232.16667)">
     <g
        id="g7710"
-       transform="translate(-0.79374968,-96.043765)">
+       transform="translate(-0.26458288,-230.71667)">
       <g
          transform="translate(-14.287499,-51.858334)"
          id="g7468">
@@ -761,7 +764,7 @@
            id="tspan9040" /></text>
     </g>
     <g
-       transform="translate(-3962.8048,-937.88973)"
+       transform="translate(-3962.2755,-1072.5626)"
        id="g15067-0">
       <path
          sodipodi:nodetypes="scccssssssss"
@@ -930,7 +933,7 @@
            id="tspan25830">Displays the remote image load pref, saves it in Geary's database.</tspan></text>
     </g>
     <g
-       transform="translate(-3962.8048,-773.38313)"
+       transform="translate(-3962.2755,-908.05603)"
        id="g15067-0-0">
       <path
          sodipodi:nodetypes="scccssssssss"
@@ -1172,7 +1175,7 @@
          sodipodi:nodetypes="cc" />
     </g>
     <g
-       transform="translate(-3962.8048,-859.10816)"
+       transform="translate(-3962.2755,-993.78106)"
        id="g15067-0-3">
       <path
          sodipodi:nodetypes="scccssssssss"
@@ -1308,6 +1311,114 @@
            sodipodi:role="line"
            style="stroke-width:0.26458332"
            id="tspan25830-2">When not in Folks and no name given in the From header</tspan></text>
+    </g>
+    <g
+       transform="translate(-3962.2755,-814.92275)"
+       id="g15067-0-3-0">
+      <path
+         sodipodi:nodetypes="scccssssssss"
+         inkscape:connector-curvature="0"
+         id="path38203-7-6-6-7"
+         d="m 4041.1198,976.48682 h -27.3243 l -3.7567,-3.7041 -3.7567,3.7041 h -27.6041 c -1.3192,0 -2.3813,1.0621 -2.3813,2.3813 v 58.20028 c 0,1.3192 1.0621,2.3812 2.3813,2.3812 h 62.4418 c 1.3192,0 2.3812,-1.062 2.3812,-2.3812 v -58.20028 c 0,-1.3192 -1.062,-2.3813 -2.3812,-2.3813 z"
+         style="display:inline;fill:#f2f2f2;fill-opacity:1;stroke:#a7aba7;stroke-width:0.26458332;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.17500019px;line-height:0%;font-family:Cantarell;-inkscape-font-specification:Cantarell;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;display:inline;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="3981.4561"
+         y="1000.5286"
+         id="text38876-6-1-7-8"><tspan
+           sodipodi:role="line"
+           id="tspan38874-4-5-5-6"
+           x="3981.4561"
+           y="1000.5286"
+           style="font-size:3.70416665px;line-height:1.25;stroke-width:0.26458332">This email address is:</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.17500019px;line-height:0%;font-family:Cantarell;-inkscape-font-specification:Cantarell;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;display:inline;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="3992.0137"
+         y="986.02368"
+         id="text38880-7-5-3-8"><tspan
+           style="font-size:3.70416665px;line-height:1.25;stroke-width:0.26458332"
+           sodipodi:role="line"
+           id="tspan38878-9-4-5-8"
+           x="3992.0137"
+           y="986.02368">Untrusted email address</tspan></text>
+      <text
+         id="text19701-1-6-09-9"
+         y="1015.874"
+         x="3981.4561"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.17500019px;line-height:0%;font-family:Cantarell;-inkscape-font-specification:Cantarell;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;display:inline;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           style="font-size:3.70416665px;line-height:1.25;stroke-width:0.26458332"
+           y="1015.874"
+           x="3981.4561"
+           id="tspan19699-6-9-3-2"
+           sodipodi:role="line">But was forged as:</tspan></text>
+      <g
+         id="g8392-4-6-8"
+         transform="translate(0,35.983337)">
+        <flowRoot
+           transform="matrix(0.26458333,0,0,0.26458333,3796.9185,778.13338)"
+           style="font-style:normal;font-weight:normal;line-height:0.01%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           id="flowRoot9430-2-6-2"
+           xml:space="preserve"><flowRegion
+             id="flowRegion9426-5-1-6"><rect
+               y="814.75"
+               x="696"
+               height="22.061871"
+               width="230.11801"
+               id="rect9424-4-8-6"
+               style="fill:#2e3436" /></flowRegion><flowPara
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.75px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
+             id="flowPara9428-74-7-4">The sender may not be trustworthy</flowPara></flowRoot>      </g>
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#a7aba7;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 3979.8678,994.17472 h 59.5207"
+         id="path39336-3-6-30-9-9"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cc" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.17500019px;line-height:0%;font-family:Cantarell;-inkscape-font-specification:Cantarell;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;display:inline;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="3987.2769"
+         y="1007.607"
+         id="text38876-6-61-8-0-0"><tspan
+           sodipodi:role="line"
+           id="tspan38874-4-0-6-2-4"
+           x="3987.2769"
+           y="1007.607"
+           style="font-size:3.70416665px;line-height:1.25;stroke-width:0.26458332">spammer@malware.com</tspan></text>
+      <text
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/lapo.fedora/SparkleShare/gnome-mockups/content selection/content-selection.png"
+         id="text9370-3-8-2-0-6-6-9-3-8"
+         y="989.25824"
+         x="4046.1494"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.78354168px;line-height:125%;font-family:Cantarell;-inkscape-font-specification:Cantarell;letter-spacing:0px;word-spacing:0px;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           y="989.25824"
+           x="4046.1494"
+           sodipodi:role="line"
+           style="stroke-width:0.26458332"
+           id="tspan25830-2-7">When an attempted forged email address is detected.</tspan></text>
+      <path
+         inkscape:connector-curvature="0"
+         d="m 3985.044,980.85466 c -0.2787,-0.0171 -0.5509,0.16034 -0.7628,0.54883 l -3.3176,6.5656 c -0.2835,0.54656 0.026,1.32819 0.5806,1.32819 h 6.9837 c 0.5212,0 1.0102,-0.65702 0.647,-1.32764 l -3.3511,-6.53104 c -0.2118,-0.36589 -0.5005,-0.56808 -0.7798,-0.58394 z m 0.034,2.22931 c 0.2889,-0.0107 0.5563,0.27583 0.5473,0.58452 v 2.23044 c 0,0.29906 -0.25,0.56639 -0.5308,0.56639 -0.2803,0 -0.5345,-0.26733 -0.5307,-0.56639 v -2.23044 a 0.54834538,0.58508121 0 0 1 0.4315,-0.56639 c 0.026,-0.009 0.054,-0.0128 0.082,-0.0171 z m 0.02,3.94773 a 0.53083243,0.566395 0 1 1 0,1.13279 0.53083243,0.566395 0 0 1 0,-1.13279 z"
+         style="color:#bebebe;overflow:visible;fill:#474747;stroke-width:0.26458332;marker:none"
+         overflow="visible"
+         id="path920" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.17500019px;line-height:0%;font-family:Cantarell;-inkscape-font-specification:Cantarell;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;display:inline;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="3987.2627"
+         y="1023.3109"
+         id="text38876-6-61-8-0-0-1"><tspan
+           sodipodi:role="line"
+           id="tspan38874-4-0-6-2-4-7"
+           x="3987.2627"
+           y="1023.3109"
+           style="font-size:3.70416665px;line-height:1.25;stroke-width:0.26458332">potus@whitehouse.gov</tspan></text>
     </g>
   </g>
 </svg>
