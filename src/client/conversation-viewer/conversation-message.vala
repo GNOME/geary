@@ -106,8 +106,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.displayed = new Geary.RFC822.MailboxAddress(
                     null, source.address
                 );
-            } else if (contact.display_name_is_trusted) {
-                // The contact's name is trusted, so no need to
+            } else if (contact.is_desktop_contact) {
+                // The contact's name can be trusted, so no need to
                 // display the email address
                 primary.set_text(contact.display_name);
                 this.displayed = new Geary.RFC822.MailboxAddress(
@@ -196,8 +196,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** HTML view that displays the message body. */
     internal ConversationWebView web_view { get; private set; }
 
+    // The message headers represented by this view
+    private Geary.EmailHeaderSet headers;
+
     private Configuration config;
 
+    // Store from which to lookup contacts
     private Application.ContactStore contacts;
 
     private GLib.DateTime? local_date = null;
@@ -259,6 +263,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private Gtk.InfoBar remote_images_infobar;
 
     private Gtk.Widget? body_placeholder = null;
+
+    private string empty_from_label;
 
     // The web_view's context menu
     private Gtk.Menu? context_menu = null;
@@ -327,15 +333,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                           Application.ContactStore contacts,
                                           Configuration config) {
         this(
-            Util.Email.get_primary_originator(email),
-            email.from,
-            email.reply_to,
-            email.sender,
-            email.to,
-            email.cc,
-            email.bcc,
-            email.date,
-            email.subject,
+            email,
             email.preview != null ? email.preview.buffer.get_valid_utf8() : null,
             load_remote_resources,
             contacts,
@@ -355,15 +353,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                             Application.ContactStore contacts,
                                             Configuration config) {
         this(
-            Util.Email.get_primary_originator(message),
-            message.from,
-            message.reply_to,
-            message.sender,
-            message.to,
-            message.cc,
-            message.bcc,
-            message.date,
-            message.subject,
+            message,
             message.get_preview(),
             load_remote_resources,
             contacts,
@@ -371,28 +361,17 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         );
     }
 
-    private ConversationMessage(Geary.RFC822.MailboxAddress? primary_originator,
-                                Geary.RFC822.MailboxAddresses? from,
-                                Geary.RFC822.MailboxAddresses? reply_to,
-                                Geary.RFC822.MailboxAddress? sender,
-                                Geary.RFC822.MailboxAddresses? to,
-                                Geary.RFC822.MailboxAddresses? cc,
-                                Geary.RFC822.MailboxAddresses? bcc,
-                                Geary.RFC822.Date? date,
-                                Geary.RFC822.Subject? subject,
+    private ConversationMessage(Geary.EmailHeaderSet headers,
                                 string? preview,
                                 bool load_remote_resources,
                                 Application.ContactStore contacts,
                                 Configuration config) {
         base_ref();
+        this.headers = headers;
         this.load_remote_resources = load_remote_resources;
-        this.contacts = contacts;
-
-        if (primary_originator != null) {
-            this.primary_contact = contacts.get(primary_originator);
-        }
-        this.primary_originator = primary_originator;
+        this.primary_originator = Util.Email.get_primary_originator(headers);
         this.config = config;
+        this.contacts = contacts;
 
         // Actions
 
@@ -448,16 +427,16 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 (MenuModel) builder.get_object("context_menu_inspector");
         }
 
-        this.local_date = date.value.to_local();
+        this.local_date = headers.date.value.to_local();
         update_display();
 
-        // Compact headers
+        // Compact headers. These are partially done here and partially
+        // in load_contacts.
 
         // Translators: This is displayed in place of the from address
         // when the message has no from address.
-        string empty_from = _("No sender");
+        this.empty_from_label = _("No sender");
 
-        this.compact_from.set_text(format_originator_compact(from, empty_from));
         this.compact_from.get_style_context().add_class(FROM_CLASS);
 
         if (preview != null) {
@@ -473,19 +452,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             this.compact_body.set_text(clean_preview);
         }
 
-        // Full headers
+        // Full headers. These are partially done here and partially
+        // in load_contacts.
 
-        fill_originator_addresses(from, reply_to, sender, empty_from);
-
-        if (subject != null) {
-            this.subject.set_text(subject.value);
+        if (headers.subject != null) {
+            this.subject.set_text(headers.subject.value);
             this.subject.set_visible(true);
-            this.subject_searchable = subject.value.casefold();
+            this.subject_searchable = headers.subject.value.casefold();
         }
-        fill_header_addresses(this.to_header, to);
-        fill_header_addresses(this.cc_header, cc);
-        fill_header_addresses(this.bcc_header, bcc);
-
 
         // Web view
 
@@ -650,27 +624,61 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     /**
-     * Starts loading the avatar for the message's sender.
+     * Starts loading message contacts and the avatar.
      */
-    public async void load_avatar(GLib.Cancellable cancellable)
+    public async void load_contacts(GLib.Cancellable cancellable)
         throws GLib.Error {
         MainWindow? main = this.get_toplevel() as MainWindow;
-        if (this.primary_originator != null &&
-            main != null &&
-            !cancellable.is_cancelled()) {
-            Application.AvatarStore loader = main.application.controller.avatars;
-            int window_scale = get_scale_factor();
-            int pixel_size = Application.AvatarStore.PIXEL_SIZE * window_scale;
-            Gdk.Pixbuf? avatar_buf = yield loader.load(
-                this.primary_originator, pixel_size, cancellable
-            );
-            if (avatar_buf != null) {
-                this.avatar.set_from_surface(
-                    Gdk.cairo_surface_create_from_pixbuf(
-                        avatar_buf, window_scale, get_window()
-                    )
+        if (main != null && !cancellable.is_cancelled()) {
+            // Load the primary contact and avatar
+            if (this.primary_originator != null) {
+                this.primary_contact = yield this.contacts.load(
+                    this.primary_originator, cancellable
                 );
+
+                Application.AvatarStore loader = main.application.controller.avatars;
+                int window_scale = get_scale_factor();
+                int pixel_size = Application.AvatarStore.PIXEL_SIZE * window_scale;
+                Gdk.Pixbuf? avatar_buf = yield loader.load(
+                    this.primary_originator, pixel_size, cancellable
+                );
+                if (avatar_buf != null) {
+                    this.avatar.set_from_surface(
+                        Gdk.cairo_surface_create_from_pixbuf(
+                            avatar_buf, window_scale, get_window()
+                        )
+                    );
+                }
+            } else {
+                this.avatar.set_from_icon_name(
+                    "avatar-default-symbolic", Gtk.IconSize.DIALOG
+                );
+                this.avatar.set_pixel_size(Application.AvatarStore.PIXEL_SIZE);
             }
+
+
+            // Preview headers
+            this.compact_from.set_text(
+                yield format_originator_compact(cancellable)
+            );
+
+            // Full headers
+            Geary.EmailHeaderSet headers = this.headers;
+            yield fill_originator_addresses(
+                headers.from,
+                headers.reply_to,
+                headers.sender,
+                cancellable
+            );
+            yield fill_header_addresses(
+                this.to_header, headers.to, cancellable
+            );
+            yield fill_header_addresses(
+                this.cc_header, headers.cc, cancellable
+            );
+            yield fill_header_addresses(
+                this.bcc_header, headers.bcc, cancellable
+            );
         }
     }
 
@@ -801,14 +809,18 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         return menu;
     }
 
-    private string format_originator_compact(Geary.RFC822.MailboxAddresses? from,
-                                             string empty_from_text) {
+    private async string format_originator_compact(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        Geary.RFC822.MailboxAddresses? from = this.headers.from;
         string text = "";
         if (from != null && from.size > 0) {
             int i = 0;
             Gee.List<Geary.RFC822.MailboxAddress> list = from.get_all();
             foreach (Geary.RFC822.MailboxAddress addr in list) {
-                text += addr.to_short_display();
+                Application.Contact originator = yield this.contacts.load(
+                    addr, cancellable
+                );
+                text += originator.display_name;
 
                 if (++i < list.size)
                     // Translators: This separates multiple 'from'
@@ -816,21 +828,22 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     text += _(", ");
             }
         } else {
-            text = empty_from_text;
+            text = this.empty_from_label;
         }
 
         return text;
     }
 
-    private void fill_originator_addresses(Geary.RFC822.MailboxAddresses? from,
-                                           Geary.RFC822.MailboxAddresses? reply_to,
-                                           Geary.RFC822.MailboxAddress? sender,
-                                           string empty_from_text)  {
+    private async void fill_originator_addresses(Geary.RFC822.MailboxAddresses? from,
+                                                 Geary.RFC822.MailboxAddresses? reply_to,
+                                                 Geary.RFC822.MailboxAddress? sender,
+                                                 GLib.Cancellable? cancellable)
+        throws GLib.Error {
         // Show any From header addresses
         if (from != null && from.size > 0) {
             foreach (Geary.RFC822.MailboxAddress address in from) {
                 ContactFlowBoxChild child = new ContactFlowBoxChild(
-                    this.contacts.get(address),
+                    yield this.contacts.load(address, cancellable),
                     address,
                     ContactFlowBoxChild.Type.FROM
                 );
@@ -839,7 +852,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
         } else {
             Gtk.Label label = new Gtk.Label(null);
-            label.set_text(empty_from_text);
+            label.set_text(this.empty_from_label);
 
             Gtk.FlowBoxChild child = new Gtk.FlowBoxChild();
             child.add(label);
@@ -853,7 +866,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         if (sender != null &&
             (from == null || !from.contains_normalized(sender.address))) {
             ContactFlowBoxChild child = new ContactFlowBoxChild(
-                this.contacts.get(sender),
+                yield this.contacts.load(sender, cancellable),
                 sender
             );
             this.searchable_addresses.add(child);
@@ -867,7 +880,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             foreach (Geary.RFC822.MailboxAddress address in reply_to) {
                 if (from == null || !from.contains_normalized(address.address)) {
                     ContactFlowBoxChild child = new ContactFlowBoxChild(
-                        this.contacts.get(address),
+                        yield this.contacts.load(address, cancellable),
                         address
                     );
                     this.searchable_addresses.add(child);
@@ -878,14 +891,16 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         }
     }
 
-    private void fill_header_addresses(Gtk.Grid header,
-                                       Geary.RFC822.MailboxAddresses? addresses) {
+    private async void fill_header_addresses(Gtk.Grid header,
+                                             Geary.RFC822.MailboxAddresses? addresses,
+                                             GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (addresses != null && addresses.size > 0) {
             Gtk.FlowBox box = header.get_children().nth(0).data as Gtk.FlowBox;
             if (box != null) {
                 foreach (Geary.RFC822.MailboxAddress address in addresses) {
                     ContactFlowBoxChild child = new ContactFlowBoxChild(
-                        this.contacts.get(address),
+                        yield this.contacts.load(address, cancellable),
                         address
                     );
                     this.searchable_addresses.add(child);

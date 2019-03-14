@@ -507,7 +507,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             email,
             email.load_remote_images().is_certain(),
             this.contacts,
-            config
+            this.config
         );
         connect_message_view_signals(this.primary_message);
 
@@ -560,18 +560,18 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     /**
-     * Loads the avatar for the primary message.
+     * Loads the contacts for the primary message.
      */
-    public async void load_avatar()
+    public async void load_contacts()
         throws GLib.Error {
         try {
-            yield this.primary_message.load_avatar(this.load_cancellable);
+            yield this.primary_message.load_contacts(this.load_cancellable);
         } catch (IOError.CANCELLED err) {
             // okay
         } catch (Error err) {
             Geary.RFC822.MailboxAddress? from =
                 this.primary_message.primary_originator;
-            debug("Avatar load failed for \"%s\": %s",
+            debug("Contact load failed for \"%s\": %s",
                   from != null ? from.to_string() : "<unknown>", err.message);
         }
     }
@@ -851,7 +851,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             attached_message.web_view.add_internal_resources(cid_resources);
             this.sub_messages.add(attached_message);
             this._attached_messages.add(attached_message);
-            attached_message.load_avatar.begin(this.load_cancellable);
+            attached_message.load_contacts.begin(this.load_cancellable);
             yield attached_message.load_message_body(
                 sub_message, this.load_cancellable
             );
