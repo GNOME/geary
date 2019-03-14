@@ -120,7 +120,7 @@ public class GearyController : Geary.BaseObject {
 
     public AutostartManager? autostart_manager { get; private set; default = null; }
 
-    public Application.AvatarStore? avatar_store {
+    public Application.AvatarStore? avatars {
         get; private set; default = null;
     }
 
@@ -274,7 +274,7 @@ public class GearyController : Geary.BaseObject {
                 });
 
         }
-        this.avatar_store = new Application.AvatarStore(individuals);
+        this.avatars = new Application.AvatarStore(individuals);
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
@@ -315,7 +315,7 @@ public class GearyController : Geary.BaseObject {
         unity_launcher = new UnityLauncher(new_messages_monitor);
 
         this.libnotify = new Libnotify(
-            this.new_messages_monitor, this.avatar_store
+            this.new_messages_monitor, this.avatars
         );
         this.libnotify.invoked.connect(on_libnotify_invoked);
 
@@ -545,8 +545,8 @@ public class GearyController : Geary.BaseObject {
 
         this.autostart_manager = null;
 
-        this.avatar_store.close();
-        this.avatar_store = null;
+        this.avatars.close();
+        this.avatars = null;
 
 
         debug("Closed GearyController");
@@ -1316,7 +1316,7 @@ public class GearyController : Geary.BaseObject {
                     viewer.load_conversation.begin(
                         convo,
                         store,
-                        this.avatar_store,
+                        this.avatars,
                         (obj, ret) => {
                             try {
                                 viewer.load_conversation.end(ret);

@@ -12,6 +12,9 @@
 public class Application.AvatarStore : Geary.BaseObject {
 
 
+    /** Default size of avatar images, in toolkit pixels */
+    public const int PIXEL_SIZE = 48;
+
     // Max age is low since we really only want to cache between
     // conversation loads.
     private const int64 MAX_CACHE_AGE_US = 5 * 1000 * 1000;

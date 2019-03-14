@@ -55,6 +55,7 @@ geary_client_vala_sources = files(
   'conversation-list/conversation-list-view.vala',
   'conversation-list/formatted-conversation-data.vala',
 
+  'conversation-viewer/conversation-contact-popover.vala',
   'conversation-viewer/conversation-email.vala',
   'conversation-viewer/conversation-list-box.vala',
   'conversation-viewer/conversation-message.vala',
