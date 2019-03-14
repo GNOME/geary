@@ -87,7 +87,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
 
     private Gee.HashMap<Imap.UID, Geary.Email.Field> unfulfilled = new Gee.HashMap<Imap.UID, Geary.Email.Field>();
 
-    public AbstractListEmail(string name, MinimalFolder owner, Geary.Email.Field required_fields,
+    protected AbstractListEmail(string name, MinimalFolder owner, Geary.Email.Field required_fields,
         Folder.ListFlags flags, Cancellable? cancellable) {
         base(name, OnError.IGNORE_REMOTE);
 

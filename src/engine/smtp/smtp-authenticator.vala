@@ -18,7 +18,7 @@ public abstract class Geary.Smtp.Authenticator : BaseObject {
 
     public Credentials credentials { get; private set; }
 
-    public Authenticator(string name, Credentials credentials) {
+    protected Authenticator(string name, Credentials credentials) {
         this.name = name;
         this.credentials = credentials;
 

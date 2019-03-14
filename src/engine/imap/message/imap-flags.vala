@@ -14,7 +14,7 @@ public abstract class Geary.Imap.Flags : Geary.MessageData.AbstractMessageData, 
 
     protected Gee.Set<Flag> list;
 
-    public Flags(Gee.Collection<Flag> flags) {
+    protected Flags(Gee.Collection<Flag> flags) {
         list = new Gee.HashSet<Flag>();
         list.add_all(flags);
     }

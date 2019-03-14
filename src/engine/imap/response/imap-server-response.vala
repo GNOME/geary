@@ -25,7 +25,7 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
      *
      * The supplied root is "stripped" of its children.
      */
-    public ServerResponse.migrate(RootParameters root) throws ImapError {
+    protected ServerResponse.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
 
         if (!has_tag())
