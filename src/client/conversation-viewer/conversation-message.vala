@@ -30,6 +30,22 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private const int HIDE_PROGRESS_TIMEOUT_MSEC = 1000;
     private const int PULSE_TIMEOUT_MSEC = 250;
 
+    private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
+
+    private const string ACTION_CONTACT_LOAD_IMAGES = "contact-load-images";
+    private const string ACTION_CONTACT_OPEN = "contact-open";
+    private const string ACTION_CONTACT_SAVE = "contact-save";
+    private const string ACTION_CONTACT_SHOW_CONVERSATIONS =
+        "contact-show-conversations";
+    private const string ACTION_CONVERSATION_NEW = "conversation-new";
+    private const string ACTION_COPY_EMAIL = "copy-email";
+    private const string ACTION_COPY_LINK = "copy-link";
+    private const string ACTION_COPY_SELECTION = "copy-selection";
+    private const string ACTION_OPEN_INSPECTOR = "open-inspector";
+    private const string ACTION_OPEN_LINK = "open-link";
+    private const string ACTION_SAVE_IMAGE = "save-image";
+    private const string ACTION_SELECT_ALL = "select-all";
+
 
     // Widget used to display sender/recipient email addresses in
     // message header Gtk.FlowBox instances.
@@ -135,16 +151,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     }
 
-    private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
-
-    private const string ACTION_COPY_EMAIL = "copy_email";
-    private const string ACTION_COPY_LINK = "copy_link";
-    private const string ACTION_COPY_SELECTION = "copy_selection";
-    private const string ACTION_OPEN_INSPECTOR = "open_inspector";
-    private const string ACTION_OPEN_LINK = "open_link";
-    private const string ACTION_SAVE_IMAGE = "save_image";
-    private const string ACTION_SEARCH_FROM = "search_from";
-    private const string ACTION_SELECT_ALL = "select_all";
 
 
     /** Box containing the preview and full header widgets.  */
@@ -230,7 +236,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private MenuModel context_menu_email;
     private MenuModel context_menu_image;
     private MenuModel context_menu_main;
-    private MenuModel context_menu_contact;
+    private MenuModel context_menu_known_contact;
+    private MenuModel context_menu_unknown_contact;
     private MenuModel? context_menu_inspector = null;
 
     // Address fields that can be search through
@@ -278,10 +285,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** Fired when the user saves an inline displayed image. */
     public signal void save_image(string? uri, string? alt_text, Geary.Memory.Buffer buffer);
 
-    /** Fired when the user activates a specific search shortcut. */
-    public signal void search_activated(string operator, string value);
-
-
+ 
     /**
      * Constructs a new view from an email's headers and body.
      *
@@ -353,6 +357,20 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         // Actions
 
+        add_action(ACTION_CONTACT_LOAD_IMAGES, true, VariantType.BOOLEAN)
+            // XXX
+            ;
+        add_action(ACTION_CONTACT_OPEN, true, VariantType.STRING)
+            // XXX
+            ;
+        add_action(ACTION_CONTACT_SAVE, true, new VariantType("(ss)"))
+            // XXX
+            ;
+        add_action(ACTION_CONTACT_SHOW_CONVERSATIONS, true, VariantType.STRING)
+            .activate.connect(on_contact_show_conversations);
+        add_action(ACTION_CONVERSATION_NEW, true, new VariantType("(ss)"))
+            // XXX
+            ;
         add_action(ACTION_COPY_EMAIL, true, VariantType.STRING)
             .activate.connect(on_copy_email_address);
         add_action(ACTION_COPY_LINK, true, VariantType.STRING)
@@ -367,14 +385,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             .activate.connect(on_link_activated);
         add_action(ACTION_SAVE_IMAGE, true, new VariantType("(sms)"))
             .activate.connect(on_save_image);
-        add_action(ACTION_SEARCH_FROM, true, VariantType.STRING)
-            .activate.connect((param) => {
-                search_activated("from", param.get_string());
-            });
         add_action(ACTION_SELECT_ALL, true).activate.connect(() => {
                 web_view.select_all();
             });
-
         insert_action_group("msg", message_actions);
 
         // Context menu
@@ -386,7 +399,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         context_menu_email = (MenuModel) builder.get_object("context_menu_email");
         context_menu_image = (MenuModel) builder.get_object("context_menu_image");
         context_menu_main = (MenuModel) builder.get_object("context_menu_main");
-        context_menu_contact = (MenuModel) builder.get_object("context_menu_contact");
+        this.context_menu_known_contact = (MenuModel) builder.get_object(
+            "context_menu_known_contact"
+        );
+        this.context_menu_unknown_contact = (MenuModel) builder.get_object(
+            "context_menu_unknown_contact"
+        );
         if (Args.inspector) {
             context_menu_inspector =
                 (MenuModel) builder.get_object("context_menu_inspector");
@@ -748,24 +766,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         return menu;
     }
 
-    private Menu set_action_param_strings(MenuModel existing,
-                                          Gee.Map<string,string> values) {
-        Menu menu = new Menu();
-        for (int i = 0; i < existing.get_n_items(); i++) {
-            MenuItem item = new MenuItem.from_model(existing, i);
-            Variant action = item.get_attribute_value(
-                Menu.ATTRIBUTE_ACTION, VariantType.STRING
-            );
-            string fq_name = action.get_string();
-            string name = fq_name.substring(fq_name.index_of(".") + 1);
-            item.set_action_and_target(
-                fq_name, VariantType.STRING.dup_string(), values[name]
-            );
-            menu.append_item(item);
-        }
-        return menu;
-    }
-
     private string format_originator_compact(Geary.RFC822.MailboxAddresses? from,
                                              string empty_from_text) {
         string text = "";
@@ -985,25 +985,34 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             address_child.set_state_flags(Gtk.StateFlags.ACTIVE, false);
 
             Geary.RFC822.MailboxAddress address = address_child.address;
-            Gee.Map<string,string> values = new Gee.HashMap<string,string>();
-            values[ACTION_OPEN_LINK] =
-                Geary.ComposedEmail.MAILTO_SCHEME + address.address;
-                values[ACTION_COPY_EMAIL] = address.to_full_display();
-            values[ACTION_SEARCH_FROM] = address.address;
 
-            Menu model = new Menu();
-            model.append_section(
-                null, set_action_param_strings(this.context_menu_email, values)
+            Gee.Map<string,GLib.Variant> values =
+                new Gee.HashMap<string,GLib.Variant>();
+
+            GLib.Variant mailbox_var = new GLib.Variant.tuple(
+                new GLib.Variant[] {
+                    address.name ?? "",
+                    address.address
+                });
+            values[ACTION_CONTACT_OPEN] = "not yet defined";
+            values[ACTION_CONTACT_SAVE] = mailbox_var;
+            values[ACTION_CONTACT_SHOW_CONVERSATIONS] = address.address;
+            values[ACTION_CONTACT_LOAD_IMAGES] = false;
+            values[ACTION_CONVERSATION_NEW] = mailbox_var;
+            values[ACTION_COPY_EMAIL] = address.to_full_display();
+
+            Conversation.ContactPopover popover = new Conversation.ContactPopover(
+                address_child,
+                address
             );
-            model.append_section(
-                null, set_action_param_strings(this.context_menu_contact, values)
-            );
-            Gtk.Popover popover = new Gtk.Popover.from_model(child, model);
+            popover.load_avatar.begin();
+            popover.add_section(this.context_menu_email, values);
+            popover.add_section(this.context_menu_unknown_contact, values);
             popover.set_position(Gtk.PositionType.BOTTOM);
             popover.closed.connect(() => {
                     address_child.unset_state_flags(Gtk.StateFlags.ACTIVE);
                 });
-            popover.show();
+            popover.popup();
         }
     }
 
@@ -1132,6 +1141,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         }
 
         remote_images_infobar.hide();
+    }
+
+    private void on_contact_show_conversations(Variant? param) {
+        string email = param as string;
+        MainWindow? main = this.get_toplevel() as MainWindow;
+        if (main != null && email != null) {
+            main.show_search_bar("from:%s".printf(email));
+        }
     }
 
     private void on_copy_link(Variant? param) {

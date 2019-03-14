@@ -2309,7 +2309,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_search_activated(SimpleAction action) {
-        show_search_bar();
+        this.main_window.show_search_bar();
     }
 
     private void on_archive_conversation(SimpleAction action) {
@@ -2647,10 +2647,6 @@ public class GearyController : Geary.BaseObject {
             msg_view.save_image.connect((url, alt_text, buf) => {
                     on_save_image_extended(view, url, alt_text, buf);
                 });
-            msg_view.search_activated.connect((op, value) => {
-                    string search = op + ":" + value;
-                    show_search_bar(search);
-                });
         }
         view.save_attachments.connect(on_save_attachments);
         view.view_source.connect(on_view_source);
@@ -2774,13 +2770,6 @@ public class GearyController : Geary.BaseObject {
             .to_linked_list();
 
         return ret.size >= 1 ? ret : null;
-    }
-
-    private void show_search_bar(string? text = null) {
-        main_window.search_bar.give_search_focus();
-        if (text != null) {
-            main_window.search_bar.set_search_text(text);
-        }
     }
 
     private void do_search(string search_text) {

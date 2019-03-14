@@ -160,6 +160,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_infobar_frame();
     }
 
+    /** Displays and focuses the search bar for the window. */
+    public void show_search_bar(string? text = null) {
+        this.search_bar.give_search_focus();
+        if (text != null) {
+            this.search_bar.set_search_text(text);
+        }
+    }
+
+    /** Displays an infobar in the window. */
     public void show_infobar(MainWindowInfoBar info_bar) {
         this.info_bar_container.add(info_bar);
         this.info_bar_frame.show();
