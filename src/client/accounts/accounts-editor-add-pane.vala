@@ -506,7 +506,7 @@ private abstract class Accounts.AddPaneRow<Value> :
     internal Components.Validator? validator { get; protected set; }
 
 
-    public AddPaneRow(string label, Value value) {
+    protected AddPaneRow(string label, Value value) {
         base(label, new Gtk.Entry());
         this.activatable = false;
     }
@@ -517,7 +517,7 @@ private abstract class Accounts.AddPaneRow<Value> :
 private abstract class Accounts.EntryRow : AddPaneRow<Gtk.Entry> {
 
 
-    public EntryRow(string label, string? placeholder = null) {
+    protected EntryRow(string label, string? placeholder = null) {
         base(label, new Gtk.Entry());
 
         this.value.placeholder_text = placeholder ?? "";

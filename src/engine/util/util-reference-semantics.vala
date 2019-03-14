@@ -81,7 +81,7 @@ public abstract class Geary.SmartReference : BaseObject {
     public virtual signal void reference_broken() {
     }
 
-    public SmartReference(ReferenceSemantics reffed) {
+    protected SmartReference(ReferenceSemantics reffed) {
         this.reffed = reffed;
 
         reffed.release_now.connect(on_release_now);
