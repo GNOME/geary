@@ -23,8 +23,8 @@ internal abstract class Geary.App.ConversationOperation : BaseObject {
     protected weak ConversationMonitor? monitor = null;
 
 
-    public ConversationOperation(ConversationMonitor? monitor,
-                                 bool allow_duplicates = true) {
+    protected ConversationOperation(ConversationMonitor? monitor,
+                                    bool allow_duplicates = true) {
         this.monitor = monitor;
         this.allow_duplicates = allow_duplicates;
     }

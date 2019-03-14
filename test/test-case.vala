@@ -213,7 +213,7 @@ public abstract class TestCase : Object {
 
     public delegate void TestMethod() throws Error;
 
-    public TestCase(string name) {
+	protected TestCase(string name) {
         this.suite = new GLib.TestSuite(name);
     }
 
