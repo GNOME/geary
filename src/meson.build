@@ -20,7 +20,6 @@ endif
 # Common vala options
 geary_vala_options = [
   '--target-glib=@0@'.format(target_glib),
-  '--thread',
   '--enable-checking',
 ]
 
