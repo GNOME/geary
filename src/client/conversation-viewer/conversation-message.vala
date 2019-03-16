@@ -154,7 +154,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.displayed = new Geary.RFC822.MailboxAddress(
                     null, this.source.address
                 );
-            } else if (this.contact.is_desktop_contact) {
+            } else if (this.contact.is_trusted) {
                 // The contact's name can be trusted, so no need to
                 // display the email address
                 primary.set_text(this.contact.display_name);

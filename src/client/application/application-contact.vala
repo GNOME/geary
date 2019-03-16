@@ -26,6 +26,14 @@ public class Application.Contact : Geary.BaseObject {
     public bool is_desktop_contact { get; private set; default = false; }
 
     /**
+     * Determines if this contact is trusted.
+     *
+     * Contacts loaded from Folks that are trusted are trusted, all
+     * other contacts are not.
+     */
+    public bool is_trusted { get; private set; default = false; }
+
+    /**
      * Determines if this contact has been marked as a favourite.
      */
     public bool is_favourite { get; private set; default = false; }
@@ -135,12 +143,14 @@ public class Application.Contact : Geary.BaseObject {
         if (this.individual != null) {
             this.display_name = this.individual.display_name;
             this.is_favourite = this.individual.is_favourite;
+            this.is_trusted = (this.individual.trust_level == PERSONAS);
             this.is_desktop_contact = true;
         } else {
             if (this.contact != null) {
                 this.display_name = this.contact.real_name;
             }
             this.is_favourite = false;
+            this.is_trusted = false;
             this.is_desktop_contact = false;
         }
     }
