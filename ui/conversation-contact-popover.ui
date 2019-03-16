@@ -20,11 +20,14 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_bottom">6</property>
-            <property name="column_spacing">6</property>
+            <property name="column_spacing">12</property>
             <child>
               <object class="GtkButton" id="unstarred_button">
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="halign">end</property>
+                <property name="valign">center</property>
+                <property name="action_name">msg.contact-star</property>
                 <property name="relief">none</property>
                 <child>
                   <object class="GtkImage">
@@ -43,6 +46,9 @@
               <object class="GtkButton" id="starred_button">
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="halign">end</property>
+                <property name="valign">center</property>
+                <property name="action_name">msg.contact-star</property>
                 <property name="relief">none</property>
                 <child>
                   <object class="GtkImage">

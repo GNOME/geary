@@ -1100,7 +1100,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             );
             popover.load_avatar.begin();
             popover.add_section(this.context_menu_email, values);
-            popover.add_section(this.context_menu_unknown_contact, values);
+            popover.add_section(
+                address_child.contact.is_desktop_contact
+                    ? this.context_menu_known_contact
+                    : this.context_menu_unknown_contact,
+                values
+            );
             popover.set_position(Gtk.PositionType.BOTTOM);
             popover.closed.connect(() => {
                     address_child.unset_state_flags(Gtk.StateFlags.ACTIVE);

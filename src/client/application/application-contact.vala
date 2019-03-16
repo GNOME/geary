@@ -26,6 +26,11 @@ public class Application.Contact : Geary.BaseObject {
     public bool is_desktop_contact { get; private set; default = false; }
 
     /**
+     * Determines if this contact has been marked as a favourite.
+     */
+    public bool is_favourite { get; private set; default = false; }
+
+    /**
      * Determines if email from this contact should load remote resources.
      *
      * Will automatically load resources from contacts in the desktop
@@ -100,6 +105,13 @@ public class Application.Contact : Geary.BaseObject {
         changed();
     }
 
+    /** Sets remote resource loading for this contact. */
+    public async void set_favourite(bool is_favourite,
+                                    GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.individual.change_is_favourite(is_favourite);
+    }
+
     /** Returns a string representation for debugging */
     public string to_string() {
         return "Contact(\"%s\")".printf(this.display_name);
@@ -122,11 +134,13 @@ public class Application.Contact : Geary.BaseObject {
     private void update() {
         if (this.individual != null) {
             this.display_name = this.individual.display_name;
+            this.is_favourite = this.individual.is_favourite;
             this.is_desktop_contact = true;
         } else {
             if (this.contact != null) {
                 this.display_name = this.contact.real_name;
             }
+            this.is_favourite = false;
             this.is_desktop_contact = false;
         }
     }

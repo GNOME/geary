@@ -30,6 +30,12 @@ public class Conversation.ContactPopover : Gtk.Popover {
     [GtkChild]
     private Gtk.Label contact_address;
 
+    [GtkChild]
+    private Gtk.Button starred_button;
+
+    [GtkChild]
+    private Gtk.Button unstarred_button;
+
 
     public ContactPopover(Gtk.Widget relative_to,
                           Application.Contact contact,
@@ -114,6 +120,15 @@ public class Conversation.ContactPopover : Gtk.Popover {
             this.contact_name.valign = FILL;
             this.contact_address.hide();
         }
+
+        bool starred = false;
+        bool unstarred = false;
+        if (this.contact.is_desktop_contact) {
+            starred = this.contact.is_favourite;
+            unstarred = !this.contact.is_favourite;
+        }
+        this.starred_button.set_visible(starred);
+        this.unstarred_button.set_visible(unstarred);
     }
 
     private void on_contact_changed() {
