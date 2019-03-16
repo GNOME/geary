@@ -17,7 +17,7 @@ public class Application.ContactStore : Geary.BaseObject {
     /** The account this store aggregates data for. */
     public Geary.Account account { get; private set; }
 
-    private Folks.IndividualAggregator individuals;
+    internal Folks.IndividualAggregator individuals;
 
 
     /** Constructs a new contact store for an account. */

@@ -46,13 +46,19 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private const string ACTION_SAVE_IMAGE = "save-image";
     private const string ACTION_SELECT_ALL = "select-all";
 
+
     // Widget used to display sender/recipient email addresses in
     // message header Gtk.FlowBox instances.
     private class ContactFlowBoxChild : Gtk.FlowBoxChild {
 
+
         private const string PRIMARY_CLASS = "geary-primary";
 
+
         public enum Type { FROM, OTHER; }
+
+
+        public Type address_type { get; private set; }
 
         public Application.Contact contact { get; private set; }
 
@@ -61,73 +67,16 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         private string search_value;
 
+        private Gtk.Bin container;
+
+
         public ContactFlowBoxChild(Application.Contact contact,
                                    Geary.RFC822.MailboxAddress source,
-                                   Type type = Type.OTHER) {
+                                   Type address_type = Type.OTHER) {
             this.contact = contact;
             this.source = source;
+            this.address_type = address_type;
             this.search_value = source.to_searchable_string().casefold();
-
-            // We use two GTK.Label instances here when address has
-            // distinct parts so we can dim the secondary part, if
-            // any. Ideally, it would be just one label instance in
-            // both cases, but we can't yet include CSS classes in
-            // Pango markup. See Bug 766763.
-
-            Gtk.Grid address_parts = new Gtk.Grid();
-
-            bool is_spoofed = source.is_spoofed();
-            if (is_spoofed) {
-                Gtk.Image spoof_img = new Gtk.Image.from_icon_name(
-                    "dialog-warning-symbolic", Gtk.IconSize.SMALL_TOOLBAR
-                );
-                this.set_tooltip_text(
-                    _("This email address may have been forged")
-                );
-                address_parts.add(spoof_img);
-            }
-
-            Gtk.Label primary = new Gtk.Label(null);
-            primary.ellipsize = Pango.EllipsizeMode.END;
-            primary.set_halign(Gtk.Align.START);
-            primary.get_style_context().add_class(PRIMARY_CLASS);
-            if (type == Type.FROM) {
-                primary.get_style_context().add_class(FROM_CLASS);
-            }
-            address_parts.add(primary);
-
-            string display_address = source.to_address_display("", "");
-
-            if (is_spoofed || contact.display_name_is_email) {
-                // Don't display the name to avoid duplication and/or
-                // reduce the chance of the user of being tricked by
-                // malware.
-                primary.set_text(display_address);
-                this.displayed = new Geary.RFC822.MailboxAddress(
-                    null, source.address
-                );
-            } else if (contact.is_desktop_contact) {
-                // The contact's name can be trusted, so no need to
-                // display the email address
-                primary.set_text(contact.display_name);
-                this.displayed = new Geary.RFC822.MailboxAddress(
-                    contact.display_name, source.address
-                );
-            } else {
-                // Display both the display name and the email address
-                // so that the user has the full information at hand
-                primary.set_text(contact.display_name);
-                this.displayed = new Geary.RFC822.MailboxAddress(
-                    contact.display_name, source.address
-                );
-
-                Gtk.Label secondary = new Gtk.Label(null);
-                secondary.ellipsize = Pango.EllipsizeMode.END;
-                secondary.set_halign(Gtk.Align.START);
-                secondary.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
-                secondary.set_text(display_address);
-                address_parts.add(secondary);
-            }
 
             // Update prelight state when mouse-overed.
             Gtk.EventBox events = new Gtk.EventBox();
@@ -138,11 +87,18 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             events.set_visible_window(false);
             events.enter_notify_event.connect(on_prelight_in_event);
             events.leave_notify_event.connect(on_prelight_out_event);
-            events.add(address_parts);
 
             add(events);
+            this.container = events;
             set_halign(Gtk.Align.START);
-            show_all();
+
+            this.contact.changed.connect(on_contact_changed);
+            update();
+        }
+
+        public override void destroy() {
+            this.contact.changed.disconnect(on_contact_changed);
+            base.destroy();
         }
 
         public bool highlight_search_term(string term) {
@@ -157,6 +113,81 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         public void unmark_search_terms() {
             get_style_context().remove_class(MATCH_CLASS);
+        }
+
+        private void update() {
+            // We use two GTK.Label instances here when address has
+            // distinct parts so we can dim the secondary part, if
+            // any. Ideally, it would be just one label instance in
+            // both cases, but we can't yet include CSS classes in
+            // Pango markup. See Bug 766763.
+
+            Gtk.Grid address_parts = new Gtk.Grid();
+
+            bool is_spoofed = this.source.is_spoofed();
+            if (is_spoofed) {
+                Gtk.Image spoof_img = new Gtk.Image.from_icon_name(
+                    "dialog-warning-symbolic", Gtk.IconSize.SMALL_TOOLBAR
+                );
+                this.set_tooltip_text(
+                    _("This email address may have been forged")
+                );
+                address_parts.add(spoof_img);
+            }
+
+            Gtk.Label primary = new Gtk.Label(null);
+            primary.ellipsize = Pango.EllipsizeMode.END;
+            primary.set_halign(Gtk.Align.START);
+            primary.get_style_context().add_class(PRIMARY_CLASS);
+            if (this.address_type == Type.FROM) {
+                primary.get_style_context().add_class(FROM_CLASS);
+            }
+            address_parts.add(primary);
+
+            string display_address = this.source.to_address_display("", "");
+
+            if (is_spoofed || this.contact.display_name_is_email) {
+                // Don't display the name to avoid duplication and/or
+                // reduce the chance of the user of being tricked by
+                // malware.
+                primary.set_text(display_address);
+                this.displayed = new Geary.RFC822.MailboxAddress(
+                    null, this.source.address
+                );
+            } else if (this.contact.is_desktop_contact) {
+                // The contact's name can be trusted, so no need to
+                // display the email address
+                primary.set_text(this.contact.display_name);
+                this.displayed = new Geary.RFC822.MailboxAddress(
+                    this.contact.display_name, this.source.address
+                );
+            } else {
+                // Display both the display name and the email address
+                // so that the user has the full information at hand
+                primary.set_text(this.contact.display_name);
+                this.displayed = new Geary.RFC822.MailboxAddress(
+                    this.contact.display_name, this.source.address
+                );
+
+                Gtk.Label secondary = new Gtk.Label(null);
+                secondary.ellipsize = Pango.EllipsizeMode.END;
+                secondary.set_halign(Gtk.Align.START);
+                secondary.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+                secondary.set_text(display_address);
+                address_parts.add(secondary);
+            }
+
+            Gtk.Widget? existing_ui = this.container.get_child();
+            if (existing_ui != null) {
+                this.container.remove(existing_ui);
+            }
+
+            this.container.add(address_parts);
+            show_all();
+        }
+
+        private void on_contact_changed() {
+            update();
         }
 
         private bool on_prelight_in_event(Gdk.Event event) {

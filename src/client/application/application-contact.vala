@@ -41,6 +41,11 @@ public class Application.Contact : Geary.BaseObject {
         }
     }
 
+
+    /** Fired when the contact has changed in some way. */
+    public signal void changed();
+
+
     private weak ContactStore store;
     private Folks.Individual? individual;
     private Geary.Contact? contact;
@@ -51,15 +56,11 @@ public class Application.Contact : Geary.BaseObject {
                      Geary.Contact? contact,
                      Geary.RFC822.MailboxAddress source) {
         this.store = store;
-        this.individual = individual;
         this.contact = contact;
+        update_individual(individual);
 
-        if (individual != null) {
-            this.display_name = individual.display_name;
-            this.is_desktop_contact = true;
-        } else if (contact != null) {
-            this.display_name = contact.real_name;
-        } else {
+        update();
+        if (Geary.String.is_empty_or_whitespace(this.display_name)) {
             this.display_name = source.name;
         }
 
@@ -72,6 +73,11 @@ public class Application.Contact : Geary.BaseObject {
             this.display_name = source.address;
             this.display_name_is_email = true;
         }
+    }
+
+    ~Contact() {
+        // Disconnect from signals if any
+        update_individual(null);
     }
 
     /** Sets remote resource loading for this contact. */
@@ -90,11 +96,68 @@ public class Application.Contact : Geary.BaseObject {
                 // XXX cancellable
             );
         }
+
+        changed();
     }
 
     /** Returns a string representation for debugging */
     public string to_string() {
         return "Contact(\"%s\")".printf(this.display_name);
+    }
+
+    private void update_individual(Folks.Individual? replacement) {
+        if (this.individual != null) {
+            this.individual.notify.disconnect(this.on_individual_notify);
+            this.individual.removed.disconnect(this.on_individual_removed);
+        }
+
+        this.individual = replacement;
+
+        if (this.individual != null) {
+            this.individual.notify.connect(this.on_individual_notify);
+            this.individual.removed.connect(this.on_individual_removed);
+        }
+    }
+
+    private void update() {
+        if (this.individual != null) {
+            this.display_name = this.individual.display_name;
+            this.is_desktop_contact = true;
+        } else {
+            if (this.contact != null) {
+                this.display_name = this.contact.real_name;
+            }
+            this.is_desktop_contact = false;
+        }
+    }
+
+    private async void update_replacement(Folks.Individual? replacement) {
+        if (replacement == null) {
+            ContactStore? store = this.store;
+            if (store != null) {
+                try {
+                    replacement = yield store.individuals.look_up_individual(
+                        this.individual.id
+                    );
+                } catch (GLib.Error err) {
+                    debug("Error loading replacement for Folks %s: %s",
+                          this.individual.id, err.message);
+                }
+            }
+        }
+
+        update_individual(replacement);
+        update();
+        changed();
+    }
+
+    private void on_individual_notify() {
+        update();
+        changed();
+    }
+
+    private void on_individual_removed(Folks.Individual? replacement) {
+        this.update_replacement.begin(replacement);
     }
 
 }

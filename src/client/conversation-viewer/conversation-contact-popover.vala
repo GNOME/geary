@@ -38,16 +38,8 @@ public class Conversation.ContactPopover : Gtk.Popover {
         this.contact = contact;
         this.mailbox = mailbox;
 
-        string? display_name = contact.display_name;
-        this.contact_name.set_text(display_name);
-
-        if (!contact.display_name_is_email) {
-            this.contact_address.set_text(mailbox.address);
-        } else {
-            this.contact_name.vexpand = true;
-            this.contact_name.valign = FILL;
-            this.contact_address.hide();
-        }
+        contact.changed.connect(this.on_contact_changed);
+        update();
     }
 
     public void add_section(GLib.MenuModel section,
@@ -106,8 +98,26 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     public override void destroy() {
+        this.contact.changed.disconnect(this.on_contact_changed);
         this.load_cancellable.cancel();
         base.destroy();
+    }
+
+    private void update() {
+        string display_name = this.contact.display_name;
+        this.contact_name.set_text(display_name);
+
+        if (!this.contact.display_name_is_email) {
+            this.contact_address.set_text(this.mailbox.address);
+        } else {
+            this.contact_name.vexpand = true;
+            this.contact_name.valign = FILL;
+            this.contact_address.hide();
+        }
+    }
+
+    private void on_contact_changed() {
+        update();
     }
 
     [GtkCallback]
