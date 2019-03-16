@@ -156,6 +156,24 @@ public class Conversation.ContactPopover : Gtk.Popover {
         );
     }
 
+    private async void open() {
+        try {
+            yield this.contact.open_on_desktop(null);
+        } catch (GLib.Error err) {
+            debug("Failed to open desktop app for showing contact %s:, %s",
+                  this.contact.to_string(), err.message);
+        }
+    }
+
+    private async void save() {
+        try {
+            yield this.contact.save_to_desktop(null);
+        } catch (GLib.Error err) {
+            debug("Failed to open desktop app for saving contact %s:, %s",
+                  this.contact.to_string(), err.message);
+        }
+    }
+
     private async void set_load_remote_resources(bool enabled) {
         try {
             yield this.contact.set_remote_resource_loading(enabled, null);
@@ -197,11 +215,11 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_open() {
-
+        this.open.begin();
     }
 
     private void on_save() {
-
+        this.save.begin();
     }
 
     private void on_show_conversations() {

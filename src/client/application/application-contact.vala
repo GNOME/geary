@@ -93,6 +93,57 @@ public class Application.Contact : Geary.BaseObject {
         update_individual(null);
     }
 
+    /** Invokes the desktop contacts application to save this contact. */
+    public async void save_to_desktop(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        GLib.DBusConnection dbus = yield GLib.Bus.get(
+            GLib.BusType.SESSION, cancellable
+        );
+        GLib.DBusActionGroup contacts = DBusActionGroup.get(
+            dbus, "org.gnome.Contacts", "/org/gnome/Contacts"
+        );
+
+        GLib.Variant param = new GLib.Variant.array(
+            new GLib.VariantType("(ss)"),
+            new GLib.Variant[] {
+                new GLib.Variant.tuple(
+                    new GLib.Variant[] {
+                        Folks.PersonaStore.detail_key(
+                            Folks.PersonaDetail.FULL_NAME
+                        ),
+                        this.display_name ?? ""
+                    }
+                ),
+                new GLib.Variant.tuple(
+                    new GLib.Variant[] {
+                        Folks.PersonaStore.detail_key(
+                            Folks.PersonaDetail.EMAIL_ADDRESSES
+                        ),
+                        this.contact.email
+                    }
+                )
+            }
+        );
+
+        contacts.activate_action("create-contact", param);
+    }
+
+    /** Invokes the desktop contacts application to open this contact. */
+    public async void open_on_desktop(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        GLib.DBusConnection dbus = yield GLib.Bus.get(
+            GLib.BusType.SESSION, cancellable
+        );
+        GLib.DBusActionGroup contacts = DBusActionGroup.get(
+            dbus, "org.gnome.Contacts", "/org/gnome/Contacts"
+        );
+
+        contacts.activate_action(
+            "show-contact",
+            new GLib.Variant.string(this.individual.id)
+        );
+    }
+
     /** Sets remote resource loading for this contact. */
     public async void set_remote_resource_loading(bool enabled,
                                                   GLib.Cancellable? cancellable)
