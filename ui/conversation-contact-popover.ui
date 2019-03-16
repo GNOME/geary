@@ -6,7 +6,7 @@
     <property name="can_focus">False</property>
     <signal name="closed" handler="after_closed" after="yes" swapped="no"/>
     <child>
-      <object class="GtkGrid" id="container">
+      <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_left">10</property>
@@ -14,7 +14,6 @@
         <property name="margin_top">10</property>
         <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
-        <property name="row_spacing">2</property>
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
@@ -27,7 +26,7 @@
                 <property name="receives_default">True</property>
                 <property name="halign">end</property>
                 <property name="valign">center</property>
-                <property name="action_name">msg.contact-star</property>
+                <property name="action_name">con.star</property>
                 <property name="relief">none</property>
                 <child>
                   <object class="GtkImage">
@@ -48,7 +47,7 @@
                 <property name="receives_default">True</property>
                 <property name="halign">end</property>
                 <property name="valign">center</property>
-                <property name="action_name">msg.contact-star</property>
+                <property name="action_name">con.unstar</property>
                 <property name="relief">none</property>
                 <child>
                   <object class="GtkImage">
@@ -121,6 +120,104 @@
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">con.new-conversation</property>
+            <property name="text" translatable="yes">_New Conversation…</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">con.copy-email</property>
+            <property name="text" translatable="yes">Copy Email _Address</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="save_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">con.save</property>
+            <property name="text" translatable="yes">Save in Contacts…</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">7</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">con.show-conversations</property>
+            <property name="text" translatable="yes">Show Conversations</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">5</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="open_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">con.open</property>
+            <property name="text" translatable="yes">Open in Contacts</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">6</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="load_remote_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">con.load-remote</property>
+            <property name="text" translatable="yes">Always Load Remote Images</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">8</property>
           </packing>
         </child>
       </object>

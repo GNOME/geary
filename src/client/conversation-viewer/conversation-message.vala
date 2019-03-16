@@ -32,11 +32,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
 
-    private const string ACTION_CONTACT_LOAD_IMAGES = "contact-load-images";
-    private const string ACTION_CONTACT_OPEN = "contact-open";
-    private const string ACTION_CONTACT_SAVE = "contact-save";
-    private const string ACTION_CONTACT_SHOW_CONVERSATIONS =
-        "contact-show-conversations";
     private const string ACTION_CONVERSATION_NEW = "conversation-new";
     private const string ACTION_COPY_EMAIL = "copy-email";
     private const string ACTION_COPY_LINK = "copy-link";
@@ -203,9 +198,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
 
-    private static GLib.VariantType MAILBOX_TYPE = new GLib.VariantType("(ss)");
-
-
     /** Contact for the primary originator, if any. */
     internal Application.Contact? primary_contact {
         get; private set;
@@ -305,8 +297,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private MenuModel context_menu_email;
     private MenuModel context_menu_image;
     private MenuModel context_menu_main;
-    private MenuModel context_menu_known_contact;
-    private MenuModel context_menu_unknown_contact;
     private MenuModel? context_menu_inspector = null;
 
     // Address fields that can be search through
@@ -406,18 +396,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         // Actions
 
-        add_action(ACTION_CONTACT_LOAD_IMAGES, true, VariantType.BOOLEAN)
-            // XXX
-            ;
-        add_action(ACTION_CONTACT_OPEN, true, VariantType.STRING)
-            // XXX
-            ;
-        add_action(ACTION_CONTACT_SAVE, true, ConversationMessage.MAILBOX_TYPE)
-            // XXX
-            ;
-        add_action(ACTION_CONTACT_SHOW_CONVERSATIONS, true, VariantType.STRING)
-            .activate.connect(on_contact_show_conversations);
-        add_action(ACTION_CONVERSATION_NEW, true, ConversationMessage.MAILBOX_TYPE)
+        add_action(ACTION_CONVERSATION_NEW, true, VariantType.STRING)
             .activate.connect(on_new_conversation);
         add_action(ACTION_COPY_EMAIL, true, VariantType.STRING)
             .activate.connect(on_copy_email_address);
@@ -447,12 +426,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         context_menu_email = (MenuModel) builder.get_object("context_menu_email");
         context_menu_image = (MenuModel) builder.get_object("context_menu_image");
         context_menu_main = (MenuModel) builder.get_object("context_menu_main");
-        this.context_menu_known_contact = (MenuModel) builder.get_object(
-            "context_menu_known_contact"
-        );
-        this.context_menu_unknown_contact = (MenuModel) builder.get_object(
-            "context_menu_unknown_contact"
-        );
         if (Args.inspector) {
             context_menu_inspector =
                 (MenuModel) builder.get_object("context_menu_inspector");
@@ -1080,17 +1053,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
             Gee.Map<string,GLib.Variant> values =
                 new Gee.HashMap<string,GLib.Variant>();
-
-            GLib.Variant mailbox_var = new GLib.Variant.tuple(
-                new GLib.Variant[] {
-                    address.name ?? "",
-                    address.address
-                });
-            values[ACTION_CONTACT_OPEN] = "not yet defined";
-            values[ACTION_CONTACT_SAVE] = mailbox_var;
-            values[ACTION_CONTACT_SHOW_CONVERSATIONS] = address.address;
-            values[ACTION_CONTACT_LOAD_IMAGES] = false;
-            values[ACTION_CONVERSATION_NEW] = mailbox_var;
             values[ACTION_COPY_EMAIL] = address.to_full_display();
 
             Conversation.ContactPopover popover = new Conversation.ContactPopover(
@@ -1099,13 +1061,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 address
             );
             popover.load_avatar.begin();
-            popover.add_section(this.context_menu_email, values);
-            popover.add_section(
-                address_child.contact.is_desktop_contact
-                    ? this.context_menu_known_contact
-                    : this.context_menu_unknown_contact,
-                values
-            );
             popover.set_position(Gtk.PositionType.BOTTOM);
             popover.closed.connect(() => {
                     address_child.unset_state_flags(Gtk.StateFlags.ACTIVE);
@@ -1245,32 +1200,26 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         remote_images_infobar.hide();
     }
 
-    private void on_contact_show_conversations(Variant? param) {
-        string email = param as string;
-        MainWindow? main = this.get_toplevel() as MainWindow;
-        if (main != null && email != null) {
-            main.show_search_bar("from:%s".printf(email));
-        }
-    }
-
-    private void on_new_conversation(Variant? param) {
-        MainWindow? main = this.get_toplevel() as MainWindow;
-        if (main != null &&
-            param.get_type().equal(ConversationMessage.MAILBOX_TYPE)) {
-            string? name = (string) param.get_child_value(0);
-            Geary.RFC822.MailboxAddress mailbox = new Geary.RFC822.MailboxAddress(
-                Geary.String.is_empty_or_whitespace(name) ? null : name,
-                (string) param.get_child_value(1)
-            );
-
-            main.open_composer_for_mailbox(mailbox);
-        }
-    }
-
     private void on_copy_link(Variant? param) {
         Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
         clipboard.set_text(param.get_string(), -1);
         clipboard.store();
+    }
+
+    private void on_new_conversation(Variant? param) {
+        string value = param.get_string();
+        if (value.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+            value = value.substring(Geary.ComposedEmail.MAILTO_SCHEME.length, -1);
+        }
+
+        MainWindow? main = this.get_toplevel() as MainWindow;
+        if (main != null &&
+            Geary.RFC822.MailboxAddress.is_valid_address(value)) {
+            Geary.RFC822.MailboxAddress mailbox = new Geary.RFC822.MailboxAddress(
+                null, value
+            );
+            main.open_composer_for_mailbox(mailbox);
+        }
     }
 
     private void on_copy_email_address(Variant? param) {

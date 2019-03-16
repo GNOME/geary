@@ -38,30 +38,6 @@
         <attribute name="action">msg.copy-selection</attribute>
       </item>
     </section>
-    <section id="context_menu_known_contact">
-      <item>
-        <attribute name="label" translatable="yes">Sho_w Conversations</attribute>
-        <attribute name="action">msg.contact-show-conversations</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">_Open in Contacts…</attribute>
-        <attribute name="action">msg.contact-save</attribute>
-      </item>
-    </section>
-    <section id="context_menu_unknown_contact">
-      <item>
-        <attribute name="label" translatable="yes">Sho_w Conversations</attribute>
-        <attribute name="action">msg.contact-show-conversations</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Save in Con_tacts…</attribute>
-        <attribute name="action">msg.contact-save</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Always Load Remote Images</attribute>
-        <attribute name="action">msg.contact-load-images</attribute>
-      </item>
-    </section>
     <section id="context_menu_inspector">
       <item>
         <attribute name="label" translatable="yes">_Inspect…</attribute>
