@@ -45,12 +45,21 @@
     <screenshot>
       <!-- Translators: A screenshot description. -->
       <caption>Geary displaying a conversation</caption>
-      <image type="default" width="1600" height="900">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-conversation-0.12.png</image>
+      <image type="default" width="1200" height="675">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-main-window.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="642" height="361">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-avatars.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="875" height="492">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-search.png</image>
     </screenshot>
     <screenshot>
       <!-- Translators: A screenshot description. -->
       <caption>Geary showing the rich text composer</caption>
-      <image type="source" width="1600" height="900">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-composer-0.12.png</image>
+      <image type="source" width="913" height="513">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-composer.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="635" height="357">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-add-account.png</image>
     </screenshot>
   </screenshots>
 
