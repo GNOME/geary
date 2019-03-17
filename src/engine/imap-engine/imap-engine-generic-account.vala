@@ -181,15 +181,17 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             );
         }
 
-        // Block obtaining and reusing IMAP connections
-        this.remote_ready_lock.reset();
-        this.imap.discard_returned_sessions = true;
-
         // Halt internal tasks early so they stop using local and
         // remote connections.
         this.refresh_folder_timer.reset();
         this.open_cancellable.cancel();
         this.processor.stop();
+
+        // Block obtaining and reusing IMAP connections. This *must*
+        // happen after internal tasks above are cancelled otherwise
+        // they may block while waiting/using a remote session.
+        this.imap.discard_returned_sessions = true;
+        this.remote_ready_lock.reset();
 
         // Close folders and ensure they do in fact close
 
