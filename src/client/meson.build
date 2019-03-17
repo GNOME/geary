@@ -96,6 +96,7 @@ geary_client_vala_sources = files(
   'sidebar/sidebar-tree.vala',
 
   'util/util-avatar.vala',
+  'util/util-cache.vala',
   'util/util-date.vala',
   'util/util-email.vala',
   'util/util-files.vala',
