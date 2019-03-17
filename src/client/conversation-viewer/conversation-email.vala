@@ -323,8 +323,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
 
     /** Determines if all message's web views have finished loading. */
-    private Geary.Nonblocking.Spinlock message_bodies_loaded_lock =
-        new Geary.Nonblocking.Spinlock();
+    private Geary.Nonblocking.Spinlock message_bodies_loaded_lock;
 
     // Message view with selected text, if any
     private ConversationMessage? body_selection_message = null;
@@ -453,6 +452,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         this.avatar_store = avatar_store;
         this.config = config;
         this.load_cancellable = load_cancellable;
+        this.message_bodies_loaded_lock =
+            new Geary.Nonblocking.Spinlock(load_cancellable);
 
         if (is_sent) {
             get_style_context().add_class(SENT_CLASS);
