@@ -59,8 +59,10 @@ public class Application.Contact : Geary.BaseObject {
     public signal void changed();
 
 
+    /** The Folks individual for the contact, if any. */
+    internal Folks.Individual? individual { get; private set; }
+
     private weak ContactStore store;
-    private Folks.Individual? individual;
     private Geary.Contact? contact;
 
 

@@ -12,7 +12,16 @@
 // flags to the object with add_required_fields().
 
 public class NewMessagesMonitor : Geary.BaseObject {
+
+
+    /** Monitor hook for obtaining a contact store for an account. */
+    public delegate Application.ContactStore? GetContactStore(
+        Geary.Account account
+    );
+
+    /** Monitor hook to determine if a folder should be notified about. */
     public delegate bool ShouldNotifyNewMessages(Geary.Folder folder);
+
 
     private class MonitorInformation : Geary.BaseObject {
         public Geary.Folder folder;
@@ -32,9 +41,16 @@ public class NewMessagesMonitor : Geary.BaseObject {
     public Geary.Folder? last_new_message_folder { get; private set; default = null; }
     public Geary.Email? last_new_message { get; private set; default = null; }
 
-    private Gee.HashMap<Geary.Folder, MonitorInformation> folder_information
-        = new Gee.HashMap<Geary.Folder, MonitorInformation>();
-    private unowned ShouldNotifyNewMessages? _should_notify_new_messages;
+    /** Returns an avatar store to lookup avatars for notifications. */
+    public Application.AvatarStore avatars { get; private set; }
+
+
+    private Gee.Map<Geary.Folder, MonitorInformation> folder_information =
+        new Gee.HashMap<Geary.Folder, MonitorInformation>();
+
+    private unowned GetContactStore contact_store_delegate;
+    private unowned ShouldNotifyNewMessages notify_delegate;
+
 
     public signal void folder_added(Geary.Folder folder);
 
@@ -51,12 +67,22 @@ public class NewMessagesMonitor : Geary.BaseObject {
      */
     public signal void new_messages_retired(Geary.Folder folder, int total);
 
-    public NewMessagesMonitor(ShouldNotifyNewMessages? should_notify_new_messages) {
-        _should_notify_new_messages = should_notify_new_messages;
+    public NewMessagesMonitor(Application.AvatarStore avatars,
+                              GetContactStore contact_store_delegate,
+                              ShouldNotifyNewMessages notify_delegate) {
+        this.avatars = avatars;
+        this.contact_store_delegate = contact_store_delegate;
+        this.notify_delegate = notify_delegate;
     }
 
+    /** Determines if notifications should be made for a specific folder. */
     public bool should_notify_new_messages(Geary.Folder folder) {
-        return (_should_notify_new_messages == null ? true : _should_notify_new_messages(folder));
+        return this.notify_delegate(folder);
+    }
+
+    /** Returns a contact store to lookup contacts for notifications. */
+    public Application.ContactStore? get_contact_store(Geary.Account account) {
+        return this.contact_store_delegate(account);
     }
 
     public void add_folder(Geary.Folder folder, Cancellable? cancellable = null) {

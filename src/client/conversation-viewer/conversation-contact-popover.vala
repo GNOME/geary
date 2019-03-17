@@ -96,6 +96,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
             int pixel_size = Application.AvatarStore.PIXEL_SIZE * window_scale;
             try {
                 Gdk.Pixbuf? avatar_buf = yield loader.load(
+                    this.contact,
                     this.mailbox,
                     pixel_size,
                     this.load_cancellable

@@ -125,7 +125,7 @@ public class GearyController : Geary.BaseObject {
     public AutostartManager? autostart_manager { get; private set; default = null; }
 
     public Application.AvatarStore? avatars {
-        get; private set; default = null;
+        get; private set; default = new Application.AvatarStore();
     }
 
     public ContactListStoreCache contact_list_store_cache {
@@ -281,7 +281,6 @@ public class GearyController : Geary.BaseObject {
                 });
 
         }
-        this.avatars = new Application.AvatarStore(this.folks);
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
@@ -310,7 +309,11 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.conversation_added.connect(
             on_conversation_view_added
         );
-        new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
+        this.new_messages_monitor = new NewMessagesMonitor(
+            this.avatars,
+            this.get_contact_store_for_account,
+            this.should_notify_new_messages
+        );
         main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
 
         // New messages indicator (Ubuntuism)
@@ -321,9 +324,7 @@ public class GearyController : Geary.BaseObject {
 
         unity_launcher = new UnityLauncher(new_messages_monitor);
 
-        this.libnotify = new Libnotify(
-            this.new_messages_monitor, this.avatars
-        );
+        this.libnotify = new Libnotify(this.new_messages_monitor);
         this.libnotify.invoked.connect(on_libnotify_invoked);
 
         this.main_window.conversation_list_view.grab_focus();
@@ -1017,6 +1018,8 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.remove_account(account);
 
         context.cancellable.cancel();
+        context.contacts.close();
+
         Geary.Folder? inbox = context.inbox;
         if (inbox != null) {
             try {
@@ -2826,7 +2829,12 @@ public class GearyController : Geary.BaseObject {
 
     private inline Geary.App.EmailStore? get_email_store_for_folder(Geary.Folder target) {
         AccountContext? context = this.accounts.get(target.account.information);
-        return context != null ? context.emails : null;
+        return (context != null) ? context.emails : null;
+    }
+
+    private Application.ContactStore? get_contact_store_for_account(Geary.Account target) {
+        AccountContext? context = this.accounts.get(target.information);
+        return (context != null) ? context.contacts : null;
     }
 
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,

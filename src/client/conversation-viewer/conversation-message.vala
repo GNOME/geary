@@ -644,7 +644,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 int window_scale = get_scale_factor();
                 int pixel_size = Application.AvatarStore.PIXEL_SIZE * window_scale;
                 Gdk.Pixbuf? avatar_buf = yield loader.load(
-                    this.primary_originator, pixel_size, cancellable
+                    this.primary_contact,
+                    this.primary_originator,
+                    pixel_size,
+                    cancellable
                 );
                 if (avatar_buf != null) {
                     this.avatar.set_from_surface(
