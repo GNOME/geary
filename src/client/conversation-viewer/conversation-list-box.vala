@@ -640,7 +640,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         // Load the interesting row completely up front, and load the
         // remaining in the background so we can return fast.
-        interesting_row.view.load_contacts.begin();
+        yield interesting_row.view.load_contacts();
         yield interesting_row.expand();
         this.finish_loading.begin(
             query, uninteresting, post_interesting
@@ -899,8 +899,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
             yield row.view.load_contacts();
-            this.search.highlight_row_if_matching(row);
             yield row.expand();
+            this.search.highlight_row_if_matching(row);
         }
     }
 
