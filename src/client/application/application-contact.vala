@@ -199,9 +199,6 @@ public class Application.Contact : Geary.BaseObject {
             this.is_trusted = (this.individual.trust_level == PERSONAS);
             this.is_desktop_contact = true;
         } else {
-            if (this.contact != null) {
-                this.display_name = this.contact.real_name;
-            }
             this.is_favourite = false;
             this.is_trusted = false;
             this.is_desktop_contact = false;
