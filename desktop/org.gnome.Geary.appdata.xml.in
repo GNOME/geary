@@ -78,7 +78,7 @@
   <translation type="gettext">geary</translation>
 
   <releases>
-    <release version="3.32">
+    <release version="3.32" date="2019-03-17">
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
