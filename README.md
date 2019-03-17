@@ -2,6 +2,8 @@
 Geary: Send and receive email
 =============================
 
+![Geary icon](https://wiki.gnome.org/Apps/Geary?action=AttachFile&do=get&target=geary-3-32-256-logo.png)
+
 Geary is an email application built around conversations, for the
 GNOME 3 desktop. It allows you to read, find and send email with a
 straightforward, modern interface.
@@ -13,7 +15,7 @@ translations are managed using GNOME's infrastructure, so we cannot
 accept tickets or pull requests on GitHub. Please see the links below
 for more information.
 
-![Geary displaying a conversation](https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-conversation-0.12.png)
+![Geary displaying a conversation](https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-main-window.png)
 
 Installation & Licensing
 ------------------------
