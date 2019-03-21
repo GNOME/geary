@@ -43,7 +43,7 @@ ConversationPageState.prototype = {
 
         headerTable = document.createElement('table');
         headerTable.id = 'geary-message-headers';
-        for (header in headers) {
+        for (var header in headers) {
             let row = headerTable.appendChild(document.createElement('tr'));
             let name = row.appendChild(document.createElement('th'));
             let value = row.appendChild(document.createElement('td'));
