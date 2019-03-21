@@ -564,7 +564,7 @@ ComposerPageState.htmlToText = function(root) {
     }
 
     return text;
-}
+};
 
 // Linkifies "plain text" link
 ComposerPageState.linkify = function(node) {
