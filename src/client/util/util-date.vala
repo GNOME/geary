@@ -35,7 +35,8 @@ private int init_count = 0;
 private string[]? xlat_pretty_clocks = null;
 private string[]? xlat_pretty_verbose_dates = null;
 private string? xlat_same_year = null;
-private string? xlat_diff_year = null;
+/// Date format for dates within a different year, i.e. 02/04/10
+private const string xlat_diff_year = "%x";
 
 // Must be called before any threads are started
 public void init() {
@@ -77,11 +78,6 @@ public void init() {
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
     xlat_same_year = _("%b %-e");
 
-    /// Date format for dates within a different year, i.e. 02/04/10
-    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-    /* xgettext:no-c-format */
-    xlat_diff_year = _("%x");
-
     xlat_pretty_verbose_dates = new string[ClockFormat.TOTAL];
     /// Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -107,7 +103,6 @@ private void terminate() {
 
     xlat_pretty_clocks = null;
     xlat_same_year = null;
-    xlat_diff_year = null;
     xlat_pretty_verbose_dates = null;
 }
 
