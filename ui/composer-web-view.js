@@ -32,8 +32,6 @@ ComposerPageState.prototype = {
         this.nextSelectionId = 0;
         this.cursorContext = null;
 
-        let state = this;
-
         document.addEventListener("click", function(e) {
             if (e.target.tagName == "A") {
                 e.preventDefault();
