@@ -608,7 +608,7 @@ private class Accounts.SaveDraftsRow :
             account,
             // Translators: This label describes an account
             // preference.
-            _("Save drafts on server"),
+            _("Save draft email on server"),
             value
         );
         update();
