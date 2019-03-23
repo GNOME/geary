@@ -882,7 +882,7 @@ public class GearyController : Geary.BaseObject {
             context.tls_validation_failed = false;
             report_problem(
                 new Geary.ServiceProblemReport(
-                    Geary.ProblemType.UNTRUSTED,
+                    Geary.ProblemType.GENERIC_ERROR,
                     context.account.information,
                     service,
                     err

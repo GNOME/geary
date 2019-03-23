@@ -10,47 +10,8 @@
 public enum Geary.ProblemType {
 
 
-    /** Indicates an engine problem not covered by one of the other types. */
-    GENERIC_ERROR,
-
-    /** Indicates an error opening, using or closing the account database. */
-    DATABASE_FAILURE,
-
-    /** Indicates a problem establishing a connection. */
-    CONNECTION_ERROR,
-
-    /** Indicates a problem caused by a network operation. */
-    NETWORK_ERROR,
-
-    /** Indicates a non-network related server error. */
-    SERVER_ERROR,
-
-    /** Indicates credentials supplied for authentication were rejected. */
-    AUTHENTICATION,
-
-    /** Indicates a remote TLS certificate failed validation. */
-    UNTRUSTED,
-
-    /** Indicates an outgoing message was sent, but not saved. */
-    SEND_EMAIL_SAVE_FAILED;
-
-
-    /** Determines the appropriate problem type for an IOError. */
-    public static ProblemType for_ioerror(IOError error) {
-        if (error is IOError.CONNECTION_REFUSED ||
-            error is IOError.HOST_NOT_FOUND ||
-            error is IOError.HOST_UNREACHABLE ||
-            error is IOError.NETWORK_UNREACHABLE) {
-            return ProblemType.CONNECTION_ERROR;
-        }
-
-        if (error is IOError.CONNECTION_CLOSED ||
-            error is IOError.NOT_CONNECTED) {
-            return ProblemType.NETWORK_ERROR;
-        }
-
-        return ProblemType.GENERIC_ERROR;
-    }
+    /** Indicates an engine problem not covered by another type. */
+    GENERIC_ERROR;
 
 }
 

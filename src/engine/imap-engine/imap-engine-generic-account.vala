@@ -999,18 +999,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     private void on_operation_error(AccountOperation op, Error error) {
-        if (error is ImapError) {
-            notify_service_problem(
-                ProblemType.SERVER_ERROR, this.information.incoming, error
-            );
-        } else if (error is IOError) {
-            // IOErrors could be network related or disk related, need
-            // to work out the difference and send a service problem
-            // if definitely network related
-            notify_account_problem(ProblemType.for_ioerror((IOError) error), error);
-        } else {
-            notify_account_problem(ProblemType.GENERIC_ERROR, error);
-        }
+        notify_service_problem(
+            ProblemType.GENERIC_ERROR, this.information.incoming, error
+        );
     }
 
     private void on_imap_status_notify() {
