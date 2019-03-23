@@ -999,9 +999,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     private void on_operation_error(AccountOperation op, Error error) {
-        notify_service_problem(
-            ProblemType.GENERIC_ERROR, this.information.incoming, error
-        );
+        notify_service_problem(this.information.incoming, error);
     }
 
     private void on_imap_status_notify() {

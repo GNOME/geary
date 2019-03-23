@@ -137,7 +137,6 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
         } catch (GLib.Error err) {
             this.account.report_problem(
                 new ServiceProblemReport(
-                    ProblemType.GENERIC_ERROR,
                     this.account.information,
                     this.account.information.outgoing,
                     err

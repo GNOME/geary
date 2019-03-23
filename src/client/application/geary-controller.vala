@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016-2018 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -571,9 +571,7 @@ public class GearyController : Geary.BaseObject {
         try {
             yield this.account_manager.expunge_accounts(this.open_cancellable);
         } catch (GLib.Error err) {
-            report_problem(
-                new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
-            );
+            report_problem(new Geary.ProblemReport(err));
         }
     }
 
@@ -761,13 +759,7 @@ public class GearyController : Geary.BaseObject {
                 // Bail out right away, but probably should be opening
                 // the GOA control panel.
                 handled = false;
-                report_problem(
-                    new Geary.AccountProblemReport(
-                        Geary.ProblemType.GENERIC_ERROR,
-                        account,
-                        err
-                    )
-                );
+                report_problem(new Geary.AccountProblemReport(account, err));
             }
             context.authentication_prompting = false;
         } else {
@@ -815,12 +807,7 @@ public class GearyController : Geary.BaseObject {
                     // all good
                 } catch (GLib.Error err) {
                     report_problem(
-                        new Geary.ServiceProblemReport(
-                            Geary.ProblemType.GENERIC_ERROR,
-                            account,
-                            service,
-                            err
-                        )
+                        new Geary.ServiceProblemReport(account, service, err)
                     );
                 }
 
@@ -839,12 +826,7 @@ public class GearyController : Geary.BaseObject {
                 );
             } catch (GLib.Error err) {
                 report_problem(
-                    new Geary.ServiceProblemReport(
-                        Geary.ProblemType.GENERIC_ERROR,
-                        account,
-                        service,
-                        err
-                    )
+                    new Geary.ServiceProblemReport(account, service, err)
                 );
             }
         } else {
@@ -882,7 +864,6 @@ public class GearyController : Geary.BaseObject {
             context.tls_validation_failed = false;
             report_problem(
                 new Geary.ServiceProblemReport(
-                    Geary.ProblemType.GENERIC_ERROR,
                     context.account.information,
                     service,
                     err
@@ -939,7 +920,6 @@ public class GearyController : Geary.BaseObject {
                 if (!retry) {
                     report_problem(
                         new Geary.AccountProblemReport(
-                            Geary.ProblemType.GENERIC_ERROR,
                             account.information,
                             open_err
                         )
@@ -1879,9 +1859,7 @@ public class GearyController : Geary.BaseObject {
                 "Error opening attachment file \"%s\": %s",
                 attachment.file.get_uri(), err.message
             );
-            report_problem(
-                new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
-            );
+            report_problem(new Geary.ProblemReport(err));
         }
 
         yield this.prompt_save_buffer(display_name, content, cancellable);
@@ -1914,11 +1892,7 @@ public class GearyController : Geary.BaseObject {
                     "Error opening attachment files \"%s\": %s",
                     attachment.file.get_uri(), err.message
                 );
-                report_problem(
-                    new Geary.ProblemReport(
-                        Geary.ProblemType.GENERIC_ERROR, err
-                    )
-                );
+                report_problem(new Geary.ProblemReport(err));
             }
 
             if (content != null &&
@@ -2017,9 +1991,7 @@ public class GearyController : Geary.BaseObject {
                 "Error writing buffer \"%s\": %s",
                 dest.get_uri(), err.message
             );
-            report_problem(
-                new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
-            );
+            report_problem(new Geary.ProblemReport(err));
         }
     }
 
@@ -2897,11 +2869,7 @@ public class GearyController : Geary.BaseObject {
             try {
                 this.application.engine.add_account(added);
             } catch (GLib.Error err) {
-                report_problem(
-                    new Geary.AccountProblemReport(
-                        Geary.ProblemType.GENERIC_ERROR, added, err
-                    )
-                );
+                report_problem(new Geary.AccountProblemReport(added, err));
             }
         }
     }
@@ -2914,11 +2882,7 @@ public class GearyController : Geary.BaseObject {
                 try {
                     this.application.engine.add_account(changed);
                 } catch (GLib.Error err) {
-                    report_problem(
-                        new Geary.AccountProblemReport(
-                            Geary.ProblemType.GENERIC_ERROR, changed, err
-                        )
-                    );
+                    report_problem(new Geary.AccountProblemReport(changed, err));
                 }
             }
             break;
@@ -2934,11 +2898,7 @@ public class GearyController : Geary.BaseObject {
                             this.application.engine.remove_account(changed);
                         } catch (GLib.Error err) {
                             report_problem(
-                                new Geary.AccountProblemReport(
-                                    Geary.ProblemType.GENERIC_ERROR,
-                                    changed,
-                                    err
-                                )
+                                new Geary.AccountProblemReport(changed, err)
                             );
                         }
                     }
@@ -2960,11 +2920,7 @@ public class GearyController : Geary.BaseObject {
                     debug("%s: Account removed from engine", removed.id);
                 } catch (GLib.Error err) {
                     report_problem(
-                        new Geary.AccountProblemReport(
-                            Geary.ProblemType.GENERIC_ERROR,
-                            removed,
-                            err
-                        )
+                        new Geary.AccountProblemReport(removed, err)
                     );
                 }
             }
@@ -3074,24 +3030,16 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_scan_error(Geary.App.ConversationMonitor monitor, Error err) {
-        // XXX determine the problem better here
         Geary.AccountInformation account =
             monitor.base_folder.account.information;
         report_problem(
-            new Geary.ServiceProblemReport(
-                Geary.ProblemType.GENERIC_ERROR,
-                account,
-                account.incoming,
-                err
-            )
+            new Geary.ServiceProblemReport(account, account.incoming, err)
         );
     }
 
     private void on_email_load_error(ConversationEmail view, GLib.Error err) {
-        // XXX determine the problem better here
         report_problem(
             new Geary.ServiceProblemReport(
-                Geary.ProblemType.GENERIC_ERROR,
                 this.current_account.information,
                 this.current_account.information.incoming,
                 err
