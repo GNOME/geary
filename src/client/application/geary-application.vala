@@ -198,7 +198,7 @@ public class GearyApplication : Gtk.Application {
         Geary.Logging.log_to(stderr);
         GLib.Log.set_default_handler(Geary.Logging.default_handler);
 
-        Date.init();
+        Util.Date.init();
 
         // Calls Gtk.init(), amongst other things
         base.startup();
@@ -411,7 +411,7 @@ public class GearyApplication : Gtk.Application {
         }
 
         quit();
-        Date.terminate();
+        Util.Date.terminate();
     }
 
     /**

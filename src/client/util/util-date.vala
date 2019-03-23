@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-namespace Date {
+namespace Util.Date {
 
 public enum ClockFormat {
     TWELVE_HOURS,
@@ -32,10 +32,11 @@ public enum CoarseDate {
 }
 
 private int init_count = 0;
-private string[]? xlat_pretty_dates = null;
+private string[]? xlat_pretty_clocks = null;
 private string[]? xlat_pretty_verbose_dates = null;
 private string? xlat_same_year = null;
-private string? xlat_diff_year = null;
+/// Date format for dates within a different year, i.e. 02/04/10
+private const string xlat_diff_year = "%x";
 
 // Must be called before any threads are started
 public void init() {
@@ -62,25 +63,20 @@ public void init() {
     if (time_locale != null)
         Intl.setlocale(LocaleCategory.MESSAGES, time_locale);
 
-    xlat_pretty_dates = new string[ClockFormat.TOTAL];
+    xlat_pretty_clocks = new string[ClockFormat.TOTAL];
     /// Datetime format for 12-hour time, i.e. 8:31 am
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-    xlat_pretty_dates[ClockFormat.TWELVE_HOURS] = _("%l:%M %P");
+    xlat_pretty_clocks[ClockFormat.TWELVE_HOURS] = _("%l:%M %P");
     /// Datetime format for 24-hour time, i.e. 16:35
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-    xlat_pretty_dates[ClockFormat.TWENTY_FOUR_HOURS] = _("%H:%M");
+    xlat_pretty_clocks[ClockFormat.TWENTY_FOUR_HOURS] = _("%H:%M");
     /// Datetime format for the locale default, i.e. 8:31 am or 16:35,
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-    xlat_pretty_dates[ClockFormat.LOCALE_DEFAULT] = C_("Default clock format", "%l:%M %P");
+    xlat_pretty_clocks[ClockFormat.LOCALE_DEFAULT] = "%X";
 
     /// Date format for dates within the current year, i.e. Nov 8
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
     xlat_same_year = _("%b %-e");
-
-    /// Date format for dates within a different year, i.e. 02/04/10
-    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-    /* xgettext:no-c-format */
-    xlat_diff_year = _("%x");
 
     xlat_pretty_verbose_dates = new string[ClockFormat.TOTAL];
     /// Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
@@ -105,9 +101,8 @@ private void terminate() {
     if (--init_count != 0)
         return;
 
-    xlat_pretty_dates = null;
+    xlat_pretty_clocks = null;
     xlat_same_year = null;
-    xlat_diff_year = null;
     xlat_pretty_verbose_dates = null;
 }
 
@@ -171,7 +166,7 @@ private string pretty_print_coarse(CoarseDate coarse_date, ClockFormat clock_for
             return ngettext("%dh ago", "%dh ago", (ulong) rounded).printf(rounded);
 
         case CoarseDate.TODAY:
-            fmt = xlat_pretty_dates[clock_format.to_index()];
+            fmt = get_clock_format(clock_format);
         break;
 
         case CoarseDate.YESTERDAY:
@@ -207,6 +202,29 @@ public string pretty_print(DateTime datetime, ClockFormat clock_format) {
 
 public string pretty_print_verbose(DateTime datetime, ClockFormat clock_format) {
     return datetime.format(xlat_pretty_verbose_dates[clock_format.to_index()]);
+}
+
+public string get_clock_format(ClockFormat clock_format) {
+    return xlat_pretty_clocks[clock_format.to_index()];
+}
+
+public string get_full_date(ClockFormat clock_format) {
+    switch(clock_format) {
+        case ClockFormat.TWELVE_HOURS:
+            /// 12 hours format for datetime that a message being replied to was received
+            /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+            return _("%a, %b %-e, %Y at %l:%M %P");
+        case ClockFormat.TWENTY_FOUR_HOURS:
+            /// 24 hours format for the datetime that a message being replied to was received
+            /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+            return _("%a, %b %-e, %Y at %H:%M");
+        case ClockFormat.LOCALE_DEFAULT:
+            /// Format for the datetime that a message being replied to was received
+            /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+            return _("%a, %b %-e, %Y at %X");
+    }
+    GLib.assert(false); // unreachable
+    return "";
 }
 
 }

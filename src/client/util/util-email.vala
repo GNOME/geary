@@ -133,4 +133,132 @@ namespace Util.Email {
         ).printf(first_recipient, mailboxes.size - 1);
     }
 
+    /**
+     * Returns a quoted text string needed for a reply.
+     *
+     * If there's no message body in the supplied email or quote text, this
+     * function will return the empty string.
+     *
+     * If html_format is true, the message will be quoted in HTML format.
+     * Otherwise it will be in plain text.
+     */
+    public string quote_email_for_reply(Geary.Email email,
+                                        string? quote,
+                                        Util.Date.ClockFormat clock_format,
+                                        Geary.RFC822.TextFormat format) {
+        if (email.body == null && quote == null)
+            return "";
+
+        string quoted = "";
+
+        string DATE_FORMAT = Util.Date.get_full_date(clock_format);
+
+        if (email.date != null && email.from != null) {
+            /// The quoted header for a message being replied to.
+            /// %1$s will be substituted for the date, and %2$s will be substituted for
+            /// the original sender.
+            string QUOTED_LABEL = _("On %1$s, %2$s wrote:");
+            quoted += QUOTED_LABEL.printf(email.date.value.format(DATE_FORMAT),
+                                          Geary.RFC822.Utils.email_addresses_for_reply(email.from, format));
+
+        } else if (email.from != null) {
+            /// The quoted header for a message being replied to (in case the date is not known).
+            /// %s will be replaced by the original sender.
+            string QUOTED_LABEL = _("%s wrote:");
+            quoted += QUOTED_LABEL.printf(Geary.RFC822.Utils.email_addresses_for_reply(email.from, format));
+
+        } else if (email.date != null) {
+            /// The quoted header for a message being replied to (in case the sender is not known).
+            /// %s will be replaced by the original date
+            string QUOTED_LABEL = _("On %s:");
+            quoted += QUOTED_LABEL.printf(email.date.value.format(DATE_FORMAT));
+        }
+
+        quoted += "<br />";
+        try {
+            quoted += quote_body(email, quote, true, format);
+        } catch (Error err) {
+            debug("Failed to quote body for replying: %s".printf(err.message));
+        }
+
+        return quoted;
+    }
+
+    /**
+     * Returns a quoted text string needed for a forward.
+     *
+     * If there's no message body in the supplied email or quote text, this
+     * function will return the empty string.
+     *
+     * If html_format is true, the message will be quoted in HTML format.
+     * Otherwise it will be in plain text.
+     */
+    public string quote_email_for_forward(Geary.Email email, string? quote, Geary.RFC822.TextFormat format) {
+        if (email.body == null && quote == null)
+            return "";
+
+        const string HEADER_FORMAT = "%s %s\n";
+
+        string quoted = _("---------- Forwarded message ----------");
+        quoted += "\n";
+        string from_line = Geary.RFC822.Utils.email_addresses_for_reply(email.from, format);
+        if (!Geary.String.is_empty_or_whitespace(from_line)) {
+            // Translators: Human-readable version of the RFC 822 From header
+            quoted += HEADER_FORMAT.printf(_("From:"), from_line);
+        }
+        // Translators: Human-readable version of the RFC 822 Subject header
+        quoted += HEADER_FORMAT.printf(_("Subject:"), email.subject != null ? email.subject.to_string() : "");
+        // Translators: Human-readable version of the RFC 822 Date header
+        quoted += HEADER_FORMAT.printf(_("Date:"), email.date != null ? email.date.to_string() : "");
+        string to_line = Geary.RFC822.Utils.email_addresses_for_reply(email.to, format);
+        if (!Geary.String.is_empty_or_whitespace(to_line)) {
+            // Translators: Human-readable version of the RFC 822 To header
+            quoted += HEADER_FORMAT.printf(_("To:"), to_line);
+        }
+        string cc_line = Geary.RFC822.Utils.email_addresses_for_reply(email.cc, format);
+        if (!Geary.String.is_empty_or_whitespace(cc_line)) {
+            // Translators: Human-readable version of the RFC 822 CC header
+            quoted += HEADER_FORMAT.printf(_("Cc:"), cc_line);
+        }
+        quoted += "\n";  // A blank line between headers and body
+        quoted = quoted.replace("\n", "<br />");
+        try {
+            quoted += quote_body(email, quote, false, format);
+        } catch (Error err) {
+            debug("Failed to quote body for forwarding: %s".printf(err.message));
+        }
+        return quoted;
+    }
+
+    private string quote_body(Geary.Email email,
+                              string? html_quote,
+                              bool use_quotes,
+                              Geary.RFC822.TextFormat format)
+        throws Error {
+        Geary.RFC822.Message? message = email.get_message();
+        string? body_text = null;
+        if (Geary.String.is_empty(html_quote)) {
+            switch (format) {
+                case Geary.RFC822.TextFormat.HTML:
+                    body_text = message.has_html_body()
+                        ? message.get_html_body(null)
+                        : message.get_plain_body(true, null);
+                    break;
+
+                case Geary.RFC822.TextFormat.PLAIN:
+                    body_text = message.has_plain_body()
+                        ? message.get_plain_body(true, null)
+                        : message.get_html_body(null);
+                    break;
+            }
+        } else {
+            body_text = html_quote;
+        }
+
+        // Wrap the whole thing in a blockquote.
+        if (use_quotes && !Geary.String.is_empty(body_text))
+            body_text = "<blockquote type=\"cite\">%s</blockquote>".printf(body_text);
+
+        return body_text;
+    }
 }
