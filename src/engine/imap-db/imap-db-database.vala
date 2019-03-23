@@ -300,12 +300,15 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     string? internaldate = select.string_at(1);
 
                     try {
-                        time_t as_time_t = (internaldate != null ?
-                            Geary.Imap.InternalDate.decode(internaldate).to_time_t() : -1);
+                        int64 as_time_t = (
+                            internaldate != null
+                            ? Imap.InternalDate.decode(internaldate).value.to_unix()
+                            : -1
+                        );
 
                         Db.Statement update = cx.prepare(
                             "UPDATE MessageTable SET internaldate_time_t=? WHERE id=?");
-                        update.bind_int64(0, (int64) as_time_t);
+                        update.bind_int64(0, as_time_t);
                         update.bind_rowid(1, id);
                         update.exec();
                     } catch (Error e) {

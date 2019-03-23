@@ -97,7 +97,6 @@ public class ConversationListStore : Gtk.ListStore {
     private Cancellable cancellable = new Cancellable();
     private bool loading_local_only = true;
     private Geary.Nonblocking.Mutex refresh_mutex = new Geary.Nonblocking.Mutex();
-    private uint update_id = 0;
 
     public signal void conversations_added(bool start);
     public signal void conversations_removed(bool start);
@@ -108,9 +107,6 @@ public class ConversationListStore : Gtk.ListStore {
         set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
 
         this.conversations = conversations;
-        this.update_id = Timeout.add_seconds_full(
-            Priority.LOW, 60, update_date_strings
-        );
         this.email_store = new Geary.App.EmailStore(
             conversations.base_folder.account
         );
@@ -135,10 +131,10 @@ public class ConversationListStore : Gtk.ListStore {
 
         // Release circular refs.
         this.row_map.clear();
-        if (this.update_id != 0) {
-            Source.remove(this.update_id);
-            this.update_id = 0;
-        }
+    }
+
+    public void update_display() {
+        this.foreach(update_date_string);
     }
 
     public Geary.App.Conversation? get_conversation_at_path(Gtk.TreePath path) {
@@ -479,11 +475,6 @@ public class ConversationListStore : Gtk.ListStore {
         refresh_previews_async.begin(this.conversations);
     }
 
-    private bool update_date_strings() {
-        this.foreach(update_date_string);
-        return Source.CONTINUE;
-    }
-
     private bool update_date_string(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
         FormattedConversationData? message_data;
         model.get(iter, Column.CONVERSATION_DATA, out message_data);
@@ -496,4 +487,3 @@ public class ConversationListStore : Gtk.ListStore {
     }
 
 }
-

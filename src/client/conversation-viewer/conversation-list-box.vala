@@ -782,6 +782,16 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             });
     }
 
+    /**
+     * Updates the displayed date for each conversation row.
+     */
+    public void update_display() {
+        message_view_iterator().foreach((msg_view) => {
+                msg_view.update_display();
+                return true;
+            });
+    }
+
     /** Returns the email row for the given id, if any. */
     internal EmailRow? get_email_row_by_id(Geary.EmailIdentifier id) {
         return this.email_rows.get(id);

@@ -317,7 +317,6 @@ geary_engine_vala_sources = files(
   'util/util-stream.vala',
   'util/util-string.vala',
   'util/util-synchronization.vala',
-  'util/util-time.vala',
   'util/util-timeout-manager.vala',
   'util/util-trillian.vala',
 )

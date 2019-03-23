@@ -995,7 +995,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         if (this.email.date != null) {
             // Translators: Human-readable version of the RFC 822 Date header
             builder.set_member_name(_("Date:"));
-            builder.add_string_value(this.email.date.to_string());
+            builder.add_string_value(
+                Util.Date.pretty_print_verbose(
+                    this.email.date.value.to_local(),
+                    this.config.clock_format
+                )
+            );
         }
         if (this.email.subject != null) {
             // Translators: Human-readable version of the RFC 822 Subject header

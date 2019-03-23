@@ -8,7 +8,11 @@
 
 [GtkTemplate (ui = "/org/gnome/Geary/main-window.ui")]
 public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
+
+
     private const int STATUS_BAR_HEIGHT = 18;
+    private const int UPDATE_UI_INTERVAL = 60;
+
 
     public new GearyApplication application {
         get { return (GearyApplication) base.get_application(); }
@@ -33,6 +37,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public ConversationViewer conversation_viewer { get; private set; }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     private MonitoredSpinner spinner = new MonitoredSpinner();
+
+    private Geary.TimeoutManager update_ui_timeout;
+    private int64 update_ui_last = 0;
+
 
     [GtkChild]
     private Gtk.Box main_layout;
@@ -104,10 +112,16 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         setup_layout(application.config);
         on_change_orientation();
 
+        this.update_ui_timeout = new Geary.TimeoutManager.seconds(
+            UPDATE_UI_INTERVAL, on_update_ui_timeout
+        );
+        this.update_ui_timeout.repetition = FOREVER;
+
         this.main_layout.show_all();
     }
 
     ~MainWindow() {
+        this.update_ui_timeout.reset();
         base_unref();
     }
 
@@ -381,6 +395,24 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         return base.key_release_event(event);
     }
 
+    private void update_ui() {
+        // Only update if we haven't done so within the last while
+        int64 now = GLib.get_monotonic_time() / (1000 * 1000);
+        if (this.update_ui_last + UPDATE_UI_INTERVAL < now) {
+            this.update_ui_last = now;
+
+            if (this.conversation_viewer.current_list != null) {
+                this.conversation_viewer.current_list.update_display();
+            }
+
+            ConversationListStore? list_store =
+                this.conversation_list_view.get_model() as ConversationListStore;
+            if (list_store != null) {
+                list_store.update_display();
+            }
+        }
+    }
+
     private void on_conversation_monitor_changed() {
         ConversationListStore? old_model = this.conversation_list_view.get_model();
         if (old_model != null) {
@@ -543,6 +575,17 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     [GtkCallback]
+    private void on_map() {
+        this.update_ui_timeout.start();
+        update_ui();
+    }
+
+    [GtkCallback]
+    private void on_unmap() {
+        this.update_ui_timeout.reset();
+    }
+
+    [GtkCallback]
     private bool on_focus_event() {
         on_shift_key(false);
         return false;
@@ -606,6 +649,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     [GtkCallback]
     private void on_info_bar_container_remove() {
         update_infobar_frame();
+    }
+
+    private void on_update_ui_timeout() {
+        update_ui();
     }
 
 }
