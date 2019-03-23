@@ -260,11 +260,7 @@ public class Accounts.Manager : GLib.Object {
                         // load_account.
                     } catch (GLib.Error err) {
                         debug("Error loading account %s", id);
-                        report_problem(
-                            new Geary.ProblemReport(
-                                Geary.ProblemType.GENERIC_ERROR,
-                                err
-                            ));
+                        report_problem(new Geary.ProblemReport(err));
                     }
                 }
             }
@@ -819,11 +815,7 @@ public class Accounts.Manager : GLib.Object {
                 yield save_account(info, cancellable);
                 yield mediator.update(info, cancellable);
             } catch (GLib.Error err) {
-                report_problem(
-                    new Geary.ProblemReport(
-                        Geary.ProblemType.GENERIC_ERROR,
-                        err
-                    ));
+                report_problem(new Geary.ProblemReport(err));
             }
 
             set_enabled(info, true);
@@ -850,12 +842,7 @@ public class Accounts.Manager : GLib.Object {
                 yield account.load_incoming_credentials(cancellable);
             }
         } catch (GLib.Error err) {
-            report_problem(
-                new Geary.AccountProblemReport(
-                    Geary.ProblemType.GENERIC_ERROR,
-                    account,
-                    err
-                ));
+            report_problem(new Geary.AccountProblemReport(account, err));
         }
 
         set_available(account, is_available);
@@ -960,13 +947,7 @@ public class Accounts.Manager : GLib.Object {
                 try {
                     this.save_account.end(res);
                 } catch (GLib.Error err) {
-                    report_problem(
-                        new Geary.AccountProblemReport(
-                            Geary.ProblemType.GENERIC_ERROR,
-                            account,
-                            err
-                        )
-                    );
+                    report_problem(new Geary.AccountProblemReport(account, err));
                 }
             }
         );
