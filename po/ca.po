@@ -135,7 +135,7 @@ msgstr "Fes gran la finestra"
 
 #: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
-msgstr "Cert si la finestra aplicació és gran, fals en l'altre cas."
+msgstr "Cert si la finestra d'aplicació és gran, fals en l'altre cas."
 
 #: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
@@ -187,7 +187,7 @@ msgstr "Orientació del plafó de la llista de carpetes"
 #: desktop/org.gnome.Geary.gschema.xml:45
 msgid "True if the folder list Paned is in the horizontal orientation."
 msgstr ""
-"Cert si la orientació del plafó de la llista de carpetes és horitzontal."
+"Cert si l'orientació del plafó de la llista de carpetes és horitzontal."
 
 #: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Position of message list pane"
@@ -284,7 +284,7 @@ msgstr "Estratègia d'assessorament per a la cerca de text complet"
 #: desktop/org.gnome.Geary.gschema.xml:111
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
-msgstr "Són valor acceptables «exacte», «conservador», «agressiu», i «neutre»."
+msgstr "Són valors acceptables «exacte», «conservador», «agressiu», i «neutre»."
 
 #: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Zoom of conversation viewer"
@@ -304,7 +304,7 @@ msgstr "El darrer registre de la mida de la finestra separada de l'editor."
 
 #: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
-msgstr "Si em d'emigrar els paràmetres antics"
+msgstr "Si hem d'emigrar els paràmetres antics"
 
 #: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
@@ -336,7 +336,7 @@ msgstr "Comproveu la recepció de l'usuari i la contrasenya"
 #: src/client/accounts/accounts-editor-add-pane.vala:211
 #: src/client/accounts/accounts-editor-servers-pane.vala:329
 msgid "Check your receiving server details"
-msgstr "Comproveu la recepció del detalls del servidor"
+msgstr "Comproveu la recepció dels detalls del servidor"
 
 #. Translators: In-app notification label
 #. There was an SMTP auth error, but IMAP already
@@ -524,7 +524,7 @@ msgstr "Afegiu de nou «%s»"
 #. is the email address edited.
 #: src/client/accounts/accounts-editor-edit-pane.vala:730
 msgid "Undo signature changes"
-msgstr "Desfés el canvis de signatura"
+msgstr "Desfés els canvis de signatura"
 
 #. Translators: This label describes the account
 #. preference for the length of time (weeks, months or
@@ -729,7 +729,7 @@ msgstr "Comptes en línia GNOME"
 #. preference.
 #: src/client/accounts/accounts-editor-servers-pane.vala:611
 msgid "Save draft email on server"
-msgstr "Desa esborranys del missatges al servidor"
+msgstr "Desa esborranys dels missatges al servidor"
 
 #. Translators: This label describes an account
 #. preference.
@@ -1773,7 +1773,7 @@ msgstr "%l:%M %P"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:72
 msgid "%H:%M"
-msgstr "%H:%M"
+msgstr "%-H:%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -1841,7 +1841,7 @@ msgstr "%a, %-e %b %Y a les %l:%M %p"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:220
 msgid "%a, %b %-e, %Y at %H:%M"
-msgstr "%a, %-e %b %Y a les %H:%M"
+msgstr "%a, %-e %b %Y a les %-H:%M"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -2250,7 +2250,7 @@ msgstr "Per començar selecciona un proveïdor de correu a sota."
 
 #: ui/accounts_editor_list_pane.ui:76
 msgid "Welcome to Geary"
-msgstr "Benvingut al Geary"
+msgstr "Us donem la benvinguda al Geary"
 
 #. This title is shown to users when confirming if they want to remove an account. The string substitution is replaced with the account's name.
 #: ui/accounts_editor_remove_pane.ui:73
@@ -2670,7 +2670,7 @@ msgstr "Però en realitat va a:"
 
 #: ui/conversation-message.ui:723
 msgid "The link appears to go to:"
-msgstr "L'enllaç apareix a l'anar a:"
+msgstr "L'enllaç sembla anar a:"
 
 #: ui/conversation-message.ui:735
 msgid "Deceptive link found"
@@ -3070,7 +3070,7 @@ msgstr "Comprova"
 #. Button tooltip for retrying TLS cert validation
 #: ui/main-window.ui:364
 msgid "Check the security details for the connection"
-msgstr "Comprova els detalls de seguretat per a la connnexió"
+msgstr "Comprova els detalls de seguretat per a la connexió"
 
 #. Infobar title when one or more accounts have a TLS cert validation error
 #: ui/main-window.ui:393
