@@ -2,18 +2,21 @@
       type="guide"
       id="index">
 
-<title><media type="image" src="figures/geary.svg"></media> Geary</title>
+  <title>
+    <media type="image" src="figures/geary.svg" width="64" height="64"></media>
+    <span>Geary</span>
+  </title>
 
-    <section id="introduction" style="2column">
-        <title>Introduction</title>
-    </section>
+  <section id="introduction" style="2column">
+    <title>Introduction</title>
+  </section>
 
-    <section id="overview" style="2column">
-        <title>Using Geary</title>
-    </section>
+  <section id="overview" style="2column">
+    <title>Using Geary</title>
+  </section>
 
-    <section id="contribute" style="2column">
-        <title>Contributing and bug reporting</title>
-    </section>
+  <section id="contribute" style="2column">
+    <title>Contributing and bug reporting</title>
+  </section>
 
 </page>

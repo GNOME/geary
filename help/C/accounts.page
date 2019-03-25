@@ -2,69 +2,99 @@
       type="guide"
       id="accounts">
 
-    <info>
-        <link type="guide" xref="index#overview"/>
-        
-        <link type="next" xref="archive"/>
-    </info>
-	<title>Accounts</title>
-	
-	<section id="adding-accounts">
-	<title>Adding accounts</title>
-	
-	<p>The first time you start Geary, you will be prompted to add an email account.  On this screen,
-	select if your account is Gmail, Yahoo, Outlook.com, or other.  For other account types, you will
-	need to enter your IMAP and SMTP login settings manually.</p>
-	
-	<p>Additional accounts can be added from the Accounts dialog.  The <gui>Accounts</gui> option is
-	available in either Geary's application menu or the gear menu in the upper-right of the
-	toolbar.  (The location depends on the install desktop shell.  For GNOME Shell and Unity, the
-	application menu is available near the top-left corner of the screen.)
-	To add an account, click the + button.</p>
-	</section>
-	
-	<section id="editing-accounts">
-	<title>Editing existing accounts</title>
-	
-	<p>From the Accounts dialog, select an account and click the pencil icon to change various settings.
-	Please note that Geary cannot change server settings on an existing account.  If you need to
-	change your IMAP or SMTP server, you will need to delete the account and re-add it.</p>
-	
-	<p>To change the order that accounts are displayed in the folder list, drag the accounts in the
-	Accounts dialog to the desired order.</p>
-	
-	<p>There are some advanced options available when editing accounts:</p>
-	<list>
-	<item><p>The <gui>Save sent mail</gui> checkbox controls whether Geary will push successfully sent
-	messages up to the account's <gui>Sent Mail</gui> folder.  For Gmail accounts, this happens
-	automatically.  Yahoo and some other accounts can be configured to do this automatically as well.
-	For other accounts, if you disable this setting, you may be unable to view messages you've
-	sent.</p></item>
-	
-	<item><p>The <gui>Sign emails</gui> checkbox indicates whether a signature will be automatically
-	inserted when a composer is opened.  You may enter the signature into the box immediately
-	below.  You may use HTML tags to style the text.  Switch to a preview of the signature using the
-	buttons to the right.</p>
-	
-	<p>If you leave the signature in the Accounts dialog blank, Geary will use the
-	<file>.signature</file> file in your home directory, if it exists.  This file may contain either
-	plain text or HTML markup.  In the latter case, the markup will be inserted directly into the
-	composer, without any escaping.</p></item>
-	
-	<item><p>The <gui>Download mail</gui> drop-down allows you to configure how much mail Geary will keep
-	locally.  Geary can only use locally available mail when searching and forming
-	conversations.</p></item>
-	</list>
-	
-	</section>
-	
-	<section id="removing-accounts">
-	<title>Removing accounts</title>
-	
-	<p>To delete an account, open the Accounts dialog, select the account, and press the - button.
-	Geary will delete all information associated with the account.</p>
-	
-	</section>
-	
-</page>
+  <info>
+    <link type="guide" xref="index#overview"/>
+    <link type="next" xref="archive"/>
+  </info>
 
+  <title>Accounts</title>
+
+  <section id="accounts-editor">
+    <title>Accounts Editor</title>
+
+    <p>Your email accounts can be added, updated, and removed using
+    the <em>accounts editor</em>. To open it, click Geary’s
+    application menu button in the main window above the folder list,
+    then click <gui>Accounts</gui> in the pop-up menu.</p>
+
+    <p>To change the order that accounts are displayed in the folder
+    list, click and drag the handle for an account in the accounts
+    editor, or focus an account with <key>Tab</key>, then use
+    <keyseq><key>Ctrl</key><key>↑</key></keyseq> and
+    <keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the
+    currently selected account.</p>
+  </section>
+
+  <section id="adding-accounts">
+    <title>Adding accounts</title>
+
+    <p>Geary will automatically use any email accounts you have added
+    via the <app>Online Accounts</app> panel of <app>GNOME
+    Settings</app>. If you do not have any accounts added to
+    <app>Online Accounts</app>, you will be prompted to add an account
+    the first time you run Geary.</p>
+
+    <p>To add additional accounts, open the accounts editor, then
+    choose the appropriate email provider from the list at the bottom
+    of the window. For providers supported by <app>Online
+    Accounts</app>, <app>GNOME Settings</app> will be opened and you
+    will be asked for your account information there. For other email
+    providers, you will be asked for your account information by
+    Geary. Once entered, click <gui>Create</gui> and the account
+    information will be checked and then added.</p>
+  </section>
+
+  <section id="editing-accounts">
+    <title>Updating existing accounts</title>
+
+    <p>To update existing accounts, open the accounts editor and
+    choose the account you wish to update. Geary will display settings
+    for the account. From there, you can add and remove additional
+    sender email addresses, edit your email signature, and various
+    other settings.</p>
+
+    <p>The <gui>Download mail</gui> setting allows you to configure
+    how much mail Geary will download and store locally. Geary can
+    only use locally available mail when displaying and searching for
+    conversations.</p>
+
+    <p>To edit the server settings for the account, scroll to the
+    bottom of the window and click <gui>Server Settings</gui>. The
+    server settings will be displayed and you can click to edit
+    them. Once done, click <gui>Apply</gui> and Geary will check the
+    settings, then update the account. Note that accounts added via
+    the <app>Online Accounts</app> panel of <app>GNOME Settings</app>
+    cannot have their server name, security, login, or password
+    settings changed.</p>
+
+    <p>The <gui>Save draft email on server</gui> checkbox controls
+    whether the composer will save copies of email messages being
+    written in the <gui>Drafts</gui> folder. If de-selected, you will
+    not be able to save draft messages when closing the composer.</p>
+
+    <p>The <gui>Save sent email on server</gui> checkbox controls
+    whether Geary will save copies of email that have been sent
+    to the <gui>Sent</gui> folder. If de-selected, you will no be able
+    to see any email messages you have sent, unless your server
+    automatically saves them for you.</p>
+  </section>
+
+  <section id="removing-accounts">
+    <title>Removing accounts</title>
+
+    <p>Accounts added via the <app>Online Accounts</app> panel of
+    <app>GNOME Settings</app> must also be removed from there. To do
+    so, open <app>Online Accounts</app>, select the account, and click
+    <gui>Remove</gui>.</p>
+
+    <p>To remove an account added via Geary, open the accounts editor
+    and choose the account you wish to remove. Geary will display
+    settings for the account. Scroll to the bottom of the window and
+    click <gui>Remove Account</gui>. You will be prompted to confirm
+    removing the account. Once confirmed, if you change your mind you
+    can still undo removing the account by clicking <gui>Undo</gui> in
+    the popup notification, or by typing
+    <keyseq><key>Ctrl</key><key>U</key></keyseq>.</p>
+  </section>
+
+</page>

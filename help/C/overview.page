@@ -2,57 +2,93 @@
       type="guide"
       id="overview">
 
-    <info>
-        <link type="guide" xref="index#introduction"/>
-    </info>
-	<title>Overview</title>
+  <info>
+    <link type="guide" xref="index#introduction"/>
+  </info>
 
-<p>Geary is a lightweight email reader for the <link href="http://gnome.org">GNOME</link> desktop.
-It works with mail servers that
-support the IMAP protocol, including popular services such as Gmail, Yahoo Mail, and Outlook.com.</p>
+  <title>Overview</title>
 
-	<p>Geary groups mail messages into <em>conversations</em>.  A conversation contains all
-	messages in a single thread of discussion.</p>
+  <p>Geary is an email application built around conversations, for the
+  GNOME 3 desktop. It allows you to read, find and send email with a
+  straightforward, modern interface.</p>
 
-    <p>The main Geary window is divided into several areas:</p>
-    
-    <section id="folder-list">
+  <p>Conversations allow you to read a complete discussion without
+  having to find and click from message to message.</p>
+
+  <p>The main Geary window is divided into several areas: The folder
+  list, the conversation list, and the conversation viewer.</p>
+
+  <section id="folder-list">
     <title>Folder list</title>
-    <p>The <em>folder list</em> at the left displays all <em>folders</em> and
-    <em>labels</em> in your mail account.  Geary uses the term <em>label</em> for any folder
-    that you have created to help organize your messages.  (The Gmail web interface
-    also uses this term; most other mail services do not.)</p>
-    </section>
-    
-    <section id="conversation-list">
+
+    <p>The <em>folder list</em> displays all <em>folders</em> and
+    <em>labels</em> for your email accounts. Geary uses the term
+    <em>label</em> for any folder that you have created to organize
+    your email messages.</p>
+
+    <p>Select a folder or label to display the conversations it
+    contains in the conversation list.</p>
+  </section>
+
+  <section id="conversation-list">
     <title>Conversation list</title>
-    <p>The <em>conversation list</em> displays a list of conversations in the
-    selected folder.  Newer conversations appear at the top.</p>
-    <p>Each sender's name appears bold if there are unread messages from that sender.
-    If a conversation has more than one message, Geary displays a count of messages
-    in the conversation.</p>
-    <p>Geary does not automatically download all messages in all of your mail folders. When you first visit your Inbox or any other folder, Geary downloads the 50 most recent messages in that folder. To see more messages, simply scroll down the conversation list and Geary will fetch more messages automatically.</p> 
-	
-    <p>Some commands in Geary can
-    act on a group of conversations.  To select multiple conversations, hold down the
-    <key>Ctrl</key> key and click each conversation in turn in the conversation list.
-    Alternatively, click the first
-    conversation in a range, then hold down <key>Shift</key> and click the last conversation.</p>
-    </section>
-    
-    <section id="message-area">
-    <title>Message area</title>
-    <p>The <em>message area</em> displays all messages in the selected conversation,
-    with the oldest message at the top.</p>
-    <p>At the upper right of each message, Geary displays a dropdown arrow that
-    lets you open the <em>message menu</em> with commands that operate on the message.</p>
-   	<p>When you view a conversation, Geary collapses messages that you've already read. Click collapsed messages to expand them. Click an expanded message's header to collapse it.</p>
-    <p>Any attachments in a message appear at the bottom of the message.  You can click
-    an attachment to open it or right-click to save it.</p>
-    <p>Geary uses <link href="https://secure.gravatar.com/">Gravatar</link> to display an avatar for each
-    message's sender in its header.</p>
 
-    </section>
-	
+    <p>The <em>conversation list</em> displays a list of
+    conversations in the selected folder. Newer conversations appear
+    at the top.</p>
+
+    <p>Each sender’s name appears bold if there are unread messages
+    from that sender. If a conversation has more than one message,
+    Geary displays a count of messages in the conversation.</p>
+
+    <p>Geary does not automatically download all messages in all of
+    your mail folders. When you first visit your Inbox or any other
+    folder, Geary downloads the most recent messages in that
+    folder. To see more messages, simply scroll down the conversation
+    list and Geary will fetch more messages automatically.</p>
+
+    <p>Some commands in Geary can act on a group of conversations. To
+    select multiple conversations, hold down the <key>Ctrl</key> key
+    and click each conversation in turn in the conversation list.
+    Alternatively, click the first conversation in a range, then hold
+    down <key>Shift</key> and click the last conversation.</p>
+  </section>
+
+  <section id="conversation-viewer">
+    <title>Conversation viewer</title>
+
+    <p>The <em>conversation viewer</em> displays all email messages in
+    the selected conversation, with the oldest message at the top.</p>
+
+    <p>When you view a conversation, Geary collapses messages that
+    you’ve already read. Click collapsed messages to expand
+    them. Click an expanded message’s header to collapse it.</p>
+
+    <p>Click on any of the sender’s or receiver’s names or email
+    address for a message to open the <em>contact menu</em>, which
+    displays additional information and options for the email
+    address. You can to start a new conversation, copy the email
+    address to the clipboard, and search for related conversations. If
+    the email address is present in your desktop address book, it will
+    show the contact’s photo, preferred name, and whether they are a
+    favourite contact. You can also open the contact in the address
+    book. If the email address is not already present, you can choose
+    to add them to the address book, and update the remote image
+    loading preference for that address.</p>
+
+    <p>Click the star button present on each message to mark or
+    un-mark a message as being starred. Staring a message will mark
+    the whole conversation as starred, and Geary will display the
+    first starred message in a conversation when returning to it.</p>
+
+    <p>Click the menu button present on each message to open the
+    <em>message menu</em>, which allows you to reply and forward to a
+    specific message, update which messages have been marked as read
+    or unread, print a message, and so on.</p>
+
+    <p>Any attachments in a message appear at the bottom of the
+    message. Double click an attachment to open it, or use the Open and Save
+    buttons to open and save selected attachments.</p>
+  </section>
+
 </page>
-

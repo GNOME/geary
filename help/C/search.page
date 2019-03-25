@@ -29,7 +29,7 @@
 	</tr>
 	<tr>
 		<td><p><input>bcc:<var>recipient</var></input></p></td>
-		<td><p>Finds messages where <var>recipient</var> matches the BCC header.</p></td>
+		<td><p>Finds messages where <var>recipient</var> matches email BCC fields.</p></td>
 	</tr>
 	<tr>
 		<td><p><input>body:<var>text</var></input></p></td>
@@ -37,11 +37,11 @@
 	</tr>
 	<tr>
 		<td><p><input>cc:<var>recipient</var></input></p></td>
-		<td><p>Finds messages where <var>recipient</var> matches the CC header.</p></td>
+		<td><p>Finds messages where <var>recipient</var> matches email CC fields.</p></td>
 	</tr>
 	<tr>
 		<td><p><input>from:<var>sender</var></input></p></td>
-		<td><p>Finds messages where <var>sender</var> matches the From header.</p></td>
+		<td><p>Finds messages where <var>sender</var> matches email From fields.</p></td>
 	</tr>
 	<tr>
 		<td><p><input>is:read</input></p></td>
@@ -61,7 +61,7 @@
 	</tr>
 	<tr>
 		<td><p><input>to:<var>recipient</var></input></p></td>
-		<td><p>Finds messages where <var>recipient</var> matches the To, CC, or BCC header.</p></td>
+		<td><p>Finds messages where <var>recipient</var> matches email To, CC, or BCC fields.</p></td>
 	</tr>
 	</table>
 
