@@ -805,7 +805,6 @@ public class GearyController : Geary.BaseObject {
             context.authentication_prompting = false;
         } else {
             context.authentication_prompting = true;
-            this.application.present();
             PasswordDialog password_dialog = new PasswordDialog(
                 this.application.get_active_window(),
                 account,
@@ -1289,7 +1288,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_indicator_activated_application(uint32 timestamp) {
-        this.application.present();
+        this.main_window.present();
     }
 
     private void on_indicator_activated_composer(uint32 timestamp) {
@@ -2245,8 +2244,8 @@ public class GearyController : Geary.BaseObject {
 
         // Find out what to do with the inline composers.
         // TODO: Remove this in favor of automatically saving drafts
-        this.application.present();
         Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
+        this.main_window.present();
         foreach (ComposerWidget cw in composer_widgets) {
             if (cw.state != ComposerWidget.ComposerState.DETACHED)
                 composers_to_destroy.add(cw);
@@ -2427,7 +2426,6 @@ public class GearyController : Geary.BaseObject {
     }
 
     private bool confirm_delete(int num_messages) {
-        this.application.present();
         ConfirmationDialog dialog = new ConfirmationDialog(main_window, ngettext(
             "Do you want to permanently delete this message?",
             "Do you want to permanently delete these messages?", num_messages),
