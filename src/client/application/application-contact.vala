@@ -95,6 +95,36 @@ public class Application.Contact : Geary.BaseObject {
         update_individual(null);
     }
 
+    /**
+     * Determines if this contact is equal to another.
+     *
+     * Returns true if the other contact has the same Folks
+     * individual, engine contact, or if none of the above display
+     * name.
+     */
+    public bool equal_to(Contact? other) {
+        if (other == null) {
+            return false;
+        }
+        if (this == other) {
+            return true;
+        }
+
+        if (this.individual != null) {
+            return (
+                other.individual != null &&
+                this.individual.id == other.individual.id
+            );
+        } else if (this.contact != null) {
+            return (
+                other.contact != null &&
+                this.contact.email == other.contact.email
+            );
+        }
+
+        return (this.display_name == other.display_name);
+    }
+
     /** Invokes the desktop contacts application to save this contact. */
     public async void save_to_desktop(GLib.Cancellable? cancellable)
         throws GLib.Error {

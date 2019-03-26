@@ -68,6 +68,10 @@ public class Conversation.ContactPopover : Gtk.Popover {
     private GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
 
 
+    /** Fired when the remote resources load pref changes */
+    public signal void load_remote_resources_changed(bool enabled);
+
+
     public ContactPopover(Gtk.Widget relative_to,
                           Application.Contact contact,
                           Geary.RFC822.MailboxAddress mailbox) {
@@ -178,6 +182,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     private async void set_load_remote_resources(bool enabled) {
         try {
             yield this.contact.set_remote_resource_loading(enabled, null);
+            load_remote_resources_changed(enabled);
         } catch (GLib.Error err) {
             debug("Failed to set load remote resources for contact %s:, %s",
                   this.contact.to_string(), err.message);

@@ -964,6 +964,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private void show_images(bool remember) {
         start_progress_loading();
+        this.remote_images_infobar.hide();
         this.load_remote_resources = true;
         this.remote_resources_requested = 0;
         this.remote_resources_loaded = 0;
@@ -1065,6 +1066,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             );
             popover.load_avatar.begin();
             popover.set_position(Gtk.PositionType.BOTTOM);
+            popover.load_remote_resources_changed.connect((enabled) => {
+                    if (this.primary_contact.equal_to(address_child.contact) &&
+                        enabled) {
+                        show_images(false);
+                    }
+                });
             popover.closed.connect(() => {
                     address_child.unset_state_flags(Gtk.StateFlags.ACTIVE);
                 });
@@ -1196,11 +1203,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
             break;
         default:
-            // Pass
+            this.remote_images_infobar.hide();
             break;
         }
-
-        remote_images_infobar.hide();
     }
 
     private void on_copy_link(Variant? param) {
