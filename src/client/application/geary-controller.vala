@@ -1755,11 +1755,11 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_show_move_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.copy_message_button.clicked();
+        this.main_window.main_toolbar.move_message_button.clicked();
     }
 
     private void on_show_copy_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.move_message_button.clicked();
+        this.main_window.main_toolbar.copy_message_button.clicked();
     }
 
     private async void mark_as_spam_toggle_async(Cancellable? cancellable) {
