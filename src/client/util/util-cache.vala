@@ -59,6 +59,13 @@ public class Util.Cache.Lru<T> : Geary.BaseObject {
     }
 
     /**
+     * Determines if the given key exists in the cache.
+     */
+    public bool has_key(string key) {
+        return this.cache.has_key(key);
+    }
+
+    /**
      * Sets an entry in the cache, replacing any existing entry.
      *
      * The entry is added to the back of the removal queue. If adding
