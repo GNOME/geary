@@ -180,6 +180,10 @@ grid.geary-message-summary {
   font-size: 80%;
 }
 
+.geary-contact-popover .geary-deceptive {
+  font-weight: bold;
+}
+
 /* Composer */
 
 .geary-composer-embed headerbar {

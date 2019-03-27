@@ -146,9 +146,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 // reduce the chance of the user of being tricked by
                 // malware.
                 primary.set_text(display_address);
-                this.displayed = new Geary.RFC822.MailboxAddress(
-                    null, this.source.address
-                );
+                // Use the source as the displayed address so that the
+                // contact popover uses the spoofed mailbox and
+                // displays it as being spoofed.
+                this.displayed = this.source;
             } else if (this.contact.is_trusted) {
                 // The contact's name can be trusted, so no need to
                 // display the email address

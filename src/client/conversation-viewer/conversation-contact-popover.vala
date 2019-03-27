@@ -42,6 +42,9 @@ public class Conversation.ContactPopover : Gtk.Popover {
     private GLib.Cancellable load_cancellable = new GLib.Cancellable();
 
     [GtkChild]
+    private Gtk.Grid contact_pane;
+
+    [GtkChild]
     private Gtk.Image avatar;
 
     [GtkChild]
@@ -64,6 +67,15 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     [GtkChild]
     private Gtk.ModelButton load_remote_button;
+
+    [GtkChild]
+    private Gtk.Grid deceptive_pane;
+
+    [GtkChild]
+    private Gtk.Label forged_email_label;
+
+    [GtkChild]
+    private Gtk.Label actual_email_label;
 
     private GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
 
@@ -125,40 +137,52 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void update() {
-        string display_name = this.contact.display_name;
-        this.contact_name.set_text(display_name);
+        if (!this.mailbox.is_spoofed()) {
+            this.contact_pane.show();
+            this.deceptive_pane.hide();
 
-        if (!this.contact.display_name_is_email) {
-            this.contact_address.set_text(this.mailbox.address);
+            string display_name = this.contact.display_name;
+            this.contact_name.set_text(display_name);
+
+            if (!this.contact.display_name_is_email) {
+                this.contact_address.set_text(this.mailbox.address);
+            } else {
+                this.contact_name.vexpand = true;
+                this.contact_name.valign = FILL;
+                this.contact_address.hide();
+            }
+
+            bool is_desktop = this.contact.is_desktop_contact;
+
+            bool starred = false;
+            bool unstarred = false;
+            if (is_desktop) {
+                starred = this.contact.is_favourite;
+                unstarred = !this.contact.is_favourite;
+            }
+            this.starred_button.set_visible(starred);
+            this.unstarred_button.set_visible(unstarred);
+
+            this.open_button.set_visible(is_desktop);
+            this.save_button.set_visible(!is_desktop);
+            this.load_remote_button.set_visible(!is_desktop);
+
+            GLib.SimpleAction load_remote = (GLib.SimpleAction)
+                actions.lookup_action(ACTION_LOAD_REMOTE);
+            load_remote.set_state(
+                new GLib.Variant.boolean(
+                    is_desktop || this.contact.load_remote_resources
+                )
+            );
         } else {
-            this.contact_name.vexpand = true;
-            this.contact_name.valign = FILL;
-            this.contact_address.hide();
+            this.deceptive_pane.show();
+            this.contact_pane.hide();
+
+            this.forged_email_label.label = Geary.String.reduce_whitespace(
+                this.mailbox.name
+            );
+            this.actual_email_label.label = this.mailbox.address;
         }
-
-        bool is_desktop = this.contact.is_desktop_contact;
-
-        bool starred = false;
-        bool unstarred = false;
-        if (is_desktop) {
-            starred = this.contact.is_favourite;
-            unstarred = !this.contact.is_favourite;
-        }
-        this.starred_button.set_visible(starred);
-        this.unstarred_button.set_visible(unstarred);
-
-
-        this.open_button.set_visible(is_desktop);
-        this.save_button.set_visible(!is_desktop);
-        this.load_remote_button.set_visible(!is_desktop);
-
-        GLib.SimpleAction load_remote = (GLib.SimpleAction)
-            actions.lookup_action(ACTION_LOAD_REMOTE);
-        load_remote.set_state(
-            new GLib.Variant.boolean(
-                is_desktop || this.contact.load_remote_resources
-            )
-        );
     }
 
     private async void open() {
