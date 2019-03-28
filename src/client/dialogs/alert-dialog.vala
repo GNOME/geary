@@ -7,17 +7,23 @@
 class AlertDialog : Object {
     private Gtk.MessageDialog dialog;
 
-    public AlertDialog(Gtk.Window? parent, Gtk.MessageType message_type, string title, string? description,
-        string? ok_button, string? cancel_button, string? tertiary_button,
-        Gtk.ResponseType tertiary_response_type, string? ok_action_type) {
+    public AlertDialog(Gtk.Window? parent, Gtk.MessageType message_type, string title,
+        string? description, string? ok_button, string? cancel_button, string? tertiary_button,
+        Gtk.ResponseType tertiary_response_type, string? ok_action_type,
+        string? tertiary_action_type = "", Gtk.ResponseType? default_response = null) {
+
         dialog = new Gtk.MessageDialog(parent, Gtk.DialogFlags.DESTROY_WITH_PARENT, message_type,
             Gtk.ButtonsType.NONE, "");
 
         dialog.text = title;
         dialog.secondary_text = description;
 
-        if (!Geary.String.is_empty_or_whitespace(tertiary_button))
-            dialog.add_button(tertiary_button, tertiary_response_type);
+        if (!Geary.String.is_empty_or_whitespace(tertiary_button)) {
+            Gtk.Widget? button = dialog.add_button(tertiary_button, tertiary_response_type);
+            if (!Geary.String.is_empty_or_whitespace(tertiary_action_type)) {
+                button.get_style_context().add_class(tertiary_action_type);
+            }
+        }
 
         if (!Geary.String.is_empty_or_whitespace(cancel_button))
             dialog.add_button(cancel_button, Gtk.ResponseType.CANCEL);
@@ -27,6 +33,10 @@ class AlertDialog : Object {
             if (!Geary.String.is_empty_or_whitespace(ok_action_type)) {
                 button.get_style_context().add_class(ok_action_type);
             }
+        }
+
+        if (default_response != null) {
+            dialog.set_default_response(default_response);
         }
     }
 
@@ -64,9 +74,13 @@ class ConfirmationDialog : AlertDialog {
 
 class TernaryConfirmationDialog : AlertDialog {
     public TernaryConfirmationDialog(Gtk.Window? parent, string title, string? description,
-        string? ok_button, string? tertiary_button, Gtk.ResponseType tertiary_response_type, string? ok_action_type = "") {
-        base (parent, Gtk.MessageType.WARNING, title, description, ok_button, Stock._CANCEL, tertiary_button,
-            tertiary_response_type, ok_action_type);
+        string? ok_button, string? tertiary_button, Gtk.ResponseType tertiary_response_type,
+        string? ok_action_type = "", string? tertiary_action_type = "",
+        Gtk.ResponseType? default_response = null) {
+
+        base (parent, Gtk.MessageType.WARNING, title, description, ok_button, Stock._CANCEL,
+            tertiary_button, tertiary_response_type, ok_action_type, tertiary_action_type,
+            default_response);
     }
 }
 
