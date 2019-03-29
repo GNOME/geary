@@ -263,11 +263,16 @@ public class GearyController : Geary.BaseObject {
         Folks.IndividualAggregator individuals =
             Folks.IndividualAggregator.dup();
         if (!individuals.is_prepared) {
-            try {
-                yield individuals.prepare();
-            } catch (GLib.Error err) {
-                error("Error preparing Folks: %s", err.message);
-            }
+            // Do this in the background since it can take a long time
+            // on some systems and the GUI shouldn't be blocked by it
+            individuals.prepare.begin((obj, res) => {
+                    try {
+                        individuals.prepare.end(res);
+                    } catch (GLib.Error err) {
+                        warning("Error preparing Folks: %s", err.message);
+                    }
+                });
+
         }
         this.avatar_store = new Application.AvatarStore(individuals);
 
