@@ -1136,7 +1136,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 null,
                 Stock._KEEP,
                 Stock._DISCARD, Gtk.ResponseType.CLOSE,
-                "suggested-action"
+                "",
+                "destructive-action",
+                Gtk.ResponseType.OK // Default == Keep
             );
             Gtk.ResponseType response = dialog.run();
             if (response == Gtk.ResponseType.CANCEL ||
