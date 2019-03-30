@@ -1,0 +1,99 @@
+/*
+ * Copyright 2019 Michael Gratton <mike@vee.net>
+ *
+ * This software is licensed under the GNU Lesser General Public License
+ * (version 2.1 or later). See the COPYING file in this distribution.
+ */
+
+class Integration.Imap.ClientSession : TestCase {
+
+
+    private Configuration config;
+    private Geary.Imap.ClientSession? session;
+
+
+    public ClientSession(Configuration config) {
+        base("Integration.Imap.ClientSession");
+        this.config = config;
+        add_test("session_connect", session_connect);
+
+        add_test("login_password_invalid", login_password_invalid);
+        if (config.provider == GMAIL ||
+            config.provider == OUTLOOK) {
+            add_test("login_oauth2_invalid", login_oauth2_invalid);
+        }
+
+        add_test("initiate_session", initiate_session);
+    }
+
+    public override void set_up() {
+        this.session = new Geary.Imap.ClientSession(
+            this.config.target
+        );
+    }
+
+    public override void tear_down() throws GLib.Error {
+        if (this.session.get_protocol_state(null) != UNCONNECTED) {
+            this.session.disconnect_async.begin(null, async_complete_full);
+            this.session.disconnect_async.end(async_result());
+        }
+        this.session = null;
+    }
+
+    public void session_connect() throws GLib.Error {
+        this.session.connect_async.begin(null, async_complete_full);
+        this.session.connect_async.end(async_result());
+
+        this.session.disconnect_async.begin(null, async_complete_full);
+        this.session.disconnect_async.end(async_result());
+    }
+
+    public void login_password_invalid() throws GLib.Error {
+        do_connect();
+
+        Geary.Credentials password_creds = new Geary.Credentials(
+            PASSWORD, "automated-integration-test", "password"
+        );
+        this.session.login_async.begin(
+            password_creds, null, async_complete_full
+        );
+        try {
+            this.session.login_async.end(async_result());
+            assert_not_reached();
+        } catch (Geary.ImapError.UNAUTHENTICATED err) {
+            // All good
+        }
+    }
+
+    public void login_oauth2_invalid() throws GLib.Error {
+        do_connect();
+
+        Geary.Credentials oauth2_creds = new Geary.Credentials(
+            OAUTH2, "automated-integration-test", "password"
+        );
+        this.session.login_async.begin(
+            oauth2_creds, null, async_complete_full
+        );
+        try {
+            this.session.login_async.end(async_result());
+            assert_not_reached();
+        } catch (Geary.ImapError.UNAUTHENTICATED err) {
+            // All good
+        }
+    }
+
+    public void initiate_session() throws GLib.Error {
+        do_connect();
+
+        this.session.initiate_session_async.begin(
+            this.config.credentials, null, async_complete_full
+        );
+        this.session.initiate_session_async.end(async_result());
+    }
+
+    private void do_connect() throws GLib.Error {
+        this.session.connect_async.begin(null, async_complete_full);
+        this.session.connect_async.end(async_result());
+    }
+
+}

@@ -1,0 +1,107 @@
+/*
+ * Copyright 2019 Michael Gratton <mike@vee.net>
+ *
+ * This software is licensed under the GNU Lesser General Public License
+ * (version 2.1 or later). See the COPYING file in this distribution.
+ */
+
+
+private const int TIMEOUT = 5;
+
+
+public struct Integration.Configuration {
+
+    Geary.Protocol type;
+    Geary.ServiceProvider provider;
+    Geary.ServiceInformation service;
+    Geary.Endpoint target;
+    Geary.Credentials credentials;
+
+}
+
+
+int main(string[] args) {
+    /*
+     * Initialise all the things.
+     */
+
+    Test.init(ref args);
+
+    Geary.RFC822.init();
+    Geary.HTML.init();
+    Geary.Logging.init();
+    Geary.Logging.log_to(stderr);
+    GLib.Log.set_default_handler(Geary.Logging.default_handler);
+
+    Integration.Configuration config = load_config(args);
+
+    /*
+     * Hook up all tests into appropriate suites
+     */
+
+    TestSuite integration = new TestSuite("integration");
+
+    switch (config.type) {
+    case IMAP:
+        integration.add_suite(
+            new Integration.Imap.ClientSession(config).get_suite()
+        );
+        break;
+    }
+
+    /*
+     * Run the tests
+     */
+    TestSuite root = TestSuite.get_root();
+    root.add_suite(integration);
+
+    MainLoop loop = new MainLoop();
+
+    int ret = -1;
+    Idle.add(() => {
+            ret = Test.run();
+            loop.quit();
+            return false;
+        });
+
+    loop.run();
+    return ret;
+}
+
+private Integration.Configuration load_config(string[] args) {
+    int i = 1;
+    try {
+        Geary.Protocol type = Geary.Protocol.for_value(args[i++]);
+        Geary.ServiceProvider provider = Geary.ServiceProvider.for_value(
+            args[i++]
+        );
+        Geary.ServiceInformation service = new Geary.ServiceInformation(
+            type, provider
+        );
+
+        if (provider == OTHER) {
+            service.host = args[i++];
+            service.port = service.get_default_port();
+        }
+
+        Geary.Credentials credentials = new Geary.Credentials(
+            PASSWORD, args[i++], args[i++]
+        );
+
+        provider.set_service_defaults(service);
+
+        Geary.Endpoint target = new Geary.Endpoint(
+            new NetworkAddress(service.host, service.port),
+            service.transport_security,
+            TIMEOUT
+        );
+
+        return { type, provider, service, target, credentials };
+    } catch (GLib.Error err) {
+        error(
+            "Error loading config: %s",
+            (new Geary.ErrorContext(err)).format_full_error()
+        );
+    }
+
+}
