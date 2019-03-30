@@ -256,6 +256,14 @@ public abstract class TestCase : Object {
         this.main_loop.wakeup();
     }
 
+    protected void async_complete_full(GLib.Object? object,
+                                       AsyncResult result) {
+        this.async_results.push(result);
+        // notify the loop so that if async_result() has already been
+        // called, that method won't block
+        this.main_loop.wakeup();
+    }
+
     protected AsyncResult async_result() {
         AsyncResult? result = null;
         while (result == null) {
