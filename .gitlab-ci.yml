@@ -2,11 +2,7 @@
 # Geary CI config.
 #
 
-include: 'https://gitlab.gnome.org/GNOME/citemplates/raw/master/flatpak/flatpak_ci_initiative.yml'
-
 variables:
-  # Flatpak CI vars
-  BUNDLE: geary-dev.flatpak
 
   # Build
   BUILD_DIR: build
@@ -14,15 +10,6 @@ variables:
   BUILD_CMD: ninja -v -C $BUILD_DIR
   TEST_CMD: xvfb-run meson test -v --no-stdsplit -C $BUILD_DIR
   INSTALL_CMD: ninja -v -C $BUILD_DIR install
-
-  # Fedora packages
-  FEDORA_DEPS: vala gobject-introspection-devel
-               meson desktop-file-utils libcanberra-devel libgee-devel
-               glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel
-               webkitgtk4-devel libsecret-devel libxml2-devel vala-tools
-               gcr-devel enchant2-devel libunwind-devel iso-codes-devel
-               gnome-online-accounts-devel itstool json-glib-devel
-  FEDORA_TEST_DEPS: Xvfb tar xz
 
   # Ubuntu & Debian packages
   UBUNTU_DEPS: valac libgirepository1.0-dev
@@ -34,21 +21,9 @@ variables:
                libmessaging-menu-dev libunity-dev libjson-glib-dev
   UBUNTU_TEST_DEPS: xauth xvfb
 
-fedora:
-  stage: build
-  image: fedora:latest
-  before_script:
-    - dnf update -y --nogpgcheck
-    - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
-  script:
-    - $CONFIG_CMD
-    - $BUILD_CMD
-    - $TEST_CMD
-    - $INSTALL_CMD
-
 ubuntu:
   stage: build
-  image: ubuntu:rolling
+  image: ubuntu:bionic
   before_script:
     - apt-get update
     - apt-get install -q -y --no-install-recommends $UBUNTU_DEPS $UBUNTU_TEST_DEPS
@@ -66,24 +41,3 @@ deb-package:
     - apt-get install -q -y --no-install-recommends packaging-dev $UBUNTU_DEPS
   script:
     - dpkg-buildpackage -b -us -uc
-
-flatpak:
-  image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master'
-  variables:
-    APP_ID: org.gnome.Geary
-    FLATPAK_MODULE: geary
-    MANIFEST_PATH: org.gnome.Geary.json
-    MESON_ARGS: "-Dprofile=Devel"
-    RUNTIME_REPO: "https://sdk.gnome.org/gnome-nightly.flatpakrepo"
-    TEST_BUILD_ARGS: "--env=CI_RUNNER_DESCRIPTION=${CI_RUNNER_DESCRIPTION}"
-  extends: .flatpak
-
-review:
-    stage: deploy
-    dependencies:
-      - flatpak
-    extends: .review
-
-stop_review:
-    stage: deploy
-    extends: .stop_review
