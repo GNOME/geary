@@ -218,10 +218,6 @@ row.geary-settings {
   padding: 0px;
 }
 
-row.geary-settings image {
-  padding: 0px 6px;
-}
-
 row.geary-settings entry {
   border-width: 0px;
   background-color: transparent;
@@ -271,6 +267,14 @@ frame.geary-settings.geary-signature {
   min-height: 5em;
 }
 
+/* Images should have some padding to offset them from adjacent
+widgets, but care ust be taken since images are also used as children
+of other widgets like entries, comboboxes and switches, and these
+shouldn't be be touched. */
+row.geary-settings widget > image,
+row.geary-settings grid > image {
+  padding: 0px 6px;
+}
 
 row.geary-settings > grid > combobox,
 row.geary-settings > grid > entry,
