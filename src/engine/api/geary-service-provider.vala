@@ -29,8 +29,7 @@ public enum Geary.ServiceProvider {
         );
     }
 
-
-    internal void set_account_defaults(AccountInformation service) {
+    public void set_account_defaults(AccountInformation service) {
         switch (this) {
         case GMAIL:
             ImapEngine.GmailAccount.setup_account(service);
@@ -44,7 +43,7 @@ public enum Geary.ServiceProvider {
         }
     }
 
-    internal void set_service_defaults(ServiceInformation service) {
+    public void set_service_defaults(ServiceInformation service) {
         switch (this) {
         case GMAIL:
             ImapEngine.GmailAccount.setup_service(service);

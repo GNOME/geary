@@ -87,6 +87,12 @@ geary_test_client_sources = [
   geary_resources
 ]
 
+geary_test_integration_sources = [
+  'test-integration.vala',
+
+  'integration/imap/client-session.vala',
+]
+
 geary_test_lib_dependencies = [
   gee,
   gio,
@@ -103,7 +109,7 @@ geary_test_client_dependencies = [
 ]
 geary_test_client_dependencies += geary_client_dependencies
 
-geary_test_lib = static_library('geary-test-lib',
+geary_test_lib = static_library('test-lib',
   geary_test_lib_sources,
   dependencies: geary_test_lib_dependencies,
   include_directories: config_h_dir,
@@ -111,7 +117,7 @@ geary_test_lib = static_library('geary-test-lib',
   c_args: geary_c_options,
 )
 
-geary_test_engine_bin = executable('geary-test-engine',
+geary_test_engine_bin = executable('test-engine',
   geary_test_engine_sources,
   link_with: geary_test_lib,
   dependencies: geary_test_engine_dependencies,
@@ -120,9 +126,24 @@ geary_test_engine_bin = executable('geary-test-engine',
   c_args: geary_c_options,
 )
 
-geary_test_client_bin = executable('geary-test-client',
+geary_test_client_bin = executable('test-client',
   geary_test_client_sources,
   dependencies: geary_test_client_dependencies,
+  link_with: geary_test_lib,
+  include_directories: config_h_dir,
+  vala_args: geary_vala_options,
+  c_args: geary_c_options,
+)
+
+geary_test_integration_bin = executable('test-integration',
+  geary_test_integration_sources,
+  dependencies: [
+    geary_engine_dep,
+    gee,
+    gio,
+    gmime,
+    webkit2gtk,
+  ],
   link_with: geary_test_lib,
   include_directories: config_h_dir,
   vala_args: geary_vala_options,
