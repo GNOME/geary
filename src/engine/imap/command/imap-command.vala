@@ -243,9 +243,17 @@ public class Geary.Imap.Command : BaseObject {
             );
         }
 
+        check_has_status();
+
         // Since this is part of the public API, perform a strict
         // check on the status code.
-        check_status(true);
+        if (this.status.status == Status.BAD) {
+            throw new ImapError.SERVER_ERROR(
+                "%s: Command failed: %s",
+                to_brief_string(),
+                this.status.to_string()
+            );
+        }
     }
 
     public virtual string to_string() {
@@ -276,9 +284,8 @@ public class Geary.Imap.Command : BaseObject {
         this.response_timer.reset();
         this.complete_lock.blind_notify();
         cancel_send();
-        // Since this gets called by the client connection only check
-        // for an expected server response, good or bad
-        check_status(false);
+
+        check_has_status();
     }
 
     /**
@@ -340,7 +347,7 @@ public class Geary.Imap.Command : BaseObject {
         }
     }
 
-    private void check_status(bool require_okay) throws ImapError {
+    private void check_has_status() throws ImapError {
         if (this.status == null) {
             throw new ImapError.SERVER_ERROR(
                 "%s: No command response was received",
@@ -351,16 +358,6 @@ public class Geary.Imap.Command : BaseObject {
         if (!this.status.is_completion) {
             throw new ImapError.SERVER_ERROR(
                 "%s: Command status response is not a completion: %s",
-                to_brief_string(),
-                this.status.to_string()
-            );
-        }
-
-        // XXX should we be distinguishing between NO and BAD
-        // responses here?
-        if (require_okay && this.status.status != Status.OK) {
-            throw new ImapError.SERVER_ERROR(
-                "%s: Command failed: %s",
                 to_brief_string(),
                 this.status.to_string()
             );
