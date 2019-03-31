@@ -18,8 +18,8 @@
    sodipodi:docname="responsive.svg"
    inkscape:version="0.92.4 5da689c313, 2019-01-14"
    inkscape:export-filename="/home/mjog/Projects/GNOME/geary-ux/ux/main-window/responsive.png"
-   inkscape:export-xdpi="200.0047"
-   inkscape:export-ydpi="200.0047">
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs11857">
     <inkscape:perspective
@@ -864,11 +864,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.24748737"
-     inkscape:cx="847.64211"
-     inkscape:cy="810.08501"
+     inkscape:zoom="0.98994948"
+     inkscape:cx="989.18864"
+     inkscape:cy="1920.9424"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g15831-4"
      showgrid="false"
      units="px"
      inkscape:window-width="1536"
@@ -892,7 +892,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1175,7 +1175,7 @@
           </g>
           <g
              id="g22519-3-3-2-7"
-             transform="translate(-1224.8784,253.47301)">
+             transform="translate(-1235.9913,253.47301)">
             <rect
                style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ebebeb;fill-opacity:1;fill-rule:nonzero;stroke:#a7a7a7;stroke-width:0.26458335;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
                id="rect22493-6-6-9-3"
@@ -1329,6 +1329,57 @@
                  transform="translate(-140.0002,-645.96875)"
                  id="g22515-3-0-1-5-1"
                  style="display:inline;fill:#2e3436;fill-opacity:1" />
+            </g>
+          </g>
+          <g
+             id="g7619-1-3-6"
+             transform="translate(-403.08567,-391.84369)">
+            <rect
+               inkscape:export-ydpi="90"
+               inkscape:export-xdpi="90"
+               inkscape:export-filename="/home/lapo.fedora/SparkleShare/gnome-mockups/content selection/content-selection.png"
+               ry="0.79374999"
+               rx="0.79374963"
+               y="963.08679"
+               x="4410.3428"
+               height="8.7312498"
+               width="8.7312498"
+               id="rect7607-5-6-0"
+               style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#eaeaea;fill-opacity:1;fill-rule:nonzero;stroke:#919191;stroke-width:0.26458326;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+            <rect
+               style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#eaeaea;fill-opacity:1;fill-rule:nonzero;stroke:#a7a7a7;stroke-width:0.26458326;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+               id="rect7609-4-75-6"
+               width="8.7312498"
+               height="8.7312498"
+               x="4410.3447"
+               y="963.08606"
+               rx="0.79374963"
+               ry="0.79374999"
+               inkscape:export-filename="/home/lapo.fedora/SparkleShare/gnome-mockups/content selection/content-selection.png"
+               inkscape:export-xdpi="90"
+               inkscape:export-ydpi="90" />
+            <g
+               style="display:inline;fill:#2e3436;fill-opacity:1"
+               id="g7617-9-3-2"
+               transform="matrix(0.26458334,0,0,0.26458334,4380.5791,728.00367)">
+              <circle
+                 style="opacity:1;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1.18518567;stroke-opacity:0.97254902"
+                 id="circle7611-2-5-6"
+                 cx="129.0002"
+                 cy="899"
+                 r="2" />
+              <circle
+                 r="2"
+                 cy="905"
+                 cx="129.0002"
+                 id="circle7613-5-6-1"
+                 style="opacity:1;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1.18518567;stroke-opacity:0.97254902" />
+              <circle
+                 style="opacity:1;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1.18518567;stroke-opacity:0.97254902"
+                 id="circle7615-7-2-8"
+                 cx="129.0002"
+                 cy="911"
+                 r="2" />
             </g>
           </g>
         </g>
@@ -2051,8 +2102,9 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
            id="flowPara4776"><flowSpan
    style="font-weight:bold"
-   id="flowSpan15913">Conversation list</flowSpan>:  Same header as the folders view, but with an a back to return to Folders</flowPara></flowRoot>      <g
-         id="g15755">
+   id="flowSpan15913">Conversation list</flowSpan>:  Same view as is desktop mode, but with an Back button to return to Folders. Search and secondary menu not included initially. </flowPara></flowRoot>      <g
+         id="g15755"
+         transform="translate(0,5.2916667)">
         <rect
            style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;color-interpolation:sRGB;color-interpolation-filters:linearRGB;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
            id="rect7339"
@@ -2423,64 +2475,7 @@
              x="176.071"
              y="-389.58182">Folder</tspan></text>
         <g
-           id="g23574-7"
-           transform="translate(-1213.4421,-1462.6375)">
-          <rect
-             inkscape:export-ydpi="90"
-             inkscape:export-xdpi="90"
-             inkscape:export-filename="/home/lapo.fedora/SparkleShare/gnome-mockups/content selection/content-selection.png"
-             ry="0.79374999"
-             rx="0.79374999"
-             y="1069.1862"
-             x="1425.9723"
-             height="8.7312822"
-             width="8.7312498"
-             id="rect23559-5"
-             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ebebeb;fill-opacity:1;fill-rule:nonzero;stroke:#a7a7a7;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
-          <rect
-             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:0;fill-rule:nonzero;stroke:none;stroke-width:0.26458332;marker:none;enable-background:accumulate"
-             id="rect23561-9"
-             width="4.2333331"
-             height="4.2333331"
-             x="1428.2212"
-             y="1071.4351" />
-          <g
-             style="display:inline"
-             transform="matrix(0.26458333,0,0,0.26458333,1422.9289,998.41007)"
-             id="g23572-2"
-             inkscape:label="open-menu">
-            <rect
-               y="276"
-               x="20"
-               height="16"
-               width="16"
-               id="rect23563-2"
-               style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:none;stroke:none;stroke-width:1;marker:none" />
-            <rect
-               y="278.99979"
-               x="23.000198"
-               height="2.0002136"
-               width="9.9996014"
-               id="rect23565-8"
-               style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1;marker:none" />
-            <rect
-               y="282.99979"
-               x="23.000198"
-               height="2.0002136"
-               width="9.9996014"
-               id="rect23567-9"
-               style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1;marker:none" />
-            <rect
-               y="286.99979"
-               x="23.000198"
-               height="2.0002136"
-               width="9.9996014"
-               id="rect23570-7"
-               style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1;marker:none" />
-          </g>
-        </g>
-        <g
-           transform="translate(-5031.0579,-711.16859)"
+           transform="translate(-5030.4991,-711.00398)"
            id="g22519-3-3">
           <rect
              inkscape:export-ydpi="90"
@@ -2608,10 +2603,61 @@
              id="tspan4089-3"
              x="176.071"
              y="-385.2446">Account</tspan></text>
+        <g
+           id="g7619-1-3-9"
+           transform="translate(-4197.5935,-1356.3207)">
+          <rect
+             inkscape:export-ydpi="90"
+             inkscape:export-xdpi="90"
+             inkscape:export-filename="/home/lapo.fedora/SparkleShare/gnome-mockups/content selection/content-selection.png"
+             ry="0.79374999"
+             rx="0.79374963"
+             y="963.08679"
+             x="4410.3428"
+             height="8.7312498"
+             width="8.7312498"
+             id="rect7607-5-6-1"
+             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#eaeaea;fill-opacity:1;fill-rule:nonzero;stroke:#919191;stroke-width:0.26458326;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+          <rect
+             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#eaeaea;fill-opacity:1;fill-rule:nonzero;stroke:#a7a7a7;stroke-width:0.26458326;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+             id="rect7609-4-75-2"
+             width="8.7312498"
+             height="8.7312498"
+             x="4410.3447"
+             y="963.08606"
+             rx="0.79374963"
+             ry="0.79374999"
+             inkscape:export-filename="/home/lapo.fedora/SparkleShare/gnome-mockups/content selection/content-selection.png"
+             inkscape:export-xdpi="90"
+             inkscape:export-ydpi="90" />
+          <g
+             style="display:inline;fill:#2e3436;fill-opacity:1"
+             id="g7617-9-3-7"
+             transform="matrix(0.26458334,0,0,0.26458334,4380.5791,728.00367)">
+            <circle
+               style="opacity:1;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1.18518567;stroke-opacity:0.97254902"
+               id="circle7611-2-5-0"
+               cx="129.0002"
+               cy="899"
+               r="2" />
+            <circle
+               r="2"
+               cy="905"
+               cx="129.0002"
+               id="circle7613-5-6-9"
+               style="opacity:1;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1.18518567;stroke-opacity:0.97254902" />
+            <circle
+               style="opacity:1;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1.18518567;stroke-opacity:0.97254902"
+               id="circle7615-7-2-3"
+               cx="129.0002"
+               cy="911"
+               r="2" />
+          </g>
+        </g>
       </g>
       <g
          id="g16249-5"
-         transform="translate(115.96193,11.132767)">
+         transform="translate(115.96193,16.424434)">
         <rect
            style="display:inline;fill:#f2f2f2;fill-opacity:1;stroke:#a7a7a7;stroke-width:0.26458332;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
            id="rect23492-5"
@@ -2759,7 +2805,7 @@
            id="path32346" />
       </g>
       <flowRoot
-         transform="matrix(0.26458333,0,0,0.26458333,186.82766,-503.4476)"
+         transform="matrix(0.26458333,0,0,0.26458333,186.82766,-498.15593)"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:0.01%;font-family:Cantarell;-inkscape-font-specification:Cantarell;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          id="flowRoot23616-3-5"
          xml:space="preserve"><flowRegion
@@ -2791,13 +2837,16 @@
              width="714.05084"
              id="rect23610"
              style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;font-family:Cantarell;-inkscape-font-specification:Cantarell" /></flowRegion><flowPara
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
-           id="flowPara23614"><flowSpan
-   style="font-weight:bold"
-   id="flowSpan15911">Folders</flowSpan>: Same as the sidebar in desktop mode, but</flowPara><flowPara
            id="flowPara4764"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436">with the global hamburger menu</flowPara></flowRoot>      <g
-         id="g15258">
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"><flowSpan
+   style="font-weight:bold"
+   id="flowSpan15911">Folders</flowSpan>: Same view as in desktop mode. Primary</flowPara><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
+           id="flowPara2201">menu containing app menu and folder-specific options</flowPara><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
+           id="flowPara2215">only.</flowPara></flowRoot>      <g
+         id="g15258"
+         transform="translate(0,5.2916667)">
         <rect
            transform="rotate(-90)"
            y="15.28662"
@@ -3294,7 +3343,7 @@
       </g>
       <g
          id="g16249"
-         transform="translate(2.7773856,10.583333)">
+         transform="translate(2.7773856,15.875)">
         <rect
            style="display:inline;fill:#f2f2f2;fill-opacity:1;stroke:#a7a7a7;stroke-width:0.26458332;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
            id="rect23492"
@@ -3387,7 +3436,7 @@
         </g>
       </g>
       <flowRoot
-         transform="matrix(0.26458333,0,0,0.26458333,73.705208,-503.99708)"
+         transform="matrix(0.26458333,0,0,0.26458333,73.705208,-498.70541)"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:0.01%;font-family:Cantarell;-inkscape-font-specification:Cantarell;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          id="flowRoot23616-3"
          xml:space="preserve"><flowRegion
@@ -3420,8 +3469,11 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
            id="flowPara4776-6"><flowSpan
    style="font-weight:bold"
-   id="flowSpan15913-8">Conversation</flowSpan>:  Same header as the folders view, but with an a back to return to Folders</flowPara></flowRoot>      <g
-         id="g15755-9">
+   id="flowSpan15913-8">Conversation</flowSpan>:  Same view as in desktop mode. Back</flowPara><flowPara
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
+           id="flowPara2219">returns to conversation list. Find button invokes in-conversation find. Secondary menu hasview options.</flowPara></flowRoot>      <g
+         id="g15755-9"
+         transform="translate(0,5.2916667)">
         <rect
            style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;color-interpolation:sRGB;color-interpolation-filters:linearRGB;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
            id="rect7339-2"
@@ -3792,64 +3844,7 @@
              x="176.071"
              y="-387.46512">Subject</tspan></text>
         <g
-           id="g23574-7-6"
-           transform="translate(-1213.4421,-1462.6375)">
-          <rect
-             inkscape:export-ydpi="90"
-             inkscape:export-xdpi="90"
-             inkscape:export-filename="/home/lapo.fedora/SparkleShare/gnome-mockups/content selection/content-selection.png"
-             ry="0.79374999"
-             rx="0.79374999"
-             y="1069.1862"
-             x="1425.9723"
-             height="8.7312822"
-             width="8.7312498"
-             id="rect23559-5-1"
-             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ebebeb;fill-opacity:1;fill-rule:nonzero;stroke:#a7a7a7;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
-          <rect
-             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:0;fill-rule:nonzero;stroke:none;stroke-width:0.26458332;marker:none;enable-background:accumulate"
-             id="rect23561-9-1"
-             width="4.2333331"
-             height="4.2333331"
-             x="1428.2212"
-             y="1071.4351" />
-          <g
-             style="display:inline"
-             transform="matrix(0.26458333,0,0,0.26458333,1422.9289,998.41007)"
-             id="g23572-2-5"
-             inkscape:label="open-menu">
-            <rect
-               y="276"
-               x="20"
-               height="16"
-               width="16"
-               id="rect23563-2-9"
-               style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:none;stroke:none;stroke-width:1;marker:none" />
-            <rect
-               y="278.99979"
-               x="23.000198"
-               height="2.0002136"
-               width="9.9996014"
-               id="rect23565-8-8"
-               style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1;marker:none" />
-            <rect
-               y="282.99979"
-               x="23.000198"
-               height="2.0002136"
-               width="9.9996014"
-               id="rect23567-9-4"
-               style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1;marker:none" />
-            <rect
-               y="286.99979"
-               x="23.000198"
-               height="2.0002136"
-               width="9.9996014"
-               id="rect23570-7-8"
-               style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1;marker:none" />
-          </g>
-        </g>
-        <g
-           transform="translate(-5031.0579,-711.16859)"
+           transform="translate(-5030.5287,-711.16859)"
            id="g22519-3-3-1">
           <rect
              inkscape:export-ydpi="90"
@@ -3927,9 +3922,60 @@
                inkscape:label="categories" />
           </g>
         </g>
+        <g
+           id="g7619-1-3"
+           transform="translate(-4197.6231,-1356.4853)">
+          <rect
+             inkscape:export-ydpi="90"
+             inkscape:export-xdpi="90"
+             inkscape:export-filename="/home/lapo.fedora/SparkleShare/gnome-mockups/content selection/content-selection.png"
+             ry="0.79374999"
+             rx="0.79374963"
+             y="963.08679"
+             x="4410.3428"
+             height="8.7312498"
+             width="8.7312498"
+             id="rect7607-5-6"
+             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#eaeaea;fill-opacity:1;fill-rule:nonzero;stroke:#919191;stroke-width:0.26458326;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+          <rect
+             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#eaeaea;fill-opacity:1;fill-rule:nonzero;stroke:#a7a7a7;stroke-width:0.26458326;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+             id="rect7609-4-75"
+             width="8.7312498"
+             height="8.7312498"
+             x="4410.3447"
+             y="963.08606"
+             rx="0.79374963"
+             ry="0.79374999"
+             inkscape:export-filename="/home/lapo.fedora/SparkleShare/gnome-mockups/content selection/content-selection.png"
+             inkscape:export-xdpi="90"
+             inkscape:export-ydpi="90" />
+          <g
+             style="display:inline;fill:#2e3436;fill-opacity:1"
+             id="g7617-9-3"
+             transform="matrix(0.26458334,0,0,0.26458334,4380.5791,728.00367)">
+            <circle
+               style="opacity:1;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1.18518567;stroke-opacity:0.97254902"
+               id="circle7611-2-5"
+               cx="129.0002"
+               cy="899"
+               r="2" />
+            <circle
+               r="2"
+               cy="905"
+               cx="129.0002"
+               id="circle7613-5-6"
+               style="opacity:1;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1.18518567;stroke-opacity:0.97254902" />
+            <circle
+               style="opacity:1;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:1.18518567;stroke-opacity:0.97254902"
+               id="circle7615-7-2"
+               cx="129.0002"
+               cy="911"
+               r="2" />
+          </g>
+        </g>
       </g>
       <flowRoot
-         transform="matrix(0.26458333,0,0,0.26458333,186.82766,-503.4476)"
+         transform="matrix(0.26458333,0,0,0.26458333,186.82766,-498.15593)"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:0.01%;font-family:Cantarell;-inkscape-font-specification:Cantarell;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          id="flowRoot23616-3-5-8"
          xml:space="preserve"><flowRegion
@@ -3944,7 +3990,7 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
            id="flowPara16286-4-9">Here, an action bar is displayed by default.</flowPara></flowRoot>      <g
          id="g16249-5-9"
-         transform="translate(115.96746,-31.011912)">
+         transform="translate(115.96746,-25.720245)">
         <rect
            style="display:inline;fill:#f2f2f2;fill-opacity:1;stroke:#a7a7a7;stroke-width:0.26458332;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
            id="rect23492-5-6"
@@ -4071,7 +4117,7 @@
         </g>
       </g>
       <g
-         transform="matrix(0.26458333,0,0,0.26458333,142.04473,-253.15789)"
+         transform="matrix(0.26458333,0,0,0.26458333,142.04473,-247.86622)"
          style="color:#000000;fill:#474747"
          id="g33212">
         <path
@@ -4145,8 +4191,9 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
            id="flowPara4776-6-7"><flowSpan
    style="font-weight:bold"
-   id="flowSpan10608">Composer</flowSpan>:  Same header as the folders view, but with an a back to return to Folders</flowPara></flowRoot>      <g
-         id="g15755-9-9">
+   id="flowSpan10608">Composer</flowSpan>:  Header bar title is updated to reflect subject when entered. Secondary menu contains composer options such as rich/plain mode.</flowPara></flowRoot>      <g
+         id="g15755-9-9"
+         transform="translate(0,5.2916667)">
         <rect
            style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;color-interpolation:sRGB;color-interpolation-filters:linearRGB;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
            id="rect7339-2-3"
@@ -4517,7 +4564,8 @@
              x="176.071"
              y="-387.46512">New conversation</tspan></text>
         <g
-           id="g6666">
+           id="g6666"
+           transform="translate(0,0.52916667)">
           <rect
              style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#f8f7f7;fill-opacity:1;fill-rule:nonzero;stroke:#a7a7a7;stroke-width:0.26458323;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
              id="rect72892-5-8"
@@ -4540,7 +4588,7 @@
              inkscape:export-ydpi="90" />
         </g>
         <g
-           transform="translate(20.425368)"
+           transform="translate(20.425368,0.52916667)"
            id="g6666-3">
           <rect
              style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#f8f7f7;fill-opacity:1;fill-rule:nonzero;stroke:#a7a7a7;stroke-width:0.26458323;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
@@ -4580,7 +4628,7 @@
              inkscape:export-ydpi="90" />
         </g>
         <g
-           transform="translate(60.39635,0.09449405)"
+           transform="translate(60.39635,0.62366072)"
            id="g6666-3-7">
           <rect
              style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#f8f7f7;fill-opacity:1;fill-rule:nonzero;stroke:#a7a7a7;stroke-width:0.26458323;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
@@ -4606,7 +4654,7 @@
         <g
            inkscape:export-ydpi="96"
            inkscape:export-xdpi="96"
-           transform="translate(-1439.123,-1436.4554)"
+           transform="translate(-1439.123,-1435.9262)"
            id="g29272-1-0-0-5-5">
           <rect
              style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#eaeaea;fill-opacity:1;fill-rule:nonzero;stroke:#919191;stroke-width:0.26458326;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
@@ -4680,7 +4728,7 @@
         </g>
       </g>
       <flowRoot
-         transform="matrix(0.26458333,0,0,0.26458333,186.82766,-503.4476)"
+         transform="matrix(0.26458333,0,0,0.26458333,186.82766,-498.15593)"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:0.01%;font-family:Cantarell;-inkscape-font-specification:Cantarell;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          id="flowRoot23616-3-5-8-64"
          xml:space="preserve"><flowRegion
@@ -4695,7 +4743,7 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
            id="flowPara16286-4-9-0">Here, an action bar is displayed by default.</flowPara></flowRoot>      <g
          id="g16249-5-9-4"
-         transform="translate(115.96746,-31.011912)">
+         transform="translate(115.96746,-25.720245)">
         <rect
            style="display:inline;fill:#f2f2f2;fill-opacity:1;stroke:#a7a7a7;stroke-width:0.26458332;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
            id="rect23492-5-6-8"
@@ -4784,15 +4832,15 @@
         </g>
       </g>
       <rect
-         y="-349.70917"
+         y="-343.71851"
          x="128.65623"
-         height="92.707603"
+         height="92.008629"
          width="94.985428"
          id="rect8841"
          style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#babdb6;stroke-width:0.26458329;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          ry="0" />
       <g
-         transform="matrix(0.26458333,0,0,0.26458333,97.126503,-488.74437)"
+         transform="matrix(0.26458333,0,0,0.26458333,97.126503,-482.9235)"
          style="display:inline"
          id="g10240">
         <rect
@@ -4817,7 +4865,7 @@
              style="opacity:1;fill:#000000;fill-opacity:0.43983406">To</tspan></text>
       </g>
       <g
-         transform="matrix(0.26458333,0,0,0.26458333,97.126503,-478.6902)"
+         transform="matrix(0.26458333,0,0,0.26458333,97.126503,-472.86933)"
          style="display:inline"
          id="g10240-6">
         <rect
@@ -4843,7 +4891,7 @@
       </g>
     </g>
     <g
-       transform="translate(341.97941,101.10507)"
+       transform="translate(341.97941,106.39674)"
        id="g15755-9-9-3">
       <rect
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;color-interpolation:sRGB;color-interpolation-filters:linearRGB;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
@@ -5363,7 +5411,7 @@
          xml:space="preserve"
          id="flowRoot4778-9-9-7"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:0.01%;font-family:Cantarell;-inkscape-font-specification:Cantarell;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         transform="matrix(0.26458333,0,0,0.26458333,188.28278,-691.86306)"><flowRegion
+         transform="matrix(0.26458333,0,0,0.26458333,188.28278,-695.03808)"><flowRegion
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;font-family:Cantarell;-inkscape-font-specification:Cantarell"
            id="flowRegion4772-2-1-3"><rect
              style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;font-family:Cantarell;-inkscape-font-specification:Cantarell"
@@ -5375,7 +5423,7 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.66666698px;line-height:1.25;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#2e3436"
            id="flowPara4776-6-7-1"><flowSpan
    style="font-weight:bold"
-   id="flowSpan10608-9">Composer</flowSpan>:  Alternative with subject in the header bar and replies dfault to dorpdowns instead of text fields.</flowPara></flowRoot>      <rect
+   id="flowSpan10608-9">Composer</flowSpan>:  Alternative with subject in the header bar and replies default to drop-downs instead of text fields.</flowPara></flowRoot>      <rect
          style="display:inline;fill:#f2f2f2;fill-opacity:1;stroke:#a7a7a7;stroke-width:0.26458332;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="rect7341-6-6-4-0"
          width="94.985535"
@@ -5928,7 +5976,7 @@
          style="display:inline;fill:#2e3436;fill-opacity:1;stroke:none;stroke-width:0.26458332" />
     </g>
     <rect
-       y="-258.53635"
+       y="-253.24467"
        x="470.59119"
        height="40.924873"
        width="94.985435"
@@ -5936,7 +5984,7 @@
        style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458329;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        ry="0" />
     <g
-       transform="matrix(0.26458333,0,0,0.26458333,439.10591,-387.63922)"
+       transform="matrix(0.26458333,0,0,0.26458333,439.10591,-382.34755)"
        style="display:inline"
        id="g10240-8">
       <rect
@@ -5963,8 +6011,19 @@
     <path
        inkscape:connector-curvature="0"
        id="path36422-0"
-       d="m 470.56142,-258.46303 95.11454,0.0716"
+       d="m 470.56142,-253.17136 95.11454,0.0716"
        style="fill:none;stroke:#a7a7a7;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="39.555889"
+       y="-258.65338"
+       id="text2205"><tspan
+         sodipodi:role="line"
+         id="tspan2203"
+         x="39.555889"
+         y="-249.28961"
+         style="stroke-width:0.26458332"></tspan></text>
   </g>
 </svg>
