@@ -62,6 +62,12 @@ class Integration.Imap.ClientSession : TestCase {
             assert_not_reached();
         } catch (Geary.ImapError.UNAUTHENTICATED err) {
             // All good
+        } catch (Geary.ImapError.SERVER_ERROR err) {
+            // Some servers (Y!) return AUTHORIZATIONFAILED response
+            // code if the login (not password) is bad
+            if (!("AUTHORIZATIONFAILED" in err.message)) {
+                throw err;
+            }
         }
     }
 
