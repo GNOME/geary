@@ -513,9 +513,9 @@ public class Accounts.Manager : GLib.Object {
         string? goa_id = metadata_config.get_string(METADATA_GOA, null);
         bool is_goa = (goa_id != null);
 
-        // This exists purely for people were running master with GOA
+        // This exists purely for people were running mainline with GOA
         // accounts before the new accounts editor landed and 0.13 was
-        // released. It can be removed once 0.14 is out.
+        // released. It can be removed once 3.34 is out.
         if (goa_id == null && id.has_prefix(GOA_ID_PREFIX)) {
             goa_id = to_goa_id(id);
             is_goa = true;

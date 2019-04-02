@@ -12,7 +12,7 @@
  * Each database supports multiple {@link Connection}s that allow SQL
  * queries to be executed, however if a single connection is required
  * by an app, this class also provides convenience methods to execute
- * queries against a common ''master'' connection.
+ * queries against a common ''primary'' connection.
  *
  * This class offers a number of asynchronous methods, however since
  * SQLite only supports a synchronous API, these are implemented using
@@ -62,7 +62,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         }
     }
 
-    private Connection? master_connection = null;
+    private Connection? primary = null;
     private int outstanding_async_jobs = 0;
     private ThreadPool<TransactionAsyncJob>? thread_pool = null;
     private unowned PrepareConnection? prepare_cb = null;
@@ -176,19 +176,21 @@ public class Geary.Db.Database : Geary.Db.Context {
     }
 
     /**
-     * Closes the Database, releasing any resources it may hold, including the master connection.
+     * Closes the database, releasing any resources it may hold.
      *
-     * Note that closing a Database does not close or invalidate Connections it has spawned nor does
-     * it cancel any scheduled asynchronous jobs pending or in execution.  All Connections,
-     * Statements, and Results will be able to communicate with the database.  Only when they are
-     * destroyed is the Database object finally destroyed.
+     * Note that closing a Database does not close or invalidate
+     * Connections it has spawned nor does it cancel any scheduled
+     * asynchronous jobs pending or in execution.  All Connections,
+     * Statements, and Results will be able to communicate with the
+     * database.  Only when they are destroyed is the Database object
+     * finally destroyed.
      */
     public virtual void close(Cancellable? cancellable = null) throws Error {
         if (!is_open)
             return;
 
-        // drop the master connection, which holds a ref back to this object
-        master_connection = null;
+        // drop the primary connection, which holds a ref back to this object
+        this.primary = null;
 
         // As per the contract above, can't simply drop the thread and connection pools; that would
         // be bad.
@@ -216,7 +218,9 @@ public class Geary.Db.Database : Geary.Db.Context {
         return cx;
     }
 
-    private Connection internal_open_connection(bool master, Cancellable? cancellable) throws Error {
+    private Connection internal_open_connection(bool is_primary,
+                                                GLib.Cancellable? cancellable)
+        throws GLib.Error {
         check_open();
 
         int sqlite_flags = (flags & DatabaseFlags.READ_ONLY) != 0
@@ -232,69 +236,93 @@ public class Geary.Db.Database : Geary.Db.Context {
 
         Connection cx = new Connection(this, sqlite_flags, cancellable);
         if (prepare_cb != null)
-            prepare_cb(cx, master);
+            prepare_cb(cx, is_primary);
 
         return cx;
     }
 
     /**
-     * The master connection is a general-use connection many of the calls in Database (including
-     * exec(), exec_file(), query(), prepare(), and exec_trnasaction()) use to perform their work.
-     * It can also be used by the caller if a dedicated Connection is not required.
+     * Returns the primary connection for the database.
      *
-     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     * The primary connection is a general-use connection many of the
+     * calls in Database (including exec(), exec_file(), query(),
+     * prepare(), and exec_transaction()) use to perform their work.
+     * It can also be used by the caller if a dedicated Connection is
+     * not required.
+     *
+     * Throws {@link DatabaseError.OPEN_REQUIRED} if not open.
      */
-    public Connection get_master_connection() throws Error {
-        if (master_connection == null)
-            master_connection = internal_open_connection(true, null);
+    public Connection get_primary_connection() throws GLib.Error {
+        if (this.primary == null)
+            this.primary = internal_open_connection(true, null);
 
-        return master_connection;
+        return this.primary;
     }
 
     /**
-     * Calls Connection.exec() on the master connection.
+     * Executes a statement from a string using the primary connection.
      *
-     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     * This is a convenience method for calling {@link
+     * Connection.exec} on the connection returned by {@link
+     * get_primary_connection}. Throws {@link
+     * DatabaseError.OPEN_REQUIRED} if not open.
      */
-    public void exec(string sql, Cancellable? cancellable = null) throws Error {
-        get_master_connection().exec(sql, cancellable);
+    public void exec(string sql, GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        get_primary_connection().exec(sql, cancellable);
     }
 
     /**
-     * Calls Connection.exec_file() on the master connection.
+     * Executes a statement from a file using the primary connection.
      *
-     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     * This is a convenience method for calling {@link
+     * Connection.exec_file} on the connection returned by {@link
+     * get_primary_connection}. Throws {@link
+     * DatabaseError.OPEN_REQUIRED} if not open.
      */
-    public void exec_file(File file, Cancellable? cancellable = null) throws Error {
-        get_master_connection().exec_file(file, cancellable);
+    public void exec_file(File file, GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        get_primary_connection().exec_file(file, cancellable);
     }
 
     /**
-     * Calls Connection.prepare() on the master connection.
+     * Prepares a statement from a string using the primary connection.
      *
-     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     * This is a convenience method for calling {@link
+     * Connection.prepare} on the connection returned by {@link
+     * get_primary_connection}. Throws {@link
+     * DatabaseError.OPEN_REQUIRED} if not open.
      */
-    public Statement prepare(string sql) throws Error {
-        return get_master_connection().prepare(sql);
+    public Statement prepare(string sql) throws GLib.Error {
+        return get_primary_connection().prepare(sql);
     }
 
     /**
-     * Calls Connection.query() on the master connection.
+     * Executes a query using the primary connection.
      *
-     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     * This is a convenience method for calling {@link
+     * Connection.query} on the connection returned by {@link
+     * get_primary_connection}. Throws {@link
+     * DatabaseError.OPEN_REQUIRED} if not open.
      */
-    public Result query(string sql, Cancellable? cancellable = null) throws Error {
-        return get_master_connection().query(sql, cancellable);
+    public Result query(string sql, GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        return get_primary_connection().query(sql, cancellable);
     }
 
     /**
-     * Calls Connection.exec_transaction() on the master connection.
+     * Executes a transaction using the primary connection.
      *
-     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     * This is a convenience method for calling {@link
+     * Connection.exec_transaction} on the connection returned by
+     * {@link get_primary_connection}. Throws {@link
+     * DatabaseError.OPEN_REQUIRED} if not open.
      */
-    public TransactionOutcome exec_transaction(TransactionType type, TransactionMethod cb,
-        Cancellable? cancellable = null) throws Error {
-        return get_master_connection().exec_transaction(type, cb, cancellable);
+    public TransactionOutcome exec_transaction(TransactionType type,
+                                               TransactionMethod cb,
+                                               GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        return get_primary_connection().exec_transaction(type, cb, cancellable);
     }
 
     /**
@@ -311,8 +339,8 @@ public class Geary.Db.Database : Geary.Db.Context {
      */
     public async TransactionOutcome exec_transaction_async(TransactionType type,
                                                            TransactionMethod cb,
-                                                           Cancellable? cancellable)
-        throws Error {
+                                                           GLib.Cancellable? cancellable)
+        throws GLib.Error {
         TransactionAsyncJob job = new TransactionAsyncJob(
             null, type, cb, cancellable
         );
@@ -339,7 +367,7 @@ public class Geary.Db.Database : Geary.Db.Context {
 
     // This method must be thread-safe.
     private void on_async_job(owned TransactionAsyncJob job) {
-        // *never* use master connection for threaded operations
+        // *never* use primary connection for threaded operations
         Connection? cx = job.cx;
         Error? open_err = null;
         if (cx == null) {

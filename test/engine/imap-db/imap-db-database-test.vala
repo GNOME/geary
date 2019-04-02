@@ -47,7 +47,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
 
         // Need to get a connection since the database doesn't
         // actually get created until then
-        db.get_master_connection();
+        db.get_primary_connection();
 
         // Need to close it again to stop the GC process running
         db.close();
