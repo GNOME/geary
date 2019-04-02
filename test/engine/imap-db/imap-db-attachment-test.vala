@@ -156,7 +156,7 @@ CREATE TABLE MessageAttachmentTable (
         GMime.Part part = new_part(null, ENCODED_BODY.data);
 
         Gee.List<Attachment> attachments = Attachment.save_attachments(
-            this.db.get_master_connection(),
+            this.db.get_primary_connection(),
             this.tmp_dir,
             1,
             new Gee.ArrayList<Geary.RFC822.Part>.wrap({
@@ -210,7 +210,7 @@ CREATE TABLE MessageAttachmentTable (
             ));
 
         Gee.List<Attachment> attachments = Attachment.save_attachments(
-            this.db.get_master_connection(),
+            this.db.get_primary_connection(),
             this.tmp_dir,
             1,
             new Gee.ArrayList<Geary.RFC822.Part>.wrap({
@@ -271,7 +271,7 @@ abriquent pour te la vendre une =C3=A2me vulgaire.""";
         );
 
         Gee.List<Attachment> attachments = Attachment.save_attachments(
-            this.db.get_master_connection(),
+            this.db.get_primary_connection(),
             this.tmp_dir,
             1,
             new Gee.ArrayList<Geary.RFC822.Part>.wrap({
@@ -299,7 +299,7 @@ VALUES (2, 'text/plain');
 """);
 
         Gee.List<Attachment> loaded = Attachment.list_attachments(
-            this.db.get_master_connection(),
+            this.db.get_primary_connection(),
             GLib.File.new_for_path("/tmp"),
             1,
             null
@@ -313,7 +313,7 @@ VALUES (2, 'text/plain');
         GMime.Part part = new_part(null, ENCODED_BODY.data);
 
         Gee.List<Attachment> attachments = Attachment.save_attachments(
-            this.db.get_master_connection(),
+            this.db.get_primary_connection(),
             this.tmp_dir,
             1,
             new Gee.ArrayList<Geary.RFC822.Part>.wrap({
@@ -331,7 +331,7 @@ VALUES (2, 'text/plain');
 """);
 
         Attachment.delete_attachments(
-            this.db.get_master_connection(), this.tmp_dir, 1, null
+            this.db.get_primary_connection(), this.tmp_dir, 1, null
         );
 
         Geary.Db.Result result = this.db.query(

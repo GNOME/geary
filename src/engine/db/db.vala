@@ -56,7 +56,8 @@ public enum ResetScope {
  *
  * This callback may be called in the context of a background thread.
  */
-public delegate void PrepareConnection(Connection cx, bool master) throws Error;
+public delegate void PrepareConnection(Connection cx, bool is_primary)
+    throws GLib.Error;
 
 /**
  * See Connection.exec_transaction() for more information on how this delegate is used.

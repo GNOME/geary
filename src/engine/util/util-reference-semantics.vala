@@ -13,8 +13,8 @@
  * feature (via WeakPointers), but Vala does not implement the weak keyword in this way currently
  * and does not (today) have semantics to be notified when the weak reference has turned to null.
  *
- * Additionally, there are situations where an Object may be held in some master table inside an
- * object and references to it are handed out to one or more callers.  The master class would like
+ * Additionally, there are situations where an Object may be held in some primary table inside an
+ * object and references to it are handed out to one or more callers.  The primary class would like
  * to know when all those references have been dropped although (of course) Object has not been
  * destroyed (even with a proper weak ref) because it's held in a table.  Even if a
  * WeakReferenceTable is somehow implemented and used, there are situations where it's necessary to

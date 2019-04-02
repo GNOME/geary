@@ -29,7 +29,7 @@ class Geary.Db.DatabaseTest : TestCase {
 
         // Need to get a connection since the database doesn't
         // actually get created until then
-        db.get_master_connection();
+        db.get_primary_connection();
     }
 
     public void open_existing() throws Error {
@@ -47,7 +47,7 @@ class Geary.Db.DatabaseTest : TestCase {
 
         // Need to get a connection since the database doesn't
         // actually get created until then
-        db.get_master_connection();
+        db.get_primary_connection();
 
         tmp_file.delete();
     }
@@ -68,7 +68,7 @@ class Geary.Db.DatabaseTest : TestCase {
 
         // Need to get a connection since the database doesn't
         // actually get created until then
-        db.get_master_connection();
+        db.get_primary_connection();
 
         db.file.delete();
         tmp_dir.delete();
@@ -92,7 +92,7 @@ class Geary.Db.DatabaseTest : TestCase {
 
         // Need to get a connection since the database doesn't
         // actually get created until then
-        db.get_master_connection();
+        db.get_primary_connection();
 
         db.file.delete();
         db.file.get_parent().delete();
@@ -117,7 +117,7 @@ class Geary.Db.DatabaseTest : TestCase {
 
         // Need to get a connection since the database doesn't
         // actually get created until then
-        db.get_master_connection();
+        db.get_primary_connection();
 
         db.file.delete();
         tmp_dir.delete();
@@ -141,7 +141,7 @@ class Geary.Db.DatabaseTest : TestCase {
 
         // Need to get a connection since the database doesn't
         // actually get created until then
-        db.get_master_connection();
+        db.get_primary_connection();
 
         db.file.delete();
         tmp_dir.delete();
@@ -166,7 +166,7 @@ class Geary.Db.DatabaseTest : TestCase {
 
         // Need to get a connection since the database doesn't
         // actually get created until then
-        db.get_master_connection();
+        db.get_primary_connection();
 
         db.file.delete();
         db.file.get_parent().delete();
