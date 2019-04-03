@@ -205,10 +205,10 @@ public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses
 
     switch (format) {
         case TextFormat.HTML:
-            return HTML.escape_markup(addresses.to_string());
+            return HTML.escape_markup(addresses.to_full_display());
 
         case TextFormat.PLAIN:
-            return addresses.to_string();
+            return addresses.to_full_display();
 
         default:
             assert_not_reached();
