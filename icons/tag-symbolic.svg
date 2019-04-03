@@ -5,51 +5,31 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   version="1.1"
-   id="Layer_1"
-   x="0px"
-   y="0px"
-   width="100"
-   height="85.323997"
-   viewBox="0 0 100 85.323997"
-   enable-background="new 0 0 100 100"
-   xml:space="preserve"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="tag-symbolic.svg"><metadata
-     id="metadata13"><rdf:RDF><cc:Work
-         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
-     id="defs11" /><sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="769"
-     inkscape:window-height="480"
-     id="namedview9"
-     showgrid="false"
-     inkscape:zoom="2.36"
-     inkscape:cx="50"
-     inkscape:cy="43.028"
-     inkscape:window-x="842"
-     inkscape:window-y="293"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="Layer_1"
-     fit-margin-top="0"
-     fit-margin-left="0"
-     fit-margin-right="0"
-     fit-margin-bottom="0" /><path
-     d="M 85.32,50.237 50.236,85.324 0,35.086 V 10.529 L 10.529,0 H 35.084 L 85.32,50.237 z M 13.289,13.288 c -1.41,1.412 -1.41,3.706 10e-4,5.118 1.41,1.411 3.706,1.411 5.116,0 1.413,-1.409 1.413,-3.706 0,-5.118 -1.41,-1.408 -3.707,-1.408 -5.117,0 z"
-     id="path3"
-     style="fill:#bebebe;fill-opacity:1"
-     inkscape:connector-curvature="0" /><path
-     style="fill:#bebebe;fill-opacity:1"
-     d="M 92.728,50.237 61.28,81.688 64.916,85.324 100,50.237 49.765,0 42.491,0 z"
-     id="polygon7"
-     inkscape:connector-curvature="0" /></svg>
+   id="svg7384"
+   height="16"
+   width="16"
+   version="1.1">
+  <title
+     id="title9167">Gnome Symbolic Icon Theme</title>
+  <defs
+     id="defs9" />
+  <metadata
+     id="metadata90">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Gnome Symbolic Icon Theme</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <path
+     id="path855"
+     d="m 1,1 v 6.0008052 l 7.9783226,7.9783228 c 0.5857862,0.585786 1.5355344,0.585786 2.1213204,0 l 0.0097,-0.0097 3.87942,-3.87942 0.0097,-0.0097 c 0.585786,-0.585786 0.585786,-1.535534 0,-2.1213204 L 7.0394752,1 Z m 2.4775289,2.4403054 c 0.271447,-0.271447 0.6464468,-0.4391799 1.0606602,-0.4391797 0.8284268,3e-7 1.4998395,0.671413 1.4998398,1.4998398 4e-7,0.8284269 -0.6714131,1.4998403 -1.4998399,1.49984 -0.8284275,4e-7 -1.4998402,-0.6714123 -1.4998398,-1.4998399 -2e-7,-0.4142134 0.1677334,-0.7892139 0.4391797,-1.0606602 z"
+     style="display:inline;fill:#bebebe;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1">
+    <title
+       id="title864">tag-symbolic</title>
+  </path>
+</svg>
