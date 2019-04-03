@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Generator: Adobe Illustrator 15.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -9,21 +7,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg7384"
+   height="16"
+   width="16"
    version="1.1"
-   id="Layer_1"
-   x="0px"
-   y="0px"
-   width="100px"
-   height="100px"
-   viewBox="0 0 100 100"
-   enable-background="new 0 0 100 100"
-   xml:space="preserve"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="outbox-symbolic.svg"><metadata
-     id="metadata11"><rdf:RDF><cc:Work
-         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
-     id="defs9" /><sodipodi:namedview
+   sodipodi:docname="mail-outbox-symbolic.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1"
@@ -32,21 +22,47 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1274"
-     inkscape:window-height="717"
-     id="namedview7"
+     inkscape:window-width="1257"
+     inkscape:window-height="781"
+     id="namedview11"
      showgrid="false"
-     inkscape:zoom="2.36"
-     inkscape:cx="-27.966102"
-     inkscape:cy="50"
-     inkscape:window-x="232"
-     inkscape:window-y="108"
+     inkscape:zoom="14.75"
+     inkscape:cx="-1.8983051"
+     inkscape:cy="7.4576271"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="0"
-     inkscape:current-layer="Layer_1" /><path
-     style="fill:#bebebe;fill-opacity:1"
-     d="M 75.969,6 61,6 61,12 72.031,12 93.296,61 69,61 58,72 42,72 31,61 6.704,61 27.969,12 39,12 39,6 24.031,6 0,61.377 0,100 l 100,0 0,-38.623 z"
-     id="polygon3" /><path
-     transform="matrix(1,0,0,-1,0,67)"
-     style="fill:#bebebe;fill-opacity:1"
-     d="M 57,41 57,0 43,0 43,41 30,41 50,61 70,41 z"
-     id="polygon5" /></svg>
+     inkscape:current-layer="g11511" />
+  <title
+     id="title9167">Gnome Symbolic Icon Theme</title>
+  <defs
+     id="defs9" />
+  <metadata
+     id="metadata90">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Gnome Symbolic Icon Theme</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     style="display:inline"
+     transform="translate(493.20782,-3647.9158)"
+     id="g11511">
+    <title
+       id="title1701">mail-inbox-symbolic</title>
+    <path
+       id="path11507"
+       d="m -486.20783,3657.9157 v -5.5625 l -1.28125,1.2812 c -0.18816,0.1882 -0.45345,0.2813 -0.71875,0.2813 h -1 v -1 c 10e-6,-0.2653 0.0931,-0.5306 0.28125,-0.7188 l 3,-3 0.28125,-0.2812 h 0.875 l 0.28125,0.2812 3,3 c 0.18819,0.1882 0.28124,0.4535 0.28125,0.7188 v 1 h -1 c -0.2653,0 -0.53059,-0.093 -0.71875,-0.2813 l -1.28125,-1.2812 v 5.5625 z"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;overflow:visible;visibility:visible;fill:#bebebe;fill-opacity:1;stroke:none;stroke-width:2;marker:none;enable-background:accumulate" />
+    <path
+       id="path11509"
+       transform="translate(678.79217,1775.9158)"
+       d="m -1169,1881 v 2 0.502 2.498 a 0.9999947,0.9999947 0 0 0 0.9727,0.998 v 0 H -1160 a 0.9999947,0.9999947 0 0 0 1,-1 v -3 -2 h -2 v 2 h -6 v -2 z m 3.4941,3 h 3 c 0.277,0 0.5,0.223 0.5,0.5 0,0.277 -0.223,0.5 -0.5,0.5 h -3 c -0.277,0 -0.5,-0.223 -0.5,-0.5 0,-0.277 0.223,-0.5 0.5,-0.5 z"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#bebebe;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;marker:none;enable-background:accumulate" />
+  </g>
+</svg>
