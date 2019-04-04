@@ -40,12 +40,6 @@ private class Geary.App.RemoveOperation : ConversationOperation {
             trimmed,
             (this.source_folder == this.monitor.base_folder) ? this.removed_ids : null
         );
-
-        // Check we still have enough conversations if any were
-        // removed
-        if (!removed.is_empty) {
-            this.monitor.check_window_count();
-        }
     }
 
 }
