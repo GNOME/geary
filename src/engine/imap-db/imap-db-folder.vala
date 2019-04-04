@@ -156,7 +156,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
      * unless update_uid_info is true.
      */
     public async void update_folder_status(Geary.Imap.FolderProperties remote_properties,
-                                           bool update_uid_info,
                                            bool respect_marked_for_remove,
                                            Cancellable? cancellable)
         throws Error {
@@ -199,9 +198,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_rowid(2, this.folder_id);
             stmt.exec(cancellable);
 
-            if (update_uid_info)
-                do_update_uid_info(cx, remote_properties, cancellable);
-
             if (remote_properties.status_messages >= 0) {
                 do_update_last_seen_status_total(
                     cx, remote_properties.status_messages, cancellable
@@ -217,11 +213,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         );
         this.properties.recent = remote_properties.recent;
         this.properties.attrs = remote_properties.attrs;
-
-        if (update_uid_info) {
-            this.properties.uid_validity = remote_properties.uid_validity;
-            this.properties.uid_next = remote_properties.uid_next;
-        }
 
         // only update STATUS MESSAGES count if previously set, but use this count as the
         // "authoritative" value until another SELECT/EXAMINE or MESSAGES response
