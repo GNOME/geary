@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2019-01-29 16:59+0000\n"
-"PO-Revision-Date: 2019-01-30 17:50+0100\n"
+"POT-Creation-Date: 2019-03-25 13:04+0000\n"
+"PO-Revision-Date: 2019-04-04 14:18+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -32,137 +32,182 @@ msgstr "Konta"
 
 #. (itstool) path: section/title
 #: C/accounts.page:13
-msgid "Adding accounts"
-msgstr "Dodawanie kont"
+msgid "Accounts Editor"
+msgstr "Edytor kont"
 
 #. (itstool) path: section/p
 #: C/accounts.page:15
 msgid ""
-"The first time you start Geary, you will be prompted to add an email "
-"account. On this screen, select if your account is Gmail, Yahoo, Outlook."
-"com, or other. For other account types, you will need to enter your IMAP and "
-"SMTP login settings manually."
+"Your email accounts can be added, updated, and removed using the "
+"<em>accounts editor</em>. To open it, click Geary’s application menu button "
+"in the main window above the folder list, then click <gui>Accounts</gui> in "
+"the pop-up menu."
 msgstr ""
-"Po pierwszym uruchomieniu zostanie wyświetlony ekran dodawania konta e-mail. "
-"Wybierz, czy to konto serwisu Gmail, Yahoo, Outlook.com lub inne. "
-"W przypadku innych typów konta należy ręcznie wprowadzić dane logowania IMAP "
-"i SMTP."
+"Konta poczty można dodawać, aktualizować i usuwać za pomocą <em>edytora "
+"kont</em>. Aby go otworzyć, kliknij przycisk menu programu w głównym oknie "
+"nad listą katalogów, a następnie kliknij <gui>Konta</gui>."
 
 #. (itstool) path: section/p
-#: C/accounts.page:19
+#: C/accounts.page:20
 msgid ""
-"Additional accounts can be added from the Accounts dialog. The "
-"<gui>Accounts</gui> option is available in either Geary's application menu "
-"or the gear menu in the upper-right of the toolbar. (The location depends on "
-"the install desktop shell. For GNOME Shell and Unity, the application menu "
-"is available near the top-left corner of the screen.) To add an account, "
-"click the + button."
+"To change the order that accounts are displayed in the folder list, click "
+"and drag the handle for an account in the accounts editor, or focus an "
+"account with <key>Tab</key>, then use <keyseq><key>Ctrl</key><key>↑</key></"
+"keyseq> and <keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the "
+"currently selected account."
 msgstr ""
-"W oknie Konta można dodawać dodatkowe konta. <gui>Konta</gui> są dostępne "
-"w menu programu lub menu z kołem zębatym w górnym prawym rogu paska "
-"narzędziowego, zależnie od zainstalowanego środowiska. W środowiskach GNOME "
-"i Unity menu programu znajduje się obok górnego lewego rogu ekranu. Aby "
-"dodać konto, kliknij przycisk „+”."
+"Aby zmienić kolejność, w jakiej konta są wyświetlane na liście katalogów, "
+"kliknij i przeciągnij uchwyt dla danego konta w edytorze kont, albo zaznacz "
+"konto za pomocą klawisza <key>Tab</key> i użyj klawiszy <keyseq><key>Ctrl</"
+"key><key>↑</key></keyseq> i <keyseq><key>Ctrl</key><key>↓</key></keyseq> do "
+"przesunięcia go na liście."
 
 #. (itstool) path: section/title
-#: C/accounts.page:27
-msgid "Editing existing accounts"
-msgstr "Modyfikowanie istniejących kont"
-
-#. (itstool) path: section/p
 #: C/accounts.page:29
-msgid ""
-"From the Accounts dialog, select an account and click the pencil icon to "
-"change various settings. Please note that Geary cannot change server "
-"settings on an existing account. If you need to change your IMAP or SMTP "
-"server, you will need to delete the account and re-add it."
-msgstr ""
-"W oknie Konta wybierz konto i kliknij ikonę z ołówkiem, aby zmienić różne "
-"ustawienia. Proszę zauważyć, że program Geary nie może zmieniać ustawień "
-"serwera istniejącego konta. Aby zmienić serwer IMAP lub SMTP, należy usunąć "
-"konto i dodać je ponownie."
+msgid "Adding accounts"
+msgstr "Dodawanie kont"
 
 #. (itstool) path: section/p
-#: C/accounts.page:33
+#: C/accounts.page:31
 msgid ""
-"To change the order that accounts are displayed in the folder list, drag the "
-"accounts in the Accounts dialog to the desired order."
+"Geary will automatically use any email accounts you have added via the "
+"<app>Online Accounts</app> panel of <app>GNOME Settings</app>. If you do not "
+"have any accounts added to <app>Online Accounts</app>, you will be prompted "
+"to add an account the first time you run Geary."
 msgstr ""
-"Aby zmienić kolejność kont na liście katalogów, przeciągnij je w oknie Konta."
+"Geary automatycznie użyje kont poczty dodanych za pomocą panelu <app>Konta "
+"online</app> <app>Ustawień GNOME</app>. Jeśli w <app>Kontach online</app> "
+"nie dodano żadnych kont, to podczas pierwszego uruchomienia Geary zapyta "
+"o dodanie konta."
 
 #. (itstool) path: section/p
-#: C/accounts.page:36
-msgid "There are some advanced options available when editing accounts:"
-msgstr ""
-"Podczas modyfikowania kont dostępnych jest kilka zaawansowanych funkcji:"
-
-#. (itstool) path: item/p
-#: C/accounts.page:38
+#: C/accounts.page:37
 msgid ""
-"The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
-"successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
-"For Gmail accounts, this happens automatically. Yahoo and some other "
-"accounts can be configured to do this automatically as well. For other "
-"accounts, if you disable this setting, you may be unable to view messages "
-"you've sent."
+"To add additional accounts, open the accounts editor, then choose the "
+"appropriate email provider from the list at the bottom of the window. For "
+"providers supported by <app>Online Accounts</app>, <app>GNOME Settings</app> "
+"will be opened and you will be asked for your account information there. For "
+"other email providers, you will be asked for your account information by "
+"Geary. Once entered, click <gui>Create</gui> and the account information "
+"will be checked and then added."
 msgstr ""
-"<gui>Zapisywanie wysłanych wiadomości</gui> określa, czy pomyślnie wysłane "
-"wiadomości są przenoszone do katalogu <gui>Wysłane</gui> konta. W przypadku "
-"kont Gmail dzieje się to automatycznie. Yahoo i kilka innych kont także może "
-"zostać skonfigurowanych w ten sposób. Wyłączenie tego ustawienia w przypadku "
-"pozostałych kont może spowodować, że wysłane wiadomości będą niewidoczne."
-
-#. (itstool) path: item/p
-#: C/accounts.page:44
-msgid ""
-"The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
-"automatically inserted when a composer is opened. You may enter the "
-"signature into the box immediately below. You may use HTML tags to style the "
-"text. Switch to a preview of the signature using the buttons to the right."
-msgstr ""
-"<gui>Podpisywanie wiadomości</gui> określa, czy podpis jest automatycznie "
-"wstawiany po otwarciu okna tworzenia wiadomości. Można wprowadzić podpis "
-"w polu poniżej. Można używać znaczników HTML, aby sformatować tekst. "
-"Przełącz na podgląd podpisu za pomocą przycisków po prawej."
-
-#. (itstool) path: item/p
-#: C/accounts.page:49
-msgid ""
-"If you leave the signature in the Accounts dialog blank, Geary will use the "
-"<file>.signature</file> file in your home directory, if it exists. This file "
-"may contain either plain text or HTML markup. In the latter case, the markup "
-"will be inserted directly into the composer, without any escaping."
-msgstr ""
-"Pozostawienie pustego pola w oknie Konta spowoduje użycie pliku <file>."
-"signature</file> z katalogu domowego (jeśli istnieje). Ten plik może "
-"zawierać zwykły tekst lub tekst ze znacznikami HTML. W tym drugim przypadku "
-"znaczniki będą wstawiane bezpośrednio do okna tworzenia wiadomości."
-
-#. (itstool) path: item/p
-#: C/accounts.page:54
-msgid ""
-"The <gui>Download mail</gui> drop-down allows you to configure how much mail "
-"Geary will keep locally. Geary can only use locally available mail when "
-"searching and forming conversations."
-msgstr ""
-"Rozwijane menu <gui>Pobieranie wiadomości</gui> umożliwia skonfigurowanie, "
-"ile wiadomości przechowywać lokalnie. Lokalnie dostępna poczta jest używana "
-"tylko do wyszukiwania i formowania wątków."
+"Aby dodać dodatkowe konta, otwórz edytor kont, a następnie wybierz "
+"właściwego dostawcę konta z listy na dole okna. W przypadku dostawców "
+"obsługiwanych przez <app>Konta online</app> zostaną otwarte <app>Ustawienia "
+"GNOME</app>, gdzie można wpisać informacje o koncie. W przypadku innych "
+"dostawców poczty można wpisać informacje o koncie w programie Geary. Po "
+"wpisaniu kliknij przycisk <gui>Utwórz</gui>, a informacje o koncie zostaną "
+"sprawdzone i dodane."
 
 #. (itstool) path: section/title
-#: C/accounts.page:62
+#: C/accounts.page:48
+msgid "Updating existing accounts"
+msgstr "Aktualizowanie istniejących kont"
+
+#. (itstool) path: section/p
+#: C/accounts.page:50
+msgid ""
+"To update existing accounts, open the accounts editor and choose the account "
+"you wish to update. Geary will display settings for the account. From there, "
+"you can add and remove additional sender email addresses, edit your email "
+"signature, and various other settings."
+msgstr ""
+"Aby zaktualizować istniejące konta, otwórz edytor kont i wybierz konto do "
+"zaktualizowania. Zostaną wyświetlone ustawienia tego konta. Teraz można "
+"dodawać i usuwać dodatkowe adresy nadawcy, modyfikować podpis i zmieniać "
+"różne inne ustawienia."
+
+#. (itstool) path: section/p
+#: C/accounts.page:56
+msgid ""
+"The <gui>Download mail</gui> setting allows you to configure how much mail "
+"Geary will download and store locally. Geary can only use locally available "
+"mail when displaying and searching for conversations."
+msgstr ""
+"Ustawienie <gui>Pobieranie wiadomości</gui> umożliwia skonfigurowanie, ile "
+"wiadomości pobierać i przechowywać lokalnie. Tylko lokalnie dostępna poczta "
+"jest używana do wyświetlania i wyszukiwania wątków."
+
+#. (itstool) path: section/p
+#: C/accounts.page:61
+msgid ""
+"To edit the server settings for the account, scroll to the bottom of the "
+"window and click <gui>Server Settings</gui>. The server settings will be "
+"displayed and you can click to edit them. Once done, click <gui>Apply</gui> "
+"and Geary will check the settings, then update the account. Note that "
+"accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> cannot have their server name, security, login, or password "
+"settings changed."
+msgstr ""
+"Aby zmodyfikować ustawienia serwera dla konta, przewiń na dół okna i kliknij "
+"<gui>Ustawienia serwera</gui>. Zostaną one wyświetlone, i można je kliknąć, "
+"aby zmodyfikować. Po ukończeniu kliknij przycisk <gui>Zastosuj</gui>, "
+"a ustawienia zostaną sprawdzone i zaktualizowane. Zauważ, że nie można "
+"zmieniać nazwy serwera, zabezpieczeń, loginu i hasła kont dodanych za pomocą "
+"panelu <app>Konta online</app> <app>Ustawień GNOME</app>."
+
+#. (itstool) path: section/p
+#: C/accounts.page:70
+msgid ""
+"The <gui>Save draft email on server</gui> checkbox controls whether the "
+"composer will save copies of email messages being written in the "
+"<gui>Drafts</gui> folder. If de-selected, you will not be able to save draft "
+"messages when closing the composer."
+msgstr ""
+"Pole wyboru <gui>Zapisywanie szkiców wiadomości na serwerze</gui> umożliwia "
+"ustawienie, czy okno tworzenia wiadomości będzie zapisywać kopie pisanych "
+"wiadomości w katalogu <gui>Szkice</gui>. Odznaczenie spowoduje, że nie "
+"będzie można zapisywać szkiców wiadomości podczas zamykania okna tworzenia "
+"wiadomości."
+
+#. (itstool) path: section/p
+#: C/accounts.page:75
+msgid ""
+"The <gui>Save sent email on server</gui> checkbox controls whether Geary "
+"will save copies of email that have been sent to the <gui>Sent</gui> folder. "
+"If de-selected, you will no be able to see any email messages you have sent, "
+"unless your server automatically saves them for you."
+msgstr ""
+"Pole wyboru <gui>Zapisywanie wysłanych wiadomości na serwerze</gui> "
+"umożliwia ustawienie, czy kopie wysłanych wiadomości będą zapisywane "
+"w katalogu <gui>Wysłane</gui>. Odznaczenie spowoduje, że nie będzie można "
+"zobaczyć wysłanych wiadomości, chyba że serwer zapisuje je automatycznie za "
+"użytkownika."
+
+#. (itstool) path: section/title
+#: C/accounts.page:83
 msgid "Removing accounts"
 msgstr "Usuwanie kont"
 
 #. (itstool) path: section/p
-#: C/accounts.page:64
+#: C/accounts.page:85
 msgid ""
-"To delete an account, open the Accounts dialog, select the account, and "
-"press the - button. Geary will delete all information associated with the "
-"account."
+"Accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> must also be removed from there. To do so, open <app>Online "
+"Accounts</app>, select the account, and click <gui>Remove</gui>."
 msgstr ""
-"Aby usunąć konto, otwórz okno Konta, zaznacz konto i kliknij przycisk „-”. "
-"Wszystkie informacje powiązane z tym kontem zostaną usunięte."
+"Konta dodane za pomocą panelu <app>Konta online</app> <app>Ustawień GNOME</"
+"app> muszą być także usuwane w tym panelu. Aby to zrobić, otwórz <app>Konta "
+"online</app>, wybierz konto i kliknij przycisk <gui>Usuń</gui>."
+
+#. (itstool) path: section/p
+#: C/accounts.page:90
+msgid ""
+"To remove an account added via Geary, open the accounts editor and choose "
+"the account you wish to remove. Geary will display settings for the account. "
+"Scroll to the bottom of the window and click <gui>Remove Account</gui>. You "
+"will be prompted to confirm removing the account. Once confirmed, if you "
+"change your mind you can still undo removing the account by clicking "
+"<gui>Undo</gui> in the popup notification, or by typing <keyseq><key>Ctrl</"
+"key><key>U</key></keyseq>."
+msgstr ""
+"Aby usunąć konto dodane za pomocą programu Geary, otwórz edytor kont "
+"i kliknij konto do usunięcia. Zostaną wyświetlone jego ustawienia. Przewiń "
+"na dół okna i kliknij przycisk <gui>Usuń konto</gui>. Użytkownik zostanie "
+"poproszony o potwierdzenie usunięcia konta. Po potwierdzeniu nadal można "
+"cofnąć usunięcie klikając przycisk <gui>Cofnij</gui> w wyskakującym "
+"powiadomieniu lub naciskając klawisze <keyseq><key>Ctrl</key><key>U</key></"
+"keyseq>."
 
 #. (itstool) path: page/title
 #: C/archive.page:10
@@ -347,29 +392,33 @@ msgstr "Dziękujemy za pomoc w ulepszaniu programu Geary!"
 #. the file changes, the md5 hash will change to let you know you need to
 #. update your localized copy. The msgstr is not used at all. Set it to
 #. whatever you like once you have updated your copy of the file.
-#: C/index.page:5
+#: C/index.page:6
 msgctxt "_"
-msgid "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
+msgid "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
 msgstr ""
-"external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
+"external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
 
 #. (itstool) path: page/title
 #: C/index.page:5
-msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
-msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+msgid ""
+"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
+"<span>Geary</span>"
+msgstr ""
+"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
+"<span>Geary</span>"
 
 #. (itstool) path: section/title
-#: C/index.page:8
+#: C/index.page:11
 msgid "Introduction"
 msgstr "Wprowadzenie"
 
 #. (itstool) path: section/title
-#: C/index.page:12
+#: C/index.page:15
 msgid "Using Geary"
 msgstr "Używanie programu Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:16
+#: C/index.page:19
 msgid "Contributing and bug reporting"
 msgstr "Pomoc w tworzeniu programu i zgłaszanie błędów"
 
@@ -482,61 +531,71 @@ msgstr ""
 "Geary zawiera więcej informacji o dodawanych i planowanych funkcjach."
 
 #. (itstool) path: page/title
-#: C/overview.page:8
+#: C/overview.page:9
 msgid "Overview"
 msgstr "Przegląd"
 
 #. (itstool) path: page/p
-#: C/overview.page:10
+#: C/overview.page:11
 msgid ""
-"Geary is a lightweight email reader for the <link href=\"http://gnome.org"
-"\">GNOME</link> desktop. It works with mail servers that support the IMAP "
-"protocol, including popular services such as Gmail, Yahoo Mail, and Outlook."
-"com."
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
 msgstr ""
-"Geary to lekki klient poczty dla środowiska <link href=\"https://gnome.org"
-"\">GNOME</link>. Działa z serwerami poczty obsługującymi protokół IMAP, "
-"w tym popularnymi serwisami Gmail, Yahoo Mail i Outlook."
+"Geary to klient poczty zbudowany wokół koncepcji wątków, przeznaczony dla "
+"środowiska GNOME 3. Umożliwia czytanie, wyszukiwanie i wysyłanie wiadomości "
+"e-mail za pomocą protego, nowoczesnego interfejsu."
 
 #. (itstool) path: page/p
-#: C/overview.page:14
+#: C/overview.page:15
 msgid ""
-"Geary groups mail messages into <em>conversations</em>. A conversation "
-"contains all messages in a single thread of discussion."
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
 msgstr ""
-"Wiadomości są grupowane w <em>wątki</em>. Wątek zawiera całą dyskusję "
-"w jednym miejscu."
+"Wątki umożliwiają czytanie pełnych dyskusji bez potrzeby szukania i klikania "
+"od wiadomości do wiadomości."
 
 #. (itstool) path: page/p
-#: C/overview.page:17
-msgid "The main Geary window is divided into several areas:"
-msgstr "Główne okno programu jest podzielone na kilka obszarów:"
+#: C/overview.page:18
+msgid ""
+"The main Geary window is divided into several areas: The folder list, the "
+"conversation list, and the conversation viewer."
+msgstr ""
+"Główne okno programu jest podzielone na kilka obszarów: listę katalogów, "
+"listę wątków i przeglądarkę wątków."
 
 #. (itstool) path: section/title
-#: C/overview.page:20
+#: C/overview.page:22
 msgid "Folder list"
 msgstr "Lista katalogów"
 
 #. (itstool) path: section/p
-#: C/overview.page:21
+#: C/overview.page:24
 msgid ""
-"The <em>folder list</em> at the left displays all <em>folders</em> and "
-"<em>labels</em> in your mail account. Geary uses the term <em>label</em> for "
-"any folder that you have created to help organize your messages. (The Gmail "
-"web interface also uses this term; most other mail services do not.)"
+"The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
+"for your email accounts. Geary uses the term <em>label</em> for any folder "
+"that you have created to organize your email messages."
 msgstr ""
-"<em>Lista katalogów</em> po lewej wyświetla wszystkie <em>katalogi</em> "
-"i <em>etykiety</em> na koncie poczty. Geary używa terminu <em>etykieta</em> "
-"dla wszystkich katalogów utworzonych do organizowania wiadomości (podobnie "
-"jak serwis Gmail, ale inaczej niż większość innych serwisów)."
+"<em>Lista katalogów</em> wyświetla wszystkie <em>katalogi</em> "
+"i <em>etykiety</em> na kontach poczty. Geary używa terminu <em>etykieta</em> "
+"dla wszystkich katalogów utworzonych do organizowania wiadomości."
+
+#. (itstool) path: section/p
+#: C/overview.page:29
+msgid ""
+"Select a folder or label to display the conversations it contains in the "
+"conversation list."
+msgstr ""
+"Kliknij katalog lub etykietę, aby wyświetlić zawarte w nich wątki na liście "
+"wątków."
 
 #. (itstool) path: section/title
-#: C/overview.page:28
+#: C/overview.page:34
 msgid "Conversation list"
 msgstr "Lista wątków"
 
 #. (itstool) path: section/p
-#: C/overview.page:29
+#: C/overview.page:36
 msgid ""
 "The <em>conversation list</em> displays a list of conversations in the "
 "selected folder. Newer conversations appear at the top."
@@ -545,9 +604,9 @@ msgstr ""
 "wątki pojawiają się na górze."
 
 #. (itstool) path: section/p
-#: C/overview.page:31
+#: C/overview.page:40
 msgid ""
-"Each sender's name appears bold if there are unread messages from that "
+"Each sender’s name appears bold if there are unread messages from that "
 "sender. If a conversation has more than one message, Geary displays a count "
 "of messages in the conversation."
 msgstr ""
@@ -556,21 +615,21 @@ msgstr ""
 "liczba."
 
 #. (itstool) path: section/p
-#: C/overview.page:34
+#: C/overview.page:44
 msgid ""
 "Geary does not automatically download all messages in all of your mail "
 "folders. When you first visit your Inbox or any other folder, Geary "
-"downloads the 50 most recent messages in that folder. To see more messages, "
+"downloads the most recent messages in that folder. To see more messages, "
 "simply scroll down the conversation list and Geary will fetch more messages "
 "automatically."
 msgstr ""
 "Wszystkie wiadomości ze wszystkich katalogów nie są automatycznie pobierane. "
-"Po pierwszym wejściu do Odebranych lub innego katalogu pobierane jest 50 "
-"najnowszych wiadomości. Aby zobaczyć więcej wiadomości, po prostu przewiń "
+"Po pierwszym wejściu do Odebranych lub innego katalogu pobierane są "
+"najnowsze wiadomości. Aby zobaczyć więcej wiadomości, po prostu przewiń "
 "listę wątków w dół, a więcej wiadomości zostanie automatycznie pobranych."
 
 #. (itstool) path: section/p
-#: C/overview.page:36
+#: C/overview.page:50
 msgid ""
 "Some commands in Geary can act on a group of conversations. To select "
 "multiple conversations, hold down the <key>Ctrl</key> key and click each "
@@ -584,35 +643,24 @@ msgstr ""
 "przytrzymać klawisz <key>Shift</key> i kliknąć ostatni."
 
 #. (itstool) path: section/title
-#: C/overview.page:44
-msgid "Message area"
-msgstr "Obszar wiadomości"
+#: C/overview.page:58
+msgid "Conversation viewer"
+msgstr "Przeglądarka wątków"
 
 #. (itstool) path: section/p
-#: C/overview.page:45
+#: C/overview.page:60
 msgid ""
-"The <em>message area</em> displays all messages in the selected "
+"The <em>conversation viewer</em> displays all email messages in the selected "
 "conversation, with the oldest message at the top."
 msgstr ""
-"<em>Obszar wiadomości</em> wyświetla wszystkie wiadomości w wybranym wątku, "
-"zaczynając od najstarszych."
+"<em>Przeglądarka wątków</em> wyświetla wszystkie wiadomości w wybranym "
+"wątku, zaczynając od najstarszych."
 
 #. (itstool) path: section/p
-#: C/overview.page:47
+#: C/overview.page:63
 msgid ""
-"At the upper right of each message, Geary displays a dropdown arrow that "
-"lets you open the <em>message menu</em> with commands that operate on the "
-"message."
-msgstr ""
-"W dolnym prawym rogu każdej wiadomości wyświetlana jest strzałka w dół, "
-"umożliwiająca otwarcie <em>menu wiadomości</em> zawierającego polecenia "
-"używane na wiadomości."
-
-#. (itstool) path: section/p
-#: C/overview.page:49
-msgid ""
-"When you view a conversation, Geary collapses messages that you've already "
-"read. Click collapsed messages to expand them. Click an expanded message's "
+"When you view a conversation, Geary collapses messages that you’ve already "
+"read. Click collapsed messages to expand them. Click an expanded message’s "
 "header to collapse it."
 msgstr ""
 "Po wyświetleniu wątku już przeczytane wiadomości są zwinięte. Kliknij "
@@ -620,22 +668,65 @@ msgstr ""
 "wiadomości, aby ją zwinąć."
 
 #. (itstool) path: section/p
-#: C/overview.page:50
+#: C/overview.page:67
 msgid ""
-"Any attachments in a message appear at the bottom of the message. You can "
-"click an attachment to open it or right-click to save it."
+"Click on any of the sender’s or receiver’s names or email address for a "
+"message to open the <em>contact menu</em>, which displays additional "
+"information and options for the email address. You can to start a new "
+"conversation, copy the email address to the clipboard, and search for "
+"related conversations. If the email address is present in your desktop "
+"address book, it will show the contact’s photo, preferred name, and whether "
+"they are a favourite contact. You can also open the contact in the address "
+"book. If the email address is not already present, you can choose to add "
+"them to the address book, and update the remote image loading preference for "
+"that address."
 msgstr ""
-"Załączniki są widoczne na dole wiadomości. Można kliknąć załącznik, aby "
-"otworzyć lub kliknąć prawym przyciskiem myszy, aby go zapisać."
+"Kliknij dowolne nazwisko lub adres e-mail nadawcy lub odbiorcy wiadomości, "
+"aby otworzyć <em>menu kontaktu</em>, wyświetlające dodatkowe informacje "
+"i opcje adresu e-mail. Można założyć nowy wątek, skopiować adres e-mail do "
+"schowka i wyszukać powiązane wątki. Jeśli adres e-mail znajduje się "
+"w książce adresowej systemu, to będzie wyświetlane zdjęcie kontaktu, "
+"preferowane nazwisko oraz czy są ulubionym kontaktem. Można także otworzyć "
+"kontakt w książce adresowej. Jeśli adres e-mail nie jest jeszcze w książce, "
+"to można go dodać i zaktualizować preferencję wczytywania zdalnych obrazów "
+"od tego adresu."
 
 #. (itstool) path: section/p
-#: C/overview.page:52
+#: C/overview.page:79
 msgid ""
-"Geary uses <link href=\"https://secure.gravatar.com/\">Gravatar</link> to "
-"display an avatar for each message's sender in its header."
+"Click the star button present on each message to mark or un-mark a message "
+"as being starred. Staring a message will mark the whole conversation as "
+"starred, and Geary will display the first starred message in a conversation "
+"when returning to it."
 msgstr ""
-"Serwis <link href=\"https://secure.gravatar.com/\">Gravatar</link> jest "
-"używany do wyświetlania awatarów nadawców wiadomości w nagłówku."
+"Kliknij przycisk z gwiazdką znajdujący się obok każdej wiadomości, aby "
+"wyróżnić lub usunąć wyróżnienie wiadomości. Wyróżnienie wiadomości wyróżni "
+"cały wątek, a po powrocie do wątku wyświetlona zostanie pierwsza wyróżniona "
+"wiadomość."
+
+#. (itstool) path: section/p
+#: C/overview.page:84
+msgid ""
+"Click the menu button present on each message to open the <em>message menu</"
+"em>, which allows you to reply and forward to a specific message, update "
+"which messages have been marked as read or unread, print a message, and so "
+"on."
+msgstr ""
+"Kliknij przycisk menu znajdujący się obok każdej wiadomości, aby otworzyć "
+"<em>menu wiadomości</em>, umożliwiające wysłanie odpowiedzi lub przekazanie "
+"konkretnej wiadomości, zaktualizowanie które wiadomości są oznaczone jako "
+"przeczytane lub nieprzeczytane, wydrukowanie wiadomości i tak dalej."
+
+#. (itstool) path: section/p
+#: C/overview.page:89
+msgid ""
+"Any attachments in a message appear at the bottom of the message. Double "
+"click an attachment to open it, or use the Open and Save buttons to open and "
+"save selected attachments."
+msgstr ""
+"Załączniki są widoczne na dole wiadomości. Podwójnie kliknij załącznik, aby "
+"go otworzyć, albo użyj przycisków Otwórz i Zapisz, aby otworzyć lub zapisać "
+"zaznaczone załączniki."
 
 #. (itstool) path: page/title
 #: C/preferences.page:10
@@ -824,10 +915,10 @@ msgstr "<input>udw:<var>odbiorca</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:32
-msgid "Finds messages where <var>recipient</var> matches the BCC header."
+msgid "Finds messages where <var>recipient</var> matches email BCC fields."
 msgstr ""
-"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do nagłówka "
-"„Ukryty do wiadomości”."
+"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do pól „Ukryty do "
+"wiadomości”."
 
 #. (itstool) path: td/p
 #: C/search.page:35
@@ -846,9 +937,9 @@ msgstr "<input>dw:<var>odbiorca</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:40
-msgid "Finds messages where <var>recipient</var> matches the CC header."
+msgid "Finds messages where <var>recipient</var> matches email CC fields."
 msgstr ""
-"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do nagłówka „Do "
+"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do pól „Do "
 "wiadomości”."
 
 #. (itstool) path: td/p
@@ -858,9 +949,8 @@ msgstr "<input>od:<var>nadawca</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:44
-msgid "Finds messages where <var>sender</var> matches the From header."
-msgstr ""
-"Odnajduje wiadomości, w których <var>nadawca</var> pasuje do nagłówka „Od”."
+msgid "Finds messages where <var>sender</var> matches email From fields."
+msgstr "Odnajduje wiadomości, w których <var>nadawca</var> pasuje do pól „Od”."
 
 #. (itstool) path: td/p
 #: C/search.page:47
@@ -910,10 +1000,11 @@ msgstr "<input>do:<var>odbiorca</var></input>"
 #. (itstool) path: td/p
 #: C/search.page:64
 msgid ""
-"Finds messages where <var>recipient</var> matches the To, CC, or BCC header."
+"Finds messages where <var>recipient</var> matches email To, CC, or BCC "
+"fields."
 msgstr ""
-"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do nagłówka „Do”, "
-"„Do wiadomości” lub „Ukryty do wiadomości”."
+"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do pól „Do”, „Do "
+"wiadomości” lub „Ukryty do wiadomości”."
 
 #. (itstool) path: section/p
 #: C/search.page:68
