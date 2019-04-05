@@ -74,6 +74,14 @@ public class GearyApplication : Gtk.Application {
     private const int64 FORCE_SHUTDOWN_USEC = 5 * USEC_PER_SEC;
 
 
+    /** Object returned by {@link get_runtime_information}. */
+    public struct RuntimeDetail {
+
+        public string name;
+        public string value;
+
+    }
+
     [Version (deprecated = true)]
     public static GearyApplication instance {
         get { return _instance; }
@@ -129,6 +137,90 @@ public class GearyApplication : Gtk.Application {
     private int exitcode = 0;
     private bool is_destroyed = false;
 
+
+    /**
+     * Returns name/value pairs of application information.
+     *
+     * This includes Geary library version information, the current
+     * desktop, and so on.
+     */
+    public Gee.Collection<RuntimeDetail?> get_runtime_information() {
+        Gee.LinkedList<RuntimeDetail?> info =
+            new Gee.LinkedList<RuntimeDetail?>();
+
+        /// Application runtime information label
+        info.add({ _("Geary version"), VERSION });
+        /// Application runtime information label
+        info.add({ _("GTK version"),
+                    "%u.%u.%u".printf(
+                        Gtk.get_major_version(),
+                        Gtk.get_minor_version(),
+                        Gtk.get_micro_version()
+                    )});
+        /// Applciation runtime information label
+        info.add({ _("GLib version"),
+                    "%u.%u.%u".printf(
+                        GLib.Version.major,
+                        GLib.Version.minor,
+                        GLib.Version.micro
+                    )});
+        /// Application runtime information label
+        info.add({ _("WebKitGTK version"),
+                    "%u.%u.%u".printf(
+                        WebKit.get_major_version(),
+                        WebKit.get_minor_version(),
+                        WebKit.get_micro_version()
+                    )});
+        /// Application runtime information label
+        info.add({ _("Desktop environment"),
+                    Environment.get_variable("XDG_CURRENT_DESKTOP") ??
+                    _("Unknown")
+            });
+
+        // Distro name and version using LSB util
+
+        GLib.SubprocessLauncher launcher = new GLib.SubprocessLauncher(
+            GLib.SubprocessFlags.STDOUT_PIPE |
+            GLib.SubprocessFlags.STDERR_SILENCE
+        );
+        // Reset lang vars so we can guess the strings below
+        launcher.setenv("LANGUAGE", "C", true);
+        launcher.setenv("LANG", "C", true);
+        launcher.setenv("LC_ALL", "C", true);
+
+        string lsb_output = "";
+        try {
+            GLib.Subprocess lsb_release = launcher.spawnv(
+                { "lsb_release", "-ir" }
+            );
+            lsb_release.communicate_utf8(null, null, out lsb_output, null);
+        } catch (GLib.Error err) {
+            warning("Failed to exec lsb_release: %s", err.message);
+        }
+        if (lsb_output != "") {
+            foreach (string line in lsb_output.split("\n")) {
+                string[] parts = line.split(":", 2);
+                if (parts.length > 1) {
+                    if (parts[0].has_prefix("Distributor ID")) {
+                        /// Application runtime information label
+                        info.add(
+                            { _("Distribution name"), parts[1].strip() }
+                        );
+                    } else if (parts[0].has_prefix("Release")) {
+                        /// Application runtime information label
+                        info.add(
+                            { _("Distribution release"), parts[1].strip() }
+                        );
+                    }
+                }
+            }
+        }
+
+        /// Application runtime information label
+        info.add({ _("Installation prefix"), INSTALL_PREFIX });
+
+        return info;
+    }
 
     /**
      * Signal that is activated when 'exit' is called, but before the application actually exits.
