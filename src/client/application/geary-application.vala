@@ -55,6 +55,7 @@ public class GearyApplication : Gtk.Application {
     private const string ACTION_ABOUT = "about";
     private const string ACTION_ACCOUNTS = "accounts";
     private const string ACTION_COMPOSE = "compose";
+    private const string ACTION_INSPECT = "inspect";
     private const string ACTION_HELP = "help";
     private const string ACTION_MAILTO = "mailto";
     private const string ACTION_PREFERENCES = "preferences";
@@ -64,6 +65,7 @@ public class GearyApplication : Gtk.Application {
         {ACTION_ABOUT, on_activate_about},
         {ACTION_ACCOUNTS, on_activate_accounts},
         {ACTION_COMPOSE, on_activate_compose},
+        {ACTION_INSPECT, on_activate_inspect},
         {ACTION_HELP, on_activate_help},
         {ACTION_MAILTO, on_activate_mailto, "s"},
         {ACTION_PREFERENCES, on_activate_preferences},
@@ -342,6 +344,7 @@ public class GearyApplication : Gtk.Application {
         // Application accels
         add_app_accelerators(ACTION_COMPOSE, { "<Ctrl>N" });
         add_app_accelerators(ACTION_HELP, { "F1" });
+        add_app_accelerators(ACTION_INSPECT, { "<Alt><Shift>I" });
         add_app_accelerators(ACTION_QUIT, { "<Ctrl>Q" });
 
         // Common window accels
@@ -559,6 +562,11 @@ public class GearyApplication : Gtk.Application {
         if (this.controller != null) {
             this.controller.compose();
         }
+    }
+
+    private void on_activate_inspect() {
+        Components.Inspector inspector = new Components.Inspector(this);
+        inspector.show();
     }
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {

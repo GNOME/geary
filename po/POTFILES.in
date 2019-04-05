@@ -26,6 +26,7 @@ src/client/application/goa-mediator.vala
 src/client/application/main.vala
 src/client/application/secret-mediator.vala
 src/client/components/client-web-view.vala
+src/client/components/components-inspector.vala
 src/client/components/components-placeholder-pane.vala
 src/client/components/components-validator.vala
 src/client/components/count-badge.vala
@@ -412,6 +413,7 @@ ui/composer-headerbar.ui
 ui/composer-link-popover.ui
 ui/composer-menus.ui
 ui/composer-widget.ui
+ui/components-inspector.ui
 ui/components-placeholder-pane.ui
 ui/conversation-email.ui
 ui/conversation-email-attachment-view.ui
