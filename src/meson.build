@@ -37,9 +37,10 @@ geary_c_options = [
   # Select libunwind's optimised, local-only backtrace unwiding. See
   # libunwind(3).
   '-DUNW_LOCAL_ONLY',
-  # Neither GOA nor GCK want to hang out unless you are cool enough
-  '-DGOA_API_IS_SUBJECT_TO_CHANGE',
+  # None of these kids want to hang out unless you are cool enough
   '-DGCK_API_SUBJECT_TO_CHANGE',
+  '-DGOA_API_IS_SUBJECT_TO_CHANGE',
+  '-DHANDY_USE_UNSTABLE_API',
 ]
 
 subdir('sqlite3-unicodesn')

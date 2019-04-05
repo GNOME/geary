@@ -38,40 +38,31 @@ distribution's package repositories:
 Installing dependencies on Fedora
 ---------------------------------
 
-Fedora 25 and later ships with the correct versions of the required
-libraries. Install them by running this command:
+Install them by running this command:
 
-    sudo yum install vala meson desktop-file-utils iso-codes-devel \
-        libcanberra-devel folks-devel libgee-devel glib2-devel \
-        gmime-devel gtk3-devel libnotify-devel sqlite-devel \
-        webkitgtk4-devel libsecret-devel libxml2-devel vala-tools \
-        gcr-devel enchant2-devel libunwind-devel json-glib-devel \
-        gnome-online-accounts-devel itstool
+    sudo yum install meson vala \
+        desktop-file-utils enchant2-devel folks-devel gcr-devel \
+        glib2-devel gmime-devel gnome-online-accounts-devel gtk3-devel \
+        iso-codes-devel json-glib-devel libcanberra-devel \
+        libgee-devel libhandy-devel libnotify-devel libsecret-devel \
+        libunwind-devel libxml2-devel sqlite-devel webkitgtk4-devel
 
 Installing dependencies on Ubuntu/Debian
 ----------------------------------------
 
-Ubuntu 17.10 (Artful) and later ships with the correct versions of the
-required libraries.
-
-Ubuntu 16.04 LTS (Xenial) does not meet the minimum requirements,
-users of that are encourage to use Geary 0.12 LTS instead.
-
-Debian 9 (Stretch) and later ships with the correct versions of the
-required libraries.
-
 Install them by running this command:
 
-    sudo apt-get install valac meson desktop-file-utils iso-codes \
-        libcanberra-dev libfolks-dev libgee-0.8-dev libglib2.0-dev \
-        libgmime-2.6-dev libgtk-3-dev libsecret-1-dev libxml2-dev \
-        libnotify-dev libsqlite3-dev libwebkit2gtk-4.0-dev \
-        libgcr-3-dev libenchant-dev libunwind-dev libgoa-1.0-dev \
-        libjson-glib-dev itstool gettext
+    sudo apt-get install meson build-essential valac \
+        desktop-file-utils iso-codes gettext libcanberra-dev \
+        libenchant-dev libfolks-dev libgcr-3-dev libgee-0.8-dev \
+        libglib2.0-dev libgmime-2.6-dev libgoa-1.0-dev libgtk-3-dev \
+        libjson-glib-dev libhandy-dev libnotify-dev libsecret-1-dev \
+        libsqlite3-dev libunwind-dev libwebkit2gtk-4.0-dev \
+        libxml2-dev
 
 And for Ubuntu Unity integration:
 
-    sudo apt-get install libunity-dev libmessaging-menu-dev
+    sudo apt-get install libmessaging-menu-dev libunity-dev
 
 Running
 -------
