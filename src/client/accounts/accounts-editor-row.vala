@@ -27,6 +27,7 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
     public EditorRow() {
         get_style_context().add_class("geary-settings");
+        get_style_context().add_class("geary-labelled-row");
 
         this.layout.orientation = Gtk.Orientation.HORIZONTAL;
         this.layout.show();
