@@ -546,6 +546,7 @@ ComposerPageState.htmlToText = function(root) {
                 }
                 break;
             case "#comment":
+	    case "style":
                 break;
             default:
                 text += ComposerPageState.htmlToText(node);
