@@ -34,6 +34,9 @@ public class Components.Inspector : Gtk.Window {
     private Hdy.SearchBar search_bar;
 
     [GtkChild]
+    private Gtk.SearchEntry search_entry;
+
+    [GtkChild]
     private Gtk.TreeView logs_view;
 
     [GtkChild]
@@ -49,11 +52,34 @@ public class Components.Inspector : Gtk.Window {
             typeof(string)
     });
 
+    private Gtk.TreeModelFilter logs_filter;
+
+    private string[] logs_filter_terms = new string[0];
+
     private string details;
 
 
     public Inspector(GearyApplication app) {
         this.title = this.header_bar.title = _("Inspector");
+
+        this.search_bar.connect_entry(this.search_entry);
+
+        GLib.Settings system = app.config.gnome_interface;
+        system.bind(
+            "monospace-font-name",
+            this.log_renderer, "font",
+            SettingsBindFlags.DEFAULT
+        );
+
+        StringBuilder details = new StringBuilder();
+        foreach (GearyApplication.RuntimeDetail? detail
+                 in app.get_runtime_information()) {
+            this.detail_list.add(
+                new DetailRow("%s:".printf(detail.name), detail.value)
+            );
+            details.append_printf("%s: %s\n", detail.name, detail.value);
+        }
+        this.details = details.str;
 
         // Log a marker for when the inspector was opened
         debug("---- 8< ---- %s ---- 8< ----", this.header_bar.title);
@@ -67,24 +93,35 @@ public class Components.Inspector : Gtk.Window {
             logs = logs.get_next();
         }
 
-        GLib.Settings system = app.config.gnome_interface;
-        system.bind(
-            "monospace-font-name",
-            this.log_renderer, "font",
-            SettingsBindFlags.DEFAULT
-        );
+        this.logs_filter = new Gtk.TreeModelFilter(logs_store, null);
+        this.logs_filter.set_visible_func((model, iter) => {
+                bool ret = true;
+                if (this.logs_filter_terms.length > 0) {
+                    ret = false;
+                    Value value;
+                    model.get_value(iter, COL_MESSAGE, out value);
+                    string? message = (string) value;
+                    if (message != null) {
+                        foreach (string term in this.logs_filter_terms) {
+                            if (term in message) {
+                                ret = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                return ret;
+            });
 
-        this.logs_view.set_model(logs_store);
+        this.logs_view.set_model(this.logs_filter);
+    }
 
-        StringBuilder details = new StringBuilder();
-        foreach (GearyApplication.RuntimeDetail? detail
-                 in app.get_runtime_information()) {
-            this.detail_list.add(
-                new DetailRow("%s:".printf(detail.name), detail.value)
-            );
-            details.append_printf("%s: %s\n", detail.name, detail.value);
+    public override bool key_press_event(Gdk.EventKey event) {
+        bool ret = this.search_bar.handle_event(event);
+        if (ret == Gdk.EVENT_PROPAGATE) {
+            ret = base.key_press_event(event);
         }
-        this.details = details.str;
+        return ret;
     }
 
     private async void save(string path,
@@ -127,6 +164,11 @@ public class Components.Inspector : Gtk.Window {
         uint logs_selected = this.logs_view.get_selection().count_selected_rows();
         this.copy_button.set_sensitive(!logs_visible || logs_selected > 0);
         this.search_button.set_visible(logs_visible);
+    }
+
+    private void update_logs_filter() {
+        this.logs_filter_terms = this.search_entry.text.split(" ");
+        this.logs_filter.refilter();
     }
 
     [GtkCallback]
@@ -200,6 +242,11 @@ public class Components.Inspector : Gtk.Window {
     [GtkCallback]
     private void on_logs_selection_changed() {
         update_ui();
+    }
+
+    [GtkCallback]
+    private void on_logs_search_changed() {
+        update_logs_filter();
     }
 
     [GtkCallback]
