@@ -87,6 +87,41 @@ public class Components.Inspector : Gtk.Window {
         this.details = details.str;
     }
 
+    private async void save(string path,
+                            GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        GLib.File dest = GLib.File.new_for_path(path);
+        GLib.FileIOStream dest_io = yield dest.create_readwrite_async(
+            GLib.FileCreateFlags.NONE,
+            GLib.Priority.DEFAULT,
+            cancellable
+        );
+        GLib.DataOutputStream out = new GLib.DataOutputStream(
+            new GLib.BufferedOutputStream(dest_io.get_output_stream())
+        );
+
+        out.put_string(this.details);
+        out.put_byte('\n');
+        out.put_byte('\n');
+
+        Gtk.TreeModel model = this.logs_view.model;
+        Gtk.TreeIter? iter;
+        bool valid = model.get_iter_first(out iter);
+        while (valid && !cancellable.is_cancelled()) {
+            Value value;
+            model.get_value(iter, COL_MESSAGE, out value);
+            string? message = (string) value;
+            if (message != null) {
+                out.put_string(message);
+                out.put_byte('\n');
+            }
+            valid = model.iter_next(ref iter);
+        }
+
+        yield out.close_async();
+        yield dest_io.close_async();
+    }
+
     private void update_ui() {
         bool logs_visible = this.stack.visible_child == this.logs_pane;
         uint logs_selected = this.logs_view.get_selection().count_selected_rows();
@@ -126,6 +161,34 @@ public class Components.Inspector : Gtk.Window {
 
         if (!Geary.String.is_empty(clipboard_value)) {
             get_clipboard(Gdk.SELECTION_CLIPBOARD).set_text(clipboard_value, -1);
+        }
+    }
+
+    [GtkCallback]
+    private void on_save_as_clicked() {
+        Gtk.FileChooserNative chooser = new Gtk.FileChooserNative(
+            _("Save As"),
+            this,
+            Gtk.FileChooserAction.SAVE,
+            _("Save As"),
+            _("Cancel")
+        );
+        chooser.set_current_name(
+            new GLib.DateTime.now_local().format("Geary Inspector - %F %T.txt")
+        );
+
+        if (chooser.run() == Gtk.ResponseType.ACCEPT) {
+            this.save.begin(
+                chooser.get_filename(),
+                null,
+                (obj, res) => {
+                    try {
+                        this.save.end(res);
+                    } catch (GLib.Error err) {
+                        warning("Failed to save inspector data: %s", err.message);
+                    }
+                }
+            );
         }
     }
 
