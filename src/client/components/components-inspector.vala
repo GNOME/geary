@@ -12,6 +12,9 @@
 public class Components.Inspector : Gtk.Window {
 
 
+    private const int COL_MESSAGE = 0;
+
+
     [GtkChild]
     private Gtk.HeaderBar header_bar;
 
@@ -37,6 +40,9 @@ public class Components.Inspector : Gtk.Window {
     private Gtk.CellRendererText log_renderer;
 
     [GtkChild]
+    private Gtk.Widget detail_pane;
+
+    [GtkChild]
     private Gtk.ListBox detail_list;
 
     private Gtk.ListStore logs_store = new Gtk.ListStore.newv({
@@ -57,7 +63,7 @@ public class Components.Inspector : Gtk.Window {
         while (logs != null) {
             Gtk.TreeIter iter;
             logs_store.append(out iter);
-            logs_store.set_value(iter, 0, logs.format());
+            logs_store.set_value(iter, COL_MESSAGE, logs.format());
             logs = logs.get_next();
         }
 
@@ -95,12 +101,42 @@ public class Components.Inspector : Gtk.Window {
 
     [GtkCallback]
     private void on_copy_clicked() {
-        get_clipboard(Gdk.SELECTION_CLIPBOARD).set_text(this.details, -1);
+        string clipboard_value = "";
+        if (this.stack.visible_child == this.logs_pane) {
+            StringBuilder rows = new StringBuilder();
+            Gtk.TreeModel model = this.logs_view.model;
+            foreach (Gtk.TreePath path in
+                     this.logs_view.get_selection().get_selected_rows(null)) {
+                Gtk.TreeIter iter;
+                if (model.get_iter(out iter, path)) {
+                    Value value;
+                    model.get_value(iter, COL_MESSAGE, out value);
+
+                    string? message = (string) value;
+                    if (message != null) {
+                        rows.append(message);
+                        rows.append_c('\n');
+                    }
+                }
+            }
+            clipboard_value = rows.str;
+        } else if (this.stack.visible_child == this.detail_pane) {
+            clipboard_value = this.details;
+        }
+
+        if (!Geary.String.is_empty(clipboard_value)) {
+            get_clipboard(Gdk.SELECTION_CLIPBOARD).set_text(clipboard_value, -1);
+        }
     }
 
     [GtkCallback]
     private void on_search_clicked() {
         this.search_bar.set_search_mode(!this.search_bar.get_search_mode());
+    }
+
+    [GtkCallback]
+    private void on_logs_selection_changed() {
+        update_ui();
     }
 
     [GtkCallback]
