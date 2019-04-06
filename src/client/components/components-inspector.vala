@@ -13,15 +13,51 @@ public class Components.Inspector : Gtk.Window {
 
 
     [GtkChild]
+    private Gtk.HeaderBar header_bar;
+
+    [GtkChild]
     private Hdy.SearchBar search_bar;
 
     [GtkChild]
+    private Gtk.TreeView logs_view;
+
+    [GtkChild]
+    private Gtk.CellRendererText log_renderer;
+
+    [GtkChild]
     private Gtk.ListBox detail_list;
+
+    private Gtk.ListStore logs_store = new Gtk.ListStore.newv({
+            typeof(string)
+    });
 
     private string details;
 
 
     public Inspector(GearyApplication app) {
+        this.title = this.header_bar.title = _("Inspector");
+
+        // Log a marker for when the inspector was opened
+        debug("---- 8< ---- %s ---- 8< ----", this.header_bar.title);
+
+        Gtk.ListStore logs_store = this.logs_store;
+        Geary.Logging.LogRecord? logs = Geary.Logging.get_logs();
+        while (logs != null) {
+            Gtk.TreeIter iter;
+            logs_store.append(out iter);
+            logs_store.set_value(iter, 0, logs.format());
+            logs = logs.get_next();
+        }
+
+        GLib.Settings system = app.config.gnome_interface;
+        system.bind(
+            "monospace-font-name",
+            this.log_renderer, "font",
+            SettingsBindFlags.DEFAULT
+        );
+
+        this.logs_view.set_model(logs_store);
+
         StringBuilder details = new StringBuilder();
         foreach (GearyApplication.RuntimeDetail? detail
                  in app.get_runtime_information()) {
@@ -41,6 +77,11 @@ public class Components.Inspector : Gtk.Window {
     [GtkCallback]
     private void on_search_clicked() {
         this.search_bar.set_search_mode(!this.search_bar.get_search_mode());
+    }
+
+    [GtkCallback]
+    private void on_destroy() {
+        destroy();
     }
 
 }
