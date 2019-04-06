@@ -13,6 +13,7 @@
 
 namespace Geary.Logging {
 
+public const uint DEFAULT_MAX_LOG_BUFFER_LENGTH = 4096;
 private const string DOMAIN = "Geary";
 
 [Flags]
@@ -36,21 +37,77 @@ public enum Flag {
     }
 }
 
+/**
+ * A single message sent to the logging system.
+ *
+ * A record is created for each log message, 
+ */
+public class LogRecord {
+
+
+    private string domain;
+    private LogLevelFlags flags;
+    private int64 timestamp;
+    private double elapsed;
+    private string message;
+
+    internal LogRecord? next = null;
+
+
+    internal LogRecord(string domain,
+                       LogLevelFlags flags,
+                       int64 timestamp,
+                       double elapsed,
+                       string message) {
+        this.domain = domain;
+        this.flags = flags;
+        this.timestamp = timestamp;
+        this.elapsed = elapsed;
+        this.message = message;
+    }
+
+    public LogRecord? get_next() {
+        return this.next;
+    }
+
+    public string format() {
+        GLib.DateTime time = new GLib.DateTime.from_unix_utc(
+            this.timestamp / 1000 / 1000
+        ).to_local();
+        return "%s %02d:%02d:%02d %lf %s: %s".printf(
+            to_prefix(this.flags),
+            time.get_hour(), time.get_minute(), time.get_second(),
+            this.elapsed,
+            this.domain ?? "default",
+            this.message
+        );
+    }
+
+}
+
 private int init_count = 0;
 private Flag logging_flags = Flag.NONE;
 private unowned FileStream? stream = null;
 private Timer? entry_timer = null;
 
+private LogRecord? first_record = null;
+private LogRecord? last_record = null;
+private uint log_length = 0;
+private uint max_log_length = 0;
+
+
 /**
  * Must be called before ''any'' call to the Logging namespace.
  *
- * This will be initialized by the Engine when it's opened, but applications may want to set up
- * logging before that, in which case, call this directly.
+ * This will be initialized by the Engine when it's opened, but
+ * applications may want to set up logging before that, in which case,
+ * call this directly.
  */
 public void init() {
     if (init_count++ != 0)
         return;
     entry_timer = new Timer();
+    max_log_length = DEFAULT_MAX_LOG_BUFFER_LENGTH;
 }
 
 /**
@@ -120,6 +177,10 @@ public inline void debug(Flag flags, string fmt, ...) {
     }
 }
 
+public LogRecord? get_logs() {
+    return first_record;
+}
+
 /**
  * Registers a FileStream to receive all log output from the Engine, be it via the specialized
  * Logging calls (which use the topic-based {@link Flag} or GLib's standard issue
@@ -135,6 +196,33 @@ public void log_to(FileStream? stream) {
 public void default_handler(string? domain,
                             LogLevelFlags log_levels,
                             string message) {
+    LogRecord record = new LogRecord(
+        domain,
+        log_levels,
+        GLib.get_real_time(),
+        entry_timer.elapsed(),
+        message
+    );
+    entry_timer.start();
+
+    // Update the record linked list
+    if (first_record == null) {
+        first_record = record;
+        last_record = record;
+    } else {
+        last_record.next = record;
+        last_record = record;
+    }
+    log_length++;
+    while (log_length > max_log_length) {
+        first_record = first_record.next;
+        log_length--;
+    }
+    if (first_record == null) {
+        last_record = null;
+    }
+
+    // Print to the output stream if needed
     unowned FileStream? out = stream;
     if (out != null ||
         ((LogLevelFlags.LEVEL_WARNING & log_levels) > 0) ||
@@ -145,17 +233,8 @@ public void default_handler(string? domain,
             out = GLib.stderr;
         }
 
-        GLib.Time tm = GLib.Time.local(time_t());
-        out.printf(
-            "%s %02d:%02d:%02d %lf %s: %s\n",
-            to_prefix(log_levels),
-            tm.hour, tm.minute, tm.second,
-            entry_timer.elapsed(),
-            domain ?? "default",
-            message
-        );
-
-        entry_timer.start();
+        out.puts(record.format());
+        out.putc('\n');
     }
 }
 
