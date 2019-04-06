@@ -16,6 +16,18 @@ public class Components.Inspector : Gtk.Window {
     private Gtk.HeaderBar header_bar;
 
     [GtkChild]
+    private Gtk.Stack stack;
+
+    [GtkChild]
+    private Gtk.Button copy_button;
+
+    [GtkChild]
+    private Gtk.Widget logs_pane;
+
+    [GtkChild]
+    private Gtk.Button search_button;
+
+    [GtkChild]
     private Hdy.SearchBar search_bar;
 
     [GtkChild]
@@ -67,6 +79,18 @@ public class Components.Inspector : Gtk.Window {
             details.append_printf("%s: %s\n", detail.name, detail.value);
         }
         this.details = details.str;
+    }
+
+    private void update_ui() {
+        bool logs_visible = this.stack.visible_child == this.logs_pane;
+        uint logs_selected = this.logs_view.get_selection().count_selected_rows();
+        this.copy_button.set_sensitive(!logs_visible || logs_selected > 0);
+        this.search_button.set_visible(logs_visible);
+    }
+
+    [GtkCallback]
+    private void on_visible_child_changed() {
+        update_ui();
     }
 
     [GtkCallback]

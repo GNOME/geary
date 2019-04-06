@@ -25,7 +25,7 @@
         <property name="can_focus">False</property>
         <property name="show_close_button">True</property>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="search_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -50,7 +50,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="copy_button">
             <property name="label" translatable="yes">Copy to Clipboard</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -71,8 +71,9 @@
       <object class="GtkStack" id="stack">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <signal name="notify::visible-child" handler="on_visible_child_changed" swapped="no"/>
         <child>
-          <object class="GtkGrid">
+          <object class="GtkGrid" id="logs_pane">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
