@@ -13,9 +13,19 @@
 
 namespace Geary.Logging {
 
+
+/** Specifies the default number of log records retained. */
 public const uint DEFAULT_MAX_LOG_BUFFER_LENGTH = 4096;
+
 private const string DOMAIN = "Geary";
 
+/**
+ * Denotes a type of log message.
+ *
+ * Logging for each type of log message may be dynamically enabled or
+ * disabled at run time by {@link enable_flags} and {@link
+ * disable_flags}.
+ */
 [Flags]
 public enum Flag {
     NONE = 0,
@@ -38,11 +48,14 @@ public enum Flag {
 }
 
 /**
- * A single message sent to the logging system.
+ * A record of a single message sent to the logging system.
  *
- * A record is created for each log message, 
+ * A record is created for each message logged, and stored in a
+ * limited-length, singly-linked buffer. Applications can retrieve
+ * this by calling {@link get_logs} and then {get_next}, and can be
+ * notified of new records via {@link set_log_listener}.
  */
-public class LogRecord {
+public class Record {
 
 
     private string domain;
@@ -51,14 +64,14 @@ public class LogRecord {
     private double elapsed;
     private string message;
 
-    internal LogRecord? next = null;
+    internal Record? next = null;
 
 
-    internal LogRecord(string domain,
-                       LogLevelFlags flags,
-                       int64 timestamp,
-                       double elapsed,
-                       string message) {
+    internal Record(string domain,
+                    LogLevelFlags flags,
+                    int64 timestamp,
+                    double elapsed,
+                    string message) {
         this.domain = domain;
         this.flags = flags;
         this.timestamp = timestamp;
@@ -66,10 +79,12 @@ public class LogRecord {
         this.message = message;
     }
 
-    public LogRecord? get_next() {
+    /** Returns the next log record in the buffer, if any. */
+    public Record? get_next() {
         return this.next;
     }
 
+    /** Returns a formatted string representation of this record. */
     public string format() {
         GLib.DateTime time = new GLib.DateTime.from_unix_utc(
             this.timestamp / 1000 / 1000
@@ -85,15 +100,19 @@ public class LogRecord {
 
 }
 
+/** Specifies the function signature for {@link set_log_listener}. */
+public delegate void LogRecord(Record record);
+
 private int init_count = 0;
 private Flag logging_flags = Flag.NONE;
 private unowned FileStream? stream = null;
 private Timer? entry_timer = null;
 
-private LogRecord? first_record = null;
-private LogRecord? last_record = null;
+private Record? first_record = null;
+private Record? last_record = null;
 private uint log_length = 0;
 private uint max_log_length = 0;
+private LogRecord? listener = null;
 
 
 /**
@@ -131,6 +150,12 @@ public void enable_flags(Flag flags) {
 public void disable_flags(Flag flags) {
     logging_flags &= ~flags;
 }
+
+/** Sets a function to be called when a new log record is created. */
+public void set_log_listener(LogRecord? new_listener) {
+    listener = new_listener;
+}
+
 
 /**
  * Returns the current logging flags.
@@ -177,7 +202,8 @@ public inline void debug(Flag flags, string fmt, ...) {
     }
 }
 
-public LogRecord? get_logs() {
+/** Returns the oldest log record in the logging system's buffer. */
+public Record? get_logs() {
     return first_record;
 }
 
@@ -196,7 +222,7 @@ public void log_to(FileStream? stream) {
 public void default_handler(string? domain,
                             LogLevelFlags log_levels,
                             string message) {
-    LogRecord record = new LogRecord(
+    Record record = new Record(
         domain,
         log_levels,
         GLib.get_real_time(),
@@ -220,6 +246,10 @@ public void default_handler(string? domain,
     }
     if (first_record == null) {
         last_record = null;
+    }
+
+    if (listener != null) {
+        listener(record);
     }
 
     // Print to the output stream if needed

@@ -85,7 +85,8 @@ public class Components.Inspector : Gtk.Window {
         debug("---- 8< ---- %s ---- 8< ----", this.header_bar.title);
 
         Gtk.ListStore logs_store = this.logs_store;
-        Geary.Logging.LogRecord? logs = Geary.Logging.get_logs();
+        Geary.Logging.Record? logs = Geary.Logging.get_logs();
+        int index = 0;
         while (logs != null) {
             Gtk.TreeIter iter;
             logs_store.append(out iter);
