@@ -382,15 +382,10 @@ public class Components.Inspector : Gtk.ApplicationWindow {
 
     private void on_log_record(Geary.Logging.Record record) {
         if (this.update_logs) {
-            if (GLib.MainContext.default() ==
-                GLib.MainContext.get_thread_default()) {
-                append_record(record);
-            } else {
-                GLib.Idle.add(() => {
-                        append_record(record);
-                        return GLib.Source.REMOVE;
-                    });
-            }
+            GLib.MainContext.default().invoke(() => {
+                    append_record(record);
+                    return GLib.Source.REMOVE;
+                });
         } else if (this.first_pending == null) {
             this.first_pending = record;
         }
