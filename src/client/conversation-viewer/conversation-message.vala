@@ -20,6 +20,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private const string FROM_CLASS = "geary-from";
     private const string MATCH_CLASS = "geary-match";
+    private const string SPOOF_CLASS = "geary-spoofed";
     private const string INTERNAL_ANCHOR_PREFIX = "geary:body#";
     private const string REPLACED_CID_TEMPLATE = "replaced_%02u@geary";
     private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
@@ -128,6 +129,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     _("This email address may have been forged")
                 );
                 address_parts.add(spoof_img);
+                get_style_context().add_class(SPOOF_CLASS);
             }
 
             Gtk.Label primary = new Gtk.Label(null);
