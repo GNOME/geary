@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2019 Michael Gratton <mike@vee.net>
  *
@@ -28,7 +29,10 @@ public class Components.Inspector : Gtk.Window {
     private Gtk.Widget logs_pane;
 
     [GtkChild]
-    private Gtk.Button search_button;
+    private Gtk.ToggleButton play_button;
+
+    [GtkChild]
+    private Gtk.ToggleButton search_button;
 
     [GtkChild]
     private Hdy.SearchBar search_bar;
@@ -61,6 +65,9 @@ public class Components.Inspector : Gtk.Window {
 
     private string details;
 
+    private bool update_logs = true;
+    private Geary.Logging.Record? first_pending = null;
+
     private bool autoscroll = true;
 
 
@@ -86,7 +93,12 @@ public class Components.Inspector : Gtk.Window {
         }
         this.details = details.str;
 
+        // Enable updates to get the log marker
         enable_log_updates(true);
+
+        // Install the listener then starting add the backlog
+        // (ba-doom-tish) so to avoid the race.
+        Geary.Logging.set_log_listener(this.on_log_record);
 
         Gtk.ListStore logs_store = this.logs_store;
         Geary.Logging.Record? logs = Geary.Logging.get_logs();
@@ -122,8 +134,6 @@ public class Components.Inspector : Gtk.Window {
     }
 
     public override void destroy() {
-        // Don't use enable_log_updates() here because we don't want a
-        // marker logged.
         Geary.Logging.set_log_listener(null);
         base.destroy();
     }
@@ -137,12 +147,26 @@ public class Components.Inspector : Gtk.Window {
     }
 
     private void enable_log_updates(bool enabled) {
-        // Log a marker it indicate when it was toggled
-        debug("---- 8< ---- %s ---- 8< ----", this.header_bar.title);
+        // Log a marker to indicate when it was started/stopped
+        debug(
+            "---- 8< ---- %s %s ---- 8< ----",
+            this.header_bar.title,
+            enabled ? "▶" : "■"
+        );
+
+        this.update_logs = enabled;
+
+        // Disable autoscroll when not updating as well to stop the
+        // tree view jumping to the bottom when changing the filter.
+        this.autoscroll = enabled;
+
         if (enabled) {
-            Geary.Logging.set_log_listener(this.on_log_record);
-        } else {
-            Geary.Logging.set_log_listener(null);
+            Geary.Logging.Record? logs = this.first_pending;
+            while (logs != null) {
+                append_record(logs);
+                logs = logs.get_next();
+            }
+            this.first_pending = null;
         }
     }
 
@@ -185,6 +209,7 @@ public class Components.Inspector : Gtk.Window {
         bool logs_visible = this.stack.visible_child == this.logs_pane;
         uint logs_selected = this.logs_view.get_selection().count_selected_rows();
         this.copy_button.set_sensitive(!logs_visible || logs_selected > 0);
+        this.play_button.set_visible(logs_visible);
         this.search_button.set_visible(logs_visible);
     }
 
@@ -285,19 +310,30 @@ public class Components.Inspector : Gtk.Window {
     }
 
     [GtkCallback]
+    private void on_logs_play_toggled(Gtk.ToggleButton button) {
+        if (this.update_logs != button.active) {
+            enable_log_updates(button.active);
+        }
+    }
+
+    [GtkCallback]
     private void on_logs_search_changed() {
         update_logs_filter();
     }
 
     private void on_log_record(Geary.Logging.Record record) {
-        if (GLib.MainContext.default() ==
-            GLib.MainContext.get_thread_default()) {
-            append_record(record);
-        } else {
-            GLib.Idle.add(() => {
-                    append_record(record);
-                    return GLib.Source.REMOVE;
-                });
+        if (this.update_logs) {
+            if (GLib.MainContext.default() ==
+                GLib.MainContext.get_thread_default()) {
+                append_record(record);
+            } else {
+                GLib.Idle.add(() => {
+                        append_record(record);
+                        return GLib.Source.REMOVE;
+                    });
+            }
+        } else if (this.first_pending == null) {
+            this.first_pending = record;
         }
     }
 
