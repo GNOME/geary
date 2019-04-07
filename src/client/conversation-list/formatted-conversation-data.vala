@@ -77,7 +77,8 @@ public class FormattedConversationData : Geary.BaseObject {
         }
 
         public bool equal_to(ParticipantDisplay other) {
-            return address.equal_to(other.address);
+            return address.equal_to(other.address)
+                && address.name == other.address.name;
         }
 
         public uint hash() {
