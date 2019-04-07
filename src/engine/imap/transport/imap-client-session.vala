@@ -835,6 +835,10 @@ public class Geary.Imap.ClientSession : BaseObject {
     /**
      * Performs the LOGIN command using the supplied credentials.
      *
+     * Throws {@link ImapError.UNAUTHENTICATED} if the credentials are
+     * bad, unsupported, or if authentication actually failed. Returns
+     * the status response for the command otherwise.
+     *
      * @see initiate_session_async
      */
     public async StatusResponse login_async(Geary.Credentials credentials,
@@ -877,32 +881,40 @@ public class Geary.Imap.ClientSession : BaseObject {
         // should always proceed; only an Error could change this
         assert(params.proceed);
 
-        GLib.Error? login_err = null;
-        try {
-            yield command_transaction_async(cmd, cancellable);
-        } catch (Error err) {
-            login_err = err;
-        }
+        StatusResponse response = yield command_transaction_async(
+            cmd, cancellable
+        );
 
-        if (login_err != null) {
+        if (response.status != Status.OK) {
             // Throw an error indicating auth failed here, unless
             // there is a status response and it indicates that the
             // server is merely reporting login as being unavailable,
             // then don't since the creds might actually be fine.
-            ResponseCodeType? code_type = null;
-            if (cmd.status != null) {
-                ResponseCode? code = cmd.status.response_code;
-                if (code != null) {
-                    code_type = code.get_response_code_type();
+            ResponseCode? code = response.response_code;
+            if (code != null) {
+                ResponseCodeType? code_type = code.get_response_code_type();
+                if (code_type != null) {
+                    switch (code_type.value) {
+                    case ResponseCodeType.UNAVAILABLE:
+                        throw new ImapError.UNAVAILABLE(
+                            "Login restricted: %s: ", response.to_string()
+                        );
+
+                    case ResponseCodeType.AUTHENTICATIONFAILED:
+                        // pass through to the error being thrown below
+                        break;
+
+                    default:
+                        throw new ImapError.SERVER_ERROR(
+                            "Login error: %s: ", response.to_string()
+                        );
+                    }
                 }
             }
 
-            if (code_type == null ||
-                code_type.value != ResponseCodeType.UNAVAILABLE) {
-                throw new ImapError.UNAUTHENTICATED(login_err.message);
-            } else {
-                throw login_err;
-            }
+            throw new ImapError.UNAUTHENTICATED(
+                "Bad credentials: %s: ", response.to_string()
+            );
         }
 
         return cmd.status;
@@ -1715,6 +1727,9 @@ public class Geary.Imap.ClientSession : BaseObject {
 
         this.cx.send_command(cmd);
         yield cmd.wait_until_complete(cancellable);
+
+        // This won't be null since the Command.wait_until_complete
+        // will throw an error if it is.
         return cmd.status;
     }
 
