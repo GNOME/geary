@@ -28,6 +28,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Search fo matching log entries</property>
             <signal name="clicked" handler="on_search_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
@@ -49,9 +50,8 @@
           <object class="GtkButton" id="save_as_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="tooltip_text" translatable="yes"
-                      comments="Tooltip for inspector button">Save logs and details to a file</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Save logs entries and details</property>
             <signal name="clicked" handler="on_save_as_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
@@ -70,8 +70,8 @@
           <object class="GtkButton" id="copy_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Copy selected rows</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Copy selected log entries</property>
             <signal name="clicked" handler="on_copy_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
