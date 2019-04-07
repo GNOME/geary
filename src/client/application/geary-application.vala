@@ -138,6 +138,7 @@ public class GearyApplication : Gtk.Application {
     private bool exiting_fired = false;
     private int exitcode = 0;
     private bool is_destroyed = false;
+    private Components.Inspector? inspector = null;
 
 
     /**
@@ -566,8 +567,15 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_inspect() {
-        Components.Inspector inspector = new Components.Inspector(this);
-        inspector.show();
+        if (this.inspector == null) {
+            this.inspector = new Components.Inspector(this);
+            this.inspector.destroy.connect(() => {
+                    this.inspector = null;
+                });
+            this.inspector.show();
+        } else {
+            this.inspector.present();
+        }
     }
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
