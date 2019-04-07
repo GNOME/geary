@@ -14,7 +14,7 @@
       </row>
     </data>
   </object>
-  <template class="ComponentsInspector" parent="GtkWindow">
+  <template class="ComponentsInspector" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
     <property name="default_width">750</property>
     <property name="default_height">500</property>
@@ -29,8 +29,8 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Togggle appending new log entries</property>
+            <property name="action_name">win.toggle-play</property>
             <property name="active">True</property>
-            <signal name="toggled" handler="on_logs_play_toggled" swapped="no"/>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -41,12 +41,12 @@
           </object>
         </child>
         <child>
-          <object class="GtkButton" id="search_button">
+          <object class="GtkToggleButton" id="search_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Search fo matching log entries</property>
-            <signal name="clicked" handler="on_search_clicked" swapped="no"/>
+            <property name="action_name">win.toggle-search</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -92,7 +92,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Copy selected log entries</property>
-            <signal name="clicked" handler="on_copy_clicked" swapped="no"/>
+            <property name="action_name">win.copy</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>

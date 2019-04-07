@@ -355,6 +355,7 @@ public class GearyApplication : Gtk.Application {
         add_window_accelerators(ACTION_UNDO, { "<Ctrl>Z" });
 
         ComposerWidget.add_window_accelerators(this);
+        Components.Inspector.add_window_accelerators(this);
 
         yield controller.open_async(null);
 

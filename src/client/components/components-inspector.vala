@@ -10,10 +10,30 @@
  * A window that displays debugging and development information.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-inspector.ui")]
-public class Components.Inspector : Gtk.Window {
+public class Components.Inspector : Gtk.ApplicationWindow {
 
 
     private const int COL_MESSAGE = 0;
+
+    private const string ACTION_CLOSE = "inspector-close";
+    private const string ACTION_PLAY_TOGGLE = "toggle-play";
+    private const string ACTION_SEARCH_TOGGLE = "toggle-search";
+    private const string ACTION_SEARCH_ACTIVATE = "activate-search";
+
+    private const ActionEntry[] action_entries = {
+        {GearyApplication.ACTION_CLOSE, on_close },
+        {GearyApplication.ACTION_COPY,  on_copy_clicked },
+        {ACTION_CLOSE,                  on_close },
+        {ACTION_PLAY_TOGGLE,            on_logs_play_toggled, null, "true" },
+        {ACTION_SEARCH_TOGGLE,          on_logs_search_toggled, null, "false" },
+        {ACTION_SEARCH_ACTIVATE,        on_logs_search_activated },
+    };
+
+    public static void add_window_accelerators(GearyApplication app) {
+        app.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
+        app.add_window_accelerators(ACTION_PLAY_TOGGLE, { "space" } );
+        app.add_window_accelerators(ACTION_SEARCH_ACTIVATE, { "<Ctrl>F" } );
+    }
 
 
     [GtkChild]
@@ -72,7 +92,10 @@ public class Components.Inspector : Gtk.Window {
 
 
     public Inspector(GearyApplication app) {
+        Object(application: app);
         this.title = this.header_bar.title = _("Inspector");
+
+        add_action_entries(Inspector.action_entries, this);
 
         this.search_bar.connect_entry(this.search_entry);
 
@@ -139,7 +162,26 @@ public class Components.Inspector : Gtk.Window {
     }
 
     public override bool key_press_event(Gdk.EventKey event) {
-        bool ret = this.search_bar.handle_event(event);
+        bool ret = Gdk.EVENT_PROPAGATE;
+
+        if (this.search_bar.search_mode_enabled &&
+            event.keyval == Gdk.Key.Escape) {
+            // Manually deactivate search so the button stays in sync
+            this.search_button.set_active(false);
+            ret = Gdk.EVENT_STOP;
+        }
+
+        if (ret == Gdk.EVENT_PROPAGATE) {
+            ret = this.search_bar.handle_event(event);
+        }
+
+        if (ret == Gdk.EVENT_PROPAGATE &&
+            this.search_bar.search_mode_enabled) {
+            // Ensure <Space> and others are passed to the search
+            // entry before getting used as an accelerator.
+            ret = this.search_entry.key_press_event(event);
+        }
+
         if (ret == Gdk.EVENT_PROPAGATE) {
             ret = base.key_press_event(event);
         }
@@ -234,7 +276,6 @@ public class Components.Inspector : Gtk.Window {
         update_ui();
     }
 
-    [GtkCallback]
     private void on_copy_clicked() {
         string clipboard_value = "";
         if (this.stack.visible_child == this.logs_pane) {
@@ -293,11 +334,6 @@ public class Components.Inspector : Gtk.Window {
     }
 
     [GtkCallback]
-    private void on_search_clicked() {
-        this.search_bar.set_search_mode(!this.search_bar.get_search_mode());
-    }
-
-    [GtkCallback]
     private void on_logs_size_allocate() {
         if (this.autoscroll) {
             update_scrollbar();
@@ -309,11 +345,23 @@ public class Components.Inspector : Gtk.Window {
         update_ui();
     }
 
-    [GtkCallback]
-    private void on_logs_play_toggled(Gtk.ToggleButton button) {
-        if (this.update_logs != button.active) {
-            enable_log_updates(button.active);
-        }
+    private void on_logs_search_toggled(GLib.SimpleAction action,
+                                        GLib.Variant? param) {
+        bool enabled = !((bool) action.state);
+        this.search_bar.set_search_mode(enabled);
+        action.set_state(enabled);
+    }
+
+    private void on_logs_search_activated() {
+        this.search_button.set_active(true);
+        this.search_entry.grab_focus();
+    }
+
+    private void on_logs_play_toggled(GLib.SimpleAction action,
+                                      GLib.Variant? param) {
+        bool enabled = !((bool) action.state);
+        enable_log_updates(enabled);
+        action.set_state(enabled);
     }
 
     [GtkCallback]
@@ -335,6 +383,10 @@ public class Components.Inspector : Gtk.Window {
         } else if (this.first_pending == null) {
             this.first_pending = record;
         }
+    }
+
+    private void on_close() {
+        destroy();
     }
 
 }
