@@ -38,8 +38,5 @@ private class Geary.App.InsertOperation : ConversationOperation {
               this.monitor.base_folder.to_string(),
               this.inserted_ids.size);
         yield this.monitor.load_by_sparse_id(to_insert);
-
-        // Check to see if we need any more
-        this.monitor.check_window_count();
     }
 }

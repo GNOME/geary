@@ -46,10 +46,12 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
             this.monitor.window_lowest, num_to_load
         );
 
-        // Check to see if we need any more, but only if we actually
-        // loaded some, so we don't keep loop loading when we have
-        // already loaded all in the folder.
-        if (loaded == num_to_load) {
+        // Check to see if we need any more, but only if there might
+        // be some more to load either locally or from the remote. If
+        // we loaded the full amount, there might be some more
+        // locally, so try that. If not, but the monitor thinks there
+        // are more to load, then we have go check the remote.
+        if (loaded == num_to_load || this.monitor.can_load_more) {
             this.monitor.check_window_count();
         }
     }

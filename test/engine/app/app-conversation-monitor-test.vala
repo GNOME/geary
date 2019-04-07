@@ -235,9 +235,6 @@ class Geary.App.ConversationMonitorTest : TestCase {
         assert_int(2, monitor.size, "Initial conversation count");
         assert_equal(e2.id, monitor.window_lowest, "Lowest window id");
 
-        // Removing a message will trigger another async load
-        this.base_folder.expect_call("list_email_by_id_async");
-
         this.base_folder.email_removed(new Gee.ArrayList<EmailIdentifier>.wrap({e2.id}));
         wait_for_signal(monitor, "conversations-removed");
         assert_int(1, monitor.size, "Conversation count");

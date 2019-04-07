@@ -156,7 +156,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
      * unless update_uid_info is true.
      */
     public async void update_folder_status(Geary.Imap.FolderProperties remote_properties,
-                                           bool update_uid_info,
                                            bool respect_marked_for_remove,
                                            Cancellable? cancellable)
         throws Error {
@@ -199,9 +198,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_rowid(2, this.folder_id);
             stmt.exec(cancellable);
 
-            if (update_uid_info)
-                do_update_uid_info(cx, remote_properties, cancellable);
-
             if (remote_properties.status_messages >= 0) {
                 do_update_last_seen_status_total(
                     cx, remote_properties.status_messages, cancellable
@@ -217,11 +213,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         );
         this.properties.recent = remote_properties.recent;
         this.properties.attrs = remote_properties.attrs;
-
-        if (update_uid_info) {
-            this.properties.uid_validity = remote_properties.uid_validity;
-            this.properties.uid_next = remote_properties.uid_next;
-        }
 
         // only update STATUS MESSAGES count if previously set, but use this count as the
         // "authoritative" value until another SELECT/EXAMINE or MESSAGES response
@@ -1057,6 +1048,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public async Gee.Set<ImapDB.EmailIdentifier>? mark_removed_async(
         Gee.Collection<ImapDB.EmailIdentifier>? ids, bool mark_removed, Cancellable? cancellable)
         throws Error {
+        int total_changed = 0;
         int unread_count = 0;
         Gee.Set<ImapDB.EmailIdentifier> removed_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
@@ -1069,6 +1061,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             if (locs == null || locs.size == 0)
                 return Db.TransactionOutcome.DONE;
 
+            total_changed = locs.size;
             unread_count = do_get_unread_count_for_ids(cx, ids, cancellable);
 
             Gee.HashSet<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
@@ -1077,14 +1070,26 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 removed_ids.add(location.email_id);
             }
 
-            if (uids.size > 0)
-                do_mark_unmark_removed(cx, uids, mark_removed, cancellable);
-
+            do_mark_unmark_removed(cx, uids, mark_removed, cancellable);
             do_add_to_unread_count(cx, -unread_count, cancellable);
 
             return Db.TransactionOutcome.DONE;
         }, cancellable);
 
+
+        // Update the folder properties so client sees the changes
+        // right away
+
+        // Email total
+        if (mark_removed) {
+            total_changed = -total_changed;
+        }
+        int total = this.properties.select_examine_messages + total_changed;
+        if (total >= 0) {
+            this.properties.set_select_examine_message_count(total);
+        }
+
+        // Unread total
         if (unread_count > 0)
             properties.set_status_unseen(properties.email_unread - unread_count);
 
