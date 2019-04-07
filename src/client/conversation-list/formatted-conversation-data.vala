@@ -208,7 +208,7 @@ public class FormattedConversationData : Geary.BaseObject {
 
                 // if present and this message is unread but the prior were read,
                 // this author is now unread
-                if (message.email_flags.is_unread() && !list[existing_index].is_unread)
+                if (message.email_flags.is_unread())
                     list[existing_index].is_unread = true;
             }
         }
