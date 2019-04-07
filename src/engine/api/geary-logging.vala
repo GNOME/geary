@@ -58,13 +58,15 @@ public enum Flag {
 public class Record {
 
 
-    private string domain;
+    /** Returns the GLib domain of the log message. */
+    public string domain { get; private set; }
+
+    internal Record? next = null;
+
     private LogLevelFlags flags;
     private int64 timestamp;
     private double elapsed;
     private string message;
-
-    internal Record? next = null;
 
 
     internal Record(string domain,

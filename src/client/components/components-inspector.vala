@@ -127,9 +127,11 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         Geary.Logging.Record? logs = Geary.Logging.get_logs();
         int index = 0;
         while (logs != null) {
-            Gtk.TreeIter iter;
-            logs_store.insert(out iter, index++);
-            logs_store.set_value(iter, COL_MESSAGE, logs.format());
+            if (should_append(logs)) {
+                Gtk.TreeIter iter;
+                logs_store.insert(out iter, index++);
+                logs_store.set_value(iter, COL_MESSAGE, logs.format());
+            }
             logs = logs.get_next();
         }
 
@@ -212,6 +214,13 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         }
     }
 
+    private inline bool should_append(Geary.Logging.Record record) {
+        // Blacklist GdkPixbuf since it spams us e.g. when window
+        // focus changes, including between MainWindow and the
+        // Inspector, which is very annoying.
+        return (record.domain != "GdkPixbuf");
+    }
+
     private async void save(string path,
                             GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -266,9 +275,11 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     }
 
     private void append_record(Geary.Logging.Record record) {
-        Gtk.TreeIter inserted_iter;
-        this.logs_store.append(out inserted_iter);
-        this.logs_store.set_value(inserted_iter, COL_MESSAGE, record.format());
+        if (should_append(record)) {
+            Gtk.TreeIter inserted_iter;
+            this.logs_store.append(out inserted_iter);
+            this.logs_store.set_value(inserted_iter, COL_MESSAGE, record.format());
+        }
     }
 
     [GtkCallback]
