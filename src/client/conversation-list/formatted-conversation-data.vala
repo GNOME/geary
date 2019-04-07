@@ -186,8 +186,8 @@ public class FormattedConversationData : Geary.BaseObject {
         if (conversation == null || account_owner_emails == null || account_owner_emails.size == 0)
             return "";
 
-        // Build chronological list of AuthorDisplay records, setting to unread if any message by
-        // that author is unread
+        // Build chronological list of unique AuthorDisplay records, setting to
+        // unread if any message by that author is unread
         Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>();
         foreach (Geary.Email message in conversation.get_emails(Geary.App.Conversation.Ordering.RECV_DATE_ASCENDING)) {
             // only display if something to display
@@ -199,7 +199,6 @@ public class FormattedConversationData : Geary.BaseObject {
                 ParticipantDisplay participant_display = new ParticipantDisplay(address,
                     message.email_flags.is_unread());
 
-                // if not present, add in chronological order
                 int existing_index = list.index_of(participant_display);
                 if (existing_index < 0) {
                     list.add(participant_display);
