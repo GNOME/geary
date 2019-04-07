@@ -128,9 +128,10 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         int index = 0;
         while (logs != null) {
             if (should_append(logs)) {
+                string message = logs.format();
                 Gtk.TreeIter iter;
                 logs_store.insert(out iter, index++);
-                logs_store.set_value(iter, COL_MESSAGE, logs.format());
+                logs_store.set_value(iter, COL_MESSAGE, message);
             }
             logs = logs.next;
         }
@@ -139,14 +140,15 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         this.logs_filter.set_visible_func((model, iter) => {
                 bool ret = true;
                 if (this.logs_filter_terms.length > 0) {
-                    ret = false;
+                    ret = true;
                     Value value;
                     model.get_value(iter, COL_MESSAGE, out value);
                     string? message = (string) value;
                     if (message != null) {
+                        message = message.casefold();
                         foreach (string term in this.logs_filter_terms) {
-                            if (term in message) {
-                                ret = true;
+                            if (!message.contains(term)) {
+                                ret = false;
                                 break;
                             }
                         }
@@ -270,7 +272,9 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     }
 
     private void update_logs_filter() {
-        this.logs_filter_terms = this.search_entry.text.split(" ");
+        string cleaned =
+            Geary.String.reduce_whitespace(this.search_entry.text).casefold();
+        this.logs_filter_terms = cleaned.split(" ");
         this.logs_filter.refilter();
     }
 
