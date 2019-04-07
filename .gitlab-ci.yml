@@ -39,7 +39,7 @@ variables:
 
 fedora:
   stage: build
-  image: fedora:latest
+  image: fedora:rawhide
   before_script:
     - dnf update -y --nogpgcheck
     - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
@@ -51,7 +51,7 @@ fedora:
 
 ubuntu:
   stage: build
-  image: ubuntu:rolling
+  image: ubuntu:devel
   before_script:
     - apt-get update
     - apt-get install -q -y --no-install-recommends $UBUNTU_DEPS $UBUNTU_TEST_DEPS
