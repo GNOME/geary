@@ -61,7 +61,8 @@ public class Record {
     /** Returns the GLib domain of the log message. */
     public string domain { get; private set; }
 
-    internal Record? next = null;
+    /** Returns the next log record in the buffer, if any. */
+    public Record? next { get; internal set; default = null; }
 
     private LogLevelFlags flags;
     private int64 timestamp;
@@ -79,11 +80,6 @@ public class Record {
         this.timestamp = timestamp;
         this.elapsed = elapsed;
         this.message = message;
-    }
-
-    /** Returns the next log record in the buffer, if any. */
-    public Record? get_next() {
-        return this.next;
     }
 
     /** Returns a formatted string representation of this record. */

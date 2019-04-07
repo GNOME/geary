@@ -132,7 +132,7 @@ public class Components.Inspector : Gtk.ApplicationWindow {
                 logs_store.insert(out iter, index++);
                 logs_store.set_value(iter, COL_MESSAGE, logs.format());
             }
-            logs = logs.get_next();
+            logs = logs.next;
         }
 
         this.logs_filter = new Gtk.TreeModelFilter(logs_store, null);
@@ -208,7 +208,7 @@ public class Components.Inspector : Gtk.ApplicationWindow {
             Geary.Logging.Record? logs = this.first_pending;
             while (logs != null) {
                 append_record(logs);
-                logs = logs.get_next();
+                logs = logs.next;
             }
             this.first_pending = null;
         }
