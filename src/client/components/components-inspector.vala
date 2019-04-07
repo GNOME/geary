@@ -37,6 +37,9 @@ public class Components.Inspector : Gtk.Window {
     private Gtk.SearchEntry search_entry;
 
     [GtkChild]
+    private Gtk.ScrolledWindow logs_scroller;
+
+    [GtkChild]
     private Gtk.TreeView logs_view;
 
     [GtkChild]
@@ -57,6 +60,8 @@ public class Components.Inspector : Gtk.Window {
     private string[] logs_filter_terms = new string[0];
 
     private string details;
+
+    private bool autoscroll = true;
 
 
     public Inspector(GearyApplication app) {
@@ -81,15 +86,14 @@ public class Components.Inspector : Gtk.Window {
         }
         this.details = details.str;
 
-        // Log a marker for when the inspector was opened
-        debug("---- 8< ---- %s ---- 8< ----", this.header_bar.title);
+        enable_log_updates(true);
 
         Gtk.ListStore logs_store = this.logs_store;
         Geary.Logging.Record? logs = Geary.Logging.get_logs();
         int index = 0;
         while (logs != null) {
             Gtk.TreeIter iter;
-            logs_store.append(out iter);
+            logs_store.insert(out iter, index++);
             logs_store.set_value(iter, COL_MESSAGE, logs.format());
             logs = logs.get_next();
         }
@@ -117,12 +121,29 @@ public class Components.Inspector : Gtk.Window {
         this.logs_view.set_model(this.logs_filter);
     }
 
+    public override void destroy() {
+        // Don't use enable_log_updates() here because we don't want a
+        // marker logged.
+        Geary.Logging.set_log_listener(null);
+        base.destroy();
+    }
+
     public override bool key_press_event(Gdk.EventKey event) {
         bool ret = this.search_bar.handle_event(event);
         if (ret == Gdk.EVENT_PROPAGATE) {
             ret = base.key_press_event(event);
         }
         return ret;
+    }
+
+    private void enable_log_updates(bool enabled) {
+        // Log a marker it indicate when it was toggled
+        debug("---- 8< ---- %s ---- 8< ----", this.header_bar.title);
+        if (enabled) {
+            Geary.Logging.set_log_listener(this.on_log_record);
+        } else {
+            Geary.Logging.set_log_listener(null);
+        }
     }
 
     private async void save(string path,
@@ -167,9 +188,20 @@ public class Components.Inspector : Gtk.Window {
         this.search_button.set_visible(logs_visible);
     }
 
+    private void update_scrollbar() {
+        Gtk.Adjustment adj = this.logs_scroller.get_vadjustment();
+        adj.set_value(adj.upper - adj.page_size);
+    }
+
     private void update_logs_filter() {
         this.logs_filter_terms = this.search_entry.text.split(" ");
         this.logs_filter.refilter();
+    }
+
+    private void append_record(Geary.Logging.Record record) {
+        Gtk.TreeIter inserted_iter;
+        this.logs_store.append(out inserted_iter);
+        this.logs_store.set_value(inserted_iter, COL_MESSAGE, record.format());
     }
 
     [GtkCallback]
@@ -241,6 +273,13 @@ public class Components.Inspector : Gtk.Window {
     }
 
     [GtkCallback]
+    private void on_logs_size_allocate() {
+        if (this.autoscroll) {
+            update_scrollbar();
+        }
+    }
+
+    [GtkCallback]
     private void on_logs_selection_changed() {
         update_ui();
     }
@@ -250,9 +289,16 @@ public class Components.Inspector : Gtk.Window {
         update_logs_filter();
     }
 
-    [GtkCallback]
-    private void on_destroy() {
-        destroy();
+    private void on_log_record(Geary.Logging.Record record) {
+        if (GLib.MainContext.default() ==
+            GLib.MainContext.get_thread_default()) {
+            append_record(record);
+        } else {
+            GLib.Idle.add(() => {
+                    append_record(record);
+                    return GLib.Source.REMOVE;
+                });
+        }
     }
 
 }

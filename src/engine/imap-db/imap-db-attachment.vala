@@ -95,9 +95,9 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
             save_file(part, attachments_dir, cancellable);
             update_db(cx, cancellable);
         } catch (Error err) {
-            // Don't honour the cancellable here, we need to delete
-            // it.
-            this.delete(cx, cancellable);
+            // Don't honour the cancellable here, it needs to be
+            // deleted
+            this.delete(cx, null);
             throw err;
         }
     }
@@ -161,10 +161,8 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
         // create directory, but don't throw exception if already exists
         try {
             target.get_parent().make_directory_with_parents(cancellable);
-        } catch (IOError ioe) {
-            // fall through if already exists
-            if (!(ioe is IOError.EXISTS))
-                throw ioe;
+        } catch (IOError.EXISTS err) {
+            // All good
         }
 
         // Delete any existing file now since we might not be creating
