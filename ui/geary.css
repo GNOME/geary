@@ -207,6 +207,45 @@ grid.geary-message-summary {
   font-weight: bold;
 }
 
+/* GtkListboxRows with padded labels */
+
+row.geary-labelled-row {
+  padding: 0px;
+}
+
+row.geary-labelled-row > grid > * {
+  margin: 18px 6px;
+}
+
+row.geary-labelled-row > grid > *:first-child:dir(ltr),
+row.geary-labelled-row > grid > *:last-child:dir(rtl) {
+  margin-left: 18px;
+}
+
+row.geary-labelled-row > grid > *:last-child:dir(ltr),
+row.geary-labelled-row > grid > *:first-child:dir(rtl) {
+  margin-right: 18px;
+}
+
+/* Images should have some padding to offset them from adjacent
+widgets, but care ust be taken since images are also used as children
+of other widgets like entries, comboboxes and switches, and these
+shouldn't be be touched. */
+row.geary-labelled-row widget > image,
+row.geary-labelled-row grid > image {
+  padding: 0px 6px;
+}
+
+row.geary-labelled-row > grid > combobox,
+row.geary-labelled-row > grid > entry,
+row.geary-labelled-row:not(.geary-add-row) > grid > image,
+row.geary-labelled-row > grid > switch {
+  /* These use more space than labels, so set their valign to center
+  when adding them and free up some space around them here to keep a
+  consistent row height. */
+  margin: 0 12px;
+}
+
 /* Accounts.Editor */
 
 grid.geary-accounts-editor-pane-content {
@@ -230,10 +269,6 @@ label.geary-settings-heading {
   margin-bottom: 12px;
 }
 
-row.geary-settings {
-  padding: 0px;
-}
-
 row.geary-settings entry {
   border-width: 0px;
   background-color: transparent;
@@ -247,20 +282,6 @@ row.geary-settings.geary-drag-source {
 row.geary-settings.geary-drag-icon {
   background-color: @theme_base_color;
   border: 1px solid @borders;
-}
-
-row.geary-settings > grid > * {
-  margin: 18px 6px;
-}
-
-row.geary-settings > grid > *:first-child:dir(ltr),
-row.geary-settings > grid > *:last-child:dir(rtl) {
-  margin-left: 18px;
-}
-
-row.geary-settings > grid > *:last-child:dir(ltr),
-row.geary-settings > grid > *:first-child:dir(rtl) {
-  margin-right: 18px;
 }
 
 /* dir pseudo-class used here for required additional specificity */
@@ -281,25 +302,6 @@ row.geary-settings > grid > grid.geary-drag-handle image:dir(rtl) {
 
 frame.geary-settings.geary-signature {
   min-height: 5em;
-}
-
-/* Images should have some padding to offset them from adjacent
-widgets, but care ust be taken since images are also used as children
-of other widgets like entries, comboboxes and switches, and these
-shouldn't be be touched. */
-row.geary-settings widget > image,
-row.geary-settings grid > image {
-  padding: 0px 6px;
-}
-
-row.geary-settings > grid > combobox,
-row.geary-settings > grid > entry,
-row.geary-settings:not(.geary-add-row) > grid > image,
-row.geary-settings > grid > switch {
-  /* These use more space than labels, so set their valign to center
-  when adding them and free up some space around them here to keep a
-  consistent row height. */
-  margin: 0 12px;
 }
 
 buttonbox.geary-settings  {

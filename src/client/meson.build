@@ -24,6 +24,7 @@ geary_client_vala_sources = files(
   'accounts/accounts-manager.vala',
 
   'components/client-web-view.vala',
+  'components/components-inspector.vala',
   'components/components-placeholder-pane.vala',
   'components/components-validator.vala',
   'components/count-badge.vala',
@@ -124,6 +125,7 @@ geary_client_dependencies = [
   gtk,
   json_glib,
   libcanberra,
+  libhandy,
   libnotify,
   libsecret,
   libsoup,

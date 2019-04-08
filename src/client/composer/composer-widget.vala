@@ -135,8 +135,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         {ACTION_SHOW_EXTENDED,            on_toggle_action,        null,  "false",  on_show_extended_toggled   },
     };
 
-    public static Gee.MultiMap<string, string> action_accelerators = new Gee.HashMultiMap<string, string>();
-
     public static void add_window_accelerators(GearyApplication application) {
         application.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         application.add_window_accelerators(ACTION_CUT, { "<Ctrl>x" } );

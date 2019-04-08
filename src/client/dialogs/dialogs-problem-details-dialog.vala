@@ -24,7 +24,10 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
                                 Geary.ErrorContext error,
                                 Geary.AccountInformation? account,
                                 Geary.ServiceInformation? service) {
-        Object(use_header_bar: 1);
+        Object(
+            transient_for: parent,
+            use_header_bar: 1
+        );
         set_default_size(600, -1);
 
         this.error = error;
@@ -50,18 +53,18 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
 
     private string format_details() {
         StringBuilder details = new StringBuilder();
-        details.append_printf(
-            "Geary version: %s\n",
-            GearyApplication.VERSION
-        );
-        details.append_printf(
-            "GTK version: %u.%u.%u\n",
-            Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()
-        );
-        details.append_printf(
-            "Desktop: %s\n",
-            Environment.get_variable("XDG_CURRENT_DESKTOP") ?? "Unknown"
-        );
+
+        Gtk.ApplicationWindow? parent =
+            this.get_toplevel() as Gtk.ApplicationWindow;
+        GearyApplication? app = (parent != null)
+            ? parent.application as GearyApplication
+            : null;
+        if (app != null) {
+            foreach (GearyApplication.RuntimeDetail? detail
+                     in app.get_runtime_information()) {
+                details.append_printf("%s: %s", detail.name, detail.value);
+            }
+        }
         if (this.account != null) {
             details.append_printf(
                 "Account id: %s\n",

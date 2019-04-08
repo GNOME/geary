@@ -16,30 +16,30 @@ variables:
   INSTALL_CMD: ninja -v -C $BUILD_DIR install
 
   # Fedora packages
-  FEDORA_DEPS: vala
-               meson desktop-file-utils libcanberra-devel
-               folks-devel libgee-devel glib2-devel gmime-devel
-               gtk3-devel libnotify-devel sqlite-devel
-               webkitgtk4-devel libsecret-devel libxml2-devel
-               vala-tools gcr-devel enchant2-devel libunwind-devel
-               iso-codes-devel gnome-online-accounts-devel itstool
-               json-glib-devel
+  FEDORA_DEPS: meson vala
+               desktop-file-utils enchant2-devel folks-devel gcr-devel
+               glib2-devel gmime-devel gnome-online-accounts-devel
+               gtk3-devel iso-codes-devel json-glib-devel itstool
+               libcanberra-devel libgee-devel libhandy-devel
+               libnotify-devel libsecret-devel libunwind-devel
+               libxml2-devel sqlite-devel webkitgtk4-devel
   FEDORA_TEST_DEPS: Xvfb tar xz
 
   # Ubuntu packages
-  UBUNTU_DEPS: valac build-essential
-               meson desktop-file-utils libcanberra-dev
-               libfolks-dev libgee-0.8-dev libglib2.0-dev
-               libgmime-2.6-dev libgtk-3-dev libsecret-1-dev
-               libxml2-dev libnotify-dev libsqlite3-dev
-               libwebkit2gtk-4.0-dev libgcr-3-dev libenchant-dev
-               libunwind-dev iso-codes libgoa-1.0-dev itstool gettext
-               libmessaging-menu-dev libunity-dev libjson-glib-dev
+  UBUNTU_DEPS: meson build-essential valac
+               desktop-file-utils gettext iso-codes itstool
+               libcanberra-dev libenchant-dev libfolks-dev
+               libgcr-3-dev libgee-0.8-dev libglib2.0-dev
+               libgmime-2.6-dev libgoa-1.0-dev libgtk-3-dev
+               libhandy-0.0-dev libjson-glib-dev libmessaging-menu-dev
+               libnotify-dev libsecret-1-dev libsqlite3-dev
+               libunity-dev libunwind-dev libwebkit2gtk-4.0-dev
+               libxml2-dev
   UBUNTU_TEST_DEPS: xauth xvfb
 
 fedora:
   stage: build
-  image: fedora:latest
+  image: fedora:rawhide
   before_script:
     - dnf update -y --nogpgcheck
     - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
@@ -51,7 +51,7 @@ fedora:
 
 ubuntu:
   stage: build
-  image: ubuntu:rolling
+  image: ubuntu:devel
   before_script:
     - apt-get update
     - apt-get install -q -y --no-install-recommends $UBUNTU_DEPS $UBUNTU_TEST_DEPS
