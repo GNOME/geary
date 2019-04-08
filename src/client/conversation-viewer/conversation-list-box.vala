@@ -816,6 +816,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // but keep the scrollbar adjusted so that the first
         // interesting message remains visible.
         Gtk.Adjustment listbox_adj = get_adjustment();
+        int i_mail_loaded = 0;
         foreach (Geary.Email email in to_insert) {
             EmailRow row = add_email(email, false);
             // Since uninteresting rows are inserted above the
@@ -831,7 +832,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             loading_height = 0;
 
             yield row.view.load_avatar(this.avatar_store);
-            yield throttle_loading();
+            if (i_mail_loaded % 10 == 0)
+                yield throttle_loading();
+            ++i_mail_loaded;
         }
 
         set_sort_func(on_sort);
