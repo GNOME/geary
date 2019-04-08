@@ -418,6 +418,7 @@ ui/composer-menus.ui
 ui/composer-widget.ui
 ui/components-inspector.ui
 ui/components-placeholder-pane.ui
+ui/conversation-contact-popover.ui
 ui/conversation-email.ui
 ui/conversation-email-attachment-view.ui
 ui/conversation-email-menus.ui
