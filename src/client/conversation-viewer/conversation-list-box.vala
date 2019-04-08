@@ -465,11 +465,14 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /** Search manager for highlighting search terms in this list. */
     public SearchManager search { get; private set; }
 
+    /** Specifies if this list box currently has an embedded composer. */
+    public bool has_composer { get; private set; default = false; }
+
     // Used to load messages in conversation.
     private Geary.App.EmailStore email_store;
 
-    // Avatars for this conversation
-    private Application.AvatarStore avatar_store;
+    // Store from which to lookup contacts
+    private Application.ContactStore contacts;
 
     // App config
     private Configuration config;
@@ -549,13 +552,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      */
     public ConversationListBox(Geary.App.Conversation conversation,
                                Geary.App.EmailStore email_store,
-                               Application.AvatarStore avatar_store,
+                               Application.ContactStore contacts,
                                Configuration config,
                                Gtk.Adjustment adjustment) {
         base_ref();
         this.conversation = conversation;
         this.email_store = email_store;
-        this.avatar_store = avatar_store;
+        this.contacts = contacts;
         this.config = config;
 
         this.search = new SearchManager(this, conversation);
@@ -637,7 +640,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         // Load the interesting row completely up front, and load the
         // remaining in the background so we can return fast.
-        interesting_row.view.load_avatar.begin(this.avatar_store);
+        yield interesting_row.view.load_contacts();
         yield interesting_row.expand();
         this.finish_loading.begin(
             query, uninteresting, post_interesting
@@ -712,9 +715,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // circular ref.
         row.should_scroll.connect((row) => { scroll_to(row); });
         add(row);
+        this.has_composer = true;
 
         embed.composer.draft_id_changed.connect((id) => { this.draft_id = id; });
         embed.vanished.connect(() => {
+                this.has_composer = false;
                 this.draft_id = null;
                 remove(row);
                 if (is_draft &&
@@ -806,7 +811,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // filling the empty space.
         foreach (Geary.Email email in to_append) {
             EmailRow row = add_email(email);
-            yield row.view.load_avatar(this.avatar_store);
+            yield row.view.load_contacts();
             if (is_interesting(email)) {
                 yield row.expand();
             }
@@ -841,7 +846,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // Only adjust for the loading row going away once
             loading_height = 0;
 
-            yield row.view.load_avatar(this.avatar_store);
+            yield row.view.load_contacts();
             if (i_mail_loaded % 10 == 0)
                 yield throttle_loading();
             ++i_mail_loaded;
@@ -893,9 +898,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
-            yield row.view.load_avatar(this.avatar_store);
-            this.search.highlight_row_if_matching(row);
+            yield row.view.load_contacts();
             yield row.expand();
+            this.search.highlight_row_if_matching(row);
         }
     }
 
@@ -915,7 +920,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         ConversationEmail view = new ConversationEmail(
             email,
             this.email_store,
-            this.avatar_store,
+            this.contacts,
             this.config,
             is_sent,
             is_draft(email),

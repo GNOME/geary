@@ -3,6 +3,8 @@ geary_client_vala_sources = files(
   'application/application-avatar-store.vala',
   'application/application-certificate-manager.vala',
   'application/application-command.vala',
+  'application/application-contact-store.vala',
+  'application/application-contact.vala',
   'application/autostart-manager.vala',
   'application/geary-application.vala',
   'application/geary-args.vala',
@@ -55,6 +57,7 @@ geary_client_vala_sources = files(
   'conversation-list/conversation-list-view.vala',
   'conversation-list/formatted-conversation-data.vala',
 
+  'conversation-viewer/conversation-contact-popover.vala',
   'conversation-viewer/conversation-email.vala',
   'conversation-viewer/conversation-list-box.vala',
   'conversation-viewer/conversation-message.vala',
@@ -93,6 +96,7 @@ geary_client_vala_sources = files(
   'sidebar/sidebar-tree.vala',
 
   'util/util-avatar.vala',
+  'util/util-cache.vala',
   'util/util-date.vala',
   'util/util-email.vala',
   'util/util-files.vala',

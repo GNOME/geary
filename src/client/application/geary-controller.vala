@@ -63,7 +63,8 @@ public class GearyController : Geary.BaseObject {
 
         public Geary.Account account { get; private set; }
         public Geary.Folder? inbox = null;
-        public Geary.App.EmailStore store { get; private set; }
+        public Geary.App.EmailStore emails { get; private set; }
+        public Application.ContactStore contacts { get; private set; }
 
         public bool authentication_failed = false;
         public bool authentication_prompting = false;
@@ -74,9 +75,12 @@ public class GearyController : Geary.BaseObject {
 
         public Cancellable cancellable { get; private set; default = new Cancellable(); }
 
-        public AccountContext(Geary.Account account) {
+        public AccountContext(Geary.Account account,
+                              Geary.App.EmailStore emails,
+                              Application.ContactStore contacts) {
             this.account = account;
-            this.store = new Geary.App.EmailStore(account);
+            this.emails = emails;
+            this.contacts = contacts;
         }
 
         public Geary.Account.Status get_effective_status() {
@@ -120,8 +124,12 @@ public class GearyController : Geary.BaseObject {
 
     public AutostartManager? autostart_manager { get; private set; default = null; }
 
-    public Application.AvatarStore? avatar_store {
-        get; private set; default = null;
+    public Application.AvatarStore? avatars {
+        get; private set; default = new Application.AvatarStore();
+    }
+
+    public ContactListStoreCache contact_list_store_cache {
+        get; private set; default = new ContactListStoreCache();
     }
 
     private Geary.Account? current_account = null;
@@ -132,12 +140,12 @@ public class GearyController : Geary.BaseObject {
     // when closed.
     private GLib.Cancellable? open_cancellable = null;
 
+    private Folks.IndividualAggregator? folks = null;
     private Geary.Folder? current_folder = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
     private Cancellable cancellable_open_account = new Cancellable();
     private Cancellable cancellable_context_dependent_buttons = new Cancellable();
-    private ContactListStoreCache contact_list_store_cache = new ContactListStoreCache();
     private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.App.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
@@ -260,21 +268,19 @@ public class GearyController : Geary.BaseObject {
             error("Error loading web resources: %s", err.message);
         }
 
-        Folks.IndividualAggregator individuals =
-            Folks.IndividualAggregator.dup();
-        if (!individuals.is_prepared) {
+        this.folks = Folks.IndividualAggregator.dup();
+        if (!this.folks.is_prepared) {
             // Do this in the background since it can take a long time
             // on some systems and the GUI shouldn't be blocked by it
-            individuals.prepare.begin((obj, res) => {
+            this.folks.prepare.begin((obj, res) => {
                     try {
-                        individuals.prepare.end(res);
+                        this.folks.prepare.end(res);
                     } catch (GLib.Error err) {
                         warning("Error preparing Folks: %s", err.message);
                     }
                 });
 
         }
-        this.avatar_store = new Application.AvatarStore(individuals);
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
@@ -303,7 +309,11 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.conversation_added.connect(
             on_conversation_view_added
         );
-        new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
+        this.new_messages_monitor = new NewMessagesMonitor(
+            this.avatars,
+            this.get_contact_store_for_account,
+            this.should_notify_new_messages
+        );
         main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
 
         // New messages indicator (Ubuntuism)
@@ -314,9 +324,7 @@ public class GearyController : Geary.BaseObject {
 
         unity_launcher = new UnityLauncher(new_messages_monitor);
 
-        this.libnotify = new Libnotify(
-            this.new_messages_monitor, this.avatar_store
-        );
+        this.libnotify = new Libnotify(this.new_messages_monitor);
         this.libnotify.invoked.connect(on_libnotify_invoked);
 
         this.main_window.conversation_list_view.grab_focus();
@@ -545,8 +553,8 @@ public class GearyController : Geary.BaseObject {
 
         this.autostart_manager = null;
 
-        this.avatar_store.close();
-        this.avatar_store = null;
+        this.avatars.close();
+        this.avatars = null;
 
 
         debug("Closed GearyController");
@@ -569,6 +577,14 @@ public class GearyController : Geary.BaseObject {
         } else {
             create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, null, null, mailto);
         }
+    }
+
+    /** Adds a new composer to be kept track of. */
+    public void add_composer(ComposerWidget widget) {
+        debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");
+        widget.destroy.connect(this.on_composer_widget_destroy);
+        widget.link_activated.connect((uri) => { open_uri(uri); });
+        this.composer_widgets.add(widget);
     }
 
     /** Expunges removed accounts while the controller remains open. */
@@ -897,7 +913,11 @@ public class GearyController : Geary.BaseObject {
     }
 
     private async void connect_account_async(Geary.Account account, Cancellable? cancellable = null) {
-        AccountContext context = new AccountContext(account);
+        AccountContext context = new AccountContext(
+            account,
+            new Geary.App.EmailStore(account),
+            new Application.ContactStore(account, this.folks)
+        );
 
         // XXX Need to set this early since
         // on_folders_available_unavailable expects it to be there
@@ -998,6 +1018,8 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.remove_account(account);
 
         context.cancellable.cancel();
+        context.contacts.close();
+
         Geary.Folder? inbox = context.inbox;
         if (inbox != null) {
             try {
@@ -1303,8 +1325,9 @@ public class GearyController : Geary.BaseObject {
                 Geary.App.Conversation convo = Geary.Collection.get_first(
                     selected
                 );
-                Geary.App.EmailStore? store = get_store_for_folder(
-                    convo.base_folder
+
+                AccountContext? context = this.accounts.get(
+                    convo.base_folder.account.information
                 );
 
                 // It's possible for a conversation with zero email to
@@ -1312,11 +1335,11 @@ public class GearyController : Geary.BaseObject {
                 // last email was removed but the conversation monitor
                 // hasn't signalled its removal yet. In this case,
                 // just don't load it since it will soon disappear.
-                if (store != null && convo.get_count() > 0) {
+                if (context != null && convo.get_count() > 0) {
                     viewer.load_conversation.begin(
                         convo,
-                        store,
-                        this.avatar_store,
+                        context.emails,
+                        context.contacts,
                         (obj, ret) => {
                             try {
                                 viewer.load_conversation.end(ret);
@@ -1605,7 +1628,7 @@ public class GearyController : Geary.BaseObject {
     private void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         if (ids.size > 0) {
-            Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
             if (store != null) {
                 store.mark_email_async.begin(
                     ids, flags_to_add, flags_to_remove, cancellable_folder
@@ -1777,7 +1800,7 @@ public class GearyController : Geary.BaseObject {
     private void copy_email(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.FolderPath destination) {
         if (ids.size > 0) {
-            Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
             if (store != null) {
                 store.copy_email_async.begin(
                     ids, destination, cancellable_folder
@@ -2127,8 +2150,7 @@ public class GearyController : Geary.BaseObject {
         if (current_account == null)
             return;
 
-        bool inline;
-        if (!should_create_new_composer(compose_type, referred, quote, is_draft, out inline))
+        if (!should_create_new_composer(compose_type, referred, quote, is_draft))
             return;
 
         ComposerWidget widget;
@@ -2138,34 +2160,23 @@ public class GearyController : Geary.BaseObject {
         } else {
             widget = new ComposerWidget(current_account, contact_list_store_cache, compose_type, application.config);
         }
-        widget.destroy.connect(on_composer_widget_destroy);
-        widget.link_activated.connect((uri) => { open_uri(uri); });
 
-        // We want to keep track of the open composer windows, so we can allow the user to cancel
-        // an exit without losing their data.
-        composer_widgets.add(widget);
-        debug(@"Creating composer of type $(widget.compose_type); $(composer_widgets.size) composers total");
+        add_composer(widget);
 
-        if (inline) {
-            if (widget.state == ComposerWidget.ComposerState.PANED) {
-                main_window.conversation_viewer.do_compose(widget);
-                get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
-            } else {
-                main_window.conversation_viewer.do_compose_embedded(
-                    widget,
-                    referred,
-                    is_draft
-                );
-            }
+        if (widget.state == INLINE || widget.state == INLINE_COMPACT) {
+            this.main_window.conversation_viewer.do_compose_embedded(
+                widget,
+                referred,
+                is_draft
+            );
         } else {
-            new ComposerWindow(widget);
-            widget.state = ComposerWidget.ComposerState.DETACHED;
+            this.main_window.show_composer(widget);
         }
 
         // Load the widget's content
         Geary.Email? full = null;
         if (referred != null) {
-            Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
             if (store != null) {
                 try {
                     full = yield store.fetch_email_async(
@@ -2185,9 +2196,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
-        Geary.Email? referred, string? quote, bool is_draft, out bool inline) {
-        inline = true;
-
+                                            Geary.Email? referred,
+                                            string? quote,
+                                            bool is_draft) {
         // In we're replying, see whether we already have a reply for that message.
         if (compose_type != null && compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
@@ -2198,7 +2209,6 @@ public class GearyController : Geary.BaseObject {
                     return false;
                 }
             }
-            inline = !any_inline_composers();
             return true;
         }
 
@@ -2208,7 +2218,6 @@ public class GearyController : Geary.BaseObject {
 
         // If we're resuming a draft with open composers, open in a new window.
         if (is_draft) {
-            inline = false;
             return true;
         }
 
@@ -2218,7 +2227,6 @@ public class GearyController : Geary.BaseObject {
             foreach (ComposerWidget cw in composer_widgets) {
                 if (cw.state == ComposerWidget.ComposerState.PANED) {
                     if (!cw.is_blank) {
-                        inline = false;
                         return true;
                     } else {
                         cw.change_compose_type(compose_type);  // To refocus
@@ -2253,8 +2261,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     public bool can_switch_conversation_view() {
-        bool inline;
-        return should_create_new_composer(null, null, null, false, out inline);
+        return should_create_new_composer(null, null, null, false);
     }
 
     public bool any_inline_composers() {
@@ -2309,7 +2316,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_search_activated(SimpleAction action) {
-        show_search_bar();
+        this.main_window.show_search_bar();
     }
 
     private void on_archive_conversation(SimpleAction action) {
@@ -2647,10 +2654,6 @@ public class GearyController : Geary.BaseObject {
             msg_view.save_image.connect((url, alt_text, buf) => {
                     on_save_image_extended(view, url, alt_text, buf);
                 });
-            msg_view.search_activated.connect((op, value) => {
-                    string search = op + ":" + value;
-                    show_search_bar(search);
-                });
         }
         view.save_attachments.connect(on_save_attachments);
         view.view_source.connect(on_view_source);
@@ -2744,7 +2747,7 @@ public class GearyController : Geary.BaseObject {
         Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
         try {
             if (current_folder != null) {
-                Geary.App.EmailStore? store = get_store_for_folder(current_folder);
+                Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
                 if (store != null) {
                     selected_operations = yield store
                         .get_supported_operations_async(get_selected_email_ids(false), cancellable);
@@ -2774,13 +2777,6 @@ public class GearyController : Geary.BaseObject {
             .to_linked_list();
 
         return ret.size >= 1 ? ret : null;
-    }
-
-    private void show_search_bar(string? text = null) {
-        main_window.search_bar.give_search_focus();
-        if (text != null) {
-            main_window.search_bar.set_search_text(text);
-        }
     }
 
     private void do_search(string search_text) {
@@ -2831,9 +2827,14 @@ public class GearyController : Geary.BaseObject {
         return selected_conversations.read_only_view;
     }
 
-    private inline Geary.App.EmailStore? get_store_for_folder(Geary.Folder target) {
+    private inline Geary.App.EmailStore? get_email_store_for_folder(Geary.Folder target) {
         AccountContext? context = this.accounts.get(target.account.information);
-        return context != null ? context.store : null;
+        return (context != null) ? context.emails : null;
+    }
+
+    private Application.ContactStore? get_contact_store_for_account(Geary.Account target) {
+        AccountContext? context = this.accounts.get(target.information);
+        return (context != null) ? context.contacts : null;
     }
 
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,

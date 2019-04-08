@@ -9,12 +9,9 @@ public class Libnotify : Geary.BaseObject {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.SUBJECT;
 
-    private const int AVATAR_SIZE = 32;
-
     private static Canberra.Context? sound_context = null;
 
     private weak NewMessagesMonitor monitor;
-    private weak Application.AvatarStore avatars;
     private Notify.Notification? current_notification = null;
     private Notify.Notification? error_notification = null;
     private Geary.Folder? folder = null;
@@ -23,10 +20,8 @@ public class Libnotify : Geary.BaseObject {
 
     public signal void invoked(Geary.Folder? folder, Geary.Email? email);
 
-    public Libnotify(NewMessagesMonitor monitor,
-                     Application.AvatarStore avatars) {
+    public Libnotify(NewMessagesMonitor monitor) {
         this.monitor = monitor;
-        this.avatars = avatars;
 
         monitor.add_required_fields(REQUIRED_FIELDS);
 
@@ -51,8 +46,11 @@ public class Libnotify : Geary.BaseObject {
     private void on_new_messages_arrived(Geary.Folder folder, int total, int added) {
         if (added == 1 && monitor.last_new_message_folder != null &&
             monitor.last_new_message != null) {
-            notify_one_message_async.begin(monitor.last_new_message_folder,
-                monitor.last_new_message, null);
+            notify_one_message_async.begin(
+                monitor.last_new_message_folder,
+                monitor.last_new_message,
+                null
+            );
         } else if (added > 0) {
             notify_new_mail(folder, added);
         }
@@ -82,10 +80,9 @@ public class Libnotify : Geary.BaseObject {
         issue_current_notification(folder.account.information.display_name, body, null);
     }
 
-    private async void notify_one_message_async(Geary.Folder folder, Geary.Email email,
-        GLib.Cancellable? cancellable) throws GLib.Error {
-        assert(email.fields.fulfills(REQUIRED_FIELDS));
-
+    private async void notify_one_message_async(Geary.Folder folder,
+                                                Geary.Email email,
+                                                GLib.Cancellable? cancellable) throws GLib.Error {
         // used if notification is invoked
         this.folder = folder;
         this.email = email;
@@ -94,34 +91,45 @@ public class Libnotify : Geary.BaseObject {
             !monitor.should_notify_new_messages(folder))
             return;
 
-        // possible to receive email with no originator
-        Geary.RFC822.MailboxAddress? primary =
+        Geary.RFC822.MailboxAddress? originator =
             Util.Email.get_primary_originator(email);
-        if (primary == null) {
-            notify_new_mail(folder, 1);
+        if (originator != null) {
+            Application.ContactStore contacts =
+                this.monitor.get_contact_store(folder.account);
+            Application.Contact contact = yield contacts.load(
+                originator, cancellable
+            );
 
-            return;
-        }
+            string body;
+            int count = monitor.get_new_message_count(folder);
+            if (count <= 1) {
+                body = Util.Email.strip_subject_prefixes(email);
+            } else {
+                body = ngettext(
+                    "%s\n(%d other new message for %s)",
+                    "%s\n(%d other new messages for %s)", count - 1).printf(
+                        Util.Email.strip_subject_prefixes(email),
+                        count - 1,
+                        folder.account.information.display_name
+                    );
+            }
 
-        string body;
-        int count = monitor.get_new_message_count(folder);
-        if (count <= 1) {
-            body = Util.Email.strip_subject_prefixes(email);
+            Gdk.Pixbuf? avatar = yield this.monitor.avatars.load(
+                contact,
+                originator,
+                Application.AvatarStore.PIXEL_SIZE,
+                cancellable
+            );
+
+            issue_current_notification(
+                contact.is_trusted
+                    ? contact.display_name : originator.to_short_display(),
+                body,
+                avatar
+            );
         } else {
-            body = ngettext(
-                "%s\n(%d other new message for %s)",
-                "%s\n(%d other new messages for %s)", count - 1).printf(
-                    Util.Email.strip_subject_prefixes(email),
-                    count - 1,
-                    folder.account.information.display_name
-                );
+            notify_new_mail(folder, 1);
         }
-
-        Gdk.Pixbuf? avatar = yield this.avatars.load(
-            primary, AVATAR_SIZE, cancellable
-        );
-
-        issue_current_notification(primary.to_short_display(), body, avatar);
     }
 
     private void issue_current_notification(string summary, string body, Gdk.Pixbuf? icon) {

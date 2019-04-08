@@ -5,49 +5,43 @@
     <section id="context_menu_link">
       <item>
         <attribute name="label" translatable="yes">_Open Link</attribute>
-        <attribute name="action">msg.open_link</attribute>
+        <attribute name="action">msg.open-link</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Copy Link _Address</attribute>
-        <attribute name="action">msg.copy_link</attribute>
+        <attribute name="action">msg.copy-link</attribute>
       </item>
     </section>
     <section id="context_menu_email">
       <item>
-        <attribute name="label" translatable="yes">Send New _Message…</attribute>
-        <attribute name="action">msg.open_link</attribute>
+        <attribute name="label" translatable="yes">_New Conversation…</attribute>
+        <attribute name="action">msg.conversation-new</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Copy Email _Address</attribute>
-        <attribute name="action">msg.copy_email</attribute>
+        <attribute name="action">msg.copy-email</attribute>
       </item>
     </section>
     <section id="context_menu_image">
       <item>
         <attribute name="label" translatable="yes">Save _Image As…</attribute>
-        <attribute name="action">msg.save_image</attribute>
+        <attribute name="action">msg.save-image</attribute>
       </item>
     </section>
     <section id="context_menu_main">
       <item>
         <attribute name="label" translatable="yes">_Select All</attribute>
-        <attribute name="action">msg.select_all</attribute>
+        <attribute name="action">msg.select-all</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Copy</attribute>
-        <attribute name="action">msg.copy_selection</attribute>
-      </item>
-    </section>
-    <section id="context_menu_contact">
-      <item>
-        <attribute name="label" translatable="yes">Search for messages from</attribute>
-        <attribute name="action">msg.search_from</attribute>
+        <attribute name="action">msg.copy-selection</attribute>
       </item>
     </section>
     <section id="context_menu_inspector">
       <item>
         <attribute name="label" translatable="yes">_Inspect…</attribute>
-        <attribute name="action">msg.open_inspector</attribute>
+        <attribute name="action">msg.open-inspector</attribute>
       </item>
     </section>
   </menu>

@@ -147,6 +147,13 @@ grid.geary-message-summary {
   padding: 0;
 }
 
+.geary-headers flowboxchild.geary-spoofed image:dir(ltr) {
+  margin-right: 2px;
+}
+.geary-headers flowboxchild.geary-spoofed image:dir(rtl) {
+  margin-left: 2px;
+}
+
 .geary-headers label.geary-from {
   font-weight: bold;
 }
@@ -174,6 +181,15 @@ grid.geary-message-summary {
   margin: 36px 16px;
 }
 
+/* ContactPopover */
+
+.geary-contact-popover .dim-label {
+  font-size: 80%;
+}
+
+.geary-contact-popover .geary-deceptive {
+  font-weight: bold;
+}
 
 /* Composer */
 
