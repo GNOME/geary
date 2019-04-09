@@ -637,7 +637,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     [GtkCallback]
     private bool on_delete_event() {
-        if (this.application.is_background_service) {
+        if (this.application.config.startup_notifications) {
             if (this.application.controller.close_composition_windows(true)) {
                 hide();
             }

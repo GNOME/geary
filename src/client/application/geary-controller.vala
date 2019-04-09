@@ -1059,7 +1059,8 @@ public class GearyController : Geary.BaseObject {
     private void display_main_window_if_ready() {
         if (did_attempt_open_all_accounts() &&
             !upgrade_dialog.visible &&
-            !cancellable_open_account.is_cancelled())
+            !cancellable_open_account.is_cancelled() &&
+            !this.application.is_background_service)
             main_window.show();
     }
 
