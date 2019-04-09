@@ -141,7 +141,8 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         Gtk.Adjustment adjustment = ((Gtk.Scrollable) this).get_vadjustment();
         double upper = adjustment.get_upper();
         double threshold = upper - adjustment.page_size - LOAD_MORE_HEIGHT;
-        if (this.conversation_monitor.can_load_more &&
+        if (this.is_visible() &&
+            this.conversation_monitor.can_load_more &&
             adjustment.get_value() >= threshold) {
             load_more();
         }

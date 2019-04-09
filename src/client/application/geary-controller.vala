@@ -3028,7 +3028,9 @@ public class GearyController : Geary.BaseObject {
     private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
-        if (!main_window.conversation_list_has_scrollbar() &&
+        if (this.main_window != null &&
+            this.main_window.is_visible() &&
+            !this.main_window.conversation_list_has_scrollbar() &&
             monitor == this.current_conversations &&
             monitor.can_load_more) {
             debug("Not enough messages, loading more for folder %s",
