@@ -8,11 +8,16 @@ variables:
   # Flatpak CI vars
   BUNDLE: geary-dev.flatpak
 
+  # ImapDB and other tests that touch the disk are super slow on CI
+  # runners like gcc150.osuosl.org that use platter drives still.
+  # See Infrastructure/Infrastructure#97.
+  TEST_ARGS: -t 10
+
   # Build
   BUILD_DIR: build
   CONFIG_CMD: meson --buildtype=debug build
   BUILD_CMD: ninja -v -C $BUILD_DIR
-  TEST_CMD: xvfb-run meson test -v --no-stdsplit -C $BUILD_DIR
+  TEST_CMD: xvfb-run meson test -v --no-stdsplit -C $BUILD_DIR $TEST_ARGS
   INSTALL_CMD: ninja -v -C $BUILD_DIR install
 
   # Fedora packages
@@ -81,7 +86,7 @@ flatpak:
     MANIFEST_PATH: org.gnome.Geary.json
     MESON_ARGS: "-Dprofile=Devel"
     RUNTIME_REPO: "https://sdk.gnome.org/gnome-nightly.flatpakrepo"
-    TEST_BUILD_ARGS: "--env=CI_RUNNER_DESCRIPTION=${CI_RUNNER_DESCRIPTION}"
+    TEST_RUN_ARGS: $TEST_ARGS
   extends: .flatpak
 
 review:
