@@ -292,8 +292,13 @@ public class GearyApplication : Gtk.Application {
 
         add_action_entries(action_entries, this);
 
-        // Use a hold() here (if started as a service, we will shutdown after 10s).
-        hold();
+        if (this.is_background_service) {
+            // Since command_line won't be called below if running as
+            // a DBus service, disable logging spew and start the
+            // controller running.
+            Geary.Logging.log_to(null);
+            this.create_async.begin();
+        }
     }
 
     public override void activate() {
