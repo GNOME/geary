@@ -2281,7 +2281,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_close() {
-        this.application.exit();
+        this.main_window.close();
     }
 
     private void on_reply_to_message(ConversationEmail target_view) {
