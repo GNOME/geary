@@ -64,18 +64,18 @@ public class GearyApplication : Gtk.Application {
     private const string OPTION_VERSION = "version";
 
     // Local command line options
-    private const string OPTION_LOG_DEBUG = "debug";
-    private const string OPTION_LOG_NETWORK = "log-conversations";
-    private const string OPTION_LOG_SERIALIZER = "log-deserializer";
-    private const string OPTION_LOG_DESERIALIZER = "log-network";
-    private const string OPTION_LOG_REPLAY_QUEUE = "log-replay-queue";
-    private const string OPTION_LOG_CONVERSATIONS = "log-serializer";
-    private const string OPTION_LOG_PERIODIC = "log-periodic";
-    private const string OPTION_LOG_SQL = "log-sql";
-    private const string OPTION_LOG_FOLDER_NORM = "log-folder-normalization";
+    private const string OPTION_DEBUG = "debug";
     private const string OPTION_INSPECTOR = "inspector";
-    private const string OPTION_REVOKE_CERTS = "revoke-certs";
+    private const string OPTION_LOG_CONVERSATIONS = "log-conversations";
+    private const string OPTION_LOG_DESERIALIZER = "log-deserializer";
+    private const string OPTION_LOG_FOLDER_NORM = "log-folder-normalization";
+    private const string OPTION_LOG_NETWORK = "log-network";
+    private const string OPTION_LOG_PERIODIC = "log-periodic";
+    private const string OPTION_LOG_REPLAY_QUEUE = "log-replay-queue";
+    private const string OPTION_LOG_SERIALIZER = "log-serializer";
+    private const string OPTION_LOG_SQL = "log-sql";
     private const string OPTION_QUIT = "quit";
+    private const string OPTION_REVOKE_CERTS = "revoke-certs";
 
     private const ActionEntry[] action_entries = {
         {ACTION_ABOUT, on_activate_about},
@@ -91,7 +91,7 @@ public class GearyApplication : Gtk.Application {
     // This is also the order in which they are presented to the user,
     // so it's probably best to keep them alphabetical
     public const GLib.OptionEntry[] OPTION_ENTRIES = {
-        { OPTION_LOG_DEBUG, 'd', 0, GLib.OptionArg.NONE, null,
+        { OPTION_DEBUG, 'd', 0, GLib.OptionArg.NONE, null,
           N_("Print debug logging"), null },
         { OPTION_INSPECTOR, 'i', 0, GLib.OptionArg.NONE, null,
           N_("Enable WebKitGTK Inspector in web views"), null },
@@ -99,8 +99,13 @@ public class GearyApplication : Gtk.Application {
           N_("Log conversation monitoring"), null },
         { OPTION_LOG_DESERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
           N_("Log IMAP network deserialization"), null },
+        /// "Normalization" can also be called "synchronization"
+        { OPTION_LOG_FOLDER_NORM, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log folder normalization"), null },
         { OPTION_LOG_NETWORK, 0, 0, GLib.OptionArg.NONE, null,
           N_("Log network activity"), null },
+        { OPTION_LOG_PERIODIC, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log periodic activity"), null },
         /// The IMAP replay queue is how changes on the server are
         /// replicated on the client.  It could also be called the
         /// IMAP events queue.
@@ -110,19 +115,14 @@ public class GearyApplication : Gtk.Application {
         /// into a stream of bytes for network transmission
         { OPTION_LOG_SERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
           N_("Log IMAP network serialization"), null },
-        { OPTION_LOG_PERIODIC, 0, 0, GLib.OptionArg.NONE, null,
-          N_("Log periodic activity"), null },
         { OPTION_LOG_SQL, 0, 0, GLib.OptionArg.NONE, null,
           N_("Log database queries (generates lots of messages)"), null },
-        /// "Normalization" can also be called "synchronization"
-        { OPTION_LOG_FOLDER_NORM, 0, 0, GLib.OptionArg.NONE, null,
-          N_("Log folder normalization"), null },
+        { OPTION_QUIT, 'q', 0, GLib.OptionArg.NONE, null,
+          N_("Perform a graceful quit"), null },
         { OPTION_REVOKE_CERTS, 0, 0, GLib.OptionArg.NONE, null,
           N_("Revoke all pinned TLS server certificates"), null },
         { OPTION_VERSION, 'v', 0, GLib.OptionArg.NONE, null,
           N_("Display program version"), null },
-        { OPTION_QUIT, 'q', 0, GLib.OptionArg.NONE, null,
-          N_("Perform a graceful quit"), null },
         /// Use this to specify arguments in the help section
         { "", 0, 0, GLib.OptionArg.NONE, null, null, "[mailto:[...]]" },
         { null }
@@ -604,7 +604,7 @@ public class GearyApplication : Gtk.Application {
             return 0;
         }
 
-        bool enable_debug = options.contains(OPTION_LOG_DEBUG);
+        bool enable_debug = options.contains(OPTION_DEBUG);
         // Will be logging to stderr until this point
         if (enable_debug) {
             Geary.Logging.log_to(GLib.stdout);
