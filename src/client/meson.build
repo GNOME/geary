@@ -7,7 +7,6 @@ geary_client_vala_sources = files(
   'application/application-contact.vala',
   'application/autostart-manager.vala',
   'application/geary-application.vala',
-  'application/geary-args.vala',
   'application/geary-config.vala',
   'application/geary-controller.vala',
   'application/goa-mediator.vala',

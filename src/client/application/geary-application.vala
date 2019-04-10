@@ -60,6 +60,23 @@ public class GearyApplication : Gtk.Application {
     public const string ACTION_PREFERENCES = "preferences";
     public const string ACTION_QUIT = "quit";
 
+    // Local-only command line options
+    private const string OPTION_VERSION = "version";
+
+    // Local command line options
+    private const string OPTION_LOG_DEBUG = "debug";
+    private const string OPTION_LOG_NETWORK = "log-conversations";
+    private const string OPTION_LOG_SERIALIZER = "log-deserializer";
+    private const string OPTION_LOG_DESERIALIZER = "log-network";
+    private const string OPTION_LOG_REPLAY_QUEUE = "log-replay-queue";
+    private const string OPTION_LOG_CONVERSATIONS = "log-serializer";
+    private const string OPTION_LOG_PERIODIC = "log-periodic";
+    private const string OPTION_LOG_SQL = "log-sql";
+    private const string OPTION_LOG_FOLDER_NORM = "log-folder-normalization";
+    private const string OPTION_INSPECTOR = "inspector";
+    private const string OPTION_REVOKE_CERTS = "revoke-certs";
+    private const string OPTION_QUIT = "quit";
+
     private const ActionEntry[] action_entries = {
         {ACTION_ABOUT, on_activate_about},
         {ACTION_ACCOUNTS, on_activate_accounts},
@@ -69,6 +86,46 @@ public class GearyApplication : Gtk.Application {
         {ACTION_MAILTO, on_activate_mailto, "s"},
         {ACTION_PREFERENCES, on_activate_preferences},
         {ACTION_QUIT, on_activate_quit},
+    };
+
+    // This is also the order in which they are presented to the user,
+    // so it's probably best to keep them alphabetical
+    public const GLib.OptionEntry[] OPTION_ENTRIES = {
+        { OPTION_LOG_DEBUG, 'd', 0, GLib.OptionArg.NONE, null,
+          N_("Print debug logging"), null },
+        { OPTION_INSPECTOR, 'i', 0, GLib.OptionArg.NONE, null,
+          N_("Enable WebKitGTK Inspector in web views"), null },
+        { OPTION_LOG_CONVERSATIONS, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log conversation monitoring"), null },
+        { OPTION_LOG_DESERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log IMAP network deserialization"), null },
+        { OPTION_LOG_NETWORK, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log network activity"), null },
+        /// The IMAP replay queue is how changes on the server are
+        /// replicated on the client.  It could also be called the
+        /// IMAP events queue.
+        { OPTION_LOG_REPLAY_QUEUE, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log IMAP replay queue"), null },
+        /// Serialization is how commands and responses are converted
+        /// into a stream of bytes for network transmission
+        { OPTION_LOG_SERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log IMAP network serialization"), null },
+        { OPTION_LOG_PERIODIC, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log periodic activity"), null },
+        { OPTION_LOG_SQL, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log database queries (generates lots of messages)"), null },
+        /// "Normalization" can also be called "synchronization"
+        { OPTION_LOG_FOLDER_NORM, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Log folder normalization"), null },
+        { OPTION_REVOKE_CERTS, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Revoke all pinned TLS server certificates"), null },
+        { OPTION_VERSION, 'v', 0, GLib.OptionArg.NONE, null,
+          N_("Display program version"), null },
+        { OPTION_QUIT, 'q', 0, GLib.OptionArg.NONE, null,
+          N_("Perform a graceful quit"), null },
+        /// Use this to specify arguments in the help section
+        { "", 0, 0, GLib.OptionArg.NONE, null, null, "[mailto:[...]]" },
+        { null }
     };
 
     private const int64 USEC_PER_SEC = 1000000;
@@ -240,7 +297,7 @@ public class GearyApplication : Gtk.Application {
             application_id: APP_ID,
             flags: ApplicationFlags.HANDLES_COMMAND_LINE
         );
-        this.add_main_option_entries(Args.OPTION_ENTRIES);
+        this.add_main_option_entries(OPTION_ENTRIES);
         _instance = this;
     }
 
@@ -253,20 +310,13 @@ public class GearyApplication : Gtk.Application {
         return base.local_command_line(ref args, out exit_status);
     }
 
-    public override int handle_local_options(VariantDict options) {
-        return Args.handle_local_options(options);
-    }
-
-    public override int command_line(ApplicationCommandLine command_line) {
-        int exit_value = Args.handle_general_options(this.config, command_line.get_options_dict());
-        if (exit_value != -1)
-            return exit_value;
-
-        exit_value = Args.handle_arguments(this, command_line.get_arguments());
-        if (exit_value != -1)
-            return exit_value;
-
-        activate();
+    public override int handle_local_options(GLib.VariantDict options) {
+        if (options.contains(OPTION_VERSION)) {
+            GLib.stdout.printf(
+                "%s: %s\n", this.bin, GearyApplication.VERSION
+            );
+            return 0;
+        }
 
         return -1;
     }
@@ -299,6 +349,20 @@ public class GearyApplication : Gtk.Application {
             Geary.Logging.log_to(null);
             this.create_async.begin();
         }
+    }
+
+    public override int command_line(ApplicationCommandLine command_line) {
+        int exit_value = handle_general_options(this.config, command_line.get_options_dict());
+        if (exit_value != -1)
+            return exit_value;
+
+        exit_value = handle_arguments(this, command_line.get_arguments());
+        if (exit_value != -1)
+            return exit_value;
+
+        activate();
+
+        return -1;
     }
 
     public override void activate() {
@@ -530,6 +594,68 @@ public class GearyApplication : Gtk.Application {
                                      string[] accelerators,
                                      Variant? param = null) {
         set_accels_for_action("app." + action, accelerators);
+    }
+
+    public int handle_general_options(Configuration config,
+                                      GLib.VariantDict options) {
+        if (options.contains(OPTION_QUIT))
+            return 0;
+
+        bool enable_debug = options.contains(OPTION_LOG_DEBUG);
+        // Will be logging to stderr until this point
+        if (enable_debug) {
+            Geary.Logging.log_to(GLib.stdout);
+        } else {
+            Geary.Logging.log_to(null);
+        }
+
+        // Logging flags
+        if (options.contains(OPTION_LOG_NETWORK))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
+        if (options.contains(OPTION_LOG_SERIALIZER))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
+        if (options.contains(OPTION_LOG_REPLAY_QUEUE))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.REPLAY);
+        if (options.contains(OPTION_LOG_CONVERSATIONS))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.CONVERSATIONS);
+        if (options.contains(OPTION_LOG_PERIODIC))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.PERIODIC);
+        if (options.contains(OPTION_LOG_SQL))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.SQL);
+        if (options.contains(OPTION_LOG_FOLDER_NORM))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.FOLDER_NORMALIZATION);
+        if (options.contains(OPTION_LOG_DESERIALIZER))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.DESERIALIZER);
+
+        config.enable_debug = enable_debug;
+        config.enable_inspector = options.contains(OPTION_INSPECTOR);
+        config.revoke_certs = options.contains(OPTION_REVOKE_CERTS);
+
+        return -1;
+    }
+
+    /**
+     * Handles the actual arguments of the application.
+     */
+    public int handle_arguments(GearyApplication app, string[] args) {
+        for (int ctr = 1; ctr < args.length; ctr++) {
+            string arg = args[ctr];
+
+            // the only acceptable arguments are mailto:'s
+            if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+                if (arg == Geary.ComposedEmail.MAILTO_SCHEME)
+                    app.activate_action(GearyApplication.ACTION_COMPOSE, null);
+                else
+                    app.activate_action(GearyApplication.ACTION_MAILTO, new Variant.string(arg));
+            } else {
+                stdout.printf(_("Unrecognized argument: “%s”\n").printf(arg));
+                stdout.printf(_("Geary only accepts mailto-links as arguments.\n"));
+
+                return 1;
+            }
+        }
+
+        return -1;
     }
 
     private void on_activate_about() {
