@@ -426,8 +426,9 @@ public class GearyApplication : Gtk.Application {
         // see create_async() for reasoning hold/release is used
         hold();
 
-        if (this.controller != null) // If we didn't get activated, controller might be null
+        if (this.controller != null && this.controller.is_open) {
             yield this.controller.close_async();
+        }
 
         release();
         this.is_destroyed = true;
@@ -598,8 +599,10 @@ public class GearyApplication : Gtk.Application {
 
     public int handle_general_options(Configuration config,
                                       GLib.VariantDict options) {
-        if (options.contains(OPTION_QUIT))
+        if (options.contains(OPTION_QUIT)) {
+            exit();
             return 0;
+        }
 
         bool enable_debug = options.contains(OPTION_LOG_DEBUG);
         // Will be logging to stderr until this point

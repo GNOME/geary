@@ -109,6 +109,13 @@ public class GearyController : Geary.BaseObject {
     }
 
 
+    /** Determines if the controller is opening or is open. */
+    public bool is_open {
+        get {
+            return (this.open_cancellable != null);
+        }
+    }
+
     public weak GearyApplication application { get; private set; } // circular ref
 
     public Accounts.Manager? account_manager { get; private set; default = null; }
@@ -413,13 +420,13 @@ public class GearyController : Geary.BaseObject {
         this.open_cancellable.cancel();
         this.open_cancellable = null;
 
-        Geary.Engine.instance.account_available.disconnect(on_account_available);
-
-        // Release folder and conversations in the main window
-        on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
-        on_folder_selected(null);
+        this.application.engine.account_available.disconnect(on_account_available);
 
         if (this.main_window != null) {
+            // Release folder and conversations in the main window
+            on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
+            on_folder_selected(null);
+
             // Disconnect from various UI signals.
             this.main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
             this.main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
