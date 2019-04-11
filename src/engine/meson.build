@@ -327,6 +327,7 @@ geary_engine_sources = [
 ]
 
 geary_engine_dependencies = [
+  libmath,
   gee,
   gio,
   glib,
