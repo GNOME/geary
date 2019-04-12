@@ -93,40 +93,53 @@ public class GearyApplication : Gtk.Application {
     // so it's probably best to keep them alphabetical
     public const GLib.OptionEntry[] OPTION_ENTRIES = {
         { OPTION_DEBUG, 'd', 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Print debug logging"), null },
         { OPTION_HIDDEN, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Start with the main window hidden (deprecated)"), null },
         { OPTION_INSPECTOR, 'i', 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Enable WebKitGTK Inspector in web views"), null },
         { OPTION_LOG_CONVERSATIONS, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Log conversation monitoring"), null },
         { OPTION_LOG_DESERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Log IMAP network deserialization"), null },
-        /// "Normalization" can also be called "synchronization"
         { OPTION_LOG_FOLDER_NORM, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option. "Normalization" can also be called
+          /// "synchronization".
           N_("Log folder normalization"), null },
         { OPTION_LOG_NETWORK, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Log network activity"), null },
         { OPTION_LOG_PERIODIC, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Log periodic activity"), null },
-        /// The IMAP replay queue is how changes on the server are
-        /// replicated on the client.  It could also be called the
-        /// IMAP events queue.
         { OPTION_LOG_REPLAY_QUEUE, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option. The IMAP replay queue is how changes
+          /// on the server are replicated on the client.  It could
+          /// also be called the IMAP events queue.
           N_("Log IMAP replay queue"), null },
-        /// Serialization is how commands and responses are converted
-        /// into a stream of bytes for network transmission
         { OPTION_LOG_SERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option. Serialization is how commands and
+          /// responses are converted into a stream of bytes for
+          /// network transmission
           N_("Log IMAP network serialization"), null },
         { OPTION_LOG_SQL, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Log database queries (generates lots of messages)"), null },
         { OPTION_QUIT, 'q', 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Perform a graceful quit"), null },
         { OPTION_REVOKE_CERTS, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Revoke all pinned TLS server certificates"), null },
         { OPTION_VERSION, 'v', 0, GLib.OptionArg.NONE, null,
+          /// Command line option
           N_("Display program version"), null },
-        /// Use this to specify arguments in the help section
+          // Use this to specify arguments in the help section
         { "", 0, 0, GLib.OptionArg.NONE, null, null, "[mailto:[...]]" },
         { null }
     };
