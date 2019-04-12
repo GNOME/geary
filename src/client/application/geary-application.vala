@@ -142,7 +142,8 @@ public class GearyApplication : Gtk.Application {
           /// Command line option
           N_("Display program version"), null },
           // Use this to specify arguments in the help section
-        { "", 0, 0, GLib.OptionArg.NONE, null, null, "[mailto:[...]]" },
+        { GLib.OPTION_REMAINING, 0, 0, GLib.OptionArg.STRING_ARRAY, null, null,
+          "[mailto:[...]]" },
         { null }
     };
 
@@ -395,12 +396,8 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
-    public override int command_line(ApplicationCommandLine command_line) {
-        int exit_value = handle_general_options(this.config, command_line.get_options_dict());
-        if (exit_value != -1)
-            return exit_value;
-
-        exit_value = handle_arguments(this, command_line.get_arguments());
+    public override int command_line(GLib.ApplicationCommandLine command_line) {
+        int exit_value = handle_general_options(command_line);
         if (exit_value != -1)
             return exit_value;
 
@@ -641,8 +638,8 @@ public class GearyApplication : Gtk.Application {
         set_accels_for_action("app." + action, accelerators);
     }
 
-    public int handle_general_options(Configuration config,
-                                      GLib.VariantDict options) {
+    public int handle_general_options(GLib.ApplicationCommandLine command_line) {
+        GLib.VariantDict options = command_line.get_options_dict();
         if (options.contains(OPTION_QUIT)) {
             exit();
             return 0;
@@ -684,34 +681,36 @@ public class GearyApplication : Gtk.Application {
             // --hidden option.
             this.update_autostart_file.begin();
         }
-
-        config.enable_debug = enable_debug;
-        config.enable_inspector = options.contains(OPTION_INSPECTOR);
-        config.revoke_certs = options.contains(OPTION_REVOKE_CERTS);
-
-        return -1;
-    }
-
-    /**
-     * Handles the actual arguments of the application.
-     */
-    public int handle_arguments(GearyApplication app, string[] args) {
-        for (int ctr = 1; ctr < args.length; ctr++) {
-            string arg = args[ctr];
-
-            // the only acceptable arguments are mailto:'s
-            if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-                if (arg == Geary.ComposedEmail.MAILTO_SCHEME)
-                    app.activate_action(GearyApplication.ACTION_COMPOSE, null);
-                else
-                    app.activate_action(GearyApplication.ACTION_MAILTO, new Variant.string(arg));
-            } else {
-                stdout.printf(_("Unrecognized argument: “%s”\n").printf(arg));
-                stdout.printf(_("Geary only accepts mailto-links as arguments.\n"));
-
-                return 1;
+        if (options.contains(GLib.OPTION_REMAINING)) {
+            string[] args = options.lookup_value(
+                GLib.OPTION_REMAINING,
+                GLib.VariantType.STRING_ARRAY
+            ).get_strv();
+            foreach (string arg in args) {
+                // the only acceptable arguments are mailto:'s
+                if (arg == Geary.ComposedEmail.MAILTO_SCHEME) {
+                    activate_action(GearyApplication.ACTION_COMPOSE, null);
+                } else if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+                    activate_action(
+                        GearyApplication.ACTION_MAILTO,
+                        new GLib.Variant.string(arg)
+                    );
+                } else {
+                    command_line.printerr("%s: ", this.binary);
+                    command_line.printerr(
+                        /// Command line warning, string substitution
+                        /// is the given argument
+                        _("Unrecognised program argument: “%s”"), arg
+                    );
+                    command_line.printerr("\n");
+                    return 1;
+                }
             }
         }
+
+        this.config.enable_debug = enable_debug;
+        this.config.enable_inspector = options.contains(OPTION_INSPECTOR);
+        this.config.revoke_certs = options.contains(OPTION_REVOKE_CERTS);
 
         return -1;
     }
