@@ -80,9 +80,9 @@ src/client/folder-list/folder-list-special-grouping.vala
 src/client/folder-list/folder-list-tree.vala
 src/client/notification/in-app-notification.vala
 src/client/notification/libmessagingmenu.vala
-src/client/notification/glib-notification.vala
 src/client/notification/new-messages-indicator.vala
 src/client/notification/new-messages-monitor.vala
+src/client/notification/notification-desktop.vala
 src/client/notification/null-indicator.vala
 src/client/notification/unity-launcher.vala
 src/client/sidebar/sidebar-branch.vala
