@@ -74,6 +74,7 @@ public class GearyApplication : Gtk.Application {
     private const string OPTION_LOG_REPLAY_QUEUE = "log-replay-queue";
     private const string OPTION_LOG_SERIALIZER = "log-serializer";
     private const string OPTION_LOG_SQL = "log-sql";
+    private const string OPTION_HIDDEN = "hidden";
     private const string OPTION_QUIT = "quit";
     private const string OPTION_REVOKE_CERTS = "revoke-certs";
 
@@ -93,6 +94,8 @@ public class GearyApplication : Gtk.Application {
     public const GLib.OptionEntry[] OPTION_ENTRIES = {
         { OPTION_DEBUG, 'd', 0, GLib.OptionArg.NONE, null,
           N_("Print debug logging"), null },
+        { OPTION_HIDDEN, 0, 0, GLib.OptionArg.NONE, null,
+          N_("Start with the main window hidden (deprecated)"), null },
         { OPTION_INSPECTOR, 'i', 0, GLib.OptionArg.NONE, null,
           N_("Enable WebKitGTK Inspector in web views"), null },
         { OPTION_LOG_CONVERSATIONS, 0, 0, GLib.OptionArg.NONE, null,
@@ -191,11 +194,17 @@ public class GearyApplication : Gtk.Application {
      * closed, instead of exiting as usual.
      */
     public bool is_background_service {
-        get { return (this.flags & ApplicationFlags.IS_SERVICE) != 0; }
+        get {
+            return (
+                (this.flags & ApplicationFlags.IS_SERVICE) != 0 ||
+                this.start_hidden
+            );
+        }
     }
 
     private string bin;
     private File exec_dir;
+    private bool start_hidden = false;
     private bool exiting_fired = false;
     private int exitcode = 0;
     private bool is_destroyed = false;
@@ -637,6 +646,17 @@ public class GearyApplication : Gtk.Application {
             Geary.Logging.enable_flags(Geary.Logging.Flag.FOLDER_NORMALIZATION);
         if (options.contains(OPTION_LOG_DESERIALIZER))
             Geary.Logging.enable_flags(Geary.Logging.Flag.DESERIALIZER);
+        if (options.contains(OPTION_HIDDEN)) {
+            warning(
+                /// Warning printed to the console when a deprecated
+                /// command line option is used.
+                _("The `--hidden` option is deprecated and will be removed in the future.")
+            );
+            this.start_hidden = true;
+            // Update the autostart file so that it stops using the
+            // --hidden option.
+            this.update_autostart_file.begin();
+        }
 
         config.enable_debug = enable_debug;
         config.enable_inspector = options.contains(OPTION_INSPECTOR);
@@ -667,6 +687,18 @@ public class GearyApplication : Gtk.Application {
         }
 
         return -1;
+    }
+
+    /** Removes and re-adds the austostart file if needed. */
+    private async void update_autostart_file() {
+        try {
+            this.autostart.delete_startup_file();
+            if (this.config.startup_notifications) {
+                this.autostart.install_startup_file();
+            }
+        } catch (GLib.Error err) {
+            warning("Could not update autostart file");
+        }
     }
 
     private void on_activate_about() {
