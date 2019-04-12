@@ -129,8 +129,6 @@ public class GearyController : Geary.BaseObject {
 
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
 
-    public AutostartManager? autostart_manager { get; private set; default = null; }
-
     public Application.AvatarStore? avatars {
         get; private set; default = new Application.AvatarStore();
     }
@@ -334,9 +332,6 @@ public class GearyController : Geary.BaseObject {
         this.libnotify.invoked.connect(on_libnotify_invoked);
 
         this.main_window.conversation_list_view.grab_focus();
-
-        // instantiate here to ensure that Config is initialized and ready
-        this.autostart_manager = new AutostartManager(this.application);
 
         // initialize revokable
         save_revokable(null, null);
@@ -561,8 +556,6 @@ public class GearyController : Geary.BaseObject {
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
         this.waiting_to_close.clear();
-
-        this.autostart_manager = null;
 
         this.avatars.close();
         this.avatars = null;

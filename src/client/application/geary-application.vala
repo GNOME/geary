@@ -178,6 +178,11 @@ public class GearyApplication : Gtk.Application {
      */
     public Configuration config { get; private set; }
 
+    /** Manages the autostart desktop file. */
+    public Application.StartupManager? autostart {
+        get; private set; default = null;
+    }
+
     /**
      * Determines if Geary configured to run as as a background service.
      *
@@ -339,6 +344,9 @@ public class GearyApplication : Gtk.Application {
         Gtk.Window.set_default_icon_name(APP_ID);
 
         this.config = new Configuration(APP_ID);
+        this.autostart = new Application.StartupManager(
+            this.config, get_install_dir()
+        );
 
         add_action_entries(action_entries, this);
 
