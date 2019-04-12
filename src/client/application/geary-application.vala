@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 // Defined by CMake build script.
@@ -78,7 +80,7 @@ public class GearyApplication : Gtk.Application {
     private const string OPTION_QUIT = "quit";
     private const string OPTION_REVOKE_CERTS = "revoke-certs";
 
-    private const ActionEntry[] action_entries = {
+    private const ActionEntry[] ACTION_ENTRIES = {
         {ACTION_ABOUT, on_activate_about},
         {ACTION_ACCOUNTS, on_activate_accounts},
         {ACTION_COMPOSE, on_activate_compose},
@@ -91,7 +93,7 @@ public class GearyApplication : Gtk.Application {
 
     // This is also the order in which they are presented to the user,
     // so it's probably best to keep them alphabetical
-    public const GLib.OptionEntry[] OPTION_ENTRIES = {
+    private const GLib.OptionEntry[] OPTION_ENTRIES = {
         { OPTION_DEBUG, 'd', 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Print debug logging"), null },
@@ -190,11 +192,21 @@ public class GearyApplication : Gtk.Application {
     }
 
     /**
-     * The user's desktop-wide settings for the application.
+     * The user's desktop settings for the application.
+     *
+     * This will be null until {@link startup} has been called, and
+     * hence will only ever become non-null for the primary instance.
      */
-    public Configuration config { get; private set; }
+    public Configuration? config {
+        get; private set; default = null;
+    }
 
-    /** Manages the autostart desktop file. */
+    /**
+     * Manages the autostart desktop file.
+     *
+     * This will be null until {@link startup} has been called, and
+     * hence will only ever become non-null for the primary instance.
+     */
     public Application.StartupManager? autostart {
         get; private set; default = null;
     }
@@ -215,7 +227,7 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
-    private string bin;
+    private string binary;
     private File exec_dir;
     private bool start_hidden = false;
     private bool exiting_fired = false;
@@ -322,7 +334,7 @@ public class GearyApplication : Gtk.Application {
     public GearyApplication() {
         Object(
             application_id: APP_ID,
-            flags: ApplicationFlags.HANDLES_COMMAND_LINE
+            flags: GLib.ApplicationFlags.HANDLES_COMMAND_LINE
         );
         this.add_main_option_entries(OPTION_ENTRIES);
         _instance = this;
@@ -330,9 +342,11 @@ public class GearyApplication : Gtk.Application {
 
     public override bool local_command_line(ref unowned string[] args,
                                             out int exit_status) {
-        this.bin = args[0];
-        string current_path = Posix.realpath(Environment.find_program_in_path(this.bin));
-        this.exec_dir = File.new_for_path(current_path).get_parent();
+        this.binary = args[0];
+        string current_path = Posix.realpath(
+            GLib.Environment.find_program_in_path(this.binary)
+        );
+        this.exec_dir = GLib.File.new_for_path(current_path).get_parent();
 
         return base.local_command_line(ref args, out exit_status);
     }
@@ -340,7 +354,7 @@ public class GearyApplication : Gtk.Application {
     public override int handle_local_options(GLib.VariantDict options) {
         if (options.contains(OPTION_VERSION)) {
             GLib.stdout.printf(
-                "%s: %s\n", this.bin, GearyApplication.VERSION
+                "%s: %s\n", this.binary, GearyApplication.VERSION
             );
             return 0;
         }
@@ -350,7 +364,7 @@ public class GearyApplication : Gtk.Application {
 
     public override void startup() {
         Environment.set_application_name(NAME);
-        International.init(GETTEXT_PACKAGE, this.bin);
+        International.init(GETTEXT_PACKAGE, this.binary);
 
         Configuration.init(is_installed(), GSETTINGS_DIR);
         Geary.Logging.init();
@@ -370,7 +384,7 @@ public class GearyApplication : Gtk.Application {
             this.config, get_install_dir()
         );
 
-        add_action_entries(action_entries, this);
+        add_action_entries(ACTION_ENTRIES, this);
 
         if (this.is_background_service) {
             // Since command_line won't be called below if running as
