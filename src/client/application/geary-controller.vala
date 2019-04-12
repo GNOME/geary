@@ -109,6 +109,13 @@ public class GearyController : Geary.BaseObject {
     }
 
 
+    /** Determines if the controller is opening or is open. */
+    public bool is_open {
+        get {
+            return (this.open_cancellable != null);
+        }
+    }
+
     public weak GearyApplication application { get; private set; } // circular ref
 
     public Accounts.Manager? account_manager { get; private set; default = null; }
@@ -121,8 +128,6 @@ public class GearyController : Geary.BaseObject {
     public MainWindow? main_window { get; private set; default = null; }
 
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
-
-    public AutostartManager? autostart_manager { get; private set; default = null; }
 
     public Application.AvatarStore? avatars {
         get; private set; default = new Application.AvatarStore();
@@ -158,7 +163,7 @@ public class GearyController : Geary.BaseObject {
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Folder? previous_non_search_folder = null;
     private UpgradeDialog upgrade_dialog;
-    private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
+    private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
 
     private uint operation_count = 0;
     private Geary.Revokable? revokable = null;
@@ -254,8 +259,7 @@ public class GearyController : Geary.BaseObject {
         ClientWebView.init_web_context(
             this.application.config,
             this.application.get_web_extensions_dir(),
-            this.application.get_user_cache_directory().get_child("web-resources"),
-            Args.log_debug
+            this.application.get_user_cache_directory().get_child("web-resources")
         );
         try {
             ClientWebView.load_resources(
@@ -328,9 +332,6 @@ public class GearyController : Geary.BaseObject {
         this.libnotify.invoked.connect(on_libnotify_invoked);
 
         this.main_window.conversation_list_view.grab_focus();
-
-        // instantiate here to ensure that Config is initialized and ready
-        this.autostart_manager = new AutostartManager(this.application);
 
         // initialize revokable
         save_revokable(null, null);
@@ -414,29 +415,32 @@ public class GearyController : Geary.BaseObject {
         this.open_cancellable.cancel();
         this.open_cancellable = null;
 
-        Geary.Engine.instance.account_available.disconnect(on_account_available);
+        this.application.engine.account_available.disconnect(on_account_available);
 
-        // Release folder and conversations in the main window
-        on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
-        on_folder_selected(null);
+        if (this.main_window != null) {
+            // Release folder and conversations in the main window
+            on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
+            on_folder_selected(null);
 
-        // Disconnect from various UI signals.
-        main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
-        main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
-        main_window.conversation_list_view.load_more.disconnect(on_load_more);
-        main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
-        main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
-        main_window.folder_list.folder_selected.disconnect(on_folder_selected);
-        main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
-        main_window.folder_list.move_conversation.disconnect(on_move_conversation);
-        main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
-        main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
-        main_window.conversation_viewer.conversation_added.disconnect(
-            on_conversation_view_added
-        );
+            // Disconnect from various UI signals.
+            this.main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
+            this.main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
+            this.main_window.conversation_list_view.load_more.disconnect(on_load_more);
+            this.main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
+            this.main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
+            this.main_window.folder_list.folder_selected.disconnect(on_folder_selected);
+            this.main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
+            this.main_window.folder_list.move_conversation.disconnect(on_move_conversation);
+            this.main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
+            this.main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
+            this.main_window.conversation_viewer.conversation_added.disconnect(
+                on_conversation_view_added
+            );
 
-        // hide window while shutting down, as this can take a few seconds under certain conditions
-        main_window.hide();
+            // hide window while shutting down, as this can take a few
+            // seconds under certain conditions
+            this.main_window.hide();
+        }
 
         // Release monitoring early so held resources can be freed up
         this.libnotify = null;
@@ -533,9 +537,11 @@ public class GearyController : Geary.BaseObject {
         );
         this.account_manager = null;
 
-        this.application.remove_window(this.main_window);
-        this.main_window.destroy();
-        this.main_window = null;
+        if (this.main_window != null) {
+            this.application.remove_window(this.main_window);
+            this.main_window.destroy();
+            this.main_window = null;
+        }
 
         this.upgrade_dialog = null;
 
@@ -551,8 +557,6 @@ public class GearyController : Geary.BaseObject {
         this.composer_widgets.clear();
         this.waiting_to_close.clear();
 
-        this.autostart_manager = null;
-
         this.avatars.close();
         this.avatars = null;
 
@@ -561,16 +565,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     /**
-     * Opens a new, blank composer.
-     */
-    public void compose() {
-        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE);
-    }
-
-    /**
      * Opens or queues a new composer addressed to a specific email address.
      */
-    public void compose_mailto(string mailto) {
+    public void compose(string? mailto = null) {
         if (current_account == null) {
             // Schedule the send for after we have an account open.
             pending_mailtos.add(mailto);
@@ -861,7 +858,7 @@ public class GearyController : Geary.BaseObject {
                                              Geary.ServiceInformation service,
                                              Geary.Endpoint endpoint,
                                              GLib.TlsConnection cx) {
-        if (Args.revoke_certs) {
+        if (this.application.config.revoke_certs) {
             // XXX
         }
 
@@ -1063,7 +1060,7 @@ public class GearyController : Geary.BaseObject {
         if (did_attempt_open_all_accounts() &&
             !upgrade_dialog.visible &&
             !cancellable_open_account.is_cancelled() &&
-            !Args.hidden_startup)
+            !this.application.is_background_service)
             main_window.show();
     }
 
@@ -1184,8 +1181,8 @@ public class GearyController : Geary.BaseObject {
 
             // If we were waiting for an account to be selected before issuing mailtos, do that now.
             if (pending_mailtos.size > 0) {
-                foreach(string mailto in pending_mailtos)
-                    compose_mailto(mailto);
+                foreach(string? mailto in pending_mailtos)
+                    compose(mailto);
 
                 pending_mailtos.clear();
             }
@@ -2284,7 +2281,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_close() {
-        this.application.exit();
+        this.main_window.close();
     }
 
     private void on_reply_to_message(ConversationEmail target_view) {
@@ -2530,12 +2527,14 @@ public class GearyController : Geary.BaseObject {
             revokable.committed.connect(on_revokable_committed);
         }
 
-        if (revokable != null && description != null)
-            this.main_window.main_toolbar.undo_tooltip = description;
-        else
-            this.main_window.main_toolbar.undo_tooltip = _("Undo (Ctrl+Z)");
+        if (this.main_window != null) {
+            if (revokable != null && description != null)
+                this.main_window.main_toolbar.undo_tooltip = description;
+            else
+                this.main_window.main_toolbar.undo_tooltip = _("Undo (Ctrl+Z)");
 
-        update_revokable_action();
+            update_revokable_action();
+        }
     }
 
     private void update_revokable_action() {
@@ -3029,7 +3028,9 @@ public class GearyController : Geary.BaseObject {
     private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
-        if (!main_window.conversation_list_has_scrollbar() &&
+        if (this.main_window != null &&
+            this.main_window.is_visible() &&
+            !this.main_window.conversation_list_has_scrollbar() &&
             monitor == this.current_conversations &&
             monitor.can_load_more) {
             debug("Not enough messages, loading more for folder %s",
@@ -3074,7 +3075,7 @@ public class GearyController : Geary.BaseObject {
 
     private void on_link_activated(string uri) {
         if (uri.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-            compose_mailto(uri);
+            compose(uri);
         } else {
             open_uri(uri);
         }

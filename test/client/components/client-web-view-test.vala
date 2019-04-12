@@ -15,11 +15,11 @@ public class ClientWebViewTest : TestCase {
 
     public void init_web_context() throws Error {
         Configuration config = new Configuration(GearyApplication.APP_ID);
+        config.enable_debug = true;
         ClientWebView.init_web_context(
             config,
             File.new_for_path(_BUILD_ROOT_DIR).get_child("src"),
-            File.new_for_path("/tmp"), // XXX use something better here
-            true
+            File.new_for_path("/tmp") // XXX use something better here
         );
     }
 

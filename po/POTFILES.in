@@ -20,9 +20,8 @@ src/client/application/application-certificate-manager.vala
 src/client/application/application-command.vala
 src/client/application/application-contact-store.vala
 src/client/application/application-contact.vala
-src/client/application/autostart-manager.vala
+src/client/application/application-startup-manager.vala
 src/client/application/geary-application.vala
-src/client/application/geary-args.vala
 src/client/application/geary-controller.vala
 src/client/application/goa-mediator.vala
 src/client/application/main.vala

@@ -46,7 +46,7 @@ public class PreferencesDialog : Gtk.Dialog {
 
     public new void run() {
         // Sync startup notification option with file state
-        this.app.controller.autostart_manager.sync_with_config();
+        this.app.autostart.sync_with_config();
 
         base.run();
         destroy();

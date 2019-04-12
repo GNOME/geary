@@ -27,6 +27,7 @@ locale_dir = join_paths(geary_prefix, get_option('localedir'))
 po_dir = join_paths(meson.source_root(), 'po')
 vapi_dir = join_paths(meson.source_root(), 'bindings', 'vapi')
 metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
+dbus_services_dir = join_paths(datadir, 'dbus-1', 'services')
 web_extensions_dir = join_paths(libdir, 'geary', 'web-extensions')
 
 # Make sure Meson can find our custom VAPI's

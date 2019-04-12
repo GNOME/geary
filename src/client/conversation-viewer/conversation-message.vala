@@ -408,7 +408,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         add_action(ACTION_COPY_SELECTION, false).activate.connect(() => {
                 web_view.copy_clipboard();
             });
-        add_action(ACTION_OPEN_INSPECTOR, Args.inspector).activate.connect(() => {
+        add_action(ACTION_OPEN_INSPECTOR, config.enable_inspector).activate.connect(() => {
                 this.web_view.get_inspector().show();
             });
         add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
@@ -429,7 +429,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         context_menu_email = (MenuModel) builder.get_object("context_menu_email");
         context_menu_image = (MenuModel) builder.get_object("context_menu_image");
         context_menu_main = (MenuModel) builder.get_object("context_menu_main");
-        if (Args.inspector) {
+        if (config.enable_inspector) {
             context_menu_inspector =
                 (MenuModel) builder.get_object("context_menu_inspector");
         }

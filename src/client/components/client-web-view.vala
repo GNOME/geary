@@ -73,8 +73,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      */
     public static void init_web_context(Configuration config,
                                         File web_extension_dir,
-                                        File cache_dir,
-                                        bool enable_logging) {
+                                        File cache_dir) {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
         // Use a shared process so we don't spawn N WebProcess instances
@@ -101,7 +100,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                     web_extension_dir.get_path()
                 );
                 context.set_web_extensions_initialization_user_data(
-                    new Variant.boolean(enable_logging)
+                    new Variant.boolean(config.enable_debug)
                 );
             });
 
@@ -300,7 +299,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
         setts.default_charset = "UTF-8";
-        setts.enable_developer_extras = Args.inspector;
+        setts.enable_developer_extras = config.enable_inspector;
         setts.enable_fullscreen = false;
         setts.enable_html5_database = false;
         setts.enable_html5_local_storage = false;

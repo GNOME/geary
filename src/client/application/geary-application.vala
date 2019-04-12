@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 // Defined by CMake build script.
@@ -18,7 +20,6 @@ extern const string GETTEXT_PACKAGE;
 public class GearyApplication : Gtk.Application {
 
     public const string NAME = "Geary";
-    public const string PRGNAME = "geary";
     public const string APP_ID = "org.gnome.Geary";
     public const string DESCRIPTION = _("Send and receive email");
     public const string COPYRIGHT_1 = _("Copyright 2016 Software Freedom Conservancy Inc.");
@@ -52,16 +53,34 @@ public class GearyApplication : Gtk.Application {
     public const string ACTION_UNDO = "undo";
 
     // App-wide actions
-    private const string ACTION_ABOUT = "about";
-    private const string ACTION_ACCOUNTS = "accounts";
-    private const string ACTION_COMPOSE = "compose";
-    private const string ACTION_INSPECT = "inspect";
-    private const string ACTION_HELP = "help";
-    private const string ACTION_MAILTO = "mailto";
-    private const string ACTION_PREFERENCES = "preferences";
-    private const string ACTION_QUIT = "quit";
+    public const string ACTION_ABOUT = "about";
+    public const string ACTION_ACCOUNTS = "accounts";
+    public const string ACTION_COMPOSE = "compose";
+    public const string ACTION_INSPECT = "inspect";
+    public const string ACTION_HELP = "help";
+    public const string ACTION_MAILTO = "mailto";
+    public const string ACTION_PREFERENCES = "preferences";
+    public const string ACTION_QUIT = "quit";
 
-    private const ActionEntry[] action_entries = {
+    // Local-only command line options
+    private const string OPTION_VERSION = "version";
+
+    // Local command line options
+    private const string OPTION_DEBUG = "debug";
+    private const string OPTION_INSPECTOR = "inspector";
+    private const string OPTION_LOG_CONVERSATIONS = "log-conversations";
+    private const string OPTION_LOG_DESERIALIZER = "log-deserializer";
+    private const string OPTION_LOG_FOLDER_NORM = "log-folder-normalization";
+    private const string OPTION_LOG_NETWORK = "log-network";
+    private const string OPTION_LOG_PERIODIC = "log-periodic";
+    private const string OPTION_LOG_REPLAY_QUEUE = "log-replay-queue";
+    private const string OPTION_LOG_SERIALIZER = "log-serializer";
+    private const string OPTION_LOG_SQL = "log-sql";
+    private const string OPTION_HIDDEN = "hidden";
+    private const string OPTION_QUIT = "quit";
+    private const string OPTION_REVOKE_CERTS = "revoke-certs";
+
+    private const ActionEntry[] ACTION_ENTRIES = {
         {ACTION_ABOUT, on_activate_about},
         {ACTION_ACCOUNTS, on_activate_accounts},
         {ACTION_COMPOSE, on_activate_compose},
@@ -70,6 +89,62 @@ public class GearyApplication : Gtk.Application {
         {ACTION_MAILTO, on_activate_mailto, "s"},
         {ACTION_PREFERENCES, on_activate_preferences},
         {ACTION_QUIT, on_activate_quit},
+    };
+
+    // This is also the order in which they are presented to the user,
+    // so it's probably best to keep them alphabetical
+    private const GLib.OptionEntry[] OPTION_ENTRIES = {
+        { OPTION_DEBUG, 'd', 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Print debug logging"), null },
+        { OPTION_HIDDEN, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Start with the main window hidden (deprecated)"), null },
+        { OPTION_INSPECTOR, 'i', 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Enable WebKitGTK Inspector in web views"), null },
+        { OPTION_LOG_CONVERSATIONS, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Log conversation monitoring"), null },
+        { OPTION_LOG_DESERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Log IMAP network deserialization"), null },
+        { OPTION_LOG_FOLDER_NORM, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option. "Normalization" can also be called
+          /// "synchronization".
+          N_("Log folder normalization"), null },
+        { OPTION_LOG_NETWORK, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Log network activity"), null },
+        { OPTION_LOG_PERIODIC, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Log periodic activity"), null },
+        { OPTION_LOG_REPLAY_QUEUE, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option. The IMAP replay queue is how changes
+          /// on the server are replicated on the client.  It could
+          /// also be called the IMAP events queue.
+          N_("Log IMAP replay queue"), null },
+        { OPTION_LOG_SERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option. Serialization is how commands and
+          /// responses are converted into a stream of bytes for
+          /// network transmission
+          N_("Log IMAP network serialization"), null },
+        { OPTION_LOG_SQL, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Log database queries (generates lots of messages)"), null },
+        { OPTION_QUIT, 'q', 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Perform a graceful quit"), null },
+        { OPTION_REVOKE_CERTS, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Revoke all pinned TLS server certificates"), null },
+        { OPTION_VERSION, 'v', 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Display program version"), null },
+          // Use this to specify arguments in the help section
+        { GLib.OPTION_REMAINING, 0, 0, GLib.OptionArg.STRING_ARRAY, null, null,
+          "[mailto:[...]]" },
+        { null }
     };
 
     private const int64 USEC_PER_SEC = 1000000;
@@ -118,23 +193,44 @@ public class GearyApplication : Gtk.Application {
     }
 
     /**
-     * The user's desktop-wide settings for the application.
+     * The user's desktop settings for the application.
+     *
+     * This will be null until {@link startup} has been called, and
+     * hence will only ever become non-null for the primary instance.
      */
-    public Configuration config { get; private set; }
+    public Configuration? config {
+        get; private set; default = null;
+    }
+
+    /**
+     * Manages the autostart desktop file.
+     *
+     * This will be null until {@link startup} has been called, and
+     * hence will only ever become non-null for the primary instance.
+     */
+    public Application.StartupManager? autostart {
+        get; private set; default = null;
+    }
 
     /**
      * Determines if Geary configured to run as as a background service.
      *
      * If this returns `true`, then the primary application instance
      * will continue to run in the background after the last window is
-     * closed, instead of existing as usual.
+     * closed, instead of exiting as usual.
      */
     public bool is_background_service {
-        get { return Args.hidden_startup || this.config.startup_notifications; }
+        get {
+            return (
+                (this.flags & ApplicationFlags.IS_SERVICE) != 0 ||
+                this.start_hidden
+            );
+        }
     }
 
-    private string bin;
+    private string binary;
     private File exec_dir;
+    private bool start_hidden = false;
     private bool exiting_fired = false;
     private int exitcode = 0;
     private bool is_destroyed = false;
@@ -238,57 +334,40 @@ public class GearyApplication : Gtk.Application {
 
     public GearyApplication() {
         Object(
-            application_id: APP_ID
+            application_id: APP_ID,
+            flags: GLib.ApplicationFlags.HANDLES_COMMAND_LINE
         );
+        this.add_main_option_entries(OPTION_ENTRIES);
         _instance = this;
     }
 
-    // Application.run() calls this as an entry point.
-    public override bool local_command_line(ref unowned string[] args, out int exit_status) {
-        bin = args[0];
-        exec_dir = (File.new_for_path(Posix.realpath(Environment.find_program_in_path(bin)))).get_parent();
+    public override bool local_command_line(ref unowned string[] args,
+                                            out int exit_status) {
+        this.binary = args[0];
+        string current_path = Posix.realpath(
+            GLib.Environment.find_program_in_path(this.binary)
+        );
+        this.exec_dir = GLib.File.new_for_path(current_path).get_parent();
 
-        try {
-            register();
-        } catch (Error e) {
-            error("Error registering GearyApplication: %s", e.message);
+        return base.local_command_line(ref args, out exit_status);
+    }
+
+    public override int handle_local_options(GLib.VariantDict options) {
+        if (options.contains(OPTION_VERSION)) {
+            GLib.stdout.printf(
+                "%s: %s\n", this.binary, GearyApplication.VERSION
+            );
+            return 0;
         }
 
-        if (!Args.parse(args)) {
-            exit_status = 1;
-            return true;
-        }
-
-        if (!Args.quit) {
-            // Normal application startup or activation
-            activate();
-            foreach (unowned string arg in args) {
-                if (arg != null) {
-                    if (arg == Geary.ComposedEmail.MAILTO_SCHEME)
-                        activate_action(ACTION_COMPOSE, null);
-                    else if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME))
-                        activate_action(ACTION_MAILTO, new Variant.string(arg));
-                }
-            }
-        } else {
-            // User requested quit, only try to if we aren't running
-            // already.
-            if (this.is_remote) {
-                activate_action(ACTION_QUIT, null);
-            }
-        }
-
-        exit_status = 0;
-        return true;
+        return -1;
     }
 
     public override void startup() {
-        Configuration.init(is_installed(), GSETTINGS_DIR);
-
         Environment.set_application_name(NAME);
-        Environment.set_prgname(PRGNAME);
-        International.init(GETTEXT_PACKAGE, bin);
+        International.init(GETTEXT_PACKAGE, this.binary);
 
+        Configuration.init(is_installed(), GSETTINGS_DIR);
         Geary.Logging.init();
         Geary.Logging.log_to(stderr);
         GLib.Log.set_default_handler(Geary.Logging.default_handler);
@@ -301,7 +380,30 @@ public class GearyApplication : Gtk.Application {
         // Ensure all geary windows have an icon
         Gtk.Window.set_default_icon_name(APP_ID);
 
-        add_action_entries(action_entries, this);
+        this.config = new Configuration(APP_ID);
+        this.autostart = new Application.StartupManager(
+            this.config, get_install_dir()
+        );
+
+        add_action_entries(ACTION_ENTRIES, this);
+
+        if (this.is_background_service) {
+            // Since command_line won't be called below if running as
+            // a DBus service, disable logging spew and start the
+            // controller running.
+            Geary.Logging.log_to(null);
+            this.create_async.begin();
+        }
+    }
+
+    public override int command_line(GLib.ApplicationCommandLine command_line) {
+        int exit_value = handle_general_options(command_line);
+        if (exit_value != -1)
+            return exit_value;
+
+        activate();
+
+        return -1;
     }
 
     public override void activate() {
@@ -340,8 +442,6 @@ public class GearyApplication : Gtk.Application {
         message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
             exec_dir.get_path(), is_installed().to_string());
 
-        config = new Configuration(APP_ID);
-
         // Application accels
         add_app_accelerators(ACTION_COMPOSE, { "<Ctrl>N" });
         add_app_accelerators(ACTION_HELP, { "F1" });
@@ -358,7 +458,7 @@ public class GearyApplication : Gtk.Application {
         ComposerWidget.add_window_accelerators(this);
         Components.Inspector.add_window_accelerators(this);
 
-        yield controller.open_async(null);
+        yield this.controller.open_async(null);
 
         release();
     }
@@ -367,11 +467,12 @@ public class GearyApplication : Gtk.Application {
         // see create_async() for reasoning hold/release is used
         hold();
 
-        yield controller.close_async();
+        if (this.controller != null && this.controller.is_open) {
+            yield this.controller.close_async();
+        }
 
         release();
-
-        is_destroyed = true;
+        this.is_destroyed = true;
     }
 
     public void add_window_accelerators(string action,
@@ -479,7 +580,7 @@ public class GearyApplication : Gtk.Application {
 
     // This call will fire "exiting" only if it's not already been fired.
     public void exit(int exitcode = 0) {
-        if (exiting_fired)
+        if (this.exiting_fired)
             return;
 
         this.exitcode = exitcode;
@@ -537,6 +638,95 @@ public class GearyApplication : Gtk.Application {
         set_accels_for_action("app." + action, accelerators);
     }
 
+    public int handle_general_options(GLib.ApplicationCommandLine command_line) {
+        GLib.VariantDict options = command_line.get_options_dict();
+        if (options.contains(OPTION_QUIT)) {
+            exit();
+            return 0;
+        }
+
+        bool enable_debug = options.contains(OPTION_DEBUG);
+        // Will be logging to stderr until this point
+        if (enable_debug) {
+            Geary.Logging.log_to(GLib.stdout);
+        } else {
+            Geary.Logging.log_to(null);
+        }
+
+        // Logging flags
+        if (options.contains(OPTION_LOG_NETWORK))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
+        if (options.contains(OPTION_LOG_SERIALIZER))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
+        if (options.contains(OPTION_LOG_REPLAY_QUEUE))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.REPLAY);
+        if (options.contains(OPTION_LOG_CONVERSATIONS))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.CONVERSATIONS);
+        if (options.contains(OPTION_LOG_PERIODIC))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.PERIODIC);
+        if (options.contains(OPTION_LOG_SQL))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.SQL);
+        if (options.contains(OPTION_LOG_FOLDER_NORM))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.FOLDER_NORMALIZATION);
+        if (options.contains(OPTION_LOG_DESERIALIZER))
+            Geary.Logging.enable_flags(Geary.Logging.Flag.DESERIALIZER);
+        if (options.contains(OPTION_HIDDEN)) {
+            warning(
+                /// Warning printed to the console when a deprecated
+                /// command line option is used.
+                _("The `--hidden` option is deprecated and will be removed in the future.")
+            );
+            this.start_hidden = true;
+            // Update the autostart file so that it stops using the
+            // --hidden option.
+            this.update_autostart_file.begin();
+        }
+        if (options.contains(GLib.OPTION_REMAINING)) {
+            string[] args = options.lookup_value(
+                GLib.OPTION_REMAINING,
+                GLib.VariantType.STRING_ARRAY
+            ).get_strv();
+            foreach (string arg in args) {
+                // the only acceptable arguments are mailto:'s
+                if (arg == Geary.ComposedEmail.MAILTO_SCHEME) {
+                    activate_action(GearyApplication.ACTION_COMPOSE, null);
+                } else if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+                    activate_action(
+                        GearyApplication.ACTION_MAILTO,
+                        new GLib.Variant.string(arg)
+                    );
+                } else {
+                    command_line.printerr("%s: ", this.binary);
+                    command_line.printerr(
+                        /// Command line warning, string substitution
+                        /// is the given argument
+                        _("Unrecognised program argument: “%s”"), arg
+                    );
+                    command_line.printerr("\n");
+                    return 1;
+                }
+            }
+        }
+
+        this.config.enable_debug = enable_debug;
+        this.config.enable_inspector = options.contains(OPTION_INSPECTOR);
+        this.config.revoke_certs = options.contains(OPTION_REVOKE_CERTS);
+
+        return -1;
+    }
+
+    /** Removes and re-adds the austostart file if needed. */
+    private async void update_autostart_file() {
+        try {
+            this.autostart.delete_startup_file();
+            if (this.config.startup_notifications) {
+                this.autostart.install_startup_file();
+            }
+        } catch (GLib.Error err) {
+            warning("Could not update autostart file");
+        }
+    }
+
     private void on_activate_about() {
         Gtk.show_about_dialog(get_active_window(),
             "program-name", NAME,
@@ -580,7 +770,7 @@ public class GearyApplication : Gtk.Application {
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
         if (this.controller != null && param != null) {
-            this.controller.compose_mailto(param.get_string());
+            this.controller.compose(param.get_string());
         }
     }
 
