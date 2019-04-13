@@ -31,12 +31,15 @@ public class Notification.Desktop : Geary.BaseObject {
     private GLib.Notification? error_notification = null;
     private Geary.Folder? folder = null;
     private Geary.Email? email = null;
+    private GLib.Cancellable load_cancellable;
 
 
     public Desktop(NewMessagesMonitor monitor,
-                   GearyApplication application) {
+                   GearyApplication application,
+                   GLib.Cancellable load_cancellable) {
         this.monitor = monitor;
         this.application = application;
+        this.load_cancellable = load_cancellable;
         init_sound();
 
         this.monitor.add_required_fields(REQUIRED_FIELDS);
@@ -44,6 +47,7 @@ public class Notification.Desktop : Geary.BaseObject {
     }
 
     ~Desktop() {
+        this.load_cancellable.cancel();
         this.monitor.new_messages_arrived.disconnect(on_new_messages_arrived);
     }
 
@@ -79,12 +83,13 @@ public class Notification.Desktop : Geary.BaseObject {
     private void on_new_messages_arrived(Geary.Folder folder,
                                          int total,
                                          int added) {
-        if (added == 1 && monitor.last_new_message_folder != null &&
+        if (added == 1 &&
+            monitor.last_new_message_folder != null &&
             monitor.last_new_message != null) {
-            notify_one_message_async.begin(
+            this.notify_one_message.begin(
                 monitor.last_new_message_folder,
                 monitor.last_new_message,
-                null
+                this.load_cancellable
             );
         } else if (added > 0) {
             notify_new_mail(folder, added);
@@ -120,9 +125,10 @@ public class Notification.Desktop : Geary.BaseObject {
         }
     }
 
-    private async void notify_one_message_async(Geary.Folder folder,
-                                                Geary.Email email,
-                                                GLib.Cancellable? cancellable) throws GLib.Error {
+    private async void notify_one_message(Geary.Folder folder,
+                                          Geary.Email email,
+                                          GLib.Cancellable? cancellable)
+        throws GLib.Error {
         // used if notification is invoked
         this.folder = folder;
         this.email = email;

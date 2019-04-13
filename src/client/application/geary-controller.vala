@@ -331,7 +331,8 @@ public class GearyController : Geary.BaseObject {
 
         this.notifications = new Notification.Desktop(
             this.new_messages_monitor,
-            this.application
+            this.application,
+            this.open_cancellable
         );
 
         this.main_window.conversation_list_view.grab_focus();
