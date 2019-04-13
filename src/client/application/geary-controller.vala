@@ -148,6 +148,9 @@ public class GearyController : Geary.BaseObject {
     private GLib.Cancellable? open_cancellable = null;
 
     private Folks.IndividualAggregator? folks = null;
+
+    private Canberra.Context? sound_context = null;
+
     private Geary.Folder? current_folder = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
@@ -272,6 +275,8 @@ public class GearyController : Geary.BaseObject {
         } catch (Error err) {
             error("Error loading web resources: %s", err.message);
         }
+
+        Canberra.Context.create(out this.sound_context);
 
         this.folks = Folks.IndividualAggregator.dup();
         if (!this.folks.is_prepared) {
@@ -447,6 +452,7 @@ public class GearyController : Geary.BaseObject {
         }
 
         // Release monitoring early so held resources can be freed up
+        this.sound_context = null;
         this.notifications = null;
         this.new_messages_indicator = null;
         this.unity_launcher = null;
@@ -2621,7 +2627,7 @@ public class GearyController : Geary.BaseObject {
         ).printf(Util.Email.to_short_recipient_display(rfc822.to));
         InAppNotification notification = new InAppNotification(message);
         this.main_window.add_notification(notification);
-        this.notifications.play_sound("message-sent-email");
+        this.play_sound("message-sent-email");
     }
 
     private void on_conversation_view_added(ConversationListBox list) {
@@ -2856,6 +2862,12 @@ public class GearyController : Geary.BaseObject {
         }
 
         return false;
+    }
+
+    public void play_sound(string sound) {
+        if (this.application.config.play_sounds) {
+            this.sound_context.play(0, Canberra.PROP_EVENT_ID, sound);
+        }
     }
 
     private void on_account_available(Geary.AccountInformation info) {

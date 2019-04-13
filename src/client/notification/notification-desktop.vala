@@ -16,15 +16,6 @@ public class Notification.Desktop : Geary.BaseObject {
     private const string ARRIVED_ID = "email-arrived";
     private const string ERROR_ID = "error";
 
-
-    private static void init_sound() {
-        if (Desktop.sound_context == null) {
-            Canberra.Context.create(out sound_context);
-        }
-    }
-
-    private static Canberra.Context? sound_context = null;
-
     private weak NewMessagesMonitor monitor;
     private weak GearyApplication application;
     private GLib.Notification? current_notification = null;
@@ -40,7 +31,6 @@ public class Notification.Desktop : Geary.BaseObject {
         this.monitor = monitor;
         this.application = application;
         this.load_cancellable = load_cancellable;
-        init_sound();
 
         this.monitor.add_required_fields(REQUIRED_FIELDS);
         this.monitor.new_messages_arrived.connect(on_new_messages_arrived);
@@ -49,14 +39,6 @@ public class Notification.Desktop : Geary.BaseObject {
     ~Desktop() {
         this.load_cancellable.cancel();
         this.monitor.new_messages_arrived.disconnect(on_new_messages_arrived);
-    }
-
-    public void play_sound(string sound) {
-        if (this.application.config.play_sounds) {
-            Desktop.sound_context.play(
-                0, Canberra.PROP_EVENT_ID, sound
-            );
-        }
     }
 
     public void clear_arrived_notification() {
@@ -70,7 +52,7 @@ public class Notification.Desktop : Geary.BaseObject {
         // but it means in the future, a more robust system will be needed.)
         if (this.error_notification == null) {
             this.error_notification = issue_notification(
-                ERROR_ID, summary, body, null
+                ERROR_ID, summary, body
             );
         }
     }
@@ -171,26 +153,19 @@ public class Notification.Desktop : Geary.BaseObject {
     private void issue_current_notification(string summary, string body) {
         // only one outstanding notification at a time
         clear_arrived_notification();
-        this.current_notification = issue_notification(
-            ARRIVED_ID, summary, body, "message-new_email"
+        this.arrived_notification = issue_notification(
+            ARRIVED_ID, summary, body
         );
     }
 
     private GLib.Notification issue_notification(string id,
                                                  string summary,
-                                                 string body,
-                                                 string? sound) {
+                                                 string body) {
         GLib.Notification notification = new GLib.Notification(summary);
         notification.set_body(body);
         notification.set_icon(
             new GLib.ThemedIcon("%s-symbolic".printf(GearyApplication.APP_ID))
         );
-        //notification.set_default_action("app.activate");
-
-        if (sound != null) {
-            play_sound(sound);
-        }
-
         this.application.send_notification(id, notification);
         return notification;
     }
