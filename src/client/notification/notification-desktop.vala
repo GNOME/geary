@@ -66,7 +66,7 @@ public class Notification.Desktop : Geary.BaseObject {
         // but it means in the future, a more robust system will be needed.)
         if (this.error_notification == null) {
             this.error_notification = issue_notification(
-                ERROR_ID, summary, body, null, null
+                ERROR_ID, summary, body, null
             );
         }
     }
@@ -115,7 +115,7 @@ public class Notification.Desktop : Geary.BaseObject {
             }
 
             issue_current_notification(
-                this.folder.account.information.display_name, body, null
+                this.folder.account.information.display_name, body
             );
         }
     }
@@ -152,44 +152,34 @@ public class Notification.Desktop : Geary.BaseObject {
                     );
             }
 
-            Gdk.Pixbuf? avatar = yield this.monitor.avatars.load(
-                contact,
-                originator,
-                Application.AvatarStore.PIXEL_SIZE,
-                cancellable
-            );
-
             issue_current_notification(
                 contact.is_trusted
                     ? contact.display_name : originator.to_short_display(),
-                body,
-                avatar
+                body
             );
         } else {
             notify_new_mail(folder, 1);
         }
     }
 
-    private void issue_current_notification(string summary, string body, Gdk.Pixbuf? icon) {
+    private void issue_current_notification(string summary, string body) {
         // only one outstanding notification at a time
         clear_arrived_notification();
         this.current_notification = issue_notification(
-            ARRIVED_ID, summary, body, icon, "message-new_email"
+            ARRIVED_ID, summary, body, "message-new_email"
         );
     }
 
     private GLib.Notification issue_notification(string id,
                                                  string summary,
                                                  string body,
-                                                 Gdk.Pixbuf? icon,
                                                  string? sound) {
         GLib.Notification notification = new GLib.Notification(summary);
         notification.set_body(body);
+        notification.set_icon(
+            new GLib.ThemedIcon("%s-symbolic".printf(GearyApplication.APP_ID))
+        );
         //notification.set_default_action("app.activate");
-
-        if (icon != null) {
-            notification.set_icon(icon);
-        }
 
         if (sound != null) {
             play_sound(sound);
