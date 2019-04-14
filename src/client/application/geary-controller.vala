@@ -2965,7 +2965,6 @@ public class GearyController : Geary.BaseObject {
 
                 case Geary.Protocol.SMTP:
                     context.account.outgoing.restart.begin(context.cancellable);
-                    this.notifications.clear_error_notification();
                     break;
                 }
             }

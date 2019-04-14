@@ -413,8 +413,17 @@ public class GearyApplication : Gtk.Application {
     public override void activate() {
         base.activate();
 
-        if (!present())
-            create_async.begin();
+        // Clear notifications immediately since we are showing a main
+        // window.
+
+        if (present()) {
+            this.controller.notifications.clear_all_notifications();
+        } else {
+            this.create_async.begin((obj, res) => {
+                    this.create_async.end(res);
+                    this.controller.notifications.clear_all_notifications();
+                });
+        }
     }
 
     public bool present() {

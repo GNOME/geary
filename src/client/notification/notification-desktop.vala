@@ -39,6 +39,11 @@ public class Notification.Desktop : Geary.BaseObject {
         this.monitor.new_messages_arrived.disconnect(on_new_messages_arrived);
     }
 
+    public void clear_all_notifications() {
+        clear_arrived_notification();
+        clear_error_notification();
+    }
+
     public void clear_arrived_notification() {
         this.application.withdraw_notification(ARRIVED_ID);
         this.arrived_notification = null;
