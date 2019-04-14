@@ -43,7 +43,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * No folder exists for this path, it merely exists to provide a
      * common root for the paths of all local folders.
      */
-    protected FolderRoot local_folder_root = new Geary.FolderRoot(true);
+    protected FolderRoot local_folder_root = new Geary.FolderRoot(
+        "$geary-local", true
+    );
 
     private bool open = false;
     private Cancellable? open_cancellable = null;
@@ -723,13 +725,20 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Folder? special = get_special_folder(type);
         if (special == null) {
             FolderPath? path = information.get_special_folder_path(type);
-            if (path != null && !remote.is_folder_path_valid(path)) {
-                debug("%s: Ignoring bad special folder path '%s' for type %s",
-                      to_string(),
-                      path.to_string(),
-                      type.to_string());
-                path = null;
+            if (path != null) {
+                if (!remote.is_folder_path_valid(path)) {
+                    warning(
+                        "%s: Ignoring bad special folder path '%s' for type %s",
+                        to_string(),
+                        path.to_string(),
+                        type.to_string()
+                    );
+                    path = null;
+                } else {
+                    path = this.local.imap_folder_root.copy(path);
+                }
             }
+
             if (path == null) {
                 FolderPath root =
                     yield remote.get_default_personal_namespace(cancellable);
@@ -1113,6 +1122,7 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
             if (generic.get_special_folder(type) == null) {
                 Geary.FolderPath? path =
                     generic.information.get_special_folder_path(type);
+                path = this.local.imap_folder_root.copy(path);
                 if (path != null) {
                     try {
                         Geary.Folder target = yield generic.fetch_folder_async(

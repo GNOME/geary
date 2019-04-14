@@ -31,8 +31,8 @@ public class Geary.Imap.FolderRoot : Geary.FolderRoot {
     public FolderPath inbox { get; private set; }
 
 
-    public FolderRoot() {
-        base(false);
+    public FolderRoot(string label) {
+        base(label, false);
         this.inbox = base.get_child(
             MailboxSpecifier.CANONICAL_INBOX_NAME,
             Trillian.FALSE

@@ -86,7 +86,7 @@ private class Geary.ImapDB.Account : BaseObject {
      * @see list_folders_async
      */
     public Imap.FolderRoot imap_folder_root {
-        get; private set; default = new Imap.FolderRoot();
+        get; private set; default = new Imap.FolderRoot("$geary-imap");
     }
 
     // Only available when the Account is opened

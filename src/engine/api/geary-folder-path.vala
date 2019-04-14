@@ -19,7 +19,7 @@ public class Geary.FolderPath :
 
 
     /** Type of the GLib.Variant used to represent folder paths */
-    public const string VARIANT_TYPE = "as";
+    public const string VARIANT_TYPE = "(sas)";
 
 
     // Workaround for Vala issue #659. See children below.
@@ -233,7 +233,10 @@ public class Geary.FolderPath :
      * @see FolderRoot.from_folder_path
      */
     public GLib.Variant to_variant() {
-        return new GLib.Variant.strv(as_array());
+        return new GLib.Variant.tuple(new GLib.Variant[] {
+                get_root().label,
+                as_array()
+        });
     }
 
     /**
@@ -278,11 +281,14 @@ public class Geary.FolderPath :
                                      bool allow_case_sensitive,
                                      bool normalize) {
         int cmp = 0;
-        if (a.parent != null && b.parent != null) {
+        if (a.parent == null && b.parent == null) {
+            cmp = strcmp(((FolderRoot) a).label, ((FolderRoot) b).label);
+        } else {
             cmp = compare_names(
                 a.parent, b.parent, allow_case_sensitive, normalize
             );
         }
+
         if (cmp == 0) {
             string a_name = a.name;
             string b_name = b.name;
@@ -319,6 +325,15 @@ public class Geary.FolderRoot : FolderPath {
 
 
     /**
+     * A label for a folder root.
+     *
+     * Since there may be multiple folder roots (for example, local
+     * and remote folders, or for different remote namespaces), the
+     * label can be used to look up a specific root.
+     */
+    public string label { get; private set; }
+
+    /**
      * The default case sensitivity of descendant folders.
      *
      * @see FolderPath.get_child
@@ -329,26 +344,51 @@ public class Geary.FolderRoot : FolderPath {
     /**
      * Constructs a new folder root with given default sensitivity.
      */
-    public FolderRoot(bool default_case_sensitivity) {
+    public FolderRoot(string label, bool default_case_sensitivity) {
         base();
+        this.label = label;
         this.default_case_sensitivity = default_case_sensitivity;
+    }
+
+    /**
+     * Copies a folder path using this as the root.
+     *
+     * This method can be used to simply copy a path, or change the
+     * root that a path is attached to.
+     */
+    public FolderPath copy(FolderPath original) {
+        FolderPath copy = this;
+        foreach (string step in original.as_array()) {
+            copy = copy.get_child(step);
+        }
+        return copy;
     }
 
     /**
      * Reconstructs a path under this root from a GLib variant.
      *
      * @see FolderPath.to_variant
+     * @throws EngineError.BAD_PARAMETERS when the variant is not the
+     * have the correct type or if the given root label does not match
+     * this root's label.
      */
     public FolderPath from_variant(GLib.Variant serialised)
-        throws EngineError {
+        throws EngineError.BAD_PARAMETERS {
         if (serialised.get_type_string() != VARIANT_TYPE) {
             throw new EngineError.BAD_PARAMETERS(
                 "Invalid serialised id type: %s", serialised.get_type_string()
             );
         }
 
+        string label = (string) serialised.get_child_value(0);
+        if (this.label != label) {
+            throw new EngineError.BAD_PARAMETERS(
+                "Invalid serialised folder root label: %s", label
+            );
+        }
+
         FolderPath path = this;
-        foreach (string step in serialised.get_strv()) {
+        foreach (string step in serialised.get_child_value(1).get_strv()) {
             path = path.get_child(step);
         }
         return path;

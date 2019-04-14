@@ -29,7 +29,7 @@ public class Geary.AccountInformation : BaseObject {
         if (parts == null || parts.size == 0)
             return null;
 
-        Geary.FolderPath path = new Imap.FolderRoot();
+        Geary.FolderPath path = new Imap.FolderRoot("#geary-config");
         foreach (string basename in parts) {
             path = path.get_child(basename);
         }

@@ -8,6 +8,8 @@
 public class Geary.FolderPathTest : TestCase {
 
 
+    private const string TEST_LABEL = "#test";
+
     private FolderRoot? root = null;
 
 
@@ -19,18 +21,19 @@ public class Geary.FolderPathTest : TestCase {
         add_test("child_is_not_root", root_is_root);
         add_test("as_array", as_array);
         add_test("is_top_level", is_top_level);
+        add_test("distinct_roots_compare", distinct_roots_compare);
         add_test("path_to_string", path_to_string);
         add_test("path_parent", path_parent);
         add_test("path_equal", path_equal);
         add_test("path_hash", path_hash);
         add_test("path_compare", path_compare);
         add_test("path_compare_normalised", path_compare_normalised);
-        add_test("distinct_roots_compare", distinct_roots_compare);
+        add_test("root_instances_compare", root_instances_compare);
         add_test("variant_representation", variant_representation);
     }
 
     public override void set_up() {
-        this.root = new FolderRoot(false);
+        this.root = new FolderRoot(TEST_LABEL, false);
     }
 
     public override void tear_down() {
@@ -97,6 +100,17 @@ public class Geary.FolderPathTest : TestCase {
         assert_false(
             this.root.get_child("test").get_child("test").is_top_level,
             "Descendent is top_level"
+        );
+    }
+
+    public void distinct_roots_compare() throws GLib.Error {
+        assert_true(
+            this.root.compare_to(new FolderRoot(TEST_LABEL, false)) == 0,
+            "Root label equality"
+        );
+        assert_true(
+            this.root.compare_to(new FolderRoot("#other", false)) > 0,
+            "Root label inequality"
         );
     }
 
@@ -257,50 +271,59 @@ public class Geary.FolderPathTest : TestCase {
         );
     }
 
-    public void distinct_roots_compare() throws GLib.Error {
-        assert_int(0, this.root.compare_to(new FolderRoot(false)), "Root equality");
-        assert_int(0,
-            this.root.get_child("a").compare_to(new FolderRoot(false).get_child("a")),
+    public void root_instances_compare() throws GLib.Error {
+        assert_int(
+            0, this.root.compare_to(new FolderRoot(TEST_LABEL, false)),
+            "Root equality"
+        );
+        assert_int(
+            0, this.root.get_child("a").compare_to(new FolderRoot(TEST_LABEL, false).get_child("a")),
             "Equal child comparison"
+        );
+
+        assert_true(
+            this.root.get_child("a").compare_to(
+                new FolderRoot("#other", false).get_child("a")) > 0,
+            "Root label inequality with children"
         );
 
         // a is less than b
         assert_true(
-            this.root.get_child("a").compare_to(new FolderRoot(false).get_child("b")) < 0,
+            this.root.get_child("a").compare_to(new FolderRoot(TEST_LABEL, false).get_child("b")) < 0,
             "Greater than child comparison"
         );
 
         // b is greater than than a
         assert_true(
-            this.root.get_child("b").compare_to(new FolderRoot(false).get_child("a")) > 0,
+            this.root.get_child("b").compare_to(new FolderRoot(TEST_LABEL, false).get_child("a")) > 0,
             "Less than child comparison"
         );
 
         assert_true(
             this.root.get_child("a").get_child("test")
-            .compare_to(new FolderRoot(false).get_child("a")) > 0,
+            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("a")) > 0,
             "Greater than descendant"
         );
         assert_true(
             this.root.get_child("a")
-            .compare_to(new FolderRoot(false).get_child("a").get_child("test")) < 0,
+            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("a").get_child("test")) < 0,
             "Less than descendant"
         );
 
         assert_true(
             this.root.get_child("a").get_child("b")
-            .compare_to(new FolderRoot(false).get_child("a").get_child("b")) == 0,
+            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("a").get_child("b")) == 0,
             "N-path equality"
         );
 
         assert_true(
             this.root.get_child("a").get_child("a")
-            .compare_to(new FolderRoot(false).get_child("b").get_child("b")) < 0,
+            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("b").get_child("b")) < 0,
             "Less than double disjoint"
         );
         assert_true(
             this.root.get_child("b").get_child("a")
-            .compare_to(new FolderRoot(false).get_child("a").get_child("a")) > 0,
+            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("a").get_child("a")) > 0,
             "Greater than double disjoint"
         );
 
