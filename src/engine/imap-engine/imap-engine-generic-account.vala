@@ -434,6 +434,34 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         throw new EngineError.BAD_PARAMETERS("Unknown serialised type: %c", type);
     }
 
+    /** {@inheritDoc} */
+    public override FolderPath to_folder_path(GLib.Variant serialised)
+        throws EngineError.BAD_PARAMETERS {
+        FolderPath? path = null;
+        try {
+            path = this.local.imap_folder_root.from_variant(serialised);
+        } catch (EngineError.BAD_PARAMETERS err) {
+            path = this.local_folder_root.from_variant(serialised);
+        }
+        return path;
+    }
+
+    /** {@inheritDoc} */
+    public override Folder get_folder(FolderPath path)
+        throws EngineError.NOT_FOUND {
+        Folder? folder = this.folder_map.get(path);
+        if (folder == null) {
+            folder = this.local_only.get(path);
+            if (folder == null) {
+                throw new EngineError.NOT_FOUND(
+                    "Folder not found: %s", path.to_string()
+                );
+            }
+        }
+        return folder;
+    }
+
+    /** {@inheritDoc} */
     public override Gee.Collection<Geary.Folder> list_matching_folders(Geary.FolderPath? parent)
         throws Error {
         check_open();
@@ -459,33 +487,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     public override Geary.ContactStore get_contact_store() {
         return local.contact_store;
-    }
-
-    /** {@inheritDoc} */
-    public override async bool folder_exists_async(Geary.FolderPath path,
-                                                   Cancellable? cancellable = null)
-        throws Error {
-        check_open();
-        return this.local_only.has_key(path) || this.folder_map.has_key(path);
-    }
-
-    /** {@inheritDoc} */
-    public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
-                                                          Cancellable? cancellable = null)
-        throws Error {
-        check_open();
-
-        Geary.Folder? folder = this.local_only.get(path);
-        if (folder == null) {
-            folder = this.folder_map.get(path);
-
-            if (folder == null) {
-                throw new EngineError.NOT_FOUND(
-                    "Folder not found: %s", path.to_string()
-                );
-            }
-        }
-        return folder;
     }
 
     public override async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
@@ -1125,9 +1126,7 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
                 path = this.local.imap_folder_root.copy(path);
                 if (path != null) {
                     try {
-                        Geary.Folder target = yield generic.fetch_folder_async(
-                            path, cancellable
-                        );
+                        Geary.Folder target = generic.get_folder(path);
                         added_specials.set(type, target);
                     } catch (Error err) {
                         debug(

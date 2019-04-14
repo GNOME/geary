@@ -41,7 +41,7 @@ public class Geary.App.EmailStore : BaseObject {
             foreach (Geary.FolderPath path in folders.get(email)) {
                 Geary.Folder folder;
                 try {
-                    folder = yield account.fetch_folder_async(path, cancellable);
+                    folder = account.get_folder(path);
                 } catch (Error e) {
                     debug("Error getting a folder from path %s: %s", path.to_string(), e.message);
                     continue;
@@ -108,33 +108,23 @@ public class Geary.App.EmailStore : BaseObject {
             emails, cancellable);
     }
 
-    private async Gee.HashMap<Geary.FolderPath, Geary.Folder> get_folder_instances_async(
-        Gee.Collection<Geary.FolderPath> paths, Cancellable? cancellable) throws Error {
-        Gee.HashMap<Geary.FolderPath, Geary.Folder> folders
-            = new Gee.HashMap<Geary.FolderPath, Geary.Folder>();
-        foreach (Geary.FolderPath path in paths) {
-            Geary.Folder folder = yield account.fetch_folder_async(path, cancellable);
-            folders.set(path, folder);
-        }
-        return folders;
-    }
-
-    private Geary.FolderPath? next_folder_for_operation(AsyncFolderOperation operation,
-        Gee.MultiMap<Geary.FolderPath, Geary.EmailIdentifier> folders_to_ids,
-        Gee.Map<Geary.FolderPath, Geary.Folder> folders) throws Error {
+    private FolderPath?
+        next_folder_for_operation(AsyncFolderOperation operation,
+                                  Gee.MultiMap<FolderPath,EmailIdentifier> folders_to_ids)
+        throws GLib.Error {
         bool best_is_open = false;
         int best_count = 0;
         Geary.FolderPath? best = null;
         foreach (Geary.FolderPath path in folders_to_ids.get_keys()) {
-            assert(folders.has_key(path));
-            if (!folders.get(path).get_type().is_a(operation.folder_type))
+            Folder folder = this.account.get_folder(path);
+            if (!folder.get_type().is_a(operation.folder_type))
                 continue;
 
             int count = folders_to_ids.get(path).size;
             if (count == 0)
                 continue;
 
-            if (folders.get(path).get_open_state() == Geary.Folder.OpenState.REMOTE) {
+            if (folder.get_open_state() == Geary.Folder.OpenState.REMOTE) {
                 if (!best_is_open) {
                     best_is_open = true;
                     best_count = 0;
@@ -167,12 +157,9 @@ public class Geary.App.EmailStore : BaseObject {
 
         Gee.MultiMap<Geary.FolderPath, Geary.EmailIdentifier> folders_to_ids
             = Geary.Collection.reverse_multi_map<Geary.EmailIdentifier, Geary.FolderPath>(ids_to_folders);
-        Gee.HashMap<Geary.FolderPath, Geary.Folder> folders
-            = yield get_folder_instances_async(folders_to_ids.get_keys(), cancellable);
-
         Geary.FolderPath? path;
-        while ((path = next_folder_for_operation(operation, folders_to_ids, folders)) != null) {
-            Geary.Folder folder = folders.get(path);
+        while ((path = next_folder_for_operation(operation, folders_to_ids)) != null) {
+            Geary.Folder folder = this.account.get_folder(path);
             Gee.Collection<Geary.EmailIdentifier> ids = folders_to_ids.get(path);
             assert(ids.size > 0);
 

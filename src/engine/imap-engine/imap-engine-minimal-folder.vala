@@ -1272,7 +1272,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                          Geary.FolderPath destination,
                          GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        Geary.Folder target = yield this._account.fetch_folder_async(destination);
+        Geary.Folder target = this._account.get_folder(destination);
         yield copy_email_uids_async(to_copy, destination, cancellable);
         this._account.update_folder(target);
     }
@@ -1321,7 +1321,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (prepare.prepared_for_move == null || prepare.prepared_for_move.size == 0)
             return null;
 
-        Geary.Folder target = yield this._account.fetch_folder_async(destination);
+        Geary.Folder target = this._account.get_folder(destination);
         return new RevokableMove(
             _account, this, target, prepare.prepared_for_move
         );

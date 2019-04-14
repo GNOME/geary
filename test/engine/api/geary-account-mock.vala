@@ -135,6 +135,36 @@ public class Geary.MockAccount : Account, MockObject {
         }
     }
 
+    public override FolderPath to_folder_path(GLib.Variant serialised)
+        throws EngineError.BAD_PARAMETERS {
+        try {
+            return object_or_throw_call(
+                "to_folder_path",
+                { box_arg(serialised) },
+                new EngineError.BAD_PARAMETERS("Mock error")
+            );
+        } catch (EngineError.BAD_PARAMETERS err) {
+            throw err;
+        } catch (GLib.Error err) {
+            return new FolderRoot("#mock", false);
+        }
+    }
+
+    public override Folder get_folder(FolderPath path)
+        throws EngineError.NOT_FOUND {
+        try {
+            return object_or_throw_call(
+                "get_folder",
+                { path },
+                new EngineError.NOT_FOUND("Mock error")
+            );
+        } catch (EngineError.NOT_FOUND err) {
+            throw err;
+        } catch (GLib.Error err) {
+            return new MockFolder(null, null, null, SpecialFolderType.NONE, null);
+        }
+    }
+
     public override Gee.Collection<Folder> list_folders() throws Error {
         return object_call<Gee.Collection<Folder>>(
             "list_folders", {}, Gee.List.empty<Folder>()
@@ -143,22 +173,6 @@ public class Geary.MockAccount : Account, MockObject {
 
     public override Geary.ContactStore get_contact_store() {
         return new MockContactStore();
-    }
-
-    public override async bool folder_exists_async(FolderPath path,
-                                                   Cancellable? cancellable = null)
-        throws Error {
-        return boolean_call("folder_exists_async", {path, cancellable}, false);
-    }
-
-    public override async Folder fetch_folder_async(FolderPath path,
-                                                    Cancellable? cancellable = null)
-    throws Error {
-        return object_or_throw_call<Folder>(
-            "fetch_folder_async",
-            {path, cancellable},
-            new EngineError.NOT_FOUND("Mock call")
-        );
     }
 
     public override Folder? get_special_folder(SpecialFolderType special)
