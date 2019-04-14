@@ -18,10 +18,8 @@ public class Notification.Desktop : Geary.BaseObject {
 
     private weak NewMessagesMonitor monitor;
     private weak GearyApplication application;
-    private GLib.Notification? current_notification = null;
+    private GLib.Notification? arrived_notification = null;
     private GLib.Notification? error_notification = null;
-    private Geary.Folder? folder = null;
-    private Geary.Email? email = null;
     private GLib.Cancellable load_cancellable;
 
 
@@ -43,7 +41,7 @@ public class Notification.Desktop : Geary.BaseObject {
 
     public void clear_arrived_notification() {
         this.application.withdraw_notification(ARRIVED_ID);
-        this.current_notification = null;
+        this.arrived_notification = null;
     }
 
     public void set_error_notification(string summary, string body) {
@@ -52,7 +50,7 @@ public class Notification.Desktop : Geary.BaseObject {
         // but it means in the future, a more robust system will be needed.)
         if (this.error_notification == null) {
             this.error_notification = issue_notification(
-                ERROR_ID, summary, body
+                ERROR_ID, summary, body, null, null
             );
         }
     }
@@ -79,10 +77,6 @@ public class Notification.Desktop : Geary.BaseObject {
     }
 
     private void notify_new_mail(Geary.Folder folder, int added) {
-        // don't pass email if invoked
-        this.folder = null;
-        this.email = null;
-
         if (this.application.config.show_notifications &&
             this.monitor.should_notify_new_messages(folder)) {
             string body = ngettext(
@@ -101,8 +95,8 @@ public class Notification.Desktop : Geary.BaseObject {
                 ).printf(body, total);
             }
 
-            issue_current_notification(
-                this.folder.account.information.display_name, body
+            issue_arrived_notification(
+                folder.account.information.display_name, body, folder, null
             );
         }
     }
@@ -111,10 +105,6 @@ public class Notification.Desktop : Geary.BaseObject {
                                           Geary.Email email,
                                           GLib.Cancellable? cancellable)
         throws GLib.Error {
-        // used if notification is invoked
-        this.folder = folder;
-        this.email = email;
-
         Geary.RFC822.MailboxAddress? originator =
             Util.Email.get_primary_originator(email);
         if (this.application.config.show_notifications &&
@@ -140,32 +130,62 @@ public class Notification.Desktop : Geary.BaseObject {
                     );
             }
 
-            issue_current_notification(
+            issue_arrived_notification(
                 contact.is_trusted
                     ? contact.display_name : originator.to_short_display(),
-                body
+                body,
+                folder,
+                email.id
             );
         } else {
             notify_new_mail(folder, 1);
         }
     }
 
-    private void issue_current_notification(string summary, string body) {
+    private void issue_arrived_notification(string summary,
+                                            string body,
+                                            Geary.Folder folder,
+                                            Geary.EmailIdentifier? id) {
         // only one outstanding notification at a time
         clear_arrived_notification();
+
+        string? action = null;
+        GLib.Variant[] target_param = new GLib.Variant[] {
+            folder.account.information.id,
+            new GLib.Variant.variant(folder.path.to_variant())
+        };
+
+        if (id == null) {
+            action = GearyApplication.ACTION_SHOW_FOLDER;
+        } else {
+            action = GearyApplication.ACTION_SHOW_EMAIL;
+            target_param += new GLib.Variant.variant(id.to_variant());
+        }
+
         this.arrived_notification = issue_notification(
-            ARRIVED_ID, summary, body
+            ARRIVED_ID,
+            summary,
+            body,
+            "app." + action,
+            new GLib.Variant.tuple(target_param)
         );
     }
 
     private GLib.Notification issue_notification(string id,
                                                  string summary,
-                                                 string body) {
+                                                 string body,
+                                                 string? action,
+                                                 GLib.Variant? action_target) {
         GLib.Notification notification = new GLib.Notification(summary);
         notification.set_body(body);
         notification.set_icon(
             new GLib.ThemedIcon("%s-symbolic".printf(GearyApplication.APP_ID))
         );
+        if (action != null) {
+            notification.set_default_action_and_target_value(
+                action, action_target
+            );
+        }
         this.application.send_notification(id, notification);
         return notification;
     }
