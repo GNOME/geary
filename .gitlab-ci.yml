@@ -49,7 +49,7 @@ fedora:
     - dnf update -y --nogpgcheck
     - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
   script:
-    - $CONFIG_CMD
+    - $CONFIG_CMD -Dtnef-support=false
     - $BUILD_CMD
     - $TEST_CMD
     - $INSTALL_CMD
