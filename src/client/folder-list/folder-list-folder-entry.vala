@@ -115,6 +115,11 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
 
     private void on_counts_changed() {
+        debug(
+            "Updating unread count for %s: %u",
+            folder.get_display_name(),
+            get_count()
+        );
         sidebar_count_changed(get_count());
         sidebar_tooltip_changed(get_sidebar_tooltip());
     }
