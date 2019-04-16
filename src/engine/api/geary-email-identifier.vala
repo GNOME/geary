@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -26,6 +28,25 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
 
     public virtual uint hash() {
         return unique.hash();
+    }
+
+    /**
+     * Returns a representation useful for serialisation.
+     *
+     * This can be used to transmit ids as D-Bus method and GLib
+     * Action parameters, and so on.
+     *
+     * @returns a serialised form of this id, that will match the
+     * GVariantType `(*)`
+     * @see Account.to_email_identifier
+     */
+    public abstract GLib.Variant to_variant();
+
+    /**
+     * Returns a representation useful for debugging.
+     */
+    public virtual string to_string() {
+        return "[%s]".printf(unique.to_string());
     }
 
     public virtual bool equal_to(Geary.EmailIdentifier other) {
@@ -111,8 +132,4 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
         return sorted;
     }
 
-    public virtual string to_string() {
-        return "[%s]".printf(unique.to_string());
-    }
 }
-

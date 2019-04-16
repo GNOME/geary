@@ -60,6 +60,8 @@ public class GearyApplication : Gtk.Application {
     public const string ACTION_HELP = "help";
     public const string ACTION_MAILTO = "mailto";
     public const string ACTION_PREFERENCES = "preferences";
+    public const string ACTION_SHOW_EMAIL = "show-email";
+    public const string ACTION_SHOW_FOLDER = "show-folder";
     public const string ACTION_QUIT = "quit";
 
     // Local-only command line options
@@ -84,11 +86,13 @@ public class GearyApplication : Gtk.Application {
         {ACTION_ABOUT, on_activate_about},
         {ACTION_ACCOUNTS, on_activate_accounts},
         {ACTION_COMPOSE, on_activate_compose},
-        {ACTION_INSPECT, on_activate_inspect},
         {ACTION_HELP, on_activate_help},
+        {ACTION_INSPECT, on_activate_inspect},
         {ACTION_MAILTO, on_activate_mailto, "s"},
         {ACTION_PREFERENCES, on_activate_preferences},
         {ACTION_QUIT, on_activate_quit},
+        {ACTION_SHOW_EMAIL, on_activate_show_email, "(svv)"},
+        {ACTION_SHOW_FOLDER, on_activate_show_folder, "(sv)"}
     };
 
     // This is also the order in which they are presented to the user,
@@ -409,8 +413,17 @@ public class GearyApplication : Gtk.Application {
     public override void activate() {
         base.activate();
 
-        if (!present())
-            create_async.begin();
+        // Clear notifications immediately since we are showing a main
+        // window.
+
+        if (present()) {
+            this.controller.notifications.clear_all_notifications();
+        } else {
+            this.create_async.begin((obj, res) => {
+                    this.create_async.end(res);
+                    this.controller.notifications.clear_all_notifications();
+                });
+        }
     }
 
     public bool present() {
@@ -727,6 +740,25 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
+    private Geary.Folder? get_folder_from_action_target(GLib.Variant target) {
+        Geary.Folder? folder = null;
+        string account_id = (string) target.get_child_value(0);
+        try {
+            Geary.AccountInformation? account_config =
+                this.engine.get_account(account_id);
+            Geary.Account? account =
+                this.engine.get_account_instance(account_config);
+            Geary.FolderPath? path =
+                account.to_folder_path(
+                    target.get_child_value(1).get_variant()
+                );
+            folder = account.get_folder(path);
+        } catch (GLib.Error err) {
+            debug("Could not find account/folder %s", err.message);
+        }
+        return folder;
+    }
+
     private void on_activate_about() {
         Gtk.show_about_dialog(get_active_window(),
             "program-name", NAME,
@@ -781,6 +813,41 @@ public class GearyApplication : Gtk.Application {
 
     private void on_activate_quit() {
         exit();
+    }
+
+    private void on_activate_show_email(GLib.SimpleAction action,
+                                        GLib.Variant? target) {
+        if (target != null) {
+            // Target is a (account_id,folder_path,email_id) tuple
+            Geary.Folder? folder = get_folder_from_action_target(target);
+            Geary.EmailIdentifier? email_id = null;
+            if (folder != null) {
+                try {
+                    email_id = folder.account.to_email_identifier(
+                        target.get_child_value(2).get_variant()
+                    );
+                } catch (GLib.Error err) {
+                    debug("Could not find email id: %s", err.message);
+                }
+
+                if (email_id != null) {
+                    this.controller.main_window.present();
+                    this.controller.main_window.show_email(folder, email_id);
+                }
+            }
+        }
+    }
+
+    private void on_activate_show_folder(GLib.SimpleAction action,
+                                        GLib.Variant? target) {
+        if (target != null) {
+            // Target is a (account_id,folder_path) tuple
+            Geary.Folder? folder = get_folder_from_action_target(target);
+            if (folder != null) {
+                this.controller.main_window.present();
+                this.controller.main_window.show_folder(folder);
+            }
+        }
     }
 
     private void on_activate_help() {

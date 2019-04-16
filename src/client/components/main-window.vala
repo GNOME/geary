@@ -174,6 +174,30 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_infobar_frame();
     }
 
+    /** Selects the given account and folder. */
+    public void show_folder(Geary.Folder folder) {
+        this.folder_list.select_folder(folder);
+    }
+
+    /** Selects the given account, folder and email. */
+    public void show_email(Geary.Folder folder, Geary.EmailIdentifier id) {
+        // XXX this is broken in the case of the email's folder not
+        // being currently selected and loaded, since changing folders
+        // and loading the email in the conversation monitor won't
+        // have completed until well after is it obtained
+        // below. However, it should work in the only case where this
+        // currently used, that is when a user clicks on a
+        // notification for new mail in the current folder.
+        show_folder(folder);
+        Geary.App.ConversationMonitor? conversations =
+            this.application.controller.current_conversations;
+        Geary.App.Conversation? conversation =
+            conversations.get_by_email_identifier(id);
+        if (conversation != null) {
+            this.conversation_list_view.select_conversation(conversation);
+        }
+    }
+
     /** Displays and focuses the search bar for the window. */
     public void show_search_bar(string? text = null) {
         this.search_bar.give_search_focus();

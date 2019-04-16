@@ -28,7 +28,7 @@ class Geary.App.ConversationTest : TestCase {
     }
 
     public override void set_up() {
-        this.folder_root = new FolderRoot(false);
+        this.folder_root = new FolderRoot("#test", false);
         this.base_folder = new MockFolder(
             null,
             null,

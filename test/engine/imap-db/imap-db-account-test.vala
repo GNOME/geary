@@ -49,7 +49,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         );
         this.account.open_async.end(async_result());
 
-        this.root = new FolderRoot(false);
+        this.root = new FolderRoot("#test", false);
     }
 
     public override void tear_down() throws GLib.Error {

@@ -60,7 +60,7 @@ class Geary.Imap.MailboxSpecifierTest : TestCase {
     }
 
     public void from_folder_path() throws Error {
-        FolderRoot root = new FolderRoot();
+        FolderRoot root = new FolderRoot("#test");
         MailboxSpecifier inbox = new MailboxSpecifier("Inbox");
         assert_string(
             "Foo",
@@ -110,7 +110,7 @@ class Geary.Imap.MailboxSpecifierTest : TestCase {
     }
 
     public void folder_path_is_inbox() throws GLib.Error {
-        FolderRoot root = new FolderRoot();
+        FolderRoot root = new FolderRoot("#test");
         assert_true(
             MailboxSpecifier.folder_path_is_inbox(root.get_child("Inbox"))
         );

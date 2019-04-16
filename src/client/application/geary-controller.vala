@@ -137,6 +137,8 @@ public class GearyController : Geary.BaseObject {
         get; private set; default = new ContactListStoreCache();
     }
 
+    public Notification.Desktop? notifications { get; private set; default = null; }
+
     private Geary.Account? current_account = null;
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
@@ -146,6 +148,9 @@ public class GearyController : Geary.BaseObject {
     private GLib.Cancellable? open_cancellable = null;
 
     private Folks.IndividualAggregator? folks = null;
+
+    private Canberra.Context? sound_context = null;
+
     private Geary.Folder? current_folder = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
@@ -157,7 +162,6 @@ public class GearyController : Geary.BaseObject {
     private NewMessagesMonitor? new_messages_monitor = null;
     private NewMessagesIndicator? new_messages_indicator = null;
     private UnityLauncher? unity_launcher = null;
-    private Libnotify? libnotify = null;
     private uint select_folder_timeout_id = 0;
     private int64 next_folder_select_allowed_usec = 0;
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
@@ -272,6 +276,8 @@ public class GearyController : Geary.BaseObject {
             error("Error loading web resources: %s", err.message);
         }
 
+        Canberra.Context.create(out this.sound_context);
+
         this.folks = Folks.IndividualAggregator.dup();
         if (!this.folks.is_prepared) {
             // Do this in the background since it can take a long time
@@ -328,8 +334,11 @@ public class GearyController : Geary.BaseObject {
 
         unity_launcher = new UnityLauncher(new_messages_monitor);
 
-        this.libnotify = new Libnotify(this.new_messages_monitor);
-        this.libnotify.invoked.connect(on_libnotify_invoked);
+        this.notifications = new Notification.Desktop(
+            this.new_messages_monitor,
+            this.application,
+            this.open_cancellable
+        );
 
         this.main_window.conversation_list_view.grab_focus();
 
@@ -443,7 +452,8 @@ public class GearyController : Geary.BaseObject {
         }
 
         // Release monitoring early so held resources can be freed up
-        this.libnotify = null;
+        this.sound_context = null;
+        this.notifications = null;
         this.new_messages_indicator = null;
         this.unity_launcher = null;
         this.new_messages_monitor.clear_folders();
@@ -703,6 +713,19 @@ public class GearyController : Geary.BaseObject {
             info_bar.retry.connect(on_retry_problem);
             this.main_window.show_infobar(info_bar);
         }
+
+        Geary.ServiceProblemReport? service_report =
+            report as Geary.ServiceProblemReport;
+        if (service_report != null && service_report.service.protocol == SMTP) {
+            this.notifications.set_error_notification(
+                /// Notification title.
+                _("A problem occurred sending email for %s").printf(
+                    service_report.account.display_name
+                ),
+                /// Notification body
+                _("Email will not be sent until re-connected")
+            );
+        }
     }
 
     private void update_account_status() {
@@ -897,7 +920,6 @@ public class GearyController : Geary.BaseObject {
         if (folder.special_folder_type == Geary.SpecialFolderType.OUTBOX) {
             main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
             main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
-            libnotify.clear_error_notification();
         }
     }
 
@@ -1264,18 +1286,6 @@ public class GearyController : Geary.BaseObject {
             }
             conversation_count_changed(count);
         }
-    }
-
-    private void on_libnotify_invoked(Geary.Folder? folder, Geary.Email? email) {
-        new_messages_monitor.clear_all_new_messages();
-
-        if (folder == null || email == null || !can_switch_conversation_view())
-            return;
-
-        main_window.folder_list.select_folder(folder);
-        Geary.App.Conversation? conversation = current_conversations.get_by_email_identifier(email.id);
-        if (conversation != null)
-            main_window.conversation_list_view.select_conversation(conversation);
     }
 
     private void on_indicator_activated_application(uint32 timestamp) {
@@ -2617,7 +2627,7 @@ public class GearyController : Geary.BaseObject {
         ).printf(Util.Email.to_short_recipient_display(rfc822.to));
         InAppNotification notification = new InAppNotification(message);
         this.main_window.add_notification(notification);
-        Libnotify.play_sound("message-sent-email");
+        this.play_sound("message-sent-email");
     }
 
     private void on_conversation_view_added(ConversationListBox list) {
@@ -2852,6 +2862,12 @@ public class GearyController : Geary.BaseObject {
         }
 
         return false;
+    }
+
+    public void play_sound(string sound) {
+        if (this.application.config.play_sounds) {
+            this.sound_context.play(0, Canberra.PROP_EVENT_ID, sound);
+        }
     }
 
     private void on_account_available(Geary.AccountInformation info) {

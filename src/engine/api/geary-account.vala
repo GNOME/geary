@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -305,6 +307,62 @@ public abstract class Geary.Account : BaseObject {
     public abstract async void rebuild_async(Cancellable? cancellable = null) throws Error;
 
     /**
+     * Returns an email identifier from its serialised form.
+     *
+     * This is useful for converting a string representation of a
+     * email id back into an actual instance of an id. This does not
+     * guarantee that the email represented by the id will exist.
+     *
+     * @see EmailIdentifier.to_variant
+     * @throws EngineError.BAD_PARAMETERS when the variant is not the
+     * have the correct type.
+     */
+    public abstract EmailIdentifier to_email_identifier(GLib.Variant serialised)
+        throws EngineError.BAD_PARAMETERS;
+
+    /**
+     * Returns the folder path from its serialised form.
+     *
+     * This is useful for converting a string representation of a
+     * folder path back into an actual instance of a path. This does
+     * not guarantee that the folder represented by the path will
+     * exist.
+     *
+     * @see FolderPath.to_variant
+     * @throws EngineError.BAD_PARAMETERS when the variant is not the
+     * have the correct type or if no folder root with an appropriate
+     * label exists.
+     */
+    public abstract FolderPath to_folder_path(GLib.Variant serialised)
+        throws EngineError.BAD_PARAMETERS;
+
+    /**
+     * Determines if a folder is known to the engine.
+     *
+     * This method only considers currently known folders, it does not
+     * check the remote to see if a previously folder exists.
+     */
+    public virtual bool has_folder(FolderPath path) {
+        try {
+            get_folder(path);
+            return true;
+        } catch (EngineError.NOT_FOUND err) {
+            return false;
+        }
+    }
+
+    /**
+     * Returns the folder represented by a specific path.
+     *
+     * This method only considers currently known folders, it does not
+     * check the remote to see if a previously folder exists.
+     *
+     * @throws EngineError.NOT_FOUND if the folder does not exist.
+     */
+    public abstract Folder get_folder(FolderPath path)
+        throws EngineError.NOT_FOUND;
+
+    /**
      * Lists all the currently-available folders found under the parent path
      * unless it's null, in which case it lists all the root folders.  If the
      * parent path cannot be found, EngineError.NOT_FOUND is thrown.  If no
@@ -330,26 +388,6 @@ public abstract class Geary.Account : BaseObject {
      * Gets a perpetually update-to-date collection of autocompletion contacts.
      */
     public abstract Geary.ContactStore get_contact_store();
-
-    /**
-     * Returns true if the folder exists.
-     *
-     * This method never throws EngineError.NOT_FOUND.
-     */
-    public abstract async bool folder_exists_async(Geary.FolderPath path, Cancellable? cancellable = null)
-        throws Error;
-
-    /**
-     * Fetches a Folder object corresponding to the supplied path.  If the backing medium does
-     * not have a record of a folder at the path, EngineError.NOT_FOUND will be thrown.
-     *
-     * The same Geary.Folder object (instance) will be returned if the same path is submitted
-     * multiple times.  This means that multiple callers may be holding references to the same
-     * Folders.  This is important when thinking of opening and closing folders and signal
-     * notifications.
-     */
-    public abstract async Geary.Folder fetch_folder_async(Geary.FolderPath path,
-        Cancellable? cancellable = null) throws Error;
 
     /**
      * Returns the folder representing the given special folder type.  If no such folder exists,

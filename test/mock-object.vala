@@ -165,11 +165,11 @@ public interface MockObject {
         return return_object;
     }
 
-    protected R object_or_throw_call<R>(string name, Object[] args, Error default_error)
-        throws Error {
+    protected R object_or_throw_call<R>(string name, Object[] args, GLib.Error default_error)
+        throws GLib.Error {
         ExpectedCall? expected = call_made(name, args);
 
-        if (expected.return_object != null) {
+        if (expected.return_object == null) {
             throw default_error;
         }
         return expected.return_object;

@@ -336,7 +336,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             = Geary.Collection.reverse_multi_map<Geary.EmailIdentifier, Geary.FolderPath>(ids_to_folders);
 
         foreach (Geary.FolderPath path in folders_to_ids.get_keys()) {
-            Geary.Folder folder = yield account.fetch_folder_async(path, cancellable);
+            Geary.Folder folder = account.get_folder(path);
             Geary.FolderSupport.Remove? remove = folder as Geary.FolderSupport.Remove;
             if (remove == null)
                 continue;
