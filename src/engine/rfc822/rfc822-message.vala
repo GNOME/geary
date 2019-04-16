@@ -880,16 +880,49 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                 Mime.ContentType content_type =
                     part.get_effective_content_type();
 
-                // Skip text/plain and text/html parts that are INLINE
-                // or UNSPECIFIED, as they will be included in the body
+#if WITH_TNEF_SUPPORT
+                if (content_type.is_type("application", "vnd.ms-tnef")) {
+                    GMime.StreamMem stream = new GMime.StreamMem();
+                    ((GMime.Part) root).get_content_object().write_to_stream(stream);
+                    ByteArray tnef_data = stream.get_byte_array();
+                    Ytnef.TNEFStruct tn;
+                    if (Ytnef.ParseMemory(tnef_data.data, out tn) == 0) {
+                        for (unowned Ytnef.Attachment? a = tn.starting_attach.next; a != null; a = a.next) {
+                            attachments.add(new Part(tnef_attachment_to_gmime_part(a)));
+                        }
+                    }
+                } else
+#endif // WITH_TNEF_SUPPORT
                 if (actual_disposition == Mime.DispositionType.ATTACHMENT ||
                     (!content_type.is_type("text", "plain") &&
                      !content_type.is_type("text", "html"))) {
+                    // Skip text/plain and text/html parts that are INLINE
+                    // or UNSPECIFIED, as they will be included in the body
                     attachments.add(part);
                 }
             }
         }
     }
+
+#if WITH_TNEF_SUPPORT
+    private GMime.Part tnef_attachment_to_gmime_part(Ytnef.Attachment a) {
+        Ytnef.VariableLength* filenameProp = Ytnef.MAPIFindProperty(a.MAPI, Ytnef.PROP_TAG(Ytnef.PropType.STRING8, Ytnef.PropID.ATTACH_LONG_FILENAME));
+        if (filenameProp == Ytnef.MAPI_UNDEFINED) {
+            filenameProp = Ytnef.MAPIFindProperty(a.MAPI, Ytnef.PROP_TAG(Ytnef.PropType.STRING8, Ytnef.PropID.DISPLAY_NAME));
+            if (filenameProp == Ytnef.MAPI_UNDEFINED) {
+                filenameProp = &a.Title;
+            }
+        }
+        string filename = (string) filenameProp.data;
+        uint8[] data = Bytes.unref_to_data(new Bytes(a.FileData.data));
+
+        GMime.Part part = new GMime.Part();
+        part.set_filename(filename);
+        part.set_content_type(new GMime.ContentType.from_string(GLib.ContentType.guess(filename, data, null)));
+        part.set_content_object(new GMime.DataWrapper.with_stream(new GMime.StreamMem.with_buffer(data), GMime.ContentEncoding.BINARY));
+        return part;
+    }
+#endif
 
     public Gee.List<Geary.RFC822.Message> get_sub_messages() {
         Gee.List<Geary.RFC822.Message> messages = new Gee.ArrayList<Geary.RFC822.Message>();

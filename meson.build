@@ -79,6 +79,7 @@ libunwind_generic_dep = dependency(
   'libunwind-generic', version: '>= 1.1', required: not get_option('libunwind_optional')
 )
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
+libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tnef-support'))
 posix = valac.find_library('posix')
 webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
 

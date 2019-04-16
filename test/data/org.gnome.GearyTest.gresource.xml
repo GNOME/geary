@@ -4,6 +4,7 @@
     <file>basic-text-plain.eml</file>
     <file>basic-text-html.eml</file>
     <file>basic-multipart-alternative.eml</file>
+    <file>basic-multipart-tnef.eml</file>
     <file>geary-0.6-db.tar.xz</file>
   </gresource>
 </gresources>
