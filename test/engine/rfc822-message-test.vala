@@ -39,7 +39,9 @@ This is the second line.
         add_test("text_plain_as_html", text_plain_as_html);
         add_test("text_html_as_html", text_html_as_html);
         add_test("text_html_as_plain", text_html_as_plain);
+#if WITH_TNEF_SUPPORT
         add_test("tnef_extract_attachments", tnef_extract_attachments);
+#endif // WITH_TNEF_SUPPORT
         add_test("multipart_alternative_as_plain",
                  multipart_alternative_as_plain);
         add_test("multipart_alternative_as_converted_html",
