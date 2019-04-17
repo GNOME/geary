@@ -154,15 +154,14 @@
         },
         {
             "name": "folks",
+            "buildsystem": "meson",
             "cleanup": [
-                "/bin",
-                "/share/GConf"
+                "/bin"
             ],
             "config-opts": [
-                "--disable-telepathy-backend",
-                "--disable-inspect-tool",
-                "--disable-import-tool",
-                "--disable-fatal-warnings"
+                "-Dtelepathy_backend=false",
+                "-Dinspect_tool=false",
+                "-Dimport_tool=false"
             ],
             "sources": [
                 {
