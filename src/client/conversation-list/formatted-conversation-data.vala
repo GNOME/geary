@@ -191,7 +191,9 @@ public class FormattedConversationData : Geary.BaseObject {
         Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>();
         foreach (Geary.Email message in conversation.get_emails(Geary.App.Conversation.Ordering.RECV_DATE_ASCENDING)) {
             // only display if something to display
-            Geary.RFC822.MailboxAddresses? addresses = use_to ? message.to : message.from;
+            Geary.RFC822.MailboxAddresses? addresses = use_to
+                ? new Geary.RFC822.MailboxAddresses.single(Util.Email.get_primary_originator(message))
+                : message.from;
             if (addresses == null || addresses.size < 1)
                 continue;
 
