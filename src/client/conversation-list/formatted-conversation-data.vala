@@ -92,7 +92,6 @@ public class FormattedConversationData : Geary.BaseObject {
     public bool is_unread { get; set; }
     public bool is_flagged { get; set; }
     public string date { get; private set; }
-    public string subject { get; private set; }
     public string? body { get; private set; default = null; } // optional
     public int num_emails { get; set; }
     public Geary.Email? preview { get; private set; default = null; }
@@ -101,6 +100,7 @@ public class FormattedConversationData : Geary.BaseObject {
     private Gee.List<Geary.RFC822.MailboxAddress>? account_owner_emails = null;
     private bool use_to = true;
     private CountBadge count_badge = new CountBadge(2);
+    private string subject_html_escaped;
 
     // Creates a formatted message data from an e-mail.
     public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email preview,
@@ -112,7 +112,8 @@ public class FormattedConversationData : Geary.BaseObject {
 
         // Load preview-related data.
         update_date_string();
-        this.subject = Util.Email.strip_subject_prefixes(preview);
+        this.subject_html_escaped
+            = Geary.HTML.escape_markup(Util.Email.strip_subject_prefixes(preview));
         this.body = Geary.String.reduce_whitespace(preview.get_preview_as_string());
         this.preview = preview;
 
@@ -147,7 +148,7 @@ public class FormattedConversationData : Geary.BaseObject {
         this.is_unread = false;
         this.is_flagged = false;
         this.date = STYLE_EXAMPLE;
-        this.subject = STYLE_EXAMPLE;
+        this.subject_html_escaped = STYLE_EXAMPLE;
         this.body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
         this.num_emails = 1;
     }
@@ -381,7 +382,7 @@ public class FormattedConversationData : Geary.BaseObject {
         int y, bool selected, int counter_width = 0) {
         string subject_markup = "<span foreground='%s'>%s</span>".printf(
             rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
-            Geary.HTML.escape_markup(subject));
+            subject_html_escaped);
 
         Pango.FontDescription font_subject = new Pango.FontDescription();
         font_subject.set_size(FONT_SIZE_SUBJECT * Pango.SCALE);
