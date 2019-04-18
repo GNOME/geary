@@ -67,18 +67,10 @@ public class MainToolbar : Gtk.Box {
 
 
     public MainToolbar(Configuration config) {
-        // Instead of putting a separator between the two headerbars, as other applications do,
-        // we put a separator at the right end of the left headerbar.  This greatly improves
-        // the appearance under the Ambiance theme (see bug #746171).  To get this separator to
-        // line up with the handle of the pane, we need to extend the width of the left-hand
-        // headerbar a bit.  Six pixels is right both for Adwaita and Ambiance.
+        // Sync headerbar width with left pane
         config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, this, "left-pane-width",
             SettingsBindFlags.GET);
-        this.bind_property("left-pane-width", this.folder_header, "width-request",
-            BindingFlags.SYNC_CREATE, (binding, source_value, ref target_value) => {
-                target_value = left_pane_width + 6;
-                return true;
-            });
+        this.bind_property("left-pane-width", this.folder_header, "width-request", BindingFlags.SYNC_CREATE);
 
         if (config.desktop_environment != Configuration.DesktopEnvironment.UNITY) {
             this.bind_property("account", this.folder_header, "title", BindingFlags.SYNC_CREATE);
