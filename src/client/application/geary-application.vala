@@ -378,65 +378,21 @@ public class GearyApplication : Gtk.Application {
 
         Util.Date.init();
 
+        // Add application's actions before chaining up so they are
+        // present when the application is first registered on the
+        // session bus.
+        add_action_entries(ACTION_ENTRIES, this);
+
         // Calls Gtk.init(), amongst other things
         base.startup();
-
-        // Ensure all geary windows have an icon
-        Gtk.Window.set_default_icon_name(APP_ID);
 
         this.config = new Configuration(APP_ID);
         this.autostart = new Application.StartupManager(
             this.config, get_install_dir()
         );
 
-        add_action_entries(ACTION_ENTRIES, this);
-
-        if (this.is_background_service) {
-            // Since command_line won't be called below if running as
-            // a DBus service, disable logging spew and start the
-            // controller running.
-            Geary.Logging.log_to(null);
-            this.create_async.begin();
-        }
-    }
-
-    public override int command_line(GLib.ApplicationCommandLine command_line) {
-        int exit_value = handle_general_options(command_line);
-        if (exit_value != -1)
-            return exit_value;
-
-        activate();
-
-        return -1;
-    }
-
-    public override void activate() {
-        base.activate();
-
-        // Clear notifications immediately since we are showing a main
-        // window.
-
-        if (present()) {
-            this.controller.notifications.clear_all_notifications();
-        } else {
-            this.create_async.begin((obj, res) => {
-                    this.create_async.end(res);
-                    this.controller.notifications.clear_all_notifications();
-                });
-        }
-    }
-
-    private async void create_async() {
-        // Manually keep the main loop around for the duration of this call.
-        // Without this, the main loop will exit as soon as we hit the yield
-        // below, before we create the main window.
-        hold();
-
-        // do *after* parsing args, as they dicate where logging is sent to, if anywhere, and only
-        // after activate (which means this is only logged for the one user-visible instance, not
-        // the other instances called when sending commands to the app via the command-line)
-        message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
-            exec_dir.get_path(), is_installed().to_string());
+        // Ensure all geary windows have an icon
+        Gtk.Window.set_default_icon_name(APP_ID);
 
         // Application accels
         add_app_accelerators(ACTION_COMPOSE, { "<Ctrl>N" });
@@ -454,21 +410,40 @@ public class GearyApplication : Gtk.Application {
         ComposerWidget.add_window_accelerators(this);
         Components.Inspector.add_window_accelerators(this);
 
-        yield this.controller.open_async(null);
-
-        release();
+        if (this.is_background_service) {
+            // Since command_line won't be called below if running as
+            // a DBus service, disable logging spew and start the
+            // controller running.
+            Geary.Logging.log_to(null);
+            this.create_controller.begin();
+        }
     }
 
-    private async void destroy_async() {
-        // see create_async() for reasoning hold/release is used
-        hold();
+    public override int command_line(GLib.ApplicationCommandLine command_line) {
+        int exit_value = handle_general_options(command_line);
+        if (exit_value != -1)
+            return exit_value;
 
-        if (this.controller != null && this.controller.is_open) {
-            yield this.controller.close_async();
+        activate();
+
+        return -1;
+    }
+
+    public override void activate() {
+        base.activate();
+
+        // Clear notifications immediately since we are showing a main
+        // window. If the controller isn't already open, need to wait
+        // for that to happen before doing so
+
+        if (present()) {
+            this.controller.notifications.clear_all_notifications();
+        } else {
+            this.create_controller.begin((obj, res) => {
+                    this.create_controller.end(res);
+                    this.controller.notifications.clear_all_notifications();
+                });
         }
-
-        release();
-        this.is_destroyed = true;
     }
 
     public void add_window_accelerators(string action,
@@ -589,11 +564,12 @@ public class GearyApplication : Gtk.Application {
             return;
         }
 
-        // Give asynchronous destroy_async() a chance to complete, but to avoid bug(s) where
-        // Geary hangs at exit, shut the whole thing down if destroy_async() takes too long to
-        // complete
+        // Give asynchronous destroy_controller() a chance to
+        // complete, but to avoid bug(s) where Geary hangs at exit,
+        // shut the whole thing down if destroy_controller() takes too
+        // long to complete
         int64 start_usec = get_monotonic_time();
-        destroy_async.begin();
+        destroy_controller.begin();
         while (!is_destroyed || Gtk.events_pending()) {
             Gtk.main_iteration();
 
@@ -609,16 +585,16 @@ public class GearyApplication : Gtk.Application {
     }
 
     /**
-     * A callback for GearyApplication.exiting should return cancel_exit() to prevent the
-     * application from exiting.
+     * A callback for GearyApplication.exiting should return
+     * cancel_exit() to prevent the application from exiting.
      */
     public bool cancel_exit() {
         Signal.stop_emission_by_name(this, "exiting");
         return false;
     }
 
-    // This call will fire "exiting" only if it's not already been fired and halt the application
-    // in its tracks.
+    // This call will fire "exiting" only if it's not already been
+    // fired and halt the application in its tracks.
     public void panic() {
         if (!exiting_fired) {
             exiting_fired = true;
@@ -628,13 +604,40 @@ public class GearyApplication : Gtk.Application {
         Posix.exit(1);
     }
 
-    public void add_app_accelerators(string action,
-                                     string[] accelerators,
-                                     Variant? param = null) {
-        set_accels_for_action("app." + action, accelerators);
+    // Opens the controller
+    private async void create_controller() {
+        // Manually keep the main loop around for the duration of this
+        // call. Without this, the main loop will exit as soon as we
+        // hit the yield below, before we create the main window.
+        hold();
+
+        // do *after* parsing args, as they dicate where logging is
+        // sent to, if anywhere, and only after activate (which means
+        // this is only logged for the one user-visible instance, not
+        // the other instances called when sending commands to the app
+        // via the command-line)
+        message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
+            exec_dir.get_path(), is_installed().to_string());
+
+        yield this.controller.open_async(null);
+
+        release();
     }
 
-    public int handle_general_options(GLib.ApplicationCommandLine command_line) {
+    // Closes the controller, if running
+    private async void destroy_controller() {
+        // see create_controller() for reasoning hold/release is used
+        hold();
+
+        if (this.controller.is_open) {
+            yield this.controller.close_async();
+        }
+
+        release();
+        this.is_destroyed = true;
+    }
+
+    private int handle_general_options(GLib.ApplicationCommandLine command_line) {
         GLib.VariantDict options = command_line.get_options_dict();
         if (options.contains(OPTION_QUIT)) {
             exit();
@@ -713,8 +716,7 @@ public class GearyApplication : Gtk.Application {
 
     private bool present() {
         bool ret = false;
-        if (this.controller != null &&
-            this.controller.main_window != null) {
+        if (this.controller.main_window != null) {
             this.controller.main_window.present();
             ret = true;
         }
@@ -731,6 +733,12 @@ public class GearyApplication : Gtk.Application {
         } catch (GLib.Error err) {
             warning("Could not update autostart file");
         }
+    }
+
+    private void add_app_accelerators(string action,
+                                      string[] accelerators,
+                                      Variant? param = null) {
+        set_accels_for_action("app." + action, accelerators);
     }
 
     private Geary.Folder? get_folder_from_action_target(GLib.Variant target) {
@@ -776,9 +784,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_compose() {
-        if (this.controller != null) {
-            this.controller.compose();
-        }
+        this.controller.compose();
     }
 
     private void on_activate_inspect() {
@@ -794,7 +800,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
-        if (this.controller != null && param != null) {
+        if (param != null) {
             this.controller.compose(param.get_string());
         }
     }
