@@ -8,18 +8,18 @@ public class Libmessagingmenu : NewMessagesIndicator {
 #if HAVE_LIBMESSAGINGMENU
     private MessagingMenu.App? app = null;
 
-    public Libmessagingmenu(NewMessagesMonitor monitor) {
-        base (monitor);
 
-        File? desktop_file = GearyApplication.instance.get_desktop_file();
-        if (desktop_file == null
-            || !desktop_file.has_prefix(GearyApplication.instance.get_install_prefix_dir())) {
-            debug("Only an installed version of Geary with its .desktop file installed can use Messaging Menu");
+    private Configuration config;
 
-            return;
-        }
 
-        app = new MessagingMenu.App("org.gnome.Geary.desktop");
+    public Libmessagingmenu(NewMessagesMonitor monitor,
+                            Configuration config) {
+        base(monitor);
+        this.config = config;
+
+        app = new MessagingMenu.App(
+            "%s.desktop".printf(GearyApplication.APP_ID)
+        );
         app.register();
         app.activate_source.connect(on_activate_source);
 
@@ -63,7 +63,7 @@ public class Libmessagingmenu : NewMessagesIndicator {
     }
 
     private void show_new_messages_count(Geary.Folder folder, int count) {
-        if (!GearyApplication.instance.config.show_notifications || !monitor.should_notify_new_messages(folder))
+        if (!this.config.show_notifications || !monitor.should_notify_new_messages(folder))
             return;
 
         string source_id = get_source_id(folder);

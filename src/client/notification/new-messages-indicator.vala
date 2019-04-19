@@ -20,7 +20,8 @@ public abstract class NewMessagesIndicator : Geary.BaseObject {
         this.monitor = monitor;
     }
 
-    public static NewMessagesIndicator create(NewMessagesMonitor monitor) {
+    public static NewMessagesIndicator create(NewMessagesMonitor monitor,
+                                              Configuration config) {
         NewMessagesIndicator? indicator = null;
 
         // Indicators are ordered from most to least prefered.  If more than one is available,
@@ -28,7 +29,7 @@ public abstract class NewMessagesIndicator : Geary.BaseObject {
 
 #if HAVE_LIBMESSAGINGMENU
         if (indicator == null)
-            indicator = new Libmessagingmenu(monitor);
+            indicator = new Libmessagingmenu(monitor, config);
 #endif
 
         if (indicator == null)

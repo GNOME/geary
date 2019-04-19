@@ -327,10 +327,12 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
 
         // New messages indicator (Ubuntuism)
-        new_messages_indicator = NewMessagesIndicator.create(new_messages_monitor);
-        new_messages_indicator.application_activated.connect(on_indicator_activated_application);
-        new_messages_indicator.composer_activated.connect(on_indicator_activated_composer);
-        new_messages_indicator.inbox_activated.connect(on_indicator_activated_inbox);
+        this.new_messages_indicator = NewMessagesIndicator.create(
+            this.new_messages_monitor, this.application.config
+        );
+        this.new_messages_indicator.application_activated.connect(on_indicator_activated_application);
+        this.new_messages_indicator.composer_activated.connect(on_indicator_activated_composer);
+        this.new_messages_indicator.inbox_activated.connect(on_indicator_activated_inbox);
 
         unity_launcher = new UnityLauncher(new_messages_monitor);
 

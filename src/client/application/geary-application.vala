@@ -232,8 +232,23 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
-    private string binary;
+    /**
+     * Determines if this instance is running from the install directory.
+     */
+    internal bool is_installed {
+        get {
+            return this.exec_dir.has_prefix(this.install_prefix);
+        }
+    }
+
+    /** Returns the compile-time configured installation directory. */
+    internal GLib.File install_prefix {
+        get; private set; default = GLib.File.new_for_path(INSTALL_PREFIX);
+    }
+
+
     private File exec_dir;
+    private string binary;
     private bool start_hidden = false;
     private bool exiting_fired = false;
     private int exitcode = 0;
@@ -371,7 +386,7 @@ public class GearyApplication : Gtk.Application {
         Environment.set_application_name(NAME);
         International.init(GETTEXT_PACKAGE, this.binary);
 
-        Configuration.init(is_installed(), GSETTINGS_DIR);
+        Configuration.init(this.is_installed, GSETTINGS_DIR);
         Geary.Logging.init();
         Geary.Logging.log_to(stderr);
         GLib.Log.set_default_handler(Geary.Logging.default_handler);
@@ -388,7 +403,7 @@ public class GearyApplication : Gtk.Application {
 
         this.config = new Configuration(APP_ID);
         this.autostart = new Application.StartupManager(
-            this.config, get_install_dir()
+            this.config, this.get_desktop_directory()
         );
 
         // Ensure all geary windows have an icon
@@ -467,34 +482,39 @@ public class GearyApplication : Gtk.Application {
     }
 
 
-    public File get_user_data_directory() {
-        return File.new_for_path(Environment.get_user_data_dir()).get_child("geary");
+    /** Returns the application's base user configuration directory. */
+    public GLib.File get_user_config_directory() {
+        return GLib.File.new_for_path(
+            Environment.get_user_config_dir()
+        ).get_child("geary");
     }
 
-    public File get_user_cache_directory() {
-        return File.new_for_path(Environment.get_user_cache_dir()).get_child("geary");
+    /** Returns the application's base user cache directory. */
+    public GLib.File get_user_cache_directory() {
+        return GLib.File.new_for_path(
+            GLib.Environment.get_user_cache_dir()
+        ).get_child("geary");
     }
 
-    public File get_user_config_directory() {
-        return File.new_for_path(Environment.get_user_config_dir()).get_child("geary");
+    /** Returns the application's base user data directory. */
+    public GLib.File get_user_data_directory() {
+        return GLib.File.new_for_path(
+            GLib.Environment.get_user_data_dir()
+        ).get_child("geary");
     }
 
-    /**
-     * Returns the base directory that the application's various resource files are stored.  If the
-     * application is running from its installed directory, this will point to
-     * $(BASEDIR)/share/<program name>.  If it's running from the build directory, this points to
-     * that.
-     */
-    public File get_resource_directory() {
-        if (get_install_dir() != null)
-            return get_install_dir().get_child("share").get_child("geary");
-        else
-            return File.new_for_path(SOURCE_ROOT_DIR);
+    /** Returns the application's base static resources directory. */
+    public GLib.File get_resource_directory() {
+        return (is_installed)
+            ? this.install_prefix.get_child("share").get_child("geary")
+            : GLib.File.new_for_path(SOURCE_ROOT_DIR);
     }
 
-    /** Returns the directory the application is currently executing from. */
-    public File get_exec_dir() {
-        return this.exec_dir;
+    /** Returns the location of the application's desktop files. */
+    public GLib.File get_desktop_directory() {
+        return (is_installed)
+            ? this.install_prefix.get_child("share").get_child("applications")
+            : GLib.File.new_for_path(BUILD_ROOT_DIR).get_child("desktop");
     }
 
     /**
@@ -504,42 +524,13 @@ public class GearyApplication : Gtk.Application {
      * on the Meson `libdir` option, and can be set by invoking `meson
      * configure` as appropriate.
      */
-    public File get_web_extensions_dir() {
-        return (get_install_dir() != null)
-            ? File.new_for_path(_WEB_EXTENSIONS_DIR)
-            : File.new_for_path(BUILD_ROOT_DIR).get_child("src");
+    public GLib.File get_web_extensions_dir() {
+        return (is_installed)
+            ? GLib.File.new_for_path(_WEB_EXTENSIONS_DIR)
+            : GLib.File.new_for_path(BUILD_ROOT_DIR).get_child("src");
     }
 
-    public File? get_desktop_file() {
-        File? install_dir = get_install_dir();
-        File desktop_file = (install_dir != null)
-            ? install_dir.get_child("share").get_child("applications").get_child("org.gnome.Geary.desktop")
-            : File.new_for_path(SOURCE_ROOT_DIR).get_child("build").get_child("desktop").get_child("org.gnome.Geary.desktop");
-
-        return desktop_file.query_exists() ? desktop_file : null;
-    }
-
-    public bool is_installed() {
-        return exec_dir.has_prefix(get_install_prefix_dir());
-    }
-
-    // Returns the configure installation prefix directory, which does not imply Geary is installed
-    // or that it's running from this directory.
-    public File get_install_prefix_dir() {
-        return File.new_for_path(INSTALL_PREFIX);
-    }
-
-    // Returns the installation directory, or null if we're running outside of the installation
-    // directory.
-    public File? get_install_dir() {
-        File prefix_dir = get_install_prefix_dir();
-
-        return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
-    }
-
-    /**
-     * Displays a URI on the current active window, if any.
-     */
+    /** Displays a URI on the current active window, if any. */
     public void show_uri(string uri) throws Error {
         bool success = Gtk.show_uri_on_window(
             get_active_window(), uri, Gdk.CURRENT_TIME
@@ -593,8 +584,12 @@ public class GearyApplication : Gtk.Application {
         return false;
     }
 
-    // This call will fire "exiting" only if it's not already been
-    // fired and halt the application in its tracks.
+    /**
+     * Causes the application to exit immediately.
+     *
+     * This call will fire "exiting" only if it's not already been
+     * fired and halt the application in its tracks
+     */
     public void panic() {
         if (!exiting_fired) {
             exiting_fired = true;
@@ -617,7 +612,7 @@ public class GearyApplication : Gtk.Application {
         // the other instances called when sending commands to the app
         // via the command-line)
         message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
-            exec_dir.get_path(), is_installed().to_string());
+            exec_dir.get_path(), this.is_installed.to_string());
 
         yield this.controller.open_async(null);
 
@@ -737,7 +732,7 @@ public class GearyApplication : Gtk.Application {
 
     private void add_app_accelerators(string action,
                                       string[] accelerators,
-                                      Variant? param = null) {
+                                      GLib.Variant? param = null) {
         set_accels_for_action("app." + action, accelerators);
     }
 
@@ -851,11 +846,11 @@ public class GearyApplication : Gtk.Application {
 
     private void on_activate_help() {
         try {
-            if (is_installed()) {
+            if (this.is_installed) {
                 show_uri("help:geary");
             } else {
                 Pid pid;
-                File exec_dir = get_exec_dir();
+                File exec_dir = this.exec_dir;
                 string[] argv = new string[3];
                 argv[0] = "yelp";
                 argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help/C/";

@@ -14,12 +14,12 @@ public class Application.StartupManager : GLib.Object {
     private const string AUTOSTART_DESKTOP_FILE = "geary-autostart.desktop";
 
     private Configuration config;
-    private GLib.File? install_dir;
-    private GLib.File startup_file; // Startup '.desktop' file
+    private GLib.File installed_file;
+    private GLib.File startup_file;
 
-    public StartupManager(Configuration config, GLib.File? install_dir) {
+    public StartupManager(Configuration config, GLib.File desktop_dir) {
         this.config = config;
-        this.install_dir = install_dir;
+        this.installed_file = desktop_dir.get_child(AUTOSTART_DESKTOP_FILE);
         this.startup_file = GLib.File.new_for_path(
             GLib.Environment.get_user_config_dir()
         ).get_child(AUTOSTART_FOLDER)
@@ -32,28 +32,10 @@ public class Application.StartupManager : GLib.Object {
     }
 
     /**
-     * Returns the system-wide autostart desktop file
+     * Returns the system-wide autostart desktop file if it exists.
      */
-    public GLib.File? get_autostart_desktop_file() {
-        GLib.File? parent = null;
-        if (this.install_dir != null) {
-            // Running from the installation directory
-            parent = (
-                this.install_dir
-                .get_child("share")
-                .get_child("applications")
-            );
-        } else {
-            // Running from the source build directory
-            parent = (
-                GLib.File.new_for_path(GearyApplication.SOURCE_ROOT_DIR)
-                .get_child("build")
-                .get_child("desktop")
-            );
-        }
-
-        GLib.File desktop_file = parent.get_child(AUTOSTART_DESKTOP_FILE);
-        return desktop_file.query_exists() ? desktop_file : null;
+    public GLib.File? get_installed_desktop_file() {
+        return this.installed_file.query_exists() ? this.installed_file : null;
     }
 
     /**
@@ -65,7 +47,7 @@ public class Application.StartupManager : GLib.Object {
             if (!autostart_dir.query_exists()) {
                 autostart_dir.make_directory_with_parents();
             }
-            GLib.File? autostart = get_autostart_desktop_file();
+            GLib.File? autostart = get_installed_desktop_file();
             if (autostart == null) {
                 warning("Autostart file is not installed!");
             } else {
