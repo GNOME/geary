@@ -59,7 +59,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
 
         GearyApplication.instance.config.settings.changed[Configuration.DISPLAY_PREVIEW_KEY].connect(
             on_display_preview_changed);
-        GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
+        GearyApplication.instance.controller.notify[Application.Controller.PROP_CURRENT_CONVERSATION].
             connect(on_conversation_monitor_changed);
 
         // Watch for mouse events.
@@ -291,23 +291,23 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
 
             Menu context_menu_model = new Menu();
-            context_menu_model.append(_("Delete conversation"), "win."+GearyController.ACTION_DELETE_CONVERSATION);
+            context_menu_model.append(_("Delete conversation"), "win."+Application.Controller.ACTION_DELETE_CONVERSATION);
 
             if (conversation.is_unread())
-                context_menu_model.append(_("Mark as _Read"), "win."+GearyController.ACTION_MARK_AS_READ);
+                context_menu_model.append(_("Mark as _Read"), "win."+Application.Controller.ACTION_MARK_AS_READ);
 
             if (conversation.has_any_read_message())
-                context_menu_model.append(_("Mark as _Unread"), "win."+GearyController.ACTION_MARK_AS_UNREAD);
+                context_menu_model.append(_("Mark as _Unread"), "win."+Application.Controller.ACTION_MARK_AS_UNREAD);
 
             if (conversation.is_flagged())
-                context_menu_model.append(_("U_nstar"), "win."+GearyController.ACTION_MARK_AS_UNSTARRED);
+                context_menu_model.append(_("U_nstar"), "win."+Application.Controller.ACTION_MARK_AS_UNSTARRED);
             else
-                context_menu_model.append(_("_Star"), "win."+GearyController.ACTION_MARK_AS_STARRED);
+                context_menu_model.append(_("_Star"), "win."+Application.Controller.ACTION_MARK_AS_STARRED);
 
             Menu actions_section = new Menu();
-            actions_section.append(_("_Reply"), "win."+GearyController.ACTION_REPLY_TO_MESSAGE);
-            actions_section.append(_("R_eply All"), "win."+GearyController.ACTION_REPLY_ALL_MESSAGE);
-            actions_section.append(_("_Forward"), "win."+GearyController.ACTION_FORWARD_MESSAGE);
+            actions_section.append(_("_Reply"), "win."+Application.Controller.ACTION_REPLY_TO_MESSAGE);
+            actions_section.append(_("R_eply All"), "win."+Application.Controller.ACTION_REPLY_ALL_MESSAGE);
+            actions_section.append(_("_Forward"), "win."+Application.Controller.ACTION_FORWARD_MESSAGE);
             context_menu_model.append_section(null, actions_section);
 
             Gtk.Menu context_menu = new Gtk.Menu.from_model(context_menu_model);

@@ -176,12 +176,14 @@ public class GearyApplication : Gtk.Application {
 
 
     /**
-     * The global UI controller for this app instance.
+     * The global controller for this application instance.
+     *
+     * This will be non-null in the primary application instance, only
+     * after initial activation, or after startup if {@link
+     * is_background_service} is true.
      */
-    public GearyController controller {
-        get;
-        private set;
-        default = new GearyController(this);
+    public Application.Controller? controller {
+        get; private set; default = null;
     }
 
     /**
@@ -253,6 +255,7 @@ public class GearyApplication : Gtk.Application {
     private bool exiting_fired = false;
     private int exitcode = 0;
     private bool is_destroyed = false;
+    private GLib.Cancellable controller_cancellable = new GLib.Cancellable();
     private Components.Inspector? inspector = null;
 
 
@@ -451,19 +454,7 @@ public class GearyApplication : Gtk.Application {
 
     public override void activate() {
         base.activate();
-
-        // Clear notifications immediately since we are showing a main
-        // window. If the controller isn't already open, need to wait
-        // for that to happen before doing so
-
-        if (present()) {
-            this.controller.notifications.clear_all_notifications();
-        } else {
-            this.create_controller.begin((obj, res) => {
-                    this.create_controller.end(res);
-                    this.controller.notifications.clear_all_notifications();
-                });
-        }
+        this.present.begin();
     }
 
     public void add_window_accelerators(string action,
@@ -560,6 +551,8 @@ public class GearyApplication : Gtk.Application {
             return;
         }
 
+        this.controller_cancellable.cancel();
+
         // Give asynchronous destroy_controller() a chance to
         // complete, but to avoid bug(s) where Geary hangs at exit,
         // shut the whole thing down if destroy_controller() takes too
@@ -604,6 +597,15 @@ public class GearyApplication : Gtk.Application {
         Posix.exit(1);
     }
 
+    // Presents a main window. If the controller is not open, opens it
+    // first.
+    private async void present() {
+        if (this.controller == null) {
+            yield create_controller();
+        }
+        this.controller.main_window.present();
+    }
+
     // Opens the controller
     private async void create_controller() {
         // Manually keep the main loop around for the duration of this
@@ -616,11 +618,16 @@ public class GearyApplication : Gtk.Application {
         // this is only logged for the one user-visible instance, not
         // the other instances called when sending commands to the app
         // via the command-line)
-        message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
-            exec_dir.get_path(), this.is_installed.to_string());
+        message(
+            "%s %s prefix=%s exec_dir=%s is_installed=%s",
+            NAME, VERSION, INSTALL_PREFIX,
+            exec_dir.get_path(),
+            this.is_installed.to_string()
+        );
 
-        yield this.controller.open_async(null);
-
+        this.controller = yield new Application.Controller(
+            this, this.controller_cancellable
+        );
         release();
     }
 
@@ -629,8 +636,9 @@ public class GearyApplication : Gtk.Application {
         // see create_controller() for reasoning hold/release is used
         hold();
 
-        if (this.controller.is_open) {
+        if (this.controller != null) {
             yield this.controller.close_async();
+            this.controller = null;
         }
 
         release();
@@ -712,15 +720,6 @@ public class GearyApplication : Gtk.Application {
         this.config.revoke_certs = options.contains(OPTION_REVOKE_CERTS);
 
         return -1;
-    }
-
-    private bool present() {
-        bool ret = false;
-        if (this.controller.main_window != null) {
-            this.controller.main_window.present();
-            ret = true;
-        }
-        return ret;
     }
 
     /** Removes and re-adds the autostart file if needed. */

@@ -102,7 +102,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         load_config(application.config);
         restore_saved_window_state();
 
-        application.controller.notify[GearyController.PROP_CURRENT_CONVERSATION]
+        application.controller.notify[Application.Controller.PROP_CURRENT_CONVERSATION]
             .connect(on_conversation_monitor_changed);
         application.controller.folder_selected.connect(on_folder_selected);
         this.application.engine.account_available.connect(on_account_available);
@@ -126,7 +126,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
-        GearyController controller = this.application.controller;
+        Application.Controller controller = this.application.controller;
         ComposerWidget composer = new ComposerWidget(
             this.current_folder.account,
             controller.contact_list_store_cache,
@@ -225,7 +225,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             new ComposerWindow(composer);
         } else {
             this.conversation_viewer.do_compose(composer);
-            get_action(GearyController.ACTION_FIND_IN_CONVERSATION).set_enabled(false);
+            get_action(Application.Controller.ACTION_FIND_IN_CONVERSATION).set_enabled(false);
         }
     }
 
