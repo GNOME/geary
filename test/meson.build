@@ -97,21 +97,13 @@ geary_test_integration_sources = [
   'integration/imap/client-session.vala',
 ]
 
+# Test library
+
 geary_test_lib_dependencies = [
   gee,
   gio,
   glib
 ]
-
-geary_test_engine_dependencies = [
-  geary_engine_internal_dep
-]
-geary_test_engine_dependencies += geary_engine_dependencies
-
-geary_test_client_dependencies = [
-  geary_client_dep
-]
-geary_test_client_dependencies += geary_client_dependencies
 
 geary_test_lib = static_library('test-lib',
   geary_test_lib_sources,
@@ -121,14 +113,37 @@ geary_test_lib = static_library('test-lib',
   c_args: geary_c_options,
 )
 
+# Engine tests
+
+geary_test_engine_dependencies = [
+  geary_engine_internal_dep
+]
+geary_test_engine_dependencies += geary_engine_dependencies
+
+geary_test_engine_vala_options = geary_vala_options
+
+if get_option('tnef-support')
+  geary_test_engine_dependencies += libytnef
+  geary_test_engine_vala_options += [
+    '-D', 'WITH_TNEF_SUPPORT'
+  ]
+endif
+
 geary_test_engine_bin = executable('test-engine',
   geary_test_engine_sources,
   link_with: geary_test_lib,
   dependencies: geary_test_engine_dependencies,
   include_directories: config_h_dir,
-  vala_args: geary_vala_options,
+  vala_args: geary_test_engine_vala_options,
   c_args: geary_c_options,
 )
+
+# Client tests
+
+geary_test_client_dependencies = [
+  geary_client_dep
+]
+geary_test_client_dependencies += geary_client_dependencies
 
 geary_test_client_bin = executable('test-client',
   geary_test_client_sources,
@@ -138,6 +153,8 @@ geary_test_client_bin = executable('test-client',
   vala_args: geary_vala_options,
   c_args: geary_c_options,
 )
+
+# Integration tests
 
 geary_test_integration_bin = executable('test-integration',
   geary_test_integration_sources,
