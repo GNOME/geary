@@ -136,7 +136,7 @@ geary_client_dependencies = [
 
 geary_client_vala_options = geary_vala_options
 
-if libmessagingmenu.found()
+if libmessagingmenu_dep.found()
   geary_client_dependencies += libmessagingmenu
   geary_client_vala_options += ['-D', 'HAVE_LIBMESSAGINGMENU']
 endif
