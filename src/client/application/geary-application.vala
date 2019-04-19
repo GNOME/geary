@@ -426,23 +426,6 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
-    public bool present() {
-        if (controller == null || controller.main_window == null)
-            return false;
-
-        // Use present_with_time and a synthesised time so the present
-        // actually works, as a work around for Bug 766284
-        // <https://bugzilla.gnome.org/show_bug.cgi?id=766284>.
-        // Subtract 1000ms from the current time to avoid the main
-        // window stealing the focus when presented just before
-        // showing a dialog (issue #43, bgo 726282).
-        this.controller.main_window.present_with_time(
-            (uint32) (get_monotonic_time() / 1000) - 1000
-        );
-
-        return true;
-    }
-
     private async void create_async() {
         // Manually keep the main loop around for the duration of this call.
         // Without this, the main loop will exit as soon as we hit the yield
@@ -728,7 +711,17 @@ public class GearyApplication : Gtk.Application {
         return -1;
     }
 
-    /** Removes and re-adds the austostart file if needed. */
+    private bool present() {
+        bool ret = false;
+        if (this.controller != null &&
+            this.controller.main_window != null) {
+            this.controller.main_window.present();
+            ret = true;
+        }
+        return ret;
+    }
+
+    /** Removes and re-adds the autostart file if needed. */
     private async void update_autostart_file() {
         try {
             this.autostart.delete_startup_file();

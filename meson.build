@@ -43,7 +43,7 @@ add_project_arguments([
 #
 
 target_glib = '2.54' # Also passed to valac, so don't include a point rev
-target_gtk = '3.22.26'
+target_gtk = '3.24.7'
 target_webkit = '2.20'
 
 # Primary deps
