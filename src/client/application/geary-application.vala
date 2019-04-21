@@ -660,9 +660,7 @@ public class GearyApplication : Gtk.Application {
     // Presents a main window. If the controller is not open, opens it
     // first.
     private async void present() {
-        if (this.controller == null) {
-            yield create_controller();
-        }
+        yield create_controller();
         this.controller.main_window.present();
     }
 
