@@ -5,8 +5,6 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-// Defined by CMake build script.
-extern const string _BUILD_ROOT_DIR;
 
 public abstract class ClientWebViewTestCase<V> : TestCase {
 

@@ -5,7 +5,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-// Defined by CMake build script.
+
+extern const string _INSTALL_PREFIX;
+extern const string _BUILD_ROOT_DIR;
 extern const string _GSETTINGS_DIR;
 
 int main(string[] args) {
@@ -43,6 +45,7 @@ int main(string[] args) {
     client.add_suite(new ClientWebViewTest().get_suite());
     client.add_suite(new ComposerWebViewTest().get_suite());
     client.add_suite(new ConfigurationTest().get_suite());
+    client.add_suite(new GearyApplicationTest().get_suite());
     client.add_suite(new Util.Avatar.Test().get_suite());
     client.add_suite(new Util.Cache.Test().get_suite());
     client.add_suite(new Util.Email.Test().get_suite());

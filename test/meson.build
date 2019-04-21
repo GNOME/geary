@@ -75,6 +75,7 @@ geary_test_client_sources = [
   'engine/api/geary-credentials-mediator-mock.vala',
 
   'client/accounts/accounts-manager-test.vala',
+  'client/application/geary-application-test.vala',
   'client/application/geary-configuration-test.vala',
   'client/components/client-web-view-test.vala',
   'client/components/client-web-view-test-case.vala',

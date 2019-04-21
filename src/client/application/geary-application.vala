@@ -363,9 +363,14 @@ public class GearyApplication : Gtk.Application {
     public override bool local_command_line(ref unowned string[] args,
                                             out int exit_status) {
         this.binary = args[0];
-        string current_path = Posix.realpath(
+        string? current_path = Posix.realpath(
             GLib.Environment.find_program_in_path(this.binary)
         );
+        if (current_path == null) {
+            // Couldn't find the path, are being run as a unit test?
+            // Probably should deal with the null either way though.
+            current_path = this.binary;
+        }
         this.exec_dir = GLib.File.new_for_path(current_path).get_parent();
 
         return base.local_command_line(ref args, out exit_status);
