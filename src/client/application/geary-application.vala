@@ -232,8 +232,23 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
-    private string binary;
+    /**
+     * Determines if this instance is running from the install directory.
+     */
+    internal bool is_installed {
+        get {
+            return this.exec_dir.has_prefix(this.install_prefix);
+        }
+    }
+
+    /** Returns the compile-time configured installation directory. */
+    internal GLib.File install_prefix {
+        get; private set; default = GLib.File.new_for_path(INSTALL_PREFIX);
+    }
+
+
     private File exec_dir;
+    private string binary;
     private bool start_hidden = false;
     private bool exiting_fired = false;
     private int exitcode = 0;
@@ -348,9 +363,14 @@ public class GearyApplication : Gtk.Application {
     public override bool local_command_line(ref unowned string[] args,
                                             out int exit_status) {
         this.binary = args[0];
-        string current_path = Posix.realpath(
+        string? current_path = Posix.realpath(
             GLib.Environment.find_program_in_path(this.binary)
         );
+        if (current_path == null) {
+            // Couldn't find the path, are being run as a unit test?
+            // Probably should deal with the null either way though.
+            current_path = this.binary;
+        }
         this.exec_dir = GLib.File.new_for_path(current_path).get_parent();
 
         return base.local_command_line(ref args, out exit_status);
@@ -371,72 +391,28 @@ public class GearyApplication : Gtk.Application {
         Environment.set_application_name(NAME);
         International.init(GETTEXT_PACKAGE, this.binary);
 
-        Configuration.init(is_installed(), GSETTINGS_DIR);
+        Configuration.init(this.is_installed, GSETTINGS_DIR);
         Geary.Logging.init();
         Geary.Logging.log_to(stderr);
         GLib.Log.set_default_handler(Geary.Logging.default_handler);
 
         Util.Date.init();
 
+        // Add application's actions before chaining up so they are
+        // present when the application is first registered on the
+        // session bus.
+        add_action_entries(ACTION_ENTRIES, this);
+
         // Calls Gtk.init(), amongst other things
         base.startup();
 
-        // Ensure all geary windows have an icon
-        Gtk.Window.set_default_icon_name(APP_ID);
-
         this.config = new Configuration(APP_ID);
         this.autostart = new Application.StartupManager(
-            this.config, get_install_dir()
+            this.config, this.get_desktop_directory()
         );
 
-        add_action_entries(ACTION_ENTRIES, this);
-
-        if (this.is_background_service) {
-            // Since command_line won't be called below if running as
-            // a DBus service, disable logging spew and start the
-            // controller running.
-            Geary.Logging.log_to(null);
-            this.create_async.begin();
-        }
-    }
-
-    public override int command_line(GLib.ApplicationCommandLine command_line) {
-        int exit_value = handle_general_options(command_line);
-        if (exit_value != -1)
-            return exit_value;
-
-        activate();
-
-        return -1;
-    }
-
-    public override void activate() {
-        base.activate();
-
-        // Clear notifications immediately since we are showing a main
-        // window.
-
-        if (present()) {
-            this.controller.notifications.clear_all_notifications();
-        } else {
-            this.create_async.begin((obj, res) => {
-                    this.create_async.end(res);
-                    this.controller.notifications.clear_all_notifications();
-                });
-        }
-    }
-
-    private async void create_async() {
-        // Manually keep the main loop around for the duration of this call.
-        // Without this, the main loop will exit as soon as we hit the yield
-        // below, before we create the main window.
-        hold();
-
-        // do *after* parsing args, as they dicate where logging is sent to, if anywhere, and only
-        // after activate (which means this is only logged for the one user-visible instance, not
-        // the other instances called when sending commands to the app via the command-line)
-        message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
-            exec_dir.get_path(), is_installed().to_string());
+        // Ensure all geary windows have an icon
+        Gtk.Window.set_default_icon_name(APP_ID);
 
         // Application accels
         add_app_accelerators(ACTION_COMPOSE, { "<Ctrl>N" });
@@ -454,21 +430,40 @@ public class GearyApplication : Gtk.Application {
         ComposerWidget.add_window_accelerators(this);
         Components.Inspector.add_window_accelerators(this);
 
-        yield this.controller.open_async(null);
-
-        release();
+        if (this.is_background_service) {
+            // Since command_line won't be called below if running as
+            // a DBus service, disable logging spew and start the
+            // controller running.
+            Geary.Logging.log_to(null);
+            this.create_controller.begin();
+        }
     }
 
-    private async void destroy_async() {
-        // see create_async() for reasoning hold/release is used
-        hold();
+    public override int command_line(GLib.ApplicationCommandLine command_line) {
+        int exit_value = handle_general_options(command_line);
+        if (exit_value != -1)
+            return exit_value;
 
-        if (this.controller != null && this.controller.is_open) {
-            yield this.controller.close_async();
+        activate();
+
+        return -1;
+    }
+
+    public override void activate() {
+        base.activate();
+
+        // Clear notifications immediately since we are showing a main
+        // window. If the controller isn't already open, need to wait
+        // for that to happen before doing so
+
+        if (present()) {
+            this.controller.notifications.clear_all_notifications();
+        } else {
+            this.create_controller.begin((obj, res) => {
+                    this.create_controller.end(res);
+                    this.controller.notifications.clear_all_notifications();
+                });
         }
-
-        release();
-        this.is_destroyed = true;
     }
 
     public void add_window_accelerators(string action,
@@ -492,34 +487,39 @@ public class GearyApplication : Gtk.Application {
     }
 
 
-    public File get_user_data_directory() {
-        return File.new_for_path(Environment.get_user_data_dir()).get_child("geary");
+    /** Returns the application's base user configuration directory. */
+    public GLib.File get_user_config_directory() {
+        return GLib.File.new_for_path(
+            Environment.get_user_config_dir()
+        ).get_child("geary");
     }
 
-    public File get_user_cache_directory() {
-        return File.new_for_path(Environment.get_user_cache_dir()).get_child("geary");
+    /** Returns the application's base user cache directory. */
+    public GLib.File get_user_cache_directory() {
+        return GLib.File.new_for_path(
+            GLib.Environment.get_user_cache_dir()
+        ).get_child("geary");
     }
 
-    public File get_user_config_directory() {
-        return File.new_for_path(Environment.get_user_config_dir()).get_child("geary");
+    /** Returns the application's base user data directory. */
+    public GLib.File get_user_data_directory() {
+        return GLib.File.new_for_path(
+            GLib.Environment.get_user_data_dir()
+        ).get_child("geary");
     }
 
-    /**
-     * Returns the base directory that the application's various resource files are stored.  If the
-     * application is running from its installed directory, this will point to
-     * $(BASEDIR)/share/<program name>.  If it's running from the build directory, this points to
-     * that.
-     */
-    public File get_resource_directory() {
-        if (get_install_dir() != null)
-            return get_install_dir().get_child("share").get_child("geary");
-        else
-            return File.new_for_path(SOURCE_ROOT_DIR);
+    /** Returns the application's base static resources directory. */
+    public GLib.File get_resource_directory() {
+        return (is_installed)
+            ? this.install_prefix.get_child("share").get_child("geary")
+            : GLib.File.new_for_path(SOURCE_ROOT_DIR);
     }
 
-    /** Returns the directory the application is currently executing from. */
-    public File get_exec_dir() {
-        return this.exec_dir;
+    /** Returns the location of the application's desktop files. */
+    public GLib.File get_desktop_directory() {
+        return (is_installed)
+            ? this.install_prefix.get_child("share").get_child("applications")
+            : GLib.File.new_for_path(BUILD_ROOT_DIR).get_child("desktop");
     }
 
     /**
@@ -529,42 +529,13 @@ public class GearyApplication : Gtk.Application {
      * on the Meson `libdir` option, and can be set by invoking `meson
      * configure` as appropriate.
      */
-    public File get_web_extensions_dir() {
-        return (get_install_dir() != null)
-            ? File.new_for_path(_WEB_EXTENSIONS_DIR)
-            : File.new_for_path(BUILD_ROOT_DIR).get_child("src");
+    public GLib.File get_web_extensions_dir() {
+        return (is_installed)
+            ? GLib.File.new_for_path(_WEB_EXTENSIONS_DIR)
+            : GLib.File.new_for_path(BUILD_ROOT_DIR).get_child("src");
     }
 
-    public File? get_desktop_file() {
-        File? install_dir = get_install_dir();
-        File desktop_file = (install_dir != null)
-            ? install_dir.get_child("share").get_child("applications").get_child("org.gnome.Geary.desktop")
-            : File.new_for_path(SOURCE_ROOT_DIR).get_child("build").get_child("desktop").get_child("org.gnome.Geary.desktop");
-
-        return desktop_file.query_exists() ? desktop_file : null;
-    }
-
-    public bool is_installed() {
-        return exec_dir.has_prefix(get_install_prefix_dir());
-    }
-
-    // Returns the configure installation prefix directory, which does not imply Geary is installed
-    // or that it's running from this directory.
-    public File get_install_prefix_dir() {
-        return File.new_for_path(INSTALL_PREFIX);
-    }
-
-    // Returns the installation directory, or null if we're running outside of the installation
-    // directory.
-    public File? get_install_dir() {
-        File prefix_dir = get_install_prefix_dir();
-
-        return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
-    }
-
-    /**
-     * Displays a URI on the current active window, if any.
-     */
+    /** Displays a URI on the current active window, if any. */
     public void show_uri(string uri) throws Error {
         bool success = Gtk.show_uri_on_window(
             get_active_window(), uri, Gdk.CURRENT_TIME
@@ -589,11 +560,12 @@ public class GearyApplication : Gtk.Application {
             return;
         }
 
-        // Give asynchronous destroy_async() a chance to complete, but to avoid bug(s) where
-        // Geary hangs at exit, shut the whole thing down if destroy_async() takes too long to
-        // complete
+        // Give asynchronous destroy_controller() a chance to
+        // complete, but to avoid bug(s) where Geary hangs at exit,
+        // shut the whole thing down if destroy_controller() takes too
+        // long to complete
         int64 start_usec = get_monotonic_time();
-        destroy_async.begin();
+        destroy_controller.begin();
         while (!is_destroyed || Gtk.events_pending()) {
             Gtk.main_iteration();
 
@@ -609,16 +581,20 @@ public class GearyApplication : Gtk.Application {
     }
 
     /**
-     * A callback for GearyApplication.exiting should return cancel_exit() to prevent the
-     * application from exiting.
+     * A callback for GearyApplication.exiting should return
+     * cancel_exit() to prevent the application from exiting.
      */
     public bool cancel_exit() {
         Signal.stop_emission_by_name(this, "exiting");
         return false;
     }
 
-    // This call will fire "exiting" only if it's not already been fired and halt the application
-    // in its tracks.
+    /**
+     * Causes the application to exit immediately.
+     *
+     * This call will fire "exiting" only if it's not already been
+     * fired and halt the application in its tracks
+     */
     public void panic() {
         if (!exiting_fired) {
             exiting_fired = true;
@@ -628,13 +604,40 @@ public class GearyApplication : Gtk.Application {
         Posix.exit(1);
     }
 
-    public void add_app_accelerators(string action,
-                                     string[] accelerators,
-                                     Variant? param = null) {
-        set_accels_for_action("app." + action, accelerators);
+    // Opens the controller
+    private async void create_controller() {
+        // Manually keep the main loop around for the duration of this
+        // call. Without this, the main loop will exit as soon as we
+        // hit the yield below, before we create the main window.
+        hold();
+
+        // do *after* parsing args, as they dicate where logging is
+        // sent to, if anywhere, and only after activate (which means
+        // this is only logged for the one user-visible instance, not
+        // the other instances called when sending commands to the app
+        // via the command-line)
+        message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
+            exec_dir.get_path(), this.is_installed.to_string());
+
+        yield this.controller.open_async(null);
+
+        release();
     }
 
-    public int handle_general_options(GLib.ApplicationCommandLine command_line) {
+    // Closes the controller, if running
+    private async void destroy_controller() {
+        // see create_controller() for reasoning hold/release is used
+        hold();
+
+        if (this.controller.is_open) {
+            yield this.controller.close_async();
+        }
+
+        release();
+        this.is_destroyed = true;
+    }
+
+    private int handle_general_options(GLib.ApplicationCommandLine command_line) {
         GLib.VariantDict options = command_line.get_options_dict();
         if (options.contains(OPTION_QUIT)) {
             exit();
@@ -713,8 +716,7 @@ public class GearyApplication : Gtk.Application {
 
     private bool present() {
         bool ret = false;
-        if (this.controller != null &&
-            this.controller.main_window != null) {
+        if (this.controller.main_window != null) {
             this.controller.main_window.present();
             ret = true;
         }
@@ -731,6 +733,12 @@ public class GearyApplication : Gtk.Application {
         } catch (GLib.Error err) {
             warning("Could not update autostart file");
         }
+    }
+
+    private void add_app_accelerators(string action,
+                                      string[] accelerators,
+                                      GLib.Variant? param = null) {
+        set_accels_for_action("app." + action, accelerators);
     }
 
     private Geary.Folder? get_folder_from_action_target(GLib.Variant target) {
@@ -776,9 +784,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_compose() {
-        if (this.controller != null) {
-            this.controller.compose();
-        }
+        this.controller.compose();
     }
 
     private void on_activate_inspect() {
@@ -794,7 +800,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
-        if (this.controller != null && param != null) {
+        if (param != null) {
             this.controller.compose(param.get_string());
         }
     }
@@ -845,11 +851,11 @@ public class GearyApplication : Gtk.Application {
 
     private void on_activate_help() {
         try {
-            if (is_installed()) {
+            if (this.is_installed) {
                 show_uri("help:geary");
             } else {
                 Pid pid;
-                File exec_dir = get_exec_dir();
+                File exec_dir = this.exec_dir;
                 string[] argv = new string[3];
                 argv[0] = "yelp";
                 argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help/C/";
