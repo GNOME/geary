@@ -98,10 +98,6 @@ public class Application.ContactStore : Geary.BaseObject {
     private async Folks.Individual? search_match(string address,
                                                  GLib.Cancellable cancellable)
         throws GLib.Error {
-        if (cancellable.is_cancelled()) {
-            throw new GLib.IOError.CANCELLED("Contact load was cancelled");
-        }
-
         Folks.SearchView view = new Folks.SearchView(
             this.individuals,
             new Folks.SimpleQuery(
@@ -126,6 +122,11 @@ public class Application.ContactStore : Geary.BaseObject {
         } catch (GLib.Error err) {
             warning("Error unpreparing Folks search: %s", err.message);
         }
+
+        if (cancellable.is_cancelled()) {
+            throw new GLib.IOError.CANCELLED("Contact load was cancelled");
+        }
+
         return match;
     }
 
