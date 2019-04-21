@@ -574,6 +574,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             debug("Contact load failed for \"%s\": %s",
                   from != null ? from.to_string() : "<unknown>", err.message);
         }
+        if (this.load_cancellable.is_cancelled()) {
+            throw new GLib.IOError.CANCELLED("Contact load was cancelled");
+        }
     }
 
     /**
@@ -622,6 +625,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         if (loaded) {
             try {
                 yield update_body();
+            } catch (GLib.IOError.CANCELLED err) {
+                this.body_loading_timeout.reset();
+                throw err;
             } catch (GLib.Error err) {
                 this.body_loading_timeout.reset();
                 handle_load_failure(err);
@@ -792,6 +798,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 try {
                     this.email = loaded;
                     yield update_body();
+                } catch (GLib.IOError.CANCELLED err) {
+                    // All good
                 } catch (GLib.Error err) {
                     debug("Remote message update failed: %s", err.message);
                     handle_load_failure(err);
