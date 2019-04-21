@@ -447,8 +447,6 @@ public class GearyApplication : Gtk.Application {
         if (exit_value != -1)
             return exit_value;
 
-        activate();
-
         return -1;
     }
 
@@ -468,8 +466,29 @@ public class GearyApplication : Gtk.Application {
         set_accels_for_action(name, all_accel);
     }
 
-    public void show_accounts() {
-        activate();
+    public async void show_about() {
+        yield this.present();
+
+        Gtk.show_about_dialog(get_active_window(),
+            "program-name", NAME,
+            "comments", DESCRIPTION,
+            "authors", AUTHORS,
+            "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
+            "license-type", Gtk.License.LGPL_2_1,
+            "logo-icon-name", APP_ID,
+            "version", VERSION,
+            "website", WEBSITE,
+            "website-label", WEBSITE_LABEL,
+            "title", _("About %s").printf(NAME),
+            // Translators: add your name and email address to receive
+            // credit in the About dialog For example: Yamada Taro
+            // <yamada.taro@example.com>
+            "translator-credits", _("translator-credits")
+        );
+    }
+
+    public async void show_accounts() {
+        yield this.present();
 
         Accounts.Editor editor = new Accounts.Editor(this, get_active_window());
         editor.run();
@@ -477,6 +496,47 @@ public class GearyApplication : Gtk.Application {
         this.controller.expunge_accounts.begin();
     }
 
+    public async void show_email(Geary.Folder? folder,
+                                 Geary.EmailIdentifier id) {
+        yield this.present();
+
+        this.controller.main_window.show_email(folder, id);
+    }
+
+    public async void show_folder(Geary.Folder? folder) {
+        yield this.present();
+
+        this.controller.main_window.show_folder(folder);
+    }
+
+    public async void show_inspector() {
+        yield this.present();
+
+        if (this.inspector == null) {
+            this.inspector = new Components.Inspector(this);
+            this.inspector.destroy.connect(() => {
+                    this.inspector = null;
+                });
+            this.inspector.show();
+        } else {
+            this.inspector.present();
+        }
+    }
+
+    public async void show_preferences() {
+        yield this.present();
+
+        PreferencesDialog dialog = new PreferencesDialog(
+            get_active_window(), this
+        );
+        dialog.run();
+    }
+
+    public async void new_composer(string? mailto) {
+        yield this.present();
+
+        this.controller.compose(mailto);
+    }
 
     /** Returns the application's base user configuration directory. */
     public GLib.File get_user_config_directory() {
@@ -688,6 +748,8 @@ public class GearyApplication : Gtk.Application {
             // --hidden option.
             this.update_autostart_file.begin();
         }
+
+        bool activated = false;
         if (options.contains(GLib.OPTION_REMAINING)) {
             string[] args = options.lookup_value(
                 GLib.OPTION_REMAINING,
@@ -697,11 +759,13 @@ public class GearyApplication : Gtk.Application {
                 // the only acceptable arguments are mailto:'s
                 if (arg == Geary.ComposedEmail.MAILTO_SCHEME) {
                     activate_action(GearyApplication.ACTION_COMPOSE, null);
+                    activated = true;
                 } else if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
                     activate_action(
                         GearyApplication.ACTION_MAILTO,
                         new GLib.Variant.string(arg)
                     );
+                    activated = true;
                 } else {
                     command_line.printerr("%s: ", this.binary);
                     command_line.printerr(
@@ -718,6 +782,10 @@ public class GearyApplication : Gtk.Application {
         this.config.enable_debug = enable_debug;
         this.config.enable_inspector = options.contains(OPTION_INSPECTOR);
         this.config.revoke_certs = options.contains(OPTION_REVOKE_CERTS);
+
+        if (!activated) {
+            activate();
+        }
 
         return -1;
     }
@@ -760,53 +828,29 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_about() {
-        Gtk.show_about_dialog(get_active_window(),
-            "program-name", NAME,
-            "comments", DESCRIPTION,
-            "authors", AUTHORS,
-            "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
-            "license-type", Gtk.License.LGPL_2_1,
-            "logo-icon-name", APP_ID,
-            "version", VERSION,
-            "website", WEBSITE,
-            "website-label", WEBSITE_LABEL,
-            "title", _("About %s").printf(NAME),
-            // Translators: add your name and email address to receive
-            // credit in the About dialog For example: Yamada Taro
-            // <yamada.taro@example.com>
-            "translator-credits", _("translator-credits")
-        );
+        this.show_about.begin();
     }
 
     private void on_activate_accounts() {
-        show_accounts();
+        this.show_accounts.begin();
     }
 
     private void on_activate_compose() {
-        this.controller.compose();
+        this.new_composer.begin(null);
     }
 
     private void on_activate_inspect() {
-        if (this.inspector == null) {
-            this.inspector = new Components.Inspector(this);
-            this.inspector.destroy.connect(() => {
-                    this.inspector = null;
-                });
-            this.inspector.show();
-        } else {
-            this.inspector.present();
-        }
+        this.show_inspector.begin();
     }
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
         if (param != null) {
-            this.controller.compose(param.get_string());
+            this.new_composer.begin(param.get_string());
         }
     }
 
     private void on_activate_preferences() {
-        PreferencesDialog dialog = new PreferencesDialog(get_active_window(), this);
-        dialog.run();
+        this.show_preferences.begin();
     }
 
     private void on_activate_quit() {
@@ -829,8 +873,7 @@ public class GearyApplication : Gtk.Application {
                 }
 
                 if (email_id != null) {
-                    this.controller.main_window.present();
-                    this.controller.main_window.show_email(folder, email_id);
+                    this.show_email.begin(folder, email_id);
                 }
             }
         }
@@ -842,8 +885,7 @@ public class GearyApplication : Gtk.Application {
             // Target is a (account_id,folder_path) tuple
             Geary.Folder? folder = get_folder_from_action_target(target);
             if (folder != null) {
-                this.controller.main_window.present();
-                this.controller.main_window.show_folder(folder);
+                this.show_folder.begin(folder);
             }
         }
     }
