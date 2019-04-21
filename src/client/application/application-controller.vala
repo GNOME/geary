@@ -8,9 +8,11 @@
 
 
 /**
- * Primary controller for a Geary application instance.
+ * Primary controller for a application instance.
+ *
+ * @see GearyAplication
  */
-public class GearyController : Geary.BaseObject {
+public class Application.Controller : Geary.BaseObject {
 
     // Named actions.
     public const string ACTION_REPLY_TO_MESSAGE = "reply-to-message";
@@ -38,10 +40,7 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_TOGGLE_FIND = "toggle-find";
 
     // Properties
-    public const string PROP_CURRENT_CONVERSATION ="current-conversations";
     public const string PROP_SELECTED_CONVERSATIONS ="selected-conversations";
-
-    public const int MIN_CONVERSATION_COUNT = 50;
 
     private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
 
@@ -55,7 +54,7 @@ public class GearyController : Geary.BaseObject {
     static construct {
         // Translators: File name used in save chooser when saving
         // attachments that do not otherwise have a name.
-        GearyController.untitled_file_name = _("Untitled");
+        Controller.untitled_file_name = _("Untitled");
     }
 
 
@@ -109,49 +108,59 @@ public class GearyController : Geary.BaseObject {
     }
 
 
-    /** Determines if the controller is opening or is open. */
+    /** Determines if the controller is open. */
     public bool is_open {
         get {
-            return (this.open_cancellable != null);
+            return !this.open_cancellable.is_cancelled();
         }
     }
 
     public weak GearyApplication application { get; private set; } // circular ref
 
-    public Accounts.Manager? account_manager { get; private set; default = null; }
+    /** Account management for the application. */
+    public Accounts.Manager account_manager { get; private set; }
 
-    /** Application-wide {@link Application.CertificateManager} instance. */
-    public Application.CertificateManager? certificate_manager {
-        get; private set; default = null;
+    /** Certificate management for the application. */
+    public Application.CertificateManager certificate_manager {
+        get; private set;
     }
 
-    public MainWindow? main_window { get; private set; default = null; }
+    /** Desktop notifications for the application. */
+    public Notification.Desktop notifications { get; private set; }
 
-    public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
-
-    public Application.AvatarStore? avatars {
+    /** Avatar store for the application. */
+    public Application.AvatarStore avatars {
         get; private set; default = new Application.AvatarStore();
     }
 
+    /** Contact store cache for the application. */
     public ContactListStoreCache contact_list_store_cache {
         get; private set; default = new ContactListStoreCache();
     }
 
-    public Notification.Desktop? notifications { get; private set; default = null; }
+    /** Default main window */
+    public MainWindow main_window { get; private set; }
 
-    private Geary.Account? current_account = null;
+    // Primary collection of the application's open accounts
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
 
-    // Created when controller is opened, cancelled and nulled out
-    // when closed.
-    private GLib.Cancellable? open_cancellable = null;
+    // Cancelled if the controller is closed
+    private GLib.Cancellable open_cancellable;
 
-    private Folks.IndividualAggregator? folks = null;
+    private UpgradeDialog upgrade_dialog;
+    private Folks.IndividualAggregator folks;
+    private Canberra.Context sound_context;
+    private NewMessagesMonitor new_messages_monitor;
+    private NewMessagesIndicator new_messages_indicator;
+    private UnityLauncher unity_launcher;
 
-    private Canberra.Context? sound_context = null;
-
+    // Null if none selected
     private Geary.Folder? current_folder = null;
+
+    // Null if no folder ever selected
+    private Geary.Account? current_account = null;
+
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
     private Cancellable cancellable_open_account = new Cancellable();
@@ -159,14 +168,10 @@ public class GearyController : Geary.BaseObject {
     private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.App.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
-    private NewMessagesMonitor? new_messages_monitor = null;
-    private NewMessagesIndicator? new_messages_indicator = null;
-    private UnityLauncher? unity_launcher = null;
     private uint select_folder_timeout_id = 0;
     private int64 next_folder_select_allowed_usec = 0;
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Folder? previous_non_search_folder = null;
-    private UpgradeDialog upgrade_dialog;
     private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
 
     private uint operation_count = 0;
@@ -206,21 +211,6 @@ public class GearyController : Geary.BaseObject {
     };
 
     /**
-     * Fired when the currently selected account has changed.
-     */
-    public signal void account_selected(Geary.Account? account);
-
-    /**
-     * Fired when the currently selected folder has changed.
-     */
-    public signal void folder_selected(Geary.Folder? folder);
-
-    /**
-     * Fired when the number of conversations changes.
-     */
-    public signal void conversation_count_changed(int count);
-
-    /**
      * Fired when the search text is changed according to the controller.  This accounts
      * for a brief typmatic delay.
      */
@@ -229,18 +219,11 @@ public class GearyController : Geary.BaseObject {
     /**
      * Constructs a new instance of the controller.
      */
-    public GearyController(GearyApplication application) {
+    public async Controller(GearyApplication application,
+                            GLib.Cancellable cancellable) {
         this.application = application;
-    }
+        this.open_cancellable = cancellable;
 
-    ~GearyController() {
-        assert(current_account == null);
-    }
-
-    /**
-     * Starts the controller and brings up Geary.
-     */
-    public async void open_async(GLib.Cancellable? cancellable) {
         Geary.Engine engine = this.application.engine;
 
         // This initializes the IconFactory, important to do before
@@ -248,16 +231,14 @@ public class GearyController : Geary.BaseObject {
         // custom icons)
         IconFactory.instance.init();
 
-        apply_app_menu_fix();
-
-        this.open_cancellable = new GLib.Cancellable();
-
         // Listen for attempts to close the application.
         this.application.exiting.connect(on_application_exiting);
 
         // Create DB upgrade dialog.
-        upgrade_dialog = new UpgradeDialog();
-        upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(display_main_window_if_ready);
+        this.upgrade_dialog = new UpgradeDialog();
+        this.upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(
+            display_main_window_if_ready
+        );
 
         // Initialise WebKit and WebViews
         ClientWebView.init_web_context(
@@ -307,7 +288,6 @@ public class GearyController : Geary.BaseObject {
         // Connect to various UI signals.
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.conversation_list_view.conversation_activated.connect(on_conversation_activated);
-        main_window.conversation_list_view.load_more.connect(on_load_more);
         main_window.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
@@ -324,7 +304,9 @@ public class GearyController : Geary.BaseObject {
             this.get_contact_store_for_account,
             this.should_notify_new_messages
         );
-        main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
+        this.main_window.folder_list.set_new_messages_monitor(
+            this.new_messages_monitor
+        );
 
         // New messages indicator (Ubuntuism)
         this.new_messages_indicator = NewMessagesIndicator.create(
@@ -334,12 +316,12 @@ public class GearyController : Geary.BaseObject {
         this.new_messages_indicator.composer_activated.connect(on_indicator_activated_composer);
         this.new_messages_indicator.inbox_activated.connect(on_indicator_activated_inbox);
 
-        unity_launcher = new UnityLauncher(new_messages_monitor);
+        this.unity_launcher = new UnityLauncher(this.new_messages_monitor);
 
         this.notifications = new Notification.Desktop(
             this.new_messages_monitor,
             this.application,
-            this.open_cancellable
+            cancellable
         );
 
         this.main_window.conversation_list_view.grab_focus();
@@ -400,7 +382,7 @@ public class GearyController : Geary.BaseObject {
             );
             yield this.account_manager.load_accounts(cancellable);
             if (engine.get_accounts().size == 0) {
-                this.application.show_accounts();
+                yield this.application.show_accounts();
                 if (engine.get_accounts().size == 0) {
                     // User cancelled without creating an account, so
                     // nothing else to do but exit.
@@ -416,72 +398,43 @@ public class GearyController : Geary.BaseObject {
         this.expunge_accounts.begin();
     }
 
-    /**
-     * At the moment, this is non-reversible, i.e. once closed a GearyController cannot be
-     * re-opened.
-     */
+    /** Closes all accounts and windows, releasing held resources. */
     public async void close_async() {
         // Cancel internal processes early so they don't block
         // shutdown
         this.open_cancellable.cancel();
-        this.open_cancellable = null;
 
         this.application.engine.account_available.disconnect(on_account_available);
 
-        if (this.main_window != null) {
-            // Release folder and conversations in the main window
-            on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
-            on_folder_selected(null);
+        // Release folder and conversations in the main window
+        on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
+        on_folder_selected(null);
 
-            // Disconnect from various UI signals.
-            this.main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
-            this.main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
-            this.main_window.conversation_list_view.load_more.disconnect(on_load_more);
-            this.main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
-            this.main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
-            this.main_window.folder_list.folder_selected.disconnect(on_folder_selected);
-            this.main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
-            this.main_window.folder_list.move_conversation.disconnect(on_move_conversation);
-            this.main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
-            this.main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
-            this.main_window.conversation_viewer.conversation_added.disconnect(
-                on_conversation_view_added
-            );
+        // Disconnect from various UI signals.
+        this.main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
+        this.main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
+        this.main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
+        this.main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
+        this.main_window.folder_list.folder_selected.disconnect(on_folder_selected);
+        this.main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
+        this.main_window.folder_list.move_conversation.disconnect(on_move_conversation);
+        this.main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
+        this.main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
+        this.main_window.conversation_viewer.conversation_added.disconnect(
+            on_conversation_view_added
+        );
 
-            // hide window while shutting down, as this can take a few
-            // seconds under certain conditions
-            this.main_window.hide();
-        }
+        // hide window while shutting down, as this can take a few
+        // seconds under certain conditions
+        this.main_window.hide();
 
         // Release monitoring early so held resources can be freed up
-        this.sound_context = null;
-        this.notifications = null;
-        this.new_messages_indicator = null;
-        this.unity_launcher = null;
         this.new_messages_monitor.clear_folders();
-        this.new_messages_monitor = null;
 
         // drop the Revokable, which will commit it if necessary
         save_revokable(null, null);
 
         this.cancellable_open_account.cancel();
-
-        // Close the ConversationMonitor
-        if (current_conversations != null) {
-            debug("Stopping conversation monitor for %s...",
-                  this.current_conversations.base_folder.to_string());
-            try {
-                yield this.current_conversations.stop_monitoring_async(null);
-            } catch (Error err) {
-                debug(
-                    "Error closing conversation monitor %s at shutdown: %s",
-                    this.current_conversations.base_folder.to_string(),
-                    err.message
-                );
-            }
-
-            this.current_conversations = null;
-        }
 
         // Create an array of known accounts so the loops below do not
         // explode if accounts are removed while iterating.
@@ -547,20 +500,16 @@ public class GearyController : Geary.BaseObject {
         this.account_manager.account_removed.disconnect(
             on_account_removed
         );
-        this.account_manager = null;
 
         if (this.main_window != null) {
             this.application.remove_window(this.main_window);
             this.main_window.destroy();
-            this.main_window = null;
         }
 
-        this.upgrade_dialog = null;
+        this.current_folder = null;
+        this.previous_non_search_folder = null;
 
         this.current_account = null;
-        this.current_folder = null;
-
-        this.previous_non_search_folder = null;
 
         this.selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
         this.last_deleted_conversation = null;
@@ -570,10 +519,8 @@ public class GearyController : Geary.BaseObject {
         this.waiting_to_close.clear();
 
         this.avatars.close();
-        this.avatars = null;
 
-
-        debug("Closed GearyController");
+        debug("Closed Application.Controller");
     }
 
     /**
@@ -596,34 +543,37 @@ public class GearyController : Geary.BaseObject {
         this.composer_widgets.add(widget);
     }
 
+    /** Displays a problem report when an error has been encountered. */
+    public void report_problem(Geary.ProblemReport report) {
+        debug("Problem reported: %s", report.to_string());
+
+        if (report.error == null ||
+            !(report.error.thrown is IOError.CANCELLED)) {
+            MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
+            info_bar.retry.connect(on_retry_problem);
+            this.main_window.show_infobar(info_bar);
+        }
+
+        Geary.ServiceProblemReport? service_report =
+            report as Geary.ServiceProblemReport;
+        if (service_report != null && service_report.service.protocol == SMTP) {
+            this.notifications.set_error_notification(
+                /// Notification title.
+                _("A problem occurred sending email for %s").printf(
+                    service_report.account.display_name
+                ),
+                /// Notification body
+                _("Email will not be sent until re-connected")
+            );
+        }
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
             yield this.account_manager.expunge_accounts(this.open_cancellable);
         } catch (GLib.Error err) {
             report_problem(new Geary.ProblemReport(err));
-        }
-    }
-
-    // Fix for clients having both:
-    //   * disabled Gtk/ShellShowsAppMenu setting
-    //   * no 'menu' setting in Gtk/DecorationLayout
-    // See https://bugzilla.gnome.org/show_bug.cgi?id=770617
-    private void apply_app_menu_fix() {
-        Gtk.Settings? settings = Gtk.Settings.get_default();
-
-        if (settings == null) {
-            warning("Couldn't fetch Gtk default settings");
-            return;
-        }
-
-        string decoration_layout = settings.gtk_decoration_layout ?? "";
-        if (!decoration_layout.contains("menu")) {
-            string prefix = "menu:";
-            if (decoration_layout.contains(":")) {
-                prefix = (decoration_layout.has_prefix(":")) ? "menu" : "menu,";
-            }
-            settings.gtk_decoration_layout = prefix + settings.gtk_decoration_layout;
         }
     }
 
@@ -703,30 +653,6 @@ public class GearyController : Geary.BaseObject {
             );
 
             yield disconnect_account_async(context);
-        }
-    }
-
-    private void report_problem(Geary.ProblemReport report) {
-        debug("Problem reported: %s", report.to_string());
-
-        if (report.error == null ||
-            !(report.error.thrown is IOError.CANCELLED)) {
-            MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
-            info_bar.retry.connect(on_retry_problem);
-            this.main_window.show_infobar(info_bar);
-        }
-
-        Geary.ServiceProblemReport? service_report =
-            report as Geary.ServiceProblemReport;
-        if (service_report != null && service_report.service.protocol == SMTP) {
-            this.notifications.set_error_notification(
-                /// Notification title.
-                _("A problem occurred sending email for %s").printf(
-                    service_report.account.display_name
-                ),
-                /// Notification body
-                _("Email will not be sent until re-connected")
-            );
         }
     }
 
@@ -1132,7 +1058,7 @@ public class GearyController : Geary.BaseObject {
             this.current_folder = null;
             main_window.conversation_list_view.set_model(null);
             main_window.main_toolbar.folder = null;
-            folder_selected(null);
+            this.main_window.folder_selected(null, null);
         } else if (folder != this.current_folder) {
             this.main_window.conversation_viewer.show_loading();
             get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
@@ -1184,12 +1110,6 @@ public class GearyController : Geary.BaseObject {
         // clear Revokable, as Undo is only available while a folder is selected
         save_revokable(null, null);
 
-        // stop monitoring for conversations and close the folder
-        if (current_conversations != null) {
-            yield current_conversations.stop_monitoring_async(null);
-            current_conversations = null;
-        }
-
         // re-enable copy/move to the last selected folder
         if (current_folder != null) {
             main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, true);
@@ -1200,7 +1120,7 @@ public class GearyController : Geary.BaseObject {
 
         if (this.current_account != folder.account) {
             this.current_account = folder.account;
-            account_selected(this.current_account);
+            this.main_window.search_bar.set_account(this.current_account);
 
             // If we were waiting for an account to be selected before issuing mailtos, do that now.
             if (pending_mailtos.size > 0) {
@@ -1218,8 +1138,6 @@ public class GearyController : Geary.BaseObject {
             }
         }
 
-        folder_selected(current_folder);
-
         if (!(current_folder is Geary.SearchFolder))
             previous_non_search_folder = current_folder;
 
@@ -1229,64 +1147,13 @@ public class GearyController : Geary.BaseObject {
 
         update_ui();
 
-        current_conversations = new Geary.App.ConversationMonitor(
-            current_folder,
-            Geary.Folder.OpenFlags.NO_DELAY,
-            // Include fields for the conversation viewer as well so
-            // conversations can be displayed without having to go
-            // back to the db
-            ConversationListStore.REQUIRED_FIELDS |
-            ConversationListBox.REQUIRED_FIELDS |
-            ConversationEmail.REQUIRED_FOR_CONSTRUCT,
-            MIN_CONVERSATION_COUNT
-        );
-
-        current_conversations.scan_completed.connect(on_scan_completed);
-        current_conversations.scan_error.connect(on_scan_error);
-
-        current_conversations.scan_completed.connect(on_conversation_count_changed);
-        current_conversations.conversations_added.connect(on_conversation_count_changed);
-        current_conversations.conversations_removed.connect(on_conversation_count_changed);
+        this.main_window.folder_selected(folder, this.cancellable_folder);
 
         clear_new_messages("do_select_folder", null);
-
-        yield this.current_conversations.start_monitoring_async(
-            this.cancellable_folder
-        );
 
         select_folder_mutex.release(ref mutex_token);
 
         debug("Switched to %s", folder.to_string());
-    }
-
-    private void on_conversation_count_changed() {
-        if (this.current_conversations != null) {
-            ConversationListView list = this.main_window.conversation_list_view;
-            ConversationViewer viewer = this.main_window.conversation_viewer;
-            int count = this.current_conversations.size;
-            if (count == 0) {
-                // Let the user know if there's no available conversations
-                if (this.current_folder is Geary.SearchFolder) {
-                    viewer.show_empty_search();
-                } else {
-                    viewer.show_empty_folder();
-                }
-                enable_message_buttons(false);
-            } else {
-                // When not doing autoselect, we never get
-                // conversations_selected firing from the convo list,
-                // so we need to stop the loading spinner here. Only
-                // do so if there isn't already a selection or a
-                // composer to avoid interrupting those.
-                if (!this.application.config.autoselect &&
-                    list.get_selection().count_selected_rows() == 0 &&
-                    !viewer.is_composer_visible) {
-                    viewer.show_none_selected();
-                    enable_message_buttons(false);
-                }
-            }
-            conversation_count_changed(count);
-        }
     }
 
     private void on_indicator_activated_application(uint32 timestamp) {
@@ -1301,11 +1168,6 @@ public class GearyController : Geary.BaseObject {
     private void on_indicator_activated_inbox(Geary.Folder folder, uint32 timestamp) {
         on_indicator_activated_application(timestamp);
         main_window.folder_list.select_folder(folder);
-    }
-
-    private void on_load_more() {
-        debug("on_load_more");
-        current_conversations.min_window_count += MIN_CONVERSATION_COUNT;
     }
 
     private void on_select_folder_completed(Object? source, AsyncResult result) {
@@ -1882,7 +1744,7 @@ public class GearyController : Geary.BaseObject {
                                                string? alt_text,
                                                GLib.Cancellable cancellable) {
         string alt_display_name = Geary.String.is_empty_or_whitespace(alt_text)
-            ? GearyController.untitled_file_name : alt_text;
+            ? Application.Controller.untitled_file_name : alt_text;
         string display_name = yield attachment.get_safe_file_name(
             alt_display_name
         );
@@ -1920,7 +1782,7 @@ public class GearyController : Geary.BaseObject {
                 content = new Geary.Memory.FileBuffer(attachment.file, true);
                 dest = dest_dir.get_child_for_display_name(
                     yield attachment.get_safe_file_name(
-                        GearyController.untitled_file_name
+                        Application.Controller.untitled_file_name
                     )
                 );
             } catch (GLib.Error err) {
@@ -3041,28 +2903,6 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
-        // Done scanning.  Check if we have enough messages to fill
-        // the conversation list; if not, trigger a load_more();
-        if (this.main_window != null &&
-            this.main_window.is_visible() &&
-            !this.main_window.conversation_list_has_scrollbar() &&
-            monitor == this.current_conversations &&
-            monitor.can_load_more) {
-            debug("Not enough messages, loading more for folder %s",
-                  current_folder.to_string());
-            on_load_more();
-        }
-    }
-
-    private void on_scan_error(Geary.App.ConversationMonitor monitor, Error err) {
-        Geary.AccountInformation account =
-            monitor.base_folder.account.information;
-        report_problem(
-            new Geary.ServiceProblemReport(account, account.incoming, err)
-        );
-    }
-
     private void on_email_load_error(ConversationEmail view, GLib.Error err) {
         report_problem(
             new Geary.ServiceProblemReport(
@@ -3136,7 +2976,7 @@ public class GearyController : Geary.BaseObject {
             // chars anyway.
             string? display_name = source.get_basename();
             if (Geary.String.is_empty_or_whitespace(display_name)) {
-                display_name = GearyController.untitled_file_name;
+                display_name = Application.Controller.untitled_file_name;
             }
 
             this.prompt_save_buffer.begin(

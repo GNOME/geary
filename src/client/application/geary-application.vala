@@ -176,12 +176,14 @@ public class GearyApplication : Gtk.Application {
 
 
     /**
-     * The global UI controller for this app instance.
+     * The global controller for this application instance.
+     *
+     * This will be non-null in the primary application instance, only
+     * after initial activation, or after startup if {@link
+     * is_background_service} is true.
      */
-    public GearyController controller {
-        get;
-        private set;
-        default = new GearyController(this);
+    public Application.Controller? controller {
+        get; private set; default = null;
     }
 
     /**
@@ -253,6 +255,7 @@ public class GearyApplication : Gtk.Application {
     private bool exiting_fired = false;
     private int exitcode = 0;
     private bool is_destroyed = false;
+    private GLib.Cancellable controller_cancellable = new GLib.Cancellable();
     private Components.Inspector? inspector = null;
 
 
@@ -444,26 +447,12 @@ public class GearyApplication : Gtk.Application {
         if (exit_value != -1)
             return exit_value;
 
-        activate();
-
         return -1;
     }
 
     public override void activate() {
         base.activate();
-
-        // Clear notifications immediately since we are showing a main
-        // window. If the controller isn't already open, need to wait
-        // for that to happen before doing so
-
-        if (present()) {
-            this.controller.notifications.clear_all_notifications();
-        } else {
-            this.create_controller.begin((obj, res) => {
-                    this.create_controller.end(res);
-                    this.controller.notifications.clear_all_notifications();
-                });
-        }
+        this.present.begin();
     }
 
     public void add_window_accelerators(string action,
@@ -477,8 +466,29 @@ public class GearyApplication : Gtk.Application {
         set_accels_for_action(name, all_accel);
     }
 
-    public void show_accounts() {
-        activate();
+    public async void show_about() {
+        yield this.present();
+
+        Gtk.show_about_dialog(get_active_window(),
+            "program-name", NAME,
+            "comments", DESCRIPTION,
+            "authors", AUTHORS,
+            "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
+            "license-type", Gtk.License.LGPL_2_1,
+            "logo-icon-name", APP_ID,
+            "version", VERSION,
+            "website", WEBSITE,
+            "website-label", WEBSITE_LABEL,
+            "title", _("About %s").printf(NAME),
+            // Translators: add your name and email address to receive
+            // credit in the About dialog For example: Yamada Taro
+            // <yamada.taro@example.com>
+            "translator-credits", _("translator-credits")
+        );
+    }
+
+    public async void show_accounts() {
+        yield this.present();
 
         Accounts.Editor editor = new Accounts.Editor(this, get_active_window());
         editor.run();
@@ -486,6 +496,47 @@ public class GearyApplication : Gtk.Application {
         this.controller.expunge_accounts.begin();
     }
 
+    public async void show_email(Geary.Folder? folder,
+                                 Geary.EmailIdentifier id) {
+        yield this.present();
+
+        this.controller.main_window.show_email(folder, id);
+    }
+
+    public async void show_folder(Geary.Folder? folder) {
+        yield this.present();
+
+        this.controller.main_window.show_folder(folder);
+    }
+
+    public async void show_inspector() {
+        yield this.present();
+
+        if (this.inspector == null) {
+            this.inspector = new Components.Inspector(this);
+            this.inspector.destroy.connect(() => {
+                    this.inspector = null;
+                });
+            this.inspector.show();
+        } else {
+            this.inspector.present();
+        }
+    }
+
+    public async void show_preferences() {
+        yield this.present();
+
+        PreferencesDialog dialog = new PreferencesDialog(
+            get_active_window(), this
+        );
+        dialog.run();
+    }
+
+    public async void new_composer(string? mailto) {
+        yield this.present();
+
+        this.controller.compose(mailto);
+    }
 
     /** Returns the application's base user configuration directory. */
     public GLib.File get_user_config_directory() {
@@ -560,6 +611,8 @@ public class GearyApplication : Gtk.Application {
             return;
         }
 
+        this.controller_cancellable.cancel();
+
         // Give asynchronous destroy_controller() a chance to
         // complete, but to avoid bug(s) where Geary hangs at exit,
         // shut the whole thing down if destroy_controller() takes too
@@ -604,6 +657,15 @@ public class GearyApplication : Gtk.Application {
         Posix.exit(1);
     }
 
+    // Presents a main window. If the controller is not open, opens it
+    // first.
+    private async void present() {
+        if (this.controller == null) {
+            yield create_controller();
+        }
+        this.controller.main_window.present();
+    }
+
     // Opens the controller
     private async void create_controller() {
         // Manually keep the main loop around for the duration of this
@@ -611,15 +673,20 @@ public class GearyApplication : Gtk.Application {
         // hit the yield below, before we create the main window.
         hold();
 
-        // do *after* parsing args, as they dicate where logging is
-        // sent to, if anywhere, and only after activate (which means
-        // this is only logged for the one user-visible instance, not
-        // the other instances called when sending commands to the app
-        // via the command-line)
-        message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
-            exec_dir.get_path(), this.is_installed.to_string());
+        lock (this.controller) {
+            if (this.controller == null) {
+                message(
+                    "%s %s prefix=%s exec_dir=%s is_installed=%s",
+                    NAME, VERSION, INSTALL_PREFIX,
+                    exec_dir.get_path(),
+                    this.is_installed.to_string()
+                );
 
-        yield this.controller.open_async(null);
+                this.controller = yield new Application.Controller(
+                    this, this.controller_cancellable
+                );
+            }
+        }
 
         release();
     }
@@ -629,8 +696,11 @@ public class GearyApplication : Gtk.Application {
         // see create_controller() for reasoning hold/release is used
         hold();
 
-        if (this.controller.is_open) {
-            yield this.controller.close_async();
+        lock (this.controller) {
+            if (this.controller != null) {
+                yield this.controller.close_async();
+                this.controller = null;
+            }
         }
 
         release();
@@ -680,6 +750,8 @@ public class GearyApplication : Gtk.Application {
             // --hidden option.
             this.update_autostart_file.begin();
         }
+
+        bool activated = false;
         if (options.contains(GLib.OPTION_REMAINING)) {
             string[] args = options.lookup_value(
                 GLib.OPTION_REMAINING,
@@ -689,11 +761,13 @@ public class GearyApplication : Gtk.Application {
                 // the only acceptable arguments are mailto:'s
                 if (arg == Geary.ComposedEmail.MAILTO_SCHEME) {
                     activate_action(GearyApplication.ACTION_COMPOSE, null);
+                    activated = true;
                 } else if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
                     activate_action(
                         GearyApplication.ACTION_MAILTO,
                         new GLib.Variant.string(arg)
                     );
+                    activated = true;
                 } else {
                     command_line.printerr("%s: ", this.binary);
                     command_line.printerr(
@@ -711,16 +785,11 @@ public class GearyApplication : Gtk.Application {
         this.config.enable_inspector = options.contains(OPTION_INSPECTOR);
         this.config.revoke_certs = options.contains(OPTION_REVOKE_CERTS);
 
-        return -1;
-    }
-
-    private bool present() {
-        bool ret = false;
-        if (this.controller.main_window != null) {
-            this.controller.main_window.present();
-            ret = true;
+        if (!activated) {
+            activate();
         }
-        return ret;
+
+        return -1;
     }
 
     /** Removes and re-adds the autostart file if needed. */
@@ -761,53 +830,29 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_about() {
-        Gtk.show_about_dialog(get_active_window(),
-            "program-name", NAME,
-            "comments", DESCRIPTION,
-            "authors", AUTHORS,
-            "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
-            "license-type", Gtk.License.LGPL_2_1,
-            "logo-icon-name", APP_ID,
-            "version", VERSION,
-            "website", WEBSITE,
-            "website-label", WEBSITE_LABEL,
-            "title", _("About %s").printf(NAME),
-            // Translators: add your name and email address to receive
-            // credit in the About dialog For example: Yamada Taro
-            // <yamada.taro@example.com>
-            "translator-credits", _("translator-credits")
-        );
+        this.show_about.begin();
     }
 
     private void on_activate_accounts() {
-        show_accounts();
+        this.show_accounts.begin();
     }
 
     private void on_activate_compose() {
-        this.controller.compose();
+        this.new_composer.begin(null);
     }
 
     private void on_activate_inspect() {
-        if (this.inspector == null) {
-            this.inspector = new Components.Inspector(this);
-            this.inspector.destroy.connect(() => {
-                    this.inspector = null;
-                });
-            this.inspector.show();
-        } else {
-            this.inspector.present();
-        }
+        this.show_inspector.begin();
     }
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
         if (param != null) {
-            this.controller.compose(param.get_string());
+            this.new_composer.begin(param.get_string());
         }
     }
 
     private void on_activate_preferences() {
-        PreferencesDialog dialog = new PreferencesDialog(get_active_window(), this);
-        dialog.run();
+        this.show_preferences.begin();
     }
 
     private void on_activate_quit() {
@@ -830,8 +875,7 @@ public class GearyApplication : Gtk.Application {
                 }
 
                 if (email_id != null) {
-                    this.controller.main_window.present();
-                    this.controller.main_window.show_email(folder, email_id);
+                    this.show_email.begin(folder, email_id);
                 }
             }
         }
@@ -843,8 +887,7 @@ public class GearyApplication : Gtk.Application {
             // Target is a (account_id,folder_path) tuple
             Geary.Folder? folder = get_folder_from_action_target(target);
             if (folder != null) {
-                this.controller.main_window.present();
-                this.controller.main_window.show_folder(folder);
+                this.show_folder.begin(folder);
             }
         }
     }
