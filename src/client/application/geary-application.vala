@@ -673,21 +673,21 @@ public class GearyApplication : Gtk.Application {
         // hit the yield below, before we create the main window.
         hold();
 
-        // do *after* parsing args, as they dicate where logging is
-        // sent to, if anywhere, and only after activate (which means
-        // this is only logged for the one user-visible instance, not
-        // the other instances called when sending commands to the app
-        // via the command-line)
-        message(
-            "%s %s prefix=%s exec_dir=%s is_installed=%s",
-            NAME, VERSION, INSTALL_PREFIX,
-            exec_dir.get_path(),
-            this.is_installed.to_string()
-        );
+        lock (this.controller) {
+            if (this.controller == null) {
+                message(
+                    "%s %s prefix=%s exec_dir=%s is_installed=%s",
+                    NAME, VERSION, INSTALL_PREFIX,
+                    exec_dir.get_path(),
+                    this.is_installed.to_string()
+                );
 
-        this.controller = yield new Application.Controller(
-            this, this.controller_cancellable
-        );
+                this.controller = yield new Application.Controller(
+                    this, this.controller_cancellable
+                );
+            }
+        }
+
         release();
     }
 
@@ -696,9 +696,11 @@ public class GearyApplication : Gtk.Application {
         // see create_controller() for reasoning hold/release is used
         hold();
 
-        if (this.controller != null) {
-            yield this.controller.close_async();
-            this.controller = null;
+        lock (this.controller) {
+            if (this.controller != null) {
+                yield this.controller.close_async();
+                this.controller = null;
+            }
         }
 
         release();
