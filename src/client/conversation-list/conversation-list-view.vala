@@ -13,7 +13,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     private bool enable_load_more = true;
 
     private bool reset_adjustment = false;
-    private Geary.App.ConversationMonitor? conversation_monitor;
     private Gee.Set<Geary.App.Conversation>? current_visible_conversations = null;
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
@@ -59,8 +58,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
 
         GearyApplication.instance.config.settings.changed[Configuration.DISPLAY_PREVIEW_KEY].connect(
             on_display_preview_changed);
-        GearyApplication.instance.controller.notify[Application.Controller.PROP_CURRENT_CONVERSATION].
-            connect(on_conversation_monitor_changed);
 
         // Watch for mouse events.
         motion_notify_event.connect(on_motion_notify_event);
@@ -92,6 +89,9 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     public new void set_model(ConversationListStore? new_store) {
         ConversationListStore? old_store = get_model();
         if (old_store != null) {
+            old_store.conversations.scan_started.disconnect(on_scan_started);
+            old_store.conversations.scan_completed.disconnect(on_scan_completed);
+
             old_store.conversations_added.disconnect(on_conversations_added);
             old_store.conversations_removed.disconnect(on_conversations_removed);
             old_store.row_inserted.disconnect(on_rows_changed);
@@ -102,6 +102,9 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         }
 
         if (new_store != null) {
+            new_store.conversations.scan_started.connect(on_scan_started);
+            new_store.conversations.scan_completed.connect(on_scan_completed);
+
             new_store.row_inserted.connect(on_rows_changed);
             new_store.rows_reordered.connect(on_rows_changed);
             new_store.row_changed.connect(on_rows_changed);
@@ -136,31 +139,23 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     }
 
     private void check_load_more() {
-        // Check if we're at the very bottom of the list. If we are,
-        // it's time to issue a load_more signal.
-        Gtk.Adjustment adjustment = ((Gtk.Scrollable) this).get_vadjustment();
-        double upper = adjustment.get_upper();
-        double threshold = upper - adjustment.page_size - LOAD_MORE_HEIGHT;
-        if (this.is_visible() &&
-            this.conversation_monitor.can_load_more &&
-            adjustment.get_value() >= threshold) {
-            load_more();
-        }
+        ConversationListStore? model = get_model();
+        Geary.App.ConversationMonitor? conversations = (model != null)
+            ? model.conversations
+            : null;
+        if (conversations != null) {
+            // Check if we're at the very bottom of the list. If we
+            // are, it's time to issue a load_more signal.
+            Gtk.Adjustment adjustment = ((Gtk.Scrollable) this).get_vadjustment();
+            double upper = adjustment.get_upper();
+            double threshold = upper - adjustment.page_size - LOAD_MORE_HEIGHT;
+            if (this.is_visible() &&
+                conversations.can_load_more &&
+                adjustment.get_value() >= threshold) {
+                load_more();
+            }
 
-        schedule_visible_conversations_changed();
-    }
-
-    private void on_conversation_monitor_changed() {
-        if (conversation_monitor != null) {
-            conversation_monitor.scan_started.disconnect(on_scan_started);
-            conversation_monitor.scan_completed.disconnect(on_scan_completed);
-        }
-
-        conversation_monitor = GearyApplication.instance.controller.current_conversations;
-
-        if (conversation_monitor != null) {
-            conversation_monitor.scan_started.connect(on_scan_started);
-            conversation_monitor.scan_completed.connect(on_scan_completed);
+            schedule_visible_conversations_changed();
         }
     }
 

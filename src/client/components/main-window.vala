@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright 2016, 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -12,6 +12,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private const int STATUS_BAR_HEIGHT = 18;
     private const int UPDATE_UI_INTERVAL = 60;
+    private const int MIN_CONVERSATION_COUNT = 50;
 
 
     public new GearyApplication application {
@@ -19,10 +20,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         set { base.set_application(value); }
     }
 
+    /** Currently selected folder, null if none selected */
     public Geary.Folder? current_folder { get; private set; default = null; }
 
+    /** Conversations for the current folder, null if none selected */
+    public Geary.App.ConversationMonitor? conversations {
+        get; private set; default = null;
+    }
+
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
-    private Geary.ProgressMonitor? folder_progress = null;
 
     // Used to save/load the window state between sessions.
     public int window_width { get; set; }
@@ -102,9 +108,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         load_config(application.config);
         restore_saved_window_state();
 
-        application.controller.notify[Application.Controller.PROP_CURRENT_CONVERSATION]
-            .connect(on_conversation_monitor_changed);
-        application.controller.folder_selected.connect(on_folder_selected);
         this.application.engine.account_available.connect(on_account_available);
         this.application.engine.account_unavailable.connect(on_account_unavailable);
 
@@ -189,10 +192,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         // currently used, that is when a user clicks on a
         // notification for new mail in the current folder.
         show_folder(folder);
-        Geary.App.ConversationMonitor? conversations =
-            this.application.controller.current_conversations;
         Geary.App.Conversation? conversation =
-            conversations.get_by_email_identifier(id);
+            this.conversations.get_by_email_identifier(id);
         if (conversation != null) {
             this.conversation_list_view.select_conversation(conversation);
         }
@@ -337,6 +338,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void setup_layout(Configuration config) {
         this.conversation_list_view = new ConversationListView(this);
+        this.conversation_list_view.load_more.connect(on_load_more);
 
         this.conversation_viewer = new ConversationViewer(
             this.application.config
@@ -459,6 +461,25 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         return base.key_release_event(event);
     }
 
+    public void folder_selected(Geary.Folder? folder,
+                                GLib.Cancellable? cancellable) {
+        if (this.current_folder != null) {
+            this.progress_monitor.remove(this.current_folder.opening_monitor);
+            this.current_folder.properties.notify.disconnect(update_headerbar);
+            close_conversation_monitor();
+        }
+
+        this.current_folder = folder;
+
+        if (folder != null) {
+            this.progress_monitor.add(folder.opening_monitor);
+            folder.properties.notify.connect(update_headerbar);
+            open_conversation_monitor.begin(cancellable);
+        }
+
+        update_headerbar();
+    }
+
     private void update_ui() {
         // Only update if we haven't done so within the last while
         int64 now = GLib.get_monotonic_time() / (1000 * 1000);
@@ -477,48 +498,128 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_conversation_monitor_changed() {
-        ConversationListStore? old_model = this.conversation_list_view.get_model();
+    private async void open_conversation_monitor(GLib.Cancellable cancellable) {
+        this.conversations = new Geary.App.ConversationMonitor(
+            this.current_folder,
+            Geary.Folder.OpenFlags.NO_DELAY,
+            // Include fields for the conversation viewer as well so
+            // conversations can be displayed without having to go
+            // back to the db
+            ConversationListStore.REQUIRED_FIELDS |
+            ConversationListBox.REQUIRED_FIELDS |
+            ConversationEmail.REQUIRED_FOR_CONSTRUCT,
+            MIN_CONVERSATION_COUNT
+        );
+
+        this.conversations.scan_completed.connect(on_scan_completed);
+        this.conversations.scan_error.connect(on_scan_error);
+
+        this.conversations.scan_completed.connect(
+            on_conversation_count_changed
+        );
+        this.conversations.conversations_added.connect(
+            on_conversation_count_changed
+        );
+        this.conversations.conversations_removed.connect(
+            on_conversation_count_changed
+        );
+
+        ConversationListStore new_model = new ConversationListStore(
+            this.conversations
+        );
+        this.progress_monitor.add(new_model.preview_monitor);
+        this.progress_monitor.add(conversations.progress_monitor);
+        this.conversation_list_view.set_model(new_model);
+
+        // Work on a local copy since the main window's copy may
+        // change if a folder is selected while closing.
+        Geary.App.ConversationMonitor conversations = this.conversations;
+        conversations.start_monitoring_async.begin(
+            cancellable,
+            (obj, res) => {
+                try {
+                    conversations.start_monitoring_async.end(res);
+                } catch (Error err) {
+                    Geary.AccountInformation account =
+                        conversations.base_folder.account.information;
+                    this.application.controller.report_problem(
+                        new Geary.ServiceProblemReport(account, account.incoming, err)
+                    );
+                }
+            }
+        );
+    }
+
+    private void close_conversation_monitor() {
+        ConversationListStore? old_model =
+            this.conversation_list_view.get_model();
         if (old_model != null) {
             this.progress_monitor.remove(old_model.preview_monitor);
             this.progress_monitor.remove(old_model.conversations.progress_monitor);
         }
 
-        Geary.App.ConversationMonitor? conversations =
-            this.application.controller.current_conversations;
+        this.conversations.scan_completed.disconnect(on_scan_completed);
+        this.conversations.scan_error.disconnect(on_scan_error);
 
-        if (conversations != null) {
-            ConversationListStore new_model =
-                new ConversationListStore(conversations);
-            this.progress_monitor.add(new_model.preview_monitor);
-            this.progress_monitor.add(conversations.progress_monitor);
-            this.conversation_list_view.set_model(new_model);
+        this.conversations.scan_completed.disconnect(
+            on_conversation_count_changed
+        );
+        this.conversations.conversations_added.disconnect(
+            on_conversation_count_changed
+        );
+        this.conversations.conversations_removed.disconnect(
+            on_conversation_count_changed
+        );
+
+        // Work on a local copy since the main window's copy may
+        // change if a folder is selected while closing.
+        Geary.App.ConversationMonitor conversations = this.conversations;
+        conversations.stop_monitoring_async.begin(
+            null,
+            (obj, res) => {
+                try {
+                    conversations.stop_monitoring_async.end(res);
+                } catch (Error err) {
+                    warning(
+                        "Error closing conversation monitor %s: %s",
+                        this.conversations.base_folder.to_string(),
+                        err.message
+                    );
+                }
+            }
+        );
+
+        this.conversations = null;
+    }
+
+    private void load_more() {
+        if (this.conversations != null) {
+            this.conversations.min_window_count += MIN_CONVERSATION_COUNT;
         }
     }
 
-    private void on_folder_selected(Geary.Folder? folder) {
-        if (this.folder_progress != null) {
-            this.progress_monitor.remove(this.folder_progress);
-            this.folder_progress = null;
+    private void on_conversation_count_changed() {
+        if (this.conversations.size == 0) {
+            // Let the user know if there's no available conversations
+            if (this.current_folder is Geary.SearchFolder) {
+                this.conversation_viewer.show_empty_search();
+            } else {
+                this.conversation_viewer.show_empty_folder();
+            }
+            this.application.controller.enable_message_buttons(false);
+        } else {
+            // When not doing autoselect, we never get
+            // conversations_selected firing from the convo list, so
+            // we need to stop the loading spinner here. Only do so if
+            // there isn't already a selection or a composer to avoid
+            // interrupting those.
+            if (!this.application.config.autoselect &&
+                this.conversation_list_view.get_selection().count_selected_rows() == 0 &&
+                !this.conversation_viewer.is_composer_visible) {
+                this.conversation_viewer.show_none_selected();
+                this.application.controller.enable_message_buttons(false);
+            }
         }
-
-        if (folder != null) {
-            this.folder_progress = folder.opening_monitor;
-            this.progress_monitor.add(this.folder_progress);
-        }
-
-        // disconnect from old folder
-        if (this.current_folder != null)
-            this.current_folder.properties.notify.disconnect(update_headerbar);
-
-        // connect to new folder
-        if (folder != null)
-            folder.properties.notify.connect(update_headerbar);
-
-        // swap it in
-        this.current_folder = folder;
-
-        update_headerbar();
     }
 
     private void on_account_available(Geary.AccountInformation account) {
@@ -640,6 +741,32 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private SimpleAction get_action(string name) {
         return (SimpleAction) lookup_action(name);
+    }
+
+    private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
+        // Done scanning.  Check if we have enough messages to fill
+        // the conversation list; if not, trigger a load_more();
+        if (is_visible() &&
+            !conversation_list_has_scrollbar() &&
+            monitor == this.conversations &&
+            monitor.can_load_more) {
+            debug("Not enough messages, loading more for folder %s",
+                  this.current_folder.to_string());
+            load_more();
+        }
+    }
+
+    private void on_scan_error(Geary.App.ConversationMonitor monitor,
+                               GLib.Error err) {
+        Geary.AccountInformation account =
+            monitor.base_folder.account.information;
+        this.application.controller.report_problem(
+            new Geary.ServiceProblemReport(account, account.incoming, err)
+        );
+    }
+
+    private void on_load_more() {
+        load_more();
     }
 
     [GtkCallback]

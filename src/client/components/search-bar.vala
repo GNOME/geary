@@ -38,8 +38,6 @@ public class SearchBar : Gtk.SearchBar {
         add(search_entry);
 
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
-
-        GearyApplication.instance.controller.account_selected.connect(on_account_changed);
     }
 
     public void set_search_text(string text) {
@@ -55,23 +53,7 @@ public class SearchBar : Gtk.SearchBar {
         search_entry.placeholder_text = placeholder;
     }
 
-    private void on_search_upgrade_start() {
-        // Set the progress bar's width to match the search entry's width.
-        int minimum_width = 0;
-        int natural_width = 0;
-        search_entry.get_preferred_width(out minimum_width, out natural_width);
-        search_upgrade_progress_bar.width_request = minimum_width;
-
-        search_entry.hide();
-        search_upgrade_progress_bar.show();
-    }
-
-    private void on_search_upgrade_finished() {
-        search_entry.show();
-        search_upgrade_progress_bar.hide();
-    }
-
-    private void on_account_changed(Geary.Account? account) {
+    public void set_account(Geary.Account? account) {
         on_search_upgrade_finished(); // Reset search box.
 
         if (search_upgrade_progress_monitor != null) {
@@ -104,6 +86,22 @@ public class SearchBar : Gtk.SearchBar {
         current_account = account;
 
         on_information_changed(); // Set new account name.
+    }
+
+    private void on_search_upgrade_start() {
+        // Set the progress bar's width to match the search entry's width.
+        int minimum_width = 0;
+        int natural_width = 0;
+        search_entry.get_preferred_width(out minimum_width, out natural_width);
+        search_upgrade_progress_bar.width_request = minimum_width;
+
+        search_entry.hide();
+        search_upgrade_progress_bar.show();
+    }
+
+    private void on_search_upgrade_finished() {
+        search_entry.show();
+        search_upgrade_progress_bar.hide();
     }
 
     private void on_information_changed() {
