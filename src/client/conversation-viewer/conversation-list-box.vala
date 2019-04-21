@@ -612,8 +612,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             new Gee.LinkedList<Geary.Email>();
         foreach (Geary.Email email in all_email) {
             if (first_interesting == null) {
-                if (email.is_unread().is_certain() ||
-                    email.is_flagged().is_certain()) {
+                if (is_interesting(email)) {
                     first_interesting = email;
                 } else {
                     // Inserted reversed so most recent uninteresting
@@ -899,7 +898,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
             yield row.view.load_contacts();
-            yield row.expand();
+            if (is_interesting(full_email)) {
+                yield row.expand();
+            }
             this.search.highlight_row_if_matching(row);
         }
     }
