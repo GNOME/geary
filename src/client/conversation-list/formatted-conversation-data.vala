@@ -216,12 +216,14 @@ public class FormattedConversationData : Geary.BaseObject {
             }
         }
 
-        StringBuilder builder = new StringBuilder("<span foreground='%s'>".printf(
-            rgba_to_markup(get_foreground_rgba(widget, selected))));
         if (list.size == 1) {
             // if only one participant, use full name
-            builder.append(list[0].get_full_markup(account_owner_emails));
+            return "<span foreground='%s'>%s</span>"
+                .printf(rgba_to_markup(get_foreground_rgba(widget, selected)),
+                        list[0].get_full_markup(account_owner_emails));
         } else {
+            StringBuilder builder = new StringBuilder("<span foreground='%s'>".printf(
+                rgba_to_markup(get_foreground_rgba(widget, selected))));
             bool first = true;
             foreach (ParticipantDisplay participant in list) {
                 if (!first)
@@ -230,10 +232,9 @@ public class FormattedConversationData : Geary.BaseObject {
                 builder.append(participant.get_short_markup(account_owner_emails));
                 first = false;
             }
+            builder.append("</span>");
+            return builder.str;
         }
-        builder.append("</span>");
-
-        return builder.str;
     }
 
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area,
@@ -434,4 +435,3 @@ public class FormattedConversationData : Geary.BaseObject {
     }
 
 }
-
