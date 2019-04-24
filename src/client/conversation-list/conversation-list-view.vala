@@ -12,9 +12,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
 
     private bool enable_load_more = true;
 
-    // Used to avoid repeated calls to load_more(). Contains the last "upper" bound of the
-    // scroll adjustment seen at the call to load_more().
-    private double last_upper = -1.0;
     private bool reset_adjustment = false;
     private Geary.App.ConversationMonitor? conversation_monitor;
     private Gee.Set<Geary.App.Conversation>? current_visible_conversations = null;
@@ -101,7 +98,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             old_store.rows_reordered.disconnect(on_rows_changed);
             old_store.row_changed.disconnect(on_rows_changed);
             old_store.row_deleted.disconnect(on_rows_changed);
-            old_store.row_deleted.disconnect(on_row_deleted);
             old_store.destroy();
         }
 
@@ -110,7 +106,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             new_store.rows_reordered.connect(on_rows_changed);
             new_store.row_changed.connect(on_rows_changed);
             new_store.row_deleted.connect(on_rows_changed);
-            new_store.row_deleted.connect(on_row_deleted);
             new_store.conversations_removed.connect(on_conversations_removed);
             new_store.conversations_added.connect(on_conversations_added);
         }
@@ -140,6 +135,20 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         }
     }
 
+    private void check_load_more() {
+        // Check if we're at the very bottom of the list. If we are,
+        // it's time to issue a load_more signal.
+        Gtk.Adjustment adjustment = ((Gtk.Scrollable) this).get_vadjustment();
+        double upper = adjustment.get_upper();
+        double threshold = upper - adjustment.page_size - LOAD_MORE_HEIGHT;
+        if (this.conversation_monitor.can_load_more &&
+            adjustment.get_value() >= threshold) {
+            load_more();
+        }
+
+        schedule_visible_conversations_changed();
+    }
+
     private void on_conversation_monitor_changed() {
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.disconnect(on_scan_started);
@@ -155,11 +164,12 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     }
 
     private void on_scan_started() {
-        enable_load_more = false;
+        this.enable_load_more = false;
     }
 
     private void on_scan_completed() {
-        enable_load_more = true;
+        this.enable_load_more = true;
+        check_load_more();
 
         // Select the first conversation, if autoselect is enabled,
         // nothing has been selected yet and we're not composing.
@@ -323,20 +333,9 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     }
 
     private void on_value_changed() {
-        if (!enable_load_more)
-            return;
-
-        // Check if we're at the very bottom of the list. If we are, it's time to
-        // issue a load_more signal.
-        Gtk.Adjustment adjustment = ((Gtk.Scrollable) this).get_vadjustment();
-        double upper = adjustment.get_upper();
-        if (adjustment.get_value() >= upper - adjustment.page_size - LOAD_MORE_HEIGHT &&
-            upper > last_upper) {
-            load_more();
-            last_upper = upper;
+        if (this.enable_load_more) {
+            check_load_more();
         }
-
-        schedule_visible_conversations_changed();
     }
 
     private static Gtk.TreeViewColumn create_column(ConversationListStore.Column column,
@@ -461,13 +460,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             if (path != null)
                 selection.select_path(path);
         }
-    }
-
-    private void on_row_deleted(Gtk.TreePath path) {
-        // if one or more rows are deleted in the model, reset the last upper limit so scrolling to
-        // the bottom will always activate a reload (this is particularly important if the model
-        // is cleared)
-        last_upper = -1.0;
     }
 
     private void on_rows_changed() {

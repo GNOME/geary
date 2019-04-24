@@ -85,6 +85,16 @@ public class Geary.App.ConversationMonitor : BaseObject {
     /** Determines if this monitor is monitoring the base folder. */
     public bool is_monitoring { get; private set; default = false; }
 
+    /** Determines if more conversations can be loaded. */
+    public bool can_load_more {
+        get {
+            return (
+                this.base_folder.properties.email_total >
+                this.folder_window_size
+            );
+        }
+    }
+
     /** Minimum number of emails large conversations should contain. */
     public int min_window_count {
         get { return _min_window_count; }
@@ -103,6 +113,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
     /** The set of all conversations loaded by the monitor. */
     internal ConversationSet conversations { get; private set; }
 
+    /** The number of messages currently loaded from the base folder. */
+    internal uint folder_window_size {
+        get {
+            return (this.window.is_empty) ? 0 : this.window.size;
+        }
+    }
+
     /** The oldest message from the base folder in the loaded window. */
     internal EmailIdentifier? window_lowest {
         owned get {
@@ -116,10 +133,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
     private Cancellable? operation_cancellable = null;
 
     // Set of known, in-folder emails, explicitly loaded for the
-    // monitor's window. This exists purely to support the
-    // window_lowest property above, but we need to maintain a sorted
-    // set of all known messages since if the last known email is
-    // removed, we won't know what the next lowest is. Only email
+    // monitor's window. This exists purely to support the window_size
+    // and window_lowest properties above, but we need to maintain a
+    // sorted set of all known messages since if the last known email
+    // is removed, we won't know what the next lowest is. Only email
     // listed by one of the load_by_*_id methods are added here. Other
     // in-folder messages pulled in for a conversation aren't added,
     // since they may not be within the load window.
@@ -345,7 +362,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
     /** Ensures enough conversations are present, otherwise loads more. */
     internal void check_window_count() {
-        if (this.is_monitoring && this.conversations.size < this.min_window_count) {
+        if (this.is_monitoring &&
+            this.can_load_more &&
+            this.conversations.size < this.min_window_count) {
             this.queue.add(new FillWindowOperation(this));
         }
     }

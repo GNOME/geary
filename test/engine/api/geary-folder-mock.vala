@@ -46,7 +46,7 @@ public class Geary.MockFolder : Folder, MockObject {
                       SpecialFolderType type,
                       ProgressMonitor? monitor) {
         this._account = account;
-        this._properties = properties;
+        this._properties = properties ?? new MockFolderPoperties();
         this._path = path;
         this._type = type;
         this._opening_monitor = monitor;

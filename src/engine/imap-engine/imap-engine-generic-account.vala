@@ -1266,7 +1266,7 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             // it's opened
             try {
                 yield minimal_folder.local_folder.update_folder_status(
-                    remote_folder.properties, false, false, cancellable
+                    remote_folder.properties, false, cancellable
                 );
             } catch (Error update_error) {
                 debug("Unable to update local folder %s with remote properties: %s",
@@ -1402,7 +1402,7 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
                         this.folder.to_string())) {
 
                     yield local_folder.update_folder_status(
-                        remote_folder.properties, false, true, cancellable
+                        remote_folder.properties, true, cancellable
                     );
 
                     ((GenericAccount) this.account).update_folder(this.folder);

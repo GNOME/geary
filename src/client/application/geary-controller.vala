@@ -3069,11 +3069,14 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_scan_completed() {
+    private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
-        if (!main_window.conversation_list_has_scrollbar()) {
-            debug("Not enough messages, loading more for folder %s", current_folder.to_string());
+        if (!main_window.conversation_list_has_scrollbar() &&
+            monitor == this.current_conversations &&
+            monitor.can_load_more) {
+            debug("Not enough messages, loading more for folder %s",
+                  current_folder.to_string());
             on_load_more();
         }
     }
