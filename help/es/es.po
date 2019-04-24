@@ -8,8 +8,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2019-03-11 08:07+0000\n"
-"PO-Revision-Date: 2019-03-18 16:11+0100\n"
+"POT-Creation-Date: 2019-04-24 02:18+0000\n"
+"PO-Revision-Date: 2019-04-24 11:58+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: es <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -17,10 +17,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 3.31.90\n"
+"X-Generator: Gtranslator 3.32.0\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#| msgid "translator-credits"
 msgctxt "_"
 msgid "translator-credits"
 msgstr ""
@@ -311,6 +310,8 @@ msgid ""
 "<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
 "reporting</link>—report new bugs or request new features"
 msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Informar de "
+"errores</link>—informe de errores o solicitar nuevas características"
 
 #. (itstool) path: item/p
 #: C/contributing.page:19
@@ -351,7 +352,6 @@ msgstr "Gracias por contribuir a mejorar Geary."
 #. update your localized copy. The msgstr is not used at all. Set it to
 #. whatever you like once you have updated your copy of the file.
 #: C/index.page:5
-#| msgid "@@image: 'figures/geary.svg'; md5=18b50c9e10fe5256ae1cb12aaa3a7600"
 msgctxt "_"
 msgid "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
 msgstr ""
@@ -374,7 +374,6 @@ msgstr "Uso de Geary"
 
 #. (itstool) path: section/title
 #: C/index.page:16
-#| msgid "Composing and replying"
 msgid "Contributing and bug reporting"
 msgstr "Contribuir e informar de errores"
 
@@ -679,7 +678,6 @@ msgstr "Lectura"
 
 #. (itstool) path: item/title
 #: C/preferences.page:20
-#| msgid "Automatically select next message"
 msgid "<gui>Automatically select next message</gui>"
 msgstr "<gui>Seleccionar automáticamente el mensaje siguiente</gui>"
 
@@ -696,7 +694,6 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:26
-#| msgid "Display conversation preview"
 msgid "<gui>Display conversation preview</gui>"
 msgstr "<gui>Mostrar la vista previa de la conversación</gui>"
 
@@ -711,7 +708,6 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:31
-#| msgid "Use three pane view"
 msgid "<gui>Use three pane view</gui>"
 msgstr "<gui>Usar la vista de tres paneles</gui>"
 
@@ -733,7 +729,6 @@ msgstr "Notificaciones"
 
 #. (itstool) path: item/title
 #: C/preferences.page:43
-#| msgid "Play notification sounds"
 msgid "<gui>Play notification sounds</gui>"
 msgstr "<gui>Reproducir sonidos de notificación</gui>"
 
@@ -746,7 +741,6 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:47
-#| msgid "Show notifications for new mail"
 msgid "<gui>Show notifications for new mail</gui>"
 msgstr "<gui>Mostrar notificaciones de mensajes nuevos</gui>"
 
@@ -772,10 +766,6 @@ msgstr "<gui>Comprobar si hay correo nuevo cuando está cerrado</gui>"
 
 #. (itstool) path: item/p
 #: C/preferences.page:55
-#| msgid ""
-#| "Geary will watch your accounts for new mail even when the main window is "
-#| "not open. To do this, it will silently start when you log in to your "
-#| "computer, and it will continue to run after you close the main window."
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
@@ -940,8 +930,6 @@ msgstr "<input>to:<var>destinatario</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:64
-#| msgid ""
-#| "Finds messages where <var>sender</var> matches the To, CC, or BCC header."
 msgid ""
 "Finds messages where <var>recipient</var> matches the To, CC, or BCC header."
 msgstr ""
@@ -991,21 +979,16 @@ msgstr "Mostrar este manual de usuario"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:23
-#| msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
 msgid "<keyseq><key>F1</key></keyseq>"
 msgstr "<keyseq><key>F1</key></keyseq>"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:26
-#| msgid "Keyboard shortcuts"
 msgid "Display all keyboard shortcuts"
 msgstr "Mostrar todos los atajos del teclado"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:27
-#| msgid ""
-#| "<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
-#| "key><key>Up</key></keyseq>"
 msgid ""
 "<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
 "key><key>F1</key></keyseq>"
@@ -1172,9 +1155,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/write.page:36
-#| msgid ""
-#| "A number of keyboard shortcuts are available in the composer; see <link "
-#| "xref=\"shortcuts#composer\"/> for details."
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
 "\"shortcuts\"/> for details."
