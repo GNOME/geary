@@ -6,7 +6,8 @@
  */
 
 
-private const int TIMEOUT = 5;
+// 5s is too short for some SMTP servers
+private const int TIMEOUT = 10;
 
 
 public struct Integration.Configuration {
@@ -45,6 +46,12 @@ int main(string[] args) {
     case IMAP:
         integration.add_suite(
             new Integration.Imap.ClientSession(config).get_suite()
+        );
+        break;
+
+    case SMTP:
+        integration.add_suite(
+            new Integration.Smtp.ClientSession(config).get_suite()
         );
         break;
     }
