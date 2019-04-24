@@ -96,6 +96,7 @@ geary_test_integration_sources = [
   'test-integration.vala',
 
   'integration/imap/client-session.vala',
+  'integration/smtp/client-session.vala',
 ]
 
 # Test library
