@@ -21,7 +21,7 @@ public class Geary.RFC822.MailboxAddress :
     Gee.Hashable<MailboxAddress>,
     BaseObject {
 
-    private static char[] ATEXT = {
+    private static unichar[] ATEXT = {
         '!', '#', '$', '%', '&', '\'', '*', '+', '-',
         '/', '=', '?', '^', '_', '`', '{', '|', '}', '~'
     };
@@ -64,17 +64,26 @@ public class Geary.RFC822.MailboxAddress :
         if (!String.is_empty(local_part)) {
             int index = 0;
             for (;;) {
-                char ch = local_part[index++];
-                if (ch == String.EOS)
+                unichar ch;
+                if (!local_part.get_next_char(ref index, out ch)) {
                     break;
+                }
 
                 is_dot = (ch == '.');
 
-                if (!(ch >= 0x41 && ch <= 0x5A) && // A-Z
-                    !(ch >= 0x61 && ch <= 0x7A) && // a-z
-                    !(ch >= 0x30 && ch <= 0x39) && // 0-9
-                    !(ch in ATEXT) &&
-                    !(is_dot && index > 1)) { // no leading dots
+                if (!(
+                        // RFC 5322 ASCII
+                        (ch >= 0x61 && ch <= 0x7A) || // a-z
+                        (ch >= 0x41 && ch <= 0x5A) || // A-Z
+                        (ch >= 0x30 && ch <= 0x39) || // 0-9
+                        // RFC 6532 UTF8
+                        (ch >= 0x80 && ch <= 0x07FF) ||      // UTF-8 2 byte
+                        (ch >= 0x800 && ch <= 0xFFFF) ||     // UTF-8 3 byte
+                        (ch >= 0x10000 && ch <= 0x10FFFF) || // UTF-8 4 byte
+                        // RFC 5322 atext
+                        (ch in ATEXT) ||
+                        // RFC 5322 dot-atom (no leading quotes)
+                        (is_dot && index > 1))) {
                     needs_quote = true;
                     break;
                 }
@@ -436,12 +445,14 @@ public class Geary.RFC822.MailboxAddress :
      * brackets.
      */
     public string to_rfc822_address() {
-        // XXX GMime.utils_header_encode_text won't quote if spaces or
-        // quotes present, and GMime.utils_quote_string will
-        // erroneously quote if a '.'  is present (which at least
-        // Yahoo doesn't like in SMTP return paths), so need to quote
+        // GMime.utils_header_encode_text won't quote if spaces or
+        // quotes present, GMime.utils_quote_string will erroneously
+        // quote if a '.'  is present (which at least Yahoo doesn't
+        // like in SMTP return paths), and
+        // GMime.utils_header_encode_text will use MIME encoding,
+        // which is disallowed in mailboxes by RFC 2074 §5. So quote
         // manually.
-        string local_part = GMime.utils_header_encode_text(this.mailbox);
+        string local_part = this.mailbox;
         if (local_part_needs_quoting(local_part)) {
             local_part = quote_string(local_part);
         }
