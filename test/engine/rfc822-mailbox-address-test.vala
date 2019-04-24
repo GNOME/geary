@@ -228,6 +228,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         //       "\"test\" test\"@example.com");
         //assert(new MailboxAddress(null, "test\"test@example.com").to_rfc822_address() ==
         //       "\"test\"test\"@example.com");
+
         assert_string(
             "$test@example.com",
             new MailboxAddress(null, "$test@example.com").to_rfc822_address()
@@ -236,14 +237,19 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
             "\"test@test\"@example.com",
             new MailboxAddress(null, "test@test@example.com").to_rfc822_address()
         );
+
+        // Likewise, Unicode chars should be passed through. Note that
+        // these can only be sent if a UTF8 connection is negotiated
+        // with the SMTP server
         assert_string(
-            "=?iso-8859-1?b?qQ==?=@example.com",
+            "©@example.com",
             new MailboxAddress(null, "©@example.com").to_rfc822_address()
         );
         assert_string(
-            "=?UTF-8?b?8J+YuA==?=@example.com",
+            "😸@example.com",
             new MailboxAddress(null, "😸@example.com").to_rfc822_address()
         );
+
     }
 
     public void to_rfc822_string() throws Error {

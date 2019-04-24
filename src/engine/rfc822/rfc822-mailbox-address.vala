@@ -21,7 +21,7 @@ public class Geary.RFC822.MailboxAddress :
     Gee.Hashable<MailboxAddress>,
     BaseObject {
 
-    private static char[] ATEXT = {
+    private static unichar[] ATEXT = {
         '!', '#', '$', '%', '&', '\'', '*', '+', '-',
         '/', '=', '?', '^', '_', '`', '{', '|', '}', '~'
     };
@@ -64,17 +64,26 @@ public class Geary.RFC822.MailboxAddress :
         if (!String.is_empty(local_part)) {
             int index = 0;
             for (;;) {
-                char ch = local_part[index++];
-                if (ch == String.EOS)
+                unichar ch;
+                if (!local_part.get_next_char(ref index, out ch)) {
                     break;
+                }
 
                 is_dot = (ch == '.');
 
-                if (!(ch >= 0x41 && ch <= 0x5A) && // A-Z
-                    !(ch >= 0x61 && ch <= 0x7A) && // a-z
-                    !(ch >= 0x30 && ch <= 0x39) && // 0-9
-                    !(ch in ATEXT) &&
-                    !(is_dot && index > 1)) { // no leading dots
+                if (!(
+                        // RFC 5322 ASCII
+                        (ch >= 0x61 && ch <= 0x7A) || // a-z
+                        (ch >= 0x41 && ch <= 0x5A) || // A-Z
+                        (ch >= 0x30 && ch <= 0x39) || // 0-9
+                        // RFC 6532 UTF8
+                        (ch >= 0x80 && ch <= 0x07FF) ||      // UTF-8 2 byte
+                        (ch >= 0x800 && ch <= 0xFFFF) ||     // UTF-8 3 byte
+                        (ch >= 0x10000 && ch <= 0x10FFFF) || // UTF-8 4 byte
+                        // RFC 5322 atext
+                        (ch in ATEXT) ||
+                        // RFC 5322 dot-atom (no leading quotes)
+                        (is_dot && index > 1))) {
                     needs_quote = true;
                     break;
                 }
