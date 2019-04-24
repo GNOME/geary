@@ -238,6 +238,15 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
             new MailboxAddress(null, "test@test@example.com").to_rfc822_address()
         );
 
+        // RFC 2047 reserved words in the local-part must be used
+        // as-is, and in particular not encoded per that RFC. See RFC
+        // 2047 §5 and GNOME/geary#336
+        string RFC_2074 = "libc-alpha-sc.1553427554.ndgdflaalknmibgfkpak-hi-angel=yandex.ru@sourceware.org";
+        assert_string(
+            RFC_2074,
+            new MailboxAddress(null, RFC_2074).to_rfc822_address()
+        );
+
         // Likewise, Unicode chars should be passed through. Note that
         // these can only be sent if a UTF8 connection is negotiated
         // with the SMTP server

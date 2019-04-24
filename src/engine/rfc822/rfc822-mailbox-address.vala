@@ -445,12 +445,14 @@ public class Geary.RFC822.MailboxAddress :
      * brackets.
      */
     public string to_rfc822_address() {
-        // XXX GMime.utils_header_encode_text won't quote if spaces or
-        // quotes present, and GMime.utils_quote_string will
-        // erroneously quote if a '.'  is present (which at least
-        // Yahoo doesn't like in SMTP return paths), so need to quote
+        // GMime.utils_header_encode_text won't quote if spaces or
+        // quotes present, GMime.utils_quote_string will erroneously
+        // quote if a '.'  is present (which at least Yahoo doesn't
+        // like in SMTP return paths), and
+        // GMime.utils_header_encode_text will use MIME encoding,
+        // which is disallowed in mailboxes by RFC 2074 §5. So quote
         // manually.
-        string local_part = GMime.utils_header_encode_text(this.mailbox);
+        string local_part = this.mailbox;
         if (local_part_needs_quoting(local_part)) {
             local_part = quote_string(local_part);
         }
