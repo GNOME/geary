@@ -304,12 +304,12 @@ ConversationPageState.getNodeBounds = function(node) {
  * Test for URL-like `text` that leads somewhere other than `href`.
  */
 ConversationPageState.isDeceptiveText = function(text, href) {
-    // First, does text look like a URI?  Right now, just test whether
-    // it has <string>.<string> in it.  More sophisticated tests are
-    // possible.
-    let domain = new RegExp("([a-z]*://)?"               // Optional scheme
-                          + "([^\\s:/]+\\.[^\\s:/\\.]+)" // Domain
-                          + "(/[^\\s]*)?");              // Optional path
+    // First, does text look like a URI? 
+    let domain = new RegExp("^"
+                          + "([a-z]*://)?"                             // Optional scheme
+                          + "([^\\s:/#%&*@()]+\\.[^\\s:/#%&*@()\\.]+)" // Domain
+                          + "(/[^\\s]*)?"                              // Optional path
+                          + "$");             
     let textParts = text.match(domain);
     if (textParts == null) {
         return ConversationPageState.NOT_DECEPTIVE;

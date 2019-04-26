@@ -17,6 +17,9 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
         add_test("is_deceptive_text_deceptive_href", is_deceptive_text_deceptive_href);
         add_test("is_deceptive_text_non_matching_subdomain", is_deceptive_text_non_matching_subdomain);
         add_test("is_deceptive_text_different_domain", is_deceptive_text_different_domain);
+        add_test("is_deceptive_text_embedded_domain", is_deceptive_text_embedded_domain);
+        add_test("is_deceptive_text_innocuous", is_deceptive_text_innocuous);
+        add_test("is_deceptive_text_gitlab", is_deceptive_text_gitlab);
         add_test("is_descendant_of", is_descendant_of);
         add_test("is_descendant_of_with_class", is_descendant_of_with_class);
         add_test("is_descendant_of_no_match", is_descendant_of_no_match);
@@ -75,6 +78,26 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
         load_body_fixture("<p>my hovercraft is full of eels</p>");
         assert(exec_is_deceptive_text("www.example.com", "phishing.net") ==
                ConversationWebView.DeceptiveText.DECEPTIVE_DOMAIN);
+    }
+
+    public void is_deceptive_text_embedded_domain() throws Error {
+        load_body_fixture("<p>my hovercraft is full of eels</p>");
+        assert(exec_is_deceptive_text("Check out why phishing.net is bad!", "example.com") ==
+               ConversationWebView.DeceptiveText.NOT_DECEPTIVE);
+    }
+
+    public void is_deceptive_text_innocuous() throws Error {
+        // https://gitlab.gnome.org/GNOME/geary/issues/400
+        load_body_fixture("<p>my hovercraft is full of eels</p>");
+        assert(exec_is_deceptive_text("This will be fixed in the next freedesktop-sdk release (18.08.30)", "example.com") ==
+               ConversationWebView.DeceptiveText.NOT_DECEPTIVE);
+    }
+
+    public void is_deceptive_text_gitlab() throws Error {
+        // Link text in gitlab is "@user.name", which was previously false positive (@ can't be part of a domain)
+        load_body_fixture("<p>my hovercraft is full of eels</p>");
+        assert(exec_is_deceptive_text("@user.name", "http://gitlab.org/user.name") ==
+               ConversationWebView.DeceptiveText.NOT_DECEPTIVE);
     }
 
     public void is_descendant_of() throws GLib.Error {
