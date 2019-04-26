@@ -33,6 +33,26 @@
           </object>
         </child>
         <child>
+          <object class="GtkMenuButton" id="main_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">False</property>
+            <property name="always_show_image">True</property>
+            <child>
+              <object class="GtkImage" id="main_menu_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">open-menu-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkToggleButton" id="search_conversations_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -53,26 +73,6 @@
             <property name="position">3</property>
           </packing>
         </child>
-        <child>
-          <object class="GtkMenuButton" id="main_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="main_menu_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">open-menu-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
         <style>
           <class name="geary-titlebar"/>
           <class name="geary-titlebar-left"/>
@@ -91,6 +91,8 @@
         <property name="orientation">vertical</property>
       </object>
       <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
         <property name="position">1</property>
       </packing>
     </child>
@@ -363,4 +365,3 @@
     </child>
   </template>
 </interface>
-
