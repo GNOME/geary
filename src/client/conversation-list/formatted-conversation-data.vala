@@ -6,6 +6,13 @@
 
 // Stores formatted data for a message.
 public class FormattedConversationData : Geary.BaseObject {
+    struct Participants {
+        string? markup;
+
+        // markup may look different depending on whether widget is selected
+        bool was_widget_selected;
+    }
+
     public const int LINE_SPACING = 6;
 
     private const string ME = _("Me");
@@ -101,6 +108,7 @@ public class FormattedConversationData : Geary.BaseObject {
     private bool use_to = true;
     private CountBadge count_badge = new CountBadge(2);
     private string subject_html_escaped;
+    private Participants participants = Participants(){markup = null};
 
     // Creates a formatted message data from an e-mail.
     public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email preview,
@@ -121,6 +129,15 @@ public class FormattedConversationData : Geary.BaseObject {
         this.is_unread = conversation.is_unread();
         this.is_flagged = conversation.is_flagged();
         this.num_emails = conversation.get_count();
+
+        // todo: instead of clearing the cache update it
+        this.conversation.appended.connect(clear_participants_cache);
+        this.conversation.trimmed.connect(clear_participants_cache);
+        this.conversation.email_flags_changed.connect(clear_participants_cache);
+    }
+
+    private void clear_participants_cache(Geary.Email email) {
+        participants.markup = null;
     }
 
     public bool update_date_string() {
@@ -184,6 +201,9 @@ public class FormattedConversationData : Geary.BaseObject {
     }
 
     private string get_participants_markup(Gtk.Widget widget, bool selected) {
+        if (participants.markup != null && participants.was_widget_selected == selected)
+            return participants.markup;
+
         if (conversation == null || account_owner_emails == null || account_owner_emails.size == 0)
             return "";
 
@@ -218,7 +238,7 @@ public class FormattedConversationData : Geary.BaseObject {
 
         if (list.size == 1) {
             // if only one participant, use full name
-            return "<span foreground='%s'>%s</span>"
+            participants.markup = "<span foreground='%s'>%s</span>"
                 .printf(rgba_to_markup(get_foreground_rgba(widget, selected)),
                         list[0].get_full_markup(account_owner_emails));
         } else {
@@ -233,8 +253,10 @@ public class FormattedConversationData : Geary.BaseObject {
                 first = false;
             }
             builder.append("</span>");
-            return builder.str;
+            participants.markup = builder.str;
         }
+        participants.was_widget_selected = selected;
+        return participants.markup;
     }
 
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area,
