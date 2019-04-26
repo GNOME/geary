@@ -67,7 +67,7 @@ iso_codes = dependency('iso-codes')
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
 libcanberra = dependency('libcanberra', version: '>= 0.28')
-libhandy = dependency('libhandy-0.0', version: '>= 0.0.9')
+libhandy = dependency('libhandy-0.0', version: '>= 0.0.9', required: false)
 libmath = cc.find_library('m')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
 libsoup = dependency('libsoup-2.4', version: '>= 2.48')
@@ -87,11 +87,31 @@ if not enchant.found()
   enchant = dependency('enchant', version: '>=1.6')
 endif
 
+# Handy isn't necessarily packaged by distros, so fall back to a
+# subproject until it is.
+if not libhandy.found()
+  libhandy_subproj = subproject(
+    'libhandy',
+    default_options: [
+      'examples=false',
+      'glade_catalog=disabled',
+      'tests=false',
+    ]
+  )
+
+  libhandy = declare_dependency(
+    dependencies: [
+      libhandy_subproj.get_variable('libhandy_dep'),
+      libhandy_subproj.get_variable('libhandy_vapi'),
+    ]
+  )
+endif
+
+# Libunwind system dependencies above ensures appropriate versions,
+# but this declared depencency is what we actually build against so we
+# can include the custom VAPI correctly. We need to add unwind_lib to
+# the search path for these so Flatpak builds can find the C lib.
 if libunwind_dep.found()
-  # Libunwind system dependencies above ensures appropriate versions,
-  # but this declared depencency is what we actually build against so we
-  # can include the custom VAPI correctly. We need to add unwind_lib to
-  # the search path for these so Flatpak builds can find the C lib.
   unwind_lib = libunwind_dep.get_pkgconfig_variable('libdir')
   libunwind = declare_dependency(
      dependencies: [
