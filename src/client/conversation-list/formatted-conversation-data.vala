@@ -6,6 +6,13 @@
 
 // Stores formatted data for a message.
 public class FormattedConversationData : Geary.BaseObject {
+    struct Participants {
+        string? markup;
+
+        // markup may look different depending on whether widget is selected
+        bool was_widget_selected;
+    }
+
     public const int LINE_SPACING = 6;
 
     private const string ME = _("Me");
@@ -77,7 +84,8 @@ public class FormattedConversationData : Geary.BaseObject {
         }
 
         public bool equal_to(ParticipantDisplay other) {
-            return address.equal_to(other.address);
+            return address.equal_to(other.address)
+                && address.name == other.address.name;
         }
 
         public uint hash() {
@@ -91,7 +99,6 @@ public class FormattedConversationData : Geary.BaseObject {
     public bool is_unread { get; set; }
     public bool is_flagged { get; set; }
     public string date { get; private set; }
-    public string subject { get; private set; }
     public string? body { get; private set; default = null; } // optional
     public int num_emails { get; set; }
     public Geary.Email? preview { get; private set; default = null; }
@@ -100,6 +107,8 @@ public class FormattedConversationData : Geary.BaseObject {
     private Gee.List<Geary.RFC822.MailboxAddress>? account_owner_emails = null;
     private bool use_to = true;
     private CountBadge count_badge = new CountBadge(2);
+    private string subject_html_escaped;
+    private Participants participants = Participants(){markup = null};
 
     // Creates a formatted message data from an e-mail.
     public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email preview,
@@ -111,7 +120,8 @@ public class FormattedConversationData : Geary.BaseObject {
 
         // Load preview-related data.
         update_date_string();
-        this.subject = Util.Email.strip_subject_prefixes(preview);
+        this.subject_html_escaped
+            = Geary.HTML.escape_markup(Util.Email.strip_subject_prefixes(preview));
         this.body = Geary.String.reduce_whitespace(preview.get_preview_as_string());
         this.preview = preview;
 
@@ -119,6 +129,15 @@ public class FormattedConversationData : Geary.BaseObject {
         this.is_unread = conversation.is_unread();
         this.is_flagged = conversation.is_flagged();
         this.num_emails = conversation.get_count();
+
+        // todo: instead of clearing the cache update it
+        this.conversation.appended.connect(clear_participants_cache);
+        this.conversation.trimmed.connect(clear_participants_cache);
+        this.conversation.email_flags_changed.connect(clear_participants_cache);
+    }
+
+    private void clear_participants_cache(Geary.Email email) {
+        participants.markup = null;
     }
 
     public bool update_date_string() {
@@ -146,7 +165,7 @@ public class FormattedConversationData : Geary.BaseObject {
         this.is_unread = false;
         this.is_flagged = false;
         this.date = STYLE_EXAMPLE;
-        this.subject = STYLE_EXAMPLE;
+        this.subject_html_escaped = STYLE_EXAMPLE;
         this.body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
         this.num_emails = 1;
     }
@@ -182,15 +201,20 @@ public class FormattedConversationData : Geary.BaseObject {
     }
 
     private string get_participants_markup(Gtk.Widget widget, bool selected) {
+        if (participants.markup != null && participants.was_widget_selected == selected)
+            return participants.markup;
+
         if (conversation == null || account_owner_emails == null || account_owner_emails.size == 0)
             return "";
 
-        // Build chronological list of AuthorDisplay records, setting to unread if any message by
-        // that author is unread
+        // Build chronological list of unique AuthorDisplay records, setting to
+        // unread if any message by that author is unread
         Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>();
         foreach (Geary.Email message in conversation.get_emails(Geary.App.Conversation.Ordering.RECV_DATE_ASCENDING)) {
             // only display if something to display
-            Geary.RFC822.MailboxAddresses? addresses = use_to ? message.to : message.from;
+            Geary.RFC822.MailboxAddresses? addresses = use_to
+                ? new Geary.RFC822.MailboxAddresses.single(Util.Email.get_primary_originator(message))
+                : message.from;
             if (addresses == null || addresses.size < 1)
                 continue;
 
@@ -198,7 +222,6 @@ public class FormattedConversationData : Geary.BaseObject {
                 ParticipantDisplay participant_display = new ParticipantDisplay(address,
                     message.email_flags.is_unread());
 
-                // if not present, add in chronological order
                 int existing_index = list.index_of(participant_display);
                 if (existing_index < 0) {
                     list.add(participant_display);
@@ -208,17 +231,19 @@ public class FormattedConversationData : Geary.BaseObject {
 
                 // if present and this message is unread but the prior were read,
                 // this author is now unread
-                if (message.email_flags.is_unread() && !list[existing_index].is_unread)
+                if (message.email_flags.is_unread())
                     list[existing_index].is_unread = true;
             }
         }
 
-        StringBuilder builder = new StringBuilder("<span foreground='%s'>".printf(
-            rgba_to_markup(get_foreground_rgba(widget, selected))));
         if (list.size == 1) {
             // if only one participant, use full name
-            builder.append(list[0].get_full_markup(account_owner_emails));
+            participants.markup = "<span foreground='%s'>%s</span>"
+                .printf(rgba_to_markup(get_foreground_rgba(widget, selected)),
+                        list[0].get_full_markup(account_owner_emails));
         } else {
+            StringBuilder builder = new StringBuilder("<span foreground='%s'>".printf(
+                rgba_to_markup(get_foreground_rgba(widget, selected))));
             bool first = true;
             foreach (ParticipantDisplay participant in list) {
                 if (!first)
@@ -227,10 +252,11 @@ public class FormattedConversationData : Geary.BaseObject {
                 builder.append(participant.get_short_markup(account_owner_emails));
                 first = false;
             }
+            builder.append("</span>");
+            participants.markup = builder.str;
         }
-        builder.append("</span>");
-
-        return builder.str;
+        participants.was_widget_selected = selected;
+        return participants.markup;
     }
 
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area,
@@ -379,7 +405,7 @@ public class FormattedConversationData : Geary.BaseObject {
         int y, bool selected, int counter_width = 0) {
         string subject_markup = "<span foreground='%s'>%s</span>".printf(
             rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
-            Geary.HTML.escape_markup(subject));
+            subject_html_escaped);
 
         Pango.FontDescription font_subject = new Pango.FontDescription();
         font_subject.set_size(FONT_SIZE_SUBJECT * Pango.SCALE);
@@ -431,4 +457,3 @@ public class FormattedConversationData : Geary.BaseObject {
     }
 
 }
-
