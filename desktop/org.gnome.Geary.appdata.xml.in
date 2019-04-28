@@ -89,6 +89,15 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="3.32.1" date="2019-04-28">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Bug fixes and server compatibility improvements</li>
+          <li>User interface translation updates</li>
+        </ul>
+      </description>
+    </release>
     <release version="3.32" date="2019-03-17">
       <description>
         <p>Enhancements included in this release:</p>

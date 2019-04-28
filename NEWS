@@ -1,3 +1,27 @@
+Version 3.32.1
+~~~~~~~~~~~~~~
+Released: 2019-04-28
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Jiří Černý
+ * Kalev Lember
+ * Konstantin Kharlamov
+ * Niels De Graef
+
+Enhancements included in this release:
+ * Bug fixes and server compatibility improvements
+ * User interface translation updates
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Carles Ferrando Garcia (ca)
+ * Federico Bruni (it)
+ * Piotr Drąg (pl)
+
+And for the user manual:
+ * Daniel Mustieles (es)
+
 Version 3.32
 ~~~~~~~~~~~~
 Released: 2019-03-17
