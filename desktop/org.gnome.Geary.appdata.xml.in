@@ -93,7 +93,13 @@
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
-          <li>TODO</li>
+          <li>Improved desktop contact integration</li>
+          <li>Added support for TNEF attachments</li>
+          <li>Added Inspector window for real-time debugging</li>
+          <li>Updated the user manual</li>
+          <li>Improved server compatibility</li>
+          <li>Numerous bug fixes and user interface improvements</li>
+          <li>Numerous user interface translation updates</li>
         </ul>
       </description>
     </release>

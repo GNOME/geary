@@ -1,3 +1,98 @@
+Version 3.33.1
+~~~~~~~~~~~~~~
+Released: 2019-04-28
+
+"Better late than never"
+
+Enhancements included in this release:
+ * Improved conversation performance
+ * Add dependency on libhandy
+ * Add IMAP and SMTP integration tests
+ * Added support for TNEF attachments
+ * Added Inspector window for real-time debugging
+ * Updated symbolic images
+ * Switched from libnotify to GNotify
+ * Added support for TNEF attachments
+ * Added support for application activation via DBus
+ * Add Inspector for real-time debugging
+ * Integrate desktop contacts into contacts popover
+ * Update the user manual
+ * Improved server compatibility
+ * Numerous bug fixes and user interface improvements
+ * Numerous user interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Christopher Davis
+ * Greg V
+ * Jiří Černý
+ * Jonathan Haas
+ * Kalev Lember
+ * Konstantin Kharlamov
+ * Niels De Graef
+ * Oliver Giles
+ * Rico Tzschichholz
+ * Tobias Bernard
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Anders Jonsson (sv)
+ * Daniel Mustieles (es)
+ * Daniel Șerbănescu (ro)
+ * Federico Bruni (it)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Piotr Drąg (pl)
+ * Rodrigo Lledó (es)
+ * Tim Sabsch (de)
+
+And for the user manual:
+ * Piotr Drąg (pl)
+
+Version 3.32
+~~~~~~~~~~~~
+Released: 2019-03-17
+
+Enhancements included in this release:
+ * Application menu moved to the main window
+ * Desktop contacts are used for sender images
+ * Unknown contacts are given personalised initials and colour
+ * Updated application icons
+ * Improved server compatibility
+ * Custom email CSS now applied to Composer view
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Bilal Elmoussaoui
+ * Christian Kellner
+ * Christopher Davis
+ * Jakub Steiner
+ * Jan Tojnar
+ * Joel Duncan
+ * Konstantin Kharlamov
+ * Kristian Klausen
+ * p3732
+ * Rico Tzschichholz
+ * Thomas Moschny
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Alexandre Franke (fr)
+ * Anders Jonsson (sv)
+ * Ask Hjorth Larsen (da)
+ * Balázs Úr (hu)
+ * Bernd Homuth (de)
+ * Daniel Mustieles (es)
+ * Daniel Șerbănescu (ro)
+ * Fabio Tomat (fur)
+ * Jiri Grönroos (fi)
+ * Nathan Follens (nl)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * Ryuta Fujii (ja)
+ * Serdar Sağlam (tr)
+ * Tim Sabsch (de)
+
 Version 0.13
 ~~~~~~~~~~~~
 Released: 2019-02-17
