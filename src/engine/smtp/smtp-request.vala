@@ -60,19 +60,10 @@ public class Geary.Smtp.MailRequest : Geary.Smtp.Request {
     public MailRequest(Geary.RFC822.MailboxAddress reverse_path) {
         base (Command.MAIL, { "from:<%s>".printf(reverse_path.to_rfc822_address()) });
     }
-
-    public MailRequest.plain(string addr) {
-        base (Command.MAIL, { "from:<%s>".printf(addr) });
-    }
 }
 
 public class Geary.Smtp.RcptRequest : Geary.Smtp.Request {
     public RcptRequest(Geary.RFC822.MailboxAddress to) {
-        base (Command.RCPT, { "to:%s".printf(to.to_address_display("<", ">")) });
-    }
-
-    public RcptRequest.plain(string addr) {
-        base (Command.RCPT, { "to:<%s>".printf(addr) });
+        base (Command.RCPT, { "to:<%s>".printf(to.to_rfc822_address()) });
     }
 }
-
