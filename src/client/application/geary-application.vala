@@ -28,7 +28,7 @@ public class GearyApplication : Gtk.Application {
     public const string WEBSITE_LABEL = _("Visit the Geary web site");
     public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
 
-    public const string VERSION = Geary.Version.GEARY_VERSION;
+    public const string VERSION = Geary.Version.NUMBER;
     public const string INSTALL_PREFIX = _INSTALL_PREFIX;
     public const string GSETTINGS_DIR = _GSETTINGS_DIR;
     public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;
@@ -66,6 +66,7 @@ public class GearyApplication : Gtk.Application {
 
     // Local-only command line options
     private const string OPTION_VERSION = "version";
+    private const string OPTION_VERSION_FULL = "version-full";
 
     // Local command line options
     private const string OPTION_DEBUG = "debug";
@@ -145,6 +146,10 @@ public class GearyApplication : Gtk.Application {
         { OPTION_VERSION, 'v', 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Display program version"), null },
+          // Use this to specify arguments in the help section
+        { OPTION_VERSION_FULL, 'V', 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Display program version and revision id"), null },
           // Use this to specify arguments in the help section
         { GLib.OPTION_REMAINING, 0, 0, GLib.OptionArg.STRING_ARRAY, null, null,
           "[mailto:[...]]" },
@@ -271,6 +276,7 @@ public class GearyApplication : Gtk.Application {
 
         /// Application runtime information label
         info.add({ _("Geary version"), VERSION });
+        info.add({ _("Geary revision"), Geary.Version.ID });
         /// Application runtime information label
         info.add({ _("GTK version"),
                     "%u.%u.%u".printf(
@@ -385,6 +391,14 @@ public class GearyApplication : Gtk.Application {
                 "%s: %s\n", this.binary, GearyApplication.VERSION
             );
             return 0;
+        } else if (options.contains(OPTION_VERSION_FULL)) {
+            GLib.stdout.printf(
+                "%s: %s (%s)\n",
+                this.binary,
+                GearyApplication.VERSION,
+                Geary.Version.ID
+            );
+            return 0;
         }
 
         return -1;
@@ -469,6 +483,22 @@ public class GearyApplication : Gtk.Application {
     public async void show_about() {
         yield this.present();
 
+        // Use just the version string for stable builds, i.e. those
+        // with even-numbered minor revisions like "3.32.0", but show
+        // the version number and revision for unstable builds
+        // i.e. those with odd-numbered minor revisions like "3.33.0"
+        string displayed_version = VERSION;
+        string[] version_parts = VERSION.split(".");
+        if (version_parts.length >= 2) {
+            int minor = int.parse(version_parts[1]);
+            if (minor % 2 == 1) {
+                displayed_version = "%s (%s)".printf(
+                    Geary.Version.NUMBER,
+                    Geary.Version.ID
+                );
+            }
+        }
+
         Gtk.show_about_dialog(get_active_window(),
             "program-name", NAME,
             "comments", DESCRIPTION,
@@ -476,7 +506,7 @@ public class GearyApplication : Gtk.Application {
             "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
             "license-type", Gtk.License.LGPL_2_1,
             "logo-icon-name", APP_ID,
-            "version", VERSION,
+            "version", displayed_version,
             "website", WEBSITE,
             "website-label", WEBSITE_LABEL,
             "title", _("About %s").printf(NAME),
@@ -674,8 +704,11 @@ public class GearyApplication : Gtk.Application {
         lock (this.controller) {
             if (this.controller == null) {
                 message(
-                    "%s %s prefix=%s exec_dir=%s is_installed=%s",
-                    NAME, VERSION, INSTALL_PREFIX,
+                    "%s %s (%s) prefix=%s exec_dir=%s is_installed=%s",
+                    NAME,
+                    VERSION,
+                    Geary.Version.ID,
+                    INSTALL_PREFIX,
                     exec_dir.get_path(),
                     this.is_installed.to_string()
                 );

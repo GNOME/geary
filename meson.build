@@ -182,9 +182,13 @@ conf.set_quoted('_WEB_EXTENSIONS_DIR', web_extensions_dir)
 conf.set_quoted('LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
 conf.set_quoted('ISO_CODE_639_XML', iso_639_xml)
 conf.set_quoted('ISO_CODE_3166_XML', iso_3166_xml)
-conf.set('HAVE_FTS3_TOKENIZE', true)
-conf.set('VERSION', meson.project_version())
 conf.set('GCR_API_SUBJECT_TO_CHANGE', true)
+conf.set('HAVE_FTS3_TOKENIZE', true)
+# geary-version.vala.in gets configured twice (once for the version,
+# once for the revision), so make sure the revision template carries
+# through to the second time.
+conf.set('REVISION', '@REVISION@')
+conf.set('VERSION', meson.project_version())
 configure_file(output: 'config.h', configuration: conf)
 
 # Post-install scripts

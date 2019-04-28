@@ -1,21 +1,18 @@
 # Version
 
-if meson.project_version().endswith('-dev')
-  # Development build
-  geary_version_vala = vcs_tag(
-    command: '../build-aux/git_version.py',
-    input: 'geary-version.vala.in',
-    output: 'geary-version.vala',
-    replace_string: '@VERSION@'
-  )
-else
-  # Release build
-  geary_version_vala = configure_file(
-    input: 'geary-version.vala.in',
-    output: 'geary-version.vala',
-    configuration: conf,
-  )
-endif
+geary_version_in = configure_file(
+  input: 'geary-version.vala.in',
+  output: 'geary-version.vala.in',
+  configuration: conf,
+  install: false
+)
+
+geary_version_vala = vcs_tag(
+  command: '../build-aux/git_version.py',
+  input: geary_version_in,
+  output: 'geary-version.vala',
+  replace_string: '@REVISION@'
+)
 
 # Common vala options
 geary_vala_options = [

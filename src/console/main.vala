@@ -409,7 +409,7 @@ class ImapConsole : Gtk.Window {
 
         Gee.HashMap<string, string> fields = new Gee.HashMap<string, string>();
         fields.set("name", "geary-console");
-        fields.set("version", Geary.Version.GEARY_VERSION);
+        fields.set("version", Geary.Version.NUMBER);
 
         this.cx.send_command(new Geary.Imap.IdCommand(fields));
     }
