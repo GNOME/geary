@@ -6,3 +6,10 @@ option('iso_639_xml', type: 'string', value: '', description: 'Full path to the 
 option('iso_3166_xml', type: 'string', value: '', description: 'Full path to the ISO 3166 XML file.')
 option('libunwind_optional', type: 'boolean', value: false, description: 'Determines if libunwind is required.')
 option('tnef-support', type: 'boolean', value: true, description: 'Whether to support TNEF attachments (requires libytnef).')
+option(
+  'profile',
+  type: 'combo',
+  value: 'default',
+  choices: ['default','development'],
+  description: 'The build profile for Geary. One of "default" or "development".'
+)

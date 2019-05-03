@@ -3,7 +3,7 @@
 <!-- Copyright 2016, 2019 Michael Gratton <mike@vee.net> -->
 
 <component type="desktop-application">
-  <id>org.gnome.Geary.desktop</id>
+  <id>@appid@.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LGPL-2.1+</project_license>
   <update_contact>geary-list@gnome.org</update_contact>
@@ -81,10 +81,10 @@
         and the proper app id is listed here here, instead of the
         other way around.
     -->
-    <id>org.gnome.Geary</id>
+    <id>@appid@</id>
   </provides>
 
-  <launchable type="desktop-id">org.gnome.Geary.desktop</launchable>
+  <launchable type="desktop-id">@appid@.desktop</launchable>
 
   <translation type="gettext">geary</translation>
 

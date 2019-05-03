@@ -2,25 +2,44 @@
 # Desktop files
 #
 
-desktop_src = [
-  'org.gnome.Geary.desktop',
-  'geary-autostart.desktop'
-]
+desktop_output = []
+desktop_conf = configuration_data()
+desktop_conf.set('appid', geary_id)
 
-foreach desktop_file: desktop_src
-  desktop_merged = i18n.merge_file(
-    input: desktop_file + '.in',
-    output: desktop_file,
-    type: 'desktop',
-    po_dir: po_dir,
-    install: true,
-    install_dir: join_paths(datadir, 'applications')
-  )
+desktop_file = i18n.merge_file(
+  input: configure_file(
+    input: 'org.gnome.Geary.desktop.in.in',
+    output: 'org.gnome.Geary.desktop.in',
+    configuration: desktop_conf
+  ),
+  output: '@0@.desktop'.format(geary_id),
+  type: 'desktop',
+  po_dir: po_dir,
+  install: true,
+  install_dir: join_paths(datadir, 'applications')
+)
+desktop_output += desktop_file
+
+autostart_file = i18n.merge_file(
+  input: configure_file(
+    input: 'geary-autostart.desktop.in.in',
+    output: 'geary-autostart.desktop.in',
+    configuration: desktop_conf
+  ),
+  output: 'geary-autostart.desktop',
+  type: 'desktop',
+  po_dir: po_dir,
+  install: true,
+  install_dir: join_paths(datadir, 'applications')
+)
+desktop_output += autostart_file
+
+foreach desktop_file: desktop_output
   if desktop_file_validate.found()
     test(
-      desktop_file + '-validate',
+      'desktop-file-validate',
       desktop_file_validate,
-      args: [ desktop_merged.full_path() ]
+      args: [ desktop_file.full_path() ]
     )
   endif
 endforeach
@@ -32,8 +51,12 @@ endforeach
 appdata_file = 'org.gnome.Geary.appdata.xml'
 
 appdata_merged = i18n.merge_file(
-  input: appdata_file + '.in',
-  output: appdata_file,
+  input: configure_file(
+    input: appdata_file + '.in.in',
+    output: appdata_file + '.in',
+    configuration: desktop_conf
+  ),
+  output: '@0@.appdata.xml'.format(geary_id),
   type: 'xml',
   po_dir: po_dir,
   install: true,
@@ -94,10 +117,11 @@ install_data('org.gnome.Geary.gschema.xml',
 
 service_conf = configuration_data()
 service_conf.set('bindir', bindir)
+service_conf.set('appid', geary_id)
 
 configure_file(
   input: 'org.gnome.Geary.service.in',
-  output: 'org.gnome.Geary.service',
+  output: '@0@.service'.format(geary_id),
   configuration: service_conf,
   install: true,
   install_dir: dbus_services_dir

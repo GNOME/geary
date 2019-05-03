@@ -13,14 +13,19 @@ extern const string _WEB_EXTENSIONS_DIR;
 extern const string _SOURCE_ROOT_DIR;
 extern const string _BUILD_ROOT_DIR;
 extern const string GETTEXT_PACKAGE;
+extern const string _APP_ID;
+extern const string _NAME_SUFFIX;
+extern const string _PROFILE;
+extern const string _VERSION;
 
 /**
  * The interface between Geary and the desktop environment.
  */
 public class GearyApplication : Gtk.Application {
 
-    public const string NAME = "Geary";
-    public const string APP_ID = "org.gnome.Geary";
+    public const string NAME = "Geary" + _NAME_SUFFIX;
+    public const string APP_ID = _APP_ID;
+    public const string SCHEMA_ID = "org.gnome.Geary";
     public const string DESCRIPTION = _("Send and receive email");
     public const string COPYRIGHT_1 = _("Copyright 2016 Software Freedom Conservancy Inc.");
     public const string COPYRIGHT_2 = _("Copyright 2016-2019 Geary Development Team.");
@@ -28,7 +33,7 @@ public class GearyApplication : Gtk.Application {
     public const string WEBSITE_LABEL = _("Visit the Geary web site");
     public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
 
-    public const string VERSION = Geary.Version.NUMBER;
+    public const string VERSION = _VERSION;
     public const string INSTALL_PREFIX = _INSTALL_PREFIX;
     public const string GSETTINGS_DIR = _GSETTINGS_DIR;
     public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;
@@ -66,7 +71,6 @@ public class GearyApplication : Gtk.Application {
 
     // Local-only command line options
     private const string OPTION_VERSION = "version";
-    private const string OPTION_VERSION_FULL = "version-full";
 
     // Local command line options
     private const string OPTION_DEBUG = "debug";
@@ -146,10 +150,6 @@ public class GearyApplication : Gtk.Application {
         { OPTION_VERSION, 'v', 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Display program version"), null },
-          // Use this to specify arguments in the help section
-        { OPTION_VERSION_FULL, 'V', 0, GLib.OptionArg.NONE, null,
-          /// Command line option
-          N_("Display program version and revision id"), null },
           // Use this to specify arguments in the help section
         { GLib.OPTION_REMAINING, 0, 0, GLib.OptionArg.STRING_ARRAY, null, null,
           "[mailto:[...]]" },
@@ -277,7 +277,6 @@ public class GearyApplication : Gtk.Application {
 
         /// Application runtime information label
         info.add({ _("Geary version"), VERSION });
-        info.add({ _("Geary revision"), Geary.Version.ID });
         /// Application runtime information label
         info.add({ _("GTK version"),
                     "%u.%u.%u".printf(
@@ -392,16 +391,7 @@ public class GearyApplication : Gtk.Application {
                 "%s: %s\n", this.binary, GearyApplication.VERSION
             );
             return 0;
-        } else if (options.contains(OPTION_VERSION_FULL)) {
-            GLib.stdout.printf(
-                "%s: %s (%s)\n",
-                this.binary,
-                GearyApplication.VERSION,
-                Geary.Version.ID
-            );
-            return 0;
         }
-
         return -1;
     }
 
@@ -424,7 +414,7 @@ public class GearyApplication : Gtk.Application {
         // Calls Gtk.init(), amongst other things
         base.startup();
 
-        this.config = new Configuration(APP_ID);
+        this.config = new Configuration(SCHEMA_ID);
         this.autostart = new Application.StartupManager(
             this.config, this.get_desktop_directory()
         );
@@ -484,22 +474,6 @@ public class GearyApplication : Gtk.Application {
     public async void show_about() {
         yield this.present();
 
-        // Use just the version string for stable builds, i.e. those
-        // with even-numbered minor revisions like "3.32.0", but show
-        // the version number and revision for unstable builds
-        // i.e. those with odd-numbered minor revisions like "3.33.0"
-        string displayed_version = VERSION;
-        string[] version_parts = VERSION.split(".");
-        if (version_parts.length >= 2) {
-            int minor = int.parse(version_parts[1]);
-            if (minor % 2 == 1) {
-                displayed_version = "%s (%s)".printf(
-                    Geary.Version.NUMBER,
-                    Geary.Version.ID
-                );
-            }
-        }
-
         Gtk.show_about_dialog(get_active_window(),
             "program-name", NAME,
             "comments", DESCRIPTION,
@@ -507,7 +481,7 @@ public class GearyApplication : Gtk.Application {
             "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
             "license-type", Gtk.License.LGPL_2_1,
             "logo-icon-name", APP_ID,
-            "version", displayed_version,
+            "version", VERSION,
             "website", WEBSITE,
             "website-label", WEBSITE_LABEL,
             "title", _("About %s").printf(NAME),
@@ -709,10 +683,9 @@ public class GearyApplication : Gtk.Application {
             int mutex_token = yield this.controler_mutex.claim_async();
             if (this.controller == null) {
                 message(
-                    "%s %s (%s) prefix=%s exec_dir=%s is_installed=%s",
+                    "%s %s prefix=%s exec_dir=%s is_installed=%s",
                     NAME,
                     VERSION,
-                    Geary.Version.ID,
                     INSTALL_PREFIX,
                     exec_dir.get_path(),
                     this.is_installed.to_string()

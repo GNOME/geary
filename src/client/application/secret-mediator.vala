@@ -13,7 +13,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     private const string ATTR_PROTO = "proto";
 
     private static Secret.Schema schema = new Secret.Schema(
-        GearyApplication.APP_ID,
+        GearyApplication.SCHEMA_ID,
         Secret.SchemaFlags.NONE,
         ATTR_LOGIN, Secret.SchemaAttributeType.STRING,
         ATTR_HOST, Secret.SchemaAttributeType.STRING,

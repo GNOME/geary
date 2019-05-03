@@ -5,7 +5,7 @@ Comment=Send and receive email
 # Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 Keywords=Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;
 # Translators: Do NOT translate or transliterate this text (this is an icon file name)!
-Icon=org.gnome.Geary
+Icon=@appid@
 TryExec=geary
 Exec=geary %U
 Type=Application

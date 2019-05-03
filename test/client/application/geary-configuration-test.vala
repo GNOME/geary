@@ -16,7 +16,7 @@ class ConfigurationTest : TestCase {
 
     public override void set_up() {
         Environment.unset_variable("XDG_CURRENT_DESKTOP");
-        this.test_config = new Configuration(GearyApplication.APP_ID);
+        this.test_config = new Configuration(GearyApplication.SCHEMA_ID);
     }
 
     public void desktop_environment() throws Error {
