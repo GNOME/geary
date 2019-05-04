@@ -810,7 +810,9 @@ public class Geary.Imap.ClientSession : BaseObject {
         debug("[%s] Connect denied: %s", to_string(), status_response.to_string());
 
         fsm.do_post_transition(() => { session_denied(status_response.get_text()); });
-        connect_err = new ImapError.SERVER_ERROR("Session denied: %s", status_response.get_text());
+        connect_err = new ImapError.UNAVAILABLE(
+            "Session denied: %s", status_response.get_text()
+        );
 
         return State.LOGGED_OUT;
     }

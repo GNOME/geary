@@ -30,10 +30,18 @@ public errordomain Geary.ImapError {
      * Indicates the connection is already established or authentication has been granted.
      */
     ALREADY_CONNECTED,
+
     /**
-     * Indicates a request failed according to a returned response.
+     * A request failed due to an explicit or implicit BAD response.
+     *
+     * An explicit BAD response is as per RFC 3501 §7.3.1. An implicit
+     * BAD response is when the server returns an unexpected response,
+     * for example, sends a status response for the same command twice.
+     *
+     * @see https://tools.ietf.org/html/rfc3501#section-7.1.3
      */
     SERVER_ERROR,
+
     /**
      * Indicates that an operation could not proceed without prior authentication.
      */
@@ -52,9 +60,9 @@ public errordomain Geary.ImapError {
      * This indicates a local time out, not one reported by the server.
      */
     TIMED_OUT,
+
     /**
-     * Network is unavailable.
+     * The remote IMAP server not currently available.
      */
     UNAVAILABLE
 }
-

@@ -125,12 +125,12 @@ public class Geary.Imap.Command : BaseObject {
      */
     internal void assign_tag(Tag new_tag) throws ImapError {
         if (this.tag.is_assigned()) {
-            throw new ImapError.SERVER_ERROR(
+            throw new ImapError.NOT_SUPPORTED(
                 "%s: Command tag is already assigned", to_brief_string()
             );
         }
         if (!new_tag.is_assigned()) {
-            throw new ImapError.SERVER_ERROR(
+            throw new ImapError.NOT_SUPPORTED(
                 "%s: New tag is not assigned", to_brief_string()
             );
         }
