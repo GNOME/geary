@@ -75,11 +75,12 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         string current_address_remainder;
         Gee.List<string> addresses = get_addresses(sender, out current_address_index, null,
             out current_address_remainder);
+        bool current_address_is_last = (current_address_index == addresses.size - 1);
         addresses[current_address_index] = full_address;
         if (!Geary.String.is_empty_or_whitespace(current_address_remainder))
             addresses.insert(current_address_index + 1, current_address_remainder);
         string delimiter = ", ";
-        entry.text = concat_strings(addresses, delimiter);
+        entry.text = concat_strings(addresses, delimiter, current_address_is_last);
 
         int characters_seen_so_far = 0;
         for (int i = 0; i <= current_address_index; i++)
@@ -159,15 +160,18 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         return addresses;
     }
 
-    // We could only add the delimiter *between* each string (i.e., don't add it after the last
-    // string). But it's easier for the user if they don't have to manually type a comma after
-    // adding each address. So we add the delimiter after every string.
-    private string concat_strings(Gee.List<string> strings, string delimiter) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < strings.size; i++) {
-            builder.append(strings[i]);
+    private string concat_strings(Gee.List<string> strings, string delimiter, bool add_trailing) {
+        StringBuilder builder = new StringBuilder(strings[0]);
+        for (int i = 1; i < strings.size; i++) {
             builder.append(delimiter);
+            builder.append(strings[i]);
         }
+
+        // If the address was appended to the end of the list, add another
+        // delimiter so that the user doesn't have to manually type a comma
+        // after adding each address
+        if (add_trailing)
+            builder.append(delimiter);
 
         return builder.str;
     }
