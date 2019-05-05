@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-03-11 08:07+0000\n"
-"PO-Revision-Date: 2019-03-11 14:03+0100\n"
+"POT-Creation-Date: 2019-04-18 07:39+0000\n"
+"PO-Revision-Date: 2019-05-05 17:17+0200\n"
 "Last-Translator: Tim Sabsch <tim@sabsch.com>\n"
 "Language-Team: Deutsch <translation-team-de@lists.sourceforge.net>\n"
 "Language: de\n"
@@ -34,11 +34,6 @@ msgstr ""
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
 msgstr "Als E-Mail versenden"
-
-#. Translators: Do NOT translate or transliterate this text (this is an icon file name)!
-#: desktop/geary-attach.contract.desktop.in:5
-msgid "mail-send"
-msgstr "mail-send"
 
 #: desktop/geary-attach.contract.desktop.in:6
 msgid "Send files using Geary"
@@ -67,12 +62,7 @@ msgstr "Senden und empfangen"
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/geary-autostart.desktop.in:7
 msgid "Email;E-mail;Mail;"
-msgstr "Email;E-Mail;Mail;"
-
-#. Translators: Do NOT translate or transliterate this text (this is an icon file name)!
-#: desktop/geary-autostart.desktop.in:9 desktop/org.gnome.Geary.desktop.in:9
-msgid "org.gnome.Geary"
-msgstr "org.gnome.Geary"
+msgstr "Email;E-Mail;Mail;Post;"
 
 #. Translators: The development team's name
 #: desktop/org.gnome.Geary.appdata.xml.in:13
@@ -132,7 +122,7 @@ msgid "Geary displaying a conversation"
 msgstr "Geary zeigt eine Konversationsvorschau an"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in:52
+#: desktop/org.gnome.Geary.appdata.xml.in:58
 msgid "Geary showing the rich text composer"
 msgstr "Geary zeigt den Editor für formatierten Text"
 
@@ -890,19 +880,19 @@ msgstr "Unbekanntes Befehlszeilenargument »%s«\n"
 msgid "Untitled"
 msgstr "Unbenannt"
 
-#: src/client/application/geary-controller.vala:954
+#: src/client/application/geary-controller.vala:959
 msgid "Labels"
 msgstr "Beschriftungen"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:967
+#: src/client/application/geary-controller.vala:972
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Die Datenbank für %s konnte nicht geöffnet werden"
 
-#: src/client/application/geary-controller.vala:968
+#: src/client/application/geary-controller.vala:973
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -927,20 +917,20 @@ msgstr ""
 "dazugehörigen Anhänge verloren. <b>E-Mails auf Ihrem Server werden nicht "
 "betroffen sein.</b>"
 
-#: src/client/application/geary-controller.vala:970
+#: src/client/application/geary-controller.vala:975
 msgid "_Rebuild"
 msgstr "_Wiederherstellen"
 
-#: src/client/application/geary-controller.vala:970
+#: src/client/application/geary-controller.vala:975
 msgid "E_xit"
 msgstr "B_eenden"
 
-#: src/client/application/geary-controller.vala:979
+#: src/client/application/geary-controller.vala:984
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Die Datenbank für »%s« konnte nicht wiederhergestellt werden"
 
-#: src/client/application/geary-controller.vala:980
+#: src/client/application/geary-controller.vala:985
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -951,15 +941,15 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1835
+#: src/client/application/geary-controller.vala:1840
 msgid "Undo move (Ctrl+Z)"
 msgstr "Verschieben rückgängig machen (Strg+Z)"
 
-#: src/client/application/geary-controller.vala:1845
+#: src/client/application/geary-controller.vala:1850
 msgid "Are you sure you want to open these attachments?"
 msgstr "Möchten Sie wirklich diese Anhänge öffnen?"
 
-#: src/client/application/geary-controller.vala:1846
+#: src/client/application/geary-controller.vala:1851
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -967,14 +957,14 @@ msgstr ""
 "Anhänge können Ihr System beschädigen, wenn diese geöffnet werden. Öffnen "
 "Sie nur Dateien aus vertrauenswürdigen Quellen."
 
-#: src/client/application/geary-controller.vala:1847
+#: src/client/application/geary-controller.vala:1852
 msgid "Don’t _ask me again"
 msgstr "Nicht _noch einmal fragen"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/geary-controller.vala:1976
+#: src/client/application/geary-controller.vala:1981
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Die Datei »%s« existiert schon. Möchten Sie diese ersetzen?"
@@ -982,7 +972,7 @@ msgstr "Die Datei »%s« existiert schon. Möchten Sie diese ersetzen?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/geary-controller.vala:1983
+#: src/client/application/geary-controller.vala:1988
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -990,69 +980,69 @@ msgstr ""
 "Die Datei existiert bereits in »%s«. Beim Ersetzen wird die Datei "
 "überschrieben."
 
-#: src/client/application/geary-controller.vala:1987
+#: src/client/application/geary-controller.vala:1992
 msgid "_Replace"
 msgstr "_Ersetzen"
 
-#: src/client/application/geary-controller.vala:2263
+#: src/client/application/geary-controller.vala:2268
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Nachrichtenentwurf schließen?"
 msgstr[1] "Alle Nachrichtenentwürfe schließen?"
 
-#: src/client/application/geary-controller.vala:2389
+#: src/client/application/geary-controller.vala:2394
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Alle E-Mails aus dem Ordner %s löschen?"
 
-#: src/client/application/geary-controller.vala:2390
+#: src/client/application/geary-controller.vala:2395
 msgid "This removes the email from Geary and your email server."
 msgstr "Dies wird die E-Mail aus Geary und von Ihrem E-Mail-Server löschen."
 
-#: src/client/application/geary-controller.vala:2391
+#: src/client/application/geary-controller.vala:2396
 msgid "This cannot be undone."
 msgstr "Dies kann nicht rückgängig gemacht werden."
 
-#: src/client/application/geary-controller.vala:2392
+#: src/client/application/geary-controller.vala:2397
 #, c-format
 msgid "Empty %s"
 msgstr "%s leeren"
 
-#: src/client/application/geary-controller.vala:2409
+#: src/client/application/geary-controller.vala:2414
 #, c-format
 msgid "Error emptying %s"
 msgstr "Fehler beim Leeren von %s"
 
-#: src/client/application/geary-controller.vala:2441
+#: src/client/application/geary-controller.vala:2446
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Möchten Sie diese Nachricht dauerhaft löschen?"
 msgstr[1] "Möchten Sie diese Nachrichten dauerhaft löschen?"
 
-#: src/client/application/geary-controller.vala:2443
+#: src/client/application/geary-controller.vala:2448
 msgid "Delete"
 msgstr "Löschen"
 
-#: src/client/application/geary-controller.vala:2457
+#: src/client/application/geary-controller.vala:2462
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Papierkorb rückgängig (Strg+Z)"
 
-#: src/client/application/geary-controller.vala:2507
+#: src/client/application/geary-controller.vala:2512
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Archivieren rückgängig (Strg+Z)"
 
-#: src/client/application/geary-controller.vala:2552
+#: src/client/application/geary-controller.vala:2557
 msgid "Undo (Ctrl+Z)"
 msgstr "Rückgängig (Strg+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2633
+#: src/client/application/geary-controller.vala:2638
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Nachricht an %s wurde erfolgreich gesendet."
 
-#: src/client/application/geary-controller.vala:2715
+#: src/client/application/geary-controller.vala:2720
 msgid "Failed to open default text editor."
 msgstr "Der Standard-Texteditor konnte nicht geöffnet werden."
 
@@ -1532,21 +1522,21 @@ msgstr "Anhang kann nicht hinzugefügt werden"
 
 #. Translators: Human-readable version of the RFC 822 To header
 #: src/client/composer/composer-widget.vala:1716
-#: src/client/conversation-viewer/conversation-email.vala:981
+#: src/client/conversation-viewer/conversation-email.vala:982
 #: src/engine/rfc822/rfc822-utils.vala:298 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "An:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
 #: src/client/composer/composer-widget.vala:1722
-#: src/client/conversation-viewer/conversation-email.vala:986
+#: src/client/conversation-viewer/conversation-email.vala:987
 #: src/engine/rfc822/rfc822-utils.vala:303 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Kopie:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
 #: src/client/composer/composer-widget.vala:1728
-#: src/client/conversation-viewer/conversation-email.vala:991
+#: src/client/conversation-viewer/conversation-email.vala:992
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Blindkopie:"
@@ -1649,19 +1639,19 @@ msgid "Unknown"
 msgstr "Unbekannt"
 
 #. Translators: Human-readable version of the RFC 822 From header
-#: src/client/conversation-viewer/conversation-email.vala:976
+#: src/client/conversation-viewer/conversation-email.vala:977
 #: src/engine/rfc822/rfc822-utils.vala:289
 msgid "From:"
 msgstr "Von:"
 
 #. Translators: Human-readable version of the RFC 822 Date header
-#: src/client/conversation-viewer/conversation-email.vala:996
+#: src/client/conversation-viewer/conversation-email.vala:997
 #: src/engine/rfc822/rfc822-utils.vala:294
 msgid "Date:"
 msgstr "Datum:"
 
 #. Translators: Human-readable version of the RFC 822 Subject header
-#: src/client/conversation-viewer/conversation-email.vala:1001
+#: src/client/conversation-viewer/conversation-email.vala:1002
 #: src/engine/rfc822/rfc822-utils.vala:292
 msgid "Subject:"
 msgstr "Betreff:"
@@ -2249,7 +2239,7 @@ msgstr "ungelesen"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:935
+#: src/engine/imap-engine/imap-engine-generic-account.vala:937
 msgid "Drafts | Draft"
 msgstr "Entwürfe | Entwurf"
 
@@ -2257,7 +2247,7 @@ msgstr "Entwürfe | Entwurf"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:944
+#: src/engine/imap-engine/imap-engine-generic-account.vala:946
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Gesendet | Gesendete E-Mail | Gesendete E-Mails | Sent | Sent Mail | Sent "
@@ -2265,7 +2255,7 @@ msgstr ""
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:949
+#: src/engine/imap-engine/imap-engine-generic-account.vala:951
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Gesendete Objekte"
@@ -2274,7 +2264,7 @@ msgstr "Gesendete Objekte"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:959
+#: src/engine/imap-engine/imap-engine-generic-account.vala:961
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2286,13 +2276,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:969
+#: src/engine/imap-engine/imap-engine-generic-account.vala:971
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Papierkorb | Müll | Trash | Rubbish | Rubbish Bin"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:974
+#: src/engine/imap-engine/imap-engine-generic-account.vala:976
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Gelöschte Objekte"
@@ -2301,7 +2291,7 @@ msgstr "Gelöschte Objekte"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:984
+#: src/engine/imap-engine/imap-engine-generic-account.vala:986
 msgid "Archive | Archives"
 msgstr "Archiv | Archive | Archive | Archives"
 
@@ -3353,6 +3343,12 @@ msgstr "Details:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Aktualisierung von Geary wird durchgeführt …"
+
+#~ msgid "mail-send"
+#~ msgstr "mail-send"
+
+#~ msgid "org.gnome.Geary"
+#~ msgstr "org.gnome.Geary"
 
 #~ msgid "Base URL to look up contact avatars"
 #~ msgstr "Basis-Adresse zum Abruf von Kontakt-Benutzerbildern"
