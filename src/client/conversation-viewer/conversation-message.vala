@@ -223,7 +223,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     internal Gtk.Grid infobars;
 
     /** HTML view that displays the message body. */
-    internal ConversationWebView web_view { get; private set; }
+    private ConversationWebView web_view { get; private set; }
+
+    public bool is_content_loaded { get { return web_view.is_content_loaded; } }
 
     // The message headers represented by this view
     private Geary.EmailHeaderSet headers;
@@ -346,6 +348,20 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         string uri, string? alt_text, Geary.Memory.Buffer? buffer
     );
 
+    /** Emitted when web_view has loaded a resource added to it. */
+    public signal void internal_resource_loaded(string name);
+
+    /** Emitted when web_view's selection has changed. */
+    public signal void selection_changed(bool has_selection);
+
+    /**
+     * Emitted when web_view's content has finished loaded.
+     *
+     * See {@link is_content_loaded} for detail about when this is
+     * emitted.
+     */
+    public signal void content_loaded();
+
 
     /**
      * Constructs a new view from an email's headers and body.
@@ -385,6 +401,18 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             contacts,
             config
         );
+    }
+
+    private void trigger_internal_resource_loaded(string name) {
+        internal_resource_loaded(name);
+    }
+
+    private void trigger_content_loaded() {
+        content_loaded();
+    }
+
+    private void trigger_selection_changed(bool has_selection) {
+        selection_changed(has_selection);
     }
 
     private ConversationMessage(Geary.EmailHeaderSet headers,
@@ -487,6 +515,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.remote_images_infobar.show();
             });
         this.web_view.selection_changed.connect(on_selection_changed);
+        this.web_view.internal_resource_loaded.connect(trigger_internal_resource_loaded);
+        this.web_view.content_loaded.connect(trigger_content_loaded);
+        this.web_view.selection_changed.connect(trigger_selection_changed);
         this.web_view.set_hexpand(true);
         this.web_view.set_vexpand(true);
         this.web_view.show();
@@ -517,6 +548,51 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.resources.clear();
         this.searchable_addresses.clear();
         base.destroy();
+    }
+
+    public async string? get_selection_for_quoting() throws Error {
+        return yield web_view.get_selection_for_quoting();
+    }
+
+    public async string? get_selection_for_find() throws Error {
+        return yield web_view.get_selection_for_find();
+    }
+
+    /**
+     * Adds a set of internal resources to web_view.
+     *
+     * @see add_internal_resource
+     */
+    public void add_internal_resources(Gee.Map<string,Geary.Memory.Buffer> res) {
+        web_view.add_internal_resources(res);
+    }
+
+    public WebKit.PrintOperation new_print_operation() {
+        return new WebKit.PrintOperation(web_view);
+    }
+
+    public async void run_javascript (string script, Cancellable? cancellable) throws Error {
+        yield web_view.run_javascript(script, cancellable);
+    }
+
+    public void zoom_in() {
+        web_view.zoom_in();
+    }
+
+    public void zoom_out() {
+        web_view.zoom_out();
+    }
+
+    public void zoom_reset() {
+        web_view.zoom_reset();
+    }
+
+    public void web_view_translate_coordinates(Gtk.Widget widget, int x, int anchor_y, out int x1, out int y1) {
+        web_view.translate_coordinates(widget, x, anchor_y, out x1, out y1);
+    }
+
+    public int web_view_get_allocated_height() {
+        return web_view.get_allocated_height();
     }
 
     /**
