@@ -74,80 +74,89 @@ ConversationPageState.prototype = {
      * Add top level blockquotes to hide/show container.
      */
     createControllableQuotes: function() {
-        let blockquoteList = document.documentElement.querySelectorAll("blockquote");
-        for (let i = 0; i < blockquoteList.length; ++i) {
-            let blockquote = blockquoteList.item(i);
-            let nextSibling = blockquote.nextSibling;
-            let parent = blockquote.parentNode;
+        for (let quote of this.getQuotes()) {
+            // Record these details up front so they don't change
+            // after altering the DOM below
+            let nextSibling = quote.nextSibling;
+            let parent = quote.parentNode;
+            let quoteHeight = quote.offsetHeight;
 
-            // Only insert into a quote container if the element is a
-            // top level blockquote
-            if (!ConversationPageState.isDescendantOf(blockquote, "BLOCKQUOTE")) {
-                let quoteHeight = blockquote.offsetHeight;
+            // Only make the quote controllable if it is tall enough
+            let isControllable = (quoteHeight > 120);
 
-                // Only make the quote it controllable if it is tall enough
-                let isControllable = (quoteHeight > 120);
+            let quoteWrapper = document.createElement("DIV");
+            quoteWrapper.classList.add("geary-quote");
+            quoteWrapper.appendChild(quote);
 
-                let quoteContainer = document.createElement("DIV");
+            let quoteContainer = document.createElement("DIV");
+            quoteContainer.classList.add(
+                ConversationPageState.QUOTE_CONTAINER_CLASS
+            );
+            if (isControllable) {
+                quoteContainer.classList.add("geary-controllable");
                 quoteContainer.classList.add(
-                    ConversationPageState.QUOTE_CONTAINER_CLASS
+                    ConversationPageState.QUOTE_HIDE_CLASS
                 );
-                if (isControllable) {
-                    quoteContainer.classList.add("geary-controllable");
-                    quoteContainer.classList.add(
-                        ConversationPageState.QUOTE_HIDE_CLASS
-                    );
-                }
+            }
 
-                let quoteDiv = document.createElement("DIV");
-                quoteDiv.classList.add("geary-quote");
+            quoteContainer.appendChild(quoteWrapper);
+            parent.insertBefore(quoteContainer, nextSibling);
 
-                quoteDiv.appendChild(blockquote);
-                quoteContainer.appendChild(quoteDiv);
-                parent.insertBefore(quoteContainer, nextSibling);
-
-                let containerHeight = quoteDiv.offsetHeight;
-
-                let state = this;
-                function newControllerButton(styleClass, text) {
-                    let button = document.createElement("BUTTON");
-                    button.classList.add("geary-button");
-                    button.type = "button";
-                    button.onclick = function() {
-                        let hide = ConversationPageState.QUOTE_HIDE_CLASS;
-                        quoteContainer.classList.toggle(hide);
-
-                        // Update the preferred height. We calculate
-                        // what the difference should be rather than
-                        // getting it directly, since WK won't ever
-                        // shrink the height of the HTML element.
-                        let height = quoteHeight - containerHeight;
-                        if (quoteContainer.classList.contains(hide)) {
-                            height = state.lastPreferredHeight - height;
-                        } else {
-                            height = state.lastPreferredHeight + height;
-                        }
-                        state.updatePreferredHeight(height);
-                    };
-                    button.appendChild(document.createTextNode(text));
-
-                    let container = document.createElement("DIV");
-                    container.classList.add(styleClass);
-                    container.appendChild(button);
-
-                    return container;
-                }
-
-                if (isControllable) {
-                    quoteContainer.appendChild(newControllerButton(
-                        "geary-shower", "▼        ▼        ▼"
-                    ));
-                    quoteContainer.appendChild(newControllerButton(
-                        "geary-hider", "▲        ▲        ▲"
-                    ));
-                }
+            if (isControllable) {
+                var hiddenHeight = quoteHeight - quoteWrapper.offsetHeight;
+                this.newQuoteControllerButton(
+                    quoteContainer,
+                    hiddenHeight,
+                    "geary-shower",
+                    "▼        ▼        ▼"
+                );
+                this.newQuoteControllerButton(
+                    quoteContainer,
+                    hiddenHeight,
+                    "geary-hider",
+                    "▲        ▲        ▲"
+                );
             }
         }
+    },
+    getQuotes: function() {
+        quotes = [];
+        for (let blockquote of document.querySelectorAll("blockquote")) {
+            // Only inlcude quotes that aren't enclosed in another quote
+            if (!ConversationPageState.isDescendantOf(blockquote, "BLOCKQUOTE")) {
+                quotes.push(blockquote);
+            }
+        }
+        return quotes;
+    },
+    newQuoteControllerButton: function(parent, heightDelta, styleClass, text) {
+        let state = this;
+        let button = document.createElement("BUTTON");
+        button.classList.add("geary-button");
+        button.type = "button";
+        button.onclick = function() {
+            let hide = ConversationPageState.QUOTE_HIDE_CLASS;
+            parent.classList.toggle(hide);
+
+            // Update the preferred height. We calculate
+            // what the difference should be rather than
+            // getting it directly, since WK won't ever
+            // shrink the height of the HTML element.
+            let height = state.lastPreferredHeight;
+            if (parent.classList.contains(hide)) {
+                height -= heightDelta;
+            } else {
+                height += heightDelta;
+            }
+            state.updatePreferredHeight(height);
+        };
+        button.appendChild(document.createTextNode(text));
+
+        let container = document.createElement("DIV");
+        container.classList.add(styleClass);
+        container.appendChild(button);
+
+        parent.appendChild(container);
     },
     /**
      * Look for and wrap a signature.
