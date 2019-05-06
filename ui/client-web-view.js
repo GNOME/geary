@@ -71,9 +71,16 @@ PageState.prototype = {
         }, true); // load does not bubble
 
         // Queues an update if the window changes size, e.g. if the
-        // user resized the window
+        // user resized the window. Only trigger when the width has
+        // changed however since the height should only change as the
+        // body is being loaded.
+        let width = window.innerWidth;
         window.addEventListener("resize", function(e) {
-            queuePreferredHeightUpdate();
+            let currentWidth = window.innerWidth;
+            if (width != currentWidth) {
+                width = currentWidth;
+                queuePreferredHeightUpdate();
+            }
         }, false); // load does not bubble
 
         // Queues an update when a transition has completed, e.g. if the
