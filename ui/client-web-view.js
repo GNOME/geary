@@ -90,7 +90,11 @@ PageState.prototype = {
         }, false); // load does not bubble
     },
     getPreferredHeight: function() {
-        return window.document.body.scrollHeight;
+        // Return the scroll height of the HTML element since the BODY
+        // may have margin/border/padding and we want to know
+        // precisely how high the widget needs to be to avoid
+        // scrolling.
+        return window.document.documentElement.scrollHeight;
     },
     getHtml: function() {
         return document.body.innerHTML;
