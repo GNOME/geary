@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-04-22 06:27+0000\n"
-"PO-Revision-Date: 2019-04-22 18:25+0200\n"
+"POT-Creation-Date: 2019-05-07 07:52+0000\n"
+"PO-Revision-Date: 2019-05-16 19:08+0200\n"
 "Last-Translator: Rodrigo Lledó <rodhos92@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -39,7 +39,7 @@ msgstr "Enviar archivos mediante Geary"
 
 #. Translators: The application name
 #: desktop/geary-autostart.desktop.in:3
-#: desktop/org.gnome.Geary.appdata.xml.in:11
+#: desktop/org.gnome.Geary.appdata.xml.in:12
 #: desktop/org.gnome.Geary.desktop.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:555
 msgid "Geary"
@@ -51,7 +51,7 @@ msgstr "Correo-e"
 
 #. Translators: The application's summary / tagline
 #: desktop/geary-autostart.desktop.in:5
-#: desktop/org.gnome.Geary.appdata.xml.in:15
+#: desktop/org.gnome.Geary.appdata.xml.in:16
 #: desktop/org.gnome.Geary.desktop.in:5
 #: src/client/application/geary-application.vala:24
 msgid "Send and receive email"
@@ -63,11 +63,11 @@ msgid "Email;E-mail;Mail;"
 msgstr "email;e-mail;correo electrónico;correo-e;"
 
 #. Translators: The development team's name
-#: desktop/org.gnome.Geary.appdata.xml.in:13
+#: desktop/org.gnome.Geary.appdata.xml.in:14
 msgid "Geary Development Team"
 msgstr "Equipo de desarrollo de Geary"
 
-#: desktop/org.gnome.Geary.appdata.xml.in:17
+#: desktop/org.gnome.Geary.appdata.xml.in:18
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -77,7 +77,7 @@ msgstr ""
 "escritorio GNOME 3. Le permite leer, buscar y enviar correos con una "
 "interfaz sencilla y moderna."
 
-#: desktop/org.gnome.Geary.appdata.xml.in:22
+#: desktop/org.gnome.Geary.appdata.xml.in:23
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -85,41 +85,41 @@ msgstr ""
 "Las conversaciones le permiten leer un hilo completo si tener que buscar y "
 "pulsa cada mensaje individual."
 
-#: desktop/org.gnome.Geary.appdata.xml.in:26
+#: desktop/org.gnome.Geary.appdata.xml.in:27
 msgid "Geary’s features include:"
 msgstr "Entre las características de Geary se incluyen:"
 
-#: desktop/org.gnome.Geary.appdata.xml.in:28
+#: desktop/org.gnome.Geary.appdata.xml.in:29
 msgid "Quick email account setup"
 msgstr "Configuración rápida de la cuenta de correo"
 
-#: desktop/org.gnome.Geary.appdata.xml.in:29
+#: desktop/org.gnome.Geary.appdata.xml.in:30
 msgid "Shows related messages together in conversations"
 msgstr "Mostrar mensajes relacionados entre ellos en las conversaciones"
 
-#: desktop/org.gnome.Geary.appdata.xml.in:30
+#: desktop/org.gnome.Geary.appdata.xml.in:31
 msgid "Fast, full text and keyword search"
 msgstr "Búsqueda de palabras clave rápida y por texto completo"
 
-#: desktop/org.gnome.Geary.appdata.xml.in:31
+#: desktop/org.gnome.Geary.appdata.xml.in:32
 msgid "Full-featured HTML and plain text message composer"
 msgstr "Editor completo de HYML y texto plano"
 
-#: desktop/org.gnome.Geary.appdata.xml.in:32
+#: desktop/org.gnome.Geary.appdata.xml.in:33
 msgid "Desktop notification of new mail"
 msgstr "Notificaciones de escritorio cuando llegue correo nuevo"
 
-#: desktop/org.gnome.Geary.appdata.xml.in:33
+#: desktop/org.gnome.Geary.appdata.xml.in:34
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Compatible con GMail, Yahoo! Mail, Outlook.com y otros servidores IMAP"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in:47
+#: desktop/org.gnome.Geary.appdata.xml.in:48
 msgid "Geary displaying a conversation"
 msgstr "Geary mostrando una conversación"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in:58
+#: desktop/org.gnome.Geary.appdata.xml.in:59
 msgid "Geary showing the rich text composer"
 msgstr "Geary mostrando el editor de texto enriquecido"
 
@@ -956,128 +956,140 @@ msgid "Visit the Geary web site"
 msgstr "Visite el sitio web de Geary"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:103
+#: src/client/application/geary-application.vala:104
 msgid "Print debug logging"
 msgstr "Mostrar el registro de depuración"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:106
+#: src/client/application/geary-application.vala:107
 msgid "Start with the main window hidden (deprecated)"
 msgstr "Iniciar con la ventana principal oculta (obsoleto)"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:109
+#: src/client/application/geary-application.vala:110
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Activar el inspector de WebKitGTK en las vistas web"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:112
+#: src/client/application/geary-application.vala:113
 msgid "Log conversation monitoring"
 msgstr "Registrar la monitorización de conversaciones"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:115
+#: src/client/application/geary-application.vala:116
 msgid "Log IMAP network deserialization"
 msgstr "Registrar la deserialización de red IMAP"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/geary-application.vala:119
+#: src/client/application/geary-application.vala:120
 msgid "Log folder normalization"
 msgstr "Registrar la normalización de carpetas"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:122
+#: src/client/application/geary-application.vala:123
 msgid "Log network activity"
 msgstr "Registrar la actividad de red"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:125
+#: src/client/application/geary-application.vala:126
 msgid "Log periodic activity"
 msgstr "Registrar la actividad periódica"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/geary-application.vala:130
+#: src/client/application/geary-application.vala:131
 msgid "Log IMAP replay queue"
 msgstr "Registrar la cola de eventos IMAP"
 
 #. / Command line option. Serialization is how commands and
 #. / responses are converted into a stream of bytes for
 #. / network transmission
-#: src/client/application/geary-application.vala:135
+#: src/client/application/geary-application.vala:136
 msgid "Log IMAP network serialization"
 msgstr "Registrar la serialización de red IMAP"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:138
+#: src/client/application/geary-application.vala:139
 msgid "Log database queries (generates lots of messages)"
 msgstr "Registrar las consultas a la base de datos (genera muchos mensajes)"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:141
+#: src/client/application/geary-application.vala:142
 msgid "Perform a graceful quit"
 msgstr "Salir elegantemente"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:144
+#: src/client/application/geary-application.vala:145
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Revocar todos los certificados fijados de servidores TLS"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:147
+#: src/client/application/geary-application.vala:148
 msgid "Display program version"
 msgstr "Mostrar la versión del programa"
 
+#. Use this to specify arguments in the help section
+#. / Command line option
+#: src/client/application/geary-application.vala:152
+#| msgid "Display program version"
+msgid "Display program version and revision id"
+msgstr "Mostrar la versión del programa y el id de revisión"
+
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:273
+#: src/client/application/geary-application.vala:278
 msgid "Geary version"
 msgstr "Versión de Geary"
 
+#: src/client/application/geary-application.vala:279
+#| msgid "Geary version"
+msgid "Geary revision"
+msgstr "Revisión de Geary"
+
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:275
+#: src/client/application/geary-application.vala:281
 msgid "GTK version"
 msgstr "Versión de GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/geary-application.vala:282
+#: src/client/application/geary-application.vala:288
 msgid "GLib version"
 msgstr "Versión de GLib"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:289
+#: src/client/application/geary-application.vala:295
 msgid "WebKitGTK version"
 msgstr "Versión de WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:296
+#: src/client/application/geary-application.vala:302
 msgid "Desktop environment"
 msgstr "Entorno de escritorio"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/geary-application.vala:298
+#: src/client/application/geary-application.vala:304
 #: src/client/conversation-viewer/conversation-email.vala:159
 msgid "Unknown"
 msgstr "Desconocido"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:328
+#: src/client/application/geary-application.vala:334
 msgid "Distribution name"
 msgstr "Nombre de la distribución"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:333
+#: src/client/application/geary-application.vala:339
 msgid "Distribution release"
 msgstr "Lanzamiento de la distribución"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:341
+#: src/client/application/geary-application.vala:347
 msgid "Installation prefix"
 msgstr "Prefijo de instalación"
 
-#: src/client/application/geary-application.vala:482
+#: src/client/application/geary-application.vala:512
 #, c-format
 msgid "About %s"
 msgstr "Acerca de %s"
@@ -1085,7 +1097,7 @@ msgstr "Acerca de %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:486
+#: src/client/application/geary-application.vala:516
 msgid "translator-credits"
 msgstr ""
 "Daniel Mustieles <daniel.mustieles@gmail.com>, 2015 - 2017\n"
@@ -1093,13 +1105,13 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/geary-application.vala:744
+#: src/client/application/geary-application.vala:777
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "La opción «--hidden» está obsoleta y se eliminará en el futuro."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/geary-application.vala:774
+#: src/client/application/geary-application.vala:807
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Opción de la línea de comandos no reconocida: «%s»"
@@ -1567,7 +1579,7 @@ msgstr "R_esponder a todos"
 msgid "_Forward"
 msgstr "_Reenviar"
 
-#: src/client/conversation-list/formatted-conversation-data.vala:11
+#: src/client/conversation-list/formatted-conversation-data.vala:18
 msgid "Me"
 msgstr "Yo"
 
@@ -2576,7 +2588,6 @@ msgstr "Alternar añadir entradas del registro nuevas"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:48
-#| msgid "Search for more languages"
 msgid "Search fo matching log entries"
 msgstr "Buscar entradas del registro que coincidan"
 
@@ -2587,7 +2598,6 @@ msgstr "Guardar las entradas de registros y detalles"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:94
-#| msgid "Open selected attachments"
 msgid "Copy selected log entries"
 msgstr "Copiar las entradas del registro seleccionadas"
 
@@ -2602,29 +2612,22 @@ msgstr "Registros"
 
 #. Inspector stack title
 #: ui/components-inspector.ui:235
-#| msgctxt "shortcut window"
-#| msgid "General"
 msgid "General"
 msgstr "General"
 
 #: ui/conversation-contact-popover.ui:146
-#| msgid "Move conversation"
-#| msgid_plural "Move conversations"
 msgid "New Conversation…"
 msgstr "Conversación nueva…"
 
 #: ui/conversation-contact-popover.ui:159
-#| msgid "Copy Email _Address"
 msgid "Copy Email Address"
 msgstr "Copiar dirección de correo"
 
 #: ui/conversation-contact-popover.ui:182
-#| msgid "Save and Close"
 msgid "Save in Contacts…"
 msgstr "Guardar en contactos…"
 
 #: ui/conversation-contact-popover.ui:195
-#| msgid "Move conversations"
 msgid "Show Conversations"
 msgstr "Mostrar conversaciones"
 
@@ -2638,13 +2641,11 @@ msgstr "Cargar siempre imágenes remotas"
 
 #. Title label on contact popover
 #: ui/conversation-contact-popover.ui:264
-#| msgid "Invalid email address"
 msgid "Deceptive email address"
 msgstr "Dirección de correo engañosa"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:294
-#| msgid "Email address:"
 msgid "This email address is:"
 msgstr "Esta dirección de correo es:"
 
@@ -2759,8 +2760,6 @@ msgid "Copy Link _Address"
 msgstr "Copiar enlace a la _dirección"
 
 #: ui/conversation-message-menus.ui:17
-#| msgid "Move conversation"
-#| msgid_plural "Move conversations"
 msgid "_New Conversation…"
 msgstr "Conversación _nueva…"
 
@@ -3107,27 +3106,27 @@ msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Redactar mensaje"
 
-#: ui/main-toolbar.ui:41
+#: ui/main-toolbar.ui:61
 msgid "Toggle search bar"
 msgstr "Conmutar la barra de búsqueda"
 
-#: ui/main-toolbar.ui:111
+#: ui/main-toolbar.ui:113
 msgid "Reply"
 msgstr "Responder"
 
-#: ui/main-toolbar.ui:134
+#: ui/main-toolbar.ui:136
 msgid "Reply All"
 msgstr "Responder a todos"
 
-#: ui/main-toolbar.ui:157
+#: ui/main-toolbar.ui:159
 msgid "Forward"
 msgstr "Reenviar"
 
-#: ui/main-toolbar.ui:263
+#: ui/main-toolbar.ui:265
 msgid "Toggle find bar"
 msgstr "Conmutar la barra de búsqueda"
 
-#: ui/main-toolbar.ui:305
+#: ui/main-toolbar.ui:307
 msgid "_Archive"
 msgstr "_Archivar"
 
