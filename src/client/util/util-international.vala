@@ -9,7 +9,7 @@ extern const string ISO_CODE_639_XML;
 extern const string ISO_CODE_3166_XML;
 public const string TRANSLATABLE = "translatable";
 
-namespace International {
+namespace Util.International {
 
     private GLib.HashTable<string, string> language_names = null;
     private GLib.HashTable<string, string> country_names = null;

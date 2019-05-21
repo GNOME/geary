@@ -59,8 +59,8 @@ public class SpellCheckPopover {
 
             Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
 
-            lang_name = International.language_name_from_locale(lang_code);
-            country_name = International.country_name_from_locale(lang_code);
+            lang_name = Util.International.language_name_from_locale(lang_code);
+            country_name = Util.International.country_name_from_locale(lang_code);
 
             string label_text = lang_name;
             if (country_name != null)
@@ -210,7 +210,7 @@ public class SpellCheckPopover {
 
     private void setup_popover() {
         // We populate the popover with the list of languages that the user wants to see
-        string[] languages = International.get_available_dictionaries();
+        string[] languages = Util.International.get_available_dictionaries();
 
         content = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
         search_box = new Gtk.SearchEntry();

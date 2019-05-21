@@ -125,7 +125,7 @@ public class Configuration {
         owned get {
             string[] langs = settings.get_strv(SPELL_CHECK_VISIBLE_LANGUAGES);
             if (langs.length == 0) {
-                langs = International.get_user_preferred_languages();
+                langs = Util.International.get_user_preferred_languages();
             }
             return langs;
         }
