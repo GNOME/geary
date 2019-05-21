@@ -694,6 +694,8 @@ public class GearyApplication : Gtk.Application {
         this.controller.main_window.present();
     }
 
+    private Geary.Nonblocking.Mutex controler_mutex = new Geary.Nonblocking.Mutex();
+
     // Opens the controller
     private async void create_controller() {
         // Manually keep the main loop around for the duration of this
@@ -701,7 +703,8 @@ public class GearyApplication : Gtk.Application {
         // hit the yield below, before we create the main window.
         hold();
 
-        lock (this.controller) {
+        try {
+            int mutex_token = yield controler_mutex.claim_async();
             if (this.controller == null) {
                 message(
                     "%s %s (%s) prefix=%s exec_dir=%s is_installed=%s",
@@ -717,6 +720,10 @@ public class GearyApplication : Gtk.Application {
                     this, this.controller_cancellable
                 );
             }
+
+            controler_mutex.release(ref mutex_token);
+        } catch (Error err) {
+            debug("Error creating controller: %s", err.message);
         }
 
         release();
@@ -727,11 +734,15 @@ public class GearyApplication : Gtk.Application {
         // see create_controller() for reasoning hold/release is used
         hold();
 
-        lock (this.controller) {
+        try {
+            int mutex_token = yield controler_mutex.claim_async();
             if (this.controller != null) {
                 yield this.controller.close_async();
                 this.controller = null;
             }
+            controler_mutex.release(ref mutex_token);
+        } catch (Error err) {
+            debug("Error creating controller: %s", err.message);
         }
 
         release();
