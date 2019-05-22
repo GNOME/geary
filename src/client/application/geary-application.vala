@@ -753,6 +753,8 @@ public class GearyApplication : Gtk.Application {
             Geary.Logging.log_to(null);
         }
 
+        bool activated = false;
+
         // Logging flags
         if (options.contains(OPTION_LOG_NETWORK))
             Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
@@ -780,9 +782,11 @@ public class GearyApplication : Gtk.Application {
             // Update the autostart file so that it stops using the
             // --hidden option.
             this.update_autostart_file.begin();
+            // Then manually start the controller
+            this.create_controller.begin();
+            activated = true;
         }
 
-        bool activated = false;
         if (options.contains(GLib.OPTION_REMAINING)) {
             string[] args = options.lookup_value(
                 GLib.OPTION_REMAINING,
