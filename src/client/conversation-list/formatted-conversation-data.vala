@@ -160,7 +160,7 @@ public class FormattedConversationData : Geary.BaseObject {
         return true;
     }
 
-    // Creates an example message (used interally for styling calculations.)
+    // Creates an example message (used internally for styling calculations.)
     public FormattedConversationData.create_example() {
         this.is_unread = false;
         this.is_flagged = false;

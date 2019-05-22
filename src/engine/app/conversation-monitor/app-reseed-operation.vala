@@ -27,7 +27,7 @@ private class Geary.App.ReseedOperation : ConversationOperation {
                   earliest_id.to_string(), this.monitor.base_folder.to_string());
             // Some conversations have already been loaded, so check
             // from the earliest known right through to the end of the
-            // vector for updated mesages
+            // vector for updated messages
             yield this.monitor.load_by_id_async(
                 earliest_id,
                 int.MAX,

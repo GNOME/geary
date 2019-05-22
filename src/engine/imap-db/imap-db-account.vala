@@ -995,7 +995,7 @@ private class Geary.ImapDB.Account : BaseObject {
             //
             // Note that this uses SQLite's "standard" query syntax for MATCH, where AND is implied
             // (and would be treated as search term if included), parentheses are not allowed, and
-            // OR has a higher precendence than AND.  So the above example in standard syntax is:
+            // OR has a higher precedence than AND.  So the above example in standard syntax is:
             //
             // party* OR parti* eventful* OR event*
             StringBuilder builder = new StringBuilder();

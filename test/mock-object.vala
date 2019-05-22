@@ -98,7 +98,7 @@ public class ExpectedCall : Object {
  * the code being tested. For example, if an object being tested
  * requires certain objects to be passed in via its constructor or as
  * arguments of method calls and uses these to implement its
- * behaviour, mock objects that fulfil these requirements can be used.
+ * behaviour, mock objects that fulfill these requirements can be used.
  *
  * Mock objects provide a means of both ensuring code being tested
  * makes expected method calls with expected arguments on its

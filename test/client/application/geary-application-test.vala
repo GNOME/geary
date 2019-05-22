@@ -28,7 +28,7 @@ class GearyApplicationTest : TestCase {
     public void paths_when_installed() throws GLib.Error {
         string[] args = new string[] {
             _INSTALL_PREFIX + "/bin/geary",
-            // Specifiy this so the app doesn't actually attempt
+            // Specify this so the app doesn't actually attempt
             // to start up
             "-v"
         };

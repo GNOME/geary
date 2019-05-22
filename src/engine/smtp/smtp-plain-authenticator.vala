@@ -5,7 +5,7 @@
  */
 
 /**
- * SASL's PLAIN authentication schema impemented as an {@link Authenticator}.
+ * SASL's PLAIN authentication schema implemented as an {@link Authenticator}.
  *
  * See [[http://tools.ietf.org/html/rfc4616]]
  */

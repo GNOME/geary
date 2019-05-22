@@ -155,7 +155,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
             return null;
 
         // Because Deserializer doesn't produce NilParameters, check manually if this Parameter
-        // can legally be NIL according to IMAP grammer.
+        // can legally be NIL according to IMAP grammar.
         StringParameter? stringp = param as StringParameter;
         if (stringp != null && NilParameter.is_nil(stringp))
             return null;
@@ -417,7 +417,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     }
 
     /**
-     * Returns the replaced Paramater.  Throws ImapError.TYPE_ERROR if no Parameter exists at the
+     * Returns the replaced Parameter.  Throws ImapError.TYPE_ERROR if no Parameter exists at the
      * index.
      */
     public Parameter replace(int index, Parameter parameter) throws ImapError {

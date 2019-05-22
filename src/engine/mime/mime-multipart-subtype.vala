@@ -5,7 +5,7 @@
  */
 
 /**
- * A represenation of a MIME multipart Content-Type subtype.
+ * A representation of a MIME multipart Content-Type subtype.
  *
  * See [[https://tools.ietf.org/html/rfc2046#section-5.1]]
  */

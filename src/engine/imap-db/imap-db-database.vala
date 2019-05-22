@@ -447,7 +447,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
                     stmt.exec();
 
-                    // reuse statment, overwrite invalid_id, fields only
+                    // reuse statement, overwrite invalid_id, fields only
                     stmt.reset(Db.ResetScope.SAVE_BINDINGS);
                 }
 
@@ -583,7 +583,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     /**
      * Rebuilds the database's FTS table index.
      *
-     * This can be used to recover from corrupt indexs, as indicated
+     * This can be used to recover from corrupt indexes, as indicated
      * by fts_integrity_check() returning false.
      */
     public void fts_rebuild() throws Error {
@@ -597,7 +597,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     /**
      * Optimises the database's FTS table index.
      *
-     * This is an expensive call, as much as performing a VACCUM.
+     * This is an expensive call, as much as performing a VACUUM.
      */
     public void fts_optimize() throws Error {
         Db.Statement stmt = prepare("""

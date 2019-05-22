@@ -28,7 +28,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Togggle appending new log entries</property>
+            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Toggle appending new log entries</property>
             <property name="action_name">win.toggle-play</property>
             <property name="active">True</property>
             <child>

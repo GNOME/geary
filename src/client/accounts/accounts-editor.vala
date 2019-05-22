@@ -159,7 +159,7 @@ public class Accounts.Editor : Gtk.Dialog {
      * Removes the current pane from the editor, showing the last one.
      */
     internal void pop() {
-        // One can't simply remove old panes fro the GTK stack since
+        // One can't simply remove old panes for the GTK stack since
         // there won't be any transition between them - the old one
         // will simply disappear. So we need to keep old, popped panes
         // around until a new one is pushed on.

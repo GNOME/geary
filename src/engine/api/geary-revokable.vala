@@ -43,7 +43,7 @@ public abstract class Geary.Revokable : BaseObject {
     /**
      * Fired when the {@link Revokable} has been revoked.
      *
-     * {@link valid} will stil be true when this is fired.
+     * {@link valid} will still be true when this is fired.
      */
     public signal void revoked();
 
@@ -52,7 +52,7 @@ public abstract class Geary.Revokable : BaseObject {
      *
      * Some Revokables will offer a new Revokable to allow revoking the committed state.
      *
-     * {@link valid} will stil be true when this is fired.
+     * {@link valid} will still be true when this is fired.
      */
     public signal void committed(Geary.Revokable? commit_revokable);
 

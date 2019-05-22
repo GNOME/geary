@@ -502,7 +502,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      */
     protected inline void register_message_handler(string name,
                                                    JavaScriptMessageHandler handler) {
-        // XXX cant use the delegate directly, see b.g.o Bug
+        // XXX can't use the delegate directly, see b.g.o Bug
         // 604781. However the workaround below creates a circular
         // reference, causing ClientWebView instances to leak. So to
         // work around that we need to record handler ids and

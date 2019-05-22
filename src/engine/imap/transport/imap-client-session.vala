@@ -923,7 +923,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     /**
      * Prepares the connection and performs a login using the supplied credentials.
      *
-     * Preparing the connnection includes attempting compression and using STARTTLS if necessary.
+     * Preparing the connection includes attempting compression and using STARTTLS if necessary.
      * {@link Capabilities} are also retrieved automatically at the right time to ensure the best
      * results are available with {@link capabilities}.
      */

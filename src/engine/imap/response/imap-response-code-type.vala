@@ -70,7 +70,7 @@ public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCode
         if (DataFormat.is_quoting_required(ascii) != DataFormat.Quoting.OPTIONAL)
             throw new ImapError.INVALID("\"%s\" cannot be represented as a ResponseCodeType", ascii);
 
-        // store lowercased so it's easily compared with const strings above
+        // store in lowercase so it's easily compared with const strings above
         original = ascii;
         value = Ascii.strdown(ascii);
     }

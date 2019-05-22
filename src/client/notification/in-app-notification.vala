@@ -23,7 +23,7 @@ public class InAppNotification : Gtk.Revealer {
     /**
      * Creates an in-app notification.
      *
-     * @param message The messag that should be displayed.
+     * @param message The message that should be displayed.
      * @param keepalive The amount of seconds that the notification should stay visible.
      */
     public InAppNotification(string message, uint keepalive = DEFAULT_KEEPALIVE) {

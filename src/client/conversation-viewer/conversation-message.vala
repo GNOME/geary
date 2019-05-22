@@ -729,7 +729,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
      * Highlights user search terms in the message view.
      *
      * Highlighting includes both in the message headers, and the
-     * mesage body. returns the number of matching search terms.
+     * message body. returns the number of matching search terms.
      */
     public async uint highlight_search_terms(Gee.Set<string> search_matches,
                                              GLib.Cancellable cancellable)
