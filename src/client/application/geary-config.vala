@@ -114,22 +114,45 @@ public class Configuration {
         get { return settings.get_boolean(DISPLAY_PREVIEW_KEY); }
     }
 
+    /**
+     * The set of enabled spell checker languages.
+     *
+     * This specifies the languages used for spell checking by the
+     * client. By default, the set will contain languages based on
+     * environment variables.
+     *
+     * @see Util.International.get_user_preferred_languages
+     */
     public string[] spell_check_languages {
         owned get {
-            return settings.get_strv(SPELL_CHECK_LANGUAGES);
-        }
-        set { settings.set_strv(SPELL_CHECK_LANGUAGES, value); }
-    }
-
-    public string[] spell_check_visible_languages {
-        owned get {
-            string[] langs = settings.get_strv(SPELL_CHECK_VISIBLE_LANGUAGES);
-            if (langs.length == 0) {
-                langs = Util.International.get_user_preferred_languages();
-            }
+            GLib.Variant? value =
+                settings.get_value(SPELL_CHECK_LANGUAGES).get_maybe();
+            string[] langs = (value != null)
+                    ? value.get_strv()
+                    : Util.International.get_user_preferred_languages();
             return langs;
         }
-        set { settings.set_strv(SPELL_CHECK_VISIBLE_LANGUAGES, value); }
+        set {
+            settings.set_value(
+                SPELL_CHECK_LANGUAGES,
+                new GLib.Variant.maybe(null, new GLib.Variant.strv(value))
+            );
+        }
+    }
+
+    /**
+     * The set of visible spell checker languages.
+     *
+     * This is the list of languages shown when selecting languages to
+     * be used for spell checking.
+     */
+    public string[] spell_check_visible_languages {
+        owned get {
+            return settings.get_strv(SPELL_CHECK_VISIBLE_LANGUAGES);
+        }
+        set {
+            settings.set_strv(SPELL_CHECK_VISIBLE_LANGUAGES, value);
+        }
     }
 
     public bool play_sounds {
