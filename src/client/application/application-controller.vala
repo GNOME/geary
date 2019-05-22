@@ -1261,7 +1261,7 @@ public class Application.Controller : Geary.BaseObject {
         this.main_window.folder_list.add_folder(folder);
         // Since removing the folder will also remove its children
         // from the folder list, we need to check for any and re-add
-        // them. See isssue #11.
+        // them. See issue #11.
         try {
             foreach (Geary.Folder child in
                      folder.account.list_matching_folders(folder.path)) {
@@ -1909,7 +1909,7 @@ public class Application.Controller : Geary.BaseObject {
     private bool open_uri(string _link) {
         string link = _link;
 
-        // Support web URLs that ommit the protocol.
+        // Support web URLs that omit the protocol.
         if (!link.contains(":"))
             link = "http://" + link;
 
@@ -2949,7 +2949,7 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         // This is going to be either an inline image, or a remote
-        // image, so either treat it as an attachment ot assume we'll
+        // image, so either treat it as an attachment to assume we'll
         // have a valid filename in the URL
         bool handled = false;
         if (url.has_prefix(ClientWebView.CID_URL_PREFIX)) {

@@ -352,7 +352,7 @@ public class GearyApplication : Gtk.Application {
     /**
      * Signal that is activated when 'exit' is called, but before the application actually exits.
      *
-     * To cancel an exit, a callback should return GearyApplication.cancel_exit(). To procede with
+     * To cancel an exit, a callback should return GearyApplication.cancel_exit(). To proceed with
      * an exit, a callback should return true.
      */
     public virtual signal bool exiting(bool panicked) {

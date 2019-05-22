@@ -57,7 +57,7 @@ PageState.prototype = {
         //
         // Note also that the delay introduced here by this last call
         // to queuePreferredHeightUpdate when the complete document is
-        // loaded seems to be important to get an acurate idea of the
+        // loaded seems to be important to get an accurate idea of the
         // final document size.
         window.addEventListener("load", function(e) {
             queuePreferredHeightUpdate();
@@ -90,7 +90,7 @@ PageState.prototype = {
     },
     loaded: function() {
         this.isLoaded = true;
-        // Always fire a prefered height update first so that it will
+        // Always fire a preferred height update first so that it will
         // be vaguegly correct when notifying of the HTML load
         // completing.
         this.updatePreferredHeight();

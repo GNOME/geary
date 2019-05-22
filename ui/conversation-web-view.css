@@ -89,7 +89,7 @@ pre {
     margin: 1em 0;
   }
 
-  /* Inline collapsable quote blocks */
+  /* Inline collapsible quote blocks */
 
   .geary-quote-container {
     position: relative;
@@ -157,9 +157,9 @@ pre {
     white-space: pre;
     -webkit-user-select: none;
     -webkit-user-drag: none;
-    /* All futher properties below are a workaround for WK Bug 166648
+    /* All further properties below are a workaround for WK Bug 166648
      * <https://bugs.webkit.org/show_bug.cgi?id=166648>. The result is
-     * we need to manually style these buttons outselves. */
+     * we need to manually style these buttons ourselves. */
     -webkit-appearance: none;
     box-sizing: border-box;
     /* The following was taken from GTK+4 trunk Adwaita theme:

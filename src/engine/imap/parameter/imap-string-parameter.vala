@@ -152,7 +152,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     }
 
     /**
-     * Returns the string lowercased.
+     * Returns the string in lowercase.
      */
     public string as_lower() {
         return Ascii.strdown(ascii);

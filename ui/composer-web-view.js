@@ -77,7 +77,7 @@ ComposerPageState.prototype = {
             }
         });
         // We can't use keydown for this, captured or bubbled, since
-        // that will also cause the line that the cursor is currenty
+        // that will also cause the line that the cursor is currently
         // positioned on when Enter is pressed to also be outdented.
         document.body.addEventListener("keyup", function(e) {
             if (e.keyIdentifier == "Enter" && !e.shiftKey) {

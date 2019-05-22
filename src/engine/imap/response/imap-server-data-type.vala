@@ -123,7 +123,7 @@ public enum Geary.Imap.ServerDataType {
     /**
      * Examines the {@link RootParameters} looking for a ServerDataType.
      *
-     * IMAP server responses don't offer a regular format for server data declations.  This method
+     * IMAP server responses don't offer a regular format for server data declaretions.  This method
      * parses for the common patterns and returns the ServerDataType it detects.
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-7.2]] for more information.

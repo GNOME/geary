@@ -300,7 +300,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
     // All commands must executed inside the cmd_mutex; returns FETCH or STORE results
     //
-    // FETCH commands can generate a FolderError.RETRY.  State will be updated to accomodate retry,
+    // FETCH commands can generate a FolderError.RETRY.  State will be updated to accommodate retry,
     // but all Commands must be regenerated to ensure new state is reflected in requests.
     private async Gee.Map<Command, StatusResponse>? exec_commands_async(Gee.Collection<Command> cmds,
                                                                         Gee.HashMap<SequenceNumber, FetchedData>? fetch_results,

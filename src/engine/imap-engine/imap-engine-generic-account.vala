@@ -515,7 +515,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         throws GLib.Error {
         check_open();
 
-        // XXX work out what our public IP adddress is somehow and use
+        // XXX work out what our public IP address is somehow and use
         // that in preference to the sender's domain
         string domain = composed.sender != null
             ? composed.sender.domain

@@ -5,7 +5,7 @@
  */
 
 /**
- * ImapDB.Folder provides an interface for retreiving messages from the local store in methods
+ * ImapDB.Folder provides an interface for retrieving messages from the local store in methods
  * that are synonymous with Geary.Folder's interface, but with some differences that deal with
  * how IMAP addresses and organizes email.
  *
@@ -1333,7 +1333,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     /**
      * Adds a message to the folder.
      *
-     * Note: does NOT check if message is already associated with thie
+     * Note: does NOT check if message is already associated with this
      * folder.
      */
     private void do_associate_with_folder(Db.Connection cx,
