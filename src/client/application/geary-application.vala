@@ -262,6 +262,7 @@ public class GearyApplication : Gtk.Application {
     private bool is_destroyed = false;
     private GLib.Cancellable controller_cancellable = new GLib.Cancellable();
     private Components.Inspector? inspector = null;
+    private Geary.Nonblocking.Mutex controler_mutex = new Geary.Nonblocking.Mutex();
 
 
     /**
@@ -701,7 +702,8 @@ public class GearyApplication : Gtk.Application {
         // hit the yield below, before we create the main window.
         hold();
 
-        lock (this.controller) {
+        try {
+            int mutex_token = yield this.controler_mutex.claim_async();
             if (this.controller == null) {
                 message(
                     "%s %s (%s) prefix=%s exec_dir=%s is_installed=%s",
@@ -717,6 +719,9 @@ public class GearyApplication : Gtk.Application {
                     this, this.controller_cancellable
                 );
             }
+            this.controler_mutex.release(ref mutex_token);
+        } catch (Error err) {
+            error("Error creating controller: %s", err.message);
         }
 
         release();
@@ -727,11 +732,15 @@ public class GearyApplication : Gtk.Application {
         // see create_controller() for reasoning hold/release is used
         hold();
 
-        lock (this.controller) {
+        try {
+            int mutex_token = yield this.controler_mutex.claim_async();
             if (this.controller != null) {
                 yield this.controller.close_async();
                 this.controller = null;
             }
+            this.controler_mutex.release(ref mutex_token);
+        } catch (Error err) {
+            debug("Error destroying controller: %s", err.message);
         }
 
         release();
