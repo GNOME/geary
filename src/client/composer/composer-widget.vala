@@ -386,6 +386,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         get { return (ComposerContainer) parent; }
     }
 
+    private Gspell.Checker subject_spell_checker = new Gspell.Checker(null);
+    private Gspell.Entry subject_spell_entry;
+
 
     /** Fired when the current saved draft's id has changed. */
     public signal void draft_id_changed(Geary.EmailIdentifier? id);
@@ -455,6 +458,11 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.reply_to_label.set_mnemonic_widget(this.reply_to_entry);
 
         this.to_entry.margin_top = this.cc_entry.margin_top = this.bcc_entry.margin_top = this.reply_to_entry.margin_top = 6;
+
+        this.subject_spell_entry = Gspell.Entry.get_from_gtk_entry(
+            this.subject_entry
+        );
+        update_subject_spell_checker();
 
         this.editor = new ComposerWebView(config);
         this.editor.set_hexpand(true);
@@ -2014,6 +2022,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             );
             this.spell_check_popover.selection_changed.connect((active_langs) => {
                     this.config.spell_check_languages = active_langs;
+                    update_subject_spell_checker();
                 });
         }
         this.spell_check_popover.toggle();
@@ -2205,6 +2214,51 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             sig = "";
         }
         this.editor.update_signature(Geary.HTML.smart_escape(sig));
+    }
+
+    private void update_subject_spell_checker() {
+        Gspell.Language? lang = null;
+        string[] langs = this.config.spell_check_languages;
+        if (langs.length == 1) {
+            lang = Gspell.Language.lookup(langs[0]);
+        } else {
+            // Since GSpell doesn't support multiple languages (see
+            // <https://gitlab.gnome.org/GNOME/gspell/issues/5>) and
+            // we don't support spell checker language priority, use
+            // the first matching most preferred language, if any.
+            foreach (string pref in
+                     Util.International.get_user_preferred_languages()) {
+                if (pref in langs) {
+                    lang = Gspell.Language.lookup(pref);
+                    if (lang != null) {
+                        break;
+                    }
+                }
+            }
+
+            if (lang == null) {
+                // No preferred lang found, so just use first
+                // supported matching langauge
+                foreach (string pref in langs) {
+                    lang = Gspell.Language.lookup(pref);
+                    if (lang != null) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        Gspell.EntryBuffer buffer =
+            Gspell.EntryBuffer.get_from_gtk_entry_buffer(
+                this.subject_entry.buffer
+            );
+        Gspell.Checker checker = null;
+        if (lang != null) {
+            checker = this.subject_spell_checker;
+            checker.language = lang;
+        }
+        this.subject_spell_entry.inline_spell_checking = (checker != null);
+        buffer.spell_checker = checker;
     }
 
     private async ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,
