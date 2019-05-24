@@ -101,6 +101,27 @@
             ]
         },
         {
+            "name" : "gspell",
+            "config-opts" : [
+                "--disable-gtk-doc",
+                "--disable-gtk-doc-html"
+            ],
+            "cleanup" : [
+                "/bin",
+                "/include",
+                "/lib/pkgconfig",
+                "*.la",
+                "/share"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/gspell.git",
+                    "branch" : "master"
+                }
+            ]
+        },
+        {
             "name": "libical",
             "cleanup": [
               "/lib/cmake"
