@@ -407,7 +407,7 @@ public class GearyApplication : Gtk.Application {
 
     public override void startup() {
         Environment.set_application_name(NAME);
-        International.init(GETTEXT_PACKAGE, this.binary);
+        Util.International.init(GETTEXT_PACKAGE, this.binary);
 
         Configuration.init(this.is_installed, GSETTINGS_DIR);
         Geary.Logging.init();
