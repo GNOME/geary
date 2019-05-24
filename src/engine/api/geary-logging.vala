@@ -110,7 +110,7 @@ private Record? first_record = null;
 private Record? last_record = null;
 private uint log_length = 0;
 private uint max_log_length = 0;
-private LogRecord? listener = null;
+private unowned LogRecord? listener = null;
 
 
 /**
