@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-04-28 09:44+0000\n"
-"PO-Revision-Date: 2019-04-28 16:21+0200\n"
+"POT-Creation-Date: 2019-05-24 10:55+0000\n"
+"PO-Revision-Date: 2019-05-27 18:38+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -219,93 +219,97 @@ msgid "Languages that shall be used in the spell checker"
 msgstr "Języki używane do sprawdzania pisowni"
 
 #: desktop/org.gnome.Geary.gschema.xml:69
-msgid "List of the languages to use in the spell checker."
-msgstr "Lista języków używanych do sprawdzania pisowni."
+msgid ""
+"A list of POSIX locales, with the empty list disabling spell checking and "
+"the null list using desktop languages by default."
+msgstr ""
+"Lista lokalizacji POSIX. Pusta lista wyłącza sprawdzanie pisowni, a lista "
+"NULL powoduje użycie domyślnego języka środowiska."
 
-#: desktop/org.gnome.Geary.gschema.xml:74
+#: desktop/org.gnome.Geary.gschema.xml:76
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Języki wyświetlane w oknie sprawdzania pisowni"
 
-#: desktop/org.gnome.Geary.gschema.xml:75
+#: desktop/org.gnome.Geary.gschema.xml:77
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr "Lista języków zawsze wyświetlanych w oknie sprawdzania pisowni."
 
-#: desktop/org.gnome.Geary.gschema.xml:80
+#: desktop/org.gnome.Geary.gschema.xml:82
 msgid "Enable notification sounds"
 msgstr "Dźwięki powiadomień"
 
-#: desktop/org.gnome.Geary.gschema.xml:81
+#: desktop/org.gnome.Geary.gschema.xml:83
 msgid "True to play sounds for notifications and sending."
 msgstr "Odtwarzanie dźwięków powiadomień i wysyłania."
 
-#: desktop/org.gnome.Geary.gschema.xml:86
+#: desktop/org.gnome.Geary.gschema.xml:88
 msgid "Show notifications for new mail"
 msgstr "Powiadomienia o nowych wiadomościach"
 
-#: desktop/org.gnome.Geary.gschema.xml:87
+#: desktop/org.gnome.Geary.gschema.xml:89
 msgid "True to show notification bubbles."
 msgstr "Wyświetlanie powiadomień."
 
-#: desktop/org.gnome.Geary.gschema.xml:92
+#: desktop/org.gnome.Geary.gschema.xml:94
 msgid "Notify of new mail at startup"
 msgstr "Powiadamianie o nowych wiadomościach po uruchomieniu"
 
-#: desktop/org.gnome.Geary.gschema.xml:93
+#: desktop/org.gnome.Geary.gschema.xml:95
 msgid "True to notify of new mail at startup."
 msgstr "Powiadamianie o nowych wiadomościach po uruchomieniu."
 
-#: desktop/org.gnome.Geary.gschema.xml:98
+#: desktop/org.gnome.Geary.gschema.xml:100
 msgid "Ask when opening an attachment"
 msgstr "Pytanie podczas otwierania załącznika"
 
-#: desktop/org.gnome.Geary.gschema.xml:99
+#: desktop/org.gnome.Geary.gschema.xml:101
 msgid "True to ask when opening an attachment."
 msgstr "Pytanie podczas otwierania załącznika."
 
-#: desktop/org.gnome.Geary.gschema.xml:104
+#: desktop/org.gnome.Geary.gschema.xml:106
 msgid "Whether to compose emails in HTML"
 msgstr "Tworzenie wiadomości w formacie HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:105
+#: desktop/org.gnome.Geary.gschema.xml:107
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Tworzenie wiadomości w formacie HTML. Wyłączenie powoduje tworzenie "
 "wiadomości w zwykłym tekście."
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:112
 msgid "Advisory strategy for full-text searching"
 msgstr "Strategia wyszukiwania w treści"
 
-#: desktop/org.gnome.Geary.gschema.xml:111
+#: desktop/org.gnome.Geary.gschema.xml:113
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Przyjmowane wartości: „exact” (dokładna), „conservative” (konserwatywna), "
 "„aggressive” (agresywna) i „horizon” (horyzontalna)."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:118
 msgid "Zoom of conversation viewer"
 msgstr "Powiększenie widoku wątku"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:119
 msgid "The zoom to apply on the conservation view."
 msgstr "Powiększenie widoku wątku."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:124
 msgid "Size of detached composer window"
 msgstr "Rozmiar odłączonego okna tworzenia wiadomości"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:125
 msgid "The last recorded size of the detached composer window."
 msgstr "Ostatnio zapisany rozmiar odłączonego okna tworzenia wiadomości."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:130
 msgid "Whether we migrated the old settings"
 msgstr "Poprzednie ustawienia zostały migrowane"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:131
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -1035,57 +1039,57 @@ msgid "Display program version and revision id"
 msgstr "Wyświetla wersję programu i identyfikator wydania"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:278
+#: src/client/application/geary-application.vala:279
 msgid "Geary version"
 msgstr "Wersja programu Geary"
 
-#: src/client/application/geary-application.vala:279
+#: src/client/application/geary-application.vala:280
 msgid "Geary revision"
 msgstr "Wydanie programu Geary"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:281
+#: src/client/application/geary-application.vala:282
 msgid "GTK version"
 msgstr "Wersja biblioteki GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/geary-application.vala:288
+#: src/client/application/geary-application.vala:289
 msgid "GLib version"
 msgstr "Wersja biblioteki GLib"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:295
+#: src/client/application/geary-application.vala:296
 msgid "WebKitGTK version"
 msgstr "Wersja biblioteki WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:302
+#: src/client/application/geary-application.vala:303
 msgid "Desktop environment"
 msgstr "Środowisko pulpitu"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/geary-application.vala:304
+#: src/client/application/geary-application.vala:305
 #: src/client/conversation-viewer/conversation-email.vala:159
 msgid "Unknown"
 msgstr "Nieznany"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:334
+#: src/client/application/geary-application.vala:335
 msgid "Distribution name"
 msgstr "Nazwa dystrybucji"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:339
+#: src/client/application/geary-application.vala:340
 msgid "Distribution release"
 msgstr "Wydanie dystrybucji"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:347
+#: src/client/application/geary-application.vala:348
 msgid "Installation prefix"
 msgstr "Przedrostek instalacji"
 
-#: src/client/application/geary-application.vala:512
+#: src/client/application/geary-application.vala:513
 #, c-format
 msgid "About %s"
 msgstr "O programie %s"
@@ -1093,7 +1097,7 @@ msgstr "O programie %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:516
+#: src/client/application/geary-application.vala:517
 msgid "translator-credits"
 msgstr ""
 "scrx <mattpiskorz@gmail.com>, 2012\n"
@@ -1109,13 +1113,13 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/geary-application.vala:777
+#: src/client/application/geary-application.vala:788
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "Opcja „--hidden” jest przestarzała i zostanie usunięta w przyszłości."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/geary-application.vala:807
+#: src/client/application/geary-application.vala:820
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Nieznany parametr programu: „%s”"
@@ -1541,15 +1545,15 @@ msgstr "Obrazy"
 msgid "New Message"
 msgstr "Nowa wiadomość"
 
-#: src/client/composer/spell-check-popover.vala:117
+#: src/client/composer/spell-check-popover.vala:108
 msgid "Remove this language from the preferred list"
 msgstr "Usuwa ten język z listy preferowanych"
 
-#: src/client/composer/spell-check-popover.vala:121
+#: src/client/composer/spell-check-popover.vala:112
 msgid "Add this language to the preferred list"
 msgstr "Dodaje ten język do listy preferowanych"
 
-#: src/client/composer/spell-check-popover.vala:217
+#: src/client/composer/spell-check-popover.vala:199
 msgid "Search for more languages"
 msgstr "Więcej języków"
 
@@ -2600,7 +2604,7 @@ msgstr "Otwarto inspektora"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:31
-msgid "Togggle appending new log entries"
+msgid "Toggle appending new log entries"
 msgstr "Przełącza dołączanie nowych wpisów dziennika"
 
 #. Tooltip for inspector button
