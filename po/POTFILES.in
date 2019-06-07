@@ -222,7 +222,6 @@ src/engine/imap-db/imap-db-database.vala
 src/engine/imap-db/imap-db-email-identifier.vala
 src/engine/imap-db/imap-db-folder.vala
 src/engine/imap-db/imap-db-gc.vala
-src/engine/imap-db/imap-db-message-addresses.vala
 src/engine/imap-db/imap-db-message-row.vala
 src/engine/imap-db/search/imap-db-search-email-identifier.vala
 src/engine/imap-db/search/imap-db-search-folder-properties.vala

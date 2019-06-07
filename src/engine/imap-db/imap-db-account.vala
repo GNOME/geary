@@ -89,7 +89,6 @@ private class Geary.ImapDB.Account : BaseObject {
     }
 
     // Only available when the Account is opened
-    public ContactStore contact_store { get; private set; }
     public IntervalProgressMonitor search_index_monitor { get; private set;
         default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
     public SimpleProgressMonitor upgrade_monitor { get; private set; default = new SimpleProgressMonitor(
@@ -288,8 +287,7 @@ private class Geary.ImapDB.Account : BaseObject {
             schema_dir,
             attachments_dir,
             upgrade_monitor,
-            vacuum_monitor,
-            account_information.primary_mailbox.address
+            vacuum_monitor
         );
 
         try {
@@ -351,8 +349,6 @@ private class Geary.ImapDB.Account : BaseObject {
 
             return false;
         });
-
-        this.contact_store = new ContactStoreImpl(db);
     }
 
     public async void close_async(Cancellable? cancellable) throws Error {
@@ -617,7 +613,6 @@ private class Geary.ImapDB.Account : BaseObject {
                 db,
                 path,
                 db.attachments_path,
-                contact_store,
                 account_information.primary_mailbox.address,
                 folder_id,
                 properties

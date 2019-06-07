@@ -35,8 +35,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
             GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql"),
             this.tmp_dir.get_child("attachments"),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_UPGRADE),
-            new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM),
-            "test@example.com"
+            new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM)
         );
 
         db.open.begin(
@@ -96,8 +95,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
             GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql"),
             attachments_dir,
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_UPGRADE),
-            new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM),
-            "test@example.com"
+            new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM)
         );
 
         db.open.begin(

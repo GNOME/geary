@@ -83,7 +83,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         base(config, imap, smtp);
 
         this.local = local;
-        this.contact_store = local.contact_store;
+        this.contact_store = new ContactStoreImpl(local.db);
 
         imap.min_pool_size = IMAP_MIN_POOL_SIZE;
         imap.notify["current-status"].connect(

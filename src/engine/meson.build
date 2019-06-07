@@ -176,7 +176,6 @@ geary_engine_vala_sources = files(
   'imap-db/imap-db-email-identifier.vala',
   'imap-db/imap-db-folder.vala',
   'imap-db/imap-db-gc.vala',
-  'imap-db/imap-db-message-addresses.vala',
   'imap-db/imap-db-message-row.vala',
   'imap-db/search/imap-db-search-email-identifier.vala',
   'imap-db/search/imap-db-search-folder.vala',

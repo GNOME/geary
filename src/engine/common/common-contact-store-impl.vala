@@ -12,15 +12,46 @@
 internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
 
 
-    // Insert or update a contact in the ContactTable. If contact
-    // already exists, flags are merged and the importance is updated
-    // to the highest importance seen.
-    //
-    // Internal and static since it is used by ImapDB.Database during
-    // upgrades
-    internal static void do_update_contact(Db.Connection cx,
-                                           Contact updated,
-                                           GLib.Cancellable? cancellable)
+    private Geary.Db.Database backing;
+
+
+    internal ContactStoreImpl(Geary.Db.Database backing) {
+        base_ref();
+        this.backing = backing;
+    }
+
+    /** Returns the contact matching the given email address, if any */
+    public async Contact? get_by_rfc822(Geary.RFC822.MailboxAddress mailbox,
+                                        GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Contact? contact = null;
+        yield this.backing.exec_transaction_async(
+            Db.TransactionType.RO,
+            (cx, cancellable) => {
+                contact = do_fetch_contact(cx, mailbox.address, cancellable);
+                return Db.TransactionOutcome.COMMIT;
+            },
+            cancellable);
+        return contact;
+    }
+
+    public async void update_contacts(Gee.Collection<Contact> updated,
+                                      GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.backing.exec_transaction_async(
+            Db.TransactionType.RW,
+            (cx, cancellable) => {
+                foreach (Contact contact in updated) {
+                    do_update_contact(cx, contact, cancellable);
+                }
+                return Db.TransactionOutcome.COMMIT;
+            },
+            cancellable);
+    }
+
+    private void do_update_contact(Db.Connection cx,
+                                   Contact updated,
+                                   GLib.Cancellable? cancellable)
         throws GLib.Error {
         Contact? existing = do_fetch_contact(
             cx, updated.email, cancellable
@@ -69,11 +100,9 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
         }
     }
 
-    // Static since it is indirectly used by ImapDB.Database during
-    // upgrades
-    private static Contact? do_fetch_contact(Db.Connection cx,
-                                             string email,
-                                             GLib.Cancellable? cancellable)
+    private Contact? do_fetch_contact(Db.Connection cx,
+                                      string email,
+                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
         Db.Statement stmt = cx.prepare(
             "SELECT real_name, highest_importance, normalized_email, flags FROM ContactTable "
@@ -93,44 +122,6 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
             contact.flags.deserialize(result.string_at(3));
         }
         return contact;
-    }
-
-
-    private Geary.Db.Database backing;
-
-
-    internal ContactStoreImpl(Geary.Db.Database backing) {
-        base_ref();
-        this.backing = backing;
-    }
-
-    /** Returns the contact matching the given email address, if any */
-    public async Contact? get_by_rfc822(Geary.RFC822.MailboxAddress mailbox,
-                                        GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        Contact? contact = null;
-        yield this.backing.exec_transaction_async(
-            Db.TransactionType.RO,
-            (cx, cancellable) => {
-                contact = do_fetch_contact(cx, mailbox.address, cancellable);
-                return Db.TransactionOutcome.COMMIT;
-            },
-            cancellable);
-        return contact;
-    }
-
-    public async void update_contacts(Gee.Collection<Contact> updated,
-                                      GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        yield this.backing.exec_transaction_async(
-            Db.TransactionType.RW,
-            (cx, cancellable) => {
-                foreach (Contact contact in updated) {
-                    do_update_contact(cx, contact, cancellable);
-                }
-                return Db.TransactionOutcome.COMMIT;
-            },
-            cancellable);
     }
 
 }

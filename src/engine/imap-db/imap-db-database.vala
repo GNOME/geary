@@ -15,7 +15,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
     private ProgressMonitor upgrade_monitor;
     private ProgressMonitor vacuum_monitor;
-    private string account_owner_email;
     private bool new_db = false;
 
     private GC? gc = null;
@@ -25,15 +24,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     GLib.File schema_dir,
                     GLib.File attachments_path,
                     ProgressMonitor upgrade_monitor,
-                    ProgressMonitor vacuum_monitor,
-                    string account_owner_email) {
+                    ProgressMonitor vacuum_monitor) {
         base.persistent(db_file, schema_dir);
         this.attachments_path = attachments_path;
         this.upgrade_monitor = upgrade_monitor;
         this.vacuum_monitor = vacuum_monitor;
-
-        // Update to use all addresses on the account. Bug 768779
-        this.account_owner_email = account_owner_email;
     }
 
     /**
@@ -133,10 +128,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                                                Cancellable? cancellable)
         throws Error {
         switch (version) {
-            case 5:
-                yield post_upgrade_populate_autocomplete(cancellable);
-            break;
-
             case 6:
                 yield post_upgrade_encode_folder_names(cancellable);
             break;
@@ -177,25 +168,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 yield post_upgrade_add_tokenizer_table(cancellable);
             break;
         }
-    }
-
-    // Version 5.
-    private async void post_upgrade_populate_autocomplete(Cancellable? cancellable)
-        throws Error {
-        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
-                Db.Result result = cx.query(
-                    "SELECT sender, from_field, to_field, cc, bcc FROM MessageTable"
-                );
-                while (!result.finished && !cancellable.is_cancelled()) {
-                    MessageAddresses message_addresses =
-                    new MessageAddresses.from_result(account_owner_email, result);
-                    foreach (Contact contact in message_addresses.contacts) {
-                        ContactStoreImpl.do_update_contact(cx, contact, null);
-                    }
-                    result.next();
-                }
-                return Geary.Db.TransactionOutcome.COMMIT;
-            }, cancellable);
     }
 
     // Version 6.
