@@ -86,7 +86,9 @@ public class Application.ContactStore : Geary.BaseObject {
         }
         if (contact == null) {
             Geary.Contact? engine =
-                this.account.get_contact_store().get_by_rfc822(mailbox);
+                yield this.account.contact_store.get_by_rfc822(
+                    mailbox, cancellable
+                );
             contact = new Contact(this, individual, engine, mailbox);
             if (individual != null) {
                 this.contact_id_cache.set_entry(individual.id, contact);

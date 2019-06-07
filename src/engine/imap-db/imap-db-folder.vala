@@ -321,8 +321,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 return Db.TransactionOutcome.COMMIT;
             }, cancellable);
 
-            if (updated_contacts.size > 0)
-                contact_store.update_contacts(updated_contacts);
+            if (updated_contacts.size > 0) {
+                yield this.contact_store.update_contacts(
+                    updated_contacts, cancellable
+                );
+            }
 
             if (update_totals) {
                 // Update the email_unread properties.

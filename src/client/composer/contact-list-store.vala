@@ -70,29 +70,29 @@ public class ContactListStore : Gtk.ListStore, Geary.BaseInterface {
         base_ref();
         set_column_types(Column.get_types());
         this.contact_store = contact_store;
-        contact_store.contacts_added.connect(on_contacts_added);
-        contact_store.contacts_updated.connect(on_contacts_updated);
+        //contact_store.contacts_added.connect(on_contacts_added);
+        //contact_store.contacts_updated.connect(on_contacts_updated);
     }
 
     ~ContactListStore() {
         base_unref();
-        this.contact_store.contacts_added.disconnect(on_contacts_added);
-        this.contact_store.contacts_updated.disconnect(on_contacts_updated);
+        //this.contact_store.contacts_added.disconnect(on_contacts_added);
+        //this.contact_store.contacts_updated.disconnect(on_contacts_updated);
     }
 
     /**
      * Loads contacts from the model's contact store.
      */
     public async void load() {
-        uint count = 0;
-        foreach (Geary.Contact contact in this.contact_store.contacts) {
-            add_contact(contact);
-            count++;
-            if (count % LOAD_BATCH_SIZE == 0) {
-                Idle.add(load.callback);
-                yield;
-            }
-        }
+        // uint count = 0;
+        // foreach (Geary.Contact contact in this.contact_store.contacts) {
+        //     add_contact(contact);
+        //     count++;
+        //     if (count % LOAD_BATCH_SIZE == 0) {
+        //         Idle.add(load.callback);
+        //         yield;
+        //     }
+        // }
     }
 
     public void set_sort_function() {

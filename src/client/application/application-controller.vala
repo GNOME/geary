@@ -616,20 +616,16 @@ public class Application.Controller : Geary.BaseObject {
         );
         account.report_problem.connect(on_report_problem);
         connect_account_async.begin(account, cancellable_open_account);
-
-        ContactListStore list_store = this.contact_list_store_cache.create(account.get_contact_store());
-        account.contacts_loaded.connect(list_store.set_sort_function);
     }
 
     private async void close_account(Geary.AccountInformation config) {
         AccountContext? context = this.accounts.get(config);
         if (context != null) {
             Geary.Account account = context.account;
-            Geary.ContactStore contact_store = account.get_contact_store();
+            Geary.ContactStore contact_store = account.contact_store;
             ContactListStore list_store =
                 this.contact_list_store_cache.get(contact_store);
 
-            account.contacts_loaded.disconnect(list_store.set_sort_function);
             this.contact_list_store_cache.unset(contact_store);
 
             if (this.current_account == account) {

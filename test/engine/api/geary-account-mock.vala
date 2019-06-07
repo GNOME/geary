@@ -16,18 +16,24 @@ public class Geary.MockAccount : Account, MockObject {
 
     }
 
-    public class MockContactStore : ContactStore {
+    public class MockContactStore : GLib.Object, ContactStore  {
 
         internal MockContactStore() {
 
         }
 
-        public override async void
-            mark_contacts_async(Gee.Collection<Contact> contacts,
-                                ContactFlags? to_add,
-                                ContactFlags? to_remove) throws Error {
-                throw new EngineError.UNSUPPORTED("Mock method");
-            }
+        public async Contact? get_by_rfc822(Geary.RFC822.MailboxAddress address,
+                                            GLib.Cancellable? cancellable)
+        throws GLib.Error {
+            throw new EngineError.UNSUPPORTED("Mock method");
+        }
+
+        public async void update_contacts(Gee.Collection<Contact> contacts,
+                                          GLib.Cancellable? cancellable)
+            throws GLib.Error {
+            throw new EngineError.UNSUPPORTED("Mock method");
+        }
+
     }
 
 
@@ -169,10 +175,6 @@ public class Geary.MockAccount : Account, MockObject {
         return object_call<Gee.Collection<Folder>>(
             "list_folders", {}, Gee.List.empty<Folder>()
         );
-    }
-
-    public override Geary.ContactStore get_contact_store() {
-        return new MockContactStore();
     }
 
     public override Folder? get_special_folder(SpecialFolderType special)

@@ -83,7 +83,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         base(config, imap, smtp);
 
         this.local = local;
-        this.local.contacts_loaded.connect(() => { contacts_loaded(); });
+        this.contact_store = local.contact_store;
 
         imap.min_pool_size = IMAP_MIN_POOL_SIZE;
         imap.notify["current-status"].connect(
@@ -483,10 +483,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         all_folders.add_all(local_only.values);
 
         return all_folders;
-    }
-
-    public override Geary.ContactStore get_contact_store() {
-        return local.contact_store;
     }
 
     public override async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,

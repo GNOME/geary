@@ -182,14 +182,17 @@ public class Application.Contact : Geary.BaseObject {
         throws GLib.Error {
         ContactStore? store = this.store;
         if (store != null && this.contact != null) {
-            Geary.ContactFlags flags = new Geary.ContactFlags();
-            flags.add(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
+            Geary.ContactFlags flags = (
+                this.contact.contact_flags ?? new Geary.ContactFlags()
+            );
+            if (enabled) {
+                flags.add(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
+            } else {
+                flags.remove(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
+            }
 
-            yield store.account.get_contact_store().mark_contacts_async(
-                Geary.Collection.single(this.contact),
-                enabled ? flags : null,
-                !enabled ? flags : null //,
-                // XXX cancellable
+            yield store.account.contact_store.update_contacts(
+                Geary.Collection.single(this.contact), cancellable
             );
         }
 

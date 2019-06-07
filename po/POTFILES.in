@@ -166,6 +166,7 @@ src/engine/app/email-store/app-copy-operation.vala
 src/engine/app/email-store/app-fetch-operation.vala
 src/engine/app/email-store/app-list-operation.vala
 src/engine/app/email-store/app-mark-operation.vala
+src/engine/common/common-contact-store-impl.vala
 src/engine/common/common-message-data.vala
 src/engine/db/db.vala
 src/engine/db/db-connection.vala
@@ -218,7 +219,6 @@ src/engine/imap/command/imap-status-command.vala
 src/engine/imap/command/imap-store-command.vala
 src/engine/imap-db/imap-db-account.vala
 src/engine/imap-db/imap-db-attachment.vala
-src/engine/imap-db/imap-db-contact.vala
 src/engine/imap-db/imap-db-database.vala
 src/engine/imap-db/imap-db-email-identifier.vala
 src/engine/imap-db/imap-db-folder.vala
@@ -239,7 +239,6 @@ src/engine/imap-engine/gmail/imap-engine-gmail-spam-trash-folder.vala
 src/engine/imap-engine/imap-engine-account-operation.vala
 src/engine/imap-engine/imap-engine-account-processor.vala
 src/engine/imap-engine/imap-engine-account-synchronizer.vala
-src/engine/imap-engine/imap-engine-contact-store.vala
 src/engine/imap-engine/imap-engine-email-prefetcher.vala
 src/engine/imap-engine/imap-engine-generic-account.vala
 src/engine/imap-engine/imap-engine-generic-folder.vala

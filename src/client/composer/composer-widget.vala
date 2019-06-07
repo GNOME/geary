@@ -240,8 +240,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     public Configuration config { get; set; }
 
-    private ContactListStore? contact_list_store = null;
-
     private string body_html = "";
 
     [GtkChild]
@@ -380,8 +378,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     // Is the composer closing (e.g. saving a draft or sending)?
     private bool is_closing = false;
 
-    private ContactListStoreCache contact_list_store_cache;
-
     private ComposerContainer container {
         get { return (ComposerContainer) parent; }
     }
@@ -406,7 +402,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                           Configuration config) {
         base_ref();
         this.account = account;
-        this.contact_list_store_cache = contact_list_store_cache;
         this.config = config;
         this.compose_type = compose_type;
         if (this.compose_type == ComposeType.NEW_MESSAGE)
@@ -653,22 +648,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
      * Loads and sets contact auto-complete data for the current account.
      */
     private void load_entry_completions() {
-        Geary.ContactStore contacts = this.account.get_contact_store();
-        if (this.contact_list_store == null ||
-            this.contact_list_store.contact_store != contacts) {
-            ContactListStore? store = this.contact_list_store_cache.get(contacts);
-
-            if (store == null) {
-                error("Error loading contact_list_store from cache");
-            } else {
-                this.contact_list_store = store;
-
-                this.to_entry.completion = new ContactEntryCompletion(store);
-                this.cc_entry.completion = new ContactEntryCompletion(store);
-                this.bcc_entry.completion = new ContactEntryCompletion(store);
-                this.reply_to_entry.completion = new ContactEntryCompletion(store);
-            }
-        }
+        Geary.ContactStore contacts = this.account.contact_store;
     }
 
     /**

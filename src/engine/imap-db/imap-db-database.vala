@@ -190,7 +190,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     MessageAddresses message_addresses =
                     new MessageAddresses.from_result(account_owner_email, result);
                     foreach (Contact contact in message_addresses.contacts) {
-                        do_update_contact(cx, contact, null);
+                        ContactStoreImpl.do_update_contact(cx, contact, null);
                     }
                     result.next();
                 }

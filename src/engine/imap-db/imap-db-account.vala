@@ -74,7 +74,6 @@ private class Geary.ImapDB.Account : BaseObject {
     private static Gee.HashMap<string, string> search_op_is_values =
         new Gee.HashMap<string, string>();
 
-    public signal void contacts_loaded();
 
     /**
      * The root path for all remote IMAP folders.
@@ -90,7 +89,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
 
     // Only available when the Account is opened
-    public ImapEngine.ContactStore contact_store { get; private set; }
+    public ContactStore contact_store { get; private set; }
     public IntervalProgressMonitor search_index_monitor { get; private set;
         default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
     public SimpleProgressMonitor upgrade_monitor { get; private set; default = new SimpleProgressMonitor(
@@ -257,7 +256,6 @@ private class Geary.ImapDB.Account : BaseObject {
 
     public Account(AccountInformation config) {
         this.account_information = config;
-        this.contact_store = new ImapEngine.ContactStore(this);
         this.name = config.id + ":db";
     }
 
@@ -354,7 +352,7 @@ private class Geary.ImapDB.Account : BaseObject {
             return false;
         });
 
-        initialize_contacts(cancellable);
+        this.contact_store = new ContactStoreImpl(db);
     }
 
     public async void close_async(Cancellable? cancellable) throws Error {
@@ -456,40 +454,6 @@ private class Geary.ImapDB.Account : BaseObject {
 
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-    }
-
-    private void initialize_contacts(Cancellable? cancellable = null) throws Error {
-        check_open();
-
-        Gee.Collection<Contact> contacts = new Gee.LinkedList<Contact>();
-        Db.TransactionOutcome outcome = db.exec_transaction(Db.TransactionType.RO,
-            (context) => {
-            Db.Statement statement = context.prepare(
-                "SELECT email, real_name, highest_importance, normalized_email, flags " +
-                "FROM ContactTable");
-
-            Db.Result result = statement.exec(cancellable);
-            while (!result.finished) {
-                try {
-                    Contact contact = new Contact(result.nonnull_string_at(0), result.string_at(1),
-                        result.int_at(2), result.string_at(3), ContactFlags.deserialize(result.string_at(4)));
-                    contacts.add(contact);
-                } catch (Geary.DatabaseError err) {
-                    // We don't want to abandon loading all contacts just because there was a
-                    // problem with one.
-                    debug("Problem loading contact: %s", err.message);
-                }
-
-                result.next();
-            }
-
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-
-        if (outcome == Db.TransactionOutcome.DONE) {
-            contact_store.update_contacts(contacts);
-            contacts_loaded();
-        }
     }
 
     /**
@@ -1390,21 +1354,6 @@ private class Geary.ImapDB.Account : BaseObject {
 
         assert(email != null);
         return email;
-    }
-
-    public async void update_contact_flags_async(Geary.Contact contact, Cancellable? cancellable)
-        throws Error{
-        check_open();
-
-        yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
-            Db.Statement update_stmt =
-                cx.prepare("UPDATE ContactTable SET flags=? WHERE email=?");
-            update_stmt.bind_string(0, contact.contact_flags.serialize());
-            update_stmt.bind_string(1, contact.email);
-            update_stmt.exec(cancellable);
-
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
     }
 
     /**
