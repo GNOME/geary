@@ -49,7 +49,7 @@ public class Application.Contact : Geary.BaseObject {
             return (
                 this.individual != null ||
                 (this.contact != null &&
-                 this.contact.always_load_remote_images())
+                 this.contact.flags.always_load_remote_images())
             );
         }
     }
@@ -182,13 +182,14 @@ public class Application.Contact : Geary.BaseObject {
         throws GLib.Error {
         ContactStore? store = this.store;
         if (store != null && this.contact != null) {
-            Geary.ContactFlags flags = (
-                this.contact.contact_flags ?? new Geary.ContactFlags()
-            );
             if (enabled) {
-                flags.add(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
+                this.contact.flags.add(
+                    Geary.Contact.Flags.ALWAYS_LOAD_REMOTE_IMAGES
+                );
             } else {
-                flags.remove(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
+                this.contact.flags.remove(
+                    Geary.Contact.Flags.ALWAYS_LOAD_REMOTE_IMAGES
+                );
             }
 
             yield store.account.contact_store.update_contacts(

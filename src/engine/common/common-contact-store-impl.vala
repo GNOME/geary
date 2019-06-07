@@ -34,7 +34,7 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
             stmt.bind_string(0, contact.normalized_email);
             stmt.bind_string(1, contact.email);
             stmt.bind_string(2, contact.real_name);
-            stmt.bind_string(3, (contact.contact_flags != null) ? contact.contact_flags.serialize() : null);
+            stmt.bind_string(3, contact.flags.serialize());
             stmt.bind_int(4, contact.highest_importance);
 
             stmt.exec(cancellable);
@@ -42,14 +42,7 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
             // Update existing contact
 
             // Merge two flags sets together
-            ContactFlags? merged_flags = contact.contact_flags;
-            if (existing.contact_flags != null) {
-                if (merged_flags != null) {
-                    merged_flags.add_all(existing.contact_flags);
-                } else {
-                    merged_flags = existing.contact_flags;
-                }
-            }
+            contact.flags.add_all(existing.flags);
 
             // update remaining fields, careful not to overwrite
             // non-null real_name with null (but using latest
@@ -63,7 +56,7 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
                 0, !String.is_empty(contact.real_name) ? contact.real_name : existing.real_name
             );
             stmt.bind_string(
-                1, (merged_flags != null) ? merged_flags.serialize() : null
+                1, contact.flags.serialize()
             );
             stmt.bind_int(
                 2, int.max(contact.highest_importance, existing.highest_importance)
@@ -88,16 +81,18 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
         stmt.bind_string(0, email);
 
         Db.Result result = stmt.exec(cancellable);
-        if (result.finished)
-            return null;
 
-        return new Contact(
-            email,
-            result.string_at(0),
-            result.int_at(1),
-            result.string_at(2),
-            ContactFlags.deserialize(result.string_at(3))
-        );
+        Contact? contact = null;
+        if (!result.finished) {
+            contact = new Contact(
+                email,
+                result.string_at(0),
+                result.int_at(1),
+                result.string_at(2)
+            );
+            contact.flags.deserialize(result.string_at(3));
+        }
+        return contact;
     }
 
 

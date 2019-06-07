@@ -10,7 +10,6 @@ geary_engine_vala_sources = files(
   'api/geary-client-service.vala',
   'api/geary-composed-email.vala',
   'api/geary-contact.vala',
-  'api/geary-contact-flags.vala',
   'api/geary-contact-importance.vala',
   'api/geary-contact-store.vala',
   'api/geary-credentials.vala',
