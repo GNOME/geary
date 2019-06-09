@@ -66,6 +66,7 @@ geary_engine_vala_sources = files(
   'app/email-store/app-list-operation.vala',
   'app/email-store/app-mark-operation.vala',
 
+  'common/common-contact-harvester.vala',
   'common/common-contact-store-impl.vala',
   'common/common-message-data.vala',
 

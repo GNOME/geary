@@ -24,6 +24,7 @@ int main(string[] args) {
 
     engine.add_suite(new Geary.AccountInformationTest().get_suite());
     engine.add_suite(new Geary.AttachmentTest().get_suite());
+    engine.add_suite(new Geary.ContactHarvesterImplTest().get_suite());
     engine.add_suite(new Geary.EngineTest().get_suite());
     engine.add_suite(new Geary.FolderPathTest().get_suite());
     engine.add_suite(new Geary.IdleManagerTest().get_suite());

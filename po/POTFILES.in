@@ -164,6 +164,7 @@ src/engine/app/email-store/app-copy-operation.vala
 src/engine/app/email-store/app-fetch-operation.vala
 src/engine/app/email-store/app-list-operation.vala
 src/engine/app/email-store/app-mark-operation.vala
+src/engine/common/common-contact-harvester.vala
 src/engine/common/common-contact-store-impl.vala
 src/engine/common/common-message-data.vala
 src/engine/db/db.vala
