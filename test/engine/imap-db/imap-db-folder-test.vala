@@ -83,6 +83,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
             true,
+            new MockContactHarvester(),
             null,
             (obj, ret) => { async_complete(ret); }
         );
@@ -102,6 +103,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
             true,
+            new MockContactHarvester(),
             null,
             (obj, ret) => { async_complete(ret); }
         );
@@ -121,6 +123,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
             false,
+            new MockContactHarvester(),
             null,
             (obj, ret) => { async_complete(ret); }
         );
@@ -150,6 +153,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
             true,
+            new MockContactHarvester(),
             null,
             (obj, ret) => { async_complete(ret); }
         );
@@ -200,6 +204,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.create_or_merge_email_async.begin(
             Collection.single(test),
             true,
+            new MockContactHarvester(),
             null,
             (obj, ret) => { async_complete(ret); }
         );
@@ -233,6 +238,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.create_or_merge_email_async.begin(
             Collection.single(test),
             true,
+            new MockContactHarvester(),
             null,
             (obj, ret) => { async_complete(ret); }
         );

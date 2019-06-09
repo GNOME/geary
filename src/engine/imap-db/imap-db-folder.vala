@@ -276,6 +276,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public async Gee.Map<Email, bool>
         create_or_merge_email_async(Gee.Collection<Email> emails,
                                     bool update_totals,
+                                    ContactHarvester harvester,
                                     GLib.Cancellable? cancellable)
         throws GLib.Error {
         Gee.HashMap<Geary.Email, bool> results = new Gee.HashMap<Geary.Email, bool>();
@@ -331,6 +332,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             if (index < list.size)
                 yield Scheduler.sleep_ms_async(100);
         }
+
+        yield harvester.harvest_from_email(
+            results.keys, cancellable
+        );
 
         return results;
     }

@@ -66,6 +66,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
     internal ReplayQueue? replay_queue { get; private set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
+    internal ContactHarvester harvester { get; private set; }
 
     private weak GenericAccount _account;
     private Geary.AggregatedFolderProperties _properties =
@@ -124,6 +125,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         this._special_folder_type = special_folder_type;
         this._properties.add(local_folder.get_properties());
         this.email_prefetcher = new EmailPrefetcher(this);
+        update_harvester();
 
         this.remote_open_timer = new TimeoutManager.seconds(
             FORCE_OPEN_REMOTE_TIMEOUT_SEC, () => { this.open_remote_session.begin(); }
@@ -181,6 +183,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         _special_folder_type = new_type;
         if (old_type != new_type)
             notify_special_folder_type_changed(old_type, new_type);
+        update_harvester();
     }
 
     /** {@inheritDoc} */
@@ -535,7 +538,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // also Issue #213.
             Gee.Map<Email, bool>? created_or_merged =
                 yield local_folder.create_or_merge_email_async(
-                    to_create, false, cancellable
+                    to_create, false, this.harvester, cancellable
                 );
             assert(created_or_merged != null);
 
@@ -1519,6 +1522,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 chunk_size = FLAG_UPDATE_MAX_CHUNK;
             }
         }
+    }
+
+    private void update_harvester() {
+        this.harvester = new ContactHarvesterImpl(
+            this.account.contact_store,
+            this.special_folder_type,
+            this.account.information.sender_mailboxes
+        );
     }
 
     private void on_refresh_unseen() {

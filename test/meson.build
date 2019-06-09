@@ -20,6 +20,7 @@ geary_test_engine_sources = [
   'engine/api/geary-email-properties-mock.vala',
   'engine/api/geary-folder-mock.vala',
   'engine/api/geary-folder-properties-mock.vala',
+  'engine/common/common-contact-harvester-mock.vala',
 
   'engine/api/geary-account-information-test.vala',
   'engine/api/geary-attachment-test.vala',
