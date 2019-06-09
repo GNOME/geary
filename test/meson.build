@@ -28,6 +28,7 @@ geary_test_engine_sources = [
   'engine/app/app-conversation-test.vala',
   'engine/app/app-conversation-monitor-test.vala',
   'engine/app/app-conversation-set-test.vala',
+  'engine/common/common-contact-store-impl-test.vala',
   'engine/db/db-database-test.vala',
   'engine/db/db-versioned-database-test.vala',
   'engine/imap/command/imap-create-command-test.vala',
