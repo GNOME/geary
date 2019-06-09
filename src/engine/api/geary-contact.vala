@@ -72,13 +72,20 @@ public class Geary.Contact : BaseObject {
                    string? normalized_email = null) {
         this.normalized_email = normalized_email ?? email.normalize().casefold();
         this.email = email;
-        this.real_name = real_name;
+        this.real_name = (
+            (real_name != email && real_name != normalized_email)
+            ? real_name : null
+        );
         this.highest_importance = highest_importance;
     }
 
     public Contact.from_rfc822_address(RFC822.MailboxAddress address,
                                        int highest_importance) {
-        this(address.address, address.name, highest_importance);
+        this(
+            address.address,
+            address.has_distinct_name() ? address.name : null,
+            highest_importance
+        );
     }
 
     public RFC822.MailboxAddress get_rfc822_address() {
