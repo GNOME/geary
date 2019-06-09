@@ -111,7 +111,6 @@ src/engine/api/geary-attachment.vala
 src/engine/api/geary-base-object.vala
 src/engine/api/geary-client-service.vala
 src/engine/api/geary-composed-email.vala
-src/engine/api/geary-contact-importance.vala
 src/engine/api/geary-contact-store.vala
 src/engine/api/geary-contact.vala
 src/engine/api/geary-credentials-mediator.vala

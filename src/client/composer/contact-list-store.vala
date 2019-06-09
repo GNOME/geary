@@ -7,7 +7,8 @@
 public class ContactListStore : Gtk.ListStore, Geary.BaseInterface {
 
     // Minimum visibility for the contact to appear in autocompletion.
-    private const Geary.ContactImportance CONTACT_VISIBILITY_THRESHOLD = Geary.ContactImportance.TO_TO;
+    private const Geary.Contact.Importance VISIBILITY_THRESHOLD =
+        Geary.Contact.Importance.RECEIVED_FROM;
 
     // Batch size for loading contacts asynchronously
     private uint LOAD_BATCH_SIZE = 4096;
@@ -112,7 +113,7 @@ public class ContactListStore : Gtk.ListStore, Geary.BaseInterface {
     }
 
     private inline void add_contact(Geary.Contact contact) {
-        if (contact.highest_importance >= CONTACT_VISIBILITY_THRESHOLD) {
+        if (contact.highest_importance >= VISIBILITY_THRESHOLD) {
             Gtk.TreeIter iter;
             append(out iter);
             set(iter,

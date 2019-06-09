@@ -1,11 +1,23 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 public class Geary.Contact : BaseObject {
 
+
+    /**
+     * Standard values for contact importance..
+     */
+    public enum Importance {
+        DESKTOP = 200,
+        SENT_TO = 100,
+        RECEIVED_FROM = 70,  // Equivalent to old TO_FROM value
+        SEEN = 30 // Equivalent to old CC_TO value
+    }
 
     /**
      * Named flags for contact objects.
