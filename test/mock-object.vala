@@ -56,16 +56,20 @@ public class ExpectedCall : Object {
 
 
     public string name { get; private set; }
-    internal Object[]? args;
     public Error? throw_error { get; private set; default = null; }
     public Object? return_object { get; private set; default = null; }
     public Variant? return_value { get; private set; default = null; }
+
     public bool was_called { get; private set; default = false; }
+
+    // XXX Arrays can't be GObject properties :(
+    internal Object[]? expected_args = null;
+    private Object[]? called_args = null;
 
 
     internal ExpectedCall(string name, Object[]? args) {
         this.name = name;
-        this.args = args;
+        this.expected_args = args;
     }
 
     public ExpectedCall returns_object(Object value) {
@@ -83,8 +87,25 @@ public class ExpectedCall : Object {
         return this;
     }
 
-    internal void called() {
+    public T called_arg<T>(int pos) throws GLib.Error {
+        assert_true(
+            this.called_args != null && this.called_args.length >= (pos + 1),
+            "%s call argument %u, type %s, not present".printf(
+                this.name, pos, typeof(T).name()
+            )
+        );
+        assert_true(
+            this.called_args[pos] is T,
+            "%s call argument %u not of type %s".printf(
+                this.name, pos, typeof(T).name()
+            )
+        );
+        return (T) this.called_args[pos];
+    }
+
+    internal void called(Object[]? args) {
         this.was_called = true;
+        this.called_args = args;
     }
 
 }
@@ -184,11 +205,11 @@ public interface MockObject {
 
         ExpectedCall expected = this.expected.poll();
         assert_string(expected.name, name, "Unexpected call");
-        if (expected.args != null) {
-            assert_args(expected.args, args, "Call %s".printf(name));
+        if (expected.expected_args != null) {
+            assert_args(expected.expected_args, args, "Call %s".printf(name));
         }
 
-        expected.called();
+        expected.called(args);
 
         if (expected.throw_error != null) {
             throw expected.throw_error;
