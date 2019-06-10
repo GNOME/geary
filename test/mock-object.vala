@@ -44,6 +44,21 @@ private class IntArgument : Object, Argument {
 
 }
 
+private class UintArgument : Object, Argument {
+
+    private uint value;
+
+    internal UintArgument(uint value) {
+        this.value = value;
+    }
+
+    public new void assert(Object object) throws Error {
+        assert_true(object is UintArgument, "Expected uint value");
+        assert_uint(this.value, ((UintArgument) object).value);
+    }
+
+}
+
 /**
  * Represents an expected method call on a mock object.
  *
@@ -143,6 +158,10 @@ public interface MockObject {
 
     public static Object int_arg(int value) {
         return new IntArgument(value);
+    }
+
+    public static Object uint_arg(uint value) {
+        return new UintArgument(value);
     }
 
     protected abstract Gee.Queue<ExpectedCall> expected { get; set; }
