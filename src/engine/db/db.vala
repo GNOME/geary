@@ -45,20 +45,6 @@ public enum ResetScope {
     CLEAR_BINDINGS
 }
 
-/*
- * PrepareConnection is called from Database when a Connection is created.  Database may pool
- * Connections, especially for asynchronous queries, so this is only called when a new
- * Connection is created and not when its reused.
- *
- * PrepareConnection may be used as an opportunity to modify or configure the Connection.
- * This callback is called prior to the Connection being used, either internally or handed off to
- * a caller for normal use.
- *
- * This callback may be called in the context of a background thread.
- */
-public delegate void PrepareConnection(Connection cx, bool is_primary)
-    throws GLib.Error;
-
 /**
  * See Connection.exec_transaction() for more information on how this delegate is used.
  */

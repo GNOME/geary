@@ -36,7 +36,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      */
     public new async void open(Db.DatabaseFlags flags, Cancellable? cancellable)
         throws Error {
-        yield base.open(flags, on_prepare_database_connection, cancellable);
+        yield base.open(flags, cancellable);
 
         // Tie user-supplied Cancellable to internal Cancellable, which is used when close() is
         // called
@@ -579,7 +579,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         stmt.exec();
     }
 
-    private void on_prepare_database_connection(Db.Connection cx) throws Error {
+    protected override void prepare_connection(Db.Connection cx)
+        throws GLib.Error {
         cx.set_busy_timeout_msec(Db.Connection.RECOMMENDED_BUSY_TIMEOUT_MSEC);
         cx.set_foreign_keys(true);
         cx.set_recursive_triggers(true);

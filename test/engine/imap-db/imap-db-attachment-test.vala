@@ -114,7 +114,7 @@ class Geary.ImapDB.AttachmentIoTest : TestCase {
 
         this.db = new Geary.Db.Database.transient();
         this.db.open.begin(
-            Geary.Db.DatabaseFlags.NONE, null, null,
+            Geary.Db.DatabaseFlags.NONE, null,
             (obj, res) => { async_complete(res); }
         );
         this.db.open.end(async_result());

@@ -65,7 +65,6 @@ public class Geary.Db.Database : Geary.Db.Context {
     private Connection? primary = null;
     private int outstanding_async_jobs = 0;
     private ThreadPool<TransactionAsyncJob>? thread_pool = null;
-    private unowned PrepareConnection? prepare_cb = null;
 
     /**
      * Constructs a new database that is persisted on disk.
@@ -104,14 +103,12 @@ public class Geary.Db.Database : Geary.Db.Context {
      * and Results.
      */
     public virtual async void open(DatabaseFlags flags,
-                                   PrepareConnection? prepare_cb,
                                    Cancellable? cancellable = null)
         throws Error {
         if (is_open)
             return;
 
         this.flags = flags;
-        this.prepare_cb = prepare_cb;
 
         if (this.file != null && (flags & DatabaseFlags.CREATE_DIRECTORY) != 0) {
             yield Geary.Files.make_directory_with_parents(this.file.get_parent());
@@ -235,9 +232,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         }
 
         Connection cx = new Connection(this, sqlite_flags, cancellable);
-        if (prepare_cb != null)
-            prepare_cb(cx, is_primary);
-
+        prepare_connection(cx);
         return cx;
     }
 
@@ -365,6 +360,17 @@ public class Geary.Db.Database : Geary.Db.Context {
         this.thread_pool.add(new_job);
     }
 
+    /**
+     * Hook for subclasses to modify a new SQLite connection before use.
+     *
+     * This allows sub-classes to configure SQLite on a newly
+     * established connections before being used, such as setting
+     * pragmas, custom collation functions, and so on,
+     */
+    protected virtual void prepare_connection(Connection cx) throws GLib.Error {
+        // No-op by default;
+    }
+
     // This method must be thread-safe.
     private void on_async_job(owned TransactionAsyncJob job) {
         // *never* use primary connection for threaded operations
@@ -395,4 +401,3 @@ public class Geary.Db.Database : Geary.Db.Context {
         return this;
     }
 }
-
