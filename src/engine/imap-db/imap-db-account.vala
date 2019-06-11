@@ -44,14 +44,6 @@ private class Geary.ImapDB.Account : BaseObject {
     private const string DB_FILENAME = "geary.db";
     private const string ATTACHMENTS_DIR = "attachments";
 
-    /**
-     * Returns the on-disk paths used for storage by this account.
-     */
-    public static void get_imap_db_storage_locations(File user_data_dir, out File db_file,
-        out File attachments_dir) {
-        db_file = user_data_dir.get_child(DB_FILENAME);
-        attachments_dir = user_data_dir.get_child(ATTACHMENTS_DIR);
-    }
 
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
@@ -62,6 +54,7 @@ private class Geary.ImapDB.Account : BaseObject {
             this.path = path;
         }
     }
+
 
     // Maps of localised search operator names and values to their
     // internal forms
@@ -97,10 +90,12 @@ private class Geary.ImapDB.Account : BaseObject {
         ProgressType.DB_VACUUM); }
 
     /** The backing database for the account. */
-    public ImapDB.Database? db { get; private set; default = null; }
+    public ImapDB.Database db { get; private set; }
 
     private string name;
     private AccountInformation account_information;
+    private GLib.File db_file;
+    private GLib.File attachments_dir;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>();
     private Cancellable? background_cancellable = null;
@@ -253,14 +248,21 @@ private class Geary.ImapDB.Account : BaseObject {
         search_op_is_values.set(SEARCH_OP_VALUE_UNREAD, SEARCH_OP_VALUE_UNREAD);
     }
 
-    public Account(AccountInformation config) {
+    public Account(AccountInformation config,
+                   GLib.File data_dir,
+                   GLib.File schema_dir) {
         this.account_information = config;
         this.name = config.id + ":db";
-    }
+        this.db_file = data_dir.get_child(DB_FILENAME);
+        this.attachments_dir = data_dir.get_child(ATTACHMENTS_DIR);
 
-    private void check_open() throws Error {
-        if (db == null)
-            throw new EngineError.OPEN_REQUIRED("Database not open");
+        this.db = new ImapDB.Database(
+            this.db_file,
+            schema_dir,
+            this.attachments_dir,
+            upgrade_monitor,
+            vacuum_monitor
+        );
     }
 
     private ImapDB.SearchQuery check_search_query(Geary.SearchQuery q) throws Error {
@@ -271,24 +273,11 @@ private class Geary.ImapDB.Account : BaseObject {
         return query;
     }
 
-    public async void open_async(File user_data_dir, File schema_dir, Cancellable? cancellable)
-        throws Error {
-        if (this.db != null)
+    public async void open_async(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (this.db.is_open) {
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
-
-        File db_file;
-        File attachments_dir;
-        Account.get_imap_db_storage_locations(
-            user_data_dir, out db_file, out attachments_dir
-        );
-
-        this.db = new ImapDB.Database(
-            db_file,
-            schema_dir,
-            attachments_dir,
-            upgrade_monitor,
-            vacuum_monitor
-        );
+        }
 
         try {
             yield db.open(
@@ -299,7 +288,6 @@ private class Geary.ImapDB.Account : BaseObject {
 
             // close database before exiting
             db.close(null);
-            db = null;
 
             throw err;
         }
@@ -1886,5 +1874,39 @@ private class Geary.ImapDB.Account : BaseObject {
 
         return search_matches.size > 0 ? search_matches : null;
     }
-}
 
+    /** Removes database file and attachments directory. */
+    public async void delete_all_data(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (this.db.is_open) {
+            throw new EngineError.ALREADY_OPEN(
+                "Account cannot be open during rebuild"
+            );
+        }
+
+        if (yield Files.query_exists_async(this.db_file, cancellable)) {
+            message(
+                "%s: Deleting database file %s...",
+                this.name, this.db_file.get_path()
+            );
+            yield db_file.delete_async(GLib.Priority.DEFAULT, cancellable);
+        }
+
+        if (yield Files.query_exists_async(this.attachments_dir, cancellable)) {
+            message(
+                "%s: Deleting attachments directory %s...",
+                this.name, this.attachments_dir.get_path()
+            );
+            yield Files.recursive_delete_async(
+                this.attachments_dir, GLib.Priority.DEFAULT, cancellable
+            );
+        }
+    }
+
+    private inline void check_open() throws GLib.Error {
+        if (!this.db.is_open) {
+            throw new EngineError.OPEN_REQUIRED("Database not open");
+        }
+    }
+
+}

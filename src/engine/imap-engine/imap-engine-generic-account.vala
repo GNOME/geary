@@ -133,11 +133,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.processor.operation_error.connect(on_operation_error);
 
         try {
-            yield this.local.open_async(
-                information.data_dir,
-                Engine.instance.resource_dir.get_child("sql"),
-                cancellable
-            );
+            yield this.local.open_async(cancellable);
         } catch (Error err) {
             // convert database-open errors
             if (err is DatabaseError.CORRUPT)
@@ -245,36 +241,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return open;
     }
 
-    public override async void rebuild_async(Cancellable? cancellable = null) throws Error {
-        if (open)
-            throw new EngineError.ALREADY_OPEN("Account cannot be open during rebuild");
+    public override async void rebuild_async(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        if (this.open) {
+            throw new EngineError.ALREADY_OPEN(
+                "Account cannot be open during rebuild"
+            );
+        }
 
         message("%s: Rebuilding account local data", to_string());
-
-        // get all the storage locations associated with this Account
-        File db_file;
-        File attachments_dir;
-        ImapDB.Account.get_imap_db_storage_locations(information.data_dir, out db_file,
-            out attachments_dir);
-
-        if (yield Files.query_exists_async(db_file, cancellable)) {
-            message(
-                "%s: Deleting database file %s...",
-                to_string(), db_file.get_path()
-            );
-            yield db_file.delete_async(GLib.Priority.DEFAULT, cancellable);
-        }
-
-        if (yield Files.query_exists_async(attachments_dir, cancellable)) {
-            message(
-                "%s: Deleting attachments directory %s...",
-                to_string(), attachments_dir.get_path()
-            );
-            yield Files.recursive_delete_async(
-                attachments_dir, GLib.Priority.DEFAULT, cancellable
-            );
-        }
-
+        yield this.local.delete_all_data(cancellable);
         message("%s: Rebuild complete", to_string());
     }
 
