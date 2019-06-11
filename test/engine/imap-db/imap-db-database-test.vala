@@ -16,6 +16,8 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         base("Geary.ImapDb.DatabaseTest");
         add_test("open_new", open_new);
         add_test("upgrade_0_6", upgrade_0_6);
+        add_test("utf8_case_insensitive_collation",
+                 utf8_case_insensitive_collation);
     }
 
     public override void set_up() throws GLib.Error {
@@ -123,6 +125,46 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         db.close();
     }
 
+    public void utf8_case_insensitive_collation() throws GLib.Error {
+        Database db = new Database(
+            this.tmp_dir.get_child("test.db"),
+            GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql"),
+            this.tmp_dir.get_child("attachments"),
+            new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_UPGRADE),
+            new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM)
+        );
+
+        db.open.begin(
+            Geary.Db.DatabaseFlags.CREATE_FILE, null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        db.open.end(async_result());
+
+        db.exec("""
+            CREATE TABLE Test (id INTEGER PRIMARY KEY, test_str TEXT);
+            INSERT INTO Test (test_str) VALUES ('a');
+            INSERT INTO Test (test_str) VALUES ('B');
+            INSERT INTO Test (test_str) VALUES ('BB');
+            INSERT INTO Test (test_str) VALUES ('🤯');
+        """);
+        string[] expected = { "🤯", "BB", "B", "a" };
+
+        Db.Result result = db.query(
+            "SELECT test_str FROM Test ORDER BY test_str COLLATE UTF8ICASE DESC"
+        );
+
+        int i = 0;
+        while (!result.finished) {
+            assert_true(i < expected.length, "Too many rows");
+            assert_string(expected[i], result.string_at(0));
+            i++;
+            result.next();
+        }
+        assert_true(i == expected.length, "Not enough rows");
+
+        // Need to close it again to stop the GC process running
+        db.close();
+    }
 
     private void unpack_archive(GLib.File archive, GLib.File dest)
         throws Error {

@@ -16,26 +16,6 @@ public class Geary.MockAccount : Account, MockObject {
 
     }
 
-    public class MockContactStore : GLib.Object, ContactStore  {
-
-        internal MockContactStore() {
-
-        }
-
-        public async Contact? get_by_rfc822(Geary.RFC822.MailboxAddress address,
-                                            GLib.Cancellable? cancellable)
-        throws GLib.Error {
-            throw new EngineError.UNSUPPORTED("Mock method");
-        }
-
-        public async void update_contacts(Gee.Collection<Contact> contacts,
-                                          GLib.Cancellable? cancellable)
-            throws GLib.Error {
-            throw new EngineError.UNSUPPORTED("Mock method");
-        }
-
-    }
-
 
     public class MockClientService : ClientService {
 

@@ -17,6 +17,9 @@ class Geary.ContactStoreImplTest : TestCase {
     public ContactStoreImplTest() {
         base("Geary.ContactStoreImplTest");
         add_test("get_by_rfc822", get_by_rfc822);
+        add_test("search_no_match", search_no_match);
+        add_test("search_email_match", search_email_match);
+        add_test("search_name_match", search_name_match);
         add_test("update_new_contact", update_new_contact);
         add_test("update_existing_contact", update_existing_contact);
     }
@@ -51,7 +54,7 @@ INSERT INTO ContactTable (
 ) VALUES (
     1,
     'test@example.com',
-    'Test',
+    'Test Name',
     'Test@example.com',
     50
 );
@@ -80,7 +83,7 @@ INSERT INTO ContactTable (
         assert_non_null(existing, "Existing contact");
         assert_string("Test@example.com", existing.email, "Existing email");
         assert_string("test@example.com", existing.normalized_email, "Existing normalized_email");
-        assert_string("Test", existing.real_name, "Existing real_name");
+        assert_string("Test Name", existing.real_name, "Existing real_name");
         assert_int(50, existing.highest_importance, "Existing highest_importance");
         assert_false(existing.flags.always_load_remote_images(), "Existing flags");
 
@@ -91,6 +94,62 @@ INSERT INTO ContactTable (
         );
         Contact? missing = test_article.get_by_rfc822.end(async_result());
         assert_null(missing, "Missing contact");
+    }
+
+    public void search_no_match() throws GLib.Error {
+        test_article.search.begin(
+            "blarg",
+            0,
+            10,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        Gee.Collection<Contact> results = test_article.search.end(
+            async_result()
+        );
+        assert_int(0, results.size);
+    }
+
+    public void search_email_match() throws GLib.Error {
+        test_article.search.begin(
+            "example.com",
+            0,
+            10,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        Gee.Collection<Contact> results = test_article.search.end(
+            async_result()
+        );
+        assert_int(1, results.size, "results.size");
+
+        Contact search_hit = Collection.get_first(results);
+        assert_string("Test@example.com", search_hit.email, "Existing email");
+        assert_string("test@example.com", search_hit.normalized_email, "Existing normalized_email");
+        assert_string("Test Name", search_hit.real_name, "Existing real_name");
+        assert_int(50, search_hit.highest_importance, "Existing highest_importance");
+        assert_false(search_hit.flags.always_load_remote_images(), "Existing flags");
+    }
+
+    public void search_name_match() throws GLib.Error {
+        test_article.search.begin(
+            "Test Name",
+            0,
+            10,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        Gee.Collection<Contact> results = test_article.search.end(
+            async_result()
+        );
+        assert_int(1, results.size, "results.size");
+
+        Contact search_hit = Collection.get_first(results);
+        assert_string("Test@example.com", search_hit.email, "Existing email");
+        assert_string("test@example.com", search_hit.normalized_email, "Existing normalized_email");
+        assert_string("Test Name", search_hit.real_name, "Existing real_name");
+        assert_int(50, search_hit.highest_importance, "Existing highest_importance");
+        assert_false(search_hit.flags.always_load_remote_images(), "Existing flags");
     }
 
     public void update_new_contact() throws GLib.Error {

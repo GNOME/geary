@@ -20,6 +20,13 @@ public interface Geary.ContactStore : GLib.Object {
                                                  GLib.Cancellable? cancellable)
         throws GLib.Error;
 
+    /** Searches for contacts based on a specific string */
+    public abstract async Gee.Collection<Contact> search(string query,
+                                                         uint min_importance,
+                                                         uint limit,
+                                                         GLib.Cancellable? cancellable)
+        throws GLib.Error;
+
     /** Updates (or adds) a set of contacts in the underlying store */
     public abstract async void update_contacts(Gee.Collection<Contact> updated,
                                                GLib.Cancellable? cancellable)

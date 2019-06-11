@@ -5,9 +5,21 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+[CCode (cname = "g_utf8_casefold")]
+extern string utf8_casefold(string data, ssize_t len);
 extern int sqlite3_unicodesn_register_tokenizer(Sqlite.Database db);
 
 private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
+
+    /** Name of UTF-8 case-sensitive SQLite collation function name. */
+    public const string UTF8_CASE_INSENSITIVE_COLLATION = "UTF8ICASE";
+
+    private static int case_insensitive_collation(int a_len, void* a_bytes,
+                                                  int b_len, void* b_bytes) {
+        string a_str = utf8_casefold((string) a_bytes, a_len).collate_key();
+        string b_str = utf8_casefold((string) b_bytes, b_len).collate_key();
+        return strcmp(a_str, b_str);
+    }
 
     internal GLib.File attachments_path;
 
@@ -586,6 +598,16 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         cx.set_recursive_triggers(true);
         cx.set_synchronous(Db.SynchronousMode.NORMAL);
         sqlite3_unicodesn_register_tokenizer(cx.db);
+        if (cx.db.create_collation(
+                UTF8_CASE_INSENSITIVE_COLLATION,
+                Sqlite.UTF8,
+                Database.case_insensitive_collation
+            ) != Sqlite.OK) {
+            throw new DatabaseError.GENERAL(
+                "Failed to register collation function %s",
+                UTF8_CASE_INSENSITIVE_COLLATION
+            );
+        }
     }
 
 }
