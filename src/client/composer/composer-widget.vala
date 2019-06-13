@@ -649,6 +649,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
      */
     private void load_entry_completions() {
         Geary.ContactStore contacts = this.account.contact_store;
+        this.to_entry.completion = new ContactEntryCompletion(contacts);
+        this.cc_entry.completion = new ContactEntryCompletion(contacts);
+        this.bcc_entry.completion = new ContactEntryCompletion(contacts);
+        this.reply_to_entry.completion = new ContactEntryCompletion(contacts);
     }
 
     /**

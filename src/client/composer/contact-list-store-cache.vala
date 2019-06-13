@@ -14,7 +14,7 @@ public class ContactListStoreCache {
 
         this.cache.set(contact_store, list_store);
 
-        list_store.load.begin();
+        //list_store.load.begin();
 
         return list_store;
     }
