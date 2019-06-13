@@ -112,7 +112,7 @@ INSERT INTO ContactTable (
 
     public void search_email_match() throws GLib.Error {
         test_article.search.begin(
-            "example.com",
+            "Test@example",
             0,
             10,
             null,

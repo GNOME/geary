@@ -97,9 +97,9 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
                                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
         Gee.Collection<Contact> contacts = new Gee.LinkedList<Contact>();
-        string normalised_query = query.make_valid().normalize();
+        string normalised_query = query.make_valid().normalize().down();
         if (!String.is_empty(normalised_query)) {
-            normalised_query = "%%%s%%".printf(normalised_query);
+            normalised_query = normalised_query + "%";
             Db.Statement stmt = cx.prepare("""
                 SELECT * FROM ContactTable
                 WHERE highest_importance >= ? AND (
