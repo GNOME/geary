@@ -133,11 +133,6 @@ public class Application.Controller : Geary.BaseObject {
         get; private set; default = new Application.AvatarStore();
     }
 
-    /** Contact store cache for the application. */
-    public ContactListStoreCache contact_list_store_cache {
-        get; private set; default = new ContactListStoreCache();
-    }
-
     /** Default main window */
     public MainWindow main_window { get; private set; }
 
@@ -622,12 +617,6 @@ public class Application.Controller : Geary.BaseObject {
         AccountContext? context = this.accounts.get(config);
         if (context != null) {
             Geary.Account account = context.account;
-            Geary.ContactStore contact_store = account.contact_store;
-            ContactListStore list_store =
-                this.contact_list_store_cache.get(contact_store);
-
-            this.contact_list_store_cache.unset(contact_store);
-
             if (this.current_account == account) {
                 this.current_account = null;
 
@@ -2021,10 +2010,13 @@ public class Application.Controller : Geary.BaseObject {
 
         ComposerWidget widget;
         if (mailto != null) {
-            widget = new ComposerWidget.from_mailto(current_account, contact_list_store_cache,
-                mailto, application.config);
+            widget = new ComposerWidget.from_mailto(
+                current_account, mailto, application.config
+            );
         } else {
-            widget = new ComposerWidget(current_account, contact_list_store_cache, compose_type, application.config);
+            widget = new ComposerWidget(
+                current_account, compose_type, application.config
+            );
         }
 
         add_composer(widget);

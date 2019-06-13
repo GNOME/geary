@@ -397,7 +397,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
 
     public ComposerWidget(Geary.Account account,
-                          ContactListStoreCache contact_list_store_cache,
                           ComposeType compose_type,
                           Configuration config) {
         base_ref();
@@ -550,9 +549,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     public ComposerWidget.from_mailto(Geary.Account account,
-        ContactListStoreCache contact_list_store_cache, string mailto, Configuration config) {
-
-        this(account, contact_list_store_cache, ComposeType.NEW_MESSAGE, config);
+                                      string mailto,
+                                      Configuration config) {
+        this(account, ComposeType.NEW_MESSAGE, config);
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {

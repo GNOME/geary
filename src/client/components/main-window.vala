@@ -132,7 +132,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Application.Controller controller = this.application.controller;
         ComposerWidget composer = new ComposerWidget(
             this.current_folder.account,
-            controller.contact_list_store_cache,
             NEW_MESSAGE,
             this.application.config
         );
