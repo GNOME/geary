@@ -131,9 +131,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
         Application.Controller controller = this.application.controller;
         ComposerWidget composer = new ComposerWidget(
-            this.current_folder.account,
-            NEW_MESSAGE,
-            this.application.config
+            this.application, this.current_folder.account, NEW_MESSAGE
         );
         composer.to = to.to_full_display();
         controller.add_composer(composer);

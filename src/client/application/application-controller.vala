@@ -2011,11 +2011,11 @@ public class Application.Controller : Geary.BaseObject {
         ComposerWidget widget;
         if (mailto != null) {
             widget = new ComposerWidget.from_mailto(
-                current_account, mailto, application.config
+                this.application, current_account, mailto
             );
         } else {
             widget = new ComposerWidget(
-                current_account, compose_type, application.config
+                this.application, current_account, compose_type
             );
         }
 
