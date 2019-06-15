@@ -21,6 +21,20 @@ public class Application.ContactStore : Geary.BaseObject {
     private const uint LRU_CACHE_MAX = 128;
 
 
+    private static string[] FOLKS_GENERAL_MATCH_FIELDS;
+    private static string[] FOLKS_EMAIL_MATCH_FIELDS;
+
+    static construct {
+        string[] general_fields = Folks.Query.MATCH_FIELDS_NAMES;
+        string email_field = Folks.PersonaStore.detail_key(
+            Folks.PersonaDetail.EMAIL_ADDRESSES
+        );
+
+        FOLKS_GENERAL_MATCH_FIELDS = general_fields;
+        FOLKS_GENERAL_MATCH_FIELDS += email_field;
+        FOLKS_EMAIL_MATCH_FIELDS = { email_field };
+    }
+
     private static inline string to_cache_key(string value) {
         return value.normalize().casefold();
     }
@@ -96,6 +110,79 @@ public class Application.ContactStore : Geary.BaseObject {
         return yield get_contact(individual, mailbox, cancellable);
     }
 
+    /** Searches for contacts based on a specific string */
+    public async Gee.Collection<Contact> search(string query,
+                                                uint min_importance,
+                                                uint limit,
+                                                GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Gee.Collection<Contact> results = new Gee.LinkedList<Contact>();
+        Gee.Set<string> seen = new Gee.HashSet<string>();
+
+        // Step 1: Search Folks for matching individuals
+
+        Folks.SearchView view = new Folks.SearchView(
+            this.individuals,
+            new Folks.SimpleQuery(query, FOLKS_GENERAL_MATCH_FIELDS)
+        );
+        yield view.prepare();
+
+        // Add favourites first
+        foreach (Folks.Individual individual in view.individuals) {
+            if (individual.is_favourite) {
+                Contact result = yield get_contact(
+                    individual, null, cancellable
+                );
+                foreach (Geary.RFC822.MailboxAddress mailbox
+                         in result.email_addresses) {
+                    seen.add(to_cache_key(mailbox.address));
+                }
+                results.add(result);
+            }
+        }
+
+        // Add non-favourites next
+        foreach (Folks.Individual individual in view.individuals) {
+            if (!individual.is_favourite) {
+                Contact result = yield get_contact(
+                    individual, null, cancellable
+                );
+                foreach (Geary.RFC822.MailboxAddress mailbox
+                         in result.email_addresses) {
+                    seen.add(to_cache_key(mailbox.address));
+                }
+                results.add(result);
+            }
+        }
+
+        try {
+            yield view.unprepare();
+        } catch (GLib.Error err) {
+            warning("Error unpreparing Folks search: %s", err.message);
+        }
+
+        // Step 2: Search the engine for matching contacts
+
+        Gee.Collection<Geary.Contact> engine_results =
+            yield this.account.contact_store.search(
+                query, min_importance, limit, cancellable
+            );
+        foreach (Geary.Contact contact in engine_results) {
+            string email_key = to_cache_key(contact.email);
+            if (!seen.contains(email_key)) {
+                Contact result = yield load(
+                    contact.get_rfc822_address(), cancellable
+                );
+                foreach (Geary.RFC822.MailboxAddress mailbox
+                         in result.email_addresses) {
+                    seen.add(to_cache_key(mailbox.address));
+                }
+                results.add(result);
+            }
+        }
+        return results;
+    }
+
     internal async Geary.Contact
         lookup_engine_contact(Geary.RFC822.MailboxAddress mailbox,
                               GLib.Cancellable cancellable)
@@ -157,14 +244,7 @@ public class Application.ContactStore : Geary.BaseObject {
         throws GLib.Error {
         Folks.SearchView view = new Folks.SearchView(
             this.individuals,
-            new Folks.SimpleQuery(
-                address,
-                new string[] {
-                    Folks.PersonaStore.detail_key(
-                        Folks.PersonaDetail.EMAIL_ADDRESSES
-                    )
-                }
-            )
+            new Folks.SimpleQuery(address, FOLKS_EMAIL_MATCH_FIELDS)
         );
 
         yield view.prepare();
