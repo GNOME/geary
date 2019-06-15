@@ -70,10 +70,11 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
                                       string email,
                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
+        string normalised_query = email.make_valid();
         Db.Statement stmt = cx.prepare(
             "SELECT real_name, highest_importance, normalized_email, flags FROM ContactTable "
             + "WHERE email=?");
-        stmt.bind_string(0, email);
+        stmt.bind_string(0, normalised_query);
 
         Db.Result result = stmt.exec(cancellable);
 
