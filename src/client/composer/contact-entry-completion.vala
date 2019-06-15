@@ -46,19 +46,25 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
     public ContactEntryCompletion(Application.ContactStore contacts) {
         base_ref();
         this.contacts = contacts;
-        this.model = new Gtk.ListStore.newv(Column.get_types());
+        this.model = new_model();
 
         // Always match all rows, since the model will only contain
         // matching addresses from the search query
         set_match_func(() => true);
 
-        Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
-        pack_start(text_renderer, true);
-        set_cell_data_func(text_renderer, cell_layout_data_func);
+        Gtk.CellRendererPixbuf icon_renderer = new Gtk.CellRendererPixbuf();
+        icon_renderer.xpad = 2;
+        icon_renderer.ypad = 2;
+        pack_start(icon_renderer, false);
+        set_cell_data_func(icon_renderer, cell_icon_data);
 
-        set_inline_selection(true);
-        match_selected.connect(on_match_selected);
-        cursor_on_match.connect(on_cursor_on_match);
+        Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
+        icon_renderer.ypad = 2;
+        pack_start(text_renderer, true);
+        set_cell_data_func(text_renderer, cell_text_data);
+
+        this.match_selected.connect(on_match_selected);
+        this.cursor_on_match.connect(on_cursor_on_match);
     }
 
     ~ContactEntryCompletion() {
@@ -75,15 +81,23 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
             this.search_cancellable = null;
         }
 
+        Gtk.ListStore model = (Gtk.ListStore) this.model;
         string completion_key = this.current_key;
         if (!Geary.String.is_empty_or_whitespace(completion_key)) {
+            // Append a placeholder row here if the model is empty to
+            // work around the issue descried in
+            // https://gitlab.gnome.org/GNOME/gtk/merge_requests/939
+            Gtk.TreeIter iter;
+            if (!model.get_iter_first(out iter)) {
+                model.append(out iter);
+            }
+
             this.search_cancellable = new GLib.Cancellable();
             this.search_contacts.begin(completion_key, this.search_cancellable);
         } else {
-            ((Gtk.ListStore) this.model).clear();
+            model.clear();
         }
     }
-
     public void trigger_selection() {
         if (last_iter != null) {
             on_match_selected(model, last_iter);
@@ -139,17 +153,22 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
 
     public async void search_contacts(string query,
                                       GLib.Cancellable? cancellable) {
+        Gee.Collection<Application.Contact>? results = null;
         try {
-            Gee.Collection<Application.Contact> results =
-                yield this.contacts.search(
-                    query,
-                    VISIBILITY_THRESHOLD,
-                    20,
-                    cancellable
-                );
+            results = yield this.contacts.search(
+                query,
+                VISIBILITY_THRESHOLD,
+                20,
+                cancellable
+            );
+        } catch (GLib.IOError.CANCELLED err) {
+            // All good
+        } catch (GLib.Error err) {
+            debug("Error searching contacts for completion: %s", err.message);
+        }
 
-            Gtk.ListStore model = (Gtk.ListStore) this.model;
-            model.clear();
+        if (!cancellable.is_cancelled()) {
+            Gtk.ListStore model = new_model();
             foreach (Application.Contact contact in results) {
                 foreach (Geary.RFC822.MailboxAddress addr
                          in contact.email_addresses) {
@@ -159,14 +178,8 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
                     model.set(iter, Column.MAILBOX, addr);
                 }
             }
-
-            // Ensure completion is visible if loading finishes after
-            // the base class's handler has triggered a completion
+            this.model = model;
             complete();
-        } catch (GLib.IOError.CANCELLED err) {
-            // All good
-        } catch (GLib.Error err) {
-            debug("Error searching contacts for completion: %s", err.message);
         }
     }
 
@@ -208,11 +221,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
                 debug("Error matching regex: %s", err.message);
             }
 
-            if (matched) {
-                value = Markup.escape_text(value)
-                    .replace("&#x91;", "<b>")
-                    .replace("&#x92;", "</b>");
-            }
+            value = Markup.escape_text(value)
+                .replace("&#x91;", "<b>")
+                .replace("&#x92;", "</b>");
         }
 
         return value;
@@ -228,19 +239,47 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
         return false;
     }
 
-    private void cell_layout_data_func(Gtk.CellLayout cell_layout,
-                                       Gtk.CellRenderer cell,
-                                       Gtk.TreeModel tree_model,
-                                       Gtk.TreeIter iter) {
+    private void cell_icon_data(Gtk.CellLayout cell_layout,
+                                Gtk.CellRenderer cell,
+                                Gtk.TreeModel tree_model,
+                                Gtk.TreeIter iter) {
+        GLib.Value value;
+        tree_model.get_value(iter, Column.CONTACT, out value);
+        Application.Contact? contact = value.get_object() as Application.Contact;
+
+        string icon = "";
+        if (contact != null) {
+            if (contact.is_favourite) {
+                icon = "starred-symbolic";
+            } else if (contact.is_desktop_contact) {
+                icon = "avatar-default-symbolic";
+            }
+        }
+
+        Gtk.CellRendererPixbuf renderer = (Gtk.CellRendererPixbuf) cell;
+        renderer.icon_name = icon;
+    }
+
+    private void cell_text_data(Gtk.CellLayout cell_layout,
+                                Gtk.CellRenderer cell,
+                                Gtk.TreeModel tree_model,
+                                Gtk.TreeIter iter) {
         GLib.Value value;
         tree_model.get_value(iter, Column.MAILBOX, out value);
-        Geary.RFC822.MailboxAddress mailbox =
-            (Geary.RFC822.MailboxAddress) value.get_object();
+        Geary.RFC822.MailboxAddress? mailbox =
+            value.get_object() as Geary.RFC822.MailboxAddress;
 
-        string render = this.match_prefix_contact(mailbox);
+        string markup = "";
+        if (mailbox != null) {
+            markup = this.match_prefix_contact(mailbox);
+        }
 
         Gtk.CellRendererText renderer = (Gtk.CellRendererText) cell;
-        renderer.markup = render;
+        renderer.markup = markup;
+    }
+
+    private inline Gtk.ListStore new_model() {
+        return new Gtk.ListStore.newv(Column.get_types());
     }
 
     private bool on_match_selected(Gtk.TreeModel model, Gtk.TreeIter iter) {
