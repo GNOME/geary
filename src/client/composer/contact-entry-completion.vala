@@ -9,10 +9,25 @@
 public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
 
 
-    public new ContactListStore model {
-        get { return base.get_model() as ContactListStore; }
-        set { base.set_model(value); }
+    // Minimum visibility for the contact to appear in autocompletion.
+    private const Geary.Contact.Importance VISIBILITY_THRESHOLD =
+        Geary.Contact.Importance.RECEIVED_FROM;
+
+
+    public enum Column {
+        CONTACT,
+        MAILBOX;
+
+        public static Type[] get_types() {
+            return {
+                typeof(Application.Contact), // CONTACT
+                typeof(Geary.RFC822.MailboxAddress) // MAILBOX
+            };
+        }
     }
+
+
+    private Application.ContactStore contacts;
 
     // Text between the start of the entry or of the previous email
     // address and the current position of the cursor, if any.
@@ -28,9 +43,10 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
     private Gtk.TreeIter? last_iter = null;
 
 
-    public ContactEntryCompletion(Geary.ContactStore contacts) {
+    public ContactEntryCompletion(Application.ContactStore contacts) {
         base_ref();
-        this.model = new ContactListStore(contacts);
+        this.contacts = contacts;
+        this.model = new Gtk.ListStore.newv(Column.get_types());
 
         // Always match all rows, since the model will only contain
         // matching addresses from the search query
@@ -62,9 +78,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
         string completion_key = this.current_key;
         if (!Geary.String.is_empty_or_whitespace(completion_key)) {
             this.search_cancellable = new GLib.Cancellable();
-            this.model.search.begin(completion_key, this.search_cancellable);
+            this.search_contacts.begin(completion_key, this.search_cancellable);
         } else {
-            this.model.clear();
+            ((Gtk.ListStore) this.model).clear();
         }
     }
 
@@ -121,23 +137,57 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
         }
     }
 
-    private string match_prefix_contact(Geary.Contact contact) {
-        string email = match_prefix_string(contact.email);
-        string real_name = match_prefix_string(contact.real_name);
+    public async void search_contacts(string query,
+                                      GLib.Cancellable? cancellable) {
+        try {
+            Gee.Collection<Application.Contact> results =
+                yield this.contacts.search(
+                    query,
+                    VISIBILITY_THRESHOLD,
+                    20,
+                    cancellable
+                );
 
-        // email and real_name were already escaped, then <b></b> tags
-        // were added to highlight matches. We don't want to escape
-        // them again.
-        return (contact.real_name == null)
-            ? email
-            : real_name + Markup.escape_text(" <") + email + Markup.escape_text(">");
+            Gtk.ListStore model = (Gtk.ListStore) this.model;
+            model.clear();
+            foreach (Application.Contact contact in results) {
+                foreach (Geary.RFC822.MailboxAddress addr
+                         in contact.email_addresses) {
+                    Gtk.TreeIter iter;
+                    model.append(out iter);
+                    model.set(iter, Column.CONTACT, contact);
+                    model.set(iter, Column.MAILBOX, addr);
+                }
+            }
+
+            // Ensure completion is visible if loading finishes after
+            // the base class's handler has triggered a completion
+            complete();
+        } catch (GLib.IOError.CANCELLED err) {
+            // All good
+        } catch (GLib.Error err) {
+            debug("Error searching contacts for completion: %s", err.message);
+        }
     }
 
-    private string? match_prefix_string(string? haystack) {
-        string? value = haystack;
-        if (!Geary.String.is_empty(this.current_key) &&
-            !Geary.String.is_empty(haystack)) {
+    private string match_prefix_contact(Geary.RFC822.MailboxAddress mailbox) {
+        string email = match_prefix_string(mailbox.address);
+        if (mailbox.name != null && !mailbox.is_spoofed()) {
+            string real_name = match_prefix_string(mailbox.name);
+            // email and real_name were already escaped, then <b></b> tags
+            // were added to highlight matches. We don't want to escape
+            // them again.
+            email = (
+                real_name +
+                Markup.escape_text(" <") + email + Markup.escape_text(">")
+            );
+        }
+        return email;
+    }
 
+    private string? match_prefix_string(string haystack) {
+        string value = haystack;
+        if (!Geary.String.is_empty(this.current_key)) {
             bool matched = false;
             try {
                 string escaped_needle = Regex.escape_string(
@@ -182,27 +232,27 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
                                        Gtk.CellRenderer cell,
                                        Gtk.TreeModel tree_model,
                                        Gtk.TreeIter iter) {
-        GLib.Value contact_value;
-        tree_model.get_value(
-            iter, ContactListStore.Column.CONTACT_OBJECT, out contact_value
-        );
+        GLib.Value value;
+        tree_model.get_value(iter, Column.MAILBOX, out value);
+        Geary.RFC822.MailboxAddress mailbox =
+            (Geary.RFC822.MailboxAddress) value.get_object();
 
-        string render = "";
-        Geary.Contact? contact = (Geary.Contact) contact_value.get_object();
-        if (contact != null) {
-            render = this.match_prefix_contact(contact);
-        }
+        string render = this.match_prefix_contact(mailbox);
 
-        Gtk.CellRendererText text_renderer = (Gtk.CellRendererText) cell;
-        text_renderer.markup = render;
+        Gtk.CellRendererText renderer = (Gtk.CellRendererText) cell;
+        renderer.markup = render;
     }
 
     private bool on_match_selected(Gtk.TreeModel model, Gtk.TreeIter iter) {
         Gtk.Entry? entry = get_entry() as Gtk.Entry;
         if (entry != null) {
             // Update the address
+            GLib.Value value;
+            model.get_value(iter, Column.MAILBOX, out value);
+            Geary.RFC822.MailboxAddress mailbox =
+                (Geary.RFC822.MailboxAddress) value.get_object();
             this.email_addresses[this.cursor_at_address] =
-                this.model.to_full_address(iter);
+                mailbox.to_full_display();
 
             // Update the entry text
             bool current_is_last = (

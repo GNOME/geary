@@ -563,6 +563,13 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** Returns the contact store for an account, if any. */
+    public Application.ContactStore?
+        get_contact_store_for_account(Geary.Account target) {
+        AccountContext? context = this.accounts.get(target.information);
+        return (context != null) ? context.contacts : null;
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -2689,11 +2696,6 @@ public class Application.Controller : Geary.BaseObject {
     private inline Geary.App.EmailStore? get_email_store_for_folder(Geary.Folder target) {
         AccountContext? context = this.accounts.get(target.account.information);
         return (context != null) ? context.emails : null;
-    }
-
-    private Application.ContactStore? get_contact_store_for_account(Geary.Account target) {
-        AccountContext? context = this.accounts.get(target.information);
-        return (context != null) ? context.contacts : null;
     }
 
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,

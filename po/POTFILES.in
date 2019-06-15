@@ -50,7 +50,6 @@ src/client/composer/composer-web-view.vala
 src/client/composer/composer-widget.vala
 src/client/composer/composer-window.vala
 src/client/composer/contact-entry-completion.vala
-src/client/composer/contact-list-store.vala
 src/client/composer/email-entry.vala
 src/client/composer/spell-check-popover.vala
 src/client/conversation-list/conversation-list-cell-renderer.vala

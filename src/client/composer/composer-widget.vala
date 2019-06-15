@@ -653,7 +653,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
      * Loads and sets contact auto-complete data for the current account.
      */
     private void load_entry_completions() {
-        Geary.ContactStore contacts = this.account.contact_store;
+        Application.ContactStore contacts =
+            this.application.controller.get_contact_store_for_account(
+                this.account
+            );
         this.to_entry.completion = new ContactEntryCompletion(contacts);
         this.cc_entry.completion = new ContactEntryCompletion(contacts);
         this.bcc_entry.completion = new ContactEntryCompletion(contacts);
