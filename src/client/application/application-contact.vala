@@ -44,15 +44,27 @@ public class Application.Contact : Geary.BaseObject {
      * Will automatically load resources from contacts in the desktop
      * database, or if the Engine's contact has been flagged to do so.
      */
-    public bool load_remote_resources {
+    public bool load_remote_resources { get; private set; }
+
+    /** The set of email addresses associated with this contact. */
+    public Gee.Collection<Geary.RFC822.MailboxAddress> email_addresses {
         get {
-            return (
-                this.individual != null ||
-                (this.contact != null &&
-                 this.contact.flags.always_load_remote_images())
-            );
+            Gee.Collection<Geary.RFC822.MailboxAddress>? addrs =
+                this._email_addresses;
+            if (addrs == null) {
+                addrs = new Gee.LinkedList<Geary.RFC822.MailboxAddress>();
+                foreach (Folks.EmailFieldDetails email in
+                         this.individual.email_addresses) {
+                    addrs.add(new Geary.RFC822.MailboxAddress(
+                                  this.display_name, email.value
+                              ));
+                }
+                this._email_addresses = addrs;
+            }
+            return this._email_addresses;
         }
     }
+    private Gee.Collection<Geary.RFC822.MailboxAddress>? _email_addresses = null;
 
 
     /** Fired when the contact has changed in some way. */
@@ -63,31 +75,27 @@ public class Application.Contact : Geary.BaseObject {
     internal Folks.Individual? individual { get; private set; }
 
     private weak ContactStore store;
-    private Geary.Contact? contact;
 
 
-    internal Contact(ContactStore store,
-                     Folks.Individual? individual,
-                     Geary.Contact? contact,
-                     Geary.RFC822.MailboxAddress source) {
+    private Contact(ContactStore store, Folks.Individual? source) {
         this.store = store;
-        this.contact = contact;
-        update_individual(individual);
-
+        update_individual(source);
         update();
-        if (Geary.String.is_empty_or_whitespace(this.display_name)) {
-            this.display_name = source.name;
-        }
+    }
 
-        // Use the email address as the display name if the existing
-        // display name looks in any way sketchy, regardless of where
-        // it came from
-        if (source.is_spoofed() ||
-            Geary.String.is_empty_or_whitespace(this.display_name) ||
-            Geary.RFC822.MailboxAddress.is_valid_address(this.display_name)) {
-            this.display_name = source.address;
-            this.display_name_is_email = true;
-        }
+    internal Contact.for_folks(ContactStore store,
+                               Folks.Individual? source) {
+        this(store, source);
+    }
+
+    internal Contact.for_engine(ContactStore store,
+                                string display_name,
+                                Geary.Contact source) {
+        this(store, null);
+        Geary.RFC822.MailboxAddress mailbox = source.get_rfc822_address();
+        update_name(display_name);
+        this._email_addresses = Geary.Collection.single(mailbox);
+        this.load_remote_resources = source.flags.always_load_remote_images();
     }
 
     ~Contact() {
@@ -115,14 +123,28 @@ public class Application.Contact : Geary.BaseObject {
                 other.individual != null &&
                 this.individual.id == other.individual.id
             );
-        } else if (this.contact != null) {
-            return (
-                other.contact != null &&
-                this.contact.email == other.contact.email
-            );
         }
 
-        return (this.display_name == other.display_name);
+        if (this.display_name != other.display_name ||
+            this.email_addresses.size != other.email_addresses.size) {
+            return false;
+        }
+
+        foreach (Geary.RFC822.MailboxAddress this_addr in this.email_addresses) {
+            bool found = false;
+            foreach (Geary.RFC822.MailboxAddress other_addr
+                     in other.email_addresses) {
+                if (this_addr.equal_to(other_addr)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /** Invokes the desktop contacts application to save this contact. */
@@ -151,7 +173,7 @@ public class Application.Contact : Geary.BaseObject {
                         Folks.PersonaStore.detail_key(
                             Folks.PersonaDetail.EMAIL_ADDRESSES
                         ),
-                        this.contact.email
+                        Geary.Collection.get_first(this.email_addresses).address
                     }
                 )
             }
@@ -181,20 +203,30 @@ public class Application.Contact : Geary.BaseObject {
                                                   GLib.Cancellable? cancellable)
         throws GLib.Error {
         ContactStore? store = this.store;
-        if (store != null && this.contact != null) {
-            if (enabled) {
-                this.contact.flags.add(
-                    Geary.Contact.Flags.ALWAYS_LOAD_REMOTE_IMAGES
+        if (store != null) {
+            Gee.Collection<Geary.Contact> contacts =
+                new Gee.LinkedList<Geary.Contact>();
+            foreach (Geary.RFC822.MailboxAddress mailbox in this.email_addresses) {
+                Geary.Contact? contact = yield store.lookup_engine_contact(
+                    mailbox, cancellable
                 );
-            } else {
-                this.contact.flags.remove(
-                    Geary.Contact.Flags.ALWAYS_LOAD_REMOTE_IMAGES
-                );
+                if (enabled) {
+                    contact.flags.add(
+                        Geary.Contact.Flags.ALWAYS_LOAD_REMOTE_IMAGES
+                    );
+                } else {
+                    contact.flags.remove(
+                        Geary.Contact.Flags.ALWAYS_LOAD_REMOTE_IMAGES
+                    );
+                }
+                contacts.add(contact);
             }
 
             yield store.account.contact_store.update_contacts(
-                Geary.Collection.single(this.contact), cancellable
+                contacts, cancellable
             );
+
+            this.load_remote_resources = enabled;
         }
 
         changed();
@@ -210,6 +242,12 @@ public class Application.Contact : Geary.BaseObject {
     /** Returns a string representation for debugging */
     public string to_string() {
         return "Contact(\"%s\")".printf(this.display_name);
+    }
+
+    private void update_name(string name) {
+        this.display_name = name;
+        this.display_name_is_email =
+            Geary.RFC822.MailboxAddress.is_valid_address(name);
     }
 
     private void update_individual(Folks.Individual? replacement) {
@@ -228,14 +266,16 @@ public class Application.Contact : Geary.BaseObject {
 
     private void update() {
         if (this.individual != null) {
-            this.display_name = this.individual.display_name;
+            update_name(this.individual.display_name);
             this.is_favourite = this.individual.is_favourite;
             this.is_trusted = (this.individual.trust_level == PERSONAS);
             this.is_desktop_contact = true;
+            this.load_remote_resources = true;
         } else {
             this.is_favourite = false;
             this.is_trusted = false;
             this.is_desktop_contact = false;
+            this.load_remote_resources = false;
         }
     }
 
