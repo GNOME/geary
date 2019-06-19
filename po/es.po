@@ -11,17 +11,17 @@
 # Revo <revolution2000@gmail.com>, 2013
 # Rodrigo Cares <rcares@gmail.com>, 2012-2013
 # Carlos Córdova <carlosab1802@gmail.com>, 2017.
-# Daniel Mustieles <daniel.mustieles@gmail.com>, 2014-2019.
 # Rodrigo Lledó <rodhos92@gmail.com>, 2019.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2014-2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-05-07 07:52+0000\n"
-"PO-Revision-Date: 2019-05-16 19:08+0200\n"
-"Last-Translator: Rodrigo Lledó <rodhos92@gmail.com>\n"
-"Language-Team: Español <gnome-es-list@gnome.org>\n"
+"POT-Creation-Date: 2019-06-15 10:54+0000\n"
+"PO-Revision-Date: 2019-06-19 12:18+0200\n"
+"Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
+"Language-Team: es <gnome-es-list@gnome.org>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -222,14 +222,19 @@ msgid "Languages that shall be used in the spell checker"
 msgstr "Idiomas que se deben usar en el corrector ortográfico"
 
 #: desktop/org.gnome.Geary.gschema.xml:69
-msgid "List of the languages to use in the spell checker."
-msgstr "Lista de idiomas que usar en el corrector ortográfico."
+msgid ""
+"A list of POSIX locales, with the empty list disabling spell checking and "
+"the null list using desktop languages by default."
+msgstr ""
+"Una lista de idiomas POSIX donde la lista vacía desactiva la comprobación "
+"ortográfica y la lista nula usa los idiomas del escritorio de manera "
+"predeterminada."
 
-#: desktop/org.gnome.Geary.gschema.xml:74
+#: desktop/org.gnome.Geary.gschema.xml:76
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Idiomas mostrados en la ventana emergente del corrector ortográfico"
 
-#: desktop/org.gnome.Geary.gschema.xml:75
+#: desktop/org.gnome.Geary.gschema.xml:77
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -237,79 +242,79 @@ msgstr ""
 "Lista de idiomas que se muestra siempre en la ventana emergente del "
 "corrector ortográfico."
 
-#: desktop/org.gnome.Geary.gschema.xml:80
+#: desktop/org.gnome.Geary.gschema.xml:82
 msgid "Enable notification sounds"
 msgstr "Activar sonidos para las notificaciones"
 
-#: desktop/org.gnome.Geary.gschema.xml:81
+#: desktop/org.gnome.Geary.gschema.xml:83
 msgid "True to play sounds for notifications and sending."
 msgstr "Cierto para reproducir sonidos en las notificaciones y al enviar."
 
-#: desktop/org.gnome.Geary.gschema.xml:86
+#: desktop/org.gnome.Geary.gschema.xml:88
 msgid "Show notifications for new mail"
 msgstr "Mostrar notificaciones de mensajes nuevos"
 
-#: desktop/org.gnome.Geary.gschema.xml:87
+#: desktop/org.gnome.Geary.gschema.xml:89
 msgid "True to show notification bubbles."
 msgstr "Cierto para mostrar burbujas de notificación."
 
-#: desktop/org.gnome.Geary.gschema.xml:92
+#: desktop/org.gnome.Geary.gschema.xml:94
 msgid "Notify of new mail at startup"
 msgstr "Notificar si hay correo nuevo al iniciar"
 
-#: desktop/org.gnome.Geary.gschema.xml:93
+#: desktop/org.gnome.Geary.gschema.xml:95
 msgid "True to notify of new mail at startup."
 msgstr "Cierto para notificar cuando llegue correo nuevo al inicio."
 
-#: desktop/org.gnome.Geary.gschema.xml:98
+#: desktop/org.gnome.Geary.gschema.xml:100
 msgid "Ask when opening an attachment"
 msgstr "Preguntar al abrir un adjunto"
 
-#: desktop/org.gnome.Geary.gschema.xml:99
+#: desktop/org.gnome.Geary.gschema.xml:101
 msgid "True to ask when opening an attachment."
 msgstr "Cierto para preguntar al abrir un adjunto."
 
-#: desktop/org.gnome.Geary.gschema.xml:104
+#: desktop/org.gnome.Geary.gschema.xml:106
 msgid "Whether to compose emails in HTML"
 msgstr "Indica si se deben redactar los correos en HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:105
+#: desktop/org.gnome.Geary.gschema.xml:107
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Cierto para redactar los correos en HTML; falso para redactarlos en texto "
 "plano."
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:112
 msgid "Advisory strategy for full-text searching"
 msgstr "Estrategia de asesoriamento para la búsqueda de textos completos."
 
-#: desktop/org.gnome.Geary.gschema.xml:111
+#: desktop/org.gnome.Geary.gschema.xml:113
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Los valores posibles son “exact”, “conservative”, “aggressive”, y “horizon”."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:118
 msgid "Zoom of conversation viewer"
 msgstr "Ampliación del visor de conversaciones"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:119
 msgid "The zoom to apply on the conservation view."
 msgstr "El nivel de ampliación que usar para la vista de conversación."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:124
 msgid "Size of detached composer window"
 msgstr "Tamaño de la ventana desacoplada del editor"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:125
 msgid "The last recorded size of the detached composer window."
 msgstr "El último tamaño guardado de la ventana desacoplada del editor."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:130
 msgid "Whether we migrated the old settings"
 msgstr "Indica si se ha migrado la configuración antigua"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:131
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -1033,63 +1038,61 @@ msgstr "Mostrar la versión del programa"
 #. Use this to specify arguments in the help section
 #. / Command line option
 #: src/client/application/geary-application.vala:152
-#| msgid "Display program version"
 msgid "Display program version and revision id"
 msgstr "Mostrar la versión del programa y el id de revisión"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:278
+#: src/client/application/geary-application.vala:279
 msgid "Geary version"
 msgstr "Versión de Geary"
 
-#: src/client/application/geary-application.vala:279
-#| msgid "Geary version"
+#: src/client/application/geary-application.vala:280
 msgid "Geary revision"
 msgstr "Revisión de Geary"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:281
+#: src/client/application/geary-application.vala:282
 msgid "GTK version"
 msgstr "Versión de GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/geary-application.vala:288
+#: src/client/application/geary-application.vala:289
 msgid "GLib version"
 msgstr "Versión de GLib"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:295
+#: src/client/application/geary-application.vala:296
 msgid "WebKitGTK version"
 msgstr "Versión de WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:302
+#: src/client/application/geary-application.vala:303
 msgid "Desktop environment"
 msgstr "Entorno de escritorio"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/geary-application.vala:304
+#: src/client/application/geary-application.vala:305
 #: src/client/conversation-viewer/conversation-email.vala:159
 msgid "Unknown"
 msgstr "Desconocido"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:334
+#: src/client/application/geary-application.vala:335
 msgid "Distribution name"
 msgstr "Nombre de la distribución"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:339
+#: src/client/application/geary-application.vala:340
 msgid "Distribution release"
 msgstr "Lanzamiento de la distribución"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:347
+#: src/client/application/geary-application.vala:348
 msgid "Installation prefix"
 msgstr "Prefijo de instalación"
 
-#: src/client/application/geary-application.vala:512
+#: src/client/application/geary-application.vala:513
 #, c-format
 msgid "About %s"
 msgstr "Acerca de %s"
@@ -1097,7 +1100,7 @@ msgstr "Acerca de %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:516
+#: src/client/application/geary-application.vala:517
 msgid "translator-credits"
 msgstr ""
 "Daniel Mustieles <daniel.mustieles@gmail.com>, 2015 - 2017\n"
@@ -1105,13 +1108,13 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/geary-application.vala:777
+#: src/client/application/geary-application.vala:788
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "La opción «--hidden» está obsoleta y se eliminará en el futuro."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/geary-application.vala:807
+#: src/client/application/geary-application.vala:820
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Opción de la línea de comandos no reconocida: «%s»"
@@ -1404,34 +1407,34 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1133
+#: src/client/composer/composer-widget.vala:1141
 msgid "Do you want to keep or discard this draft message?"
 msgstr "¿Quiere mantener o descartar este mensaje en borrador?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1163
+#: src/client/composer/composer-widget.vala:1171
 msgid "Do you want to discard this draft message?"
 msgstr "¿Quiere descartar este mensaje en borrador?"
 
-#: src/client/composer/composer-widget.vala:1280
+#: src/client/composer/composer-widget.vala:1288
 msgid "Send message with an empty subject and body?"
 msgstr "¿Quiere enviar el mensaje sin asunto ni cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1282
+#: src/client/composer/composer-widget.vala:1290
 msgid "Send message with an empty subject?"
 msgstr "¿Quiere enviar el mensaje sin asunto?"
 
-#: src/client/composer/composer-widget.vala:1284
+#: src/client/composer/composer-widget.vala:1292
 msgid "Send message with an empty body?"
 msgstr "¿Quiere enviar el mensaje sin cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1288
+#: src/client/composer/composer-widget.vala:1296
 msgid "Send message without an attachment?"
 msgstr "¿Quiere enviar el mensaje sin el archivo adjunto?"
 
-#: src/client/composer/composer-widget.vala:1593
+#: src/client/composer/composer-widget.vala:1601
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Ya se ha adjuntado «%s» para enviarlo."
@@ -1441,63 +1444,63 @@ msgstr "Ya se ha adjuntado «%s» para enviarlo."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1601
+#: src/client/composer/composer-widget.vala:1609
 #: src/client/conversation-viewer/conversation-email.vala:173
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1638
+#: src/client/composer/composer-widget.vala:1646
 #, c-format
 msgid "“%s” could not be found."
 msgstr "No se pudo encontrar «%s»."
 
-#: src/client/composer/composer-widget.vala:1644
+#: src/client/composer/composer-widget.vala:1652
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» es una carpeta."
 
-#: src/client/composer/composer-widget.vala:1650
+#: src/client/composer/composer-widget.vala:1658
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» es un archivo vacío."
 
-#: src/client/composer/composer-widget.vala:1663
+#: src/client/composer/composer-widget.vala:1671
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "No se pudo abrir «%s» para lectura."
 
-#: src/client/composer/composer-widget.vala:1671
+#: src/client/composer/composer-widget.vala:1679
 msgid "Cannot add attachment"
 msgstr "No se puede adjuntar el archivo"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1721
+#: src/client/composer/composer-widget.vala:1729
 #: src/client/conversation-viewer/conversation-email.vala:976
 #: src/client/util/util-email.vala:216 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Para:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1727
+#: src/client/composer/composer-widget.vala:1735
 #: src/client/conversation-viewer/conversation-email.vala:981
 #: src/client/util/util-email.vala:221 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1733
+#: src/client/composer/composer-widget.vala:1741
 #: src/client/conversation-viewer/conversation-email.vala:986
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Cco:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:1739
+#: src/client/composer/composer-widget.vala:1747
 msgid "Reply-To: "
 msgstr "Responder a:"
 
-#: src/client/composer/composer-widget.vala:1879
+#: src/client/composer/composer-widget.vala:1887
 msgid "Select Color"
 msgstr "Seleccionar color"
 
@@ -1506,20 +1509,20 @@ msgstr "Seleccionar color"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2069
+#: src/client/composer/composer-widget.vala:2078
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s mediante %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2130
+#: src/client/composer/composer-widget.vala:2139
 msgid "_From:"
 msgstr "_De:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2362
+#: src/client/composer/composer-widget.vala:2416
 msgid "Images"
 msgstr "Imágenes"
 
@@ -1527,15 +1530,15 @@ msgstr "Imágenes"
 msgid "New Message"
 msgstr "Mensaje nuevo"
 
-#: src/client/composer/spell-check-popover.vala:117
+#: src/client/composer/spell-check-popover.vala:108
 msgid "Remove this language from the preferred list"
 msgstr "Quitar este idioma de la lista de favoritos"
 
-#: src/client/composer/spell-check-popover.vala:121
+#: src/client/composer/spell-check-popover.vala:112
 msgid "Add this language to the preferred list"
 msgstr "Añadir este idioma de la lista de favoritos"
 
-#: src/client/composer/spell-check-popover.vala:217
+#: src/client/composer/spell-check-popover.vala:199
 msgid "Search for more languages"
 msgstr "Buscar más idiomas"
 
@@ -2583,8 +2586,9 @@ msgstr "Se ha abierto el inspector"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:31
-msgid "Togggle appending new log entries"
-msgstr "Alternar añadir entradas del registro nuevas"
+#| msgid "Togggle appending new log entries"
+msgid "Toggle appending new log entries"
+msgstr "Cojnmutar añadir entradas del registro nuevas"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:48
@@ -3351,6 +3355,9 @@ msgstr "Detalles:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Actualización de Geary en proceso…"
+
+#~ msgid "List of the languages to use in the spell checker."
+#~ msgstr "Lista de idiomas que usar en el corrector ortográfico."
 
 #~ msgid "Output debugging information"
 #~ msgstr "Salida de información de depuración"
