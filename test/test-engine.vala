@@ -12,6 +12,10 @@ int main(string[] args) {
 
     Test.init(ref args);
 
+    // Ensure things like e.g. GLib's formatting routines uses a
+    // UTF-8-based locale rather ASCII
+    GLib.Intl.setlocale(LocaleCategory.ALL, "C.UTF-8");
+
     Geary.RFC822.init();
     Geary.HTML.init();
     Geary.Logging.init();
