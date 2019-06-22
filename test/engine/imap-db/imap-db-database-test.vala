@@ -147,10 +147,10 @@ class Geary.ImapDB.DatabaseTest : TestCase {
             INSERT INTO Test (test_str) VALUES ('BB');
             INSERT INTO Test (test_str) VALUES ('🤯');
         """);
-        string[] expected = { "🤯", "BB", "B", "a" };
+        string[] expected = { "a", "BB", "B", "🤯" };
 
         Db.Result result = db.query(
-            "SELECT test_str FROM Test ORDER BY test_str COLLATE UTF8ICASE DESC"
+            "SELECT test_str FROM Test ORDER BY test_str COLLATE UTF8COLL DESC"
         );
 
         int i = 0;

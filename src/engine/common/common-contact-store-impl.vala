@@ -98,19 +98,19 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
                                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
         Gee.Collection<Contact> contacts = new Gee.LinkedList<Contact>();
-        string normalised_query = query.make_valid().normalize().down();
+        string normalised_query = Geary.Db.normalise_case_insensitive_query(query);
         if (!String.is_empty(normalised_query)) {
             normalised_query = normalised_query + "%";
             Db.Statement stmt = cx.prepare("""
                 SELECT * FROM ContactTable
                 WHERE highest_importance >= ? AND (
-                    real_name LIKE ? COLLATE UTF8ICASE OR
-                    normalized_email LIKE ? COLLATE UTF8ICASE
+                    UTF8FOLD(real_name) LIKE ? OR
+                    UTF8FOLD(email) LIKE ?
                 )
                 ORDER BY highest_importance DESC,
                          real_name IS NULL,
-                         real_name COLLATE UTF8ICASE,
-                         email COLLATE UTF8ICASE
+                         real_name COLLATE UTF8COLL,
+                         email COLLATE UTF8COLL
                 LIMIT ?
             """);
             stmt.bind_uint(0, min_importance);

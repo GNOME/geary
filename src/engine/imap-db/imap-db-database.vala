@@ -5,21 +5,44 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-[CCode (cname = "g_utf8_casefold")]
-extern string utf8_casefold(string data, ssize_t len);
+[CCode (cname = "g_utf8_collate_key")]
+extern string utf8_collate_key(string data, ssize_t len);
 extern int sqlite3_unicodesn_register_tokenizer(Sqlite.Database db);
 
 private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
-    /** Name of UTF-8 case-sensitive SQLite collation function name. */
-    public const string UTF8_CASE_INSENSITIVE_COLLATION = "UTF8ICASE";
 
-    private static int case_insensitive_collation(int a_len, void* a_bytes,
-                                                  int b_len, void* b_bytes) {
-        string a_str = utf8_casefold((string) a_bytes, a_len).collate_key();
-        string b_str = utf8_casefold((string) b_bytes, b_len).collate_key();
-        return strcmp(a_str, b_str);
+    /** SQLite UTF-8 case-insensitive, transliterating function name. */
+    public const string UTF8_CASE_INSENSITIVE_FN = "UTF8FOLD";
+
+    /** SQLite UTF-8 collation name. */
+    public const string UTF8_COLLATE = "UTF8COLL";
+
+
+    private static void utf8_transliterate_fold(Sqlite.Context context,
+                                                Sqlite.Value[] values) {
+        string? text = values[0].to_text();
+        if (text != null) {
+            context.result_text(Geary.Db.normalise_case_insensitive_query(text));
+        } else {
+            context.result_value(values[0]);
+        }
     }
+
+    private static int utf8_collate(int a_len, void* a_bytes,
+                                    int b_len, void* b_bytes) {
+        // Don't need to normalise, collate_key() will do it for us
+        string? a_str = null;
+        if (a_bytes != null) {
+            a_str = utf8_collate_key((string) a_bytes, a_len);
+        }
+        string? b_str = null;
+        if (b_bytes != null) {
+            b_str = utf8_collate_key((string) b_bytes, b_len);
+        }
+        return GLib.strcmp(a_str, b_str);
+    }
+
 
     internal GLib.File attachments_path;
 
@@ -598,14 +621,29 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         cx.set_recursive_triggers(true);
         cx.set_synchronous(Db.SynchronousMode.NORMAL);
         sqlite3_unicodesn_register_tokenizer(cx.db);
-        if (cx.db.create_collation(
-                UTF8_CASE_INSENSITIVE_COLLATION,
+
+        if (cx.db.create_function(
+                UTF8_CASE_INSENSITIVE_FN,
+                1, // n args
                 Sqlite.UTF8,
-                Database.case_insensitive_collation
+                null,
+                Database.utf8_transliterate_fold,
+                null,
+                null
             ) != Sqlite.OK) {
             throw new DatabaseError.GENERAL(
-                "Failed to register collation function %s",
-                UTF8_CASE_INSENSITIVE_COLLATION
+                "Failed to register function %s",
+                UTF8_CASE_INSENSITIVE_FN
+            );
+        }
+
+        if (cx.db.create_collation(
+                UTF8_COLLATE,
+                Sqlite.UTF8,
+                Database.utf8_collate
+            ) != Sqlite.OK) {
+            throw new DatabaseError.GENERAL(
+                "Failed to register collation %s", UTF8_COLLATE
             );
         }
     }

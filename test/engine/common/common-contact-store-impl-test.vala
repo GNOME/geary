@@ -20,6 +20,8 @@ class Geary.ContactStoreImplTest : TestCase {
         add_test("search_no_match", search_no_match);
         add_test("search_email_match", search_email_match);
         add_test("search_name_match", search_name_match);
+        add_test("search_utf8_latin_names", search_utf8_latin_names);
+        add_test("search_utf8_multi_byte_names", search_utf8_multi_byte_names);
         add_test("update_new_contact", update_new_contact);
         add_test("update_existing_contact", update_existing_contact);
     }
@@ -45,20 +47,20 @@ class Geary.ContactStoreImplTest : TestCase {
         this.db.open.end(async_result());
 
         this.db.exec("""
-INSERT INTO ContactTable (
-    id,
-    normalized_email,
-    real_name,
-    email,
-    highest_importance
-) VALUES (
-    1,
-    'test@example.com',
-    'Test Name',
-    'Test@example.com',
-    50
-);
-""");
+            INSERT INTO ContactTable (
+                id,
+                normalized_email,
+                real_name,
+                email,
+                highest_importance
+            ) VALUES (
+                1,
+                'test@example.com',
+                'Test Name',
+                'Test@example.com',
+                50
+            );
+        """);
 
         this.test_article = new ContactStoreImpl(this.db);
     }
@@ -150,6 +152,67 @@ INSERT INTO ContactTable (
         assert_string("Test Name", search_hit.real_name, "Existing real_name");
         assert_int(50, search_hit.highest_importance, "Existing highest_importance");
         assert_false(search_hit.flags.always_load_remote_images(), "Existing flags");
+    }
+
+    public void search_utf8_latin_names() throws GLib.Error {
+        this.db.exec("""
+            INSERT INTO ContactTable (
+                real_name,
+                email,
+                normalized_email,
+                highest_importance
+            ) VALUES (
+                'Germán',
+                'latin@example.com',
+                'latin@example.com',
+                50
+            );
+        """);
+        test_article.search.begin(
+            "germá",
+            0,
+            10,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        Gee.Collection<Contact> results = test_article.search.end(
+            async_result()
+        );
+        assert_int(1, results.size, "results.size");
+
+        Contact search_hit = Collection.get_first(results);
+        assert_string("Germán", search_hit.real_name, "Existing real_name");
+    }
+
+    public void search_utf8_multi_byte_names() throws GLib.Error {
+        this.db.exec("""
+            INSERT INTO ContactTable (
+                real_name,
+                email,
+                normalized_email,
+                highest_importance
+            ) VALUES (
+                '年収1億円目指せ',
+                'cjk@example.com',
+                'cjk@example.com',
+                50
+            );
+        """);
+
+        test_article.search.begin(
+            "年収",
+            0,
+            10,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        Gee.Collection<Contact> results = test_article.search.end(
+            async_result()
+        );
+        assert_int(1, results.size, "results.size");
+
+        Contact search_hit = Collection.get_first(results);
+        assert_string("年収1億円目指せ", search_hit.real_name, "Existing real_name");
     }
 
     public void update_new_contact() throws GLib.Error {
