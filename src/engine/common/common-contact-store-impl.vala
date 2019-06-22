@@ -43,7 +43,7 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
         yield this.backing.exec_transaction_async(
             Db.TransactionType.RO,
             (cx, cancellable) => {
-                contacts = do_search_contact(
+                contacts = do_search_contacts(
                     cx, query, min_importance, limit, cancellable
                 );
                 return Db.TransactionOutcome.COMMIT;
@@ -91,11 +91,12 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
         return contact;
     }
 
-    private Gee.Collection<Contact> do_search_contact(Db.Connection cx,
-                                                      string query,
-                                                      uint min_importance,
-                                                      uint limit,
-                                                      GLib.Cancellable? cancellable)
+    private Gee.Collection<Contact>
+        do_search_contacts(Db.Connection cx,
+                           string query,
+                           uint min_importance,
+                           uint limit,
+                           GLib.Cancellable? cancellable)
         throws GLib.Error {
         Gee.Collection<Contact> contacts = new Gee.LinkedList<Contact>();
         string normalised_query = Geary.Db.normalise_case_insensitive_query(query);
