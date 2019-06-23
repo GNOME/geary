@@ -167,6 +167,21 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         yield this.imap.start(cancellable);
         this.queue_operation(new StartPostie(this));
 
+        // Kick off a background update of the search table, but since
+        // the database is getting hammered at startup, wait a bit
+        // before starting the update ... use the ordinal to stagger
+        // these being fired off (important for users with many
+        // accounts registered).
+        //
+        // This is an example of an operation for which we need an
+        // engine-wide operation queue, not just an account-wide
+        // queue.
+        const int POPULATE_DELAY_SEC = 5;
+        int account_sec = this.information.ordinal.clamp(0, 10);
+        Timeout.add_seconds(POPULATE_DELAY_SEC + account_sec, () => {
+                this.local.populate_search_table.begin(cancellable);
+            return false;
+        });
     }
 
     public override async void close_async(Cancellable? cancellable = null) throws Error {

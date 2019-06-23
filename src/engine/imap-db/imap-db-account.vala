@@ -7,7 +7,6 @@
  */
 
 private class Geary.ImapDB.Account : BaseObject {
-    private const int POPULATE_SEARCH_TABLE_DELAY_SEC = 5;
 
     // These characters are chosen for being commonly used to continue a single word (such as
     // extended last names, i.e. "Lars-Eric") or in terms commonly searched for in an email client,
@@ -327,16 +326,6 @@ private class Geary.ImapDB.Account : BaseObject {
         }
 
         background_cancellable = new Cancellable();
-
-        // Kick off a background update of the search table, but since the database is getting
-        // hammered at startup, wait a bit before starting the update ... use the ordinal to
-        // stagger these being fired off (important for users with many accounts registered)
-        int account_sec = account_information.ordinal.clamp(0, 10);
-        Timeout.add_seconds(POPULATE_SEARCH_TABLE_DELAY_SEC + account_sec, () => {
-            populate_search_table_async.begin(background_cancellable);
-
-            return false;
-        });
     }
 
     public async void close_async(Cancellable? cancellable) throws Error {
@@ -1370,7 +1359,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
     }
 
-    private async void populate_search_table_async(Cancellable? cancellable) {
+    public async void populate_search_table(Cancellable? cancellable) {
         debug("%s: Populating search table", account_information.id);
         try {
             while (!yield populate_search_table_batch_async(50, cancellable)) {
