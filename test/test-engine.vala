@@ -10,11 +10,19 @@ int main(string[] args) {
      * Initialise all the things.
      */
 
-    Test.init(ref args);
-
     // Ensure things like e.g. GLib's formatting routines uses a
-    // UTF-8-based locale rather ASCII
-    GLib.Intl.setlocale(LocaleCategory.ALL, "C.UTF-8");
+    // well-known UTF-8-based locale rather ASCII.
+    //
+    // Distros don't ship well-known locales other than C.UTF-8 by
+    // default, but Flatpak does not currently support C.UTF-8, so
+    // need to try both. :(
+    // https://gitlab.com/freedesktop-sdk/freedesktop-sdk/issues/812
+    string? locale = GLib.Intl.setlocale(LocaleCategory.ALL, "C.UTF-8");
+    if (locale == null) {
+        GLib.Intl.setlocale(LocaleCategory.ALL, "en_US.UTF-8");
+    }
+
+    Test.init(ref args);
 
     Geary.RFC822.init();
     Geary.HTML.init();
