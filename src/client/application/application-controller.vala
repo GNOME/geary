@@ -8,7 +8,7 @@
 
 
 /**
- * Primary controller for a application instance.
+ * Primary controller for an application instance.
  *
  * @see GearyAplication
  */
@@ -171,6 +171,10 @@ public class Application.Controller : Geary.BaseObject {
 
     private uint operation_count = 0;
     private Geary.Revokable? revokable = null;
+
+    // Store the description for the revokable for tooltip display.
+    // This was previously stored within the context of undo button of the main toolbar.
+    private string revokable_description { get; set; }
 
     // List of windows we're waiting to close before Geary closes.
     private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
@@ -1702,7 +1706,7 @@ public class Application.Controller : Geary.BaseObject {
                                                Cancellable? cancellable) {
         try {
             save_revokable(yield source_folder.move_email_async(ids, destination, cancellable),
-                _("Undo move (Ctrl+Z)"));
+                ngettext("Moved %d message to %s", "Moved %d messages to %s", ids.size).printf(ids.size, destination.to_string()));
         } catch (Error err) {
             debug("%s: Unable to move %d emails: %s", source_folder.to_string(), ids.size,
                 err.message);
@@ -2302,7 +2306,7 @@ public class Application.Controller : Geary.BaseObject {
             Geary.FolderPath trash_path = (yield current_account.get_required_special_folder_async(
                 Geary.SpecialFolderType.TRASH, cancellable)).path;
             save_revokable(yield supports_move.move_email_async(ids, trash_path, cancellable),
-                _("Undo trash (Ctrl+Z)"));
+                ngettext("Trashed %d message", "Trashed %d messages", ids.size).printf(ids.size));
         } else {
             debug("Folder %s doesn't support move or account %s doesn't have a trash folder",
                 current_folder.to_string(), current_account.to_string());
@@ -2352,7 +2356,7 @@ public class Application.Controller : Geary.BaseObject {
                 debug("Folder %s doesn't support archive", current_folder.to_string());
             } else {
                 save_revokable(yield supports_archive.archive_email_async(ids, cancellable),
-                    _("Undo archive (Ctrl+Z)"));
+                    ngettext("Archived %d message", "Archived %d messages", ids.size).printf(ids.size));
             }
 
             return;
@@ -2385,7 +2389,8 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         // store new revokable
-        revokable = new_revokable;
+        this.revokable = new_revokable;
+        this.revokable_description = description;
 
         // connect to new revokable
         if (revokable != null) {
@@ -2395,11 +2400,11 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         if (this.main_window != null) {
-            if (revokable != null && description != null)
-                this.main_window.main_toolbar.undo_tooltip = description;
-            else
-                this.main_window.main_toolbar.undo_tooltip = _("Undo (Ctrl+Z)");
-
+            if (this.revokable != null && this.revokable_description != null) {
+                InAppNotification ian = new InAppNotification(this.revokable_description);
+                ian.set_button(_("Undo"), "win." + GearyApplication.ACTION_UNDO);
+                this.main_window.add_notification(ian);
+            }
             update_revokable_action();
         }
     }
@@ -2422,8 +2427,7 @@ public class Application.Controller : Geary.BaseObject {
         if (committed_revokable == null)
             return;
 
-        // use existing description
-        save_revokable(committed_revokable, this.main_window.main_toolbar.undo_tooltip);
+        save_revokable(committed_revokable, this.revokable_description);
     }
 
     private void on_revoke() {
