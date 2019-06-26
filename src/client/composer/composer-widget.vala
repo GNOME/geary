@@ -1199,7 +1199,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
         Gtk.Widget? focused_widget = this.container.top_window.get_focus();
         this.container.remove_composer();
-        ComposerWindow new_window = new ComposerWindow(this);
+        ComposerWindow new_window = new ComposerWindow(this, this.application);
 
         // Workaround a GTK+ crasher, Bug 771812. When the composer is
         // re-parented, its menu_button's popover keeps a reference to

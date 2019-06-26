@@ -29,7 +29,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
     private bool closing = false;
 
-    public ComposerWindow(ComposerWidget composer) {
+    public ComposerWindow(ComposerWidget composer, GearyApplication application) {
         Object(application: application, type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
 

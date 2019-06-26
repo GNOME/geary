@@ -220,7 +220,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         if (has_composer) {
             composer.state = ComposerWidget.ComposerState.DETACHED;
-            new ComposerWindow(composer);
+            new ComposerWindow(composer, this.application);
         } else {
             this.conversation_viewer.do_compose(composer);
             get_action(Application.Controller.ACTION_FIND_IN_CONVERSATION).set_enabled(false);
