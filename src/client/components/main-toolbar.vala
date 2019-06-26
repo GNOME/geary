@@ -26,11 +26,6 @@ public class MainToolbar : Gtk.Box {
     public int selected_conversations { get; set; }
     // Whether to show the trash or the delete button
     public bool show_trash_button { get; set; default = true; }
-    // The tooltip of the Undo-button
-    public string undo_tooltip {
-        owned get { return this.undo_button.tooltip_text; }
-        set { this.undo_button.tooltip_text = value; }
-    }
 
     // Folder header elements
     [GtkChild]
@@ -56,10 +51,6 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Button trash_delete_button;
     [GtkChild]
     private Gtk.ToggleButton find_button;
-
-    // Other
-    [GtkChild]
-    private Gtk.Button undo_button;
 
     // Load these at construction time
     private Gtk.Image trash_image = new Gtk.Image.from_icon_name("user-trash-symbolic", Gtk.IconSize.MENU);
