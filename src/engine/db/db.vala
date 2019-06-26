@@ -45,20 +45,6 @@ public enum ResetScope {
     CLEAR_BINDINGS
 }
 
-/*
- * PrepareConnection is called from Database when a Connection is created.  Database may pool
- * Connections, especially for asynchronous queries, so this is only called when a new
- * Connection is created and not when its reused.
- *
- * PrepareConnection may be used as an opportunity to modify or configure the Connection.
- * This callback is called prior to the Connection being used, either internally or handed off to
- * a caller for normal use.
- *
- * This callback may be called in the context of a background thread.
- */
-public delegate void PrepareConnection(Connection cx, bool is_primary)
-    throws GLib.Error;
-
 /**
  * See Connection.exec_transaction() for more information on how this delegate is used.
  */
@@ -93,6 +79,17 @@ public int sqlite_version_number() {
  */
 public bool set_shared_cache_mode(bool enabled) {
     return sqlite3_enable_shared_cache(enabled ? 1 : 0) == Sqlite.OK;
+}
+
+/** Standard transformation for case-insensitive string values. */
+public inline string normalise_case_insensitive_query(string text) {
+    // This would be a place to do transliteration to improve query
+    // results, for example normalising `á` to `a`. The built-in GLib
+    // method `string.to_ascii()` does this but is too strong: It will
+    // convert e.g. CJK chars to `?`. The `string.tokenize_and_fold`
+    // function may work better but the calling interface is all
+    // wrong.
+    return text.normalize().casefold();
 }
 
 private void check_cancelled(string? method, Cancellable? cancellable) throws IOError {

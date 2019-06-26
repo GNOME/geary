@@ -21,6 +21,25 @@ public class Application.ContactStore : Geary.BaseObject {
     private const uint LRU_CACHE_MAX = 128;
 
 
+    private static string[] FOLKS_GENERAL_MATCH_FIELDS;
+    private static string[] FOLKS_EMAIL_MATCH_FIELDS;
+
+    static construct {
+        string[] general_fields = Folks.Query.MATCH_FIELDS_NAMES;
+        string email_field = Folks.PersonaStore.detail_key(
+            Folks.PersonaDetail.EMAIL_ADDRESSES
+        );
+
+        FOLKS_GENERAL_MATCH_FIELDS = general_fields;
+        FOLKS_GENERAL_MATCH_FIELDS += email_field;
+        FOLKS_EMAIL_MATCH_FIELDS = { email_field };
+    }
+
+    private static inline string to_cache_key(string value) {
+        return value.normalize().casefold();
+    }
+
+
     /** The account this store aggregates data for. */
     public Geary.Account account { get; private set; }
 
@@ -32,8 +51,12 @@ public class Application.ContactStore : Geary.BaseObject {
         new Util.Cache.Lru<Folks.Individual?>(LRU_CACHE_MAX);
 
     // Cache for contacts backed by Folks individual's id.
-    private Util.Cache.Lru<Contact?> contact_id_cache =
-        new Util.Cache.Lru<Contact?>(LRU_CACHE_MAX);
+    private Util.Cache.Lru<Contact> contact_id_cache =
+        new Util.Cache.Lru<Contact>(LRU_CACHE_MAX);
+
+    // Cache for engine contacts by email address.
+    private Util.Cache.Lru<Geary.Contact> engine_address_cache =
+        new Util.Cache.Lru<Geary.Contact>(LRU_CACHE_MAX);
 
 
     /** Constructs a new contact store for an account. */
@@ -56,6 +79,7 @@ public class Application.ContactStore : Geary.BaseObject {
     public void close() {
         this.folks_address_cache.clear();
         this.contact_id_cache.clear();
+        this.engine_address_cache.clear();
     }
 
     /**
@@ -73,41 +97,154 @@ public class Application.ContactStore : Geary.BaseObject {
         // Do a double lookup here in case of cache hit since null
         // values are used to be able to cache Folks lookup failures
         // (as well as successes).
-        if (this.folks_address_cache.has_key(mailbox.address)) {
-            individual = this.folks_address_cache.get_entry(mailbox.address);
+        string email_key = to_cache_key(mailbox.address);
+        if (this.folks_address_cache.has_key(email_key)) {
+            individual = this.folks_address_cache.get_entry(email_key);
         } else {
-            individual = yield search_match(mailbox.address, cancellable);
-            this.folks_address_cache.set_entry(mailbox.address, individual);
+            individual = yield search_folks_by_email(
+                mailbox.address, cancellable
+            );
+            this.folks_address_cache.set_entry(email_key, individual);
         }
 
-        Contact? contact = null;
-        if (individual != null) {
-            this.contact_id_cache.get_entry(individual.id);
-        }
-        if (contact == null) {
-            Geary.Contact? engine =
-                this.account.get_contact_store().get_by_rfc822(mailbox);
-            contact = new Contact(this, individual, engine, mailbox);
-            if (individual != null) {
-                this.contact_id_cache.set_entry(individual.id, contact);
+        return yield get_contact(individual, mailbox, cancellable);
+    }
+
+    /** Searches for contacts based on a specific string */
+    public async Gee.Collection<Contact> search(string query,
+                                                uint min_importance,
+                                                uint limit,
+                                                GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Gee.Collection<Contact> results = new Gee.LinkedList<Contact>();
+        Gee.Set<string> seen = new Gee.HashSet<string>();
+
+        // Step 1: Search Folks for matching individuals
+
+        Folks.SearchView view = new Folks.SearchView(
+            this.individuals,
+            new Folks.SimpleQuery(query, FOLKS_GENERAL_MATCH_FIELDS)
+        );
+        yield view.prepare();
+
+        // Add favourites first
+        foreach (Folks.Individual individual in view.individuals) {
+            if (individual.is_favourite) {
+                Contact result = yield get_contact(
+                    individual, null, cancellable
+                );
+                foreach (Geary.RFC822.MailboxAddress mailbox
+                         in result.email_addresses) {
+                    seen.add(to_cache_key(mailbox.address));
+                }
+                results.add(result);
             }
+        }
+
+        // Add non-favourites next
+        foreach (Folks.Individual individual in view.individuals) {
+            if (!individual.is_favourite) {
+                Contact result = yield get_contact(
+                    individual, null, cancellable
+                );
+                foreach (Geary.RFC822.MailboxAddress mailbox
+                         in result.email_addresses) {
+                    seen.add(to_cache_key(mailbox.address));
+                }
+                results.add(result);
+            }
+        }
+
+        try {
+            yield view.unprepare();
+        } catch (GLib.Error err) {
+            warning("Error unpreparing Folks search: %s", err.message);
+        }
+
+        // Step 2: Search the engine for matching contacts
+
+        Gee.Collection<Geary.Contact> engine_results =
+            yield this.account.contact_store.search(
+                query, min_importance, limit, cancellable
+            );
+        foreach (Geary.Contact contact in engine_results) {
+            string email_key = to_cache_key(contact.email);
+            if (!seen.contains(email_key)) {
+                Contact result = yield load(
+                    contact.get_rfc822_address(), cancellable
+                );
+                foreach (Geary.RFC822.MailboxAddress mailbox
+                         in result.email_addresses) {
+                    seen.add(to_cache_key(mailbox.address));
+                }
+                results.add(result);
+            }
+        }
+        return results;
+    }
+
+    internal async Geary.Contact
+        lookup_engine_contact(Geary.RFC822.MailboxAddress mailbox,
+                              GLib.Cancellable cancellable)
+        throws GLib.Error {
+        string email_key = to_cache_key(mailbox.address);
+        Geary.Contact contact = this.engine_address_cache.get_entry(email_key);
+        if (contact == null) {
+            contact = yield this.account.contact_store.get_by_rfc822(
+                mailbox, cancellable
+            );
+            if (contact == null) {
+                contact = new Geary.Contact.from_rfc822_address(mailbox, 0);
+                yield this.account.contact_store.update_contacts(
+                    Geary.Collection.single(contact), cancellable
+                );
+            }
+            this.engine_address_cache.set_entry(email_key, contact);
         }
         return contact;
     }
 
-    private async Folks.Individual? search_match(string address,
-                                                 GLib.Cancellable cancellable)
+    private async Contact get_contact(Folks.Individual? individual,
+                                      Geary.RFC822.MailboxAddress? mailbox,
+                                      GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Contact? contact = null;
+        if (individual != null) {
+            contact = this.contact_id_cache.get_entry(individual.id);
+            if (contact == null) {
+                contact = new Contact.for_folks(this, individual);
+                this.contact_id_cache.set_entry(individual.id, contact);
+            }
+        } else if (mailbox != null) {
+            Geary.Contact engine = yield lookup_engine_contact(
+                mailbox, cancellable
+            );
+            // Despite the engine's contact having a display name, use
+            // the one from the source mailbox: Online services like
+            // Gitlab will use the sender's name but the service's
+            // email address, so the name from the engine probably
+            // won't match the name on the email
+            string name = (!Geary.String.is_empty_or_whitespace(mailbox.name) &&
+                           !mailbox.is_spoofed())
+               ? mailbox.name
+               : mailbox.mailbox;
+            contact = new Contact.for_engine(
+                this, name, engine
+            );
+        } else {
+            throw new Geary.EngineError.BAD_PARAMETERS(
+                "Requires either an individual or a mailbox"
+            );
+        }
+        return contact;
+    }
+
+    private async Folks.Individual? search_folks_by_email(string address,
+                                                          GLib.Cancellable cancellable)
         throws GLib.Error {
         Folks.SearchView view = new Folks.SearchView(
             this.individuals,
-            new Folks.SimpleQuery(
-                address,
-                new string[] {
-                    Folks.PersonaStore.detail_key(
-                        Folks.PersonaDetail.EMAIL_ADDRESSES
-                    )
-                }
-            )
+            new Folks.SimpleQuery(address, FOLKS_EMAIL_MATCH_FIELDS)
         );
 
         yield view.prepare();

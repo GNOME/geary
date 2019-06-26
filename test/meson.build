@@ -14,11 +14,13 @@ geary_test_engine_sources = [
   # geary-engine_internal.vapi, which leads to duplicate symbols when
   # linking
   'engine/api/geary-account-mock.vala',
+  'engine/api/geary-contact-store-mock.vala',
   'engine/api/geary-credentials-mediator-mock.vala',
   'engine/api/geary-email-identifier-mock.vala',
   'engine/api/geary-email-properties-mock.vala',
   'engine/api/geary-folder-mock.vala',
   'engine/api/geary-folder-properties-mock.vala',
+  'engine/common/common-contact-harvester-mock.vala',
 
   'engine/api/geary-account-information-test.vala',
   'engine/api/geary-attachment-test.vala',
@@ -28,6 +30,8 @@ geary_test_engine_sources = [
   'engine/app/app-conversation-test.vala',
   'engine/app/app-conversation-monitor-test.vala',
   'engine/app/app-conversation-set-test.vala',
+  'engine/common/common-contact-store-impl-test.vala',
+  'engine/common/common-contact-harvester-test.vala',
   'engine/db/db-database-test.vala',
   'engine/db/db-versioned-database-test.vala',
   'engine/imap/command/imap-create-command-test.vala',

@@ -83,7 +83,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         base(config, imap, smtp);
 
         this.local = local;
-        this.local.contacts_loaded.connect(() => { contacts_loaded(); });
+        this.contact_store = new ContactStoreImpl(local.db);
 
         imap.min_pool_size = IMAP_MIN_POOL_SIZE;
         imap.notify["current-status"].connect(
@@ -133,11 +133,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.processor.operation_error.connect(on_operation_error);
 
         try {
-            yield this.local.open_async(
-                information.data_dir,
-                Engine.instance.resource_dir.get_child("sql"),
-                cancellable
-            );
+            yield this.local.open_async(cancellable);
         } catch (Error err) {
             // convert database-open errors
             if (err is DatabaseError.CORRUPT)
@@ -171,6 +167,21 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         yield this.imap.start(cancellable);
         this.queue_operation(new StartPostie(this));
 
+        // Kick off a background update of the search table, but since
+        // the database is getting hammered at startup, wait a bit
+        // before starting the update ... use the ordinal to stagger
+        // these being fired off (important for users with many
+        // accounts registered).
+        //
+        // This is an example of an operation for which we need an
+        // engine-wide operation queue, not just an account-wide
+        // queue.
+        const int POPULATE_DELAY_SEC = 5;
+        int account_sec = this.information.ordinal.clamp(0, 10);
+        Timeout.add_seconds(POPULATE_DELAY_SEC + account_sec, () => {
+                this.local.populate_search_table.begin(cancellable);
+            return false;
+        });
     }
 
     public override async void close_async(Cancellable? cancellable = null) throws Error {
@@ -245,36 +256,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return open;
     }
 
-    public override async void rebuild_async(Cancellable? cancellable = null) throws Error {
-        if (open)
-            throw new EngineError.ALREADY_OPEN("Account cannot be open during rebuild");
+    public override async void rebuild_async(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        if (this.open) {
+            throw new EngineError.ALREADY_OPEN(
+                "Account cannot be open during rebuild"
+            );
+        }
 
         message("%s: Rebuilding account local data", to_string());
-
-        // get all the storage locations associated with this Account
-        File db_file;
-        File attachments_dir;
-        ImapDB.Account.get_imap_db_storage_locations(information.data_dir, out db_file,
-            out attachments_dir);
-
-        if (yield Files.query_exists_async(db_file, cancellable)) {
-            message(
-                "%s: Deleting database file %s...",
-                to_string(), db_file.get_path()
-            );
-            yield db_file.delete_async(GLib.Priority.DEFAULT, cancellable);
-        }
-
-        if (yield Files.query_exists_async(attachments_dir, cancellable)) {
-            message(
-                "%s: Deleting attachments directory %s...",
-                to_string(), attachments_dir.get_path()
-            );
-            yield Files.recursive_delete_async(
-                attachments_dir, GLib.Priority.DEFAULT, cancellable
-            );
-        }
-
+        yield this.local.delete_all_data(cancellable);
         message("%s: Rebuild complete", to_string());
     }
 
@@ -483,10 +474,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         all_folders.add_all(local_only.values);
 
         return all_folders;
-    }
-
-    public override Geary.ContactStore get_contact_store() {
-        return local.contact_store;
     }
 
     public override async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,

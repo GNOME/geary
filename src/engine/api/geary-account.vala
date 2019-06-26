@@ -126,6 +126,11 @@ public abstract class Geary.Account : BaseObject {
      */
     public ClientService outgoing { get; private set; }
 
+    /**
+     * The contact information store for this account.
+     */
+    public Geary.ContactStore contact_store { get; protected set; }
+
     public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_vacuum_monitor { get; protected set; }
@@ -150,8 +155,6 @@ public abstract class Geary.Account : BaseObject {
      * problem itself.
      */
     public signal void report_problem(Geary.ProblemReport problem);
-
-    public signal void contacts_loaded();
 
     /**
      * Fired when folders become available or unavailable in the account.
@@ -383,11 +386,6 @@ public abstract class Geary.Account : BaseObject {
      * list_matching_folders().
      */
     public abstract Gee.Collection<Geary.Folder> list_folders() throws Error;
-
-    /**
-     * Gets a perpetually update-to-date collection of autocompletion contacts.
-     */
-    public abstract Geary.ContactStore get_contact_store();
 
     /**
      * Returns the folder representing the given special folder type.  If no such folder exists,

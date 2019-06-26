@@ -22,7 +22,7 @@ class Geary.Db.DatabaseTest : TestCase {
     public void transient_open() throws Error {
         Database db = new Geary.Db.Database.transient();
         db.open.begin(
-            Geary.Db.DatabaseFlags.NONE, null, null,
+            Geary.Db.DatabaseFlags.NONE, null,
             (obj, ret) => { async_complete(ret); }
         );
         db.open.end(async_result());
@@ -40,7 +40,7 @@ class Geary.Db.DatabaseTest : TestCase {
 
         Database db = new Geary.Db.Database.persistent(tmp_file);
         db.open.begin(
-            Geary.Db.DatabaseFlags.NONE, null, null,
+            Geary.Db.DatabaseFlags.NONE, null,
             (obj, ret) => { async_complete(ret); }
         );
         db.open.end(async_result());
@@ -61,7 +61,7 @@ class Geary.Db.DatabaseTest : TestCase {
             tmp_dir.get_child("test.db")
         );
         db.open.begin(
-            Geary.Db.DatabaseFlags.CREATE_FILE, null, null,
+            Geary.Db.DatabaseFlags.CREATE_FILE, null,
             (obj, ret) => { async_complete(ret); }
         );
         db.open.end(async_result());
@@ -85,7 +85,7 @@ class Geary.Db.DatabaseTest : TestCase {
         db.open.begin(
             Geary.Db.DatabaseFlags.CREATE_DIRECTORY |
             Geary.Db.DatabaseFlags.CREATE_FILE,
-            null, null,
+            null,
             (obj, ret) => { async_complete(ret); }
         );
         db.open.end(async_result());
@@ -110,7 +110,7 @@ class Geary.Db.DatabaseTest : TestCase {
         db.open.begin(
             Geary.Db.DatabaseFlags.CREATE_DIRECTORY |
             Geary.Db.DatabaseFlags.CREATE_FILE,
-            null, null,
+            null,
             (obj, ret) => { async_complete(ret); }
         );
         db.open.end(async_result());
@@ -134,7 +134,7 @@ class Geary.Db.DatabaseTest : TestCase {
         db.open.begin(
             Geary.Db.DatabaseFlags.CREATE_FILE |
             Geary.Db.DatabaseFlags.CHECK_CORRUPTION,
-            null, null,
+            null,
             (obj, ret) => { async_complete(ret); }
         );
         db.open.end(async_result());
@@ -159,7 +159,7 @@ class Geary.Db.DatabaseTest : TestCase {
             Geary.Db.DatabaseFlags.CREATE_DIRECTORY |
             Geary.Db.DatabaseFlags.CREATE_FILE |
             Geary.Db.DatabaseFlags.CHECK_CORRUPTION,
-            null, null,
+            null,
             (obj, ret) => { async_complete(ret); }
         );
         db.open.end(async_result());

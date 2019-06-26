@@ -10,8 +10,6 @@ geary_engine_vala_sources = files(
   'api/geary-client-service.vala',
   'api/geary-composed-email.vala',
   'api/geary-contact.vala',
-  'api/geary-contact-flags.vala',
-  'api/geary-contact-importance.vala',
   'api/geary-contact-store.vala',
   'api/geary-credentials.vala',
   'api/geary-credentials-mediator.vala',
@@ -68,6 +66,8 @@ geary_engine_vala_sources = files(
   'app/email-store/app-list-operation.vala',
   'app/email-store/app-mark-operation.vala',
 
+  'common/common-contact-harvester.vala',
+  'common/common-contact-store-impl.vala',
   'common/common-message-data.vala',
 
   'db/db.vala',
@@ -172,12 +172,10 @@ geary_engine_vala_sources = files(
 
   'imap-db/imap-db-account.vala',
   'imap-db/imap-db-attachment.vala',
-  'imap-db/imap-db-contact.vala',
   'imap-db/imap-db-database.vala',
   'imap-db/imap-db-email-identifier.vala',
   'imap-db/imap-db-folder.vala',
   'imap-db/imap-db-gc.vala',
-  'imap-db/imap-db-message-addresses.vala',
   'imap-db/imap-db-message-row.vala',
   'imap-db/search/imap-db-search-email-identifier.vala',
   'imap-db/search/imap-db-search-folder.vala',
@@ -189,7 +187,6 @@ geary_engine_vala_sources = files(
   'imap-engine/imap-engine-account-operation.vala',
   'imap-engine/imap-engine-account-processor.vala',
   'imap-engine/imap-engine-account-synchronizer.vala',
-  'imap-engine/imap-engine-contact-store.vala',
   'imap-engine/imap-engine-email-prefetcher.vala',
   'imap-engine/imap-engine-generic-account.vala',
   'imap-engine/imap-engine-generic-folder.vala',

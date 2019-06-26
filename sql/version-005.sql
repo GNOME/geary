@@ -1,6 +1,6 @@
 
 --
--- Create ContactTable for autocompletion contacts. Data is migrated in vala upgrade hooks.
+-- Create ContactTable for autocompletion contacts.
 --
 
 CREATE TABLE ContactTable (

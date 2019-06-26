@@ -26,6 +26,10 @@ int main(string[] args) {
      * Initialise all the things.
      */
 
+    // Ensure things like e.g. GLib's formatting routines uses a
+    // UTF-8-based locale rather ASCII
+    GLib.Intl.setlocale(LocaleCategory.ALL, "C.UTF-8");
+
     Test.init(ref args);
 
     Geary.RFC822.init();

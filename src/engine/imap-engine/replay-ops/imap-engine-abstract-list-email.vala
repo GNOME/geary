@@ -23,18 +23,23 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         // OUT
         public Gee.Set<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>();
 
+        private ContactHarvester harvester;
+
+
         public RemoteBatchOperation(Imap.FolderSession remote,
                                     ImapDB.Folder local,
                                     Imap.MessageSet msg_set,
                                     Geary.Email.Field unfulfilled_fields,
                                     Geary.Email.Field required_fields,
-                                    bool update_unread) {
+                                    bool update_unread,
+                                    ContactHarvester harvester) {
             this.remote = remote;
             this.local = local;
             this.msg_set = msg_set;
             this.unfulfilled_fields = unfulfilled_fields;
             this.required_fields = required_fields;
             this.update_unread = update_unread;
+            this.harvester = harvester;
         }
 
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
@@ -50,8 +55,10 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                 yield this.local.create_or_merge_email_async(
                     list,
                     this.update_unread,
+                    this.harvester,
                     cancellable
                 );
+
             for (int ctr = 0; ctr < list.size; ctr++) {
                 Geary.Email email = list[ctr];
 
@@ -179,7 +186,8 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                     msg_set,
                     unfulfilled_fields,
                     required_fields,
-                    !this.flags.is_any_set(NO_UNREAD_UPDATE)
+                    !this.flags.is_any_set(NO_UNREAD_UPDATE),
+                    this.owner.harvester
                 );
                 batch.add(remote_op);
             }

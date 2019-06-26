@@ -16,20 +16,6 @@ public class Geary.MockAccount : Account, MockObject {
 
     }
 
-    public class MockContactStore : ContactStore {
-
-        internal MockContactStore() {
-
-        }
-
-        public override async void
-            mark_contacts_async(Gee.Collection<Contact> contacts,
-                                ContactFlags? to_add,
-                                ContactFlags? to_remove) throws Error {
-                throw new EngineError.UNSUPPORTED("Mock method");
-            }
-    }
-
 
     public class MockClientService : ClientService {
 
@@ -169,10 +155,6 @@ public class Geary.MockAccount : Account, MockObject {
         return object_call<Gee.Collection<Folder>>(
             "list_folders", {}, Gee.List.empty<Folder>()
         );
-    }
-
-    public override Geary.ContactStore get_contact_store() {
-        return new MockContactStore();
     }
 
     public override Folder? get_special_folder(SpecialFolderType special)

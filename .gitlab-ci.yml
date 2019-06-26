@@ -53,6 +53,12 @@ fedora:
     - $BUILD_CMD
     - $TEST_CMD
     - $INSTALL_CMD
+  artifacts:
+    when: 'always'
+    paths:
+      - '$BUILD_DIR/meson-logs/meson-log.txt'
+      - '$BUILD_DIR/meson-logs/testlog.txt'
+    expire_in: 2 days
 
 ubuntu:
   stage: build
@@ -65,6 +71,12 @@ ubuntu:
     - $BUILD_CMD
     - $TEST_CMD
     - $INSTALL_CMD
+  artifacts:
+    when: 'always'
+    paths:
+      - '_build/meson-logs/meson-log.txt'
+      - '_build/meson-logs/testlog.txt'
+    expire_in: 2 days
 
 flatpak:
   image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master'

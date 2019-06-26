@@ -133,11 +133,6 @@ public class Application.Controller : Geary.BaseObject {
         get; private set; default = new Application.AvatarStore();
     }
 
-    /** Contact store cache for the application. */
-    public ContactListStoreCache contact_list_store_cache {
-        get; private set; default = new ContactListStoreCache();
-    }
-
     /** Default main window */
     public MainWindow main_window { get; private set; }
 
@@ -568,6 +563,13 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** Returns the contact store for an account, if any. */
+    public Application.ContactStore?
+        get_contact_store_for_account(Geary.Account target) {
+        AccountContext? context = this.accounts.get(target.information);
+        return (context != null) ? context.contacts : null;
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -616,22 +618,12 @@ public class Application.Controller : Geary.BaseObject {
         );
         account.report_problem.connect(on_report_problem);
         connect_account_async.begin(account, cancellable_open_account);
-
-        ContactListStore list_store = this.contact_list_store_cache.create(account.get_contact_store());
-        account.contacts_loaded.connect(list_store.set_sort_function);
     }
 
     private async void close_account(Geary.AccountInformation config) {
         AccountContext? context = this.accounts.get(config);
         if (context != null) {
             Geary.Account account = context.account;
-            Geary.ContactStore contact_store = account.get_contact_store();
-            ContactListStore list_store =
-                this.contact_list_store_cache.get(contact_store);
-
-            account.contacts_loaded.disconnect(list_store.set_sort_function);
-            this.contact_list_store_cache.unset(contact_store);
-
             if (this.current_account == account) {
                 this.current_account = null;
 
@@ -2025,10 +2017,13 @@ public class Application.Controller : Geary.BaseObject {
 
         ComposerWidget widget;
         if (mailto != null) {
-            widget = new ComposerWidget.from_mailto(current_account, contact_list_store_cache,
-                mailto, application.config);
+            widget = new ComposerWidget.from_mailto(
+                this.application, current_account, mailto
+            );
         } else {
-            widget = new ComposerWidget(current_account, contact_list_store_cache, compose_type, application.config);
+            widget = new ComposerWidget(
+                this.application, current_account, compose_type
+            );
         }
 
         add_composer(widget);
@@ -2701,11 +2696,6 @@ public class Application.Controller : Geary.BaseObject {
     private inline Geary.App.EmailStore? get_email_store_for_folder(Geary.Folder target) {
         AccountContext? context = this.accounts.get(target.account.information);
         return (context != null) ? context.emails : null;
-    }
-
-    private Application.ContactStore? get_contact_store_for_account(Geary.Account target) {
-        AccountContext? context = this.accounts.get(target.information);
-        return (context != null) ? context.contacts : null;
     }
 
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,

@@ -47,8 +47,6 @@ geary_client_vala_sources = files(
   'composer/composer-widget.vala',
   'composer/composer-window.vala',
   'composer/contact-entry-completion.vala',
-  'composer/contact-list-store.vala',
-  'composer/contact-list-store-cache.vala',
   'composer/email-entry.vala',
   'composer/spell-check-popover.vala',
 
