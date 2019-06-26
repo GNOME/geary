@@ -150,36 +150,95 @@ public class Application.Contact : Geary.BaseObject {
     /** Invokes the desktop contacts application to save this contact. */
     public async void save_to_desktop(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        GLib.DBusConnection dbus = yield GLib.Bus.get(
-            GLib.BusType.SESSION, cancellable
-        );
-        GLib.DBusActionGroup contacts = DBusActionGroup.get(
-            dbus, "org.gnome.Contacts", "/org/gnome/Contacts"
-        );
+        Folks.Persona? persona = null;
+        ContactStore? contacts = this.store;
+        if (contacts != null) {
+            Folks.PersonaStore? personas = contacts.individuals.primary_store;
+            if (personas != null && personas.can_add_personas == TRUE) {
+                GLib.HashTable<string,GLib.Value?> details =
+                    new GLib.HashTable<string,GLib.Value?>(GLib.str_hash,
+                                                           GLib.str_equal);
 
-        GLib.Variant param = new GLib.Variant.array(
-            new GLib.VariantType("(ss)"),
-            new GLib.Variant[] {
-                new GLib.Variant.tuple(
-                    new GLib.Variant[] {
-                        Folks.PersonaStore.detail_key(
-                            Folks.PersonaDetail.FULL_NAME
-                        ),
-                        this.display_name ?? ""
-                    }
-                ),
-                new GLib.Variant.tuple(
-                    new GLib.Variant[] {
-                        Folks.PersonaStore.detail_key(
-                            Folks.PersonaDetail.EMAIL_ADDRESSES
-                        ),
-                        Geary.Collection.get_first(this.email_addresses).address
-                    }
-                )
+                GLib.Value name_value = GLib.Value(typeof(string));
+                name_value.set_string(this.display_name);
+                details.insert(
+                    Folks.PersonaStore.detail_key(
+                        Folks.PersonaDetail.FULL_NAME
+                    ),
+                    name_value
+                );
+
+                Gee.Set<Folks.EmailFieldDetails> email_addresses =
+                    new Gee.HashSet<Folks.EmailFieldDetails>();
+                GLib.Value email_value = GLib.Value(typeof(Gee.Set));
+                foreach (Geary.RFC822.MailboxAddress addr
+                         in this.email_addresses) {
+                    email_addresses.add(
+                        new Folks.EmailFieldDetails(addr.address)
+                    );
+                }
+                email_value.set_object(email_addresses);
+                details.insert(
+                    Folks.PersonaStore.detail_key(
+                        Folks.PersonaDetail.EMAIL_ADDRESSES
+                    ),
+                    email_value
+                );
+
+                persona = yield personas.add_persona_from_details(details);
             }
-        );
+        }
+        if (persona == null) {
+            throw new Geary.EngineError.UNSUPPORTED(
+                "Supported persona store not found"
+            );
+        }
 
-        contacts.activate_action("create-contact", param);
+        Folks.Individual? individual = persona.individual;
+        if (individual == null) {
+            throw new Geary.EngineError.UNSUPPORTED(
+                "Individual not created for persona"
+            );
+        }
+
+        update_individual(individual);
+        update();
+        changed();
+
+        open_on_desktop(cancellable);
+
+        // XXX Un-comment and use the section below instead of the
+        // code above when something has been done about
+        // https://gitlab.gnome.org/GNOME/gnome-contacts/merge_requests/66
+
+        // GLib.DBusConnection dbus = yield GLib.Bus.get(
+        // GLib.BusType.SESSION, cancellable ); GLib.DBusActionGroup
+        // contacts = DBusActionGroup.get( dbus, "org.gnome.Contacts",
+        // "/org/gnome/Contacts" );
+
+        // GLib.Variant param = new GLib.Variant.array(
+        //     new GLib.VariantType("(ss)"),
+        //     new GLib.Variant[] {
+        //         new GLib.Variant.tuple(
+        //             new GLib.Variant[] {
+        //                 Folks.PersonaStore.detail_key(
+        //                     Folks.PersonaDetail.FULL_NAME
+        //                 ),
+        //                 this.display_name ?? ""
+        //             }
+        //         ),
+        //         new GLib.Variant.tuple(
+        //             new GLib.Variant[] {
+        //                 Folks.PersonaStore.detail_key(
+        //                     Folks.PersonaDetail.EMAIL_ADDRESSES
+        //                 ),
+        //                 this.contact.email
+        //             }
+        //         )
+        //     }
+        // );
+
+        // contacts.activate_action("create-contact", param);
     }
 
     /** Invokes the desktop contacts application to open this contact. */
