@@ -160,6 +160,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(new MailboxAddress("test  test", "example@example.com").is_spoofed() == false);
         assert(new MailboxAddress("test?", "example@example.com").is_spoofed() == false);
         assert(new MailboxAddress("test@example.com", "test@example.com").is_spoofed() == false);
+        assert(new MailboxAddress("test@EXAMPLE.com", "test@example.com").is_spoofed() == false);
 
         assert(new MailboxAddress("test@example.com", "example@example.com").is_spoofed() == true);
         assert(new MailboxAddress("test @ example . com", "example@example.com").is_spoofed() == true);
