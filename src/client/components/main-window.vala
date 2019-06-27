@@ -591,6 +591,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void load_more() {
         if (this.conversations != null) {
+            debug("Loading more messages in conversation list");
             this.conversations.min_window_count += MIN_CONVERSATION_COUNT;
         }
     }
