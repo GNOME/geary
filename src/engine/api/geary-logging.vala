@@ -326,6 +326,8 @@ private Flag logging_flags = Flag.NONE;
 private unowned FileStream? stream = null;
 private Timer? entry_timer = null;
 
+// Can't be nullable. See https://gitlab.gnome.org/GNOME/vala/issues/812
+private GLib.Mutex record_lock;
 private Record? first_record = null;
 private Record? last_record = null;
 private uint log_length = 0;
@@ -344,6 +346,7 @@ public void init() {
     if (init_count++ != 0)
         return;
     entry_timer = new Timer();
+    record_lock = GLib.Mutex();
     max_log_length = DEFAULT_MAX_LOG_BUFFER_LENGTH;
 }
 
@@ -449,6 +452,10 @@ public void log_to(FileStream? stream) {
 
 public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
                                                GLib.LogField[] fields) {
+    // Obtain a lock since multiple threads can be calling this
+    // function at the same time
+    record_lock.lock();
+
     Record record = new Record(
         fields,
         levels,
@@ -475,7 +482,10 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
     }
 
     if (listener != null) {
-        listener(record);
+        GLib.MainContext.default().invoke(() => {
+                listener(record);
+                return GLib.Source.REMOVE;
+            });
     }
 
     // Print a log message to the stream
@@ -492,6 +502,8 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
         out.puts(record.format());
         out.putc('\n');
     }
+
+    record_lock.unlock();
 
     return GLib.LogWriterOutput.HANDLED;
 }
