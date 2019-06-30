@@ -87,8 +87,8 @@ public interface Geary.Loggable : GLib.Object {
             this.count++;
         }
 
-        public inline void append_instance<T>(T value) {
-            this.append(typeof(T).name(), value);
+        public inline void append_loggable(Loggable value) {
+            this.append(value.get_type().name(), value);
         }
 
         public GLib.LogField[] to_array() {
@@ -177,7 +177,7 @@ public interface Geary.Loggable : GLib.Object {
         Context context = Context(Logging.DOMAIN, flags, levels, fmt, args);
         Loggable? decorated = this;
         while (decorated != null) {
-            context.append_instance(decorated);
+            context.append_loggable(decorated);
             decorated = decorated.loggable_parent;
         }
 
