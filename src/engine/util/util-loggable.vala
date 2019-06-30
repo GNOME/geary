@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -88,7 +88,7 @@ public interface Geary.Loggable : GLib.Object {
         }
 
         public inline void append_loggable(Loggable value) {
-            this.append(value.get_type().name(), value);
+            this.append("GEARY_LOGGABLE", value);
         }
 
         public GLib.LogField[] to_array() {

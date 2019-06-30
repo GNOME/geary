@@ -106,41 +106,86 @@ public class Record {
 
 
     /** Returns the GLib domain of the log message. */
-    public string domain { get; private set; }
+    public string? domain { get; private set; }
 
     /** Returns the next log record in the buffer, if any. */
     public Record? next { get; internal set; default = null; }
 
-    private LogLevelFlags flags;
+    private Flag? flags;
+    private string? message;
+    private GLib.LogLevelFlags levels;
     private int64 timestamp;
     private double elapsed;
-    private string message;
+    private Loggable[] loggables;
 
 
-    internal Record(string domain,
-                    LogLevelFlags flags,
+    internal Record(GLib.LogField[] fields,
+                    GLib.LogLevelFlags levels,
                     int64 timestamp,
-                    double elapsed,
-                    string message) {
-        this.domain = domain;
-        this.flags = flags;
+                    double elapsed) {
+        this.levels = levels;
         this.timestamp = timestamp;
         this.elapsed = elapsed;
-        this.message = message;
+        this.loggables = new Loggable[fields.length];
+
+        // Since GLib.LogField only retains a weak ref to its value,
+        // find and ref any values we wish to keep around.
+        int loggable_count = 0;
+        foreach (GLib.LogField field in fields) {
+            switch (field.key) {
+            case "GLIB_DOMAIN":
+                this.domain = field_to_string(field);
+                break;
+
+            case "MESSAGE":
+                this.message = field_to_string(field);
+                break;
+
+            case "GEARY_FLAGS":
+                this.flags = (Flag) field.value;
+                break;
+
+            case "GEARY_LOGGABLE":
+                this.loggables[loggable_count++] = (Loggable) field.value;
+                break;
+            }
+        }
+
+        this.loggables.length = loggable_count;
     }
 
     /** Returns a formatted string representation of this record. */
     public string format() {
+        string domain = this.domain ?? "[no domain]";
+        Flag flags = this.flags ?? Flag.NONE;
+        string message = this.message ?? "[no message]";
         GLib.DateTime time = new GLib.DateTime.from_unix_utc(
             this.timestamp / 1000 / 1000
         ).to_local();
-        return "%s %02d:%02d:%02d %lf %s: %s".printf(
-            to_prefix(this.flags),
+
+        GLib.StringBuilder str = new GLib.StringBuilder();
+        str.printf(
+            "%s %02d:%02d:%02d %lf %s",
+            to_prefix(levels),
             time.get_hour(), time.get_minute(), time.get_second(),
             this.elapsed,
-            this.domain ?? "default",
-            this.message
+            domain
         );
+
+        if (flags != NONE && flags != ALL) {
+            str.printf("[%s]: ", flags.to_string());
+        } else {
+            str.append(": ");
+        }
+
+        foreach (Loggable loggable in this.loggables) {
+            str.append(loggable.to_string());
+            str.append_c(' ');
+        }
+
+        str.append(message);
+
+        return str.str;
     }
 
 }
@@ -273,15 +318,14 @@ public void log_to(FileStream? stream) {
     Logging.stream = stream;
 }
 
-public void default_handler(string? domain,
-                            LogLevelFlags log_levels,
-                            string message) {
+
+public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
+                                               GLib.LogField[] fields) {
     Record record = new Record(
-        domain,
-        log_levels,
+        fields,
+        levels,
         GLib.get_real_time(),
-        entry_timer.elapsed(),
-        message
+        entry_timer.elapsed()
     );
     entry_timer.start();
 
@@ -306,12 +350,12 @@ public void default_handler(string? domain,
         listener(record);
     }
 
-    // Print to the output stream if needed
+    // Print a log message to the stream
     unowned FileStream? out = stream;
     if (out != null ||
-        ((LogLevelFlags.LEVEL_WARNING & log_levels) > 0) ||
-        ((LogLevelFlags.LEVEL_CRITICAL & log_levels) > 0)  ||
-        ((LogLevelFlags.LEVEL_ERROR & log_levels) > 0)) {
+        LogLevelFlags.LEVEL_WARNING in levels ||
+        LogLevelFlags.LEVEL_CRITICAL in levels  ||
+        LogLevelFlags.LEVEL_ERROR in levels) {
 
         if (out == null) {
             out = GLib.stderr;
@@ -319,85 +363,6 @@ public void default_handler(string? domain,
 
         out.puts(record.format());
         out.putc('\n');
-    }
-}
-
-public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags log_levels,
-                                               GLib.LogField[] fields) {
-    unowned FileStream? out = stream;
-    if (out != null ||
-        ((LogLevelFlags.LEVEL_WARNING & log_levels) > 0) ||
-        ((LogLevelFlags.LEVEL_CRITICAL & log_levels) > 0)  ||
-        ((LogLevelFlags.LEVEL_ERROR & log_levels) > 0)) {
-
-        if (out == null) {
-            out = GLib.stderr;
-        }
-
-        string domain = "default";
-        Flag flag = Flag.NONE;
-        string message = "[no message]";
-
-        string[] strings = new string[fields.length];
-        uint string_count = 0;
-
-        foreach (GLib.LogField field in fields) {
-            switch (field.key.ascii_up()) {
-            case "GLIB_DOMAIN":
-                if (field.length < 0) {
-                    domain = (string) field.value;
-                }
-                break;
-            case "MESSAGE":
-                if (field.length < 0) {
-                    message = (string) field.value;
-                }
-                break;
-            case "PRIORITY":
-                // noop, we get it from the args
-                break;
-            case "GEARY_FLAGS":
-                flag = (Flag) field.value;
-                break;
-            default:
-                string? string_value = null;
-                if (field.length < 0) {
-                    string_value = (string) field.value;
-                } else {
-                    Loggable? loggable = field.value as Loggable;
-                    if (loggable != null) {
-                        string_value = loggable.to_string();
-                    }
-                }
-                if (string_value != null) {
-                    strings[string_count++] = string_value;
-                }
-                break;
-            }
-        }
-
-        GLib.Time tm = GLib.Time.local(time_t());
-        out.printf(
-            "%s %02d:%02d:%02d %lf %s",
-            to_prefix(log_levels),
-            tm.hour, tm.minute, tm.second,
-            entry_timer.elapsed(),
-            domain
-        );
-
-        if (flag != ALL && flag != NONE) {
-            out.printf("[%s]: ", flag.to_string());
-        } else {
-            out.puts(": ");
-        }
-
-        for (int i = 0; i < string_count; i++) {
-            out.puts(strings[i]);
-            out.putc(' ');
-        }
-        out.puts(message);
-        out.putc('\n');
-        entry_timer.start();
     }
 
     return GLib.LogWriterOutput.HANDLED;
@@ -431,6 +396,16 @@ private inline string to_prefix(LogLevelFlags level) {
         return "![???]";
 
     }
+}
+
+private inline string? field_to_string(GLib.LogField field) {
+    string? value = null;
+    if (field.length < 0) {
+        value = (string) field.value;
+    } else if (field.length > 0) {
+        value = ((string) field.value).substring(0, field.length);
+    }
+    return value;
 }
 
 }
