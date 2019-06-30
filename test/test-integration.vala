@@ -36,7 +36,7 @@ int main(string[] args) {
     Geary.HTML.init();
     Geary.Logging.init();
     Geary.Logging.log_to(stderr);
-    GLib.Log.set_default_handler(Geary.Logging.default_handler);
+    GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
 
     Integration.Configuration config = load_config(args);
 

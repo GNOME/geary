@@ -22,7 +22,7 @@
  * A list of all Accounts may be retrieved from the {@link Engine} singleton.
  */
 
-public abstract class Geary.Account : BaseObject {
+public abstract class Geary.Account : BaseObject, Loggable {
 
 
     /** Number of times to attempt re-authentication. */
@@ -137,8 +137,6 @@ public abstract class Geary.Account : BaseObject {
     public Geary.ProgressMonitor opening_monitor { get; protected set; }
     public Geary.ProgressMonitor sending_monitor { get; protected set; }
 
-    protected string id { get; private set; }
-
 
     public signal void opened();
 
@@ -250,6 +248,14 @@ public abstract class Geary.Account : BaseObject {
     public signal void email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
 
+    /** {@inheritDoc} */
+    public Logging.Flag loggable_flags {
+        get; protected set; default = Logging.Flag.ALL;
+    }
+
+    /** {@inheritDoc} */
+    public Loggable? loggable_parent { get { return null; } }
+
 
     protected Account(AccountInformation information,
                       ClientService incoming,
@@ -257,9 +263,6 @@ public abstract class Geary.Account : BaseObject {
         this.information = information;
         this.incoming = incoming;
         this.outgoing = outgoing;
-        this.id = "%s[%s]".printf(
-            information.id, information.service_provider.to_value()
-        );
 
         incoming.notify["current-status"].connect(
             on_service_status_notify
@@ -484,11 +487,12 @@ public abstract class Geary.Account : BaseObject {
     public abstract async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error;
 
-    /**
-     * Used only for debugging.  Should not be used for user-visible strings.
-     */
+    /** {@inheritDoc} */
     public virtual string to_string() {
-        return this.id;
+        return "%s(%s)".printf(
+            this.get_type().name(),
+            this.information.id
+        );
     }
 
     /** Fires a {@link opened} signal. */

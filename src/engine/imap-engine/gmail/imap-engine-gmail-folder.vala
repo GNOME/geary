@@ -68,7 +68,7 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
         // messages are removed from all labels)
         Gee.Set<Imap.UID>? uids = yield folder.copy_email_uids_async(email_ids, trash.path, cancellable);
         if (uids == null || uids.size == 0) {
-            debug("%s: Can't true-remove %d emails, no COPYUIDs returned", folder.to_string(),
+            GLib.debug("%s: Can't true-remove %d emails, no COPYUIDs returned", folder.to_string(),
                 email_ids.size);
 
             return;
@@ -87,7 +87,7 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
             yield account.release_folder_session(imap_trash);
         }
 
-        debug("%s: Successfully true-removed %d/%d emails", folder.to_string(), uids.size,
+        GLib.debug("%s: Successfully true-removed %d/%d emails", folder.to_string(), uids.size,
             email_ids.size);
     }
 }

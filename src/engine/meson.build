@@ -307,6 +307,7 @@ geary_engine_vala_sources = files(
   'util/util-inet.vala',
   'util/util-iterable.vala',
   'util/util-js.vala',
+  'util/util-loggable.vala',
   'util/util-numeric.vala',
   'util/util-object.vala',
   'util/util-reference-semantics.vala',

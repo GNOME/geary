@@ -389,6 +389,7 @@ src/engine/util/util-imap-utf7.vala
 src/engine/util/util-inet.vala
 src/engine/util/util-iterable.vala
 src/engine/util/util-js.vala
+src/engine/util/util-loggable.vala
 src/engine/util/util-numeric.vala
 src/engine/util/util-object.vala
 src/engine/util/util-reference-semantics.vala
