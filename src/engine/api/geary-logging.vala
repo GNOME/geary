@@ -138,9 +138,6 @@ public class Record {
     /** Time at which the log message was generated. */
     public int64 timestamp;
 
-    /** Time since the last message was generated. */
-    public double elapsed;
-
     /** The next log record in the buffer, if any. */
     public Record? next { get; internal set; default = null; }
 
@@ -151,11 +148,9 @@ public class Record {
 
     internal Record(GLib.LogField[] fields,
                     GLib.LogLevelFlags levels,
-                    int64 timestamp,
-                    double elapsed) {
+                    int64 timestamp) {
         this.levels = levels;
         this.timestamp = timestamp;
-        this.elapsed = elapsed;
         this.old_log_api = (
             fields.length > 0 &&
             fields[0].key == "GLIB_OLD_LOG_API"
@@ -247,16 +242,20 @@ public class Record {
         string domain = this.domain ?? "[no domain]";
         Flag flags = this.flags ?? Flag.NONE;
         string message = this.message ?? "[no message]";
+        double float_secs = this.timestamp / 1000.0 / 1000.0;
+        double floor_secs = GLib.Math.floor(float_secs);
+        int ms = (int) GLib.Math.round((float_secs - floor_secs) * 1000.0);
         GLib.DateTime time = new GLib.DateTime.from_unix_utc(
-            this.timestamp / 1000 / 1000
+            (int64) float_secs
         ).to_local();
-
         GLib.StringBuilder str = new GLib.StringBuilder();
         str.printf(
-            "%s %02d:%02d:%02d %lf %s",
+            "%s %02d:%02d:%02d.%04d %s",
             to_prefix(levels),
-            time.get_hour(), time.get_minute(), time.get_second(),
-            this.elapsed,
+            time.get_hour(),
+            time.get_minute(),
+            time.get_second(),
+            ms,
             domain
         );
 
@@ -324,7 +323,6 @@ public delegate void LogRecord(Record record);
 private int init_count = 0;
 private Flag logging_flags = Flag.NONE;
 private unowned FileStream? stream = null;
-private Timer? entry_timer = null;
 
 // Can't be nullable. See https://gitlab.gnome.org/GNOME/vala/issues/812
 private GLib.Mutex record_lock;
@@ -345,7 +343,6 @@ private unowned LogRecord? listener = null;
 public void init() {
     if (init_count++ != 0)
         return;
-    entry_timer = new Timer();
     record_lock = GLib.Mutex();
     max_log_length = DEFAULT_MAX_LOG_BUFFER_LENGTH;
 }
@@ -473,15 +470,8 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
     // function at the same time
     record_lock.lock();
 
-    Record record = new Record(
-        fields,
-        levels,
-        GLib.get_real_time(),
-        entry_timer.elapsed()
-    );
-    entry_timer.start();
-
     // Update the record linked list
+    Record record = new Record(fields, levels, GLib.get_real_time());
     if (first_record == null) {
         first_record = record;
         last_record = record;
