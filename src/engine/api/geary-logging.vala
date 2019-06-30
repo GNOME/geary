@@ -248,7 +248,7 @@ public class Record {
         GLib.DateTime time = new GLib.DateTime.from_unix_utc(
             (int64) float_secs
         ).to_local();
-        GLib.StringBuilder str = new GLib.StringBuilder();
+        GLib.StringBuilder str = new GLib.StringBuilder.sized(128);
         str.printf(
             "%s %02d:%02d:%02d.%04d %s",
             to_prefix(levels),
