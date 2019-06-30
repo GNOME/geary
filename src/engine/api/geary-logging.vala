@@ -105,18 +105,48 @@ public enum Flag {
 public class Record {
 
 
-    /** Returns the GLib domain of the log message. */
-    public string? domain { get; private set; }
+    /** The GLib domain of the log message, if any. */
+    public string? domain { get; private set; default = null; }
 
-    /** Returns the next log record in the buffer, if any. */
+    /** Account from which the record originated, if any. */
+    public Account? account { get; private set; default = null; }
+
+    /** Client service from which the record originated, if any. */
+    public ClientService? service { get; private set; default = null; }
+
+    /** Folder from which the record originated, if any. */
+    public Folder? folder { get; private set; default = null; }
+
+    /** The logged flags, if any. */
+    public Flag? flags = null;
+
+    /** The logged message, if any. */
+    public string? message = null;
+
+    /** The source filename, if any. */
+    public string? source_filename = null;
+
+    /** The source filename, if any. */
+    public string? source_line_number = null;
+
+    /** The source function, if any. */
+    public string? source_function = null;
+
+    /** The logged level, if any. */
+    public GLib.LogLevelFlags levels;
+
+    /** Time at which the log message was generated. */
+    public int64 timestamp;
+
+    /** Time since the last message was generated. */
+    public double elapsed;
+
+    /** The next log record in the buffer, if any. */
     public Record? next { get; internal set; default = null; }
 
-    private Flag? flags;
-    private string? message;
-    private GLib.LogLevelFlags levels;
-    private int64 timestamp;
-    private double elapsed;
     private Loggable[] loggables;
+    private bool filled = false;
+    private bool old_log_api = false;
 
 
     internal Record(GLib.LogField[] fields,
@@ -126,13 +156,25 @@ public class Record {
         this.levels = levels;
         this.timestamp = timestamp;
         this.elapsed = elapsed;
-        this.loggables = new Loggable[fields.length];
+        this.old_log_api = (
+            fields.length > 0 &&
+            fields[0].key == "GLIB_OLD_LOG_API"
+        );
 
         // Since GLib.LogField only retains a weak ref to its value,
         // find and ref any values we wish to keep around.
+        this.loggables = new Loggable[fields.length];
         int loggable_count = 0;
         foreach (GLib.LogField field in fields) {
             switch (field.key) {
+            case "GEARY_LOGGABLE":
+                this.loggables[loggable_count++] = (Loggable) field.value;
+                break;
+
+            case "GEARY_FLAGS":
+                this.flags = (Flag) field.value;
+                break;
+
             case "GLIB_DOMAIN":
                 this.domain = field_to_string(field);
                 break;
@@ -141,12 +183,16 @@ public class Record {
                 this.message = field_to_string(field);
                 break;
 
-            case "GEARY_FLAGS":
-                this.flags = (Flag) field.value;
+            case "CODE_FILE":
+                this.source_filename = field_to_string(field);
                 break;
 
-            case "GEARY_LOGGABLE":
-                this.loggables[loggable_count++] = (Loggable) field.value;
+            case "CODE_LINE":
+                this.source_line_number = field_to_string(field);
+                break;
+
+            case "CODE_FUNC":
+                this.source_function = field_to_string(field);
                 break;
             }
         }
@@ -154,8 +200,50 @@ public class Record {
         this.loggables.length = loggable_count;
     }
 
+    /** Returns the record's loggables that aren't well-known. */
+    public Loggable[] get_other_loggables() {
+        fill_well_known_loggables();
+
+        Loggable[] copy = new Loggable[this.loggables.length];
+        int count = 0;
+        foreach (Loggable loggable in this.loggables) {
+            if (loggable != this.account &&
+                loggable != this.service &&
+                loggable != this.folder) {
+                copy[count++] = loggable;
+            }
+        }
+        copy.length = count;
+        return copy;
+    }
+
+    /**
+     * Sets the well-known loggable properties.
+     *
+     * Call this before trying to access {@link account}, {@link
+     * folder} and {@link service}. Determining these can be
+     * computationally complex and hence is not done by default.
+     */
+    public void fill_well_known_loggables() {
+        if (!this.filled) {
+            foreach (Loggable loggable in this.loggables) {
+                GLib.Type type = loggable.get_type();
+                if (type.is_a(typeof(Account))) {
+                    this.account = (Account) loggable;
+                } else if (type.is_a(typeof(ClientService))) {
+                    this.service = (ClientService) loggable;
+                } else if (type.is_a(typeof(Folder))) {
+                    this.folder = (Folder) loggable;
+                }
+            }
+            this.filled = true;
+        }
+    }
+
     /** Returns a formatted string representation of this record. */
     public string format() {
+        fill_well_known_loggables();
+
         string domain = this.domain ?? "[no domain]";
         Flag flags = this.flags ?? Flag.NONE;
         string message = this.message ?? "[no message]";
@@ -178,12 +266,52 @@ public class Record {
             str.append(": ");
         }
 
-        foreach (Loggable loggable in this.loggables) {
+        // Use a compact format for well known ojects
+        if (this.account != null) {
+            str.append(this.account.information.id);
+            str.append_c('[');
+            str.append(this.account.information.service_provider.to_value());
+            if (this.service != null) {
+                str.append_c(':');
+                str.append(this.service.configuration.protocol.to_value());
+            }
+            str.append_c(']');
+            if (this.folder == null) {
+                str.append(": ");
+            }
+        } else if (this.service != null) {
+            str.append(this.service.configuration.protocol.to_value());
+            str.append(": ");
+        }
+        if (this.folder != null) {
+            str.append(this.folder.path.to_string());
+            str.append(": ");
+        }
+
+        foreach (Loggable loggable in get_other_loggables()) {
             str.append(loggable.to_string());
             str.append_c(' ');
         }
 
         str.append(message);
+
+
+        // XXX Don't append source details for the moment because of
+        // https://gitlab.gnome.org/GNOME/vala/issues/815
+        bool disabled = true;
+        if (!disabled && !this.old_log_api && this.source_filename != null) {
+            str.append(" [");
+            str.append(GLib.Path.get_basename(this.source_filename));
+            if (this.source_line_number != null) {
+                str.append_c(':');
+                str.append(this.source_line_number);
+            }
+            if (this.source_function != null) {
+                str.append_c(':');
+                str.append(this.source_function.to_string());
+            }
+            str.append("]");
+        }
 
         return str.str;
     }
