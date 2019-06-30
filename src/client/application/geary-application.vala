@@ -661,6 +661,8 @@ public class GearyApplication : Gtk.Application {
         }
 
         quit();
+
+        Geary.Logging.clear();
         Util.Date.terminate();
     }
 

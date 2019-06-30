@@ -351,6 +351,23 @@ public void init() {
 }
 
 /**
+ * Clears all log records.
+ *
+ * Since log records hold references to Geary engine objects, it may
+ * be desirable to clear the records prior to shutdown so that the
+ * objects can be destroyed.
+ */
+public void clear() {
+    record_lock.lock();
+
+    first_record = null;
+    last_record = null;
+    log_length = 0;
+    
+    record_lock.unlock();
+}
+
+/**
  * Replaces the current logging flags with flags.  Use Geary.Logging.Flag.NONE to clear all
  * logging flags.
  */
