@@ -123,9 +123,17 @@ public class MainWindowInfoBar : Gtk.InfoBar {
     }
 
     private void show_details() {
+        Geary.ServiceProblemReport? service_report =
+            this.report as Geary.ServiceProblemReport;
+        Geary.AccountProblemReport? account_report =
+            this.report as Geary.AccountProblemReport;
+
         Dialogs.ProblemDetailsDialog dialog =
-            new Dialogs.ProblemDetailsDialog.for_problem_report(
-                get_toplevel() as Gtk.Window, this.report
+            new Dialogs.ProblemDetailsDialog(
+                get_toplevel() as MainWindow,
+                this.report.error,
+                account_report != null ? account_report.account : null,
+                service_report != null ? service_report.service : null
         );
         dialog.run();
         dialog.destroy();

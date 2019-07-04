@@ -9,18 +9,46 @@
  * Displays technical details when a problem has been reported.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/problem-details-dialog.ui")]
-public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
+public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
 
+
+    private const string ACTION_CLOSE = "problem-details-close";
+    private const string ACTION_SEARCH_TOGGLE = "toggle-search";
+    private const string ACTION_SEARCH_ACTIVATE = "activate-search";
+
+    private const ActionEntry[] action_entries = {
+        {GearyApplication.ACTION_CLOSE, on_close },
+        {GearyApplication.ACTION_COPY,  on_copy_clicked },
+        {ACTION_CLOSE,                  on_close },
+        {ACTION_SEARCH_TOGGLE,          on_logs_search_toggled, null, "false" },
+        {ACTION_SEARCH_ACTIVATE,        on_logs_search_activated },
+    };
+
+    public static void add_window_accelerators(GearyApplication app) {
+        app.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
+        app.add_window_accelerators(ACTION_SEARCH_ACTIVATE, { "<Ctrl>F" } );
+    }
+
+
+    [GtkChild]
+    private Gtk.Stack stack;
+
+    [GtkChild]
+    private Gtk.Button copy_button;
+
+    [GtkChild]
+    private Gtk.ToggleButton search_button;
+
+    private Components.InspectorErrorView error_pane;
+    private Components.InspectorLogView log_pane;
+    private Components.InspectorSystemView system_pane;
 
     private Geary.ErrorContext error;
     private Geary.AccountInformation? account;
     private Geary.ServiceInformation? service;
 
-    [GtkChild]
-    private Gtk.TextView detail_text;
 
-
-    public ProblemDetailsDialog(Gtk.Window parent,
+    public ProblemDetailsDialog(MainWindow parent,
                                 Geary.ErrorContext error,
                                 Geary.AccountInformation? account,
                                 Geary.ServiceInformation? service) {
@@ -28,84 +56,191 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
             transient_for: parent,
             use_header_bar: 1
         );
-        set_default_size(600, -1);
+        set_default_size(600, 400);
 
         this.error = error;
         this.account = account;
         this.service = service;
 
-        this.detail_text.buffer.text = format_details();
-    }
+        GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
+        actions.add_action_entries(ProblemDetailsDialog.action_entries, this);
+        insert_action_group("win", actions);
 
-    public ProblemDetailsDialog.for_problem_report(Gtk.Window parent,
-                                                   Geary.ProblemReport report) {
-        Geary.ServiceProblemReport? service_report =
-            report as Geary.ServiceProblemReport;
-        Geary.AccountProblemReport? account_report =
-            report as Geary.AccountProblemReport;
-        this(
-            parent,
-            report.error,
-            account_report != null ? account_report.account : null,
-            service_report != null ? service_report.service : null
+        this.error_pane = new Components.InspectorErrorView(
+            error, account, service
         );
+
+        this.log_pane = new Components.InspectorLogView(
+            parent.application.config, null
+        );
+        this.log_pane.load();
+        this.log_pane.record_selection_changed.connect(
+            on_logs_selection_changed
+        );
+
+        this.system_pane = new Components.InspectorSystemView(
+            parent.application
+        );
+
+        /// Translators: Title for problem report dialog error
+        /// information pane
+        this.stack.add_titled(this.error_pane, "error_pane", _("Details"));
+        /// Translators: Title for problem report dialog logs pane
+        this.stack.add_titled(this.log_pane, "log_pane", _("Logs"));
+        /// Translators: Title for problem report system information
+        /// pane
+        this.stack.add_titled(this.system_pane, "system_pane", _("System"));
     }
 
-    private string format_details() {
-        StringBuilder details = new StringBuilder();
+    public override bool key_press_event(Gdk.EventKey event) {
+        bool ret = Gdk.EVENT_PROPAGATE;
 
-        Gtk.ApplicationWindow? parent =
-            this.get_toplevel() as Gtk.ApplicationWindow;
-        GearyApplication? app = (parent != null)
-            ? parent.application as GearyApplication
-            : null;
-        if (app != null) {
-            foreach (GearyApplication.RuntimeDetail? detail
-                     in app.get_runtime_information()) {
-                details.append_printf("%s: %s", detail.name, detail.value);
+        if (this.log_pane.search_mode_enabled &&
+            event.keyval == Gdk.Key.Escape) {
+            // Manually deactivate search so the button stays in sync
+            this.search_button.set_active(false);
+            ret = Gdk.EVENT_STOP;
+        }
+
+        if (ret == Gdk.EVENT_PROPAGATE &&
+            this.log_pane.search_mode_enabled) {
+            // Ensure <Space> and others are passed to the search
+            // entry before getting used as an accelerator.
+            ret = this.log_pane.handle_key_press(event);
+        }
+
+        if (ret == Gdk.EVENT_PROPAGATE) {
+            ret = base.key_press_event(event);
+        }
+
+        if (ret == Gdk.EVENT_PROPAGATE &&
+            !this.log_pane.search_mode_enabled) {
+            // Nothing has handled the event yet, and search is not
+            // active, so see if we want to activate it now.
+            ret = this.log_pane.handle_key_press(event);
+            if (ret == Gdk.EVENT_STOP) {
+                this.search_button.set_active(true);
             }
         }
-        if (this.account != null) {
-            details.append_printf(
-                "Account id: %s\n",
-                this.account.id
-            );
-            details.append_printf(
-                "Account provider: %s\n",
-                this.account.service_provider.to_string()
-            );
-        }
-        if (this.service != null) {
-            details.append_printf(
-                "Service type: %s\n",
-                this.service.protocol.to_string()
-            );
-            details.append_printf(
-                "Service host: %s\n",
-                this.service.host
-            );
-        }
-        if (this.error == null) {
-            details.append("No error reported");
-        } else {
-            details.append_printf(
-                "Error type: %s\n", this.error.format_error_type()
-            );
-            details.append_printf(
-                "Message: %s\n", this.error.thrown.message
-            );
-            details.append("Back trace:\n");
-            foreach (Geary.ErrorContext.StackFrame frame in
-                     this.error.backtrace) {
-                details.append_printf(" - %s\n", frame.to_string());
-            }
-        }
-        return details.str;
+
+        return ret;
+    }
+
+    private async void save(string path,
+                            GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        GLib.File dest = GLib.File.new_for_path(path);
+        GLib.FileIOStream dest_io = yield dest.replace_readwrite_async(
+            null,
+            false,
+            GLib.FileCreateFlags.NONE,
+            GLib.Priority.DEFAULT,
+            cancellable
+        );
+        GLib.DataOutputStream out = new GLib.DataOutputStream(
+            new GLib.BufferedOutputStream(dest_io.get_output_stream())
+        );
+
+        this.error_pane.save(@out, cancellable);
+        out.put_byte('\n');
+        out.put_byte('\n');
+        this.system_pane.save(@out, cancellable);
+        out.put_byte('\n');
+        out.put_byte('\n');
+        this.log_pane.save(@out, true, cancellable);
+
+        yield out.close_async();
+        yield dest_io.close_async();
+    }
+
+    private void update_ui() {
+        bool logs_visible = this.stack.visible_child == this.log_pane;
+        uint logs_selected = this.log_pane.count_selected_records();
+        this.copy_button.set_sensitive(!logs_visible || logs_selected > 0);
+        this.search_button.set_visible(logs_visible);
     }
 
     [GtkCallback]
+    private void on_visible_child_changed() {
+        update_ui();
+    }
+
     private void on_copy_clicked() {
-        get_clipboard(Gdk.SELECTION_CLIPBOARD).set_text(format_details(), -1);
+        GLib.MemoryOutputStream bytes = new GLib.MemoryOutputStream.resizable();
+        GLib.DataOutputStream out = new GLib.DataOutputStream(bytes);
+        try {
+            if (this.stack.visible_child == this.error_pane) {
+                this.error_pane.save(@out, null);
+            } else if (this.stack.visible_child == this.log_pane) {
+                this.log_pane.save(@out, false, null);
+            } else if (this.stack.visible_child == this.system_pane) {
+                this.system_pane.save(@out, null);
+            }
+
+            // Ensure the data is a valid string
+            out.put_byte(0, null);
+        } catch (GLib.Error err) {
+            warning(
+                "Error saving inspector data for clipboard: %s",
+                err.message
+            );
+        }
+
+        string clipboard_value = (string) bytes.get_data();
+        if (!Geary.String.is_empty(clipboard_value)) {
+            get_clipboard(Gdk.SELECTION_CLIPBOARD).set_text(clipboard_value, -1);
+        }
+    }
+
+    [GtkCallback]
+    private void on_save_as_clicked() {
+        Gtk.FileChooserNative chooser = new Gtk.FileChooserNative(
+            _("Save As"),
+            this,
+            Gtk.FileChooserAction.SAVE,
+            _("Save As"),
+            _("Cancel")
+        );
+        chooser.set_current_name(
+            new GLib.DateTime.now_local().format(
+                "Geary Problem Report - %F %T.txt"
+            )
+        );
+
+        if (chooser.run() == Gtk.ResponseType.ACCEPT) {
+            this.save.begin(
+                chooser.get_filename(),
+                null,
+                (obj, res) => {
+                    try {
+                        this.save.end(res);
+                    } catch (GLib.Error err) {
+                        warning(
+                            "Failed to save problem report data: %s", err.message
+                        );
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_logs_selection_changed() {
+        update_ui();
+    }
+
+    private void on_logs_search_toggled(GLib.SimpleAction action,
+                                        GLib.Variant? param) {
+        bool enabled = !((bool) action.state);
+        this.log_pane.search_mode_enabled = enabled;
+        action.set_state(enabled);
+    }
+
+    private void on_logs_search_activated() {
+        this.search_button.set_active(true);
+    }
+
+    private void on_close() {
+        destroy();
     }
 
 }

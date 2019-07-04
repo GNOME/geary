@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.1 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <requires lib="libhandy" version="0.0"/>
+  <template class="ComponentsInspectorErrorView" parent="GtkGrid">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="HdyColumn">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">16</property>
+        <property name="margin_right">16</property>
+        <property name="margin_top">32</property>
+        <property name="margin_bottom">32</property>
+        <property name="maximum_width">500</property>
+        <property name="linear_growth_width">1</property>
+        <child>
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="row_spacing">6</property>
+            <property name="column_spacing">12</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">start</property>
+                <property name="valign">baseline</property>
+                <property name="margin_bottom">12</property>
+                <property name="hexpand">True</property>
+                <property name="label" translatable="yes">If the problem is serious or persists, please copy and send these details to the &lt;a href="https://wiki.gnome.org/Apps/Geary/Contact"&gt;mailing list&lt;/a&gt; or file a &lt;a href="https://wiki.gnome.org/Apps/Geary/ReportingABug"&gt;new bug report&lt;/a&gt;.</property>
+                <property name="use_markup">True</property>
+                <property name="wrap">True</property>
+                <property name="xalign">0</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="valign">baseline</property>
+                <property name="label" translatable="yes">Details:</property>
+                <property name="track_visited_links">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTextView" id="problem_text">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="editable">False</property>
+                    <property name="wrap_mode">none</property>
+                    <property name="left_margin">6</property>
+                    <property name="right_margin">6</property>
+                    <property name="top_margin">6</property>
+                    <property name="bottom_margin">6</property>
+                    <property name="cursor_visible">False</property>
+                    <property name="monospace">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">2</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+  </template>
+</interface>
