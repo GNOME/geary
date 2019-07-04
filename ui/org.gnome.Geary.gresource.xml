@@ -11,6 +11,8 @@
     <file compressed="true">client-web-view.js</file>
     <file compressed="true">client-web-view-allow-remote-images.js</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-inspector-log-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-inspector-system-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-placeholder-pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-headerbar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-link-popover.ui</file>
