@@ -33,61 +33,64 @@ public class MainWindowInfoBar : Gtk.InfoBar {
         string title = "";
         string descr = "";
         string? retry = null;
-        bool show_generic = false;
-        bool show_close = false;
 
-        if (report is Geary.ServiceProblemReport) {
-            Geary.ServiceProblemReport service_report = (Geary.ServiceProblemReport) report;
-            string account = service_report.account.display_name;
-
-            if (service_report.service.protocol == Geary.Protocol.IMAP) {
-                // Translators: Info bar title for an incoming account
-                // problem. String substitution is the account name
-                title = _("A problem occurred checking email for %s").printf(account);
-                // Translators: Info bar sub-title for an incoming account
-                // problem.
-                descr = _("Email will not be received until re-connected");
-                // Translators: Tooltip label for Retry button
-                retry = _("Try reconnecting");
-
-            } else if (service_report.service.protocol == Geary.Protocol.SMTP) {
-                // Translators: Info bar title for an outgoing account
-                // problem. String substitution is the account name
-                title = _("A problem occurred sending email for %s").printf(account);
-                // Translators: Info bar sub-title for an outgoing
-                // account problem.
-                descr = _("Email will not be sent until re-connected");
-                // Translators: Tooltip label for Retry button
-                retry = _("Retry sending queued messages");
-
-            }
-        } else if (report is Geary.AccountProblemReport) {
-            Geary.AccountProblemReport account_report = (Geary.AccountProblemReport) report;
-            string account = account_report.account.display_name;
+        if (report is Geary.AccountProblemReport) {
+            Geary.AccountProblemReport account_report =
+                (Geary.AccountProblemReport) report;
+            string account_name = account_report.account.display_name;
 
             // Translators: Info bar title for a generic account
-            // problem. String substitution is the account name
-            title = _("A problem occurred with account %s").printf(account);
-            // Translators: Info bar sub-title for a generic account
             // problem.
-            descr = _("Something went wrong, please file a bug report if the problem persists");
+            title = _("Account problem");
+            // Translators: Info bar sub-title for a generic account
+            // problem. String substitution is the account name.
+            descr = _(
+                "Geary has encountered a problem with %s."
+            ).printf(account_name);
 
+            if (report is Geary.ServiceProblemReport) {
+                Geary.ServiceProblemReport service_report =
+                    (Geary.ServiceProblemReport) report;
+
+                switch (service_report.service.protocol) {
+                case IMAP:
+                    // Translators: Info bar sub-title for a generic
+                    // account problem. String substitution is the
+                    // account name.
+                    descr = _(
+                        "Geary encountered a problem checking mail for %s."
+                    ).printf(account_name);
+
+                    // Translators: Tooltip label for Retry button
+                    retry = _("Try reconnecting");
+                    break;
+
+                case SMTP:
+                    // Translators: Info bar title for an outgoing
+                    // account problem. String substitution is the
+                    // account name
+                    descr = _(
+                        "Geary encountered a problem sending email for %s."
+                    ).printf(account_name);
+
+                    // Translators: Tooltip label for Retry button
+                    retry = _("Retry sending queued messages");
+                    break;
+                }
+            }
         } else {
-            debug("Un-handled generic problem report: %s".printf(report.to_string()));
-            show_generic = true;
-        }
-
-        if (show_generic) {
             // Translators: Info bar title for a generic application
             // problem.
             title = _("Geary has encountered a problem");
             // Translators: Info bar sub-title for a generic
             // application problem.
-            descr = _("Please check the technical details and report the problem if it persists.");
-            show_close = true;
+            descr = _(
+                "Please report the details if it persists."
+            );
         }
 
-        this(type, title, descr, show_close);
+        // Only show a close button if retrying not possible
+        this(type, title, descr, (retry == null));
         this.report = report;
 
         if (this.report.error != null) {
@@ -123,17 +126,10 @@ public class MainWindowInfoBar : Gtk.InfoBar {
     }
 
     private void show_details() {
-        Geary.ServiceProblemReport? service_report =
-            this.report as Geary.ServiceProblemReport;
-        Geary.AccountProblemReport? account_report =
-            this.report as Geary.AccountProblemReport;
-
         Dialogs.ProblemDetailsDialog dialog =
             new Dialogs.ProblemDetailsDialog(
                 get_toplevel() as MainWindow,
-                this.report.error,
-                account_report != null ? account_report.account : null,
-                service_report != null ? service_report.service : null
+                this.report
         );
         dialog.run();
         dialog.destroy();
