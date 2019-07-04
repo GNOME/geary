@@ -123,7 +123,9 @@ public class Components.Inspector : Gtk.ApplicationWindow {
                             GLib.Cancellable? cancellable)
         throws GLib.Error {
         GLib.File dest = GLib.File.new_for_path(path);
-        GLib.FileIOStream dest_io = yield dest.create_readwrite_async(
+        GLib.FileIOStream dest_io = yield dest.replace_readwrite_async(
+            null,
+            false,
             GLib.FileCreateFlags.NONE,
             GLib.Priority.DEFAULT,
             cancellable
