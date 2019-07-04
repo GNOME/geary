@@ -71,7 +71,7 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
         );
 
         this.log_pane = new Components.InspectorLogView(
-            parent.application.config, null
+            parent.application.config, account
         );
         this.log_pane.load();
         this.log_pane.record_selection_changed.connect(

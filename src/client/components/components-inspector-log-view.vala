@@ -66,6 +66,7 @@ public class Components.InspectorLogView : Gtk.Grid {
         );
 
         this.search_bar.connect_entry(this.search_entry);
+        this.account_filter = filter_by;
     }
 
     /** Loads log records from the logging system into the view. */
