@@ -51,6 +51,8 @@ public class Components.InspectorLogView : Gtk.Grid {
 
     private Geary.AccountInformation? account_filter = null;
 
+    private bool listener_installed = false;
+
 
     /** Emitted when the number of selected records changes. */
     public signal void record_selection_changed();
@@ -70,15 +72,18 @@ public class Components.InspectorLogView : Gtk.Grid {
     }
 
     /** Loads log records from the logging system into the view. */
-    public void load() {
-        // Install the listener then start adding the backlog
-        // (ba-doom-tish) so to avoid the race.
-        Geary.Logging.set_log_listener(this.on_log_record);
+    public void load(Geary.Logging.Record first, Geary.Logging.Record? last) {
+        if (last == null) {
+            // Install the listener then start adding the backlog
+            // (ba-doom-tish) so to avoid the race.
+            Geary.Logging.set_log_listener(this.on_log_record);
+            this.listener_installed = true;
+        }
 
         Gtk.ListStore logs_store = this.logs_store;
-        Geary.Logging.Record? logs = Geary.Logging.get_logs();
+        Geary.Logging.Record? logs = first;
         int index = 0;
-        while (logs != null) {
+        while (logs != last) {
             if (should_append(logs)) {
                 string message = logs.format();
                 Gtk.TreeIter iter;
@@ -114,7 +119,9 @@ public class Components.InspectorLogView : Gtk.Grid {
 
     /** {@inheritDoc} */
     public override void destroy() {
-        Geary.Logging.set_log_listener(null);
+        if (this.listener_installed) {
+            Geary.Logging.set_log_listener(null);
+        }
         base.destroy();
     }
 

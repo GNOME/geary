@@ -48,19 +48,21 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
     private Geary.ServiceInformation? service;
 
 
-    public ProblemDetailsDialog(MainWindow parent,
-                                Geary.ErrorContext error,
-                                Geary.AccountInformation? account,
-                                Geary.ServiceInformation? service) {
+    public ProblemDetailsDialog(MainWindow parent, Geary.ProblemReport report) {
         Object(
             transient_for: parent,
             use_header_bar: 1
         );
         set_default_size(600, 400);
 
-        this.error = error;
-        this.account = account;
-        this.service = service;
+        Geary.AccountProblemReport? account_report =
+            report as Geary.AccountProblemReport;
+        Geary.ServiceProblemReport? service_report =
+            report as Geary.ServiceProblemReport;
+
+        this.error = report.error;
+        this.account = (account_report != null) ? account_report.account : null;
+        this.service = (service_report != null) ? service_report.service : null;
 
         GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
         actions.add_action_entries(ProblemDetailsDialog.action_entries, this);
@@ -73,7 +75,7 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
         this.log_pane = new Components.InspectorLogView(
             parent.application.config, account
         );
-        this.log_pane.load();
+        this.log_pane.load(report.earliest_log, report.latest_log);
         this.log_pane.record_selection_changed.connect(
             on_logs_selection_changed
         );

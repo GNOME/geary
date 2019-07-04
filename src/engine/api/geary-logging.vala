@@ -99,8 +99,8 @@ public enum Flag {
  *
  * A record is created for each message logged, and stored in a
  * limited-length, singly-linked buffer. Applications can retrieve
- * this by calling {@link get_logs} and then {get_next}, and can be
- * notified of new records via {@link set_log_listener}.
+ * this by calling {@link get_earliest_record} and then {get_next},
+ * and can be notified of new records via {@link set_log_listener}.
  */
 public class Record {
 
@@ -447,8 +447,13 @@ public inline void logv(Flag flags,
 }
 
 /** Returns the oldest log record in the logging system's buffer. */
-public Record? get_logs() {
+public Record? get_earliest_record() {
     return first_record;
+}
+
+/** Returns the most recent log record in the logging system's buffer. */
+public Record? get_latest_record() {
+    return last_record;
 }
 
 /**

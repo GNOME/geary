@@ -69,9 +69,10 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         /// Translators: Title for Inspector system system information pane
         this.stack.add_titled(this.system_pane, "system_pane", _("System"));
 
-        // Enable updates to get the log marker, then load log records in
+        // Enable updates to get the log marker, then load log all log
+        // records in
         enable_log_updates(true);
-        this.log_pane.load();
+        this.log_pane.load(Geary.Logging.get_earliest_record(), null);
     }
 
     public override bool key_press_event(Gdk.EventKey event) {
