@@ -30,7 +30,7 @@
                 <property name="valign">baseline</property>
                 <property name="margin_bottom">12</property>
                 <property name="hexpand">True</property>
-                <property name="label" translatable="yes">If the problem is serious or persists, please copy and send these details to the &lt;a href="https://wiki.gnome.org/Apps/Geary/Contact"&gt;mailing list&lt;/a&gt; or file a &lt;a href="https://wiki.gnome.org/Apps/Geary/ReportingABug"&gt;new bug report&lt;/a&gt;.</property>
+                <property name="label" translatable="yes">If the problem is serious or persists, please save and send these details to the &lt;a href="https://wiki.gnome.org/Apps/Geary/Contact"&gt;mailing list&lt;/a&gt; or attach to a &lt;a href="https://wiki.gnome.org/Apps/Geary/ReportingABug"&gt;new bug report&lt;/a&gt;.</property>
                 <property name="use_markup">True</property>
                 <property name="wrap">True</property>
                 <property name="xalign">0</property>
