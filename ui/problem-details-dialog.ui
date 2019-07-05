@@ -39,18 +39,15 @@
         </child>
         <child>
           <object class="GtkButton" id="save_as_button">
+            <property name="label" translatable="yes" comments="Button label for saving problem report information">Save As</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for problem report button">Save logs entries and details</property>
             <signal name="clicked" handler="on_save_as_clicked" swapped="no"/>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">document-save-as-symbolic</property>
-              </object>
-            </child>
+            <style>
+              <class name="suggested-action"/>
+            </style>
           </object>
           <packing>
             <property name="pack_type">end</property>
