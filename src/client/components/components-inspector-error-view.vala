@@ -15,58 +15,73 @@ public class Components.InspectorErrorView : Gtk.Grid {
     [GtkChild]
     private Gtk.TextView problem_text;
 
-    private string details;
+    private Geary.ErrorContext error;
+    private Geary.AccountInformation? account;
+    private Geary.ServiceInformation? service;
 
 
     public InspectorErrorView(Geary.ErrorContext error,
                               Geary.AccountInformation? account,
                               Geary.ServiceInformation? service) {
-        this.details = format_problem(error, account, service);
-        this.problem_text.buffer.text = this.details;
+        this.error = error;
+        this.account = account;
+        this.service = service;
+
+        this.problem_text.buffer.text = format_problem(
+            Inspector.TextFormat.PLAIN
+        );
     }
 
-    public void save(GLib.DataOutputStream out, GLib.Cancellable? cancellable)
+    public void save(GLib.DataOutputStream out,
+                     Inspector.TextFormat format,
+                     GLib.Cancellable? cancellable)
         throws GLib.Error {
-        out.put_string(this.details, cancellable);
+            out.put_string(format_problem(format), cancellable);
     }
 
-    private string format_problem(Geary.ErrorContext error,
-                                  Geary.AccountInformation? account,
-                                  Geary.ServiceInformation? service) {
+    private string format_problem(Inspector.TextFormat format) {
+        string line_sep = format.get_line_separator();
         StringBuilder details = new StringBuilder();
-        if (account != null) {
+        if (this.account != null) {
             details.append_printf(
-                "Account id: %s\n",
-                account.id
+                "Account identifier: %s", this.account.id
             );
+            details.append(line_sep);
             details.append_printf(
-                "Account provider: %s\n",
-                account.service_provider.to_string()
+                "Account provider: %s", this.account.service_provider.to_string()
             );
+            details.append(line_sep);
         }
-        if (service != null) {
+        if (this.service != null) {
             details.append_printf(
-                "Service type: %s\n",
-                service.protocol.to_string()
+                "Service type: %s", this.service.protocol.to_string()
             );
+            details.append(line_sep);
             details.append_printf(
-                "Service host: %s\n",
-                service.host
+                "Service host: %s", this.service.host
             );
+            details.append(line_sep);
         }
-        if (error == null) {
+        if (this.error == null) {
             details.append("No error reported");
+            details.append(line_sep);
         } else {
             details.append_printf(
-                "Error type: %s\n", error.format_error_type()
+                "Error type: %s", this.error.format_error_type()
             );
+            details.append(line_sep);
             details.append_printf(
-                "Message: %s\n", error.thrown.message
+                "Message: %s", this.error.thrown.message
             );
-            details.append("Back trace:\n");
+            details.append(line_sep);
+
+            details.append_c('\n');
+            details.append("Back trace:");
+            details.append(line_sep);
             foreach (Geary.ErrorContext.StackFrame frame in
-                     error.backtrace) {
-                details.append_printf(" - %s\n", frame.to_string());
+                     this.error.backtrace) {
+                details.append_printf(" * %s", frame.to_string());
+                details.append(line_sep);
             }
         }
         return details.str;

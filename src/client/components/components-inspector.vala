@@ -12,6 +12,17 @@
 public class Components.Inspector : Gtk.ApplicationWindow {
 
 
+    /** Determines the format used when serialising inspector data. */
+    public enum TextFormat {
+        PLAIN,
+        MARKDOWN;
+
+        public string get_line_separator() {
+            return (this == MARKDOWN) ? "  \n" : "\n";
+        }
+    }
+
+
     private const string ACTION_CLOSE = "inspector-close";
     private const string ACTION_PLAY_TOGGLE = "toggle-play";
     private const string ACTION_SEARCH_TOGGLE = "toggle-search";
@@ -135,10 +146,9 @@ public class Components.Inspector : Gtk.ApplicationWindow {
             new GLib.BufferedOutputStream(dest_io.get_output_stream())
         );
 
-        this.system_pane.save(@out, cancellable);
-        out.put_byte('\n');
-        out.put_byte('\n');
-        this.log_pane.save(@out, true, cancellable);
+        this.system_pane.save(@out, TextFormat.PLAIN, cancellable);
+        out.put_string("\n");
+        this.log_pane.save(@out, TextFormat.PLAIN, true, cancellable);
 
         yield out.close_async();
         yield dest_io.close_async();
@@ -162,9 +172,9 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         GLib.DataOutputStream out = new GLib.DataOutputStream(bytes);
         try {
             if (this.stack.visible_child == this.log_pane) {
-                this.log_pane.save(@out, false, null);
+                this.log_pane.save(@out, TextFormat.MARKDOWN, false, null);
             } else if (this.stack.visible_child == this.system_pane) {
-                this.system_pane.save(@out, null);
+                this.system_pane.save(@out, TextFormat.MARKDOWN, null);
             }
 
             // Ensure the data is a valid string

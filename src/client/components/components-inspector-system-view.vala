@@ -60,24 +60,29 @@ public class Components.InspectorSystemView : Gtk.Grid {
     [GtkChild]
     private Gtk.ListBox system_list;
 
-    private string details;
+    private Gee.Collection<GearyApplication.RuntimeDetail?> details;
 
 
     public InspectorSystemView(GearyApplication application) {
-        StringBuilder details = new StringBuilder();
-        foreach (GearyApplication.RuntimeDetail? detail
-                 in application.get_runtime_information()) {
+        this.details = application.get_runtime_information();
+        foreach (GearyApplication.RuntimeDetail? detail in this.details) {
             this.system_list.add(
                 new DetailRow("%s:".printf(detail.name), detail.value)
             );
-            details.append_printf("%s: %s\n", detail.name, detail.value);
         }
-        this.details = details.str;
     }
 
-    public void save(GLib.DataOutputStream out, GLib.Cancellable? cancellable)
+    public void save(GLib.DataOutputStream out,
+                     Inspector.TextFormat format,
+                     GLib.Cancellable? cancellable)
         throws GLib.Error {
-        out.put_string(this.details, cancellable);
+        string line_sep = format.get_line_separator();
+        foreach (GearyApplication.RuntimeDetail? detail in this.details) {
+            out.put_string(detail.name);
+            out.put_string(": ");
+            out.put_string(detail.value);
+            out.put_string(line_sep);
+        }
     }
 
 }

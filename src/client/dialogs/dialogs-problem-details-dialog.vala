@@ -143,13 +143,17 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
             new GLib.BufferedOutputStream(dest_io.get_output_stream())
         );
 
-        this.error_pane.save(@out, cancellable);
-        out.put_byte('\n');
-        out.put_byte('\n');
-        this.system_pane.save(@out, cancellable);
-        out.put_byte('\n');
-        out.put_byte('\n');
-        this.log_pane.save(@out, true, cancellable);
+        this.error_pane.save(
+            @out, Components.Inspector.TextFormat.PLAIN, cancellable
+        );
+        out.put_string("\n");
+        this.system_pane.save(
+            @out, Components.Inspector.TextFormat.PLAIN, cancellable
+        );
+        out.put_string("\n");
+        this.log_pane.save(
+            @out, Components.Inspector.TextFormat.PLAIN, true, cancellable
+        );
 
         yield out.close_async();
         yield dest_io.close_async();
@@ -172,11 +176,17 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
         GLib.DataOutputStream out = new GLib.DataOutputStream(bytes);
         try {
             if (this.stack.visible_child == this.error_pane) {
-                this.error_pane.save(@out, null);
+                this.error_pane.save(
+                    @out, Components.Inspector.TextFormat.MARKDOWN, null
+                );
             } else if (this.stack.visible_child == this.log_pane) {
-                this.log_pane.save(@out, false, null);
+                this.log_pane.save(
+                    @out, Components.Inspector.TextFormat.MARKDOWN, false, null
+                );
             } else if (this.stack.visible_child == this.system_pane) {
-                this.system_pane.save(@out, null);
+                this.system_pane.save(
+                    @out, Components.Inspector.TextFormat.MARKDOWN, null
+                );
             }
 
             // Ensure the data is a valid string

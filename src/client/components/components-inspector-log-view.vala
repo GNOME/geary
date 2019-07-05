@@ -155,9 +155,14 @@ public class Components.InspectorLogView : Gtk.Grid {
 
     /** Saves all log records to the given output stream. */
     public void save(GLib.DataOutputStream out,
+                     Inspector.TextFormat format,
                      bool save_all,
                      GLib.Cancellable? cancellable)
         throws GLib.Error {
+        if (format == MARKDOWN) {
+            out.put_string("```\n");
+        }
+        string line_sep = format.get_line_separator();
         Gtk.TreeModel model = this.logs_view.model;
         if (save_all) {
             // Save all rows selected
@@ -165,6 +170,7 @@ public class Components.InspectorLogView : Gtk.Grid {
             bool valid = model.get_iter_first(out iter);
             while (valid && !cancellable.is_cancelled()) {
                 save_record(model, iter, @out, cancellable);
+                out.put_string(line_sep);
                 valid = model.iter_next(ref iter);
             }
         } else {
@@ -175,6 +181,7 @@ public class Components.InspectorLogView : Gtk.Grid {
                     if (inner_err == null) {
                         try {
                             save_record(model, iter, @out, cancellable);
+                            out.put_string(line_sep);
                         } catch (GLib.Error err) {
                             inner_err = err;
                         }
@@ -184,6 +191,9 @@ public class Components.InspectorLogView : Gtk.Grid {
             if (inner_err != null) {
                 throw inner_err;
             }
+        }
+        if (format == MARKDOWN) {
+            out.put_string("```\n");
         }
     }
 
@@ -197,7 +207,6 @@ public class Components.InspectorLogView : Gtk.Grid {
         string? message = (string) value;
         if (message != null) {
             out.put_string(message);
-            out.put_byte('\n');
         }
     }
 
