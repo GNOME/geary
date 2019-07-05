@@ -34,7 +34,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Search fo matching log entries</property>
+            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Search for matching log entries</property>
             <property name="action_name">win.toggle-search</property>
             <child>
               <object class="GtkImage">
