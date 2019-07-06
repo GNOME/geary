@@ -15,11 +15,19 @@ public class Geary.ProblemReport : Object {
     /** The exception caused the problem, if any. */
     public ErrorContext? error { get; private set; default = null; }
 
+    /** The oldest log record when the report was first created. */
+    public Logging.Record? earliest_log { get; private set; default = null; }
 
-    public ProblemReport(Error? error) {
+    /** The newest log record when the report was first created. */
+    public Logging.Record? latest_log { get; private set; default = null; }
+
+
+    public ProblemReport(GLib.Error? error) {
         if (error != null) {
             this.error = new ErrorContext(error);
         }
+        this.earliest_log = Logging.get_earliest_record();
+        this.latest_log = Logging.get_latest_record();
     }
 
     /** Returns a string representation of the report, for debugging only. */

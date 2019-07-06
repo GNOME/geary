@@ -80,6 +80,7 @@ geary_bin_dependencies = [
   gmime,
   goa,
   gtk,
+  libhandy,
   libmath,
   libsoup,
   webkit2gtk,

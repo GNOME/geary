@@ -24,6 +24,9 @@ geary_client_vala_sources = files(
 
   'components/client-web-view.vala',
   'components/components-inspector.vala',
+  'components/components-inspector-error-view.vala',
+  'components/components-inspector-log-view.vala',
+  'components/components-inspector-system-view.vala',
   'components/components-placeholder-pane.vala',
   'components/components-validator.vala',
   'components/count-badge.vala',

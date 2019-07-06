@@ -235,117 +235,6 @@ You will not be able to send or receive email until it is re-connected.</propert
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkInfoBar" id="service_problem_infobar">
-                        <property name="can_focus">False</property>
-                        <property name="hexpand">True</property>
-                        <property name="message_type">error</property>
-                        <child internal-child="action_area">
-                          <object class="GtkButtonBox">
-                            <property name="can_focus">False</property>
-                            <property name="spacing">6</property>
-                            <property name="layout_style">end</property>
-                            <child>
-                              <object class="GtkButton" id="service_problem_details">
-                                <property name="label" translatable="yes" comments="Button label for displaying technical details about an account problem">Details</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="tooltip_text" translatable="yes" comments="Button tooltip for displaying technical details about an account problem">View technical details about the error</property>
-                                <signal name="clicked" handler="on_service_problem_details" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton">
-                                <property name="label" translatable="yes" comments="Button label for retrying an account problem">Retry</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="tooltip_text" translatable="yes" comments="Button tooltip for retrying an account problem">Try reconnecting</property>
-                                <signal name="clicked" handler="on_service_problem_retry" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child internal-child="content_area">
-                          <object class="GtkBox">
-                            <property name="can_focus">False</property>
-                            <property name="spacing">16</property>
-                            <child>
-                              <object class="GtkGrid">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <child>
-                                  <object class="GtkLabel" id="service_problem_title">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">start</property>
-                                    <property name="label" translatable="yes" comments="Infobar title when one or more accounts have encounted an error">Account problem</property>
-                                    <attributes>
-                                      <attribute name="weight" value="bold"/>
-                                    </attributes>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="service_problem_description">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes" comments="Label and tooltip for account service problem infobar">Geary encountered a problem connecting to an account.
-Please check your Internet connection, the server configuration and try again.</property>
-                                    <property name="halign">start</property>
-                                    <property name="label" translatable="yes" comments="Label and tooltip for account service problem infobar">Geary encountered a problem connecting to an account.</property>
-                                    <property name="wrap">True</property>
-                                    <property name="ellipsize">end</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">1</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <style>
-                              <class name="sigh"/>
-                            </style>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkInfoBar" id="cert_problem_infobar">
                         <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
@@ -439,7 +328,7 @@ Please check the server configuration and try again.</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
+                        <property name="top_attach">1</property>
                       </packing>
                     </child>
                     <child>
@@ -536,7 +425,7 @@ Please check your login name and try again.</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">3</property>
+                        <property name="top_attach">2</property>
                       </packing>
                     </child>
                   </object>
