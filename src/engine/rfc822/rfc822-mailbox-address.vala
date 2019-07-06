@@ -408,15 +408,20 @@ public class Geary.RFC822.MailboxAddress :
     /**
      * Determines if the name part is different to the address part.
      *
-     * @return //true// if {@link name} is not empty, and the cleaned
-     * versions of the name part and {@link address} are not equal.
+     * @return //true// if {@link name} is not empty, and the
+     * normalised {@link address} part is not contained within the
+     * name part when performing a case-insensitive comparison.
      */
     public bool has_distinct_name() {
-        string clean_name = Geary.String.reduce_whitespace(this.name);
-        return (
-            !Geary.String.is_empty(clean_name) &&
-            clean_name != Geary.String.reduce_whitespace(this.address)
-        );
+        string name = Geary.String.reduce_whitespace(this.name);
+        bool ret = false;
+        if (!Geary.String.is_empty(name)) {
+            string address = Geary.String.reduce_whitespace(
+                this.address.normalize()
+            );
+            ret = !(address.normalize().casefold() in name.casefold());
+        }
+        return ret;
     }
 
     /**
