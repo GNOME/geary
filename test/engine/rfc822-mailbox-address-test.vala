@@ -12,8 +12,9 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         add_test("is_valid_address", is_valid_address);
         add_test("unescaped_constructor", unescaped_constructor);
         add_test("from_rfc822_string_encoded", from_rfc822_string_encoded);
-        add_test("is_spoofed", is_spoofed);
+        // latter depends on the former, so test that first
         add_test("has_distinct_name", has_distinct_name);
+        add_test("is_spoofed", is_spoofed);
         add_test("to_full_display", to_full_display);
         add_test("to_short_display", to_short_display);
         // latter depends on the former, so test that first
@@ -151,6 +152,17 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         }
     }
 
+    public void has_distinct_name() throws Error {
+        assert(new MailboxAddress("example", "example@example.com").has_distinct_name() == true);
+
+        assert(new MailboxAddress("", "example@example.com").has_distinct_name() == false);
+        assert(new MailboxAddress(" ", "example@example.com").has_distinct_name() == false);
+        assert(new MailboxAddress("example@example.com", "example@example.com").has_distinct_name() == false);
+        assert(new MailboxAddress(" example@example.com ", "example@example.com").has_distinct_name() == false);
+        assert(new MailboxAddress(" example@example.com ", "example@example.com").has_distinct_name() == false);
+        assert(new MailboxAddress("'example@example.com'", "example@example.com").has_distinct_name() == false);
+    }
+
     public void is_spoofed() throws Error {
         assert(new MailboxAddress(null, "example@example.com").is_spoofed() == false);
         assert(new MailboxAddress("", "example@example.com").is_spoofed() == false);
@@ -161,6 +173,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(new MailboxAddress("test?", "example@example.com").is_spoofed() == false);
         assert(new MailboxAddress("test@example.com", "test@example.com").is_spoofed() == false);
         assert(new MailboxAddress("test@EXAMPLE.com", "test@example.com").is_spoofed() == false);
+        assert(new MailboxAddress("'example@example.com'", "example@example.com").is_spoofed() == false);
 
         assert(new MailboxAddress("test@example.com", "example@example.com").is_spoofed() == true);
         assert(new MailboxAddress("test @ example . com", "example@example.com").is_spoofed() == true);
@@ -169,22 +182,13 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(new MailboxAddress("test", "example@\nexample@example.com").is_spoofed() == true);
         assert(new MailboxAddress("test", "example@example@example.com").is_spoofed() == true);
 
+
         try {
             assert(new MailboxAddress.from_rfc822_string("\"=?utf-8?b?dGVzdCIgPHBvdHVzQHdoaXRlaG91c2UuZ292Pg==?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>")
                    .is_spoofed() == true);
         } catch (Error err) {
             assert_no_error(err);
         }
-    }
-
-    public void has_distinct_name() throws Error {
-        assert(new MailboxAddress("example", "example@example.com").has_distinct_name() == true);
-
-        assert(new MailboxAddress("", "example@example.com").has_distinct_name() == false);
-        assert(new MailboxAddress(" ", "example@example.com").has_distinct_name() == false);
-        assert(new MailboxAddress("example@example.com", "example@example.com").has_distinct_name() == false);
-        assert(new MailboxAddress(" example@example.com ", "example@example.com").has_distinct_name() == false);
-        assert(new MailboxAddress(" example@example.com ", "example@example.com").has_distinct_name() == false);
     }
 
     public void to_full_display() throws Error {
