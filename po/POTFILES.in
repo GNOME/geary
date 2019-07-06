@@ -411,6 +411,8 @@ ui/composer-headerbar.ui
 ui/composer-link-popover.ui
 ui/composer-menus.ui
 ui/composer-widget.ui
+ui/components-inspector-error-view.ui
+ui/components-inspector-log-view.ui
 ui/components-inspector.ui
 ui/components-placeholder-pane.ui
 ui/conversation-contact-popover.ui
