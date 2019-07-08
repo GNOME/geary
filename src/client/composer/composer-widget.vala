@@ -168,6 +168,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
 
     public Geary.Account account { get; private set; }
+    private Gee.Map<string, Geary.AccountInformation> accounts;
 
     public Geary.RFC822.MailboxAddresses from { get; private set; }
 
@@ -402,14 +403,25 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         base_ref();
         this.application = application;
         this.account = initial_account;
+        this.account = account;
+
+        try {
+            this.accounts = this.application.engine.get_accounts();
+        } catch (Error e) {
+            warning("Could not fetch account info: %s", e.message);
+        }
+
         this.compose_type = compose_type;
-        if (this.compose_type == ComposeType.NEW_MESSAGE)
+        if (this.compose_type == ComposeType.NEW_MESSAGE) {
             this.state = ComposerState.PANED;
+        }
         else if (this.compose_type == ComposeType.FORWARD ||
-                 this.account.information.has_sender_aliases)
+                 this.accounts.size > 1 || this.account.information.has_sender_aliases) {
             this.state = ComposerState.INLINE;
-        else
+        }
+        else {
             this.state = ComposerState.INLINE_COMPACT;
+        }
 
         this.header = new ComposerHeaderbar(
             application.config,
@@ -724,7 +736,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.state = ComposerState.PANED;
         } else if (this.compose_type == ComposeType.FORWARD || this.to_entry.modified
                    || this.cc_entry.modified || this.bcc_entry.modified
-                   || this.account.information.has_sender_aliases) {
+                   || this.accounts.size > 1 || this.account.information.has_sender_aliases) {
             this.state = ComposerState.INLINE;
         } else {
             this.state = ComposerState.INLINE_COMPACT;
@@ -2106,27 +2118,21 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.from_multiple.changed.disconnect(on_from_changed);
         this.from_single.visible = this.from_multiple.visible = this.from_label.visible = false;
 
-        Gee.Map<string, Geary.AccountInformation> accounts;
-        try {
-            accounts = this.application.engine.get_accounts();
-        } catch (Error e) {
-            warning("Could not fetch account info: %s", e.message);
-            return false;
-        }
-
         // Don't show in inline unless the current account has
-        // multiple emails, since these will be replies to a
+        // multiple email accounts or aliases, since these will be replies to a
         // conversation
-        if ((this.state == ComposerState.INLINE ||
-             this.state == ComposerState.INLINE_COMPACT) &&
-            !this.account.information.has_sender_aliases)
-            return false;
+        if ((this.state == ComposerState.INLINE || this.state == ComposerState.INLINE_COMPACT) &&
+            !(this.accounts.size > 1 || this.account.information.has_sender_aliases)) {
+            return false;         
+        }
 
         // If there's only one account and it not have any aliases,
         // show nothing.
-        if (accounts.size < 1 || (accounts.size == 1 && !Geary.traverse<Geary.AccountInformation>(
-            accounts.values).first().has_sender_aliases))
+        if (this.accounts.size < 1 ||
+            (this.accounts.size == 1 &&
+            !Geary.traverse<Geary.AccountInformation>(this.accounts.values).first().has_sender_aliases)) {
             return false;
+        }
 
         this.from_label.visible = true;
         this.from_label.set_mnemonic_widget(this.from_multiple);
@@ -2142,16 +2148,13 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // is set to true if the current message's from address has
         // been set in the ComboBox.
         bool set_active = add_account_emails_to_from_list(this.account);
-        if (this.compose_type == ComposeType.NEW_MESSAGE) {
-            foreach (Geary.AccountInformation info in accounts.values) {
-                try {
-                    Geary.Account a =
-                        this.application.engine.get_account_instance(info);
-                    if (a != this.account)
-                        set_active = add_account_emails_to_from_list(a, set_active);
-                } catch (Error e) {
-                    debug("Error getting account in composer: %s", e.message);
-                }
+        foreach (Geary.AccountInformation info in this.accounts.values) {
+            try {
+                Geary.Account a = this.application.engine.get_account_instance(info);
+                if (a != this.account)
+                    set_active = add_account_emails_to_from_list(a, set_active);
+            } catch (Error e) {
+                debug("Error getting account in composer: %s", e.message);
             }
         }
 
