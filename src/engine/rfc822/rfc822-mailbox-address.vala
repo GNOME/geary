@@ -152,7 +152,7 @@ public class Geary.RFC822.MailboxAddress :
      *
      * For "Dirk Gently <dirk@example.com>", this would be "Dirk Gently".
      *
-     * The returned value has been decoded into UTF-8.
+     * The returned value has been unquoted and decoded into UTF-8.
      */
     public string? name { get; private set; }
 
@@ -191,6 +191,13 @@ public class Geary.RFC822.MailboxAddress :
     public string address { get; private set; }
 
 
+    /**
+     * Constructs a new mailbox address from unquoted, decoded parts.
+     *
+     * The given name (if any) and address parts will be used
+     * verbatim, and quoted or encoded if needed when serialising to
+     * an RFC 833 mailbox address string.
+     */
     public MailboxAddress(string? name, string address) {
         this.name = name;
         this.source_route = null;
@@ -409,17 +416,29 @@ public class Geary.RFC822.MailboxAddress :
      * Determines if the name part is different to the address part.
      *
      * @return //true// if {@link name} is not empty, and the
-     * normalised {@link address} part is not contained within the
-     * name part when performing a case-insensitive comparison.
+     * normalised {@link address} part is not equal to the name part
+     * when performing a case-insensitive comparison.
      */
     public bool has_distinct_name() {
         string name = Geary.String.reduce_whitespace(this.name);
+        if (!Geary.String.is_empty(name)) {
+            // Some software uses single quotes instead of double
+            // quotes for name parts, which GMime ignores. Don't take
+            // those into account if present. See GNOME/geary#491.
+            if (name.length >= 2 &&
+                name[0] == '\'' &&
+                name[name.length - 1] == '\'') {
+                name = name.substring(1, name.length - 2);
+            }
+        }
+
         bool ret = false;
         if (!Geary.String.is_empty(name)) {
+            name = name.normalize().casefold();
             string address = Geary.String.reduce_whitespace(
-                this.address.normalize()
+                this.address.normalize().casefold()
             );
-            ret = !(address.normalize().casefold() in name.casefold());
+            ret = (name != address);
         }
         return ret;
     }
