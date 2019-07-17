@@ -118,14 +118,14 @@ public class MainToolbar : Gtk.Box {
 
     private void set_window_buttons() {
         string[] buttons = Gtk.Settings.get_default().gtk_decoration_layout.split(":");
-        if (buttons.length != 2) {
-            warning("gtk_decoration_layout in unexpected format");
-            return;
-        }
-        show_close_button_left = show_close_button;
-        show_close_button_right = show_close_button;
-        folder_header.decoration_layout = buttons[0] + ":";
-        conversation_header.decoration_layout = ":" + buttons[1];
+        this.show_close_button_left = this.show_close_button;
+        this.show_close_button_right = this.show_close_button;
+        this.folder_header.decoration_layout = buttons[0] + ":";
+        this.conversation_header.decoration_layout = (
+            (buttons.length == 2)
+            ? ":" + buttons[1]
+            : ""
+        );
     }
 
     // Updates tooltip text depending on number of conversations selected.
