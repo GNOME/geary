@@ -152,7 +152,7 @@ public class Geary.RFC822.MailboxAddress :
      *
      * For "Dirk Gently <dirk@example.com>", this would be "Dirk Gently".
      *
-     * The returned value has been decoded into UTF-8.
+     * The returned value has been unquoted and decoded into UTF-8.
      */
     public string? name { get; private set; }
 
@@ -191,6 +191,13 @@ public class Geary.RFC822.MailboxAddress :
     public string address { get; private set; }
 
 
+    /**
+     * Constructs a new mailbox address from unquoted, decoded parts.
+     *
+     * The given name (if any) and address parts will be used
+     * verbatim, and quoted or encoded if needed when serialising to
+     * an RFC 833 mailbox address string.
+     */
     public MailboxAddress(string? name, string address) {
         this.name = name;
         this.source_route = null;
