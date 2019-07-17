@@ -722,7 +722,7 @@ namespace GMime {
 		[CCode (cname = "g_mime_object_to_string")]
 		public string to_string ();
 		[CCode (cname = "g_mime_object_new_type", has_construct_function = false)]
-		public Object.type (string type, string subtype);
+		protected Object.type (string type, string subtype);
 		[CCode (cname = "g_mime_object_type_registry_init")]
 		public static void type_registry_init ();
 		[CCode (cname = "g_mime_object_type_registry_shutdown")]
