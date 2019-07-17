@@ -676,7 +676,7 @@ namespace GMime {
 		public weak GMime.ContentDisposition disposition;
 		public weak GMime.HeaderList headers;
 		[CCode (cname = "g_mime_object_new", has_construct_function = false)]
-		public Object (GMime.ContentType content_type);
+		protected Object (GMime.ContentType content_type);
 		[CCode (cname = "g_mime_object_append_header")]
 		public virtual void append_header (string header, string value);
 		[CCode (cname = "g_mime_object_encode")]
