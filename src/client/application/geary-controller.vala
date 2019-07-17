@@ -1479,8 +1479,8 @@ public class GearyController : Geary.BaseObject {
         if (unavailable != null) {
             Gee.BidirIterator<Geary.Folder> unavailable_iterator =
                 unavailable.bidir_iterator();
-            unavailable_iterator.last();
-            while (unavailable_iterator.previous()) {
+            bool has_prev = unavailable_iterator.last();
+            while (has_prev) {
                 Geary.Folder folder = unavailable_iterator.get();
 
                 main_window.folder_list.remove_folder(folder);
@@ -1507,6 +1507,8 @@ public class GearyController : Geary.BaseObject {
                 }
 
                 folder.special_folder_type_changed.disconnect(on_special_folder_type_changed);
+
+                has_prev = unavailable_iterator.previous();
             }
         }
     }
