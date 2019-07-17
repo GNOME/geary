@@ -160,7 +160,9 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(new MailboxAddress("example@example.com", "example@example.com").has_distinct_name() == false);
         assert(new MailboxAddress(" example@example.com ", "example@example.com").has_distinct_name() == false);
         assert(new MailboxAddress(" example@example.com ", "example@example.com").has_distinct_name() == false);
+
         assert(new MailboxAddress("'example@example.com'", "example@example.com").has_distinct_name() == false);
+        assert(new MailboxAddress("'prefix-example@example.com'", "example@example.com").has_distinct_name() == true);
     }
 
     public void is_spoofed() throws Error {
@@ -181,7 +183,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(new MailboxAddress("\n", "example@example.com").is_spoofed() == true);
         assert(new MailboxAddress("test", "example@\nexample@example.com").is_spoofed() == true);
         assert(new MailboxAddress("test", "example@example@example.com").is_spoofed() == true);
-
+        assert(new MailboxAddress("'prefix-example@example.com'", "example@example.com").is_spoofed() == true);
 
         try {
             assert(new MailboxAddress.from_rfc822_string("\"=?utf-8?b?dGVzdCIgPHBvdHVzQHdoaXRlaG91c2UuZ292Pg==?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>")
