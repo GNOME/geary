@@ -11,36 +11,6 @@ namespace Geary.RFC822.Utils {
 // in UTF-8, and is unmolested by GMime.FilterHTML.
 public const char QUOTE_MARKER = '\x7f';
 
-/**
- * Charset to use when it is otherwise missing or invalid
- *
- * Per RFC 2045, Section 5.2.
- */
-public const string DEFAULT_MIME_CHARSET = "us-ascii";
-
-/**
- * Creates a filter to convert a MIME charset to UTF-8.
- *
- * Param `from_charset` may be null, empty or invalid, in which case
- * `DEFAULT_MIME_CHARSET` will be used instead.
- */
-public GMime.FilterCharset create_utf8_filter_charset(string? from_charset) {
-    string actual_charset = from_charset != null ? from_charset.strip() : "";
-    if (Geary.String.is_empty(actual_charset)) {
-        actual_charset = DEFAULT_MIME_CHARSET;
-    }
-    GMime.FilterCharset? filter_charset = new GMime.FilterCharset(
-        actual_charset, Geary.RFC822.UTF8_CHARSET
-    );
-    if (filter_charset == null) {
-        debug("Unknown charset: %s; using RFC 2045 default instead", from_charset);
-        filter_charset = new GMime.FilterCharset(
-            DEFAULT_MIME_CHARSET, Geary.RFC822.UTF8_CHARSET
-        );
-        assert(filter_charset != null);
-    }
-    return filter_charset;
-}
 
 /**
  * Uses the best-possible transfer of bytes from the Memory.Buffer to the GMime.StreamMem object.

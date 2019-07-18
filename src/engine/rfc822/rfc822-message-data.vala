@@ -414,7 +414,9 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
                 output_stream.set_owner(false);
 
                 try {
-                    part.write_to_stream(output_stream);
+                    part.write_to_stream(
+                        output_stream, Part.EncodingConversion.NONE
+                    );
                     uint8[] data = output.data;
                     data += (uint8) '\0';
 

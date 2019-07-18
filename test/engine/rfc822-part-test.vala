@@ -10,6 +10,7 @@ class Geary.RFC822.PartTest : TestCase {
     private const string CR_BODY = "This is an attachment.\n";
     private const string CRLF_BODY = "This is an attachment.\r\n";
     private const string ICAL_BODY = "BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n";
+    private const string UTF8_BODY = "Тест.";
 
 
     public PartTest() {
@@ -19,6 +20,7 @@ class Geary.RFC822.PartTest : TestCase {
         add_test("write_to_buffer_plain", write_to_buffer_plain);
         add_test("write_to_buffer_plain_crlf", write_to_buffer_plain_crlf);
         add_test("write_to_buffer_plain_ical", write_to_buffer_plain_ical);
+        add_test("write_to_buffer_plain_utf8", write_to_buffer_plain_utf8);
     }
 
     public void new_from_minimal_mime_part() throws Error {
@@ -56,7 +58,7 @@ class Geary.RFC822.PartTest : TestCase {
     public void write_to_buffer_plain() throws Error {
         Part test = new Part(new_part("text/plain", CR_BODY.data));
 
-        Memory.Buffer buf = test.write_to_buffer();
+        Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
 
         assert_string(CR_BODY, buf.to_string());
     }
@@ -64,7 +66,7 @@ class Geary.RFC822.PartTest : TestCase {
     public void write_to_buffer_plain_crlf() throws Error {
         Part test = new Part(new_part("text/plain", CRLF_BODY.data));
 
-        Memory.Buffer buf = test.write_to_buffer();
+        Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
 
         // CRLF should be stripped
         assert_string(CR_BODY, buf.to_string());
@@ -73,10 +75,18 @@ class Geary.RFC822.PartTest : TestCase {
     public void write_to_buffer_plain_ical() throws Error {
         Part test = new Part(new_part("text/calendar", ICAL_BODY.data));
 
-        Memory.Buffer buf = test.write_to_buffer();
+        Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
 
         // CRLF should not be stripped
         assert_string(ICAL_BODY, buf.to_string());
+    }
+
+    public void write_to_buffer_plain_utf8() throws GLib.Error {
+        Part test = new Part(new_part("text/plain", UTF8_BODY.data));
+
+        Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
+
+        assert_string(UTF8_BODY, buf.to_string());
     }
 
     private GMime.Part new_part(string? mime_type,

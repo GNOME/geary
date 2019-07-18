@@ -943,7 +943,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         }
 
         try {
-            this.web_view.add_internal_resource(id, part.write_to_buffer());
+            this.web_view.add_internal_resource(
+                id,
+                part.write_to_buffer(Geary.RFC822.Part.EncodingConversion.UTF8)
+            );
         } catch (Geary.RFC822Error err) {
             debug("Failed to get inline buffer: %s", err.message);
             return null;

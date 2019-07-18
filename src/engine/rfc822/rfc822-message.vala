@@ -596,6 +596,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
             if (content_type.is_type("text", text_subtype)) {
                 body = part.write_to_buffer(
+                    Part.EncodingConversion.UTF8,
                     to_html ? Part.BodyFormatting.HTML : Part.BodyFormatting.NONE
                 ).to_string();
             } else if (replacer != null &&

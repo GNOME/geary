@@ -183,7 +183,7 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
             stream, GMime.StreamBufferMode.BLOCK_WRITE
         );
 
-        part.write_to_stream(stream);
+        part.write_to_stream(stream, RFC822.Part.EncodingConversion.NONE);
 
         // Using the stream's length is a bit of a hack, but at
         // least on one system we are getting 0 back for the file
