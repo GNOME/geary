@@ -504,9 +504,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         string domain = composed.sender != null
             ? composed.sender.domain
             : this.information.primary_mailbox.domain;
-        Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(
-            composed, GMime.utils_generate_message_id(domain)
-        );
+        Geary.RFC822.Message rfc822 =
+            yield new Geary.RFC822.Message.from_composed_email(
+                composed, GMime.utils_generate_message_id(domain), cancellable
+            );
 
         yield this.smtp.queue_email(rfc822, cancellable);
     }

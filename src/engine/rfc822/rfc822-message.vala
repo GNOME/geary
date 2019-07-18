@@ -125,7 +125,9 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         stock_from_gmime();
     }
 
-    public Message.from_composed_email(Geary.ComposedEmail email, string? message_id) {
+    public async Message.from_composed_email(Geary.ComposedEmail email,
+                                             string? message_id,
+                                             GLib.Cancellable? cancellable) {
         this.message = new GMime.Message(true);
 
         // Required headers
@@ -205,12 +207,26 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
         // Body: text format (optional)
         if (email.body_text != null) {
-            GMime.Part? body_text = body_data_to_part(email.body_text.data,
-                                                      ref body_charset,
-                                                      ref body_encoding,
-                                                      "text/plain",
-                                                      true);
-            body_parts.add(body_text);
+            GMime.Part? body_text = null;
+            try {
+                body_text = yield body_data_to_part(
+                    email.body_text.data,
+                    null,
+                    null,
+                    "text/plain",
+                    true,
+                    cancellable
+                );
+            } catch (GLib.Error err) {
+                warning("Error creating text body part: %s", err.message);
+            }
+            if (body_text != null) {
+                body_charset = body_text.get_content_type().get_parameter(
+                    "charset"
+                );
+                body_encoding = body_text.get_content_encoding();
+                body_parts.add(body_text);
+            }
         }
 
         // Body: HTML format (also optional)
@@ -233,9 +249,20 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             foreach (string cid in email.cid_files.keys) {
                 if (email.contains_inline_img_src(CID_URL_PREFIX + cid)) {
                     File file = email.cid_files[cid];
-                    GMime.Object? inline_part = get_file_part(
-                        file, Geary.Mime.DispositionType.INLINE
-                    );
+                    GMime.Object? inline_part = null;
+                    try {
+                        inline_part = yield get_file_part(
+                            file,
+                            Geary.Mime.DispositionType.INLINE,
+                            cancellable
+                        );
+                    } catch (GLib.Error err) {
+                        warning(
+                            "Error creating CID part %s: %s",
+                            file.get_path(),
+                            err.message
+                        );
+                    }
                     if (inline_part != null) {
                         inline_part.set_content_id(cid);
                         related_parts.add(inline_part);
@@ -259,9 +286,20 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
                     if (email.replace_inline_img_src(name,
                                                      CID_URL_PREFIX + cid)) {
-                        GMime.Object? inline_part = get_file_part(
-                            inline_files[name], Geary.Mime.DispositionType.INLINE
-                        );
+                        GMime.Object? inline_part = null;
+                        try {
+                            inline_part = yield get_file_part(
+                                inline_files[name],
+                                Geary.Mime.DispositionType.INLINE,
+                                cancellable
+                            );
+                        } catch (GLib.Error err) {
+                            warning(
+                                "Error creating inline file part %s: %s",
+                                inline_files[name].get_path(),
+                                err.message
+                            );
+                        }
                         if (inline_part != null) {
                             inline_part.set_content_id(cid);
                             related_parts.add(inline_part);
@@ -270,11 +308,19 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                 }
             }
 
-            GMime.Object? body_html = body_data_to_part(email.body_html.data,
-                                                        ref body_charset,
-                                                        ref body_encoding,
-                                                        "text/html",
-                                                        false);
+            GMime.Object? body_html = null;
+            try {
+                body_html = yield body_data_to_part(
+                    email.body_html.data,
+                    body_charset,
+                    body_encoding,
+                    "text/html",
+                    false,
+                    cancellable
+                );
+            } catch (GLib.Error err) {
+                warning("Error creating html body part: %s", err.message);
+            }
 
             // Assemble the HTML and inline images into a related
             // part, if needed
@@ -297,11 +343,23 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
         Gee.List<GMime.Object> attachment_parts = new Gee.LinkedList<GMime.Object>();
         foreach (File file in email.attached_files) {
-            GMime.Object? attachment_part = get_file_part(
-                file, Geary.Mime.DispositionType.ATTACHMENT
-            );
-            if (attachment_part != null)
+            GMime.Object? attachment_part = null;
+            try {
+                attachment_part = yield get_file_part(
+                    file,
+                    Geary.Mime.DispositionType.ATTACHMENT,
+                    cancellable
+                );
+            } catch (GLib.Error err) {
+                warning(
+                    "Error creating attachment file part %s: %s",
+                    file.get_path(),
+                    err.message
+                );
+            }
+            if (attachment_part != null) {
                 attachment_parts.add(attachment_part);
+            }
         }
         GMime.Object? attachment_part = coalesce_parts(attachment_parts, "mixed");
         if (attachment_part != null)
@@ -366,29 +424,39 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
     }
 
-    private GMime.Part? get_file_part(File file,
-                                      Geary.Mime.DispositionType disposition) {
-        if (!file.query_exists())
-            return null;
-
-        FileInfo file_info;
-        try {
-            file_info = file.query_info(FileAttribute.STANDARD_CONTENT_TYPE, FileQueryInfoFlags.NONE);
-        } catch (Error err) {
-            debug("Error querying info from file: %s", err.message);
-            return null;
-        }
+    private async GMime.Part? get_file_part(File file,
+                                            Geary.Mime.DispositionType disposition,
+                                            GLib.Cancellable cancellable)
+        throws GLib.Error {
+        FileInfo file_info = yield file.query_info_async(
+            FileAttribute.STANDARD_CONTENT_TYPE,
+            FileQueryInfoFlags.NONE
+        );
 
         GMime.Part part = new GMime.Part();
         part.set_disposition(disposition.serialize());
         part.set_filename(file.get_basename());
-        part.set_content_type(new GMime.ContentType.from_string(file_info.get_content_type()));
+        part.set_content_type(
+            new GMime.ContentType.from_string(file_info.get_content_type())
+        );
 
         // This encoding is the initial encoding of the stream.
         GMime.StreamGIO stream = new GMime.StreamGIO(file);
         stream.set_owner(false);
-        part.set_content_object(new GMime.DataWrapper.with_stream(stream, GMime.ContentEncoding.BINARY));
-        part.set_content_encoding(Geary.RFC822.Utils.get_best_encoding(stream));
+        part.set_content_object(
+            new GMime.DataWrapper.with_stream(
+                stream, GMime.ContentEncoding.BINARY
+            )
+        );
+        part.set_content_encoding(
+            yield Utils.get_best_encoding(
+                stream,
+                // Determine this from the MTA's capabilities at send
+                // time
+                GMime.EncodingConstraint.7BIT,
+                cancellable
+            )
+        );
         return part;
     }
 
@@ -993,11 +1061,13 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      * clean ASCII. So if we have guessed both already for a plain
      * text body, it will still apply for any HTML part.
      */
-    private GMime.Part body_data_to_part(uint8[] content,
-                                         ref string? charset,
-                                         ref GMime.ContentEncoding? encoding,
-                                         string content_type,
-                                         bool is_flowed) {
+    private async GMime.Part body_data_to_part(uint8[] content,
+                                               string? charset,
+                                               GMime.ContentEncoding? encoding,
+                                               string content_type,
+                                               bool is_flowed,
+                                               GLib.Cancellable? cancellable)
+        throws GLib.Error {
         GMime.Stream content_stream = new GMime.StreamMem.with_buffer(content);
         if (charset == null) {
             charset = Geary.RFC822.Utils.get_best_charset(content_stream);
