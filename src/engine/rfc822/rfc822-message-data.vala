@@ -408,20 +408,12 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
                 );
                 gpart.set_content_object(body);
 
-                ByteArray output = new ByteArray();
-                GMime.StreamMem output_stream =
-                    new GMime.StreamMem.with_byte_array(output);
-                output_stream.set_owner(false);
-
                 try {
-                    part.write_to_stream(
-                        output_stream, Part.EncodingConversion.NONE
+                    Memory.Buffer preview_buffer = part.write_to_buffer(
+                        Part.EncodingConversion.UTF8
                     );
-                    uint8[] data = output.data;
-                    data += (uint8) '\0';
-
                     preview_text = Geary.RFC822.Utils.to_preview_text(
-                        (string) data,
+                        preview_buffer.get_valid_utf8(),
                         is_html ? TextFormat.HTML : TextFormat.PLAIN
                     );
                 } catch (RFC822Error err) {
