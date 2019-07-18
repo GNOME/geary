@@ -90,15 +90,14 @@ class Geary.RFC822.PartTest : TestCase {
     }
 
     private GMime.Part new_part(string? mime_type,
-                                uint8[] body,
-                                GMime.ContentEncoding encoding = GMime.ContentEncoding.DEFAULT) {
+                                uint8[] body) {
         GMime.Part part = new GMime.Part();
         if (mime_type != null) {
             part.set_content_type(new GMime.ContentType.from_string(mime_type));
         }
         GMime.DataWrapper body_wrapper = new GMime.DataWrapper.with_stream(
             new GMime.StreamMem.with_buffer(body),
-            encoding
+            GMime.ContentEncoding.BINARY
         );
         part.set_content_object(body_wrapper);
         part.encode(GMime.EncodingConstraint.7BIT);
