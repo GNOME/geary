@@ -46,7 +46,7 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
 
         this(
             message_id,
-            part.get_effective_content_type(),
+            part.content_type,
             part.content_id,
             part.content_description,
             disposition,

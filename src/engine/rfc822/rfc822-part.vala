@@ -52,7 +52,7 @@ public class Geary.RFC822.Part : Object {
      *
      * See [[https://tools.ietf.org/html/rfc2045#section-5]]
      */
-    public Mime.ContentType? content_type { get; private set; }
+    public Mime.ContentType content_type { get; private set; }
 
     /**
      * The entity's Content-ID.
@@ -85,44 +85,34 @@ public class Geary.RFC822.Part : Object {
         this.source_object = source;
         this.source_part = source as GMime.Part;
 
-        GMime.ContentType? part_type = source.get_content_type();
-        if (part_type != null) {
-            this.content_type = new Mime.ContentType.from_gmime(part_type);
-        }
-
         this.content_id = source.get_content_id();
 
         this.content_description = (this.source_part != null)
             ? source_part.get_content_description() : null;
 
-        GMime.ContentDisposition? part_disposition = source.get_content_disposition();
+        GMime.ContentDisposition? part_disposition =
+            source.get_content_disposition();
         if (part_disposition != null) {
             this.content_disposition = new Mime.ContentDisposition.from_gmime(
                 part_disposition
             );
         }
-    }
 
-    /**
-     * The entity's effective Content-Type.
-     *
-     * This returns the entity's content type if set, else returns
-     * {@link Geary.Mime.ContentType.DISPLAY_DEFAULT} this is a
-     * displayable (i.e. non-attachment) entity, or {@link
-     * Geary.Mime.ContentType.ATTACHMENT_DEFAULT} if not.
-     */
-    public Mime.ContentType get_effective_content_type() {
-        Mime.ContentType? type = this.content_type;
-        if (type == null) {
+        // Although the GMime API permits this to be null, it's not
+        // clear if it ever will be, since the API requires it to be
+        // specified at construction time.
+        GMime.ContentType? part_type = source.get_content_type();
+        if (part_type != null) {
+            this.content_type = new Mime.ContentType.from_gmime(part_type);
+        } else {
             Mime.DispositionType disposition = Mime.DispositionType.UNSPECIFIED;
             if (this.content_disposition != null) {
                 disposition = this.content_disposition.disposition_type;
             }
-            type = (disposition != Mime.DispositionType.ATTACHMENT)
+            this.content_type = (disposition != Mime.DispositionType.ATTACHMENT)
                 ? Mime.ContentType.DISPLAY_DEFAULT
                 : Mime.ContentType.ATTACHMENT_DEFAULT;
         }
-        return type;
     }
 
     /**

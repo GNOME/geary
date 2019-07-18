@@ -14,20 +14,16 @@ class Geary.RFC822.PartTest : TestCase {
 
     public PartTest() {
         base("Geary.RFC822.PartTest");
-        add_test("new_from_empty_mime_part", new_from_empty_mime_part);
+        add_test("new_from_minimal_mime_part", new_from_minimal_mime_part);
         add_test("new_from_complete_mime_part", new_from_complete_mime_part);
         add_test("write_to_buffer_plain", write_to_buffer_plain);
         add_test("write_to_buffer_plain_crlf", write_to_buffer_plain_crlf);
         add_test("write_to_buffer_plain_ical", write_to_buffer_plain_ical);
     }
 
-    public void new_from_empty_mime_part() throws Error {
-        GMime.Part part = new_part(null, CR_BODY.data);
-        part.set_header("Content-Type", "");
+    public void new_from_minimal_mime_part() throws Error {
+        Part test = new Part(new_part("test/plain", CR_BODY.data));
 
-        Part test = new Part(part);
-
-        assert_null(test.content_type, "content_type");
         assert_null_string(test.content_id, "content_id");
         assert_null_string(test.content_description, "content_description");
         assert_null(test.content_disposition, "content_disposition");

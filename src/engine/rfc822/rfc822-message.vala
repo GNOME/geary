@@ -519,7 +519,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
             is_matching_part = (
                 disposition != Mime.DispositionType.ATTACHMENT &&
-                part.get_effective_content_type().is_type("text", text_subtype)
+                part.content_type.is_type("text", text_subtype)
             );
         }
         return is_matching_part;
@@ -549,7 +549,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                                                 ref string? body)
         throws RFC822Error {
         Part part = new Part(node);
-        Mime.ContentType content_type = part.get_effective_content_type();
+        Mime.ContentType content_type = part.content_type;
 
         // If this is a multipart, call ourselves recursively on the children
         GMime.Multipart? multipart = node as GMime.Multipart;
@@ -876,9 +876,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
             if (requested_disposition == Mime.DispositionType.UNSPECIFIED ||
                 actual_disposition == requested_disposition) {
-
-                Mime.ContentType content_type =
-                    part.get_effective_content_type();
+                Mime.ContentType content_type = part.content_type;
 
 #if WITH_TNEF_SUPPORT
                 if (content_type.is_type("application", "vnd.ms-tnef")) {

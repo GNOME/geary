@@ -396,7 +396,7 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         if (gpart != null) {
             Part part = new Part(gpart);
 
-            Mime.ContentType content_type = part.get_effective_content_type();
+            Mime.ContentType content_type = part.content_type;
             bool is_plain = content_type.is_type("text", "plain");
             bool is_html = content_type.is_type("text", "html");
 
