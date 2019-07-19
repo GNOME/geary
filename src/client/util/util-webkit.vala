@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Michael James Gratton <mike@vee.net>
+ * Copyright 2017-2019 Michael James Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -8,7 +8,7 @@
 /**
  * Utility functions for WebKit objects.
  */
-namespace WebKitUtil {
+namespace Util.WebKit {
 
     /**
      * Returns a WebKit {@link WebKit.JavascriptResult} as a `bool`.
@@ -16,7 +16,7 @@ namespace WebKitUtil {
      * This will raise a {@link Geary.JS.Error.TYPE} error if the
      * result is not a JavaScript `Boolean`.
      */
-    public bool to_bool(WebKit.JavascriptResult result)
+    public bool to_bool(global::WebKit.JavascriptResult result)
         throws Geary.JS.Error {
         unowned JS.GlobalContext context = result.get_global_context();
         unowned JS.Value value = result.get_value();
@@ -32,7 +32,7 @@ namespace WebKitUtil {
      * This will raise a {@link Geary.JS.Error.TYPE} error if the
      * result is not a JavaScript `Number`.
      */
-    public inline double to_number(WebKit.JavascriptResult result)
+    public inline double to_number(global::WebKit.JavascriptResult result)
         throws Geary.JS.Error {
         return Geary.JS.to_number(result.get_global_context(),
                                   result.get_value());
@@ -44,7 +44,7 @@ namespace WebKitUtil {
      * This will raise a {@link Geary.JS.Error.TYPE} error if the
      * result is not a JavaScript `String`.
      */
-    public inline string to_string(WebKit.JavascriptResult result)
+    public inline string to_string(global::WebKit.JavascriptResult result)
         throws Geary.JS.Error {
         return Geary.JS.to_string(result.get_global_context(),
                                   result.get_value());
@@ -57,7 +57,7 @@ namespace WebKitUtil {
      * result to a string, effectively by calling the JavaScript
      * `toString()` method on it, and returning that value.
      */
-    public string as_string(WebKit.JavascriptResult result)
+    public string as_string(global::WebKit.JavascriptResult result)
         throws Geary.JS.Error {
         unowned JS.GlobalContext context = result.get_global_context();
         unowned JS.Value js_str_value = result.get_value();
@@ -76,7 +76,7 @@ namespace WebKitUtil {
      * Return type is nullable as a workaround for Bug 778046, it will
      * never actually be null.
      */
-    public JS.Object? to_object(WebKit.JavascriptResult result)
+    public JS.Object? to_object(global::WebKit.JavascriptResult result)
         throws Geary.JS.Error {
         return Geary.JS.to_object(result.get_global_context(),
                                   result.get_value());

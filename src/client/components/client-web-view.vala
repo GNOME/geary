@@ -392,7 +392,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      * Returns the view's content as an HTML string.
      */
     public async string? get_html() throws Error {
-        return WebKitUtil.to_string(
+        return Util.WebKit.to_string(
             yield call(Geary.JS.callable("geary.getHtml"), null)
         );
     }
@@ -617,7 +617,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     private void on_preferred_height_changed(WebKit.JavascriptResult result) {
         double height = this.webkit_reported_height;
         try {
-            height = WebKitUtil.to_number(result);
+            height = Util.WebKit.to_number(result);
         } catch (Geary.JS.Error err) {
             debug("Could not get preferred height: %s", err.message);
         }
@@ -630,7 +630,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
     private void on_command_stack_changed(WebKit.JavascriptResult result) {
         try {
-            string[] values = WebKitUtil.to_string(result).split(",");
+            string[] values = Util.WebKit.to_string(result).split(",");
             command_stack_changed(values[0] == "true", values[1] == "true");
         } catch (Geary.JS.Error err) {
             debug("Could not get command stack state: %s", err.message);
@@ -652,7 +652,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
     private void on_selection_changed(WebKit.JavascriptResult result) {
         try {
-            bool has_selection = WebKitUtil.to_bool(result);
+            bool has_selection = Util.WebKit.to_bool(result);
             // Avoid firing multiple notifies if the value hasn't
             // changed
             if (this.has_selection != has_selection) {

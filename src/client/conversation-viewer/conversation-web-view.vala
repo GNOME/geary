@@ -75,7 +75,7 @@ public class ConversationWebView : ClientWebView {
         WebKit.JavascriptResult result = yield call(
             Geary.JS.callable("geary.getSelectionForFind"), null
         );
-        return WebKitUtil.to_string(result);
+        return Util.WebKit.to_string(result);
     }
 
     /**
@@ -85,7 +85,7 @@ public class ConversationWebView : ClientWebView {
         WebKit.JavascriptResult result = yield call(
             Geary.JS.callable("geary.getSelectionForQuoting"), null
         );
-        return WebKitUtil.to_string(result);
+        return Util.WebKit.to_string(result);
     }
 
     /**
@@ -97,7 +97,7 @@ public class ConversationWebView : ClientWebView {
             Geary.JS.callable("geary.getAnchorTargetY")
             .string(anchor_body), null
         );
-        return (int) WebKitUtil.to_number(result);
+        return (int) Util.WebKit.to_number(result);
     }
 
     /**
@@ -199,7 +199,7 @@ public class ConversationWebView : ClientWebView {
     private void on_deceptive_link_clicked(WebKit.JavascriptResult result) {
         try {
             unowned JS.GlobalContext context = result.get_global_context();
-            JS.Object details = WebKitUtil.to_object(result);
+            JS.Object details = Util.WebKit.to_object(result);
 
             uint reason = (uint) Geary.JS.to_number(
                 context,
