@@ -15,9 +15,14 @@ public enum TextFormat {
 }
 
 /**
- * Official IANA charset encoding name for UTF-8.
+ * Official IANA charset encoding name for the UTF-8 character set.
  */
 public const string UTF8_CHARSET = "UTF-8";
+
+/**
+ * Official IANA charset encoding name for the ASCII  character set.
+ */
+public const string ASCII_CHARSET = "US-ASCII";
 
 private int init_count = 0;
 
@@ -45,6 +50,20 @@ public void init() {
     } catch (RegexError e) {
         assert_not_reached();
     }
+}
+
+
+internal bool is_utf_8(string charset) {
+    string up = charset.up();
+    return (
+        // ASCII is a subset of UTF-8, so it's also valid
+        up == "ASCII" ||
+        up == "US-ASCII" ||
+        up == "US_ASCII" ||
+        up == "UTF-8" ||
+        up == "UTF8" ||
+        up == "UTF_8"
+    );
 }
 
 }

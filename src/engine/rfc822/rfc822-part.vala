@@ -237,16 +237,3 @@ public class Geary.RFC822.Part : Object {
     }
 
 }
-
-private inline bool is_utf_8(string charset) {
-    string up = charset.up();
-    return (
-        // ASCII is a subset of UTF-8, so it's also valid
-        up == "ASCII" ||
-        up == "US-ASCII" ||
-        up == "US_ASCII" ||
-        up == "UTF-8" ||
-        up == "UTF8" ||
-        up == "UTF_8"
-    );
-}
