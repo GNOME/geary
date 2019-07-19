@@ -436,25 +436,38 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         GMime.Part part = new GMime.Part();
         part.set_disposition(disposition.serialize());
         part.set_filename(file.get_basename());
-        part.set_content_type(
-            new GMime.ContentType.from_string(file_info.get_content_type())
-        );
 
-        // This encoding is the initial encoding of the stream.
+        GMime.ContentType content_type = new GMime.ContentType.from_string(
+            file_info.get_content_type()
+        );
+        part.set_content_type(content_type);
+
         GMime.StreamGIO stream = new GMime.StreamGIO(file);
         stream.set_owner(false);
+
+        // Text parts should be scanned fully to determine best
+        // (i.e. most compact) transport encoding to use, but
+        // that's usually fine since they tend to be
+        // small. Non-text parts are nearly always going to be
+        // binary, so we just assume they require Base64.
+        //
+        // XXX We should be setting the content encoding lazily
+        // though because if sending via a MTA that supports 8-bit
+        // or binary transfer modes, we can avoid using a content
+        // encoding altogether.
+        GMime.ContentEncoding encoding = BASE64;
+        if (content_type.is_type("text", Mime.ContentType.WILDCARD)) {
+            encoding = yield Utils.get_best_encoding(
+                stream,
+                GMime.EncodingConstraint.7BIT,
+                cancellable
+            );
+        }
+
+        part.set_content_encoding(encoding);
         part.set_content_object(
             new GMime.DataWrapper.with_stream(
                 stream, GMime.ContentEncoding.BINARY
-            )
-        );
-        part.set_content_encoding(
-            yield Utils.get_best_encoding(
-                stream,
-                // Determine this from the MTA's capabilities at send
-                // time
-                GMime.EncodingConstraint.7BIT,
-                cancellable
             )
         );
         return part;
