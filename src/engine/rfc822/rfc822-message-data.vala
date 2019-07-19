@@ -396,7 +396,7 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         if (gpart != null) {
             Part part = new Part(gpart);
 
-            Mime.ContentType content_type = part.get_effective_content_type();
+            Mime.ContentType content_type = part.content_type;
             bool is_plain = content_type.is_type("text", "plain");
             bool is_html = content_type.is_type("text", "html");
 
@@ -408,18 +408,12 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
                 );
                 gpart.set_content_object(body);
 
-                ByteArray output = new ByteArray();
-                GMime.StreamMem output_stream =
-                    new GMime.StreamMem.with_byte_array(output);
-                output_stream.set_owner(false);
-
                 try {
-                    part.write_to_stream(output_stream);
-                    uint8[] data = output.data;
-                    data += (uint8) '\0';
-
+                    Memory.Buffer preview_buffer = part.write_to_buffer(
+                        Part.EncodingConversion.UTF8
+                    );
                     preview_text = Geary.RFC822.Utils.to_preview_text(
-                        (string) data,
+                        preview_buffer.get_valid_utf8(),
                         is_html ? TextFormat.HTML : TextFormat.PLAIN
                     );
                 } catch (RFC822Error err) {

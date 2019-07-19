@@ -205,7 +205,7 @@ public class Application.Contact : Geary.BaseObject {
         update();
         changed();
 
-        open_on_desktop(cancellable);
+        yield open_on_desktop(cancellable);
 
         // XXX Un-comment and use the section below instead of the
         // code above when something has been done about

@@ -43,7 +43,9 @@ async void main_async() throws Error {
                 composed_email.body_html = contents;
             }
 
-            msg = new Geary.RFC822.Message.from_composed_email(composed_email, null);
+            msg = yield new Geary.RFC822.Message.from_composed_email(
+                composed_email, null, null
+            );
         }
 
         stdout.printf("\n\n%s\n\n", msg.to_string());

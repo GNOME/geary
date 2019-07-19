@@ -91,13 +91,15 @@ class Integration.Smtp.ClientSession : TestCase {
                 null, this.config.credentials.user
             );
 
-        Geary.RFC822.Message message = new_message(
+        this.new_message.begin(
             return_path,
             new Geary.RFC822.MailboxAddress(
                 "Geary integration test",
                 this.config.credentials.user
-            )
+            ),
+            async_complete_full
         );
+        Geary.RFC822.Message message = new_message.end(async_result());
 
         this.session.send_email_async.begin(
             return_path,
@@ -115,8 +117,8 @@ class Integration.Smtp.ClientSession : TestCase {
         this.session.login_async.end(async_result());
     }
 
-    private Geary.RFC822.Message new_message(Geary.RFC822.MailboxAddress from,
-                                             Geary.RFC822.MailboxAddress to) {
+    private async Geary.RFC822.Message new_message(Geary.RFC822.MailboxAddress from,
+                                                   Geary.RFC822.MailboxAddress to) {
         Geary.ComposedEmail composed = new Geary.ComposedEmail(
             new GLib.DateTime.now_local(),
             new Geary.RFC822.MailboxAddresses.single(from),
@@ -128,9 +130,10 @@ class Integration.Smtp.ClientSession : TestCase {
             null
         );
 
-        return new Geary.RFC822.Message.from_composed_email(
+        return yield new Geary.RFC822.Message.from_composed_email(
             composed,
-            GMime.utils_generate_message_id(from.domain)
+            GMime.utils_generate_message_id(from.domain),
+            null
         );
     }
 

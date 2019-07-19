@@ -1473,7 +1473,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             try {
                 Geary.ComposedEmail draft = yield get_composed_email(null, true);
                 this.draft_manager.update(
-                    draft.to_rfc822_message(), this.draft_flags, null
+                    yield draft.to_rfc822_message(null, null),
+                    this.draft_flags,
+                    null
                 );
             } catch (Error err) {
                 GLib.message("Unable to save draft: %s", err.message);

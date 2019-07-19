@@ -929,7 +929,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     // returns HTML that is placed into the document in the position
     // where the MIME part was found
     private string? inline_image_replacer(Geary.RFC822.Part part) {
-        Geary.Mime.ContentType content_type = part.get_effective_content_type();
+        Geary.Mime.ContentType content_type = part.content_type;
         if (content_type.media_type != "image" ||
             !this.web_view.can_show_mime_type(content_type.to_string())) {
             debug("Not displaying %s inline: unsupported Content-Type",
@@ -943,7 +943,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         }
 
         try {
-            this.web_view.add_internal_resource(id, part.write_to_buffer());
+            this.web_view.add_internal_resource(
+                id,
+                part.write_to_buffer(Geary.RFC822.Part.EncodingConversion.UTF8)
+            );
         } catch (Geary.RFC822Error err) {
             debug("Failed to get inline buffer: %s", err.message);
             return null;
