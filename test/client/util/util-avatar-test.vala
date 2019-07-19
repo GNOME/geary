@@ -13,22 +13,22 @@ public class Util.Avatar.Test : TestCase {
     }
 
     public void extract_initials() throws GLib.Error {
-        assert_string("A", extract_initials_from_name("aardvark"));
-        assert_string("AB", extract_initials_from_name("aardvark baardvark"));
-        assert_string("AB", extract_initials_from_name("aardvark  baardvark"));
-        assert_string("AC", extract_initials_from_name("aardvark baardvark caardvark"));
+        assert_string("A", extract_initials_from_name("aardvark"), "basic");
+        assert_string("AB", extract_initials_from_name("aardvark baardvark"), "basic");
+        assert_string("AB", extract_initials_from_name("aardvark  baardvark"), "basic");
+        assert_string("AC", extract_initials_from_name("aardvark baardvark caardvark"), "basic");
 
-        assert_string("A", extract_initials_from_name("!aardvark"));
-        assert_string("AB", extract_initials_from_name("aardvark !baardvark"));
-        assert_string("AC", extract_initials_from_name("aardvark baardvark !caardvark"));
+        assert_string("A", extract_initials_from_name("!aardvark"), "extra sym");
+        assert_string("AB", extract_initials_from_name("aardvark !baardvark"), "extra sym");
+        assert_string("AC", extract_initials_from_name("aardvark baardvark !caardvark"), "extra sym");
 
-        assert_true(extract_initials_from_name("") == null);
-        assert_true(extract_initials_from_name(" ") == null);
-        assert_true(extract_initials_from_name("  ") == null);
-        assert_true(extract_initials_from_name("!") == null);
-        assert_true(extract_initials_from_name("!!") == null);
-        assert_true(extract_initials_from_name("! !") == null);
-        assert_true(extract_initials_from_name("! !!") == null);
+        assert_true(extract_initials_from_name("") == null, "edge");
+        assert_true(extract_initials_from_name(" ") == null, "edge");
+        assert_true(extract_initials_from_name("  ") == null, "edge");
+        assert_true(extract_initials_from_name("!") == null, "edge");
+        assert_true(extract_initials_from_name("!!") == null, "edge");
+        assert_true(extract_initials_from_name("! !") == null, "edge");
+        assert_true(extract_initials_from_name("! !!") == null, "edge");
     }
 
 }
