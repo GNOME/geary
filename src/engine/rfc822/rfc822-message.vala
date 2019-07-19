@@ -1070,12 +1070,16 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         throws GLib.Error {
         GMime.Stream content_stream = new GMime.StreamMem.with_buffer(content);
         if (charset == null) {
-            charset = Geary.RFC822.Utils.get_best_charset(content_stream);
+            charset = yield Utils.get_best_charset(content_stream, cancellable);
         }
         GMime.StreamFilter filter_stream = new GMime.StreamFilter(content_stream);
         filter_stream.add(new GMime.FilterCharset(UTF8_CHARSET, charset));
         if (encoding == null) {
-            encoding = Geary.RFC822.Utils.get_best_encoding(filter_stream);
+            encoding = yield Utils.get_best_encoding(
+                filter_stream,
+                GMime.EncodingConstraint.7BIT,
+                cancellable
+            );
         }
         if (is_flowed && encoding == GMime.ContentEncoding.BASE64) {
             // Base64-encoded text needs to have CR's added after LF's

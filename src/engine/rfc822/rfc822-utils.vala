@@ -254,37 +254,54 @@ public string to_preview_text(string? text, TextFormat format) {
 /**
  * Uses a GMime.FilterBest to determine the best charset.
  *
- * WARNING: This call does not perform async I/O, meaning it will loop on the
- * stream without relinquishing control to the event loop.  Use with
- * caution.
+ * This may require processing the entire stream, so occurs in a
+ * background thread.
  */
-public string get_best_charset(GMime.Stream in_stream) {
+public async string get_best_charset(GMime.Stream in_stream,
+                                     GLib.Cancellable? cancellable)
+    throws GLib.Error {
     GMime.FilterBest filter = new GMime.FilterBest(
         GMime.FilterBestFlags.CHARSET
     );
-    GMime.StreamFilter out_stream = new GMime.StreamFilter(new GMime.StreamNull());
+    GMime.StreamFilter out_stream = new GMime.StreamFilter(
+        new GMime.StreamNull()
+    );
     out_stream.add(filter);
-    in_stream.write_to_stream(out_stream);
-    in_stream.reset();
+
+    yield Nonblocking.Concurrent.global.schedule_async(() => {
+            in_stream.write_to_stream(out_stream);
+            in_stream.reset();
+        },
+        cancellable
+    );
     return filter.charset();
 }
 
 /**
  * Uses a GMime.FilterBest to determine the best encoding.
  *
- * WARNING: This call does not perform async I/O, meaning it will loop on the
- * stream without relinquishing control to the event loop.  Use with
- * caution.
+ * This may require processing the entire stream, so occurs in a
+ * background thread.
  */
-public GMime.ContentEncoding get_best_encoding(GMime.Stream in_stream) {
+public async GMime.ContentEncoding get_best_encoding(GMime.Stream in_stream,
+                                                     GMime.EncodingConstraint constraint,
+                                                     GLib.Cancellable? cancellable)
+    throws GLib.Error {
     GMime.FilterBest filter = new GMime.FilterBest(
         GMime.FilterBestFlags.ENCODING
     );
-    GMime.StreamFilter out_stream = new GMime.StreamFilter(new GMime.StreamNull());
+    GMime.StreamFilter out_stream = new GMime.StreamFilter(
+        new GMime.StreamNull()
+    );
     out_stream.add(filter);
-    in_stream.write_to_stream(out_stream);
-    in_stream.reset();
-    return filter.encoding(GMime.EncodingConstraint.7BIT);
+
+    yield Nonblocking.Concurrent.global.schedule_async(() => {
+            in_stream.write_to_stream(out_stream);
+            in_stream.reset();
+        },
+        cancellable
+    );
+    return filter.encoding(constraint);
 }
 
 }
