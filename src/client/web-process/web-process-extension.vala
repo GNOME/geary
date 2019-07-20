@@ -86,15 +86,17 @@ public class GearyWebExtension : Object {
     private bool should_load_remote_images(WebKit.WebPage page) {
         bool should_load = false;
         WebKit.Frame frame = page.get_main_frame();
-        // Explicit cast fixes build on s390x/ppc64. Bug 783882
-        unowned JS.GlobalContext context = (JS.GlobalContext)
-            frame.get_javascript_global_context();
+        JSC.Context context = frame.get_js_context();
         try {
-            unowned JS.Value ret = execute_script(
-                context, "geary.allowRemoteImages", int.parse("__LINE__")
+            JSC.Value ret = execute_script(
+                context,
+                "geary.allowRemoteImages",
+                GLib.Log.FILE,
+                GLib.Log.METHOD,
+                GLib.Log.LINE
             );
-            should_load = ret.to_boolean(context);
-        } catch (Error err) {
+            should_load = Geary.JS.to_bool(ret);
+        } catch (GLib.Error err) {
             debug(
                 "Error checking PageState::allowRemoteImages: %s",
                 err.message
@@ -105,12 +107,14 @@ public class GearyWebExtension : Object {
 
     private void remote_image_load_blocked(WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
-        // Explicit cast fixes build on s390x/ppc64. Bug 783882
-        unowned JS.GlobalContext context = (JS.GlobalContext)
-            frame.get_javascript_global_context();
+        JSC.Context context = frame.get_js_context();
         try {
             execute_script(
-                context, "geary.remoteImageLoadBlocked();", int.parse("__LINE__")
+                context,
+                "geary.remoteImageLoadBlocked();",
+                GLib.Log.FILE,
+                GLib.Log.METHOD,
+                GLib.Log.LINE
             );
         } catch (Error err) {
             debug(
@@ -122,33 +126,31 @@ public class GearyWebExtension : Object {
 
     private void selection_changed(WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
-        // Explicit cast fixes build on s390x/ppc64. Bug 783882
-        unowned JS.GlobalContext context = (JS.GlobalContext)
-            frame.get_javascript_global_context();
+        JSC.Context context = frame.get_js_context();
         try {
             execute_script(
-                context, "geary.selectionChanged();", int.parse("__LINE__")
+                context,
+                "geary.selectionChanged();",
+                GLib.Log.FILE,
+                GLib.Log.METHOD,
+                GLib.Log.LINE
             );
         } catch (Error err) {
             debug("Error calling PageStates::selectionChanged: %s", err.message);
         }
     }
 
-    // Return type is nullable as a workaround for Bug 778046, it will
-    // never actually be null.
-    private unowned JS.Value? execute_script(JS.Context context, string script, int line)
-    throws Geary.JS.Error {
-        JS.String js_script = new JS.String.create_with_utf8_cstring(script);
-        JS.String js_source = new JS.String.create_with_utf8_cstring("__FILE__");
-        JS.Value? err = null;
-        try {
-            unowned JS.Value ret = context.evaluate_script(
-                js_script, null, js_source, line, out err
-            );
-            Geary.JS.check_exception(context, err);
-            return ret;
-        } finally {
-        }
+    private JSC.Value execute_script(JSC.Context context,
+                                     string script,
+                                     string file_name,
+                                     string method_name,
+                                     int line_number)
+        throws Geary.JS.Error {
+        JSC.Value ret = context.evaluate_with_source_uri(
+            script, -1, "geary:%s/%s".printf(file_name, method_name), line_number
+        );
+        Geary.JS.check_exception(context);
+        return ret;
     }
 
 }

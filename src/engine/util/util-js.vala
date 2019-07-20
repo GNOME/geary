@@ -10,16 +10,6 @@
  */
 namespace Geary.JS {
 
-#if !VALA_0_42
-    // Workaround broken version of this in the vala bindings. See Bug
-    // 788113.
-    [CCode (cname = "JSStringGetUTF8CString")]
-    private extern size_t js_string_get_utf8_cstring(
-        global::JS.String js,
-        [CCode (array_length_type = "gsize")] char[] buffer
-    );
-#endif
-
     /**
      * Errors produced by functions in {@link Geary.JS}.
      */
@@ -36,32 +26,52 @@ namespace Geary.JS {
     }
 
     /**
-     * Determines if a {@link JS.Value} object is {{{null}}}.
+     * Returns a JSC Value as a bool.
      *
-     * @return `true` if `js` is `null` or has a {@link JS.Type} of
-     * `NULL` according to `context`.
+     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * value is not a JavaScript `Boolean`.
      */
-    public inline bool is_null(global::JS.Context context,
-                               global::JS.Value? js) {
-        return (js == null || js.get_type(context) == global::JS.Type.NULL);
+    public bool to_bool(JSC.Value value)
+        throws Geary.JS.Error {
+        if (!value.is_boolean()) {
+            throw new Geary.JS.Error.TYPE("Value is not a JS Boolean object");
+        }
+        bool boolean = value.to_boolean();
+        Geary.JS.check_exception(value.context);
+        return boolean;
     }
 
     /**
-     * Returns a JSC Value as a number.
+     * Returns a JSC Value as a double.
      *
      * This will raise a {@link Geary.JS.Error.TYPE} error if the
      * value is not a JavaScript `Number`.
      */
-    public double to_number(global::JS.Context context,
-                            global::JS.Value value)
+    public double to_double(JSC.Value value)
         throws Geary.JS.Error {
-        if (!value.is_number(context)) {
+        if (!value.is_number()) {
             throw new Geary.JS.Error.TYPE("Value is not a JS Number object");
         }
 
-        global::JS.Value? err = null;
-        double number = value.to_number(context, out err);
-        Geary.JS.check_exception(context, err);
+        double number = value.to_double();
+        Geary.JS.check_exception(value.context);
+        return number;
+    }
+
+    /**
+     * Returns a JSC Value as an int32.
+     *
+     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * value is not a JavaScript `Number`.
+     */
+    public int32 to_int32(JSC.Value value)
+        throws Geary.JS.Error {
+        if (!value.is_number()) {
+            throw new Geary.JS.Error.TYPE("Value is not a JS Number object");
+        }
+
+        int32 number = value.to_int32();
+        Geary.JS.check_exception(value.context);
         return number;
     }
 
@@ -71,103 +81,48 @@ namespace Geary.JS {
      * This will raise a {@link Geary.JS.Error.TYPE} error if the
      * value is not a JavaScript `String`.
      */
-    public string to_string(global::JS.Context context,
-                            global::JS.Value value)
+    public string to_string(JSC.Value value)
         throws Geary.JS.Error {
-        if (!value.is_string(context)) {
+        if (!value.is_string()) {
             throw new Geary.JS.Error.TYPE("Value is not a JS String object");
         }
 
-        global::JS.Value? err = null;
-        global::JS.String js_str = value.to_string_copy(context, out err);
-        Geary.JS.check_exception(context, err);
-
-        return to_native_string(js_str);
+        string str = value.to_string();
+        Geary.JS.check_exception(value.context);
+        return str;
     }
 
     /**
-     * Returns a JSC Value as an object.
+     * Returns the value of an object property.
      *
      * This will raise a {@link Geary.JS.Error.TYPE} error if the
-     * value is not a JavaScript `Object`.
-     *
-     * Return type is nullable as a workaround for Bug 778046, it will
-     * never actually be null.
+     * value is not an object or does not contain the named property.
      */
-    public global::JS.Object? to_object(global::JS.Context context,
-                                       global::JS.Value value)
+    public inline JSC.Value get_property(JSC.Value value,
+                                         string name)
         throws Geary.JS.Error {
-        if (!value.is_object(context)) {
+        if (!value.is_object()) {
             throw new Geary.JS.Error.TYPE("Value is not a JS Object");
         }
 
-        global::JS.Value? err = null;
-        global::JS.Object js_obj = value.to_object(context, out err);
-        Geary.JS.check_exception(context, err);
-
-        return js_obj;
-    }
-
-    /**
-     * Returns a JSC {@link JS.String} as a Vala {@link string}.
-     */
-    public inline string to_native_string(global::JS.String js) {
-        size_t len = js.get_maximum_utf8_cstring_size();
-        uint8[] str = new uint8[len];
-#if VALA_0_42
-        js.get_utf8_cstring(str);
-#else
-        js_string_get_utf8_cstring(js, (char[]) str);
-#endif
-        return (string) str;
-    }
-
-    /**
-     * Returns the value of an object's property.
-     *
-     * This will raise a {@link Geary.JS.Error.TYPE} error if the
-     * object does not contain the named property.
-     *
-     * Return type is nullable as a workaround for Bug 778046, it will
-     * never actually be null.
-     */
-    public inline global::JS.Value? get_property(global::JS.Context context,
-                                                global::JS.Object object,
-                                                string name)
-        throws Geary.JS.Error {
-        global::JS.String js_name = new global::JS.String.create_with_utf8_cstring(name);
-        global::JS.Value? err = null;
-        global::JS.Value prop = object.get_property(context, js_name, out err);
-        Geary.JS.check_exception(context, err);
-
-        return prop;
+        JSC.Value property = value.object_get_property(name);
+        Geary.JS.check_exception(value.context);
+        return property;
     }
 
     /**
      * Checks an JS exception returned from a JSC call.
      *
-     * This method will raise a {@link Geary.JS.Error} if the given
-     * `err_value` is not null (in a Vala or JS sense).
+     * If the given context has a current exception, it will cleared
+     * and a {@link Geary.JS.Error} will be thrown.
      */
-    public inline void check_exception(global::JS.Context context,
-                                       global::JS.Value? err_value)
+    public inline void check_exception(JSC.Context context)
         throws Error {
-        if (!is_null(context, err_value)) {
-            global::JS.Value? nested_err = null;
-            global::JS.Type err_type = err_value.get_type(context);
-            global::JS.String err_str =
-                err_value.to_string_copy(context, out nested_err);
-
-            if (!is_null(context, nested_err)) {
-                throw new Error.EXCEPTION(
-                    "Nested exception getting exception %s as a string",
-                    err_type.to_string()
-                );
-            }
-
+        JSC.Exception? exception = context.get_exception();
+        if (exception != null) {
+            context.clear_exception();
             throw new Error.EXCEPTION(
-                "JS exception thrown [%s]: %s"
-                .printf(err_type.to_string(), to_native_string(err_str))
+                "JS exception thrown: %s", exception.to_string()
             );
         }
     }

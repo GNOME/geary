@@ -617,7 +617,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     private void on_preferred_height_changed(WebKit.JavascriptResult result) {
         double height = this.webkit_reported_height;
         try {
-            height = Util.WebKit.to_number(result);
+            height = Util.WebKit.to_double(result);
         } catch (Geary.JS.Error err) {
             debug("Could not get preferred height: %s", err.message);
         }

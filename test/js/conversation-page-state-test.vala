@@ -159,7 +159,7 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
 
     private uint exec_is_deceptive_text(string text, string href) {
         try {
-            return (uint) Util.WebKit.to_number(
+            return (uint) Util.WebKit.to_int32(
                 run_javascript(@"ConversationPageState.isDeceptiveText(\"$text\", \"$href\")")
             );
         } catch (Geary.JS.Error err) {

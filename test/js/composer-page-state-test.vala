@@ -70,7 +70,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         try {
             run_javascript(@"SelectionUtil.selectNode(document.getElementById('test'))");
             run_javascript(@"geary.indentLine()");
-            assert(Util.WebKit.to_number(run_javascript(@"document.querySelectorAll('blockquote[type=cite]').length")) == 1);
+            assert(Util.WebKit.to_int32(run_javascript(@"document.querySelectorAll('blockquote[type=cite]').length")) == 1);
             assert(Util.WebKit.to_string(run_javascript(@"document.querySelectorAll('blockquote[type=cite]').item(0).innerText")) ==
                 "some text");
         } catch (Geary.JS.Error err) {

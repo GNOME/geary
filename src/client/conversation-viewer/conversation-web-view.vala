@@ -97,7 +97,7 @@ public class ConversationWebView : ClientWebView {
             Geary.JS.callable("geary.getAnchorTargetY")
             .string(anchor_body), null
         );
-        return (int) Util.WebKit.to_number(result);
+        return (int) Util.WebKit.to_int32(result);
     }
 
     /**
@@ -198,38 +198,34 @@ public class ConversationWebView : ClientWebView {
 
     private void on_deceptive_link_clicked(WebKit.JavascriptResult result) {
         try {
-            unowned JS.GlobalContext context = result.get_global_context();
-            JS.Object details = Util.WebKit.to_object(result);
-
-            uint reason = (uint) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, details, "reason"));
+            JSC.Value object = result.get_js_value();
+            uint reason = (uint) Geary.JS.to_int32(
+                Geary.JS.get_property(object, "reason")
+            );
 
             string href = Geary.JS.to_string(
-                context,
-                Geary.JS.get_property(context, details, "href"));
+                Geary.JS.get_property(object, "href")
+            );
 
             string text = Geary.JS.to_string(
-                context,
-                Geary.JS.get_property(context, details, "text"));
+                Geary.JS.get_property(object, "text")
+            );
 
-            JS.Object js_location = Geary.JS.to_object(
-                context,
-                Geary.JS.get_property(context, details, "location"));
+            JSC.Value js_location = Geary.JS.get_property(object, "location");
 
             Gdk.Rectangle location = Gdk.Rectangle();
-            location.x = (int) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, js_location, "x"));
-            location.y = (int) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, js_location, "y"));
-            location.width = (int) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, js_location, "width"));
-            location.height = (int) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, js_location, "height"));
+            location.x = Geary.JS.to_int32(
+                Geary.JS.get_property(js_location, "x")
+            );
+            location.y = Geary.JS.to_int32(
+                Geary.JS.get_property(js_location, "y")
+            );
+            location.width = Geary.JS.to_int32(
+                Geary.JS.get_property(js_location, "width")
+            );
+            location.height = Geary.JS.to_int32(
+                Geary.JS.get_property(js_location, "height")
+            );
 
             deceptive_link_clicked((DeceptiveText) reason, text, href, location);
         } catch (Geary.JS.Error err) {
