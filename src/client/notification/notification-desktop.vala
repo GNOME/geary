@@ -186,13 +186,22 @@ public class Notification.Desktop : Geary.BaseObject {
         notification.set_icon(
             new GLib.ThemedIcon("%s-symbolic".printf(GearyApplication.APP_ID))
         );
-        if (action != null) {
-            notification.set_default_action_and_target_value(
-                action, action_target
-            );
+
+        /* We do not show notification action under Unity */
+
+        if (this.application.config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+            this.application.send_notification(id, notification);
+            return notification;
+        } else {
+            if (action != null) {
+                notification.set_default_action_and_target_value(
+                    action, action_target
+                );
+            }
+
+            this.application.send_notification(id, notification);
+            return notification;
         }
-        this.application.send_notification(id, notification);
-        return notification;
     }
 
 }
