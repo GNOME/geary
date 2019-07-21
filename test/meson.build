@@ -60,7 +60,6 @@ geary_test_engine_sources = [
   'engine/util-html-test.vala',
   'engine/util-idle-manager-test.vala',
   'engine/util-inet-test.vala',
-  'engine/util-js-test.vala',
   'engine/util-string-test.vala',
   'engine/util-timeout-manager-test.vala',
 
@@ -87,6 +86,7 @@ geary_test_client_sources = [
   'client/util/util-avatar-test.vala',
   'client/util/util-cache-test.vala',
   'client/util/util-email-test.vala',
+  'client/util/util-js-test.vala',
 
   'js/client-page-state-test.vala',
   'js/composer-page-state-test.vala',
@@ -107,8 +107,7 @@ geary_test_integration_sources = [
 
 geary_test_lib_dependencies = [
   gee,
-  gio,
-  glib
+  gio
 ]
 
 geary_test_lib = static_library('test-lib',

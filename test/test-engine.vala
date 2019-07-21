@@ -71,7 +71,6 @@ int main(string[] args) {
     engine.add_suite(new Geary.ContactStoreImplTest().get_suite());
 
     engine.add_suite(new Geary.Inet.Test().get_suite());
-    engine.add_suite(new Geary.JS.Test().get_suite());
     engine.add_suite(new Geary.Mime.ContentTypeTest().get_suite());
     engine.add_suite(new Geary.Outbox.EmailIdentifierTest().get_suite());
     engine.add_suite(new Geary.RFC822.MailboxAddressTest().get_suite());

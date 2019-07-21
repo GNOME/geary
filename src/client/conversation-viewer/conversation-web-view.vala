@@ -73,9 +73,9 @@ public class ConversationWebView : ClientWebView {
      */
     public async string? get_selection_for_find() throws Error{
         WebKit.JavascriptResult result = yield call(
-            Geary.JS.callable("geary.getSelectionForFind"), null
+            Util.JS.callable("geary.getSelectionForFind"), null
         );
-        return WebKitUtil.to_string(result);
+        return Util.WebKit.to_string(result);
     }
 
     /**
@@ -83,9 +83,9 @@ public class ConversationWebView : ClientWebView {
      */
     public async string? get_selection_for_quoting() throws Error {
         WebKit.JavascriptResult result = yield call(
-            Geary.JS.callable("geary.getSelectionForQuoting"), null
+            Util.JS.callable("geary.getSelectionForQuoting"), null
         );
-        return WebKitUtil.to_string(result);
+        return Util.WebKit.to_string(result);
     }
 
     /**
@@ -94,10 +94,10 @@ public class ConversationWebView : ClientWebView {
     public async int? get_anchor_target_y(string anchor_body)
         throws GLib.Error {
         WebKit.JavascriptResult result = yield call(
-            Geary.JS.callable("geary.getAnchorTargetY")
+            Util.JS.callable("geary.getAnchorTargetY")
             .string(anchor_body), null
         );
-        return (int) WebKitUtil.to_number(result);
+        return (int) Util.WebKit.to_int32(result);
     }
 
     /**
@@ -198,41 +198,37 @@ public class ConversationWebView : ClientWebView {
 
     private void on_deceptive_link_clicked(WebKit.JavascriptResult result) {
         try {
-            unowned JS.GlobalContext context = result.get_global_context();
-            JS.Object details = WebKitUtil.to_object(result);
+            JSC.Value object = result.get_js_value();
+            uint reason = (uint) Util.JS.to_int32(
+                Util.JS.get_property(object, "reason")
+            );
 
-            uint reason = (uint) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, details, "reason"));
+            string href = Util.JS.to_string(
+                Util.JS.get_property(object, "href")
+            );
 
-            string href = Geary.JS.to_string(
-                context,
-                Geary.JS.get_property(context, details, "href"));
+            string text = Util.JS.to_string(
+                Util.JS.get_property(object, "text")
+            );
 
-            string text = Geary.JS.to_string(
-                context,
-                Geary.JS.get_property(context, details, "text"));
-
-            JS.Object js_location = Geary.JS.to_object(
-                context,
-                Geary.JS.get_property(context, details, "location"));
+            JSC.Value js_location = Util.JS.get_property(object, "location");
 
             Gdk.Rectangle location = Gdk.Rectangle();
-            location.x = (int) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, js_location, "x"));
-            location.y = (int) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, js_location, "y"));
-            location.width = (int) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, js_location, "width"));
-            location.height = (int) Geary.JS.to_number(
-                context,
-                Geary.JS.get_property(context, js_location, "height"));
+            location.x = Util.JS.to_int32(
+                Util.JS.get_property(js_location, "x")
+            );
+            location.y = Util.JS.to_int32(
+                Util.JS.get_property(js_location, "y")
+            );
+            location.width = Util.JS.to_int32(
+                Util.JS.get_property(js_location, "width")
+            );
+            location.height = Util.JS.to_int32(
+                Util.JS.get_property(js_location, "height")
+            );
 
             deceptive_link_clicked((DeceptiveText) reason, text, href, location);
-        } catch (Geary.JS.Error err) {
+        } catch (Util.JS.Error err) {
             debug("Could not get deceptive link param: %s", err.message);
         }
     }

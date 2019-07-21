@@ -53,6 +53,7 @@ int main(string[] args) {
     client.add_suite(new Util.Avatar.Test().get_suite());
     client.add_suite(new Util.Cache.Test().get_suite());
     client.add_suite(new Util.Email.Test().get_suite());
+    client.add_suite(new Util.JS.Test().get_suite());
 
     TestSuite js = new TestSuite("js");
 
