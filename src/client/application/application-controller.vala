@@ -38,6 +38,8 @@ public class Application.Controller : Geary.BaseObject {
     public const string ACTION_CONVERSATION_LIST = "focus-conv-list";
     public const string ACTION_TOGGLE_SEARCH = "toggle-search";
     public const string ACTION_TOGGLE_FIND = "toggle-find";
+    public const string ACTION_CONVERSATION_UP = "up-conversation";
+    public const string ACTION_CONVERSATION_DOWN = "down-conversation";
 
     // Properties
     public const string PROP_SELECTED_CONVERSATIONS ="selected-conversations";
@@ -197,6 +199,8 @@ public class Application.Controller : Geary.BaseObject {
         {ACTION_DELETE_CONVERSATION,   on_delete_conversation       },
         {ACTION_COPY_MENU,             on_show_copy_menu            },
         {ACTION_MOVE_MENU,             on_show_move_menu            },
+        {ACTION_CONVERSATION_UP,       on_conversation_up           },
+        {ACTION_CONVERSATION_DOWN,     on_conversation_down         },
         // Message marking actions
         {ACTION_SHOW_MARK_MENU,     on_show_mark_menu           },
         {ACTION_MARK_AS_READ,       on_mark_as_read             },
@@ -606,6 +610,8 @@ public class Application.Controller : Geary.BaseObject {
         add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0" });
         add_window_accelerators(ACTION_SEARCH, { "<Ctrl>S" });
         add_window_accelerators(ACTION_CONVERSATION_LIST, { "<Ctrl>B" });
+        add_window_accelerators(ACTION_CONVERSATION_UP, { "<Ctrl>bracketleft", "K" });
+        add_window_accelerators(ACTION_CONVERSATION_DOWN, { "<Ctrl>bracketright", "J" });
     }
 
     private void add_window_accelerators(string action, string[] accelerators, Variant? param = null) {
@@ -2907,6 +2913,14 @@ public class Application.Controller : Geary.BaseObject {
                 err
             )
         );
+    }
+
+    private void on_conversation_up() {
+        this.main_window.conversation_list_view.scroll(Gtk.ScrollType.STEP_UP);
+    }
+
+    private void on_conversation_down() {
+        this.main_window.conversation_list_view.scroll(Gtk.ScrollType.STEP_DOWN);
     }
 
     private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {

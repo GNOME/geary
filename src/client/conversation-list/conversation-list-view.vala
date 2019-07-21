@@ -122,6 +122,39 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         selection.changed.connect(on_selection_changed);
     }
 
+    public void scroll(Gtk.ScrollType where) {
+        Gtk.TreeSelection selection = get_selection();
+        weak Gtk.TreeModel model;
+        GLib.List<Gtk.TreePath> selected = selection.get_selected_rows(out model);
+        Gtk.TreePath? target_path = null;
+        Gtk.TreeIter? target_iter = null;
+        if (selected.length() > 0) {
+            switch (where) {
+            case STEP_UP:
+                target_path = selected.first().data;
+                model.get_iter(out target_iter, target_path);
+                if (model.iter_previous(ref target_iter)) {
+                    target_path = model.get_path(target_iter);
+                } else {
+                    this.get_window().beep();
+                }
+                break;
+
+            case STEP_DOWN:
+                target_path = selected.last().data;
+                model.get_iter(out target_iter, target_path);
+                if (model.iter_next(ref target_iter)) {
+                    target_path = model.get_path(target_iter);
+                } else {
+                    this.get_window().beep();
+                }
+                break;
+            }
+
+            set_cursor(target_path, null, false);
+        }
+    }
+
     /**
      * Specifies an action is currently changing the view's selection.
      */

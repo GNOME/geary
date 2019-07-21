@@ -244,15 +244,15 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Select next conversation down</property>
-                                <property name="accelerator">J</property>
+                                <property name="title" translatable="yes" context="shortcut window">Select the conversation down</property>
+                                <property name="accelerator">&lt;primary&gt;bracketright J</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Select previous conversation up</property>
-                                <property name="accelerator">K</property>
+                                <property name="title" translatable="yes" context="shortcut window">Select the conversation up</property>
+                                <property name="accelerator">&lt;primary&gt;bracketleft K</property>
                             </object>
                         </child>
                         <child>
