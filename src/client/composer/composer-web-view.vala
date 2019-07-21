@@ -218,7 +218,7 @@ public class ComposerWebView : ClientWebView {
      * subsequent calls.
      */
     public async string save_selection() throws Error {
-        return Util.WebKit.to_string(
+        return Util.JS.to_string(
             yield call(Util.JS.callable("geary.saveSelection"), null)
         );
     }
@@ -400,7 +400,7 @@ public class ComposerWebView : ClientWebView {
     public async bool contains_attachment_keywords(string keyword_spec,
                                                    string subject) {
         try {
-            return Util.WebKit.to_bool(
+            return Util.JS.to_bool(
                 yield call(
                     Util.JS.callable("geary.containsAttachmentKeyword")
                     .string(keyword_spec)
@@ -430,7 +430,7 @@ public class ComposerWebView : ClientWebView {
         const int MAX_BREAKABLE_LEN = 72; // F=F recommended line limit
         const int MAX_UNBREAKABLE_LEN = 998; // SMTP line limit
 
-        string body_text = Util.WebKit.to_string(
+        string body_text = Util.JS.to_string(
             yield call(Util.JS.callable("geary.getText"), null)
         );
         string[] lines = body_text.split("\n");
@@ -506,7 +506,9 @@ public class ComposerWebView : ClientWebView {
 
     private void on_cursor_context_changed(WebKit.JavascriptResult result) {
         try {
-            cursor_context_changed(new EditContext(Util.WebKit.to_string(result)));
+            cursor_context_changed(
+                new EditContext(Util.JS.to_string(result.get_js_value()))
+            );
         } catch (Util.JS.Error err) {
             debug("Could not get text cursor style: %s", err.message);
         }
