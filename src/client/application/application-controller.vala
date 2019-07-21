@@ -601,9 +601,9 @@ public class Application.Controller : Geary.BaseObject {
         add_window_accelerators(ACTION_ARCHIVE_CONVERSATION, { "A" });
         add_window_accelerators(ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" });
         add_window_accelerators(ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" });
-        add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "equal" });
-        add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus", "minus" });
-        add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0", "0" });
+        add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "<Ctrl>plus" });
+        add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus" });
+        add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0" });
         add_window_accelerators(ACTION_SEARCH, { "<Ctrl>S" });
         add_window_accelerators(ACTION_CONVERSATION_LIST, { "<Ctrl>B" });
     }
