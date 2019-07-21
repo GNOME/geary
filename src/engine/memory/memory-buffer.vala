@@ -104,8 +104,8 @@ public abstract class Geary.Memory.Buffer : BaseObject {
      * Returns a copy of the contents of the buffer as a UTF-8 string.
      *
      * The base class implementation uses {@link to_string} to create
-     * the string and and {@link GLib.string.make_valid} to perform
-     * the validation.  Subclasses should look for more optimal
+     * the string and and {@link string.make_valid} to perform the
+     * validation. Subclasses should look for more optimal
      * implementations.
      */
     public virtual string get_valid_utf8() {
