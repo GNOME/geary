@@ -393,7 +393,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      */
     public async string? get_html() throws Error {
         return Util.WebKit.to_string(
-            yield call(Geary.JS.callable("geary.getHtml"), null)
+            yield call(Util.JS.callable("geary.getHtml"), null)
         );
     }
 
@@ -438,7 +438,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      * Load any remote images previously that were blocked.
      */
     public void load_remote_images() {
-        this.call.begin(Geary.JS.callable("geary.loadRemoteImages"), null);
+        this.call.begin(Util.JS.callable("geary.loadRemoteImages"), null);
     }
 
     /**
@@ -484,14 +484,14 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                                        Cancellable? cancellable)
         throws Error {
         yield call(
-            Geary.JS.callable("geary.setEditable").bool(enabled), cancellable
+            Util.JS.callable("geary.setEditable").bool(enabled), cancellable
         );
     }
 
     /**
-     * Invokes a {@link Geary.JS.Callable} on this web view.
+     * Invokes a {@link Util.JS.Callable} on this web view.
      */
-    protected async WebKit.JavascriptResult call(Geary.JS.Callable target,
+    protected async WebKit.JavascriptResult call(Util.JS.Callable target,
                                                  Cancellable? cancellable)
     throws Error {
         return yield run_javascript(target.to_string(), cancellable);
@@ -618,7 +618,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         double height = this.webkit_reported_height;
         try {
             height = Util.WebKit.to_double(result);
-        } catch (Geary.JS.Error err) {
+        } catch (Util.JS.Error err) {
             debug("Could not get preferred height: %s", err.message);
         }
 
@@ -632,7 +632,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         try {
             string[] values = Util.WebKit.to_string(result).split(",");
             command_stack_changed(values[0] == "true", values[1] == "true");
-        } catch (Geary.JS.Error err) {
+        } catch (Util.JS.Error err) {
             debug("Could not get command stack state: %s", err.message);
         }
     }
@@ -659,7 +659,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                 this.has_selection = has_selection;
             }
             selection_changed(has_selection);
-        } catch (Geary.JS.Error err) {
+        } catch (Util.JS.Error err) {
             debug("Could not get selection content: %s", err.message);
         }
     }

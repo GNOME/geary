@@ -40,8 +40,8 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         try {
             assert(Util.WebKit.to_string(run_javascript(@"new EditContext(document.getElementById('test')).encode()"))
                    .has_prefix("1,url,"));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -56,8 +56,8 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         try {
             assert(Util.WebKit.to_string(run_javascript(@"new EditContext(document.getElementById('test')).encode()")) ==
                    "0,,Comic Sans,144");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -73,8 +73,8 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
             assert(Util.WebKit.to_int32(run_javascript(@"document.querySelectorAll('blockquote[type=cite]').length")) == 1);
             assert(Util.WebKit.to_string(run_javascript(@"document.querySelectorAll('blockquote[type=cite]').item(0).innerText")) ==
                 "some text");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -106,8 +106,8 @@ some text
             assert(!Util.WebKit.to_bool(run_javascript(
                 @"geary.containsAttachmentKeyword(\"outerquote\", \"subject text\");"
             )));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -145,8 +145,8 @@ unknown://example6.com
             run_javascript("geary.cleanContent();");
             assert(Util.WebKit.to_string(run_javascript("geary.bodyPart.innerHTML;")) ==
                    CLEAN_BODY_TEMPLATE.printf(expected));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -160,8 +160,8 @@ unknown://example6.com
         try {
             assert(Util.WebKit.to_string(run_javascript(@"window.geary.getHtml();")) ==
                    COMPLETE_BODY_TEMPLATE.printf(html));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -174,8 +174,8 @@ unknown://example6.com
         try {
             assert(Util.WebKit.to_string(run_javascript(@"window.geary.getText();")) ==
                    "para\n\n\n\n");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -189,8 +189,8 @@ unknown://example6.com
         try {
             assert(Util.WebKit.to_string(run_javascript(@"window.geary.getText();")) ==
                    @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s", err.message);
@@ -204,8 +204,8 @@ unknown://example6.com
         try {
             assert(Util.WebKit.to_string(run_javascript(@"window.geary.getText();")) ==
                    @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -257,8 +257,8 @@ unknown://example6.com
             assert(Util.WebKit.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('something.something.sf2', $complete_keys, $suffix_keys);"
             )));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -275,8 +275,8 @@ unknown://example6.com
                    "a b");
             assert(Util.WebKit.to_string(run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(multiple_nbsp)');")) ==
                    "a b c");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);

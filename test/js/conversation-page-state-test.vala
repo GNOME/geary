@@ -162,8 +162,8 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
             return (uint) Util.WebKit.to_int32(
                 run_javascript(@"ConversationPageState.isDeceptiveText(\"$text\", \"$href\")")
             );
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);

@@ -1,17 +1,17 @@
 /*
- * Copyright 2017 Michael James Gratton <mike@vee.net>
+ * Copyright 2017,2019 Michael James Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
  * Utility functions for WebKit JavaScriptCore (JSC) objects.
  */
-namespace Geary.JS {
+namespace Util.JS {
 
     /**
-     * Errors produced by functions in {@link Geary.JS}.
+     * Errors produced by functions in {@link Util.JS}.
      */
     public errordomain Error {
         /**
@@ -28,85 +28,85 @@ namespace Geary.JS {
     /**
      * Returns a JSC Value as a bool.
      *
-     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * This will raise a {@link Util.JS.Error.TYPE} error if the
      * value is not a JavaScript `Boolean`.
      */
     public bool to_bool(JSC.Value value)
-        throws Geary.JS.Error {
+        throws Util.JS.Error {
         if (!value.is_boolean()) {
-            throw new Geary.JS.Error.TYPE("Value is not a JS Boolean object");
+            throw new Util.JS.Error.TYPE("Value is not a JS Boolean object");
         }
         bool boolean = value.to_boolean();
-        Geary.JS.check_exception(value.context);
+        Util.JS.check_exception(value.context);
         return boolean;
     }
 
     /**
      * Returns a JSC Value as a double.
      *
-     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * This will raise a {@link Util.JS.Error.TYPE} error if the
      * value is not a JavaScript `Number`.
      */
     public double to_double(JSC.Value value)
-        throws Geary.JS.Error {
+        throws Util.JS.Error {
         if (!value.is_number()) {
-            throw new Geary.JS.Error.TYPE("Value is not a JS Number object");
+            throw new Util.JS.Error.TYPE("Value is not a JS Number object");
         }
 
         double number = value.to_double();
-        Geary.JS.check_exception(value.context);
+        Util.JS.check_exception(value.context);
         return number;
     }
 
     /**
      * Returns a JSC Value as an int32.
      *
-     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * This will raise a {@link Util.JS.Error.TYPE} error if the
      * value is not a JavaScript `Number`.
      */
     public int32 to_int32(JSC.Value value)
-        throws Geary.JS.Error {
+        throws Util.JS.Error {
         if (!value.is_number()) {
-            throw new Geary.JS.Error.TYPE("Value is not a JS Number object");
+            throw new Util.JS.Error.TYPE("Value is not a JS Number object");
         }
 
         int32 number = value.to_int32();
-        Geary.JS.check_exception(value.context);
+        Util.JS.check_exception(value.context);
         return number;
     }
 
     /**
      * Returns a JSC Value as a string.
      *
-     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * This will raise a {@link Util.JS.Error.TYPE} error if the
      * value is not a JavaScript `String`.
      */
     public string to_string(JSC.Value value)
-        throws Geary.JS.Error {
+        throws Util.JS.Error {
         if (!value.is_string()) {
-            throw new Geary.JS.Error.TYPE("Value is not a JS String object");
+            throw new Util.JS.Error.TYPE("Value is not a JS String object");
         }
 
         string str = value.to_string();
-        Geary.JS.check_exception(value.context);
+        Util.JS.check_exception(value.context);
         return str;
     }
 
     /**
      * Returns the value of an object property.
      *
-     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * This will raise a {@link Util.JS.Error.TYPE} error if the
      * value is not an object or does not contain the named property.
      */
     public inline JSC.Value get_property(JSC.Value value,
                                          string name)
-        throws Geary.JS.Error {
+        throws Util.JS.Error {
         if (!value.is_object()) {
-            throw new Geary.JS.Error.TYPE("Value is not a JS Object");
+            throw new Util.JS.Error.TYPE("Value is not a JS Object");
         }
 
         JSC.Value property = value.object_get_property(name);
-        Geary.JS.check_exception(value.context);
+        Util.JS.check_exception(value.context);
         return property;
     }
 
@@ -114,7 +114,7 @@ namespace Geary.JS {
      * Checks an JS exception returned from a JSC call.
      *
      * If the given context has a current exception, it will cleared
-     * and a {@link Geary.JS.Error} will be thrown.
+     * and a {@link Util.JS.Error} will be thrown.
      */
     public inline void check_exception(JSC.Context context)
         throws Error {

@@ -73,7 +73,7 @@ public class ConversationWebView : ClientWebView {
      */
     public async string? get_selection_for_find() throws Error{
         WebKit.JavascriptResult result = yield call(
-            Geary.JS.callable("geary.getSelectionForFind"), null
+            Util.JS.callable("geary.getSelectionForFind"), null
         );
         return Util.WebKit.to_string(result);
     }
@@ -83,7 +83,7 @@ public class ConversationWebView : ClientWebView {
      */
     public async string? get_selection_for_quoting() throws Error {
         WebKit.JavascriptResult result = yield call(
-            Geary.JS.callable("geary.getSelectionForQuoting"), null
+            Util.JS.callable("geary.getSelectionForQuoting"), null
         );
         return Util.WebKit.to_string(result);
     }
@@ -94,7 +94,7 @@ public class ConversationWebView : ClientWebView {
     public async int? get_anchor_target_y(string anchor_body)
         throws GLib.Error {
         WebKit.JavascriptResult result = yield call(
-            Geary.JS.callable("geary.getAnchorTargetY")
+            Util.JS.callable("geary.getAnchorTargetY")
             .string(anchor_body), null
         );
         return (int) Util.WebKit.to_int32(result);
@@ -199,36 +199,36 @@ public class ConversationWebView : ClientWebView {
     private void on_deceptive_link_clicked(WebKit.JavascriptResult result) {
         try {
             JSC.Value object = result.get_js_value();
-            uint reason = (uint) Geary.JS.to_int32(
-                Geary.JS.get_property(object, "reason")
+            uint reason = (uint) Util.JS.to_int32(
+                Util.JS.get_property(object, "reason")
             );
 
-            string href = Geary.JS.to_string(
-                Geary.JS.get_property(object, "href")
+            string href = Util.JS.to_string(
+                Util.JS.get_property(object, "href")
             );
 
-            string text = Geary.JS.to_string(
-                Geary.JS.get_property(object, "text")
+            string text = Util.JS.to_string(
+                Util.JS.get_property(object, "text")
             );
 
-            JSC.Value js_location = Geary.JS.get_property(object, "location");
+            JSC.Value js_location = Util.JS.get_property(object, "location");
 
             Gdk.Rectangle location = Gdk.Rectangle();
-            location.x = Geary.JS.to_int32(
-                Geary.JS.get_property(js_location, "x")
+            location.x = Util.JS.to_int32(
+                Util.JS.get_property(js_location, "x")
             );
-            location.y = Geary.JS.to_int32(
-                Geary.JS.get_property(js_location, "y")
+            location.y = Util.JS.to_int32(
+                Util.JS.get_property(js_location, "y")
             );
-            location.width = Geary.JS.to_int32(
-                Geary.JS.get_property(js_location, "width")
+            location.width = Util.JS.to_int32(
+                Util.JS.get_property(js_location, "width")
             );
-            location.height = Geary.JS.to_int32(
-                Geary.JS.get_property(js_location, "height")
+            location.height = Util.JS.to_int32(
+                Util.JS.get_property(js_location, "height")
             );
 
             deceptive_link_clicked((DeceptiveText) reason, text, href, location);
-        } catch (Geary.JS.Error err) {
+        } catch (Util.JS.Error err) {
             debug("Could not get deceptive link param: %s", err.message);
         }
     }

@@ -191,7 +191,9 @@ public class ComposerWebView : ClientWebView {
     public void set_rich_text(bool enabled) {
         this.is_rich_text = enabled;
         if (this.is_content_loaded) {
-            this.call.begin(Geary.JS.callable("geary.setRichText").bool(enabled), null);
+            this.call.begin(
+                Util.JS.callable("geary.setRichText").bool(enabled), null
+            );
         }
     }
 
@@ -199,14 +201,14 @@ public class ComposerWebView : ClientWebView {
      * Undoes the last edit operation.
      */
     public void undo() {
-        this.call.begin(Geary.JS.callable("geary.undo"), null);
+        this.call.begin(Util.JS.callable("geary.undo"), null);
     }
 
     /**
      * Redoes the last undone edit operation.
      */
     public void redo() {
-        this.call.begin(Geary.JS.callable("geary.redo"), null);
+        this.call.begin(Util.JS.callable("geary.redo"), null);
     }
 
     /**
@@ -217,7 +219,7 @@ public class ComposerWebView : ClientWebView {
      */
     public async string save_selection() throws Error {
         return Util.WebKit.to_string(
-            yield call(Geary.JS.callable("geary.saveSelection"), null)
+            yield call(Util.JS.callable("geary.saveSelection"), null)
         );
     }
 
@@ -225,7 +227,9 @@ public class ComposerWebView : ClientWebView {
      * Removes a saved selection.
      */
     public void free_selection(string id) {
-        this.call.begin(Geary.JS.callable("geary.freeSelection").string(id), null);
+        this.call.begin(
+            Util.JS.callable("geary.freeSelection").string(id), null
+        );
     }
 
     /**
@@ -332,7 +336,9 @@ public class ComposerWebView : ClientWebView {
      */
     public void insert_link(string href, string selection_id) {
         this.call.begin(
-            Geary.JS.callable("geary.insertLink").string(href).string(selection_id),
+            Util.JS.callable(
+                "geary.insertLink"
+            ).string(href).string(selection_id),
             null
         );
     }
@@ -341,7 +347,7 @@ public class ComposerWebView : ClientWebView {
      * Removes any A element at the current text cursor location.
      */
     public void delete_link() {
-        this.call.begin(Geary.JS.callable("geary.deleteLink"), null);
+        this.call.begin(Util.JS.callable("geary.deleteLink"), null);
     }
 
     /**
@@ -361,39 +367,42 @@ public class ComposerWebView : ClientWebView {
      * Indents the line at the current text cursor location.
      */
     public void indent_line() {
-        this.call.begin(Geary.JS.callable("geary.indentLine"), null);
+        this.call.begin(Util.JS.callable("geary.indentLine"), null);
     }
 
     public void insert_olist() {
-        this.call.begin(Geary.JS.callable("geary.insertOrderedList"), null);
+        this.call.begin(Util.JS.callable("geary.insertOrderedList"), null);
     }
 
     public void insert_ulist() {
-        this.call.begin(Geary.JS.callable("geary.insertUnorderedList"), null);
+        this.call.begin(Util.JS.callable("geary.insertUnorderedList"), null);
     }
 
     /**
      * Updates the signature block if it has not been deleted.
      */
     public new void update_signature(string signature) {
-        this.call.begin(Geary.JS.callable("geary.updateSignature").string(signature), null);
+        this.call.begin(
+            Util.JS.callable("geary.updateSignature").string(signature), null
+        );
     }
 
     /**
      * Removes the quoted message (if any) from the composer.
      */
     public void delete_quoted_message() {
-        this.call.begin(Geary.JS.callable("geary.deleteQuotedMessage"), null);
+        this.call.begin(Util.JS.callable("geary.deleteQuotedMessage"), null);
     }
 
     /**
      * Determines if the editor content contains an attachment keyword.
      */
-    public async bool contains_attachment_keywords(string keyword_spec, string subject) {
+    public async bool contains_attachment_keywords(string keyword_spec,
+                                                   string subject) {
         try {
             return Util.WebKit.to_bool(
                 yield call(
-                    Geary.JS.callable("geary.containsAttachmentKeyword")
+                    Util.JS.callable("geary.containsAttachmentKeyword")
                     .string(keyword_spec)
                     .string(subject),
                     null)
@@ -411,7 +420,7 @@ public class ComposerWebView : ClientWebView {
      * this.
      */
     public async void clean_content() throws Error {
-        this.call.begin(Geary.JS.callable("geary.cleanContent"), null);
+        this.call.begin(Util.JS.callable("geary.cleanContent"), null);
     }
 
     /**
@@ -422,7 +431,7 @@ public class ComposerWebView : ClientWebView {
         const int MAX_UNBREAKABLE_LEN = 998; // SMTP line limit
 
         string body_text = Util.WebKit.to_string(
-            yield call(Geary.JS.callable("geary.getText"), null)
+            yield call(Util.JS.callable("geary.getText"), null)
         );
         string[] lines = body_text.split("\n");
         GLib.StringBuilder flowed = new GLib.StringBuilder.sized(body_text.length);
@@ -498,7 +507,7 @@ public class ComposerWebView : ClientWebView {
     private void on_cursor_context_changed(WebKit.JavascriptResult result) {
         try {
             cursor_context_changed(new EditContext(Util.WebKit.to_string(result)));
-        } catch (Geary.JS.Error err) {
+        } catch (Util.JS.Error err) {
             debug("Could not get text cursor style: %s", err.message);
         }
     }

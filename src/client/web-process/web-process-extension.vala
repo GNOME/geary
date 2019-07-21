@@ -95,7 +95,7 @@ public class GearyWebExtension : Object {
                 GLib.Log.METHOD,
                 GLib.Log.LINE
             );
-            should_load = Geary.JS.to_bool(ret);
+            should_load = Util.JS.to_bool(ret);
         } catch (GLib.Error err) {
             debug(
                 "Error checking PageState::allowRemoteImages: %s",
@@ -145,11 +145,11 @@ public class GearyWebExtension : Object {
                                      string file_name,
                                      string method_name,
                                      int line_number)
-        throws Geary.JS.Error {
+        throws Util.JS.Error {
         JSC.Value ret = context.evaluate_with_source_uri(
             script, -1, "geary:%s/%s".printf(file_name, method_name), line_number
         );
-        Geary.JS.check_exception(context);
+        Util.JS.check_exception(context);
         return ret;
     }
 

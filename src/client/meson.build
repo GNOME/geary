@@ -104,6 +104,7 @@ geary_client_vala_sources = files(
   'util/util-gio.vala',
   'util/util-gtk.vala',
   'util/util-international.vala',
+  'util/util-js.vala',
   'util/util-migrate.vala',
   'util/util-webkit.vala',
 )
@@ -125,6 +126,7 @@ geary_client_dependencies = [
   gspell,
   gtk,
   json_glib,
+  javascriptcoregtk,
   libcanberra,
   libhandy,
   libsecret,
@@ -147,6 +149,7 @@ if libunity.found()
   geary_client_vala_options += ['-D', 'HAVE_LIBUNITY']
 endif
 
+# Main client application library
 geary_client_lib = static_library('geary-client',
   geary_client_sources,
   dependencies: geary_client_dependencies,
