@@ -107,8 +107,7 @@ geary_test_integration_sources = [
 
 geary_test_lib_dependencies = [
   gee,
-  gio,
-  glib
+  gio
 ]
 
 geary_test_lib = static_library('test-lib',

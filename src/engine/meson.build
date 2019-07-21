@@ -324,11 +324,11 @@ geary_engine_sources = [
 ]
 
 geary_engine_dependencies = [
-  libmath,
   gee,
   gio,
   glib,
   gmime,
+  libmath,
   libxml,
   libytnef,
   posix,

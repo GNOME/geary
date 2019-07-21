@@ -115,27 +115,27 @@ geary_client_sources = [
 ]
 
 geary_client_dependencies = [
-  libmath,
   enchant,
   folks,
   gck,
   gcr,
+  geary_engine_dep,
   gee,
   gio,
+  gmime,
   goa,
   gspell,
   gtk,
-  json_glib,
   javascriptcoregtk,
+  json_glib,
   libcanberra,
   libhandy,
+  libmath,
   libsecret,
   libsoup,
-  gmime,
   libxml,
   posix,
   webkit2gtk,
-  geary_engine_dep,
 ]
 
 geary_client_vala_options = geary_vala_options
