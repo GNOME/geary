@@ -178,7 +178,6 @@ public class Geary.RFC822.Part : Object {
                 charset = "US-ASCII";
             }
             if (conversion == UTF8 && !is_utf_8(charset)) {
-                print("\nconverting!\n");
                 GMime.FilterCharset? filter_charset = new GMime.FilterCharset(
                     charset, Geary.RFC822.UTF8_CHARSET
                 );
