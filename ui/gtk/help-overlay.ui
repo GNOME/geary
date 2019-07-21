@@ -308,7 +308,7 @@
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Archive conversation</property>
-                                <property name="accelerator">A</property>
+                                <property name="accelerator">A Y</property>
                             </object>
                         </child>
                         <child>
