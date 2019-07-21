@@ -106,7 +106,6 @@ geary_client_vala_sources = files(
   'util/util-international.vala',
   'util/util-js.vala',
   'util/util-migrate.vala',
-  'util/util-webkit.vala',
 )
 
 geary_client_sources = [
