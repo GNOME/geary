@@ -170,6 +170,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public Geary.Account account { get; private set; }
     private Gee.Map<string, Geary.AccountInformation> accounts;
 
+    /** The identifier of the draft this composer holds, if any. */
+    public Geary.EmailIdentifier? draft_id { get; private set; default = null; }
+
     public Geary.RFC822.MailboxAddresses from { get; private set; }
 
     public string to {
@@ -399,11 +402,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     public ComposerWidget(GearyApplication application,
                           Geary.Account initial_account,
+                          Geary.EmailIdentifier? draft_id,
                           ComposeType compose_type) {
         base_ref();
         this.application = application;
         this.account = initial_account;
-        this.account = account;
+        this.draft_id = draft_id;
 
         try {
             this.accounts = this.application.engine.get_accounts();
@@ -569,7 +573,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public ComposerWidget.from_mailto(GearyApplication application,
                                       Geary.Account initial_account,
                                       string mailto) {
-        this(application, initial_account, ComposeType.NEW_MESSAGE);
+        this(application, initial_account, null, ComposeType.NEW_MESSAGE);
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {
@@ -817,6 +821,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             break;
         }
         return referred_quote;
+    }
+
+    public void present() {
+        this.container.present();
     }
 
     public void set_focus() {

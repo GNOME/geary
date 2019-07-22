@@ -1250,9 +1250,23 @@ public class Application.Controller : Geary.BaseObject {
         Geary.Email draft = activated.get_latest_recv_email(
             Geary.App.Conversation.Location.IN_FOLDER
         );
-        create_compose_widget(
-            ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
-        );
+
+        bool already_open = false;
+        foreach (ComposerWidget composer in this.composer_widgets) {
+            if (composer.draft_id != null &&
+                composer.draft_id.equal_to(draft.id)) {
+                already_open = true;
+                composer.present();
+                composer.set_focus();
+                break;
+            }
+        }
+
+        if (!already_open) {
+            create_compose_widget(
+                ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
+            );
+        }
     }
 
     private void on_special_folder_type_changed(Geary.Folder folder,
@@ -2027,7 +2041,10 @@ public class Application.Controller : Geary.BaseObject {
             );
         } else {
             widget = new ComposerWidget(
-                this.application, current_account, compose_type
+                this.application,
+                current_account,
+                is_draft ? referred.id : null,
+                compose_type
             );
         }
 
