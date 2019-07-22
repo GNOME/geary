@@ -755,14 +755,21 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         switch (this.compose_type) {
             // Restoring a draft
             case ComposeType.NEW_MESSAGE:
+                bool show_extended = false;
                 if (referred.from != null)
                     this.from = referred.from;
                 if (referred.to != null)
                     this.to_entry.addresses = referred.to;
                 if (referred.cc != null)
                     this.cc_entry.addresses = referred.cc;
-                if (referred.bcc != null)
+                if (referred.bcc != null) {
+                    show_extended = true;
                     this.bcc_entry.addresses = referred.bcc;
+                }
+                if (referred.reply_to != null) {
+                    show_extended = true;
+                    this.reply_to_entry.addresses = referred.reply_to;
+                }
                 if (referred.in_reply_to != null)
                     this.in_reply_to.add_all(referred.in_reply_to.list);
                 if (referred.references != null)
@@ -778,6 +785,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                     }
                 } catch (Error error) {
                     debug("Error getting draft message body: %s", error.message);
+                }
+                if (show_extended) {
+                    this.editor_actions.change_action_state(
+                        ACTION_SHOW_EXTENDED, true
+                    );
+                    this.composer_actions.change_action_state(
+                        ACTION_SHOW_EXTENDED, true
+                    );
                 }
             break;
 
