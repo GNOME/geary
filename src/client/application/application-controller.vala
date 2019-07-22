@@ -2108,26 +2108,16 @@ public class Application.Controller : Geary.BaseObject {
 
         // Find out what to do with the inline composers.
         // TODO: Remove this in favor of automatically saving drafts
-        Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
         this.main_window.present();
+        bool create_okay = true;
         foreach (ComposerWidget cw in composer_widgets) {
-            if (cw.state != ComposerWidget.ComposerState.DETACHED)
-                composers_to_destroy.add(cw);
+            if (cw.state != ComposerWidget.ComposerState.DETACHED &&
+                cw.should_close() == ComposerWidget.CloseStatus.CANCEL_CLOSE) {
+                create_okay = false;
+                break;
+            }
         }
-        string message = ngettext(
-            "Close the draft message?",
-            "Close all draft messages?",
-            composers_to_destroy.size
-        );
-        ConfirmationDialog dialog = new ConfirmationDialog(
-            main_window, message, null, Stock._CLOSE, "destructive-action"
-        );
-        if (dialog.run() == Gtk.ResponseType.OK) {
-            foreach(ComposerWidget cw in composers_to_destroy)
-                ((ComposerContainer) cw.parent).close_container();
-            return true;
-        }
-        return false;
+        return create_okay;
     }
 
     public bool can_switch_conversation_view() {
