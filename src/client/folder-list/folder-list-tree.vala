@@ -54,7 +54,12 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     }
 
     public override bool accept_cursor_changed() {
-        return GearyApplication.instance.controller.can_switch_conversation_view();
+        bool can_switch = true;
+        MainWindow? parent = get_toplevel() as MainWindow;
+        if (parent != null) {
+            can_switch = parent.close_composer();
+        }
+        return can_switch;
     }
 
     private void on_entry_selected(Sidebar.SelectableEntry selectable) {

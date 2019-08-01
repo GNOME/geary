@@ -623,6 +623,11 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    /** Closes the composer unconditionally. */
+    public void close() {
+        this.container.close_container();
+    }
+
     /**
      * Loads the message into the composer editor.
      */
@@ -779,7 +784,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 if (referred.references != null)
                     this.references = referred.references.to_rfc822_string();
                 if (referred.subject != null)
-                    this.subject = referred.subject.value;
+                    this.subject = referred.subject.value ?? "";
                 try {
                     Geary.RFC822.Message message = referred.get_message();
                     if (message.has_html_body()) {
@@ -1213,8 +1218,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_close(SimpleAction action, Variant? param) {
-        if (should_close() == CloseStatus.DO_CLOSE)
-            this.container.close_container();
+        if (should_close() == CloseStatus.DO_CLOSE) {
+            close();
+        }
     }
 
     private void on_close_and_save(SimpleAction action, Variant? param) {

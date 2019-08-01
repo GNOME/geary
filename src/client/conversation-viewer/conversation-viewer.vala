@@ -19,14 +19,15 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         get; private set; default = null;
     }
 
-    /**
-     * Specifies if a full-height composer is currently shown.
-     */
-    public bool is_composer_visible {
-        get { return (get_visible_child() == this.composer_page); }
+    /** Returns the currently displayed composer if any. */
+    public ComposerWidget? current_composer {
+        get; private set; default = null;
     }
 
     private Configuration config;
+
+    private Gee.Set<Geary.App.Conversation>? selection_while_composing = null;
+
 
     // Stack pages
     [GtkChild]
@@ -141,21 +142,18 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      */
     public void do_compose(ComposerWidget composer) {
         ComposerBox box = new ComposerBox(composer);
+        this.current_composer = composer;
 
         // XXX move the ConversationListView management code into
-        // GearyController or somewhere more appropriate
-        ConversationListView conversation_list_view =
-            ((MainWindow) GearyApplication.instance.controller.main_window).conversation_list_view;
-        Gee.Set<Geary.App.Conversation>? prev_selection = conversation_list_view.get_selected_conversations();
-        conversation_list_view.get_selection().unselect_all();
-        box.vanished.connect((box) => {
-                set_visible_child(this.conversation_page);
-                if (prev_selection.is_empty) {
-                    conversation_list_view.conversations_selected(prev_selection);
-                } else {
-                    conversation_list_view.select_conversations(prev_selection);
-                }
-            });
+        // MainWindow or somewhere more appropriate
+        MainWindow? main_window = get_toplevel() as MainWindow;
+        if (main_window != null) {
+            ConversationListView conversation_list = main_window.conversation_list_view;
+            this.selection_while_composing = conversation_list.get_selected_conversations();
+            conversation_list.get_selection().unselect_all();
+        }
+
+        box.vanished.connect(on_composer_closed);
         this.composer_page.add(box);
         set_visible_child(this.composer_page);
     }
@@ -166,11 +164,13 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     public void do_compose_embedded(ComposerWidget composer,
                                     Geary.Email? referred,
                                     bool is_draft) {
+        this.current_composer = composer;
         ComposerEmbed embed = new ComposerEmbed(
             referred,
             composer,
             this.conversation_scroller
         );
+        embed.vanished.connect(on_composer_closed);
 
         // We need to disable kinetic scrolling so that if it still
         // has some momentum when the composer is inserted and
@@ -439,6 +439,32 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             this.current_list.mark_visible_read();
         }
         return Gdk.EVENT_PROPAGATE;
+    }
+
+    private void on_composer_closed() {
+        this.current_composer = null;
+        if (get_visible_child() == this.composer_page) {
+            set_visible_child(this.conversation_page);
+
+            // Restore the old selection
+            MainWindow? main_window = get_toplevel() as MainWindow;
+            if (main_window != null &&
+                this.selection_while_composing != null) {
+                ConversationListView conversation_list =
+                    main_window.conversation_list_view;
+                if (this.selection_while_composing.is_empty) {
+                    conversation_list.conversations_selected(
+                        this.selection_while_composing
+                    );
+                } else {
+                    conversation_list.select_conversations(
+                        this.selection_while_composing
+                    );
+                }
+
+                this.selection_while_composing = null;
+            }
+        }
     }
 
 }

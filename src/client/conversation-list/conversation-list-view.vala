@@ -201,11 +201,14 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         check_load_more();
 
         // Select the first conversation, if autoselect is enabled,
-        // nothing has been selected yet and we're not composing.
+        // nothing has been selected yet and we're not showing a
+        // composer.
         if (GearyApplication.instance.config.autoselect &&
-            get_selection().count_selected_rows() == 0 &&
-            !GearyApplication.instance.controller.any_inline_composers()) {
-            set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
+            get_selection().count_selected_rows() == 0) {
+            MainWindow? parent = get_toplevel() as MainWindow;
+            if (parent != null && !parent.has_composer) {
+                set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
+            }
         }
     }
 
@@ -311,9 +314,12 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             }
         }
 
-        if (!get_selection().path_is_selected(path) &&
-            !GearyApplication.instance.controller.can_switch_conversation_view())
-            return true;
+        if (!get_selection().path_is_selected(path)) {
+            MainWindow? parent = get_toplevel() as MainWindow;
+            if (parent != null && !parent.close_composer()) {
+                return true;
+            }
+        }
 
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);

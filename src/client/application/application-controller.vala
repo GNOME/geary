@@ -1186,7 +1186,7 @@ public class Application.Controller : Geary.BaseObject {
         this.selected_conversations = selected;
         get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
         ConversationViewer viewer = this.main_window.conversation_viewer;
-        if (this.current_folder != null && !viewer.is_composer_visible) {
+        if (this.current_folder != null && !this.main_window.has_composer) {
             switch(selected.size) {
             case 0:
                 enable_message_buttons(false);
@@ -1251,6 +1251,8 @@ public class Application.Controller : Geary.BaseObject {
             Geary.App.Conversation.Location.IN_FOLDER
         );
 
+        // Check all known composers since the draft may be open in a
+        // detached composer
         bool already_open = false;
         foreach (ComposerWidget composer in this.composer_widgets) {
             if (composer.draft_id != null &&
@@ -2031,8 +2033,41 @@ public class Application.Controller : Geary.BaseObject {
         if (current_account == null)
             return;
 
-        if (!should_create_new_composer(compose_type, referred, quote, is_draft))
-            return;
+        // There's a few situations where we can re-use an existing
+        // composer, check for these first.
+
+        if (compose_type == NEW_MESSAGE && !is_draft) {
+            // We're creating a new message that isn't a draft, if
+            // there's already a composer open, just use that
+            ComposerWidget? existing =
+                this.main_window.conversation_viewer.current_composer;
+            if (existing != null &&
+                existing.state == PANED &&
+                existing.is_blank) {
+                existing.present();
+                existing.set_focus();
+                return;
+            }
+        } else if (compose_type != NEW_MESSAGE) {
+            // We're replying, see whether we already have a reply for
+            // that message and if so, insert a quote into that.
+            foreach (ComposerWidget existing in this.composer_widgets) {
+                if (existing.state != DETACHED &&
+                    ((referred != null && existing.referred_ids.contains(referred.id)) ||
+                     quote != null)) {
+                    existing.change_compose_type(compose_type, referred, quote);
+                    return;
+                }
+            }
+
+            // Can't re-use an existing composer, so need to create a
+            // new one. Replies must open inline in the main window,
+            // so we need to ensure there are no composers open there
+            // first.
+            if (!this.main_window.close_composer()) {
+                return;
+            }
+        }
 
         ComposerWidget widget;
         if (mailto != null) {
@@ -2080,72 +2115,6 @@ public class Application.Controller : Geary.BaseObject {
         yield widget.load(full, quote, is_draft);
 
         widget.set_focus();
-    }
-
-    private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
-                                            Geary.Email? referred,
-                                            string? quote,
-                                            bool is_draft) {
-        // In we're replying, see whether we already have a reply for that message.
-        if (compose_type != null && compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
-            foreach (ComposerWidget cw in composer_widgets) {
-                if (cw.state != ComposerWidget.ComposerState.DETACHED &&
-                    ((referred != null && cw.referred_ids.contains(referred.id)) ||
-                     quote != null)) {
-                    cw.change_compose_type(compose_type, referred, quote);
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // If there are no inline composers, go ahead!
-        if (!any_inline_composers())
-            return true;
-
-        // If we're resuming a draft with open composers, open in a new window.
-        if (is_draft) {
-            return true;
-        }
-
-        // If we're creating a new message, and there's already a new message open, focus on
-        // it if it hasn't been modified; otherwise open a new composer in a new window.
-        if (compose_type == ComposerWidget.ComposeType.NEW_MESSAGE) {
-            foreach (ComposerWidget cw in composer_widgets) {
-                if (cw.state == ComposerWidget.ComposerState.PANED) {
-                    if (!cw.is_blank) {
-                        return true;
-                    } else {
-                        cw.change_compose_type(compose_type);  // To refocus
-                        return false;
-                    }
-                }
-            }
-        }
-
-        // Find out what to do with the inline composers.
-        // TODO: Remove this in favor of automatically saving drafts
-        this.main_window.present();
-        bool create_okay = true;
-        foreach (ComposerWidget cw in composer_widgets) {
-            if (cw.state != ComposerWidget.ComposerState.DETACHED &&
-                cw.should_close() == ComposerWidget.CloseStatus.CANCEL_CLOSE) {
-                create_okay = false;
-                break;
-            }
-        }
-        return create_okay;
-    }
-
-    public bool can_switch_conversation_view() {
-        return should_create_new_composer(null, null, null, false);
-    }
-
-    public bool any_inline_composers() {
-        foreach (ComposerWidget cw in composer_widgets)
-            if (cw.state != ComposerWidget.ComposerState.DETACHED)
-                return true;
-        return false;
     }
 
     private void on_composer_widget_destroy(Gtk.Widget sender) {
@@ -2339,9 +2308,6 @@ public class Application.Controller : Geary.BaseObject {
 
     private async void archive_or_delete_selection_async(bool archive, bool trash,
         Cancellable? cancellable) throws Error {
-        if (!can_switch_conversation_view())
-            return;
-
         ConversationListBox list_view =
             main_window.conversation_viewer.current_list;
         if (list_view != null &&
