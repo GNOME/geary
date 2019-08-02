@@ -2090,8 +2090,7 @@ public class Application.Controller : Geary.BaseObject {
         if (widget.state == INLINE || widget.state == INLINE_COMPACT) {
             this.main_window.conversation_viewer.do_compose_embedded(
                 widget,
-                referred,
-                is_draft
+                referred
             );
         } else {
             this.main_window.show_composer(widget);
@@ -2102,7 +2101,6 @@ public class Application.Controller : Geary.BaseObject {
             widget,
             referred,
             quote,
-            is_draft,
             this.cancellable_folder
         );
     }
@@ -2111,7 +2109,6 @@ public class Application.Controller : Geary.BaseObject {
                                      ComposerWidget widget,
                                      Geary.Email? referred = null,
                                      string? quote = null,
-                                     bool is_draft = false,
                                      GLib.Cancellable? cancellable) {
         Geary.Email? full = null;
         if (referred != null) {
@@ -2129,7 +2126,7 @@ public class Application.Controller : Geary.BaseObject {
                 }
             }
         }
-        yield widget.load(full, quote, is_draft, cancellable);
+        yield widget.load(full, quote, cancellable);
         widget.set_focus();
     }
 

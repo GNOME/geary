@@ -162,8 +162,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      * Puts the view into composer mode, showing an embedded composer.
      */
     public void do_compose_embedded(ComposerWidget composer,
-                                    Geary.Email? referred,
-                                    bool is_draft) {
+                                    Geary.Email? referred) {
         this.current_composer = composer;
         ComposerEmbed embed = new ComposerEmbed(
             referred,
@@ -178,7 +177,10 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         conversation_scroller.kinetic_scrolling = false;
 
         if (this.current_list != null) {
-            this.current_list.add_embedded_composer(embed, is_draft);
+            this.current_list.add_embedded_composer(
+                embed,
+                composer.draft_id != null
+            );
         }
 
         conversation_scroller.kinetic_scrolling = true;

@@ -633,10 +633,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
      */
     public async void load(Geary.Email? referred = null,
                            string? quote = null,
-                           bool is_referred_draft = false,
                            GLib.Cancellable? cancellable) {
-        this.last_quote = quote;
+        bool is_referred_draft = (
+            referred != null &&
+            this.draft_id != null &&
+            referred.id.equal_to(this.draft_id)
+        );
         string referred_quote = "";
+        this.last_quote = quote;
         if (referred != null) {
             referred_quote = fill_in_from_referred(referred, quote);
             if (is_referred_draft ||
