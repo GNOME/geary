@@ -18,6 +18,16 @@ namespace Util.Gtk {
         ctx.set_source_rgb(rgba.red, rgba.green, rgba.blue);
     }
 
+    /** Determines if a widget's window has client-side WM decorations. */
+    public inline bool has_client_side_decorations(global::Gtk.Widget widget) {
+        bool has_csd = true;
+        global::Gtk.Window? window = widget.get_toplevel() as global::Gtk.Window;
+        if (window != null) {
+            has_csd = window.get_style_context().has_class(Gtk.STYLE_CLASS_CSD);
+        }
+        return has_csd;
+    }
+
     /**
      * Returns whether the close button is at the end of the headerbar.
      */
