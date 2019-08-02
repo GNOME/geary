@@ -822,7 +822,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         Gtk.ListBoxRow initial_row = get_row_at_index(0);
         int loading_height = 0;
         if (initial_row is LoadingRow) {
-            loading_height = GtkUtil.get_border_box_height(initial_row);
+            loading_height = Util.Gtk.get_border_box_height(initial_row);
             remove(initial_row);
         }
 
@@ -839,7 +839,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // same place.
             row.enable_should_scroll();
             row.should_scroll.connect(() => {
-                    listbox_adj.value += GtkUtil.get_border_box_height(row);
+                    listbox_adj.value += Util.Gtk.get_border_box_height(row);
                 });
 
             // Only adjust for the loading row going away once

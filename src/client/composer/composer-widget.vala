@@ -1967,7 +1967,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
         // Step 3.
 
-        GtkUtil.menu_foreach(context_menu_model, (label, name, target, section) => {
+        Util.Gtk.menu_foreach(context_menu_model, (label, name, target, section) => {
                 if (context_menu.last() != null) {
                     context_menu.append(new WebKit.ContextMenuItem.separator());
                 }
@@ -2005,7 +2005,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     private inline void append_menu_section(WebKit.ContextMenu context_menu,
                                             Menu section) {
-        GtkUtil.menu_foreach(section, (label, name, target, section) => {
+        Util.Gtk.menu_foreach(section, (label, name, target, section) => {
                 string simple_name = name;
                 if ("." in simple_name) {
                     simple_name = simple_name.split(".")[1];
