@@ -32,6 +32,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
     public ComposerWindow(ComposerWidget composer, GearyApplication application) {
         Object(application: application, type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
+        this.composer.header.detached();
 
         // XXX Bug 764622
         set_property("name", "GearyComposerWindow");

@@ -1263,7 +1263,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         );
 
         this.state = ComposerWidget.ComposerState.DETACHED;
-        this.header.detached();
         update_composer_view();
 
         // If the previously focused widget is in the new composer
