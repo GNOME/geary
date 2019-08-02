@@ -225,7 +225,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         composer.to = to.to_full_display();
         controller.add_composer(composer);
         show_composer(composer);
-        composer.load.begin(null, null, false);
+        composer.load.begin(null, null, false, null);
     }
 
     /** Displays a composer in the window if possible, else in a new window. */

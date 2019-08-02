@@ -634,7 +634,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public async void load(Geary.Email? referred = null,
                            string? quote = null,
                            bool is_referred_draft = false,
-                           Cancellable? cancellable = null) {
+                           GLib.Cancellable? cancellable) {
         this.last_quote = quote;
         string referred_quote = "";
         if (referred != null) {
@@ -664,7 +664,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         );
 
         try {
-            yield open_draft_manager_async(is_referred_draft ? referred.id : null);
+            yield open_draft_manager_async(
+                is_referred_draft ? referred.id : null,
+                cancellable
+            );
         } catch (Error e) {
             debug("Could not open draft manager: %s", e.message);
         }
@@ -1378,9 +1381,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     /**
      * Creates and opens the composer's draft manager.
      */
-    private async void
-        open_draft_manager_async(Geary.EmailIdentifier? editing_draft_id = null)
-    throws Error {
+    private async void open_draft_manager_async(Geary.EmailIdentifier? editing_draft_id,
+                                                GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (!this.account.information.save_drafts) {
             this.header.save_and_close_button.hide();
             return;
@@ -1390,16 +1393,17 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         if (this.draft_manager_opening != null) {
             this.draft_manager_opening.cancel();
         }
-        this.draft_manager_opening = new GLib.Cancellable();
+
+        GLib.Cancellable internal_cancellable = new GLib.Cancellable();
+        cancellable.cancelled.connect(() => { internal_cancellable.cancel(); });
+        this.draft_manager_opening = internal_cancellable;
 
         Geary.App.DraftManager new_manager = new Geary.App.DraftManager(account);
         try {
-            yield new_manager.open_async(editing_draft_id, this.draft_manager_opening);
+            yield new_manager.open_async(editing_draft_id, internal_cancellable);
             debug("Draft manager opened");
-        } catch (Error err) {
-            debug("Unable to open draft manager %s: %s",
-                  new_manager.to_string(), err.message);
-            throw err;
+        } finally {
+            this.draft_manager_opening = null;
         }
 
         new_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
@@ -1408,7 +1412,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             .connect(on_draft_id_changed);
         new_manager.fatal.connect(on_draft_manager_fatal);
 
-        this.draft_manager_opening = null;
         this.draft_manager = new_manager;
 
         update_draft_state();
@@ -1429,7 +1432,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.draft_manager.discard_on_close = true;
             yield close_draft_manager_async(null);
         }
-        yield open_draft_manager_async();
+        yield open_draft_manager_async(null, null);
     }
 
     private async void close_draft_manager_async(Cancellable? cancellable)

@@ -2012,24 +2012,26 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void create_compose_widget(ComposerWidget.ComposeType compose_type,
-        Geary.Email? referred = null, string? quote = null, string? mailto = null,
-        bool is_draft = false) {
-        create_compose_widget_async.begin(compose_type, referred, quote, mailto, is_draft);
-    }
-
     /**
-     * Creates a composer widget. Depending on the arguments, this can be inline in the
+     * Creates a composer widget.
+     *
+     * Depending on the arguments, this can be inline in the
      * conversation or as a new window.
-     * @param compose_type - Whether it's a new message, a reply, a forwarded mail, ...
-     * @param referred - The mail of which we should copy the from/to/... addresses
+     *
+     * @param compose_type - Whether it's a new message, a reply, a
+     * forwarded mail, ...
+     * @param referred - The mail of which we should copy the from/to/...
+     * addresses
      * @param quote - The quote after the mail body
      * @param mailto - A "mailto:"-link
-     * @param is_draft - Whether we're starting from a draft (true) or a new mail (false)
+     * @param is_draft - Whether we're starting from a draft (true) or
+     * a new mail (false)
      */
-    private async void create_compose_widget_async(ComposerWidget.ComposeType compose_type,
-        Geary.Email? referred = null, string? quote = null, string? mailto = null,
-        bool is_draft = false) {
+    private void create_compose_widget(ComposerWidget.ComposeType compose_type,
+                                       Geary.Email? referred = null,
+                                       string? quote = null,
+                                       string? mailto = null,
+                                       bool is_draft = false) {
         if (current_account == null)
             return;
 
@@ -2095,25 +2097,39 @@ public class Application.Controller : Geary.BaseObject {
             this.main_window.show_composer(widget);
         }
 
-        // Load the widget's content
+        this.load_composer.begin(
+            this.current_account,
+            widget,
+            referred,
+            quote,
+            is_draft,
+            this.cancellable_folder
+        );
+    }
+
+    private async void load_composer(Geary.Account account,
+                                     ComposerWidget widget,
+                                     Geary.Email? referred = null,
+                                     string? quote = null,
+                                     bool is_draft = false,
+                                     GLib.Cancellable? cancellable) {
         Geary.Email? full = null;
         if (referred != null) {
-            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
-            if (store != null) {
+            AccountContext? context = this.accounts.get(account.information);
+            if (context != null) {
                 try {
-                    full = yield store.fetch_email_async(
+                    full = yield context.emails.fetch_email_async(
                         referred.id,
                         Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
                         Geary.Folder.ListFlags.NONE,
-                        cancellable_folder
+                        cancellable
                     );
                 } catch (Error e) {
                     message("Could not load full message: %s", e.message);
                 }
             }
         }
-        yield widget.load(full, quote, is_draft);
-
+        yield widget.load(full, quote, is_draft, cancellable);
         widget.set_focus();
     }
 
