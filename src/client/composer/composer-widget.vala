@@ -1405,6 +1405,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         try {
             yield new_manager.open_async(editing_draft_id, internal_cancellable);
             debug("Draft manager opened");
+        } catch (GLib.Error err) {
+            this.header.save_and_close_button.hide();
+            throw err;
         } finally {
             this.draft_manager_opening = null;
         }
