@@ -151,8 +151,8 @@ public class MainToolbar : Gtk.Box {
             this.selected_conversations
         );
         this.archive_button.tooltip_text = ngettext(
-            "Archive conversation (A)",
-            "Archive conversations (A)",
+            "Archive conversation",
+            "Archive conversations",
             this.selected_conversations
         );
 
@@ -160,16 +160,16 @@ public class MainToolbar : Gtk.Box {
             this.trash_delete_button.action_name = "win."+Application.Controller.ACTION_TRASH_CONVERSATION;
             this.trash_delete_button.image = trash_image;
             this.trash_delete_button.tooltip_text = ngettext(
-                "Move conversation to Trash (Delete, Backspace)",
-                "Move conversations to Trash (Delete, Backspace)",
+                "Move conversation to Trash",
+                "Move conversations to Trash",
                 this.selected_conversations
             );
         } else {
             this.trash_delete_button.action_name = "win."+Application.Controller.ACTION_DELETE_CONVERSATION;
             this.trash_delete_button.image = delete_image;
             this.trash_delete_button.tooltip_text = ngettext(
-                "Delete conversation (Shift+Delete)",
-                "Delete conversations (Shift+Delete)",
+                "Delete conversation",
+                "Delete conversations",
                 this.selected_conversations
             );
         }

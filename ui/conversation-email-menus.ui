@@ -46,15 +46,15 @@
     <section id="email_menu_trash">
       <item>
         <!-- Translators: Menu item to move a single, specific message
-             to the trash -->
-        <attribute name="label" translatable="yes">_Trash</attribute>
+             to the trash folder -->
+        <attribute name="label" translatable="yes">Move message to _Trash</attribute>
         <attribute name="action">eml.trash_msg</attribute>
       </item>
     </section>
     <section id="email_menu_delete">
       <item>
         <!-- Translators: Menu item to delete a single, specific message -->
-        <attribute name="label" translatable="yes">_Delete…</attribute>
+        <attribute name="label" translatable="yes">_Delete message…</attribute>
         <attribute name="action">eml.delete_msg</attribute>
       </item>
     </section>
