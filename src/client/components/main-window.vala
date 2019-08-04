@@ -28,6 +28,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         get; private set; default = null;
     }
 
+    /** Specifies if the Shift key is currently being held. */
+    public bool is_shift_down { get; private set; default = false; }
+
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
 
     // Used to save/load the window state between sessions.
@@ -727,13 +730,28 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             Gtk.Widget? focus = get_focus();
             if (focus == null ||
                 (!(focus is Gtk.Entry) && !(focus is ComposerWebView))) {
-                on_shift_key(event.type == Gdk.EventType.KEY_PRESS);
+                this.is_shift_down = (event.type == Gdk.EventType.KEY_PRESS);
+                this.main_toolbar.update_trash_button(
+                    !this.is_shift_down &&
+                    current_folder_supports_trash()
+                );
+                on_shift_key(this.is_shift_down);
             }
         }
     }
 
     private SimpleAction get_action(string name) {
         return (SimpleAction) lookup_action(name);
+    }
+
+    private bool current_folder_supports_trash() {
+        Geary.Folder? current = this.current_folder;
+        return (
+            current != null &&
+            current.special_folder_type != TRASH &&
+            !current_folder.properties.is_local_only &&
+            (current_folder as Geary.FolderSupport.Move) != null
+        );
     }
 
     private void on_scan_completed(Geary.App.ConversationMonitor monitor) {

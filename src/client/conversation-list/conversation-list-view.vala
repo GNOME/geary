@@ -318,8 +318,28 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
 
-            Menu context_menu_model = new Menu();
-            context_menu_model.append(_("Delete conversation"), "win."+Application.Controller.ACTION_DELETE_CONVERSATION);
+            GLib.Menu context_menu_model = new GLib.Menu();
+            if (!this.main_window.is_shift_down) {
+                context_menu_model.append(
+                    /// Translators: Context menu item
+                    ngettext(
+                        "Move conversation to _Trash",
+                        "Move conversations to _Trash",
+                        this.selected.size
+                    ),
+                    "win." + Application.Controller.ACTION_ARCHIVE_CONVERSATION
+                );
+            } else {
+                context_menu_model.append(
+                    /// Translators: Context menu item
+                    ngettext(
+                        "_Delete conversation",
+                        "_Delete conversations",
+                        this.selected.size
+                    ),
+                    "win." + Application.Controller.ACTION_DELETE_CONVERSATION
+                );
+            }
 
             if (conversation.is_unread())
                 context_menu_model.append(_("Mark as _Read"), "win."+Application.Controller.ACTION_MARK_AS_READ);
@@ -338,9 +358,18 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             actions_section.append(_("_Forward"), "win."+Application.Controller.ACTION_FORWARD_MESSAGE);
             context_menu_model.append_section(null, actions_section);
 
-            Gtk.Menu context_menu = new Gtk.Menu.from_model(context_menu_model);
-            context_menu.insert_action_group("win", this.main_window);
-            context_menu.popup_at_pointer(event);
+            // Use a popover rather than a regular context menu since
+            // the latter grabs the event queue, so the MainWindow
+            // will not receive events if the user releases Shift,
+            // making the trash/delete header bar state wrong.
+            Gtk.Popover context_menu = new Gtk.Popover.from_model(
+                this, context_menu_model
+            );
+            Gdk.Rectangle dest = Gdk.Rectangle();
+            dest.x = (int) event.x;
+            dest.y = (int) event.y;
+            context_menu.set_pointing_to(dest);
+            context_menu.popup();
 
             // When the conversation under the mouse is selected, stop event propagation
             return get_selection().path_is_selected(path);

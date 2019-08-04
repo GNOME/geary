@@ -24,8 +24,7 @@ public class MainToolbar : Gtk.Box {
     public FolderPopover move_folder_menu { get; private set; default = new FolderPopover(); }
     // How many conversations are selected right now. Should automatically be updated.
     public int selected_conversations { get; set; }
-    // Whether to show the trash or the delete button
-    public bool show_trash_button { get; set; default = true; }
+
 
     // Folder header elements
     [GtkChild]
@@ -51,6 +50,8 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Button trash_delete_button;
     [GtkChild]
     private Gtk.ToggleButton find_button;
+
+    private bool show_trash_button = true;
 
     // Load these at construction time
     private Gtk.Image trash_image = new Gtk.Image.from_icon_name("user-trash-symbolic", Gtk.IconSize.MENU);
@@ -84,7 +85,6 @@ public class MainToolbar : Gtk.Box {
 
         // Setup conversation header elements
         this.notify["selected-conversations"].connect(() => update_conversation_buttons());
-        this.notify["show-trash-button"].connect(() => update_conversation_buttons());
         this.mark_message_button.popover = new Gtk.Popover.from_model(null, mark_menu);
         this.copy_message_button.popover = copy_folder_menu;
         this.move_message_button.popover = move_folder_menu;
@@ -114,6 +114,11 @@ public class MainToolbar : Gtk.Box {
         header.show_close_button = false;
         header.decoration_layout = Gtk.Settings.get_default().gtk_decoration_layout;
         conversation_header.show();
+    }
+
+    public void update_trash_button(bool show_trash) {
+        this.show_trash_button = show_trash;
+        update_conversation_buttons();
     }
 
     private void set_window_buttons() {
@@ -146,8 +151,8 @@ public class MainToolbar : Gtk.Box {
             this.selected_conversations
         );
         this.archive_button.tooltip_text = ngettext(
-            "Archive conversation (A)",
-            "Archive conversations (A)",
+            "Archive conversation",
+            "Archive conversations",
             this.selected_conversations
         );
 
@@ -155,16 +160,16 @@ public class MainToolbar : Gtk.Box {
             this.trash_delete_button.action_name = "win."+Application.Controller.ACTION_TRASH_CONVERSATION;
             this.trash_delete_button.image = trash_image;
             this.trash_delete_button.tooltip_text = ngettext(
-                "Move conversation to Trash (Delete, Backspace)",
-                "Move conversations to Trash (Delete, Backspace)",
+                "Move conversation to Trash",
+                "Move conversations to Trash",
                 this.selected_conversations
             );
         } else {
             this.trash_delete_button.action_name = "win."+Application.Controller.ACTION_DELETE_CONVERSATION;
             this.trash_delete_button.image = delete_image;
             this.trash_delete_button.tooltip_text = ngettext(
-                "Delete conversation (Shift+Delete)",
-                "Delete conversations (Shift+Delete)",
+                "Delete conversation",
+                "Delete conversations",
                 this.selected_conversations
             );
         }

@@ -279,7 +279,6 @@ public class Application.Controller : Geary.BaseObject {
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
         main_window.retry_service_problem.connect(on_retry_service_problem);
-        main_window.on_shift_key.connect(on_shift_key);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
         setup_actions();
@@ -1049,9 +1048,12 @@ public class Application.Controller : Geary.BaseObject {
     // Update widgets and such to match capabilities of the current folder ... sensitivity is handled
     // by other utility methods
     private void update_ui() {
-        main_window.main_toolbar.selected_conversations = this.selected_conversations.size;
-        main_window.main_toolbar.show_trash_button = current_folder_supports_trash() ||
-                                                    !(current_folder is Geary.FolderSupport.Remove);
+        this.main_window.main_toolbar.selected_conversations =
+            this.selected_conversations.size;
+        this.main_window.main_toolbar.update_trash_button(
+            !this.main_window.is_shift_down &&
+            current_folder_supports_trash()
+        );
     }
 
     private void on_folder_selected(Geary.Folder? folder) {
@@ -1422,15 +1424,6 @@ public class Application.Controller : Geary.BaseObject {
             return true;
 
         return sender.cancel_exit();
-    }
-
-    private void on_shift_key(bool pressed) {
-        if (main_window != null && main_window.main_toolbar != null
-            && current_account != null && current_folder != null) {
-            main_window.main_toolbar.show_trash_button =
-                (!pressed && current_folder_supports_trash()) ||
-                !(current_folder is Geary.FolderSupport.Remove);
-        }
     }
 
     // this signal does not necessarily indicate that the application previously didn't have
