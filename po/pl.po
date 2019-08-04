@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-07-21 15:51+0000\n"
-"PO-Revision-Date: 2019-07-28 14:25+0200\n"
+"POT-Creation-Date: 2019-08-04 03:12+0000\n"
+"PO-Revision-Date: 2019-08-04 15:44+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -587,7 +587,7 @@ msgstr[1] "ostatnie %d dni"
 msgstr[2] "ostatnie %d dni"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-controller.vala:2413
+#: src/client/application/application-controller.vala:2406
 msgid "Undo"
 msgstr "Cofnij"
 
@@ -763,29 +763,29 @@ msgid "Untitled"
 msgstr "Bez tytułu"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:565
+#: src/client/application/application-controller.vala:564
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "Wystąpił problem podczas wysyłania wiadomości z konta %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:569
+#: src/client/application/application-controller.vala:568
 msgid "Email will not be sent until re-connected"
 msgstr "Wiadomości nie będą wysyłane do czasu ponownego połączenia"
 
-#: src/client/application/application-controller.vala:907
+#: src/client/application/application-controller.vala:906
 msgid "Labels"
 msgstr "Etykiety"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/application-controller.vala:920
+#: src/client/application/application-controller.vala:919
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nie można otworzyć bazy danych dla %s"
 
-#: src/client/application/application-controller.vala:921
+#: src/client/application/application-controller.vala:920
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -810,20 +810,20 @@ msgstr ""
 "Przebudowanie bazy danych usunie wszystkie lokalne wiadomości e-mail i ich "
 "załączniki. <b>Poczta na serwerze nie zostanie usunięta.</b>"
 
-#: src/client/application/application-controller.vala:923
+#: src/client/application/application-controller.vala:922
 msgid "_Rebuild"
 msgstr "P_rzebuduj"
 
-#: src/client/application/application-controller.vala:923
+#: src/client/application/application-controller.vala:922
 msgid "E_xit"
 msgstr "Za_kończ"
 
-#: src/client/application/application-controller.vala:932
+#: src/client/application/application-controller.vala:931
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Nie można przebudować bazy danych dla „%s”"
 
-#: src/client/application/application-controller.vala:933
+#: src/client/application/application-controller.vala:932
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -834,7 +834,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/application-controller.vala:1717
+#: src/client/application/application-controller.vala:1710
 #, c-format
 msgid "Moved %d message to %s"
 msgid_plural "Moved %d messages to %s"
@@ -842,11 +842,11 @@ msgstr[0] "Przeniesiono %d wiadomość do „%s”"
 msgstr[1] "Przeniesiono %d wiadomości do „%s”"
 msgstr[2] "Przeniesiono %d wiadomości do „%s”"
 
-#: src/client/application/application-controller.vala:1727
+#: src/client/application/application-controller.vala:1720
 msgid "Are you sure you want to open these attachments?"
 msgstr "Na pewno otworzyć te załączniki?"
 
-#: src/client/application/application-controller.vala:1728
+#: src/client/application/application-controller.vala:1721
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -854,14 +854,14 @@ msgstr ""
 "Załączniki po otwarciu mogą uszkodzić system. Należy otwierać załączniki "
 "pochodzące tylko z zaufanych źródeł."
 
-#: src/client/application/application-controller.vala:1729
+#: src/client/application/application-controller.vala:1722
 msgid "Don’t _ask me again"
 msgstr "_Bez pytania ponownie"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/application-controller.vala:1852
+#: src/client/application/application-controller.vala:1845
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Plik o nazwie „%s” już istnieje. Zastąpić go?"
@@ -869,58 +869,58 @@ msgstr "Plik o nazwie „%s” już istnieje. Zastąpić go?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/application-controller.vala:1859
+#: src/client/application/application-controller.vala:1852
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Plik w „%s” już istnieje. Zastąpienie go nadpisze jego zawartość."
 
-#: src/client/application/application-controller.vala:1863
+#: src/client/application/application-controller.vala:1856
 msgid "_Replace"
 msgstr "_Zastąp"
 
-#: src/client/application/application-controller.vala:2125
+#: src/client/application/application-controller.vala:2118
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Zamknąć szkic?"
 msgstr[1] "Zamknąć wszystkie szkice?"
 msgstr[2] "Zamknąć wszystkie szkice?"
 
-#: src/client/application/application-controller.vala:2250
+#: src/client/application/application-controller.vala:2243
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Usunąć wszystkie wiadomości z katalogu %s?"
 
-#: src/client/application/application-controller.vala:2251
+#: src/client/application/application-controller.vala:2244
 msgid "This removes the email from Geary and your email server."
 msgstr "Spowoduje to usunięcie wiadomości z programu Geary i serwera poczty."
 
-#: src/client/application/application-controller.vala:2252
+#: src/client/application/application-controller.vala:2245
 msgid "This cannot be undone."
 msgstr "Tego nie można cofnąć."
 
-#: src/client/application/application-controller.vala:2253
+#: src/client/application/application-controller.vala:2246
 #, c-format
 msgid "Empty %s"
 msgstr "Opróżnij %s"
 
-#: src/client/application/application-controller.vala:2270
+#: src/client/application/application-controller.vala:2263
 #, c-format
 msgid "Error emptying %s"
 msgstr "Błąd podczas opróżniania %s"
 
-#: src/client/application/application-controller.vala:2301
+#: src/client/application/application-controller.vala:2294
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Trwale usunąć tę wiadomość?"
 msgstr[1] "Trwale usunąć te wiadomości?"
 msgstr[2] "Trwale usunąć te wiadomości?"
 
-#: src/client/application/application-controller.vala:2303
+#: src/client/application/application-controller.vala:2296
 msgid "Delete"
 msgstr "Usuń"
 
-#: src/client/application/application-controller.vala:2317
+#: src/client/application/application-controller.vala:2310
 #, c-format
 msgid "Trashed %d message"
 msgid_plural "Trashed %d messages"
@@ -928,7 +928,7 @@ msgstr[0] "Przeniesiono %d wiadomość do kosza"
 msgstr[1] "Przeniesiono %d wiadomości do kosza"
 msgstr[2] "Przeniesiono %d wiadomości do kosza"
 
-#: src/client/application/application-controller.vala:2367
+#: src/client/application/application-controller.vala:2360
 #, c-format
 msgid "Archived %d message"
 msgid_plural "Archived %d messages"
@@ -938,12 +938,12 @@ msgstr[2] "Przeniesiono %d wiadomości do archiwum"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2495
+#: src/client/application/application-controller.vala:2488
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Pomyślnie wysłano wiadomość do: %s."
 
-#: src/client/application/application-controller.vala:2573
+#: src/client/application/application-controller.vala:2566
 msgid "Failed to open default text editor."
 msgstr "Otwarcie domyślnego edytora tekstu się nie powiodło."
 
@@ -1187,49 +1187,49 @@ msgstr "Wymagana jest nazwa serwera"
 msgid "Could not look up server name"
 msgstr "Nie można wyszukać nazwy serwera"
 
-#: src/client/components/main-toolbar.vala:134
+#: src/client/components/main-toolbar.vala:139
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Oznacza wątek"
 msgstr[1] "Oznacza wątki"
 msgstr[2] "Oznacza wątki"
 
-#: src/client/components/main-toolbar.vala:139
+#: src/client/components/main-toolbar.vala:144
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Nadaje etykietę wątkowi"
 msgstr[1] "Nadaje etykietę wątkom"
 msgstr[2] "Nadaje etykietę wątkom"
 
-#: src/client/components/main-toolbar.vala:144
+#: src/client/components/main-toolbar.vala:149
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Przenosi wątek"
 msgstr[1] "Przenosi wątki"
 msgstr[2] "Przenosi wątki"
 
-#: src/client/components/main-toolbar.vala:149
-msgid "Archive conversation (A)"
-msgid_plural "Archive conversations (A)"
-msgstr[0] "Archiwizuje wątek (A)"
-msgstr[1] "Archiwizuje wątki (A)"
-msgstr[2] "Archiwizuje wątki (A)"
+#: src/client/components/main-toolbar.vala:154
+msgid "Archive conversation"
+msgid_plural "Archive conversations"
+msgstr[0] "Archiwizuje wątek"
+msgstr[1] "Archiwizuje wątki"
+msgstr[2] "Archiwizuje wątki"
 
-#: src/client/components/main-toolbar.vala:158
-msgid "Move conversation to Trash (Delete, Backspace)"
-msgid_plural "Move conversations to Trash (Delete, Backspace)"
-msgstr[0] "Przenosi wątek do kosza (Delete, Backspace)"
-msgstr[1] "Przenosi wątki do kosza (Delete, Backspace)"
-msgstr[2] "Przenosi wątki do kosza (Delete, Backspace)"
+#: src/client/components/main-toolbar.vala:163
+msgid "Move conversation to Trash"
+msgid_plural "Move conversations to Trash"
+msgstr[0] "Przenosi wątek do kosza"
+msgstr[1] "Przenosi wątki do kosza"
+msgstr[2] "Przenosi wątki do kosza"
 
-#: src/client/components/main-toolbar.vala:166
-msgid "Delete conversation (Shift+Delete)"
-msgid_plural "Delete conversations (Shift+Delete)"
-msgstr[0] "Usuwa wątek (Shift+Delete)"
-msgstr[1] "Usuwa wątki (Shift+Delete)"
-msgstr[2] "Usuwa wątki (Shift+Delete)"
+#: src/client/components/main-toolbar.vala:171
+msgid "Delete conversation"
+msgid_plural "Delete conversations"
+msgstr[0] "Usuwa wątek"
+msgstr[1] "Usuwa wątki"
+msgstr[2] "Usuwa wątki"
 
-#: src/client/components/main-window.vala:705
+#: src/client/components/main-window.vala:708
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1579,42 +1579,54 @@ msgstr "Dodaje ten język do listy preferowanych"
 msgid "Search for more languages"
 msgstr "Więcej języków"
 
-#: src/client/conversation-list/conversation-list-view.vala:322
-msgid "Delete conversation"
-msgstr "Usuń wątek"
+#. / Translators: Context menu item
+#: src/client/conversation-list/conversation-list-view.vala:326
+msgid "Move conversation to _Trash"
+msgid_plural "Move conversations to _Trash"
+msgstr[0] "_Przenieś wątek do kosza"
+msgstr[1] "_Przenieś wątki do kosza"
+msgstr[2] "_Przenieś wątki do kosza"
 
-#: src/client/conversation-list/conversation-list-view.vala:325
+#. / Translators: Context menu item
+#: src/client/conversation-list/conversation-list-view.vala:336
+msgid "_Delete conversation"
+msgid_plural "_Delete conversations"
+msgstr[0] "_Usuń wątek"
+msgstr[1] "_Usuń wątki"
+msgstr[2] "_Usuń wątki"
+
+#: src/client/conversation-list/conversation-list-view.vala:345
 #: ui/main-toolbar-menus.ui:5
 msgid "Mark as _Read"
 msgstr "Oznacz jako p_rzeczytane"
 
-#: src/client/conversation-list/conversation-list-view.vala:328
+#: src/client/conversation-list/conversation-list-view.vala:348
 #: ui/main-toolbar-menus.ui:9
 msgid "Mark as _Unread"
 msgstr "Oznacz jako niep_rzeczytane"
 
-#: src/client/conversation-list/conversation-list-view.vala:331
+#: src/client/conversation-list/conversation-list-view.vala:351
 #: ui/main-toolbar-menus.ui:17
 msgid "U_nstar"
 msgstr "Usuń wy_różnienie"
 
-#: src/client/conversation-list/conversation-list-view.vala:333
+#: src/client/conversation-list/conversation-list-view.vala:353
 #: ui/main-toolbar-menus.ui:13
 msgid "_Star"
 msgstr "_Wyróżnij"
 
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:336
+#: src/client/conversation-list/conversation-list-view.vala:356
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Odpowiedz"
 
-#: src/client/conversation-list/conversation-list-view.vala:337
+#: src/client/conversation-list/conversation-list-view.vala:357
 msgid "R_eply All"
 msgstr "O_dpowiedz wszystkim"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:338
+#: src/client/conversation-list/conversation-list-view.vala:358
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Przekaż"
@@ -2791,15 +2803,15 @@ msgid "Mark Unread From _Here"
 msgstr "Oznacz jako nieprzeczytane od tego _miejsca"
 
 #. Translators: Menu item to move a single, specific message
-#. to the trash
+#. to the trash folder
 #: ui/conversation-email-menus.ui:50
-msgid "_Trash"
-msgstr "_Przenieś do kosza"
+msgid "Move message to _Trash"
+msgstr "_Przenieś wiadomość do kosza"
 
 #. Translators: Menu item to delete a single, specific message
 #: ui/conversation-email-menus.ui:57
-msgid "_Delete…"
-msgstr "_Usuń…"
+msgid "_Delete message…"
+msgstr "_Usuń wiadomość…"
 
 #. Translators: Menu item to view the source for a message
 #: ui/conversation-email-menus.ui:69
