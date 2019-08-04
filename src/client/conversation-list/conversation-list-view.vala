@@ -318,8 +318,28 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
 
-            Menu context_menu_model = new Menu();
-            context_menu_model.append(_("Delete conversation"), "win."+Application.Controller.ACTION_DELETE_CONVERSATION);
+            GLib.Menu context_menu_model = new GLib.Menu();
+            if (!this.main_window.is_shift_down) {
+                context_menu_model.append(
+                    /// Translators: Context menu item
+                    ngettext(
+                        "Move conversation to _Trash",
+                        "Move conversations to _Trash",
+                        this.selected.size
+                    ),
+                    "win." + Application.Controller.ACTION_ARCHIVE_CONVERSATION
+                );
+            } else {
+                context_menu_model.append(
+                    /// Translators: Context menu item
+                    ngettext(
+                        "_Delete conversation",
+                        "_Delete conversations",
+                        this.selected.size
+                    ),
+                    "win." + Application.Controller.ACTION_DELETE_CONVERSATION
+                );
+            }
 
             if (conversation.is_unread())
                 context_menu_model.append(_("Mark as _Read"), "win."+Application.Controller.ACTION_MARK_AS_READ);
