@@ -1,3 +1,17 @@
+Version 3.32.2
+~~~~~~~~~~~~~~
+Released: 2019-08-04
+
+Enhancements included in this release:
+ * Bug fixes and server compatibility improvements
+ * User interface translation updates
+
+Thanks to all who contributed translations for the user interface:
+
+ * Bruce Cowan (en_GB)
+ * Tim Sabsch (de)
+ * Yuras Shumovich (be)
+
 Version 3.32.1
 ~~~~~~~~~~~~~~
 Released: 2019-04-28
