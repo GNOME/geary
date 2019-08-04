@@ -5,7 +5,7 @@
  */
 
 /**
- * An abstract class describing a process for goind through an SASL authentication transaction.
+ * An abstract class describing a process for going through an SASL authentication transaction.
  *
  * Authenticators expect to use complete {@link Credentials}, i.e. user and pass must not be null.
  */

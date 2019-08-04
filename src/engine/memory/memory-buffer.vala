@@ -101,19 +101,15 @@ public abstract class Geary.Memory.Buffer : BaseObject {
     }
 
     /**
-     * Returns a copy of the contents of the buffer as though it was a UTF-8 string.
+     * Returns a copy of the contents of the buffer as a UTF-8 string.
      *
-     * The base class implementation uses {@link get_bytes} to create the InputStream.  Subclasses
-     * should look for more optimal implementations.
-     *
-     * If the conversion fails or decodes as invalid UTF-8, an empty string is returned.
-     *
-     * @see UnownedStringBuffer.get_unowned_valid_utf8
+     * The base class implementation uses {@link to_string} to create
+     * the string and and {@link string.make_valid} to perform the
+     * validation. Subclasses should look for more optimal
+     * implementations.
      */
     public virtual string get_valid_utf8() {
-        string str = to_string();
-
-        return str.validate() ? str : "";
+        return to_string().make_valid();
     }
-}
 
+}

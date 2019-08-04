@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2019 Michael Gratton <mike@vee.net>
  *
@@ -13,7 +12,16 @@
 public class Components.Inspector : Gtk.ApplicationWindow {
 
 
-    private const int COL_MESSAGE = 0;
+    /** Determines the format used when serialising inspector data. */
+    public enum TextFormat {
+        PLAIN,
+        MARKDOWN;
+
+        public string get_line_separator() {
+            return (this == MARKDOWN) ? "  \n" : "\n";
+        }
+    }
+
 
     private const string ACTION_CLOSE = "inspector-close";
     private const string ACTION_PLAY_TOGGLE = "toggle-play";
@@ -46,149 +54,69 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     private Gtk.Button copy_button;
 
     [GtkChild]
-    private Gtk.Widget logs_pane;
-
-    [GtkChild]
     private Gtk.ToggleButton play_button;
 
     [GtkChild]
     private Gtk.ToggleButton search_button;
 
-    [GtkChild]
-    private Hdy.SearchBar search_bar;
-
-    [GtkChild]
-    private Gtk.SearchEntry search_entry;
-
-    [GtkChild]
-    private Gtk.ScrolledWindow logs_scroller;
-
-    [GtkChild]
-    private Gtk.TreeView logs_view;
-
-    [GtkChild]
-    private Gtk.CellRendererText log_renderer;
-
-    [GtkChild]
-    private Gtk.Widget detail_pane;
-
-    [GtkChild]
-    private Gtk.ListBox detail_list;
-
-    private Gtk.ListStore logs_store = new Gtk.ListStore.newv({
-            typeof(string)
-    });
-
-    private Gtk.TreeModelFilter logs_filter;
-
-    private string[] logs_filter_terms = new string[0];
-
-    private string details;
-
-    private bool update_logs = true;
-    private Geary.Logging.Record? first_pending = null;
-
-    private bool autoscroll = true;
+    private InspectorLogView log_pane;
+    private InspectorSystemView system_pane;
 
 
-    public Inspector(GearyApplication app) {
-        Object(application: app);
+    public Inspector(GearyApplication application) {
+        Object(application: application);
         this.title = this.header_bar.title = _("Inspector");
 
         add_action_entries(Inspector.action_entries, this);
 
-        this.search_bar.connect_entry(this.search_entry);
-
-        GLib.Settings system = app.config.gnome_interface;
-        system.bind(
-            "monospace-font-name",
-            this.log_renderer, "font",
-            SettingsBindFlags.DEFAULT
+        this.log_pane = new InspectorLogView(application.config, null);
+        this.log_pane.record_selection_changed.connect(
+            on_logs_selection_changed
         );
+        /// Translators: Title for Inspector logs pane
+        this.stack.add_titled(this.log_pane, "log_pane", _("Logs"));
 
-        StringBuilder details = new StringBuilder();
-        foreach (GearyApplication.RuntimeDetail? detail
-                 in app.get_runtime_information()) {
-            this.detail_list.add(
-                new DetailRow("%s:".printf(detail.name), detail.value)
-            );
-            details.append_printf("%s: %s\n", detail.name, detail.value);
-        }
-        this.details = details.str;
+        this.system_pane = new InspectorSystemView(application);
+        /// Translators: Title for Inspector system system information pane
+        this.stack.add_titled(this.system_pane, "system_pane", _("System"));
 
-        // Enable updates to get the log marker
+        // Enable updates to get the log marker, then load log all log
+        // records in
         enable_log_updates(true);
-
-        // Install the listener then starting add the backlog
-        // (ba-doom-tish) so to avoid the race.
-        Geary.Logging.set_log_listener(this.on_log_record);
-
-        Gtk.ListStore logs_store = this.logs_store;
-        Geary.Logging.Record? logs = Geary.Logging.get_logs();
-        int index = 0;
-        while (logs != null) {
-            if (should_append(logs)) {
-                string message = logs.format();
-                Gtk.TreeIter iter;
-                logs_store.insert(out iter, index++);
-                logs_store.set_value(iter, COL_MESSAGE, message);
-            }
-            logs = logs.next;
-        }
-
-        this.logs_filter = new Gtk.TreeModelFilter(logs_store, null);
-        this.logs_filter.set_visible_func((model, iter) => {
-                bool ret = true;
-                if (this.logs_filter_terms.length > 0) {
-                    ret = true;
-                    Value value;
-                    model.get_value(iter, COL_MESSAGE, out value);
-                    string? message = (string) value;
-                    if (message != null) {
-                        message = message.casefold();
-                        foreach (string term in this.logs_filter_terms) {
-                            if (!message.contains(term)) {
-                                ret = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-                return ret;
-            });
-
-        this.logs_view.set_model(this.logs_filter);
-    }
-
-    public override void destroy() {
-        Geary.Logging.set_log_listener(null);
-        base.destroy();
+        this.log_pane.load(Geary.Logging.get_earliest_record(), null);
     }
 
     public override bool key_press_event(Gdk.EventKey event) {
         bool ret = Gdk.EVENT_PROPAGATE;
 
-        if (this.search_bar.search_mode_enabled &&
+        if (this.log_pane.search_mode_enabled &&
             event.keyval == Gdk.Key.Escape) {
             // Manually deactivate search so the button stays in sync
             this.search_button.set_active(false);
             ret = Gdk.EVENT_STOP;
         }
 
-        if (ret == Gdk.EVENT_PROPAGATE) {
-            ret = this.search_bar.handle_event(event);
-        }
-
         if (ret == Gdk.EVENT_PROPAGATE &&
-            this.search_bar.search_mode_enabled) {
+            this.log_pane.search_mode_enabled) {
             // Ensure <Space> and others are passed to the search
             // entry before getting used as an accelerator.
-            ret = this.search_entry.key_press_event(event);
+            ret = this.log_pane.handle_key_press(event);
         }
 
         if (ret == Gdk.EVENT_PROPAGATE) {
             ret = base.key_press_event(event);
         }
+
+        if (ret == Gdk.EVENT_PROPAGATE &&
+            !this.log_pane.search_mode_enabled) {
+            // Nothing has handled the event yet, and search is not
+            // active, so see if we want to activate it now.
+            ret = this.log_pane.handle_key_press(event);
+            if (ret == Gdk.EVENT_STOP) {
+                this.search_button.set_active(true);
+            }
+        }
+
         return ret;
     }
 
@@ -196,38 +124,20 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         // Log a marker to indicate when it was started/stopped
         debug(
             "---- 8< ---- %s %s ---- 8< ----",
-            this.header_bar.title,
+            this.title,
             enabled ? "▶" : "■"
         );
 
-        this.update_logs = enabled;
-
-        // Disable autoscroll when not updating as well to stop the
-        // tree view jumping to the bottom when changing the filter.
-        this.autoscroll = enabled;
-
-        if (enabled) {
-            Geary.Logging.Record? logs = this.first_pending;
-            while (logs != null) {
-                append_record(logs);
-                logs = logs.next;
-            }
-            this.first_pending = null;
-        }
-    }
-
-    private inline bool should_append(Geary.Logging.Record record) {
-        // Blacklist GdkPixbuf since it spams us e.g. when window
-        // focus changes, including between MainWindow and the
-        // Inspector, which is very annoying.
-        return (record.domain != "GdkPixbuf");
+        this.log_pane.enable_log_updates(enabled);
     }
 
     private async void save(string path,
                             GLib.Cancellable? cancellable)
         throws GLib.Error {
         GLib.File dest = GLib.File.new_for_path(path);
-        GLib.FileIOStream dest_io = yield dest.create_readwrite_async(
+        GLib.FileIOStream dest_io = yield dest.replace_readwrite_async(
+            null,
+            false,
             GLib.FileCreateFlags.NONE,
             GLib.Priority.DEFAULT,
             cancellable
@@ -236,54 +146,20 @@ public class Components.Inspector : Gtk.ApplicationWindow {
             new GLib.BufferedOutputStream(dest_io.get_output_stream())
         );
 
-        out.put_string(this.details);
-        out.put_byte('\n');
-        out.put_byte('\n');
-
-        Gtk.TreeModel model = this.logs_view.model;
-        Gtk.TreeIter? iter;
-        bool valid = model.get_iter_first(out iter);
-        while (valid && !cancellable.is_cancelled()) {
-            Value value;
-            model.get_value(iter, COL_MESSAGE, out value);
-            string? message = (string) value;
-            if (message != null) {
-                out.put_string(message);
-                out.put_byte('\n');
-            }
-            valid = model.iter_next(ref iter);
-        }
+        this.system_pane.save(@out, TextFormat.PLAIN, cancellable);
+        out.put_string("\n");
+        this.log_pane.save(@out, TextFormat.PLAIN, true, cancellable);
 
         yield out.close_async();
         yield dest_io.close_async();
     }
 
     private void update_ui() {
-        bool logs_visible = this.stack.visible_child == this.logs_pane;
-        uint logs_selected = this.logs_view.get_selection().count_selected_rows();
+        bool logs_visible = this.stack.visible_child == this.log_pane;
+        uint logs_selected = this.log_pane.count_selected_records();
         this.copy_button.set_sensitive(!logs_visible || logs_selected > 0);
         this.play_button.set_visible(logs_visible);
         this.search_button.set_visible(logs_visible);
-    }
-
-    private void update_scrollbar() {
-        Gtk.Adjustment adj = this.logs_scroller.get_vadjustment();
-        adj.set_value(adj.upper - adj.page_size);
-    }
-
-    private void update_logs_filter() {
-        string cleaned =
-            Geary.String.reduce_whitespace(this.search_entry.text).casefold();
-        this.logs_filter_terms = cleaned.split(" ");
-        this.logs_filter.refilter();
-    }
-
-    private void append_record(Geary.Logging.Record record) {
-        if (should_append(record)) {
-            Gtk.TreeIter inserted_iter;
-            this.logs_store.append(out inserted_iter);
-            this.logs_store.set_value(inserted_iter, COL_MESSAGE, record.format());
-        }
     }
 
     [GtkCallback]
@@ -292,29 +168,25 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     }
 
     private void on_copy_clicked() {
-        string clipboard_value = "";
-        if (this.stack.visible_child == this.logs_pane) {
-            StringBuilder rows = new StringBuilder();
-            Gtk.TreeModel model = this.logs_view.model;
-            foreach (Gtk.TreePath path in
-                     this.logs_view.get_selection().get_selected_rows(null)) {
-                Gtk.TreeIter iter;
-                if (model.get_iter(out iter, path)) {
-                    Value value;
-                    model.get_value(iter, COL_MESSAGE, out value);
-
-                    string? message = (string) value;
-                    if (message != null) {
-                        rows.append(message);
-                        rows.append_c('\n');
-                    }
-                }
+        GLib.MemoryOutputStream bytes = new GLib.MemoryOutputStream.resizable();
+        GLib.DataOutputStream out = new GLib.DataOutputStream(bytes);
+        try {
+            if (this.stack.visible_child == this.log_pane) {
+                this.log_pane.save(@out, TextFormat.MARKDOWN, false, null);
+            } else if (this.stack.visible_child == this.system_pane) {
+                this.system_pane.save(@out, TextFormat.MARKDOWN, null);
             }
-            clipboard_value = rows.str;
-        } else if (this.stack.visible_child == this.detail_pane) {
-            clipboard_value = this.details;
+
+            // Ensure the data is a valid string
+            out.put_byte(0, null);
+        } catch (GLib.Error err) {
+            warning(
+                "Error saving inspector data for clipboard: %s",
+                err.message
+            );
         }
 
+        string clipboard_value = (string) bytes.get_data();
         if (!Geary.String.is_empty(clipboard_value)) {
             get_clipboard(Gdk.SELECTION_CLIPBOARD).set_text(clipboard_value, -1);
         }
@@ -348,14 +220,6 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         }
     }
 
-    [GtkCallback]
-    private void on_logs_size_allocate() {
-        if (this.autoscroll) {
-            update_scrollbar();
-        }
-    }
-
-    [GtkCallback]
     private void on_logs_selection_changed() {
         update_ui();
     }
@@ -363,13 +227,12 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     private void on_logs_search_toggled(GLib.SimpleAction action,
                                         GLib.Variant? param) {
         bool enabled = !((bool) action.state);
-        this.search_bar.set_search_mode(enabled);
+        this.log_pane.search_mode_enabled = enabled;
         action.set_state(enabled);
     }
 
     private void on_logs_search_activated() {
         this.search_button.set_active(true);
-        this.search_entry.grab_focus();
     }
 
     private void on_logs_play_toggled(GLib.SimpleAction action,
@@ -379,60 +242,8 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         action.set_state(enabled);
     }
 
-    [GtkCallback]
-    private void on_logs_search_changed() {
-        update_logs_filter();
-    }
-
-    private void on_log_record(Geary.Logging.Record record) {
-        if (this.update_logs) {
-            GLib.MainContext.default().invoke(() => {
-                    append_record(record);
-                    return GLib.Source.REMOVE;
-                });
-        } else if (this.first_pending == null) {
-            this.first_pending = record;
-        }
-    }
-
     private void on_close() {
         destroy();
-    }
-
-}
-
-
-private class Components.DetailRow : Gtk.ListBoxRow {
-
-
-    private Gtk.Grid layout { get; private set; default = new Gtk.Grid(); }
-    private Gtk.Label label { get; private set; default = new Gtk.Label(""); }
-    private Gtk.Label value { get; private set; default = new Gtk.Label(""); }
-
-
-    public DetailRow(string label, string value) {
-        get_style_context().add_class("geary-labelled-row");
-
-        this.label.halign = Gtk.Align.START;
-        this.label.valign = Gtk.Align.CENTER;
-        this.label.set_text(label);
-        this.label.show();
-
-        this.value.halign = Gtk.Align.END;
-        this.value.hexpand = true;
-        this.value.valign = Gtk.Align.CENTER;
-        this.value.xalign = 1.0f;
-        this.value.set_text(value);
-        this.value.show();
-
-        this.layout.orientation = Gtk.Orientation.HORIZONTAL;
-        this.layout.add(this.label);
-        this.layout.add(this.value);
-        this.layout.show();
-        add(this.layout);
-
-        this.activatable = false;
-        show();
     }
 
 }

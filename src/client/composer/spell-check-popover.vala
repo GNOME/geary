@@ -30,37 +30,39 @@ public class SpellCheckPopover {
 
     private class SpellCheckLangRow : Gtk.ListBoxRow {
 
-        /**
-         * This signal is emitted then the user activates the row.
-         *
-         * @param lang_code The language code associated to this row (such as en_US).
-         * @param status true if the associated dictionary should be enabled, false if it should be
-         *               disabled.
-         */
-        public signal void toggled (string lang_code, bool status);
+        public string lang_code { get; private set; }
 
-        /**
-         * @brief Signal when the visibility has changed.
-         */
-        public signal void visibility_changed ();
-
-        private string lang_code;
         private string lang_name;
         private string country_name;
         private bool is_lang_visible;
         private Gtk.Image active_image;
-        private Gtk.Button remove_button;
+        private Gtk.Button visibility_button;
         private SpellCheckStatus lang_active = SpellCheckStatus.INACTIVE;
-        private Configuration config;
 
-        public SpellCheckLangRow (string lang_code, Configuration config) {
+        /**
+         * Emitted when the language has been enabled or disabled.
+         */
+        public signal void enabled_changed(bool is_enabled);
+
+        /**
+         * @brief Signal when the visibility has changed.
+         */
+        public signal void visibility_changed(bool is_visible);
+
+
+        public SpellCheckLangRow(string lang_code,
+                                 bool is_active,
+                                 bool is_visible) {
             this.lang_code = lang_code;
-            this.config = config;
+            this.lang_active = is_active
+                ? SpellCheckStatus.ACTIVE
+                : SpellCheckStatus.INACTIVE;
+            this.is_lang_visible = is_active || is_visible;
 
             Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
 
-            lang_name = International.language_name_from_locale(lang_code);
-            country_name = International.country_name_from_locale(lang_code);
+            lang_name = Util.International.language_name_from_locale(lang_code);
+            country_name = Util.International.country_name_from_locale(lang_code);
 
             string label_text = lang_name;
             if (country_name != null)
@@ -73,24 +75,13 @@ public class SpellCheckPopover {
 
             Gtk.IconSize sz = Gtk.IconSize.SMALL_TOOLBAR;
             active_image = new Gtk.Image.from_icon_name("object-select-symbolic", sz);
-            remove_button = new Gtk.Button();
-            remove_button.set_relief(Gtk.ReliefStyle.NONE);
+            this.visibility_button = new Gtk.Button();
+            this.visibility_button.set_relief(Gtk.ReliefStyle.NONE);
             box.pack_start(active_image, false, false, 6);
-            box.pack_start(remove_button, true, true);
-            remove_button.halign = Gtk.Align.END; // Make the button stay at the right end of the screen
+            box.pack_start(this.visibility_button, true, true);
+            this.visibility_button.halign = Gtk.Align.END; // Make the button stay at the right end of the screen
 
-            remove_button.clicked.connect(on_remove_clicked);
-
-            is_lang_visible = false;
-            foreach (string visible_lang in this.config.spell_check_visible_languages) {
-                if (visible_lang == lang_code)
-                    is_lang_visible = true;
-            }
-
-            foreach (string active_lang in this.config.spell_check_languages) {
-                if (active_lang == lang_code)
-                    lang_active = SpellCheckStatus.ACTIVE;
-            }
+            this.visibility_button.clicked.connect(on_visibility_clicked);
 
             update_images();
             add(box);
@@ -113,38 +104,13 @@ public class SpellCheckPopover {
             }
 
             if (is_lang_visible) {
-                remove_button.set_image(new Gtk.Image.from_icon_name("list-remove-symbolic", sz));
-                remove_button.set_tooltip_text(_("Remove this language from the preferred list"));
+                this.visibility_button.set_image(new Gtk.Image.from_icon_name("list-remove-symbolic", sz));
+                this.visibility_button.set_tooltip_text(_("Remove this language from the preferred list"));
             }
             else {
-                remove_button.set_image(new Gtk.Image.from_icon_name("list-add-symbolic", sz));
-                remove_button.set_tooltip_text(_("Add this language to the preferred list"));
+                this.visibility_button.set_image(new Gtk.Image.from_icon_name("list-add-symbolic", sz));
+                this.visibility_button.set_tooltip_text(_("Add this language to the preferred list"));
             }
-        }
-
-        private void on_remove_clicked() {
-            is_lang_visible = ! is_lang_visible;
-
-            update_images();
-
-            if (!is_lang_visible && lang_active == SpellCheckStatus.ACTIVE)
-                set_lang_active(SpellCheckStatus.INACTIVE);
-
-            if (is_lang_visible) {
-                string[] visible_langs = this.config.spell_check_visible_languages;
-                visible_langs += lang_code;
-                this.config.spell_check_visible_languages = visible_langs;
-            }
-            else {
-                string[] visible_langs = {};
-                foreach (string lang in this.config.spell_check_visible_languages) {
-                    if (lang != lang_code)
-                        visible_langs += lang;
-                }
-                this.config.spell_check_visible_languages = visible_langs;
-            }
-
-            visibility_changed();
         }
 
         public bool match_filter(string filter) {
@@ -154,16 +120,13 @@ public class SpellCheckPopover {
         }
 
         private void set_lang_active(SpellCheckStatus active) {
-            lang_active = active;
+            this.lang_active = active;
 
             switch (active) {
                 case SpellCheckStatus.ACTIVE:
                     // If the lang is not visible make it visible now
-                    if (!is_lang_visible) {
-                        string[] visible_langs = this.config.spell_check_visible_languages;
-                        visible_langs += lang_code;
-                        this.config.spell_check_visible_languages = visible_langs;
-                        is_lang_visible = true;
+                    if (!this.is_lang_visible) {
+                        set_lang_visible(true);
                     }
                     break;
                 case SpellCheckStatus.INACTIVE:
@@ -171,7 +134,19 @@ public class SpellCheckPopover {
             }
 
             update_images();
-            this.toggled(lang_code, active == SpellCheckStatus.ACTIVE);
+            this.enabled_changed(active == SpellCheckStatus.ACTIVE);
+        }
+
+        private void set_lang_visible(bool is_visible) {
+            this.is_lang_visible = is_visible;
+
+            update_images();
+            if (!this.is_lang_visible &&
+                this.lang_active == SpellCheckStatus.ACTIVE) {
+                set_lang_active(SpellCheckStatus.INACTIVE);
+            }
+
+            visibility_changed(is_visible);
         }
 
         public void handle_activation(SpellCheckPopover spell_check_popover) {
@@ -193,6 +168,11 @@ public class SpellCheckPopover {
         public bool is_row_visible(bool is_expanded) {
             return is_lang_visible || is_expanded;
         }
+
+        private void on_visibility_clicked() {
+            set_lang_visible(!this.is_lang_visible);
+        }
+
     }
 
     public SpellCheckPopover(Gtk.Widget button, Configuration config) {
@@ -210,7 +190,9 @@ public class SpellCheckPopover {
 
     private void setup_popover() {
         // We populate the popover with the list of languages that the user wants to see
-        string[] languages = International.get_available_dictionaries();
+        string[] languages = Util.International.get_available_dictionaries();
+        string[] enabled_langs = this.config.spell_check_languages;
+        string[] visible_langs = this.config.spell_check_visible_languages;
 
         content = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
         search_box = new Gtk.SearchEntry();
@@ -226,14 +208,18 @@ public class SpellCheckPopover {
         langs_list = new Gtk.ListBox();
         langs_list.set_selection_mode(Gtk.SelectionMode.NONE);
         foreach (string lang in languages) {
-            SpellCheckLangRow row = new SpellCheckLangRow(lang, this.config);
+            SpellCheckLangRow row = new SpellCheckLangRow(
+                lang,
+                lang in enabled_langs,
+                lang in visible_langs
+            );
             langs_list.add(row);
 
             if (row.is_lang_active())
                 selected_rows.add(lang);
 
-            row.toggled.connect(this.on_row_toggled);
-            row.visibility_changed.connect(this.on_visibility_changed);
+            row.enabled_changed.connect(this.on_row_enabled_changed);
+            row.visibility_changed.connect(this.on_row_visibility_changed);
         }
         langs_list.row_activated.connect(on_row_activated);
         view.add(langs_list);
@@ -297,11 +283,14 @@ public class SpellCheckPopover {
         return popover.get_visible();
     }
 
-    private void on_row_toggled(string lang_code, bool active) {
-        if (active)
-            selected_rows.add(lang_code);
-        else
-            selected_rows.remove(lang_code);
+    private void on_row_enabled_changed(SpellCheckLangRow row,
+                                        bool is_active) {
+        string lang = row.lang_code;
+        if (is_active) {
+            selected_rows.add(lang);
+        } else {
+            selected_rows.remove(lang);
+        }
 
         // Signal that the selection has changed
         string[] active_langs = {};
@@ -309,8 +298,26 @@ public class SpellCheckPopover {
         this.selection_changed(active_langs);
     }
 
-    private void on_visibility_changed() {
+    private void on_row_visibility_changed(SpellCheckLangRow row,
+                                           bool is_visible) {
         langs_list.invalidate_filter();
+
+        string[] visible_langs = this.config.spell_check_visible_languages;
+        string lang = row.lang_code;
+        if (is_visible) {
+            if (!(lang in visible_langs)) {
+                visible_langs += lang;
+            }
+        } else {
+            string[] new_langs = {};
+            foreach (string lang_code in visible_langs) {
+                if (lang != lang_code) {
+                    new_langs += lang_code;
+                }
+            }
+            visible_langs = new_langs;
+        }
+        this.config.spell_check_visible_languages = visible_langs;
     }
 
 }

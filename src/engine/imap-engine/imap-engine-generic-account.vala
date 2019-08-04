@@ -83,17 +83,19 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         base(config, imap, smtp);
 
         this.local = local;
-        this.local.contacts_loaded.connect(() => { contacts_loaded(); });
+        this.contact_store = new ContactStoreImpl(local.db);
 
         imap.min_pool_size = IMAP_MIN_POOL_SIZE;
         imap.notify["current-status"].connect(
             on_imap_status_notify
         );
+        imap.set_loggable_parent(this);
         this.imap = imap;
 
         smtp.outbox = new Outbox.Folder(this, local_folder_root, local);
         smtp.email_sent.connect(on_email_sent);
         smtp.report_problem.connect(notify_report_problem);
+        smtp.set_loggable_parent(this);
         this.smtp = smtp;
 
         this.sync = new AccountSynchronizer(this);
@@ -133,11 +135,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.processor.operation_error.connect(on_operation_error);
 
         try {
-            yield this.local.open_async(
-                information.data_dir,
-                Engine.instance.resource_dir.get_child("sql"),
-                cancellable
-            );
+            yield this.local.open_async(cancellable);
         } catch (Error err) {
             // convert database-open errors
             if (err is DatabaseError.CORRUPT)
@@ -171,6 +169,21 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         yield this.imap.start(cancellable);
         this.queue_operation(new StartPostie(this));
 
+        // Kick off a background update of the search table, but since
+        // the database is getting hammered at startup, wait a bit
+        // before starting the update ... use the ordinal to stagger
+        // these being fired off (important for users with many
+        // accounts registered).
+        //
+        // This is an example of an operation for which we need an
+        // engine-wide operation queue, not just an account-wide
+        // queue.
+        const int POPULATE_DELAY_SEC = 5;
+        int account_sec = this.information.ordinal.clamp(0, 10);
+        Timeout.add_seconds(POPULATE_DELAY_SEC + account_sec, () => {
+                this.local.populate_search_table.begin(cancellable);
+            return false;
+        });
     }
 
     public override async void close_async(Cancellable? cancellable = null) throws Error {
@@ -181,9 +194,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         try {
             yield this.smtp.stop();
         } catch (Error err) {
-            debug(
-                "%s: Error stopping SMTP service: %s", to_string(), err.message
-            );
+            debug("Error stopping SMTP service: %s", err.message);
         }
 
         // Halt internal tasks early so they stop using local and
@@ -210,11 +221,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         notify_folders_available_unavailable(null, remotes);
 
         foreach (Geary.Folder folder in locals) {
-            debug("%s: Waiting for local to close: %s", to_string(), folder.to_string());
+            debug("Waiting for local to close: %s", folder.to_string());
             yield folder.wait_for_close_async();
         }
         foreach (Geary.Folder folder in remotes) {
-            debug("%s: Waiting for remote to close: %s", to_string(), folder.to_string());
+            debug("Waiting for remote to close: %s", folder.to_string());
             yield folder.wait_for_close_async();
         }
 
@@ -223,9 +234,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         try {
             yield this.imap.stop();
         } catch (Error err) {
-            debug(
-                "%s: Error stopping IMAP service: %s", to_string(), err.message
-            );
+            debug("Error stopping IMAP service: %s", err.message);
         }
         this.remote_ready_lock = null;
 
@@ -245,37 +254,17 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return open;
     }
 
-    public override async void rebuild_async(Cancellable? cancellable = null) throws Error {
-        if (open)
-            throw new EngineError.ALREADY_OPEN("Account cannot be open during rebuild");
-
-        message("%s: Rebuilding account local data", to_string());
-
-        // get all the storage locations associated with this Account
-        File db_file;
-        File attachments_dir;
-        ImapDB.Account.get_imap_db_storage_locations(information.data_dir, out db_file,
-            out attachments_dir);
-
-        if (yield Files.query_exists_async(db_file, cancellable)) {
-            message(
-                "%s: Deleting database file %s...",
-                to_string(), db_file.get_path()
-            );
-            yield db_file.delete_async(GLib.Priority.DEFAULT, cancellable);
-        }
-
-        if (yield Files.query_exists_async(attachments_dir, cancellable)) {
-            message(
-                "%s: Deleting attachments directory %s...",
-                to_string(), attachments_dir.get_path()
-            );
-            yield Files.recursive_delete_async(
-                attachments_dir, GLib.Priority.DEFAULT, cancellable
+    public override async void rebuild_async(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        if (this.open) {
+            throw new EngineError.ALREADY_OPEN(
+                "Account cannot be open during rebuild"
             );
         }
 
-        message("%s: Rebuild complete", to_string());
+        message("Rebuilding account local data");
+        yield this.local.delete_all_data(cancellable);
+        message("Rebuild complete");
     }
 
     /**
@@ -288,7 +277,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public void queue_operation(AccountOperation op)
         throws EngineError {
         check_open();
-        debug("%s: Enqueuing operation: %s", this.to_string(), op.to_string());
+        debug("Enqueuing operation: %s", op.to_string());
         this.processor.enqueue(op);
     }
 
@@ -306,7 +295,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public async Imap.AccountSession claim_account_session(Cancellable? cancellable = null)
         throws Error {
         check_open();
-        debug("%s: Acquiring account session", this.to_string());
+        debug("Acquiring account session");
         yield this.remote_ready_lock.wait_async(cancellable);
         Imap.ClientSession client =
             yield this.imap.claim_authorized_session_async(cancellable);
@@ -319,7 +308,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * Returns an IMAP account session to the pool for re-use.
      */
     public void release_account_session(Imap.AccountSession session) {
-        debug("%s: Releasing account session", this.to_string());
+        debug("Releasing account session");
         Imap.ClientSession? old_session = session.close();
         if (old_session != null) {
             this.imap.release_session_async.begin(
@@ -328,9 +317,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                     try {
                         this.imap.release_session_async.end(res);
                     } catch (Error err) {
-                        debug("%s: Error releasing account session: %s",
-                              to_string(),
-                              err.message);
+                        debug(
+                            "Error releasing account session: %s", err.message
+                        );
                     }
                 }
             );
@@ -352,7 +341,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                                                          Cancellable cancellable)
         throws Error {
         check_open();
-        debug("%s: Acquiring folder session", this.to_string());
+        debug("Acquiring folder session for: %s", path.to_string());
         yield this.remote_ready_lock.wait_async(cancellable);
 
         // We manually construct an account session here and then
@@ -403,14 +392,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * Returns an IMAP folder session to the pool for cleanup and re-use.
      */
     public async void release_folder_session(Imap.FolderSession session) {
-        debug("%s: Releasing folder session", this.to_string());
+        debug("Releasing folder session");
         Imap.ClientSession? old_session = session.close();
         if (old_session != null) {
             try {
                 yield this.imap.release_session_async(old_session);
             } catch (Error err) {
-                debug("%s: Error releasing %s session: %s",
-                      to_string(),
+                debug("Error releasing %s session: %s",
                       session.folder.path.to_string(),
                       err.message);
             }
@@ -485,10 +473,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return all_folders;
     }
 
-    public override Geary.ContactStore get_contact_store() {
-        return local.contact_store;
-    }
-
     public override async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
         Cancellable? cancellable) throws Error {
         if (!(special in get_supported_special_folders())) {
@@ -515,14 +499,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         throws GLib.Error {
         check_open();
 
-        // XXX work out what our public IP adddress is somehow and use
+        // XXX work out what our public IP address is somehow and use
         // that in preference to the sender's domain
         string domain = composed.sender != null
             ? composed.sender.domain
             : this.information.primary_mailbox.domain;
-        Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(
-            composed, GMime.utils_generate_message_id(domain)
-        );
+        Geary.RFC822.Message rfc822 =
+            yield new Geary.RFC822.Message.from_composed_email(
+                composed, GMime.utils_generate_message_id(domain), cancellable
+            );
 
         yield this.smtp.queue_email(rfc822, cancellable);
     }
@@ -636,7 +621,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Gee.Collection<Geary.Folder> folders =
             new Gee.LinkedList<Geary.Folder>();
         folders.add(folder);
-        debug("Contents altered!");
+        debug("Folder updated: %s", folder.path.to_string());
         notify_folders_contents_altered(folders);
     }
 
@@ -659,8 +644,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         foreach (Geary.SpecialFolderType special in specials.keys) {
             MinimalFolder? minimal = specials.get(special) as MinimalFolder;
             if (minimal.special_folder_type != special) {
-                debug("%s: Promoting %s to %s",
-                      to_string(), minimal.to_string(), special.to_string());
+                debug("Promoting %s to %s",
+                      minimal.to_string(), special.to_string());
                 minimal.set_special_folder_type(special);
                 changed.add(minimal);
 
@@ -668,8 +653,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 try {
                     existing = get_special_folder(special) as MinimalFolder;
                 } catch (Error err) {
-                    debug("%s: Error getting special folder: %s",
-                          to_string(), err.message);
+                    debug("Error getting special folder: %s", err.message);
                 }
 
                 if (existing != null && existing != minimal) {
@@ -729,8 +713,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             if (path != null) {
                 if (!remote.is_folder_path_valid(path)) {
                     warning(
-                        "%s: Ignoring bad special folder path '%s' for type %s",
-                        to_string(),
+                        "Ignoring bad special folder path '%s' for type %s",
                         path.to_string(),
                         type.to_string()
                     );
@@ -760,15 +743,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                     path = root.get_child(search_names[0]);
                 }
 
-                debug("%s: Guessed folder \'%s\' for special_path %s",
-                      to_string(), path.to_string(), type.to_string()
+                debug("Guessed folder \'%s\' for special_path %s",
+                      path.to_string(), type.to_string()
                 );
                 information.set_special_folder_path(type, path);
             }
 
             if (!this.folder_map.has_key(path)) {
-                debug("%s: Creating \"%s\" to use as special folder %s",
-                      to_string(), path.to_string(), type.to_string());
+                debug("Creating \"%s\" to use as special folder %s",
+                      path.to_string(), type.to_string());
 
                 GLib.Error? created_err = null;
                 try {
@@ -1130,8 +1113,7 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
                         added_specials.set(type, target);
                     } catch (Error err) {
                         debug(
-                            "%s: Previously used special folder %s not loaded: %s",
-                            generic.information.id,
+                            "Previously used special folder %s not loaded: %s",
                             type.to_string(),
                             err.message
                         );
@@ -1237,7 +1219,7 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             if (err is IOError || err is ImapError)
                 throw err;
             debug("Ignoring error listing child folders of %s: %s",
-                (parent != null ? parent.to_string() : "root"), err.message);
+                  (parent != null ? parent.to_string() : "root"), err.message);
             results_suspect = true;
         }
 
@@ -1337,8 +1319,8 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
 
             Gee.BidirIterator<MinimalFolder> removed_iterator =
                 removed.bidir_iterator();
-            removed_iterator.last();
-            while (removed_iterator.previous()) {
+            bool has_prev = removed_iterator.last();
+            while (has_prev) {
                 MinimalFolder folder = removed_iterator.get();
 
                 try {
@@ -1347,6 +1329,8 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
                 } catch (Error e) {
                     debug("Unable to locally delete removed folder %s: %s", folder.to_string(), e.message);
                 }
+
+                has_prev = removed_iterator.previous();
             }
 
             // Let the remote know as well

@@ -278,27 +278,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="undo_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="action_name">win.undo</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="undo_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">edit-undo-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox" id="archive_trash_delete_buttons">
             <property name="visible">True</property>
             <property name="can_focus">False</property>

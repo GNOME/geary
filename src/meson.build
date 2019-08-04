@@ -31,6 +31,8 @@ endif
 
 geary_c_options = [
   '-include', 'config.h',
+  # Enable GLib structured logging
+  '-DG_LOG_USE_STRUCTURED',
   # Select libunwind's optimised, local-only backtrace unwiding. See
   # libunwind(3).
   '-DUNW_LOCAL_ONLY',
@@ -46,15 +48,20 @@ subdir('client')
 subdir('console')
 subdir('mailer')
 
+geary_web_process_sources = files(
+  'client/web-process/web-process-extension.vala',
+  'client/util/util-js.vala',
+)
+
 # Web process extension library
 geary_web_process = library('geary-web-process',
-  join_paths('client', 'web-process', 'web-process-extension.vala'),
+  geary_web_process_sources,
   c_args: geary_c_options,
   dependencies: [
+    geary_engine_dep,
     gee,
     gmime,
-    webkit2gtk_web_extension ,
-    geary_engine_dep,
+    webkit2gtk_web_extension,
   ],
   install: true,
   install_dir: web_extensions_dir
@@ -78,6 +85,8 @@ geary_bin_dependencies = [
   gmime,
   goa,
   gtk,
+  javascriptcoregtk,
+  libhandy,
   libmath,
   libsoup,
   webkit2gtk,

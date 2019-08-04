@@ -26,11 +26,6 @@ public class MainToolbar : Gtk.Box {
     public int selected_conversations { get; set; }
     // Whether to show the trash or the delete button
     public bool show_trash_button { get; set; default = true; }
-    // The tooltip of the Undo-button
-    public string undo_tooltip {
-        owned get { return this.undo_button.tooltip_text; }
-        set { this.undo_button.tooltip_text = value; }
-    }
 
     // Folder header elements
     [GtkChild]
@@ -56,10 +51,6 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Button trash_delete_button;
     [GtkChild]
     private Gtk.ToggleButton find_button;
-
-    // Other
-    [GtkChild]
-    private Gtk.Button undo_button;
 
     // Load these at construction time
     private Gtk.Image trash_image = new Gtk.Image.from_icon_name("user-trash-symbolic", Gtk.IconSize.MENU);
@@ -127,14 +118,14 @@ public class MainToolbar : Gtk.Box {
 
     private void set_window_buttons() {
         string[] buttons = Gtk.Settings.get_default().gtk_decoration_layout.split(":");
-        if (buttons.length != 2) {
-            warning("gtk_decoration_layout in unexpected format");
-            return;
-        }
-        show_close_button_left = show_close_button;
-        show_close_button_right = show_close_button;
-        folder_header.decoration_layout = buttons[0] + ":";
-        conversation_header.decoration_layout = ":" + buttons[1];
+        this.show_close_button_left = this.show_close_button;
+        this.show_close_button_right = this.show_close_button;
+        this.folder_header.decoration_layout = buttons[0] + ":";
+        this.conversation_header.decoration_layout = (
+            (buttons.length == 2)
+            ? ":" + buttons[1]
+            : ""
+        );
     }
 
     // Updates tooltip text depending on number of conversations selected.

@@ -11,36 +11,6 @@ namespace Geary.RFC822.Utils {
 // in UTF-8, and is unmolested by GMime.FilterHTML.
 public const char QUOTE_MARKER = '\x7f';
 
-/**
- * Charset to use when it is otherwise missing or invalid
- *
- * Per RFC 2045, Section 5.2.
- */
-public const string DEFAULT_MIME_CHARSET = "us-ascii";
-
-/**
- * Creates a filter to convert a MIME charset to UTF-8.
- *
- * Param `from_charset` may be null, empty or invalid, in which case
- * `DEFAULT_MIME_CHARSET` will be used instead.
- */
-public GMime.FilterCharset create_utf8_filter_charset(string? from_charset) {
-    string actual_charset = from_charset != null ? from_charset.strip() : "";
-    if (Geary.String.is_empty(actual_charset)) {
-        actual_charset = DEFAULT_MIME_CHARSET;
-    }
-    GMime.FilterCharset? filter_charset = new GMime.FilterCharset(
-        actual_charset, Geary.RFC822.UTF8_CHARSET
-    );
-    if (filter_charset == null) {
-        debug("Unknown charset: %s; using RFC 2045 default instead", from_charset);
-        filter_charset = new GMime.FilterCharset(
-            DEFAULT_MIME_CHARSET, Geary.RFC822.UTF8_CHARSET
-        );
-        assert(filter_charset != null);
-    }
-    return filter_charset;
-}
 
 /**
  * Uses the best-possible transfer of bytes from the Memory.Buffer to the GMime.StreamMem object.
@@ -284,37 +254,54 @@ public string to_preview_text(string? text, TextFormat format) {
 /**
  * Uses a GMime.FilterBest to determine the best charset.
  *
- * WARNING: This call does not perform async I/O, meaning it will loop on the
- * stream without relinquishing control to the event loop.  Use with
- * caution.
+ * This may require processing the entire stream, so occurs in a
+ * background thread.
  */
-public string get_best_charset(GMime.Stream in_stream) {
+public async string get_best_charset(GMime.Stream in_stream,
+                                     GLib.Cancellable? cancellable)
+    throws GLib.Error {
     GMime.FilterBest filter = new GMime.FilterBest(
         GMime.FilterBestFlags.CHARSET
     );
-    GMime.StreamFilter out_stream = new GMime.StreamFilter(new GMime.StreamNull());
+    GMime.StreamFilter out_stream = new GMime.StreamFilter(
+        new GMime.StreamNull()
+    );
     out_stream.add(filter);
-    in_stream.write_to_stream(out_stream);
-    in_stream.reset();
+
+    yield Nonblocking.Concurrent.global.schedule_async(() => {
+            in_stream.write_to_stream(out_stream);
+            in_stream.reset();
+        },
+        cancellable
+    );
     return filter.charset();
 }
 
 /**
  * Uses a GMime.FilterBest to determine the best encoding.
  *
- * WARNING: This call does not perform async I/O, meaning it will loop on the
- * stream without relinquishing control to the event loop.  Use with
- * caution.
+ * This may require processing the entire stream, so occurs in a
+ * background thread.
  */
-public GMime.ContentEncoding get_best_encoding(GMime.Stream in_stream) {
+public async GMime.ContentEncoding get_best_encoding(GMime.Stream in_stream,
+                                                     GMime.EncodingConstraint constraint,
+                                                     GLib.Cancellable? cancellable)
+    throws GLib.Error {
     GMime.FilterBest filter = new GMime.FilterBest(
         GMime.FilterBestFlags.ENCODING
     );
-    GMime.StreamFilter out_stream = new GMime.StreamFilter(new GMime.StreamNull());
+    GMime.StreamFilter out_stream = new GMime.StreamFilter(
+        new GMime.StreamNull()
+    );
     out_stream.add(filter);
-    in_stream.write_to_stream(out_stream);
-    in_stream.reset();
-    return filter.encoding(GMime.EncodingConstraint.7BIT);
+
+    yield Nonblocking.Concurrent.global.schedule_async(() => {
+            in_stream.write_to_stream(out_stream);
+            in_stream.reset();
+        },
+        cancellable
+    );
+    return filter.encoding(constraint);
 }
 
 }

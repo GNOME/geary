@@ -5,7 +5,7 @@
  */
 
 /**
- * A represenation of an IMAP message range specifier.
+ * A representation of an IMAP message range specifier.
  *
  * A MessageSet can be for {@link SequenceNumber}s (which use positional addressing) or
  * {@link UID}s.

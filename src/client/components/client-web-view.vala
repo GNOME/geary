@@ -392,8 +392,8 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      * Returns the view's content as an HTML string.
      */
     public async string? get_html() throws Error {
-        return WebKitUtil.to_string(
-            yield call(Geary.JS.callable("geary.getHtml"), null)
+        return Util.JS.to_string(
+            yield call(Util.JS.callable("geary.getHtml"), null)
         );
     }
 
@@ -438,7 +438,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      * Load any remote images previously that were blocked.
      */
     public void load_remote_images() {
-        this.call.begin(Geary.JS.callable("geary.loadRemoteImages"), null);
+        this.call.begin(Util.JS.callable("geary.loadRemoteImages"), null);
     }
 
     /**
@@ -484,17 +484,20 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                                        Cancellable? cancellable)
         throws Error {
         yield call(
-            Geary.JS.callable("geary.setEditable").bool(enabled), cancellable
+            Util.JS.callable("geary.setEditable").bool(enabled), cancellable
         );
     }
 
     /**
-     * Invokes a {@link Geary.JS.Callable} on this web view.
+     * Invokes a {@link Util.JS.Callable} on this web view.
      */
-    protected async WebKit.JavascriptResult call(Geary.JS.Callable target,
-                                                 Cancellable? cancellable)
-    throws Error {
-        return yield run_javascript(target.to_string(), cancellable);
+    protected async JSC.Value call(Util.JS.Callable target,
+                                   GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        WebKit.JavascriptResult result = yield run_javascript(
+            target.to_string(), cancellable
+        );
+        return result.get_js_value();
     }
 
     /**
@@ -502,7 +505,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      */
     protected inline void register_message_handler(string name,
                                                    JavaScriptMessageHandler handler) {
-        // XXX cant use the delegate directly, see b.g.o Bug
+        // XXX can't use the delegate directly, see b.g.o Bug
         // 604781. However the workaround below creates a circular
         // reference, causing ClientWebView instances to leak. So to
         // work around that we need to record handler ids and
@@ -617,8 +620,8 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     private void on_preferred_height_changed(WebKit.JavascriptResult result) {
         double height = this.webkit_reported_height;
         try {
-            height = WebKitUtil.to_number(result);
-        } catch (Geary.JS.Error err) {
+            height = Util.JS.to_double(result.get_js_value());
+        } catch (Util.JS.Error err) {
             debug("Could not get preferred height: %s", err.message);
         }
 
@@ -630,9 +633,10 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
     private void on_command_stack_changed(WebKit.JavascriptResult result) {
         try {
-            string[] values = WebKitUtil.to_string(result).split(",");
+            string[] values =
+                Util.JS.to_string(result.get_js_value()).split(",");
             command_stack_changed(values[0] == "true", values[1] == "true");
-        } catch (Geary.JS.Error err) {
+        } catch (Util.JS.Error err) {
             debug("Could not get command stack state: %s", err.message);
         }
     }
@@ -652,14 +656,14 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
     private void on_selection_changed(WebKit.JavascriptResult result) {
         try {
-            bool has_selection = WebKitUtil.to_bool(result);
+            bool has_selection = Util.JS.to_bool(result.get_js_value());
             // Avoid firing multiple notifies if the value hasn't
             // changed
             if (this.has_selection != has_selection) {
                 this.has_selection = has_selection;
             }
             selection_changed(has_selection);
-        } catch (Geary.JS.Error err) {
+        } catch (Util.JS.Error err) {
             debug("Could not get selection content: %s", err.message);
         }
     }

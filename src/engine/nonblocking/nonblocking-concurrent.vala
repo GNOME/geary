@@ -65,7 +65,7 @@ public class Geary.Nonblocking.Concurrent : BaseObject {
             // can't notify event here, Nonblocking.Event is not thread safe
             //
             // artificially increment the ref count of this object, schedule a completion callback
-            // on the forground thread, and signal there
+            // on the foreground thread, and signal there
             ref();
 
             Idle.add(on_notify_completed);

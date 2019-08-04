@@ -38,10 +38,13 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         load_body_fixture(html);
 
         try {
-            assert(WebKitUtil.to_string(run_javascript(@"new EditContext(document.getElementById('test')).encode()"))
-                   .has_prefix("1,url,"));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+            assert(
+                Util.JS.to_string(
+                    run_javascript(@"new EditContext(document.getElementById('test')).encode()")
+                    .get_js_value()
+                ).has_prefix("1,url,"));
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -54,10 +57,13 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         load_body_fixture(html);
 
         try {
-            assert(WebKitUtil.to_string(run_javascript(@"new EditContext(document.getElementById('test')).encode()")) ==
-                   "0,,Comic Sans,144");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+            assert(
+                Util.JS.to_string(
+                    run_javascript(@"new EditContext(document.getElementById('test')).encode()")
+                    .get_js_value()
+                ) == "0,,Comic Sans,144");
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -70,11 +76,20 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         try {
             run_javascript(@"SelectionUtil.selectNode(document.getElementById('test'))");
             run_javascript(@"geary.indentLine()");
-            assert(WebKitUtil.to_number(run_javascript(@"document.querySelectorAll('blockquote[type=cite]').length")) == 1);
-            assert(WebKitUtil.to_string(run_javascript(@"document.querySelectorAll('blockquote[type=cite]').item(0).innerText")) ==
-                "some text");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+            assert(
+                Util.JS.to_int32(
+                    run_javascript(@"document.querySelectorAll('blockquote[type=cite]').length")
+                    .get_js_value()
+                ) == 1
+            );
+            assert(
+                Util.JS.to_string(
+                    run_javascript(@"document.querySelectorAll('blockquote[type=cite]').item(0).innerText")
+                    .get_js_value()
+                ) == "some text"
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -94,20 +109,32 @@ some text
                           true
             );
         try {
-            assert(WebKitUtil.to_bool(run_javascript(
-                @"geary.containsAttachmentKeyword(\"some\", \"subject text\");"
-            )));
-            assert(WebKitUtil.to_bool(run_javascript(
-                @"geary.containsAttachmentKeyword(\"subject\", \"subject text\");"
-            )));
-            assert(!WebKitUtil.to_bool(run_javascript(
-                @"geary.containsAttachmentKeyword(\"innerquote\", \"subject text\");"
-            )));
-            assert(!WebKitUtil.to_bool(run_javascript(
-                @"geary.containsAttachmentKeyword(\"outerquote\", \"subject text\");"
-            )));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+            assert(
+                Util.JS.to_bool(
+                    run_javascript(@"geary.containsAttachmentKeyword(\"some\", \"subject text\");")
+                    .get_js_value()
+                )
+            );
+            assert(
+                Util.JS.to_bool(
+                    run_javascript(@"geary.containsAttachmentKeyword(\"subject\", \"subject text\");")
+                    .get_js_value()
+                )
+            );
+            assert(
+                !Util.JS.to_bool(
+                    run_javascript(@"geary.containsAttachmentKeyword(\"innerquote\", \"subject text\");")
+                    .get_js_value()
+                )
+            );
+            assert(
+                !Util.JS.to_bool(
+                    run_javascript(@"geary.containsAttachmentKeyword(\"outerquote\", \"subject text\");")
+                    .get_js_value()
+                )
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -143,10 +170,14 @@ unknown://example6.com
 
         try {
             run_javascript("geary.cleanContent();");
-            assert(WebKitUtil.to_string(run_javascript("geary.bodyPart.innerHTML;")) ==
-                   CLEAN_BODY_TEMPLATE.printf(expected));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+            assert(
+                Util.JS.to_string(
+                    run_javascript("geary.bodyPart.innerHTML;")
+                    .get_js_value()
+                ) == CLEAN_BODY_TEMPLATE.printf(expected)
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -158,10 +189,14 @@ unknown://example6.com
         string html = "<p>para</p>";
         load_body_fixture(html);
         try {
-            assert(WebKitUtil.to_string(run_javascript(@"window.geary.getHtml();")) ==
-                   COMPLETE_BODY_TEMPLATE.printf(html));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+            assert(
+                Util.JS.to_string(
+                   run_javascript(@"window.geary.getHtml();")
+                   .get_js_value()
+                ) == COMPLETE_BODY_TEMPLATE.printf(html)
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -172,10 +207,14 @@ unknown://example6.com
     public void get_text() throws Error {
         load_body_fixture("<p>para</p>");
         try {
-            assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
-                   "para\n\n\n\n");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+            assert(
+                Util.JS.to_string(
+                    run_javascript(@"window.geary.getText();")
+                    .get_js_value()
+                ) == "para\n\n\n\n"
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -187,10 +226,14 @@ unknown://example6.com
         unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
         try {
-            assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
-                   @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s", err.message);
+            assert(
+                Util.JS.to_string(
+                    run_javascript(@"window.geary.getText();")
+                    .get_js_value()
+                ) == @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n"
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s", err.message);
@@ -202,10 +245,14 @@ unknown://example6.com
         unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
         try {
-            assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
-                   @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+            assert(
+                Util.JS.to_string(
+                    run_javascript(@"window.geary.getText();")
+                    .get_js_value()
+                ) == @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n"
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -219,46 +266,68 @@ unknown://example6.com
         string suffix_keys = """new Set(["sf1", "sf2"])""";
         try {
             // Doesn't contain
-            assert(!WebKitUtil.to_bool(run_javascript(
+            assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('notcontained', $complete_keys, $suffix_keys);"
-            )));
-            assert(!WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+            assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('not contained', $complete_keys, $suffix_keys);"
-            )));
-            assert(!WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+
+            assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('not\tcontained', $complete_keys, $suffix_keys);"
-            )));
-            assert(!WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+
+            assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('http://www.keyword1.com', $complete_keys, $suffix_keys);"
-            )));
-            assert(!WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+
+            assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('http://www.something.com/something.sf1', $complete_keys, $suffix_keys);"
-            )));
-            assert(!WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+
+            assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('sf1', $complete_keys, $suffix_keys);"
-            )));
-            assert(!WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+
+            assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('.sf1', $complete_keys, $suffix_keys);"
-            )));
+                ).get_js_value()
+            ));
+
 
             // Does contain
-            assert(WebKitUtil.to_bool(run_javascript(
+            assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('keyword1', $complete_keys, $suffix_keys);"
-            )));
-            assert(WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+
+            assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('keyword2 contained', $complete_keys, $suffix_keys);"
-            )));
-            assert(WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+
+            assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('keyword2\tcontained', $complete_keys, $suffix_keys);"
-            )));
-            assert(WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+
+            assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('something.sf1', $complete_keys, $suffix_keys);"
-            )));
-            assert(WebKitUtil.to_bool(run_javascript(
+                ).get_js_value()
+            ));
+
+            assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('something.something.sf2', $complete_keys, $suffix_keys);"
-            )));
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+                ).get_js_value()
+            ));
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);
@@ -271,12 +340,18 @@ unknown://example6.com
         string single_nbsp = "a b";
         string multiple_nbsp = "a b c";
         try {
-            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(single_nbsp)');")) ==
-                   "a b");
-            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(multiple_nbsp)');")) ==
-                   "a b c");
-        } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s\n", err.message);
+            assert(
+                Util.JS.to_string(
+                    run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(single_nbsp)');")
+                    .get_js_value()
+                ) == "a b");
+            assert(
+                Util.JS.to_string(
+                    run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(multiple_nbsp)');")
+                    .get_js_value()
+                ) == "a b c");
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s\n", err.message);

@@ -281,7 +281,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
                     results.add(yield fetch_email_async(ids[i], required_fields, flags, cancellable));
                 } catch (Error err) {
                     // Don't let missing or incomplete messages stop the list operation, which has
-                    // different symantics from fetch
+                    // different semantics from fetch
                     if (!(err is EngineError.NOT_FOUND) && !(err is EngineError.INCOMPLETE_MESSAGE)) {
                         fetch_err = err;
 

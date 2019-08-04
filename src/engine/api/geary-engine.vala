@@ -306,7 +306,11 @@ public class Geary.Engine : BaseObject {
         if (account_instances.has_key(config.id))
             return account_instances.get(config.id);
 
-        ImapDB.Account local = new ImapDB.Account(config);
+        ImapDB.Account local = new ImapDB.Account(
+            config,
+            config.data_dir,
+            this.resource_dir.get_child("sql")
+        );
         Endpoint incoming_remote = get_shared_endpoint(
             config.service_provider, config.incoming
         );

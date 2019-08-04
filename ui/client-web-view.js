@@ -57,7 +57,7 @@ PageState.prototype = {
         //
         // Note also that the delay introduced here by this last call
         // to queuePreferredHeightUpdate when the complete document is
-        // loaded seems to be important to get an acurate idea of the
+        // loaded seems to be important to get an accurate idea of the
         // final document size.
         window.addEventListener("load", function(e) {
             queuePreferredHeightUpdate();
@@ -71,9 +71,16 @@ PageState.prototype = {
         }, true); // load does not bubble
 
         // Queues an update if the window changes size, e.g. if the
-        // user resized the window
+        // user resized the window. Only trigger when the width has
+        // changed however since the height should only change as the
+        // body is being loaded.
+        let width = window.innerWidth;
         window.addEventListener("resize", function(e) {
-            queuePreferredHeightUpdate();
+            let currentWidth = window.innerWidth;
+            if (width != currentWidth) {
+                width = currentWidth;
+                queuePreferredHeightUpdate();
+            }
         }, false); // load does not bubble
 
         // Queues an update when a transition has completed, e.g. if the
@@ -83,14 +90,18 @@ PageState.prototype = {
         }, false); // load does not bubble
     },
     getPreferredHeight: function() {
-        return window.document.body.scrollHeight;
+        // Return the scroll height of the HTML element since the BODY
+        // may have margin/border/padding and we want to know
+        // precisely how high the widget needs to be to avoid
+        // scrolling.
+        return window.document.documentElement.scrollHeight;
     },
     getHtml: function() {
         return document.body.innerHTML;
     },
     loaded: function() {
         this.isLoaded = true;
-        // Always fire a prefered height update first so that it will
+        // Always fire a preferred height update first so that it will
         // be vaguegly correct when notifying of the HTML load
         // completing.
         this.updatePreferredHeight();

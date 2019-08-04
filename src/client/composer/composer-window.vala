@@ -14,6 +14,11 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
     private const string DEFAULT_TITLE = _("New Message");
 
 
+    public new GearyApplication application {
+        get { return (GearyApplication) base.get_application(); }
+        set { base.set_application(value); }
+    }
+
     public Gtk.ApplicationWindow top_window {
         get { return this; }
     }
@@ -24,20 +29,16 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
     private bool closing = false;
 
-    public ComposerWindow(ComposerWidget composer) {
-        Object(type: Gtk.WindowType.TOPLEVEL);
+    public ComposerWindow(ComposerWidget composer, GearyApplication application) {
+        Object(application: application, type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
-
-        // Make sure it gets added to the GtkApplication, to get the window-specific
-        // composer actions to work properly.
-        GearyApplication.instance.add_window(this);
 
         // XXX Bug 764622
         set_property("name", "GearyComposerWindow");
 
         add(this.composer);
 
-        if (composer.config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+        if (application.config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
             composer.embed_header();
         } else {
             composer.header.show_close_button = true;
@@ -59,7 +60,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
             if (monitor == null) {
                 monitor = display.get_monitor_at_point(1, 1);
             }
-            int[] size = GearyApplication.instance.config.composer_window_size;
+            int[] size = this.application.config.composer_window_size;
             //check if stored values are reasonable
             if (monitor != null &&
                 size[0] >= 0 && size[0] <= monitor.geometry.width &&
@@ -87,7 +88,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
                 // Only store if the values are reasonable-looking.
                 if (width > 0 && width <= monitor.geometry.width &&
                     height > 0 && height <= monitor.geometry.height) {
-                    GearyApplication.instance.config.composer_window_size = {
+                    this.application.config.composer_window_size = {
                         width, height
                     };
                 }
@@ -126,7 +127,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
             subject = DEFAULT_TITLE;
         }
 
-        switch (this.composer.config.desktop_environment) {
+        switch (this.application.config.desktop_environment) {
         case Configuration.DesktopEnvironment.UNITY:
             this.title = subject;
             break;

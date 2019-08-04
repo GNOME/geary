@@ -22,7 +22,7 @@
  * A list of all Accounts may be retrieved from the {@link Engine} singleton.
  */
 
-public abstract class Geary.Account : BaseObject {
+public abstract class Geary.Account : BaseObject, Loggable {
 
 
     /** Number of times to attempt re-authentication. */
@@ -126,13 +126,16 @@ public abstract class Geary.Account : BaseObject {
      */
     public ClientService outgoing { get; private set; }
 
+    /**
+     * The contact information store for this account.
+     */
+    public Geary.ContactStore contact_store { get; protected set; }
+
     public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_vacuum_monitor { get; protected set; }
     public Geary.ProgressMonitor opening_monitor { get; protected set; }
     public Geary.ProgressMonitor sending_monitor { get; protected set; }
-
-    protected string id { get; private set; }
 
 
     public signal void opened();
@@ -150,8 +153,6 @@ public abstract class Geary.Account : BaseObject {
      * problem itself.
      */
     public signal void report_problem(Geary.ProblemReport problem);
-
-    public signal void contacts_loaded();
 
     /**
      * Fired when folders become available or unavailable in the account.
@@ -247,6 +248,14 @@ public abstract class Geary.Account : BaseObject {
     public signal void email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
 
+    /** {@inheritDoc} */
+    public Logging.Flag loggable_flags {
+        get; protected set; default = Logging.Flag.ALL;
+    }
+
+    /** {@inheritDoc} */
+    public Loggable? loggable_parent { get { return null; } }
+
 
     protected Account(AccountInformation information,
                       ClientService incoming,
@@ -254,9 +263,6 @@ public abstract class Geary.Account : BaseObject {
         this.information = information;
         this.incoming = incoming;
         this.outgoing = outgoing;
-        this.id = "%s[%s]".printf(
-            information.id, information.service_provider.to_value()
-        );
 
         incoming.notify["current-status"].connect(
             on_service_status_notify
@@ -385,11 +391,6 @@ public abstract class Geary.Account : BaseObject {
     public abstract Gee.Collection<Geary.Folder> list_folders() throws Error;
 
     /**
-     * Gets a perpetually update-to-date collection of autocompletion contacts.
-     */
-    public abstract Geary.ContactStore get_contact_store();
-
-    /**
      * Returns the folder representing the given special folder type.  If no such folder exists,
      * null is returned.
      */
@@ -486,11 +487,12 @@ public abstract class Geary.Account : BaseObject {
     public abstract async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error;
 
-    /**
-     * Used only for debugging.  Should not be used for user-visible strings.
-     */
+    /** {@inheritDoc} */
     public virtual string to_string() {
-        return this.id;
+        return "%s(%s)".printf(
+            this.get_type().name(),
+            this.information.id
+        );
     }
 
     /** Fires a {@link opened} signal. */

@@ -262,6 +262,7 @@ public class GearyApplication : Gtk.Application {
     private bool is_destroyed = false;
     private GLib.Cancellable controller_cancellable = new GLib.Cancellable();
     private Components.Inspector? inspector = null;
+    private Geary.Nonblocking.Mutex controler_mutex = new Geary.Nonblocking.Mutex();
 
 
     /**
@@ -352,7 +353,7 @@ public class GearyApplication : Gtk.Application {
     /**
      * Signal that is activated when 'exit' is called, but before the application actually exits.
      *
-     * To cancel an exit, a callback should return GearyApplication.cancel_exit(). To procede with
+     * To cancel an exit, a callback should return GearyApplication.cancel_exit(). To proceed with
      * an exit, a callback should return true.
      */
     public virtual signal bool exiting(bool panicked) {
@@ -406,12 +407,12 @@ public class GearyApplication : Gtk.Application {
 
     public override void startup() {
         Environment.set_application_name(NAME);
-        International.init(GETTEXT_PACKAGE, this.binary);
+        Util.International.init(GETTEXT_PACKAGE, this.binary);
 
         Configuration.init(this.is_installed, GSETTINGS_DIR);
         Geary.Logging.init();
         Geary.Logging.log_to(stderr);
-        GLib.Log.set_default_handler(Geary.Logging.default_handler);
+        GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
 
         Util.Date.init();
 
@@ -660,6 +661,8 @@ public class GearyApplication : Gtk.Application {
         }
 
         quit();
+
+        Geary.Logging.clear();
         Util.Date.terminate();
     }
 
@@ -701,7 +704,8 @@ public class GearyApplication : Gtk.Application {
         // hit the yield below, before we create the main window.
         hold();
 
-        lock (this.controller) {
+        try {
+            int mutex_token = yield this.controler_mutex.claim_async();
             if (this.controller == null) {
                 message(
                     "%s %s (%s) prefix=%s exec_dir=%s is_installed=%s",
@@ -717,6 +721,9 @@ public class GearyApplication : Gtk.Application {
                     this, this.controller_cancellable
                 );
             }
+            this.controler_mutex.release(ref mutex_token);
+        } catch (Error err) {
+            error("Error creating controller: %s", err.message);
         }
 
         release();
@@ -727,11 +734,15 @@ public class GearyApplication : Gtk.Application {
         // see create_controller() for reasoning hold/release is used
         hold();
 
-        lock (this.controller) {
+        try {
+            int mutex_token = yield this.controler_mutex.claim_async();
             if (this.controller != null) {
                 yield this.controller.close_async();
                 this.controller = null;
             }
+            this.controler_mutex.release(ref mutex_token);
+        } catch (Error err) {
+            debug("Error destroying controller: %s", err.message);
         }
 
         release();
@@ -752,6 +763,8 @@ public class GearyApplication : Gtk.Application {
         } else {
             Geary.Logging.log_to(null);
         }
+
+        bool activated = false;
 
         // Logging flags
         if (options.contains(OPTION_LOG_NETWORK))
@@ -780,9 +793,11 @@ public class GearyApplication : Gtk.Application {
             // Update the autostart file so that it stops using the
             // --hidden option.
             this.update_autostart_file.begin();
+            // Then manually start the controller
+            this.create_controller.begin();
+            activated = true;
         }
 
-        bool activated = false;
         if (options.contains(GLib.OPTION_REMAINING)) {
             string[] args = options.lookup_value(
                 GLib.OPTION_REMAINING,

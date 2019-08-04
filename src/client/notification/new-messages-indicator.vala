@@ -24,7 +24,7 @@ public abstract class NewMessagesIndicator : Geary.BaseObject {
                                               Configuration config) {
         NewMessagesIndicator? indicator = null;
 
-        // Indicators are ordered from most to least prefered.  If more than one is available,
+        // Indicators are ordered from most to least preferred.  If more than one is available,
         // use the first.
 
 #if HAVE_LIBMESSAGINGMENU

@@ -8,7 +8,7 @@
 
 
 /**
- * Primary controller for a application instance.
+ * Primary controller for an application instance.
  *
  * @see GearyAplication
  */
@@ -38,6 +38,8 @@ public class Application.Controller : Geary.BaseObject {
     public const string ACTION_CONVERSATION_LIST = "focus-conv-list";
     public const string ACTION_TOGGLE_SEARCH = "toggle-search";
     public const string ACTION_TOGGLE_FIND = "toggle-find";
+    public const string ACTION_CONVERSATION_UP = "up-conversation";
+    public const string ACTION_CONVERSATION_DOWN = "down-conversation";
 
     // Properties
     public const string PROP_SELECTED_CONVERSATIONS ="selected-conversations";
@@ -133,11 +135,6 @@ public class Application.Controller : Geary.BaseObject {
         get; private set; default = new Application.AvatarStore();
     }
 
-    /** Contact store cache for the application. */
-    public ContactListStoreCache contact_list_store_cache {
-        get; private set; default = new ContactListStoreCache();
-    }
-
     /** Default main window */
     public MainWindow main_window { get; private set; }
 
@@ -177,6 +174,10 @@ public class Application.Controller : Geary.BaseObject {
     private uint operation_count = 0;
     private Geary.Revokable? revokable = null;
 
+    // Store the description for the revokable for tooltip display.
+    // This was previously stored within the context of undo button of the main toolbar.
+    private string revokable_description { get; set; }
+
     // List of windows we're waiting to close before Geary closes.
     private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
 
@@ -198,6 +199,8 @@ public class Application.Controller : Geary.BaseObject {
         {ACTION_DELETE_CONVERSATION,   on_delete_conversation       },
         {ACTION_COPY_MENU,             on_show_copy_menu            },
         {ACTION_MOVE_MENU,             on_show_move_menu            },
+        {ACTION_CONVERSATION_UP,       on_conversation_up           },
+        {ACTION_CONVERSATION_DOWN,     on_conversation_down         },
         // Message marking actions
         {ACTION_SHOW_MARK_MENU,     on_show_mark_menu           },
         {ACTION_MARK_AS_READ,       on_mark_as_read             },
@@ -568,6 +571,13 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** Returns the contact store for an account, if any. */
+    public Application.ContactStore?
+        get_contact_store_for_account(Geary.Account target) {
+        AccountContext? context = this.accounts.get(target.information);
+        return (context != null) ? context.contacts : null;
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -582,24 +592,26 @@ public class Application.Controller : Geary.BaseObject {
 
         add_window_accelerators(ACTION_MARK_AS_READ, { "<Ctrl>I", "<Shift>I" });
         add_window_accelerators(ACTION_MARK_AS_UNREAD, { "<Ctrl>U", "<Shift>U" });
-        add_window_accelerators(ACTION_MARK_AS_STARRED, { "S" });
-        add_window_accelerators(ACTION_MARK_AS_UNSTARRED, { "D" });
+        add_window_accelerators(ACTION_MARK_AS_STARRED, { "<Ctrl>S", "S" });
+        add_window_accelerators(ACTION_MARK_AS_UNSTARRED, { "<Ctrl>D", "D" });
         add_window_accelerators(ACTION_MARK_AS_SPAM, { "<Ctrl>J", "exclam" }); // Exclamation mark (!)
         add_window_accelerators(ACTION_MARK_AS_NOT_SPAM, { "<Ctrl>J", "exclam" });
-        add_window_accelerators(ACTION_COPY_MENU, { "L" });
-        add_window_accelerators(ACTION_MOVE_MENU, { "M" });
+        add_window_accelerators(ACTION_COPY_MENU, { "<Ctrl>L", "L" });
+        add_window_accelerators(ACTION_MOVE_MENU, { "<Ctrl>M", "M" });
         add_window_accelerators(ACTION_REPLY_TO_MESSAGE, { "<Ctrl>R", "R" });
         add_window_accelerators(ACTION_REPLY_ALL_MESSAGE, { "<Ctrl><Shift>R", "<Shift>R" });
         add_window_accelerators(ACTION_FORWARD_MESSAGE, { "<Ctrl>L", "F" });
         add_window_accelerators(ACTION_FIND_IN_CONVERSATION, { "<Ctrl>F", "slash" });
-        add_window_accelerators(ACTION_ARCHIVE_CONVERSATION, { "A" });
+        add_window_accelerators(ACTION_ARCHIVE_CONVERSATION, { "<Ctrl>A", "A", "Y" });
         add_window_accelerators(ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" });
         add_window_accelerators(ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" });
-        add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "equal" });
-        add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus", "minus" });
-        add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0", "0" });
+        add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "<Ctrl>plus" });
+        add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus" });
+        add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0" });
         add_window_accelerators(ACTION_SEARCH, { "<Ctrl>S" });
         add_window_accelerators(ACTION_CONVERSATION_LIST, { "<Ctrl>B" });
+        add_window_accelerators(ACTION_CONVERSATION_UP, { "<Ctrl>bracketleft", "K" });
+        add_window_accelerators(ACTION_CONVERSATION_DOWN, { "<Ctrl>bracketright", "J" });
     }
 
     private void add_window_accelerators(string action, string[] accelerators, Variant? param = null) {
@@ -616,22 +628,12 @@ public class Application.Controller : Geary.BaseObject {
         );
         account.report_problem.connect(on_report_problem);
         connect_account_async.begin(account, cancellable_open_account);
-
-        ContactListStore list_store = this.contact_list_store_cache.create(account.get_contact_store());
-        account.contacts_loaded.connect(list_store.set_sort_function);
     }
 
     private async void close_account(Geary.AccountInformation config) {
         AccountContext? context = this.accounts.get(config);
         if (context != null) {
             Geary.Account account = context.account;
-            Geary.ContactStore contact_store = account.get_contact_store();
-            ContactListStore list_store =
-                this.contact_list_store_cache.get(contact_store);
-
-            account.contacts_loaded.disconnect(list_store.set_sort_function);
-            this.contact_list_store_cache.unset(contact_store);
-
             if (this.current_account == account) {
                 this.current_account = null;
 
@@ -1261,7 +1263,7 @@ public class Application.Controller : Geary.BaseObject {
         this.main_window.folder_list.add_folder(folder);
         // Since removing the folder will also remove its children
         // from the folder list, we need to check for any and re-add
-        // them. See isssue #11.
+        // them. See issue #11.
         try {
             foreach (Geary.Folder child in
                      folder.account.list_matching_folders(folder.path)) {
@@ -1352,8 +1354,8 @@ public class Application.Controller : Geary.BaseObject {
         if (unavailable != null) {
             Gee.BidirIterator<Geary.Folder> unavailable_iterator =
                 unavailable.bidir_iterator();
-            unavailable_iterator.last();
-            while (unavailable_iterator.previous()) {
+            bool has_prev = unavailable_iterator.last();
+            while (has_prev) {
                 Geary.Folder folder = unavailable_iterator.get();
 
                 main_window.folder_list.remove_folder(folder);
@@ -1380,6 +1382,8 @@ public class Application.Controller : Geary.BaseObject {
                 }
 
                 folder.special_folder_type_changed.disconnect(on_special_folder_type_changed);
+
+                has_prev = unavailable_iterator.previous();
             }
         }
     }
@@ -1710,7 +1714,7 @@ public class Application.Controller : Geary.BaseObject {
                                                Cancellable? cancellable) {
         try {
             save_revokable(yield source_folder.move_email_async(ids, destination, cancellable),
-                _("Undo move (Ctrl+Z)"));
+                ngettext("Moved %d message to %s", "Moved %d messages to %s", ids.size).printf(ids.size, destination.to_string()));
         } catch (Error err) {
             debug("%s: Unable to move %d emails: %s", source_folder.to_string(), ids.size,
                 err.message);
@@ -1909,7 +1913,7 @@ public class Application.Controller : Geary.BaseObject {
     private bool open_uri(string _link) {
         string link = _link;
 
-        // Support web URLs that ommit the protocol.
+        // Support web URLs that omit the protocol.
         if (!link.contains(":"))
             link = "http://" + link;
 
@@ -2025,10 +2029,13 @@ public class Application.Controller : Geary.BaseObject {
 
         ComposerWidget widget;
         if (mailto != null) {
-            widget = new ComposerWidget.from_mailto(current_account, contact_list_store_cache,
-                mailto, application.config);
+            widget = new ComposerWidget.from_mailto(
+                this.application, current_account, mailto
+            );
         } else {
-            widget = new ComposerWidget(current_account, contact_list_store_cache, compose_type, application.config);
+            widget = new ComposerWidget(
+                this.application, current_account, compose_type
+            );
         }
 
         add_composer(widget);
@@ -2307,7 +2314,7 @@ public class Application.Controller : Geary.BaseObject {
             Geary.FolderPath trash_path = (yield current_account.get_required_special_folder_async(
                 Geary.SpecialFolderType.TRASH, cancellable)).path;
             save_revokable(yield supports_move.move_email_async(ids, trash_path, cancellable),
-                _("Undo trash (Ctrl+Z)"));
+                ngettext("Trashed %d message", "Trashed %d messages", ids.size).printf(ids.size));
         } else {
             debug("Folder %s doesn't support move or account %s doesn't have a trash folder",
                 current_folder.to_string(), current_account.to_string());
@@ -2357,7 +2364,7 @@ public class Application.Controller : Geary.BaseObject {
                 debug("Folder %s doesn't support archive", current_folder.to_string());
             } else {
                 save_revokable(yield supports_archive.archive_email_async(ids, cancellable),
-                    _("Undo archive (Ctrl+Z)"));
+                    ngettext("Archived %d message", "Archived %d messages", ids.size).printf(ids.size));
             }
 
             return;
@@ -2390,7 +2397,8 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         // store new revokable
-        revokable = new_revokable;
+        this.revokable = new_revokable;
+        this.revokable_description = description;
 
         // connect to new revokable
         if (revokable != null) {
@@ -2400,11 +2408,11 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         if (this.main_window != null) {
-            if (revokable != null && description != null)
-                this.main_window.main_toolbar.undo_tooltip = description;
-            else
-                this.main_window.main_toolbar.undo_tooltip = _("Undo (Ctrl+Z)");
-
+            if (this.revokable != null && this.revokable_description != null) {
+                InAppNotification ian = new InAppNotification(this.revokable_description);
+                ian.set_button(_("Undo"), "win." + GearyApplication.ACTION_UNDO);
+                this.main_window.add_notification(ian);
+            }
             update_revokable_action();
         }
     }
@@ -2427,8 +2435,7 @@ public class Application.Controller : Geary.BaseObject {
         if (committed_revokable == null)
             return;
 
-        // use existing description
-        save_revokable(committed_revokable, this.main_window.main_toolbar.undo_tooltip);
+        save_revokable(committed_revokable, this.revokable_description);
     }
 
     private void on_revoke() {
@@ -2703,11 +2710,6 @@ public class Application.Controller : Geary.BaseObject {
         return (context != null) ? context.emails : null;
     }
 
-    private Application.ContactStore? get_contact_store_for_account(Geary.Account target) {
-        AccountContext? context = this.accounts.get(target.information);
-        return (context != null) ? context.contacts : null;
-    }
-
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,
                                    Geary.Folder folder) {
         // if folder is openable, add it
@@ -2913,6 +2915,14 @@ public class Application.Controller : Geary.BaseObject {
         );
     }
 
+    private void on_conversation_up() {
+        this.main_window.conversation_list_view.scroll(Gtk.ScrollType.STEP_UP);
+    }
+
+    private void on_conversation_down() {
+        this.main_window.conversation_list_view.scroll(Gtk.ScrollType.STEP_DOWN);
+    }
+
     private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
         GLib.Cancellable? cancellable = null;
         if (this.current_account != null) {
@@ -2949,7 +2959,7 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         // This is going to be either an inline image, or a remote
-        // image, so either treat it as an attachment ot assume we'll
+        // image, so either treat it as an attachment to assume we'll
         // have a valid filename in the URL
         bool handled = false;
         if (url.has_prefix(ClientWebView.CID_URL_PREFIX)) {

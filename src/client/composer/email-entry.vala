@@ -46,7 +46,7 @@ public class EmailEntry : Gtk.Entry {
 
         ContactEntryCompletion? completion = get_completion() as ContactEntryCompletion;
         if (completion != null) {
-            completion.reset_selection();
+            completion.update_model();
         }
 
         if (Geary.String.is_empty(text.strip())) {

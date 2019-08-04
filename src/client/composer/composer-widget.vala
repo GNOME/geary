@@ -168,6 +168,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
 
     public Geary.Account account { get; private set; }
+    private Gee.Map<string, Geary.AccountInformation> accounts;
 
     public Geary.RFC822.MailboxAddresses from { get; private set; }
 
@@ -237,10 +238,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public ComposerWebView editor { get; private set; }
 
     public string window_title { get; set; }
-
-    public Configuration config { get; set; }
-
-    private ContactListStore? contact_list_store = null;
 
     private string body_html = "";
 
@@ -380,11 +377,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     // Is the composer closing (e.g. saving a draft or sending)?
     private bool is_closing = false;
 
-    private ContactListStoreCache contact_list_store_cache;
-
     private ComposerContainer container {
         get { return (ComposerContainer) parent; }
     }
+
+    private Gspell.Checker subject_spell_checker = new Gspell.Checker(null);
+    private Gspell.Entry subject_spell_entry;
+
+    private GearyApplication application;
 
 
     /** Fired when the current saved draft's id has changed. */
@@ -397,25 +397,34 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public signal void subject_changed(string new_subject);
 
 
-    public ComposerWidget(Geary.Account account,
-                          ContactListStoreCache contact_list_store_cache,
-                          ComposeType compose_type,
-                          Configuration config) {
+    public ComposerWidget(GearyApplication application,
+                          Geary.Account initial_account,
+                          ComposeType compose_type) {
         base_ref();
+        this.application = application;
+        this.account = initial_account;
         this.account = account;
-        this.contact_list_store_cache = contact_list_store_cache;
-        this.config = config;
+
+        try {
+            this.accounts = this.application.engine.get_accounts();
+        } catch (Error e) {
+            warning("Could not fetch account info: %s", e.message);
+        }
+
         this.compose_type = compose_type;
-        if (this.compose_type == ComposeType.NEW_MESSAGE)
+        if (this.compose_type == ComposeType.NEW_MESSAGE) {
             this.state = ComposerState.PANED;
+        }
         else if (this.compose_type == ComposeType.FORWARD ||
-                 this.account.information.has_sender_aliases)
+                 this.accounts.size > 1 || this.account.information.has_sender_aliases) {
             this.state = ComposerState.INLINE;
-        else
+        }
+        else {
             this.state = ComposerState.INLINE_COMPACT;
+        }
 
         this.header = new ComposerHeaderbar(
-            config,
+            application.config,
             this.state == ComposerState.INLINE_COMPACT
         );
         this.header.expand_composer.connect(() => {
@@ -456,7 +465,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
         this.to_entry.margin_top = this.cc_entry.margin_top = this.bcc_entry.margin_top = this.reply_to_entry.margin_top = 6;
 
-        this.editor = new ComposerWebView(config);
+        this.subject_spell_entry = Gspell.Entry.get_from_gtk_entry(
+            this.subject_entry
+        );
+        update_subject_spell_checker();
+
+        this.editor = new ComposerWebView(application.config);
         this.editor.set_hexpand(true);
         this.editor.set_vexpand(true);
         this.editor.content_loaded.connect(on_editor_content_loaded);
@@ -480,14 +494,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         embed_header();
 
         // Listen to account signals to update from menu.
-        Geary.Engine.instance.account_available.connect(() => {
-                update_from_field();
-            });
-        Geary.Engine.instance.account_unavailable.connect(() => {
-                if (update_from_field()) {
-                    on_from_changed();
-                }
-            });
+        this.application.engine.account_available.connect(
+            on_account_available
+        );
+        this.application.engine.account_unavailable.connect(
+            on_account_unavailable
+        );
         // TODO: also listen for account updates to allow adding identities while writing an email
 
         this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
@@ -543,13 +555,21 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
         if (this.draft_manager != null)
             close_draft_manager_async.begin(null);
+
+        this.application.engine.account_available.disconnect(
+            on_account_available
+        );
+        this.application.engine.account_unavailable.disconnect(
+            on_account_unavailable
+        );
+
         base.destroy();
     }
 
-    public ComposerWidget.from_mailto(Geary.Account account,
-        ContactListStoreCache contact_list_store_cache, string mailto, Configuration config) {
-
-        this(account, contact_list_store_cache, ComposeType.NEW_MESSAGE, config);
+    public ComposerWidget.from_mailto(GearyApplication application,
+                                      Geary.Account initial_account,
+                                      string mailto) {
+        this(application, initial_account, ComposeType.NEW_MESSAGE);
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {
@@ -645,22 +665,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
      * Loads and sets contact auto-complete data for the current account.
      */
     private void load_entry_completions() {
-        Geary.ContactStore contacts = this.account.get_contact_store();
-        if (this.contact_list_store == null ||
-            this.contact_list_store.contact_store != contacts) {
-            ContactListStore? store = this.contact_list_store_cache.get(contacts);
-
-            if (store == null) {
-                error("Error loading contact_list_store from cache");
-            } else {
-                this.contact_list_store = store;
-
-                this.to_entry.completion = new ContactEntryCompletion(store);
-                this.cc_entry.completion = new ContactEntryCompletion(store);
-                this.bcc_entry.completion = new ContactEntryCompletion(store);
-                this.reply_to_entry.completion = new ContactEntryCompletion(store);
-            }
-        }
+        Application.ContactStore contacts =
+            this.application.controller.get_contact_store_for_account(
+                this.account
+            );
+        this.to_entry.completion = new ContactEntryCompletion(contacts);
+        this.cc_entry.completion = new ContactEntryCompletion(contacts);
+        this.bcc_entry.completion = new ContactEntryCompletion(contacts);
+        this.reply_to_entry.completion = new ContactEntryCompletion(contacts);
     }
 
     /**
@@ -724,7 +736,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.state = ComposerState.PANED;
         } else if (this.compose_type == ComposeType.FORWARD || this.to_entry.modified
                    || this.cc_entry.modified || this.bcc_entry.modified
-                   || this.account.information.has_sender_aliases) {
+                   || this.accounts.size > 1 || this.account.information.has_sender_aliases) {
             this.state = ComposerState.INLINE;
         } else {
             this.state = ComposerState.INLINE_COMPACT;
@@ -774,7 +786,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 this.subject = reply_subject;
                 this.references = Geary.RFC822.Utils.reply_references(referred);
                 referred_quote = Util.Email.quote_email_for_reply(referred, quote,
-                    config.clock_format,
+                    this.application.config.clock_format,
                     Geary.RFC822.TextFormat.HTML);
                 if (!Geary.String.is_empty(quote)) {
                     this.top_posting = false;
@@ -837,7 +849,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         foreach (SimpleActionGroup entries_users in composer_action_entries_users) {
             entries_users.change_action_state(ACTION_SHOW_EXTENDED, false);
             entries_users.change_action_state(
-                ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
+                ACTION_COMPOSE_AS_HTML, this.application.config.compose_as_html
             );
         }
 
@@ -1009,11 +1021,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.last_quote = quote;
             // Always use reply styling, since forward styling doesn't work for inline quotes
             this.editor.insert_html(
-                Util.Email.quote_email_for_reply(referred,
-                                                 quote,
-                                                 config.clock_format,
-                                                 Geary.RFC822.TextFormat.HTML)
-
+                Util.Email.quote_email_for_reply(
+                    referred,
+                    quote,
+                    this.application.config.clock_format,
+                    Geary.RFC822.TextFormat.HTML
+                )
             );
 
             if (!referred_ids.contains(referred.id)) {
@@ -1198,7 +1211,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
         Gtk.Widget? focused_widget = this.container.top_window.get_focus();
         this.container.remove_composer();
-        ComposerWindow new_window = new ComposerWindow(this);
+        ComposerWindow new_window = new ComposerWindow(this, this.application);
 
         // Workaround a GTK+ crasher, Bug 771812. When the composer is
         // re-parented, its menu_button's popover keeps a reference to
@@ -1208,8 +1221,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // conversation back in the main window. The workaround here
         // sets a new menu model and hence the menu_button constructs
         // a new popover.
-        this.composer_actions.change_action_state(ACTION_COMPOSE_AS_HTML,
-            GearyApplication.instance.config.compose_as_html);
+        this.composer_actions.change_action_state(
+            ACTION_COMPOSE_AS_HTML,
+            this.application.config.compose_as_html
+        );
 
         this.state = ComposerWidget.ComposerState.DETACHED;
         this.header.detached();
@@ -1458,7 +1473,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             try {
                 Geary.ComposedEmail draft = yield get_composed_email(null, true);
                 this.draft_manager.update(
-                    draft.to_rfc822_message(), this.draft_flags, null
+                    yield draft.to_rfc822_message(null, null),
+                    this.draft_flags,
+                    null
                 );
             } catch (Error err) {
                 GLib.message("Unable to save draft: %s", err.message);
@@ -1838,7 +1855,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
         this.editor.set_rich_text(compose_as_html);
 
-        GearyApplication.instance.config.compose_as_html = compose_as_html;
+        this.application.config.compose_as_html = compose_as_html;
     }
 
     private void on_show_extended_toggled(SimpleAction? action, Variant? new_state) {
@@ -1968,7 +1985,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                     if (!this.editor.is_rich_text)
                         append_menu_section(context_menu, section);
                 } else if (section == this.context_menu_inspector) {
-                    if (this.config.enable_inspector)
+                    if (this.application.config.enable_inspector)
                         append_menu_section(context_menu, section);
                 } else {
                     append_menu_section(context_menu, section);
@@ -2009,11 +2026,13 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_select_dictionary(SimpleAction action, Variant? param) {
         if (this.spell_check_popover == null) {
+            Configuration config = this.application.config;
             this.spell_check_popover = new SpellCheckPopover(
-                this.select_dictionary_button, this.config
+                this.select_dictionary_button, config
             );
             this.spell_check_popover.selection_changed.connect((active_langs) => {
-                    this.config.spell_check_languages = active_langs;
+                    config.spell_check_languages = active_langs;
+                    update_subject_spell_checker();
                 });
         }
         this.spell_check_popover.toggle();
@@ -2101,27 +2120,21 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.from_multiple.changed.disconnect(on_from_changed);
         this.from_single.visible = this.from_multiple.visible = this.from_label.visible = false;
 
-        Gee.Map<string, Geary.AccountInformation> accounts;
-        try {
-            accounts = Geary.Engine.instance.get_accounts();
-        } catch (Error e) {
-            warning("Could not fetch account info: %s", e.message);
-            return false;
-        }
-
         // Don't show in inline unless the current account has
-        // multiple emails, since these will be replies to a
+        // multiple email accounts or aliases, since these will be replies to a
         // conversation
-        if ((this.state == ComposerState.INLINE ||
-             this.state == ComposerState.INLINE_COMPACT) &&
-            !this.account.information.has_sender_aliases)
-            return false;
+        if ((this.state == ComposerState.INLINE || this.state == ComposerState.INLINE_COMPACT) &&
+            !(this.accounts.size > 1 || this.account.information.has_sender_aliases)) {
+            return false;         
+        }
 
         // If there's only one account and it not have any aliases,
         // show nothing.
-        if (accounts.size < 1 || (accounts.size == 1 && !Geary.traverse<Geary.AccountInformation>(
-            accounts.values).first().has_sender_aliases))
+        if (this.accounts.size < 1 ||
+            (this.accounts.size == 1 &&
+            !Geary.traverse<Geary.AccountInformation>(this.accounts.values).first().has_sender_aliases)) {
             return false;
+        }
 
         this.from_label.visible = true;
         this.from_label.set_mnemonic_widget(this.from_multiple);
@@ -2137,15 +2150,13 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // is set to true if the current message's from address has
         // been set in the ComboBox.
         bool set_active = add_account_emails_to_from_list(this.account);
-        if (this.compose_type == ComposeType.NEW_MESSAGE) {
-            foreach (Geary.AccountInformation info in accounts.values) {
-                try {
-                    Geary.Account a = Geary.Engine.instance.get_account_instance(info);
-                    if (a != this.account)
-                        set_active = add_account_emails_to_from_list(a, set_active);
-                } catch (Error e) {
-                    debug("Error getting account in composer: %s", e.message);
-                }
+        foreach (Geary.AccountInformation info in this.accounts.values) {
+            try {
+                Geary.Account a = this.application.engine.get_account_instance(info);
+                if (a != this.account)
+                    set_active = add_account_emails_to_from_list(a, set_active);
+            } catch (Error e) {
+                debug("Error getting account in composer: %s", e.message);
             }
         }
 
@@ -2205,6 +2216,51 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             sig = "";
         }
         this.editor.update_signature(Geary.HTML.smart_escape(sig));
+    }
+
+    private void update_subject_spell_checker() {
+        Gspell.Language? lang = null;
+        string[] langs = this.application.config.spell_check_languages;
+        if (langs.length == 1) {
+            lang = Gspell.Language.lookup(langs[0]);
+        } else {
+            // Since GSpell doesn't support multiple languages (see
+            // <https://gitlab.gnome.org/GNOME/gspell/issues/5>) and
+            // we don't support spell checker language priority, use
+            // the first matching most preferred language, if any.
+            foreach (string pref in
+                     Util.International.get_user_preferred_languages()) {
+                if (pref in langs) {
+                    lang = Gspell.Language.lookup(pref);
+                    if (lang != null) {
+                        break;
+                    }
+                }
+            }
+
+            if (lang == null) {
+                // No preferred lang found, so just use first
+                // supported matching langauge
+                foreach (string pref in langs) {
+                    lang = Gspell.Language.lookup(pref);
+                    if (lang != null) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        Gspell.EntryBuffer buffer =
+            Gspell.EntryBuffer.get_from_gtk_entry_buffer(
+                this.subject_entry.buffer
+            );
+        Gspell.Checker checker = null;
+        if (lang != null) {
+            checker = this.subject_spell_checker;
+            checker.language = lang;
+        }
+        this.subject_spell_entry.inline_spell_checking = (checker != null);
+        buffer.spell_checker = checker;
     }
 
     private async ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,
@@ -2276,7 +2332,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // so the user can still select text with a link in it,
         // without the popover immediately appearing and raining on
         // their text selection parade.
-        if (this.pointer_url != null && this.config.compose_as_html) {
+        if (this.pointer_url != null &&
+            this.application.config.compose_as_html) {
             Gdk.EventButton? button = (Gdk.EventButton) event;
             Gdk.Rectangle location = Gdk.Rectangle();
             location.x = (int) button.x;
@@ -2331,7 +2388,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_add_attachment() {
-        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window, this.config);
+        AttachmentDialog dialog = new AttachmentDialog(
+            this.container.top_window, this.application.config
+        );
         if (dialog.run() == Gtk.ResponseType.ACCEPT) {
             dialog.hide();
             foreach (File file in dialog.get_files()) {
@@ -2355,7 +2414,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_insert_image(SimpleAction action, Variant? param) {
-        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window, this.config);
+        AttachmentDialog dialog = new AttachmentDialog(
+            this.container.top_window, this.application.config
+        );
         Gtk.FileFilter filter = new Gtk.FileFilter();
         // Translators: This is the name of the file chooser filter
         // when inserting an image in the composer.
@@ -2413,6 +2474,16 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_selection_changed(bool has_selection) {
         update_cursor_actions();
+    }
+
+    private void on_account_available() {
+        update_from_field();
+    }
+
+    private void on_account_unavailable() {
+        if (update_from_field()) {
+            on_from_changed();
+        }
     }
 
 }

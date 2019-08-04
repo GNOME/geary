@@ -11,7 +11,7 @@
  * This class does not check if quoting is required.  Use {@link DataFormat.is_quoting_required}
  * or {@link StringParameter.get_best_for}.
  *
- * See {@link StringParameter} for a note about class heirarchy.  In particular, note that
+ * See {@link StringParameter} for a note about class hierarchy.  In particular, note that
  * [@link Deserializer} will not create this type of {@link Parameter} because it's unable to
  * deduce if a string is an atom or a string from syntax alone.
  *

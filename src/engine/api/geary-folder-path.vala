@@ -228,9 +228,9 @@ public class Geary.FolderPath :
      * This can be used to transmit folder paths as D-Bus method and
      * GLib Action parameters, and so on.
      *
-     * @returns a serialised form of this path, that will match the
+     * @return a serialised form of this path, that will match the
      * GVariantType specified by {@link VARIANT_TYPE}.
-     * @see FolderRoot.from_folder_path
+     * @see FolderRoot.from_variant
      */
     public GLib.Variant to_variant() {
         return new GLib.Variant.tuple(new GLib.Variant[] {

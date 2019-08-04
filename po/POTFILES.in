@@ -50,8 +50,6 @@ src/client/composer/composer-web-view.vala
 src/client/composer/composer-widget.vala
 src/client/composer/composer-window.vala
 src/client/composer/contact-entry-completion.vala
-src/client/composer/contact-list-store.vala
-src/client/composer/contact-list-store-cache.vala
 src/client/composer/email-entry.vala
 src/client/composer/spell-check-popover.vala
 src/client/conversation-list/conversation-list-cell-renderer.vala
@@ -98,8 +96,8 @@ src/client/util/util-files.vala
 src/client/util/util-gio.vala
 src/client/util/util-gtk.vala
 src/client/util/util-international.vala
+src/client/util/util-js.vala
 src/client/util/util-migrate.vala
-src/client/util/util-webkit.vala
 src/client/web-process/web-process-extension.vala
 src/console/main.vala
 src/engine/api/geary.vala
@@ -111,8 +109,6 @@ src/engine/api/geary-attachment.vala
 src/engine/api/geary-base-object.vala
 src/engine/api/geary-client-service.vala
 src/engine/api/geary-composed-email.vala
-src/engine/api/geary-contact-flags.vala
-src/engine/api/geary-contact-importance.vala
 src/engine/api/geary-contact-store.vala
 src/engine/api/geary-contact.vala
 src/engine/api/geary-credentials-mediator.vala
@@ -166,6 +162,8 @@ src/engine/app/email-store/app-copy-operation.vala
 src/engine/app/email-store/app-fetch-operation.vala
 src/engine/app/email-store/app-list-operation.vala
 src/engine/app/email-store/app-mark-operation.vala
+src/engine/common/common-contact-harvester.vala
+src/engine/common/common-contact-store-impl.vala
 src/engine/common/common-message-data.vala
 src/engine/db/db.vala
 src/engine/db/db-connection.vala
@@ -218,12 +216,10 @@ src/engine/imap/command/imap-status-command.vala
 src/engine/imap/command/imap-store-command.vala
 src/engine/imap-db/imap-db-account.vala
 src/engine/imap-db/imap-db-attachment.vala
-src/engine/imap-db/imap-db-contact.vala
 src/engine/imap-db/imap-db-database.vala
 src/engine/imap-db/imap-db-email-identifier.vala
 src/engine/imap-db/imap-db-folder.vala
 src/engine/imap-db/imap-db-gc.vala
-src/engine/imap-db/imap-db-message-addresses.vala
 src/engine/imap-db/imap-db-message-row.vala
 src/engine/imap-db/search/imap-db-search-email-identifier.vala
 src/engine/imap-db/search/imap-db-search-folder-properties.vala
@@ -239,7 +235,6 @@ src/engine/imap-engine/gmail/imap-engine-gmail-spam-trash-folder.vala
 src/engine/imap-engine/imap-engine-account-operation.vala
 src/engine/imap-engine/imap-engine-account-processor.vala
 src/engine/imap-engine/imap-engine-account-synchronizer.vala
-src/engine/imap-engine/imap-engine-contact-store.vala
 src/engine/imap-engine/imap-engine-email-prefetcher.vala
 src/engine/imap-engine/imap-engine-generic-account.vala
 src/engine/imap-engine/imap-engine-generic-folder.vala
@@ -393,7 +388,7 @@ src/engine/util/util-idle-manager.vala
 src/engine/util/util-imap-utf7.vala
 src/engine/util/util-inet.vala
 src/engine/util/util-iterable.vala
-src/engine/util/util-js.vala
+src/engine/util/util-loggable.vala
 src/engine/util/util-numeric.vala
 src/engine/util/util-object.vala
 src/engine/util/util-reference-semantics.vala
@@ -415,6 +410,8 @@ ui/composer-headerbar.ui
 ui/composer-link-popover.ui
 ui/composer-menus.ui
 ui/composer-widget.ui
+ui/components-inspector-error-view.ui
+ui/components-inspector-log-view.ui
 ui/components-inspector.ui
 ui/components-placeholder-pane.ui
 ui/conversation-contact-popover.ui

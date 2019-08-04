@@ -15,7 +15,7 @@ Relative paths are also supported."
     exit 1 # so that calling without parameters is counted as a failure
 fi
 
-#we dont do file checking as geary is clever enough
+#we don't do file checking as geary is clever enough
 ARG="mailto:?attachment=$1" #add first file
 shift
 while [ -n "$1" ]; do

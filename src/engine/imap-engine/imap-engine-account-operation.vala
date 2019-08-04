@@ -33,8 +33,16 @@
  * equal_to} method to specify which instances are considered to be
  * duplicates.
  */
-public abstract class Geary.ImapEngine.AccountOperation : Geary.BaseObject {
+public abstract class Geary.ImapEngine.AccountOperation : BaseObject, Loggable {
 
+
+    /** {@inheritDoc} */
+    public Logging.Flag loggable_flags {
+        get; protected set; default = Logging.Flag.ALL;
+    }
+
+    /** {@inheritDoc} */
+    public Loggable? loggable_parent { get { return account; } }
 
     /** The account this operation applies to. */
     protected weak Geary.Account account { get; private set; }
@@ -103,13 +111,9 @@ public abstract class Geary.ImapEngine.AccountOperation : Geary.BaseObject {
         return (op != null && (this == op || this.get_type() == op.get_type()));
     }
 
-    /**
-     * Provides a representation of this operation for debugging.
-     *
-     * By default simply returns the name of the class.
-     */
+    /** {@inheritDoc} */
     public virtual string to_string() {
-        return this.get_type().name();
+        return get_type().name();
     }
 
 }

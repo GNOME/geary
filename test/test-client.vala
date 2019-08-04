@@ -26,6 +26,10 @@ int main(string[] args) {
      * Initialise all the things.
      */
 
+    // Ensure things like e.g. GLib's formatting routines uses a
+    // UTF-8-based locale rather ASCII
+    GLib.Intl.setlocale(LocaleCategory.ALL, "C.UTF-8");
+
     Gtk.init(ref args);
     Test.init(ref args);
 
@@ -49,6 +53,7 @@ int main(string[] args) {
     client.add_suite(new Util.Avatar.Test().get_suite());
     client.add_suite(new Util.Cache.Test().get_suite());
     client.add_suite(new Util.Email.Test().get_suite());
+    client.add_suite(new Util.JS.Test().get_suite());
 
     TestSuite js = new TestSuite("js");
 

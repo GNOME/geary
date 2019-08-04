@@ -36,7 +36,7 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
      * This can be used to transmit ids as D-Bus method and GLib
      * Action parameters, and so on.
      *
-     * @returns a serialised form of this id, that will match the
+     * @return a serialised form of this id, that will match the
      * GVariantType `(*)`
      * @see Account.to_email_identifier
      */

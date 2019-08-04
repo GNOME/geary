@@ -5,7 +5,7 @@
  */
 
 /**
- * SASL's LOGIN authentication schema impemented as an {@link Authenticator}.
+ * SASL's LOGIN authentication schema implemented as an {@link Authenticator}.
  *
  * LOGIN is obsolete but still widely in use and provided for backward compatibility.
  *

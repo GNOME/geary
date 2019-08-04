@@ -7,7 +7,6 @@
  */
 
 private class Geary.ImapDB.Account : BaseObject {
-    private const int POPULATE_SEARCH_TABLE_DELAY_SEC = 5;
 
     // These characters are chosen for being commonly used to continue a single word (such as
     // extended last names, i.e. "Lars-Eric") or in terms commonly searched for in an email client,
@@ -44,14 +43,6 @@ private class Geary.ImapDB.Account : BaseObject {
     private const string DB_FILENAME = "geary.db";
     private const string ATTACHMENTS_DIR = "attachments";
 
-    /**
-     * Returns the on-disk paths used for storage by this account.
-     */
-    public static void get_imap_db_storage_locations(File user_data_dir, out File db_file,
-        out File attachments_dir) {
-        db_file = user_data_dir.get_child(DB_FILENAME);
-        attachments_dir = user_data_dir.get_child(ATTACHMENTS_DIR);
-    }
 
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
@@ -62,6 +53,7 @@ private class Geary.ImapDB.Account : BaseObject {
             this.path = path;
         }
     }
+
 
     // Maps of localised search operator names and values to their
     // internal forms
@@ -74,7 +66,6 @@ private class Geary.ImapDB.Account : BaseObject {
     private static Gee.HashMap<string, string> search_op_is_values =
         new Gee.HashMap<string, string>();
 
-    public signal void contacts_loaded();
 
     /**
      * The root path for all remote IMAP folders.
@@ -90,7 +81,6 @@ private class Geary.ImapDB.Account : BaseObject {
     }
 
     // Only available when the Account is opened
-    public ImapEngine.ContactStore contact_store { get; private set; }
     public IntervalProgressMonitor search_index_monitor { get; private set;
         default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
     public SimpleProgressMonitor upgrade_monitor { get; private set; default = new SimpleProgressMonitor(
@@ -99,10 +89,12 @@ private class Geary.ImapDB.Account : BaseObject {
         ProgressType.DB_VACUUM); }
 
     /** The backing database for the account. */
-    public ImapDB.Database? db { get; private set; default = null; }
+    public ImapDB.Database db { get; private set; }
 
     private string name;
     private AccountInformation account_information;
+    private GLib.File db_file;
+    private GLib.File attachments_dir;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>();
     private Cancellable? background_cancellable = null;
@@ -255,15 +247,21 @@ private class Geary.ImapDB.Account : BaseObject {
         search_op_is_values.set(SEARCH_OP_VALUE_UNREAD, SEARCH_OP_VALUE_UNREAD);
     }
 
-    public Account(AccountInformation config) {
+    public Account(AccountInformation config,
+                   GLib.File data_dir,
+                   GLib.File schema_dir) {
         this.account_information = config;
-        this.contact_store = new ImapEngine.ContactStore(this);
         this.name = config.id + ":db";
-    }
+        this.db_file = data_dir.get_child(DB_FILENAME);
+        this.attachments_dir = data_dir.get_child(ATTACHMENTS_DIR);
 
-    private void check_open() throws Error {
-        if (db == null)
-            throw new EngineError.OPEN_REQUIRED("Database not open");
+        this.db = new ImapDB.Database(
+            this.db_file,
+            schema_dir,
+            this.attachments_dir,
+            upgrade_monitor,
+            vacuum_monitor
+        );
     }
 
     private ImapDB.SearchQuery check_search_query(Geary.SearchQuery q) throws Error {
@@ -274,25 +272,11 @@ private class Geary.ImapDB.Account : BaseObject {
         return query;
     }
 
-    public async void open_async(File user_data_dir, File schema_dir, Cancellable? cancellable)
-        throws Error {
-        if (this.db != null)
+    public async void open_async(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (this.db.is_open) {
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
-
-        File db_file;
-        File attachments_dir;
-        Account.get_imap_db_storage_locations(
-            user_data_dir, out db_file, out attachments_dir
-        );
-
-        this.db = new ImapDB.Database(
-            db_file,
-            schema_dir,
-            attachments_dir,
-            upgrade_monitor,
-            vacuum_monitor,
-            account_information.primary_mailbox.address
-        );
+        }
 
         try {
             yield db.open(
@@ -303,7 +287,6 @@ private class Geary.ImapDB.Account : BaseObject {
 
             // close database before exiting
             db.close(null);
-            db = null;
 
             throw err;
         }
@@ -343,18 +326,6 @@ private class Geary.ImapDB.Account : BaseObject {
         }
 
         background_cancellable = new Cancellable();
-
-        // Kick off a background update of the search table, but since the database is getting
-        // hammered at startup, wait a bit before starting the update ... use the ordinal to
-        // stagger these being fired off (important for users with many accounts registered)
-        int account_sec = account_information.ordinal.clamp(0, 10);
-        Timeout.add_seconds(POPULATE_SEARCH_TABLE_DELAY_SEC + account_sec, () => {
-            populate_search_table_async.begin(background_cancellable);
-
-            return false;
-        });
-
-        initialize_contacts(cancellable);
     }
 
     public async void close_async(Cancellable? cancellable) throws Error {
@@ -456,40 +427,6 @@ private class Geary.ImapDB.Account : BaseObject {
 
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-    }
-
-    private void initialize_contacts(Cancellable? cancellable = null) throws Error {
-        check_open();
-
-        Gee.Collection<Contact> contacts = new Gee.LinkedList<Contact>();
-        Db.TransactionOutcome outcome = db.exec_transaction(Db.TransactionType.RO,
-            (context) => {
-            Db.Statement statement = context.prepare(
-                "SELECT email, real_name, highest_importance, normalized_email, flags " +
-                "FROM ContactTable");
-
-            Db.Result result = statement.exec(cancellable);
-            while (!result.finished) {
-                try {
-                    Contact contact = new Contact(result.nonnull_string_at(0), result.string_at(1),
-                        result.int_at(2), result.string_at(3), ContactFlags.deserialize(result.string_at(4)));
-                    contacts.add(contact);
-                } catch (Geary.DatabaseError err) {
-                    // We don't want to abandon loading all contacts just because there was a
-                    // problem with one.
-                    debug("Problem loading contact: %s", err.message);
-                }
-
-                result.next();
-            }
-
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-
-        if (outcome == Db.TransactionOutcome.DONE) {
-            contact_store.update_contacts(contacts);
-            contacts_loaded();
-        }
     }
 
     /**
@@ -653,7 +590,6 @@ private class Geary.ImapDB.Account : BaseObject {
                 db,
                 path,
                 db.attachments_path,
-                contact_store,
                 account_information.primary_mailbox.address,
                 folder_id,
                 properties
@@ -995,7 +931,7 @@ private class Geary.ImapDB.Account : BaseObject {
             //
             // Note that this uses SQLite's "standard" query syntax for MATCH, where AND is implied
             // (and would be treated as search term if included), parentheses are not allowed, and
-            // OR has a higher precendence than AND.  So the above example in standard syntax is:
+            // OR has a higher precedence than AND.  So the above example in standard syntax is:
             //
             // party* OR parti* eventful* OR event*
             StringBuilder builder = new StringBuilder();
@@ -1392,21 +1328,6 @@ private class Geary.ImapDB.Account : BaseObject {
         return email;
     }
 
-    public async void update_contact_flags_async(Geary.Contact contact, Cancellable? cancellable)
-        throws Error{
-        check_open();
-
-        yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
-            Db.Statement update_stmt =
-                cx.prepare("UPDATE ContactTable SET flags=? WHERE email=?");
-            update_stmt.bind_string(0, contact.contact_flags.serialize());
-            update_stmt.bind_string(1, contact.email);
-            update_stmt.exec(cancellable);
-
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
-    }
-
     /**
      * Return a map of each passed-in email identifier to the set of folders
      * that contain it.  If an email id doesn't appear in the resulting map,
@@ -1438,7 +1359,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
     }
 
-    private async void populate_search_table_async(Cancellable? cancellable) {
+    public async void populate_search_table(Cancellable? cancellable) {
         debug("%s: Populating search table", account_information.id);
         try {
             while (!yield populate_search_table_batch_async(50, cancellable)) {
@@ -1942,5 +1863,39 @@ private class Geary.ImapDB.Account : BaseObject {
 
         return search_matches.size > 0 ? search_matches : null;
     }
-}
 
+    /** Removes database file and attachments directory. */
+    public async void delete_all_data(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (this.db.is_open) {
+            throw new EngineError.ALREADY_OPEN(
+                "Account cannot be open during rebuild"
+            );
+        }
+
+        if (yield Files.query_exists_async(this.db_file, cancellable)) {
+            message(
+                "%s: Deleting database file %s...",
+                this.name, this.db_file.get_path()
+            );
+            yield db_file.delete_async(GLib.Priority.DEFAULT, cancellable);
+        }
+
+        if (yield Files.query_exists_async(this.attachments_dir, cancellable)) {
+            message(
+                "%s: Deleting attachments directory %s...",
+                this.name, this.attachments_dir.get_path()
+            );
+            yield Files.recursive_delete_async(
+                this.attachments_dir, GLib.Priority.DEFAULT, cancellable
+            );
+        }
+    }
+
+    private inline void check_open() throws GLib.Error {
+        if (!this.db.is_open) {
+            throw new EngineError.OPEN_REQUIRED("Database not open");
+        }
+    }
+
+}

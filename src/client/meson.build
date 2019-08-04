@@ -24,6 +24,9 @@ geary_client_vala_sources = files(
 
   'components/client-web-view.vala',
   'components/components-inspector.vala',
+  'components/components-inspector-error-view.vala',
+  'components/components-inspector-log-view.vala',
+  'components/components-inspector-system-view.vala',
   'components/components-placeholder-pane.vala',
   'components/components-validator.vala',
   'components/count-badge.vala',
@@ -47,8 +50,6 @@ geary_client_vala_sources = files(
   'composer/composer-widget.vala',
   'composer/composer-window.vala',
   'composer/contact-entry-completion.vala',
-  'composer/contact-list-store.vala',
-  'composer/contact-list-store-cache.vala',
   'composer/email-entry.vala',
   'composer/spell-check-popover.vala',
 
@@ -103,8 +104,8 @@ geary_client_vala_sources = files(
   'util/util-gio.vala',
   'util/util-gtk.vala',
   'util/util-international.vala',
+  'util/util-js.vala',
   'util/util-migrate.vala',
-  'util/util-webkit.vala',
 )
 
 geary_client_sources = [
@@ -113,25 +114,27 @@ geary_client_sources = [
 ]
 
 geary_client_dependencies = [
-  libmath,
   enchant,
   folks,
   gck,
   gcr,
+  geary_engine_dep,
   gee,
   gio,
+  gmime,
   goa,
+  gspell,
   gtk,
+  javascriptcoregtk,
   json_glib,
   libcanberra,
   libhandy,
+  libmath,
   libsecret,
   libsoup,
-  gmime,
   libxml,
   posix,
   webkit2gtk,
-  geary_engine_dep,
 ]
 
 geary_client_vala_options = geary_vala_options
@@ -145,6 +148,7 @@ if libunity.found()
   geary_client_vala_options += ['-D', 'HAVE_LIBUNITY']
 endif
 
+# Main client application library
 geary_client_lib = static_library('geary-client',
   geary_client_sources,
   dependencies: geary_client_dependencies,

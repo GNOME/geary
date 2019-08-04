@@ -10,6 +10,18 @@ int main(string[] args) {
      * Initialise all the things.
      */
 
+    // Ensure things like e.g. GLib's formatting routines uses a
+    // well-known UTF-8-based locale rather ASCII.
+    //
+    // Distros don't ship well-known locales other than C.UTF-8 by
+    // default, but Flatpak does not currently support C.UTF-8, so
+    // need to try both. :(
+    // https://gitlab.com/freedesktop-sdk/freedesktop-sdk/issues/812
+    string? locale = GLib.Intl.setlocale(LocaleCategory.ALL, "C.UTF-8");
+    if (locale == null) {
+        GLib.Intl.setlocale(LocaleCategory.ALL, "en_US.UTF-8");
+    }
+
     Test.init(ref args);
 
     Geary.RFC822.init();
@@ -24,6 +36,7 @@ int main(string[] args) {
 
     engine.add_suite(new Geary.AccountInformationTest().get_suite());
     engine.add_suite(new Geary.AttachmentTest().get_suite());
+    engine.add_suite(new Geary.ContactHarvesterImplTest().get_suite());
     engine.add_suite(new Geary.EngineTest().get_suite());
     engine.add_suite(new Geary.FolderPathTest().get_suite());
     engine.add_suite(new Geary.IdleManagerTest().get_suite());
@@ -53,14 +66,18 @@ int main(string[] args) {
     engine.add_suite(new Geary.ImapDB.EmailIdentifierTest().get_suite());
     engine.add_suite(new Geary.ImapDB.FolderTest().get_suite());
     engine.add_suite(new Geary.ImapEngine.AccountProcessorTest().get_suite());
+
+    // Depends on ImapDb.Database working correctly
+    engine.add_suite(new Geary.ContactStoreImplTest().get_suite());
+
     engine.add_suite(new Geary.Inet.Test().get_suite());
-    engine.add_suite(new Geary.JS.Test().get_suite());
     engine.add_suite(new Geary.Mime.ContentTypeTest().get_suite());
     engine.add_suite(new Geary.Outbox.EmailIdentifierTest().get_suite());
     engine.add_suite(new Geary.RFC822.MailboxAddressTest().get_suite());
     engine.add_suite(new Geary.RFC822.MailboxAddressesTest().get_suite());
     engine.add_suite(new Geary.RFC822.MessageTest().get_suite());
     engine.add_suite(new Geary.RFC822.MessageDataTest().get_suite());
+    engine.add_suite(new Geary.RFC822.PartTest().get_suite());
     engine.add_suite(new Geary.RFC822.Utils.Test().get_suite());
     engine.add_suite(new Geary.String.Test().get_suite());
 

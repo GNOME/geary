@@ -1,230 +1,325 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class ContactEntryCompletion : Gtk.EntryCompletion {
+public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
 
 
-    private static bool completion_match_func(Gtk.EntryCompletion completion, string key, Gtk.TreeIter iter) {
-        ContactEntryCompletion contacts = (ContactEntryCompletion) completion;
+    // Minimum visibility for the contact to appear in autocompletion.
+    private const Geary.Contact.Importance VISIBILITY_THRESHOLD =
+        Geary.Contact.Importance.RECEIVED_FROM;
 
-        // We don't use the provided key, because the user can enter multiple addresses.
-        int current_address_index;
-        string current_address_key;
-        contacts.get_addresses(completion, out current_address_index, out current_address_key);
 
-        Geary.Contact? contact = contacts.list_store.get_contact(iter);
-        if (contact == null)
-            return false;
+    public enum Column {
+        CONTACT,
+        MAILBOX;
 
-        string highlighted_result;
-        if (!contacts.match_prefix_contact(current_address_key, contact, out highlighted_result))
-            return false;
-
-        return true;
+        public static Type[] get_types() {
+            return {
+                typeof(Application.Contact), // CONTACT
+                typeof(Geary.RFC822.MailboxAddress) // MAILBOX
+            };
+        }
     }
 
-    private ContactListStore list_store;
+
+    private Application.ContactStore contacts;
+
+    // Text between the start of the entry or of the previous email
+    // address and the current position of the cursor, if any.
+    private string current_key = "";
+
+    // List of (possibly incomplete) email addresses in the entry.
+    private string[] email_addresses = {};
+
+    // Index of the email address the cursor is currently at
+    private int cursor_at_address = -1;
+
+    private GLib.Cancellable? search_cancellable = null;
     private Gtk.TreeIter? last_iter = null;
 
-    public ContactEntryCompletion(ContactListStore list_store) {
-        this.list_store = list_store;
 
-        model = list_store;
-        set_match_func(ContactEntryCompletion.completion_match_func);
+    public ContactEntryCompletion(Application.ContactStore contacts) {
+        base_ref();
+        this.contacts = contacts;
+        this.model = new_model();
+
+        // Always match all rows, since the model will only contain
+        // matching addresses from the search query
+        set_match_func(() => true);
+
+        Gtk.CellRendererPixbuf icon_renderer = new Gtk.CellRendererPixbuf();
+        icon_renderer.xpad = 2;
+        icon_renderer.ypad = 2;
+        pack_start(icon_renderer, false);
+        set_cell_data_func(icon_renderer, cell_icon_data);
 
         Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
+        icon_renderer.ypad = 2;
         pack_start(text_renderer, true);
-        set_cell_data_func(text_renderer, cell_layout_data_func);
+        set_cell_data_func(text_renderer, cell_text_data);
 
-        set_inline_selection(true);
-        match_selected.connect(on_match_selected);
-        cursor_on_match.connect(on_cursor_on_match);
+        this.match_selected.connect(on_match_selected);
+        this.cursor_on_match.connect(on_cursor_on_match);
     }
 
-    private void cell_layout_data_func(Gtk.CellLayout cell_layout, Gtk.CellRenderer cell,
-        Gtk.TreeModel tree_model, Gtk.TreeIter iter) {
-        string highlighted_result = "";
+    ~ContactEntryCompletion() {
+        base_unref();
+    }
 
-        GLib.Value contact_value;
-        tree_model.get_value(iter, ContactListStore.Column.CONTACT_OBJECT, out contact_value);
+    public void update_model() {
+        this.last_iter = null;
 
-        Geary.Contact? contact = (Geary.Contact) contact_value.get_object();
+        update_addresses();
 
-        if (contact != null) {
-            string current_address_key;
-            this.get_addresses(this, null, out current_address_key);
-
-            this.match_prefix_contact(current_address_key, contact, out highlighted_result);
+        if (this.search_cancellable != null) {
+            this.search_cancellable.cancel();
+            this.search_cancellable = null;
         }
 
-        Gtk.CellRendererText text_renderer = (Gtk.CellRendererText) cell;
-        text_renderer.markup = highlighted_result;
+        Gtk.ListStore model = (Gtk.ListStore) this.model;
+        string completion_key = this.current_key;
+        if (!Geary.String.is_empty_or_whitespace(completion_key)) {
+            // Append a placeholder row here if the model is empty to
+            // work around the issue descried in
+            // https://gitlab.gnome.org/GNOME/gtk/merge_requests/939
+            Gtk.TreeIter iter;
+            if (!model.get_iter_first(out iter)) {
+                model.append(out iter);
+            }
+
+            this.search_cancellable = new GLib.Cancellable();
+            this.search_contacts.begin(completion_key, this.search_cancellable);
+        } else {
+            model.clear();
+        }
     }
-
-    private bool on_match_selected(Gtk.EntryCompletion sender, Gtk.TreeModel model, Gtk.TreeIter iter) {
-        string full_address = list_store.to_full_address(iter);
-
-        Gtk.Entry? entry = sender.get_entry() as Gtk.Entry;
-        if (entry == null)
-            return false;
-
-        int current_address_index;
-        string current_address_remainder;
-        Gee.List<string> addresses = get_addresses(sender, out current_address_index, null,
-            out current_address_remainder);
-        addresses[current_address_index] = full_address;
-        if (!Geary.String.is_empty_or_whitespace(current_address_remainder))
-            addresses.insert(current_address_index + 1, current_address_remainder);
-        string delimiter = ", ";
-        entry.text = concat_strings(addresses, delimiter);
-
-        int characters_seen_so_far = 0;
-        for (int i = 0; i <= current_address_index; i++)
-            characters_seen_so_far += addresses[i].char_count() + delimiter.char_count();
-
-        entry.set_position(characters_seen_so_far);
-
-        return true;
-    }
-
-    private bool on_cursor_on_match(Gtk.EntryCompletion sender, Gtk.TreeModel model, Gtk.TreeIter iter) {
-        last_iter = iter;
-        return true;
-    }
-
     public void trigger_selection() {
         if (last_iter != null) {
-            on_match_selected(this, model, last_iter);
+            on_match_selected(model, last_iter);
             last_iter = null;
         }
     }
 
-    public void reset_selection() {
-        last_iter = null;
-    }
+    private void update_addresses() {
+        Gtk.Entry? entry = get_entry() as Gtk.Entry;
+        if (entry != null) {
+            this.current_key = "";
+            this.cursor_at_address = -1;
+            this.email_addresses = {};
 
-    private Gee.List<string> get_addresses(Gtk.EntryCompletion completion,
-        out int current_address_index = null, out string current_address_key = null,
-        out string current_address_remainder = null) {
-        current_address_index = 0;
-        current_address_key = "";
-        current_address_remainder = "";
-        Gtk.Entry? entry = completion.get_entry() as Gtk.Entry;
-        Gee.List<string> empty_addresses = new Gee.ArrayList<string>();
-        empty_addresses.add("");
-        if (entry == null)
-            return empty_addresses;
+            string text = entry.get_text();
+            int cursor_pos = entry.get_position();
 
-        string? original_text = entry.get_text();
-        if (original_text == null)
-            return empty_addresses;
+            int start_idx = 0;
+            int next_idx = 0;
+            unichar c = 0;
+            int current_char = 0;
+            bool in_quote = false;
+            while (text.get_next_char(ref next_idx, out c)) {
+                if (current_char == cursor_pos) {
+                    this.current_key = text.slice(start_idx, next_idx).strip();
+                    this.cursor_at_address = this.email_addresses.length;
+                }
 
-        int cursor_position = entry.cursor_position;
-        int cursor_offset = original_text.index_of_nth_char(cursor_position);
-        if (cursor_offset < 0)
-            return empty_addresses;
+                switch (c) {
+                case ',':
+                    if (!in_quote) {
+                        // Don't include the comma in the address
+                        string address = text.slice(start_idx, next_idx -1);
+                        this.email_addresses += address.strip();
+                        // Don't include it in the next one, either
+                        start_idx = next_idx;
+                    }
+                    break;
 
-        Gee.List<string> addresses = new Gee.ArrayList<string>();
-        string delimiter = ",";
-        string[] addresses_array = original_text.split(delimiter);
-        foreach (string address in addresses_array)
-            addresses.add(address);
+                case '"':
+                    in_quote = !in_quote;
+                    break;
+                }
 
-        if (addresses.size < 1)
-            return empty_addresses;
-
-        int bytes_seen_so_far = 0;
-        current_address_index = addresses.size - 1;
-        for (int i = 0; i < addresses.size; i++) {
-            int token_bytes = addresses[i].length + delimiter.length;
-            if ((bytes_seen_so_far + token_bytes) > cursor_offset) {
-                current_address_index = i;
-                current_address_key = addresses[i]
-                    .substring(0, cursor_offset - bytes_seen_so_far)
-                    .strip().normalize().casefold();
-
-                current_address_remainder = addresses[i]
-                    .substring(cursor_offset - bytes_seen_so_far).strip();
-                break;
+                current_char++;
             }
-            bytes_seen_so_far += token_bytes;
-        }
-        for (int i = 0; i < addresses.size; i++) {
-            addresses[i] = addresses[i].strip();
-        }
 
-        return addresses;
+            // Add any remaining text after the last comma
+            string address = text.substring(start_idx);
+            this.email_addresses += address.strip();
+        }
     }
 
-    // We could only add the delimiter *between* each string (i.e., don't add it after the last
-    // string). But it's easier for the user if they don't have to manually type a comma after
-    // adding each address. So we add the delimiter after every string.
-    private string concat_strings(Gee.List<string> strings, string delimiter) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < strings.size; i++) {
-            builder.append(strings[i]);
-            builder.append(delimiter);
-        }
-
-        return builder.str;
-    }
-
-    private bool match_prefix_contact(string needle, Geary.Contact contact,
-        out string highlighted_result = null) {
-        string email_result;
-        bool email_match = match_prefix_string(needle, contact.email, out email_result);
-
-        string real_name_result;
-        bool real_name_match = match_prefix_string(needle, contact.real_name, out real_name_result);
-
-        // email_result and real_name_result were already escaped, then <b></b> tags were added to
-        // highlight matches. We don't want to escape them again.
-        highlighted_result = contact.real_name == null ? email_result :
-            real_name_result + Markup.escape_text(" <") + email_result + Markup.escape_text(">");
-
-        return email_match || real_name_match;
-    }
-
-    private bool match_prefix_string(string needle, string? haystack = null,
-        out string highlighted_result = null) {
-        highlighted_result = "";
-
-        if (Geary.String.is_empty(haystack) || Geary.String.is_empty(needle))
-            return false;
-
-        // Default result if there is no match or we encounter an error.
-        highlighted_result = haystack;
-
-        bool matched = false;
+    public async void search_contacts(string query,
+                                      GLib.Cancellable? cancellable) {
+        Gee.Collection<Application.Contact>? results = null;
         try {
-            string escaped_needle = Regex.escape_string(needle.normalize());
-            Regex regex = new Regex("\\b" + escaped_needle, RegexCompileFlags.CASELESS);
-            string haystack_normalized = haystack.normalize();
-            if (regex.match(haystack_normalized)) {
-                highlighted_result = regex.replace_eval(haystack_normalized, -1, 0, 0, eval_callback);
-                matched = true;
-            }
-        } catch (RegexError err) {
-            debug("Error matching regex: %s", err.message);
+            results = yield this.contacts.search(
+                query,
+                VISIBILITY_THRESHOLD,
+                20,
+                cancellable
+            );
+        } catch (GLib.IOError.CANCELLED err) {
+            // All good
+        } catch (GLib.Error err) {
+            debug("Error searching contacts for completion: %s", err.message);
         }
 
-        highlighted_result = Markup.escape_text(highlighted_result)
-            .replace("&#x91;", "<b>").replace("&#x92;", "</b>");
-
-        return matched;
+        if (!cancellable.is_cancelled()) {
+            Gtk.ListStore model = new_model();
+            foreach (Application.Contact contact in results) {
+                foreach (Geary.RFC822.MailboxAddress addr
+                         in contact.email_addresses) {
+                    Gtk.TreeIter iter;
+                    model.append(out iter);
+                    model.set(iter, Column.CONTACT, contact);
+                    model.set(iter, Column.MAILBOX, addr);
+                }
+            }
+            this.model = model;
+            complete();
+        }
     }
 
-    private bool eval_callback(MatchInfo match_info, StringBuilder result) {
+    private string match_prefix_contact(Geary.RFC822.MailboxAddress mailbox) {
+        string email = match_prefix_string(mailbox.address);
+        if (mailbox.name != null && !mailbox.is_spoofed()) {
+            string real_name = match_prefix_string(mailbox.name);
+            // email and real_name were already escaped, then <b></b> tags
+            // were added to highlight matches. We don't want to escape
+            // them again.
+            email = (
+                real_name +
+                Markup.escape_text(" <") + email + Markup.escape_text(">")
+            );
+        }
+        return email;
+    }
+
+    private string? match_prefix_string(string haystack) {
+        string value = haystack;
+        if (!Geary.String.is_empty(this.current_key)) {
+            bool matched = false;
+            try {
+                string escaped_needle = Regex.escape_string(
+                    this.current_key.normalize()
+                );
+                Regex regex = new Regex(
+                    "\\b" + escaped_needle,
+                    RegexCompileFlags.CASELESS
+                );
+                string haystack_normalized = haystack.normalize();
+                if (regex.match(haystack_normalized)) {
+                    value = regex.replace_eval(
+                        haystack_normalized, -1, 0, 0, eval_callback
+                    );
+                    matched = true;
+                }
+            } catch (RegexError err) {
+                debug("Error matching regex: %s", err.message);
+            }
+
+            value = Markup.escape_text(value)
+                .replace("&#x91;", "<b>")
+                .replace("&#x92;", "</b>");
+        }
+
+        return value;
+    }
+
+    private bool eval_callback(GLib.MatchInfo match_info,
+                               GLib.StringBuilder result) {
         string? match = match_info.fetch(0);
         if (match != null) {
             result.append("\xc2\x91%s\xc2\x92".printf(match));
             // This is UTF-8 encoding of U+0091 and U+0092
         }
-
         return false;
     }
-}
 
+    private void cell_icon_data(Gtk.CellLayout cell_layout,
+                                Gtk.CellRenderer cell,
+                                Gtk.TreeModel tree_model,
+                                Gtk.TreeIter iter) {
+        GLib.Value value;
+        tree_model.get_value(iter, Column.CONTACT, out value);
+        Application.Contact? contact = value.get_object() as Application.Contact;
+
+        string icon = "";
+        if (contact != null) {
+            if (contact.is_favourite) {
+                icon = "starred-symbolic";
+            } else if (contact.is_desktop_contact) {
+                icon = "avatar-default-symbolic";
+            }
+        }
+
+        Gtk.CellRendererPixbuf renderer = (Gtk.CellRendererPixbuf) cell;
+        renderer.icon_name = icon;
+    }
+
+    private void cell_text_data(Gtk.CellLayout cell_layout,
+                                Gtk.CellRenderer cell,
+                                Gtk.TreeModel tree_model,
+                                Gtk.TreeIter iter) {
+        GLib.Value value;
+        tree_model.get_value(iter, Column.MAILBOX, out value);
+        Geary.RFC822.MailboxAddress? mailbox =
+            value.get_object() as Geary.RFC822.MailboxAddress;
+
+        string markup = "";
+        if (mailbox != null) {
+            markup = this.match_prefix_contact(mailbox);
+        }
+
+        Gtk.CellRendererText renderer = (Gtk.CellRendererText) cell;
+        renderer.markup = markup;
+    }
+
+    private inline Gtk.ListStore new_model() {
+        return new Gtk.ListStore.newv(Column.get_types());
+    }
+
+    private bool on_match_selected(Gtk.TreeModel model, Gtk.TreeIter iter) {
+        Gtk.Entry? entry = get_entry() as Gtk.Entry;
+        if (entry != null) {
+            // Update the address
+            GLib.Value value;
+            model.get_value(iter, Column.MAILBOX, out value);
+            Geary.RFC822.MailboxAddress mailbox =
+                (Geary.RFC822.MailboxAddress) value.get_object();
+            this.email_addresses[this.cursor_at_address] =
+                mailbox.to_full_display();
+
+            // Update the entry text
+            bool current_is_last = (
+                this.cursor_at_address == this.email_addresses.length - 1
+            );
+            int new_cursor_pos = -1;
+            GLib.StringBuilder text = new GLib.StringBuilder();
+            int i = 0;
+            while (i < this.email_addresses.length) {
+                text.append(this.email_addresses[i]);
+                if (i == this.cursor_at_address) {
+                    new_cursor_pos = text.str.char_count();
+                }
+
+                i++;
+                if (i != this.email_addresses.length || current_is_last) {
+                    text.append(", ");
+                }
+            }
+            entry.text = text.str;
+            entry.set_position(current_is_last ? -1 : new_cursor_pos);
+        }
+        return true;
+    }
+
+    private bool on_cursor_on_match(Gtk.TreeModel model, Gtk.TreeIter iter) {
+        this.last_iter = iter;
+        return true;
+    }
+
+}

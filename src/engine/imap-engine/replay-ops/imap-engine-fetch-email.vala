@@ -116,7 +116,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
 
         Gee.Map<Geary.Email, bool> created_or_merged =
             yield this.engine.local_folder.create_or_merge_email_async(
-                list, true, this.cancellable
+                list, true, this.engine.harvester, this.cancellable
             );
 
         Geary.Email email = list[0];

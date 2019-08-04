@@ -43,7 +43,9 @@ async void main_async() throws Error {
                 composed_email.body_html = contents;
             }
 
-            msg = new Geary.RFC822.Message.from_composed_email(composed_email, null);
+            msg = yield new Geary.RFC822.Message.from_composed_email(
+                composed_email, null, null
+            );
         }
 
         stdout.printf("\n\n%s\n\n", msg.to_string());
@@ -161,7 +163,7 @@ int main(string[] args) {
         Geary.Logging.init();
         Geary.Logging.log_to(stdout);
         Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
-        GLib.Log.set_default_handler(Geary.Logging.default_handler);
+        GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
     }
 
     Geary.RFC822.init();

@@ -54,6 +54,9 @@ sqlite = dependency('sqlite3', version: '>= 3.12')
 webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 
 # Secondary deps - keep sorted alphabetically
+# We need appdata.its from appstream-glib:
+# https://gitlab.gnome.org/GNOME/geary/issues/439
+appstream_glib = dependency('appstream-glib', version: '>=0.7.10')
 enchant = dependency('enchant-2', version: '>=2.1', required: false) # see below
 folks = dependency('folks', version: '>=0.11')
 gck = dependency('gck-1')
@@ -62,6 +65,7 @@ gdk = dependency('gdk-3.0', version: '>=' + target_gtk)
 gee = dependency('gee-0.8', version: '>= 0.8.5')
 gio = dependency('gio-2.0', version: '>=' + target_glib)
 goa = dependency('goa-1.0')
+gspell = dependency('gspell-1')
 gthread = dependency('gthread-2.0', version: '>=' + target_glib)
 iso_codes = dependency('iso-codes')
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)

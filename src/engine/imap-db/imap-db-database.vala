@@ -5,9 +5,44 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+[CCode (cname = "g_utf8_collate_key")]
+extern string utf8_collate_key(string data, ssize_t len);
 extern int sqlite3_unicodesn_register_tokenizer(Sqlite.Database db);
 
 private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
+
+
+    /** SQLite UTF-8 case-insensitive, transliterating function name. */
+    public const string UTF8_CASE_INSENSITIVE_FN = "UTF8FOLD";
+
+    /** SQLite UTF-8 collation name. */
+    public const string UTF8_COLLATE = "UTF8COLL";
+
+
+    private static void utf8_transliterate_fold(Sqlite.Context context,
+                                                Sqlite.Value[] values) {
+        string? text = values[0].to_text();
+        if (text != null) {
+            context.result_text(Geary.Db.normalise_case_insensitive_query(text));
+        } else {
+            context.result_value(values[0]);
+        }
+    }
+
+    private static int utf8_collate(int a_len, void* a_bytes,
+                                    int b_len, void* b_bytes) {
+        // Don't need to normalise, collate_key() will do it for us
+        string? a_str = null;
+        if (a_bytes != null) {
+            a_str = utf8_collate_key((string) a_bytes, a_len);
+        }
+        string? b_str = null;
+        if (b_bytes != null) {
+            b_str = utf8_collate_key((string) b_bytes, b_len);
+        }
+        return GLib.strcmp(a_str, b_str);
+    }
+
 
     internal GLib.File attachments_path;
 
@@ -15,7 +50,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
     private ProgressMonitor upgrade_monitor;
     private ProgressMonitor vacuum_monitor;
-    private string account_owner_email;
     private bool new_db = false;
 
     private GC? gc = null;
@@ -25,15 +59,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     GLib.File schema_dir,
                     GLib.File attachments_path,
                     ProgressMonitor upgrade_monitor,
-                    ProgressMonitor vacuum_monitor,
-                    string account_owner_email) {
+                    ProgressMonitor vacuum_monitor) {
         base.persistent(db_file, schema_dir);
         this.attachments_path = attachments_path;
         this.upgrade_monitor = upgrade_monitor;
         this.vacuum_monitor = vacuum_monitor;
-
-        // Update to use all addresses on the account. Bug 768779
-        this.account_owner_email = account_owner_email;
     }
 
     /**
@@ -41,7 +71,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      */
     public new async void open(Db.DatabaseFlags flags, Cancellable? cancellable)
         throws Error {
-        yield base.open(flags, on_prepare_database_connection, cancellable);
+        yield base.open(flags, cancellable);
 
         // Tie user-supplied Cancellable to internal Cancellable, which is used when close() is
         // called
@@ -133,10 +163,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                                                Cancellable? cancellable)
         throws Error {
         switch (version) {
-            case 5:
-                yield post_upgrade_populate_autocomplete(cancellable);
-            break;
-
             case 6:
                 yield post_upgrade_encode_folder_names(cancellable);
             break;
@@ -177,25 +203,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 yield post_upgrade_add_tokenizer_table(cancellable);
             break;
         }
-    }
-
-    // Version 5.
-    private async void post_upgrade_populate_autocomplete(Cancellable? cancellable)
-        throws Error {
-        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
-                Db.Result result = cx.query(
-                    "SELECT sender, from_field, to_field, cc, bcc FROM MessageTable"
-                );
-                while (!result.finished && !cancellable.is_cancelled()) {
-                    MessageAddresses message_addresses =
-                    new MessageAddresses.from_result(account_owner_email, result);
-                    foreach (Contact contact in message_addresses.contacts) {
-                        do_update_contact(cx, contact, null);
-                    }
-                    result.next();
-                }
-                return Geary.Db.TransactionOutcome.COMMIT;
-            }, cancellable);
     }
 
     // Version 6.
@@ -447,7 +454,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
                     stmt.exec();
 
-                    // reuse statment, overwrite invalid_id, fields only
+                    // reuse statement, overwrite invalid_id, fields only
                     stmt.reset(Db.ResetScope.SAVE_BINDINGS);
                 }
 
@@ -583,7 +590,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     /**
      * Rebuilds the database's FTS table index.
      *
-     * This can be used to recover from corrupt indexs, as indicated
+     * This can be used to recover from corrupt indexes, as indicated
      * by fts_integrity_check() returning false.
      */
     public void fts_rebuild() throws Error {
@@ -597,7 +604,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     /**
      * Optimises the database's FTS table index.
      *
-     * This is an expensive call, as much as performing a VACCUM.
+     * This is an expensive call, as much as performing a VACUUM.
      */
     public void fts_optimize() throws Error {
         Db.Statement stmt = prepare("""
@@ -607,12 +614,38 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         stmt.exec();
     }
 
-    private void on_prepare_database_connection(Db.Connection cx) throws Error {
+    protected override void prepare_connection(Db.Connection cx)
+        throws GLib.Error {
         cx.set_busy_timeout_msec(Db.Connection.RECOMMENDED_BUSY_TIMEOUT_MSEC);
         cx.set_foreign_keys(true);
         cx.set_recursive_triggers(true);
         cx.set_synchronous(Db.SynchronousMode.NORMAL);
         sqlite3_unicodesn_register_tokenizer(cx.db);
+
+        if (cx.db.create_function(
+                UTF8_CASE_INSENSITIVE_FN,
+                1, // n args
+                Sqlite.UTF8,
+                null,
+                Database.utf8_transliterate_fold,
+                null,
+                null
+            ) != Sqlite.OK) {
+            throw new DatabaseError.GENERAL(
+                "Failed to register function %s",
+                UTF8_CASE_INSENSITIVE_FN
+            );
+        }
+
+        if (cx.db.create_collation(
+                UTF8_COLLATE,
+                Sqlite.UTF8,
+                Database.utf8_collate
+            ) != Sqlite.OK) {
+            throw new DatabaseError.GENERAL(
+                "Failed to register collation %s", UTF8_COLLATE
+            );
+        }
     }
 
 }

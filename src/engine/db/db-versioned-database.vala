@@ -86,10 +86,9 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
      * the application.
      */
     public override async void open(DatabaseFlags flags,
-                                    PrepareConnection? prepare_cb,
-                                    Cancellable? cancellable = null)
-        throws Error {
-        yield base.open(flags, prepare_cb, cancellable);
+                                    GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        yield base.open(flags, cancellable);
 
         // get Connection for upgrade activity
         Connection cx = yield open_connection(cancellable);
