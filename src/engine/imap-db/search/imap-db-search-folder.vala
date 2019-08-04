@@ -159,9 +159,13 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         }
     }
 
-    private async void set_search_query_async(string query, Geary.SearchQuery.Strategy strategy,
-        Cancellable? cancellable) throws Error {
-        Geary.SearchQuery search_query = account.open_search(query, strategy);
+    private async void set_search_query_async(string query,
+                                              Geary.SearchQuery.Strategy strategy,
+                                              Cancellable? cancellable)
+        throws GLib.Error {
+        Geary.SearchQuery search_query = yield account.open_search(
+            query, strategy, cancellable
+        );
 
         int result_mutex_token = yield result_mutex.claim_async();
 

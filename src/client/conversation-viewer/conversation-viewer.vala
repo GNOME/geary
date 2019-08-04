@@ -27,7 +27,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     private Configuration config;
 
     private Gee.Set<Geary.App.Conversation>? selection_while_composing = null;
-
+    private GLib.Cancellable? find_cancellable = null;
 
     // Stack pages
     [GtkChild]
@@ -269,8 +269,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
         // Highlight matching terms from find if active, otherwise
         // from the search folder if that's where we are at
-        Geary.SearchQuery? query = get_find_search_query(
-            conversation.base_folder.account
+        Geary.SearchQuery? query = yield get_find_search_query(
+            conversation.base_folder.account, null
         );
         if (query == null) {
             Geary.SearchFolder? search_folder =
@@ -301,6 +301,11 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
     // Remove any existing conversation list, cancelling its loading
     private void remove_current_list() {
+        if (this.find_cancellable != null) {
+            this.find_cancellable.cancel();
+            this.find_cancellable = null;
+        }
+
         if (this.current_list != null) {
             this.current_list.cancel_conversation_load();
             this.conversation_removed(this.current_list);
@@ -357,7 +362,34 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         base.set_visible_child(widget);
     }
 
-    private Geary.SearchQuery? get_find_search_query(Geary.Account account) {
+    private async void update_find_results() {
+        ConversationListBox? list = this.current_list;
+        if (list != null) {
+            if (this.find_cancellable != null) {
+                this.find_cancellable.cancel();
+            }
+            GLib.Cancellable cancellable = new GLib.Cancellable();
+            cancellable.cancelled.connect(() => {
+                    list.search.cancel();
+                });
+            this.find_cancellable = cancellable;
+            try {
+                Geary.SearchQuery? query = yield get_find_search_query(
+                    list.conversation.base_folder.account,
+                    cancellable
+                );
+                if (query != null) {
+                    yield list.search.highlight_matching_email(query);
+                }
+            } catch (GLib.Error err) {
+                warning("Error updating find results: %s", err.message);
+            }
+        }
+    }
+
+    private async Geary.SearchQuery? get_find_search_query(Geary.Account account,
+                                                           GLib.Cancellable? cancellable)
+        throws GLib.Error {
         Geary.SearchQuery? query = null;
         if (this.conversation_find_bar.get_search_mode()) {
             string text = this.conversation_find_entry.get_text().strip();
@@ -365,8 +397,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             // opening every message in the conversation as soon as
             // the user presses a key
             if (text.length >= 2) {
-                query = account.open_search(
-                    text, this.config.get_search_strategy()
+                query = yield account.open_search(
+                    text, this.config.get_search_strategy(), cancellable
                 );
             }
         }
@@ -412,14 +444,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     private void on_find_text_changed(Gtk.SearchEntry entry) {
         this.conversation_find_next.set_sensitive(false);
         this.conversation_find_prev.set_sensitive(false);
-        if (this.current_list != null) {
-            Geary.SearchQuery? query = get_find_search_query(
-                this.current_list.conversation.base_folder.account
-            );
-            if (query != null) {
-                this.current_list.search.highlight_matching_email.begin(query);
-            }
-        }
+        this.update_find_results.begin();
     }
 
     [GtkCallback]

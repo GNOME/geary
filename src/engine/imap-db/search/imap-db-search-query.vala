@@ -261,11 +261,11 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     // A list of all search terms, regardless of search op field name
     private Gee.ArrayList<SearchTerm> all = new Gee.ArrayList<SearchTerm>();
 
-    public SearchQuery(ImapDB.Account account,
-                       string query,
-                       Geary.SearchQuery.Strategy strategy) {
-        base (query, strategy);
-
+    public async SearchQuery(ImapDB.Account account,
+                             string query,
+                             Geary.SearchQuery.Strategy strategy,
+                             GLib.Cancellable? cancellable) {
+        base(query, strategy);
         this.account = account;
 
         switch (strategy) {
@@ -298,7 +298,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
             break;
         }
 
-        prepare();
+        yield prepare(cancellable);
     }
 
     public Gee.Collection<string?> get_fields() {
@@ -403,7 +403,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
         return phrases;
     }
 
-    private void prepare() {
+    private async void prepare(GLib.Cancellable? cancellable) {
         // A few goals here:
         //   1) Append an * after every term so it becomes a prefix search
         //      (see <https://www.sqlite.org/fts3.html#section_3>)
@@ -490,7 +490,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
                     // searching for [archive* OR archiv*] when that's
                     // the same as [archiv*]), otherwise search for
                     // both
-                    string? stemmed = stem_search_term(s);
+                    string? stemmed = yield stem_search_term(s, cancellable);
 
                     string? sql_stemmed = null;
                     if (stemmed != null) {
@@ -580,7 +580,8 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
      *
      * Otherwise, the stem for the term is returned.
      */
-    private string? stem_search_term(string term) {
+    private async string? stem_search_term(string term,
+                                           GLib.Cancellable? cancellable) {
         if (!this.allow_stemming)
             return null;
 
@@ -590,19 +591,25 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
 
         string? stemmed = null;
         try {
-            Db.Statement stmt = this.account.db.prepare("""
-                SELECT token
-                FROM TokenizerTable
-                WHERE input=?
-            """);
-            stmt.bind_string(0, term);
+            yield this.account.db.exec_transaction_async(RO,
+                (cx, cancellable) => {
+                    Db.Statement stmt = cx.prepare("""
+                        SELECT token
+                        FROM TokenizerTable
+                        WHERE input=?
+                    """);
+                    stmt.bind_string(0, term);
 
-            // get stemmed string; if no result, fall through
-            Db.Result result = stmt.exec();
-            if (!result.finished)
-                stemmed = result.string_at(0);
-            else
-                debug("No stemmed term returned for \"%s\"", term);
+                    // get stemmed string; if no result, fall through
+                    Db.Result result = stmt.exec(cancellable);
+                    if (!result.finished) {
+                        stemmed = result.string_at(0);
+                    } else {
+                        debug("No stemmed term returned for \"%s\"", term);
+                    }
+                    return COMMIT;
+                }, cancellable
+            );
         } catch (Error err) {
             debug("Unable to query tokenizer table for stemmed term for \"%s\": %s", term, err.message);
 

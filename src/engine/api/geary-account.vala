@@ -457,7 +457,10 @@ public abstract class Geary.Account : BaseObject, Loggable {
      *
      * Dropping the last reference to the SearchQuery will close it.
      */
-    public abstract Geary.SearchQuery open_search(string query, Geary.SearchQuery.Strategy strategy);
+    public abstract async Geary.SearchQuery open_search(string query,
+                                                        SearchQuery.Strategy strategy,
+                                                        GLib.Cancellable? cancellable)
+        throws GLib.Error;
 
     /**
      * Performs a search with the given query.  Optionally, a list of folders not to search
