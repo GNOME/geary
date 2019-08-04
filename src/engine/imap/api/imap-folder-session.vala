@@ -6,10 +6,6 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// this is used internally to indicate a recoverable failure
-private errordomain Geary.Imap.FolderError {
-    RETRY
-}
 
 /**
  * An interface between the high-level engine API and an IMAP mailbox.
@@ -121,27 +117,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         StatusResponse? response = yield session.select_async(
             mailbox, cancellable
         );
-
-        switch (response.status) {
-        case Status.OK:
-            // all good
-            break;
-
-        case Status.BAD:
-        case Status.NO:
-            throw new ImapError.NOT_SUPPORTED(
-                "Server disallowed SELECT %s: %s",
-                this.folder.path.to_string(),
-                response.to_string()
-            );
-
-        default:
-            throw new ImapError.SERVER_ERROR(
-                "Unable to SELECT %s: %s",
-                this.folder.path.to_string(),
-                response.to_string()
-            );
-        }
+        throw_on_not_ok(response, "SELECT " + this.folder.path.to_string());
 
         // if at end of SELECT command accepts_user_flags is still
         // UNKKNOWN, treat as TRUE because, according to IMAP spec, if
@@ -298,15 +274,16 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         }
     }
 
-    // All commands must executed inside the cmd_mutex; returns FETCH or STORE results
+    // Executes a set of commands.
     //
-    // FETCH commands can generate a FolderError.RETRY.  State will be updated to accommodate retry,
-    // but all Commands must be regenerated to ensure new state is reflected in requests.
-    private async Gee.Map<Command, StatusResponse>? exec_commands_async(Gee.Collection<Command> cmds,
-                                                                        Gee.HashMap<SequenceNumber, FetchedData>? fetch_results,
-                                                                        Gee.Set<Imap.UID>? search_results,
-                                                                        Cancellable? cancellable)
-        throws Error {
+    // All commands must executed inside the cmd_mutex. Collects
+    // results in fetch_results or store results.
+    private async Gee.Map<Command,StatusResponse>?
+        exec_commands_async(Gee.Collection<Command> cmds,
+                            Gee.HashMap<SequenceNumber, FetchedData>? fetch_results,
+                            Gee.Set<Imap.UID>? search_results,
+                            GLib.Cancellable? cancellable)
+        throws GLib.Error {
         ClientSession session = claim_session();
         Gee.Map<Command, StatusResponse>? responses = null;
         int token = yield this.cmd_mutex.claim_async(cancellable);
@@ -333,73 +310,10 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         }
 
         foreach (Command cmd in responses.keys) {
-            throw_on_failed_status(responses.get(cmd), cmd);
+            throw_on_not_ok(responses.get(cmd), cmd.to_string());
         }
 
         return responses;
-    }
-
-    // HACK: See https://bugzilla.gnome.org/show_bug.cgi?id=714902
-    //
-    // Detect when a server has returned a BAD response to FETCH BODY[HEADER.FIELDS (HEADER-LIST)]
-    // due to space between HEADER.FIELDS and (HEADER-LIST)
-    private bool retry_bad_header_fields_response(Command cmd, StatusResponse response) {
-        if (response.status != Status.BAD)
-            return false;
-
-        FetchCommand? fetch = cmd as FetchCommand;
-        if (fetch == null)
-            return false;
-
-        foreach (FetchBodyDataSpecifier body_specifier in fetch.for_body_data_specifiers) {
-            switch (body_specifier.section_part) {
-                case FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS:
-                case FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS_NOT:
-                    // use value stored in specifier, not this folder's setting, as it's possible
-                    // the folder's setting was enabled after sending command but before response
-                    // returned
-                    if (body_specifier.request_header_fields_space)
-                        return true;
-                break;
-            }
-        }
-
-        return false;
-    }
-
-    private void throw_on_failed_status(StatusResponse response, Command cmd) throws Error {
-        assert(response.is_completion);
-
-        switch (response.status) {
-            case Status.OK:
-                return;
-
-            case Status.NO:
-                throw new ImapError.SERVER_ERROR("Request %s failed on %s: %s", cmd.to_string(),
-                    to_string(), response.to_string());
-
-            case Status.BAD: {
-                // if a FetchBodyDataSpecifier is used to request for a header field BAD is returned,
-                // could be a specific formatting mistake some servers make of not allowing a space
-                // between the "header.fields" and list of email header names, i.e.
-                //
-                // "body[header.fields (references)]"
-                //
-                // If so, then enable a hack to work around this and retry the FETCH
-                if (retry_bad_header_fields_response(cmd, response)) {
-                    imap_header_fields_hack = true;
-
-                    throw new FolderError.RETRY("BAD response to header.fields FETCH BODY, retry with hack");
-                }
-
-                throw new ImapError.INVALID("Bad request %s on %s: %s", cmd.to_string(),
-                    to_string(), response.to_string());
-            }
-
-            default:
-                throw new ImapError.NOT_SUPPORTED("Unknown response status to %s on %s: %s",
-                    cmd.to_string(), to_string(), response.to_string());
-        }
     }
 
     // Utility method for listing UIDs on the remote within the supplied range
@@ -519,7 +433,8 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         FetchBodyDataSpecifier? body_specifier = null;
         FetchBodyDataSpecifier? preview_specifier = null;
         FetchBodyDataSpecifier? preview_charset_specifier = null;
-        for (;;) {
+        bool success = false;
+        while (!success) {
             Gee.Collection<FetchCommand> cmds = assemble_list_commands(msg_set, fields,
                 out header_specifier, out body_specifier, out preview_specifier,
                 out preview_charset_specifier);
@@ -531,17 +446,17 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             // Commands prepped, do the fetch and accumulate all the responses
             try {
                 yield exec_commands_async(cmds, fetched, null, cancellable);
-            } catch (Error err) {
-                if (err is FolderError.RETRY) {
-                    debug("Retryable server failure detected for %s: %s", to_string(), err.message);
-
-                    continue;
+                success = true;
+            } catch (ImapError.SERVER_ERROR err) {
+                if (retry_bad_header_fields_response(cmds)) {
+                    // The command failed, but it wasn't using the
+                    // header field hack, so retry it.
+                    debug("Retryable server failure detected for %s: %s",
+                          to_string(), err.message);
+                } else {
+                    throw err;
                 }
-
-                throw err;
             }
-
-            break;
         }
 
         if (fetched.size == 0)
@@ -1094,7 +1009,57 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         return null;
     }
 
+    // HACK: See https://bugzilla.gnome.org/show_bug.cgi?id=714902
+    //
+    // Detect when a server has returned a BAD response to FETCH
+    // BODY[HEADER.FIELDS (HEADER-LIST)] due to space between
+    // HEADER.FIELDS and (HEADER-LIST)
+    private bool retry_bad_header_fields_response(Gee.Collection<FetchCommand> cmds) {
+        foreach (FetchCommand fetch in cmds) {
+            if (fetch.status.status == BAD) {
+                foreach (FetchBodyDataSpecifier specifier in
+                         fetch.for_body_data_specifiers) {
+                    if (specifier.section_part == HEADER_FIELDS ||
+                        specifier.section_part == HEADER_FIELDS_NOT) {
+                        // Check the specifier's use of the space, not the
+                        // folder's property, as it's possible the
+                        // property was enabled after sending command but
+                        // before response returned
+                        if (specifier.request_header_fields_space) {
+                            this.imap_header_fields_hack = true;
+                        return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+     }
+
+    private void throw_on_not_ok(StatusResponse response, string cmd)
+        throws ImapError {
+        switch (response.status) {
+        case Status.OK:
+            // All good
+            break;
+
+        case Status.NO:
+            throw new ImapError.NOT_SUPPORTED(
+                "Request %s failed on %s: %s", cmd.to_string(),
+                to_string(), response.to_string()
+            );
+
+        default:
+            throw new ImapError.SERVER_ERROR(
+                "Unknown response status to %s on %s: %s",
+                cmd.to_string(), to_string(), response.to_string()
+            );
+        }
+    }
+
     private static bool required_but_not_set(Geary.Email.Field check, Geary.Email.Field users_fields, Geary.Email email) {
         return users_fields.require(check) ? !email.fields.is_all_set(check) : false;
     }
+
 }
