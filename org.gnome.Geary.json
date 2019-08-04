@@ -13,14 +13,11 @@
 
 {
     "app-id": "org.gnome.Geary",
-    "branch": "master",
+    "branch": "gnome-3.32",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "master",
+    "runtime-version": "3.32",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
-
-    "tags": ["nightly"],
-    "desktop-file-name-prefix": "(Nightly) ",
 
     "finish-args": [
         /* X11 + XShm access */
@@ -73,9 +70,9 @@
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libgee.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/libgee/0.20/libgee-0.20.1.tar.xz",
+                    "sha256": "bb2802d29a518e8c6d2992884691f06ccfcc25792a5686178575c7111fea4630"
                 }
             ]
         },
@@ -94,9 +91,9 @@
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/gnome-online-accounts.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/gnome-online-accounts/3.32/gnome-online-accounts-3.32.0.tar.xz",
+                    "sha256": "1c19e65771c8d16fa0016ab70d9a1ee2b75a84aeeedd24527a4e41b132e8d4aa"
                 }
             ]
         },
@@ -109,11 +106,7 @@
             "config-opts": [
                 "-DCMAKE_BUILD_TYPE=Release",
                 "-DCMAKE_INSTALL_LIBDIR=lib",
-                "-DBUILD_SHARED_LIBS:BOOL=ON",
-                "-DICAL_GLIB=true",
-                "-DGOBJECT_INTROSPECTION=true",
-                "-DICAL_GLIB_VAPI=true",
-                "-DICAL_BUILD_DOCS=false"
+                "-DBUILD_SHARED_LIBS:BOOL=ON"
             ],
             "sources": [
                 {
@@ -151,8 +144,9 @@
             "buildsystem": "cmake-ninja",
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/evolution-data-server/3.32/evolution-data-server-3.32.3.tar.xz",
+                    "sha256": "6481f385dd9977b6d8442f356210921ac63244cb5a188c6986b72ebe37f7a2eb"
                 }
             ]
         },
@@ -160,7 +154,8 @@
             "name": "folks",
             "buildsystem": "meson",
             "cleanup": [
-                "/bin"
+                "/bin",
+                "/share/GConf"
             ],
             "config-opts": [
                 "-Dtelepathy_backend=false",
@@ -169,8 +164,9 @@
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/folks.git"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/folks/0.12/folks-0.12.1.tar.xz",
+                    "sha256": "3ca9f2d50fdf5a7a3d3f59c49bd54ceaf8d8181938762370e07535f86d36d475"
                 }
             ]
         },
@@ -178,9 +174,9 @@
             "name": "gmime",
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://github.com/jstedfast/gmime.git",
-                    "branch": "gmime-2-6"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/gmime/2.6/gmime-2.6.23.tar.xz",
+                    "sha256": "7149686a71ca42a1390869b6074815106b061aaeaaa8f2ef8c12c191d9a79f6a"
                 }
             ]
         },
@@ -188,9 +184,9 @@
             "name": "libunwind",
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://git.savannah.gnu.org/git/libunwind.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.3.1.tar.gz",
+                    "sha256": "43997a3939b6ccdf2f669b50fdb8a4d3205374728c2923ddc2354c65260214f8"
                 }
             ]
         },
