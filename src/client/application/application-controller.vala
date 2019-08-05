@@ -213,11 +213,6 @@ public class Application.Controller : Geary.BaseObject {
         {ACTION_ZOOM,  on_zoom,  "s"  },
     };
 
-    /**
-     * Fired when the search text is changed according to the controller.  This accounts
-     * for a brief typmatic delay.
-     */
-    public signal void search_text_changed(string keywords);
 
     /**
      * Constructs a new instance of the controller.
@@ -2673,8 +2668,6 @@ public class Application.Controller : Geary.BaseObject {
 
             this.main_window.folder_list.set_search(search_folder);
         }
-
-        search_text_changed(search_text);
     }
 
     /**
