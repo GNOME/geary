@@ -454,7 +454,7 @@ public class ConversationListStore : Gtk.ListStore {
         if (has_conversation(conversation)) {
             refresh_conversation(conversation);
         } else {
-            debug("Unable to append conversation; conversation not present in list store");
+            add_conversation(conversation);
         }
     }
 
