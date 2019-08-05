@@ -1,9 +1,9 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -30,5 +30,44 @@ internal abstract class Geary.App.ConversationOperation : BaseObject {
     }
 
     public abstract async void execute_async() throws Error;
+
+}
+
+/**
+ * An operation that executes on a collection in batches.
+ */
+internal abstract class Geary.App.BatchOperation<T> : ConversationOperation {
+
+
+    private const int BATCH_MAX_N = 20;
+
+
+    private Gee.Collection<T> full;
+
+
+    protected BatchOperation(ConversationMonitor? monitor,
+                             Gee.Collection<T> full) {
+        base(monitor, true);
+        this.full = full;
+    }
+
+    public override async void execute_async() throws GLib.Error {
+        Gee.Collection<T>? batch = new Gee.LinkedList<T>();
+        foreach (T element in this.full) {
+            batch.add(element);
+
+            if (batch.size == BATCH_MAX_N) {
+                yield execute_batch(batch);
+                batch = new Gee.LinkedList<T>();
+            }
+        }
+
+        if (!batch.is_empty) {
+            yield execute_batch(batch);
+        }
+    }
+
+    public abstract async void execute_batch(Gee.Collection<T> batch)
+        throws GLib.Error;
 
 }
