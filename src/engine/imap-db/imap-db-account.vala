@@ -676,23 +676,34 @@ private class Geary.ImapDB.Account : BaseObject {
     // given removal conditions
     private async void strip_removal_conditions(ImapDB.SearchQuery query,
                                                 Gee.Collection<EmailIdentifier> matches,
-                                                Gee.Map<Geary.NamedFlag, bool> conditions,
-                                                GLib.Cancellable? cancellable = null) {
+                                                Gee.Map<Geary.NamedFlag,bool> conditions,
+                                                GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         Email.Field required_fields = Geary.Email.Field.FLAGS;
         Gee.Iterator<EmailIdentifier> iter = matches.iterator();
-        while (iter.next()) {
-            try {
-                ImapDB.EmailIdentifier id = iter.get();
-                Geary.Email email = yield fetch_email_async(id, required_fields, cancellable);
-                foreach (Geary.NamedFlag flag in conditions.keys)
-                    if (email.email_flags.contains(flag) == conditions.get(flag)) {
+
+        yield db.exec_transaction_async(RO, (cx) => {
+                while (iter.next()) {
+                    ImapDB.EmailIdentifier id = iter.get();
+                    MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
+                        cx, id.message_id, required_fields, null, cancellable
+                    );
+                    Geary.EmailFlags? flags = row.get_generic_email_flags();
+                    if (flags != null) {
+                        foreach (Gee.Map.Entry<NamedFlag,bool> condition
+                                 in conditions.entries) {
+                            if (flags.contains(condition.key) == condition.value) {
+                                iter.remove();
+                                break;
+                            }
+                        }
+                    } else {
                         iter.remove();
-                        break;
                     }
-            } catch (Error e) {
-                debug("Error fetching email: %s", e.message);
-            }
-        }
+                }
+                return Db.TransactionOutcome.DONE;
+            }, cancellable
+        );
     }
 
     // Strip out from the given collection of matching ids and results
