@@ -52,16 +52,6 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         account.email_removed.disconnect(on_account_email_removed);
     }
 
-    private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
-        Gee.Collection<Geary.Folder>? unavailable) {
-        if (available != null) {
-            // Exclude it from searching if it's got the right special type.
-            foreach(Geary.Folder folder in Geary.traverse<Geary.Folder>(available)
-                .filter(f => f.special_folder_type in EXCLUDE_TYPES))
-                exclude_folder(folder);
-        }
-    }
-
     private async void append_new_email_async(Geary.SearchQuery query, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         int result_mutex_token = yield result_mutex.claim_async();
@@ -77,20 +67,6 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
 
         if (error != null)
             throw error;
-    }
-
-    private void on_append_new_email_complete(Object? source, AsyncResult result) {
-        try {
-            append_new_email_async.end(result);
-        } catch(Error e) {
-            debug("Error appending new email to search results: %s", e.message);
-        }
-    }
-
-    private void on_email_locally_complete(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> ids) {
-        if (search_query != null)
-            append_new_email_async.begin(search_query, folder, ids, null, on_append_new_email_complete);
     }
 
     private async void handle_removed_email_async(Geary.SearchQuery query, Geary.Folder folder,
@@ -115,20 +91,6 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
 
         if (error != null)
             throw error;
-    }
-
-    private void on_handle_removed_email_complete(Object? source, AsyncResult result) {
-        try {
-            handle_removed_email_async.end(result);
-        } catch(Error e) {
-            debug("Error removing removed email from search results: %s", e.message);
-        }
-    }
-
-    private void on_account_email_removed(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> ids) {
-        if (search_query != null)
-            handle_removed_email_async.begin(search_query, folder, ids, null, on_handle_removed_email_complete);
     }
 
     /**
@@ -401,6 +363,16 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             ImapDB.SearchEmailIdentifier.compare_descending);
     }
 
+    private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
+        Gee.Collection<Geary.Folder>? unavailable) {
+        if (available != null) {
+            // Exclude it from searching if it's got the right special type.
+            foreach(Geary.Folder folder in Geary.traverse<Geary.Folder>(available)
+                .filter(f => f.special_folder_type in EXCLUDE_TYPES))
+                exclude_folder(folder);
+        }
+    }
+
     private void on_folders_special_type(Gee.Collection<Geary.Folder> folders) {
         foreach (Geary.Folder folder in folders) {
             if (folder.special_folder_type in EXCLUDE_TYPES) {
@@ -408,6 +380,44 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             } else {
                 include_folder(folder);
             }
+        }
+    }
+
+    private void on_email_locally_complete(Geary.Folder folder,
+                                           Gee.Collection<Geary.EmailIdentifier> ids) {
+        if (search_query != null) {
+            this.append_new_email_async.begin(
+                search_query, folder, ids, null, on_append_new_email_complete
+            );
+        }
+    }
+
+    private void on_append_new_email_complete(GLib.Object? source,
+                                              GLib.AsyncResult result) {
+        try {
+            this.append_new_email_async.end(result);
+        } catch (GLib.Error e) {
+            debug("Error appending new email to search results: %s", e.message);
+        }
+    }
+
+    private void on_account_email_removed(Geary.Folder folder,
+                                          Gee.Collection<Geary.EmailIdentifier> ids) {
+        if (search_query != null) {
+            this.handle_removed_email_async.begin(
+                search_query, folder, ids, null,
+                on_handle_removed_email_complete
+            );
+        }
+    }
+
+    private void on_handle_removed_email_complete(GLib.Object? source,
+                                                  GLib.AsyncResult result) {
+        try {
+            this.handle_removed_email_async.end(result);
+        } catch (GLib.Error e) {
+            debug("Error removing removed email from search results: %s",
+                  e.message);
         }
     }
 
