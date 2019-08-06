@@ -4,6 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+private extern string? sqlite3_expanded_sql(Sqlite.Statement stmt);
+
+
 public class Geary.Db.Statement : Geary.Db.Context {
 
     public string sql {
@@ -38,6 +41,15 @@ public class Geary.Db.Statement : Geary.Db.Context {
         throw_on_error("Statement.ctor", connection.db.prepare_v2(sql, -1, out stmt, null), sql);
     }
 
+    /** Returns SQL for the statement with bound parameters expanded. */
+    public string? get_expanded_sql() {
+        // Replace all this with `Sqlite.Statement.expanded_sql` is
+        // readily available. See:
+        // https://gitlab.gnome.org/GNOME/vala/merge_requests/74
+        string* sqlite = sqlite3_expanded_sql(this.stmt);
+        string? sql = sqlite;
+        Sqlite.Memory.free((void*) sqlite);
+        return sql;
     }
 
     /**
