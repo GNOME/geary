@@ -38,7 +38,7 @@ public errordomain Geary.ImapError {
      * BAD response is when the server returns an unexpected response,
      * for example, sends a status response for the same command twice.
      *
-     * @see https://tools.ietf.org/html/rfc3501#section-7.1.3
+     * See [[https://tools.ietf.org/html/rfc3501#section-7.1.3]].
      */
     SERVER_ERROR,
 
