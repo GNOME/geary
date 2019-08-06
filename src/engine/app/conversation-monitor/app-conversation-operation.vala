@@ -39,7 +39,7 @@ internal abstract class Geary.App.ConversationOperation : BaseObject {
 internal abstract class Geary.App.BatchOperation<T> : ConversationOperation {
 
 
-    private const int BATCH_MAX_N = 20;
+    private const int BATCH_MAX_N = 100;
 
 
     private Gee.Collection<T> full;
