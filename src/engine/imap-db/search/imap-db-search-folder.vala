@@ -13,7 +13,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
     /** The canonical name of the search folder. */
     public const string MAGIC_BASENAME = "$GearySearchFolder$";
 
-    private const Geary.SpecialFolderType[] exclude_types = {
+    private const Geary.SpecialFolderType[] EXCLUDE_TYPES = {
         Geary.SpecialFolderType.SPAM,
         Geary.SpecialFolderType.TRASH,
         Geary.SpecialFolderType.DRAFTS,
@@ -34,6 +34,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         );
 
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
+        account.folders_special_type.connect(on_folders_special_type);
         account.email_locally_complete.connect(on_email_locally_complete);
         account.email_removed.connect(on_account_email_removed);
 
@@ -46,6 +47,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
 
     ~SearchFolder() {
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
+        account.folders_special_type.disconnect(on_folders_special_type);
         account.email_locally_complete.disconnect(on_email_locally_complete);
         account.email_removed.disconnect(on_account_email_removed);
     }
@@ -55,7 +57,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         if (available != null) {
             // Exclude it from searching if it's got the right special type.
             foreach(Geary.Folder folder in Geary.traverse<Geary.Folder>(available)
-                .filter(f => f.special_folder_type in exclude_types))
+                .filter(f => f.special_folder_type in EXCLUDE_TYPES))
                 exclude_folder(folder);
         }
     }
@@ -382,17 +384,31 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         return yield account.get_search_matches_async(search_query, ids, cancellable);
     }
 
+    private void include_folder(Geary.Folder folder) {
+        this.exclude_folders.remove(folder.path);
+    }
+
     private void exclude_folder(Geary.Folder folder) {
-        exclude_folders.add(folder.path);
+        this.exclude_folders.add(folder.path);
     }
 
     private void exclude_orphan_emails() {
-        exclude_folders.add(null);
+        this.exclude_folders.add(null);
     }
 
     private void clear_search_results() {
         search_results = new Gee.TreeSet<ImapDB.SearchEmailIdentifier>(
             ImapDB.SearchEmailIdentifier.compare_descending);
     }
-}
 
+    private void on_folders_special_type(Gee.Collection<Geary.Folder> folders) {
+        foreach (Geary.Folder folder in folders) {
+            if (folder.special_folder_type in EXCLUDE_TYPES) {
+                exclude_folder(folder);
+            } else {
+                include_folder(folder);
+            }
+        }
+    }
+
+}
