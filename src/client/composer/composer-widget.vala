@@ -170,6 +170,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public Geary.Account account { get; private set; }
     private Gee.Map<string, Geary.AccountInformation> accounts;
 
+    /** The identifier of the draft this composer holds, if any. */
+    public Geary.EmailIdentifier? draft_id { get; private set; default = null; }
+
     public Geary.RFC822.MailboxAddresses from { get; private set; }
 
     public string to {
@@ -399,11 +402,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     public ComposerWidget(GearyApplication application,
                           Geary.Account initial_account,
+                          Geary.EmailIdentifier? draft_id,
                           ComposeType compose_type) {
         base_ref();
         this.application = application;
         this.account = initial_account;
-        this.account = account;
+        this.draft_id = draft_id;
 
         try {
             this.accounts = this.application.engine.get_accounts();
@@ -569,7 +573,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public ComposerWidget.from_mailto(GearyApplication application,
                                       Geary.Account initial_account,
                                       string mailto) {
-        this(application, initial_account, ComposeType.NEW_MESSAGE);
+        this(application, initial_account, null, ComposeType.NEW_MESSAGE);
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {
@@ -619,15 +623,24 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    /** Closes the composer unconditionally. */
+    public void close() {
+        this.container.close_container();
+    }
+
     /**
      * Loads the message into the composer editor.
      */
     public async void load(Geary.Email? referred = null,
                            string? quote = null,
-                           bool is_referred_draft = false,
-                           Cancellable? cancellable = null) {
-        this.last_quote = quote;
+                           GLib.Cancellable? cancellable) {
+        bool is_referred_draft = (
+            referred != null &&
+            this.draft_id != null &&
+            referred.id.equal_to(this.draft_id)
+        );
         string referred_quote = "";
+        this.last_quote = quote;
         if (referred != null) {
             referred_quote = fill_in_from_referred(referred, quote);
             if (is_referred_draft ||
@@ -655,7 +668,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         );
 
         try {
-            yield open_draft_manager_async(is_referred_draft ? referred.id : null);
+            yield open_draft_manager_async(
+                is_referred_draft ? referred.id : null,
+                cancellable
+            );
         } catch (Error e) {
             debug("Could not open draft manager: %s", e.message);
         }
@@ -755,20 +771,27 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         switch (this.compose_type) {
             // Restoring a draft
             case ComposeType.NEW_MESSAGE:
+                bool show_extended = false;
                 if (referred.from != null)
                     this.from = referred.from;
                 if (referred.to != null)
                     this.to_entry.addresses = referred.to;
                 if (referred.cc != null)
                     this.cc_entry.addresses = referred.cc;
-                if (referred.bcc != null)
+                if (referred.bcc != null) {
+                    show_extended = true;
                     this.bcc_entry.addresses = referred.bcc;
+                }
+                if (referred.reply_to != null) {
+                    show_extended = true;
+                    this.reply_to_entry.addresses = referred.reply_to;
+                }
                 if (referred.in_reply_to != null)
                     this.in_reply_to.add_all(referred.in_reply_to.list);
                 if (referred.references != null)
                     this.references = referred.references.to_rfc822_string();
                 if (referred.subject != null)
-                    this.subject = referred.subject.value;
+                    this.subject = referred.subject.value ?? "";
                 try {
                     Geary.RFC822.Message message = referred.get_message();
                     if (message.has_html_body()) {
@@ -778,6 +801,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                     }
                 } catch (Error error) {
                     debug("Error getting draft message body: %s", error.message);
+                }
+                if (show_extended) {
+                    this.editor_actions.change_action_state(
+                        ACTION_SHOW_EXTENDED, true
+                    );
+                    this.composer_actions.change_action_state(
+                        ACTION_SHOW_EXTENDED, true
+                    );
                 }
             break;
 
@@ -802,6 +833,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             break;
         }
         return referred_quote;
+    }
+
+    public void present() {
+        this.container.present();
     }
 
     public void set_focus() {
@@ -1190,8 +1225,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_close(SimpleAction action, Variant? param) {
-        if (should_close() == CloseStatus.DO_CLOSE)
-            this.container.close_container();
+        if (should_close() == CloseStatus.DO_CLOSE) {
+            close();
+        }
     }
 
     private void on_close_and_save(SimpleAction action, Variant? param) {
@@ -1227,7 +1263,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         );
 
         this.state = ComposerWidget.ComposerState.DETACHED;
-        this.header.detached();
         update_composer_view();
 
         // If the previously focused widget is in the new composer
@@ -1349,9 +1384,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     /**
      * Creates and opens the composer's draft manager.
      */
-    private async void
-        open_draft_manager_async(Geary.EmailIdentifier? editing_draft_id = null)
-    throws Error {
+    private async void open_draft_manager_async(Geary.EmailIdentifier? editing_draft_id,
+                                                GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (!this.account.information.save_drafts) {
             this.header.save_and_close_button.hide();
             return;
@@ -1361,16 +1396,20 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         if (this.draft_manager_opening != null) {
             this.draft_manager_opening.cancel();
         }
-        this.draft_manager_opening = new GLib.Cancellable();
+
+        GLib.Cancellable internal_cancellable = new GLib.Cancellable();
+        cancellable.cancelled.connect(() => { internal_cancellable.cancel(); });
+        this.draft_manager_opening = internal_cancellable;
 
         Geary.App.DraftManager new_manager = new Geary.App.DraftManager(account);
         try {
-            yield new_manager.open_async(editing_draft_id, this.draft_manager_opening);
+            yield new_manager.open_async(editing_draft_id, internal_cancellable);
             debug("Draft manager opened");
-        } catch (Error err) {
-            debug("Unable to open draft manager %s: %s",
-                  new_manager.to_string(), err.message);
+        } catch (GLib.Error err) {
+            this.header.save_and_close_button.hide();
             throw err;
+        } finally {
+            this.draft_manager_opening = null;
         }
 
         new_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
@@ -1379,7 +1418,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             .connect(on_draft_id_changed);
         new_manager.fatal.connect(on_draft_manager_fatal);
 
-        this.draft_manager_opening = null;
         this.draft_manager = new_manager;
 
         update_draft_state();
@@ -1400,7 +1438,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.draft_manager.discard_on_close = true;
             yield close_draft_manager_async(null);
         }
-        yield open_draft_manager_async();
+        yield open_draft_manager_async(null, null);
     }
 
     private async void close_draft_manager_async(Cancellable? cancellable)

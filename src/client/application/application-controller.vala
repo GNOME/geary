@@ -1186,7 +1186,7 @@ public class Application.Controller : Geary.BaseObject {
         this.selected_conversations = selected;
         get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
         ConversationViewer viewer = this.main_window.conversation_viewer;
-        if (this.current_folder != null && !viewer.is_composer_visible) {
+        if (this.current_folder != null && !this.main_window.has_composer) {
             switch(selected.size) {
             case 0:
                 enable_message_buttons(false);
@@ -1250,9 +1250,25 @@ public class Application.Controller : Geary.BaseObject {
         Geary.Email draft = activated.get_latest_recv_email(
             Geary.App.Conversation.Location.IN_FOLDER
         );
-        create_compose_widget(
-            ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
-        );
+
+        // Check all known composers since the draft may be open in a
+        // detached composer
+        bool already_open = false;
+        foreach (ComposerWidget composer in this.composer_widgets) {
+            if (composer.draft_id != null &&
+                composer.draft_id.equal_to(draft.id)) {
+                already_open = true;
+                composer.present();
+                composer.set_focus();
+                break;
+            }
+        }
+
+        if (!already_open) {
+            create_compose_widget(
+                ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
+            );
+        }
     }
 
     private void on_special_folder_type_changed(Geary.Folder folder,
@@ -1996,29 +2012,64 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void create_compose_widget(ComposerWidget.ComposeType compose_type,
-        Geary.Email? referred = null, string? quote = null, string? mailto = null,
-        bool is_draft = false) {
-        create_compose_widget_async.begin(compose_type, referred, quote, mailto, is_draft);
-    }
-
     /**
-     * Creates a composer widget. Depending on the arguments, this can be inline in the
+     * Creates a composer widget.
+     *
+     * Depending on the arguments, this can be inline in the
      * conversation or as a new window.
-     * @param compose_type - Whether it's a new message, a reply, a forwarded mail, ...
-     * @param referred - The mail of which we should copy the from/to/... addresses
+     *
+     * @param compose_type - Whether it's a new message, a reply, a
+     * forwarded mail, ...
+     * @param referred - The mail of which we should copy the from/to/...
+     * addresses
      * @param quote - The quote after the mail body
      * @param mailto - A "mailto:"-link
-     * @param is_draft - Whether we're starting from a draft (true) or a new mail (false)
+     * @param is_draft - Whether we're starting from a draft (true) or
+     * a new mail (false)
      */
-    private async void create_compose_widget_async(ComposerWidget.ComposeType compose_type,
-        Geary.Email? referred = null, string? quote = null, string? mailto = null,
-        bool is_draft = false) {
+    private void create_compose_widget(ComposerWidget.ComposeType compose_type,
+                                       Geary.Email? referred = null,
+                                       string? quote = null,
+                                       string? mailto = null,
+                                       bool is_draft = false) {
         if (current_account == null)
             return;
 
-        if (!should_create_new_composer(compose_type, referred, quote, is_draft))
-            return;
+        // There's a few situations where we can re-use an existing
+        // composer, check for these first.
+
+        if (compose_type == NEW_MESSAGE && !is_draft) {
+            // We're creating a new message that isn't a draft, if
+            // there's already a composer open, just use that
+            ComposerWidget? existing =
+                this.main_window.conversation_viewer.current_composer;
+            if (existing != null &&
+                existing.state == PANED &&
+                existing.is_blank) {
+                existing.present();
+                existing.set_focus();
+                return;
+            }
+        } else if (compose_type != NEW_MESSAGE) {
+            // We're replying, see whether we already have a reply for
+            // that message and if so, insert a quote into that.
+            foreach (ComposerWidget existing in this.composer_widgets) {
+                if (existing.state != DETACHED &&
+                    ((referred != null && existing.referred_ids.contains(referred.id)) ||
+                     quote != null)) {
+                    existing.change_compose_type(compose_type, referred, quote);
+                    return;
+                }
+            }
+
+            // Can't re-use an existing composer, so need to create a
+            // new one. Replies must open inline in the main window,
+            // so we need to ensure there are no composers open there
+            // first.
+            if (!this.main_window.close_composer()) {
+                return;
+            }
+        }
 
         ComposerWidget widget;
         if (mailto != null) {
@@ -2027,7 +2078,10 @@ public class Application.Controller : Geary.BaseObject {
             );
         } else {
             widget = new ComposerWidget(
-                this.application, current_account, compose_type
+                this.application,
+                current_account,
+                is_draft ? referred.id : null,
+                compose_type
             );
         }
 
@@ -2036,109 +2090,44 @@ public class Application.Controller : Geary.BaseObject {
         if (widget.state == INLINE || widget.state == INLINE_COMPACT) {
             this.main_window.conversation_viewer.do_compose_embedded(
                 widget,
-                referred,
-                is_draft
+                referred
             );
         } else {
             this.main_window.show_composer(widget);
         }
 
-        // Load the widget's content
+        this.load_composer.begin(
+            this.current_account,
+            widget,
+            referred,
+            quote,
+            this.cancellable_folder
+        );
+    }
+
+    private async void load_composer(Geary.Account account,
+                                     ComposerWidget widget,
+                                     Geary.Email? referred = null,
+                                     string? quote = null,
+                                     GLib.Cancellable? cancellable) {
         Geary.Email? full = null;
         if (referred != null) {
-            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
-            if (store != null) {
+            AccountContext? context = this.accounts.get(account.information);
+            if (context != null) {
                 try {
-                    full = yield store.fetch_email_async(
+                    full = yield context.emails.fetch_email_async(
                         referred.id,
                         Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
                         Geary.Folder.ListFlags.NONE,
-                        cancellable_folder
+                        cancellable
                     );
                 } catch (Error e) {
                     message("Could not load full message: %s", e.message);
                 }
             }
         }
-        yield widget.load(full, quote, is_draft);
-
+        yield widget.load(full, quote, cancellable);
         widget.set_focus();
-    }
-
-    private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
-                                            Geary.Email? referred,
-                                            string? quote,
-                                            bool is_draft) {
-        // In we're replying, see whether we already have a reply for that message.
-        if (compose_type != null && compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
-            foreach (ComposerWidget cw in composer_widgets) {
-                if (cw.state != ComposerWidget.ComposerState.DETACHED &&
-                    ((referred != null && cw.referred_ids.contains(referred.id)) ||
-                     quote != null)) {
-                    cw.change_compose_type(compose_type, referred, quote);
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // If there are no inline composers, go ahead!
-        if (!any_inline_composers())
-            return true;
-
-        // If we're resuming a draft with open composers, open in a new window.
-        if (is_draft) {
-            return true;
-        }
-
-        // If we're creating a new message, and there's already a new message open, focus on
-        // it if it hasn't been modified; otherwise open a new composer in a new window.
-        if (compose_type == ComposerWidget.ComposeType.NEW_MESSAGE) {
-            foreach (ComposerWidget cw in composer_widgets) {
-                if (cw.state == ComposerWidget.ComposerState.PANED) {
-                    if (!cw.is_blank) {
-                        return true;
-                    } else {
-                        cw.change_compose_type(compose_type);  // To refocus
-                        return false;
-                    }
-                }
-            }
-        }
-
-        // Find out what to do with the inline composers.
-        // TODO: Remove this in favor of automatically saving drafts
-        Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
-        this.main_window.present();
-        foreach (ComposerWidget cw in composer_widgets) {
-            if (cw.state != ComposerWidget.ComposerState.DETACHED)
-                composers_to_destroy.add(cw);
-        }
-        string message = ngettext(
-            "Close the draft message?",
-            "Close all draft messages?",
-            composers_to_destroy.size
-        );
-        ConfirmationDialog dialog = new ConfirmationDialog(
-            main_window, message, null, Stock._CLOSE, "destructive-action"
-        );
-        if (dialog.run() == Gtk.ResponseType.OK) {
-            foreach(ComposerWidget cw in composers_to_destroy)
-                ((ComposerContainer) cw.parent).close_container();
-            return true;
-        }
-        return false;
-    }
-
-    public bool can_switch_conversation_view() {
-        return should_create_new_composer(null, null, null, false);
-    }
-
-    public bool any_inline_composers() {
-        foreach (ComposerWidget cw in composer_widgets)
-            if (cw.state != ComposerWidget.ComposerState.DETACHED)
-                return true;
-        return false;
     }
 
     private void on_composer_widget_destroy(Gtk.Widget sender) {
@@ -2332,9 +2321,6 @@ public class Application.Controller : Geary.BaseObject {
 
     private async void archive_or_delete_selection_async(bool archive, bool trash,
         Cancellable? cancellable) throws Error {
-        if (!can_switch_conversation_view())
-            return;
-
         ConversationListBox list_view =
             main_window.conversation_viewer.current_list;
         if (list_view != null &&

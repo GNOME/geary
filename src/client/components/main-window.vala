@@ -28,10 +28,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         get; private set; default = null;
     }
 
+    /** Determines if a composer is currently open in this window. */
+    public bool has_composer {
+        get {
+            return (this.conversation_viewer.current_composer != null);
+        }
+    }
+
     /** Specifies if the Shift key is currently being held. */
     public bool is_shift_down { get; private set; default = false; }
-
-    private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
 
     // Used to save/load the window state between sessions.
     public int window_width { get; set; }
@@ -47,6 +52,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
+    private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
     private Geary.TimeoutManager update_ui_timeout;
     private int64 update_ui_last = 0;
 
@@ -123,17 +129,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     ~MainWindow() {
         this.update_ui_timeout.reset();
         base_unref();
-    }
-
-    public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
-        Application.Controller controller = this.application.controller;
-        ComposerWidget composer = new ComposerWidget(
-            this.application, this.current_folder.account, NEW_MESSAGE
-        );
-        composer.to = to.to_full_display();
-        controller.add_composer(composer);
-        show_composer(composer);
-        composer.load.begin(null, null, false);
     }
 
     /** Updates the window's account status info bars. */
@@ -221,21 +216,50 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.info_bar_frame.show();
     }
 
+    /** Displays a composer addressed to a specific email address. */
+    public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
+        Application.Controller controller = this.application.controller;
+        ComposerWidget composer = new ComposerWidget(
+            this.application, this.current_folder.account, null, NEW_MESSAGE
+        );
+        composer.to = to.to_full_display();
+        controller.add_composer(composer);
+        show_composer(composer);
+        composer.load.begin(null, null, null);
+    }
+
     /** Displays a composer in the window if possible, else in a new window. */
     public void show_composer(ComposerWidget composer) {
-        bool has_composer = (
-            this.conversation_viewer.is_composer_visible ||
-            (this.conversation_viewer.current_list != null &&
-             this.conversation_viewer.current_list.has_composer)
-        );
-
-        if (has_composer) {
+        if (this.has_composer) {
             composer.state = ComposerWidget.ComposerState.DETACHED;
             new ComposerWindow(composer, this.application);
         } else {
             this.conversation_viewer.do_compose(composer);
             get_action(Application.Controller.ACTION_FIND_IN_CONVERSATION).set_enabled(false);
         }
+    }
+
+    /**
+     * Closes any open composers after prompting the user.
+     *
+     * Returns true if none were open or the user approved closing
+     * them.
+     */
+    public bool close_composer() {
+        bool closed = true;
+        ComposerWidget? composer = this.conversation_viewer.current_composer;
+        if (composer != null) {
+            switch (composer.should_close()) {
+            case DO_CLOSE:
+                composer.close();
+                break;
+
+            case CANCEL_CLOSE:
+                closed = false;
+                break;
+            }
+        }
+        return closed;
     }
 
     private void load_config(Configuration config) {
@@ -607,25 +631,26 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_conversation_count_changed() {
-        if (this.conversations.size == 0) {
-            // Let the user know if there's no available conversations
-            if (this.current_folder is Geary.SearchFolder) {
-                this.conversation_viewer.show_empty_search();
-            } else {
-                this.conversation_viewer.show_empty_folder();
-            }
-            this.application.controller.enable_message_buttons(false);
-        } else {
-            // When not doing autoselect, we never get
-            // conversations_selected firing from the convo list, so
-            // we need to stop the loading spinner here. Only do so if
-            // there isn't already a selection or a composer to avoid
-            // interrupting those.
-            if (!this.application.config.autoselect &&
-                this.conversation_list_view.get_selection().count_selected_rows() == 0 &&
-                !this.conversation_viewer.is_composer_visible) {
-                this.conversation_viewer.show_none_selected();
+        // Only update the UI if we don't currently have a composer,
+        // so we don't clobber it
+        if (!this.has_composer) {
+            if (this.conversations.size == 0) {
+                // Let the user know if there's no available conversations
+                if (this.current_folder is Geary.SearchFolder) {
+                    this.conversation_viewer.show_empty_search();
+                } else {
+                    this.conversation_viewer.show_empty_folder();
+                }
                 this.application.controller.enable_message_buttons(false);
+            } else {
+                // When not doing autoselect, we never get
+                // conversations_selected firing from the convo list,
+                // so we need to stop the loading spinner here.
+                if (!this.application.config.autoselect &&
+                    this.conversation_list_view.get_selection().count_selected_rows() == 0) {
+                    this.conversation_viewer.show_none_selected();
+                    this.application.controller.enable_message_buttons(false);
+                }
             }
         }
     }
