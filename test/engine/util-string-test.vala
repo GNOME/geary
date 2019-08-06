@@ -11,6 +11,7 @@ class Geary.String.Test : TestCase {
         base("Geary.String.Test");
         add_test("test_whitespace", test_whitespace);
         add_test("test_nonprinting", test_nonprinting);
+        add_test("test_contains_any_char", test_contains_any_char);
     }
 
     public void test_whitespace() throws Error {
@@ -44,4 +45,12 @@ class Geary.String.Test : TestCase {
         assert(reduce_whitespace("test\n") == "test");
         assert(reduce_whitespace("test\ntest") == "test test");
     }
+
+    public void test_contains_any_char() throws GLib.Error {
+         assert(!contains_any_char("test", new unichar[]{ '@' }));
+         assert(contains_any_char("@test", new unichar[]{ '@' }));
+         assert(contains_any_char("te@st", new unichar[]{ '@' }));
+         assert(contains_any_char("test@", new unichar[]{ '@' }));
+    }
+
 }
