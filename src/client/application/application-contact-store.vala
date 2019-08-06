@@ -258,7 +258,7 @@ public class Application.ContactStore : Geary.BaseObject {
             foreach (Folks.Individual poss in view.individuals) {
                 foreach (Folks.EmailFieldDetails email in poss.email_addresses) {
                     if (email.value.normalize().casefold() == normalised_address) {
-                        match = view.individuals.first();
+                        match = poss;
                         break;
                     }
                 }
