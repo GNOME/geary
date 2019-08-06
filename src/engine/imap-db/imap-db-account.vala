@@ -580,7 +580,8 @@ private class Geary.ImapDB.Account : BaseObject {
         string? search_ids_sql = get_search_ids_sql(search_ids);
 
         bool strip_greedy = query.should_strip_greedy_results();
-        Gee.Set<EmailIdentifier> matching_ids = new Gee.HashSet<EmailIdentifier>();
+        Gee.List<EmailIdentifier> matching_ids =
+            new Gee.LinkedList<EmailIdentifier>();
         Gee.Map<EmailIdentifier,Gee.Set<string>>? search_matches = null;
 
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
