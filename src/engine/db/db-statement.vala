@@ -5,10 +5,10 @@
  */
 
 public class Geary.Db.Statement : Geary.Db.Context {
-    private unowned string? raw;
-    public unowned string sql { get {
-        return !String.is_empty(raw) ? raw : stmt.sql();
-    } }
+
+    public string sql {
+        get { return this.stmt.sql(); }
+    }
 
     public Connection connection { get; private set; }
 
@@ -35,13 +35,9 @@ public class Geary.Db.Statement : Geary.Db.Context {
 
     internal Statement(Connection connection, string sql) throws DatabaseError {
         this.connection = connection;
-        // save for logging in case prepare_v2() fails
-        raw = sql;
-
         throw_on_error("Statement.ctor", connection.db.prepare_v2(sql, -1, out stmt, null), sql);
+    }
 
-        // not needed any longer
-        raw = null;
     }
 
     /**
