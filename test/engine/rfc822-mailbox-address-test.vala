@@ -147,6 +147,11 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
             addr = new MailboxAddress.from_rfc822_string("\"=?utf-8?Q?=42=45=47=49=4E=20=2F=20=28=7C=29=7C=3C=7C=3E=7C=40=7C=2C=7C=3B=7C=3A=7C=5C=7C=22=7C=2F=7C=5B=7C=5D=7C=3F=7C=2E=7C=3D=20=2F=20=00=20=50=41=53=53=45=44=20=4E=55=4C=4C=20=42=59=54=45=20=2F=20=0D=0A=20=50=41=53=53=45=44=20=43=52=4C=46=20=2F=20?==?utf-8?b?RU5E=?=\"");
             assert(addr.name == null);
             assert(addr.address == "BEGIN / (|)|<|>|@|,|;|:|\\|\"|/|[|]|?|.|= / ? PASSED NULL BYTE / \r\n PASSED CRLF / END");
+
+            addr = new MailboxAddress.from_rfc822_string("=?UTF-8?Q?=22Firstname_=22=C2=AF\\=5F=28=E3=83=84=29=5F/=C2=AF=22_Lastname_via?==?UTF-8?Q?_Vendor=22_<system@vendor.com>?=");
+            assert(addr.name == "Firstname ¯_(ツ)_/¯ Lastname via=?UTF-8?Q?_Vendor=22_");
+            assert(addr.mailbox == "system");
+            assert(addr.domain == "vendor.com");
         } catch (Error err) {
             assert_not_reached();
         }
