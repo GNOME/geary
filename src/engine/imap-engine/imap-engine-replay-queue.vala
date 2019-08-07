@@ -500,7 +500,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             // wait until the remote folder is opened (or throws an exception, in which case closed)
             Imap.FolderSession? remote = null;
             try {
-                if (!is_close_op && folder_opened && state == State.OPEN) {
+                if (!is_close_op && folder_opened && state != State.CLOSED) {
                     remote = yield owner.claim_remote_session(
                         this.remote_wait_cancellable
                     );
