@@ -131,7 +131,7 @@ public class Geary.RFC822.MailboxAddress :
         while ((start = text.index_of("=?", offset)) != -1) {
             // Find the closing marker.
             int end = text.index_of("?=", start + 2) + 2;
-            if (end == -1) {
+            if (end <= 1) {
                 end = text.length;
             }
 
