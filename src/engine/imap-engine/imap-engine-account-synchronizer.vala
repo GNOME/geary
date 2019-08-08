@@ -33,10 +33,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             // Only sync folders that:
             // 1. Can actually be opened (i.e. are selectable)
             // 2. Are remote backed
-            // and 3. if considering a folder not because it's
-            // contents changed (i.e. didn't just become available,
-            // only sync if closed, otherwise he folder will keep
-            // track of changes as they occur
             //
             // All this implies the folder must be a MinimalFolder and
             // we do require that for syncing at the moment anyway,
@@ -46,9 +42,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             if (imap_folder != null &&
                 folder.properties.is_openable.is_possible() &&
                 !folder.properties.is_local_only &&
-                !folder.properties.is_virtual &&
-                (became_available ||
-                 imap_folder.get_open_state() == Folder.OpenState.CLOSED)) {
+                !folder.properties.is_virtual) {
 
                 AccountOperation op = became_available
                     ? new CheckFolderSync(
