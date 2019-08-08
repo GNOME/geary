@@ -1472,7 +1472,19 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (cancellable != null && cancellable.is_cancelled() && ret != null && remove_folder != null)
             yield remove_folder.remove_email_async(iterate<EmailIdentifier>(ret).to_array_list());
 
-        this._account.update_folder(this);
+        if (ret != null) {
+            // Server returned a UID for the new message. It was saved
+            // locally possibly before the server notified that the
+            // message exists. As such, fetch any missing parts from
+            // the remote to ensure it is properly filled in.
+            yield list_email_by_id_async(
+                ret, 1, ALL, INCLUDING_ID, cancellable
+            );
+        } else {
+            // The server didn't return a UID for the new email, so do
+            // a sync now to ensure it shows up immediately.
+            yield synchronise_remote(cancellable);
+        }
 
         return ret;
     }
