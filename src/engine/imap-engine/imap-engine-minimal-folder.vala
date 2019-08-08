@@ -65,12 +65,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     internal ImapDB.Folder local_folder { get; private set; }
 
     internal ReplayQueue? replay_queue { get; private set; default = null; }
-    internal EmailPrefetcher email_prefetcher { get; private set; }
     internal ContactHarvester harvester { get; private set; }
 
     private weak GenericAccount _account;
     private Geary.AggregatedFolderProperties _properties =
         new Geary.AggregatedFolderProperties(false, false);
+    private EmailPrefetcher email_prefetcher;
 
     private int open_count = 0;
     private Folder.OpenFlags open_flags = OpenFlags.NONE;
@@ -276,6 +276,28 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override async void wait_for_close_async(Cancellable? cancellable = null)
         throws Error {
         yield this.closed_semaphore.wait_async(cancellable);
+    }
+
+    /** {@inheritDoc} */
+    public override async void synchronise_remote(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        check_open("synchronise_remote");
+        // The normalisation process will pick up any missing messages
+        // if closed so ensure there is a remote session
+        Imap.FolderSession remote = yield claim_remote_session(cancellable);
+
+        // Send a NOOP so the server can return an untagged EXISTS if
+        // any new messages have arrived since the remote was opened.
+        yield remote.send_noop(cancellable);
+
+        // Wait until the replay queue has processed all notifications
+        // so the prefetcher becomes aware of the new mail
+        this.replay_queue.flush_notifications();
+        yield this.replay_queue.checkpoint(cancellable);
+
+        // Finally, wait for the prefetcher to have finished
+        // downloading the new mail.
+        yield this.email_prefetcher.active_sem.wait_async(cancellable);
     }
 
     // used by normalize_folders() during the normalization process; should not be used elsewhere
