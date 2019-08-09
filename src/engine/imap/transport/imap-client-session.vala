@@ -1442,10 +1442,6 @@ public class Geary.Imap.ClientSession : BaseObject {
 
             default:
                 debug("[%s]: Unable to SELECT/EXAMINE: %s", to_string(), completion_response.to_string());
-
-                // turn off IDLE, client should request it again if desired.
-                this.cx.enable_idle_when_quiet(false);
-
                 return State.AUTHORIZED;
         }
     }
