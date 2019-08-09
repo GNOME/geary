@@ -135,7 +135,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         int token = yield this.cmd_mutex.claim_async(cancellable);
         Error? cmd_err = null;
         try {
-            yield session.enable_idle(cancellable);
+            session.enable_idle();
         } catch (Error err) {
             cmd_err = err;
         }
