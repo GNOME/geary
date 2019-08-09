@@ -262,7 +262,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 "[%s] Cancelling pending command: %s",
                 to_string(), pending.to_string()
             );
-            pending.cancel_command();
+            pending.disconnected("Disconnected");
         }
         this.pending_queue.clear();
 
@@ -385,7 +385,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 "[%s] Cancelling sent command: %s",
                 to_string(), sent.to_string()
             );
-            sent.cancel_command();
+            sent.disconnected("Connection channels closed");
         }
         this.sent_queue.clear();
 

@@ -78,8 +78,7 @@ public class Geary.Imap.Command : BaseObject {
     private Geary.Nonblocking.Semaphore complete_lock =
         new Geary.Nonblocking.Semaphore();
 
-    private bool timed_out = false;
-    private bool cancelled = false;
+    private ImapError? cancelled_cause = null;
 
     private Geary.Nonblocking.Spinlock? literal_spinlock = null;
     private GLib.Cancellable? literal_cancellable = null;
@@ -207,20 +206,6 @@ public class Geary.Imap.Command : BaseObject {
     }
 
     /**
-     * Cancels this command's execution.
-     *
-     * When this method is called, all locks will be released,
-     * including {@link wait_until_complete}, which will then throw a
-     * `GLib.IOError.CANCELLED` error.
-     */
-    internal virtual void cancel_command() {
-        cancel_send();
-        this.cancelled = true;
-        this.response_timer.reset();
-        this.complete_lock.blind_notify();
-    }
-
-    /**
      * Yields until the command has been completed or cancelled.
      *
      * Throws an error if the command or the cancellable argument is
@@ -231,16 +216,8 @@ public class Geary.Imap.Command : BaseObject {
         throws GLib.Error {
         yield this.complete_lock.wait_async(cancellable);
 
-        if (this.cancelled) {
-            throw new GLib.IOError.CANCELLED(
-                "%s: Command was cancelled", to_brief_string()
-            );
-        }
-
-        if (this.timed_out) {
-            throw new ImapError.TIMED_OUT(
-                "%s: Command timed out", to_brief_string()
-            );
+        if (this.cancelled_cause != null) {
+            throw this.cancelled_cause;
         }
 
         check_has_status();
@@ -286,6 +263,17 @@ public class Geary.Imap.Command : BaseObject {
         cancel_send();
 
         check_has_status();
+    }
+
+    /**
+     * Cancels this command due to a network or server disconnect.
+     *
+     * When this method is called, all locks will be released,
+     * including {@link wait_until_complete}, which will then throw a
+     * `GLib.IOError.CANCELLED` error.
+     */
+    internal virtual void disconnected(string reason) {
+        cancel(new ImapError.NOT_CONNECTED("%s: %s", to_brief_string(), reason));
     }
 
     /**
@@ -347,6 +335,13 @@ public class Geary.Imap.Command : BaseObject {
         }
     }
 
+    private void cancel(ImapError cause) {
+        cancel_send();
+        this.cancelled_cause = cause;
+        this.response_timer.reset();
+        this.complete_lock.blind_notify();
+    }
+
     private void check_has_status() throws ImapError {
         if (this.status == null) {
             throw new ImapError.SERVER_ERROR(
@@ -369,8 +364,9 @@ public class Geary.Imap.Command : BaseObject {
     }
 
     private void on_response_timeout() {
-        this.timed_out = true;
-        cancel_command();
+        cancel(
+            new ImapError.TIMED_OUT("%s: Command timed out", to_brief_string())
+        );
         response_timed_out();
     }
 
