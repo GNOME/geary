@@ -323,6 +323,11 @@ public class Geary.Imap.Command : BaseObject {
         this.literal_spinlock.blind_notify();
     }
 
+    /** Returns the command tag and name for debugging. */
+    internal string to_brief_string() {
+        return "%s %s".printf(this.tag.to_string(), this.name);
+    }
+
     /**
      * Cancels any existing serialisation in progress.
      *
@@ -357,10 +362,6 @@ public class Geary.Imap.Command : BaseObject {
                 this.status.to_string()
             );
         }
-    }
-
-    private string to_brief_string() {
-        return "%s %s".printf(this.tag.to_string(), this.name);
     }
 
     private void on_response_timeout() {
