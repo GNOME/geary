@@ -750,7 +750,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         cx.received_continuation_response.connect(on_received_continuation_response);
         cx.received_bytes.connect(on_received_bytes);
         cx.received_bad_response.connect(on_received_bad_response);
-        cx.recv_closed.connect(on_received_closed);
+        cx.received_eos.connect(on_received_eos);
         cx.receive_failure.connect(on_network_receive_failure);
         cx.deserialize_failure.connect(on_network_receive_failure);
 
@@ -777,7 +777,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             cx.received_continuation_response.disconnect(on_received_continuation_response);
             cx.received_bytes.disconnect(on_received_bytes);
             cx.received_bad_response.disconnect(on_received_bad_response);
-            cx.recv_closed.disconnect(on_received_closed);
+            cx.received_eos.connect(on_received_eos);
             cx.receive_failure.disconnect(on_network_receive_failure);
             cx.deserialize_failure.disconnect(on_network_receive_failure);
 
@@ -1606,16 +1606,20 @@ public class Geary.Imap.ClientSession : BaseObject {
     // error handling
     //
 
-    // use different error handler when connecting because, if connect_async() fails, there's no
-    // requirement for the user to call disconnect_async() and clean up... this prevents leaving the
-    //  FSM in the CONNECTING state, causing an assertion when this object is destroyed
-    private uint on_connecting_send_recv_error(uint state, uint event, void *user, Object? object, Error? err) {
-        assert(err != null);
-
-        debug("[%s] Connecting send/recv error, dropping client connection: %s", to_string(), err.message);
-
+    // use different error handler when connecting because, if
+    // connect_async() fails, there's no requirement for the user to
+    // call disconnect_async() and clean up... this prevents leaving
+    // the FSM in the CONNECTING state, causing an assertion when this
+    // object is destroyed
+    private uint on_connecting_send_recv_error(uint state,
+                                               uint event,
+                                               void *user,
+                                               GLib.Object? object,
+                                               GLib.Error? err) {
+        debug("[%s] Connecting send/recv error, dropping client connection: %s",
+              to_string(),
+              err != null ? err.message : "EOS");
         fsm.do_post_transition(() => { drop_connection(); });
-
         return State.BROKEN;
     }
 
@@ -1636,12 +1640,16 @@ public class Geary.Imap.ClientSession : BaseObject {
         dispatch_disconnect_results(DisconnectReason.LOCAL_ERROR, result);
     }
 
-    private uint on_recv_error(uint state, uint event, void *user, Object? object, Error? err) {
-        assert(err != null);
-        debug("[%s] Receive error, disconnecting: %s", to_string(), err.message);
-
+    private uint on_recv_error(uint state,
+                               uint event,
+                               void *user,
+                               GLib.Object? object,
+                               GLib.Error? err) {
+        debug("[%s] Receive error, disconnecting: %s",
+              to_string(),
+              (err != null) ? err.message : "EOS"
+        );
         cx.disconnect_async.begin(null, on_fire_recv_error_signal);
-
         return State.BROKEN;
     }
 
@@ -1906,12 +1914,8 @@ public class Geary.Imap.ClientSession : BaseObject {
         debug("[%s] Received bad response %s: %s", to_string(), root.to_string(), err.message);
     }
 
-    private void on_received_closed(ClientConnection cx) {
-#if VERBOSE_SESSION
-        // This currently doesn't generate any Events, but it does mean the connection has closed
-        // due to EOS
-        debug("[%s] Received closed", to_string());
-#endif
+    private void on_received_eos(ClientConnection cx) {
+        fsm.issue(Event.RECV_ERROR, null, null, null);
     }
 
     private void on_network_receive_failure(Error err) {
