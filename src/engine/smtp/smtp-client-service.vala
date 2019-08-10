@@ -137,6 +137,9 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
                 cancellable.cancel();
             } catch (GLib.IOError.CANCELLED err) {
                 // Nothing to do here — we're already cancelled.
+            } catch (EngineError.NOT_FOUND err) {
+                debug("Queued email %s not found in outbox, ignoring: %s",
+                      id.to_string(), err.message);
             } catch (GLib.Error err) {
                 notify_connection_failed(new ErrorContext(err));
                 cancellable.cancel();
@@ -194,15 +197,9 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
             throw new SmtpError.AUTHENTICATION_FAILED("Credentials not loaded");
         }
 
-        Email? email = null;
-        try {
-            email = yield this.outbox.fetch_email_async(
-                id, Email.Field.ALL, Folder.ListFlags.NONE, cancellable
-            );
-        } catch (EngineError.NOT_FOUND err) {
-            debug("Queued email %s not found in outbox, ignoring: %s",
-                  id.to_string(), err.message);
-        }
+        Email email = yield this.outbox.fetch_email_async(
+            id, Email.Field.ALL, Folder.ListFlags.NONE, cancellable
+        );
 
         if (!email.email_flags.contains(EmailFlags.OUTBOX_SENT)) {
             RFC822.Message message = email.get_message();
