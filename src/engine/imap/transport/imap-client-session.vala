@@ -1912,6 +1912,7 @@ public class Geary.Imap.ClientSession : BaseObject {
 
     private void on_received_bad_response(RootParameters root, ImapError err) {
         debug("[%s] Received bad response %s: %s", to_string(), root.to_string(), err.message);
+        fsm.issue(Event.RECV_ERROR, null, null, err);
     }
 
     private void on_received_eos(ClientConnection cx) {
