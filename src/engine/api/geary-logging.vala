@@ -436,13 +436,20 @@ public inline void logv(Flag flags,
                         string fmt,
                         va_list args) {
     if (flags == ALL || logging_flags.is_any_set(flags)) {
-        string formatted = fmt.vprintf(args);
-        GLib.LogField<string> message = GLib.LogField<string>();
-        message.key = "MESSAGE";
-        message.length = -1;
-        message.value = formatted;
-
-        GLib.log_structured_array(level, { message });
+        GLib.log_structured_array(
+            level,
+            new GLib.LogField[] {
+                GLib.LogField<string>() {
+                    key = "GLIB_DOMAIN", value = DOMAIN, length = -1
+                },
+                GLib.LogField<Flag>() {
+                    key = "GEARY_FLAGS", value = flags, length = 0
+                },
+                GLib.LogField<string>() {
+                    key = "MESSAGE", value = fmt.vprintf(args), length = -1
+                }
+            }
+        );
     }
 }
 
