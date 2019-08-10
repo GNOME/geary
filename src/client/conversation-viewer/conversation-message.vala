@@ -434,7 +434,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 (MenuModel) builder.get_object("context_menu_inspector");
         }
 
-        this.local_date = headers.date.value.to_local();
+        if (headers.date != null) {
+            this.local_date = headers.date.value.to_local();
+        }
         update_display();
 
         // Compact headers. These are partially done here and partially
