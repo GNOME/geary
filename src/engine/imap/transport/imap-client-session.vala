@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -472,7 +474,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.BROKEN, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.BROKEN, Event.LOGOUT, on_late_command),
             new Geary.State.Mapping(State.BROKEN, Event.DISCONNECT, Geary.State.nop),
-            new Geary.State.Mapping(State.BROKEN, Event.DISCONNECTED, Geary.State.nop),
+            new Geary.State.Mapping(State.BROKEN, Event.DISCONNECTED, on_disconnected),
             new Geary.State.Mapping(State.BROKEN, Event.RECV_STATUS, on_dropped_response),
             new Geary.State.Mapping(State.BROKEN, Event.RECV_COMPLETION, on_dropped_response),
             new Geary.State.Mapping(State.BROKEN, Event.SEND_ERROR, Geary.State.nop),
@@ -784,9 +786,23 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
 
     private uint on_connected(uint state, uint event) {
-        debug("[%s] Connected", to_string());
+        debug("[%s] Connected to %s",
+              to_string(),
+              imap_endpoint.to_string());
 
-        // stay in current state -- wait for initial status response to move into NOAUTH or LOGGED OUT
+        // stay in current state -- wait for initial status response
+        // to move into NOAUTH or LOGGED OUT
+        return state;
+    }
+
+    private uint on_disconnected(uint state,
+                                 uint event,
+                                 void *user = null,
+                                 GLib.Object? obj = null,
+                                 GLib.Error? err = null) {
+        debug("[%s] Disconnected from %s",
+              to_string(),
+              this.imap_endpoint.to_string());
         return state;
     }
 
@@ -1736,28 +1752,19 @@ public class Geary.Imap.ClientSession : BaseObject {
     //
 
     private void on_network_connected() {
-        debug("[%s] Connected to %s", to_string(), imap_endpoint.to_string());
-
         fsm.issue(Event.CONNECTED);
     }
 
     private void on_network_disconnected() {
-        debug("[%s] Disconnected from %s", to_string(), imap_endpoint.to_string());
-
         fsm.issue(Event.DISCONNECTED);
     }
 
     private void on_network_sent_command(Command cmd) {
-#if VERBOSE_SESSION
-        debug("[%s] Sent command %s", to_string(), cmd.to_string());
-#endif
         // resechedule keepalive
         schedule_keepalive();
     }
 
     private void on_network_send_error(Error err) {
-        debug("[%s] Send error: %s", to_string(), err.message);
-
         fsm.issue(Event.SEND_ERROR, null, null, err);
     }
 
@@ -1908,8 +1915,6 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
 
     private void on_network_receive_failure(Error err) {
-        debug("[%s] Receive failed: %s", to_string(), err.message);
-
         fsm.issue(Event.RECV_ERROR, null, null, err);
     }
 
