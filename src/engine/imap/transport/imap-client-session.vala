@@ -83,7 +83,7 @@ public class Geary.Imap.ClientSession : BaseObject {
      * These don't exactly match the states in the IMAP specification.  For one, they count
      * transitions as states unto themselves (due to network latency and the asynchronous nature
      * of ClientSession's interface).  Also, the LOGOUT (and logging out) state has been melded
-     * into {@link ProtocolState.UNCONNECTED} on the presumption that the nuances of a disconnected or
+     * into {@link ProtocolState.NOT_CONNECTED} on the presumption that the nuances of a disconnected or
      * disconnecting session is uninteresting to the caller.
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-3]]
@@ -91,7 +91,7 @@ public class Geary.Imap.ClientSession : BaseObject {
      * @see get_protocol_state
      */
     public enum ProtocolState {
-        UNCONNECTED,
+        NOT_CONNECTED,
         CONNECTING,
         UNAUTHORIZED,
         AUTHORIZING,
@@ -165,8 +165,10 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
 
     private enum State {
+        // initial state
+        NOT_CONNECTED,
+
         // canonical IMAP session states
-        UNCONNECTED,
         NOAUTH,
         AUTHORIZED,
         SELECTED,
@@ -219,7 +221,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
 
     private static Geary.State.MachineDescriptor machine_desc = new Geary.State.MachineDescriptor(
-        "Geary.Imap.ClientSession", State.UNCONNECTED, State.COUNT, Event.COUNT,
+        "Geary.Imap.ClientSession", State.NOT_CONNECTED, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
 
     /**
@@ -348,13 +350,13 @@ public class Geary.Imap.ClientSession : BaseObject {
         this.imap_endpoint = imap_endpoint;
 
         Geary.State.Mapping[] mappings = {
-            new Geary.State.Mapping(State.UNCONNECTED, Event.CONNECT, on_connect),
-            new Geary.State.Mapping(State.UNCONNECTED, Event.LOGIN, on_early_command),
-            new Geary.State.Mapping(State.UNCONNECTED, Event.SEND_CMD, on_early_command),
-            new Geary.State.Mapping(State.UNCONNECTED, Event.SELECT, on_early_command),
-            new Geary.State.Mapping(State.UNCONNECTED, Event.CLOSE_MAILBOX, on_early_command),
-            new Geary.State.Mapping(State.UNCONNECTED, Event.LOGOUT, on_early_command),
-            new Geary.State.Mapping(State.UNCONNECTED, Event.DISCONNECT, Geary.State.nop),
+            new Geary.State.Mapping(State.NOT_CONNECTED, Event.CONNECT, on_connect),
+            new Geary.State.Mapping(State.NOT_CONNECTED, Event.LOGIN, on_early_command),
+            new Geary.State.Mapping(State.NOT_CONNECTED, Event.SEND_CMD, on_early_command),
+            new Geary.State.Mapping(State.NOT_CONNECTED, Event.SELECT, on_early_command),
+            new Geary.State.Mapping(State.NOT_CONNECTED, Event.CLOSE_MAILBOX, on_early_command),
+            new Geary.State.Mapping(State.NOT_CONNECTED, Event.LOGOUT, on_early_command),
+            new Geary.State.Mapping(State.NOT_CONNECTED, Event.DISCONNECT, Geary.State.nop),
 
             new Geary.State.Mapping(State.CONNECTING, Event.CONNECT, on_already_connected),
             new Geary.State.Mapping(State.CONNECTING, Event.LOGIN, on_early_command),
@@ -487,7 +489,7 @@ public class Geary.Imap.ClientSession : BaseObject {
 
     ~ClientSession() {
         switch (fsm.get_state()) {
-            case State.UNCONNECTED:
+            case State.NOT_CONNECTED:
             case State.CLOSED:
                 // no problem-o
             break;
@@ -592,11 +594,11 @@ public class Geary.Imap.ClientSession : BaseObject {
         current_mailbox = null;
 
         switch (fsm.get_state()) {
-            case State.UNCONNECTED:
+            case State.NOT_CONNECTED:
             case State.LOGGED_OUT:
             case State.LOGGING_OUT:
             case State.CLOSED:
-                return ProtocolState.UNCONNECTED;
+                return ProtocolState.NOT_CONNECTED;
 
             case State.NOAUTH:
                 return ProtocolState.UNAUTHORIZED;
@@ -1197,7 +1199,7 @@ public class Geary.Imap.ClientSession : BaseObject {
 
         uint seconds;
         switch (get_protocol_state(null)) {
-            case ProtocolState.UNCONNECTED:
+            case ProtocolState.NOT_CONNECTED:
             case ProtocolState.CONNECTING:
                 return;
 

@@ -33,7 +33,7 @@ class Integration.Imap.ClientSession : TestCase {
     }
 
     public override void tear_down() throws GLib.Error {
-        if (this.session.get_protocol_state(null) != UNCONNECTED) {
+        if (this.session.get_protocol_state(null) != NOT_CONNECTED) {
             this.session.disconnect_async.begin(null, async_complete_full);
             this.session.disconnect_async.end(async_result());
         }
