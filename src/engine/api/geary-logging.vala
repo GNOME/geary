@@ -260,7 +260,7 @@ public class Record {
         );
 
         if (flags != NONE && flags != ALL) {
-            str.printf("[%s]: ", flags.to_string());
+            str.append_printf("[%s]: ", flags.to_string());
         } else {
             str.append(": ");
         }
