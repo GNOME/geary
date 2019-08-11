@@ -87,7 +87,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         debug("Queuing message for sending: %s", message_subject(rfc822));
 
         EmailIdentifier id = yield this.outbox.create_email_async(
-            rfc822, null, null, null, cancellable
+            rfc822, null, null, cancellable
         );
         this.outbox_queue.send(id);
     }
@@ -330,7 +330,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         try {
             yield create.open_async(NO_DELAY, cancellable);
             open = true;
-            yield create.create_email_async(raw, null, null, null, cancellable);
+            yield create.create_email_async(raw, null, null, cancellable);
             yield wait_for_message(create, message, cancellable);
         } finally {
             if (open) {

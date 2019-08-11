@@ -1458,58 +1458,34 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         return earliest;
     }
 
-    protected async Geary.EmailIdentifier? create_email_async(RFC822.Message rfc822,
-        Geary.EmailFlags? flags, DateTime? date_received, Geary.EmailIdentifier? id,
-        Cancellable? cancellable = null) throws Error {
+    protected async EmailIdentifier?
+        create_email_async(RFC822.Message rfc822,
+                           EmailFlags? flags,
+                           DateTime? date_received,
+                           GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open("create_email_async");
-        if (id != null)
-            check_id("create_email_async", id);
+        CreateEmail op = new CreateEmail(
+            this, rfc822, flags, date_received, cancellable
+        );
+        replay_queue.schedule(op);
+        yield op.wait_for_ready_async(cancellable);
+        this._account.update_folder(this);
 
-        Error? cancel_error = null;
-        Geary.EmailIdentifier? ret = null;
-        try {
-            CreateEmail create = new CreateEmail(this, rfc822, flags, date_received, cancellable);
-            replay_queue.schedule(create);
-            yield create.wait_for_ready_async(cancellable);
-
-            ret = create.created_id;
-        } catch (Error e) {
-            if (e is IOError.CANCELLED)
-                cancel_error = e;
-            else
-                throw e;
-        }
-
-        Geary.FolderSupport.Remove? remove_folder = this as Geary.FolderSupport.Remove;
-
-        // Remove old message.
-        if (id != null && remove_folder != null)
-            yield remove_folder.remove_email_async(iterate<EmailIdentifier>(id).to_array_list());
-
-        // If the user cancelled the operation, throw the error here.
-        if (cancel_error != null)
-            throw cancel_error;
-
-        // If the caller cancelled during the remove operation, delete the newly created message to
-        // safely back out.
-        if (cancellable != null && cancellable.is_cancelled() && ret != null && remove_folder != null)
-            yield remove_folder.remove_email_async(iterate<EmailIdentifier>(ret).to_array_list());
-
-        if (ret != null) {
+        if (op.created_id != null) {
             // Server returned a UID for the new message. It was saved
             // locally possibly before the server notified that the
             // message exists. As such, fetch any missing parts from
             // the remote to ensure it is properly filled in.
             yield list_email_by_id_async(
-                ret, 1, ALL, INCLUDING_ID, cancellable
+                op.created_id, 1, ALL, INCLUDING_ID, cancellable
             );
         } else {
             // The server didn't return a UID for the new email, so do
             // a sync now to ensure it shows up immediately.
             yield synchronise_remote(cancellable);
         }
-
-        return ret;
+        return op.created_id;
     }
 
     /** Fires a {@link marked_email_removed} signal for this folder. */
