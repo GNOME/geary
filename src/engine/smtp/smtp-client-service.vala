@@ -225,10 +225,16 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
         // If we get to this point, the message has either been just
         // sent, or previously sent but not saved. So now try flagging
-        // as such and saving it.
+        // as such and saving it if enabled, else sync the folder in
+        // case the provider saved it so the new mail shows up.
         if (this.account.save_sent) {
-            debug("Outbox postie: Saving %s to sent mail", email.id.to_string());
-            yield save_sent_mail_async(email, cancellable);
+            debug("Outbox postie: Saving %s to sent mail",
+                  email.id.to_string());
+            yield save_sent_mail(email, cancellable);
+        } else {
+            debug("Outbox postie: Syncing sent mail to find %s",
+                  email.id.to_string());
+            yield sync_sent_mail(cancellable);
         }
 
         // Again, don't observe the cancellable here - if it's been
@@ -305,8 +311,8 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         email_sent(rfc822);
     }
 
-    private async void save_sent_mail_async(Geary.Email email,
-                                            GLib.Cancellable? cancellable)
+    private async void save_sent_mail(Geary.Email email,
+                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
         Geary.FolderSupport.Create? create = (
             yield this.owner.get_required_special_folder_async(
@@ -336,4 +342,29 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         }
     }
 
+    private async void sync_sent_mail(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Geary.Folder sent = yield this.owner.get_required_special_folder_async(
+            Geary.SpecialFolderType.SENT, cancellable
+        );
+        if (sent != null) {
+            bool open = false;
+            try {
+                yield sent.open_async(
+                    Geary.Folder.OpenFlags.NO_DELAY, cancellable
+                );
+                open = true;
+                yield sent.synchronise_remote(cancellable);
+            } finally {
+                if (open) {
+                    try {
+                        yield sent.close_async(null);
+                    } catch (Error e) {
+                        debug("Error closing folder %s: %s",
+                              sent.to_string(), e.message);
+                    }
+                }
+            }
+        }
+    }
 }
