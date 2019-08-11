@@ -1230,10 +1230,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     protected async void expunge_all_async(Cancellable? cancellable = null) throws Error {
         check_open("expunge_all_async");
 
-        EmptyFolder empty_folder = new EmptyFolder(this, cancellable);
-        replay_queue.schedule(empty_folder);
+        EmptyFolder op = new EmptyFolder(this, cancellable);
+        this.replay_queue.schedule(op);
+        yield op.wait_for_ready_async(cancellable);
 
-        yield empty_folder.wait_for_ready_async(cancellable);
+        // Checkpoint the replay queue, so it and the folder remains
+        // open while processing first the flag updates then the
+        // expunge from the remote
+        yield this.replay_queue.checkpoint(cancellable);
     }
 
     private void check_open(string method) throws EngineError {
