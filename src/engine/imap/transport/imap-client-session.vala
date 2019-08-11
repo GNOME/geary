@@ -1156,8 +1156,8 @@ public class Geary.Imap.ClientSession : BaseObject {
      * CAPABILITY server data response with IDLE listed as a supported
      * extension.
      */
-    public async void enable_idle(Cancellable? cancellable)
-        throws Error {
+    public void enable_idle()
+        throws GLib.Error {
         if (this.is_idle_supported) {
             switch (get_protocol_state(null)) {
             case ProtocolState.AUTHORIZING:
@@ -1442,10 +1442,6 @@ public class Geary.Imap.ClientSession : BaseObject {
 
             default:
                 debug("[%s]: Unable to SELECT/EXAMINE: %s", to_string(), completion_response.to_string());
-
-                // turn off IDLE, client should request it again if desired.
-                this.cx.enable_idle_when_quiet(false);
-
                 return State.AUTHORIZED;
         }
     }
