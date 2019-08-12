@@ -1881,7 +1881,7 @@ msgstr "%l:%M %P"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:71
 msgid "%H:%M"
-msgstr "%H:%M"
+msgstr "%-H:%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -2358,7 +2358,7 @@ msgstr "Per començar selecciona un proveïdor de correu a sota."
 
 #: ui/accounts_editor_list_pane.ui:76
 msgid "Welcome to Geary"
-msgstr "Benvingut al Geary"
+msgstr "Us donem la benvinguda al Geary"
 
 #. This title is shown to users when confirming if they want to remove an account. The string substitution is replaced with the account's name.
 #: ui/accounts_editor_remove_pane.ui:73
