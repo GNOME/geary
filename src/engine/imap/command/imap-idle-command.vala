@@ -21,13 +21,13 @@ public class Geary.Imap.IdleCommand : Command {
     public bool idle_started { get; private set; default = false; }
 
     private bool serialised = false;
-    private Geary.Nonblocking.Spinlock? exit_lock;
+    private Geary.Nonblocking.Semaphore? exit_lock;
     private GLib.Cancellable? exit_cancellable = new GLib.Cancellable();
 
 
     public IdleCommand() {
         base(NAME);
-        this.exit_lock = new Geary.Nonblocking.Spinlock(this.exit_cancellable);
+        this.exit_lock = new Geary.Nonblocking.Semaphore(this.exit_cancellable);
     }
 
     /** Causes the idle command to exit, if currently executing. **/
