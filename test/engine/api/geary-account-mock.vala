@@ -109,7 +109,7 @@ public class Geary.MockAccount : Account, MockObject {
     public override EmailIdentifier to_email_identifier(GLib.Variant serialised)
         throws EngineError.BAD_PARAMETERS {
         try {
-            return object_or_throw_call(
+            return object_or_throw_call<EmailIdentifier>(
                 "to_email_identifier",
                 { box_arg(serialised) },
                 new EngineError.BAD_PARAMETERS("Mock error")
@@ -124,7 +124,7 @@ public class Geary.MockAccount : Account, MockObject {
     public override FolderPath to_folder_path(GLib.Variant serialised)
         throws EngineError.BAD_PARAMETERS {
         try {
-            return object_or_throw_call(
+            return object_or_throw_call<FolderPath>(
                 "to_folder_path",
                 { box_arg(serialised) },
                 new EngineError.BAD_PARAMETERS("Mock error")
@@ -139,7 +139,7 @@ public class Geary.MockAccount : Account, MockObject {
     public override Folder get_folder(FolderPath path)
         throws EngineError.NOT_FOUND {
         try {
-            return object_or_throw_call(
+            return object_or_throw_call<Folder>(
                 "get_folder",
                 { path },
                 new EngineError.NOT_FOUND("Mock error")
