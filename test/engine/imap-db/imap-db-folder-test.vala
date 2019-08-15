@@ -60,7 +60,7 @@ class Geary.ImapDB.FolderTest : TestCase {
             null,
             (obj, ret) => { async_complete(ret); }
         );
-        this.folder = traverse(
+        this.folder = traverse<Folder>(
             this.account.list_folders_async.end(async_result())
         ).first();
     }
