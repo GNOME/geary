@@ -42,23 +42,23 @@ variables:
                libxml2-dev libytnef0-dev
   UBUNTU_TEST_DEPS: xauth xvfb
 
-fedora:
-  stage: build
-  image: fedora:rawhide
-  before_script:
-    - dnf update -y --nogpgcheck
-    - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
-  script:
-    - $CONFIG_CMD -Dtnef-support=false
-    - $BUILD_CMD
-    - $TEST_CMD
-    - $INSTALL_CMD
-  artifacts:
-    when: 'always'
-    paths:
-      - '$BUILD_DIR/meson-logs/meson-log.txt'
-      - '$BUILD_DIR/meson-logs/testlog.txt'
-    expire_in: 2 days
+# fedora:
+#   stage: build
+#   image: fedora:rawhide
+#   before_script:
+#     - dnf update -y --nogpgcheck
+#     - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
+#   script:
+#     - $CONFIG_CMD -Dtnef-support=false
+#     - $BUILD_CMD
+#     - $TEST_CMD
+#     - $INSTALL_CMD
+#   artifacts:
+#     when: 'always'
+#     paths:
+#       - '$BUILD_DIR/meson-logs/meson-log.txt'
+#       - '$BUILD_DIR/meson-logs/testlog.txt'
+#     expire_in: 2 days
 
 ubuntu:
   stage: build
