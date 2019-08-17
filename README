@@ -16,10 +16,15 @@ Please consult the INSTALL and COPYING files for more information.
 Getting in Touch
 ----------------
 
- * Found a bug? Please report it!
-   https://wiki.gnome.org/Apps/Geary/ReportingABug
+ * Geary wiki:   https://wiki.gnome.org/Apps/Geary
  * Mailing list: http://mail.gnome.org/mailman/listinfo/geary-list
  * IRC Channel:  #geary on irc.gimp.org
+
+**Code Of Conduct**
+
+We follow the Contributor Covenant (See code-of-conduct.md) as our
+Code of Conduct. All communications in project spaces are expected to
+follow it.
 
 Contributing to Geary
 ---------------------

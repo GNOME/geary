@@ -23,6 +23,19 @@ Installation & Licensing
 Please consult the [INSTALL](./INSTALL) and [COPYING](./COPYING) files
 for more information.
 
+Getting in Touch
+----------------
+
+ * Geary wiki:   https://wiki.gnome.org/Apps/Geary
+ * Mailing list: http://mail.gnome.org/mailman/listinfo/geary-list
+ * IRC Channel:  [#geary on irc.gimp.org](irc://irc.gimp.org/%23geary)
+
+**Code Of Conduct**
+
+We follow the [Contributor Covenant](./code-of-conduct.md) as our
+Code of Conduct. All communications in project spaces are expected to
+follow it.
+
 Contributing to Geary
 ---------------------
 
@@ -32,13 +45,6 @@ Want to help improve Geary? Here are some ways to contribute:
  * Development:   https://wiki.gnome.org/Apps/Geary/Development
  * Translating:   https://wiki.gnome.org/Apps/Geary/Translating
  * Join the mailing list or IRC channel and join in the discussion
-
-Getting in Touch
-----------------
-
- * Geary wiki:   https://wiki.gnome.org/Apps/Geary
- * Mailing list: http://mail.gnome.org/mailman/listinfo/geary-list
- * IRC Channel:  [#geary on irc.gimp.org](irc://irc.gimp.org/%23geary)
 
 ---
 Copyright 2016 Software Freedom Conservancy Inc.  
