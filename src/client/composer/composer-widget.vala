@@ -1398,7 +1398,11 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         GLib.Cancellable internal_cancellable = new GLib.Cancellable();
-        cancellable.cancelled.connect(() => { internal_cancellable.cancel(); });
+        if (cancellable != null) {
+            cancellable.cancelled.connect(
+                () => { internal_cancellable.cancel(); }
+            );
+        }
         this.draft_manager_opening = internal_cancellable;
 
         Geary.App.DraftManager new_manager = new Geary.App.DraftManager(account);
