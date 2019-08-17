@@ -1765,7 +1765,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void validate_send_button() {
-        get_action(ACTION_SEND).set_enabled(this.to_entry.valid || this.cc_entry.valid || this.bcc_entry.valid);
+        // To must be valid (and hence non-empty), the other email
+        // fields must be either empty or valid.
+        get_action(ACTION_SEND).set_enabled(
+            this.to_entry.valid &&
+            (this.cc_entry.empty || this.cc_entry.valid) &&
+            (this.bcc_entry.empty || this.bcc_entry.valid) &&
+            (this.reply_to_entry.empty || this.reply_to_entry.valid)
+        );
     }
 
     private void set_compact_header_recipients() {
