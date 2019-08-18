@@ -1,8 +1,9 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -21,6 +22,10 @@ private class Geary.App.ReseedOperation : ConversationOperation {
     }
 
     public override async void execute_async() throws Error {
+        // Clear the fill flag since more messages may have appeared
+        // after coming online.
+        this.monitor.fill_complete = false;
+
         EmailIdentifier? earliest_id = this.monitor.window_lowest;
         if (earliest_id != null) {
             debug("Reseeding starting from Email ID %s on opened %s",

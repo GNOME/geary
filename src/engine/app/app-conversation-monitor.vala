@@ -91,7 +91,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             return (
                 this.base_folder.properties.email_total >
                 this.folder_window_size
-            );
+            ) && !this.fill_complete;
         }
     }
 
@@ -126,6 +126,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             return (this.window.is_empty) ? null : this.window.first();
         }
     }
+
+    /** Determines if the fill operation can load more messages. */
+    internal bool fill_complete { get; set; default = false; }
 
     private Geary.Email.Field required_fields;
     private Geary.Folder.OpenFlags open_flags;

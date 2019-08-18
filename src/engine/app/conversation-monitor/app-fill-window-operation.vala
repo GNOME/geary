@@ -78,6 +78,8 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
             // Loaded the maximum number of messages, so go see if
             // there are any more needed.
             this.monitor.check_window_count();
+        } else {
+            this.monitor.fill_complete = true;
         }
 
     }
