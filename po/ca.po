@@ -136,7 +136,7 @@ msgstr "Maximitza la finestra"
 #: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
 msgstr ""
-"Cert si està finestra d'aplicació està maximitzada, fals en cas contrari."
+"Cert si la finestra d'aplicació està maximitzada, fals en cas contrari."
 
 #: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
@@ -1072,7 +1072,7 @@ msgstr[1] "Marca les converses"
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Afegeix etiqueta a la conversa"
-msgstr[1] "Afegeix etiqueta a la converses"
+msgstr[1] "Afegeix etiqueta a les converses"
 
 #: src/client/components/main-toolbar.vala:161
 msgid "Move conversation"
@@ -2778,7 +2778,7 @@ msgstr "Però en realitat va a:"
 
 #: ui/conversation-message.ui:723
 msgid "The link appears to go to:"
-msgstr "L'enllaç apareix a l'anar a:"
+msgstr "L'enllaç apareix en l'anar a:"
 
 #: ui/conversation-message.ui:735
 msgid "Deceptive link found"
