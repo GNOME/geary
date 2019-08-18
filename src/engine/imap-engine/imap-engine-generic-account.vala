@@ -547,8 +547,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return yield local.fetch_email_async(check_id(email_id), required_fields, cancellable);
     }
 
-    public override Geary.SearchQuery open_search(string query, SearchQuery.Strategy strategy) {
-        return new ImapDB.SearchQuery(local, query, strategy);
+    public override async Geary.SearchQuery open_search(string query,
+                                                        SearchQuery.Strategy strategy,
+                                                        GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        return yield new ImapDB.SearchQuery(local, query, strategy, cancellable);
     }
 
     public override async Gee.Collection<Geary.EmailIdentifier>? local_search_async(Geary.SearchQuery query,

@@ -8,37 +8,6 @@
 
 private class Geary.ImapDB.Account : BaseObject {
 
-    // These characters are chosen for being commonly used to continue a single word (such as
-    // extended last names, i.e. "Lars-Eric") or in terms commonly searched for in an email client,
-    // i.e. unadorned mailbox addresses.  Note that characters commonly used for wildcards or that
-    // would be interpreted as wildcards by SQLite are not included here.
-    private const unichar[] SEARCH_TERM_CONTINUATION_CHARS = { '-', '_', '.', '@' };
-
-    // Search operator field names, eg: "to:foo@example.com" or "is:unread"
-    private const string SEARCH_OP_ATTACHMENT = "attachment";
-    private const string SEARCH_OP_BCC = "bcc";
-    private const string SEARCH_OP_BODY = "body";
-    private const string SEARCH_OP_CC = "cc";
-    private const string SEARCH_OP_FROM = "from_field";
-    private const string SEARCH_OP_IS = "is";
-    private const string SEARCH_OP_SUBJECT = "subject";
-    private const string SEARCH_OP_TO = "receivers";
-
-    // Operators allowing finding mail addressed to "me"
-    private const string[] SEARCH_OP_TO_ME_FIELDS = {
-        SEARCH_OP_BCC,
-        SEARCH_OP_CC,
-        SEARCH_OP_TO,
-    };
-
-    // The addressable op value for "me"
-    private const string SEARCH_OP_ADDRESSABLE_VALUE_ME = "me";
-
-    // Search operator field values
-    private const string SEARCH_OP_VALUE_READ = "read";
-    private const string SEARCH_OP_VALUE_STARRED = "starred";
-    private const string SEARCH_OP_VALUE_UNREAD = "unread";
-
     // Storage path names
     private const string DB_FILENAME = "geary.db";
     private const string ATTACHMENTS_DIR = "attachments";
@@ -53,18 +22,6 @@ private class Geary.ImapDB.Account : BaseObject {
             this.path = path;
         }
     }
-
-
-    // Maps of localised search operator names and values to their
-    // internal forms
-    private static Gee.HashMap<string, string> search_op_names =
-        new Gee.HashMap<string, string>();
-    private static Gee.ArrayList<string> search_op_to_me_values =
-        new Gee.ArrayList<string>();
-    private static Gee.ArrayList<string> search_op_from_me_values =
-        new Gee.ArrayList<string>();
-    private static Gee.HashMap<string, string> search_op_is_values =
-        new Gee.HashMap<string, string>();
 
 
     /**
@@ -91,161 +48,14 @@ private class Geary.ImapDB.Account : BaseObject {
     /** The backing database for the account. */
     public ImapDB.Database db { get; private set; }
 
+    internal AccountInformation account_information { get; private set; }
+
     private string name;
-    private AccountInformation account_information;
     private GLib.File db_file;
     private GLib.File attachments_dir;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>();
     private Cancellable? background_cancellable = null;
-
-    static construct {
-        // Map of possibly translated search operator names and values
-        // to English/internal names and values. We include the
-        // English version anyway so that when translations provide a
-        // localised version of the operator names but have not also
-        // translated the user manual, the English version in the
-        // manual still works.
-
-        // Can be typed in the search box like "attachment:file.txt"
-        // to find messages with attachments with a particular name.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_names.set(C_("Search operator", "attachment"), SEARCH_OP_ATTACHMENT);
-        // Can be typed in the search box like
-        // "bcc:johndoe@example.com" to find messages bcc'd to a
-        // particular person.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_names.set(C_("Search operator", "bcc"), SEARCH_OP_BCC);
-        // Can be typed in the search box like "body:word" to find
-        // "word" only if it occurs in the body of a message.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_names.set(C_("Search operator", "body"), SEARCH_OP_BODY);
-        // Can be typed in the search box like
-        // "cc:johndoe@example.com" to find messages cc'd to a
-        // particular person.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_names.set(C_("Search operator", "cc"), SEARCH_OP_CC);
-        // Can be typed in the search box like
-        // "from:johndoe@example.com" to find messages from a
-        // particular sender.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_names.set(C_("Search operator", "from"), SEARCH_OP_FROM);
-        // Can be typed in the search box like "is:unread" to find
-        // messages that are read, unread, or starred.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_names.set(C_("Search operator", "is"), SEARCH_OP_IS);
-        // Can be typed in the search box like "subject:word" to find
-        // "word" only if it occurs in the subject of a message.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary
-        // User Guide.
-        search_op_names.set(C_("Search operator", "subject"), SEARCH_OP_SUBJECT);
-        // Can be typed in the search box like
-        // "to:johndoe@example.com" to find messages received by a
-        // particular person.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_names.set(C_("Search operator", "to"), SEARCH_OP_TO);
-
-        // And the English language versions
-        search_op_names.set("attachment", SEARCH_OP_ATTACHMENT);
-        search_op_names.set("bcc", SEARCH_OP_BCC);
-        search_op_names.set("body", SEARCH_OP_BODY);
-        search_op_names.set("cc", SEARCH_OP_CC);
-        search_op_names.set("from", SEARCH_OP_FROM);
-        search_op_names.set("is", SEARCH_OP_IS);
-        search_op_names.set("subject", SEARCH_OP_SUBJECT);
-        search_op_names.set("to", SEARCH_OP_TO);
-
-        // Can be typed in the search box after "to:", "cc:" and
-        // "bcc:" e.g.: "to:me". Matches conversations that are
-        // addressed to the user.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_to_me_values.add(
-            C_("Search operator value - mail addressed to the user", "me")
-        );
-        search_op_to_me_values.add(SEARCH_OP_ADDRESSABLE_VALUE_ME);
-
-        // Can be typed in the search box after "from:" i.e.:
-        // "from:me". Matches conversations were sent by the user.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_from_me_values.add(
-            C_("Search operator value - mail sent by the user", "me")
-        );
-        search_op_from_me_values.add(SEARCH_OP_ADDRESSABLE_VALUE_ME);
-
-        // Can be typed in the search box after "is:" i.e.:
-        // "is:read". Matches conversations that are flagged as read.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_is_values.set(
-            C_("'is:' search operator value", "read"), SEARCH_OP_VALUE_READ
-        );
-        // Can be typed in the search box after "is:" i.e.:
-        // "is:starred". Matches conversations that are flagged as
-        // starred.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_is_values.set(
-            C_("'is:' search operator value", "starred"), SEARCH_OP_VALUE_STARRED
-        );
-        // Can be typed in the search box after "is:" i.e.:
-        // "is:unread". Matches conversations that are flagged unread.
-        //
-        // The translated string must be a single word (use '-', '_'
-        // or similar to combine words into one), should be short, and
-        // also match the translation in "search.page" of the Geary User
-        // Guide.
-        search_op_is_values.set(
-            C_("'is:' search operator value", "unread"), SEARCH_OP_VALUE_UNREAD
-        );
-        search_op_is_values.set(SEARCH_OP_VALUE_READ, SEARCH_OP_VALUE_READ);
-        search_op_is_values.set(SEARCH_OP_VALUE_STARRED, SEARCH_OP_VALUE_STARRED);
-        search_op_is_values.set(SEARCH_OP_VALUE_UNREAD, SEARCH_OP_VALUE_UNREAD);
-    }
 
     public Account(AccountInformation config,
                    GLib.File data_dir,
@@ -262,14 +72,6 @@ private class Geary.ImapDB.Account : BaseObject {
             upgrade_monitor,
             vacuum_monitor
         );
-    }
-
-    private ImapDB.SearchQuery check_search_query(Geary.SearchQuery q) throws Error {
-        ImapDB.SearchQuery? query = q as ImapDB.SearchQuery;
-        if (query == null || query.account != this)
-            throw new EngineError.BAD_PARAMETERS("Geary.SearchQuery not associated with %s", name);
-
-        return query;
     }
 
     public async void open_async(GLib.Cancellable? cancellable)
@@ -677,288 +479,6 @@ private class Geary.ImapDB.Account : BaseObject {
         return (messages.size == 0 ? null : messages);
     }
 
-    private string? extract_field_from_token(string[] parts, ref string token) {
-        string? field = null;
-        if (Geary.String.is_empty_or_whitespace(parts[1])) {
-            // User stopped at "field:", treat it as if they hadn't
-            // typed the ':'
-            token = parts[0];
-        } else {
-            field = search_op_names.get(parts[0].down());
-            if (field == SEARCH_OP_IS) {
-                string? value = search_op_is_values.get(parts[1].down());
-                if (value != null) {
-                    token = value;
-                } else {
-                    // Unknown op value, pretend there is no search op
-                    field = null;
-                }
-            } else if (field == SEARCH_OP_FROM &&
-                       parts[1].down() in search_op_from_me_values) {
-                // Search for all addresses on the account. Bug 768779
-                token = account_information.primary_mailbox.address;
-            } else if (field in SEARCH_OP_TO_ME_FIELDS &&
-                       parts[1].down() in search_op_to_me_values) {
-                // Search for all addresses on the account. Bug 768779
-                token = account_information.primary_mailbox.address;
-            } else if (field != null) {
-                token = parts[1];
-            }
-        }
-        return field;
-    }
-
-    /**
-     * This method is used to convert an unquoted user-entered search terms into a stemmed search
-     * term.
-     *
-     * Prior experience with the Unicode Snowball stemmer indicates it's too aggressive for our
-     * tastes when coupled with prefix-matching of all unquoted terms (see
-     * https://bugzilla.gnome.org/show_bug.cgi?id=713179)   This method is part of a larger strategy
-     * designed to dampen that aggressiveness without losing the benefits of stemming entirely.
-     *
-     * Database upgrade 23 removes the old Snowball-stemmed FTS table and replaces it with one
-     * with no stemming (using only SQLite's "simple" tokenizer).  It also creates a "magic" SQLite
-     * table called TokenizerTable which allows for uniform queries to the Snowball stemmer, which
-     * is still installed in Geary.  Thus, we are now in the position to search for the original
-     * term and its stemmed variant, then do post-search processing to strip results which are
-     * too "greedy" due to prefix-matching the stemmed variant.
-     *
-     * Some heuristics are in place simply to determine if stemming should occur:
-     *
-     * # If stemming is unallowed, no stemming occurs.
-     * # If the term is < min. term length for stemming, no stemming occurs.
-     * # If the stemmer returns a stem that is the same as the original term, no stemming occurs.
-     * # If the difference between the stemmed word and the original term is more than
-     *   maximum allowed, no stemming occurs.  This works under the assumption that if
-     *   the user has typed a long word, they do not want to "go back" to searching for a much
-     *   shorter version of it.  (For example, "accountancies" stems to "account").
-     *
-     * Otherwise, the stem for the term is returned.
-     */
-    private string? stem_search_term(ImapDB.SearchQuery query, string term) {
-        if (!query.allow_stemming)
-            return null;
-
-        int term_length = term.length;
-        if (term_length < query.min_term_length_for_stemming)
-            return null;
-
-        string? stemmed = null;
-        try {
-            Db.Statement stmt = db.prepare("""
-                SELECT token
-                FROM TokenizerTable
-                WHERE input=?
-            """);
-            stmt.bind_string(0, term);
-
-            // get stemmed string; if no result, fall through
-            Db.Result result = stmt.exec();
-            if (!result.finished)
-                stemmed = result.string_at(0);
-            else
-                debug("No stemmed term returned for \"%s\"", term);
-        } catch (Error err) {
-            debug("Unable to query tokenizer table for stemmed term for \"%s\": %s", term, err.message);
-
-            // fall-through
-        }
-
-        if (String.is_empty(stemmed)) {
-            debug("Empty stemmed term returned for \"%s\"", term);
-
-            return null;
-        }
-
-        // If same term returned, treat as non-stemmed
-        if (stemmed == term)
-            return null;
-
-        // Don't search for stemmed words that are significantly shorter than the user's search term
-        if (term_length - stemmed.length > query.max_difference_term_stem_lengths) {
-            debug("Stemmed \"%s\" dropped searching for \"%s\": too much distance in terms",
-                stemmed, term);
-
-            return null;
-        }
-
-        debug("Search processing: term -> stem is \"%s\" -> \"%s\"", term, stemmed);
-
-        return stemmed;
-    }
-
-    private void prepare_search_query(ImapDB.SearchQuery query) {
-        if (query.parsed)
-            return;
-
-        // A few goals here:
-        //   1) Append an * after every term so it becomes a prefix search
-        //      (see <https://www.sqlite.org/fts3.html#section_3>)
-        //   2) Strip out common words/operators that might get interpreted as
-        //      search operators
-        //   3) Parse each word into a list of which field it applies to, so
-        //      you can do "to:johndoe@example.com thing" (quotes excluded)
-        //      to find messages to John containing the word thing
-        // We ignore everything inside quotes to give the user a way to
-        // override our algorithm here.  The idea is to offer one search query
-        // syntax for Geary that we can use locally and via IMAP, etc.
-
-        string quote_balanced = query.raw;
-        if (Geary.String.count_char(query.raw, '"') % 2 != 0) {
-            // Remove the last quote if it's not balanced.  This has the
-            // benefit of showing decent results as you type a quoted phrase.
-            int last_quote = query.raw.last_index_of_char('"');
-            assert(last_quote >= 0);
-            quote_balanced = query.raw.splice(last_quote, last_quote + 1, " ");
-        }
-
-        string[] words = quote_balanced.split_set(" \t\r\n()%*\\");
-        bool in_quote = false;
-        foreach (string s in words) {
-            string? field = null;
-
-            s = s.strip();
-
-            int quotes = Geary.String.count_char(s, '"');
-            if (!in_quote && quotes > 0) {
-                in_quote = true;
-                --quotes;
-            }
-
-            SearchTerm? term;
-            if (in_quote) {
-                // HACK: this helps prevent a syntax error when the user types
-                // something like from:"somebody".  If we ever properly support
-                // quotes after : we can get rid of this.
-                term = new SearchTerm(s, s, null, s.replace(":", " "), null);
-            } else {
-                string original = s;
-
-                // Some common search phrases we don't respect and
-                // therefore don't want to fall through to search
-                // results
-                // XXX translate these
-                string lower = s.down();
-                switch (lower) {
-                    case "":
-                    case "and":
-                    case "or":
-                    case "not":
-                    case "near":
-                        continue;
-
-                    default:
-                        if (lower.has_prefix("near/"))
-                            continue;
-                    break;
-                }
-
-                if (s.has_prefix("-"))
-                    s = s.substring(1);
-
-                if (s == "")
-                    continue;
-
-                // TODO: support quotes after :
-                string[] parts = s.split(":", 2);
-                if (parts.length > 1)
-                    field = extract_field_from_token(parts, ref s);
-
-                if (field == SEARCH_OP_IS) {
-                    // s will have been de-translated
-                    term = new SearchTerm(original, s, null, null, null);
-                } else {
-                    // SQL MATCH syntax for parsed term
-                    string? sql_s = "%s*".printf(s);
-
-                    // stem the word, but if stemmed and stem is
-                    // simply shorter version of original term, only
-                    // prefix-match search for it (i.e. avoid
-                    // searching for [archive* OR archiv*] when that's
-                    // the same as [archiv*]), otherwise search for
-                    // both
-                    string? stemmed = stem_search_term(query, s);
-
-                    string? sql_stemmed = null;
-                    if (stemmed != null) {
-                        sql_stemmed = "%s*".printf(stemmed);
-                        if (s.has_prefix(stemmed))
-                            sql_s = null;
-                    }
-
-                    // if term contains continuation characters, treat
-                    // as exact search to reduce effects of tokenizer
-                    // splitting terms w/ punctuation in them
-                    if (String.contains_any_char(s, SEARCH_TERM_CONTINUATION_CHARS))
-                        s = "\"%s\"".printf(s);
-
-                    term = new SearchTerm(original, s, stemmed, sql_s, sql_stemmed);
-                }
-            }
-
-            if (in_quote && quotes % 2 != 0)
-                in_quote = false;
-
-            query.add_search_term(field, term);
-        }
-
-        assert(!in_quote);
-
-        query.parsed = true;
-    }
-
-    // Return a map of column -> phrase, to use as WHERE column MATCH 'phrase'.
-    private Gee.HashMap<string, string> get_query_phrases(ImapDB.SearchQuery query) {
-        prepare_search_query(query);
-
-        Gee.HashMap<string, string> phrases = new Gee.HashMap<string, string>();
-        foreach (string? field in query.get_fields()) {
-            Gee.List<SearchTerm>? terms = query.get_search_terms(field);
-            if (terms == null || terms.size == 0 || field == "is")
-                continue;
-
-            // Each SearchTerm is an AND but the SQL text within in are OR ... this allows for
-            // each user term to be AND but the variants of each term are or.  So, if terms are
-            // [party] and [eventful] and stems are [parti] and [event], the search would be:
-            //
-            // (party* OR parti*) AND (eventful* OR event*)
-            //
-            // Obviously with stemming there's the possibility of the stemmed variant being nothing
-            // but a broader search of the original term (such as event* and eventful*) but do both
-            // to determine from each hit result which term caused the hit, and if it's too greedy
-            // a match of the stemmed variant, it can be stripped from the results.
-            //
-            // Note that this uses SQLite's "standard" query syntax for MATCH, where AND is implied
-            // (and would be treated as search term if included), parentheses are not allowed, and
-            // OR has a higher precedence than AND.  So the above example in standard syntax is:
-            //
-            // party* OR parti* eventful* OR event*
-            StringBuilder builder = new StringBuilder();
-            foreach (SearchTerm term in terms) {
-                if (term.sql.size == 0)
-                    continue;
-
-                if (term.is_exact) {
-                    builder.append_printf("%s ", term.parsed);
-                } else {
-                    bool is_first_sql = true;
-                    foreach (string sql in term.sql) {
-                        if (!is_first_sql)
-                            builder.append(" OR ");
-
-                        builder.append_printf("%s ", sql);
-                        is_first_sql = false;
-                    }
-                }
-            }
-
-            phrases.set(field ?? "MessageSearchTable", builder.str);
-        }
-
-        return phrases;
-    }
-
     private void sql_add_query_phrases(StringBuilder sql, Gee.HashMap<string, string> query_phrases,
         string operator, string columns, string condition) {
         bool is_first_field = true;
@@ -1034,8 +554,8 @@ private class Geary.ImapDB.Account : BaseObject {
         check_open();
         ImapDB.SearchQuery query = check_search_query(q);
 
-        Gee.HashMap<string, string> query_phrases = get_query_phrases(query);
-        Gee.Map<Geary.NamedFlag, bool> removal_conditions = get_removal_conditions(query);
+        Gee.HashMap<string, string> query_phrases = query.get_query_phrases();
+        Gee.Map<Geary.NamedFlag, bool> removal_conditions = query.get_removal_conditions();
         if (query_phrases.size == 0 && removal_conditions.is_empty)
             return null;
 
@@ -1059,8 +579,9 @@ private class Geary.ImapDB.Account : BaseObject {
         // Do this outside of transaction to catch invalid search ids up-front
         string? search_ids_sql = get_search_ids_sql(search_ids);
 
-        bool strip_greedy = should_strip_greedy_results(query);
-        Gee.Set<EmailIdentifier> matching_ids = new Gee.HashSet<EmailIdentifier>();
+        bool strip_greedy = query.should_strip_greedy_results();
+        Gee.List<EmailIdentifier> matching_ids =
+            new Gee.LinkedList<EmailIdentifier>();
         Gee.Map<EmailIdentifier,Gee.Set<string>>? search_matches = null;
 
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
@@ -1152,67 +673,38 @@ private class Geary.ImapDB.Account : BaseObject {
         return matching_ids.is_empty ? null : matching_ids;
     }
 
-    private Gee.Map<Geary.NamedFlag, bool> get_removal_conditions(ImapDB.SearchQuery query) {
-        Gee.Map<Geary.NamedFlag, bool> removal_conditions = new Gee.HashMap<Geary.NamedFlag, bool>();
-        foreach (string? field in query.get_fields())
-            if (field == SEARCH_OP_IS) {
-                Gee.List<SearchTerm>? terms = query.get_search_terms(field);
-                foreach (SearchTerm term in terms)
-                    if (term.parsed == SEARCH_OP_VALUE_READ)
-                        removal_conditions.set(new NamedFlag("UNREAD"), true);
-                    else if (term.parsed == SEARCH_OP_VALUE_UNREAD)
-                        removal_conditions.set(new NamedFlag("UNREAD"), false);
-                    else if (term.parsed == SEARCH_OP_VALUE_STARRED)
-                        removal_conditions.set(new NamedFlag("FLAGGED"), false);
-                return removal_conditions;
-            }
-        return removal_conditions;
-    }
-
     // Strip out from the given collection any email that matches the
     // given removal conditions
     private async void strip_removal_conditions(ImapDB.SearchQuery query,
                                                 Gee.Collection<EmailIdentifier> matches,
-                                                Gee.Map<Geary.NamedFlag, bool> conditions,
-                                                GLib.Cancellable? cancellable = null) {
+                                                Gee.Map<Geary.NamedFlag,bool> conditions,
+                                                GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         Email.Field required_fields = Geary.Email.Field.FLAGS;
         Gee.Iterator<EmailIdentifier> iter = matches.iterator();
-        while (iter.next()) {
-            try {
-                ImapDB.EmailIdentifier id = iter.get();
-                Geary.Email email = yield fetch_email_async(id, required_fields, cancellable);
-                foreach (Geary.NamedFlag flag in conditions.keys)
-                    if (email.email_flags.contains(flag) == conditions.get(flag)) {
+
+        yield db.exec_transaction_async(RO, (cx) => {
+                while (iter.next()) {
+                    ImapDB.EmailIdentifier id = iter.get();
+                    MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
+                        cx, id.message_id, required_fields, null, cancellable
+                    );
+                    Geary.EmailFlags? flags = row.get_generic_email_flags();
+                    if (flags != null) {
+                        foreach (Gee.Map.Entry<NamedFlag,bool> condition
+                                 in conditions.entries) {
+                            if (flags.contains(condition.key) == condition.value) {
+                                iter.remove();
+                                break;
+                            }
+                        }
+                    } else {
                         iter.remove();
-                        break;
                     }
-            } catch (Error e) {
-                debug("Error fetching email: %s", e.message);
-            }
-        }
-    }
-
-    // For some searches, results are stripped if they're too
-    // "greedy", but this requires examining the matched text, which
-    // has an expense to fetch, so avoid doing so unless necessary
-    private bool should_strip_greedy_results(SearchQuery query) {
-        // HORIZON strategy is configured in such a way to allow all
-        // stemmed variants to match, so don't do any stripping in
-        // that case
-        //
-        // If any of the search terms is exact-match (no prefix
-        // matching) or none have stemmed variants, then don't do
-        // stripping of "greedy" stemmed matching (because in both
-        // cases, there are none)
-
-        bool strip_results = true;
-        if (query.strategy == Geary.SearchQuery.Strategy.HORIZON)
-            strip_results = false;
-        else if (traverse<SearchTerm>(query.get_all_terms()).any(
-                     term => term.stemmed == null || term.is_exact)) {
-            strip_results = false;
-        }
-        return strip_results;
+                }
+                return Db.TransactionOutcome.DONE;
+            }, cancellable
+        );
     }
 
     // Strip out from the given collection of matching ids and results
@@ -1284,7 +776,7 @@ private class Geary.ImapDB.Account : BaseObject {
             if (match_map == null || match_map.size == 0)
                 return Db.TransactionOutcome.DONE;
 
-            if (should_strip_greedy_results(query)) {
+            if (query.should_strip_greedy_results()) {
                 strip_greedy_results(query, ids, match_map);
             }
 
@@ -1792,7 +1284,7 @@ private class Geary.ImapDB.Account : BaseObject {
         if (id_map.size == 0)
             return null;
 
-        Gee.HashMap<string, string> query_phrases = get_query_phrases(query);
+        Gee.HashMap<string, string> query_phrases = query.get_query_phrases();
         if (query_phrases.size == 0)
             return null;
 
@@ -1896,6 +1388,14 @@ private class Geary.ImapDB.Account : BaseObject {
         if (!this.db.is_open) {
             throw new EngineError.OPEN_REQUIRED("Database not open");
         }
+    }
+
+    private ImapDB.SearchQuery check_search_query(Geary.SearchQuery q) throws Error {
+        ImapDB.SearchQuery? query = q as ImapDB.SearchQuery;
+        if (query == null || query.account != this)
+            throw new EngineError.BAD_PARAMETERS("Geary.SearchQuery not associated with %s", name);
+
+        return query;
     }
 
 }

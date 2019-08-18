@@ -85,13 +85,20 @@ public class Geary.App.ConversationMonitor : BaseObject {
     /** Determines if this monitor is monitoring the base folder. */
     public bool is_monitoring { get; private set; default = false; }
 
+    /** Determines if more conversations should be loaded. */
+    public bool should_load_more {
+        get {
+            return (this.conversations.size < this.min_window_count);
+        }
+    }
+
     /** Determines if more conversations can be loaded. */
     public bool can_load_more {
         get {
             return (
                 this.base_folder.properties.email_total >
                 this.folder_window_size
-            );
+            ) && !this.fill_complete;
         }
     }
 
@@ -126,6 +133,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             return (this.window.is_empty) ? null : this.window.first();
         }
     }
+
+    /** Determines if the fill operation can load more messages. */
+    internal bool fill_complete { get; set; default = false; }
 
     private Geary.Email.Field required_fields;
     private Geary.Folder.OpenFlags open_flags;
@@ -364,7 +374,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     internal void check_window_count() {
         if (this.is_monitoring &&
             this.can_load_more &&
-            this.conversations.size < this.min_window_count) {
+            this.should_load_more) {
             this.queue.add(new FillWindowOperation(this));
         }
     }

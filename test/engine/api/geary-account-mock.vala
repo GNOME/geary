@@ -213,7 +213,10 @@ public class Geary.MockAccount : Account, MockObject {
         );
     }
 
-    public override SearchQuery open_search(string query, SearchQuery.Strategy strategy) {
+    public override async SearchQuery open_search(string query,
+                                                  SearchQuery.Strategy strategy,
+                                                  GLib.Cancellable? cancellable)
+        throws GLib.Error {
         return new MockSearchQuery();
     }
 
