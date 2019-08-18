@@ -37,22 +37,48 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
             num_to_load = MAX_FILL_COUNT;
         }
 
-        debug(
-            "Filling %d messages in %s...",
-            num_to_load, this.monitor.base_folder.to_string()
-        );
-
         int loaded = yield this.monitor.load_by_id_async(
-            this.monitor.window_lowest, num_to_load
+            this.monitor.window_lowest, num_to_load, LOCAL_ONLY
         );
 
-        // Check to see if we need any more, but only if there might
-        // be some more to load either locally or from the remote. If
-        // we loaded the full amount, there might be some more
-        // locally, so try that. If not, but the monitor thinks there
-        // are more to load, then we have go check the remote.
-        if (loaded == num_to_load || this.monitor.can_load_more) {
+        debug(
+            "Filled %d of %d locally, window: %d, total: %d",
+            loaded, num_to_load,
+            this.monitor.conversations.size,
+            this.monitor.base_folder.properties.email_total
+        );
+
+        if (loaded < num_to_load &&
+            this.monitor.can_load_more &&
+            this.monitor.base_folder.get_open_state() == REMOTE) {
+            // Not enough were loaded locally, but the remote seems to
+            // be online and it looks like there and there might be
+            // some more on the remote, so go see if there are any.
+            //
+            // XXX Ideally this would be performed as an explicit user
+            // action
+
+            // Load the max amount if going to the trouble of talking
+            // to the remote.
+            num_to_load = MAX_FILL_COUNT;
+            loaded = yield this.monitor.load_by_id_async(
+                this.monitor.window_lowest, num_to_load, FORCE_UPDATE
+            );
+
+            debug(
+                "Filled %d of %d from the remote, window: %d, total: %d",
+                loaded, num_to_load,
+                this.monitor.conversations.size,
+                this.monitor.base_folder.properties.email_total
+            );
+
+        }
+
+        if (loaded == num_to_load) {
+            // Loaded the maximum number of messages, so go see if
+            // there are any more needed.
             this.monitor.check_window_count();
         }
+
     }
 }
