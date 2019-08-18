@@ -42,22 +42,22 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Mark/un-mark read</property>
-                                <property name="accelerator">&lt;primary&gt;U &lt;primary&gt;I</property>
+                                <property name="title" translatable="yes" context="shortcut window">Un-mark/mark read</property>
+                                <property name="accelerator">&lt;primary&gt;U &lt;primary&gt;&lt;Shift&gt;U</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Mark/un-mark starred</property>
-                                <property name="accelerator">&lt;primary&gt;S &lt;primary&gt;D</property>
+                                <property name="accelerator">&lt;primary&gt;D &lt;primary&gt;&lt;Shift&gt;D</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Archive conversation</property>
-                                <property name="accelerator">&lt;primary&gt;A</property>
+                                <property name="accelerator">&lt;primary&gt;K</property>
                             </object>
                         </child>
                         <child>
@@ -91,7 +91,8 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Delete</property>
+                                <property name="title"
+                                          translatable="yes" context="shortcut window">Delete conversation</property>
                                 <property name="accelerator">&lt;Shift&gt;Delete &lt;Shift&gt;Back</property>
                             </object>
                         </child>
@@ -116,8 +117,7 @@
                             </object>
                         </child>
                         <!--
-                             The following two aren't curently
-                             supported.
+                             The following two aren't currently supported.
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
@@ -388,7 +388,7 @@
                                 <property name="visible">True</property>
                                 <property name="title"
                                           translatable="yes" context="shortcut window">Move selection to the clipboard</property>
-                                <property name="accelerator">&lt;primary&gt;C</property>
+                                <property name="accelerator">&lt;primary&gt;X</property>
                             </object>
                         </child>
                         <child>

@@ -589,25 +589,38 @@ public class Application.Controller : Geary.BaseObject {
     private void setup_actions() {
         this.main_window.add_action_entries(win_action_entries, this);
 
-        add_window_accelerators(ACTION_MARK_AS_READ, { "<Ctrl>I", "<Shift>I" });
+        // Marking actions
+        //
+        // Unmark is the primary action
+        add_window_accelerators(ACTION_MARK_AS_READ, { "<Ctrl><Shift>U", "<Shift>I" });
         add_window_accelerators(ACTION_MARK_AS_UNREAD, { "<Ctrl>U", "<Shift>U" });
-        add_window_accelerators(ACTION_MARK_AS_STARRED, { "<Ctrl>S", "S" });
-        add_window_accelerators(ACTION_MARK_AS_UNSTARRED, { "<Ctrl>D", "D" });
+        // Ephy uses Ctrl+D for bookmarking
+        add_window_accelerators(ACTION_MARK_AS_STARRED, { "<Ctrl>D", "S" });
+        add_window_accelerators(ACTION_MARK_AS_UNSTARRED, { "<Ctrl><Shift>D", "D" });
         add_window_accelerators(ACTION_MARK_AS_SPAM, { "<Ctrl>J", "exclam" }); // Exclamation mark (!)
-        add_window_accelerators(ACTION_MARK_AS_NOT_SPAM, { "<Ctrl>J", "exclam" });
-        add_window_accelerators(ACTION_COPY_MENU, { "<Ctrl>L", "L" });
-        add_window_accelerators(ACTION_MOVE_MENU, { "<Ctrl>M", "M" });
+
+        // Replying & forwarding
         add_window_accelerators(ACTION_REPLY_TO_MESSAGE, { "<Ctrl>R", "R" });
         add_window_accelerators(ACTION_REPLY_ALL_MESSAGE, { "<Ctrl><Shift>R", "<Shift>R" });
         add_window_accelerators(ACTION_FORWARD_MESSAGE, { "<Ctrl>L", "F" });
-        add_window_accelerators(ACTION_FIND_IN_CONVERSATION, { "<Ctrl>F", "slash" });
-        add_window_accelerators(ACTION_ARCHIVE_CONVERSATION, { "<Ctrl>A", "A", "Y" });
+
+        // Moving & labelling
+        add_window_accelerators(ACTION_COPY_MENU, { "<Ctrl>L", "L" });
+        add_window_accelerators(ACTION_MOVE_MENU, { "<Ctrl>M", "M" });
+        add_window_accelerators(ACTION_ARCHIVE_CONVERSATION, { "<Ctrl>K", "A", "Y" });
         add_window_accelerators(ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" });
         add_window_accelerators(ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" });
+
+        // Find & search
+        add_window_accelerators(ACTION_FIND_IN_CONVERSATION, { "<Ctrl>F", "slash" });
+        add_window_accelerators(ACTION_SEARCH, { "<Ctrl>S" });
+
+        // Zoom
         add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "<Ctrl>plus" });
         add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus" });
         add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0" });
-        add_window_accelerators(ACTION_SEARCH, { "<Ctrl>S" });
+
+        // Navigation
         add_window_accelerators(ACTION_CONVERSATION_LIST, { "<Ctrl>B" });
         add_window_accelerators(ACTION_CONVERSATION_UP, { "<Ctrl>bracketleft", "K" });
         add_window_accelerators(ACTION_CONVERSATION_DOWN, { "<Ctrl>bracketright", "J" });
