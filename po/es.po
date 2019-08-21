@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-07-21 15:51+0000\n"
-"PO-Revision-Date: 2019-07-26 09:32+0200\n"
+"POT-Creation-Date: 2019-08-18 11:39+0000\n"
+"PO-Revision-Date: 2019-08-21 12:18+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -591,7 +591,7 @@ msgstr[0] "hace %d día"
 msgstr[1] "hace %d días"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-controller.vala:2413
+#: src/client/application/application-controller.vala:2405
 msgid "Undo"
 msgstr "Deshacer"
 
@@ -767,29 +767,29 @@ msgid "Untitled"
 msgstr "Sin título"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:565
+#: src/client/application/application-controller.vala:564
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "Ha ocurrido un error al enviar el correo para %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:569
+#: src/client/application/application-controller.vala:568
 msgid "Email will not be sent until re-connected"
 msgstr "El correo no se enviará hasta que se vuelva a conectar"
 
-#: src/client/application/application-controller.vala:907
+#: src/client/application/application-controller.vala:919
 msgid "Labels"
 msgstr "Etiquetas"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/application-controller.vala:920
+#: src/client/application/application-controller.vala:932
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "No se pudo abrir la base de datos local para %s"
 
-#: src/client/application/application-controller.vala:921
+#: src/client/application/application-controller.vala:933
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -814,20 +814,20 @@ msgstr ""
 "Reconstruir la base de datos destruirá todo el correo guardado de forma "
 "local y sus adjuntos. <b>El correo del servidor permanecerá intacto.</b>"
 
-#: src/client/application/application-controller.vala:923
+#: src/client/application/application-controller.vala:935
 msgid "_Rebuild"
 msgstr "_Reconstruir"
 
-#: src/client/application/application-controller.vala:923
+#: src/client/application/application-controller.vala:935
 msgid "E_xit"
 msgstr "_Salir"
 
-#: src/client/application/application-controller.vala:932
+#: src/client/application/application-controller.vala:944
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "No se puede reconstruir la base de datos para «%s»"
 
-#: src/client/application/application-controller.vala:933
+#: src/client/application/application-controller.vala:945
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -838,18 +838,18 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/application-controller.vala:1717
+#: src/client/application/application-controller.vala:1739
 #, c-format
 msgid "Moved %d message to %s"
 msgid_plural "Moved %d messages to %s"
 msgstr[0] "Movido %d mensaje a %s"
 msgstr[1] "Movidos %d mensajes a %s"
 
-#: src/client/application/application-controller.vala:1727
+#: src/client/application/application-controller.vala:1749
 msgid "Are you sure you want to open these attachments?"
 msgstr "¿Está seguro de que quiere abrir estos adjuntos?"
 
-#: src/client/application/application-controller.vala:1728
+#: src/client/application/application-controller.vala:1750
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -857,14 +857,14 @@ msgstr ""
 "Los archivos adjuntos podrían causar daños a su sistema. Abra solo los "
 "archivos que provengan de fuentes fiables."
 
-#: src/client/application/application-controller.vala:1729
+#: src/client/application/application-controller.vala:1751
 msgid "Don’t _ask me again"
 msgstr "No volver a _preguntarme"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/application-controller.vala:1852
+#: src/client/application/application-controller.vala:1874
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Ya existe un archivo llamado «%s». ¿Quiere reemplazarlo?"
@@ -872,65 +872,59 @@ msgstr "Ya existe un archivo llamado «%s». ¿Quiere reemplazarlo?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/application-controller.vala:1859
+#: src/client/application/application-controller.vala:1881
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
 "El archivo ya existe en «%s». Si lo reemplaza sobrescribirá su contenido."
 
-#: src/client/application/application-controller.vala:1863
+#: src/client/application/application-controller.vala:1885
 msgid "_Replace"
 msgstr "_Reemplazar"
 
-#: src/client/application/application-controller.vala:2125
-msgid "Close the draft message?"
-msgid_plural "Close all draft messages?"
-msgstr[0] "¿Quiere cerrar el mensaje en borrador?"
-msgstr[1] "¿Quiere cerrar los mensajes en borrador?"
-
-#: src/client/application/application-controller.vala:2250
+#: src/client/application/application-controller.vala:2245
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "¿Quiere eliminar todos los mensajes de la carpeta «%s»?"
 
-#: src/client/application/application-controller.vala:2251
+#: src/client/application/application-controller.vala:2246
 msgid "This removes the email from Geary and your email server."
 msgstr ""
 "Esto eliminará el mensaje de Geary y del servidor de correo electrónico."
 
-#: src/client/application/application-controller.vala:2252
+#: src/client/application/application-controller.vala:2247
 msgid "This cannot be undone."
 msgstr "Esto no se puede deshacer."
 
-#: src/client/application/application-controller.vala:2253
+#: src/client/application/application-controller.vala:2248
 #, c-format
 msgid "Empty %s"
 msgstr "Vaciar %s"
 
-#: src/client/application/application-controller.vala:2270
+#: src/client/application/application-controller.vala:2265
 #, c-format
 msgid "Error emptying %s"
 msgstr "Error al vaciar «%s»"
 
-#: src/client/application/application-controller.vala:2301
+#: src/client/application/application-controller.vala:2296
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "¿Quiere eliminar permanentemente este mensaje?"
 msgstr[1] "¿Quiere eliminar permanentemente estos mensajes?"
 
-#: src/client/application/application-controller.vala:2303
+#: src/client/application/application-controller.vala:2298
 msgid "Delete"
 msgstr "Eliminar"
 
-#: src/client/application/application-controller.vala:2317
+#: src/client/application/application-controller.vala:2312
 #, c-format
 msgid "Trashed %d message"
 msgid_plural "Trashed %d messages"
 msgstr[0] "%d mensaje eliminado"
 msgstr[1] "%d mensajes eliminados"
 
-#: src/client/application/application-controller.vala:2367
+#: src/client/application/application-controller.vala:2359
 #, c-format
 msgid "Archived %d message"
 msgid_plural "Archived %d messages"
@@ -939,12 +933,12 @@ msgstr[1] "%d mensajes archivados"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2495
+#: src/client/application/application-controller.vala:2487
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Correo enviado correctamente a %s."
 
-#: src/client/application/application-controller.vala:2573
+#: src/client/application/application-controller.vala:2565
 msgid "Failed to open default text editor."
 msgstr "Falló al abrir el editor de textos predeterminado."
 
@@ -1179,43 +1173,48 @@ msgstr "Se necesita un nombre de servidor"
 msgid "Could not look up server name"
 msgstr "No se pudo encontrar el nombre del servidor"
 
-#: src/client/components/main-toolbar.vala:134
+#: src/client/components/main-toolbar.vala:139
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Marcar conversación"
 msgstr[1] "Marcar conversaciones"
 
-#: src/client/components/main-toolbar.vala:139
+#: src/client/components/main-toolbar.vala:144
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Añadir etiqueta a la conversación"
 msgstr[1] "Añadir etiqueta a las conversaciones"
 
-#: src/client/components/main-toolbar.vala:144
+#: src/client/components/main-toolbar.vala:149
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Mover conversación"
 msgstr[1] "Mover conversaciones"
 
-#: src/client/components/main-toolbar.vala:149
-msgid "Archive conversation (A)"
-msgid_plural "Archive conversations (A)"
-msgstr[0] "Archivar conversación (A)"
-msgstr[1] "Archivar conversaciones (A)"
+#: src/client/components/main-toolbar.vala:154
+#| msgctxt "shortcut window"
+#| msgid "Archive conversation"
+msgid "Archive conversation"
+msgid_plural "Archive conversations"
+msgstr[0] "Archivar conversación"
+msgstr[1] "Archivar conversación"
 
-#: src/client/components/main-toolbar.vala:158
-msgid "Move conversation to Trash (Delete, Backspace)"
-msgid_plural "Move conversations to Trash (Delete, Backspace)"
-msgstr[0] "Mover conversación a la papelera (Supr, Retroceso)"
-msgstr[1] "Mover conversaciones a la papelera (Supr, Retroceso)"
+#: src/client/components/main-toolbar.vala:163
+#| msgid "Move conversation"
+#| msgid_plural "Move conversations"
+msgid "Move conversation to Trash"
+msgid_plural "Move conversations to Trash"
+msgstr[0] "Mover conversación a la papelera"
+msgstr[1] "Mover conversaciones a la papelera"
 
-#: src/client/components/main-toolbar.vala:166
-msgid "Delete conversation (Shift+Delete)"
-msgid_plural "Delete conversations (Shift+Delete)"
-msgstr[0] "Eliminar conversación (Mayús+Supr)"
-msgstr[1] "Eliminar conversaciones (Mayús+Supr)"
+#: src/client/components/main-toolbar.vala:171
+#| msgid "Delete conversation"
+msgid "Delete conversation"
+msgid_plural "Delete conversations"
+msgstr[0] "Eliminar conversación"
+msgstr[1] "Eliminar conversaciones"
 
-#: src/client/components/main-window.vala:705
+#: src/client/components/main-window.vala:733
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1230,7 +1229,6 @@ msgstr "Problema con la cuenta"
 #. problem. String substitution is the account name.
 #: src/client/components/main-window-info-bar.vala:48
 #, c-format
-#| msgid "Geary has encountered a problem"
 msgid "Geary has encountered a problem with %s."
 msgstr "Geary ha encontrado un problema con %s."
 
@@ -1239,7 +1237,6 @@ msgstr "Geary ha encontrado un problema con %s."
 #. account name.
 #: src/client/components/main-window-info-bar.vala:61
 #, c-format
-#| msgid "Geary encountered a problem connecting to an account."
 msgid "Geary encountered a problem checking mail for %s."
 msgstr "Geary ha encontrado un problema al comprobar el correo para %s."
 
@@ -1253,7 +1250,6 @@ msgstr "Vuelva a intentar conectar"
 #. account name
 #: src/client/components/main-window-info-bar.vala:73
 #, c-format
-#| msgid "Geary encountered a problem connecting to an account."
 msgid "Geary encountered a problem sending email for %s."
 msgstr "Geary ha encontrado un problema al enviar correo para %s."
 
@@ -1271,8 +1267,6 @@ msgstr "Geary ha encontrado un problema"
 #. Translators: Info bar sub-title for a generic
 #. application problem.
 #: src/client/components/main-window-info-bar.vala:88
-#| msgid ""
-#| "Please check the technical details and report the problem if it persists."
 msgid "Please report the details if it persists."
 msgstr "Informe del problema si persiste."
 
@@ -1432,34 +1426,34 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1146
+#: src/client/composer/composer-widget.vala:1181
 msgid "Do you want to keep or discard this draft message?"
 msgstr "¿Quiere mantener o descartar este mensaje en borrador?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1176
+#: src/client/composer/composer-widget.vala:1211
 msgid "Do you want to discard this draft message?"
 msgstr "¿Quiere descartar este mensaje en borrador?"
 
-#: src/client/composer/composer-widget.vala:1295
+#: src/client/composer/composer-widget.vala:1330
 msgid "Send message with an empty subject and body?"
 msgstr "¿Quiere enviar el mensaje sin asunto ni cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1297
+#: src/client/composer/composer-widget.vala:1332
 msgid "Send message with an empty subject?"
 msgstr "¿Quiere enviar el mensaje sin asunto?"
 
-#: src/client/composer/composer-widget.vala:1299
+#: src/client/composer/composer-widget.vala:1334
 msgid "Send message with an empty body?"
 msgstr "¿Quiere enviar el mensaje sin cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1303
+#: src/client/composer/composer-widget.vala:1338
 msgid "Send message without an attachment?"
 msgstr "¿Quiere enviar el mensaje sin el archivo adjunto?"
 
-#: src/client/composer/composer-widget.vala:1610
+#: src/client/composer/composer-widget.vala:1652
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Ya se ha adjuntado «%s» para enviarlo."
@@ -1469,63 +1463,63 @@ msgstr "Ya se ha adjuntado «%s» para enviarlo."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1618
+#: src/client/composer/composer-widget.vala:1660
 #: src/client/conversation-viewer/conversation-email.vala:173
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1655
+#: src/client/composer/composer-widget.vala:1697
 #, c-format
 msgid "“%s” could not be found."
 msgstr "No se pudo encontrar «%s»."
 
-#: src/client/composer/composer-widget.vala:1661
+#: src/client/composer/composer-widget.vala:1703
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» es una carpeta."
 
-#: src/client/composer/composer-widget.vala:1667
+#: src/client/composer/composer-widget.vala:1709
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» es un archivo vacío."
 
-#: src/client/composer/composer-widget.vala:1680
+#: src/client/composer/composer-widget.vala:1722
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "No se pudo abrir «%s» para lectura."
 
-#: src/client/composer/composer-widget.vala:1688
+#: src/client/composer/composer-widget.vala:1730
 msgid "Cannot add attachment"
 msgstr "No se puede adjuntar el archivo"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1738
+#: src/client/composer/composer-widget.vala:1787
 #: src/client/conversation-viewer/conversation-email.vala:976
 #: src/client/util/util-email.vala:216 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Para:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1744
+#: src/client/composer/composer-widget.vala:1793
 #: src/client/conversation-viewer/conversation-email.vala:981
 #: src/client/util/util-email.vala:221 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1750
+#: src/client/composer/composer-widget.vala:1799
 #: src/client/conversation-viewer/conversation-email.vala:986
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Cco:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:1756
+#: src/client/composer/composer-widget.vala:1805
 msgid "Reply-To: "
 msgstr "Responder a:"
 
-#: src/client/composer/composer-widget.vala:1896
+#: src/client/composer/composer-widget.vala:1945
 msgid "Select Color"
 msgstr "Seleccionar color"
 
@@ -1534,20 +1528,20 @@ msgstr "Seleccionar color"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2088
+#: src/client/composer/composer-widget.vala:2137
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s mediante %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2143
+#: src/client/composer/composer-widget.vala:2192
 msgid "_From:"
 msgstr "_De:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2423
+#: src/client/composer/composer-widget.vala:2472
 msgid "Images"
 msgstr "Imágenes"
 
@@ -1567,42 +1561,55 @@ msgstr "Añadir este idioma de la lista de favoritos"
 msgid "Search for more languages"
 msgstr "Buscar más idiomas"
 
-#: src/client/conversation-list/conversation-list-view.vala:322
-msgid "Delete conversation"
-msgstr "Eliminar conversación"
+#. / Translators: Context menu item
+#: src/client/conversation-list/conversation-list-view.vala:337
+#| msgid "Move conversation"
+#| msgid_plural "Move conversations"
+msgid "Move conversation to _Trash"
+msgid_plural "Move conversations to _Trash"
+msgstr[0] "Mover conversación a la _papelera"
+msgstr[1] "Mover conversaciones a la _papelera"
 
-#: src/client/conversation-list/conversation-list-view.vala:325
+#. / Translators: Context menu item
+#: src/client/conversation-list/conversation-list-view.vala:347
+#| msgid "Delete conversation"
+msgid "_Delete conversation"
+msgid_plural "_Delete conversations"
+msgstr[0] "_Eliminar conversación"
+msgstr[1] "_Eliminar conversaciones"
+
+#: src/client/conversation-list/conversation-list-view.vala:356
 #: ui/main-toolbar-menus.ui:5
 msgid "Mark as _Read"
 msgstr "Marcar como _leído"
 
-#: src/client/conversation-list/conversation-list-view.vala:328
+#: src/client/conversation-list/conversation-list-view.vala:359
 #: ui/main-toolbar-menus.ui:9
 msgid "Mark as _Unread"
 msgstr "Marcar como _no leído"
 
-#: src/client/conversation-list/conversation-list-view.vala:331
+#: src/client/conversation-list/conversation-list-view.vala:362
 #: ui/main-toolbar-menus.ui:17
 msgid "U_nstar"
 msgstr "_No destacar"
 
-#: src/client/conversation-list/conversation-list-view.vala:333
+#: src/client/conversation-list/conversation-list-view.vala:364
 #: ui/main-toolbar-menus.ui:13
 msgid "_Star"
 msgstr "_Destacar"
 
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:336
+#: src/client/conversation-list/conversation-list-view.vala:367
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Responder"
 
-#: src/client/conversation-list/conversation-list-view.vala:337
+#: src/client/conversation-list/conversation-list-view.vala:368
 msgid "R_eply All"
 msgstr "R_esponder a todos"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:338
+#: src/client/conversation-list/conversation-list-view.vala:369
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Reenviar"
@@ -1656,25 +1663,25 @@ msgstr "Imagen"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:81
+#: src/client/conversation-viewer/conversation-viewer.vala:82
 msgid "No conversations selected"
 msgstr "No hay ninguna conversación seleccionada."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:85
+#: src/client/conversation-viewer/conversation-viewer.vala:86
 msgid "Selecting a conversation from the list will display it here"
 msgstr "Al seleccionar una conversación de la lista se mostrará aquí"
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:94
+#: src/client/conversation-viewer/conversation-viewer.vala:95
 msgid "Multiple conversations selected"
 msgstr "Varias conversaciones seleccionadas"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:98
+#: src/client/conversation-viewer/conversation-viewer.vala:99
 msgid "Choosing an action will apply to all selected conversations"
 msgstr ""
 "Al elegir una acción ésta se aplicará a todas las conversaciones "
@@ -1684,20 +1691,20 @@ msgstr ""
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:107
-#: src/client/conversation-viewer/conversation-viewer.vala:120
+#: src/client/conversation-viewer/conversation-viewer.vala:108
+#: src/client/conversation-viewer/conversation-viewer.vala:121
 msgid "No conversations found"
 msgstr "No se han encontrado conversaciones"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:111
+#: src/client/conversation-viewer/conversation-viewer.vala:112
 msgid "This folder does not contain any conversations"
 msgstr "Esta carpeta no contiene conversaciones"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:124
+#: src/client/conversation-viewer/conversation-viewer.vala:125
 msgid "Your search returned no results, try refining your search terms"
 msgstr ""
 "La búsqueda no ha devuelto resultados, intente refinar los términos de la "
@@ -2614,11 +2621,6 @@ msgid "Select spell checking languages"
 msgstr "Seleccione el idioma de la revisión ortográfica"
 
 #: ui/components-inspector-error-view.ui:33
-#| msgid ""
-#| "If the problem is serious or persists, please copy and send these details "
-#| "to the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">mailing "
-#| "list</a> or file a <a href=\"https://wiki.gnome.org/Apps/Geary/"
-#| "ReportingABug\">new bug report</a>."
 msgid ""
 "If the problem is serious or persists, please save and send these details to "
 "the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">mailing list</a> "
@@ -2650,7 +2652,6 @@ msgstr "Cojnmutar añadir entradas del registro nuevas"
 #. Tooltip for inspector button
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:37 ui/problem-details-dialog.ui:19
-#| msgid "Search fo matching log entries"
 msgid "Search for matching log entries"
 msgstr "Buscar entradas del registro que coincidan"
 
@@ -2663,7 +2664,6 @@ msgstr "Guardar las entradas de registros y detalles"
 #. Tooltip for inspector button
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:84 ui/problem-details-dialog.ui:62
-#| msgid "Copy to Clipboard"
 msgid "Copy to clipboard"
 msgstr "Copiar al portapapeles"
 
@@ -2784,15 +2784,18 @@ msgid "Mark Unread From _Here"
 msgstr "Marcar como no leído desde _aquí"
 
 #. Translators: Menu item to move a single, specific message
-#. to the trash
+#. to the trash folder
 #: ui/conversation-email-menus.ui:50
-msgid "_Trash"
-msgstr "_Papelera"
+#| msgid "Moved %d message to %s"
+#| msgid_plural "Moved %d messages to %s"
+msgid "Move message to _Trash"
+msgstr "Movido mensaje a la _papelera"
 
 #. Translators: Menu item to delete a single, specific message
 #: ui/conversation-email-menus.ui:57
-msgid "_Delete…"
-msgstr "E_liminar…"
+#| msgid "_Delete…"
+msgid "_Delete message…"
+msgstr "E_liminar mensaje…"
 
 #. Translators: Menu item to view the source for a message
 #: ui/conversation-email-menus.ui:69
@@ -2930,14 +2933,11 @@ msgid "Actions"
 msgstr "Acciones"
 
 #: ui/gtk/help-overlay.ui:17
-#| msgid "New Conversation…"
 msgctxt "shortcut window"
 msgid "New conversation"
 msgstr "Conversación nueva"
 
 #: ui/gtk/help-overlay.ui:24
-#| msgctxt "shortcut window"
-#| msgid "Reply to sender "
 msgctxt "shortcut window"
 msgid "Reply to sender"
 msgstr "Responder al remitente "
@@ -2952,12 +2952,12 @@ msgctxt "shortcut window"
 msgid "Forward"
 msgstr "Reenviar"
 
-#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:296
+#: ui/gtk/help-overlay.ui:45
 #| msgctxt "shortcut window"
-#| msgid "Mark unread"
+#| msgid "Mark/un-mark read"
 msgctxt "shortcut window"
-msgid "Mark/un-mark read"
-msgstr "Marcar/desmarcar como no leído"
+msgid "Un-mark/mark read"
+msgstr "Desmarcar/marcar como leído"
 
 #: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:303
 msgctxt "shortcut window"
@@ -2965,63 +2965,52 @@ msgid "Mark/un-mark starred"
 msgstr "Marcar/desmarcar como favorito"
 
 #: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:310
-#| msgid "Archive conversation (A)"
-#| msgid_plural "Archive conversations (A)"
 msgctxt "shortcut window"
 msgid "Archive conversation"
 msgstr "Archivar conversación"
 
 #: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:317
-#| msgid "Move conversation"
-#| msgid_plural "Move conversations"
 msgctxt "shortcut window"
 msgid "Move conversation"
 msgstr "Mover conversación"
 
 #: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:324
-#| msgctxt "shortcut window"
-#| msgid "Label the conversation"
 msgctxt "shortcut window"
 msgid "Label conversation"
 msgstr "Etiquetar la conversación"
 
 #: ui/gtk/help-overlay.ui:80
-#| msgid "Mark conversation"
-#| msgid_plural "Mark conversations"
 msgctxt "shortcut window"
 msgid "Trash conversation"
 msgstr "Eliminar conversación"
 
 #: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:331
-#| msgctxt "shortcut window"
-#| msgid "Move to trash"
 msgctxt "shortcut window"
 msgid "Move to Spam"
 msgstr "Mover a SPAM"
 
-#: ui/gtk/help-overlay.ui:94
+#: ui/gtk/help-overlay.ui:95
+#| msgid "Delete conversation"
 msgctxt "shortcut window"
-msgid "Delete"
-msgstr "Eliminar"
+msgid "Delete conversation"
+msgstr "Eliminar conversación"
 
-#: ui/gtk/help-overlay.ui:103
+#: ui/gtk/help-overlay.ui:104
 msgctxt "shortcut window"
 msgid "Search"
 msgstr "Buscar"
 
-#: ui/gtk/help-overlay.ui:107
-#| msgid "Mark conversations"
+#: ui/gtk/help-overlay.ui:108
 msgctxt "shortcut window"
 msgid "Search for conversations"
 msgstr "Buscar conversaciones"
 
-#: ui/gtk/help-overlay.ui:114
+#: ui/gtk/help-overlay.ui:115
 msgctxt "shortcut window"
 msgid "Find in current conversation"
 msgstr "Buscar en la conversación actual"
 
 #: ui/gtk/help-overlay.ui:141
-#| msgid "Undo"
 msgctxt "shortcut window"
 msgid "Undo"
 msgstr "Deshacer"
@@ -3072,8 +3061,6 @@ msgid "Show keyboard shortcuts"
 msgstr "Mostrar los atajos de teclado"
 
 #: ui/gtk/help-overlay.ui:206
-#| msgctxt "shortcut window"
-#| msgid "Close composer window"
 msgctxt "shortcut window"
 msgid "Close current window"
 msgstr "Cerrar la ventana actual."
@@ -3089,48 +3076,36 @@ msgid "Keyboard navigation"
 msgstr "Navegación con el teclado"
 
 #: ui/gtk/help-overlay.ui:226
-#| msgctxt "shortcut window"
-#| msgid "Move focus to the next/previous pane"
 msgctxt "shortcut window"
 msgid "Focus the next pane"
 msgstr "Mover el foco al panel siguiente"
 
 #: ui/gtk/help-overlay.ui:233
-#| msgctxt "shortcut window"
-#| msgid "Move focus to the next/previous pane"
 msgctxt "shortcut window"
 msgid "Focus the previous pane"
 msgstr "Mover el foco al panel anterior"
 
 #: ui/gtk/help-overlay.ui:240
-#| msgctxt "shortcut window"
-#| msgid "Move focus to conversation list"
 msgctxt "shortcut window"
 msgid "Focus the conversation list"
 msgstr "Mover el foco a lista de conversaciones"
 
 #: ui/gtk/help-overlay.ui:247
-#| msgid "Delete conversation"
 msgctxt "shortcut window"
 msgid "Select the conversation down"
 msgstr "Seleccionar la conversación a continuación"
 
 #: ui/gtk/help-overlay.ui:254
-#| msgid "Delete conversation"
 msgctxt "shortcut window"
 msgid "Select the conversation up"
 msgstr "Seleccionar conversación anterior"
 
 #: ui/gtk/help-overlay.ui:261
-#| msgctxt "shortcut window"
-#| msgid "Move focus to the next/previous pane"
 msgctxt "shortcut window"
 msgid "Focus next/previous message"
 msgstr "Mover el foco al mensaje siguiente/anterior"
 
 #: ui/gtk/help-overlay.ui:271
-#| msgctxt "shortcut window"
-#| msgid "Show keyboard shortcuts"
 msgctxt "shortcut window"
 msgid "Single-key shortcuts"
 msgstr "Atajos de una sola tecla"
@@ -3139,6 +3114,11 @@ msgstr "Atajos de una sola tecla"
 msgctxt "shortcut window"
 msgid "Reply to sender "
 msgstr "Responder al remitente "
+
+#: ui/gtk/help-overlay.ui:296
+msgctxt "shortcut window"
+msgid "Mark/un-mark read"
+msgstr "Marcar/desmarcar como no leído"
 
 #: ui/gtk/help-overlay.ui:343
 msgid "Composer Shortcuts"
@@ -3165,7 +3145,6 @@ msgid "Detach composer window"
 msgstr "Desacoplar la ventana del editor"
 
 #: ui/gtk/help-overlay.ui:385
-#| msgid "Edit"
 msgctxt "shortcut window"
 msgid "Editing"
 msgstr "Edición"
@@ -3176,7 +3155,6 @@ msgid "Move selection to the clipboard"
 msgstr "Mover la selección al portapapeles"
 
 #: ui/gtk/help-overlay.ui:397
-#| msgid "Copy to Clipboard"
 msgctxt "shortcut window"
 msgid "Copy selection to clipboard"
 msgstr "Copiar selección a portapapeles"
@@ -3197,15 +3175,11 @@ msgid "Unquote text"
 msgstr "Eliminar cita del texto"
 
 #: ui/gtk/help-overlay.ui:427
-#| msgctxt "shortcut window"
-#| msgid "Rich text mode"
 msgctxt "shortcut window"
 msgid "Rich text editing"
 msgstr "Edición de texto enriquecido"
 
 #: ui/gtk/help-overlay.ui:431
-#| msgctxt "Clipboard paste as plain text"
-#| msgid "Paste _Without Formatting"
 msgctxt "shortcut window"
 msgid "Paste without formatting"
 msgstr "Pegar sin formato"
@@ -3236,7 +3210,6 @@ msgid "Remove formatting"
 msgstr "Eliminar el formato"
 
 #: ui/gtk/help-overlay.ui:473
-#| msgid "Insert an image (Ctrl+G)"
 msgctxt "shortcut window"
 msgid "Insert an image"
 msgstr "Insertar una imagen"
@@ -3435,6 +3408,33 @@ msgstr "Preferencias"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Actualización de Geary en proceso…"
+
+#~ msgid "Close the draft message?"
+#~ msgid_plural "Close all draft messages?"
+#~ msgstr[0] "¿Quiere cerrar el mensaje en borrador?"
+#~ msgstr[1] "¿Quiere cerrar los mensajes en borrador?"
+
+#~ msgid "Archive conversation (A)"
+#~ msgid_plural "Archive conversations (A)"
+#~ msgstr[0] "Archivar conversación (A)"
+#~ msgstr[1] "Archivar conversaciones (A)"
+
+#~ msgid "Move conversation to Trash (Delete, Backspace)"
+#~ msgid_plural "Move conversations to Trash (Delete, Backspace)"
+#~ msgstr[0] "Mover conversación a la papelera (Supr, Retroceso)"
+#~ msgstr[1] "Mover conversaciones a la papelera (Supr, Retroceso)"
+
+#~ msgid "Delete conversation (Shift+Delete)"
+#~ msgid_plural "Delete conversations (Shift+Delete)"
+#~ msgstr[0] "Eliminar conversación (Mayús+Supr)"
+#~ msgstr[1] "Eliminar conversaciones (Mayús+Supr)"
+
+#~ msgid "_Trash"
+#~ msgstr "_Papelera"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Delete"
+#~ msgstr "Eliminar"
 
 #~ msgid "A problem occurred checking email for %s"
 #~ msgstr "Ha ocurrido un problema al comprobar el correo para %s"
