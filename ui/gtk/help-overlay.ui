@@ -293,8 +293,8 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Mark/un-mark read</property>
-                                <property name="accelerator">&lt;Shift&gt;I &lt;Shift&gt;U</property>
+                                <property name="title" translatable="yes" context="shortcut window">Un-mark/mark read</property>
+                                <property name="accelerator">&lt;Shift&gt;U &lt;Shift&gt;I</property>
                             </object>
                         </child>
                         <child>
