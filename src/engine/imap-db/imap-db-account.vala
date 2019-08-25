@@ -93,24 +93,38 @@ private class Geary.ImapDB.Account : BaseObject {
             throw err;
         }
 
-        // have seen cases where multiple "Inbox" folders are created in the root with different
-        // case names, leading to trouble ... this clears out all Inboxes that don't match our
-        // "canonical" name
+        // Have seen cases where multiple "Inbox" folders are created
+        // in the root, leading to trouble ... this clears out all
+        // Inboxes that don't match our "canonical" name and that
+        // appears after the first that does.
+        //
+        // XXX the proper fix for this is of course to move this code
+        // to a migration and add a uniqueness constraint on
+        // (parent_id, name).
         try {
             yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
                 Db.Statement stmt = cx.prepare("""
                     SELECT id, name
                     FROM FolderTable
                     WHERE parent_id IS NULL
+                    ORDER BY id
                 """);
 
                 Db.Result results = stmt.exec(cancellable);
+                bool found = false;
                 while (!results.finished) {
                     string name = results.string_for("name");
-                    if (Imap.MailboxSpecifier.is_inbox_name(name)
-                        && !Imap.MailboxSpecifier.is_canonical_inbox_name(name)) {
-                        debug("%s: Removing duplicate INBOX \"%s\"", this.name, name);
-                        do_delete_folder(cx, results.rowid_for("id"), cancellable);
+                    if (Imap.MailboxSpecifier.is_inbox_name(name)) {
+                        if (!found &&
+                            Imap.MailboxSpecifier.is_canonical_inbox_name(name)) {
+                            found = true;
+                        } else {
+                            warning("%s: Removing duplicate INBOX \"%s\"",
+                                    this.name, name);
+                            do_delete_folder(
+                                cx, results.rowid_for("id"), cancellable
+                            );
+                        }
                     }
 
                     results.next(cancellable);
