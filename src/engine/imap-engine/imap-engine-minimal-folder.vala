@@ -282,13 +282,36 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override async void synchronise_remote(GLib.Cancellable? cancellable)
         throws GLib.Error {
         check_open("synchronise_remote");
-        // The normalisation process will pick up any missing messages
-        // if closed so ensure there is a remote session
-        Imap.FolderSession remote = yield claim_remote_session(cancellable);
 
-        // Send a NOOP so the server can return an untagged EXISTS if
-        // any new messages have arrived since the remote was opened.
-        yield remote.send_noop(cancellable);
+        bool have_nooped = false;
+        while (!have_nooped && !cancellable.is_cancelled()) {
+            // The normalisation process will pick up any missing
+            // messages if closed, so ensure there is a remote
+            // session.
+            Imap.FolderSession? remote =
+                yield claim_remote_session(cancellable);
+
+            try {
+                // Send a NOOP so the server can return an untagged
+                // EXISTS if any new messages have arrived since the
+                // remote was opened.
+                //
+                // This is important for servers like GMail that
+                // automatically save sent mail, since the Sent folder
+                // will already be open, but unless the client is also
+                // showing the Sent folder, IDLE won't be enabled and
+                // hence we won't get notified of the saved mail.
+                yield remote.send_noop(cancellable);
+                have_nooped = true;
+            } catch (GLib.Error err) {
+                if (is_recoverable_failure(err)) {
+                    debug("Recoverable error during remote sync: %s",
+                          err.message);
+                } else {
+                    throw err;
+                }
+            }
+        }
 
         // Wait until the replay queue has processed all notifications
         // so the prefetcher becomes aware of the new mail
