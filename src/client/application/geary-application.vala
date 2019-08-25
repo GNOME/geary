@@ -704,6 +704,7 @@ public class GearyApplication : Gtk.Application {
         // hit the yield below, before we create the main window.
         hold();
 
+        bool first_run = false;
         try {
             int mutex_token = yield this.controler_mutex.claim_async();
             if (this.controller == null) {
@@ -720,10 +721,24 @@ public class GearyApplication : Gtk.Application {
                 this.controller = yield new Application.Controller(
                     this, this.controller_cancellable
                 );
+
+                if (this.engine.get_accounts().size == 0) {
+                    first_run = true;
+                }
             }
             this.controler_mutex.release(ref mutex_token);
         } catch (Error err) {
             error("Error creating controller: %s", err.message);
+        }
+
+        if (first_run) {
+            yield show_accounts();
+            if (this.engine.get_accounts().size == 0) {
+                // No accounts were added after showing the accounts
+                // editor, accounts editor, so nothing else to do but
+                // exit.
+                quit();
+            }
         }
 
         release();

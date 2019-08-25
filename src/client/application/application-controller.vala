@@ -378,14 +378,6 @@ public class Application.Controller : Geary.BaseObject {
                 this.application.get_resource_directory(), cancellable
             );
             yield this.account_manager.load_accounts(cancellable);
-            if (engine.get_accounts().size == 0) {
-                yield this.application.show_accounts();
-                if (engine.get_accounts().size == 0) {
-                    // User cancelled without creating an account, so
-                    // nothing else to do but exit.
-                    this.application.quit();
-                }
-            }
         } catch (Error e) {
             warning("Error opening Geary.Engine instance: %s", e.message);
         }
