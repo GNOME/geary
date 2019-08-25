@@ -68,7 +68,19 @@ public enum Flag {
                 if (buf.len > 0) {
                     buf.append_c('|');
                 }
-                buf.append("REPLAY");
+                buf.append("REP");
+            }
+            if (this.is_any_set(CONVERSATIONS)) {
+                if (buf.len > 0) {
+                    buf.append_c('|');
+                }
+                buf.append("CNV");
+            }
+            if (this.is_any_set(PERIODIC)) {
+                if (buf.len > 0) {
+                    buf.append_c('|');
+                }
+                buf.append("PER");
             }
             if (this.is_any_set(SQL)) {
                 if (buf.len > 0) {
@@ -80,13 +92,13 @@ public enum Flag {
                 if (buf.len > 0) {
                     buf.append_c('|');
                 }
-                buf.append("NORM");
+                buf.append("NRM");
             }
             if (this.is_any_set(DESERIALIZER)) {
                 if (buf.len > 0) {
                     buf.append_c('|');
                 }
-                buf.append("DESER");
+                buf.append("DES");
             }
         }
         return buf.str;
