@@ -423,10 +423,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         throws Error {
         notify_scan_started();
 
-        if (this.base_folder.get_open_state() != Folder.OpenState.REMOTE) {
-            flags |= Folder.ListFlags.LOCAL_ONLY;
-        }
-
         int load_count = 0;
         GLib.Error? scan_error = null;
         try {
@@ -463,10 +459,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
                                           Folder.ListFlags flags = Folder.ListFlags.NONE)
         throws Error {
         notify_scan_started();
-
-        if (this.base_folder.get_open_state() != Folder.OpenState.REMOTE) {
-            flags |= Folder.ListFlags.LOCAL_ONLY;
-        }
 
         GLib.Error? scan_error = null;
         try {
@@ -511,10 +503,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 Geary.Folder.OpenFlags.NONE, this.operation_cancellable
             );
             opened = true;
-
-            if (folder.get_open_state() != Folder.OpenState.REMOTE) {
-                flags |= Folder.ListFlags.LOCAL_ONLY;
-            }
 
             // First just get the bare minimum we need to determine if we even
             // care about the messages.
