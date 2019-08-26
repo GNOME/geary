@@ -22,10 +22,7 @@ private class Geary.App.ReseedOperation : ConversationOperation {
     }
 
     public override async void execute_async() throws Error {
-        // Clear the fill flag since more messages may have appeared
-        // after coming online.
-        this.monitor.fill_complete = false;
-
+        // Check for and load any newly appended messages
         EmailIdentifier? earliest_id = this.monitor.window_lowest;
         if (earliest_id != null) {
             debug("Reseeding starting from Email ID %s on opened %s",
@@ -38,11 +35,13 @@ private class Geary.App.ReseedOperation : ConversationOperation {
                 int.MAX,
                 Folder.ListFlags.OLDEST_TO_NEWEST | Folder.ListFlags.INCLUDING_ID
             );
-        } else {
-            // No conversations are present, so do a check to get the
-            // side effect of queuing a fill operation.
-            this.monitor.check_window_count();
         }
+
+        // Clear the fill flag since more messages may have appeared
+        // after coming online, and do a check to get them filled if
+        // needed.
+        this.monitor.fill_complete = false;
+        this.monitor.check_window_count();
     }
 
 }
