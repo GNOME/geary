@@ -721,10 +721,7 @@ public class GearyApplication : Gtk.Application {
                 this.controller = yield new Application.Controller(
                     this, this.controller_cancellable
                 );
-
-                if (this.engine.get_accounts().size == 0) {
-                    first_run = true;
-                }
+                first_run = !this.engine.has_accounts;
             }
             this.controler_mutex.release(ref mutex_token);
         } catch (Error err) {
@@ -733,10 +730,9 @@ public class GearyApplication : Gtk.Application {
 
         if (first_run) {
             yield show_accounts();
-            if (this.engine.get_accounts().size == 0) {
+            if (!this.engine.has_accounts) {
                 // No accounts were added after showing the accounts
-                // editor, accounts editor, so nothing else to do but
-                // exit.
+                // editor, so nothing else to do but exit.
                 quit();
             }
         }
