@@ -17,6 +17,7 @@ extern const string _APP_ID;
 extern const string _NAME_SUFFIX;
 extern const string _PROFILE;
 extern const string _VERSION;
+extern const string _REVNO;
 
 /**
  * The interface between Geary and the desktop environment.
@@ -278,6 +279,8 @@ public class GearyApplication : Gtk.Application {
         /// Application runtime information label
         info.add({ _("Geary version"), VERSION });
         /// Application runtime information label
+        info.add({ _("Geary revision"), _REVNO });
+        /// Application runtime information label
         info.add({ _("GTK version"),
                     "%u.%u.%u".printf(
                         Gtk.get_major_version(),
@@ -481,7 +484,7 @@ public class GearyApplication : Gtk.Application {
             "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
             "license-type", Gtk.License.LGPL_2_1,
             "logo-icon-name", APP_ID,
-            "version", VERSION,
+            "version", _REVNO == "" ? VERSION : "%s (%s)".printf(VERSION, _REVNO),
             "website", WEBSITE,
             "website-label", WEBSITE_LABEL,
             "title", _("About %s").printf(NAME),
@@ -683,9 +686,10 @@ public class GearyApplication : Gtk.Application {
             int mutex_token = yield this.controller_mutex.claim_async();
             if (this.controller == null) {
                 message(
-                    "%s %s prefix=%s exec_dir=%s is_installed=%s",
+                    "%s %s%s prefix=%s exec_dir=%s is_installed=%s",
                     NAME,
                     VERSION,
+                    _REVNO != "" ? " (%s)".printf(_REVNO) : "",
                     INSTALL_PREFIX,
                     exec_dir.get_path(),
                     this.is_installed.to_string()

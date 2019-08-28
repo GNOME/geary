@@ -15,24 +15,19 @@ reference_tracking = get_option('ref_tracking')
 poodle = get_option('poodle')
 enable_valadoc = get_option('valadoc')
 
+revno = run_command('build-aux/git_version.py').stdout().strip()
+
 # Build type
 if get_option('profile') == 'development'
-  name_suffix = ' (Development)'
   profile = 'Devel'
-  vcs_tag = run_command('git', 'rev-parse', '--short', 'HEAD').stdout().strip()
-  if vcs_tag == ''
-    version_suffix = '-devel'
-  else
-    version_suffix = '-@0@'.format(vcs_tag)
-  endif
+  name_suffix = ' (Development)'
 else
   profile = ''
   name_suffix = ''
-  version_suffix = ''
 endif
 
 geary_id = 'org.gnome.Geary@0@'.format(profile)
-geary_version = meson.project_version() + version_suffix
+geary_version = meson.project_version()
 
 # Some variables
 cc = meson.get_compiler('c')
@@ -210,6 +205,7 @@ conf.set_quoted('_VERSION', geary_version)
 conf.set_quoted('_APP_ID', geary_id)
 conf.set_quoted('_PROFILE', profile)
 conf.set_quoted('_NAME_SUFFIX', name_suffix)
+conf.set_quoted('_REVNO', revno)
 configure_file(output: 'config.h', configuration: conf)
 
 # Post-install scripts
