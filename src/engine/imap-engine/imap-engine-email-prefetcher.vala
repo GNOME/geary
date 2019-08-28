@@ -52,6 +52,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     }
 
     public void close() {
+        this.cancellable.cancel();
+
         if (this.prefetch_timer.is_running) {
             this.prefetch_timer.reset();
             // since an acquire was done when scheduled, need to
