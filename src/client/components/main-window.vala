@@ -352,6 +352,11 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Gtk.StyleContext.add_provider_for_screen(Gdk.Display.get_default().get_default_screen(),
             provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 
+        if (_PROFILE != "") {
+            Gtk.StyleContext ctx = this.get_style_context();
+            ctx.add_class("devel");
+        }
+
         provider.parsing_error.connect((section, error) => {
             uint start = section.get_start_line();
             uint end = section.get_end_line();

@@ -12,7 +12,7 @@
  */
 
 {
-    "app-id": "org.gnome.Geary",
+    "app-id": "org.gnome.GearyDevel",
     "branch": "master",
     "runtime": "org.gnome.Platform",
     "runtime-version": "master",
@@ -20,7 +20,7 @@
     "command": "geary",
 
     "tags": ["nightly"],
-    "desktop-file-name-prefix": "(Nightly) ",
+    "desktop-file-name-suffix": " (Development)",
 
     "finish-args": [
         /* X11 + XShm access */
@@ -254,6 +254,7 @@
             "name": "geary",
             "buildsystem": "meson",
             "builddir": true,
+            "config-opts" : ["-Dprofile=development"],
             "sources": [
                 {
                     "type": "git",

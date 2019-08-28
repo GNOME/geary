@@ -41,10 +41,19 @@ install_data(icon_files,
   install_dir: join_paths(system_icons_dir, 'scalable', 'actions'),
 )
 
-install_data(join_paths('hicolor', 'scalable', 'apps', 'org.gnome.Geary.svg'),
-  install_dir: join_paths(system_icons_dir, 'scalable', 'apps'),
+scalable_dir = join_paths('hicolor', 'scalable', 'apps')
+
+install_data(
+  join_paths(scalable_dir, 'org.gnome.Geary.svg'),
+  install_dir: join_paths(datadir, 'icons', scalable_dir),
+  rename: '@0@.svg'.format(geary_id)
 )
 
-install_data(join_paths('hicolor', 'symbolic', 'apps', 'org.gnome.Geary-symbolic.svg'),
-  install_dir: join_paths(system_icons_dir, 'symbolic', 'apps'),
+symbolic_dir = join_paths('hicolor', 'symbolic', 'apps')
+
+install_data(
+  join_paths(symbolic_dir, 'org.gnome.Geary-symbolic.svg'),
+  install_dir: join_paths(datadir, 'icons', symbolic_dir),
+  rename: '@0@-symbolic.svg'.format(geary_id)
 )
+

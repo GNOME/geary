@@ -1,7 +1,7 @@
 project('geary', [ 'vala', 'c' ],
   version: '3.33.1',
   license: 'LGPL2.1+',
-  meson_version: '>= 0.43',
+  meson_version: '>= 0.50',
 )
 
 gnome = import('gnome')
@@ -14,6 +14,25 @@ iso_3166_xml = get_option('iso_3166_xml')
 reference_tracking = get_option('ref_tracking')
 poodle = get_option('poodle')
 enable_valadoc = get_option('valadoc')
+
+# Build type
+if get_option('profile') == 'development'
+  name_suffix = ' (Development)'
+  profile = 'Devel'
+  vcs_tag = run_command('git', 'rev-parse', '--short', 'HEAD').stdout().strip()
+  if vcs_tag == ''
+    version_suffix = '-devel'
+  else
+    version_suffix = '-@0@'.format(vcs_tag)
+  endif
+else
+  profile = ''
+  name_suffix = ''
+  version_suffix = ''
+endif
+
+geary_id = 'org.gnome.Geary@0@'.format(profile)
+geary_version = meson.project_version() + version_suffix
 
 # Some variables
 cc = meson.get_compiler('c')
@@ -187,12 +206,10 @@ conf.set_quoted('LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
 conf.set_quoted('ISO_CODE_639_XML', iso_639_xml)
 conf.set_quoted('ISO_CODE_3166_XML', iso_3166_xml)
 conf.set('GCR_API_SUBJECT_TO_CHANGE', true)
-conf.set('HAVE_FTS3_TOKENIZE', true)
-# geary-version.vala.in gets configured twice (once for the version,
-# once for the revision), so make sure the revision template carries
-# through to the second time.
-conf.set('REVISION', '@REVISION@')
-conf.set('VERSION', meson.project_version())
+conf.set_quoted('_VERSION', geary_version)
+conf.set_quoted('_APP_ID', geary_id)
+conf.set_quoted('_PROFILE', profile)
+conf.set_quoted('_NAME_SUFFIX', name_suffix)
 configure_file(output: 'config.h', configuration: conf)
 
 # Post-install scripts

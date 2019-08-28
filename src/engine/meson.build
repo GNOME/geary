@@ -320,7 +320,6 @@ geary_engine_vala_sources = files(
 
 geary_engine_sources = [
   geary_engine_vala_sources,
-  geary_version_vala,
 ]
 
 geary_engine_dependencies = [

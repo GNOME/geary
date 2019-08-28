@@ -72,6 +72,9 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     private Gtk.Grid welcome_panel;
 
     [GtkChild]
+    private Gtk.Image welcome_icon;
+
+    [GtkChild]
     private Gtk.ListBox accounts_list;
 
     [GtkChild]
@@ -89,6 +92,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
     public EditorListPane(Editor editor) {
         this.editor = editor;
+        this.welcome_icon.icon_name = GearyApplication.APP_ID;
 
         // keep our own copy of this so we can disconnect from its signals
         // without worrying about the editor's lifecycle
