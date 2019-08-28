@@ -104,13 +104,29 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
  */
 private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
 
+
+    GLib.Cancellable? closed_cancellable = null;
+
+
     internal RefreshFolderSync(GenericAccount account,
                                MinimalFolder folder) {
         base(account, folder);
+        this.folder.closed.connect(on_folder_close);
+    }
+
+    ~RefreshFolderSync() {
+        Geary.Folder? folder = this.folder;
+        if (folder != null) {
+            this.folder.closed.disconnect(on_folder_close);
+        }
     }
 
     public override async void execute(GLib.Cancellable cancellable)
         throws GLib.Error {
+        // Stash the cancellable so the op can cancel the sync if the
+        // folder closes.
+        this.closed_cancellable = cancellable;
+
         bool was_opened = false;
         MinimalFolder minimal = (MinimalFolder) this.folder;
         try {
@@ -186,6 +202,12 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
                 folder.to_string(),
                 err.message
             );
+        }
+    }
+
+    private void on_folder_close() {
+        if (this.closed_cancellable != null) {
+            this.closed_cancellable.cancel();
         }
     }
 
