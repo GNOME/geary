@@ -1,9 +1,9 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 public class Geary.Imap.ClientConnection : BaseObject {
@@ -114,8 +114,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
             root.to_string(), err.message);
     }
 
-    public virtual signal void recv_closed() {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] recv closed", to_string());
+    public virtual signal void received_eos() {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] recv eos", to_string());
     }
 
     public virtual signal void send_failure(Error err) {
@@ -596,7 +596,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
 
     private void on_eos() {
-        recv_closed();
+        received_eos();
     }
 
     private void on_command_timeout(Command command) {
