@@ -10,7 +10,19 @@
  * Ensures all email in a folder's vector has been downloaded.
  */
 private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
+
+
     public const int PREFETCH_DELAY_SEC = 1;
+
+    // Specify PROPERTIES so messages can be pre-fetched
+    // smallest first, ONLY_INCOMPLETE since complete messages
+    // don't need re-fetching, and PARTIAL_OK so that messages
+    // that don't have properties (i.e. are essentially blank)
+    // are still found and filled in.
+    private const Geary.Email.Field PREPARE_FIELDS = PROPERTIES;
+    private const ImapDB.Folder.ListFlags PREPARE_FLAGS = (
+        ONLY_INCOMPLETE | PARTIAL_OK
+    );
 
     private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
     private const int PREFETCH_CHUNK_BYTES = 32 * 1024;
@@ -70,7 +82,6 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         do_prepare_new_async.begin(ids);
     }
 
-    // emails should include PROPERTIES
     private void schedule_prefetch(Gee.Collection<Geary.Email>? emails) {
         if (emails != null && emails.size > 0) {
             this.prefetch_emails.add_all(emails);
@@ -89,8 +100,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         try {
             list = yield this.folder.local_folder.list_email_by_id_async(
                 null, int.MAX,
-                Geary.Email.Field.PROPERTIES,
-                ImapDB.Folder.ListFlags.ONLY_INCOMPLETE,
+                PREPARE_FIELDS,
+                PREPARE_FLAGS,
                 this.cancellable
             );
         } catch (GLib.IOError.CANCELLED err) {
@@ -111,8 +122,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         try {
             list = yield this.folder.local_folder.list_email_by_sparse_id_async(
                 (Gee.Collection<ImapDB.EmailIdentifier>) ids,
-                Geary.Email.Field.PROPERTIES,
-                ImapDB.Folder.ListFlags.ONLY_INCOMPLETE,
+                PREPARE_FIELDS,
+                PREPARE_FLAGS,
                 this.cancellable
             );
         } catch (GLib.IOError.CANCELLED err) {
@@ -169,7 +180,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         // requests so a large email doesn't monopolize the pipe and
         // prevent other requests from going through
 
-        Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>();
+        Gee.HashSet<EmailIdentifier> chunk = new Gee.HashSet<EmailIdentifier>();
+        Gee.HashSet<EmailIdentifier> blanks = new Gee.HashSet<EmailIdentifier>();
         int64 chunk_bytes = 0;
         int count = 0;
 
@@ -177,38 +189,51 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
             // dequeue emails by date received, newest to oldest
             Geary.Email email = emails.first();
 
-            // only add to this chunk if the email is smaller than one chunk or there's nothing
-            // in this chunk so far ... this means an oversized email will be pulled all by itself
-            // in the next round if there's stuff already ahead of it
-            if (email.properties.total_bytes < PREFETCH_CHUNK_BYTES || ids.size == 0) {
-                bool removed = emails.remove(email);
-                assert(removed);
-
-                ids.add(email.id);
+            if (email.properties == null) {
+                // There's no properties, so there's no idea how large
+                // the message is. Do these one at a time at the end.
+                emails.remove(email);
+                blanks.add(email.id);
+            } else if (email.properties.total_bytes < PREFETCH_CHUNK_BYTES ||
+                       chunk.size == 0) {
+                // Add email that is smaller than one chunk or there's
+                // nothing in this chunk so far ... this means an
+                // oversized email will be pulled all by itself in the
+                // next round if there's stuff already ahead of it
+                emails.remove(email);
+                chunk.add(email.id);
                 chunk_bytes += email.properties.total_bytes;
                 count++;
 
-                // if not enough stuff is in this chunk, keep going
-                if (chunk_bytes < PREFETCH_CHUNK_BYTES)
+                if (chunk_bytes < PREFETCH_CHUNK_BYTES) {
                     continue;
+                }
             }
 
-            bool keep_going = yield do_prefetch_email_async(ids, chunk_bytes);
+            bool keep_going = yield do_prefetch_email_async(
+                chunk, chunk_bytes
+            );
 
-            // clear out for next chunk ... this also prevents the final prefetch_async() from trying
-            // to pull twice if !keep_going
-            ids.clear();
+            // clear out for next chunk ... this also prevents the
+            // final prefetch_async() from trying to pull twice if
+            // !keep_going
+            chunk.clear();
             chunk_bytes = 0;
 
-            if (!keep_going)
+            if (!keep_going) {
                 break;
+            }
 
             yield Scheduler.sleep_ms_async(200);
         }
 
-        // get any remaining
-        if (ids.size > 0)
-            yield do_prefetch_email_async(ids, chunk_bytes);
+        // Finish of any remaining
+        if (chunk.size > 0) {
+            yield do_prefetch_email_async(chunk, chunk_bytes);
+        }
+        foreach (EmailIdentifier id in blanks) {
+            yield do_prefetch_email_async(Collection.single(id), -1);
+        }
 
         debug("finished do_prefetch_batch_async %s end_total=%d", folder.to_string(), count);
     }

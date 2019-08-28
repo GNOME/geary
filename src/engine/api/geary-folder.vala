@@ -581,6 +581,19 @@ public abstract class Geary.Folder : BaseObject, Loggable {
     public abstract async void wait_for_close_async(Cancellable? cancellable = null) throws Error;
 
     /**
+     * Synchronises the local folder with the remote mailbox.
+     *
+     * If backed by a remote folder, this ensures that the end of the
+     * vector is up to date with the end of the remote mailbox, and
+     * that all messages in the vector satisfy the minimum
+     * requirements for being used by the engine.
+     *
+     * The folder must be opened prior to attempting this operation.
+     */
+    public abstract async void synchronise_remote(GLib.Cancellable? cancellable)
+        throws GLib.Error;
+
+    /**
      * List a number of contiguous emails in the folder's vector.
      *
      * Emails in the folder are listed starting at a particular

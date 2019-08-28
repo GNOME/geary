@@ -65,12 +65,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     internal ImapDB.Folder local_folder { get; private set; }
 
     internal ReplayQueue? replay_queue { get; private set; default = null; }
-    internal EmailPrefetcher email_prefetcher { get; private set; }
     internal ContactHarvester harvester { get; private set; }
 
     private weak GenericAccount _account;
     private Geary.AggregatedFolderProperties _properties =
         new Geary.AggregatedFolderProperties(false, false);
+    private EmailPrefetcher email_prefetcher;
 
     private int open_count = 0;
     private Folder.OpenFlags open_flags = OpenFlags.NONE;
@@ -276,6 +276,51 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override async void wait_for_close_async(Cancellable? cancellable = null)
         throws Error {
         yield this.closed_semaphore.wait_async(cancellable);
+    }
+
+    /** {@inheritDoc} */
+    public override async void synchronise_remote(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        check_open("synchronise_remote");
+
+        bool have_nooped = false;
+        while (!have_nooped && !cancellable.is_cancelled()) {
+            // The normalisation process will pick up any missing
+            // messages if closed, so ensure there is a remote
+            // session.
+            Imap.FolderSession? remote =
+                yield claim_remote_session(cancellable);
+
+            try {
+                // Send a NOOP so the server can return an untagged
+                // EXISTS if any new messages have arrived since the
+                // remote was opened.
+                //
+                // This is important for servers like GMail that
+                // automatically save sent mail, since the Sent folder
+                // will already be open, but unless the client is also
+                // showing the Sent folder, IDLE won't be enabled and
+                // hence we won't get notified of the saved mail.
+                yield remote.send_noop(cancellable);
+                have_nooped = true;
+            } catch (GLib.Error err) {
+                if (is_recoverable_failure(err)) {
+                    debug("Recoverable error during remote sync: %s",
+                          err.message);
+                } else {
+                    throw err;
+                }
+            }
+        }
+
+        // Wait until the replay queue has processed all notifications
+        // so the prefetcher becomes aware of the new mail
+        this.replay_queue.flush_notifications();
+        yield this.replay_queue.checkpoint(cancellable);
+
+        // Finally, wait for the prefetcher to have finished
+        // downloading the new mail.
+        yield this.email_prefetcher.active_sem.wait_async(cancellable);
     }
 
     // used by normalize_folders() during the normalization process; should not be used elsewhere
@@ -1450,7 +1495,19 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (cancellable != null && cancellable.is_cancelled() && ret != null && remove_folder != null)
             yield remove_folder.remove_email_async(iterate<EmailIdentifier>(ret).to_array_list());
 
-        this._account.update_folder(this);
+        if (ret != null) {
+            // Server returned a UID for the new message. It was saved
+            // locally possibly before the server notified that the
+            // message exists. As such, fetch any missing parts from
+            // the remote to ensure it is properly filled in.
+            yield list_email_by_id_async(
+                ret, 1, ALL, INCLUDING_ID, cancellable
+            );
+        } else {
+            // The server didn't return a UID for the new email, so do
+            // a sync now to ensure it shows up immediately.
+            yield synchronise_remote(cancellable);
+        }
 
         return ret;
     }

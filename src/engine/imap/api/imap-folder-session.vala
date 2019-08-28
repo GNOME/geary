@@ -161,6 +161,17 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         return old_session;
     }
 
+    /** Sends a NOOP command. */
+    public async void send_noop(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield exec_commands_async(
+            Collection.single(new NoopCommand()),
+            null,
+            null,
+            cancellable
+        );
+    }
+
     private void on_exists(int total) {
         debug("%s EXISTS %d", to_string(), total);
 

@@ -137,6 +137,9 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
                 cancellable.cancel();
             } catch (GLib.IOError.CANCELLED err) {
                 // Nothing to do here — we're already cancelled.
+            } catch (EngineError.NOT_FOUND err) {
+                debug("Queued email %s not found in outbox, ignoring: %s",
+                      id.to_string(), err.message);
             } catch (GLib.Error err) {
                 notify_connection_failed(new ErrorContext(err));
                 cancellable.cancel();
@@ -194,15 +197,9 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
             throw new SmtpError.AUTHENTICATION_FAILED("Credentials not loaded");
         }
 
-        Email? email = null;
-        try {
-            email = yield this.outbox.fetch_email_async(
-                id, Email.Field.ALL, Folder.ListFlags.NONE, cancellable
-            );
-        } catch (EngineError.NOT_FOUND err) {
-            debug("Queued email %s not found in outbox, ignoring: %s",
-                  id.to_string(), err.message);
-        }
+        Email email = yield this.outbox.fetch_email_async(
+            id, Email.Field.ALL, Folder.ListFlags.NONE, cancellable
+        );
 
         if (!email.email_flags.contains(EmailFlags.OUTBOX_SENT)) {
             RFC822.Message message = email.get_message();
@@ -228,10 +225,16 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
 
         // If we get to this point, the message has either been just
         // sent, or previously sent but not saved. So now try flagging
-        // as such and saving it.
+        // as such and saving it if enabled, else sync the folder in
+        // case the provider saved it so the new mail shows up.
         if (this.account.save_sent) {
-            debug("Outbox postie: Saving %s to sent mail", email.id.to_string());
-            yield save_sent_mail_async(email, cancellable);
+            debug("Outbox postie: Saving %s to sent mail",
+                  email.id.to_string());
+            yield save_sent_mail(email, cancellable);
+        } else {
+            debug("Outbox postie: Syncing sent mail to find %s",
+                  email.id.to_string());
+            yield sync_sent_mail(email, cancellable);
         }
 
         // Again, don't observe the cancellable here - if it's been
@@ -308,12 +311,12 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         email_sent(rfc822);
     }
 
-    private async void save_sent_mail_async(Geary.Email email,
-                                            GLib.Cancellable? cancellable)
+    private async void save_sent_mail(Geary.Email message,
+                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
         Geary.FolderSupport.Create? create = (
             yield this.owner.get_required_special_folder_async(
-                Geary.SpecialFolderType.SENT, cancellable
+                SENT, cancellable
             )
         ) as Geary.FolderSupport.Create;
         if (create == null) {
@@ -322,12 +325,13 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
             );
         }
 
-        RFC822.Message message = email.get_message();
+        RFC822.Message raw = message.get_message();
         bool open = false;
         try {
-            yield create.open_async(Geary.Folder.OpenFlags.NO_DELAY, cancellable);
+            yield create.open_async(NO_DELAY, cancellable);
             open = true;
-            yield create.create_email_async(message, null, null, null, cancellable);
+            yield create.create_email_async(raw, null, null, null, cancellable);
+            yield wait_for_message(create, message, cancellable);
         } finally {
             if (open) {
                 try {
@@ -335,6 +339,61 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
                 } catch (Error e) {
                     debug("Error closing folder %s: %s", create.to_string(), e.message);
                 }
+            }
+        }
+    }
+
+    private async void sync_sent_mail(Geary.Email message,
+                                      GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Geary.Folder sent = this.owner.get_special_folder(SENT);
+        if (sent != null) {
+            bool open = false;
+            try {
+                yield sent.open_async(NO_DELAY, cancellable);
+                open = true;
+                yield sent.synchronise_remote(cancellable);
+                yield wait_for_message(sent, message, cancellable);
+            } finally {
+                if (open) {
+                    try {
+                        yield sent.close_async(null);
+                    } catch (Error e) {
+                        debug("Error closing folder %s: %s",
+                              sent.to_string(), e.message);
+                    }
+                }
+            }
+        }
+    }
+
+    // Wait for a sent message to turn up. There's no guarantee how or
+    // when a server may make newly saved email show up, so poll for
+    // it. :(
+    private async void wait_for_message(Folder location,
+                                        Email sent,
+                                        GLib.Cancellable cancellable)
+        throws GLib.Error {
+        RFC822.MessageID? id = sent.message_id;
+        if (id != null) {
+            const int MAX_RETRIES = 3;
+            for (int i = 0; i < MAX_RETRIES; i++) {
+                Gee.List<Email>? list = yield location.list_email_by_id_async(
+                    null, 1, REFERENCES, NONE, cancellable
+                );
+                if (list != null && !list.is_empty) {
+                    Email listed = Collection.get_first<Email>(list);
+                    if (listed.message_id != null &&
+                        listed.message_id.equal_to(id)) {
+                        break;
+                    }
+                }
+
+                // Wait a second before retrying to give the server
+                // some breathing room
+                debug("Waiting for sent mail...");
+                GLib.Timeout.add_seconds(1, wait_for_message.callback);
+                yield;
             }
         }
     }

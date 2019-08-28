@@ -33,10 +33,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             // Only sync folders that:
             // 1. Can actually be opened (i.e. are selectable)
             // 2. Are remote backed
-            // and 3. if considering a folder not because it's
-            // contents changed (i.e. didn't just become available,
-            // only sync if closed, otherwise he folder will keep
-            // track of changes as they occur
             //
             // All this implies the folder must be a MinimalFolder and
             // we do require that for syncing at the moment anyway,
@@ -46,9 +42,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             if (imap_folder != null &&
                 folder.properties.is_openable.is_possible() &&
                 !folder.properties.is_local_only &&
-                !folder.properties.is_virtual &&
-                (became_available ||
-                 imap_folder.get_open_state() == Folder.OpenState.CLOSED)) {
+                !folder.properties.is_virtual) {
 
                 AccountOperation op = became_available
                     ? new CheckFolderSync(
@@ -130,12 +124,7 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
         bool was_opened = false;
         MinimalFolder minimal = (MinimalFolder) this.folder;
         try {
-            // Open the folder on no delay since there's no point just
-            // waiting around for it. Then claim a remote session so
-            // we know that a remote connection has been made and the
-            // folder has had a chance to normalise itself.
             yield minimal.open_async(Folder.OpenFlags.NO_DELAY, cancellable);
-            yield minimal.claim_remote_session(cancellable);
             was_opened = true;
             debug("Synchronising %s", minimal.to_string());
             yield sync_folder(cancellable);
@@ -185,24 +174,9 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
         }
     }
 
-    protected virtual async void sync_folder(Cancellable cancellable)
-        throws Error {
-        yield wait_for_prefetcher(cancellable);
-    }
-
-    protected async void wait_for_prefetcher(Cancellable cancellable)
-        throws Error {
-        MinimalFolder minimal = (MinimalFolder) this.folder;
-        try {
-            yield minimal.email_prefetcher.active_sem.wait_async(cancellable);
-        } catch (Error err) {
-            Logging.debug(
-                Logging.Flag.PERIODIC,
-                "Error waiting for email prefetcher to complete %s: %s",
-                folder.to_string(),
-                err.message
-            );
-        }
+    protected virtual async void sync_folder(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        yield this.folder.synchronise_remote(cancellable);
     }
 
     private void on_folder_close() {
@@ -311,8 +285,9 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
                 next_epoch = prefetch_max_epoch.add_days(-1);
             }
 
-            // let the prefetcher catch up
-            yield wait_for_prefetcher(cancellable);
+            // Wait for basic syncing (i.e. the prefetcher) to
+            // complete as well.
+            yield base.sync_folder(cancellable);
         }
     }
 

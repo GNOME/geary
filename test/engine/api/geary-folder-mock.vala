@@ -78,6 +78,11 @@ public class Geary.MockFolder : Folder, MockObject {
         throw new EngineError.UNSUPPORTED("Mock method");
     }
 
+    public override async void synchronise_remote(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        void_call("synchronise_remote", { cancellable });
+    }
+
     public override async Gee.List<Geary.Email>?
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,

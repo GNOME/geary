@@ -494,6 +494,10 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         email.set_message_subject(subject);
         email.set_message_body(new Geary.RFC822.Text(new Geary.Memory.OffsetBuffer(
             body_buffer, body_offset)));
+        string preview = get_preview();
+        if (preview != "") {
+            email.set_message_preview(new PreviewText.from_string(preview));
+        }
         return email;
     }
 

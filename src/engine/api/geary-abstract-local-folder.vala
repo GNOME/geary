@@ -60,5 +60,10 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
     public override async void wait_for_close_async(Cancellable? cancellable = null) throws Error {
         yield closed_semaphore.wait_async(cancellable);
     }
-}
 
+    public override async void synchronise_remote(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        // No-op
+    }
+
+}
