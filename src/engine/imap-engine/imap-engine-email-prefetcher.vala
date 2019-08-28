@@ -1,15 +1,13 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * The EmailPrefetcher monitors the supplied folder for its "opened" and "closed" signals.  When
- * opened, the prefetcher will pull in email from the server in the background so its available
- * in the local store.
- *
- * The EmailPrefetcher does not maintain a reference to the folder.
+ * Ensures all email in a folder's vector has been downloaded.
  */
 private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     public const int PREFETCH_DELAY_SEC = 1;
