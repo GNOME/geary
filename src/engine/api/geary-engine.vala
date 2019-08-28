@@ -47,6 +47,11 @@ public class Geary.Engine : BaseObject {
     }
 
 
+    /** Determines if any accounts have been added to this instance. */
+    public bool has_accounts {
+        get { return this.accounts != null && !this.accounts.is_empty; }
+    }
+
     /** Location of the directory containing shared resource files. */
     public File? resource_dir { get; private set; default = null; }
 

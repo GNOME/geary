@@ -8,7 +8,9 @@
 
 CONFIGURE := meson \
 	--buildtype debug \
-	--warnlevel 3
+	--warnlevel 3 \
+	-Dvaladoc=true \
+	-Dref_tracking=true
 MAKE := ninja
 
 BUILD_DIR := build
