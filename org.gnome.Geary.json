@@ -38,9 +38,6 @@
         /* Needs to talk to the network: */
         "--share=network",
 
-        /* Notification access */
-        "--talk-name=org.freedesktop.Notifications",
-
         /* Secrets access */
         "--talk-name=org.freedesktop.secrets",
 
