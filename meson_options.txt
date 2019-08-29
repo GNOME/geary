@@ -10,6 +10,6 @@ option(
   'profile',
   type: 'combo',
   value: 'default',
-  choices: ['default','development'],
-  description: 'The build profile for Geary. One of "default" or "development".'
+  choices: ['default','development','beta'],
+  description: 'Specifies the application type to be built'
 )
