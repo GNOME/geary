@@ -217,7 +217,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
             return stringp;
 
         LiteralParameter? literalp = param as LiteralParameter;
-        if (literalp != null && literalp.get_size() <= MAX_STRING_LITERAL_LENGTH)
+        if (literalp != null && literalp.value.size <= MAX_STRING_LITERAL_LENGTH)
             return literalp.coerce_to_string_parameter();
 
         throw new ImapError.TYPE_ERROR("Parameter %d not of type string or literal (is %s)", index,
@@ -246,7 +246,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
             return stringp;
 
         LiteralParameter? literalp = param as LiteralParameter;
-        if (literalp != null && literalp.get_size() <= MAX_STRING_LITERAL_LENGTH)
+        if (literalp != null && literalp.value.size <= MAX_STRING_LITERAL_LENGTH)
             return literalp.coerce_to_string_parameter();
 
         throw new ImapError.TYPE_ERROR("Parameter %d not of type string or literal (is %s)", index,
@@ -390,7 +390,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public Memory.Buffer? get_as_nullable_buffer(int index) throws ImapError {
         LiteralParameter? literalp = get_if_literal(index);
         if (literalp != null)
-            return literalp.get_buffer();
+            return literalp.value;
 
         StringParameter? stringp = get_if_string(index);
         if (stringp != null)

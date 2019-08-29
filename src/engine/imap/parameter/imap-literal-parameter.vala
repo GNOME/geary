@@ -1,38 +1,30 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
  * A representation of an IMAP literal parameter.
  *
- * Because a literal parameter can hold 8-bit data, this is not a descendent of
- * {@link StringParameter}, although some times literal data is used to store 8-bit text (for
- * example, UTF-8).
+ * Because a literal parameter can hold 8-bit data, this is not a
+ * descendent of {@link StringParameter}, although some times literal
+ * data is used to store 8-bit text (for example, UTF-8).
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-4.3]]
  */
 
 public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
-    private Memory.Buffer buffer;
 
-    public LiteralParameter(Memory.Buffer buffer) {
-        this.buffer = buffer;
-    }
 
-    /**
-     * Returns the number of bytes in the literal parameter's buffer.
-     */
-    public size_t get_size() {
-        return buffer.size;
-    }
+    /** The value of the literal parameter. */
+    public Memory.Buffer value { get; private set; }
 
-    /**
-     * Returns the literal paremeter's buffer.
-     */
-    public Memory.Buffer get_buffer() {
-        return buffer;
+
+    public LiteralParameter(Memory.Buffer value) {
+        this.value = value;
     }
 
     /**
@@ -45,14 +37,14 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
      * for transmitting on the wire.
      */
     public StringParameter coerce_to_string_parameter() {
-        return new UnquotedStringParameter(buffer.get_valid_utf8());
+        return new UnquotedStringParameter(this.value.get_valid_utf8());
     }
 
     /**
      * {@inheritDoc}
      */
     public override string to_string() {
-        return "{literal/%lub}".printf(get_size());
+        return "{literal/%lub}".printf(this.value.size);
     }
 
     /**
@@ -60,17 +52,8 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
      */
     public override void serialize(Serializer ser, GLib.Cancellable cancellable)
         throws GLib.Error {
-        ser.push_unquoted_string("{%lu}".printf(get_size()), cancellable);
+        ser.push_unquoted_string("{%lu}".printf(this.value.size), cancellable);
         ser.push_eol(cancellable);
-    }
-
-    /**
-     * Serialises the literal parameter data.
-     */
-    public async void serialize_data(Serializer ser,
-                                     GLib.Cancellable cancellable)
-        throws GLib.Error {
-        yield ser.push_literal_data(buffer, cancellable);
     }
 
 }

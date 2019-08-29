@@ -42,7 +42,7 @@ public abstract class Geary.Imap.FetchDataDecoder : BaseObject {
             // because this method is called without the help of get_as_string() (which converts
             // reasonably-length literals into StringParameters), do so here manually
             try {
-                if (literalp.get_size() <= ListParameter.MAX_STRING_LITERAL_LENGTH)
+                if (literalp.value.size <= ListParameter.MAX_STRING_LITERAL_LENGTH)
                     return decode_string(literalp.coerce_to_string_parameter());
             } catch (ImapError imap_err) {
                 // if decode_string() throws a TYPE_ERROR, retry as a LiteralParameter, otherwise
@@ -197,7 +197,7 @@ public class Geary.Imap.RFC822HeaderDecoder : Geary.Imap.FetchDataDecoder {
     }
 
     protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
-        return new Geary.Imap.RFC822Header(literalp.get_buffer());
+        return new Geary.Imap.RFC822Header(literalp.value);
     }
 }
 
@@ -207,7 +207,7 @@ public class Geary.Imap.RFC822TextDecoder : Geary.Imap.FetchDataDecoder {
     }
 
     protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
-        return new Geary.Imap.RFC822Text(literalp.get_buffer());
+        return new Geary.Imap.RFC822Text(literalp.value);
     }
 
     protected override MessageData decode_nil(NilParameter nilp) throws ImapError {
@@ -221,7 +221,6 @@ public class Geary.Imap.RFC822FullDecoder : Geary.Imap.FetchDataDecoder {
     }
 
     protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
-        return new Geary.Imap.RFC822Full(literalp.get_buffer());
+        return new Geary.Imap.RFC822Full(literalp.value);
     }
 }
-

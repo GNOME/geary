@@ -64,7 +64,9 @@ public class Geary.Imap.AuthenticateCommand : Command {
         // Wait to either get a response or a continuation request
         yield this.error_lock.wait_async(cancellable);
         if (this.response_literal != null) {
-            yield this.response_literal.serialize_data(ser, cancellable);
+            yield ser.push_literal_data(
+                this.response_literal.value, cancellable
+            );
             ser.push_eol(cancellable);
             yield ser.flush_stream(cancellable);
         }
