@@ -103,14 +103,14 @@ public class Geary.Imap.Serializer : BaseObject {
     /**
      * Writes literal data to the output stream.
      */
-    public async void push_literal_data(Memory.Buffer buffer,
+    public async void push_literal_data(uint8[] buffer,
                                         GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        yield this.output.splice_async(
-            buffer.get_input_stream(),
-            OutputStreamSpliceFlags.NONE,
+        yield this.output.write_all_async(
+            buffer,
             Priority.DEFAULT,
-            cancellable
+            cancellable,
+            null
         );
     }
 
