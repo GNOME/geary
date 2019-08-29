@@ -178,7 +178,9 @@ public class Geary.Imap.Command : BaseObject {
                     // Will get notified via continuation_requested
                     // when server indicated the literal can be sent.
                     yield this.literal_spinlock.wait_async(cancellable);
-                    yield ser.push_literal_data(literal.value, cancellable);
+                    yield ser.push_literal_data(
+                        literal.value.get_uint8_array(), cancellable
+                    );
                 }
             }
         }
