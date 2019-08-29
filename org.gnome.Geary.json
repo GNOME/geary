@@ -38,9 +38,6 @@
         /* Needs to talk to the network: */
         "--share=network",
 
-        /* Notification access */
-        "--talk-name=org.freedesktop.Notifications",
-
         /* Secrets access */
         "--talk-name=org.freedesktop.secrets",
 
@@ -53,9 +50,8 @@
         "--talk-name=org.gnome.evolution.dataserver.Sources5",
         "--filesystem=xdg-cache/evolution/addressbook:ro",
 
-        /* Needed for dconf to work */
-        "--filesystem=xdg-run/dconf", "--filesystem=~/.config/dconf:ro",
-        "--talk-name=ca.desrt.dconf", "--env=DCONF_USER_CONFIG_DIR=.config/dconf",
+        /* Migrate GSettings into the sandbox */
+        "--metadata=X-DConf=migrate-path=/org/gnome/Geary/",
 
         /* Let view source keep on working as-sis for now. Bug 779311. */
         "--filesystem=/tmp"
