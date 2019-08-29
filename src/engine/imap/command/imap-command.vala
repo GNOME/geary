@@ -178,9 +178,45 @@ public class Geary.Imap.Command : BaseObject {
                     // Will get notified via continuation_requested
                     // when server indicated the literal can be sent.
                     yield this.literal_spinlock.wait_async(cancellable);
-                    yield ser.push_literal_data(
-                        literal.value.get_uint8_array(), cancellable
-                    );
+
+                    // Buffer size is dependent on timeout, since we
+                    // need to ensure we can send a full buffer before
+                    // the timeout is up. v.92 56k baud modems have
+                    // theoretical max upload of 48kbit/s and GSM 2G
+                    // 40kbit/s, but typical is usually well below
+                    // that, so assume a low end of 1kbyte/s. Hence
+                    // buffer size needs to be less than or equal to
+                    // (response_timeout * 1)k, rounded down to the
+                    // nearest power of two.
+                    uint buf_size = 1;
+                    while (buf_size <= this.response_timeout) {
+                        buf_size <<= 1;
+                    }
+                    buf_size >>= 1;
+
+                    uint8[] buf = new uint8[buf_size * 1024];
+                    GLib.InputStream data = literal.value.get_input_stream();
+                    try {
+                        while (true) {
+                            size_t read;
+                            yield data.read_all_async(
+                                buf, Priority.DEFAULT, cancellable, out read
+                            );
+                            if (read <= 0) {
+                                break;
+                            }
+
+                            buf.length = (int) read;
+                            yield ser.push_literal_data(buf, cancellable);
+                            this.response_timer.start();
+                        }
+                    } finally {
+                        try {
+                            yield data.close_async();
+                        } catch (GLib.Error err) {
+                            // Oh well
+                        }
+                    }
                 }
             }
         }
