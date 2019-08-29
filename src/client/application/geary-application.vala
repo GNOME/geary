@@ -363,7 +363,10 @@ public class GearyApplication : Gtk.Application {
     public GearyApplication() {
         Object(
             application_id: APP_ID,
-            flags: GLib.ApplicationFlags.HANDLES_COMMAND_LINE
+            flags: (
+                GLib.ApplicationFlags.HANDLES_OPEN |
+                GLib.ApplicationFlags.HANDLES_COMMAND_LINE
+            )
         );
         this.add_main_option_entries(OPTION_ENTRIES);
         _instance = this;
@@ -458,6 +461,14 @@ public class GearyApplication : Gtk.Application {
     public override void activate() {
         base.activate();
         this.present.begin();
+    }
+
+    public override void open(GLib.File[] targets, string hint) {
+        foreach (GLib.File target in targets) {
+            if (target.get_uri_scheme() == "mailto") {
+                this.new_composer.begin(target.get_uri());
+            }
+        }
     }
 
     public void add_window_accelerators(string action,
