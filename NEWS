@@ -1,3 +1,51 @@
+Version 3.33.90
+~~~~~~~~~~~~~~~
+Released: 2019-08-30
+
+Enhancements included in this release:
+ * Sent email is now immediately added to a conversation
+ * Loading large search results now much more smooth
+ * Background synchronisation reliability greatly improved
+ * Messages can be replied to via by a different account
+ * Added a number of keyboard shortcuts for common operations
+ * Support for Development and Beta build profiles
+ * Bug causing Geary to use 100% CPU fixed
+ * Numerous bug fixes and user interface improvements
+ * Numerous user interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Alex Henrie
+ * Christopher Davis
+ * Federico Bruni
+ * Jiří Černý
+ * Joe Barnett
+ * Jon Banafato
+ * Khurshid Alam
+ * Konstantin Kharlamov
+ * Mario Ravalli
+ * Mete Can Eris
+ * Rafael Fontenelle
+ * Rico Tzschichholz
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Bruce Cowan (en_GB)
+ * Daniel Mustieles (es)
+ * Daniel Șerbănescu (ro)
+ * Emin Tufan Çetin (tr)
+ * Enrico Nicoletto (pt_BR)
+ * Federico Bruni (it)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * Rodrigo Lledó (es)
+
+And for the user manual:
+ * Emin Tufan Çetin (tr)
+ * Federico Bruni (it)
+
 Version 3.33.1
 ~~~~~~~~~~~~~~
 Released: 2019-04-28
