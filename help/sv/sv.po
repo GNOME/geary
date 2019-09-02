@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2019-01-29 05:49+0000\n"
-"PO-Revision-Date: 2019-01-29 17:58+0100\n"
+"POT-Creation-Date: 2019-06-19 10:27+0000\n"
+"PO-Revision-Date: 2019-09-02 20:31+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.3\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 msgctxt "_"
@@ -32,140 +32,183 @@ msgstr "Konton"
 
 #. (itstool) path: section/title
 #: C/accounts.page:13
-msgid "Adding accounts"
-msgstr "Lägga till konton"
+msgid "Accounts Editor"
+msgstr "Kontoredigerare"
 
 #. (itstool) path: section/p
 #: C/accounts.page:15
 msgid ""
-"The first time you start Geary, you will be prompted to add an email "
-"account. On this screen, select if your account is Gmail, Yahoo, Outlook."
-"com, or other. For other account types, you will need to enter your IMAP and "
-"SMTP login settings manually."
+"Your email accounts can be added, updated, and removed using the "
+"<em>accounts editor</em>. To open it, click Geary’s application menu button "
+"in the main window above the folder list, then click <gui>Accounts</gui> in "
+"the pop-up menu."
 msgstr ""
-"Den första gången du startar Geary kommer du att frågas om att lägga till "
-"ett e-postkonto. Vid denna dialog, markera om ditt konto är Gmail, Yahoo, "
-"Outlook.com eller ett annat. För andra kontotyper behöver du ange dina IMAP- "
-"och SMTP-inställningar manuellt."
+"Dina e-postkonton kan läggas till, uppdateras och tas bort med "
+"<em>kontoredigeraren</em>. För att öppna den klickar du på Gearys "
+"programmenyknapp i huvudfönstret ovanför mapplistan, och klickar sedan på "
+"<gui>Konton</gui> i poppuppmenyn."
 
 #. (itstool) path: section/p
-#: C/accounts.page:19
+#: C/accounts.page:20
 msgid ""
-"Additional accounts can be added from the Accounts dialog. The "
-"<gui>Accounts</gui> option is available in either Geary's application menu "
-"or the gear menu in the upper-right of the toolbar. (The location depends on "
-"the install desktop shell. For GNOME Shell and Unity, the application menu "
-"is available near the top-left corner of the screen.) To add an account, "
-"click the + button."
+"To change the order that accounts are displayed in the folder list, click "
+"and drag the handle for an account in the accounts editor, or focus an "
+"account with <key>Tab</key>, then use <keyseq><key>Ctrl</key><key>↑</key></"
+"keyseq> and <keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the "
+"currently selected account."
 msgstr ""
-"Ytterligare konton kan läggas till från kontodialogen. Alternativet "
-"<gui>Konton</gui> är tillgängligt i antingen Gearys programmeny eller "
-"kugghjulsmenyn i det över högra hörnet av verktygsfältet. (Platsen beror på "
-"det installerade skrivbordsskalet. I GNOME Shell och Unity finns "
-"programmenyn i det övre vänstra hörnet av skärmen.) För att lägga till ett "
-"konto, klicka på ”+”-knappen."
+"För att ändra ordningen i vilken konton visas i mapplistan, klicka och dra "
+"handtaget för ett konto i kontoredigeraren, eller fokusera ett konto med "
+"<key>Tabb</key> och använd sedan <keyseq><key>Ctrl</key><key>↑</key></"
+"keyseq> och <keyseq><key>Ctrl</key><key>↓</key></keyseq> för att ändra "
+"position för det för närvarande markerade kontot."
 
 #. (itstool) path: section/title
-#: C/accounts.page:27
-msgid "Editing existing accounts"
-msgstr "Redigera existerande konton"
-
-#. (itstool) path: section/p
 #: C/accounts.page:29
-msgid ""
-"From the Accounts dialog, select an account and click the pencil icon to "
-"change various settings. Please note that Geary cannot change server "
-"settings on an existing account. If you need to change your IMAP or SMTP "
-"server, you will need to delete the account and re-add it."
-msgstr ""
-"Från kontodialogen, välj ett konto och klicka på pennikonen för att ändra "
-"olika inställningar. Observera att Geary inte kan ändra server-inställningar "
-"för ett existerande konto. Om du behöver ändra din IMAP eller SMTP-server "
-"måste du ta bort kontot och lägga till det igen."
+msgid "Adding accounts"
+msgstr "Lägga till konton"
 
 #. (itstool) path: section/p
-#: C/accounts.page:33
+#: C/accounts.page:31
 msgid ""
-"To change the order that accounts are displayed in the folder list, drag the "
-"accounts in the Accounts dialog to the desired order."
+"Geary will automatically use any email accounts you have added via the "
+"<app>Online Accounts</app> panel of <app>GNOME Settings</app>. If you do not "
+"have any accounts added to <app>Online Accounts</app>, you will be prompted "
+"to add an account the first time you run Geary."
 msgstr ""
-"För att ändra ordningen på de konton som visas i mapplistan, dra kontona i "
-"kontodialogen till önskad ordning."
+"Geary kommer automatiskt att använda alla e-postkonton som du har lagt till "
+"via panelen <app>Nätkonton</app> i <app>GNOME Inställningar</app>. Om du "
+"inte har något konto tillagt i <app>Nätkonton</app> kommer du att ombes att "
+"lägga till ett konto första gången du kör Geary."
 
 #. (itstool) path: section/p
-#: C/accounts.page:36
-msgid "There are some advanced options available when editing accounts:"
-msgstr ""
-"Det finns några avancerade alternativ tillgängliga vid redigering av konton:"
-
-#. (itstool) path: item/p
-#: C/accounts.page:38
+#: C/accounts.page:37
 msgid ""
-"The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
-"successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
-"For Gmail accounts, this happens automatically. Yahoo and some other "
-"accounts can be configured to do this automatically as well. For other "
-"accounts, if you disable this setting, you may be unable to view messages "
-"you've sent."
+"To add additional accounts, open the accounts editor, then choose the "
+"appropriate email provider from the list at the bottom of the window. For "
+"providers supported by <app>Online Accounts</app>, <app>GNOME Settings</app> "
+"will be opened and you will be asked for your account information there. For "
+"other email providers, you will be asked for your account information by "
+"Geary. Once entered, click <gui>Create</gui> and the account information "
+"will be checked and then added."
 msgstr ""
-"Kryssrutan <gui>Spara skickad e-post</gui> kontrollerar huruvida Geary "
-"kommer att skicka vidare e-post som skickats till kontots mapp för "
-"<gui>Skickad e-post</gui>. För Gmail-konton sker detta automatiskt. Yahoo "
-"och några andra konton kan också konfigureras till att göra detta "
-"automatiskt. För övriga konton gäller att om du inaktiverar denna "
-"inställning så kan du inte se de meddelanden du skickat."
-
-#. (itstool) path: item/p
-#: C/accounts.page:44
-msgid ""
-"The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
-"automatically inserted when a composer is opened. You may enter the "
-"signature into the box immediately below. You may use HTML tags to style the "
-"text. Switch to a preview of the signature using the buttons to the right."
-msgstr ""
-"Kryssrutan <gui>Signera e-post</gui> visar huruvida en signatur automatiskt "
-"infogas när ett redigerarfönster öppnas. Du kan ange signaturen i rutan "
-"direkt under. Du kan använda HTML-taggar för att formge texten. Växla till "
-"en förhandsvisning av signaturen genom att använda knapparna till höger."
-
-#. (itstool) path: item/p
-#: C/accounts.page:49
-msgid ""
-"If you leave the signature in the Accounts dialog blank, Geary will use the "
-"<file>.signature</file> file in your home directory, if it exists. This file "
-"may contain either plain text or HTML markup. In the latter case, the markup "
-"will be inserted directly into the composer, without any escaping."
-msgstr ""
-"Om du lämnar signaturen i kontodialogen tom kommer Geary att använda filen "
-"<file>.signature</file> i din hemkatalog om den existerar. Denna fil kan "
-"innehålla vanlig text eller HTML-markup. I det senare fallet kommer markupen "
-"att infogas direkt i redigeraren utan kontrollsekvenser."
-
-#. (itstool) path: item/p
-#: C/accounts.page:54
-msgid ""
-"The <gui>Download mail</gui> drop-down allows you to configure how much mail "
-"Geary will keep locally. Geary can only use locally available mail when "
-"searching and forming conversations."
-msgstr ""
-"Rullgardinsmenyn <gui>Hämta e-post</gui> låter dig konfigurera hur mycket e-"
-"post Geary har lokalt. Geary kan endast använda lokalt tillgänglig e-post "
-"vid sökning och skapandet av konversationer."
+"För att lägga till ytterligare konton, öppna kontoredigeraren, välj sedan "
+"lämplig e-postleverantör från listan längs ner i fönstret. För leverantörer "
+"som stöds av <app>Nätkonton</app> kommer <app>GNOME Inställningar</app> att "
+"öppnas och du kommer att ombes att ge din kontoinformation där. För andra e-"
+"postleverantörer kommer Geary att fråga om din kontoinformation. Då den "
+"matats in kan du klicka på <gui>Skapa</gui> så kommer kontoinformationen att "
+"kontrolleras och sedan läggas till."
 
 #. (itstool) path: section/title
-#: C/accounts.page:62
+#: C/accounts.page:48
+msgid "Updating existing accounts"
+msgstr "Uppdatera befintliga konton"
+
+#. (itstool) path: section/p
+#: C/accounts.page:50
+msgid ""
+"To update existing accounts, open the accounts editor and choose the account "
+"you wish to update. Geary will display settings for the account. From there, "
+"you can add and remove additional sender email addresses, edit your email "
+"signature, and various other settings."
+msgstr ""
+"För att uppdatera befintliga konton, öppna kontoredigeraren och välj kontot "
+"som du vill uppdatera. Geary kommer att visa inställningar för kontot. "
+"Därifrån kan du lägga till och ta bort ytterligare e-postadresser för "
+"avsändare, redigera din e-postsignatur samt många andra inställningar."
+
+#. (itstool) path: section/p
+#: C/accounts.page:56
+msgid ""
+"The <gui>Download mail</gui> setting allows you to configure how much mail "
+"Geary will download and store locally. Geary can only use locally available "
+"mail when displaying and searching for conversations."
+msgstr ""
+"Inställningen <gui>Hämta e-post</gui> låter dig konfigurera hur mycket e-"
+"post Geary kommer hämta och lagra lokalt. Geary kan endast använda lokalt "
+"tillgänglig e-post vid visning och sökning av konversationer."
+
+#. (itstool) path: section/p
+#: C/accounts.page:61
+msgid ""
+"To edit the server settings for the account, scroll to the bottom of the "
+"window and click <gui>Server Settings</gui>. The server settings will be "
+"displayed and you can click to edit them. Once done, click <gui>Apply</gui> "
+"and Geary will check the settings, then update the account. Note that "
+"accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> cannot have their server name, security, login, or password "
+"settings changed."
+msgstr ""
+"För att redigera serverinställningarna för kontot, rulla längst ner i "
+"fönstret och klicka på <gui>Serverinställningar</gui>. Serverinställningarna "
+"kommer att visas och du kan klicka för att redigera dem. Då du är klar kan "
+"du klicka på <gui>Verkställ</gui> så kommer Geary att kontrollera "
+"inställningarna och sedan uppdatera kontot. Observera att konton som lagts "
+"till via panelen <app>Nätkonton</app> i <app>GNOME Inställningar</app> inte "
+"kan få sina servernamn eller inställningar för säkerhet, inloggning eller "
+"lösenord ändrade."
+
+#. (itstool) path: section/p
+#: C/accounts.page:70
+msgid ""
+"The <gui>Save draft email on server</gui> checkbox controls whether the "
+"composer will save copies of email messages being written in the "
+"<gui>Drafts</gui> folder. If de-selected, you will not be able to save draft "
+"messages when closing the composer."
+msgstr ""
+"Kryssrutan <gui>Spara meddelandeutkast på server</gui> styr huruvida "
+"redigeraren kommer att spara kopior av e-postmeddelanden som håller på att "
+"skrivas i mappen <gui>Utkast</gui>. Om den avmarkeras kommer du inte att "
+"kunna spara utkastmeddelanden då datorn stängs."
+
+#. (itstool) path: section/p
+#: C/accounts.page:75
+msgid ""
+"The <gui>Save sent email on server</gui> checkbox controls whether Geary "
+"will save copies of email that have been sent to the <gui>Sent</gui> folder. "
+"If de-selected, you will no be able to see any email messages you have sent, "
+"unless your server automatically saves them for you."
+msgstr ""
+"Kryssrutan <gui>Spara skickad e-post på server</gui> styr huruvida Geary "
+"kommer att spara kopior av e-post som har skickats i mappen <gui>Skickat</"
+"gui>. Om den avmarkeras kommer du inte att kunna se några e-postmeddelanden "
+"som du har skickat, om inte din server automatiskt sparar dem åt dig."
+
+#. (itstool) path: section/title
+#: C/accounts.page:83
 msgid "Removing accounts"
 msgstr "Ta bort konton"
 
 #. (itstool) path: section/p
-#: C/accounts.page:64
+#: C/accounts.page:85
 msgid ""
-"To delete an account, open the Accounts dialog, select the account, and "
-"press the - button. Geary will delete all information associated with the "
-"account."
+"Accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> must also be removed from there. To do so, open <app>Online "
+"Accounts</app>, select the account, and click <gui>Remove</gui>."
 msgstr ""
-"För att ta bort ett konto, öppna konto-dialogen, välj konto och tryck ned -. "
-"Geary kommer att ta bort all information associerad med kontot."
+"Konton tillagda via panelen <app>Nätkonton</app> i <app>GNOME Inställningar</"
+"app> måste också tas bort därifrån. För att göra detta öppnar du "
+"<app>Nätkonton</app>, väljer kontot, och klickar på <gui>Ta bort</gui>."
+
+#. (itstool) path: section/p
+#: C/accounts.page:90
+msgid ""
+"To remove an account added via Geary, open the accounts editor and choose "
+"the account you wish to remove. Geary will display settings for the account. "
+"Scroll to the bottom of the window and click <gui>Remove Account</gui>. You "
+"will be prompted to confirm removing the account. Once confirmed, if you "
+"change your mind you can still undo removing the account by clicking "
+"<gui>Undo</gui> in the popup notification, or by typing <keyseq><key>Ctrl</"
+"key><key>U</key></keyseq>."
+msgstr ""
+"För att ta bort ett konto som lagts till via Geary, öppna kontoredigeraren "
+"och välj kontot som du vill ta bort. Geary kommer att visas inställningar "
+"för kontot. Rulla längst ner i fönstret och klicka på <gui>Ta bort konto</"
+"gui>. Du kommer att ombes att bekräfta borttagningen av kontot. Då den "
+"bekräftats kan du fortfarande göra borttagningen ogjord genom att klicka på "
+"<gui>Ångra</gui> i poppuppaviseringen, eller genom att trycka "
+"<keyseq><key>Ctrl</key><key>U</key></keyseq>."
 
 #. (itstool) path: page/title
 #: C/archive.page:10
@@ -350,29 +393,37 @@ msgstr "Tack för att du hjälper till att göra Geary bättre!"
 #. the file changes, the md5 hash will change to let you know you need to
 #. update your localized copy. The msgstr is not used at all. Set it to
 #. whatever you like once you have updated your copy of the file.
-#: C/index.page:5
+#: C/index.page:6
+#| msgctxt "_"
+#| msgid ""
+#| "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
 msgctxt "_"
-msgid "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
+msgid "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
 msgstr ""
-"external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
+"external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
 
 #. (itstool) path: page/title
 #: C/index.page:5
-msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
-msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+#| msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+msgid ""
+"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
+"<span>Geary</span>"
+msgstr ""
+"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
+"<span>Geary</span>"
 
 #. (itstool) path: section/title
-#: C/index.page:8
+#: C/index.page:11
 msgid "Introduction"
 msgstr "Introduktion"
 
 #. (itstool) path: section/title
-#: C/index.page:12
+#: C/index.page:15
 msgid "Using Geary"
 msgstr "Använda Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:16
+#: C/index.page:19
 msgid "Contributing and bug reporting"
 msgstr "Bidra och rapportera fel"
 
@@ -487,63 +538,71 @@ msgstr ""
 "Gearys <link href=\"https://wiki.gnome.org/Apps/Geary\">wikisida</link>."
 
 #. (itstool) path: page/title
-#: C/overview.page:8
+#: C/overview.page:9
 msgid "Overview"
 msgstr "Översikt"
 
 #. (itstool) path: page/p
-#: C/overview.page:10
+#: C/overview.page:11
 msgid ""
-"Geary is a lightweight email reader for the <link href=\"http://gnome.org"
-"\">GNOME</link> desktop. It works with mail servers that support the IMAP "
-"protocol, including popular services such as Gmail, Yahoo Mail, and Outlook."
-"com."
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
 msgstr ""
-"Geary är en lättviktig e-postläsare för <link href=\"http://gnome.org"
-"\">GNOME</link>-skrivbordet. Det fungerar med e-postservrar som stöder IMAP-"
-"protokollet, vilket omfattar populära tjänster som Gmail, Yahoo Mail och "
-"Outlook.com."
+"Geary är ett e-postprogram byggt kring konversationer för GNOME 3-"
+"skrivbordet. Det låter dig läsa, söka och sända e-post med ett enkelt "
+"modernt gränssnitt."
 
 #. (itstool) path: page/p
-#: C/overview.page:14
+#: C/overview.page:15
 msgid ""
-"Geary groups mail messages into <em>conversations</em>. A conversation "
-"contains all messages in a single thread of discussion."
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
 msgstr ""
-"Geary grupperar e-postmeddelanden efter <em>konversationer</em>. En "
-"konversation innehåller alla meddelanden i en enskild diskussionstråd."
+"Konversationer låter dig läsa en fullständig diskussion utan att behöva "
+"hitta och klicka från meddelande till meddelande."
 
 #. (itstool) path: page/p
-#: C/overview.page:17
-msgid "The main Geary window is divided into several areas:"
-msgstr "Gearys huvudfönster är uppdelat i flera områden:"
+#: C/overview.page:18
+msgid ""
+"The main Geary window is divided into several areas: The folder list, the "
+"conversation list, and the conversation viewer."
+msgstr ""
+"Gearys huvudfönster är uppdelat i flera områden: mapplistan, "
+"konversationslistan och konversationsvisaren."
 
 #. (itstool) path: section/title
-#: C/overview.page:20
+#: C/overview.page:22
 msgid "Folder list"
 msgstr "Mapplista"
 
 #. (itstool) path: section/p
-#: C/overview.page:21
+#: C/overview.page:24
 msgid ""
-"The <em>folder list</em> at the left displays all <em>folders</em> and "
-"<em>labels</em> in your mail account. Geary uses the term <em>label</em> for "
-"any folder that you have created to help organize your messages. (The Gmail "
-"web interface also uses this term; most other mail services do not.)"
+"The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
+"for your email accounts. Geary uses the term <em>label</em> for any folder "
+"that you have created to organize your email messages."
 msgstr ""
-"<em>Mapplistan</em> till vänster visar alla <em>mappar</em> och "
-"<em>etiketter</em> för ditt e-postkonto. Geary använder termen <em>etikett</"
-"em> för varje mapp du har skapat för att hjälpa dig att organisera dina "
-"meddelanden. (Gmails webbgränssnitt använder också denna term; de flesta "
-"andra gör det inte.)"
+"<em>Mapplistan</em> visar alla <em>mappar</em> och <em>etiketter</em> för "
+"dina e-postkonton. Geary använder termen <em>etikett</em> för varje mapp du "
+"har skapat för att hjälpa dig att organisera dina meddelanden."
+
+#. (itstool) path: section/p
+#: C/overview.page:29
+msgid ""
+"Select a folder or label to display the conversations it contains in the "
+"conversation list."
+msgstr ""
+"Välj en mapp eller etikett för att visa konversationerna som den innehåller "
+"i konversationslistan."
 
 #. (itstool) path: section/title
-#: C/overview.page:28
+#: C/overview.page:34
 msgid "Conversation list"
 msgstr "Konversationslista"
 
 #. (itstool) path: section/p
-#: C/overview.page:29
+#: C/overview.page:36
 msgid ""
 "The <em>conversation list</em> displays a list of conversations in the "
 "selected folder. Newer conversations appear at the top."
@@ -552,9 +611,9 @@ msgstr ""
 "mappen. Nyare konversationer visas överst."
 
 #. (itstool) path: section/p
-#: C/overview.page:31
+#: C/overview.page:40
 msgid ""
-"Each sender's name appears bold if there are unread messages from that "
+"Each sender’s name appears bold if there are unread messages from that "
 "sender. If a conversation has more than one message, Geary displays a count "
 "of messages in the conversation."
 msgstr ""
@@ -563,22 +622,22 @@ msgstr ""
 "totalsumma över meddelanden i konversationen."
 
 #. (itstool) path: section/p
-#: C/overview.page:34
+#: C/overview.page:44
 msgid ""
 "Geary does not automatically download all messages in all of your mail "
 "folders. When you first visit your Inbox or any other folder, Geary "
-"downloads the 50 most recent messages in that folder. To see more messages, "
+"downloads the most recent messages in that folder. To see more messages, "
 "simply scroll down the conversation list and Geary will fetch more messages "
 "automatically."
 msgstr ""
 "Geary hämtar inte automatiskt alla meddelanden i alla e-postmappar. När du "
-"först besöker din inkorg eller någon annan mapp hämtar Geary de 50 senaste "
+"först besöker din inkorg eller någon annan mapp hämtar Geary de senaste "
 "meddelandena i den mappen. För att se flera meddelanden, rulla helt enkelt "
 "ned i konversationslistan och Geary kommer att hämta flera meddelanden "
 "automatiskt."
 
 #. (itstool) path: section/p
-#: C/overview.page:36
+#: C/overview.page:50
 msgid ""
 "Some commands in Geary can act on a group of conversations. To select "
 "multiple conversations, hold down the <key>Ctrl</key> key and click each "
@@ -593,35 +652,24 @@ msgstr ""
 "den sista konversationen."
 
 #. (itstool) path: section/title
-#: C/overview.page:44
-msgid "Message area"
-msgstr "Meddelandeyta"
+#: C/overview.page:58
+msgid "Conversation viewer"
+msgstr "Konversationsvisare"
 
 #. (itstool) path: section/p
-#: C/overview.page:45
+#: C/overview.page:60
 msgid ""
-"The <em>message area</em> displays all messages in the selected "
+"The <em>conversation viewer</em> displays all email messages in the selected "
 "conversation, with the oldest message at the top."
 msgstr ""
-"<em>Meddelandeytan</em> visar alla meddelanden i den markerade "
+"<em>Konversationsvisaren</em> visar alla e-postmeddelanden i den markerade "
 "konversationen med de äldsta meddelandena överst."
 
 #. (itstool) path: section/p
-#: C/overview.page:47
+#: C/overview.page:63
 msgid ""
-"At the upper right of each message, Geary displays a dropdown arrow that "
-"lets you open the <em>message menu</em> with commands that operate on the "
-"message."
-msgstr ""
-"I det övre högra hörnet för varje meddelande visar Geary en nedåtpil som "
-"låter dig öppna <em>meddelandemenyn</em> med kommandon som kan bearbeta "
-"meddelandet."
-
-#. (itstool) path: section/p
-#: C/overview.page:49
-msgid ""
-"When you view a conversation, Geary collapses messages that you've already "
-"read. Click collapsed messages to expand them. Click an expanded message's "
+"When you view a conversation, Geary collapses messages that you’ve already "
+"read. Click collapsed messages to expand them. Click an expanded message’s "
 "header to collapse it."
 msgstr ""
 "När du tittar på en konversation fäller Geary ihop meddelanden som du redan "
@@ -629,22 +677,66 @@ msgstr ""
 "ett utfällt meddelandehuvud för att fälla ihop det."
 
 #. (itstool) path: section/p
-#: C/overview.page:50
+#: C/overview.page:67
 msgid ""
-"Any attachments in a message appear at the bottom of the message. You can "
-"click an attachment to open it or right-click to save it."
+"Click on any of the sender’s or receiver’s names or email address for a "
+"message to open the <em>contact menu</em>, which displays additional "
+"information and options for the email address. You can to start a new "
+"conversation, copy the email address to the clipboard, and search for "
+"related conversations. If the email address is present in your desktop "
+"address book, it will show the contact’s photo, preferred name, and whether "
+"they are a favourite contact. You can also open the contact in the address "
+"book. If the email address is not already present, you can choose to add "
+"them to the address book, and update the remote image loading preference for "
+"that address."
 msgstr ""
-"Bilagor i ett meddelande visas längst ned i meddelandet. Du kan klicka på en "
-"bilaga för att öppna den, eller högerklicka för att spara den."
+"Klicka på valfritt namn eller e-postadress för avsändare eller mottagare för "
+"ett meddelande för att öppna <em>kontaktmenyn</em>, vilken visar ytterligare "
+"information och alternativ för e-postadressen. För att starta en ny "
+"konversation kan du kopiera e-postadressen till urklipp, och söka relaterade "
+"konversationer. Om e-postadressen finns i skrivbordets adressbok kommer den "
+"att visa kontaktens foto, föredragna namn, och huruvida de är en "
+"favoritkontakt. Du kan även öppna kontakten i adressboken. Om e-postadressen "
+"inte redan finns kan du välja att lägga till dem i adressboken, och "
+"uppdatera inställningen för inläsning av fjärrbilder för den adressen."
 
 #. (itstool) path: section/p
-#: C/overview.page:52
+#: C/overview.page:79
 msgid ""
-"Geary uses <link href=\"https://secure.gravatar.com/\">Gravatar</link> to "
-"display an avatar for each message's sender in its header."
+"Click the star button present on each message to mark or un-mark a message "
+"as being starred. Staring a message will mark the whole conversation as "
+"starred, and Geary will display the first starred message in a conversation "
+"when returning to it."
 msgstr ""
-"Geary använder <link href=\"https://secure.gravatar.com/\">Gravatar</link> "
-"för att visa en avatar för varje meddelandes avsändare i dess rubriker."
+"Klicka på stjärnknappen som finns på varje meddelande för att markera eller "
+"avmarkera meddelandet som att vara stjärnmärkt. Att stjärnmärka ett "
+"meddelande kommer markera hela konversationen som stjärnmärkt, och Geary "
+"kommer att visa det första stjärnmärkta meddelandet i en konversation då det "
+"återkommer till den."
+
+#. (itstool) path: section/p
+#: C/overview.page:84
+msgid ""
+"Click the menu button present on each message to open the <em>message menu</"
+"em>, which allows you to reply and forward to a specific message, update "
+"which messages have been marked as read or unread, print a message, and so "
+"on."
+msgstr ""
+"Klicka på menyknappen som finns på varje meddelande för att öppna "
+"<em>meddelandemenyn</em> som låter dig besvara och vidarebefordra ett "
+"specifikt meddelande, uppdatera vilka meddelanden som har markerats som "
+"lästa eller olästa, skriva ut ett meddelande och så vidare."
+
+#. (itstool) path: section/p
+#: C/overview.page:89
+msgid ""
+"Any attachments in a message appear at the bottom of the message. Double "
+"click an attachment to open it, or use the Open and Save buttons to open and "
+"save selected attachments."
+msgstr ""
+"Bilagor i ett meddelande visas längst ned i meddelandet. Dubbelklicka på en "
+"bilaga för att öppna den, eller använd knapparna Öppna och Spara för att "
+"öppna och spara valda bilagor."
 
 #. (itstool) path: page/title
 #: C/preferences.page:10
@@ -832,8 +924,9 @@ msgstr "<input>bcc:<var>mottagare</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:32
-msgid "Finds messages where <var>recipient</var> matches the BCC header."
-msgstr "Hittar meddelanden där <var>mottagare</var> matchar BCC-rubrik."
+msgid "Finds messages where <var>recipient</var> matches email BCC fields."
+msgstr ""
+"Hittar meddelanden där <var>mottagare</var> matchar meddelandets Bcc-fält."
 
 #. (itstool) path: td/p
 #: C/search.page:35
@@ -852,8 +945,9 @@ msgstr "<input>cc:<var>mottagare</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:40
-msgid "Finds messages where <var>recipient</var> matches the CC header."
-msgstr "Hittar meddelanden där <var>mottagare</var> matchar CC-rubrik."
+msgid "Finds messages where <var>recipient</var> matches email CC fields."
+msgstr ""
+"Hittar meddelanden där <var>mottagare</var> matchar meddelandets Cc-fält."
 
 #. (itstool) path: td/p
 #: C/search.page:43
@@ -862,8 +956,10 @@ msgstr "<input>från:<var>avsändare</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:44
-msgid "Finds messages where <var>sender</var> matches the From header."
-msgstr "Hittar meddelanden där <var>avsändare</var> matchar med från-rubriken."
+msgid "Finds messages where <var>sender</var> matches email From fields."
+msgstr ""
+"Hittar meddelanden där <var>avsändare</var> matchar med meddelandets Från-"
+"fält."
 
 #. (itstool) path: td/p
 #: C/search.page:47
@@ -913,10 +1009,11 @@ msgstr "<input>till:<var>mottagare</var></input>"
 #. (itstool) path: td/p
 #: C/search.page:64
 msgid ""
-"Finds messages where <var>recipient</var> matches the To, CC, or BCC header."
+"Finds messages where <var>recipient</var> matches email To, CC, or BCC "
+"fields."
 msgstr ""
-"Hittar meddelanden där <var>mottagare</var> matchar någon av rubrikerna "
-"till, cc eller bcc."
+"Hittar meddelanden där <var>mottagare</var> matchar något av fälten Till, Cc "
+"eller Bcc."
 
 #. (itstool) path: section/p
 #: C/search.page:68
@@ -1174,13 +1271,148 @@ msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
 msgstr ""
-"För att redigera ett existerande utkast, välj mappen Utkast i mapplistan, "
+"För att redigera ett befintligt utkast, välj mappen Utkast i mapplistan, "
 "välj meddelanden och klicka på ”Redigera utkast” i meddelandevisaren."
 
 #. (itstool) path: section/p
 #: C/write.page:51
 msgid "Geary deletes the draft when you send the message."
 msgstr "Geary tar bort utkastet när du skickar meddelandet."
+
+#~ msgid ""
+#~ "The first time you start Geary, you will be prompted to add an email "
+#~ "account. On this screen, select if your account is Gmail, Yahoo, Outlook."
+#~ "com, or other. For other account types, you will need to enter your IMAP "
+#~ "and SMTP login settings manually."
+#~ msgstr ""
+#~ "Den första gången du startar Geary kommer du att frågas om att lägga till "
+#~ "ett e-postkonto. Vid denna dialog, markera om ditt konto är Gmail, Yahoo, "
+#~ "Outlook.com eller ett annat. För andra kontotyper behöver du ange dina "
+#~ "IMAP- och SMTP-inställningar manuellt."
+
+#~ msgid ""
+#~ "Additional accounts can be added from the Accounts dialog. The "
+#~ "<gui>Accounts</gui> option is available in either Geary's application "
+#~ "menu or the gear menu in the upper-right of the toolbar. (The location "
+#~ "depends on the install desktop shell. For GNOME Shell and Unity, the "
+#~ "application menu is available near the top-left corner of the screen.) To "
+#~ "add an account, click the + button."
+#~ msgstr ""
+#~ "Ytterligare konton kan läggas till från kontodialogen. Alternativet "
+#~ "<gui>Konton</gui> är tillgängligt i antingen Gearys programmeny eller "
+#~ "kugghjulsmenyn i det över högra hörnet av verktygsfältet. (Platsen beror "
+#~ "på det installerade skrivbordsskalet. I GNOME Shell och Unity finns "
+#~ "programmenyn i det övre vänstra hörnet av skärmen.) För att lägga till "
+#~ "ett konto, klicka på ”+”-knappen."
+
+#~ msgid ""
+#~ "From the Accounts dialog, select an account and click the pencil icon to "
+#~ "change various settings. Please note that Geary cannot change server "
+#~ "settings on an existing account. If you need to change your IMAP or SMTP "
+#~ "server, you will need to delete the account and re-add it."
+#~ msgstr ""
+#~ "Från kontodialogen, välj ett konto och klicka på pennikonen för att ändra "
+#~ "olika inställningar. Observera att Geary inte kan ändra server-"
+#~ "inställningar för ett existerande konto. Om du behöver ändra din IMAP "
+#~ "eller SMTP-server måste du ta bort kontot och lägga till det igen."
+
+#~ msgid ""
+#~ "To change the order that accounts are displayed in the folder list, drag "
+#~ "the accounts in the Accounts dialog to the desired order."
+#~ msgstr ""
+#~ "För att ändra ordningen på de konton som visas i mapplistan, dra kontona "
+#~ "i kontodialogen till önskad ordning."
+
+#~ msgid "There are some advanced options available when editing accounts:"
+#~ msgstr ""
+#~ "Det finns några avancerade alternativ tillgängliga vid redigering av "
+#~ "konton:"
+
+#~ msgid ""
+#~ "The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
+#~ "successfully sent messages up to the account's <gui>Sent Mail</gui> "
+#~ "folder. For Gmail accounts, this happens automatically. Yahoo and some "
+#~ "other accounts can be configured to do this automatically as well. For "
+#~ "other accounts, if you disable this setting, you may be unable to view "
+#~ "messages you've sent."
+#~ msgstr ""
+#~ "Kryssrutan <gui>Spara skickad e-post</gui> kontrollerar huruvida Geary "
+#~ "kommer att skicka vidare e-post som skickats till kontots mapp för "
+#~ "<gui>Skickad e-post</gui>. För Gmail-konton sker detta automatiskt. Yahoo "
+#~ "och några andra konton kan också konfigureras till att göra detta "
+#~ "automatiskt. För övriga konton gäller att om du inaktiverar denna "
+#~ "inställning så kan du inte se de meddelanden du skickat."
+
+#~ msgid ""
+#~ "The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
+#~ "automatically inserted when a composer is opened. You may enter the "
+#~ "signature into the box immediately below. You may use HTML tags to style "
+#~ "the text. Switch to a preview of the signature using the buttons to the "
+#~ "right."
+#~ msgstr ""
+#~ "Kryssrutan <gui>Signera e-post</gui> visar huruvida en signatur "
+#~ "automatiskt infogas när ett redigerarfönster öppnas. Du kan ange "
+#~ "signaturen i rutan direkt under. Du kan använda HTML-taggar för att "
+#~ "formge texten. Växla till en förhandsvisning av signaturen genom att "
+#~ "använda knapparna till höger."
+
+#~ msgid ""
+#~ "If you leave the signature in the Accounts dialog blank, Geary will use "
+#~ "the <file>.signature</file> file in your home directory, if it exists. "
+#~ "This file may contain either plain text or HTML markup. In the latter "
+#~ "case, the markup will be inserted directly into the composer, without any "
+#~ "escaping."
+#~ msgstr ""
+#~ "Om du lämnar signaturen i kontodialogen tom kommer Geary att använda "
+#~ "filen <file>.signature</file> i din hemkatalog om den existerar. Denna "
+#~ "fil kan innehålla vanlig text eller HTML-markup. I det senare fallet "
+#~ "kommer markupen att infogas direkt i redigeraren utan kontrollsekvenser."
+
+#~ msgid ""
+#~ "To delete an account, open the Accounts dialog, select the account, and "
+#~ "press the - button. Geary will delete all information associated with the "
+#~ "account."
+#~ msgstr ""
+#~ "För att ta bort ett konto, öppna konto-dialogen, välj konto och tryck ned "
+#~ "-. Geary kommer att ta bort all information associerad med kontot."
+
+#~ msgid ""
+#~ "Geary is a lightweight email reader for the <link href=\"http://gnome.org"
+#~ "\">GNOME</link> desktop. It works with mail servers that support the IMAP "
+#~ "protocol, including popular services such as Gmail, Yahoo Mail, and "
+#~ "Outlook.com."
+#~ msgstr ""
+#~ "Geary är en lättviktig e-postläsare för <link href=\"http://gnome.org"
+#~ "\">GNOME</link>-skrivbordet. Det fungerar med e-postservrar som stöder "
+#~ "IMAP-protokollet, vilket omfattar populära tjänster som Gmail, Yahoo Mail "
+#~ "och Outlook.com."
+
+#~ msgid ""
+#~ "Geary groups mail messages into <em>conversations</em>. A conversation "
+#~ "contains all messages in a single thread of discussion."
+#~ msgstr ""
+#~ "Geary grupperar e-postmeddelanden efter <em>konversationer</em>. En "
+#~ "konversation innehåller alla meddelanden i en enskild diskussionstråd."
+
+#~ msgid "Message area"
+#~ msgstr "Meddelandeyta"
+
+#~ msgid ""
+#~ "At the upper right of each message, Geary displays a dropdown arrow that "
+#~ "lets you open the <em>message menu</em> with commands that operate on the "
+#~ "message."
+#~ msgstr ""
+#~ "I det övre högra hörnet för varje meddelande visar Geary en nedåtpil som "
+#~ "låter dig öppna <em>meddelandemenyn</em> med kommandon som kan bearbeta "
+#~ "meddelandet."
+
+#~ msgid ""
+#~ "Geary uses <link href=\"https://secure.gravatar.com/\">Gravatar</link> to "
+#~ "display an avatar for each message's sender in its header."
+#~ msgstr ""
+#~ "Geary använder <link href=\"https://secure.gravatar.com/\">Gravatar</"
+#~ "link> för att visa en avatar för varje meddelandes avsändare i dess "
+#~ "rubriker."
 
 #~ msgid "Geary has keyboard shortcuts for most common operations."
 #~ msgstr "Geary har tangentbordsgenvägar för de vanligaste åtgärderna."
