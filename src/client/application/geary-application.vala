@@ -466,7 +466,16 @@ public class GearyApplication : Gtk.Application {
     public override void open(GLib.File[] targets, string hint) {
         foreach (GLib.File target in targets) {
             if (target.get_uri_scheme() == "mailto") {
-                this.new_composer.begin(target.get_uri());
+                string mailto = target.get_uri();
+                // Due to GNOME/glib#1886, the email address may be
+                // prefixed by a '///'. If so, remove it.
+                if (mailto.has_prefix("mailto:///")) {
+                    mailto = (
+                        Geary.ComposedEmail.MAILTO_SCHEME +
+                        mailto.substring("mailto:///".length)
+                    );
+                }
+                this.new_composer.begin(mailto);
             }
         }
     }
