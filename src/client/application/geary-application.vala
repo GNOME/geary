@@ -366,7 +366,10 @@ public class GearyApplication : Gtk.Application {
     public GearyApplication() {
         Object(
             application_id: APP_ID,
-            flags: GLib.ApplicationFlags.HANDLES_COMMAND_LINE
+            flags: (
+                GLib.ApplicationFlags.HANDLES_OPEN |
+                GLib.ApplicationFlags.HANDLES_COMMAND_LINE
+            )
         );
         this.add_main_option_entries(OPTION_ENTRIES);
         _instance = this;
@@ -461,6 +464,23 @@ public class GearyApplication : Gtk.Application {
     public override void activate() {
         base.activate();
         this.present.begin();
+    }
+
+    public override void open(GLib.File[] targets, string hint) {
+        foreach (GLib.File target in targets) {
+            if (target.get_uri_scheme() == "mailto") {
+                string mailto = target.get_uri();
+                // Due to GNOME/glib#1886, the email address may be
+                // prefixed by a '///'. If so, remove it.
+                if (mailto.has_prefix("mailto:///")) {
+                    mailto = (
+                        Geary.ComposedEmail.MAILTO_SCHEME +
+                        mailto.substring("mailto:///".length)
+                    );
+                }
+                this.new_composer.begin(mailto);
+            }
+        }
     }
 
     public void add_window_accelerators(string action,
