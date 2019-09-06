@@ -41,17 +41,19 @@ internal class Geary.ImapEngine.AccountProcessor : Geary.BaseObject {
 
     private string id;
 
+    private bool is_running;
+
     private Nonblocking.Queue<AccountOperation> queue =
         new Nonblocking.Queue<AccountOperation>.fifo(op_equal);
 
     private AccountOperation? current_op = null;
-
-    private Cancellable cancellable = new Cancellable();
+    private GLib.Cancellable? op_cancellable = null;
 
 
     public AccountProcessor(string id) {
         this.id = id;
         this.queue.allow_duplicates = false;
+        this.is_running = true;
         this.run.begin();
     }
 
@@ -62,15 +64,21 @@ internal class Geary.ImapEngine.AccountProcessor : Geary.BaseObject {
     }
 
     public void stop() {
-        this.cancellable.cancel();
+        this.is_running = false;
+        if (this.op_cancellable != null) {
+            this.op_cancellable.cancel();
+            this.op_cancellable = null;
+        }
         this.queue.clear();
     }
 
     private async void run() {
-        while (!this.cancellable.is_cancelled()) {
+        while (this.is_running) {
+            this.op_cancellable = new GLib.Cancellable();
+
             AccountOperation? op = null;
             try {
-                op = yield this.queue.receive(this.cancellable);
+                op = yield this.queue.receive(this.op_cancellable);
             } catch (Error err) {
                 // we've been cancelled, so bail out
                 return;
@@ -84,7 +92,7 @@ internal class Geary.ImapEngine.AccountProcessor : Geary.BaseObject {
                 int network_errors = 0;
                 while (op_error == null) {
                     try {
-                        yield op.execute(this.cancellable);
+                        yield op.execute(this.op_cancellable);
                         op.succeeded();
                         break;
                     } catch (ImapError err) {
@@ -109,6 +117,7 @@ internal class Geary.ImapEngine.AccountProcessor : Geary.BaseObject {
                 op.completed();
 
                 this.current_op = null;
+                this.op_cancellable = null;
             }
         }
     }
