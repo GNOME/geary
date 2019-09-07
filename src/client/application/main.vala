@@ -20,13 +20,10 @@ int main(string[] args) {
     Environment.set_variable("G_TLS_GNUTLS_PRIORITY", "NORMAL:%COMPAT:!VERS-SSL3.0", false);
 #endif
 
-    // Disable WebKit2 accelerated compositing here while we can't
-    // depend on there being an API to do it. AC isn't appropriate
-    // since Geary is likely to be doing anything that requires
-    // acceleration, and it is costs a lot in terms of performance
-    // and memory:
-    // https://lists.webkit.org/pipermail/webkit-gtk/2016-November/002863.html
-    Environment.set_variable("WEBKIT_DISABLE_COMPOSITING_MODE", "1", true);
+    // Temporary workaround for WebKitGTK deprecation of the
+    // shared-secondary process model. Pull this out in 3.36 when the
+    // proper fix lands. See GNOME/geary#558.
+    Environment.set_variable("WEBKIT_USE_SINGLE_WEB_PROCESS", "1", true);
 
     GearyApplication app = new GearyApplication();
 
@@ -38,4 +35,3 @@ int main(string[] args) {
 
     return ec;
 }
-

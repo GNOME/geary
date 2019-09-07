@@ -76,9 +76,6 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                                         File cache_dir) {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
-        // Use a shared process so we don't spawn N WebProcess instances
-        // when showing N messages in a conversation.
-        context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
         // Use the doc viewer model since each web view instance only
         // ever shows a single HTML document.
         context.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
@@ -309,6 +306,8 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         setts.enable_offline_web_application_cache = false;
         setts.enable_page_cache = false;
         setts.enable_plugins = false;
+        setts.hardware_acceleration_policy =
+            WebKit.HardwareAccelerationPolicy.NEVER;
         setts.javascript_can_access_clipboard = true;
 
         WebKit.UserContentManager content_manager =
