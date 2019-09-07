@@ -149,6 +149,10 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
             );
         }
 
+        // Clear this now so that the wait for close below doesn't get
+        // cancelled as the folder closes.
+        this.closed_cancellable = null;
+
         if (was_opened) {
             try {
                 // don't pass in the Cancellable; really need this
