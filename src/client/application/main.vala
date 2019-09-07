@@ -20,6 +20,11 @@ int main(string[] args) {
     Environment.set_variable("G_TLS_GNUTLS_PRIORITY", "NORMAL:%COMPAT:!VERS-SSL3.0", false);
 #endif
 
+    // Temporary workaround for WebKitGTK deprecation of the
+    // shared-secondary process model. Pull this out in 3.36 when the
+    // proper fix lands. See GNOME/geary#558.
+    Environment.set_variable("WEBKIT_USE_SINGLE_WEB_PROCESS", "1", true);
+
     GearyApplication app = new GearyApplication();
 
     int ec = app.run(args);
