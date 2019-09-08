@@ -20,16 +20,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-08-28 09:14+0000\n"
-"PO-Revision-Date: 2019-08-28 16:05-0300\n"
-"Last-Translator: Enrico Nicoletto <enrico.nicoletto@src.gnome.org>\n"
+"POT-Creation-Date: 2019-09-06 01:06+0000\n"
+"PO-Revision-Date: 2019-09-08 12:01-0300\n"
+"Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 2.2.3\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"X-Generator: Gtranslator 3.32.0\n"
 "X-Project-Style: gnome\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
@@ -57,7 +57,7 @@ msgstr "E-mail"
 #: desktop/geary-autostart.desktop.in.in:5
 #: desktop/org.gnome.Geary.appdata.xml.in.in:16
 #: desktop/org.gnome.Geary.desktop.in.in:5
-#: src/client/application/geary-application.vala:29
+#: src/client/application/geary-application.vala:30
 msgid "Send and receive email"
 msgstr "Envie e receba e-mail"
 
@@ -953,141 +953,146 @@ msgstr "E-mail enviado com sucesso para %s."
 msgid "Failed to open default text editor."
 msgstr "Falha ao abrir o editor de texto padrão."
 
-#: src/client/application/geary-application.vala:30
+#: src/client/application/geary-application.vala:31
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
-#: src/client/application/geary-application.vala:31
+#: src/client/application/geary-application.vala:32
 msgid "Copyright 2016-2019 Geary Development Team."
 msgstr "Copyright 2016-2019 Geary Development Team."
 
-#: src/client/application/geary-application.vala:33
+#: src/client/application/geary-application.vala:34
 msgid "Visit the Geary web site"
 msgstr "Visite o website do Geary"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:108
+#: src/client/application/geary-application.vala:109
 msgid "Print debug logging"
 msgstr "Emite log de depuração"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:111
+#: src/client/application/geary-application.vala:112
 msgid "Start with the main window hidden (deprecated)"
 msgstr "Inicia com a janela principal oculta (obsoleto)"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:114
+#: src/client/application/geary-application.vala:115
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Habilita Inspetor WebKitGTK em exibições web"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:117
+#: src/client/application/geary-application.vala:118
 msgid "Log conversation monitoring"
 msgstr "Registra monitoramento de conversa"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:120
+#: src/client/application/geary-application.vala:121
 msgid "Log IMAP network deserialization"
 msgstr "Registra desserialização de rede IMAP"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/geary-application.vala:124
+#: src/client/application/geary-application.vala:125
 msgid "Log folder normalization"
 msgstr "Registra normalização de pasta"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:127
+#: src/client/application/geary-application.vala:128
 msgid "Log network activity"
 msgstr "Registra atividade de rede"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:130
+#: src/client/application/geary-application.vala:131
 msgid "Log periodic activity"
 msgstr "Registra atividade periódica"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/geary-application.vala:135
+#: src/client/application/geary-application.vala:136
 msgid "Log IMAP replay queue"
 msgstr "Registra lista de repetição do IMAP"
 
 #. / Command line option. Serialization is how commands and
 #. / responses are converted into a stream of bytes for
 #. / network transmission
-#: src/client/application/geary-application.vala:140
+#: src/client/application/geary-application.vala:141
 msgid "Log IMAP network serialization"
 msgstr "Registra serialização de rede IMAP"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:143
+#: src/client/application/geary-application.vala:144
 msgid "Log database queries (generates lots of messages)"
 msgstr "Registra consultas ao banco de dados (gera muitas mensagens)"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:146
+#: src/client/application/geary-application.vala:147
 msgid "Perform a graceful quit"
 msgstr "Realiza uma saída graciosa"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:149
+#: src/client/application/geary-application.vala:150
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Revoga todos os certificados de servidor TLS fixados"
 
 #. / Command line option
-#: src/client/application/geary-application.vala:152
+#: src/client/application/geary-application.vala:153
 msgid "Display program version"
 msgstr "Mostra versão do programa"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:279
+#: src/client/application/geary-application.vala:280
 msgid "Geary version"
 msgstr "Versão do Geary"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:281
+#: src/client/application/geary-application.vala:282
+msgid "Geary revision"
+msgstr "Revisão do Geary"
+
+#. / Application runtime information label
+#: src/client/application/geary-application.vala:284
 msgid "GTK version"
 msgstr "Versão do GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/geary-application.vala:288
+#: src/client/application/geary-application.vala:291
 msgid "GLib version"
 msgstr "Versão do GLib"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:295
+#: src/client/application/geary-application.vala:298
 msgid "WebKitGTK version"
 msgstr "Versão do WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:302
+#: src/client/application/geary-application.vala:305
 msgid "Desktop environment"
 msgstr "Ambiente"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/geary-application.vala:304
+#: src/client/application/geary-application.vala:307
 #: src/client/conversation-viewer/conversation-email.vala:159
 msgid "Unknown"
 msgstr "Desconhecido"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:334
+#: src/client/application/geary-application.vala:337
 msgid "Distribution name"
 msgstr "Nome da distribuição"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:339
+#: src/client/application/geary-application.vala:342
 msgid "Distribution release"
 msgstr "Lançamento da distribuição"
 
 #. / Application runtime information label
-#: src/client/application/geary-application.vala:347
+#: src/client/application/geary-application.vala:350
 msgid "Installation prefix"
 msgstr "Prefixo de lançamento"
 
-#: src/client/application/geary-application.vala:487
+#: src/client/application/geary-application.vala:510
 #, c-format
 msgid "About %s"
 msgstr "Sobre %s"
@@ -1095,7 +1100,7 @@ msgstr "Sobre %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:491
+#: src/client/application/geary-application.vala:514
 msgid "translator-credits"
 msgstr ""
 "Leonardo Lemos <leonardolemos@live.com>\n"
@@ -1106,13 +1111,13 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/geary-application.vala:774
+#: src/client/application/geary-application.vala:798
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "A opção `--hidden` está obsoleta e será removida no futuro."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/geary-application.vala:806
+#: src/client/application/geary-application.vala:830
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Argumento do programa não reconhecida “%s”"
@@ -3395,9 +3400,6 @@ msgstr "Atualização do Geary em progresso…"
 
 #~ msgid "Display program version and revision id"
 #~ msgstr "Mostra versão do programa e id de revisão"
-
-#~ msgid "Geary revision"
-#~ msgstr "Revisão do Geary"
 
 #~ msgid "Move conversation to Trash (Delete, Backspace)"
 #~ msgid_plural "Move conversations to Trash (Delete, Backspace)"
