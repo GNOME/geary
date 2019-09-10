@@ -296,9 +296,31 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     private async void add_pool_session() {
         ClientSession? new_session = null;
         try {
-            new_session = yield this.create_new_authorized_session(
-                this.pool_cancellable
-            );
+            // Work around GNOME/glib#1872 by waiting a second and
+            // retying when a G_IO_ERROR_FAILED is received. Pull this
+            // loop out when that bug is fixed.
+            int attempts = 3;
+            while (new_session == null) {
+                try {
+                    new_session = yield this.create_new_authorized_session(
+                        this.pool_cancellable
+                    );
+                } catch (GLib.IOError.FAILED err) {
+                    if (--attempts > 0) {
+                        debug(
+                            "Generic error connecting, retrying after 1s: %s",
+                            err.message
+                        );
+                        GLib.Timeout.add_seconds(
+                            1, this.add_pool_session.callback
+                        );
+                        yield;
+                    } else {
+                        throw err;
+                    }
+                }
+            }
+            // === 8< === End of work-around === 8< ===
         } catch (ImapError.UNAUTHENTICATED err) {
             debug("Auth error adding new session to the pool: %s", err.message);
             notify_authentication_failed();
