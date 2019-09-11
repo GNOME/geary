@@ -1,3 +1,25 @@
+Version 3.33.91
+~~~~~~~~~~~~~~~
+Released: 2019-08-11
+
+Bugs fixed:
+ * Background sync being cancelled on folder close
+ * Retry IMAP pool connections on GLib "Unknown error on connect"
+ * Temporarily replace WebKitGTK process model API with env var
+ * Conditionally enable WebKitGTK shared secondary process model
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Anders Jonsson (sv)
+ * Efstathios Iosifidis (el)
+ * Rafael Fontenelle (pt_BR)
+ * Ryuta Fujii (ja)
+ * Zander Brown (en_GB)
+
+And for the user manual:
+ * Anders Jonsson (sv)
+
+
 Version 3.33.90
 ~~~~~~~~~~~~~~~
 Released: 2019-08-30
