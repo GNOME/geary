@@ -1,6 +1,6 @@
 Version 3.33.91
 ~~~~~~~~~~~~~~~
-Released: 2019-08-11
+Released: 2019-09-11
 
 Bugs fixed:
  * Background sync being cancelled on folder close
