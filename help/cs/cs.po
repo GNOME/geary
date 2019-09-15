@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2019-01-29 05:49+0000\n"
+"POT-Creation-Date: 2019-06-19 10:27+0000\n"
 "PO-Revision-Date: 2019-01-29 10:40+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
@@ -29,138 +29,142 @@ msgstr "Účty"
 
 #. (itstool) path: section/title
 #: C/accounts.page:13
-msgid "Adding accounts"
-msgstr "Přidávání účtů"
+#, fuzzy
+#| msgid "Accounts"
+msgid "Accounts Editor"
+msgstr "Účty"
 
 #. (itstool) path: section/p
 #: C/accounts.page:15
 msgid ""
-"The first time you start Geary, you will be prompted to add an email "
-"account. On this screen, select if your account is Gmail, Yahoo, Outlook."
-"com, or other. For other account types, you will need to enter your IMAP and "
-"SMTP login settings manually."
+"Your email accounts can be added, updated, and removed using the "
+"<em>accounts editor</em>. To open it, click Geary’s application menu button "
+"in the main window above the folder list, then click <gui>Accounts</gui> in "
+"the pop-up menu."
 msgstr ""
-"Když Geary spustíte poprvé, budete dotázáni na přidání poštovního účtu. Na "
-"této obrazovce vyberte, jestli máte účet Gmail, Yahoo, Outlook.com nebo "
-"jiný. U účtu jiného typu budete muset zadat své nastavení IMAP a SMTP ručně."
 
 #. (itstool) path: section/p
-#: C/accounts.page:19
+#: C/accounts.page:20
 msgid ""
-"Additional accounts can be added from the Accounts dialog. The "
-"<gui>Accounts</gui> option is available in either Geary's application menu "
-"or the gear menu in the upper-right of the toolbar. (The location depends on "
-"the install desktop shell. For GNOME Shell and Unity, the application menu "
-"is available near the top-left corner of the screen.) To add an account, "
-"click the + button."
+"To change the order that accounts are displayed in the folder list, click "
+"and drag the handle for an account in the accounts editor, or focus an "
+"account with <key>Tab</key>, then use <keyseq><key>Ctrl</key><key>↑</key></"
+"keyseq> and <keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the "
+"currently selected account."
 msgstr ""
-"Další účty můžete přidat v dialogovém okně Účty. Volbu <gui>Účty</gui> "
-"najdete buď v aplikační nabídce Geary nebo v nabídce v pravém horním rohu "
-"nástrojové lišty. (Přesné místo závisí na používaném grafickém shellu. V "
-"GNOME Shell a Unity se aplikační nabídka nachází poblíž levého horního rohu "
-"obrazovky.) Nový účet přidáte kliknutím na tlačítko <gui>+</gui>."
 
 #. (itstool) path: section/title
-#: C/accounts.page:27
-msgid "Editing existing accounts"
+#: C/accounts.page:29
+msgid "Adding accounts"
+msgstr "Přidávání účtů"
+
+#. (itstool) path: section/p
+#: C/accounts.page:31
+msgid ""
+"Geary will automatically use any email accounts you have added via the "
+"<app>Online Accounts</app> panel of <app>GNOME Settings</app>. If you do not "
+"have any accounts added to <app>Online Accounts</app>, you will be prompted "
+"to add an account the first time you run Geary."
+msgstr ""
+
+#. (itstool) path: section/p
+#: C/accounts.page:37
+msgid ""
+"To add additional accounts, open the accounts editor, then choose the "
+"appropriate email provider from the list at the bottom of the window. For "
+"providers supported by <app>Online Accounts</app>, <app>GNOME Settings</app> "
+"will be opened and you will be asked for your account information there. For "
+"other email providers, you will be asked for your account information by "
+"Geary. Once entered, click <gui>Create</gui> and the account information "
+"will be checked and then added."
+msgstr ""
+
+#. (itstool) path: section/title
+#: C/accounts.page:48
+#, fuzzy
+#| msgid "Editing existing accounts"
+msgid "Updating existing accounts"
 msgstr "Úprava stávajících účtů"
 
 #. (itstool) path: section/p
-#: C/accounts.page:29
+#: C/accounts.page:50
 msgid ""
-"From the Accounts dialog, select an account and click the pencil icon to "
-"change various settings. Please note that Geary cannot change server "
-"settings on an existing account. If you need to change your IMAP or SMTP "
-"server, you will need to delete the account and re-add it."
+"To update existing accounts, open the accounts editor and choose the account "
+"you wish to update. Geary will display settings for the account. From there, "
+"you can add and remove additional sender email addresses, edit your email "
+"signature, and various other settings."
 msgstr ""
-"V dialogovém okně Účty vyberte účet a po kliknutí na ikonu tužky můžete "
-"měnit různá nastavení. Vezměte ale prosím na vědomí, že Geary neumí změnit u "
-"existujícího účtu server. Pokud potřebujete změnit server IMAP nebo SMTP, "
-"budete muset účet smazat a znovu jej přidat."
 
 #. (itstool) path: section/p
-#: C/accounts.page:33
+#: C/accounts.page:56
+#, fuzzy
+#| msgid ""
+#| "The <gui>Download mail</gui> drop-down allows you to configure how much "
+#| "mail Geary will keep locally. Geary can only use locally available mail "
+#| "when searching and forming conversations."
 msgid ""
-"To change the order that accounts are displayed in the folder list, drag the "
-"accounts in the Accounts dialog to the desired order."
-msgstr ""
-"Pro změnu pořadí zobrazení účtů v seznamu složek, stačí účet v dialogovém "
-"okně Účty přetáhnout na požadované místo."
-
-#. (itstool) path: section/p
-#: C/accounts.page:36
-msgid "There are some advanced options available when editing accounts:"
-msgstr "Během úprav účtu jsou k dispozici některá pokročilá nastavení:"
-
-#. (itstool) path: item/p
-#: C/accounts.page:38
-msgid ""
-"The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
-"successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
-"For Gmail accounts, this happens automatically. Yahoo and some other "
-"accounts can be configured to do this automatically as well. For other "
-"accounts, if you disable this setting, you may be unable to view messages "
-"you've sent."
-msgstr ""
-"Zaškrtávací políčko <gui>Ukládat odeslanou poštu</gui> řídí, jestli se mají "
-"úspěšně odeslané zprávy vkládat do složky <gui>Odeslaná pošta</gui> "
-"náležející k účtu. U Gmailu se tak děje automaticky. Yahoo a některé další "
-"účty lze nastavit, aby se tak dělo také automaticky. U ostatních účtů "
-"nebudete při vypnutí této volby moci procházet zprávy, které jste odeslali."
-
-#. (itstool) path: item/p
-#: C/accounts.page:44
-msgid ""
-"The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
-"automatically inserted when a composer is opened. You may enter the "
-"signature into the box immediately below. You may use HTML tags to style the "
-"text. Switch to a preview of the signature using the buttons to the right."
-msgstr ""
-"Zaškrtávací políčko <gui>Patička e-mailů</gui> říká, jestli se má při "
-"otevření editoru automaticky vložit patička s podpisem. Obsah patičky můžete "
-"zadat do pole níže. Můžete při tom určovat styl pomocí značek HTML. "
-"Tlačítkem napravo si můžete zobrazit náhled patičky."
-
-#. (itstool) path: item/p
-#: C/accounts.page:49
-msgid ""
-"If you leave the signature in the Accounts dialog blank, Geary will use the "
-"<file>.signature</file> file in your home directory, if it exists. This file "
-"may contain either plain text or HTML markup. In the latter case, the markup "
-"will be inserted directly into the composer, without any escaping."
-msgstr ""
-"Pokud ponecháte patičku v dialogovém okně Účty prázdnou, bude Geary používat "
-"soubor <file>.signature</file> ve vaší domovské složce (za předpokladu, že "
-"soubor existuje). Může obsahovat buď prostý text nebo text formátovaný jako "
-"HTML. Ve druhém případě bude vložen do editoru tak, jak je, bez jakéhokoliv "
-"ošetření speciálních znaků."
-
-#. (itstool) path: item/p
-#: C/accounts.page:54
-msgid ""
-"The <gui>Download mail</gui> drop-down allows you to configure how much mail "
-"Geary will keep locally. Geary can only use locally available mail when "
-"searching and forming conversations."
+"The <gui>Download mail</gui> setting allows you to configure how much mail "
+"Geary will download and store locally. Geary can only use locally available "
+"mail when displaying and searching for conversations."
 msgstr ""
 "V rozbalovacím seznamu <gui>Stahnout e-mail</gui> je možné nastavit, kolik "
 "zpráv bude Geary uchovávat místně. Jen v místně uložených zprávám může Geary "
 "vychledávat a sestavovat z nich konverzace."
 
+#. (itstool) path: section/p
+#: C/accounts.page:61
+msgid ""
+"To edit the server settings for the account, scroll to the bottom of the "
+"window and click <gui>Server Settings</gui>. The server settings will be "
+"displayed and you can click to edit them. Once done, click <gui>Apply</gui> "
+"and Geary will check the settings, then update the account. Note that "
+"accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> cannot have their server name, security, login, or password "
+"settings changed."
+msgstr ""
+
+#. (itstool) path: section/p
+#: C/accounts.page:70
+msgid ""
+"The <gui>Save draft email on server</gui> checkbox controls whether the "
+"composer will save copies of email messages being written in the "
+"<gui>Drafts</gui> folder. If de-selected, you will not be able to save draft "
+"messages when closing the composer."
+msgstr ""
+
+#. (itstool) path: section/p
+#: C/accounts.page:75
+msgid ""
+"The <gui>Save sent email on server</gui> checkbox controls whether Geary "
+"will save copies of email that have been sent to the <gui>Sent</gui> folder. "
+"If de-selected, you will no be able to see any email messages you have sent, "
+"unless your server automatically saves them for you."
+msgstr ""
+
 #. (itstool) path: section/title
-#: C/accounts.page:62
+#: C/accounts.page:83
 msgid "Removing accounts"
 msgstr "Odebírání účtů"
 
 #. (itstool) path: section/p
-#: C/accounts.page:64
+#: C/accounts.page:85
 msgid ""
-"To delete an account, open the Accounts dialog, select the account, and "
-"press the - button. Geary will delete all information associated with the "
-"account."
+"Accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> must also be removed from there. To do so, open <app>Online "
+"Accounts</app>, select the account, and click <gui>Remove</gui>."
 msgstr ""
-"Když chcete účet smazat, otevřte dialogové okno Účty, vyberte účet a "
-"zmáčkněte tlačítko -. Geary smaže všechny informace související s daným "
-"účtem."
+
+#. (itstool) path: section/p
+#: C/accounts.page:90
+msgid ""
+"To remove an account added via Geary, open the accounts editor and choose "
+"the account you wish to remove. Geary will display settings for the account. "
+"Scroll to the bottom of the window and click <gui>Remove Account</gui>. You "
+"will be prompted to confirm removing the account. Once confirmed, if you "
+"change your mind you can still undo removing the account by clicking "
+"<gui>Undo</gui> in the popup notification, or by typing <keyseq><key>Ctrl</"
+"key><key>U</key></keyseq>."
+msgstr ""
 
 #. (itstool) path: page/title
 #: C/archive.page:10
@@ -346,29 +350,37 @@ msgstr "Děkujeme za vaši pomoc ve snaze udělat Geary stále lepším!"
 #. the file changes, the md5 hash will change to let you know you need to
 #. update your localized copy. The msgstr is not used at all. Set it to
 #. whatever you like once you have updated your copy of the file.
-#: C/index.page:5
+#: C/index.page:6
+#, fuzzy
+#| msgctxt "_"
+#| msgid ""
+#| "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
 msgctxt "_"
-msgid "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
+msgid "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
 msgstr ""
 "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
 
 #. (itstool) path: page/title
 #: C/index.page:5
-msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+#, fuzzy
+#| msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+msgid ""
+"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
+"<span>Geary</span>"
 msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:8
+#: C/index.page:11
 msgid "Introduction"
 msgstr "Úvod"
 
 #. (itstool) path: section/title
-#: C/index.page:12
+#: C/index.page:15
 msgid "Using Geary"
 msgstr "Používání Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:16
+#: C/index.page:19
 msgid "Contributing and bug reporting"
 msgstr "Přispívání a hlášení chyb"
 
@@ -486,49 +498,51 @@ msgstr ""
 "\">wikistránku</link> projektu Geary."
 
 #. (itstool) path: page/title
-#: C/overview.page:8
+#: C/overview.page:9
 msgid "Overview"
 msgstr "Přehled"
 
 #. (itstool) path: page/p
-#: C/overview.page:10
+#: C/overview.page:11
 msgid ""
-"Geary is a lightweight email reader for the <link href=\"http://gnome.org"
-"\">GNOME</link> desktop. It works with mail servers that support the IMAP "
-"protocol, including popular services such as Gmail, Yahoo Mail, and Outlook."
-"com."
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
 msgstr ""
-"Geary je lehká čtečka e-mailů pro pracovní prostředí <link href=\"http://"
-"gnome.org\">GNOME</link>. Pracuje s poštovními servery, které podporují "
-"protokol IMAP, včetně populárních služeb jako je Gmail, Yahoo Mail a Outlook."
-"com."
 
 #. (itstool) path: page/p
-#: C/overview.page:14
+#: C/overview.page:15
 msgid ""
-"Geary groups mail messages into <em>conversations</em>. A conversation "
-"contains all messages in a single thread of discussion."
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
 msgstr ""
-"Geary seskupuje poštu do takzvaných <em>konverzací</em>. Konverzace obsahuje "
-"všechny zprávy v jednom vlákně diskuze."
 
 #. (itstool) path: page/p
-#: C/overview.page:17
-msgid "The main Geary window is divided into several areas:"
+#: C/overview.page:18
+#, fuzzy
+#| msgid "The main Geary window is divided into several areas:"
+msgid ""
+"The main Geary window is divided into several areas: The folder list, the "
+"conversation list, and the conversation viewer."
 msgstr "Hlavní okno Geary je rozděleno na několik částí:"
 
 #. (itstool) path: section/title
-#: C/overview.page:20
+#: C/overview.page:22
 msgid "Folder list"
 msgstr "Seznam složek"
 
 #. (itstool) path: section/p
-#: C/overview.page:21
+#: C/overview.page:24
+#, fuzzy
+#| msgid ""
+#| "The <em>folder list</em> at the left displays all <em>folders</em> and "
+#| "<em>labels</em> in your mail account. Geary uses the term <em>label</em> "
+#| "for any folder that you have created to help organize your messages. (The "
+#| "Gmail web interface also uses this term; most other mail services do not.)"
 msgid ""
-"The <em>folder list</em> at the left displays all <em>folders</em> and "
-"<em>labels</em> in your mail account. Geary uses the term <em>label</em> for "
-"any folder that you have created to help organize your messages. (The Gmail "
-"web interface also uses this term; most other mail services do not.)"
+"The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
+"for your email accounts. Geary uses the term <em>label</em> for any folder "
+"that you have created to organize your email messages."
 msgstr ""
 "<em>Seznam složek</em> nalevo zobrazuje všechny <em>složky</em> a "
 "<em>štítky</em> ve vašem poštovním účtu. Geary používá výraz <em>štítek</em> "
@@ -536,13 +550,20 @@ msgstr ""
 "(Webové rozhraní Gmail používá tento výraz také, většina ostatních služeb "
 "jej ale nepoužívá.)"
 
+#. (itstool) path: section/p
+#: C/overview.page:29
+msgid ""
+"Select a folder or label to display the conversations it contains in the "
+"conversation list."
+msgstr ""
+
 #. (itstool) path: section/title
-#: C/overview.page:28
+#: C/overview.page:34
 msgid "Conversation list"
 msgstr "Seznam konverzací"
 
 #. (itstool) path: section/p
-#: C/overview.page:29
+#: C/overview.page:36
 msgid ""
 "The <em>conversation list</em> displays a list of conversations in the "
 "selected folder. Newer conversations appear at the top."
@@ -551,9 +572,14 @@ msgstr ""
 "Nejnovější konverzace se zobrazují nahoře."
 
 #. (itstool) path: section/p
-#: C/overview.page:31
+#: C/overview.page:40
+#, fuzzy
+#| msgid ""
+#| "Each sender's name appears bold if there are unread messages from that "
+#| "sender. If a conversation has more than one message, Geary displays a "
+#| "count of messages in the conversation."
 msgid ""
-"Each sender's name appears bold if there are unread messages from that "
+"Each sender’s name appears bold if there are unread messages from that "
 "sender. If a conversation has more than one message, Geary displays a count "
 "of messages in the conversation."
 msgstr ""
@@ -562,11 +588,18 @@ msgstr ""
 "počet zpráv v konverzaci."
 
 #. (itstool) path: section/p
-#: C/overview.page:34
+#: C/overview.page:44
+#, fuzzy
+#| msgid ""
+#| "Geary does not automatically download all messages in all of your mail "
+#| "folders. When you first visit your Inbox or any other folder, Geary "
+#| "downloads the 50 most recent messages in that folder. To see more "
+#| "messages, simply scroll down the conversation list and Geary will fetch "
+#| "more messages automatically."
 msgid ""
 "Geary does not automatically download all messages in all of your mail "
 "folders. When you first visit your Inbox or any other folder, Geary "
-"downloads the 50 most recent messages in that folder. To see more messages, "
+"downloads the most recent messages in that folder. To see more messages, "
 "simply scroll down the conversation list and Geary will fetch more messages "
 "automatically."
 msgstr ""
@@ -577,7 +610,7 @@ msgstr ""
 "boudou automaticky získávat."
 
 #. (itstool) path: section/p
-#: C/overview.page:36
+#: C/overview.page:50
 msgid ""
 "Some commands in Geary can act on a group of conversations. To select "
 "multiple conversations, hold down the <key>Ctrl</key> key and click each "
@@ -592,34 +625,35 @@ msgstr ""
 "podržíte <key>Shift</key> a kliknete na poslední konverzaci."
 
 #. (itstool) path: section/title
-#: C/overview.page:44
-msgid "Message area"
-msgstr "Oblast zpráv"
+#: C/overview.page:58
+#, fuzzy
+#| msgid "Conversation list"
+msgid "Conversation viewer"
+msgstr "Seznam konverzací"
 
 #. (itstool) path: section/p
-#: C/overview.page:45
+#: C/overview.page:60
+#, fuzzy
+#| msgid ""
+#| "The <em>message area</em> displays all messages in the selected "
+#| "conversation, with the oldest message at the top."
 msgid ""
-"The <em>message area</em> displays all messages in the selected "
+"The <em>conversation viewer</em> displays all email messages in the selected "
 "conversation, with the oldest message at the top."
 msgstr ""
 "V <em>oblasti zpráv</em> jsou zobrazeny všechny zprávy z vybrané konverzace, "
 "přičemž nejstarší zpráva je nejvíc nahoře."
 
 #. (itstool) path: section/p
-#: C/overview.page:47
+#: C/overview.page:63
+#, fuzzy
+#| msgid ""
+#| "When you view a conversation, Geary collapses messages that you've "
+#| "already read. Click collapsed messages to expand them. Click an expanded "
+#| "message's header to collapse it."
 msgid ""
-"At the upper right of each message, Geary displays a dropdown arrow that "
-"lets you open the <em>message menu</em> with commands that operate on the "
-"message."
-msgstr ""
-"V pravém horním rohu každé zprávy zobrazuje Geary rozbalovací šipku, pomocí "
-"které můžete otevřít <em>nabídku zprávy</em> s příkazy týkajícími se zprávy."
-
-#. (itstool) path: section/p
-#: C/overview.page:49
-msgid ""
-"When you view a conversation, Geary collapses messages that you've already "
-"read. Click collapsed messages to expand them. Click an expanded message's "
+"When you view a conversation, Geary collapses messages that you’ve already "
+"read. Click collapsed messages to expand them. Click an expanded message’s "
 "header to collapse it."
 msgstr ""
 "Když si zobrazíte konverzaci, Geary sbalí zprávy, které jste již četli. "
@@ -627,22 +661,51 @@ msgstr ""
 "zprávy je sbalíte."
 
 #. (itstool) path: section/p
-#: C/overview.page:50
+#: C/overview.page:67
 msgid ""
-"Any attachments in a message appear at the bottom of the message. You can "
-"click an attachment to open it or right-click to save it."
+"Click on any of the sender’s or receiver’s names or email address for a "
+"message to open the <em>contact menu</em>, which displays additional "
+"information and options for the email address. You can to start a new "
+"conversation, copy the email address to the clipboard, and search for "
+"related conversations. If the email address is present in your desktop "
+"address book, it will show the contact’s photo, preferred name, and whether "
+"they are a favourite contact. You can also open the contact in the address "
+"book. If the email address is not already present, you can choose to add "
+"them to the address book, and update the remote image loading preference for "
+"that address."
+msgstr ""
+
+#. (itstool) path: section/p
+#: C/overview.page:79
+msgid ""
+"Click the star button present on each message to mark or un-mark a message "
+"as being starred. Staring a message will mark the whole conversation as "
+"starred, and Geary will display the first starred message in a conversation "
+"when returning to it."
+msgstr ""
+
+#. (itstool) path: section/p
+#: C/overview.page:84
+msgid ""
+"Click the menu button present on each message to open the <em>message menu</"
+"em>, which allows you to reply and forward to a specific message, update "
+"which messages have been marked as read or unread, print a message, and so "
+"on."
+msgstr ""
+
+#. (itstool) path: section/p
+#: C/overview.page:89
+#, fuzzy
+#| msgid ""
+#| "Any attachments in a message appear at the bottom of the message. You can "
+#| "click an attachment to open it or right-click to save it."
+msgid ""
+"Any attachments in a message appear at the bottom of the message. Double "
+"click an attachment to open it, or use the Open and Save buttons to open and "
+"save selected attachments."
 msgstr ""
 "Případné přílohy zprávy se objeví ve spodní části zprávy. Kliknutím na "
 "přílohu ji otevřete, kliknutím pravým tlačítkem ji uložíte."
-
-#. (itstool) path: section/p
-#: C/overview.page:52
-msgid ""
-"Geary uses <link href=\"https://secure.gravatar.com/\">Gravatar</link> to "
-"display an avatar for each message's sender in its header."
-msgstr ""
-"Geary používá <link href=\"https://secure.gravatar.com/\">Gravatar</link> "
-"pro zobrazení avatara u odesilatele zprávy v hlavičce zprávy."
 
 #. (itstool) path: page/title
 #: C/preferences.page:10
@@ -832,7 +895,9 @@ msgstr "<input>bcc:<var>příjemce</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:32
-msgid "Finds messages where <var>recipient</var> matches the BCC header."
+#, fuzzy
+#| msgid "Finds messages where <var>recipient</var> matches the BCC header."
+msgid "Finds messages where <var>recipient</var> matches email BCC fields."
 msgstr ""
 "Najít zprávy, ve kterých <var>příjemce</var> odpovídá údaji „Skrytá kopie“ v "
 "hlavičce."
@@ -854,7 +919,9 @@ msgstr "<input>cc:<var>příjemce</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:40
-msgid "Finds messages where <var>recipient</var> matches the CC header."
+#, fuzzy
+#| msgid "Finds messages where <var>recipient</var> matches the CC header."
+msgid "Finds messages where <var>recipient</var> matches email CC fields."
 msgstr ""
 "Najít zprávy, ve kterých <var>příjemce</var> odpovídá údaji „Kopie“ v "
 "hlavičce."
@@ -866,7 +933,9 @@ msgstr "<input>from:<var>odesilatel</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:44
-msgid "Finds messages where <var>sender</var> matches the From header."
+#, fuzzy
+#| msgid "Finds messages where <var>sender</var> matches the From header."
+msgid "Finds messages where <var>sender</var> matches email From fields."
 msgstr ""
 "Najít zprávy, ve kterých <var>odesilatel</var> odpovídá údaji „Od“ v "
 "hlavičce."
@@ -918,11 +987,16 @@ msgstr "<input>to:<var>příjemce</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:64
+#, fuzzy
+#| msgid ""
+#| "Finds messages where <var>recipient</var> matches the To, CC, or BCC "
+#| "header."
 msgid ""
-"Finds messages where <var>recipient</var> matches the To, CC, or BCC header."
+"Finds messages where <var>recipient</var> matches email To, CC, or BCC "
+"fields."
 msgstr ""
-"Najít zprávy, ve kterých <var>příjemce</var> odpovídá údajům „Komu“, "
-"„Kopi“ nebo „Skrytá kopie“ v hlavičce."
+"Najít zprávy, ve kterých <var>příjemce</var> odpovídá údajům „Komu“, „Kopi“ "
+"nebo „Skrytá kopie“ v hlavičce."
 
 #. (itstool) path: section/p
 #: C/search.page:68
@@ -1186,6 +1260,138 @@ msgstr ""
 #: C/write.page:51
 msgid "Geary deletes the draft when you send the message."
 msgstr "Po odeslání zprávy Geary koncept smaže."
+
+#~ msgid ""
+#~ "The first time you start Geary, you will be prompted to add an email "
+#~ "account. On this screen, select if your account is Gmail, Yahoo, Outlook."
+#~ "com, or other. For other account types, you will need to enter your IMAP "
+#~ "and SMTP login settings manually."
+#~ msgstr ""
+#~ "Když Geary spustíte poprvé, budete dotázáni na přidání poštovního účtu. "
+#~ "Na této obrazovce vyberte, jestli máte účet Gmail, Yahoo, Outlook.com "
+#~ "nebo jiný. U účtu jiného typu budete muset zadat své nastavení IMAP a "
+#~ "SMTP ručně."
+
+#~ msgid ""
+#~ "Additional accounts can be added from the Accounts dialog. The "
+#~ "<gui>Accounts</gui> option is available in either Geary's application "
+#~ "menu or the gear menu in the upper-right of the toolbar. (The location "
+#~ "depends on the install desktop shell. For GNOME Shell and Unity, the "
+#~ "application menu is available near the top-left corner of the screen.) To "
+#~ "add an account, click the + button."
+#~ msgstr ""
+#~ "Další účty můžete přidat v dialogovém okně Účty. Volbu <gui>Účty</gui> "
+#~ "najdete buď v aplikační nabídce Geary nebo v nabídce v pravém horním rohu "
+#~ "nástrojové lišty. (Přesné místo závisí na používaném grafickém shellu. V "
+#~ "GNOME Shell a Unity se aplikační nabídka nachází poblíž levého horního "
+#~ "rohu obrazovky.) Nový účet přidáte kliknutím na tlačítko <gui>+</gui>."
+
+#~ msgid ""
+#~ "From the Accounts dialog, select an account and click the pencil icon to "
+#~ "change various settings. Please note that Geary cannot change server "
+#~ "settings on an existing account. If you need to change your IMAP or SMTP "
+#~ "server, you will need to delete the account and re-add it."
+#~ msgstr ""
+#~ "V dialogovém okně Účty vyberte účet a po kliknutí na ikonu tužky můžete "
+#~ "měnit různá nastavení. Vezměte ale prosím na vědomí, že Geary neumí "
+#~ "změnit u existujícího účtu server. Pokud potřebujete změnit server IMAP "
+#~ "nebo SMTP, budete muset účet smazat a znovu jej přidat."
+
+#~ msgid ""
+#~ "To change the order that accounts are displayed in the folder list, drag "
+#~ "the accounts in the Accounts dialog to the desired order."
+#~ msgstr ""
+#~ "Pro změnu pořadí zobrazení účtů v seznamu složek, stačí účet v dialogovém "
+#~ "okně Účty přetáhnout na požadované místo."
+
+#~ msgid "There are some advanced options available when editing accounts:"
+#~ msgstr "Během úprav účtu jsou k dispozici některá pokročilá nastavení:"
+
+#~ msgid ""
+#~ "The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
+#~ "successfully sent messages up to the account's <gui>Sent Mail</gui> "
+#~ "folder. For Gmail accounts, this happens automatically. Yahoo and some "
+#~ "other accounts can be configured to do this automatically as well. For "
+#~ "other accounts, if you disable this setting, you may be unable to view "
+#~ "messages you've sent."
+#~ msgstr ""
+#~ "Zaškrtávací políčko <gui>Ukládat odeslanou poštu</gui> řídí, jestli se "
+#~ "mají úspěšně odeslané zprávy vkládat do složky <gui>Odeslaná pošta</gui> "
+#~ "náležející k účtu. U Gmailu se tak děje automaticky. Yahoo a některé "
+#~ "další účty lze nastavit, aby se tak dělo také automaticky. U ostatních "
+#~ "účtů nebudete při vypnutí této volby moci procházet zprávy, které jste "
+#~ "odeslali."
+
+#~ msgid ""
+#~ "The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
+#~ "automatically inserted when a composer is opened. You may enter the "
+#~ "signature into the box immediately below. You may use HTML tags to style "
+#~ "the text. Switch to a preview of the signature using the buttons to the "
+#~ "right."
+#~ msgstr ""
+#~ "Zaškrtávací políčko <gui>Patička e-mailů</gui> říká, jestli se má při "
+#~ "otevření editoru automaticky vložit patička s podpisem. Obsah patičky "
+#~ "můžete zadat do pole níže. Můžete při tom určovat styl pomocí značek "
+#~ "HTML. Tlačítkem napravo si můžete zobrazit náhled patičky."
+
+#~ msgid ""
+#~ "If you leave the signature in the Accounts dialog blank, Geary will use "
+#~ "the <file>.signature</file> file in your home directory, if it exists. "
+#~ "This file may contain either plain text or HTML markup. In the latter "
+#~ "case, the markup will be inserted directly into the composer, without any "
+#~ "escaping."
+#~ msgstr ""
+#~ "Pokud ponecháte patičku v dialogovém okně Účty prázdnou, bude Geary "
+#~ "používat soubor <file>.signature</file> ve vaší domovské složce (za "
+#~ "předpokladu, že soubor existuje). Může obsahovat buď prostý text nebo "
+#~ "text formátovaný jako HTML. Ve druhém případě bude vložen do editoru tak, "
+#~ "jak je, bez jakéhokoliv ošetření speciálních znaků."
+
+#~ msgid ""
+#~ "To delete an account, open the Accounts dialog, select the account, and "
+#~ "press the - button. Geary will delete all information associated with the "
+#~ "account."
+#~ msgstr ""
+#~ "Když chcete účet smazat, otevřte dialogové okno Účty, vyberte účet a "
+#~ "zmáčkněte tlačítko -. Geary smaže všechny informace související s daným "
+#~ "účtem."
+
+#~ msgid ""
+#~ "Geary is a lightweight email reader for the <link href=\"http://gnome.org"
+#~ "\">GNOME</link> desktop. It works with mail servers that support the IMAP "
+#~ "protocol, including popular services such as Gmail, Yahoo Mail, and "
+#~ "Outlook.com."
+#~ msgstr ""
+#~ "Geary je lehká čtečka e-mailů pro pracovní prostředí <link href=\"http://"
+#~ "gnome.org\">GNOME</link>. Pracuje s poštovními servery, které podporují "
+#~ "protokol IMAP, včetně populárních služeb jako je Gmail, Yahoo Mail a "
+#~ "Outlook.com."
+
+#~ msgid ""
+#~ "Geary groups mail messages into <em>conversations</em>. A conversation "
+#~ "contains all messages in a single thread of discussion."
+#~ msgstr ""
+#~ "Geary seskupuje poštu do takzvaných <em>konverzací</em>. Konverzace "
+#~ "obsahuje všechny zprávy v jednom vlákně diskuze."
+
+#~ msgid "Message area"
+#~ msgstr "Oblast zpráv"
+
+#~ msgid ""
+#~ "At the upper right of each message, Geary displays a dropdown arrow that "
+#~ "lets you open the <em>message menu</em> with commands that operate on the "
+#~ "message."
+#~ msgstr ""
+#~ "V pravém horním rohu každé zprávy zobrazuje Geary rozbalovací šipku, "
+#~ "pomocí které můžete otevřít <em>nabídku zprávy</em> s příkazy týkajícími "
+#~ "se zprávy."
+
+#~ msgid ""
+#~ "Geary uses <link href=\"https://secure.gravatar.com/\">Gravatar</link> to "
+#~ "display an avatar for each message's sender in its header."
+#~ msgstr ""
+#~ "Geary používá <link href=\"https://secure.gravatar.com/\">Gravatar</link> "
+#~ "pro zobrazení avatara u odesilatele zprávy v hlavičce zprávy."
 
 #~ msgid "F1"
 #~ msgstr "F1"
