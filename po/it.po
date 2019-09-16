@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-08-18 11:39+0000\n"
-"PO-Revision-Date: 2019-08-20 18:12+0200\n"
+"POT-Creation-Date: 2019-08-21 11:19+0000\n"
+"PO-Revision-Date: 2019-08-25 17:55+0200\n"
 "Last-Translator: Federico Bruni <fede@inventati.org>\n"
 "Language-Team: Italiano <gnome-it-list@gnome.org>\n"
 "Language: it\n"
@@ -593,7 +593,7 @@ msgstr[0] "%d giorno fa"
 msgstr[1] "%d giorni fa"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-controller.vala:2405
+#: src/client/application/application-controller.vala:2400
 msgid "Undo"
 msgstr "Annulla"
 
@@ -769,29 +769,29 @@ msgid "Untitled"
 msgstr "Senza titolo"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:564
+#: src/client/application/application-controller.vala:559
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "Si è verificato un problema nell'inviare la posta per %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:568
+#: src/client/application/application-controller.vala:563
 msgid "Email will not be sent until re-connected"
 msgstr "La posta non sarà inviata finché fuori rete"
 
-#: src/client/application/application-controller.vala:919
+#: src/client/application/application-controller.vala:914
 msgid "Labels"
 msgstr "Etichette"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/application-controller.vala:932
+#: src/client/application/application-controller.vala:927
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Impossibile aprire il database per %s"
 
-#: src/client/application/application-controller.vala:933
+#: src/client/application/application-controller.vala:928
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -817,20 +817,20 @@ msgstr ""
 "allegati. <b>Tale operazione non ha effetti sulla posta presente sul server."
 "</b>"
 
-#: src/client/application/application-controller.vala:935
+#: src/client/application/application-controller.vala:930
 msgid "_Rebuild"
 msgstr "_Ricostruisci"
 
-#: src/client/application/application-controller.vala:935
+#: src/client/application/application-controller.vala:930
 msgid "E_xit"
 msgstr "_Esci"
 
-#: src/client/application/application-controller.vala:944
+#: src/client/application/application-controller.vala:939
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Impossibile ricostruire il database per «%s»"
 
-#: src/client/application/application-controller.vala:945
+#: src/client/application/application-controller.vala:940
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -841,18 +841,18 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/application-controller.vala:1739
+#: src/client/application/application-controller.vala:1734
 #, c-format
 msgid "Moved %d message to %s"
 msgid_plural "Moved %d messages to %s"
 msgstr[0] "%d messaggio spostato in %s"
 msgstr[1] "%d messaggi spostati in %s"
 
-#: src/client/application/application-controller.vala:1749
+#: src/client/application/application-controller.vala:1744
 msgid "Are you sure you want to open these attachments?"
 msgstr "Sicuri di voler aprire questi allegati?"
 
-#: src/client/application/application-controller.vala:1750
+#: src/client/application/application-controller.vala:1745
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -860,14 +860,14 @@ msgstr ""
 "Gli allegati possono danneggiare il sistema se aperti. Aprire solo file "
 "provenienti da fonti fidate."
 
-#: src/client/application/application-controller.vala:1751
+#: src/client/application/application-controller.vala:1746
 msgid "Don’t _ask me again"
 msgstr "_Non chiederlo più"
 
 #. Translators: Dialog primary label when prompting to
 #. overwrite a file. The string substitution is the file'sx
 #. name.
-#: src/client/application/application-controller.vala:1874
+#: src/client/application/application-controller.vala:1869
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Il file «%s» esiste già. Sostituirlo?"
@@ -875,58 +875,58 @@ msgstr "Il file «%s» esiste già. Sostituirlo?"
 #. Translators: Dialog secondary label when prompting to
 #. overwrite a file. The string substitution is the parent
 #. folder's name.
-#: src/client/application/application-controller.vala:1881
+#: src/client/application/application-controller.vala:1876
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
 "Il file esiste già in «%s». Sostituendolo il suo contenuto sarà sovrascritto."
 
-#: src/client/application/application-controller.vala:1885
+#: src/client/application/application-controller.vala:1880
 msgid "_Replace"
 msgstr "_Sostituisci"
 
-#: src/client/application/application-controller.vala:2245
+#: src/client/application/application-controller.vala:2240
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Svuotare tutte le email dalla cartella %s?"
 
-#: src/client/application/application-controller.vala:2246
+#: src/client/application/application-controller.vala:2241
 msgid "This removes the email from Geary and your email server."
 msgstr "Questo rimuoverà le email dall'applicazione e dal server di posta."
 
-#: src/client/application/application-controller.vala:2247
+#: src/client/application/application-controller.vala:2242
 msgid "This cannot be undone."
 msgstr "Impossibile annullare questa azione."
 
-#: src/client/application/application-controller.vala:2248
+#: src/client/application/application-controller.vala:2243
 #, c-format
 msgid "Empty %s"
 msgstr "Svuota %s"
 
-#: src/client/application/application-controller.vala:2265
+#: src/client/application/application-controller.vala:2260
 #, c-format
 msgid "Error emptying %s"
 msgstr "Errore nello svuotare %s"
 
-#: src/client/application/application-controller.vala:2296
+#: src/client/application/application-controller.vala:2291
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Eliminare permanentemente questo messaggio?"
 msgstr[1] "Eliminare permanentemente questi messaggi?"
 
-#: src/client/application/application-controller.vala:2298
+#: src/client/application/application-controller.vala:2293
 msgid "Delete"
 msgstr "Elimina"
 
-#: src/client/application/application-controller.vala:2312
+#: src/client/application/application-controller.vala:2307
 #, c-format
 msgid "Trashed %d message"
 msgid_plural "Trashed %d messages"
 msgstr[0] "%d messaggio cestinato"
 msgstr[1] "%d messaggi cestinati"
 
-#: src/client/application/application-controller.vala:2359
+#: src/client/application/application-controller.vala:2354
 #, c-format
 msgid "Archived %d message"
 msgid_plural "Archived %d messages"
@@ -935,12 +935,12 @@ msgstr[1] "%d messaggi archiviati"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2487
+#: src/client/application/application-controller.vala:2482
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Posta inviata con successo a %s."
 
-#: src/client/application/application-controller.vala:2565
+#: src/client/application/application-controller.vala:2560
 msgid "Failed to open default text editor."
 msgstr "Apertura dell'editor di testo predefinito non riuscita."
 
@@ -2091,7 +2091,7 @@ msgstr "Archivio"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:117
+#: src/engine/imap-db/search/imap-db-search-query.vala:73
 msgctxt "Search operator"
 msgid "attachment"
 msgstr "allegato"
@@ -2104,7 +2104,7 @@ msgstr "allegato"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:126
+#: src/engine/imap-db/search/imap-db-search-query.vala:82
 msgctxt "Search operator"
 msgid "bcc"
 msgstr "ccn"
@@ -2116,7 +2116,7 @@ msgstr "ccn"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:134
+#: src/engine/imap-db/search/imap-db-search-query.vala:90
 msgctxt "Search operator"
 msgid "body"
 msgstr "corpo"
@@ -2129,7 +2129,7 @@ msgstr "corpo"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:143
+#: src/engine/imap-db/search/imap-db-search-query.vala:99
 msgctxt "Search operator"
 msgid "cc"
 msgstr "cc"
@@ -2142,7 +2142,7 @@ msgstr "cc"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:152
+#: src/engine/imap-db/search/imap-db-search-query.vala:108
 msgctxt "Search operator"
 msgid "from"
 msgstr "da"
@@ -2154,7 +2154,7 @@ msgstr "da"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:160
+#: src/engine/imap-db/search/imap-db-search-query.vala:116
 msgctxt "Search operator"
 msgid "is"
 msgstr "è"
@@ -2166,7 +2166,7 @@ msgstr "è"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary
 #. User Guide.
-#: src/engine/imap-db/imap-db-account.vala:168
+#: src/engine/imap-db/search/imap-db-search-query.vala:124
 msgctxt "Search operator"
 msgid "subject"
 msgstr "oggetto"
@@ -2179,7 +2179,7 @@ msgstr "oggetto"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:177
+#: src/engine/imap-db/search/imap-db-search-query.vala:133
 msgctxt "Search operator"
 msgid "to"
 msgstr "a"
@@ -2192,7 +2192,7 @@ msgstr "a"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:198
+#: src/engine/imap-db/search/imap-db-search-query.vala:154
 msgctxt "Search operator value - mail addressed to the user"
 msgid "me"
 msgstr "me"
@@ -2204,7 +2204,7 @@ msgstr "me"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:210
+#: src/engine/imap-db/search/imap-db-search-query.vala:166
 msgctxt "Search operator value - mail sent by the user"
 msgid "me"
 msgstr "me"
@@ -2216,7 +2216,7 @@ msgstr "me"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:222
+#: src/engine/imap-db/search/imap-db-search-query.vala:178
 msgctxt "'is:' search operator value"
 msgid "read"
 msgstr "letto"
@@ -2229,7 +2229,7 @@ msgstr "letto"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:233
+#: src/engine/imap-db/search/imap-db-search-query.vala:189
 msgctxt "'is:' search operator value"
 msgid "starred"
 msgstr "speciale"
@@ -2241,7 +2241,7 @@ msgstr "speciale"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: src/engine/imap-db/imap-db-account.vala:243
+#: src/engine/imap-db/search/imap-db-search-query.vala:199
 msgctxt "'is:' search operator value"
 msgid "unread"
 msgstr "nonletto"
@@ -2250,7 +2250,7 @@ msgstr "nonletto"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:950
+#: src/engine/imap-engine/imap-engine-generic-account.vala:953
 msgid "Drafts | Draft"
 msgstr "Bozze | Bozza | Drafts | Draft"
 
@@ -2258,7 +2258,7 @@ msgstr "Bozze | Bozza | Drafts | Draft"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:959
+#: src/engine/imap-engine/imap-engine-generic-account.vala:962
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Inviata | Posta inviata | Email inviate | E-mail inviate | Sent | Sent Mail "
@@ -2266,7 +2266,7 @@ msgstr ""
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:964
+#: src/engine/imap-engine/imap-engine-generic-account.vala:967
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Messaggi inviati"
@@ -2275,7 +2275,7 @@ msgstr "Messaggi inviati"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:974
+#: src/engine/imap-engine/imap-engine-generic-account.vala:977
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2287,13 +2287,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:984
+#: src/engine/imap-engine/imap-engine-generic-account.vala:987
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Cestino | Trash | Rubbish | Rubbish Bin"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:989
+#: src/engine/imap-engine/imap-engine-generic-account.vala:992
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Messaggi eliminati"
@@ -2302,7 +2302,7 @@ msgstr "Messaggi eliminati"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:999
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1002
 msgid "Archive | Archives"
 msgstr "Archivio | Archivi"
 
@@ -2946,15 +2946,15 @@ msgctxt "shortcut window"
 msgid "Forward"
 msgstr "Inoltra"
 
-#: ui/gtk/help-overlay.ui:45
+#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:296
 msgctxt "shortcut window"
 msgid "Un-mark/mark read"
-msgstr "Attiva/Disattiva il contrassegno letto"
+msgstr "Contrassegna/non contrassegna come letto"
 
 #: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:303
 msgctxt "shortcut window"
 msgid "Mark/un-mark starred"
-msgstr "Attiva/Disattiva il contrassegno speciale"
+msgstr "Contrassegna/non contrassegna come speciale"
 
 #: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:310
 msgctxt "shortcut window"
@@ -3105,11 +3105,6 @@ msgstr "Scorciatoie da tastiera a tasto singolo"
 msgctxt "shortcut window"
 msgid "Reply to sender "
 msgstr "Rispondi al mittente "
-
-#: ui/gtk/help-overlay.ui:296
-msgctxt "shortcut window"
-msgid "Mark/un-mark read"
-msgstr "Attiva/Disattiva il contrassegno letto"
 
 #: ui/gtk/help-overlay.ui:343
 msgid "Composer Shortcuts"
