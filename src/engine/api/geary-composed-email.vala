@@ -38,10 +38,10 @@ public class Geary.ComposedEmail : BaseObject {
 
     public Gee.Set<File> attached_files { get; private set;
         default = new Gee.HashSet<File>(Geary.Files.nullable_hash, Geary.Files.nullable_equal); }
-    public Gee.Map<string,File> inline_files { get; private set;
-        default = new Gee.HashMap<string,File>(); }
-    public Gee.Map<string,File> cid_files { get; private set;
-        default = new Gee.HashMap<string,File>(); }
+    public Gee.Map<string,Memory.Buffer> inline_files { get; private set;
+        default = new Gee.HashMap<string,Memory.Buffer>(); }
+    public Gee.Map<string,Memory.Buffer> cid_files { get; private set;
+        default = new Gee.HashMap<string,Memory.Buffer>(); }
 
     public string img_src_prefix { get; set; default = ""; }
 
@@ -88,18 +88,18 @@ public class Geary.ComposedEmail : BaseObject {
     public bool replace_inline_img_src(string orig, string replacement) {
         // XXX This and contains_inline_img_src are pretty
         // hacky. Should probably be working with a DOM tree.
-        bool ret = false;
+        bool found = false;
         if (this.body_html != null) {
-            string old_body = this.body_html;
-            this.body_html = old_body.replace(
-                IMG_SRC_TEMPLATE.printf(this.img_src_prefix + orig),
-                IMG_SRC_TEMPLATE.printf(replacement)
-            );
-            // Avoid doing a proper comparison so we don't need to scan
-            // the whole string again.
-            ret = this.body_html.length != old_body.length;
+            string prefixed_orig = IMG_SRC_TEMPLATE.printf(this.img_src_prefix + orig);
+            found = this.body_html.contains(prefixed_orig);
+            if (found) {
+                this.body_html = this.body_html.replace(
+                    prefixed_orig,
+                    IMG_SRC_TEMPLATE.printf(replacement)
+                );
+            }
         }
-        return ret;
+        return found;
     }
 
 }

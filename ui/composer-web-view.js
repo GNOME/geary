@@ -93,6 +93,12 @@ ComposerPageState.prototype = {
             }
         }, true);
 
+        // Handle file drag & drop
+        document.body.addEventListener("drop", state.handleFileDrop, true);
+        document.body.addEventListener("allowDrop", function(e) {
+            ev.preventDefault();
+        }, true);
+
         // Search for and remove a particular styling when we quote
         // text. If that style exists in the quoted text, we alter it
         // slightly so we don't mess with it later.
@@ -380,6 +386,24 @@ ComposerPageState.prototype = {
             }
         }
         return inPart;
+    },
+    handleFileDrop: function(dropEvent) {
+        dropEvent.preventDefault();
+
+        for (var i = 0; i < dropEvent.dataTransfer.files.length; i++) {
+            const file = dropEvent.dataTransfer.files[i];
+
+            if (!file.type.startsWith('image/'))
+                continue;
+
+            const reader = new FileReader();
+            reader.onload = (function(filename, imageType) { return function(loadEvent) {
+                window.webkit.messageHandlers.dragDropReceived.postMessage(
+                    encodeURIComponent(filename) + "," + imageType + "," + loadEvent.target.result
+                );
+            }; })(file.name, file.type);
+            reader.readAsDataURL(file);
+        }
     }
 };
 

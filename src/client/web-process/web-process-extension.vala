@@ -30,8 +30,7 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
  */
 public class GearyWebExtension : Object {
 
-
-    private const string[] ALLOWED_SCHEMES = { "cid", "geary", "data" };
+    private const string[] ALLOWED_SCHEMES = { "cid", "geary", "data", "blob" };
 
     private WebKit.WebExtension extension;
 
