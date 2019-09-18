@@ -236,7 +236,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                 new Gee.LinkedList<GMime.Object>();
 
             // The files that need to have Content IDs assigned
-            Gee.Map<string,File> inline_files = new Gee.HashMap<string,File>();
+            Gee.Map<string,Memory.Buffer> inline_files = new Gee.HashMap<string,Memory.Buffer>();
             inline_files.set_all(email.inline_files);
 
             // Create parts for inline images, if any, and updating
@@ -248,18 +248,18 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             // assigned
             foreach (string cid in email.cid_files.keys) {
                 if (email.contains_inline_img_src(CID_URL_PREFIX + cid)) {
-                    File file = email.cid_files[cid];
                     GMime.Object? inline_part = null;
                     try {
-                        inline_part = yield get_file_part(
-                            file,
+                        inline_part = yield get_buffer_part(
+                            email.cid_files[cid],
+                            GLib.Path.get_basename(cid),
                             Geary.Mime.DispositionType.INLINE,
                             cancellable
                         );
                     } catch (GLib.Error err) {
                         warning(
                             "Error creating CID part %s: %s",
-                            file.get_path(),
+                            cid,
                             err.message
                         );
                     }
@@ -288,15 +288,16 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                                                      CID_URL_PREFIX + cid)) {
                         GMime.Object? inline_part = null;
                         try {
-                            inline_part = yield get_file_part(
+                            inline_part = yield get_buffer_part(
                                 inline_files[name],
+                                GLib.Path.get_basename(name),
                                 Geary.Mime.DispositionType.INLINE,
                                 cancellable
                             );
                         } catch (GLib.Error err) {
                             warning(
                                 "Error creating inline file part %s: %s",
-                                inline_files[name].get_path(),
+                                name,
                                 err.message
                             );
                         }
@@ -444,6 +445,59 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
         GMime.StreamGIO stream = new GMime.StreamGIO(file);
         stream.set_owner(false);
+
+        return yield finalise_attachment_part(stream, part, content_type, cancellable);
+    }
+
+    /**
+     * Create a GMime part for the provided attachment buffer
+     */
+    private async GMime.Part? get_buffer_part(Memory.Buffer buffer,
+                                              string basename,
+                                              Geary.Mime.DispositionType disposition,
+                                              GLib.Cancellable cancellable)
+        throws Error {
+
+        Mime.ContentType? mime_type = Mime.ContentType.guess_type(
+            basename,
+            buffer
+        );
+
+        if (mime_type == null) {
+            throw new RFC822Error.INVALID(
+                _("Could not determine mime type for “%s”.").printf(basename)
+                );
+        }
+
+        GMime.ContentType? content_type = new GMime.ContentType.from_string(mime_type.get_mime_type());
+
+        if (content_type == null) {
+            throw new RFC822Error.INVALID(
+                _("Could not determine content type for mime type “%s” on “%s”.").printf(mime_type.to_string(), basename)
+                );
+        }
+
+        GMime.Part part = new GMime.Part();
+        part.set_disposition(disposition.serialize());
+        part.set_filename(basename);
+
+        part.set_content_type(content_type);
+
+        // TODO seems inefficient, surely there's a way to create a Glib.Stream using, say Memory.Buffer's InputStream.
+        GMime.StreamMem stream = new GMime.StreamMem.with_buffer(buffer.get_uint8_array());
+        stream.set_owner(false);
+
+        return yield finalise_attachment_part(stream, part, content_type, cancellable);
+    }
+
+    /**
+     * Set encoding and content object on GMime part
+     */
+    private async GMime.Part finalise_attachment_part(GMime.Stream stream,
+                                                      GMime.Part part,
+                                                      GMime.ContentType content_type,
+                                                      GLib.Cancellable cancellable)
+        throws Error {
 
         // Text parts should be scanned fully to determine best
         // (i.e. most compact) transport encoding to use, but
