@@ -1,6 +1,6 @@
 # po/geary.pot
 # PO message string template file for Geary email client
-# Copyright 2016 Software Freedom Conservancy Inc.
+# Copyright 2016-2019 Software Freedom Conservancy Inc.
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2019-09-15 23:26+0000\n"
-"PO-Revision-Date: 2019-09-06 23:30+0900\n"
+"PO-Revision-Date: 2019-09-20 23:30+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -821,12 +821,10 @@ msgstr ""
 "%s"
 
 #: src/client/application/application-controller.vala:1726
-#, fuzzy, c-format
-#| msgid "%d message"
-#| msgid_plural "%d messages"
+#, c-format
 msgid "Moved %d message to %s"
 msgid_plural "Moved %d messages to %s"
-msgstr[0] "%d 件のメッセージ"
+msgstr[0] "%d 件のメッセージを %s に移動しました"
 
 #: src/client/application/application-controller.vala:1736
 msgid "Are you sure you want to open these attachments?"
@@ -898,20 +896,16 @@ msgid "Delete"
 msgstr "削除"
 
 #: src/client/application/application-controller.vala:2299
-#, fuzzy, c-format
-#| msgid "%d message"
-#| msgid_plural "%d messages"
+#, c-format
 msgid "Trashed %d message"
 msgid_plural "Trashed %d messages"
-msgstr[0] "%d 件のメッセージ"
+msgstr[0] "%d 件のメッセージをごみ箱に移動しました"
 
 #: src/client/application/application-controller.vala:2346
-#, fuzzy, c-format
-#| msgid "%d message"
-#| msgid_plural "%d messages"
+#, c-format
 msgid "Archived %d message"
 msgid_plural "Archived %d messages"
-msgstr[0] "%d 件のメッセージ"
+msgstr[0] "%d 件のメッセージをアーカイブに移動しました"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
@@ -1016,32 +1010,32 @@ msgstr "プログラムのバージョンを表示する"
 #. / Application runtime information label
 #: src/client/application/geary-application.vala:280
 msgid "Geary version"
-msgstr ""
+msgstr "Geary のバージョン"
 
 #. / Application runtime information label
 #: src/client/application/geary-application.vala:282
 msgid "Geary revision"
-msgstr ""
+msgstr "Geary のリビジョン"
 
 #. / Application runtime information label
 #: src/client/application/geary-application.vala:284
 msgid "GTK version"
-msgstr ""
+msgstr "GTK のバージョン"
 
 #. / Applciation runtime information label
 #: src/client/application/geary-application.vala:291
 msgid "GLib version"
-msgstr ""
+msgstr "GLib のバージョン"
 
 #. / Application runtime information label
 #: src/client/application/geary-application.vala:298
 msgid "WebKitGTK version"
-msgstr ""
+msgstr "WebKitGTK のバージョン"
 
 #. / Application runtime information label
 #: src/client/application/geary-application.vala:305
 msgid "Desktop environment"
-msgstr ""
+msgstr "デスクトップ環境"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
@@ -1053,7 +1047,7 @@ msgstr "不明"
 #. / Application runtime information label
 #: src/client/application/geary-application.vala:337
 msgid "Distribution name"
-msgstr ""
+msgstr "ディストリビューション名"
 
 #. / Application runtime information label
 #: src/client/application/geary-application.vala:342
@@ -1096,17 +1090,15 @@ msgid "Unrecognised program argument: “%s”"
 msgstr "不明な引数です: “%s”"
 
 #: src/client/components/components-inspector.vala:68
-#, fuzzy
-#| msgid "_Inspect…"
 msgid "Inspector"
-msgstr "検証(_I)…"
+msgstr ""
 
 #. / Translators: Title for Inspector logs pane
 #. / Translators: Title for problem report dialog logs pane
 #: src/client/components/components-inspector.vala:77
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:91
 msgid "Logs"
-msgstr ""
+msgstr "ログ"
 
 #. / Translators: Title for Inspector system system information pane
 #. / Translators: Title for problem report system information
@@ -1114,7 +1106,7 @@ msgstr ""
 #: src/client/components/components-inspector.vala:81
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:94
 msgid "System"
-msgstr ""
+msgstr "システム"
 
 #. Button label for saving problem report information
 #: src/client/components/components-inspector.vala:198
@@ -2614,7 +2606,7 @@ msgstr ""
 
 #: ui/conversation-contact-popover.ui:146
 msgid "New Conversation…"
-msgstr ""
+msgstr "新しいスレッド…"
 
 #: ui/conversation-contact-popover.ui:159
 msgid "Copy Email Address"
@@ -2622,7 +2614,7 @@ msgstr "メールアドレスをコピー"
 
 #: ui/conversation-contact-popover.ui:182
 msgid "Save in Contacts…"
-msgstr ""
+msgstr "“連絡先”に保存…"
 
 #: ui/conversation-contact-popover.ui:195
 msgid "Show Conversations"
@@ -2630,31 +2622,31 @@ msgstr "スレッドを表示"
 
 #: ui/conversation-contact-popover.ui:208
 msgid "Open in Contacts"
-msgstr ""
+msgstr "“連絡先”を開く"
 
 #: ui/conversation-contact-popover.ui:221
 msgid "Always Load Remote Images"
-msgstr ""
+msgstr "常にリモート画像を読み込む"
 
 #. Title label on contact popover
 #: ui/conversation-contact-popover.ui:264
 msgid "Deceptive email address"
-msgstr ""
+msgstr "偽装メールアドレスです"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:294
 msgid "This email address is:"
-msgstr ""
+msgstr "このメールアドレス:"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:319
 msgid "But was forged as:"
-msgstr ""
+msgstr "次のように偽装:"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:344
 msgid "The sender may not be trustworthy"
-msgstr ""
+msgstr "送信者は信頼できません"
 
 #: ui/conversation-email.ui:27
 msgid "Save all attachments"
@@ -3032,12 +3024,12 @@ msgstr "スレッドリストにフォーカスを移動する"
 #: ui/gtk/help-overlay.ui:247
 msgctxt "shortcut window"
 msgid "Select the conversation down"
-msgstr ""
+msgstr "下のスレッドを選択する"
 
 #: ui/gtk/help-overlay.ui:254
 msgctxt "shortcut window"
 msgid "Select the conversation up"
-msgstr ""
+msgstr "上のスレッドを選択する"
 
 #: ui/gtk/help-overlay.ui:261
 msgctxt "shortcut window"
@@ -3047,7 +3039,7 @@ msgstr "フォーカスを次/前のメッセージに移動する"
 #: ui/gtk/help-overlay.ui:271
 msgctxt "shortcut window"
 msgid "Single-key shortcuts"
-msgstr ""
+msgstr "シングルキーショートカット"
 
 #: ui/gtk/help-overlay.ui:275
 msgctxt "shortcut window"
