@@ -1,3 +1,68 @@
+Version 3.34.0
+~~~~~~~~~~~~~~
+Released: 2019-09-21
+
+Enhancements included in this release:
+ * Improved desktop contact integration
+ * Added support for TNEF attachments
+ * User interface and icon refinements
+ * Subject line now also spell checked in the composer
+ * Updated user manual
+ * Improved problem reporting tool
+ * New Inspector window for real-time debugging
+ * Improved server compatibility
+ * Numerous bug fixes and user interface improvements
+ * Numerous user interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Alex Henrie
+ * Christopher Davis
+ * Claudio
+ * Federico Bruni
+ * Greg V
+ * Jiří Černý
+ * Joe Barnett
+ * Jonathan Haas
+ * Jon Banafato
+ * Khurshid Alam
+ * Konstantin Kharlamov
+ * Mario Ravalli
+ * Mete Can Eris
+ * Niels De Graef
+ * Oliver Giles
+ * Rafael Fontenelle
+ * Rico Tzschichholz
+ * Tobias Bernard
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Anders Jonsson (sv)
+ * Balázs Úr (hu)
+ * Bruce Cowan (en_GB)
+ * Daniel Mustieles (es)
+ * Daniel Șerbănescu (ro)
+ * Efstathios Iosifidis (el)
+ * Emin Tufan Çetin (tr)
+ * Enrico Nicoletto (pt_BR)
+ * Federico Bruni (it)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Marek Černocký (cs)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * Rodrigo Lledó (es)
+ * Ryuta Fujii (ja)
+ * Tim Sabsch (de)
+ * Zander Brown (en_GB)
+
+And for the user manual:
+ * Anders Jonsson (sv)
+ * Emin Tufan Çetin (tr)
+ * Federico Bruni (it)
+ * Marek Černocký (cs)
+ * Piotr Drąg (pl)
+
 Version 3.33.91
 ~~~~~~~~~~~~~~~
 Released: 2019-09-11

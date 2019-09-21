@@ -1,5 +1,5 @@
 project('geary', [ 'vala', 'c' ],
-  version: '3.33.91',
+  version: '3.34.0',
   license: 'LGPL2.1+',
   meson_version: '>= 0.49',
 )
