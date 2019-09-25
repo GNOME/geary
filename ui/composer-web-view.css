@@ -7,7 +7,8 @@ body {
   margin: 0 !important;
   border: 0 !important;
   padding: 0 !important;
-  background-color: #f9f9f9 !important;
+  color: black;
+  background-color: #f9f9f9;
   font-size: medium !important;
 }
 
@@ -16,7 +17,6 @@ body.plain, body.plain * {
   font-weight: normal;
   font-style: normal;
   font-size: medium !important;
-  color: black;
   text-decoration: none;
 }
 
@@ -43,7 +43,7 @@ body > div#geary-quote {
 }
 
 body > div.geary-focus {
-  background-color: white !important;
+  background-color: white;
 }
 
 body > div#geary-signature.geary-focus,
