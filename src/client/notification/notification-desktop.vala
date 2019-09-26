@@ -16,14 +16,14 @@ public class Notification.Desktop : Geary.BaseObject {
     private const string ARRIVED_ID = "email-arrived";
     private const string ERROR_ID = "error";
 
-    private weak NewMessagesMonitor monitor;
+    private weak Application.NotificationContext monitor;
     private weak GearyApplication application;
     private GLib.Notification? arrived_notification = null;
     private GLib.Notification? error_notification = null;
     private GLib.Cancellable load_cancellable;
 
 
-    public Desktop(NewMessagesMonitor monitor,
+    public Desktop(Application.NotificationContext monitor,
                    GearyApplication application,
                    GLib.Cancellable load_cancellable) {
         this.monitor = monitor;
@@ -89,7 +89,14 @@ public class Notification.Desktop : Geary.BaseObject {
                 /// new messages are already awaiting.
                 "%d new message", "%d new messages", added
             ).printf(added);
-            int total = monitor.get_new_message_count(folder);
+
+            int total = 0;
+            try {
+                total = monitor.get_new_message_count(folder);
+            } catch (Geary.EngineError.NOT_FOUND err) {
+                // All good
+            }
+
             if (total > added) {
                 body = ngettext(
                     /// Notification body text for new email when
@@ -121,27 +128,34 @@ public class Notification.Desktop : Geary.BaseObject {
                 originator, cancellable
             );
 
-            string body;
-            int count = monitor.get_new_message_count(folder);
-            if (count <= 1) {
-                body = Util.Email.strip_subject_prefixes(email);
-            } else {
-                body = ngettext(
-                    "%s\n(%d other new message for %s)",
-                    "%s\n(%d other new messages for %s)", count - 1).printf(
-                        Util.Email.strip_subject_prefixes(email),
-                        count - 1,
-                        folder.account.information.display_name
-                    );
+            int count = -1;
+            try {
+                count = monitor.get_new_message_count(folder);
+            } catch (Geary.EngineError.NOT_FOUND err) {
+                // All good
             }
+            if (count > -1) {
+                string body = "";
+                if (count <= 1) {
+                    body = Util.Email.strip_subject_prefixes(email);
+                } else {
+                    body = ngettext(
+                        "%s\n(%d other new message for %s)",
+                        "%s\n(%d other new messages for %s)", count - 1).printf(
+                            Util.Email.strip_subject_prefixes(email),
+                            count - 1,
+                            folder.account.information.display_name
+                        );
+                }
 
-            issue_arrived_notification(
-                contact.is_trusted
+                issue_arrived_notification(
+                    contact.is_trusted
                     ? contact.display_name : originator.to_short_display(),
-                body,
-                folder,
-                email.id
-            );
+                    body,
+                    folder,
+                    email.id
+                );
+            }
         } else {
             notify_new_mail(folder, 1);
         }

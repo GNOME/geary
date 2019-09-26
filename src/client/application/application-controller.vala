@@ -148,7 +148,6 @@ public class Application.Controller : Geary.BaseObject {
     private UpgradeDialog upgrade_dialog;
     private Folks.IndividualAggregator folks;
     private Canberra.Context sound_context;
-    private NewMessagesMonitor new_messages_monitor;
     private NewMessagesIndicator new_messages_indicator;
     private UnityLauncher unity_launcher;
 
@@ -276,6 +275,12 @@ public class Application.Controller : Geary.BaseObject {
         this.plugin_manager = new PluginManager(
             application.get_app_plugins_dir()
         );
+        this.plugin_manager.notifications = new NotificationContext(
+            this.avatars,
+            this.get_contact_store_for_account,
+            this.should_notify_new_messages
+        );
+
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
@@ -302,27 +307,22 @@ public class Application.Controller : Geary.BaseObject {
         main_window.conversation_viewer.conversation_added.connect(
             on_conversation_view_added
         );
-        this.new_messages_monitor = new NewMessagesMonitor(
-            this.avatars,
-            this.get_contact_store_for_account,
-            this.should_notify_new_messages
-        );
         this.main_window.folder_list.set_new_messages_monitor(
-            this.new_messages_monitor
+            this.plugin_manager.notifications
         );
 
         // New messages indicator (Ubuntuism)
         this.new_messages_indicator = NewMessagesIndicator.create(
-            this.new_messages_monitor, this.application.config
+            this.plugin_manager.notifications, this.application.config
         );
         this.new_messages_indicator.application_activated.connect(on_indicator_activated_application);
         this.new_messages_indicator.composer_activated.connect(on_indicator_activated_composer);
         this.new_messages_indicator.inbox_activated.connect(on_indicator_activated_inbox);
 
-        this.unity_launcher = new UnityLauncher(this.new_messages_monitor);
+        this.unity_launcher = new UnityLauncher(this.plugin_manager.notifications);
 
         this.notifications = new Notification.Desktop(
-            this.new_messages_monitor,
+            this.plugin_manager.notifications,
             this.application,
             cancellable
         );
@@ -423,8 +423,9 @@ public class Application.Controller : Geary.BaseObject {
         // seconds under certain conditions
         this.main_window.hide();
 
-        // Release monitoring early so held resources can be freed up
-        this.new_messages_monitor.clear_folders();
+        // Release notification monitoring early so held resources can
+        // be freed up
+        this.plugin_manager.notifications.clear_folders();
 
         // drop the Revokable, which will commit it if necessary
         save_revokable(null, null);
@@ -1298,11 +1299,11 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         // Update notifications
-        this.new_messages_monitor.remove_folder(folder);
+        this.plugin_manager.notifications.remove_folder(folder);
         if (folder.special_folder_type == Geary.SpecialFolderType.INBOX ||
             (folder.special_folder_type == Geary.SpecialFolderType.NONE &&
              is_inbox_descendant(folder))) {
-            this.new_messages_monitor.add_folder(
+            this.plugin_manager.notifications.add_folder(
                 folder, this.accounts.get(info).cancellable
             );
         }
@@ -1359,14 +1360,18 @@ public class Application.Controller : Geary.BaseObject {
                     folder.open_async.begin(Geary.Folder.OpenFlags.NO_DELAY, cancellable);
 
                     // Always notify for new messages in the Inbox
-                    this.new_messages_monitor.add_folder(folder, cancellable);
+                    this.plugin_manager.notifications.add_folder(
+                        folder, cancellable
+                    );
                     break;
 
                 case Geary.SpecialFolderType.NONE:
                     // Only notify for new messages in non-special
                     // descendants of the Inbox
                     if (is_inbox_descendant(folder)) {
-                        this.new_messages_monitor.add_folder(folder, cancellable);
+                        this.plugin_manager.notifications.add_folder(
+                            folder, cancellable
+                        );
                     }
                     break;
                 }
@@ -1393,14 +1398,14 @@ public class Application.Controller : Geary.BaseObject {
                 switch (folder.special_folder_type) {
                 case Geary.SpecialFolderType.INBOX:
                     context.inbox = null;
-                    new_messages_monitor.remove_folder(folder);
+                    this.plugin_manager.notifications.remove_folder(folder);
                     break;
 
                 case Geary.SpecialFolderType.NONE:
                     // Only notify for new messages in non-special
                     // descendants of the Inbox
                     if (is_inbox_descendant(folder)) {
-                        this.new_messages_monitor.remove_folder(folder);
+                        this.plugin_manager.notifications.remove_folder(folder);
                     }
                     break;
                 }
@@ -1580,19 +1585,25 @@ public class Application.Controller : Geary.BaseObject {
     // Clears messages if conditions are true: anything in should_notify_new_messages() is
     // false and the supplied visible messages are visible in the conversation list view
     private void clear_new_messages(string caller, Gee.Set<Geary.App.Conversation>? supplied) {
-        if (current_folder == null || !new_messages_monitor.get_folders().contains(current_folder)
-            || should_notify_new_messages(current_folder))
-            return;
+        NotificationContext notifications = this.plugin_manager.notifications;
+        if (current_folder != null && (
+                !notifications.get_folders().contains(current_folder) ||
+                should_notify_new_messages(current_folder))) {
 
-        Gee.Set<Geary.App.Conversation> visible =
-            supplied ?? main_window.conversation_list_view.get_visible_conversations();
+            Gee.Set<Geary.App.Conversation> visible =
+                supplied ?? main_window.conversation_list_view.get_visible_conversations();
 
-        foreach (Geary.App.Conversation conversation in visible) {
-            if (new_messages_monitor.are_any_new_messages(current_folder, conversation.get_email_ids())) {
-                debug("Clearing new messages: %s", caller);
-                new_messages_monitor.clear_new_messages(current_folder);
-
-                break;
+            foreach (Geary.App.Conversation conversation in visible) {
+                try {
+                    if (notifications.are_any_new_messages(current_folder,
+                                                           conversation.get_email_ids())) {
+                        debug("Clearing new messages: %s", caller);
+                        notifications.clear_new_messages(current_folder);
+                        break;
+                    }
+                } catch (Geary.EngineError.NOT_FOUND err) {
+                    // all good
+                }
             }
         }
     }

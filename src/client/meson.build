@@ -6,6 +6,7 @@ geary_client_vala_sources = files(
   'application/application-contact-store.vala',
   'application/application-contact.vala',
   'application/application-controller.vala',
+  'application/application-notification-context.vala',
   'application/application-plugin-manager.vala',
   'application/application-startup-manager.vala',
   'application/geary-application.vala',
@@ -87,7 +88,6 @@ geary_client_vala_sources = files(
   'notification/in-app-notification.vala',
   'notification/libmessagingmenu.vala',
   'notification/new-messages-indicator.vala',
-  'notification/new-messages-monitor.vala',
   'notification/null-indicator.vala',
   'notification/unity-launcher.vala',
 

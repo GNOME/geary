@@ -6,10 +6,10 @@
 
 public class UnityLauncher : Geary.BaseObject {
 #if HAVE_LIBUNITY
-    private NewMessagesMonitor? monitor = null;
+    private Application.NotificationContext? monitor = null;
     private Unity.LauncherEntry? entry = null;
 
-    public UnityLauncher(NewMessagesMonitor monitor) {
+    public UnityLauncher(Application.NotificationContext monitor) {
         this.monitor = monitor;
 
         entry = Unity.LauncherEntry.get_for_desktop_id(GearyApplication.APP_ID + ".desktop");
@@ -31,8 +31,13 @@ public class UnityLauncher : Geary.BaseObject {
         // doesn't seem like it's worth too much effort.
         int count = 0;
         foreach (Geary.Folder folder in monitor.get_folders()) {
-            if (monitor.should_notify_new_messages(folder))
-                count += monitor.get_new_message_count(folder);
+            try {
+                if (monitor.should_notify_new_messages(folder)) {
+                    count += monitor.get_new_message_count(folder);
+                }
+            } catch (Geary.EngineError.NOT_FOUND err) {
+                // All good
+            }
         }
 
         set_count(count);

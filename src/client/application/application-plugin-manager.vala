@@ -11,6 +11,8 @@
 public class Application.PluginManager : GLib.Object {
 
 
+    public NotificationContext notifications { get; set; }
+
     private Peas.Engine engine;
 
 

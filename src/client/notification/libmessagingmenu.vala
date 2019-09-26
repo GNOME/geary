@@ -12,7 +12,7 @@ public class Libmessagingmenu : NewMessagesIndicator {
     private Configuration config;
 
 
-    public Libmessagingmenu(NewMessagesMonitor monitor,
+    public Libmessagingmenu(Application.NotificationContext monitor,
                             Configuration config) {
         base(monitor);
         this.config = config;

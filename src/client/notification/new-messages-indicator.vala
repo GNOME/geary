@@ -8,7 +8,7 @@
 // compiled at same time) and minimize the exposure of differences to the rest of the application.
 
 public abstract class NewMessagesIndicator : Geary.BaseObject {
-    protected NewMessagesMonitor monitor;
+    protected Application.NotificationContext monitor;
 
     public signal void application_activated(uint32 timestamp);
 
@@ -16,11 +16,11 @@ public abstract class NewMessagesIndicator : Geary.BaseObject {
 
     public signal void composer_activated(uint32 timestamp);
 
-    protected NewMessagesIndicator(NewMessagesMonitor monitor) {
+    protected NewMessagesIndicator(Application.NotificationContext monitor) {
         this.monitor = monitor;
     }
 
-    public static NewMessagesIndicator create(NewMessagesMonitor monitor,
+    public static NewMessagesIndicator create(Application.NotificationContext monitor,
                                               Configuration config) {
         NewMessagesIndicator? indicator = null;
 
