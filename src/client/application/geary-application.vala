@@ -10,6 +10,7 @@
 extern const string _INSTALL_PREFIX;
 extern const string _GSETTINGS_DIR;
 extern const string _WEB_EXTENSIONS_DIR;
+extern const string _PLUGINS_DIR;
 extern const string _SOURCE_ROOT_DIR;
 extern const string _BUILD_ROOT_DIR;
 extern const string GETTEXT_PACKAGE;
@@ -611,6 +612,19 @@ public class GearyApplication : Gtk.Application {
     public GLib.File get_web_extensions_dir() {
         return (is_installed)
             ? GLib.File.new_for_path(_WEB_EXTENSIONS_DIR)
+            : GLib.File.new_for_path(BUILD_ROOT_DIR).get_child("src");
+    }
+
+    /**
+     * Returns the directory containing the application's plugins.
+     *
+     * When running from the installation prefix, this will be based
+     * on the Meson `libdir` option, and can be set by invoking `meson
+     * configure` as appropriate.
+     */
+    public GLib.File get_app_plugins_dir() {
+        return (is_installed)
+            ? GLib.File.new_for_path(_PLUGINS_DIR)
             : GLib.File.new_for_path(BUILD_ROOT_DIR).get_child("src");
     }
 

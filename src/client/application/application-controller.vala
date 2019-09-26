@@ -152,6 +152,8 @@ public class Application.Controller : Geary.BaseObject {
     private NewMessagesIndicator new_messages_indicator;
     private UnityLauncher unity_launcher;
 
+    private PluginManager plugin_manager;
+
     // Null if none selected
     private Geary.Folder? current_folder = null;
 
@@ -270,6 +272,10 @@ public class Application.Controller : Geary.BaseObject {
                 });
 
         }
+
+        this.plugin_manager = new PluginManager(
+            application.get_app_plugins_dir()
+        );
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
