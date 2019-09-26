@@ -90,6 +90,7 @@ json_glib = dependency('json-glib-1.0', version: '>= 1.0')
 libcanberra = dependency('libcanberra', version: '>= 0.28')
 libhandy = dependency('libhandy-0.0', version: '>= 0.0.9', required: false)
 libmath = cc.find_library('m')
+libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
 libsoup = dependency('libsoup-2.4', version: '>= 2.48')
 libunwind_dep = dependency(

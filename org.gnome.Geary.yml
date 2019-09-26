@@ -187,6 +187,13 @@ modules:
         url: https://source.puri.sm/Librem5/libhandy.git
 
   # Geary dependency
+  - name: libpeas
+    buildsystem: meson
+    sources:
+      - type: git
+        url: https://gitlab.gnome.org/GNOME/libpeas.git
+
+  # Geary dependency
   - name: "libytnef"
     sources:
       - type: git

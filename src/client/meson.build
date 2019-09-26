@@ -130,6 +130,7 @@ geary_client_dependencies = [
   libcanberra,
   libhandy,
   libmath,
+  libpeas,
   libsecret,
   libsoup,
   libxml,
