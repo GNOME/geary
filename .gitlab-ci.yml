@@ -101,3 +101,6 @@ stop_review:
 
 nightly:
   extends: '.publish_nightly'
+  only:
+    refs:
+      - mainline
