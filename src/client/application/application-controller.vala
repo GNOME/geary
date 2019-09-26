@@ -127,9 +127,6 @@ public class Application.Controller : Geary.BaseObject {
         get; private set;
     }
 
-    /** Desktop notifications for the application. */
-    public Notification.Desktop notifications { get; private set; }
-
     /** Avatar store for the application. */
     public Application.AvatarStore avatars {
         get; private set; default = new Application.AvatarStore();
@@ -272,9 +269,7 @@ public class Application.Controller : Geary.BaseObject {
 
         }
 
-        this.plugin_manager = new PluginManager(
-            application.get_app_plugins_dir()
-        );
+        this.plugin_manager = new PluginManager(application);
         this.plugin_manager.notifications = new NotificationContext(
             this.avatars,
             this.get_contact_store_for_account,
@@ -320,12 +315,6 @@ public class Application.Controller : Geary.BaseObject {
         this.new_messages_indicator.inbox_activated.connect(on_indicator_activated_inbox);
 
         this.unity_launcher = new UnityLauncher(this.plugin_manager.notifications);
-
-        this.notifications = new Notification.Desktop(
-            this.plugin_manager.notifications,
-            this.application,
-            cancellable
-        );
 
         this.main_window.conversation_list_view.grab_focus();
 
@@ -553,7 +542,7 @@ public class Application.Controller : Geary.BaseObject {
         Geary.ServiceProblemReport? service_report =
             report as Geary.ServiceProblemReport;
         if (service_report != null && service_report.service.protocol == SMTP) {
-            this.notifications.set_error_notification(
+            this.application.send_error_notification(
                 /// Notification title.
                 _("A problem occurred sending email for %s").printf(
                     service_report.account.display_name

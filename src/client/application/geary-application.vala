@@ -161,6 +161,9 @@ public class GearyApplication : Gtk.Application {
     private const int64 USEC_PER_SEC = 1000000;
     private const int64 FORCE_SHUTDOWN_USEC = 5 * USEC_PER_SEC;
 
+    private const string ERROR_NOTIFICATION_ID = "error";
+
+
 
     /** Object returned by {@link get_runtime_information}. */
     public struct RuntimeDetail {
@@ -265,6 +268,7 @@ public class GearyApplication : Gtk.Application {
     private GLib.Cancellable controller_cancellable = new GLib.Cancellable();
     private Components.Inspector? inspector = null;
     private Geary.Nonblocking.Mutex controller_mutex = new Geary.Nonblocking.Mutex();
+    private GLib.Notification? error_notification = null;
 
 
     /**
@@ -625,7 +629,8 @@ public class GearyApplication : Gtk.Application {
     public GLib.File get_app_plugins_dir() {
         return (is_installed)
             ? GLib.File.new_for_path(_PLUGINS_DIR)
-            : GLib.File.new_for_path(BUILD_ROOT_DIR).get_child("src");
+            : GLib.File.new_for_path(BUILD_ROOT_DIR)
+                  .get_child("src").get_child("client").get_child("plugin");
     }
 
     /** Displays a URI on the current active window, if any. */
@@ -699,6 +704,30 @@ public class GearyApplication : Gtk.Application {
         }
 
         Posix.exit(1);
+    }
+
+    /**
+     * Displays an error notification.
+     *
+     * Use _very_ sparingly.
+     */
+    internal void send_error_notification(string summary, string body) {
+        if (this.error_notification != null) {
+            clear_error_notification();
+        }
+
+        GLib.Notification error = new GLib.Notification(summary);
+        error.set_body(body);
+        error.set_icon(
+            new GLib.ThemedIcon("%s-symbolic".printf(GearyApplication.APP_ID))
+        );
+        send_notification(ERROR_NOTIFICATION_ID, error);
+        this.error_notification = error;
+    }
+
+    internal void clear_error_notification() {
+        this.error_notification = null;
+        withdraw_notification(ERROR_NOTIFICATION_ID);
     }
 
     // Presents a main window. If the controller is not open, opens it

@@ -10,7 +10,12 @@
  */
 public abstract class Plugin.Notification : Geary.BaseObject {
 
-    /** Context object for notification information. */
+    /** The application instance containing the plugin. */
+    public abstract GearyApplication application {
+        get; construct set;
+    }
+
+    /** Context object for notifications. */
     public abstract Application.NotificationContext context {
         get; construct set;
     }
@@ -19,6 +24,6 @@ public abstract class Plugin.Notification : Geary.BaseObject {
     public abstract void activate();
 
     /* Invoked to deactivate the plugin, prior to unloading */
-    public abstract void deactivate();
+    public abstract void deactivate(bool is_shutdown);
 
 }

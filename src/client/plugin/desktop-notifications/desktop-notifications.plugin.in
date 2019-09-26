@@ -1,0 +1,5 @@
+[Plugin]
+Module=libdesktop-notifications.so
+Name=Desktop Notifications
+Description=Displays desktop notifications when new email is delivered
+Builtin=true

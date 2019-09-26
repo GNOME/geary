@@ -72,6 +72,7 @@ geary_bin_dependencies = [
   javascriptcoregtk,
   libhandy,
   libmath,
+  libpeas,
   libsoup,
   webkit2gtk,
 ]

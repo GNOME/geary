@@ -84,7 +84,6 @@ geary_client_vala_sources = files(
   'folder-list/folder-list-search-branch.vala',
   'folder-list/folder-list-special-grouping.vala',
 
-  'notification/notification-desktop.vala',
   'notification/in-app-notification.vala',
   'notification/libmessagingmenu.vala',
   'notification/new-messages-indicator.vala',
@@ -175,3 +174,5 @@ geary_client_dep = declare_dependency(
   link_with: geary_client_lib,
   include_directories: include_directories('.'),
 )
+
+subdir('plugin')
