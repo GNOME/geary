@@ -63,19 +63,6 @@
                 "*.la", "*.a"],
     "modules": [
         {
-            "name": "libgee",
-            "config-opts" : [
-                "--enable-introspection=no"
-            ],
-            "sources": [
-                {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libgee.git",
-                    "branch": "master"
-                }
-            ]
-        },
-        {
             "name": "gnome-online-accounts",
             "config-opts": [
                 "--disable-telepathy",
@@ -223,16 +210,6 @@
                 {
                     "type": "git",
                     "url": "https://source.puri.sm/Librem5/libhandy.git"
-                }
-            ]
-        },
-        {
-            "name": "libunwind",
-            "sources": [
-                {
-                    "type": "git",
-                    "url": "https://git.savannah.gnu.org/git/libunwind.git",
-                    "branch": "master"
                 }
             ]
         },
