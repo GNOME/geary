@@ -280,7 +280,7 @@ public class Application.Controller : Geary.BaseObject {
             this.get_contact_store_for_account,
             this.should_notify_new_messages
         );
-
+        this.plugin_manager.load();
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);

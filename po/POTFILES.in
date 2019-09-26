@@ -83,6 +83,7 @@ src/client/notification/new-messages-indicator.vala
 src/client/notification/notification-desktop.vala
 src/client/notification/null-indicator.vala
 src/client/notification/unity-launcher.vala
+src/client/plugin/plugin-notification.vala
 src/client/sidebar/sidebar-branch.vala
 src/client/sidebar/sidebar-common.vala
 src/client/sidebar/sidebar-count-cell-renderer.vala

@@ -91,6 +91,8 @@ geary_client_vala_sources = files(
   'notification/null-indicator.vala',
   'notification/unity-launcher.vala',
 
+  'plugin/plugin-notification.vala',
+
   'sidebar/sidebar-branch.vala',
   'sidebar/sidebar-common.vala',
   'sidebar/sidebar-count-cell-renderer.vala',
