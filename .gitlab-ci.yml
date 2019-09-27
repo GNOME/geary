@@ -80,7 +80,7 @@ ubuntu:
 flatpak:
   image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master'
   variables:
-    APP_ID: org.gnome.GearyDevel
+    APP_ID: org.gnome.Geary.Devel
     FLATPAK_MODULE: geary
     MANIFEST_PATH: org.gnome.Geary.yml
     MESON_ARGS: "-Dprofile=development"

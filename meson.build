@@ -14,10 +14,10 @@ reference_tracking = get_option('ref_tracking')
 
 # Build type
 if get_option('profile') == 'development'
-  profile = 'Devel'
+  profile = '.Devel'
   name_suffix = ' (Development)'
 elif get_option('profile') == 'beta'
-  profile = 'Beta'
+  profile = '.Beta'
   name_suffix = ' (Beta)'
 else
   profile = ''
