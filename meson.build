@@ -7,13 +7,13 @@ project('geary', [ 'vala', 'c' ],
 gnome = import('gnome')
 i18n = import('i18n')
 
-# Option
-install_contractor_file = get_option('contractor')
-iso_639_xml = get_option('iso_639_xml')
-iso_3166_xml = get_option('iso_3166_xml')
-reference_tracking = get_option('ref_tracking')
-poodle = get_option('poodle')
+# Build-time configuration options
 enable_valadoc = get_option('valadoc')
+install_contractor_file = get_option('contractor')
+iso_3166_xml = get_option('iso_3166_xml')
+iso_639_xml = get_option('iso_639_xml')
+poodle = get_option('poodle')
+reference_tracking = get_option('ref_tracking')
 
 revno = run_command('build-aux/git_version.py').stdout().strip()
 
