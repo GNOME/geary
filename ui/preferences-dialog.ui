@@ -39,17 +39,20 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkCheckButton" id="autoselect">
+                <property name="label" translatable="yes">_Automatically select next message</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="margin_left">12</property>
+                <property name="margin_right">5</property>
+                <property name="margin_start">12</property>
                 <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
-                <property name="label" translatable="yes">Reading</property>
+                <property name="use_underline">True</property>
                 <property name="xalign">0</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
+                <property name="draw_indicator">True</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -57,11 +60,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="autoselect">
-                <property name="label" translatable="yes">_Automatically select next message</property>
+              <object class="GtkCheckButton" id="display_preview">
+                <property name="label" translatable="yes">_Display conversation preview</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="margin_left">12</property>
+                <property name="margin_right">5</property>
                 <property name="margin_start">12</property>
                 <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
@@ -76,11 +81,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="display_preview">
-                <property name="label" translatable="yes">_Display conversation preview</property>
+              <object class="GtkCheckButton" id="three_pane_view">
+                <property name="label" translatable="yes">Use _three pane view</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="margin_left">12</property>
+                <property name="margin_right">5</property>
                 <property name="margin_start">12</property>
                 <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
@@ -92,62 +99,6 @@
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="three_pane_view">
-                <property name="label" translatable="yes">Use _three pane view</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="margin_start">12</property>
-                <property name="margin_end">5</property>
-                <property name="margin_top">5</property>
-                <property name="margin_bottom">5</property>
-                <property name="use_underline">True</property>
-                <property name="xalign">0</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_end">5</property>
-                <property name="margin_top">5</property>
-                <property name="margin_bottom">5</property>
-                <property name="label" translatable="yes">Notifications</property>
-                <property name="xalign">0</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="play_sounds">
-                <property name="label" translatable="yes">_Play notification sounds</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="margin_start">12</property>
-                <property name="margin_end">5</property>
-                <property name="margin_top">5</property>
-                <property name="margin_bottom">5</property>
-                <property name="use_underline">True</property>
-                <property name="xalign">0</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
               </packing>
             </child>
             <child>
@@ -169,7 +120,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">6</property>
+                <property name="top_attach">3</property>
               </packing>
             </child>
           </object>

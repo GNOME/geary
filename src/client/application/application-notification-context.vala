@@ -89,6 +89,11 @@ public class Application.NotificationContext : Geary.BaseObject {
     /** Emitted when a folder has been cleared of new messages. */
     public signal void new_messages_retired(Geary.Folder parent, int total);
 
+    /** Emitted when an email has been sent. */
+    public signal void email_sent(Geary.Account account,
+                                  Geary.RFC822.Message sent);
+
+
     /** Constructs a new context instance. */
     internal NotificationContext(AvatarStore avatars,
                                  GetContactStore contact_store_delegate,

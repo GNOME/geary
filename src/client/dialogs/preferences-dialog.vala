@@ -17,9 +17,6 @@ public class PreferencesDialog : Gtk.Dialog {
     private Gtk.CheckButton three_pane_view;
 
     [GtkChild]
-    private Gtk.CheckButton play_sounds;
-
-    [GtkChild]
     private Gtk.CheckButton startup_notifications;
 
     [GtkChild]
@@ -36,7 +33,6 @@ public class PreferencesDialog : Gtk.Dialog {
         config.bind(Configuration.AUTOSELECT_KEY, autoselect, "active");
         config.bind(Configuration.DISPLAY_PREVIEW_KEY, display_preview, "active");
         config.bind(Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY, three_pane_view, "active");
-        config.bind(Configuration.PLAY_SOUNDS_KEY, play_sounds, "active");
         config.bind(Configuration.STARTUP_NOTIFICATIONS_KEY, startup_notifications, "active");
     }
 

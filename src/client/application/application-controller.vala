@@ -144,7 +144,6 @@ public class Application.Controller : Geary.BaseObject {
 
     private UpgradeDialog upgrade_dialog;
     private Folks.IndividualAggregator folks;
-    private Canberra.Context sound_context;
 
     private PluginManager plugin_manager;
 
@@ -250,8 +249,6 @@ public class Application.Controller : Geary.BaseObject {
         } catch (Error err) {
             error("Error loading web resources: %s", err.message);
         }
-
-        Canberra.Context.create(out this.sound_context);
 
         this.folks = Folks.IndividualAggregator.dup();
         if (!this.folks.is_prepared) {
@@ -2448,16 +2445,16 @@ public class Application.Controller : Geary.BaseObject {
         this.main_window.conversation_list_view.grab_focus();
     }
 
-    private void on_sent(Geary.RFC822.Message rfc822) {
+    private void on_sent(Geary.Account account, Geary.RFC822.Message sent) {
         // Translators: The label for an in-app notification. The
         // string substitution is a list of recipients of the email.
         string message = _(
             "Successfully sent mail to %s."
-        ).printf(Util.Email.to_short_recipient_display(rfc822.to));
+        ).printf(Util.Email.to_short_recipient_display(sent.to));
         Components.InAppNotification notification =
             new Components.InAppNotification(message);
         this.main_window.add_notification(notification);
-        this.play_sound("message-sent-email");
+        this.plugin_manager.notifications.email_sent(account, sent);
     }
 
     private void on_conversation_view_added(ConversationListBox list) {
@@ -2685,12 +2682,6 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         return false;
-    }
-
-    public void play_sound(string sound) {
-        if (this.application.config.play_sounds) {
-            this.sound_context.play(0, Canberra.PROP_EVENT_ID, sound);
-        }
     }
 
     private void on_account_available(Geary.AccountInformation info) {

@@ -77,12 +77,6 @@
         <description>List of languages that are always displayed in the popover of the spell checker.</description>
     </key>
 
-    <key name="play-sounds" type="b">
-        <default>true</default>
-        <summary>Enable notification sounds</summary>
-        <description>True to play sounds for notifications and sending.</description>
-    </key>
-
     <key name="startup-notifications" type="b">
         <default>false</default>
         <summary>Notify of new mail at startup</summary>

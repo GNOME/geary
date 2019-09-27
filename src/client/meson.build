@@ -124,7 +124,6 @@ geary_client_dependencies = [
   gtk,
   javascriptcoregtk,
   json_glib,
-  libcanberra,
   libhandy,
   libmath,
   libpeas,
