@@ -298,7 +298,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             }
             if (message != null) {
                 this.editor.add_notification(
-                    new InAppNotification(
+                    new Components.InAppNotification(
                         // Translators: In-app notification label, the
                         // string substitution is a more detailed reason.
                         _("Account not created: %s").printf(message)

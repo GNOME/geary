@@ -28,6 +28,7 @@ src/client/application/goa-mediator.vala
 src/client/application/main.vala
 src/client/application/secret-mediator.vala
 src/client/components/client-web-view.vala
+src/client/components/components-in-app-notification.vala
 src/client/components/components-inspector.vala
 src/client/components/components-placeholder-pane.vala
 src/client/components/components-validator.vala
@@ -411,6 +412,7 @@ ui/composer-headerbar.ui
 ui/composer-link-popover.ui
 ui/composer-menus.ui
 ui/composer-widget.ui
+ui/components-in-app-notification.ui
 ui/components-inspector-error-view.ui
 ui/components-inspector-log-view.ui
 ui/components-inspector.ui
@@ -425,7 +427,6 @@ ui/conversation-viewer.ui
 ui/find_bar.glade
 ui/folder-popover.ui
 ui/gtk/help-overlay.ui
-ui/in-app-notification.ui
 ui/main-toolbar.ui
 ui/main-toolbar-menus.ui
 ui/main-window.ui

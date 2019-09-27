@@ -371,7 +371,7 @@ internal class Accounts.EditorServersPane :
 
         if (!is_valid && message != null) {
             this.editor.add_notification(
-                new InAppNotification(
+                new Components.InAppNotification(
                     // Translators: In-app notification label, the
                     // string substitution is a more detailed reason.
                     _("Account not updated: %s").printf(message)

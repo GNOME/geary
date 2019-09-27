@@ -26,6 +26,7 @@ geary_client_vala_sources = files(
 
   'components/client-web-view.vala',
   'components/components-inspector.vala',
+  'components/components-in-app-notification.vala',
   'components/components-inspector-error-view.vala',
   'components/components-inspector-log-view.vala',
   'components/components-inspector-system-view.vala',
@@ -83,8 +84,6 @@ geary_client_vala_sources = files(
   'folder-list/folder-list-inbox-folder-entry.vala',
   'folder-list/folder-list-search-branch.vala',
   'folder-list/folder-list-special-grouping.vala',
-
-  'notification/in-app-notification.vala',
 
   'plugin/plugin-notification.vala',
 

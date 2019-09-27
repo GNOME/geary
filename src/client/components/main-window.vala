@@ -342,7 +342,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    public void add_notification(InAppNotification notification) {
+    public void add_notification(Components.InAppNotification notification) {
         this.overlay.add_overlay(notification);
         notification.show();
     }

@@ -2368,7 +2368,8 @@ public class Application.Controller : Geary.BaseObject {
 
         if (this.main_window != null) {
             if (this.revokable != null && this.revokable_description != null) {
-                InAppNotification ian = new InAppNotification(this.revokable_description);
+                Components.InAppNotification ian =
+                    new Components.InAppNotification(this.revokable_description);
                 ian.set_button(_("Undo"), "win." + GearyApplication.ACTION_UNDO);
                 this.main_window.add_notification(ian);
             }
@@ -2453,7 +2454,8 @@ public class Application.Controller : Geary.BaseObject {
         string message = _(
             "Successfully sent mail to %s."
         ).printf(Util.Email.to_short_recipient_display(rfc822.to));
-        InAppNotification notification = new InAppNotification(message);
+        Components.InAppNotification notification =
+            new Components.InAppNotification(message);
         this.main_window.add_notification(notification);
         this.play_sound("message-sent-email");
     }
