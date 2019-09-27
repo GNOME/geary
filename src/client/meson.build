@@ -147,12 +147,29 @@ if webkit_version[0].to_int() <= 2 and webkit_version[1].to_int() <= 24
 endif
 
 # Main client application library
-geary_client_lib = static_library('geary-client',
+geary_client_lib = shared_library(
+  'geary-client',
   geary_client_sources,
   dependencies: geary_client_dependencies,
   include_directories: config_h_dir,
+  vala_gir: geary_client_pkg + '.gir',
   vala_args: geary_client_vala_options,
   c_args: geary_c_options,
+  install: true,
+  install_dir: [true, true, true, true]
+)
+
+custom_target(
+  'client typelib',
+  command: [
+    g_ir_compiler,
+    '--output', '@OUTPUT@',
+    meson.current_build_dir() / geary_client_pkg + '.gir',
+  ],
+  output: geary_client_pkg + '.typelib',
+  depends: geary_client_lib,
+  install: true,
+  install_dir: libdir / 'girepository-1.0'
 )
 
 geary_client_dep = declare_dependency(

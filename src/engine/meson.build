@@ -362,12 +362,28 @@ if get_option('tnef-support')
   ]
 endif
 
-geary_engine_lib = static_library('geary-engine',
+geary_engine_lib = shared_library('geary-engine',
   geary_engine_sources,
   dependencies: geary_engine_dependencies,
   include_directories: config_h_dir,
   vala_args: geary_engine_vala_options,
+  vala_gir: geary_engine_pkg + '.gir',
   c_args: geary_c_options,
+  install: true,
+  install_dir: [true, true, true, true]
+)
+
+custom_target(
+  'engine typelib',
+  command: [
+    g_ir_compiler,
+    '--output', '@OUTPUT@',
+    meson.current_build_dir() / geary_engine_pkg + '.gir'
+  ],
+  output: geary_engine_pkg + '.typelib',
+  depends: geary_engine_lib,
+  install: true,
+  install_dir: libdir / 'girepository-1.0'
 )
 
 # Dummy target to tell Meson about the internal VAPI given the

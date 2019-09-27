@@ -77,6 +77,7 @@ webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 appstream_glib = dependency('appstream-glib', version: '>=0.7.10')
 enchant = dependency('enchant-2', version: '>=2.1', required: false) # see below
 folks = dependency('folks', version: '>=0.11')
+g_ir_compiler = find_program('g-ir-compiler')
 gck = dependency('gck-1')
 gcr = dependency('gcr-3', version: '>= 3.10.1')
 gdk = dependency('gdk-3.0', version: '>=' + target_gtk)
@@ -200,6 +201,10 @@ configure_file(output: 'config.h', configuration: conf)
 
 # Post-install scripts
 meson.add_install_script(join_paths('build-aux', 'post_install.py'))
+
+# NB: Changing these will break API for plugins, etc
+geary_client_pkg = 'GearyClient-1.0'
+geary_engine_pkg = 'GearyEngine-1.0'
 
 # Subfolders
 subdir('desktop')
