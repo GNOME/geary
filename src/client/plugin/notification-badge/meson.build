@@ -13,6 +13,7 @@ if libunity.found()
     plugin_name,
     sources: plugin_src,
     dependencies: badge_dependencies,
+    include_directories: config_h_dir,
     vala_args: geary_vala_args,
     c_args: plugin_c_args,
     install: true,

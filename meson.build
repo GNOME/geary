@@ -35,7 +35,6 @@ geary_version = meson.project_version()
 # Some variables
 cc = meson.get_compiler('c')
 valac = meson.get_compiler('vala')
-config_h_dir = include_directories('.')
 geary_prefix = get_option('prefix')
 
 # Source dirs
@@ -179,30 +178,6 @@ if iso_3166_xml == ''
   iso_3166_xml = join_paths(iso_codes_dir, 'iso_3166.xml')
 endif
 files(iso_639_xml, iso_3166_xml) # Check to make sure these exist
-
-# Configuration
-conf = configuration_data()
-conf.set_quoted('GETTEXT_PACKAGE', meson.project_name())
-conf.set_quoted('G_LOG_DOMAIN', meson.project_name())
-conf.set_quoted('PACKAGE_NAME', meson.project_name())
-conf.set_quoted('PACKAGE_STRING', '@0@-@1@'.format(meson.project_name(), meson.project_version()))
-conf.set_quoted('PACKAGE_VERSION', meson.project_version())
-conf.set_quoted('_BUILD_ROOT_DIR', meson.build_root())
-conf.set_quoted('_SOURCE_ROOT_DIR', meson.source_root())
-conf.set_quoted('_GSETTINGS_DIR', join_paths(meson.build_root(), 'desktop'))
-conf.set_quoted('_INSTALL_PREFIX', geary_prefix)
-conf.set_quoted('_WEB_EXTENSIONS_DIR', web_extensions_dir)
-conf.set_quoted('_PLUGINS_DIR', plugins_dir)
-conf.set_quoted('LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
-conf.set_quoted('ISO_CODE_639_XML', iso_639_xml)
-conf.set_quoted('ISO_CODE_3166_XML', iso_3166_xml)
-conf.set('GCR_API_SUBJECT_TO_CHANGE', true)
-conf.set_quoted('_VERSION', geary_version)
-conf.set_quoted('_APP_ID', geary_id)
-conf.set_quoted('_PROFILE', profile)
-conf.set_quoted('_NAME_SUFFIX', name_suffix)
-conf.set_quoted('_REVNO', revno)
-configure_file(output: 'config.h', configuration: conf)
 
 # Post-install scripts
 meson.add_install_script(join_paths('build-aux', 'post_install.py'))

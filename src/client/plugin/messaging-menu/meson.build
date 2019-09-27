@@ -28,6 +28,7 @@ if libmessagingmenu_dep.found()
     plugin_name + '-geary',
     sources: plugin_src,
     dependencies: messaging_menu_dependencies,
+    include_directories: config_h_dir,
     vala_args: geary_vala_args,
     c_args: plugin_c_args,
     install: true,
