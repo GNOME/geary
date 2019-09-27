@@ -60,7 +60,7 @@ add_project_arguments([
 # Required libraries and other dependencies
 #
 
-target_glib = '2.54' # Also passed to valac, so don't include a point rev
+target_glib = '2.60.4'
 target_gtk = '3.24.7'
 target_webkit = '2.24'
 
