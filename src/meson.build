@@ -1,6 +1,5 @@
 # Common vala options
 geary_vala_options = [
-  '--target-glib=@0@'.format(target_glib),
   '--enable-checking',
 ]
 
@@ -97,7 +96,6 @@ if enable_valadoc
       '--internal',
       '--package-name=@0@-@1@'.format(meson.project_name(), meson.project_version()),
       '--package-version=@0@'.format(meson.project_version()),
-      '--target-glib=@0@'.format(target_glib),
       '-b', meson.current_source_dir(),
       '-o', '@OUTPUT@',
       '--vapidir=@0@'.format(vapi_dir),
