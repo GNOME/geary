@@ -11,7 +11,7 @@
 # and pin each source to a specific tarball.
 #
 
-app-id: org.gnome.GearyDevel
+app-id: org.gnome.Geary.Devel
 branch: master
 runtime: org.gnome.Platform
 runtime-version: master

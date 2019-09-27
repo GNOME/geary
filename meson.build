@@ -19,10 +19,10 @@ revno = run_command('build-aux/git_version.py').stdout().strip()
 
 # Build type
 if get_option('profile') == 'development'
-  profile = 'Devel'
+  profile = '.Devel'
   name_suffix = ' (Development)'
 elif get_option('profile') == 'beta'
-  profile = 'Beta'
+  profile = '.Beta'
   name_suffix = ' (Beta)'
 else
   profile = ''
