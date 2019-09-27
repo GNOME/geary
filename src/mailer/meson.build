@@ -13,6 +13,6 @@ geary_mailer = executable('geary-mailer',
   geary_mailer_sources,
   dependencies: geary_mailer_dependencies,
   include_directories: config_h_dir,
-  vala_args: geary_vala_options,
-  c_args: geary_c_options,
+  vala_args: geary_vala_args,
+  c_args: geary_c_args,
 )

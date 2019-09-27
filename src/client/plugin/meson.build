@@ -20,7 +20,7 @@ plugin_dependencies = [
   webkit2gtk,
 ]
 
-plugin_cflags = geary_c_options
+plugin_c_args = geary_c_args
 
 subdir('desktop-notifications')
 subdir('messaging-menu')

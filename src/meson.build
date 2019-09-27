@@ -1,18 +1,18 @@
 # Common vala options
-geary_vala_options = [
+geary_vala_args = [
   '--enable-checking',
 ]
 
 # Symbols for valac's preprocessor must be defined as compiler args,
 # not in the code or in config.h
 if reference_tracking
-  geary_vala_options += [ '--define=REF_TRACKING' ]
+  geary_vala_args += [ '--define=REF_TRACKING' ]
 endif
 if not poodle
-  geary_vala_options += [ '--define=DISABLE_POODLE' ]
+  geary_vala_args += [ '--define=DISABLE_POODLE' ]
 endif
 
-geary_c_options = [
+geary_c_args = [
   '-include', 'config.h',
   # Enable GLib structured logging
   '-DG_LOG_USE_STRUCTURED',
@@ -39,7 +39,7 @@ geary_web_process_sources = files(
 # Web process extension library
 geary_web_process = library('geary-web-process',
   geary_web_process_sources,
-  c_args: geary_c_options,
+  c_args: geary_c_args,
   dependencies: [
     geary_engine_dep,
     gee,
@@ -79,8 +79,8 @@ geary_bin_dependencies = [
 geary_bin = executable('geary',
   geary_bin_sources,
   dependencies: geary_bin_dependencies,
-  vala_args: geary_vala_options,
-  c_args: geary_c_options,
+  vala_args: geary_vala_args,
+  c_args: geary_c_args,
   install: true,
 )
 
