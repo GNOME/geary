@@ -97,7 +97,7 @@
         </ul>
       </description>
     </release>
-    <release version="3.34">
+    <release version="3.34" date="2019-09-21">
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
@@ -111,7 +111,7 @@
         </ul>
       </description>
     </release>
-    <release version="3.32">
+    <release version="3.32" date="2019-08-04">
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
