@@ -94,14 +94,22 @@ if enable_valadoc
       '--verbose',
       '--force',
       '--internal',
-      '--package-name=@0@-@1@'.format(meson.project_name(), meson.project_version()),
+      '--package-name=@0@'.format(meson.project_name()),
       '--package-version=@0@'.format(meson.project_version()),
       '-b', meson.current_source_dir(),
       '-o', '@OUTPUT@',
       '--vapidir=@0@'.format(vapi_dir),
       '--vapidir=@0@'.format(meson.current_build_dir()),
-      # Hopefully, Meson gets baked-in valadoc support, so we don't have to do this (see also https://github.com/mesonbuild/meson/issues/894)
-      '--pkg', 'glib-2.0', '--pkg', 'gio-2.0', '--pkg', 'gee-0.8', '--pkg', 'sqlite3', '--pkg', 'gmime-2.6', '--pkg', 'javascriptcoregtk-4.0', '--pkg', 'libxml-2.0', '--pkg', 'libunwind',
+      # Hopefully, Meson gets baked-in valadoc support, so we don't
+      # have to do this (see https://github.com/mesonbuild/meson/issues/894)
+      '--pkg', 'glib-2.0',
+      '--pkg', 'gio-2.0',
+      '--pkg', 'gee-0.8',
+      '--pkg', 'sqlite3',
+      '--pkg', 'gmime-2.6',
+      '--pkg', 'javascriptcoregtk-4.0',
+      '--pkg', 'libxml-2.0',
+      '--pkg', 'libunwind',
       '@INPUT@',
     ]
   )
