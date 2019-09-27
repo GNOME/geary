@@ -22,6 +22,7 @@ public class Application.PluginManager : GLib.Object {
     public PluginManager(GearyApplication application) {
         this.application = application;
         this.engine = Peas.Engine.get_default();
+        this.engine.enable_loader("python3");
         this.engine.add_search_path(
             application.get_app_plugins_dir().get_path(), null
         );
