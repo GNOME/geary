@@ -23,3 +23,4 @@ plugin_dependencies = [
 plugin_cflags = geary_c_options
 
 subdir('desktop-notifications')
+subdir('notification-badge')

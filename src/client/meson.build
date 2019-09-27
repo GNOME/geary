@@ -88,7 +88,6 @@ geary_client_vala_sources = files(
   'notification/libmessagingmenu.vala',
   'notification/new-messages-indicator.vala',
   'notification/null-indicator.vala',
-  'notification/unity-launcher.vala',
 
   'plugin/plugin-notification.vala',
 
@@ -145,10 +144,6 @@ geary_client_vala_options = geary_vala_options
 if libmessagingmenu_dep.found()
   geary_client_dependencies += libmessagingmenu
   geary_client_vala_options += ['-D', 'HAVE_LIBMESSAGINGMENU']
-endif
-if libunity.found()
-  geary_client_dependencies += libunity
-  geary_client_vala_options += ['-D', 'HAVE_LIBUNITY']
 endif
 
 # Enable shared shecondary process if available.

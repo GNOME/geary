@@ -146,7 +146,6 @@ public class Application.Controller : Geary.BaseObject {
     private Folks.IndividualAggregator folks;
     private Canberra.Context sound_context;
     private NewMessagesIndicator new_messages_indicator;
-    private UnityLauncher unity_launcher;
 
     private PluginManager plugin_manager;
 
@@ -313,8 +312,6 @@ public class Application.Controller : Geary.BaseObject {
         this.new_messages_indicator.application_activated.connect(on_indicator_activated_application);
         this.new_messages_indicator.composer_activated.connect(on_indicator_activated_composer);
         this.new_messages_indicator.inbox_activated.connect(on_indicator_activated_inbox);
-
-        this.unity_launcher = new UnityLauncher(this.plugin_manager.notifications);
 
         this.main_window.conversation_list_view.grab_focus();
 
