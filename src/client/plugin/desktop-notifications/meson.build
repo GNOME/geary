@@ -9,6 +9,7 @@ shared_module(
   plugin_name,
   sources: plugin_src,
   dependencies: plugin_dependencies,
+  vala_args: geary_vala_options,
   c_args: plugin_cflags,
   install: true,
   install_dir: plugin_dest
