@@ -8,7 +8,7 @@
 /**
  * A plugin for notifying of new mail being delivered.
  */
-public abstract class Plugin.Notification : Geary.BaseObject {
+public abstract class Plugin.Notification : GLib.Object {
 
     /** The application instance containing the plugin. */
     public abstract GearyApplication application {
