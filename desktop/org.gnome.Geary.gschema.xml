@@ -83,12 +83,6 @@
         <description>True to play sounds for notifications and sending.</description>
     </key>
 
-    <key name="show-notifications" type="b">
-        <default>true</default>
-        <summary>Show notifications for new mail</summary>
-        <description>True to show notification bubbles.</description>
-    </key>
-
     <key name="startup-notifications" type="b">
         <default>false</default>
         <summary>Notify of new mail at startup</summary>
