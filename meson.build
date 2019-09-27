@@ -1,7 +1,7 @@
 project('geary', [ 'vala', 'c' ],
   version: '3.35.0',
   license: 'LGPL2.1+',
-  meson_version: '>= 0.49',
+  meson_version: '>= 0.50',
 )
 
 gnome = import('gnome')
