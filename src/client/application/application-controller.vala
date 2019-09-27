@@ -145,7 +145,6 @@ public class Application.Controller : Geary.BaseObject {
     private UpgradeDialog upgrade_dialog;
     private Folks.IndividualAggregator folks;
     private Canberra.Context sound_context;
-    private NewMessagesIndicator new_messages_indicator;
 
     private PluginManager plugin_manager;
 
@@ -304,14 +303,6 @@ public class Application.Controller : Geary.BaseObject {
         this.main_window.folder_list.set_new_messages_monitor(
             this.plugin_manager.notifications
         );
-
-        // New messages indicator (Ubuntuism)
-        this.new_messages_indicator = NewMessagesIndicator.create(
-            this.plugin_manager.notifications, this.application.config
-        );
-        this.new_messages_indicator.application_activated.connect(on_indicator_activated_application);
-        this.new_messages_indicator.composer_activated.connect(on_indicator_activated_composer);
-        this.new_messages_indicator.inbox_activated.connect(on_indicator_activated_inbox);
 
         this.main_window.conversation_list_view.grab_focus();
 
@@ -1151,20 +1142,6 @@ public class Application.Controller : Geary.BaseObject {
         select_folder_mutex.release(ref mutex_token);
 
         debug("Switched to %s", folder.to_string());
-    }
-
-    private void on_indicator_activated_application(uint32 timestamp) {
-        this.main_window.present();
-    }
-
-    private void on_indicator_activated_composer(uint32 timestamp) {
-        on_indicator_activated_application(timestamp);
-        compose();
-    }
-
-    private void on_indicator_activated_inbox(Geary.Folder folder, uint32 timestamp) {
-        on_indicator_activated_application(timestamp);
-        main_window.folder_list.select_folder(folder);
     }
 
     private void on_select_folder_completed(Object? source, AsyncResult result) {

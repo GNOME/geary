@@ -151,21 +151,6 @@ desktop_file_validate = find_program('desktop-file-validate', required: false)
 libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', required: false)
 libunity = dependency('unity', version: '>= 5.12.0', required: false)
 
-if libmessagingmenu_dep.found()
-  # The libmessagingmenu dependency above determines if the lib is
-  # present, but since it uses a broken name for its VAPI we have to
-  # find that and the C libs separately.
-  libmessagingmenu = declare_dependency(
-    include_directories: include_directories(
-      libmessagingmenu_dep.get_pkgconfig_variable('includedir')
-    ),
-    dependencies: [
-      valac.find_library('MessagingMenu-1.0', dirs: [ '/usr/share/vala/vapi' ]),
-      cc.find_library('messaging-menu')
-    ],
-  )
-endif
-
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
   error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3.\n'

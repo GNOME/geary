@@ -85,9 +85,6 @@ geary_client_vala_sources = files(
   'folder-list/folder-list-special-grouping.vala',
 
   'notification/in-app-notification.vala',
-  'notification/libmessagingmenu.vala',
-  'notification/new-messages-indicator.vala',
-  'notification/null-indicator.vala',
 
   'plugin/plugin-notification.vala',
 
@@ -140,11 +137,6 @@ geary_client_dependencies = [
 ]
 
 geary_client_vala_options = geary_vala_options
-
-if libmessagingmenu_dep.found()
-  geary_client_dependencies += libmessagingmenu
-  geary_client_vala_options += ['-D', 'HAVE_LIBMESSAGINGMENU']
-endif
 
 # Enable shared shecondary process if available.
 # See issues #558 and #559

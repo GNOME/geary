@@ -77,12 +77,10 @@ src/client/folder-list/folder-list-inboxes-branch.vala
 src/client/folder-list/folder-list-search-branch.vala
 src/client/folder-list/folder-list-special-grouping.vala
 src/client/folder-list/folder-list-tree.vala
-src/client/notification/in-app-notification.vala
-src/client/notification/libmessagingmenu.vala
-src/client/notification/new-messages-indicator.vala
-src/client/notification/null-indicator.vala
 src/client/plugin/desktop-notifications/desktop-notifications.plugin.in
 src/client/plugin/desktop-notifications/desktop-notifications.vala
+src/client/plugin/messaging-menu/messaging-menu.plugin.in
+src/client/plugin/messaging-menu/messaging-menu.vala
 src/client/plugin/notification-badge/notification-badge.plugin.in
 src/client/plugin/notification-badge/notification-badge.vala
 src/client/plugin/plugin-notification.vala

@@ -1,9 +1,8 @@
 
 plugin_name = 'notification-badge'
 
-badge_dependencies = plugin_dependencies
-
 if libunity.found()
+  badge_dependencies = plugin_dependencies
   badge_dependencies += libunity
 
   plugin_src = join_paths(plugin_name + '.vala')

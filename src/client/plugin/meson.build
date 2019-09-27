@@ -1,6 +1,6 @@
 #
 # Builds individual plugins. The client's plugin classes themselves
-# are built at the next directory back up the tree.
+# are built back up the tree.
 #
 
 plugin_dependencies = [
@@ -23,4 +23,5 @@ plugin_dependencies = [
 plugin_cflags = geary_c_options
 
 subdir('desktop-notifications')
+subdir('messaging-menu')
 subdir('notification-badge')
