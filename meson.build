@@ -4,9 +4,6 @@ project('geary', [ 'vala', 'c' ],
   meson_version: '>= 0.50',
 )
 
-gnome = import('gnome')
-i18n = import('i18n')
-
 # Build-time configuration options
 enable_valadoc = get_option('valadoc')
 install_contractor_file = get_option('contractor')
@@ -14,8 +11,6 @@ iso_3166_xml = get_option('iso_3166_xml')
 iso_639_xml = get_option('iso_639_xml')
 poodle = get_option('poodle')
 reference_tracking = get_option('ref_tracking')
-
-revno = run_command('build-aux/git_version.py').stdout().strip()
 
 # Build type
 if get_option('profile') == 'development'
@@ -29,37 +24,28 @@ else
   name_suffix = ''
 endif
 
-geary_id = 'org.gnome.Geary@0@'.format(profile)
-geary_version = meson.project_version()
-
-# Some variables
-cc = meson.get_compiler('c')
-valac = meson.get_compiler('vala')
+# Configurable install dirs
 geary_prefix = get_option('prefix')
+bin_dir = join_paths(geary_prefix, get_option('bindir'))
+data_dir = join_paths(geary_prefix, get_option('datadir'))
+lib_dir = join_paths(geary_prefix, get_option('libdir'))
+locale_dir = join_paths(geary_prefix, get_option('localedir'))
 
 # Source dirs
 metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
 po_dir = join_paths(meson.source_root(), 'po')
 vapi_dir = join_paths(meson.source_root(), 'bindings', 'vapi')
 
-# Configurable install dirs
-bin_dir = join_paths(geary_prefix, get_option('bindir'))
-data_dir = join_paths(geary_prefix, get_option('datadir'))
-lib_dir = join_paths(geary_prefix, get_option('libdir'))
-locale_dir = join_paths(geary_prefix, get_option('localedir'))
-
-# Static install dirs
-dbus_services_dir = join_paths(data_dir, 'dbus-1', 'services')
-plugins_dir = join_paths(lib_dir, 'geary', 'plugins')
-web_extensions_dir = join_paths(lib_dir, 'geary', 'web-extensions')
-
-# Make sure Meson can find our custom VAPI's
+# Compiler configuration
 add_project_arguments([
+    # Make sure Meson can find custom VAPIs
     '--vapidir', vapi_dir,
     '--metadatadir', metadata_dir,
   ],
   language: 'vala'
 )
+cc = meson.get_compiler('c')
+valac = meson.get_compiler('vala')
 
 #
 # Required libraries and other dependencies
@@ -154,6 +140,23 @@ appstream_util = find_program('appstream-util', required: false)
 desktop_file_validate = find_program('desktop-file-validate', required: false)
 libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', required: false)
 libunity = dependency('unity', version: '>= 5.12.0', required: false)
+
+#
+# Internal build configuration
+#
+
+# Build variables
+geary_id = 'org.gnome.Geary@0@'.format(profile)
+geary_version = meson.project_version()
+revno = run_command('build-aux/git_version.py').stdout().strip()
+
+gnome = import('gnome')
+i18n = import('i18n')
+
+# Static install dirs
+dbus_services_dir = join_paths(data_dir, 'dbus-1', 'services')
+plugins_dir = join_paths(lib_dir, 'geary', 'plugins')
+web_extensions_dir = join_paths(lib_dir, 'geary', 'web-extensions')
 
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
