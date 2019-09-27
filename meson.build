@@ -46,6 +46,7 @@ vapi_dir = join_paths(meson.source_root(), 'bindings', 'vapi')
 metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
 dbus_services_dir = join_paths(datadir, 'dbus-1', 'services')
 web_extensions_dir = join_paths(libdir, 'geary', 'web-extensions')
+plugins_dir = join_paths(libdir, 'geary', 'plugins')
 
 # Make sure Meson can find our custom VAPI's
 add_project_arguments([
@@ -87,9 +88,9 @@ gthread = dependency('gthread-2.0', version: '>=' + target_glib)
 iso_codes = dependency('iso-codes')
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
-libcanberra = dependency('libcanberra', version: '>= 0.28')
 libhandy = dependency('libhandy-0.0', version: '>= 0.0.9', required: false)
 libmath = cc.find_library('m')
+libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
 libsoup = dependency('libsoup-2.4', version: '>= 2.48')
 libunwind_dep = dependency(
@@ -149,21 +150,6 @@ desktop_file_validate = find_program('desktop-file-validate', required: false)
 libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', required: false)
 libunity = dependency('unity', version: '>= 5.12.0', required: false)
 
-if libmessagingmenu_dep.found()
-  # The libmessagingmenu dependency above determines if the lib is
-  # present, but since it uses a broken name for its VAPI we have to
-  # find that and the C libs separately.
-  libmessagingmenu = declare_dependency(
-    include_directories: include_directories(
-      libmessagingmenu_dep.get_pkgconfig_variable('includedir')
-    ),
-    dependencies: [
-      valac.find_library('MessagingMenu-1.0', dirs: [ '/usr/share/vala/vapi' ]),
-      cc.find_library('messaging-menu')
-    ],
-  )
-endif
-
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
   error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3.\n'
@@ -200,6 +186,7 @@ conf.set_quoted('_SOURCE_ROOT_DIR', meson.source_root())
 conf.set_quoted('_GSETTINGS_DIR', join_paths(meson.build_root(), 'desktop'))
 conf.set_quoted('_INSTALL_PREFIX', geary_prefix)
 conf.set_quoted('_WEB_EXTENSIONS_DIR', web_extensions_dir)
+conf.set_quoted('_PLUGINS_DIR', plugins_dir)
 conf.set_quoted('LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
 conf.set_quoted('ISO_CODE_639_XML', iso_639_xml)
 conf.set_quoted('ISO_CODE_3166_XML', iso_3166_xml)

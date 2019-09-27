@@ -1,62 +1,46 @@
 <page xmlns="http://projectmallard.org/1.0/"
       type="guide"
       id="preferences">
+  
+  <info>
+    <link type="guide" xref="index#overview"/>
+    <link type="next" xref="search" />
+  </info>
 
-    <info>
-        <link type="guide" xref="index#overview"/>
-        
-        <link type="next" xref="search" />
-    </info>
-   <title>Preferences</title>
-	<p>The <gui>Preferences</gui> option is available in either Geary's application menu or the
-	gear menu in the upper-right of the toolbar.  (The location depends on the install desktop
-	shell.  For GNOME Shell and Unity, the application menu is available near the top-left corner of
-	the screen.)</p>
-	
-    <section id="reading">
-	<title>Reading</title>
-	<terms>
-	<item>
-	<title><gui>Automatically select next message</gui></title>
-	<p>When this option is enabled, Geary automatically selects the latest message in a folder
-	when you enter the folder. In addition, after archiving a message, Geary automatically selects
-	an adjacent message.</p>
-	</item>
-	<item>
-	<title><gui>Display conversation preview</gui></title>
-	<p>Enables message previews in the conversation list. Previews show
-	the first few lines of each message. </p>
-	</item>
-	<item>
-	<title><gui>Use three pane view</gui></title>
-	<p>Show the folder list, the conversation list, and the messages side-by-side-by-side in three
-	panes.  If not selected, the folder list and conversation list will be stacked vertically in a
-	single pane.</p>
-	</item>
-	</terms>
-	</section>
+  <title>Preferences</title>
 
-	<section id="notifications">
-	<title>Notifications</title>
-	<terms>
-	<item>
-	<title><gui>Play notification sounds</gui></title>
-	<p>When set, Geary plays a sound whenever a new message arrives.</p>
-	</item>
-	<item>
-	<title><gui>Show notifications for new mail</gui></title>
-	<p>When set, Geary displays a <em>notification</em> each time a new message arrives.  Notifications
-	are displayed in a system-dependent manner.  On GNOME Shell, notifications appear at the
-	bottom of the display (older versions) or centered just below the top bar (newer versions).
-	In Ubuntu Unity, notifications appear at the upper right of the display.</p>
-	</item>
-	<item>
-	<title><gui>Watch for new mail when closed</gui></title>
-	<p>Geary will watch your accounts for new mail even when the main window is not open.  To do
-	this, it will silently start when you log in to your computer, and it will continue to run
-	after you close all windows.</p>
-	</item>
-	</terms>
-	</section>
+  <p>Geary allows you to customise how it works via its
+  <gui>Preferences</gui> window. To open the window, select
+  <gui>Preferences</gui> from the application menu on the main
+  window's toolbar. You can change the following options:</p>
+
+  <terms>
+    <item>
+      <title><gui>Automatically select next message</gui></title>
+      <p>When this option is enabled, Geary automatically selects the
+      latest message in a folder when you enter the folder. In
+      addition, after archiving a message, Geary automatically selects
+      an adjacent message.</p>
+    </item>
+    <item>
+      <title><gui>Display conversation preview</gui></title>
+      <p>Enables message previews in the conversation list. Previews
+      show the first few lines of each message.</p>
+    </item>
+    <item>
+      <title><gui>Use three pane view</gui></title>
+      <p>Show the folder list, the conversation list, and the messages
+      side-by-side-by-side in three panes.  If not selected, the
+      folder list and conversation list will be stacked vertically in
+      a single pane.</p>
+    </item>
+    <item>
+      <title><gui>Watch for new mail when closed</gui></title>
+      <p>Geary will watch your accounts for new mail even when the
+      main window is not open.  To do this, it will silently start
+      when you log in to your computer, and it will continue to run
+      after you close all windows.</p>
+    </item>
+  </terms>
 
 </page>

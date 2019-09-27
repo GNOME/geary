@@ -6,6 +6,8 @@ geary_client_vala_sources = files(
   'application/application-contact-store.vala',
   'application/application-contact.vala',
   'application/application-controller.vala',
+  'application/application-notification-context.vala',
+  'application/application-plugin-manager.vala',
   'application/application-startup-manager.vala',
   'application/geary-application.vala',
   'application/geary-config.vala',
@@ -24,6 +26,7 @@ geary_client_vala_sources = files(
 
   'components/client-web-view.vala',
   'components/components-inspector.vala',
+  'components/components-in-app-notification.vala',
   'components/components-inspector-error-view.vala',
   'components/components-inspector-log-view.vala',
   'components/components-inspector-system-view.vala',
@@ -82,13 +85,7 @@ geary_client_vala_sources = files(
   'folder-list/folder-list-search-branch.vala',
   'folder-list/folder-list-special-grouping.vala',
 
-  'notification/notification-desktop.vala',
-  'notification/in-app-notification.vala',
-  'notification/libmessagingmenu.vala',
-  'notification/new-messages-indicator.vala',
-  'notification/new-messages-monitor.vala',
-  'notification/null-indicator.vala',
-  'notification/unity-launcher.vala',
+  'plugin/plugin-notification.vala',
 
   'sidebar/sidebar-branch.vala',
   'sidebar/sidebar-common.vala',
@@ -127,9 +124,9 @@ geary_client_dependencies = [
   gtk,
   javascriptcoregtk,
   json_glib,
-  libcanberra,
   libhandy,
   libmath,
+  libpeas,
   libsecret,
   libsoup,
   libxml,
@@ -138,15 +135,6 @@ geary_client_dependencies = [
 ]
 
 geary_client_vala_options = geary_vala_options
-
-if libmessagingmenu_dep.found()
-  geary_client_dependencies += libmessagingmenu
-  geary_client_vala_options += ['-D', 'HAVE_LIBMESSAGINGMENU']
-endif
-if libunity.found()
-  geary_client_dependencies += libunity
-  geary_client_vala_options += ['-D', 'HAVE_LIBUNITY']
-endif
 
 # Enable shared shecondary process if available.
 # See issues #558 and #559
@@ -171,3 +159,5 @@ geary_client_dep = declare_dependency(
   link_with: geary_client_lib,
   include_directories: include_directories('.'),
 )
+
+subdir('plugin')

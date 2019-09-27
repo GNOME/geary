@@ -19,8 +19,6 @@ public class Configuration {
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
     public const string AUTOSELECT_KEY = "autoselect";
     public const string DISPLAY_PREVIEW_KEY = "display-preview";
-    public const string PLAY_SOUNDS_KEY = "play-sounds";
-    public const string SHOW_NOTIFICATIONS_KEY = "show-notifications";
     public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
     public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
@@ -153,14 +151,6 @@ public class Configuration {
         set {
             settings.set_strv(SPELL_CHECK_VISIBLE_LANGUAGES, value);
         }
-    }
-
-    public bool play_sounds {
-        get { return settings.get_boolean(PLAY_SOUNDS_KEY); }
-    }
-
-    public bool show_notifications {
-        get { return settings.get_boolean(SHOW_NOTIFICATIONS_KEY); }
     }
 
     public bool startup_notifications {

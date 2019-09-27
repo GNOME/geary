@@ -171,7 +171,7 @@ public class Accounts.Editor : Gtk.Dialog {
     }
 
     /** Displays an in-app notification in the dialog. */
-    internal void add_notification(InAppNotification notification) {
+    internal void add_notification(Components.InAppNotification notification) {
         this.notifications_pane.add_overlay(notification);
         notification.show();
     }
@@ -197,7 +197,7 @@ public class Accounts.Editor : Gtk.Dialog {
         } catch (Application.CertificateManagerError.STORE_FAILED err) {
             // XXX show error info bar rather than a notification?
             add_notification(
-                new InAppNotification(
+                new Components.InAppNotification(
                     // Translators: In-app notification label, when
                     // the app had a problem pinning an otherwise
                     // untrusted TLS certificate

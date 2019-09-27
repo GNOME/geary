@@ -1,109 +1,93 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
+
+[ModuleInit]
+public void peas_register_types(TypeModule module) {
+    Peas.ObjectModule obj = module as Peas.ObjectModule;
+    obj.register_extension_type(
+        typeof(Plugin.Notification),
+        typeof(Plugin.DesktopNotifications)
+    );
+}
 
 /**
  * Manages standard desktop application notifications.
  */
-public class Notification.Desktop : Geary.BaseObject {
+public class Plugin.DesktopNotifications : Notification {
 
 
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.SUBJECT;
 
+    public override GearyApplication application {
+        get; construct set;
+    }
+
+    public override Application.NotificationContext context {
+        get; construct set;
+    }
+
     private const string ARRIVED_ID = "email-arrived";
-    private const string ERROR_ID = "error";
 
-    private weak NewMessagesMonitor monitor;
-    private weak GearyApplication application;
     private GLib.Notification? arrived_notification = null;
-    private GLib.Notification? error_notification = null;
-    private GLib.Cancellable load_cancellable;
+    private GLib.Cancellable? cancellable = null;
 
 
-    public Desktop(NewMessagesMonitor monitor,
-                   GearyApplication application,
-                   GLib.Cancellable load_cancellable) {
-        this.monitor = monitor;
-        this.application = application;
-        this.load_cancellable = load_cancellable;
-
-        this.monitor.add_required_fields(REQUIRED_FIELDS);
-        this.monitor.new_messages_arrived.connect(on_new_messages_arrived);
+    public override void activate() {
+        this.context.add_required_fields(REQUIRED_FIELDS);
+        this.context.new_messages_arrived.connect(on_new_messages_arrived);
+        this.cancellable = new GLib.Cancellable();
     }
 
-    ~Desktop() {
-        this.load_cancellable.cancel();
-        this.monitor.new_messages_arrived.disconnect(on_new_messages_arrived);
+    public override void deactivate(bool is_shutdown) {
+        this.cancellable.cancel();
+        this.context.new_messages_arrived.disconnect(on_new_messages_arrived);
+        this.context.remove_required_fields(REQUIRED_FIELDS);
+
+        // Keep existing notifications if shutting down since they are
+        // persistent, but revoke if the plugin is being disabled.
+        if (!is_shutdown) {
+            clear_arrived_notification();
+        }
     }
 
-    public void clear_all_notifications() {
-        clear_arrived_notification();
-        clear_error_notification();
-    }
-
-    public void clear_arrived_notification() {
+    private void clear_arrived_notification() {
         this.application.withdraw_notification(ARRIVED_ID);
         this.arrived_notification = null;
     }
 
-    public void set_error_notification(string summary, string body) {
-        // Only one error at a time, guys.  (This means subsequent errors will
-        // be dropped.  Since this is only used for one thing now, that's ok,
-        // but it means in the future, a more robust system will be needed.)
-        if (this.error_notification == null) {
-            this.error_notification = issue_notification(
-                ERROR_ID, summary, body, null, null
-            );
-        }
-    }
-
-    public void clear_error_notification() {
-        this.error_notification = null;
-        this.application.withdraw_notification(ERROR_ID);
-    }
-
-    private void on_new_messages_arrived(Geary.Folder folder,
-                                         int total,
-                                         int added) {
-        if (added == 1 &&
-            monitor.last_new_message_folder != null &&
-            monitor.last_new_message != null) {
-            this.notify_one_message.begin(
-                monitor.last_new_message_folder,
-                monitor.last_new_message,
-                this.load_cancellable
-            );
-        } else if (added > 0) {
-            notify_new_mail(folder, added);
-        }
-    }
-
     private void notify_new_mail(Geary.Folder folder, int added) {
-        if (this.application.config.show_notifications &&
-            this.monitor.should_notify_new_messages(folder)) {
-            string body = ngettext(
-                /// Notification body text for new email when no other
-                /// new messages are already awaiting.
-                "%d new message", "%d new messages", added
-            ).printf(added);
-            int total = monitor.get_new_message_count(folder);
-            if (total > added) {
-                body = ngettext(
-                    /// Notification body text for new email when
-                    /// other new messages have already been notified
-                    /// about
-                    "%s, %d new message total", "%s, %d new messages total",
-                    total
-                ).printf(body, total);
-            }
+        string body = ngettext(
+            /// Notification body text for new email when no other
+            /// new messages are already awaiting.
+            "%d new message", "%d new messages", added
+        ).printf(added);
 
-            issue_arrived_notification(
-                folder.account.information.display_name, body, folder, null
-            );
+        int total = 0;
+        try {
+            total = this.context.get_new_message_count(folder);
+        } catch (Geary.EngineError err) {
+            // All good
         }
+
+        if (total > added) {
+            body = ngettext(
+                /// Notification body text for new email when
+                /// other new messages have already been notified
+                /// about
+                "%s, %d new message total", "%s, %d new messages total",
+                total
+            ).printf(body, total);
+        }
+
+        issue_arrived_notification(
+            folder.account.information.display_name, body, folder, null
+        );
     }
 
     private async void notify_one_message(Geary.Folder folder,
@@ -112,17 +96,21 @@ public class Notification.Desktop : Geary.BaseObject {
         throws GLib.Error {
         Geary.RFC822.MailboxAddress? originator =
             Util.Email.get_primary_originator(email);
-        if (this.application.config.show_notifications &&
-            this.monitor.should_notify_new_messages(folder) &&
-            originator != null) {
+        if (originator != null) {
             Application.ContactStore contacts =
-                this.monitor.get_contact_store(folder.account);
+                this.context.get_contact_store(folder.account);
             Application.Contact contact = yield contacts.load(
                 originator, cancellable
             );
 
-            string body;
-            int count = monitor.get_new_message_count(folder);
+            int count = 1;
+            try {
+                count = this.context.get_new_message_count(folder);
+            } catch (Geary.EngineError.NOT_FOUND err) {
+                // All good
+            }
+
+            string body = "";
             if (count <= 1) {
                 body = Util.Email.strip_subject_prefixes(email);
             } else {
@@ -137,7 +125,7 @@ public class Notification.Desktop : Geary.BaseObject {
 
             issue_arrived_notification(
                 contact.is_trusted
-                    ? contact.display_name : originator.to_short_display(),
+                ? contact.display_name : originator.to_short_display(),
                 body,
                 folder,
                 email.id
@@ -201,6 +189,24 @@ public class Notification.Desktop : Geary.BaseObject {
 
             this.application.send_notification(id, notification);
             return notification;
+        }
+    }
+
+    private void on_new_messages_arrived(Geary.Folder folder,
+                                         int total,
+                                         int added) {
+        if (this.context.should_notify_new_messages(folder)) {
+            if (added == 1 &&
+                this.context.last_new_message_folder != null &&
+                this.context.last_new_message != null) {
+                this.notify_one_message.begin(
+                    this.context.last_new_message_folder,
+                    this.context.last_new_message,
+                    this.cancellable
+                );
+            } else if (added > 0) {
+                notify_new_mail(folder, added);
+            }
         }
     }
 

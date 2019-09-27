@@ -20,7 +20,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         = new Gee.HashMap<Geary.Account, AccountBranch>();
     private InboxesBranch inboxes_branch = new InboxesBranch();
     private SearchBranch? search_branch = null;
-    private NewMessagesMonitor? monitor = null;
+    private Application.NotificationContext? monitor = null;
 
     public Tree() {
         base(new Gtk.TargetEntry[0], Gdk.DragAction.ASK, drop_handler);
@@ -80,7 +80,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         }
     }
 
-    public void set_new_messages_monitor(NewMessagesMonitor? monitor) {
+    public void set_new_messages_monitor(Application.NotificationContext? monitor) {
         if (this.monitor != null) {
             this.monitor.new_messages_arrived.disconnect(on_new_messages_changed);
             this.monitor.new_messages_retired.disconnect(on_new_messages_changed);
