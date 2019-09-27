@@ -27,5 +27,5 @@ sql_files = [
 ]
 
 install_data(sql_files,
-  install_dir: join_paths(datadir, meson.project_name(), 'sql')
+  install_dir: join_paths(data_dir, meson.project_name(), 'sql')
 )

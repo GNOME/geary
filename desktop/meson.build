@@ -16,7 +16,7 @@ desktop_file = i18n.merge_file(
   type: 'desktop',
   po_dir: po_dir,
   install: true,
-  install_dir: join_paths(datadir, 'applications')
+  install_dir: join_paths(data_dir, 'applications')
 )
 desktop_output += desktop_file
 
@@ -30,7 +30,7 @@ autostart_file = i18n.merge_file(
   type: 'desktop',
   po_dir: po_dir,
   install: true,
-  install_dir: join_paths(datadir, 'applications')
+  install_dir: join_paths(data_dir, 'applications')
 )
 desktop_output += autostart_file
 
@@ -60,7 +60,7 @@ appdata_merged = i18n.merge_file(
   type: 'xml',
   po_dir: po_dir,
   install: true,
-  install_dir: join_paths(datadir, 'metainfo')
+  install_dir: join_paths(data_dir, 'metainfo')
 )
 
 if appstream_util.found()
@@ -87,11 +87,11 @@ if install_contractor_file
     output: 'geary-attach.contract',
     command: [msgfmt, '--desktop', '--keyword=Description', '--template', '@INPUT@', '-d', po_dir, '-o', '@OUTPUT@'],
     install: true,
-    install_dir: join_paths(datadir, 'contractor')
+    install_dir: join_paths(data_dir, 'contractor')
   )
 
   install_data('geary-attach',
-    install_dir: bindir,
+    install_dir: bin_dir,
   )
 endif
 
@@ -108,7 +108,7 @@ geary_compiled_schema = gnome.compile_schemas(
   depend_files: files('org.gnome.Geary.gschema.xml'),
 )
 install_data('org.gnome.Geary.gschema.xml',
-  install_dir: join_paths(datadir, 'glib-2.0', 'schemas'),
+  install_dir: join_paths(data_dir, 'glib-2.0', 'schemas'),
 )
 
 #
@@ -116,7 +116,7 @@ install_data('org.gnome.Geary.gschema.xml',
 #
 
 service_conf = configuration_data()
-service_conf.set('bindir', bindir)
+service_conf.set('bindir', bin_dir)
 service_conf.set('appid', geary_id)
 
 configure_file(

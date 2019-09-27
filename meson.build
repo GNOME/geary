@@ -4,18 +4,13 @@ project('geary', [ 'vala', 'c' ],
   meson_version: '>= 0.50',
 )
 
-gnome = import('gnome')
-i18n = import('i18n')
-
-# Option
-install_contractor_file = get_option('contractor')
-iso_639_xml = get_option('iso_639_xml')
-iso_3166_xml = get_option('iso_3166_xml')
-reference_tracking = get_option('ref_tracking')
-poodle = get_option('poodle')
+# Build-time configuration options
 enable_valadoc = get_option('valadoc')
-
-revno = run_command('build-aux/git_version.py').stdout().strip()
+install_contractor_file = get_option('contractor')
+iso_3166_xml = get_option('iso_3166_xml')
+iso_639_xml = get_option('iso_639_xml')
+poodle = get_option('poodle')
+reference_tracking = get_option('ref_tracking')
 
 # Build type
 if get_option('profile') == 'development'
@@ -29,38 +24,34 @@ else
   name_suffix = ''
 endif
 
-geary_id = 'org.gnome.Geary@0@'.format(profile)
-geary_version = meson.project_version()
-
-# Some variables
-cc = meson.get_compiler('c')
-valac = meson.get_compiler('vala')
-config_h_dir = include_directories('.')
+# Configurable install dirs
 geary_prefix = get_option('prefix')
-bindir = join_paths(geary_prefix, get_option('bindir'))
-datadir = join_paths(geary_prefix, get_option('datadir'))
-libdir = join_paths(geary_prefix, get_option('libdir'))
+bin_dir = join_paths(geary_prefix, get_option('bindir'))
+data_dir = join_paths(geary_prefix, get_option('datadir'))
+lib_dir = join_paths(geary_prefix, get_option('libdir'))
 locale_dir = join_paths(geary_prefix, get_option('localedir'))
+
+# Source dirs
+metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
 po_dir = join_paths(meson.source_root(), 'po')
 vapi_dir = join_paths(meson.source_root(), 'bindings', 'vapi')
-metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
-dbus_services_dir = join_paths(datadir, 'dbus-1', 'services')
-web_extensions_dir = join_paths(libdir, 'geary', 'web-extensions')
-plugins_dir = join_paths(libdir, 'geary', 'plugins')
 
-# Make sure Meson can find our custom VAPI's
+# Compiler configuration
 add_project_arguments([
+    # Make sure Meson can find custom VAPIs
     '--vapidir', vapi_dir,
     '--metadatadir', metadata_dir,
   ],
   language: 'vala'
 )
+cc = meson.get_compiler('c')
+valac = meson.get_compiler('vala')
 
 #
 # Required libraries and other dependencies
 #
 
-target_glib = '2.54' # Also passed to valac, so don't include a point rev
+target_glib = '2.60.4'
 target_gtk = '3.24.7'
 target_webkit = '2.24'
 
@@ -150,6 +141,23 @@ desktop_file_validate = find_program('desktop-file-validate', required: false)
 libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', required: false)
 libunity = dependency('unity', version: '>= 5.12.0', required: false)
 
+#
+# Internal build configuration
+#
+
+# Build variables
+geary_id = 'org.gnome.Geary@0@'.format(profile)
+geary_version = meson.project_version()
+revno = run_command('build-aux/git_version.py').stdout().strip()
+
+gnome = import('gnome')
+i18n = import('i18n')
+
+# Static install dirs
+dbus_services_dir = join_paths(data_dir, 'dbus-1', 'services')
+plugins_dir = join_paths(lib_dir, 'geary', 'plugins')
+web_extensions_dir = join_paths(lib_dir, 'geary', 'web-extensions')
+
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
   error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3.\n'
@@ -173,30 +181,6 @@ if iso_3166_xml == ''
   iso_3166_xml = join_paths(iso_codes_dir, 'iso_3166.xml')
 endif
 files(iso_639_xml, iso_3166_xml) # Check to make sure these exist
-
-# Configuration
-conf = configuration_data()
-conf.set_quoted('GETTEXT_PACKAGE', meson.project_name())
-conf.set_quoted('G_LOG_DOMAIN', meson.project_name())
-conf.set_quoted('PACKAGE_NAME', meson.project_name())
-conf.set_quoted('PACKAGE_STRING', '@0@-@1@'.format(meson.project_name(), meson.project_version()))
-conf.set_quoted('PACKAGE_VERSION', meson.project_version())
-conf.set_quoted('_BUILD_ROOT_DIR', meson.build_root())
-conf.set_quoted('_SOURCE_ROOT_DIR', meson.source_root())
-conf.set_quoted('_GSETTINGS_DIR', join_paths(meson.build_root(), 'desktop'))
-conf.set_quoted('_INSTALL_PREFIX', geary_prefix)
-conf.set_quoted('_WEB_EXTENSIONS_DIR', web_extensions_dir)
-conf.set_quoted('_PLUGINS_DIR', plugins_dir)
-conf.set_quoted('LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
-conf.set_quoted('ISO_CODE_639_XML', iso_639_xml)
-conf.set_quoted('ISO_CODE_3166_XML', iso_3166_xml)
-conf.set('GCR_API_SUBJECT_TO_CHANGE', true)
-conf.set_quoted('_VERSION', geary_version)
-conf.set_quoted('_APP_ID', geary_id)
-conf.set_quoted('_PROFILE', profile)
-conf.set_quoted('_NAME_SUFFIX', name_suffix)
-conf.set_quoted('_REVNO', revno)
-configure_file(output: 'config.h', configuration: conf)
 
 # Post-install scripts
 meson.add_install_script(join_paths('build-aux', 'post_install.py'))
