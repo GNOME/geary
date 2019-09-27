@@ -633,6 +633,13 @@ public class GearyApplication : Gtk.Application {
                   .get_child("src").get_child("client").get_child("plugin");
     }
 
+    /**
+     * Returns the directory containing the home directory plugins.
+     */
+    public GLib.File get_home_plugins_dir() {
+        return get_user_data_directory().get_child("plugins");
+    }
+
     /** Displays a URI on the current active window, if any. */
     public void show_uri(string uri) throws Error {
         bool success = Gtk.show_uri_on_window(

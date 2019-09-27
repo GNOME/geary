@@ -25,9 +25,15 @@ public class Application.PluginManager : GLib.Object {
         this.engine.add_search_path(
             application.get_app_plugins_dir().get_path(), null
         );
+        this.engine.add_search_path(
+            application.get_home_plugins_dir().get_path(), null
+        );
     }
 
     public void load() {
+        string app_prefix = this.application.get_app_plugins_dir().get_path();
+        string local_prefix = this.application.get_home_plugins_dir().get_path();
+
         this.notification_extensions = new Peas.ExtensionSet(
             this.engine,
             typeof(Plugin.Notification),
@@ -41,12 +47,18 @@ public class Application.PluginManager : GLib.Object {
                 (extension as Plugin.Notification).deactivate(this.is_shutdown);
             });
 
-        // Load built-in plugins by default
+        debug("Loading app plugins from: %s", app_prefix);
+        debug("Loading local plugins from: %s", local_prefix);
+
         foreach (Peas.PluginInfo info in this.engine.get_plugin_list()) {
             try {
                 info.is_available();
-                if (info.is_builtin()) {
-                    debug("Loading built-in plugin: %s", info.get_name());
+                if (info.get_module_dir().has_prefix(app_prefix) &&
+                    info.is_builtin()) {
+                    debug("Loading app built-in plugin: %s", info.get_name());
+                    this.engine.load_plugin(info);
+                } else if (info.get_module_dir().has_prefix(local_prefix)) {
+                    debug("Loading local plugin: %s", info.get_name());
                     this.engine.load_plugin(info);
                 } else {
                     debug("Not loading plugin: %s", info.get_name());
