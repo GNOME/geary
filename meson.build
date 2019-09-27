@@ -37,16 +37,22 @@ cc = meson.get_compiler('c')
 valac = meson.get_compiler('vala')
 config_h_dir = include_directories('.')
 geary_prefix = get_option('prefix')
-bindir = join_paths(geary_prefix, get_option('bindir'))
-datadir = join_paths(geary_prefix, get_option('datadir'))
-libdir = join_paths(geary_prefix, get_option('libdir'))
-locale_dir = join_paths(geary_prefix, get_option('localedir'))
+
+# Source dirs
+metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
 po_dir = join_paths(meson.source_root(), 'po')
 vapi_dir = join_paths(meson.source_root(), 'bindings', 'vapi')
-metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
-dbus_services_dir = join_paths(datadir, 'dbus-1', 'services')
-web_extensions_dir = join_paths(libdir, 'geary', 'web-extensions')
-plugins_dir = join_paths(libdir, 'geary', 'plugins')
+
+# Configurable install dirs
+bin_dir = join_paths(geary_prefix, get_option('bindir'))
+data_dir = join_paths(geary_prefix, get_option('datadir'))
+lib_dir = join_paths(geary_prefix, get_option('libdir'))
+locale_dir = join_paths(geary_prefix, get_option('localedir'))
+
+# Static install dirs
+dbus_services_dir = join_paths(data_dir, 'dbus-1', 'services')
+plugins_dir = join_paths(lib_dir, 'geary', 'plugins')
+web_extensions_dir = join_paths(lib_dir, 'geary', 'web-extensions')
 
 # Make sure Meson can find our custom VAPI's
 add_project_arguments([
