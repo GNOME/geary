@@ -424,7 +424,8 @@ public class Geary.App.DraftManager : BaseObject {
 
         this.draft_state = DraftState.STORING;
 
-        // if draft supplied, save it
+        // if draft supplied, save it, and delete the old one if it
+        // exists
         if (op.draft != null) {
             try {
                 EmailIdentifier? old_id = this.current_draft_id;
@@ -435,9 +436,12 @@ public class Geary.App.DraftManager : BaseObject {
                         op.date_received,
                         null
                     );
-                yield this.remove_support.remove_email_async(
-                    Collection.single(old_id), null
-                );
+
+                if (old_id != null) {
+                    yield this.remove_support.remove_email_async(
+                        Collection.single(old_id), null
+                    );
+                }
 
                 this.draft_state = DraftState.STORED;
                 notify_stored(op.draft);
