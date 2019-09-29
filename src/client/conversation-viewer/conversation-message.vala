@@ -344,7 +344,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** Fired when the user saves an inline displayed image. */
     public signal void save_image(string? uri, string? alt_text, Geary.Memory.Buffer buffer);
 
- 
+
     /**
      * Constructs a new view from an email's headers and body.
      *
@@ -737,7 +737,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                              GLib.Cancellable cancellable)
         throws GLib.IOError.CANCELLED {
         uint headers_found = 0;
-        uint webkit_found = 0;
         foreach(string raw_match in search_matches) {
             string match = raw_match.casefold();
 
@@ -755,7 +754,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
         }
 
-        webkit_found += yield this.web_view.highlight_search_terms(
+        uint webkit_found = yield this.web_view.highlight_search_terms(
             search_matches, cancellable
         );
         return headers_found + webkit_found;
