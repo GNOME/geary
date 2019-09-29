@@ -477,11 +477,4 @@ public class Geary.App.DraftManager : BaseObject {
         return "%s DraftManager".printf(account.to_string());
     }
 
-    private async void save_draft(EmailIdentifier id) {
-
-    }
-
-    private async void remove_draft(EmailIdentifier id) {
-
-    }
 }
