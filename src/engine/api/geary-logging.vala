@@ -334,15 +334,19 @@ public delegate void LogRecord(Record record);
 
 private int init_count = 0;
 private Flag logging_flags = Flag.NONE;
-private unowned FileStream? stream = null;
 
-// Can't be nullable. See https://gitlab.gnome.org/GNOME/vala/issues/812
+// The two locks below can't be nullable. See
+// https://gitlab.gnome.org/GNOME/vala/issues/812
+
 private GLib.Mutex record_lock;
 private Record? first_record = null;
 private Record? last_record = null;
 private uint log_length = 0;
 private uint max_log_length = 0;
 private unowned LogRecord? listener = null;
+
+private GLib.Mutex writer_lock;
+private unowned FileStream? stream = null;
 
 
 /**
@@ -356,6 +360,7 @@ public void init() {
     if (init_count++ != 0)
         return;
     record_lock = GLib.Mutex();
+    writer_lock = GLib.Mutex();
     max_log_length = DEFAULT_MAX_LOG_BUFFER_LENGTH;
 }
 
@@ -367,13 +372,29 @@ public void init() {
  * objects can be destroyed.
  */
 public void clear() {
-    record_lock.lock();
+    // Keep the old first record so we don't cause any records to be
+    // finalised while under the lock, leading to deadlock if
+    // finalisation causes any more logging to be generated.
+    Record? old_first = null;
 
+    // Obtain a lock since other threads could be calling this or
+    // generating more logging at the same time.
+    record_lock.lock();
+    old_first = first_record;
     first_record = null;
     last_record = null;
     log_length = 0;
-    
     record_lock.unlock();
+
+    // Manually clear each log record in a loop so that finalisation
+    // of each is an iterative process. If we just nulled out the
+    // record, finalising the first would cause second to be
+    // finalised, which would finalise the third, etc., and the
+    // recursion could cause the stack to blow right out for large log
+    // buffers.
+    while (old_first != null) {
+        old_first = old_first.next;
+    }
 }
 
 /**
@@ -490,12 +511,17 @@ public void log_to(FileStream? stream) {
 
 public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
                                                GLib.LogField[] fields) {
-    // Obtain a lock since multiple threads can be calling this
-    // function at the same time
-    record_lock.lock();
-
-    // Update the record linked list
     Record record = new Record(fields, levels, GLib.get_real_time());
+
+    // Keep the old first record so we don't cause any records to be
+    // finalised while under the lock, leading to deadlock if
+    // finalisation causes any more logging to be generated.
+    Record? old_record = null;
+
+    // Update the record linked list. Obtain a lock since multiple
+    // threads could be calling this function at the same time.
+    record_lock.lock();
+    old_record = first_record;
     if (first_record == null) {
         first_record = record;
         last_record = record;
@@ -503,15 +529,20 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
         last_record.next = record;
         last_record = record;
     }
-    log_length++;
-    while (log_length > max_log_length) {
+    // Drop the first if we are already at maximum length
+    if (log_length == max_log_length) {
         first_record = first_record.next;
-        log_length--;
+    } else {
+        log_length++;
     }
-    if (first_record == null) {
-        last_record = null;
-    }
+    record_lock.unlock();
 
+    // Now that we are out of the lock, it is safe to finalise any old
+    // records.
+    old_record = null;
+
+    // Ensure the listener is updated on the main loop only, since
+    // this could be getting called from other threads.
     if (listener != null) {
         GLib.MainContext.default().invoke(() => {
                 listener(record);
@@ -519,7 +550,8 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
             });
     }
 
-    // Print a log message to the stream
+    // Print a log message to the stream if configured, or if the
+    // priority is high enough.
     unowned FileStream? out = stream;
     if (out != null ||
         LogLevelFlags.LEVEL_WARNING in levels ||
@@ -530,11 +562,13 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
             out = GLib.stderr;
         }
 
+        // Lock the writer here so two different threads don't
+        // interleave their lines.
+        writer_lock.lock();
         out.puts(record.format());
         out.putc('\n');
+        writer_lock.unlock();
     }
-
-    record_lock.unlock();
 
     return GLib.LogWriterOutput.HANDLED;
 }
