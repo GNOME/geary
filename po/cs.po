@@ -9,10 +9,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: geary\n"
+"Project-Id-Version: geary gnome-3.34\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-08-29 23:05+0000\n"
-"PO-Revision-Date: 2019-09-15 21:40+0200\n"
+"POT-Creation-Date: 2019-09-21 22:57+0000\n"
+"PO-Revision-Date: 2019-10-01 17:48+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -1077,7 +1077,7 @@ msgstr "Vydání distribuce"
 msgid "Installation prefix"
 msgstr "Prefix instalace"
 
-#: src/client/application/geary-application.vala:490
+#: src/client/application/geary-application.vala:510
 #, c-format
 msgid "About %s"
 msgstr "O aplikaci %s"
@@ -1085,7 +1085,7 @@ msgstr "O aplikaci %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:494
+#: src/client/application/geary-application.vala:514
 msgid "translator-credits"
 msgstr ""
 "Petr Šimáček <petr.simacek@gmail.com>\n"
@@ -1093,20 +1093,20 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/geary-application.vala:778
+#: src/client/application/geary-application.vala:798
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "Volba „--hidden“ je zavržená a v budoucnu bude odstraněna."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/geary-application.vala:810
+#: src/client/application/geary-application.vala:830
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Nerozpoznaný argument aplikace: „%s“"
 
 #: src/client/components/components-inspector.vala:68
 msgid "Inspector"
-msgstr "Inspektor…"
+msgstr "Inspektor"
 
 #. / Translators: Title for Inspector logs pane
 #. / Translators: Title for problem report dialog logs pane
@@ -2646,7 +2646,7 @@ msgstr ""
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:20
 msgid "Toggle appending new log entries"
-msgstr "Zapnout/vypnout přidávání nových položek záznamu"
+msgstr "Zapnout/vypnout přidávání nových položek do záznamu"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
