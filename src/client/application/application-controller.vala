@@ -1013,12 +1013,7 @@ public class Application.Controller : Geary.BaseObject {
         bool is_descendent = false;
 
         Geary.Account account = target.account;
-        Geary.Folder? inbox = null;
-        try {
-            inbox = account.get_special_folder(Geary.SpecialFolderType.INBOX);
-        } catch (Error err) {
-            debug("Failed to get inbox for account %s", account.information.id);
-        }
+        Geary.Folder? inbox = account.get_special_folder(Geary.SpecialFolderType.INBOX);
 
         if (inbox != null) {
             is_descendent = inbox.path.is_descendant(target.path);
@@ -1435,17 +1430,12 @@ public class Application.Controller : Geary.BaseObject {
         Gee.Collection<Geary.FolderPath>? blacklist = null;
         if (this.current_folder != null &&
             this.current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX) {
-            Geary.Folder? outbox = null;
-            try {
-                outbox = this.current_account.get_special_folder(
-                    Geary.SpecialFolderType.OUTBOX
-                );
+            Geary.Folder? outbox = this.current_account.get_special_folder(
+                Geary.SpecialFolderType.OUTBOX
+            );
 
-                blacklist = new Gee.ArrayList<Geary.FolderPath>();
-                blacklist.add(outbox.path);
-            } catch (GLib.Error err) {
-                // Oh well
-            }
+            blacklist = new Gee.ArrayList<Geary.FolderPath>();
+            blacklist.add(outbox.path);
         }
 
         foreach(Geary.App.Conversation conversation in conversations) {
@@ -1642,11 +1632,7 @@ public class Application.Controller : Geary.BaseObject {
             }
         } else {
             // Move out of spam folder, back to inbox.
-            try {
-                destination_folder = current_account.get_special_folder(Geary.SpecialFolderType.INBOX);
-            } catch (Error e) {
-                debug("Error getting inbox folder: %s", e.message);
-            }
+            destination_folder = current_account.get_special_folder(Geary.SpecialFolderType.INBOX);
         }
 
         if (destination_folder != null)
@@ -2189,16 +2175,7 @@ public class Application.Controller : Geary.BaseObject {
         if (current_account == null)
             return;
 
-        Geary.Folder? folder = null;
-        try {
-            folder = current_account.get_special_folder(special_folder_type);
-        } catch (Error err) {
-            debug("%s: Unable to get special folder %s: %s", current_account.to_string(),
-                special_folder_type.to_string(), err.message);
-
-            // fall through
-        }
-
+        Geary.Folder? folder = current_account.get_special_folder(special_folder_type);
         if (folder == null)
             return;
 
@@ -2623,14 +2600,9 @@ public class Application.Controller : Geary.BaseObject {
     private void do_search(string search_text) {
         Geary.SearchFolder? search_folder = null;
         if (this.current_account != null) {
-            try {
-                search_folder =
-                    this.current_account.get_special_folder(
-                        Geary.SpecialFolderType.SEARCH
-                    ) as Geary.SearchFolder;
-            } catch (Error e) {
-                debug("Could not get search folder: %s", e.message);
-            }
+            search_folder = this.current_account.get_special_folder(
+                Geary.SpecialFolderType.SEARCH
+            ) as Geary.SearchFolder;
         }
 
         if (Geary.String.is_empty_or_whitespace(search_text)) {

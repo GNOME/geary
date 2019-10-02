@@ -391,13 +391,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
         Gee.ArrayList<Geary.FolderPath?> blacklist = new Gee.ArrayList<Geary.FolderPath?>();
         foreach (Geary.SpecialFolderType type in blacklisted_folder_types) {
-            try {
-                Geary.Folder? blacklist_folder = this.base_folder.account.get_special_folder(type);
-                if (blacklist_folder != null)
-                    blacklist.add(blacklist_folder.path);
-            } catch (Error e) {
-                debug("Error finding special folder %s on account %s: %s",
-                    type.to_string(), this.base_folder.account.to_string(), e.message);
+            Geary.Folder? blacklist_folder = this.base_folder.account.get_special_folder(type);
+            if (blacklist_folder != null) {
+                blacklist.add(blacklist_folder.path);
             }
         }
 

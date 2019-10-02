@@ -64,11 +64,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         // just opened) because just because this value has changed
         // doesn't mean the contents in the folders have changed
         if (this.account.is_open()) {
-            try {
-                send_all(this.account.list_folders(), true);
-            } catch (Error err) {
-                debug("Failed to list account folders for sync: %s", err.message);
-            }
+            send_all(this.account.list_folders(), true);
         }
     }
 
