@@ -34,21 +34,53 @@ public class Application.Controller : Geary.BaseObject {
     }
 
 
-    internal class AccountContext : Geary.BaseObject {
+    /**
+     * Collects objects and state related to a single open account.
+     */
+    public class AccountContext : Geary.BaseObject {
 
+        /** The account for this context. */
         public Geary.Account account { get; private set; }
+
+        /** The account's Inbox folder */
         public Geary.Folder? inbox = null;
+
+        /** The account's email store */
         public Geary.App.EmailStore emails { get; private set; }
+
+        /** The account's contact store */
         public Application.ContactStore contacts { get; private set; }
 
-        public bool authentication_failed = false;
-        public bool authentication_prompting = false;
-        public uint authentication_attempts = 0;
+        /** A cancellable tied to the life-cycle of the account. */
+        public Cancellable cancellable {
+            get; private set; default = new Cancellable();
+        }
 
-        public bool tls_validation_failed = false;
-        public bool tls_validation_prompting = false;
+        /** Determines if the account has an authentication problem. */
+        internal bool authentication_failed {
+            get; private set; default = false;
+        }
 
-        public Cancellable cancellable { get; private set; default = new Cancellable(); }
+        /** Determines if the account is prompting for a pasword. */
+        internal bool authentication_prompting {
+            get; private set; default = false;
+        }
+
+        /** Determines if currently prompting for a password. */
+        internal uint authentication_attempts {
+            get; private set; default = 0;
+        }
+
+        /** Determines if any TLS certificate errors have been seen. */
+        internal bool tls_validation_failed {
+            get; private set; default = false;
+        }
+
+        /** Determines if currently prompting about TLS certificate errors. */
+        internal bool tls_validation_prompting {
+            get; private set; default = false;
+        }
+
 
         public AccountContext(Geary.Account account,
                               Geary.App.EmailStore emails,
@@ -58,6 +90,7 @@ public class Application.Controller : Geary.BaseObject {
             this.contacts = contacts;
         }
 
+        /** Returns the current effective status for the account. */
         public Geary.Account.Status get_effective_status() {
             Geary.Account.Status current = this.account.current_status;
             Geary.Account.Status effective = 0;
@@ -291,6 +324,11 @@ public class Application.Controller : Geary.BaseObject {
         // Expunge any deleted accounts in the background, so we're
         // not blocking the app continuing to open.
         this.expunge_accounts.begin();
+    }
+
+    /** Returns a context for an account, if any. */
+    public AccountContext? get_context_for_account(Geary.AccountInformation account) {
+        return this.accounts.get(account);
     }
 
     /** Un-does the last executed application command, if any. */
