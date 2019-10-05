@@ -796,6 +796,33 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    public async void delete_conversations(Geary.FolderSupport.Remove target,
+                                           Gee.Collection<Geary.App.Conversation> conversations)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(target.account.information);
+        if (context != null) {
+            yield this.commands.execute(
+                new DeleteEmailCommand(
+                    target,
+                    to_in_folder_email_ids(conversations)
+                ),
+                context.cancellable
+            );
+        }
+    }
+
+    public async void delete_messages(Geary.FolderSupport.Remove target,
+                                      Gee.Collection<Geary.EmailIdentifier> messages)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(target.account.information);
+        if (context != null) {
+            yield this.commands.execute(
+                new DeleteEmailCommand(target, messages),
+                context.cancellable
+            );
+        }
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -2440,7 +2467,55 @@ private class Application.CopyEmailCommand : Command {
         throws GLib.Error {
         throw new Geary.EngineError.UNSUPPORTED(
             "Cannot undo copy, not yet supported"
+        );
+    }
+
+}
+
+
+private class Application.DeleteEmailCommand : Command {
+
+
+    public override bool can_undo {
+        get { return false; }
+    }
+
+    private Geary.FolderSupport.Remove target;
+    private Gee.Collection<Geary.EmailIdentifier> messages;
+
+
+    public DeleteEmailCommand(Geary.FolderSupport.Remove target,
+                              Gee.Collection<Geary.EmailIdentifier> messages) {
+        this.target = target;
+        this.messages = messages;
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.target.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
+            );
+            open = true;
+            yield this.target.remove_email_async(this.messages, cancellable);
+        } finally {
+            if (open) {
+                try {
+                    yield this.target.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
         }
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        throw new Geary.EngineError.UNSUPPORTED(
+            "Cannot undo emptying a folder: %s",
+            this.target.path.to_string()
+        );
     }
 
 }

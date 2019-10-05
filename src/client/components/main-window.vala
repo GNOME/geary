@@ -714,6 +714,36 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         );
     }
 
+    private bool prompt_delete_conversations(int count) {
+        ConfirmationDialog dialog = new ConfirmationDialog(
+            this,
+            /// Translators: Primary text for a confirmation dialog
+            ngettext(
+                "Do you want to permanently delete this conversation?",
+                "Do you want to permanently delete these conversations?",
+                count
+            ),
+            null,
+            _("Delete"), "destructive-action"
+        );
+        return (dialog.run() == Gtk.ResponseType.OK);
+    }
+
+    private bool prompt_delete_messages(int count) {
+        ConfirmationDialog dialog = new ConfirmationDialog(
+            this,
+            /// Translators: Primary text for a confirmation dialog
+            ngettext(
+                "Do you want to permanently delete this message?",
+                "Do you want to permanently delete these messages?",
+                count
+            ),
+            null,
+            _("Delete"), "destructive-action"
+        );
+        return (dialog.run() == Gtk.ResponseType.OK);
+    }
+
     private inline void handle_error(Geary.AccountInformation? account,
                                      GLib.Error error) {
         Geary.ProblemReport? report = (account != null)
@@ -1600,6 +1630,23 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_delete_conversation() {
+        Geary.FolderSupport.Remove target =
+            this.current_folder as Geary.FolderSupport.Remove;
+        Gee.Collection<Geary.App.Conversation> conversations =
+            this.conversation_list_view.get_selected_conversations();
+        if (target != null && this.prompt_delete_conversations(conversations.size)) {
+            this.application.controller.delete_conversations.begin(
+                target,
+                conversations,
+                (obj, res) => {
+                    try {
+                        this.application.controller.delete_conversations.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(target.account.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_empty_spam() {
@@ -1767,6 +1814,21 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_delete_message(ConversationEmail target_view) {
+        Geary.FolderSupport.Remove? source =
+            this.current_folder as Geary.FolderSupport.Remove;
+        if (source != null && prompt_delete_messages(1)) {
+            this.application.controller.delete_messages.begin(
+                source,
+                Geary.Collection.single(target_view.email.id),
+                (obj, res) => {
+                    try {
+                        this.application.controller.delete_messages.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(source.account.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_link_activated(string uri) {
