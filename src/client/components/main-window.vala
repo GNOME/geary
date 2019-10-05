@@ -1542,6 +1542,23 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_copy_conversation(Geary.Folder destination) {
+        Geary.FolderSupport.Copy source =
+            this.current_folder as Geary.FolderSupport.Copy;
+        if (source != null) {
+            this.application.controller.copy_conversations.begin(
+                source,
+                destination,
+                this.conversation_list_view.get_selected_conversations(),
+                (obj, res) => {
+                    try {
+                        this.application.controller.copy_conversations.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(source.account.information, err);
+                    }
+                }
+            );
+
+        }
     }
 
     private void on_archive_conversation() {

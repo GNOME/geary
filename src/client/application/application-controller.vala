@@ -763,6 +763,39 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    public async void copy_conversations(Geary.FolderSupport.Copy source,
+                                         Geary.Folder destination,
+                                         Gee.Collection<Geary.App.Conversation> conversations)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.account.information);
+        if (context != null) {
+            yield this.commands.execute(
+                new CopyEmailCommand(
+                    source,
+                    destination,
+                    to_in_folder_email_ids(conversations),
+                    /// Translators: Label for in-app undo
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Conversation labelled as %s",
+                        "Conversations labelled as %s",
+                        conversations.size
+                    ).printf(destination.get_display_name()),
+                    /// Translators: Label for in-app undo
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Conversation un-labelled as %s",
+                        "Conversations un-labelled as %s",
+                        conversations.size
+                    ).printf(destination.get_display_name())
+                ),
+                context.cancellable
+            );
+        }
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -2349,6 +2382,64 @@ private class Application.MoveEmailCommand : RevokableCommand {
                     // ignored
                 }
             }
+        }
+    }
+
+}
+
+
+private class Application.CopyEmailCommand : Command {
+
+
+    public override bool can_undo {
+        // Engine doesn't yet support it :(
+        get { return false; }
+    }
+
+    private Geary.FolderSupport.Copy source;
+    private Gee.Collection<Geary.EmailIdentifier> source_messages;
+    private Geary.Folder destination;
+
+
+    public CopyEmailCommand(Geary.FolderSupport.Copy source,
+                            Geary.Folder destination,
+                            Gee.Collection<Geary.EmailIdentifier> messages,
+                            string? executed_label = null,
+                            string? undone_label = null) {
+        this.source = source;
+        this.source_messages = messages;
+        this.destination = destination;
+
+        this.executed_label = executed_label;
+        this.undone_label = undone_label;
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.source.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
+            );
+            open = true;
+            yield this.source.copy_email_async(
+                this.source_messages, this.destination.path, cancellable
+            );
+        } finally {
+            if (open) {
+                try {
+                    yield this.source.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
+        }
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        throw new Geary.EngineError.UNSUPPORTED(
+            "Cannot undo copy, not yet supported"
         }
     }
 
