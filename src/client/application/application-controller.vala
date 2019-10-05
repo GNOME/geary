@@ -456,6 +456,15 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /**
+     * Opens new composer with an existing message as context.
+     */
+    public void compose_with_context_email(ComposerWidget.ComposeType type,
+                                           Geary.Email context,
+                                           string? quote) {
+        create_compose_widget(type, context, quote);
+    }
+
     /** Adds a new composer to be kept track of. */
     public void add_composer(ComposerWidget widget) {
         debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");

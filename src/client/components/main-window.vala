@@ -804,6 +804,22 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.conversations = null;
     }
 
+    private void create_composer_from_viewer(ComposerWidget.ComposeType compose_type) {
+        ConversationEmail? email_view = null;
+        ConversationListBox? list_view = this.conversation_viewer.current_list;
+        if (list_view != null) {
+            email_view = list_view.get_reply_target();
+        }
+        if (email_view != null) {
+            email_view.get_selection_for_quoting.begin((obj, res) => {
+                    string? quote = email_view.get_selection_for_quoting.end(res);
+                    this.application.controller.compose_with_context_email(
+                        compose_type, email_view.email, quote
+                    );
+                });
+        }
+    }
+
     private void load_more() {
         if (this.conversations != null) {
             this.conversations.min_window_count += MIN_CONVERSATION_COUNT;
@@ -1108,12 +1124,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_reply_to_message() {
+        create_composer_from_viewer(REPLY);
     }
 
     private void on_reply_all_message() {
+        create_composer_from_viewer(REPLY_ALL);
     }
 
     private void on_forward_message() {
+        create_composer_from_viewer(FORWARD);
     }
 
     private void on_show_copy_menu() {
