@@ -636,6 +636,13 @@ public class GearyApplication : Gtk.Application {
 
     /** Displays a URI on the current active window, if any. */
     public void show_uri(string uri) throws Error {
+        string uri_ = uri;
+
+        // Support web URLs that omit the protocol.
+        if (!uri.contains(":")) {
+            uri_ = "http://" + uri;
+        }
+
         bool success = Gtk.show_uri_on_window(
             get_active_window(), uri, Gdk.CURRENT_TIME
         );

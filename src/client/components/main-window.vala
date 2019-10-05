@@ -51,9 +51,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         {ACTION_EMPTY_SPAM,            on_empty_spam                   },
         {ACTION_EMPTY_TRASH,           on_empty_trash                  },
         // Message actions
-        {ACTION_REPLY_TO_MESSAGE,      on_reply_to_message     },
-        {ACTION_REPLY_ALL_MESSAGE,     on_reply_all_message    },
-        {ACTION_FORWARD_MESSAGE,       on_forward_message      },
+        {ACTION_REPLY_TO_MESSAGE,      on_reply_conversation },
+        {ACTION_REPLY_ALL_MESSAGE,     on_reply_all_conversation },
+        {ACTION_FORWARD_MESSAGE,       on_forward_conversation },
         {ACTION_ARCHIVE_CONVERSATION,  on_archive_conversation },
         {ACTION_TRASH_CONVERSATION,    on_trash_conversation   },
         {ACTION_DELETE_CONVERSATION,   on_delete_conversation  },
@@ -169,6 +169,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             return account;
         }
     }
+
     /** Currently selected folder, null if none selected */
     public Geary.Folder? current_folder { get; private set; default = null; }
 
@@ -539,6 +540,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.conversation_viewer = new ConversationViewer(
             this.application.config
         );
+        this.conversation_viewer.conversation_added.connect(
+            on_conversation_view_added
+        );
 
         this.main_toolbar = new MainToolbar(config);
         this.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
@@ -690,6 +694,14 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         get_action(GearyApplication.ACTION_REDO).set_enabled(
             this.commands.can_redo
         );
+    }
+
+    private inline void handle_error(Geary.AccountInformation? account,
+                                     GLib.Error error) {
+        Geary.ProblemReport? report = (account != null)
+            ? new Geary.AccountProblemReport(account, error)
+            : new Geary.ProblemReport(error);
+        this.application.controller.report_problem(report);
     }
 
     private void update_ui() {
@@ -1084,7 +1096,44 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_command_actions();
     }
 
-    // Action callbacks
+    private void on_conversation_view_added(ConversationListBox list) {
+        list.email_added.connect(on_conversation_viewer_email_added);
+        list.mark_emails.connect(on_conversation_viewer_mark_emails);
+    }
+
+    private void on_conversation_viewer_email_added(ConversationEmail view) {
+        view.load_error.connect(on_email_load_error);
+
+        view.forward_message.connect(on_forward_message);
+        view.reply_all_message.connect(on_reply_all_message);
+        view.reply_to_message.connect(on_reply_to_message);
+        view.edit_draft.connect(on_edit_draft);
+
+        view.attachments_activated.connect(on_attachments_activated);
+        view.save_attachments.connect(on_save_attachments);
+        view.view_source.connect(on_view_source);
+
+        Geary.App.Conversation conversation = this.conversation_viewer.current_list.conversation;
+        bool in_current_folder = (
+            conversation.is_in_base_folder(view.email.id) &&
+            conversation.base_folder == current_folder
+        );
+        bool supports_trash = in_current_folder && current_folder_supports_trash();
+        bool supports_delete = in_current_folder && current_folder is Geary.FolderSupport.Remove;
+        view.trash_message.connect(on_trash_message);
+        view.delete_message.connect(on_delete_message);
+        view.set_folder_actions_enabled(supports_trash, supports_delete);
+        this.on_shift_key.connect(view.shift_key_changed);
+
+        foreach (ConversationMessage msg_view in view) {
+            msg_view.link_activated.connect(on_link_activated);
+            msg_view.save_image.connect((url, alt_text, buf) => {
+                    on_save_image_extended(view, url, alt_text, buf);
+                });
+        }
+    }
+
+    // Window-level action callbacks
 
     private void on_undo() {
         this.application.controller.undo.begin();
@@ -1123,15 +1172,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_reply_to_message() {
+    private void on_reply_conversation() {
         create_composer_from_viewer(REPLY);
     }
 
-    private void on_reply_all_message() {
+    private void on_reply_all_conversation() {
         create_composer_from_viewer(REPLY_ALL);
     }
 
-    private void on_forward_message() {
+    private void on_forward_conversation() {
         create_composer_from_viewer(FORWARD);
     }
 
@@ -1223,6 +1272,150 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_empty_trash() {
+    // Individual message view action callbacks
+
+    private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> email,
+                                                    Geary.EmailFlags? to_add,
+                                                    Geary.EmailFlags? to_remove) {
+    }
+
+    private void on_email_load_error(ConversationEmail view, GLib.Error err) {
+        handle_error(
+            this.current_account != null ? this.current_account.information : null,
+            err
+        );
+    }
+
+    private void on_reply_to_message(ConversationEmail target_view) {
+        target_view.get_selection_for_quoting.begin((obj, res) => {
+                string? quote = target_view.get_selection_for_quoting.end(res);
+                this.application.controller.compose_with_context_email(
+                    REPLY, target_view.email, quote
+                );
+            });
+    }
+
+    private void on_reply_all_message(ConversationEmail target_view) {
+        target_view.get_selection_for_quoting.begin((obj, res) => {
+                string? quote = target_view.get_selection_for_quoting.end(res);
+                this.application.controller.compose_with_context_email(
+                    REPLY_ALL, target_view.email, quote
+                );
+            });
+    }
+
+    private void on_forward_message(ConversationEmail target_view) {
+        target_view.get_selection_for_quoting.begin((obj, res) => {
+                string? quote = target_view.get_selection_for_quoting.end(res);
+                this.application.controller.compose_with_context_email(
+                    FORWARD, target_view.email, quote
+                );
+            });
+    }
+
+    private void on_edit_draft(ConversationEmail target_view) {
+        this.application.controller.compose_with_context_email(
+            NEW_MESSAGE, target_view.email, null
+        );
+    }
+
+    private void on_attachments_activated(Gee.Collection<Geary.Attachment> attachments) {
+        if (this.application.config.ask_open_attachment) {
+            QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(
+                this,
+                _("Are you sure you want to open these attachments?"),
+                _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
+                Stock._OPEN_BUTTON, Stock._CANCEL, _("Don’t _ask me again"), false);
+            if (ask_to_open.run() != Gtk.ResponseType.OK) {
+                return;
+            }
+            // only save checkbox state if OK was selected
+            this.application.config.ask_open_attachment = !ask_to_open.is_checked;
+        }
+
+        foreach (Geary.Attachment attachment in attachments) {
+            string uri = attachment.file.get_uri();
+            try {
+                this.application.show_uri(uri);
+            } catch (Error err) {
+                message("Unable to open attachment \"%s\": %s", uri, err.message);
+            }
+        }
+    }
+
+    private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
+        if (this.current_account != null) {
+            if (attachments.size == 1) {
+                this.application.controller.save_attachment_to_file.begin(
+                    this.current_account,
+                    attachments.to_array()[0],
+                    null
+                );
+            } else {
+                this.application.controller.save_attachments_to_file.begin(
+                    this.current_account,
+                    attachments
+                );
+            }
+        }
+    }
+
+    private void on_view_source(ConversationEmail email_view) {
+        string source = (email_view.email.header.buffer.to_string() +
+                         email_view.email.body.buffer.to_string());
+        string temporary_filename;
+        try {
+            int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",
+                                                      out temporary_filename);
+            FileUtils.set_contents(temporary_filename, source);
+            FileUtils.close(temporary_handle);
+
+            // ensure this file is only readable by the user ... this
+            // needs to be done after the file is closed
+            FileUtils.chmod(temporary_filename, (int) (Posix.S_IRUSR | Posix.S_IWUSR));
+
+            string temporary_uri = Filename.to_uri(temporary_filename, null);
+            this.application.show_uri(temporary_uri);
+        } catch (Error error) {
+            ErrorDialog dialog = new ErrorDialog(
+                this,
+                _("Failed to open default text editor."),
+                error.message
+            );
+            dialog.run();
+        }
+    }
+
+    private void on_save_image_extended(ConversationEmail view,
+                                        string url,
+                                        string? alt_text,
+                                        Geary.Memory.Buffer resource_buf) {
+        if (this.current_account != null) {
+            this.application.controller.save_image_extended.begin(
+                this.current_account, view, url, alt_text, resource_buf
+            );
+        }
+    }
+
+    private void on_trash_message(ConversationEmail target_view) {
+    }
+
+    private void on_delete_message(ConversationEmail target_view) {
+    }
+
+    private void on_link_activated(string uri) {
+        try {
+            if (uri.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+                this.application.controller.compose(uri);
+            } else {
+                this.application.show_uri(uri);
+            }
+        } catch (GLib.Error err) {
+            handle_error(
+                this.current_account != null ? this.current_account.information : null,
+                err
+            );
+        }
     }
 
 }

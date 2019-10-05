@@ -226,9 +226,6 @@ public class Application.Controller : Geary.BaseObject {
         main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.search_bar.search_text_changed.connect((text) => { do_search(text); });
-        main_window.conversation_viewer.conversation_added.connect(
-            on_conversation_view_added
-        );
         this.main_window.folder_list.set_new_messages_monitor(
             this.plugin_manager.notifications
         );
@@ -343,9 +340,6 @@ public class Application.Controller : Geary.BaseObject {
         this.main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
         this.main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
         this.main_window.folder_list.folder_selected.disconnect(on_folder_selected);
-        this.main_window.conversation_viewer.conversation_added.disconnect(
-            on_conversation_view_added
-        );
 
         // hide window while shutting down, as this can take a few
         // seconds under certain conditions
@@ -469,7 +463,6 @@ public class Application.Controller : Geary.BaseObject {
     public void add_composer(ComposerWidget widget) {
         debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");
         widget.destroy.connect(this.on_composer_widget_destroy);
-        widget.link_activated.connect((uri) => { open_uri(uri); });
         this.composer_widgets.add(widget);
     }
 
@@ -1421,37 +1414,14 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> email,
-                                                    Geary.EmailFlags? to_add,
-                                                    Geary.EmailFlags? to_remove) {
-    }
+    public async void save_attachment_to_file(Geary.Account account,
+                                              Geary.Attachment attachment,
+                                              string? alt_text) {
+        AccountContext? context = this.accounts.get(account.information);
+        GLib.Cancellable cancellable = (
+            context != null ? context.cancellable : null
+        );
 
-    private void on_attachments_activated(Gee.Collection<Geary.Attachment> attachments) {
-        if (this.application.config.ask_open_attachment) {
-            QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
-                _("Are you sure you want to open these attachments?"),
-                _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
-                Stock._OPEN_BUTTON, Stock._CANCEL, _("Don’t _ask me again"), false);
-            if (ask_to_open.run() != Gtk.ResponseType.OK) {
-                return;
-            }
-            // only save checkbox state if OK was selected
-            this.application.config.ask_open_attachment = !ask_to_open.is_checked;
-        }
-
-        foreach (Geary.Attachment attachment in attachments) {
-            string uri = attachment.file.get_uri();
-            try {
-                this.application.show_uri(uri);
-            } catch (Error err) {
-                message("Unable to open attachment \"%s\": %s", uri, err.message);
-            }
-        }
-    }
-
-    private async void save_attachment_to_file(Geary.Attachment attachment,
-                                               string? alt_text,
-                                               GLib.Cancellable cancellable) {
         string alt_display_name = Geary.String.is_empty_or_whitespace(alt_text)
             ? Application.Controller.untitled_file_name : alt_text;
         string display_name = yield attachment.get_safe_file_name(
@@ -1472,9 +1442,14 @@ public class Application.Controller : Geary.BaseObject {
         yield this.prompt_save_buffer(display_name, content, cancellable);
     }
 
-    private async void
-        save_attachments_to_file(Gee.Collection<Geary.Attachment> attachments,
-                                 GLib.Cancellable? cancellable) {
+    public async void
+        save_attachments_to_file(Geary.Account account,
+                                 Gee.Collection<Geary.Attachment> attachments) {
+        AccountContext? context = this.accounts.get(account.information);
+        GLib.Cancellable cancellable = (
+            context != null ? context.cancellable : null
+        );
+
         Gtk.FileChooserNative dialog = new_save_chooser(Gtk.FileChooserAction.SELECT_FOLDER);
 
         bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
@@ -1507,6 +1482,53 @@ public class Application.Controller : Geary.BaseObject {
                 yield check_overwrite(dest, cancellable)) {
                 yield write_buffer_to_file(content, dest, cancellable);
             }
+        }
+    }
+
+    public async void save_image_extended(Geary.Account account,
+                                          ConversationEmail view,
+                                          string url,
+                                          string? alt_text,
+                                          Geary.Memory.Buffer resource_buf) {
+        AccountContext? context = this.accounts.get(account.information);
+        GLib.Cancellable cancellable = (
+            context != null ? context.cancellable : null
+        );
+
+        // This is going to be either an inline image, or a remote
+        // image, so either treat it as an attachment to assume we'll
+        // have a valid filename in the URL
+        bool handled = false;
+        if (url.has_prefix(ClientWebView.CID_URL_PREFIX)) {
+            string cid = url.substring(ClientWebView.CID_URL_PREFIX.length);
+            Geary.Attachment? attachment = null;
+            try {
+                attachment = view.email.get_attachment_by_content_id(cid);
+            } catch (Error err) {
+                debug("Could not get attachment \"%s\": %s", cid, err.message);
+            }
+            if (attachment != null) {
+                yield this.save_attachment_to_file(
+                    account, attachment, alt_text
+                );
+                handled = true;
+            }
+        }
+
+        if (!handled) {
+            GLib.File source = GLib.File.new_for_uri(url);
+            // Querying the URL-based file for the display name
+            // results in it being looked up, so just get the basename
+            // from it directly. GIO seems to decode any %-encoded
+            // chars anyway.
+            string? display_name = source.get_basename();
+            if (Geary.String.is_empty_or_whitespace(display_name)) {
+                display_name = Controller.untitled_file_name;
+            }
+
+            yield this.prompt_save_buffer(
+                display_name, resource_buf, cancellable
+            );
         }
     }
 
@@ -1612,25 +1634,6 @@ public class Application.Controller : Geary.BaseObject {
         );
         dialog.set_local_only(false);
         return dialog;
-    }
-
-    // Opens a link in an external browser.
-    private bool open_uri(string _link) {
-        string link = _link;
-
-        // Support web URLs that omit the protocol.
-        if (!link.contains(":"))
-            link = "http://" + link;
-
-        bool success = true;
-        try {
-            this.application.show_uri(link);
-        } catch (Error err) {
-            success = false;
-            debug("Unable to open URL: \"%s\" %s", link, err.message);
-        }
-
-        return success;
     }
 
     internal bool close_composition_windows(bool main_window_only = false) {
@@ -1836,76 +1839,6 @@ public class Application.Controller : Geary.BaseObject {
             new Components.InAppNotification(message);
         this.main_window.add_notification(notification);
         this.plugin_manager.notifications.email_sent(account, sent);
-    }
-
-    private void on_conversation_view_added(ConversationListBox list) {
-        list.email_added.connect(on_conversation_viewer_email_added);
-        list.mark_emails.connect(on_conversation_viewer_mark_emails);
-    }
-
-    private void on_conversation_viewer_email_added(ConversationEmail view) {
-        view.attachments_activated.connect(on_attachments_activated);
-        view.forward_message.connect(on_forward_message);
-        view.load_error.connect(on_email_load_error);
-        view.reply_to_message.connect(on_reply_to_message);
-        view.reply_all_message.connect(on_reply_all_message);
-
-        Geary.App.Conversation conversation = main_window.conversation_viewer.current_list.conversation;
-        bool in_current_folder = (conversation.is_in_base_folder(view.email.id) &&
-            conversation.base_folder == current_folder);
-        bool supports_trash = in_current_folder && current_folder_supports_trash();
-        bool supports_delete = in_current_folder && current_folder is Geary.FolderSupport.Remove;
-        view.trash_message.connect(on_trash_message);
-        view.delete_message.connect(on_delete_message);
-        view.set_folder_actions_enabled(supports_trash, supports_delete);
-        main_window.on_shift_key.connect(view.shift_key_changed);
-
-        view.edit_draft.connect((draft_view) => {
-                create_compose_widget(
-                    ComposerWidget.ComposeType.NEW_MESSAGE,
-                    draft_view.email, null, null, true
-                );
-            });
-        foreach (ConversationMessage msg_view in view) {
-            msg_view.link_activated.connect(on_link_activated);
-            msg_view.save_image.connect((url, alt_text, buf) => {
-                    on_save_image_extended(view, url, alt_text, buf);
-                });
-        }
-        view.save_attachments.connect(on_save_attachments);
-        view.view_source.connect(on_view_source);
-    }
-
-    private void on_trash_message(ConversationEmail target_view) {
-    }
-
-    private void on_delete_message(ConversationEmail target_view) {
-    }
-
-    private void on_view_source(ConversationEmail email_view) {
-        string source = (email_view.email.header.buffer.to_string() +
-                         email_view.email.body.buffer.to_string());
-        string temporary_filename;
-        try {
-            int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",
-                                                      out temporary_filename);
-            FileUtils.set_contents(temporary_filename, source);
-            FileUtils.close(temporary_handle);
-
-            // ensure this file is only readable by the user ... this
-            // needs to be done after the file is closed
-            FileUtils.chmod(temporary_filename, (int) (Posix.S_IRUSR | Posix.S_IWUSR));
-
-            string temporary_uri = Filename.to_uri(temporary_filename, null);
-            this.application.show_uri(temporary_uri);
-        } catch (Error error) {
-            ErrorDialog dialog = new ErrorDialog(
-                main_window,
-                _("Failed to open default text editor."),
-                error.message
-            );
-            dialog.run();
-        }
     }
 
     private SimpleAction get_window_action(string action_name) {
@@ -2220,109 +2153,6 @@ public class Application.Controller : Geary.BaseObject {
                     service.restart.begin(context.cancellable);
                 }
             }
-        }
-    }
-
-    private void on_email_load_error(ConversationEmail view, GLib.Error err) {
-        report_problem(
-            new Geary.ServiceProblemReport(
-                this.current_account.information,
-                this.current_account.information.incoming,
-                err
-            )
-        );
-    }
-
-    private void on_reply_to_message(ConversationEmail target_view) {
-        target_view.get_selection_for_quoting.begin((obj, res) => {
-                string? quote = target_view.get_selection_for_quoting.end(res);
-                create_compose_widget(REPLY, target_view.email, quote);
-            });
-    }
-
-    private void on_reply_all_message(ConversationEmail target_view) {
-        target_view.get_selection_for_quoting.begin((obj, res) => {
-                string? quote = target_view.get_selection_for_quoting.end(res);
-                create_compose_widget(REPLY_ALL, target_view.email, quote);
-            });
-    }
-
-    private void on_forward_message(ConversationEmail target_view) {
-        target_view.get_selection_for_quoting.begin((obj, res) => {
-                string? quote = target_view.get_selection_for_quoting.end(res);
-                create_compose_widget(FORWARD, target_view.email, quote);
-            });
-    }
-
-    private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
-        GLib.Cancellable? cancellable = null;
-        if (this.current_account != null) {
-            cancellable = this.accounts.get(
-                this.current_account.information
-            ).cancellable;
-        }
-        if (attachments.size == 1) {
-            this.save_attachment_to_file.begin(
-                attachments.to_array()[0], null, cancellable
-            );
-        } else {
-            this.save_attachments_to_file.begin(attachments, cancellable);
-        }
-    }
-
-    private void on_link_activated(string uri) {
-        if (uri.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-            compose(uri);
-        } else {
-            open_uri(uri);
-        }
-    }
-
-    private void on_save_image_extended(ConversationEmail view,
-                                        string url,
-                                        string? alt_text,
-                                        Geary.Memory.Buffer resource_buf) {
-        GLib.Cancellable? cancellable = null;
-        if (this.current_account != null) {
-            cancellable = this.accounts.get(
-                this.current_account.information
-            ).cancellable;
-        }
-
-        // This is going to be either an inline image, or a remote
-        // image, so either treat it as an attachment to assume we'll
-        // have a valid filename in the URL
-        bool handled = false;
-        if (url.has_prefix(ClientWebView.CID_URL_PREFIX)) {
-            string cid = url.substring(ClientWebView.CID_URL_PREFIX.length);
-            Geary.Attachment? attachment = null;
-            try {
-                attachment = view.email.get_attachment_by_content_id(cid);
-            } catch (Error err) {
-                debug("Could not get attachment \"%s\": %s", cid, err.message);
-            }
-            if (attachment != null) {
-                this.save_attachment_to_file.begin(
-                    attachment, alt_text, cancellable
-                );
-                handled = true;
-            }
-        }
-
-        if (!handled) {
-            GLib.File source = GLib.File.new_for_uri(url);
-            // Querying the URL-based file for the display name
-            // results in it being looked up, so just get the basename
-            // from it directly. GIO seems to decode any %-encoded
-            // chars anyway.
-            string? display_name = source.get_basename();
-            if (Geary.String.is_empty_or_whitespace(display_name)) {
-                display_name = Application.Controller.untitled_file_name;
-            }
-
-            this.prompt_save_buffer.begin(
-                display_name, resource_buf, cancellable
-            );
         }
     }
 

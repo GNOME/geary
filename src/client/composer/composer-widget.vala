@@ -2336,7 +2336,13 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         popover.link_delete.connect(() => {
                 this.editor.delete_link(selection_id);
             });
-        popover.link_open.connect(() => { link_activated(popover.link_uri); });
+        popover.link_open.connect(() => {
+                try {
+                    this.application.show_uri(popover.link_uri);
+                } catch (GLib.Error err) {
+                    debug("Failed to open URI: %s", err.message);
+                }
+            });
         return popover;
     }
 
