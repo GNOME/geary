@@ -122,6 +122,11 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         selection.changed.connect(on_selection_changed);
     }
 
+    /** Returns a read-only collection of the current selection. */
+    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
+        return this.selected.read_only_view;
+    }
+
     public void scroll(Gtk.ScrollType where) {
         Gtk.TreeSelection selection = get_selection();
         weak Gtk.TreeModel model;
@@ -482,18 +487,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         }
 
         return visible_conversations;
-    }
-
-    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
-        Gee.HashSet<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
-
-        foreach (Gtk.TreePath path in get_all_selected_paths()) {
-            Geary.App.Conversation? conversation = get_model().get_conversation_at_path(path);
-            if (path != null)
-                selected_conversations.add(conversation);
-        }
-
-        return selected_conversations;
     }
 
     // Always returns false, so it can be used as a one-time SourceFunc
