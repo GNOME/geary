@@ -544,6 +544,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private void setup_layout(Configuration config) {
         this.conversation_list_view = new ConversationListView(this);
         this.conversation_list_view.load_more.connect(on_load_more);
+        this.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         this.conversation_list_view.conversations_selected.connect(on_conversations_selected);
 
         this.conversation_viewer = new ConversationViewer(
@@ -1401,16 +1402,100 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
     }
 
+    private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
+                                       Geary.NamedFlag flag) {
+        Geary.Account? target = this.current_account;
+        if (target != null) {
+            this.application.controller.mark_conversations.begin(
+                target,
+                conversations,
+                flag,
+                true,
+                (obj, res) => {
+                    try {
+                        this.application.controller.mark_conversations.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(target.information, err);
+                    }
+                }
+            );
+        }
+    }
+
     private void on_mark_as_read() {
+        Geary.Account? target = this.current_account;
+        if (target != null) {
+            this.application.controller.mark_conversations.begin(
+                target,
+                this.conversation_list_view.get_selected_conversations(),
+                Geary.EmailFlags.UNREAD,
+                false,
+                (obj, res) => {
+                    try {
+                        this.application.controller.mark_conversations.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(target.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_mark_as_unread() {
+        Geary.Account? target = this.current_account;
+        if (target != null) {
+            this.application.controller.mark_conversations.begin(
+                target,
+                this.conversation_list_view.get_selected_conversations(),
+                Geary.EmailFlags.UNREAD,
+                true,
+                (obj, res) => {
+                    try {
+                        this.application.controller.mark_conversations.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(target.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_mark_as_starred() {
+        Geary.Account? target = this.current_account;
+        if (target != null) {
+            this.application.controller.mark_conversations.begin(
+                target,
+                this.conversation_list_view.get_selected_conversations(),
+                Geary.EmailFlags.FLAGGED,
+                true,
+                (obj, res) => {
+                    try {
+                        this.application.controller.mark_conversations.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(target.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_mark_as_unstarred() {
+        Geary.Account? target = this.current_account;
+        if (target != null) {
+            this.application.controller.mark_conversations.begin(
+                target,
+                this.conversation_list_view.get_selected_conversations(),
+                Geary.EmailFlags.FLAGGED,
+                false,
+                (obj, res) => {
+                    try {
+                        this.application.controller.mark_conversations.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(target.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_mark_as_spam_toggle() {
@@ -1437,9 +1522,25 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private void on_empty_trash() {
     // Individual message view action callbacks
 
-    private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> email,
+    private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> messages,
                                                     Geary.EmailFlags? to_add,
                                                     Geary.EmailFlags? to_remove) {
+        Geary.Account? target = this.current_account;
+        if (target != null) {
+            this.application.controller.mark_messages.begin(
+                target,
+                messages,
+                to_add,
+                to_remove,
+                (obj, res) => {
+                    try {
+                        this.application.controller.mark_messages.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(target.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_email_load_error(ConversationEmail view, GLib.Error err) {

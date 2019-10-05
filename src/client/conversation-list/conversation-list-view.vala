@@ -7,6 +7,7 @@
 public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     const int LOAD_MORE_HEIGHT = 100;
 
+
     // Used to be able to refer to the action names of the MainWindow
     private weak MainWindow main_window;
 
@@ -29,7 +30,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     }
 
     public signal void mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
-        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview);
+                                          Geary.NamedFlag flag);
 
     public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
 
@@ -289,32 +290,18 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             // all selected conversations; otherwise, it just applies to this one.
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
             Gee.Collection<Geary.App.Conversation> to_mark;
-            if (GearyApplication.instance.controller.get_selected_conversations().contains(conversation))
-                to_mark = GearyApplication.instance.controller.get_selected_conversations();
+            if (this.selected.contains(conversation))
+                // take a copy of currently selected for handling to
+                // the signal
+                to_mark = get_selected_conversations();
             else
-                to_mark = Geary.iterate<Geary.App.Conversation>(conversation).to_array_list();
+                to_mark = Geary.Collection.single(conversation);
 
             if (read_clicked) {
-                // Read/unread.
-                Geary.EmailFlags flags = new Geary.EmailFlags();
-                flags.add(Geary.EmailFlags.UNREAD);
-
-                if (conversation.is_unread())
-                    mark_conversations(to_mark, null, flags, false);
-                else
-                    mark_conversations(to_mark, flags, null, true);
-
+                mark_conversations(to_mark, Geary.EmailFlags.UNREAD);
                 return true;
             } else if (star_clicked) {
-                // Starred/unstarred.
-                Geary.EmailFlags flags = new Geary.EmailFlags();
-                flags.add(Geary.EmailFlags.FLAGGED);
-
-                if (conversation.is_flagged())
-                    mark_conversations(to_mark, null, flags, false);
-                else
-                    mark_conversations(to_mark, flags, null, true);
-
+                mark_conversations(to_mark, Geary.EmailFlags.FLAGGED);
                 return true;
             }
         }

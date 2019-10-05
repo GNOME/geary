@@ -525,6 +525,137 @@ public class Application.Controller : Geary.BaseObject {
         return (context != null) ? context.contacts : null;
     }
 
+    /**
+     * Updates flags for a collection of conversations.
+     *
+     * If `prefer_adding` is true, this will add the flag if not set
+     * on all conversations or else will remove it. If false, this
+     * will remove the flag if not set on all conversations or else
+     * add it.
+     */
+    public async void mark_conversations(Geary.Account target,
+                                         Gee.Collection<Geary.App.Conversation> conversations,
+                                         Geary.NamedFlag flag,
+                                         bool prefer_adding)
+        throws GLib.Error {
+        Geary.Iterable<Geary.App.Conversation> selecting =
+            Geary.traverse(conversations);
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+
+        if (flag.equal_to(Geary.EmailFlags.UNREAD)) {
+            selecting = selecting.filter(c => prefer_adding ^ c.is_unread());
+            flags.add(Geary.EmailFlags.UNREAD);
+        } else if (flag.equal_to(Geary.EmailFlags.FLAGGED)) {
+            selecting = selecting.filter(c => prefer_adding ^ c.is_flagged());
+            flags.add(Geary.EmailFlags.FLAGGED);
+        } else {
+            throw new Geary.EngineError.UNSUPPORTED(
+                "Marking as %s is not supported", flag.to_string()
+            );
+        }
+
+        Gee.Collection<Geary.EmailIdentifier>? messages = null;
+        Gee.Collection<Geary.App.Conversation> selected =
+            selecting.to_linked_list();
+
+        bool do_add = prefer_adding ^ selected.is_empty;
+        if (selected.is_empty) {
+            selected = conversations;
+        }
+
+        if (do_add) {
+            // Only apply to the latest in-folder message in
+            // conversations that don't already have the flag, since
+            // we don't want to flag every message in the conversation
+            messages = Geary.traverse(selected).map<Geary.EmailIdentifier>(
+                c => c.get_latest_recv_email(IN_FOLDER_OUT_OF_FOLDER).id
+            ).to_linked_list();
+        } else {
+            // Remove the flag from those that have it
+            messages = new Gee.LinkedList<Geary.EmailIdentifier>();
+            foreach (Geary.App.Conversation convo in selected) {
+                foreach (Geary.Email email in
+                         convo.get_emails(RECV_DATE_DESCENDING)) {
+                    if (email.email_flags != null &&
+                        email.email_flags.contains(flag)) {
+                        messages.add(email.id);
+                    }
+                }
+            }
+        }
+
+        AccountContext? context = this.accounts.get(target.information);
+        if (context != null) {
+            yield this.commands.execute(
+                new MarkEmailCommand(
+                    context.emails,
+                    messages,
+                    do_add ? flags : null,
+                    do_add ? null : flags,
+                    /// Translators: Label for in-app undo notification
+                    ngettext(
+                        "Conversation marked",
+                        "Conversations marked",
+                        selected.size
+                    ),
+                    /// Translators: Label for in-app undo notification
+                    ngettext(
+                        "Conversation un-marked",
+                        "Conversations un-marked",
+                        selected.size
+                    )
+
+                ),
+                context.cancellable
+            );
+        }
+    }
+
+    /**
+     * Updates flags for a collection of email.
+     *
+     * This should only be used when working with specific messages
+     * (for example, marking a specific message in a conversation)
+     * rather than when working with whole conversations. In that
+     * case, use {@link mark_conversations}.
+     */
+    public async void mark_messages(Geary.Account target,
+                                    Gee.Collection<Geary.EmailIdentifier> messages,
+                                    Geary.EmailFlags? to_add,
+                                    Geary.EmailFlags? to_remove)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(target.information);
+        if (context != null) {
+            yield this.commands.execute(
+                new MarkEmailCommand(
+                    context.emails,
+                    messages,
+                    to_add,
+                    to_remove,
+                    /// Translators: Label for in-app undo notification
+                    ngettext(
+                        "Message marked",
+                        "Messages marked",
+                        messages.size
+                    ),
+                    /// Translators: Label for in-app undo notification
+                    ngettext(
+                        "Message un-marked",
+                        "Messages un-marked",
+                        messages.size
+                    )
+                ),
+                context.cancellable
+            );
+        }
+    }
+
+                ),
+                context.cancellable
+            );
+        }
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -1958,3 +2089,46 @@ public class Application.Controller : Geary.BaseObject {
     }
 
 }
+
+
+private class Application.MarkEmailCommand : Command {
+
+
+    private Geary.App.EmailStore store;
+    private Gee.Collection<Geary.EmailIdentifier> messages;
+    private Geary.EmailFlags? to_add;
+    private Geary.EmailFlags? to_remove;
+
+
+    public MarkEmailCommand(Geary.App.EmailStore store,
+                            Gee.Collection<Geary.EmailIdentifier> messages,
+                            Geary.EmailFlags? to_add,
+                            Geary.EmailFlags? to_remove,
+                            string? executed_label = null,
+                            string? undone_label = null) {
+        this.store = store;
+        this.messages = messages;
+        this.to_add = to_add;
+        this.to_remove = to_remove;
+
+        this.executed_label = executed_label;
+        this.undone_label = undone_label;
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.store.mark_email_async(
+            this.messages, this.to_add, this.to_remove, cancellable
+        );
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.store.mark_email_async(
+            this.messages, this.to_remove, this.to_add, cancellable
+        );
+    }
+
+}
+
+
