@@ -650,6 +650,113 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    public async void move_conversations(Geary.FolderSupport.Move source,
+                                         Geary.Folder destination,
+                                         Gee.Collection<Geary.App.Conversation> conversations)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.account.information);
+        if (context != null) {
+            yield this.commands.execute(
+                new MoveEmailCommand(
+                    source,
+                    destination,
+                    to_in_folder_email_ids(conversations),
+                    /// Translators: Label for in-app undo
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Conversation moved to %s",
+                        "Conversations moved to %s",
+                        conversations.size
+                    ).printf(destination.get_display_name()),
+                    /// Translators: Label for in-app undo
+                    /// notification. String substitution is the name
+                    /// of the source folder.
+                    ngettext(
+                        "Conversation restored to %s",
+                        "Conversations restored to %s",
+                        conversations.size
+                    ).printf(source.get_display_name())
+                ),
+                context.cancellable
+            );
+        }
+    }
+
+    public async void move_conversations_special(Geary.FolderSupport.Move source,
+                                                 Geary.SpecialFolderType destination,
+                                                 Gee.Collection<Geary.App.Conversation> conversations)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.account.information);
+        if (context != null) {
+            Geary.Folder? dest = source.account.get_special_folder(destination);
+            if (dest == null) {
+                throw new Geary.EngineError.NOT_FOUND(
+                    "No folder found for: %s", destination.to_string()
+                );
+            }
+
+            yield this.commands.execute(
+                new MoveEmailCommand(
+                    source,
+                    dest,
+                    to_in_folder_email_ids(conversations),
+                    /// Translators: Label for in-app undo
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Conversation moved to %s",
+                        "Conversations moved to %s",
+                        conversations.size
+                    ).printf(dest.get_display_name()),
+                    /// Translators: Label for in-app undo
+                    /// notification. String substitution is the name
+                    /// of the source folder.
+                    ngettext(
+                        "Conversation restored to %s",
+                        "Conversations restored to %s",
+                        conversations.size
+                    ).printf(source.get_display_name())
+                ),
+                context.cancellable
+            );
+        }
+    }
+
+    public async void move_messages_special(Geary.FolderSupport.Move source,
+                                            Geary.SpecialFolderType destination,
+                                            Gee.Collection<Geary.EmailIdentifier> messages)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.account.information);
+        if (context != null) {
+            Geary.Folder? dest = source.account.get_special_folder(destination);
+            if (dest == null) {
+                throw new Geary.EngineError.NOT_FOUND(
+                    "No folder found for: %s", destination.to_string()
+                );
+            }
+
+            yield this.commands.execute(
+                new MoveEmailCommand(
+                    source,
+                    dest,
+                    messages,
+                    /// Translators: Label for in-app undo
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Message moved to %s",
+                        "Messages moved to %s",
+                        messages.size
+                    ).printf(destination.get_display_name()),
+                    /// Translators: Label for in-app undo
+                    /// notification. String substitution is the name
+                    /// of the source folder.
+                    ngettext(
+                        "Message restored to %s",
+                        "Messages restored to %s",
+                        messages.size
+                    ).printf(source.get_display_name())
                 ),
                 context.cancellable
             );
@@ -1917,6 +2024,19 @@ public class Application.Controller : Geary.BaseObject {
         return false;
     }
 
+    private Gee.Collection<Geary.EmailIdentifier>
+        to_in_folder_email_ids(Gee.Collection<Geary.App.Conversation> conversations) {
+        Gee.Collection<Geary.EmailIdentifier> messages =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        foreach (Geary.App.Conversation conversation in conversations) {
+            foreach (Geary.Email email in
+                     conversation.get_emails(RECV_DATE_ASCENDING, IN_FOLDER)) {
+                messages.add(email.id);
+            }
+        }
+        return messages;
+    }
+
     private void on_account_available(Geary.AccountInformation info) {
         Geary.Account? account = null;
         try {
@@ -2127,6 +2247,109 @@ private class Application.MarkEmailCommand : Command {
         yield this.store.mark_email_async(
             this.messages, this.to_remove, this.to_add, cancellable
         );
+    }
+
+}
+
+
+private abstract class Application.RevokableCommand : Command {
+
+
+    public override bool can_undo {
+        get { return this.revokable != null && this.revokable.valid; }
+    }
+
+    private Geary.Revokable? revokable = null;
+
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        set_revokable(yield execute_impl(cancellable));
+        if (this.revokable != null && this.revokable.valid) {
+            yield this.revokable.commit_async(cancellable);
+        }
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (this.revokable == null) {
+            throw new Geary.EngineError.UNSUPPORTED(
+                "Cannot undo command, no revokable available"
+            );
+        }
+
+        yield this.revokable.revoke_async(cancellable);
+        set_revokable(null);
+    }
+
+    protected abstract async Geary.Revokable
+        execute_impl(GLib.Cancellable cancellable)
+        throws GLib.Error;
+
+    private void set_revokable(Geary.Revokable? updated) {
+        if (this.revokable != null) {
+            this.revokable.committed.disconnect(on_revokable_committed);
+        }
+
+        this.revokable = updated;
+
+        if (this.revokable != null) {
+            this.revokable.committed.connect(on_revokable_committed);
+        }
+    }
+
+    private void on_revokable_committed(Geary.Revokable? updated) {
+        set_revokable(updated);
+    }
+
+}
+
+
+private class Application.MoveEmailCommand : RevokableCommand {
+
+
+    private Geary.FolderSupport.Move source;
+    private Gee.Collection<Geary.EmailIdentifier> source_messages;
+
+    private Geary.Folder destination;
+
+
+    public MoveEmailCommand(Geary.FolderSupport.Move source,
+                            Geary.Folder destination,
+                            Gee.Collection<Geary.EmailIdentifier> messages,
+                            string? executed_label = null,
+                            string? undone_label = null) {
+        this.source = source;
+        this.source_messages = messages;
+        this.destination = destination;
+
+        this.executed_label = executed_label;
+        this.undone_label = undone_label;
+    }
+
+    protected override async Geary.Revokable
+        execute_impl(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.source.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
+            );
+            open = true;
+            return yield this.source.move_email_async(
+                this.source_messages,
+                this.destination.path,
+                cancellable
+            );
+        } finally {
+            if (open) {
+                try {
+                    yield this.source.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
+        }
     }
 
 }

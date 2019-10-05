@@ -1499,18 +1499,87 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_spam_toggle() {
+        Geary.FolderSupport.Move? source =
+            this.current_folder as Geary.FolderSupport.Move;
+        if (source != null) {
+            Geary.SpecialFolderType destination =
+                (source.special_folder_type != SPAM)
+                ? Geary.SpecialFolderType.SPAM
+                : Geary.SpecialFolderType.INBOX;
+            this.application.controller.move_conversations_special.begin(
+                source,
+                destination,
+                this.conversation_list_view.get_selected_conversations(),
+                (obj, res) => {
+                    try {
+                        this.application.controller.move_conversations_special.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(source.account.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_move_conversation(Geary.Folder destination) {
+        Geary.FolderSupport.Move source =
+            this.current_folder as Geary.FolderSupport.Move;
+        if (source != null) {
+            this.application.controller.move_conversations.begin(
+                source,
+                destination,
+                this.conversation_list_view.get_selected_conversations(),
+                (obj, res) => {
+                    try {
+                        this.application.controller.move_conversations.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(source.account.information, err);
+                    }
+                }
+            );
+
+        }
     }
 
     private void on_copy_conversation(Geary.Folder destination) {
     }
 
     private void on_archive_conversation() {
+        Geary.FolderSupport.Move source =
+            this.current_folder as Geary.FolderSupport.Move;
+        if (source != null) {
+            this.application.controller.move_conversations_special.begin(
+                source,
+                Geary.SpecialFolderType.ARCHIVE,
+                this.conversation_list_view.get_selected_conversations(),
+                (obj, res) => {
+                    try {
+                        this.application.controller.move_conversations_special.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(source.account.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_trash_conversation() {
+        Geary.FolderSupport.Move source =
+            this.current_folder as Geary.FolderSupport.Move;
+        if (source != null) {
+            this.application.controller.move_conversations_special.begin(
+                source,
+                Geary.SpecialFolderType.TRASH,
+                this.conversation_list_view.get_selected_conversations(),
+                (obj, res) => {
+                    try {
+                        this.application.controller.move_conversations_special.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(source.account.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_delete_conversation() {
@@ -1662,6 +1731,22 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_trash_message(ConversationEmail target_view) {
+        Geary.FolderSupport.Move? source =
+            this.current_folder as Geary.FolderSupport.Move;
+        if (source != null) {
+            this.application.controller.move_messages_special.begin(
+                source,
+                TRASH,
+                Geary.Collection.single(target_view.email.id),
+                (obj, res) => {
+                    try {
+                        this.application.controller.move_messages_special.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(source.account.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_delete_message(ConversationEmail target_view) {
