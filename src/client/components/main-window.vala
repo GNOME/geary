@@ -744,6 +744,22 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         return (dialog.run() == Gtk.ResponseType.OK);
     }
 
+    private bool prompt_empty_folder(Geary.SpecialFolderType type) {
+        ConfirmationDialog dialog = new ConfirmationDialog(
+            this,
+            _("Empty all email from your %s folder?").printf(
+                type.get_display_name()
+            ),
+            _("This removes the email from Geary and your email server.") +
+            "  <b>" + _("This cannot be undone.") + "</b>",
+            _("Empty %s").printf(type.get_display_name()),
+            "destructive-action"
+        );
+        dialog.use_secondary_markup(true);
+        dialog.set_focus_response(Gtk.ResponseType.CANCEL);
+        return (dialog.run() == Gtk.ResponseType.OK);
+    }
+
     private inline void handle_error(Geary.AccountInformation? account,
                                      GLib.Error error) {
         Geary.ProblemReport? report = (account != null)
@@ -1650,9 +1666,41 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_empty_spam() {
+        Geary.Account? account = this.current_account;
+        if (account != null &&
+            prompt_empty_folder(Geary.SpecialFolderType.SPAM)) {
+            this.application.controller.empty_folder_special.begin(
+                account,
+                Geary.SpecialFolderType.SPAM,
+                (obj, res) => {
+                    try {
+                        this.application.controller.empty_folder_special.end(res);
+                } catch (GLib.Error err) {
+                        handle_error(account.information, err);
+                    }
+                }
+            );
+        }
     }
 
     private void on_empty_trash() {
+        Geary.Account? account = this.current_account;
+        if (account != null &&
+            prompt_empty_folder(Geary.SpecialFolderType.TRASH)) {
+            this.application.controller.empty_folder_special.begin(
+                account,
+                Geary.SpecialFolderType.TRASH,
+                (obj, res) => {
+                    try {
+                        this.application.controller.empty_folder_special.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(account.information, err);
+                    }
+                }
+            );
+        }
+    }
+
     // Individual message view action callbacks
 
     private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> messages,

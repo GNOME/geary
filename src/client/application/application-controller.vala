@@ -823,6 +823,28 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    public async void empty_folder_special(Geary.Account source,
+                                           Geary.SpecialFolderType type)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.information);
+        if (context != null) {
+            Geary.FolderSupport.Empty? emptyable = (
+                source.get_special_folder(type)
+                as Geary.FolderSupport.Empty
+            );
+            if (emptyable == null) {
+                throw new Geary.EngineError.UNSUPPORTED(
+                    "Special folder type not supported %s", type.to_string()
+                );
+            }
+
+            yield this.commands.execute(
+                new EmptyFolderCommand(emptyable),
+                context.cancellable
+            );
+        }
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -2521,3 +2543,46 @@ private class Application.DeleteEmailCommand : Command {
 }
 
 
+private class Application.EmptyFolderCommand : Command {
+
+
+    public override bool can_undo {
+        get { return false; }
+    }
+
+    private Geary.FolderSupport.Empty target;
+
+
+    public EmptyFolderCommand(Geary.FolderSupport.Empty target) {
+        this.target = target;
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.target.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
+            );
+            open = true;
+            yield this.target.empty_folder_async(cancellable);
+        } finally {
+            if (open) {
+                try {
+                    yield this.target.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
+        }
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        throw new Geary.EngineError.UNSUPPORTED(
+            "Cannot undo emptying a folder: %s",
+            this.target.path.to_string()
+        );
+    }
+
+}
