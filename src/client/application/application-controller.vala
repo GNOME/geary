@@ -165,9 +165,6 @@ public class Application.Controller : Geary.BaseObject {
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
     private Cancellable cancellable_open_account = new Cancellable();
-    private Cancellable cancellable_context_dependent_buttons = new Cancellable();
-    private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
-    private Geary.App.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
     private uint select_folder_timeout_id = 0;
     private int64 next_folder_select_allowed_usec = 0;
@@ -249,12 +246,9 @@ public class Application.Controller : Geary.BaseObject {
         main_window.retry_service_problem.connect(on_retry_service_problem);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
-        enable_message_buttons(false);
-
         engine.account_available.connect(on_account_available);
 
         // Connect to various UI signals.
-        main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.conversation_list_view.conversation_activated.connect(on_conversation_activated);
         main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
@@ -370,11 +364,9 @@ public class Application.Controller : Geary.BaseObject {
         this.application.engine.account_available.disconnect(on_account_available);
 
         // Release folder and conversations in the main window
-        on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
         on_folder_selected(null);
 
         // Disconnect from various UI signals.
-        this.main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
         this.main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
         this.main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
         this.main_window.folder_list.folder_selected.disconnect(on_folder_selected);
@@ -463,9 +455,6 @@ public class Application.Controller : Geary.BaseObject {
         this.previous_non_search_folder = null;
 
         this.current_account = null;
-
-        this.selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
-        this.last_deleted_conversation = null;
 
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
@@ -968,17 +957,6 @@ public class Application.Controller : Geary.BaseObject {
         return is_descendent;
     }
 
-    // Update widgets and such to match capabilities of the current folder ... sensitivity is handled
-    // by other utility methods
-    private void update_ui() {
-        this.main_window.main_toolbar.selected_conversations =
-            this.selected_conversations.size;
-        this.main_window.main_toolbar.update_trash_button(
-            !this.main_window.is_shift_down &&
-            current_folder_supports_trash()
-        );
-    }
-
     private void on_folder_selected(Geary.Folder? folder) {
         debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
         if (folder == null) {
@@ -987,10 +965,6 @@ public class Application.Controller : Geary.BaseObject {
             main_window.main_toolbar.folder = null;
             this.main_window.folder_selected(null, null);
         } else if (folder != this.current_folder) {
-            this.main_window.conversation_viewer.show_loading();
-            get_window_action(MainWindow.ACTION_FIND_IN_CONVERSATION).set_enabled(false);
-            enable_message_buttons(false);
-
             // To prevent the user from selecting folders too quickly,
             // we prevent additional selection changes to occur until
             // after a timeout has expired from the last one
@@ -1069,8 +1043,6 @@ public class Application.Controller : Geary.BaseObject {
         main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
         main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
 
-        update_ui();
-
         this.main_window.folder_selected(folder, this.cancellable_folder);
 
         clear_new_messages("do_select_folder", null);
@@ -1085,64 +1057,6 @@ public class Application.Controller : Geary.BaseObject {
             do_select_folder.end(result);
         } catch (Error err) {
             debug("Unable to select folder: %s", err.message);
-        }
-    }
-
-    private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
-        this.selected_conversations = selected;
-        get_window_action(MainWindow.ACTION_FIND_IN_CONVERSATION).set_enabled(false);
-        ConversationViewer viewer = this.main_window.conversation_viewer;
-        if (this.current_folder != null && !this.main_window.has_composer) {
-            switch(selected.size) {
-            case 0:
-                enable_message_buttons(false);
-                viewer.show_none_selected();
-                break;
-
-            case 1:
-                // Cancel existing avatar loads before loading new
-                // convo since that will start loading more avatars
-                Geary.App.Conversation convo = Geary.Collection.get_first(
-                    selected
-                );
-
-                AccountContext? context = this.accounts.get(
-                    convo.base_folder.account.information
-                );
-
-                // It's possible for a conversation with zero email to
-                // be selected, when it has just evaporated after its
-                // last email was removed but the conversation monitor
-                // hasn't signalled its removal yet. In this case,
-                // just don't load it since it will soon disappear.
-                if (context != null && convo.get_count() > 0) {
-                    viewer.load_conversation.begin(
-                        convo,
-                        context.emails,
-                        context.contacts,
-                        (obj, ret) => {
-                            try {
-                                viewer.load_conversation.end(ret);
-                                enable_message_buttons(true);
-                                get_window_action(
-                                    MainWindow.ACTION_FIND_IN_CONVERSATION
-                                ).set_enabled(true);
-                            } catch (GLib.IOError.CANCELLED err) {
-                                // All good
-                            } catch (Error err) {
-                                debug("Unable to load conversation: %s",
-                                      err.message);
-                            }
-                        }
-                    );
-                }
-                break;
-
-            default:
-                enable_multiple_message_buttons();
-                viewer.show_multiple_selected();
-                break;
-            }
         }
     }
 
@@ -1336,13 +1250,6 @@ public class Application.Controller : Geary.BaseObject {
         old_cancellable.cancel();
     }
 
-    private void cancel_context_dependent_buttons() {
-        Cancellable old_cancellable = cancellable_context_dependent_buttons;
-        cancellable_context_dependent_buttons = new Cancellable();
-
-        old_cancellable.cancel();
-    }
-
     // We need to include the second parameter, or valac doesn't recognize the function as matching
     // GearyApplication.exiting's signature.
     private bool on_application_exiting(GearyApplication sender, bool panicked) {
@@ -1356,61 +1263,6 @@ public class Application.Controller : Geary.BaseObject {
     // focus and now it does
     private void on_has_toplevel_focus() {
         clear_new_messages("on_has_toplevel_focus", null);
-    }
-
-    // latest_sent_only uses Email's Date: field, which corresponds to
-    // how they're sorted in the ConversationViewer, not whether they
-    // are in the sent folder.
-    private Gee.Collection<Geary.EmailIdentifier> get_conversation_email_ids(
-        Gee.Collection<Geary.App.Conversation> conversations,
-        bool latest_sent_only) {
-
-        Gee.Collection<Geary.EmailIdentifier> ids =
-            new Gee.ArrayList<Geary.EmailIdentifier>();
-
-        // Blacklist the Outbox unless that's currently selected since
-        // we don't want any operations to apply to messages there
-        // normally.
-        Gee.Collection<Geary.FolderPath>? blacklist = null;
-        if (this.current_folder != null &&
-            this.current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX) {
-            Geary.Folder? outbox = this.current_account.get_special_folder(
-                Geary.SpecialFolderType.OUTBOX
-            );
-
-            blacklist = new Gee.ArrayList<Geary.FolderPath>();
-            blacklist.add(outbox.path);
-        }
-
-        foreach(Geary.App.Conversation conversation in conversations) {
-            if (latest_sent_only) {
-                Geary.Email? latest = conversation.get_latest_sent_email(
-                    Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER,
-                    blacklist
-                );
-                if (latest != null) {
-                    ids.add(latest.id);
-                }
-            } else {
-                Geary.traverse<Geary.Email>(
-                    conversation.get_emails(
-                        Geary.App.Conversation.Ordering.NONE,
-                        Geary.App.Conversation.Location.ANYWHERE,
-                        blacklist
-                    )
-                ).map<Geary.EmailIdentifier>(e => e.id)
-                .add_all_to(ids);
-            }
-        }
-
-        return ids;
-    }
-
-    private Gee.Collection<Geary.EmailIdentifier>
-        get_selected_email_ids(bool latest_sent_only) {
-        return get_conversation_email_ids(
-            this.selected_conversations, latest_sent_only
-        );
     }
 
     private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
@@ -1861,12 +1713,6 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private bool current_folder_supports_trash() {
-        return (current_folder != null && current_folder.special_folder_type != Geary.SpecialFolderType.TRASH
-            && !current_folder.properties.is_local_only && current_account != null
-            && (current_folder as Geary.FolderSupport.Move) != null);
-    }
-
     private void on_sent(Geary.Account account, Geary.RFC822.Message sent) {
         // Translators: The label for an in-app notification. The
         // string substitution is a list of recipients of the email.
@@ -1877,77 +1723,6 @@ public class Application.Controller : Geary.BaseObject {
             new Components.InAppNotification(message);
         this.main_window.add_notification(notification);
         this.plugin_manager.notifications.email_sent(account, sent);
-    }
-
-    private SimpleAction get_window_action(string action_name) {
-        return (SimpleAction) this.main_window.lookup_action(action_name);
-    }
-
-    // Disables all single-message buttons and enables all multi-message buttons.
-    public void enable_multiple_message_buttons() {
-        main_window.main_toolbar.selected_conversations = this.selected_conversations.size;
-
-        // Single message only buttons.
-        get_window_action(MainWindow.ACTION_REPLY_TO_MESSAGE).set_enabled(false);
-        get_window_action(MainWindow.ACTION_REPLY_ALL_MESSAGE).set_enabled(false);
-        get_window_action(MainWindow.ACTION_FORWARD_MESSAGE).set_enabled(false);
-
-        // Mutliple message buttons.
-        get_window_action(MainWindow.ACTION_MOVE_MENU).set_enabled(current_folder is Geary.FolderSupport.Move);
-        get_window_action(MainWindow.ACTION_ARCHIVE_CONVERSATION).set_enabled(current_folder is Geary.FolderSupport.Archive);
-        get_window_action(MainWindow.ACTION_TRASH_CONVERSATION).set_enabled(current_folder_supports_trash());
-        get_window_action(MainWindow.ACTION_DELETE_CONVERSATION).set_enabled(current_folder is Geary.FolderSupport.Remove);
-
-        cancel_context_dependent_buttons();
-        enable_context_dependent_buttons_async.begin(true, cancellable_context_dependent_buttons);
-    }
-
-    // Enables or disables the message buttons on the toolbar.
-    public void enable_message_buttons(bool sensitive) {
-        main_window.main_toolbar.selected_conversations = this.selected_conversations.size;
-
-        // No reply/forward in drafts folder.
-        bool respond_sensitive = sensitive;
-        if (current_folder != null && current_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS)
-            respond_sensitive = false;
-
-        get_window_action(MainWindow.ACTION_REPLY_TO_MESSAGE).set_enabled(respond_sensitive);
-        get_window_action(MainWindow.ACTION_REPLY_ALL_MESSAGE).set_enabled(respond_sensitive);
-        get_window_action(MainWindow.ACTION_FORWARD_MESSAGE).set_enabled(respond_sensitive);
-        get_window_action(MainWindow.ACTION_MOVE_MENU).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Move));
-        get_window_action(MainWindow.ACTION_ARCHIVE_CONVERSATION).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Archive));
-        get_window_action(MainWindow.ACTION_TRASH_CONVERSATION).set_enabled(sensitive && current_folder_supports_trash());
-        get_window_action(MainWindow.ACTION_DELETE_CONVERSATION).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Remove));
-
-        cancel_context_dependent_buttons();
-        enable_context_dependent_buttons_async.begin(sensitive, cancellable_context_dependent_buttons);
-    }
-
-    private async void enable_context_dependent_buttons_async(bool sensitive, Cancellable? cancellable) {
-        Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
-        try {
-            if (current_folder != null) {
-                Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
-                if (store != null) {
-                    selected_operations = yield store
-                        .get_supported_operations_async(get_selected_email_ids(false), cancellable);
-                }
-            }
-        } catch (Error e) {
-            debug("Error checking for what operations are supported in the selected conversations: %s",
-                e.message);
-        }
-
-        // Exit here if the user has cancelled.
-        if (cancellable != null && cancellable.is_cancelled())
-            return;
-
-        Gee.HashSet<Type> supported_operations = new Gee.HashSet<Type>();
-        if (selected_operations != null)
-            supported_operations.add_all(selected_operations.get_values());
-
-        get_window_action(MainWindow.ACTION_SHOW_MARK_MENU).set_enabled(sensitive && (typeof(Geary.FolderSupport.Mark) in supported_operations));
-        get_window_action(MainWindow.ACTION_COPY_MENU).set_enabled(sensitive && (supported_operations.contains(typeof(Geary.FolderSupport.Copy))));
     }
 
     // Returns a list of composer windows for an account, or null if none.
@@ -1991,18 +1766,6 @@ public class Application.Controller : Geary.BaseObject {
 
             this.main_window.folder_list.set_search(search_folder);
         }
-    }
-
-    /**
-     * Returns a read-only set of currently selected conversations.
-     */
-    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
-        return selected_conversations.read_only_view;
-    }
-
-    private inline Geary.App.EmailStore? get_email_store_for_folder(Geary.Folder target) {
-        AccountContext? context = this.accounts.get(target.account.information);
-        return (context != null) ? context.emails : null;
     }
 
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,

@@ -153,6 +153,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         );
     }
 
+    private enum ConversationCount { NONE, SINGLE, MULTIPLE; }
+
 
     public new GearyApplication application {
         get { return (GearyApplication) base.get_application(); }
@@ -203,6 +205,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
+
+    private GLib.Cancellable action_update_cancellable = new GLib.Cancellable();
+
+
     private Geary.TimeoutManager update_ui_timeout;
     private int64 update_ui_last = 0;
 
@@ -274,6 +280,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.commands.undone.connect(on_command_undo);
         this.commands.redone.connect(on_command_execute);
         update_command_actions();
+
+        update_conversation_actions(NONE);
 
         this.application.engine.account_available.connect(on_account_available);
         this.application.engine.account_unavailable.connect(on_account_unavailable);
@@ -536,6 +544,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private void setup_layout(Configuration config) {
         this.conversation_list_view = new ConversationListView(this);
         this.conversation_list_view.load_more.connect(on_load_more);
+        this.conversation_list_view.conversations_selected.connect(on_conversations_selected);
 
         this.conversation_viewer = new ConversationViewer(
             this.application.config
@@ -670,18 +679,26 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     public void folder_selected(Geary.Folder? folder,
                                 GLib.Cancellable? cancellable) {
-        if (this.current_folder != null) {
-            this.progress_monitor.remove(this.current_folder.opening_monitor);
-            this.current_folder.properties.notify.disconnect(update_headerbar);
-            close_conversation_monitor();
-        }
+        if (this.current_folder != folder) {
+            if (this.current_folder != null) {
+                this.progress_monitor.remove(this.current_folder.opening_monitor);
+                this.current_folder.properties.notify.disconnect(update_headerbar);
+                close_conversation_monitor();
+            }
 
-        this.current_folder = folder;
+            this.current_folder = folder;
 
-        if (folder != null) {
-            this.progress_monitor.add(folder.opening_monitor);
-            folder.properties.notify.connect(update_headerbar);
-            open_conversation_monitor.begin(cancellable);
+            this.conversation_viewer.show_loading();
+            update_conversation_actions(NONE);
+            this.main_toolbar.update_trash_button(
+                !this.is_shift_down && current_folder_supports_trash()
+            );
+
+            if (folder != null) {
+                this.progress_monitor.add(folder.opening_monitor);
+                folder.properties.notify.connect(update_headerbar);
+                open_conversation_monitor.begin(cancellable);
+            }
         }
 
         update_headerbar();
@@ -838,6 +855,58 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
+    private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
+        this.main_toolbar.selected_conversations = selected.size;
+        if (this.current_folder != null && !this.has_composer) {
+            switch(selected.size) {
+            case 0:
+                update_conversation_actions(NONE);
+                this.conversation_viewer.show_none_selected();
+                break;
+
+            case 1:
+                Geary.App.Conversation convo = Geary.Collection.get_first(
+                    selected
+                );
+
+                Application.Controller.AccountContext? context =
+                    this.application.controller.get_context_for_account(
+                        convo.base_folder.account.information
+                    );
+
+                // It's possible for a conversation with zero email to
+                // be selected, when it has just evaporated after its
+                // last email was removed but the conversation monitor
+                // hasn't signalled its removal yet. In this case,
+                // just don't load it since it will soon disappear.
+                if (context != null && convo.get_count() > 0) {
+                    this.conversation_viewer.load_conversation.begin(
+                        convo,
+                        context.emails,
+                        context.contacts,
+                        (obj, ret) => {
+                            try {
+                                this.conversation_viewer.load_conversation.end(ret);
+                                update_conversation_actions(SINGLE);
+                            } catch (GLib.IOError.CANCELLED err) {
+                                // All good
+                            } catch (Error err) {
+                                debug("Unable to load conversation: %s",
+                                      err.message);
+                            }
+                        }
+                    );
+                }
+                break;
+
+            default:
+                update_conversation_actions(MULTIPLE);
+                this.conversation_viewer.show_multiple_selected();
+                break;
+            }
+        }
+    }
+
     private void on_conversation_count_changed() {
         // Only update the UI if we don't currently have a composer,
         // so we don't clobber it
@@ -849,7 +918,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 } else {
                     this.conversation_viewer.show_empty_folder();
                 }
-                this.application.controller.enable_message_buttons(false);
+                update_conversation_actions(NONE);
             } else {
                 // When not doing autoselect, we never get
                 // conversations_selected firing from the convo list,
@@ -857,7 +926,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 if (!this.application.config.autoselect &&
                     this.conversation_list_view.get_selection().count_selected_rows() == 0) {
                     this.conversation_viewer.show_none_selected();
-                    this.application.controller.enable_message_buttons(false);
+                    update_conversation_actions(NONE);
                 }
             }
         }
@@ -953,6 +1022,100 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 }
             });
         this.info_bar_frame.set_visible(show_frame);
+    }
+
+    private void update_conversation_actions(ConversationCount count) {
+        bool sensitive = (count != NONE);
+        bool multiple = (count == MULTIPLE);
+
+        get_action(ACTION_FIND_IN_CONVERSATION).set_enabled(
+            sensitive && !multiple
+        );
+
+        bool reply_sensitive = (
+            sensitive &&
+            !multiple &&
+            this.current_folder != null &&
+            this.current_folder.special_folder_type != DRAFTS
+        );
+        get_action(ACTION_REPLY_TO_MESSAGE).set_enabled(reply_sensitive);
+        get_action(ACTION_REPLY_ALL_MESSAGE).set_enabled(reply_sensitive);
+        get_action(ACTION_FORWARD_MESSAGE).set_enabled(reply_sensitive);
+
+        bool move_enabled = (
+            sensitive && (current_folder is Geary.FolderSupport.Move)
+        );
+        this.main_toolbar.move_message_button.set_sensitive(move_enabled);
+        get_action(ACTION_MOVE_MENU).set_enabled(move_enabled);
+
+        bool copy_enabled = (
+            sensitive && (current_folder is Geary.FolderSupport.Copy)
+        );
+        this.main_toolbar.copy_message_button.set_sensitive(copy_enabled);
+        get_action(ACTION_COPY_MENU).set_enabled(move_enabled);
+
+        get_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(
+            sensitive && (current_folder is Geary.FolderSupport.Archive)
+        );
+        get_action(ACTION_TRASH_CONVERSATION).set_enabled(
+            sensitive && current_folder_supports_trash()
+        );
+        get_action(ACTION_DELETE_CONVERSATION).set_enabled(
+            sensitive && (current_folder is Geary.FolderSupport.Remove)
+        );
+
+        this.update_context_dependent_actions.begin(sensitive);
+    }
+
+    private async void update_context_dependent_actions(bool sensitive) {
+        // Cancel any existing update that is running
+        this.action_update_cancellable.cancel();
+        GLib.Cancellable cancellable = new Cancellable();
+        this.action_update_cancellable = cancellable;
+
+        Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
+        if (this.current_folder != null) {
+            Application.Controller.AccountContext? context =
+                this.application.controller.get_context_for_account(
+                    this.current_folder.account.information
+                );
+            if (context != null) {
+                Gee.Collection<Geary.EmailIdentifier> ids =
+                    new Gee.LinkedList<Geary.EmailIdentifier>();
+                foreach (Geary.App.Conversation convo in
+                         this.conversation_list_view.get_selected_conversations()) {
+                    ids.add_all(convo.get_email_ids());
+                }
+                try {
+                    selected_operations = yield context.emails.get_supported_operations_async(
+                        ids, cancellable
+                    );
+                } catch (GLib.Error e) {
+                    debug("Error checking for what operations are supported in the selected conversations: %s",
+                          e.message);
+                }
+            }
+        }
+
+        if (!cancellable.is_cancelled()) {
+            Gee.HashSet<Type> supported_operations = new Gee.HashSet<Type>();
+            if (selected_operations != null) {
+                supported_operations.add_all(selected_operations.get_values());
+            }
+
+            get_action(ACTION_SHOW_MARK_MENU).set_enabled(
+                sensitive &&
+                (typeof(Geary.FolderSupport.Mark) in supported_operations)
+            );
+            get_action(ACTION_COPY_MENU).set_enabled(
+                sensitive &&
+                (supported_operations.contains(typeof(Geary.FolderSupport.Copy)))
+            );
+            get_action(ACTION_MOVE_MENU).set_enabled(
+                sensitive &&
+                (supported_operations.contains(typeof(Geary.FolderSupport.Move)))
+            );
+        }
     }
 
     private inline void check_shift_event(Gdk.EventKey event) {
