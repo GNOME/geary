@@ -205,6 +205,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private Geary.TimeoutManager update_ui_timeout;
     private int64 update_ui_last = 0;
 
+    private Application.CommandStack commands { get; protected set; }
+
 
     [GtkChild]
     private Gtk.Box main_layout;
@@ -250,7 +252,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public signal void on_shift_key(bool pressed);
 
 
-    public MainWindow(GearyApplication application) {
+    public MainWindow(GearyApplication application,
+                      Application.CommandStack commands) {
         Object(
             application: application,
             show_menubar: false
@@ -264,6 +267,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         set_styling();
         setup_layout(application.config);
         on_change_orientation();
+
+        this.commands = commands;
+        this.commands.executed.connect(on_command_execute);
+        this.commands.undone.connect(on_command_undo);
+        this.commands.redone.connect(on_command_execute);
+        update_command_actions();
 
         this.application.engine.account_available.connect(on_account_available);
         this.application.engine.account_unavailable.connect(on_account_unavailable);
@@ -674,6 +683,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_headerbar();
     }
 
+    private void update_command_actions() {
+        get_action(GearyApplication.ACTION_UNDO).set_enabled(
+            this.commands.can_undo
+        );
+        get_action(GearyApplication.ACTION_REDO).set_enabled(
+            this.commands.can_redo
+        );
+    }
+
     private void update_ui() {
         // Only update if we haven't done so within the last while
         int64 now = GLib.get_monotonic_time() / (1000 * 1000);
@@ -1030,12 +1048,34 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_ui();
     }
 
+    private void on_command_execute(Application.Command command) {
+        if (command.executed_label != null) {
+            Components.InAppNotification ian =
+                new Components.InAppNotification(command.executed_label);
+            ian.set_button(_("Undo"), "win." + GearyApplication.ACTION_UNDO);
+            add_notification(ian);
+        }
+        update_command_actions();
+    }
+
+    private void on_command_undo(Application.Command command) {
+        if (command.undone_label != null) {
+            Components.InAppNotification ian =
+                new Components.InAppNotification(command.undone_label);
+            ian.set_button(_("Redo"), "win." + GearyApplication.ACTION_REDO);
+            add_notification(ian);
+        }
+        update_command_actions();
+    }
+
     // Action callbacks
 
     private void on_undo() {
+        this.application.controller.undo.begin();
     }
 
     private void on_redo() {
+        this.application.controller.redo.begin();
     }
 
     private void on_close() {
