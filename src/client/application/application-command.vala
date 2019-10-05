@@ -13,6 +13,20 @@ public abstract class Application.Command : GLib.Object {
 
 
     /**
+     * Determines if a command can be undone.
+     *
+     * When passed to {@link CommandStack}, the stack will check this
+     * property after the command has been executed, and if false undo
+     * stack will be emptied and the non-undo-able command dropped.
+     *
+     * Returns true by default, derived classes may override if their
+     * {@link undo} method should not be called.
+     */
+    public virtual bool can_undo {
+        get { return true; }
+    }
+
+    /**
      * A human-readable label describing the effect of calling {@link undo}.
      *
      * This can be used in a user interface, perhaps as a tooltip for
@@ -279,8 +293,13 @@ public class Application.CommandStack : GLib.Object {
         debug("Executing: %s", target.to_string());
         yield target.execute(cancellable);
 
-        this.undo_stack.insert(0, target);
-        this.can_undo = true;
+        if (target.can_undo) {
+            this.undo_stack.insert(0, target);
+            this.can_undo = true;
+        } else {
+            this.undo_stack.clear();
+            this.can_undo = false;
+        }
 
         this.redo_stack.clear();
         this.can_redo = false;
