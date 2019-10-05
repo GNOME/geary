@@ -10,9 +10,148 @@
 public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
 
+    // Named actions.
+    public const string ACTION_ARCHIVE_CONVERSATION = "archive-conv";
+    public const string ACTION_CONVERSATION_DOWN = "down-conversation";
+    public const string ACTION_CONVERSATION_LIST = "focus-conv-list";
+    public const string ACTION_CONVERSATION_UP = "up-conversation";
+    public const string ACTION_COPY_MENU = "show-copy-menu";
+    public const string ACTION_DELETE_CONVERSATION = "delete-conv";
+    public const string ACTION_EMPTY_SPAM = "empty-spam";
+    public const string ACTION_EMPTY_TRASH = "empty-trash";
+    public const string ACTION_FIND_IN_CONVERSATION = "conv-find";
+    public const string ACTION_FORWARD_MESSAGE = "forward-message";
+    public const string ACTION_MARK_AS_READ = "mark-message-read";
+    public const string ACTION_MARK_AS_STARRED = "mark-message-starred";
+    public const string ACTION_MARK_AS_UNREAD = "mark-message-unread";
+    public const string ACTION_MARK_AS_UNSTARRED = "mark-message-unstarred";
+    public const string ACTION_MOVE_MENU = "show-move-menu";
+    public const string ACTION_REPLY_ALL_MESSAGE = "reply-all-message";
+    public const string ACTION_REPLY_TO_MESSAGE = "reply-to-message";
+    public const string ACTION_SEARCH = "search-conv";
+    public const string ACTION_SHOW_MARK_MENU = "mark-message-menu";
+    public const string ACTION_TOGGLE_FIND = "toggle-find";
+    public const string ACTION_TOGGLE_SEARCH = "toggle-search";
+    public const string ACTION_TOGGLE_SPAM = "toggle-message-spam";
+    public const string ACTION_TRASH_CONVERSATION = "trash-conv";
+    public const string ACTION_ZOOM = "zoom";
+
     private const int STATUS_BAR_HEIGHT = 18;
     private const int UPDATE_UI_INTERVAL = 60;
     private const int MIN_CONVERSATION_COUNT = 50;
+
+    private const ActionEntry[] win_action_entries = {
+        {GearyApplication.ACTION_CLOSE, on_close },
+        {GearyApplication.ACTION_UNDO,  on_undo },
+        {GearyApplication.ACTION_REDO,  on_redo },
+
+        {ACTION_CONVERSATION_LIST,     on_conversation_list            },
+        {ACTION_FIND_IN_CONVERSATION,  on_find_in_conversation_action  },
+        {ACTION_SEARCH,                on_search_activated             },
+        {ACTION_EMPTY_SPAM,            on_empty_spam                   },
+        {ACTION_EMPTY_TRASH,           on_empty_trash                  },
+        // Message actions
+        {ACTION_REPLY_TO_MESSAGE,      on_reply_to_message     },
+        {ACTION_REPLY_ALL_MESSAGE,     on_reply_all_message    },
+        {ACTION_FORWARD_MESSAGE,       on_forward_message      },
+        {ACTION_ARCHIVE_CONVERSATION,  on_archive_conversation },
+        {ACTION_TRASH_CONVERSATION,    on_trash_conversation   },
+        {ACTION_DELETE_CONVERSATION,   on_delete_conversation  },
+        {ACTION_COPY_MENU,             on_show_copy_menu       },
+        {ACTION_MOVE_MENU,             on_show_move_menu       },
+        {ACTION_CONVERSATION_UP,       on_conversation_up      },
+        {ACTION_CONVERSATION_DOWN,     on_conversation_down    },
+        // Message marking actions
+        {ACTION_SHOW_MARK_MENU,     on_show_mark_menu           },
+        {ACTION_MARK_AS_READ,       on_mark_as_read             },
+        {ACTION_MARK_AS_UNREAD,     on_mark_as_unread           },
+        {ACTION_MARK_AS_STARRED,    on_mark_as_starred          },
+        {ACTION_MARK_AS_UNSTARRED,  on_mark_as_unstarred        },
+        {ACTION_TOGGLE_SPAM,        on_mark_as_spam_toggle      },
+        // Message viewer
+        {ACTION_ZOOM,  on_zoom,  "s"  },
+    };
+
+
+    public static void add_window_accelerators(GearyApplication owner) {
+        // Marking actions
+        //
+        // Unmark is the primary action
+        owner.add_window_accelerators(
+            ACTION_MARK_AS_READ, { "<Ctrl><Shift>U", "<Shift>I" }
+        );
+        owner.add_window_accelerators(
+            ACTION_MARK_AS_UNREAD, { "<Ctrl>U", "<Shift>U" }
+        );
+        // Ephy uses Ctrl+D for bookmarking
+        owner.add_window_accelerators(
+            ACTION_MARK_AS_STARRED, { "<Ctrl>D", "S" }
+        );
+        owner.add_window_accelerators(
+            ACTION_MARK_AS_UNSTARRED, { "<Ctrl><Shift>D", "D" }
+        );
+        owner.add_window_accelerators(
+            ACTION_TOGGLE_SPAM, { "<Ctrl>J", "exclam" } // Exclamation mark (!)
+        );
+
+        // Replying & forwarding
+        owner.add_window_accelerators(
+            ACTION_REPLY_TO_MESSAGE, { "<Ctrl>R", "R" }
+        );
+        owner.add_window_accelerators(
+            ACTION_REPLY_ALL_MESSAGE, { "<Ctrl><Shift>R", "<Shift>R" }
+        );
+        owner.add_window_accelerators(
+            ACTION_FORWARD_MESSAGE, { "<Ctrl>L", "F" }
+        );
+
+        // Moving & labelling
+        owner.add_window_accelerators(
+            ACTION_COPY_MENU, { "<Ctrl>L", "L" }
+        );
+        owner.add_window_accelerators(
+            ACTION_MOVE_MENU, { "<Ctrl>M", "M" }
+        );
+        owner.add_window_accelerators(
+            ACTION_ARCHIVE_CONVERSATION, { "<Ctrl>K", "A", "Y" }
+        );
+        owner.add_window_accelerators(
+            ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" }
+        );
+        owner.add_window_accelerators(
+            ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" }
+        );
+
+        // Find & search
+        owner.add_window_accelerators(
+            ACTION_FIND_IN_CONVERSATION, { "<Ctrl>F", "slash" }
+        );
+        owner.add_window_accelerators(
+            ACTION_SEARCH, { "<Ctrl>S" }
+        );
+
+        // Zoom
+        owner.add_window_accelerators(
+            ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "<Ctrl>plus" }
+        );
+        owner.add_window_accelerators(
+            ACTION_ZOOM+("('out')"), { "<Ctrl>minus" }
+        );
+        owner.add_window_accelerators(
+            ACTION_ZOOM+("('normal')"), { "<Ctrl>0" }
+        );
+
+        // Navigation
+        owner.add_window_accelerators(
+            ACTION_CONVERSATION_LIST, { "<Ctrl>B" }
+        );
+        owner.add_window_accelerators(
+            ACTION_CONVERSATION_UP, { "<Ctrl>bracketleft", "K" }
+        );
+        owner.add_window_accelerators(
+            ACTION_CONVERSATION_DOWN, { "<Ctrl>bracketright", "J" }
+        );
+    }
 
 
     public new GearyApplication application {
@@ -20,6 +159,16 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         set { base.set_application(value); }
     }
 
+    /** Currently selected account, null if none selected */
+    public Geary.Account? current_account {
+        owned get {
+            Geary.Account? account = null;
+            if (this.current_folder != null) {
+                account = this.current_folder.account;
+            }
+            return account;
+        }
+    }
     /** Currently selected folder, null if none selected */
     public Geary.Folder? current_folder { get; private set; default = null; }
 
@@ -110,13 +259,14 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         load_config(application.config);
         restore_saved_window_state();
-
-        this.application.engine.account_available.connect(on_account_available);
-        this.application.engine.account_unavailable.connect(on_account_unavailable);
+        add_action_entries(win_action_entries, this);
 
         set_styling();
         setup_layout(application.config);
         on_change_orientation();
+
+        this.application.engine.account_available.connect(on_account_available);
+        this.application.engine.account_unavailable.connect(on_account_unavailable);
 
         this.update_ui_timeout = new Geary.TimeoutManager.seconds(
             UPDATE_UI_INTERVAL, on_update_ui_timeout
@@ -235,7 +385,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             new ComposerWindow(composer, this.application);
         } else {
             this.conversation_viewer.do_compose(composer);
-            get_action(Application.Controller.ACTION_FIND_IN_CONVERSATION).set_enabled(false);
+            get_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
         }
     }
 
@@ -382,6 +532,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         );
 
         this.main_toolbar = new MainToolbar(config);
+        this.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
+        this.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         this.main_toolbar.bind_property("find-open", this.conversation_viewer.conversation_find_bar,
@@ -405,10 +557,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         // Search bar
         this.search_bar_box.pack_start(this.search_bar, false, false, 0);
+
         // Folder list
         this.folder_list_scrolled.add(this.folder_list);
+        this.folder_list.move_conversation.connect(on_move_conversation);
+        this.folder_list.copy_conversation.connect(on_copy_conversation);
+
         // Conversation list
         this.conversation_list_scrolled.add(this.conversation_list_view);
+
         // Conversation viewer
         this.conversations_paned.pack2(this.conversation_viewer, true, true);
 
@@ -871,6 +1028,142 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_update_ui_timeout() {
         update_ui();
+    }
+
+    // Action callbacks
+
+    private void on_undo() {
+    }
+
+    private void on_redo() {
+    }
+
+    private void on_close() {
+        close();
+    }
+
+    private void on_conversation_list() {
+        this.conversation_list_view.grab_focus();
+    }
+
+    private void on_find_in_conversation_action() {
+        this.conversation_viewer.enable_find();
+    }
+
+    private void on_search_activated() {
+        show_search_bar();
+    }
+
+    private void on_zoom(SimpleAction action, Variant? parameter) {
+        ConversationListBox? view = this.conversation_viewer.current_list;
+        if (view != null && parameter != null) {
+            string zoom_action = parameter.get_string();
+            if (zoom_action == "in")
+                view.zoom_in();
+            else if (zoom_action == "out")
+                view.zoom_out();
+            else
+                view.zoom_reset();
+        }
+    }
+
+    private void on_reply_to_message() {
+    }
+
+    private void on_reply_all_message() {
+    }
+
+    private void on_forward_message() {
+    }
+
+    private void on_show_copy_menu() {
+        this.main_toolbar.copy_message_button.clicked();
+    }
+
+    private void on_show_move_menu() {
+        this.main_toolbar.move_message_button.clicked();
+    }
+
+    private void on_conversation_up() {
+        this.conversation_list_view.scroll(Gtk.ScrollType.STEP_UP);
+    }
+
+    private void on_conversation_down() {
+        this.conversation_list_view.scroll(Gtk.ScrollType.STEP_DOWN);
+    }
+
+    private void on_show_mark_menu() {
+        bool unread_selected = false;
+        bool read_selected = false;
+        bool starred_selected = false;
+        bool unstarred_selected = false;
+        foreach (Geary.App.Conversation conversation in
+                 this.conversation_list_view.get_selected_conversations()) {
+            if (conversation.is_unread())
+                unread_selected = true;
+
+            // Only check the messages that "Mark as Unread" would mark, so we
+            // don't add the menu option and have it not do anything.
+            //
+            // Sort by Date: field to correspond with ConversationViewer ordering
+            Geary.Email? latest = conversation.get_latest_sent_email(
+                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+            if (latest != null && latest.email_flags != null
+                && !latest.email_flags.contains(Geary.EmailFlags.UNREAD))
+                read_selected = true;
+
+            if (conversation.is_flagged()) {
+                starred_selected = true;
+            } else {
+                unstarred_selected = true;
+            }
+        }
+        get_action(ACTION_MARK_AS_READ).set_enabled(unread_selected);
+        get_action(ACTION_MARK_AS_UNREAD).set_enabled(read_selected);
+        get_action(ACTION_MARK_AS_STARRED).set_enabled(unstarred_selected);
+        get_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
+
+        // If we're in Drafts/Outbox, we also shouldn't set a message as SPAM.
+        bool in_spam_folder = current_folder.special_folder_type == Geary.SpecialFolderType.SPAM;
+        get_action(ACTION_TOGGLE_SPAM).set_enabled(!in_spam_folder &&
+            current_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
+            current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
+    }
+
+    private void on_mark_as_read() {
+    }
+
+    private void on_mark_as_unread() {
+    }
+
+    private void on_mark_as_starred() {
+    }
+
+    private void on_mark_as_unstarred() {
+    }
+
+    private void on_mark_as_spam_toggle() {
+    }
+
+    private void on_move_conversation(Geary.Folder destination) {
+    }
+
+    private void on_copy_conversation(Geary.Folder destination) {
+    }
+
+    private void on_archive_conversation() {
+    }
+
+    private void on_trash_conversation() {
+    }
+
+    private void on_delete_conversation() {
+    }
+
+    private void on_empty_spam() {
+    }
+
+    private void on_empty_trash() {
     }
 
 }

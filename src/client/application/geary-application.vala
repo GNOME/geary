@@ -446,6 +446,7 @@ public class GearyApplication : Gtk.Application {
         add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>Z" });
         add_window_accelerators(ACTION_UNDO, { "<Ctrl>Z" });
 
+        MainWindow.add_window_accelerators(this);
         ComposerWidget.add_window_accelerators(this);
         Components.Inspector.add_window_accelerators(this);
 
