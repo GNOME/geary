@@ -163,30 +163,31 @@ ComposerPageState.prototype = {
         this.selections.delete(id);
     },
     insertLink: function(href, selectionId) {
-        if (!window.getSelection().isCollapsed) {
-            // There is currently a selection, so assume the user
-            // knows what they are doing and just linkify it.
+        SelectionUtil.restore(this.selections.get(selectionId));
+        if (window.getSelection().isCollapsed) {
+            // The saved selection was empty, which means that the user is
+            // modifying an existing link instead of inserting a new one.
+            let selection = SelectionUtil.save();
+            let selected = SelectionUtil.getCursorElement();
+            SelectionUtil.selectNode(selected);
             document.execCommand("createLink", false, href);
+            SelectionUtil.restore(selection);
         } else {
-            SelectionUtil.restore(this.selections.get(selectionId));
             document.execCommand("createLink", false, href);
         }
     },
-    deleteLink: function() {
-        if (!window.getSelection().isCollapsed) {
-            // There is currently a selection, so assume the user
-            // knows what they are doing and just unlink it.
-            document.execCommand("unlink", false, null);
-        } else {
+    deleteLink: function(selectionId) {
+        SelectionUtil.restore(this.selections.get(selectionId));
+        if (window.getSelection().isCollapsed) {
+            // The saved selection was empty, which means that the user is
+            // deleting the entire existing link.
+            let selection = SelectionUtil.save();
             let selected = SelectionUtil.getCursorElement();
-            if (selected != null && selected.tagName == "A") {
-                // The current cursor element is an A, so select it
-                // since unlink requires a range
-                let selection = SelectionUtil.save();
-                SelectionUtil.selectNode(selected);
-                document.execCommand("unlink", false, null);
-                SelectionUtil.restore(selection);
-            }
+            SelectionUtil.selectNode(selected);
+            document.execCommand("unlink", false, null);
+            SelectionUtil.restore(selection);
+        } else {
+            document.execCommand("unlink", false, null);
         }
     },
     indentLine: function() {
