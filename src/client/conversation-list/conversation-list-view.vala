@@ -356,9 +356,9 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
                 context_menu_model.append(_("_Star"), "win."+MainWindow.ACTION_MARK_AS_STARRED);
 
             Menu actions_section = new Menu();
-            actions_section.append(_("_Reply"), "win."+MainWindow.ACTION_REPLY_TO_MESSAGE);
-            actions_section.append(_("R_eply All"), "win."+MainWindow.ACTION_REPLY_ALL_MESSAGE);
-            actions_section.append(_("_Forward"), "win."+MainWindow.ACTION_FORWARD_MESSAGE);
+            actions_section.append(_("_Reply"), "win."+MainWindow.ACTION_REPLY_CONVERSATION);
+            actions_section.append(_("R_eply All"), "win."+MainWindow.ACTION_REPLY_ALL_CONVERSATION);
+            actions_section.append(_("_Forward"), "win."+MainWindow.ACTION_FORWARD_CONVERSATION);
             context_menu_model.append_section(null, actions_section);
 
             // Use a popover rather than a regular context menu since

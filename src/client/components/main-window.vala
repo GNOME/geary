@@ -11,29 +11,27 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
 
     // Named actions.
-    public const string ACTION_ARCHIVE_CONVERSATION = "archive-conv";
+    public const string ACTION_ARCHIVE_CONVERSATION = "archive-conversation";
     public const string ACTION_CONVERSATION_DOWN = "down-conversation";
-    public const string ACTION_CONVERSATION_LIST = "focus-conv-list";
+    public const string ACTION_CONVERSATION_LIST = "focus-conversation-list";
     public const string ACTION_CONVERSATION_UP = "up-conversation";
-    public const string ACTION_COPY_MENU = "show-copy-menu";
-    public const string ACTION_DELETE_CONVERSATION = "delete-conv";
+    public const string ACTION_DELETE_CONVERSATION = "delete-conversation";
     public const string ACTION_EMPTY_SPAM = "empty-spam";
     public const string ACTION_EMPTY_TRASH = "empty-trash";
-    public const string ACTION_FIND_IN_CONVERSATION = "conv-find";
-    public const string ACTION_FORWARD_MESSAGE = "forward-message";
-    public const string ACTION_MARK_AS_READ = "mark-message-read";
-    public const string ACTION_MARK_AS_STARRED = "mark-message-starred";
-    public const string ACTION_MARK_AS_UNREAD = "mark-message-unread";
-    public const string ACTION_MARK_AS_UNSTARRED = "mark-message-unstarred";
-    public const string ACTION_MOVE_MENU = "show-move-menu";
-    public const string ACTION_REPLY_ALL_MESSAGE = "reply-all-message";
-    public const string ACTION_REPLY_TO_MESSAGE = "reply-to-message";
-    public const string ACTION_SEARCH = "search-conv";
-    public const string ACTION_SHOW_MARK_MENU = "mark-message-menu";
-    public const string ACTION_TOGGLE_FIND = "toggle-find";
-    public const string ACTION_TOGGLE_SEARCH = "toggle-search";
-    public const string ACTION_TOGGLE_SPAM = "toggle-message-spam";
-    public const string ACTION_TRASH_CONVERSATION = "trash-conv";
+    public const string ACTION_FIND_IN_CONVERSATION = "find-in-conversation";
+    public const string ACTION_FORWARD_CONVERSATION = "forward-conversation";
+    public const string ACTION_MARK_AS_READ = "mark-conversation-read";
+    public const string ACTION_MARK_AS_STARRED = "mark-conversation-starred";
+    public const string ACTION_MARK_AS_UNREAD = "mark-conversation-unread";
+    public const string ACTION_MARK_AS_UNSTARRED = "mark-conversation-unstarred";
+    public const string ACTION_REPLY_ALL_CONVERSATION = "reply-all-conversation";
+    public const string ACTION_REPLY_CONVERSATION = "reply-conversation";
+    public const string ACTION_SEARCH = "search";
+    public const string ACTION_SHOW_COPY_MENU = "show-copy-menu";
+    public const string ACTION_SHOW_MARK_MENU = "show-mark-menu";
+    public const string ACTION_SHOW_MOVE_MENU = "show-move-menu";
+    public const string ACTION_TOGGLE_SPAM = "toggle-conversation-spam";
+    public const string ACTION_TRASH_CONVERSATION = "trash-conversation";
     public const string ACTION_ZOOM = "zoom";
 
     private const int STATUS_BAR_HEIGHT = 18;
@@ -41,47 +39,48 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private const int MIN_CONVERSATION_COUNT = 50;
 
     private const ActionEntry[] win_action_entries = {
-        {GearyApplication.ACTION_CLOSE, on_close },
-        {GearyApplication.ACTION_UNDO,  on_undo },
-        {GearyApplication.ACTION_REDO,  on_redo },
+        { GearyApplication.ACTION_CLOSE, on_close },
+        { GearyApplication.ACTION_UNDO, on_undo },
+        { GearyApplication.ACTION_REDO, on_redo },
 
-        {ACTION_CONVERSATION_LIST,     on_conversation_list            },
-        {ACTION_FIND_IN_CONVERSATION,  on_find_in_conversation_action  },
-        {ACTION_SEARCH,                on_search_activated             },
-        {ACTION_EMPTY_SPAM,            on_empty_spam                   },
-        {ACTION_EMPTY_TRASH,           on_empty_trash                  },
+        { ACTION_CONVERSATION_LIST, on_conversation_list },
+        { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
+        { ACTION_SEARCH, on_search_activated },
+        { ACTION_EMPTY_SPAM, on_empty_spam },
+        { ACTION_EMPTY_TRASH, on_empty_trash },
         // Message actions
-        {ACTION_REPLY_TO_MESSAGE,      on_reply_conversation },
-        {ACTION_REPLY_ALL_MESSAGE,     on_reply_all_conversation },
-        {ACTION_FORWARD_MESSAGE,       on_forward_conversation },
-        {ACTION_ARCHIVE_CONVERSATION,  on_archive_conversation },
-        {ACTION_TRASH_CONVERSATION,    on_trash_conversation   },
-        {ACTION_DELETE_CONVERSATION,   on_delete_conversation  },
-        {ACTION_COPY_MENU,             on_show_copy_menu       },
-        {ACTION_MOVE_MENU,             on_show_move_menu       },
-        {ACTION_CONVERSATION_UP,       on_conversation_up      },
-        {ACTION_CONVERSATION_DOWN,     on_conversation_down    },
+        { ACTION_REPLY_CONVERSATION, on_reply_conversation },
+        { ACTION_REPLY_ALL_CONVERSATION, on_reply_all_conversation },
+        { ACTION_FORWARD_CONVERSATION, on_forward_conversation },
+        { ACTION_ARCHIVE_CONVERSATION, on_archive_conversation },
+        { ACTION_TRASH_CONVERSATION, on_trash_conversation },
+        { ACTION_DELETE_CONVERSATION, on_delete_conversation },
+        { ACTION_SHOW_COPY_MENU, on_show_copy_menu },
+        { ACTION_SHOW_MOVE_MENU, on_show_move_menu },
+        { ACTION_CONVERSATION_UP, on_conversation_up },
+        { ACTION_CONVERSATION_DOWN, on_conversation_down },
         // Message marking actions
-        {ACTION_SHOW_MARK_MENU,     on_show_mark_menu           },
-        {ACTION_MARK_AS_READ,       on_mark_as_read             },
-        {ACTION_MARK_AS_UNREAD,     on_mark_as_unread           },
-        {ACTION_MARK_AS_STARRED,    on_mark_as_starred          },
-        {ACTION_MARK_AS_UNSTARRED,  on_mark_as_unstarred        },
-        {ACTION_TOGGLE_SPAM,        on_mark_as_spam_toggle      },
+        { ACTION_SHOW_MARK_MENU, on_show_mark_menu },
+        { ACTION_MARK_AS_READ, on_mark_as_read },
+        { ACTION_MARK_AS_UNREAD, on_mark_as_unread },
+        { ACTION_MARK_AS_STARRED, on_mark_as_starred },
+        { ACTION_MARK_AS_UNSTARRED, on_mark_as_unstarred },
+        { ACTION_TOGGLE_SPAM, on_mark_as_spam_toggle },
         // Message viewer
-        {ACTION_ZOOM,  on_zoom,  "s"  },
+        { ACTION_ZOOM, on_zoom, "s" },
     };
 
 
     public static void add_window_accelerators(GearyApplication owner) {
         // Marking actions
         //
-        // Unmark is the primary action
-        owner.add_window_accelerators(
-            ACTION_MARK_AS_READ, { "<Ctrl><Shift>U", "<Shift>I" }
-        );
+        // Unread is the primary action, so it doesn't get the <Shift>
+        // modifier
         owner.add_window_accelerators(
             ACTION_MARK_AS_UNREAD, { "<Ctrl>U", "<Shift>U" }
+        );
+        owner.add_window_accelerators(
+            ACTION_MARK_AS_READ, { "<Ctrl><Shift>U", "<Shift>I" }
         );
         // Ephy uses Ctrl+D for bookmarking
         owner.add_window_accelerators(
@@ -96,21 +95,21 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         // Replying & forwarding
         owner.add_window_accelerators(
-            ACTION_REPLY_TO_MESSAGE, { "<Ctrl>R", "R" }
+            ACTION_REPLY_CONVERSATION, { "<Ctrl>R", "R" }
         );
         owner.add_window_accelerators(
-            ACTION_REPLY_ALL_MESSAGE, { "<Ctrl><Shift>R", "<Shift>R" }
+            ACTION_REPLY_ALL_CONVERSATION, { "<Ctrl><Shift>R", "<Shift>R" }
         );
         owner.add_window_accelerators(
-            ACTION_FORWARD_MESSAGE, { "<Ctrl>L", "F" }
+            ACTION_FORWARD_CONVERSATION, { "<Ctrl>L", "F" }
         );
 
         // Moving & labelling
         owner.add_window_accelerators(
-            ACTION_COPY_MENU, { "<Ctrl>L", "L" }
+            ACTION_SHOW_COPY_MENU, { "<Ctrl>L", "L" }
         );
         owner.add_window_accelerators(
-            ACTION_MOVE_MENU, { "<Ctrl>M", "M" }
+            ACTION_SHOW_MOVE_MENU, { "<Ctrl>M", "M" }
         );
         owner.add_window_accelerators(
             ACTION_ARCHIVE_CONVERSATION, { "<Ctrl>K", "A", "Y" }
@@ -1085,21 +1084,21 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             this.current_folder != null &&
             this.current_folder.special_folder_type != DRAFTS
         );
-        get_action(ACTION_REPLY_TO_MESSAGE).set_enabled(reply_sensitive);
-        get_action(ACTION_REPLY_ALL_MESSAGE).set_enabled(reply_sensitive);
-        get_action(ACTION_FORWARD_MESSAGE).set_enabled(reply_sensitive);
+        get_action(ACTION_REPLY_CONVERSATION).set_enabled(reply_sensitive);
+        get_action(ACTION_REPLY_ALL_CONVERSATION).set_enabled(reply_sensitive);
+        get_action(ACTION_FORWARD_CONVERSATION).set_enabled(reply_sensitive);
 
         bool move_enabled = (
             sensitive && (current_folder is Geary.FolderSupport.Move)
         );
         this.main_toolbar.move_message_button.set_sensitive(move_enabled);
-        get_action(ACTION_MOVE_MENU).set_enabled(move_enabled);
+        get_action(ACTION_SHOW_MOVE_MENU).set_enabled(move_enabled);
 
         bool copy_enabled = (
             sensitive && (current_folder is Geary.FolderSupport.Copy)
         );
         this.main_toolbar.copy_message_button.set_sensitive(copy_enabled);
-        get_action(ACTION_COPY_MENU).set_enabled(move_enabled);
+        get_action(ACTION_SHOW_COPY_MENU).set_enabled(move_enabled);
 
         get_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(
             sensitive && (current_folder is Geary.FolderSupport.Archive)
@@ -1154,11 +1153,11 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 sensitive &&
                 (typeof(Geary.FolderSupport.Mark) in supported_operations)
             );
-            get_action(ACTION_COPY_MENU).set_enabled(
+            get_action(ACTION_SHOW_COPY_MENU).set_enabled(
                 sensitive &&
                 (supported_operations.contains(typeof(Geary.FolderSupport.Copy)))
             );
-            get_action(ACTION_MOVE_MENU).set_enabled(
+            get_action(ACTION_SHOW_MOVE_MENU).set_enabled(
                 sensitive &&
                 (supported_operations.contains(typeof(Geary.FolderSupport.Move)))
             );
