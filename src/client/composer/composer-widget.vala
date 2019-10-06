@@ -2330,7 +2330,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 this.editor.insert_link(popover.link_uri, selection_id);
             });
         popover.link_delete.connect(() => {
-                this.editor.delete_link();
+                this.editor.delete_link(selection_id);
             });
         popover.link_open.connect(() => { link_activated(popover.link_uri); });
         return popover;
