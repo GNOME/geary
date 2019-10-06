@@ -11,6 +11,9 @@
 }
 
 html {
+  color: black;
+  background-color: white;
+
   /* Trigger CSS 2.1 § 10.6.7 to get a shrink-wrapped height. */
   position: absolute !important;
   top: 0 !important;
