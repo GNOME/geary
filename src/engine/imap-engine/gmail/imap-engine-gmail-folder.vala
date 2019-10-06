@@ -13,10 +13,15 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
         base (account, local_folder, special_folder_type);
     }
 
-    public new async Geary.EmailIdentifier? create_email_async(
-        RFC822.Message rfc822, Geary.EmailFlags? flags, DateTime? date_received,
-        Geary.EmailIdentifier? id, Cancellable? cancellable = null) throws Error {
-        return yield base.create_email_async(rfc822, flags, date_received, id, cancellable);
+    public new async EmailIdentifier?
+        create_email_async(RFC822.Message rfc822,
+                           EmailFlags? flags,
+                           DateTime? date_received,
+                           GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        return yield base.create_email_async(
+            rfc822, flags, date_received, cancellable
+        );
     }
 
     public async Geary.Revokable?
