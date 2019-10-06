@@ -10,18 +10,14 @@
 /**
  * Primary controller for an application instance.
  *
- * @see GearyAplication
+ * A single instance of this class is constructed by {@link
+ * GearyAplication} when the primary application instance is started.
  */
 public class Application.Controller : Geary.BaseObject {
 
 
-    // Properties
-    public const string PROP_SELECTED_CONVERSATIONS ="selected-conversations";
-
-    private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
-
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
-
+    private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
     private const uint MAX_AUTH_ATTEMPTS = 3;
 
     private static string untitled_file_name;
@@ -124,6 +120,7 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** The primary application instance that owns this controller. */
     public weak GearyApplication application { get; private set; } // circular ref
 
     /** Account management for the application. */
