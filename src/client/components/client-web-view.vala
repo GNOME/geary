@@ -307,6 +307,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         setts.enable_html5_local_storage = false;
         setts.enable_java = false;
         setts.enable_javascript = true;
+        setts.enable_javascript_markup = false;
         setts.enable_media_stream = false;
         setts.enable_offline_web_application_cache = false;
         setts.enable_page_cache = false;

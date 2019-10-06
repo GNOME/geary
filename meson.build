@@ -61,7 +61,7 @@ add_project_arguments([
 
 target_glib = '2.54' # Also passed to valac, so don't include a point rev
 target_gtk = '3.24.7'
-target_webkit = '2.20'
+target_webkit = '2.24'
 
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
