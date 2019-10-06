@@ -344,10 +344,17 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
-     * Removes any A element at the current text cursor location.
+     * Removes the A element at the current text cursor location.
+     *
+     * If only part of the A element is selected, only that part is
+     * unlinked, possibly creating two new A elements flanking the
+     * unlinked section.
      */
-    public void delete_link() {
-        this.call.begin(Util.JS.callable("geary.deleteLink"), null);
+    public void delete_link(string selection_id) {
+        this.call.begin(
+            Util.JS.callable("geary.deleteLink").string(selection_id),
+            null
+        );
     }
 
     /**
