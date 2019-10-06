@@ -10,7 +10,7 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Inspector opened</col>
+        <col id="0">Inspector opened</col>
       </row>
     </data>
   </object>
@@ -62,7 +62,7 @@
             </child>
             <child>
               <object class="GtkTreeViewColumn" id="log_column">
-                <property name="title" translatable="yes">column</property>
+                <property name="title">column</property>
                 <child>
                   <object class="GtkCellRendererText" id="log_renderer"/>
                   <attributes>
