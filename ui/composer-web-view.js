@@ -239,30 +239,12 @@ ComposerPageState.prototype = {
             return true;
         }
 
-        // Check interesting body text
-        let node = this.bodyPart.firstChild;
-        let content = [];
-        let breakingElements = new Set([
-            "BR", "P", "DIV", "BLOCKQUOTE", "TABLE", "OL", "UL", "HR"
-        ]);
-        while (node != null) {
-            if (node.nodeType == Node.TEXT_NODE) {
-                content.push(node.textContent);
-            } else if (content.nodeType == Node.ELEMENT_NODE) {
-                let isBreaking = breakingElements.has(node.nodeName);
-                if (isBreaking) {
-                    content.push("\n");
-                }
-
-                // Only include non-quoted text
-                if (content.nodeName != "BLOCKQUOTE") {
-                    content.push(content.textContent);
-                }
-            }
-            node = node.nextSibling;
-        }
+        // Check the body text
+        let content = ComposerPageState.htmlToText(
+            this.bodyPart, ["blockquote"]
+        );
         return ComposerPageState.containsKeywords(
-            content.join(""), completeKeys, suffixKeys
+            content, completeKeys, suffixKeys
         );
     },
     tabOut: function() {

@@ -20,11 +20,12 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("edit_context_font", edit_context_font);
         add_test("edit_context_link", edit_context_link);
         add_test("indent_line", indent_line);
-        add_test("contains_attachment_keywords", contains_attachment_keywords);
         add_test("clean_content", clean_content);
         add_test("get_html", get_html);
         add_test("get_text", get_text);
         add_test("contains_keywords", contains_keywords);
+        // Depends contains_keywords and html_to_text_with_blacklist
+        add_test("contains_attachment_keywords", contains_attachment_keywords);
         add_test("replace_non_breaking_space", replace_non_breaking_space);
 
         try {
