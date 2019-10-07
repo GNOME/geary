@@ -15,7 +15,7 @@ variables:
 
   # Build
   BUILD_DIR: build
-  CONFIG_CMD: meson --buildtype=debug build
+  CONFIG_CMD: meson --buildtype=debug $BUILD_DIR
   BUILD_CMD: ninja -v -C $BUILD_DIR
   TEST_CMD: xvfb-run meson test -v --no-stdsplit -C $BUILD_DIR $TEST_ARGS
   INSTALL_CMD: ninja -v -C $BUILD_DIR install
@@ -73,8 +73,8 @@ ubuntu:
   artifacts:
     when: 'always'
     paths:
-      - '_build/meson-logs/meson-log.txt'
-      - '_build/meson-logs/testlog.txt'
+      - '$BUILD_DIR/meson-logs/meson-log.txt'
+      - '$BUILD_DIR/meson-logs/testlog.txt'
     expire_in: 2 days
 
 flatpak:
