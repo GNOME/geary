@@ -1,3 +1,25 @@
+Version 3.34.1
+~~~~~~~~~~~~~~
+Released: 2019-10-07
+
+Enhancements included in this release:
+ * Fix conversation and composer colours under dark themes
+ * Fixes for link editing in rich text mode
+ * Fix drafts being left over in Gmail
+ * Fix application not exiting on quit
+ * Fix crash when sending certain emails
+ * User interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+
+ * Alex Henrie
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Asier Sarasua Garmendia (eu)
+ * Marek Černocký (cs)
+
 Version 3.34.0
 ~~~~~~~~~~~~~~
 Released: 2019-09-21

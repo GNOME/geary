@@ -89,6 +89,19 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="3.34.1" date="2019-10-07">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Fix conversation and composer colours under dark themes</li>
+          <li>Fixes for link editing in rich text mode</li>
+          <li>Fix drafts being left over in Gmail</li>
+          <li>Fix application not exiting on quit</li>
+          <li>Fix crash when sending certain emails</li>
+          <li>User interface translation updates</li>
+        </ul>
+      </description>
+    </release>
     <release version="3.34.0" date="2019-09-21">
       <description>
         <p>Enhancements included in this release:</p>
