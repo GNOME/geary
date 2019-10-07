@@ -42,6 +42,9 @@ finish-args:
   # Secrets access
   - "--talk-name=org.freedesktop.secrets"
 
+  # Contacts open/edit support
+  - "--talk-name=org.gnome.Contacts"
+
   # GOA support
   - "--talk-name=org.gnome.ControlCenter"
   - "--talk-name=org.gnome.OnlineAccounts"
