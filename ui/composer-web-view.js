@@ -12,7 +12,8 @@
 let ComposerPageState = function() {
     this.init.apply(this, arguments);
 };
-ComposerPageState.KEYWORD_SPLIT_REGEX = /[\s]+/g;
+ComposerPageState.SPACE_CHAR_REGEX = /[\s]/i;
+ComposerPageState.WORD_CHAR_REGEX = /[\s\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\u2000-\u206F\u2E00-\u2E7F]/i;
 ComposerPageState.QUOTE_MARKER = "\x7f"; // delete
 ComposerPageState.PROTOCOL_REGEX = /^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):/i;
 // Taken from Geary.HTML.URL_REGEX, without the inline modifier (?x)
@@ -403,33 +404,50 @@ ComposerPageState.prototype = {
 /**
  * Determines if any keywords are present in a string.
  */
-ComposerPageState.containsKeywords = function(line, completeKeys, suffixKeys) {
-    let tokens = new Set(
-        line.toLocaleLowerCase().split(ComposerPageState.KEYWORD_SPLIT_REGEX)
-    );
-
-    for (let key of completeKeys) {
-        if (tokens.has(key)) {
-            return true;
-        }
-    }
-
+ComposerPageState.containsKeywords = function(line, wordKeys, suffixKeys) {
     let urlRegex = ComposerPageState.URL_REGEX;
-    // XXX assuming all suffixes have length = 3 here.
-    let extLen = 3;
-    for (let token of tokens) {
-        let extDelim = token.length - (extLen + 1);
-        // We do care about "a.pdf", but not ".pdf"
-        if (token.length >= extLen + 2 && token.charAt(extDelim) == ".") {
-            let suffix = token.substring(extDelim + 1);
-            if (suffixKeys.has(suffix)) {
-                if (token.match(urlRegex) == null) {
-                    return true;
+    let lastToken = -1;
+    let lastSpace = -1;
+    for (var i = 0; i <= line.length; i++) {
+        let char = (i < line.length) ? line[i] : " ";
+
+        if (char.match(ComposerPageState.WORD_CHAR_REGEX)) {
+            if (lastToken + 1 < i) {
+                let wordToken = line.substring(lastToken + 1, i).toLocaleLowerCase();
+                let isWordMatch = wordKeys.has(wordToken);
+                let isSuffixMatch = suffixKeys.has(wordToken);
+                if (isWordMatch || isSuffixMatch) {
+                    let spaceToken = line.substring(lastSpace + 1, i);
+                    let isUrl = (spaceToken.match(ComposerPageState.URL_REGEX) != null);
+
+                    // Matches a token if it is a word that isn't in a
+                    // URL. I.e. this gets "some attachment." but not
+                    // "http://attachment.com"
+                    if (isWordMatch && !isUrl) {
+                        return true;
+                    }
+
+                    // Matches a token if it is a suffix that isn't a
+                    // URL and such that the space-delimited token
+                    // ends with ".SUFFIX". I.e. this matches "see
+                    // attachment.pdf." but not
+                    // "http://example.com/attachment.pdf" or "see the
+                    // pdf."
+                    if (isSuffixMatch &&
+                        !isUrl &&
+                        spaceToken.length != (1 + wordToken.length) &&
+                        spaceToken.endsWith("." + wordToken)) {
+                        return true;
+                    }
                 }
+            }
+            lastToken = i;
+
+            if (char.match(ComposerPageState.SPACE_CHAR_REGEX)) {
+                lastSpace = i;
             }
         }
     }
-
     return false;
 };
 

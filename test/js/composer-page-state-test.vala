@@ -359,6 +359,11 @@ unknown://example6.com
             ));
 
             assert(Util.JS.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('keyword1.', $complete_keys, $suffix_keys);"
+                ).get_js_value()
+            ));
+
+            assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('something.sf1', $complete_keys, $suffix_keys);"
                 ).get_js_value()
             ));
@@ -367,6 +372,12 @@ unknown://example6.com
                 @"ComposerPageState.containsKeywords('something.something.sf2', $complete_keys, $suffix_keys);"
                 ).get_js_value()
             ));
+
+            assert(!Util.JS.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('http://something/esle.sf2', $complete_keys, $suffix_keys);"
+                ).get_js_value()
+            ));
+
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
