@@ -33,9 +33,6 @@ finish-args:
   # OpenGL access for WK2
   - "--device=dri"
 
-  # Pulseaudio
-  - "--socket=pulseaudio"
-
   # Needs to talk to the network
   - "--share=network"
 
