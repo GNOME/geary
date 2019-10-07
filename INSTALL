@@ -39,7 +39,7 @@ Installing dependencies on Fedora
 
 Install them by running this command:
 
-    sudo yum install meson vala desktop-file-utils enchant2-devel \
+    sudo dnf install meson vala desktop-file-utils enchant2-devel \
         folks-devel gcr-devel glib2-devel gmime-devel \
         gnome-online-accounts-devel gspell-devel gtk3-devel \
         iso-codes-devel json-glib-devel libappstream-glib-devel \
