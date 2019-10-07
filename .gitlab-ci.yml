@@ -13,6 +13,10 @@ variables:
   # See Infrastructure/Infrastructure#97.
   TEST_ARGS: -t 10
 
+  # Locale used for unit tests. See notes in test/test-engine.vala and
+  # test/test-client.vala.
+  TEST_LOCALE: en_US.UTF-8
+
   # Build
   BUILD_DIR: build
   CONFIG_CMD: meson --buildtype=debug $BUILD_DIR
@@ -28,7 +32,7 @@ variables:
     libappstream-glib-devel libgee-devel libhandy-devel libpeas-devel
     libsecret-devel libunwind-devel libxml2-devel libytnef-devel
     sqlite-devel webkitgtk4-devel
-  FEDORA_TEST_DEPS: Xvfb tar xz
+  FEDORA_TEST_DEPS: glibc-langpack-en tar xz Xvfb
 
   # Ubuntu packages
   UBUNTU_DEPS:
@@ -39,7 +43,7 @@ variables:
     libjson-glib-dev libmessaging-menu-dev libpeas-dev libsecret-1-dev
     libsqlite3-dev libunity-dev libunwind-dev libwebkit2gtk-4.0-dev
     libxml2-dev libytnef0-dev
-  UBUNTU_TEST_DEPS: xauth xvfb
+  UBUNTU_TEST_DEPS: locales xauth xvfb
 
 fedora:
   stage: build
@@ -65,6 +69,7 @@ ubuntu:
   before_script:
     - apt-get update
     - apt-get install -q -y --no-install-recommends $UBUNTU_DEPS $UBUNTU_TEST_DEPS
+    - locale-gen $TEST_LOCALE
   script:
     - $CONFIG_CMD
     - $BUILD_CMD
