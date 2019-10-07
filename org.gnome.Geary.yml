@@ -14,7 +14,7 @@
 app-id: org.gnome.GearyDevel
 branch: master
 runtime: org.gnome.Platform
-runtime-version: master
+runtime-version: "3.34"
 sdk: org.gnome.Sdk
 command: geary
 
@@ -87,7 +87,7 @@ modules:
     sources:
       - type: git
         url: "https://gitlab.gnome.org/GNOME/gnome-online-accounts.git"
-        branch: master
+        branch: gnome-3-34
 
   # Geary dependency
   - name: gspell
@@ -151,6 +151,7 @@ modules:
     sources:
       - type: git
         url: https://gitlab.gnome.org/GNOME/evolution-data-server.git
+        branch: gnome-3-34
     cleanup:
       - /lib/cmake
       - /lib/evolution-data-server/*-backends
@@ -191,7 +192,6 @@ modules:
     sources:
       - type: git
         url: https://github.com/Yeraze/ytnef.git
-        branch: master
 
   - name: geary
     buildsystem: meson
@@ -200,4 +200,4 @@ modules:
     sources:
       - type: git
         url: https://gitlab.gnome.org/GNOME/geary.git
-        branch: mainline
+        branch: gnome-3-34
