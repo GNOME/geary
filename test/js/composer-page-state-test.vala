@@ -13,6 +13,10 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
     public ComposerPageStateTest() {
         base("ComposerPageStateTest");
+        add_test("html_to_text", html_to_text);
+        add_test("html_to_text_with_quote", html_to_text_with_quote);
+        add_test("html_to_text_with_nested_quote", html_to_text_with_nested_quote);
+        add_test("html_to_text_with_blacklist", html_to_text_with_blacklist);
         add_test("edit_context_font", edit_context_font);
         add_test("edit_context_link", edit_context_link);
         add_test("indent_line", indent_line);
@@ -20,15 +24,90 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("clean_content", clean_content);
         add_test("get_html", get_html);
         add_test("get_text", get_text);
-        add_test("get_text_with_quote", get_text_with_quote);
-        add_test("get_text_with_nested_quote", get_text_with_nested_quote);
-
         add_test("contains_keywords", contains_keywords);
         add_test("replace_non_breaking_space", replace_non_breaking_space);
 
         try {
             ComposerWebView.load_resources();
         } catch (Error err) {
+            assert_not_reached();
+        }
+    }
+
+    public void html_to_text() throws Error {
+        load_body_fixture("<p>para</p>");
+        try {
+            assert(
+                Util.JS.to_string(
+                    run_javascript(
+                        @"ComposerPageState.htmlToText(window.document.body);"
+                    ).get_js_value()
+                ) == "para\n\n\n\n"
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void html_to_text_with_quote() throws Error {
+        unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
+        load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
+        try {
+            assert(
+                Util.JS.to_string(
+                    run_javascript(
+                        "ComposerPageState.htmlToText(window.document.body);"
+                    ).get_js_value()
+                ) == @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n"
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void html_to_text_with_nested_quote() throws Error {
+        unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
+        load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
+        try {
+            assert(
+                Util.JS.to_string(
+                    run_javascript(
+                        "ComposerPageState.htmlToText(window.document.body)"
+                    ).get_js_value()
+                ) == @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n"
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void html_to_text_with_blacklist() throws Error {
+        load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
+        try {
+            assert(
+                Util.JS.to_string(
+                    run_javascript(
+                        "ComposerPageState.htmlToText(window.document.body, [\"blockquote\"])"
+                    ).get_js_value()
+                ) == @"pre\n\npost\n\n\n\n"
+            );
+        } catch (Util.JS.Error err) {
+            print("Util.JS.Error: %s\n", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s\n", err.message);
             assert_not_reached();
         }
     }
@@ -212,44 +291,6 @@ unknown://example6.com
                     run_javascript(@"window.geary.getText();")
                     .get_js_value()
                 ) == "para\n\n\n\n"
-            );
-        } catch (Util.JS.Error err) {
-            print("Util.JS.Error: %s\n", err.message);
-            assert_not_reached();
-        } catch (Error err) {
-            print("WKError: %s\n", err.message);
-            assert_not_reached();
-        }
-    }
-
-    public void get_text_with_quote() throws Error {
-        unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
-        load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
-        try {
-            assert(
-                Util.JS.to_string(
-                    run_javascript(@"window.geary.getText();")
-                    .get_js_value()
-                ) == @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n"
-            );
-        } catch (Util.JS.Error err) {
-            print("Util.JS.Error: %s", err.message);
-            assert_not_reached();
-        } catch (Error err) {
-            print("WKError: %s", err.message);
-            assert_not_reached();
-        }
-    }
-
-    public void get_text_with_nested_quote() throws Error {
-        unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
-        load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
-        try {
-            assert(
-                Util.JS.to_string(
-                    run_javascript(@"window.geary.getText();")
-                    .get_js_value()
-                ) == @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n"
             );
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);

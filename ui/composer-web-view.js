@@ -460,11 +460,16 @@ ComposerPageState.cleanPart = function(part, removeIfEmpty) {
  * `ComposerPageState.QUOTE_MARKER`, where the number of markers indicates
  * the depth of nesting of the quote.
  */
-ComposerPageState.htmlToText = function(root) {
+ComposerPageState.htmlToText = function(root, blacklist = []) {
     let parentStyle = window.getComputedStyle(root);
     let text = "";
 
     for (let node of (root.childNodes || [])) {
+        let nodeName = node.nodeName.toLowerCase();
+        if (blacklist.includes(nodeName)) {
+            continue;
+        }
+
         let isBlock = (
             node instanceof Element
                 && window.getComputedStyle(node).display == "block"
@@ -476,7 +481,7 @@ ComposerPageState.htmlToText = function(root) {
                 text += "\n";
             }
         }
-        switch (node.nodeName.toLowerCase()) {
+        switch (nodeName) {
             case "#text":
                 let nodeText = node.nodeValue;
                 switch (parentStyle.whiteSpace) {
@@ -500,24 +505,24 @@ ComposerPageState.htmlToText = function(root) {
                 break;
             case "a":
                 if (node.closest("body.plain")) {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                 } else if (node.textContent == node.href) {
                     text += "<" + node.href + ">";
                 } else {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                     text += " <" + node.href + ">";
                 }
                 break;
             case "b":
             case "strong":
                 if (node.closest("body.plain")) {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                 } else {
-                    text += "*" + ComposerPageState.htmlToText(node) + "*";
+                    text += "*" + ComposerPageState.htmlToText(node, blacklist) + "*";
                 }
                 break;
             case "blockquote":
-                let bqText = ComposerPageState.htmlToText(node);
+                let bqText = ComposerPageState.htmlToText(node, blacklist);
                 // If there is a newline at the end of the quote, remove it
                 // After this switch we ensure that there is a newline after the quote
                 bqText = bqText.replace(/\n$/, "");
@@ -532,23 +537,23 @@ ComposerPageState.htmlToText = function(root) {
             case "i":
             case "em":
                 if (node.closest("body.plain")) {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                 } else {
-                    text += "/" + ComposerPageState.htmlToText(node) + "/";
+                    text += "/" + ComposerPageState.htmlToText(node, blacklist) + "/";
                 }
                 break;
             case "u":
                 if (node.closest("body.plain")) {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                 } else {
-                    text += "_" + ComposerPageState.htmlToText(node) + "_";
+                    text += "_" + ComposerPageState.htmlToText(node, blacklist) + "_";
                 }
                 break;
             case "#comment":
-	    case "style":
+            case "style":
                 break;
             default:
-                text += ComposerPageState.htmlToText(node);
+                text += ComposerPageState.htmlToText(node, blacklist);
                 break;
         }
         if (isBlock) {
