@@ -12,7 +12,8 @@
 let ComposerPageState = function() {
     this.init.apply(this, arguments);
 };
-ComposerPageState.KEYWORD_SPLIT_REGEX = /[\s]+/g;
+ComposerPageState.SPACE_CHAR_REGEX = /[\s]/i;
+ComposerPageState.WORD_CHAR_REGEX = /[\s\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\u2000-\u206F\u2E00-\u2E7F]/i;
 ComposerPageState.QUOTE_MARKER = "\x7f"; // delete
 ComposerPageState.PROTOCOL_REGEX = /^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):/i;
 // Taken from Geary.HTML.URL_REGEX, without the inline modifier (?x)
@@ -238,30 +239,12 @@ ComposerPageState.prototype = {
             return true;
         }
 
-        // Check interesting body text
-        let node = this.bodyPart.firstChild;
-        let content = [];
-        let breakingElements = new Set([
-            "BR", "P", "DIV", "BLOCKQUOTE", "TABLE", "OL", "UL", "HR"
-        ]);
-        while (node != null) {
-            if (node.nodeType == Node.TEXT_NODE) {
-                content.push(node.textContent);
-            } else if (content.nodeType == Node.ELEMENT_NODE) {
-                let isBreaking = breakingElements.has(node.nodeName);
-                if (isBreaking) {
-                    content.push("\n");
-                }
-
-                // Only include non-quoted text
-                if (content.nodeName != "BLOCKQUOTE") {
-                    content.push(content.textContent);
-                }
-            }
-            node = node.nextSibling;
-        }
+        // Check the body text
+        let content = ComposerPageState.htmlToText(
+            this.bodyPart, ["blockquote"]
+        );
         return ComposerPageState.containsKeywords(
-            content.join(""), completeKeys, suffixKeys
+            content, completeKeys, suffixKeys
         );
     },
     tabOut: function() {
@@ -403,33 +386,50 @@ ComposerPageState.prototype = {
 /**
  * Determines if any keywords are present in a string.
  */
-ComposerPageState.containsKeywords = function(line, completeKeys, suffixKeys) {
-    let tokens = new Set(
-        line.toLocaleLowerCase().split(ComposerPageState.KEYWORD_SPLIT_REGEX)
-    );
-
-    for (let key of completeKeys) {
-        if (tokens.has(key)) {
-            return true;
-        }
-    }
-
+ComposerPageState.containsKeywords = function(line, wordKeys, suffixKeys) {
     let urlRegex = ComposerPageState.URL_REGEX;
-    // XXX assuming all suffixes have length = 3 here.
-    let extLen = 3;
-    for (let token of tokens) {
-        let extDelim = token.length - (extLen + 1);
-        // We do care about "a.pdf", but not ".pdf"
-        if (token.length >= extLen + 2 && token.charAt(extDelim) == ".") {
-            let suffix = token.substring(extDelim + 1);
-            if (suffixKeys.has(suffix)) {
-                if (token.match(urlRegex) == null) {
-                    return true;
+    let lastToken = -1;
+    let lastSpace = -1;
+    for (var i = 0; i <= line.length; i++) {
+        let char = (i < line.length) ? line[i] : " ";
+
+        if (char.match(ComposerPageState.WORD_CHAR_REGEX)) {
+            if (lastToken + 1 < i) {
+                let wordToken = line.substring(lastToken + 1, i).toLocaleLowerCase();
+                let isWordMatch = wordKeys.has(wordToken);
+                let isSuffixMatch = suffixKeys.has(wordToken);
+                if (isWordMatch || isSuffixMatch) {
+                    let spaceToken = line.substring(lastSpace + 1, i);
+                    let isUrl = (spaceToken.match(ComposerPageState.URL_REGEX) != null);
+
+                    // Matches a token if it is a word that isn't in a
+                    // URL. I.e. this gets "some attachment." but not
+                    // "http://attachment.com"
+                    if (isWordMatch && !isUrl) {
+                        return true;
+                    }
+
+                    // Matches a token if it is a suffix that isn't a
+                    // URL and such that the space-delimited token
+                    // ends with ".SUFFIX". I.e. this matches "see
+                    // attachment.pdf." but not
+                    // "http://example.com/attachment.pdf" or "see the
+                    // pdf."
+                    if (isSuffixMatch &&
+                        !isUrl &&
+                        spaceToken.length != (1 + wordToken.length) &&
+                        spaceToken.endsWith("." + wordToken)) {
+                        return true;
+                    }
                 }
+            }
+            lastToken = i;
+
+            if (char.match(ComposerPageState.SPACE_CHAR_REGEX)) {
+                lastSpace = i;
             }
         }
     }
-
     return false;
 };
 
@@ -460,11 +460,16 @@ ComposerPageState.cleanPart = function(part, removeIfEmpty) {
  * `ComposerPageState.QUOTE_MARKER`, where the number of markers indicates
  * the depth of nesting of the quote.
  */
-ComposerPageState.htmlToText = function(root) {
+ComposerPageState.htmlToText = function(root, blacklist = []) {
     let parentStyle = window.getComputedStyle(root);
     let text = "";
 
     for (let node of (root.childNodes || [])) {
+        let nodeName = node.nodeName.toLowerCase();
+        if (blacklist.includes(nodeName)) {
+            continue;
+        }
+
         let isBlock = (
             node instanceof Element
                 && window.getComputedStyle(node).display == "block"
@@ -476,7 +481,7 @@ ComposerPageState.htmlToText = function(root) {
                 text += "\n";
             }
         }
-        switch (node.nodeName.toLowerCase()) {
+        switch (nodeName) {
             case "#text":
                 let nodeText = node.nodeValue;
                 switch (parentStyle.whiteSpace) {
@@ -500,24 +505,24 @@ ComposerPageState.htmlToText = function(root) {
                 break;
             case "a":
                 if (node.closest("body.plain")) {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                 } else if (node.textContent == node.href) {
                     text += "<" + node.href + ">";
                 } else {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                     text += " <" + node.href + ">";
                 }
                 break;
             case "b":
             case "strong":
                 if (node.closest("body.plain")) {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                 } else {
-                    text += "*" + ComposerPageState.htmlToText(node) + "*";
+                    text += "*" + ComposerPageState.htmlToText(node, blacklist) + "*";
                 }
                 break;
             case "blockquote":
-                let bqText = ComposerPageState.htmlToText(node);
+                let bqText = ComposerPageState.htmlToText(node, blacklist);
                 // If there is a newline at the end of the quote, remove it
                 // After this switch we ensure that there is a newline after the quote
                 bqText = bqText.replace(/\n$/, "");
@@ -532,23 +537,23 @@ ComposerPageState.htmlToText = function(root) {
             case "i":
             case "em":
                 if (node.closest("body.plain")) {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                 } else {
-                    text += "/" + ComposerPageState.htmlToText(node) + "/";
+                    text += "/" + ComposerPageState.htmlToText(node, blacklist) + "/";
                 }
                 break;
             case "u":
                 if (node.closest("body.plain")) {
-                    text += ComposerPageState.htmlToText(node);
+                    text += ComposerPageState.htmlToText(node, blacklist);
                 } else {
-                    text += "_" + ComposerPageState.htmlToText(node) + "_";
+                    text += "_" + ComposerPageState.htmlToText(node, blacklist) + "_";
                 }
                 break;
             case "#comment":
-	    case "style":
+            case "style":
                 break;
             default:
-                text += ComposerPageState.htmlToText(node);
+                text += ComposerPageState.htmlToText(node, blacklist);
                 break;
         }
         if (isBlock) {
