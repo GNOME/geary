@@ -328,7 +328,7 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
     private string[]? names = null;
 
     public Header(Memory.Buffer buffer) {
-        base ("RFC822.Header", buffer);
+        base("RFC822.Header", buffer);
     }
 
     private unowned GMime.HeaderList get_headers() throws RFC822Error {
@@ -351,20 +351,16 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
     }
 
     public string[] get_header_names() throws RFC822Error {
-        if (names != null)
-            return names;
-
-        names = new string[0];
-
-        unowned GMime.HeaderIter iter;
-        if (!get_headers().get_iter(out iter))
-            return names;
-
-        do {
-            names += iter.get_name();
-        } while (iter.next());
-
-        return names;
+        if (this.names == null) {
+            this.names = new string[0];
+            GMime.HeaderIter iter = new GMime.HeaderIter();
+            if (get_headers().get_iter(iter) && iter.first()) {
+                do {
+                    names += iter.get_name();
+                } while (iter.next());
+            }
+        }
+        return this.names;
     }
 }
 

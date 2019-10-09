@@ -10,7 +10,10 @@ class Geary.RFC822.MessageDataTest : TestCase {
     public MessageDataTest() {
         base("Geary.RFC822.MessageDataTest");
         add_test("date_from_rfc822", date_from_rfc822);
+        add_test("date_from_rfc822", date_from_rfc822);
         add_test("date_to_rfc822", date_to_rfc822);
+        add_test("header_from_rfc822", header_from_rfc822);
+        add_test("header_names_from_rfc822", header_names_from_rfc822);
         add_test("PreviewText.with_header", preview_text_with_header);
     }
 
@@ -40,6 +43,20 @@ class Geary.RFC822.MessageDataTest : TestCase {
             new Geary.Memory.StringBuffer(HTML_BODY2_ENCODED)
         );
         assert_string(HTML_BODY2_EXPECTED, html_preview2.buffer.to_string());
+    }
+
+    public void header_from_rfc822() throws GLib.Error {
+        Header test_article = new Header(new Memory.StringBuffer(HEADER_FIXTURE));
+        assert_string("Test <test@example.com>", test_article.get_header("From"));
+        assert_string("test", test_article.get_header("Subject"));
+        assert_null_string(test_article.get_header("Blah"));
+    }
+
+    public void header_names_from_rfc822() throws GLib.Error {
+        Header test_article = new Header(new Memory.StringBuffer(HEADER_FIXTURE));
+        assert_int(2, test_article.get_header_names().length);
+        assert_string("From", test_article.get_header_names()[0]);
+        assert_string("Subject", test_article.get_header_names()[1]);
     }
 
     public void date_from_rfc822() throws GLib.Error {
@@ -91,6 +108,11 @@ class Geary.RFC822.MessageDataTest : TestCase {
         assert_string(NEG_HALF_HOUR_TZ, neg_half_hour_tz.to_rfc822_string());
     }
 
+
+    private const string HEADER_FIXTURE = """From: Test <test@example.com>
+Subject: test
+
+""";
 
     public static string PLAIN_BODY1_HEADERS = "Content-Type: text/plain; charset=\"us-ascii\"\r\nContent-Transfer-Encoding: 7bit\r\n";
     public static string PLAIN_BODY1_ENCODED = "-----BEGIN PGP SIGNED MESSAGE-----\r\nHash: SHA512\r\n\r\n=============================================================================\r\nFreeBSD-EN-16:11.vmbus                                          Errata Notice\r\n                                                          The FreeBSD Project\r\n\r\nTopic:          Avoid using spin locks for channel message locks\r\n\r\nCategory:       core\r\nModule:         vmbus\r\nAnnounced:      2016-08-12\r\nCredits:        Microsoft OSTC\r\nAffects:        FreeBSD 10.3\r\nCorrected:      2016-06-15 09:52:01 UTC (stable/10, 10.3-STABLE)\r\n                2016-08-12 04:01:16 UTC (releng/10.3, 10.3-RELEASE-p7)\r\n\r\nFor general information regarding FreeBSD Errata Notices and Security\r\nAdvisories, including descriptions of the fields above, security\r\nbranches, and the following sections, please visit\r\n<URL:https://security.FreeBSD.org/>.\r\n";
