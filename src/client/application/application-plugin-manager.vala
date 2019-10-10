@@ -35,10 +35,16 @@ public class Application.PluginManager : GLib.Object {
             "context", this.notifications
         );
         this.notification_extensions.extension_added.connect((info, extension) => {
-                (extension as Plugin.Notification).activate();
+                Plugin.Notification? plugin = extension as Plugin.Notification;
+                if (plugin != null) {
+                    plugin.activate();
+                }
             });
         this.notification_extensions.extension_removed.connect((info, extension) => {
-                (extension as Plugin.Notification).deactivate(this.is_shutdown);
+                Plugin.Notification? plugin = extension as Plugin.Notification;
+                if (plugin != null) {
+                    plugin.deactivate(this.is_shutdown);
+                }
             });
 
         // Load built-in plugins by default

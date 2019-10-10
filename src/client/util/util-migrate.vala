@@ -128,11 +128,11 @@ namespace Migrate {
 
         if (oldSettingsSchema != null) {
             Settings oldSettings = new Settings.full(oldSettingsSchema, null, null);
-
-            string[] oldKeys = oldSettings.list_keys();
-            foreach (string key in newSettings.list_keys())
-                if (key in oldKeys)
+            foreach (string key in newSettings.settings_schema.list_keys()) {
+                if (oldSettingsSchema.has_key(key)) {
                     newSettings.set_value(key, oldSettings.get_value(key));
+                }
+            }
         }
 
         newSettings.set_boolean(MIGRATED_CONFIG_KEY, true);
