@@ -93,7 +93,9 @@
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
-          <li>Your enhancement here</li>
+          <li>App-wide notification preferences now handled by desktop</li>
+          <li>Improved missing attachment detection in composer</li>
+          <li>Initial plugin system</li>
         </ul>
       </description>
     </release>
