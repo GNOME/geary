@@ -251,9 +251,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private string body_html = "";
 
     [GtkChild]
-    private Gtk.Box composer_container;
-
-    [GtkChild]
     internal Gtk.Grid editor_container;
 
     [GtkChild]
@@ -307,9 +304,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild]
     private Gtk.Box header_area;
     [GtkChild]
-
-    private Gtk.Box composer_toolbar;
-    [GtkChild]
     private Gtk.Box insert_buttons;
     [GtkChild]
     private Gtk.Box font_style_buttons;
@@ -325,9 +319,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private Gtk.MenuButton menu_button;
     [GtkChild]
     private Gtk.Label info_label;
-
-    [GtkChild]
-    private Gtk.Box message_area;
 
     private SimpleActionGroup composer_actions = new SimpleActionGroup();
     private SimpleActionGroup editor_actions = new SimpleActionGroup();
@@ -538,16 +529,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.content_loaded.connect(on_content_loaded);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect(on_selection_changed);
-
-        // Place the message area before the compose toolbar in the focus chain, so that
-        // the user can tab directly from the Subject: field to the message area.
-        // TODO: after bumping the min. GTK+ version to 3.16, we can/should do this in the UI file.
-        List<Gtk.Widget> chain = new List<Gtk.Widget>();
-        chain.append(this.hidden_on_attachment_drag_over);
-        chain.append(this.message_area);
-        chain.append(this.composer_toolbar);
-        chain.append(this.attachments_box);
-        this.composer_container.set_focus_chain(chain);
 
         update_composer_view();
         load_entry_completions();
