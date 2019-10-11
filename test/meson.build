@@ -176,5 +176,55 @@ geary_test_integration_bin = executable('test-integration',
   c_args: geary_c_args,
 )
 
-test('engine-tests', geary_test_engine_bin)
-test('client-tests', geary_test_client_bin)
+# Test harnesses
+
+# Tests that use storage can run exceptionally slow under CI
+# and other automated buid systems. Break them out into individual
+# tests so that each gets its own timeout.
+engine_storage_tests = [
+  'Geary.ContactStoreImplTest',
+  'Geary.Db.DatabaseTest',
+  'Geary.Db.VersionedDatabaseTest',
+  'Geary.ImapDB.AccountTest',
+  'Geary.ImapDB.AttachmentTest',
+  'Geary.ImapDB.AttachmentIoTest',
+  'Geary.ImapDB.DatabaseTest',
+  'Geary.ImapDB.FolderTest',
+]
+
+test_engine_args = []
+foreach name: engine_storage_tests
+  test_engine_args += '-s'
+  test_engine_args += '/engine/' + name
+endforeach
+
+test(
+  'engine-tests',
+  geary_test_engine_bin,
+  args: test_engine_args,
+  suite: ['engine']
+)
+
+foreach name: engine_storage_tests
+  test(
+    'engine-' + name.to_lower(),
+    geary_test_engine_bin,
+    args: ['-p', '/engine/' + name],
+    timeout: 300,
+    suite: ['engine']
+  )
+endforeach
+
+test(
+  'client-tests',
+  geary_test_client_bin,
+  args: ['-p', '/client'],
+  suite: ['client']
+)
+
+test(
+  'js-tests',
+  geary_test_client_bin,
+  args: ['-p', '/js'],
+  suite: ['client']
+)

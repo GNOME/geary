@@ -1,10 +1,13 @@
 #
-# Desktop files
+# Desktop data files
 #
 
-desktop_output = []
 desktop_conf = configuration_data()
 desktop_conf.set('appid', geary_id)
+
+#
+# Desktop file
+#
 
 desktop_file = i18n.merge_file(
   input: configure_file(
@@ -18,7 +21,19 @@ desktop_file = i18n.merge_file(
   install: true,
   install_dir: join_paths(data_dir, 'applications')
 )
-desktop_output += desktop_file
+
+if desktop_file_validate.found()
+  test(
+    'org.gnome.Geary.desktop-validate',
+    desktop_file_validate,
+    args: [ desktop_file.full_path() ],
+    suite: ['desktop']
+  )
+endif
+
+#
+# Autostart file
+#
 
 autostart_file = i18n.merge_file(
   input: configure_file(
@@ -32,17 +47,15 @@ autostart_file = i18n.merge_file(
   install: true,
   install_dir: join_paths(data_dir, 'applications')
 )
-desktop_output += autostart_file
 
-foreach desktop_file: desktop_output
-  if desktop_file_validate.found()
-    test(
-      'desktop-file-validate',
-      desktop_file_validate,
-      args: [ desktop_file.full_path() ]
-    )
-  endif
-endforeach
+if desktop_file_validate.found()
+  test(
+    'geary-autostart.desktop-validate',
+    desktop_file_validate,
+    args: [ autostart_file.full_path() ],
+    suite: ['desktop']
+  )
+endif
 
 #
 # Appdata file
@@ -69,7 +82,8 @@ if appstream_util.found()
     appstream_util,
     args: [
       'validate-relax', '--nonet', appdata_merged.full_path()
-    ]
+    ],
+    suite: ['desktop']
   )
 endif
 
