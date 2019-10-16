@@ -143,23 +143,13 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         db.exec("""
             CREATE TABLE Test (id INTEGER PRIMARY KEY, test_str TEXT);
             INSERT INTO Test (test_str) VALUES ('a');
+            INSERT INTO Test (test_str) VALUES ('b');
             INSERT INTO Test (test_str) VALUES ('B');
             INSERT INTO Test (test_str) VALUES ('BB');
-            INSERT INTO Test (test_str) VALUES ('🤯');
+            INSERT INTO Test (test_str) VALUES ('á');
         """);
 
-        string[] expected = { "a", "BB", "B", "🤯" };
-        // Distros don't ship well-known locales other than C.UTF-8 by
-        // default, but Flatpak does not currently ship C.UTF-8 at
-        // all, so need to support both. :(
-        //
-        // See test-engine.vala and
-        // https://gitlab.com/freedesktop-sdk/freedesktop-sdk/issues/812
-        if (GLib.Intl.setlocale(LocaleCategory.COLLATE, null) != "C.UTF-8") {
-            // en_US.UTF-8:
-            expected = { "BB", "B", "a", "🤯" };
-        }
-
+        string[] expected = { "BB", "B", "b", "á", "a" };
         Db.Result result = db.query(
             "SELECT test_str FROM Test ORDER BY test_str COLLATE UTF8COLL DESC"
         );
