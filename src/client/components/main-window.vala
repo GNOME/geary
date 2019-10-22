@@ -161,18 +161,18 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     /** Currently selected account, null if none selected */
-    public Geary.Account? current_account {
+    public Geary.Account? selected_account {
         owned get {
             Geary.Account? account = null;
-            if (this.current_folder != null) {
-                account = this.current_folder.account;
+            if (this.selected_folder != null) {
+                account = this.selected_folder.account;
             }
             return account;
         }
     }
 
     /** Currently selected folder, null if none selected */
-    public Geary.Folder? current_folder { get; private set; default = null; }
+    public Geary.Folder? selected_folder { get; private set; default = null; }
 
     /** Conversations for the current folder, null if none selected */
     public Geary.App.ConversationMonitor? conversations {
@@ -387,7 +387,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
         Application.Controller controller = this.application.controller;
         ComposerWidget composer = new ComposerWidget(
-            this.application, this.current_folder.account, null, NEW_MESSAGE
+            this.application, this.selected_folder.account, null, NEW_MESSAGE
         );
         composer.to = to.to_full_display();
         controller.add_composer(composer);
@@ -562,7 +562,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 "search-mode-enabled", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
             BindingTransformFunc title_func = (binding, source, ref target) => {
-                string folder = current_folder != null ? current_folder.get_display_name() + " " : "";
+                string folder = selected_folder != null ? selected_folder.get_display_name() + " " : "";
                 string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
 
                 target = "%s%s - %s".printf(folder, account, GearyApplication.NAME);
@@ -679,19 +679,19 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     public void folder_selected(Geary.Folder? folder,
                                 GLib.Cancellable? cancellable) {
-        if (this.current_folder != folder) {
-            if (this.current_folder != null) {
-                this.progress_monitor.remove(this.current_folder.opening_monitor);
-                this.current_folder.properties.notify.disconnect(update_headerbar);
+        if (this.selected_folder != folder) {
+            if (this.selected_folder != null) {
+                this.progress_monitor.remove(this.selected_folder.opening_monitor);
+                this.selected_folder.properties.notify.disconnect(update_headerbar);
                 close_conversation_monitor();
             }
 
-            this.current_folder = folder;
+            this.selected_folder = folder;
 
             this.conversation_viewer.show_loading();
             update_conversation_actions(NONE);
             this.main_toolbar.update_trash_button(
-                !this.is_shift_down && current_folder_supports_trash()
+                !this.is_shift_down && selected_folder_supports_trash()
             );
 
             if (folder != null) {
@@ -787,7 +787,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private async void open_conversation_monitor(GLib.Cancellable cancellable) {
         this.conversations = new Geary.App.ConversationMonitor(
-            this.current_folder,
+            this.selected_folder,
             Geary.Folder.OpenFlags.NO_DELAY,
             // Include fields for the conversation viewer as well so
             // conversations can be displayed without having to go
@@ -903,7 +903,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
         this.main_toolbar.selected_conversations = selected.size;
-        if (this.current_folder != null && !this.has_composer) {
+        if (this.selected_folder != null && !this.has_composer) {
             switch(selected.size) {
             case 0:
                 update_conversation_actions(NONE);
@@ -959,7 +959,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         if (!this.has_composer) {
             if (this.conversations.size == 0) {
                 // Let the user know if there's no available conversations
-                if (this.current_folder is Geary.SearchFolder) {
+                if (this.selected_folder is Geary.SearchFolder) {
                     this.conversation_viewer.show_empty_search();
                 } else {
                     this.conversation_viewer.show_empty_folder();
@@ -1028,7 +1028,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void update_headerbar() {
-        if (this.current_folder == null) {
+        if (this.selected_folder == null) {
             this.main_toolbar.account = null;
             this.main_toolbar.folder = null;
 
@@ -1036,26 +1036,26 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
 
         this.main_toolbar.account =
-            this.current_folder.account.information.display_name;
+            this.selected_folder.account.information.display_name;
 
         /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
         // except for Drafts and Outbox, where we show total count
         int count;
-        switch (this.current_folder.special_folder_type) {
+        switch (this.selected_folder.special_folder_type) {
             case Geary.SpecialFolderType.DRAFTS:
             case Geary.SpecialFolderType.OUTBOX:
-                count = this.current_folder.properties.email_total;
+                count = this.selected_folder.properties.email_total;
             break;
 
             default:
-                count = this.current_folder.properties.email_unread;
+                count = this.selected_folder.properties.email_unread;
             break;
         }
 
         if (count > 0)
-            this.main_toolbar.folder = _("%s (%d)").printf(this.current_folder.get_display_name(), count);
+            this.main_toolbar.folder = _("%s (%d)").printf(this.selected_folder.get_display_name(), count);
         else
-            this.main_toolbar.folder = this.current_folder.get_display_name();
+            this.main_toolbar.folder = this.selected_folder.get_display_name();
     }
 
     private void update_infobar_frame() {
@@ -1081,33 +1081,33 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         bool reply_sensitive = (
             sensitive &&
             !multiple &&
-            this.current_folder != null &&
-            this.current_folder.special_folder_type != DRAFTS
+            this.selected_folder != null &&
+            this.selected_folder.special_folder_type != DRAFTS
         );
         get_action(ACTION_REPLY_CONVERSATION).set_enabled(reply_sensitive);
         get_action(ACTION_REPLY_ALL_CONVERSATION).set_enabled(reply_sensitive);
         get_action(ACTION_FORWARD_CONVERSATION).set_enabled(reply_sensitive);
 
         bool move_enabled = (
-            sensitive && (current_folder is Geary.FolderSupport.Move)
+            sensitive && (selected_folder is Geary.FolderSupport.Move)
         );
         this.main_toolbar.move_message_button.set_sensitive(move_enabled);
         get_action(ACTION_SHOW_MOVE_MENU).set_enabled(move_enabled);
 
         bool copy_enabled = (
-            sensitive && (current_folder is Geary.FolderSupport.Copy)
+            sensitive && (selected_folder is Geary.FolderSupport.Copy)
         );
         this.main_toolbar.copy_message_button.set_sensitive(copy_enabled);
         get_action(ACTION_SHOW_COPY_MENU).set_enabled(move_enabled);
 
         get_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(
-            sensitive && (current_folder is Geary.FolderSupport.Archive)
+            sensitive && (selected_folder is Geary.FolderSupport.Archive)
         );
         get_action(ACTION_TRASH_CONVERSATION).set_enabled(
-            sensitive && current_folder_supports_trash()
+            sensitive && selected_folder_supports_trash()
         );
         get_action(ACTION_DELETE_CONVERSATION).set_enabled(
-            sensitive && (current_folder is Geary.FolderSupport.Remove)
+            sensitive && (selected_folder is Geary.FolderSupport.Remove)
         );
 
         this.update_context_dependent_actions.begin(sensitive);
@@ -1120,10 +1120,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.action_update_cancellable = cancellable;
 
         Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
-        if (this.current_folder != null) {
+        if (this.selected_folder != null) {
             Application.Controller.AccountContext? context =
                 this.application.controller.get_context_for_account(
-                    this.current_folder.account.information
+                    this.selected_folder.account.information
                 );
             if (context != null) {
                 Gee.Collection<Geary.EmailIdentifier> ids =
@@ -1175,7 +1175,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 this.is_shift_down = (event.type == Gdk.EventType.KEY_PRESS);
                 this.main_toolbar.update_trash_button(
                     !this.is_shift_down &&
-                    current_folder_supports_trash()
+                    selected_folder_supports_trash()
                 );
                 on_shift_key(this.is_shift_down);
             }
@@ -1186,13 +1186,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         return (SimpleAction) lookup_action(name);
     }
 
-    private bool current_folder_supports_trash() {
-        Geary.Folder? current = this.current_folder;
+    private bool selected_folder_supports_trash() {
+        Geary.Folder? current = this.selected_folder;
         return (
             current != null &&
             current.special_folder_type != TRASH &&
-            !current_folder.properties.is_local_only &&
-            (current_folder as Geary.FolderSupport.Move) != null
+            !selected_folder.properties.is_local_only &&
+            (selected_folder as Geary.FolderSupport.Move) != null
         );
     }
 
@@ -1204,7 +1204,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             monitor == this.conversations &&
             monitor.can_load_more) {
             debug("Not enough messages, loading more for folder %s",
-                  this.current_folder.to_string());
+                  this.selected_folder.to_string());
             load_more();
         }
     }
@@ -1335,12 +1335,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         view.view_source.connect(on_view_source);
 
         Geary.App.Conversation conversation = this.conversation_viewer.current_list.conversation;
-        bool in_current_folder = (
+        bool in_selected_folder = (
             conversation.is_in_base_folder(view.email.id) &&
-            conversation.base_folder == current_folder
+            conversation.base_folder == selected_folder
         );
-        bool supports_trash = in_current_folder && current_folder_supports_trash();
-        bool supports_delete = in_current_folder && current_folder is Geary.FolderSupport.Remove;
+        bool supports_trash = in_selected_folder && selected_folder_supports_trash();
+        bool supports_delete = in_selected_folder && selected_folder is Geary.FolderSupport.Remove;
         view.trash_message.connect(on_trash_message);
         view.delete_message.connect(on_delete_message);
         view.set_folder_actions_enabled(supports_trash, supports_delete);
@@ -1453,15 +1453,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         get_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
 
         // If we're in Drafts/Outbox, we also shouldn't set a message as SPAM.
-        bool in_spam_folder = current_folder.special_folder_type == Geary.SpecialFolderType.SPAM;
+        bool in_spam_folder = selected_folder.special_folder_type == Geary.SpecialFolderType.SPAM;
         get_action(ACTION_TOGGLE_SPAM).set_enabled(!in_spam_folder &&
-            current_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
-            current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
+            selected_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
+            selected_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
     }
 
     private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
                                        Geary.NamedFlag flag) {
-        Geary.Account? target = this.current_account;
+        Geary.Account? target = this.selected_account;
         if (target != null) {
             this.application.controller.mark_conversations.begin(
                 target,
@@ -1480,7 +1480,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_read() {
-        Geary.Account? target = this.current_account;
+        Geary.Account? target = this.selected_account;
         if (target != null) {
             this.application.controller.mark_conversations.begin(
                 target,
@@ -1499,7 +1499,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_unread() {
-        Geary.Account? target = this.current_account;
+        Geary.Account? target = this.selected_account;
         if (target != null) {
             this.application.controller.mark_conversations.begin(
                 target,
@@ -1518,7 +1518,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_starred() {
-        Geary.Account? target = this.current_account;
+        Geary.Account? target = this.selected_account;
         if (target != null) {
             this.application.controller.mark_conversations.begin(
                 target,
@@ -1537,7 +1537,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_unstarred() {
-        Geary.Account? target = this.current_account;
+        Geary.Account? target = this.selected_account;
         if (target != null) {
             this.application.controller.mark_conversations.begin(
                 target,
@@ -1557,7 +1557,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_mark_as_spam_toggle() {
         Geary.FolderSupport.Move? source =
-            this.current_folder as Geary.FolderSupport.Move;
+            this.selected_folder as Geary.FolderSupport.Move;
         if (source != null) {
             Geary.SpecialFolderType destination =
                 (source.special_folder_type != SPAM)
@@ -1580,7 +1580,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_move_conversation(Geary.Folder destination) {
         Geary.FolderSupport.Move source =
-            this.current_folder as Geary.FolderSupport.Move;
+            this.selected_folder as Geary.FolderSupport.Move;
         if (source != null) {
             this.application.controller.move_conversations.begin(
                 source,
@@ -1600,7 +1600,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_copy_conversation(Geary.Folder destination) {
         Geary.FolderSupport.Copy source =
-            this.current_folder as Geary.FolderSupport.Copy;
+            this.selected_folder as Geary.FolderSupport.Copy;
         if (source != null) {
             this.application.controller.copy_conversations.begin(
                 source,
@@ -1620,7 +1620,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_archive_conversation() {
         Geary.FolderSupport.Move source =
-            this.current_folder as Geary.FolderSupport.Move;
+            this.selected_folder as Geary.FolderSupport.Move;
         if (source != null) {
             this.application.controller.move_conversations_special.begin(
                 source,
@@ -1639,7 +1639,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_trash_conversation() {
         Geary.FolderSupport.Move source =
-            this.current_folder as Geary.FolderSupport.Move;
+            this.selected_folder as Geary.FolderSupport.Move;
         if (source != null) {
             this.application.controller.move_conversations_special.begin(
                 source,
@@ -1658,7 +1658,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_delete_conversation() {
         Geary.FolderSupport.Remove target =
-            this.current_folder as Geary.FolderSupport.Remove;
+            this.selected_folder as Geary.FolderSupport.Remove;
         Gee.Collection<Geary.App.Conversation> conversations =
             this.conversation_list_view.get_selected_conversations();
         if (target != null && this.prompt_delete_conversations(conversations.size)) {
@@ -1677,7 +1677,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_empty_spam() {
-        Geary.Account? account = this.current_account;
+        Geary.Account? account = this.selected_account;
         if (account != null &&
             prompt_empty_folder(Geary.SpecialFolderType.SPAM)) {
             this.application.controller.empty_folder_special.begin(
@@ -1695,7 +1695,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_empty_trash() {
-        Geary.Account? account = this.current_account;
+        Geary.Account? account = this.selected_account;
         if (account != null &&
             prompt_empty_folder(Geary.SpecialFolderType.TRASH)) {
             this.application.controller.empty_folder_special.begin(
@@ -1717,7 +1717,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private void on_mark_messages(Gee.Collection<Geary.EmailIdentifier> messages,
                                   Geary.EmailFlags? to_add,
                                   Geary.EmailFlags? to_remove) {
-        Geary.Account? target = this.current_account;
+        Geary.Account? target = this.selected_account;
         if (target != null) {
             this.application.controller.mark_messages.begin(
                 target,
@@ -1737,7 +1737,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_email_load_error(ConversationEmail view, GLib.Error err) {
         handle_error(
-            this.current_account != null ? this.current_account.information : null,
+            this.selected_account != null ? this.selected_account.information : null,
             err
         );
     }
@@ -1800,16 +1800,16 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
-        if (this.current_account != null) {
+        if (this.selected_account != null) {
             if (attachments.size == 1) {
                 this.application.controller.save_attachment_to_file.begin(
-                    this.current_account,
+                    this.selected_account,
                     attachments.to_array()[0],
                     null
                 );
             } else {
                 this.application.controller.save_attachments_to_file.begin(
-                    this.current_account,
+                    this.selected_account,
                     attachments
                 );
             }
@@ -1846,16 +1846,16 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                                         string url,
                                         string? alt_text,
                                         Geary.Memory.Buffer resource_buf) {
-        if (this.current_account != null) {
+        if (this.selected_account != null) {
             this.application.controller.save_image_extended.begin(
-                this.current_account, view, url, alt_text, resource_buf
+                this.selected_account, view, url, alt_text, resource_buf
             );
         }
     }
 
     private void on_trash_message(ConversationEmail target_view) {
         Geary.FolderSupport.Move? source =
-            this.current_folder as Geary.FolderSupport.Move;
+            this.selected_folder as Geary.FolderSupport.Move;
         if (source != null) {
             this.application.controller.move_messages_special.begin(
                 source,
@@ -1874,7 +1874,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_delete_message(ConversationEmail target_view) {
         Geary.FolderSupport.Remove? source =
-            this.current_folder as Geary.FolderSupport.Remove;
+            this.selected_folder as Geary.FolderSupport.Remove;
         if (source != null && prompt_delete_messages(1)) {
             this.application.controller.delete_messages.begin(
                 source,
@@ -1899,7 +1899,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             }
         } catch (GLib.Error err) {
             handle_error(
-                this.current_account != null ? this.current_account.information : null,
+                this.selected_account != null ? this.selected_account.information : null,
                 err
             );
         }
