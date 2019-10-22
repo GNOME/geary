@@ -248,7 +248,10 @@ public string to_preview_text(string? text, TextFormat format) {
         preview = Geary.HTML.html_to_text(text, false);
     }
 
-    return Geary.String.reduce_whitespace(preview);
+    // XXX really shouldn't have to call make_valid here but do so to
+    // avoid segfaults in the regex engine on invalid char data. See
+    // issue #186 for the proper fix.
+    return Geary.String.reduce_whitespace(preview.make_valid());
 }
 
 /**
