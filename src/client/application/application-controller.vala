@@ -47,6 +47,11 @@ public class Application.Controller : Geary.BaseObject {
         /** The account's contact store */
         public Application.ContactStore contacts { get; private set; }
 
+        /** The account's application command stack. */
+        public Application.CommandStack commands {
+            get; protected set; default = new CommandStack();
+        }
+
         /** A cancellable tied to the life-cycle of the account. */
         public Cancellable cancellable {
             get; private set; default = new Cancellable();
@@ -154,8 +159,6 @@ public class Application.Controller : Geary.BaseObject {
     // Null if none selected
     private Geary.Folder? current_folder = null;
 
-    private Application.CommandStack commands { get; protected set; }
-
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
     private Cancellable cancellable_open_account = new Cancellable();
@@ -233,10 +236,8 @@ public class Application.Controller : Geary.BaseObject {
         );
         this.plugin_manager.load();
 
-        this.commands = new CommandStack();
-
         // Create the main window (must be done after creating actions.)
-        main_window = new MainWindow(this.application, this.commands);
+        main_window = new MainWindow(this.application);
         main_window.retry_service_problem.connect(on_retry_service_problem);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
@@ -317,36 +318,6 @@ public class Application.Controller : Geary.BaseObject {
     /** Returns a context for an account, if any. */
     public AccountContext? get_context_for_account(Geary.AccountInformation account) {
         return this.accounts.get(account);
-    }
-
-    /** Un-does the last executed application command, if any. */
-    public async void undo() {
-        this.commands.undo.begin(
-            this.open_cancellable,
-            (obj, res) => {
-                try {
-                    this.commands.undo.end(res);
-                } catch (GLib.Error err) {
-                    // XXX extract account info somehow
-                    report_problem(new Geary.ProblemReport(err));
-                }
-            }
-        );
-    }
-
-    /** Re-does the last undone application command, if any. */
-    public async void redo() {
-        this.commands.redo.begin(
-            this.open_cancellable,
-            (obj, res) => {
-                try {
-                    this.commands.redo.end(res);
-                } catch (GLib.Error err) {
-                    // XXX extract account info somehow
-                    report_problem(new Geary.ProblemReport(err));
-                }
-            }
-        );
     }
 
     /** Closes all accounts and windows, releasing held resources. */
@@ -580,7 +551,7 @@ public class Application.Controller : Geary.BaseObject {
 
         AccountContext? context = this.accounts.get(target.information);
         if (context != null) {
-            yield this.commands.execute(
+            yield context.commands.execute(
                 new MarkEmailCommand(
                     context.emails,
                     messages,
@@ -620,7 +591,7 @@ public class Application.Controller : Geary.BaseObject {
         throws GLib.Error {
         AccountContext? context = this.accounts.get(target.information);
         if (context != null) {
-            yield this.commands.execute(
+            yield context.commands.execute(
                 new MarkEmailCommand(
                     context.emails,
                     messages,
@@ -650,7 +621,7 @@ public class Application.Controller : Geary.BaseObject {
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
         if (context != null) {
-            yield this.commands.execute(
+            yield context.commands.execute(
                 new MoveEmailCommand(
                     source,
                     destination,
@@ -690,7 +661,7 @@ public class Application.Controller : Geary.BaseObject {
                 );
             }
 
-            yield this.commands.execute(
+            yield context.commands.execute(
                 new MoveEmailCommand(
                     source,
                     dest,
@@ -730,7 +701,7 @@ public class Application.Controller : Geary.BaseObject {
                 );
             }
 
-            yield this.commands.execute(
+            yield context.commands.execute(
                 new MoveEmailCommand(
                     source,
                     dest,
@@ -763,7 +734,7 @@ public class Application.Controller : Geary.BaseObject {
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
         if (context != null) {
-            yield this.commands.execute(
+            yield context.commands.execute(
                 new CopyEmailCommand(
                     source,
                     destination,
@@ -795,7 +766,7 @@ public class Application.Controller : Geary.BaseObject {
         throws GLib.Error {
         AccountContext? context = this.accounts.get(target.account.information);
         if (context != null) {
-            yield this.commands.execute(
+            yield context.commands.execute(
                 new DeleteEmailCommand(
                     target,
                     to_in_folder_email_ids(conversations)
@@ -810,7 +781,7 @@ public class Application.Controller : Geary.BaseObject {
         throws GLib.Error {
         AccountContext? context = this.accounts.get(target.account.information);
         if (context != null) {
-            yield this.commands.execute(
+            yield context.commands.execute(
                 new DeleteEmailCommand(target, messages),
                 context.cancellable
             );
@@ -832,7 +803,7 @@ public class Application.Controller : Geary.BaseObject {
                 );
             }
 
-            yield this.commands.execute(
+            yield context.commands.execute(
                 new EmptyFolderCommand(emptyable),
                 context.cancellable
             );

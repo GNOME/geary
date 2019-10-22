@@ -195,6 +195,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
+    private Application.Controller.AccountContext? context = null;
+
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
 
     private GLib.Cancellable action_update_cancellable = new GLib.Cancellable();
@@ -202,8 +204,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private Geary.TimeoutManager update_ui_timeout;
     private int64 update_ui_last = 0;
-
-    private Application.CommandStack commands { get; protected set; }
 
 
     [GtkChild]
@@ -250,8 +250,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public signal void on_shift_key(bool pressed);
 
 
-    public MainWindow(GearyApplication application,
-                      Application.CommandStack commands) {
+    public MainWindow(GearyApplication application) {
         Object(
             application: application,
             show_menubar: false
@@ -266,12 +265,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         setup_layout(application.config);
         on_change_orientation();
 
-        this.commands = commands;
-        this.commands.executed.connect(on_command_execute);
-        this.commands.undone.connect(on_command_undo);
-        this.commands.redone.connect(on_command_redo);
         update_command_actions();
-
         update_conversation_actions(NONE);
 
         this.application.engine.account_available.connect(on_account_available);
@@ -377,8 +371,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     /** Deselected the currently selected account, if any. */
     public void deselect_account() {
+        // XXX do other things like select the first/next most highest
+        // account's inbox?
         this.search_bar.set_search_text(""); // Reset search.
-        // XXX do other things
     }
 
     /** Displays a composer addressed to a specific email address. */
@@ -705,12 +700,47 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_headerbar();
     }
 
+    /** Un-does the last executed application command, if any. */
+    private async void undo() {
+        Application.Controller.AccountContext? selected = this.context;
+        if (selected != null) {
+            selected.commands.undo.begin(
+                selected.cancellable,
+                (obj, res) => {
+                    try {
+                        selected.commands.undo.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(selected.account.information, err);
+                    }
+                }
+            );
+        }
+    }
+
+    /** Re-does the last undone application command, if any. */
+    private async void redo() {
+        Application.Controller.AccountContext? selected = this.context;
+        if (selected != null) {
+            selected.commands.redo.begin(
+                selected.cancellable,
+                (obj, res) => {
+                    try {
+                        selected.commands.redo.end(res);
+                    } catch (GLib.Error err) {
+                        handle_error(selected.account.information, err);
+                    }
+                }
+            );
+        }
+    }
+
     private void update_command_actions() {
+        Application.Controller.AccountContext? selected = this.context;
         get_action(GearyApplication.ACTION_UNDO).set_enabled(
-            this.commands.can_undo
+            selected != null && selected.commands.can_undo
         );
         get_action(GearyApplication.ACTION_REDO).set_enabled(
-            this.commands.can_redo
+            selected != null && selected.commands.can_redo
         );
     }
 
@@ -791,17 +821,36 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             if (this.selected_account != null) {
                 this.main_toolbar.copy_folder_menu.clear();
                 this.main_toolbar.move_folder_menu.clear();
+
+                Application.Controller.AccountContext? context = this.context;
+                if (context != null) {
+                    context.commands.executed.disconnect(on_command_execute);
+                    context.commands.undone.disconnect(on_command_undo);
+                    context.commands.redone.disconnect(on_command_redo);
+                }
+                this.context = null;
             }
 
             this.selected_account = account;
             this.search_bar.set_account(account);
 
             if (account != null) {
+                this.context = this.application.controller.get_context_for_account(
+                    account.information
+                );
+                if (this.context != null) {
+                    this.context.commands.executed.connect(on_command_execute);
+                    this.context.commands.undone.connect(on_command_undo);
+                    this.context.commands.redone.connect(on_command_redo);
+                }
+
                 foreach (Geary.Folder folder in account.list_folders()) {
                     this.main_toolbar.copy_folder_menu.add_folder(folder);
                     this.main_toolbar.move_folder_menu.add_folder(folder);
                 }
             }
+
+            update_command_actions();
         }
     }
 
@@ -939,16 +988,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                     selected
                 );
 
-                Application.Controller.AccountContext? context =
-                    this.application.controller.get_context_for_account(
-                        convo.base_folder.account.information
-                    );
-
                 // It's possible for a conversation with zero email to
                 // be selected, when it has just evaporated after its
                 // last email was removed but the conversation monitor
                 // hasn't signalled its removal yet. In this case,
                 // just don't load it since it will soon disappear.
+                Application.Controller.AccountContext? context = this.context;
                 if (context != null && convo.get_count() > 0) {
                     this.conversation_viewer.load_conversation.begin(
                         convo,
@@ -1381,11 +1426,11 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     // Window-level action callbacks
 
     private void on_undo() {
-        this.application.controller.undo.begin();
+        this.undo.begin();
     }
 
     private void on_redo() {
-        this.application.controller.redo.begin();
+        this.redo.begin();
     }
 
     private void on_close() {
