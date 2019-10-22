@@ -2290,7 +2290,18 @@ public class Application.Controller : Geary.BaseObject {
 }
 
 
-private class Application.MarkEmailCommand : Command {
+/**
+ * Mixin for trivial application commands.
+ *
+ * Trivial commands should not cause a notification to be shown when
+ * initially executed.
+ */
+public interface Application.TrivialCommand : Command {
+
+}
+
+
+private class Application.MarkEmailCommand : TrivialCommand, Command {
 
 
     private Geary.App.EmailStore store;

@@ -277,7 +277,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.commands = commands;
         this.commands.executed.connect(on_command_execute);
         this.commands.undone.connect(on_command_undo);
-        this.commands.redone.connect(on_command_execute);
+        this.commands.redone.connect(on_command_redo);
         update_command_actions();
 
         update_conversation_actions(NONE);
@@ -1286,13 +1286,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_command_execute(Application.Command command) {
-        if (command.executed_label != null) {
-            Components.InAppNotification ian =
-                new Components.InAppNotification(command.executed_label);
-            ian.set_button(_("Undo"), "win." + GearyApplication.ACTION_UNDO);
-            add_notification(ian);
+        if (!(command is Application.TrivialCommand)) {
+            // Only show an execute notification for non-trivial
+            // commands
+            on_command_redo(command);
+        } else {
+            // Still have to update the undo/redo actions for trivial
+            // commands
+            update_command_actions();
         }
-        update_command_actions();
     }
 
     private void on_command_undo(Application.Command command) {
@@ -1305,9 +1307,19 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_command_actions();
     }
 
+    private void on_command_redo(Application.Command command) {
+        if (command.executed_label != null) {
+            Components.InAppNotification ian =
+            new Components.InAppNotification(command.executed_label);
+            ian.set_button(_("Undo"), "win." + GearyApplication.ACTION_UNDO);
+            add_notification(ian);
+        }
+        update_command_actions();
+    }
+
     private void on_conversation_view_added(ConversationListBox list) {
         list.email_added.connect(on_conversation_viewer_email_added);
-        list.mark_emails.connect(on_conversation_viewer_mark_emails);
+        list.mark_emails.connect(on_mark_messages);
     }
 
     private void on_conversation_viewer_email_added(ConversationEmail view) {
@@ -1702,9 +1714,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     // Individual message view action callbacks
 
-    private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> messages,
-                                                    Geary.EmailFlags? to_add,
-                                                    Geary.EmailFlags? to_remove) {
+    private void on_mark_messages(Gee.Collection<Geary.EmailIdentifier> messages,
+                                  Geary.EmailFlags? to_add,
+                                  Geary.EmailFlags? to_remove) {
         Geary.Account? target = this.current_account;
         if (target != null) {
             this.application.controller.mark_messages.begin(
