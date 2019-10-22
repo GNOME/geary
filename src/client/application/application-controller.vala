@@ -154,9 +154,6 @@ public class Application.Controller : Geary.BaseObject {
     // Null if none selected
     private Geary.Folder? current_folder = null;
 
-    // Null if no folder ever selected
-    private Geary.Account? current_account = null;
-
     private Application.CommandStack commands { get; protected set; }
 
     private Cancellable cancellable_folder = new Cancellable();
@@ -451,8 +448,6 @@ public class Application.Controller : Geary.BaseObject {
         this.current_folder = null;
         this.previous_non_search_folder = null;
 
-        this.current_account = null;
-
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
         this.waiting_to_close.clear();
@@ -466,21 +461,23 @@ public class Application.Controller : Geary.BaseObject {
      * Opens or queues a new composer addressed to a specific email address.
      */
     public void compose(string? mailto = null) {
-        if (current_account == null) {
+        Geary.Account? selected = this.main_window.selected_account;
+        if (selected == null) {
             // Schedule the send for after we have an account open.
             pending_mailtos.add(mailto);
         } else {
-            create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, null, null, mailto);
+            create_compose_widget(selected, NEW_MESSAGE, null, null, mailto);
         }
     }
 
     /**
      * Opens new composer with an existing message as context.
      */
-    public void compose_with_context_email(ComposerWidget.ComposeType type,
+    public void compose_with_context_email(Geary.Account account,
+                                           ComposerWidget.ComposeType type,
                                            Geary.Email context,
                                            string? quote) {
-        create_compose_widget(type, context, quote);
+        create_compose_widget(account, type, context, quote);
     }
 
     /** Adds a new composer to be kept track of. */
@@ -867,13 +864,10 @@ public class Application.Controller : Geary.BaseObject {
         AccountContext? context = this.accounts.get(config);
         if (context != null) {
             Geary.Account account = context.account;
-            if (this.current_account == account) {
-                this.current_account = null;
-
-                previous_non_search_folder = null;
-                main_window.search_bar.set_search_text(""); // Reset search.
-
+            if (this.main_window.selected_account == account) {
+                this.main_window.deselect_account();
                 cancel_folder();
+                this.previous_non_search_folder = null;
             }
 
             // Stop updating status and showing errors when closing
@@ -1333,23 +1327,14 @@ public class Application.Controller : Geary.BaseObject {
 
         this.current_folder = folder;
 
-        if (this.current_account != folder.account) {
-            this.current_account = folder.account;
-            this.main_window.search_bar.set_account(this.current_account);
-
-            // If we were waiting for an account to be selected before issuing mailtos, do that now.
+        if (this.main_window.selected_account != folder.account) {
+            // If we were waiting for an account to be selected before
+            // issuing mailtos, do that now.
             if (pending_mailtos.size > 0) {
                 foreach(string? mailto in pending_mailtos)
                     compose(mailto);
 
                 pending_mailtos.clear();
-            }
-
-            main_window.main_toolbar.copy_folder_menu.clear();
-            main_window.main_toolbar.move_folder_menu.clear();
-            foreach(Geary.Folder f in current_folder.account.list_folders()) {
-                main_window.main_toolbar.copy_folder_menu.add_folder(f);
-                main_window.main_toolbar.move_folder_menu.add_folder(f);
             }
         }
 
@@ -1403,7 +1388,12 @@ public class Application.Controller : Geary.BaseObject {
 
         if (!already_open) {
             create_compose_widget(
-                ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
+                activated.base_folder.account,
+                NEW_MESSAGE,
+                draft,
+                null,
+                null,
+                true
             );
         }
     }
@@ -1452,7 +1442,7 @@ public class Application.Controller : Geary.BaseObject {
                 }
 
                 main_window.folder_list.add_folder(folder);
-                if (folder.account == current_account) {
+                if (folder.account == main_window.selected_account) {
                     if (!main_window.main_toolbar.copy_folder_menu.has_folder(folder))
                         main_window.main_toolbar.copy_folder_menu.add_folder(folder);
                     if (!main_window.main_toolbar.move_folder_menu.has_folder(folder))
@@ -1518,7 +1508,7 @@ public class Application.Controller : Geary.BaseObject {
                 Geary.Folder folder = unavailable_iterator.get();
 
                 main_window.folder_list.remove_folder(folder);
-                if (folder.account == current_account) {
+                if (folder.account == this.main_window.selected_account) {
                     if (main_window.main_toolbar.copy_folder_menu.has_folder(folder))
                         main_window.main_toolbar.copy_folder_menu.remove_folder(folder);
                     if (main_window.main_toolbar.move_folder_menu.has_folder(folder))
@@ -1910,14 +1900,12 @@ public class Application.Controller : Geary.BaseObject {
      * @param is_draft - Whether we're starting from a draft (true) or
      * a new mail (false)
      */
-    private void create_compose_widget(ComposerWidget.ComposeType compose_type,
+    private void create_compose_widget(Geary.Account account,
+                                       ComposerWidget.ComposeType compose_type,
                                        Geary.Email? referred = null,
                                        string? quote = null,
                                        string? mailto = null,
                                        bool is_draft = false) {
-        if (current_account == null)
-            return;
-
         // There's a few situations where we can re-use an existing
         // composer, check for these first.
 
@@ -1957,12 +1945,12 @@ public class Application.Controller : Geary.BaseObject {
         ComposerWidget widget;
         if (mailto != null) {
             widget = new ComposerWidget.from_mailto(
-                this.application, current_account, mailto
+                this.application, account, mailto
             );
         } else {
             widget = new ComposerWidget(
                 this.application,
-                current_account,
+                account,
                 is_draft ? referred.id : null,
                 compose_type
             );
@@ -1980,7 +1968,7 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         this.load_composer.begin(
-            this.current_account,
+            account,
             widget,
             referred,
             quote,
@@ -2053,8 +2041,8 @@ public class Application.Controller : Geary.BaseObject {
 
     private void do_search(string search_text) {
         Geary.SearchFolder? search_folder = null;
-        if (this.current_account != null) {
-            search_folder = this.current_account.get_special_folder(
+        if (this.main_window.selected_account != null) {
+            search_folder = this.main_window.selected_account.get_special_folder(
                 Geary.SpecialFolderType.SEARCH
             ) as Geary.SearchFolder;
         }
