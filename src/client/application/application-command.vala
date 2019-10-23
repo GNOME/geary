@@ -68,6 +68,37 @@ public abstract class Application.Command : GLib.Object {
 
 
     /**
+     * Emitted when the command was successfully executed.
+     *
+     * Command implementations must not manage this signal, it will be
+     * emitted by {@link CommandStack} as needed.
+     */
+    public virtual signal void executed() {
+        // no-op
+    }
+
+    /**
+     * Emitted when the command was successfully undone.
+     *
+     * Command implementations must not manage this signal, it will be
+     * emitted by {@link CommandStack} as needed.
+     */
+    public virtual signal void undone() {
+        // no-op
+    }
+
+    /**
+     * Emitted when the command was successfully redone.
+     *
+     * Command implementations must not manage this signal, it will be
+     * emitted by {@link CommandStack} as needed.
+     */
+    public virtual signal void redone() {
+        // no-op
+    }
+
+
+    /**
      * Called by {@link CommandStack} to execute the command.
      *
      * Applications should not call this method directly, rather pass
@@ -303,6 +334,7 @@ public class Application.CommandStack : GLib.Object {
         this.can_redo = false;
 
         executed(target);
+        target.executed();
     }
 
     /**
@@ -335,6 +367,7 @@ public class Application.CommandStack : GLib.Object {
             this.can_redo = true;
 
             undone(target);
+            target.undone();
         }
     }
 
@@ -368,6 +401,7 @@ public class Application.CommandStack : GLib.Object {
             this.can_undo = !this.undo_stack.is_empty;
 
             redone(target);
+            target.redone();
         }
     }
 
