@@ -1079,14 +1079,14 @@ private class Accounts.ServiceOutgoingAuthRow :
                 );
             }
 
-            Application.CommandSequence seq = new Application.CommandSequence({
-                    new Application.PropertyCommand<Geary.Credentials?>(
-                        this.service, "credentials", new_creds
-                    ),
-                    new Application.PropertyCommand<uint>(
-                        this.service, "credentials-requirement", this.value.source
-                    )
-                });
+            Application.Command[] commands = {
+                new Application.PropertyCommand<Geary.Credentials?>(
+                    this.service, "credentials", new_creds
+                ),
+                new Application.PropertyCommand<uint>(
+                    this.service, "credentials-requirement", this.value.source
+                )
+            };
 
             // The default SMTP port also depends on the auth method
             // used, so also update the port here if we're currently
@@ -1099,14 +1099,14 @@ private class Accounts.ServiceOutgoingAuthRow :
                 Geary.ServiceInformation copy =
                     new Geary.ServiceInformation.copy(this.service);
                 copy.credentials_requirement = this.value.source;
-                seq.commands.add(
-                    new Application.PropertyCommand<uint>(
-                        this.service, "port", copy.get_default_port()
-                    )
+                commands += new Application.PropertyCommand<uint>(
+                    this.service, "port", copy.get_default_port()
                 );
             }
 
-            this.commands.execute.begin(seq, this.cancellable);
+            this.commands.execute.begin(
+                new Application.CommandSequence(commands), this.cancellable
+            );
         }
     }
 

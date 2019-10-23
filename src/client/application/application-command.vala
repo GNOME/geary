@@ -155,13 +155,53 @@ public abstract class Application.Command : GLib.Object {
 
 /**
  * A command that executes a sequence of other commands.
+ *
+ * When initially executed or redone, commands will be processed
+ * individually in the given order. When undone, commands will be
+ * processed individually in reverse order.
  */
 public class Application.CommandSequence : Command {
 
 
-    public Gee.List<Command> commands {
-        get; private set; default = new Gee.LinkedList<Command>();
+    /**
+     * Emitted when the command was successfully executed.
+     *
+     * Ensures the same signal is emitted on all commands in the
+     * sequence, in order.
+     */
+    public override void executed() {
+       foreach (Command command in this.commands) {
+           command.executed();
+       }
     }
+
+    /**
+     * Emitted when the command was successfully undone.
+     *
+     * Ensures the same signal is emitted on all commands in the
+     * sequence, in reverse order.
+     */
+    public override void undone() {
+       foreach (Command command in reversed_commands()) {
+           command.undone();
+       }
+    }
+
+    /**
+     * Emitted when the command was successfully redone.
+     *
+     * Ensures the same signal is emitted on all commands in the
+     * sequence, in order.
+     */
+    public override void redone() {
+       foreach (Command command in this.commands) {
+           command.redone();
+       }
+    }
+
+
+    private Gee.List<Command> commands = new Gee.LinkedList<Command>();
+
 
     public CommandSequence(Command[]? commands = null) {
         if (commands != null) {
@@ -185,11 +225,7 @@ public class Application.CommandSequence : Command {
      */
     public override async void undo(GLib.Cancellable? cancellable)
        throws GLib.Error {
-       Gee.LinkedList<Command> reversed = new Gee.LinkedList<Command>();
-       foreach (Command command in this.commands) {
-           reversed.insert(0, command);
-       }
-       foreach (Command command in this.commands) {
+       foreach (Command command in reversed_commands()) {
            yield command.undo(cancellable);
        }
     }
@@ -202,6 +238,14 @@ public class Application.CommandSequence : Command {
        foreach (Command command in this.commands) {
            yield command.redo(cancellable);
        }
+    }
+
+    private Gee.List<Command> reversed_commands() {
+       var reversed = new Gee.LinkedList<Command>();
+       foreach (Command command in this.commands) {
+           reversed.insert(0, command);
+       }
+       return reversed;
     }
 
 }
