@@ -268,8 +268,11 @@ public class Application.CommandStack : GLib.Object {
     public bool can_redo { get; private set; }
 
 
-    private Gee.LinkedList<Command> undo_stack = new Gee.LinkedList<Command>();
-    private Gee.LinkedList<Command> redo_stack = new Gee.LinkedList<Command>();
+    /** Stack of commands that can be undone. */
+    protected Gee.Deque<Command> undo_stack = new Gee.LinkedList<Command>();
+
+    /** Stack of commands that can be redone. */
+    protected Gee.Deque<Command> redo_stack = new Gee.LinkedList<Command>();
 
 
     /** Fired when a command is first executed */
@@ -293,13 +296,8 @@ public class Application.CommandStack : GLib.Object {
         debug("Executing: %s", target.to_string());
         yield target.execute(cancellable);
 
-        if (target.can_undo) {
-            this.undo_stack.insert(0, target);
-            this.can_undo = true;
-        } else {
-            this.undo_stack.clear();
-            this.can_undo = false;
-        }
+        update_undo_stack(target);
+        this.can_undo = !this.undo_stack.is_empty;
 
         this.redo_stack.clear();
         this.can_redo = false;
@@ -318,7 +316,7 @@ public class Application.CommandStack : GLib.Object {
     public async void undo(GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (!this.undo_stack.is_empty) {
-            Command target = this.undo_stack.remove_at(0);
+            Command target = this.undo_stack.poll_head();
 
             if (this.undo_stack.is_empty) {
                 this.can_undo = false;
@@ -333,8 +331,9 @@ public class Application.CommandStack : GLib.Object {
                 throw err;
             }
 
-            this.redo_stack.insert(0, target);
+            this.redo_stack.offer_head(target);
             this.can_redo = true;
+
             undone(target);
         }
     }
@@ -350,7 +349,7 @@ public class Application.CommandStack : GLib.Object {
     public async void redo(GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (!this.redo_stack.is_empty) {
-            Command target = this.redo_stack.remove_at(0);
+            Command target = this.redo_stack.poll_head();
 
             if (this.redo_stack.is_empty) {
                 this.can_redo = false;
@@ -365,20 +364,21 @@ public class Application.CommandStack : GLib.Object {
                 throw err;
             }
 
-            this.undo_stack.insert(0, target);
-            this.can_undo = true;
+            update_undo_stack(target);
+            this.can_undo = !this.undo_stack.is_empty;
+
             redone(target);
         }
     }
 
     /** Returns the command at the top of the undo stack, if any. */
     public Command? peek_undo() {
-        return this.undo_stack.is_empty ? null : this.undo_stack[0];
+        return this.undo_stack.is_empty ? null : this.undo_stack.peek_head();
     }
 
     /** Returns the command at the top of the redo stack, if any. */
     public Command? peek_redo() {
-        return this.redo_stack.is_empty ? null : this.redo_stack[0];
+        return this.redo_stack.is_empty ? null : this.redo_stack.peek_head();
     }
 
     /** Clears all commands from both the undo and redo stacks. */
@@ -387,6 +387,18 @@ public class Application.CommandStack : GLib.Object {
         this.can_undo = false;
         this.redo_stack.clear();
         this.can_redo = false;
+    }
+
+    /**
+     * Updates the undo stack when a command is executed or re-done.
+     *
+     * By default, this pushes the command to the head of the undo
+     * stack if {@link Command.can_undo} is true.
+     */
+    protected virtual void update_undo_stack(Command target) {
+        if (target.can_undo) {
+            this.undo_stack.offer_head(target);
+        }
     }
 
 }
