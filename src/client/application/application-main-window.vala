@@ -317,9 +317,9 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.Box main_layout;
     [GtkChild]
-    private Gtk.Paned folder_paned;
+    private Hdy.Leaflet main_leaflet;
     [GtkChild]
-    private Gtk.Paned conversations_paned;
+    private Hdy.Leaflet conversations_leaflet;
     [GtkChild]
     private Gtk.Box folder_box;
     [GtkChild]
@@ -520,7 +520,6 @@ public class Application.MainWindow :
         });
 
         setup_layout(application.config);
-        this.folder_paned.orientation = Gtk.Orientation.HORIZONTAL;
         this.folder_box.pack_start(status_bar, false, false);
 
         update_command_actions();
@@ -1249,8 +1248,9 @@ public class Application.MainWindow :
             on_conversation_view_added
         );
 
-        this.conversations_paned.pack2(this.conversation_viewer, true, false);
+        this.conversation_viewer.hexpand = true;
         this.conversation_size_group.add_widget(this.conversation_viewer);
+        this.main_leaflet.add_with_properties(this.conversation_viewer, "name", "conversation", null);
 
         // Main toolbar
         this.main_toolbar = new MainToolbar(config);

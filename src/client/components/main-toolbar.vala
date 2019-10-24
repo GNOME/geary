@@ -6,7 +6,7 @@
 
 // Draws the main toolbar.
 [GtkTemplate (ui = "/org/gnome/Geary/main-toolbar.ui")]
-public class MainToolbar : Gtk.Box {
+public class MainToolbar : Hdy.Leaflet {
     // How wide the left pane should be. Auto-synced with our settings
     public int left_pane_width { get; set; }
     // Used to form the title of the folder header
@@ -97,7 +97,8 @@ public class MainToolbar : Gtk.Box {
     public void set_conversation_header(Gtk.HeaderBar header) {
         conversation_header.hide();
         this.header_group.add_gtk_header_bar(header);
-        pack_start(header, true, true);
+        header.hexpand = true;
+        add(header);
     }
 
     public void remove_conversation_header(Gtk.HeaderBar header) {
