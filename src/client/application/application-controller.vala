@@ -614,7 +614,7 @@ public class Application.Controller : Geary.BaseObject {
                     source,
                     destination,
                     to_in_folder_email_ids(conversations),
-                    /// Translators: Label for in-app undo
+                    /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the destination folder.
                     ngettext(
@@ -622,7 +622,7 @@ public class Application.Controller : Geary.BaseObject {
                         "Conversations moved to %s",
                         conversations.size
                     ).printf(destination.get_display_name()),
-                    /// Translators: Label for in-app undo
+                    /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the source folder.
                     ngettext(
@@ -799,7 +799,7 @@ public class Application.Controller : Geary.BaseObject {
                     source,
                     destination,
                     to_in_folder_email_ids(conversations),
-                    /// Translators: Label for in-app undo
+                    /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the destination folder.
                     ngettext(
@@ -807,7 +807,7 @@ public class Application.Controller : Geary.BaseObject {
                         "Conversations labelled as %s",
                         conversations.size
                     ).printf(destination.get_display_name()),
-                    /// Translators: Label for in-app undo
+                    /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the destination folder.
                     ngettext(
