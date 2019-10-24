@@ -1625,8 +1625,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_spam_toggle() {
-        Geary.FolderSupport.Move? source =
-            this.selected_folder as Geary.FolderSupport.Move;
+        Geary.Folder? source = this.selected_folder;
         if (source != null) {
             Geary.SpecialFolderType destination =
                 (source.special_folder_type != SPAM)
@@ -1688,12 +1687,11 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_archive_conversation() {
-        Geary.FolderSupport.Move source =
-            this.selected_folder as Geary.FolderSupport.Move;
+        Geary.Folder source = this.selected_folder;
         if (source != null) {
             this.application.controller.move_conversations_special.begin(
                 source,
-                Geary.SpecialFolderType.ARCHIVE,
+                ARCHIVE,
                 this.conversation_list_view.get_selected_conversations(),
                 (obj, res) => {
                     try {
@@ -1707,8 +1705,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_trash_conversation() {
-        Geary.FolderSupport.Move source =
-            this.selected_folder as Geary.FolderSupport.Move;
+        Geary.Folder source = this.selected_folder;
         if (source != null) {
             this.application.controller.move_conversations_special.begin(
                 source,
@@ -1935,8 +1932,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_trash_message(ConversationEmail target_view) {
-        Geary.FolderSupport.Move? source =
-            this.selected_folder as Geary.FolderSupport.Move;
+        Geary.Folder? source = this.selected_folder;
         if (source != null) {
             this.application.controller.move_messages_special.begin(
                 source,

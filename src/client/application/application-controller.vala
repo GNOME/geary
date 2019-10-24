@@ -653,65 +653,143 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    public async void move_conversations_special(Geary.FolderSupport.Move source,
+    public async void move_conversations_special(Geary.Folder source,
                                                  Geary.SpecialFolderType destination,
                                                  Gee.Collection<Geary.App.Conversation> conversations)
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
         if (context != null) {
-            Geary.Folder? dest = source.account.get_special_folder(destination);
-            if (dest == null) {
-                throw new Geary.EngineError.NOT_FOUND(
-                    "No folder found for: %s", destination.to_string()
-                );
-            }
+            Command? command = null;
+            Gee.Collection<Geary.EmailIdentifier> messages =
+                to_in_folder_email_ids(conversations);
+            /// Translators: Label for in-app notification. String
+            /// substitution is the name of the destination folder.
+            string undone_tooltip = ngettext(
+                "Conversation restored to %s",
+                "Conversations restored to %s",
+                messages.size
+            ).printf(source.get_display_name());
 
-            yield context.commands.execute(
-                new MoveEmailCommand(
-                    source,
+            if (destination == ARCHIVE) {
+                Geary.FolderSupport.Archive? archive_source = (
+                    source as Geary.FolderSupport.Archive
+                );
+                if (archive_source == null) {
+                    throw new Geary.EngineError.UNSUPPORTED(
+                        "Folder does not support archiving: %s",
+                        source.to_string()
+                    );
+                }
+                command = new ArchiveEmailCommand(
+                    archive_source,
+                    messages,
+                    /// Translators: Label for in-app notification.
+                    ngettext(
+                        "Conversation archived",
+                        "Conversations archived",
+                        messages.size
+                    ),
+                    undone_tooltip
+                );
+            } else {
+                Geary.FolderSupport.Move? move_source = (
+                    source as Geary.FolderSupport.Move
+                );
+                if (move_source == null) {
+                    throw new Geary.EngineError.UNSUPPORTED(
+                        "Folder does not support moving: %s",
+                        source.to_string()
+                    );
+                }
+                Geary.Folder? dest = source.account.get_special_folder(
+                    destination
+                );
+                if (dest == null) {
+                    throw new Geary.EngineError.NOT_FOUND(
+                        "No folder found for: %s", destination.to_string()
+                    );
+                }
+                command = new MoveEmailCommand(
+                    move_source,
                     dest,
-                    to_in_folder_email_ids(conversations),
-                    /// Translators: Label for in-app undo
+                    messages,
+                    /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the destination folder.
                     ngettext(
                         "Conversation moved to %s",
                         "Conversations moved to %s",
-                        conversations.size
-                    ).printf(dest.get_display_name()),
-                    /// Translators: Label for in-app undo
-                    /// notification. String substitution is the name
-                    /// of the source folder.
-                    ngettext(
-                        "Conversation restored to %s",
-                        "Conversations restored to %s",
-                        conversations.size
-                    ).printf(source.get_display_name())
-                ),
-                context.cancellable
-            );
+                        messages.size
+                    ).printf(destination.get_display_name()),
+                    undone_tooltip
+                );
+            }
+
+            yield context.commands.execute(command, context.cancellable);
         }
     }
 
-    public async void move_messages_special(Geary.FolderSupport.Move source,
+    public async void move_messages_special(Geary.Folder source,
                                             Geary.SpecialFolderType destination,
                                             Gee.Collection<Geary.EmailIdentifier> messages)
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
         if (context != null) {
-            Geary.Folder? dest = source.account.get_special_folder(destination);
-            if (dest == null) {
-                throw new Geary.EngineError.NOT_FOUND(
-                    "No folder found for: %s", destination.to_string()
-                );
-            }
+            Command? command = null;
+            /// Translators: Label for in-app notification. String
+            /// substitution is the name of the destination folder.
+            string undone_tooltip = ngettext(
+                "Message restored to %s",
+                "Messages restored to %s",
+                messages.size
+            ).printf(source.get_display_name());
 
-            yield context.commands.execute(
-                new MoveEmailCommand(
-                    source,
+            if (destination == ARCHIVE) {
+                Geary.FolderSupport.Archive? archive_source = (
+                    source as Geary.FolderSupport.Archive
+                );
+                if (archive_source == null) {
+                    throw new Geary.EngineError.UNSUPPORTED(
+                        "Folder does not support archiving: %s",
+                        source.to_string()
+                    );
+                }
+                command = new ArchiveEmailCommand(
+                    archive_source,
+                    messages,
+                    /// Translators: Label for in-app notification.
+                    ngettext(
+                        "Message archived",
+                        "Messages archived",
+                        messages.size
+                    ),
+                    undone_tooltip
+                );
+            } else {
+                Geary.FolderSupport.Move? move_source = (
+                    source as Geary.FolderSupport.Move
+                );
+                if (move_source == null) {
+                    throw new Geary.EngineError.UNSUPPORTED(
+                        "Folder does not support moving: %s",
+                        source.to_string()
+                    );
+                }
+
+                Geary.Folder? dest = source.account.get_special_folder(
+                    destination
+                );
+                if (dest == null) {
+                    throw new Geary.EngineError.NOT_FOUND(
+                        "No folder found for: %s", destination.to_string()
+                    );
+                }
+
+                command = new MoveEmailCommand(
+                    move_source,
                     dest,
                     messages,
-                    /// Translators: Label for in-app undo
+                    /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the destination folder.
                     ngettext(
@@ -719,17 +797,11 @@ public class Application.Controller : Geary.BaseObject {
                         "Messages moved to %s",
                         messages.size
                     ).printf(destination.get_display_name()),
-                    /// Translators: Label for in-app undo
-                    /// notification. String substitution is the name
-                    /// of the source folder.
-                    ngettext(
-                        "Message restored to %s",
-                        "Messages restored to %s",
-                        messages.size
-                    ).printf(source.get_display_name())
-                ),
-                context.cancellable
-            );
+                    undone_tooltip
+                );
+            }
+
+            yield context.commands.execute(command, context.cancellable);
         }
     }
 
@@ -2549,6 +2621,79 @@ private class Application.MoveEmailCommand : EmailCommand, RevokableCommand {
             return yield this.source.move_email_async(
                 this.source_messages,
                 this.destination.path,
+                cancellable
+            );
+        } finally {
+            if (open) {
+                try {
+                    yield this.source.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
+        }
+    }
+
+}
+
+
+private class Application.ArchiveEmailCommand : EmailCommand, RevokableCommand {
+
+
+    private Geary.FolderSupport.Archive source;
+    private Gee.Collection<Geary.EmailIdentifier> source_messages;
+
+    public ArchiveEmailCommand(Geary.FolderSupport.Archive source,
+                               Gee.Collection<Geary.EmailIdentifier> messages,
+                               string? executed_label = null,
+                               string? undone_label = null) {
+        this.source = source;
+        this.source_messages = messages;
+
+        this.executed_label = executed_label;
+        this.undone_label = undone_label;
+    }
+
+    internal override EmailCommand.StateChangePolicy folders_removed(
+        Gee.Collection<Geary.Folder> removed
+    ) {
+        EmailCommand.StateChangePolicy ret = IGNORE;
+        if (this.source in removed ||
+            Geary.traverse(removed).any(f => f.special_folder_type == ARCHIVE)) {
+            ret = REMOVE;
+        }
+        return ret;
+    }
+
+    internal override EmailCommand.StateChangePolicy email_removed(
+        Geary.Folder location,
+        Gee.Collection<Geary.EmailIdentifier> targets
+    ) {
+        EmailCommand.StateChangePolicy ret = IGNORE;
+        if (location == this.source) {
+            this.source_messages.remove_all(targets);
+            if (this.source_messages.is_empty) {
+                ret = REMOVE;
+            }
+        } else if (location.special_folder_type == ARCHIVE) {
+            // Don't actually know because of the revokable impl, so
+            // assume the worst
+            ret = REMOVE;
+        }
+        return ret;
+    }
+
+    protected override async Geary.Revokable
+        execute_impl(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.source.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
+            );
+            open = true;
+            return yield this.source.archive_email_async(
+                this.source_messages,
                 cancellable
             );
         } finally {
