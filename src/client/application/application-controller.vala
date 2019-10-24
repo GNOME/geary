@@ -554,31 +554,13 @@ public class Application.Controller : Geary.BaseObject {
             }
         }
 
-        AccountContext? context = this.accounts.get(target.information);
-        if (context != null) {
-            yield context.commands.execute(
-                new MarkEmailCommand(
-                    context.emails,
-                    messages,
-                    do_add ? flags : null,
-                    do_add ? null : flags,
-                    /// Translators: Label for in-app undo notification
-                    ngettext(
-                        "Conversation marked",
-                        "Conversations marked",
-                        selected.size
-                    ),
-                    /// Translators: Label for in-app undo notification
-                    ngettext(
-                        "Conversation un-marked",
-                        "Conversations un-marked",
-                        selected.size
-                    )
-
-                ),
-                context.cancellable
-            );
-        }
+        yield mark_messages(
+            target,
+            conversations,
+            messages,
+            do_add ? flags : null,
+            do_add ? null : flags
+        );
     }
 
     /**
@@ -590,6 +572,7 @@ public class Application.Controller : Geary.BaseObject {
      * case, use {@link mark_conversations}.
      */
     public async void mark_messages(Geary.Account target,
+                                    Gee.Collection<Geary.App.Conversation> conversations,
                                     Gee.Collection<Geary.EmailIdentifier> messages,
                                     Geary.EmailFlags? to_add,
                                     Geary.EmailFlags? to_remove)
@@ -602,17 +585,17 @@ public class Application.Controller : Geary.BaseObject {
                     messages,
                     to_add,
                     to_remove,
-                    /// Translators: Label for in-app undo notification
+                    /// Translators: Label for in-app notification
                     ngettext(
-                        "Message marked",
-                        "Messages marked",
-                        messages.size
+                        "Conversation marked",
+                        "Conversations marked",
+                        conversations.size
                     ),
-                    /// Translators: Label for in-app undo notification
+                    /// Translators: Label for in-app notification
                     ngettext(
-                        "Message un-marked",
-                        "Messages un-marked",
-                        messages.size
+                        "Conversation un-marked",
+                        "Conversations un-marked",
+                        conversations.size
                     )
                 ),
                 context.cancellable

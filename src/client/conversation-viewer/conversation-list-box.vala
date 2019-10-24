@@ -543,8 +543,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     public signal void email_removed(ConversationEmail email);
 
     /** Fired when the user updates the flags for a set of emails. */
-    public signal void mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
-        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
+    public signal void mark_emails(
+        Geary.App.Conversation conversation,
+        Gee.Collection<Geary.EmailIdentifier> emails,
+        Geary.EmailFlags? flags_to_add,
+        Geary.EmailFlags? flags_to_remove
+    );
 
 
     /**
@@ -1046,7 +1050,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         if (email_ids.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.UNREAD);
-            mark_emails(email_ids, null, flags);
+            mark_emails(this.conversation, email_ids, null, flags);
         }
     }
 
@@ -1137,7 +1141,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         Gee.Collection<Geary.EmailIdentifier> ids =
             new Gee.LinkedList<Geary.EmailIdentifier>();
         ids.add(view.email.id);
-        mark_emails(ids, flag_to_flags(to_add), flag_to_flags(to_remove));
+        mark_emails(
+            this.conversation,
+            ids,
+            flag_to_flags(to_add),
+            flag_to_flags(to_remove)
+        );
     }
 
     private void on_mark_email_from_here(ConversationEmail view,
@@ -1156,7 +1165,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                     }
                 }
             });
-        mark_emails(ids, flag_to_flags(to_add), flag_to_flags(to_remove));
+        mark_emails(
+            this.conversation,
+            ids,
+            flag_to_flags(to_add),
+            flag_to_flags(to_remove)
+        );
     }
 
     private void on_message_body_state_notify(GLib.Object obj,

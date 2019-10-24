@@ -1780,13 +1780,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     // Individual message view action callbacks
 
-    private void on_mark_messages(Gee.Collection<Geary.EmailIdentifier> messages,
+    private void on_mark_messages(Geary.App.Conversation conversation,
+                                  Gee.Collection<Geary.EmailIdentifier> messages,
                                   Geary.EmailFlags? to_add,
                                   Geary.EmailFlags? to_remove) {
         Geary.Account? target = this.selected_account;
         if (target != null) {
             this.application.controller.mark_messages.begin(
                 target,
+                Geary.Collection.single(conversation),
                 messages,
                 to_add,
                 to_remove,
