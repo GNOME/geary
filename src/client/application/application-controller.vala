@@ -45,16 +45,21 @@ public class Application.Controller : Geary.BaseObject {
         public Geary.App.EmailStore emails { get; private set; }
 
         /** The account's contact store */
-        public Application.ContactStore contacts { get; private set; }
+        public ContactStore contacts { get; private set; }
 
         /** The account's application command stack. */
-        public Application.CommandStack commands {
-            get; protected set; default = new CommandStack();
+        public CommandStack commands {
+            get { return this.controller_stack; }
         }
 
         /** A cancellable tied to the life-cycle of the account. */
         public Cancellable cancellable {
             get; private set; default = new Cancellable();
+        }
+
+        /** The account's application command stack. */
+        internal ControllerCommandStack controller_stack {
+            get; protected set; default = new ControllerCommandStack();
         }
 
         /** Determines if the account has an authentication problem. */
@@ -766,13 +771,13 @@ public class Application.Controller : Geary.BaseObject {
         throws GLib.Error {
         AccountContext? context = this.accounts.get(target.account.information);
         if (context != null) {
-            yield context.commands.execute(
-                new DeleteEmailCommand(
-                    target,
-                    to_in_folder_email_ids(conversations)
-                ),
-                context.cancellable
+            Gee.Collection<Geary.EmailIdentifier> ids =
+                to_in_folder_email_ids(conversations);
+            Command command = new DeleteEmailCommand(target, ids);
+            command.executed.connect(
+                () => context.controller_stack.email_removed(target, ids)
             );
+            yield context.commands.execute(command, context.cancellable);
         }
     }
 
@@ -781,10 +786,11 @@ public class Application.Controller : Geary.BaseObject {
         throws GLib.Error {
         AccountContext? context = this.accounts.get(target.account.information);
         if (context != null) {
-            yield context.commands.execute(
-                new DeleteEmailCommand(target, messages),
-                context.cancellable
+            Command command = new DeleteEmailCommand(target, messages);
+            command.executed.connect(
+                () => context.controller_stack.email_removed(target, messages)
             );
+            yield context.commands.execute(command, context.cancellable);
         }
     }
 
@@ -803,10 +809,14 @@ public class Application.Controller : Geary.BaseObject {
                 );
             }
 
-            yield context.commands.execute(
-                new EmptyFolderCommand(emptyable),
-                context.cancellable
+            Command command = new EmptyFolderCommand(emptyable);
+            command.executed.connect(
+                // Not quite accurate, but close enough
+                () => context.controller_stack.folders_removed(
+                    Geary.Collection.single(emptyable)
+                )
             );
+            yield context.commands.execute(command, context.cancellable);
         }
     }
 
@@ -1505,6 +1515,9 @@ public class Application.Controller : Geary.BaseObject {
 
                 has_prev = unavailable_iterator.previous();
             }
+
+            // Notify the command stack that folders have gone away
+            context.controller_stack.folders_removed(unavailable);
         }
     }
 
@@ -2249,6 +2262,105 @@ public class Application.Controller : Geary.BaseObject {
 }
 
 
+/** Base class for all application controller commands. */
+internal class Application.ControllerCommandStack : CommandStack {
+
+
+    /**
+     * Notifies the stack that one or more folders were removed.
+     *
+     * This will cause any commands involving the given folder to be
+     * removed from the stack. It should only be called as a response
+     * to un-recoverable changes, e.g. when the server notifies that a
+     * folder has been removed.
+     */
+    internal void folders_removed(Gee.Collection<Geary.Folder> removed) {
+        Gee.Iterator<Command> commands = this.undo_stack.iterator();
+        while (commands.next()) {
+            EmailCommand? email = commands.get() as EmailCommand;
+            if (email != null) {
+                if (email.folders_removed(removed) == REMOVE) {
+                    commands.remove();
+                }
+            }
+        }
+    }
+
+    /**
+     * Notifies the stack that email was removed from a folder.
+     *
+     * This will cause any commands involving the given email
+     * identifiers to be removed from commands where they are present,
+     * potentially also causing the command to be removed from the
+     * stack. It should only be called as a response to un-recoverable
+     * changes, e.g. when the server notifies that an email has been
+     * removed as a result of some other client removing it, or the
+     * message being deleted completely.
+     */
+    internal void email_removed(Geary.Folder location,
+                                Gee.Collection<Geary.EmailIdentifier> targets) {
+        Gee.Iterator<Command> commands = this.undo_stack.iterator();
+        while (commands.next()) {
+            EmailCommand? email = commands.get() as EmailCommand;
+            if (email != null) {
+                if (email.email_removed(location, targets) == REMOVE) {
+                    commands.remove();
+                }
+            }
+        }
+    }
+
+}
+
+
+/** Mixin for email-related commands. */
+public interface Application.EmailCommand : Command {
+
+
+    /** Specifies a command's response to external mail state changes. */
+    public enum StateChangePolicy {
+        /** The change can be ignored */
+        IGNORE,
+
+        /** The command is no longer valid and should be removed */
+        REMOVE;
+    }
+
+
+    /**
+     * Determines the command's response when a folder is removed.
+     *
+     * This is called when some external means (such as another
+     * command, or another email client altogether) has caused a
+     * folder to be removed.
+     *
+     * The returned policy will determine if the command is unaffected
+     * by the change and hence can remain on the stack, or is no
+     * longer valid and hence must be removed.
+     */
+    internal abstract StateChangePolicy folders_removed(
+        Gee.Collection<Geary.Folder> removed
+    );
+
+    /**
+     * Determines the command's response when email is removed.
+     *
+     * This is called when some external means (such as another
+     * command, or another email client altogether) has caused a
+     * email in a folder to be removed.
+     *
+     * The returned policy will determine if the command is unaffected
+     * by the change and hence can remain on the stack, or is no
+     * longer valid and hence must be removed.
+     */
+    internal abstract StateChangePolicy email_removed(
+        Geary.Folder location,
+        Gee.Collection<Geary.EmailIdentifier> targets
+    );
+
+}
+
+
 /**
  * Mixin for trivial application commands.
  *
@@ -2260,7 +2372,8 @@ public interface Application.TrivialCommand : Command {
 }
 
 
-private class Application.MarkEmailCommand : TrivialCommand, Command {
+private class Application.MarkEmailCommand :
+    TrivialCommand, EmailCommand, Command {
 
 
     private Geary.App.EmailStore store;
@@ -2295,6 +2408,26 @@ private class Application.MarkEmailCommand : TrivialCommand, Command {
         throws GLib.Error {
         yield this.store.mark_email_async(
             this.messages, this.to_remove, this.to_add, cancellable
+        );
+    }
+
+    internal override EmailCommand.StateChangePolicy folders_removed(
+        Gee.Collection<Geary.Folder> removed
+    ) {
+        // Not much we can do here without expensive DB querying, so
+        // assume we are okay
+        return IGNORE;
+    }
+
+    internal override EmailCommand.StateChangePolicy email_removed(
+        Geary.Folder location,
+        Gee.Collection<Geary.EmailIdentifier> targets
+    ) {
+        this.messages.remove_all(targets);
+        return (
+            this.messages.is_empty
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : EmailCommand.StateChangePolicy.IGNORE
         );
     }
 
@@ -2354,7 +2487,7 @@ private abstract class Application.RevokableCommand : Command {
 }
 
 
-private class Application.MoveEmailCommand : RevokableCommand {
+private class Application.MoveEmailCommand : EmailCommand, RevokableCommand {
 
 
     private Geary.FolderSupport.Move source;
@@ -2374,6 +2507,34 @@ private class Application.MoveEmailCommand : RevokableCommand {
 
         this.executed_label = executed_label;
         this.undone_label = undone_label;
+    }
+
+    internal override EmailCommand.StateChangePolicy folders_removed(
+        Gee.Collection<Geary.Folder> removed
+    ) {
+        return (
+            this.source in removed || this.destination in removed
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : EmailCommand.StateChangePolicy.IGNORE
+        );
+    }
+
+    internal override EmailCommand.StateChangePolicy email_removed(
+        Geary.Folder location,
+        Gee.Collection<Geary.EmailIdentifier> targets
+    ) {
+        EmailCommand.StateChangePolicy ret = IGNORE;
+        if (location == this.source) {
+            this.source_messages.remove_all(targets);
+            if (this.source_messages.is_empty) {
+                ret = REMOVE;
+            }
+        } else if (location == this.destination) {
+            // Don't actually know because of the revokable impl, so
+            // assume the worst
+            ret = REMOVE;
+        }
+        return ret;
     }
 
     protected override async Geary.Revokable
@@ -2404,7 +2565,7 @@ private class Application.MoveEmailCommand : RevokableCommand {
 }
 
 
-private class Application.CopyEmailCommand : Command {
+private class Application.CopyEmailCommand : EmailCommand, Command {
 
 
     public override bool can_undo {
@@ -2457,6 +2618,34 @@ private class Application.CopyEmailCommand : Command {
         throw new Geary.EngineError.UNSUPPORTED(
             "Cannot undo copy, not yet supported"
         );
+    }
+
+    internal override EmailCommand.StateChangePolicy folders_removed(
+        Gee.Collection<Geary.Folder> removed
+    ) {
+        return (
+            this.source in removed || this.destination in removed
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : EmailCommand.StateChangePolicy.IGNORE
+        );
+    }
+
+    internal override EmailCommand.StateChangePolicy email_removed(
+        Geary.Folder location,
+        Gee.Collection<Geary.EmailIdentifier> targets
+    ) {
+        EmailCommand.StateChangePolicy ret = IGNORE;
+        if (location == this.source) {
+            this.source_messages.remove_all(targets);
+            if (this.source_messages.is_empty) {
+                ret = REMOVE;
+            }
+        } else if (location == this.destination) {
+            // Don't actually know because of the revokable impl, so
+            // assume the worst
+            ret = REMOVE;
+        }
+        return ret;
     }
 
 }
