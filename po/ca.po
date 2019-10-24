@@ -39,7 +39,7 @@ msgstr "Enviar fitxers a través de Geary"
 #: desktop/org.gnome.Geary.desktop.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:555
 msgid "Geary"
-msgstr "Geary "
+msgstr "Geary"
 
 #: desktop/geary-autostart.desktop.in:4 desktop/org.gnome.Geary.desktop.in:4
 msgid "Email"
@@ -2463,7 +2463,7 @@ msgstr "S_erif"
 
 #: ui/composer-menus.ui:17
 msgid "_Fixed Width"
-msgstr "Ample _Fix"
+msgstr "Ample _fix"
 
 #: ui/composer-menus.ui:24
 msgid "_Small"
@@ -2778,7 +2778,7 @@ msgstr "Però en realitat va a:"
 
 #: ui/conversation-message.ui:723
 msgid "The link appears to go to:"
-msgstr "L'enllaç apareix en l'anar a:"
+msgstr "L'enllaç apareix en anar a:"
 
 #: ui/conversation-message.ui:735
 msgid "Deceptive link found"
