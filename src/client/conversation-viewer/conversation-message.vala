@@ -338,7 +338,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** Fired when the user clicks a internal link in the email. */
     public signal void internal_link_activated(int y);
 
-    /** Fired when the user requests remote images be loaded. */
+    /** Fired when the email should be flagged for remote image loading. */
     public signal void flag_remote_images();
 
     /** Fired when the user saves an inline displayed image. */
@@ -969,14 +969,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         );
     }
 
-    private void show_images(bool remember) {
+    private void show_images(bool update_email_flag) {
         start_progress_loading();
         this.remote_images_infobar.hide();
         this.load_remote_resources = true;
         this.remote_resources_requested = 0;
         this.remote_resources_loaded = 0;
         this.web_view.load_remote_images();
-        if (remember) {
+        if (update_email_flag) {
             flag_remote_images();
         }
     }
