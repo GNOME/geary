@@ -1,15 +1,60 @@
-option('valadoc', type: 'boolean', value: false, description: 'Whether to build the documentaton (requires valadoc).')
-option('contractor', type: 'boolean', value: false, description: 'Whether to install the contractor file (Elementary OS-specific).')
-option('poodle', type: 'boolean', value: true, description: 'Whether to apply the POODLE SSLv3 fix.')
-option('ref_tracking', type: 'boolean', value: false, description: 'Whether to use explicit reference tracking.')
-option('iso_639_xml', type: 'string', value: '', description: 'Full path to the ISO 639 XML file.')
-option('iso_3166_xml', type: 'string', value: '', description: 'Full path to the ISO 3166 XML file.')
-option('libunwind_optional', type: 'boolean', value: false, description: 'Determines if libunwind is required.')
-option('tnef-support', type: 'boolean', value: true, description: 'Whether to support TNEF attachments (requires libytnef).')
+#
+# General build options
+#
+option(
+  'contractor',
+  type: 'boolean',
+  value: false,
+  description: 'Whether to install the contractor file (Elementary OS-specific).'
+)
+option(
+  'iso_639_xml',
+  type: 'string',
+  value: '',
+  description: 'Full path to the ISO 639 XML file.'
+)
+option(
+  'iso_3166_xml',
+  type: 'string',
+  value: '',
+  description: 'Full path to the ISO 3166 XML file.'
+)
+option(
+  'libunwind_optional',
+  type: 'boolean',
+  value: false,
+  description: 'Determines if libunwind is required.'
+)
+option(
+  'poodle',
+  type: 'boolean',
+  value: true,
+  description: 'Whether to apply the POODLE SSLv3 fix.'
+)
+option(
+  'tnef-support',
+  type: 'boolean',
+  value: true,
+  description: 'Whether to support TNEF attachments (requires libytnef).'
+)
+option(
+  'valadoc',
+  type: 'boolean',
+  value: false,
+  description: 'Whether to build the documentaton (requires valadoc).'
+)
+
+# Development options
 option(
   'profile',
   type: 'combo',
   value: 'default',
   choices: ['default','development','beta'],
   description: 'Specifies the application type to be built'
+)
+option(
+  'ref_tracking',
+  type: 'boolean',
+  value: false,
+  description: 'Whether to use explicit reference tracking.'
 )

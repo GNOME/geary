@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2019-03-25 13:04+0000\n"
-"PO-Revision-Date: 2019-04-04 14:18+0200\n"
+"POT-Creation-Date: 2019-09-27 12:58+0000\n"
+"PO-Revision-Date: 2019-09-29 15:48+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -734,30 +734,24 @@ msgid "Preferences"
 msgstr "Preferencje"
 
 #. (itstool) path: page/p
-#: C/preferences.page:11
+#: C/preferences.page:12
 msgid ""
-"The <gui>Preferences</gui> option is available in either Geary's application "
-"menu or the gear menu in the upper-right of the toolbar. (The location "
-"depends on the install desktop shell. For GNOME Shell and Unity, the "
-"application menu is available near the top-left corner of the screen.)"
+"Geary allows you to customise how it works via its <gui>Preferences</gui> "
+"window. To open the window, select <gui>Preferences</gui> from the "
+"application menu on the main window's toolbar. You can change the following "
+"options:"
 msgstr ""
-"<gui>Preferencje</gui> są dostępne w menu programu lub menu z kołem zębatym "
-"w górnym prawym rogu paska narzędziowego, zależnie od zainstalowanego "
-"środowiska. W środowiskach GNOME i Unity menu programu znajduje się obok "
-"górnego lewego rogu ekranu."
-
-#. (itstool) path: section/title
-#: C/preferences.page:17
-msgid "Reading"
-msgstr "Czytanie"
+"Można dostosować działanie programu w jego oknie <gui>Preferencji</gui>. Aby "
+"je otworzyć, wybierz <gui>Preferencje</gui> z menu programu na pasku "
+"narzędziowym głównego okna. Opcje, które można zmienić:"
 
 #. (itstool) path: item/title
-#: C/preferences.page:20
+#: C/preferences.page:19
 msgid "<gui>Automatically select next message</gui>"
 msgstr "<gui>Automatyczne wybieranie następnej wiadomości</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:21
+#: C/preferences.page:20
 msgid ""
 "When this option is enabled, Geary automatically selects the latest message "
 "in a folder when you enter the folder. In addition, after archiving a "
@@ -797,46 +791,13 @@ msgstr ""
 "panelach. Jeśli wyłączono tę opcję, lista katalogów i lista wątków są "
 "umieszczone pionowo w jednym panelu."
 
-#. (itstool) path: section/title
-#: C/preferences.page:40
-msgid "Notifications"
-msgstr "Powiadomienia"
-
 #. (itstool) path: item/title
-#: C/preferences.page:43
-msgid "<gui>Play notification sounds</gui>"
-msgstr "<gui>Dźwięki powiadomień</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:44
-msgid "When set, Geary plays a sound whenever a new message arrives."
-msgstr "Po włączeniu przy nadejściu wiadomości odtwarzany jest dźwięk."
-
-#. (itstool) path: item/title
-#: C/preferences.page:47
-msgid "<gui>Show notifications for new mail</gui>"
-msgstr "<gui>Powiadomienia o nowych wiadomościach</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:48
-msgid ""
-"When set, Geary displays a <em>notification</em> each time a new message "
-"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
-"Shell, notifications appear at the bottom of the display (older versions) or "
-"centered just below the top bar (newer versions). In Ubuntu Unity, "
-"notifications appear at the upper right of the display."
-msgstr ""
-"Po włączeniu przy nadejściu wiadomości wyświetlane jest <em>powiadomienie</"
-"em>. Powiadomienia są różnie wyświetlane w zależności od środowiska. GNOME "
-"wyświetla je pod górnym paskiem, a Unity w górnym prawym rogu ekranu."
-
-#. (itstool) path: item/title
-#: C/preferences.page:54
+#: C/preferences.page:38
 msgid "<gui>Watch for new mail when closed</gui>"
 msgstr "<gui>Monitorowanie nowych wiadomości po zamknięciu</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:55
+#: C/preferences.page:39
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "

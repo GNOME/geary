@@ -338,13 +338,13 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /** Fired when the user clicks a internal link in the email. */
     public signal void internal_link_activated(int y);
 
-    /** Fired when the user requests remote images be loaded. */
+    /** Fired when the email should be flagged for remote image loading. */
     public signal void flag_remote_images();
 
     /** Fired when the user saves an inline displayed image. */
     public signal void save_image(string? uri, string? alt_text, Geary.Memory.Buffer buffer);
 
- 
+
     /**
      * Constructs a new view from an email's headers and body.
      *
@@ -737,7 +737,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                              GLib.Cancellable cancellable)
         throws GLib.IOError.CANCELLED {
         uint headers_found = 0;
-        uint webkit_found = 0;
         foreach(string raw_match in search_matches) {
             string match = raw_match.casefold();
 
@@ -755,7 +754,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
         }
 
-        webkit_found += yield this.web_view.highlight_search_terms(
+        uint webkit_found = yield this.web_view.highlight_search_terms(
             search_matches, cancellable
         );
         return headers_found + webkit_found;
@@ -970,14 +969,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         );
     }
 
-    private void show_images(bool remember) {
+    private void show_images(bool update_email_flag) {
         start_progress_loading();
         this.remote_images_infobar.hide();
         this.load_remote_resources = true;
         this.remote_resources_requested = 0;
         this.remote_resources_loaded = 0;
         this.web_view.load_remote_images();
-        if (remember) {
+        if (update_email_flag) {
             flag_remote_images();
         }
     }

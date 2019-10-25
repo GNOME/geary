@@ -9,8 +9,8 @@
  *
  * Following the GNOME HIG, it should only contain a label and maybe a button.
  */
-[GtkTemplate (ui = "/org/gnome/Geary/in-app-notification.ui")]
-public class InAppNotification : Gtk.Revealer {
+[GtkTemplate (ui = "/org/gnome/Geary/components-in-app-notification.ui")]
+public class Components.InAppNotification : Gtk.Revealer {
 
     /** Length of the default timeout to close the notification. */
     public const uint DEFAULT_KEEPALIVE = 5;

@@ -1,3 +1,37 @@
+Version 3.35.1
+~~~~~~~~~~~~~~~
+Released: 2019-10-11
+
+Changes:
+ * Improved missing attachment detection in composer
+ * App-wide notification preferences now handled by desktop
+ * Initial plugin system
+ * Rename development app id to org.gnome.Geary.Devel
+ * Publish nightly devel Flatpak builds to nightly.gnome.org
+ * Tighten Flatpak sandbox permissions
+ * Convert Flatpak manifest to YML
+ * Roll up bugs fixed in 3.34.1
+ * Add libpeas dependency
+ * Drop libcanberra dependency
+ * Update meson dependency to >= 0.50
+ * Misc bug fixes and code cleanup
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Alex Henrie
+ * Bilal Elmoussaoui
+ * João Loureiro
+ * Konstantin Kharlamov
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Asier Sarasua Garmendia (eu)
+ * Marek Černocký (cs)
+
+And for the user manual:
+ * Marek Černocký (cs)
+ * Piotr Drąg (pl)
+
 Version 3.33.91
 ~~~~~~~~~~~~~~~
 Released: 2019-09-11

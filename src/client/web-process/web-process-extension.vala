@@ -13,8 +13,10 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
     bool logging_enabled = data.get_boolean();
 
     Geary.Logging.init();
-    if (logging_enabled)
+    GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
+    if (logging_enabled) {
         Geary.Logging.log_to(stdout);
+    }
 
     debug("Initialising...");
 

@@ -89,7 +89,17 @@
   <translation type="gettext">geary</translation>
 
   <releases>
-    <release version="3.34">
+    <release version="3.36" date="">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>App-wide notification preferences now handled by desktop</li>
+          <li>Improved missing attachment detection in composer</li>
+          <li>Initial plugin system</li>
+        </ul>
+      </description>
+    </release>
+    <release version="3.34" date="2019-09-21">
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
@@ -103,7 +113,7 @@
         </ul>
       </description>
     </release>
-    <release version="3.32">
+    <release version="3.32" date="2019-08-04">
       <description>
         <p>Enhancements included in this release:</p>
         <ul>

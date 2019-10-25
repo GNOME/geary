@@ -2,7 +2,7 @@
  * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -30,17 +30,12 @@ public interface Geary.FolderSupport.Create : Folder {
      * time to be set when saved.  Like EmailFlags, this is optional
      * if not applicable.
      *
-     * If an id is passed, this will replace the existing message by
-     * deleting it after the new message is created.  The new
-     * message's ID is returned.
-     *
      * @see FolderProperties.create_never_returns_id
      */
     public abstract async EmailIdentifier?
         create_email_async(RFC822.Message rfc822,
                            EmailFlags? flags,
                            DateTime? date_received,
-                           EmailIdentifier? id,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error;
 

@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2019-06-19 10:27+0000\n"
-"PO-Revision-Date: 2019-09-16 01:24+0200\n"
+"Project-Id-Version: geary\n"
+"POT-Creation-Date: 2019-09-27 12:58+0000\n"
+"PO-Revision-Date: 2019-10-01 17:41+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -734,30 +734,24 @@ msgid "Preferences"
 msgstr "Předvolby"
 
 #. (itstool) path: page/p
-#: C/preferences.page:11
+#: C/preferences.page:12
 msgid ""
-"The <gui>Preferences</gui> option is available in either Geary's application "
-"menu or the gear menu in the upper-right of the toolbar. (The location "
-"depends on the install desktop shell. For GNOME Shell and Unity, the "
-"application menu is available near the top-left corner of the screen.)"
+"Geary allows you to customise how it works via its <gui>Preferences</gui> "
+"window. To open the window, select <gui>Preferences</gui> from the "
+"application menu on the main window's toolbar. You can change the following "
+"options:"
 msgstr ""
-"Položku <gui>Předvolby</gui> najdete v aplikační nabídce Geary a v nabídce v "
-"pravém horním rohu nástrojové lišty. (Přesné umístění záleží na "
-"nainstalovaném pracovním prostředí. V GNOME Shell a Unity se aplikační "
-"nabídky nachází poblíž levého horního rohu obrazovky.)"
-
-#. (itstool) path: section/title
-#: C/preferences.page:17
-msgid "Reading"
-msgstr "Čtení"
+"Pomocí okna <gui>Předvolby</gui> si můžete přizpůsobit, jak má pošťák Geary "
+"fungovat. <gui>Předvolby</gui> otevřete pomocí nabídky aplikace v záhlavní "
+"liště. Měnit můžete následující věci:"
 
 #. (itstool) path: item/title
-#: C/preferences.page:20
+#: C/preferences.page:19
 msgid "<gui>Automatically select next message</gui>"
 msgstr "<gui>Automaticky vybrat další zprávu</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:21
+#: C/preferences.page:20
 msgid ""
 "When this option is enabled, Geary automatically selects the latest message "
 "in a folder when you enter the folder. In addition, after archiving a "
@@ -797,48 +791,13 @@ msgstr ""
 "Když není vybráno, budou seznam složek a seznam konverzací svisle nad sebou "
 "v jediném panelu."
 
-#. (itstool) path: section/title
-#: C/preferences.page:40
-msgid "Notifications"
-msgstr "Upozornění"
-
 #. (itstool) path: item/title
-#: C/preferences.page:43
-msgid "<gui>Play notification sounds</gui>"
-msgstr "<gui>Přehrávat zvuková upozornění</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:44
-msgid "When set, Geary plays a sound whenever a new message arrives."
-msgstr "Když je zapnuto, Geary přehraje zvuk pokaždé, když dorazí nová zpráva."
-
-#. (itstool) path: item/title
-#: C/preferences.page:47
-msgid "<gui>Show notifications for new mail</gui>"
-msgstr "<gui>Zobrazit upozornění na nový e-mail</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:48
-msgid ""
-"When set, Geary displays a <em>notification</em> each time a new message "
-"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
-"Shell, notifications appear at the bottom of the display (older versions) or "
-"centered just below the top bar (newer versions). In Ubuntu Unity, "
-"notifications appear at the upper right of the display."
-msgstr ""
-"Když je zapnuto, zobrazí Geary <em>upozornění</em> pokaždé, když dorazí nová "
-"zpráva. Upozornění se zobrazují podle zvyklostí systému. V GNOME Shell se "
-"zobrazují ve spodní části obrazovky (starší verze) nebo uprostřed přímo pod "
-"horní lištou (novější verze). V Ubuntu Unity se zobrazují v pravém horním "
-"rohu obrazovky."
-
-#. (itstool) path: item/title
-#: C/preferences.page:54
+#: C/preferences.page:38
 msgid "<gui>Watch for new mail when closed</gui>"
 msgstr "<gui>Sledovat novou poštu při zavřené aplikaci</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:55
+#: C/preferences.page:39
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "

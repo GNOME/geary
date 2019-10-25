@@ -1,4 +1,4 @@
-system_icons_dir = join_paths(datadir, 'icons', 'hicolor')
+system_icons_dir = join_paths(data_dir, 'icons', 'hicolor')
 
 icon_files = files(
   'mail-archive-symbolic.svg',
@@ -45,7 +45,7 @@ scalable_dir = join_paths('hicolor', 'scalable', 'apps')
 
 install_data(
   join_paths(scalable_dir, 'org.gnome.Geary.svg'),
-  install_dir: join_paths(datadir, 'icons', scalable_dir),
+  install_dir: join_paths(data_dir, 'icons', scalable_dir),
   rename: '@0@.svg'.format(geary_id)
 )
 
@@ -53,7 +53,6 @@ symbolic_dir = join_paths('hicolor', 'symbolic', 'apps')
 
 install_data(
   join_paths(symbolic_dir, 'org.gnome.Geary-symbolic.svg'),
-  install_dir: join_paths(datadir, 'icons', symbolic_dir),
+  install_dir: join_paths(data_dir, 'icons', symbolic_dir),
   rename: '@0@-symbolic.svg'.format(geary_id)
 )
-

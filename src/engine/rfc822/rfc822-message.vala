@@ -372,7 +372,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
     // Makes a copy of the given message without the BCC fields. This is used for sending the email
     // without sending the BCC headers to all recipients.
-    public Message.without_bcc(Message email) {
+    public Message.without_bcc(Message email) throws GLib.Error {
         // GMime doesn't make it easy to get a copy of the body of a message.  It's easy to
         // make a new message and add in all the headers, but calling set_mime_part() with
         // the existing one's get_mime_part() result yields a double Content-Type header in
@@ -380,11 +380,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         // Barring any better way to clone a message, which I couldn't find by looking at
         // the docs, we just dump out the old message to a buffer and read it back in to
         // create the new object.  Kinda sucks, but our hands are tied.
-        try {
-            this.from_buffer (email.message_to_memory_buffer(false, false));
-        } catch (Error e) {
-            error("Error creating a memory buffer from a message: %s", e.message);
-        }
+        this.from_buffer(email.message_to_memory_buffer(false, false));
 
         // GMime also drops the ball for the *new* message.  When it comes out of the GMime
         // Parser, its "mime part" somehow isn't realizing it has a Content-Type header

@@ -4,10 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-extern const string LANGUAGE_SUPPORT_DIRECTORY;
-extern const string ISO_CODE_639_XML;
-extern const string ISO_CODE_3166_XML;
-public const string TRANSLATABLE = "translatable";
+extern const string _LANGUAGE_SUPPORT_DIRECTORY;
+extern const string _ISO_CODE_639_XML;
+extern const string _ISO_CODE_3166_XML;
 
 namespace Util.International {
 
@@ -25,7 +24,7 @@ namespace Util.International {
 
     // TODO: Geary should be able to use langpacks from the build directory
     private string get_langpack_dir_path(string program_path) {
-        return LANGUAGE_SUPPORT_DIRECTORY;
+        return _LANGUAGE_SUPPORT_DIRECTORY;
     }
 
     /**
@@ -147,7 +146,7 @@ namespace Util.International {
         if (language_names == null) {
             language_names = new HashTable<string, string>(GLib.str_hash, GLib.str_equal);
 
-            unowned Xml.Doc doc = Xml.Parser.parse_file(ISO_CODE_639_XML);
+            unowned Xml.Doc doc = Xml.Parser.parse_file(_ISO_CODE_639_XML);
             if (doc == null) {
                 return null;
             }
@@ -197,7 +196,7 @@ namespace Util.International {
         if (country_names == null) {
             country_names = new HashTable<string, string>(GLib.str_hash, GLib.str_equal);
 
-            unowned Xml.Doc doc = Xml.Parser.parse_file(ISO_CODE_3166_XML);
+            unowned Xml.Doc doc = Xml.Parser.parse_file(_ISO_CODE_3166_XML);
 
             if (doc == null) {
                 return null;

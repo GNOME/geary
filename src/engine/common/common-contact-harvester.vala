@@ -55,16 +55,28 @@ internal class Geary.ContactHarvesterImpl : BaseObject, ContactHarvester {
             foreach (Email message in messages) {
                 if (message.fields.fulfills(REQUIRED_FIELDS)) {
                     type = Email.Field.ORIGINATORS;
-                    add_contacts(contacts, message.from, type, importance);
+                    yield add_contacts(
+                        contacts, message.from, type, importance, cancellable
+                    );
                     if (message.sender != null) {
-                        add_contact(contacts, message.sender, type, importance);
+                        yield add_contact(
+                            contacts, message.sender, type, importance, cancellable
+                        );
                     }
-                    add_contacts(contacts, message.bcc, type, importance);
+                    yield add_contacts(
+                        contacts, message.bcc, type, importance, cancellable
+                    );
 
                     type = Email.Field.RECEIVERS;
-                    add_contacts(contacts, message.to, type, importance);
-                    add_contacts(contacts, message.cc, type, importance);
-                    add_contacts(contacts, message.bcc, type, importance);
+                    yield add_contacts(
+                        contacts, message.to, type, importance, cancellable
+                    );
+                    yield add_contacts(
+                        contacts, message.cc, type, importance, cancellable
+                    );
+                    yield add_contacts(
+                        contacts, message.bcc, type, importance, cancellable
+                    );
                 }
             }
 
@@ -72,33 +84,55 @@ internal class Geary.ContactHarvesterImpl : BaseObject, ContactHarvester {
         }
     }
 
-    private void add_contacts(Gee.Map<string, Contact> contacts,
-                              RFC822.MailboxAddresses? addresses,
-                              Email.Field type,
-                              int importance) {
+    private async void add_contacts(Gee.Map<string, Contact> contacts,
+                                    RFC822.MailboxAddresses? addresses,
+                                    Email.Field type,
+                                    int importance,
+                                    GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (addresses != null) {
             foreach (RFC822.MailboxAddress address in addresses) {
-                add_contact(contacts, address, type, importance);
+                yield add_contact(
+                    contacts, address, type, importance, cancellable
+                );
             }
         }
     }
 
-    private inline void add_contact(Gee.Map<string, Contact> contacts,
-                                    RFC822.MailboxAddress address,
-                                    Email.Field type,
-                                    int importance) {
+    private async void add_contact(Gee.Map<string, Contact> contacts,
+                                   RFC822.MailboxAddress address,
+                                   Email.Field type,
+                                   int importance,
+                                   GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (address.is_valid() && !address.is_spoofed()) {
             if (type == RECEIVERS && address in this.owner_mailboxes) {
                 importance = Contact.Importance.RECEIVED_FROM;
             }
 
-            Contact contact = new Contact.from_rfc822_address(
-                address, importance
-            );
-            Contact? existing = contacts[contact.normalized_email];
-            if (existing == null ||
-                existing.highest_importance < contact.highest_importance) {
+            Contact? contact = contacts[
+                Contact.normalise_email(address.address)
+            ];
+            if (contact == null) {
+                contact = yield this.store.get_by_rfc822(address, cancellable);
+                if (contact == null) {
+                    contact = new Geary.Contact.from_rfc822_address(
+                        address, importance
+                    );
+                }
                 contacts[contact.normalized_email] = contact;
+            }
+
+            // Update the contact's name if the current address is at
+            // least equal importance to the existing one so that the
+            // sender's labels are preferred.
+            if (contact.highest_importance <= importance &&
+                !String.is_empty_or_whitespace(address.name)) {
+                contact.real_name = address.name;
+            }
+
+            if (contact.highest_importance < importance) {
+                contact.highest_importance = importance;
             }
         }
     }

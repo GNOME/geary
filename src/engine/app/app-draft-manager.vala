@@ -408,8 +408,13 @@ public class Geary.App.DraftManager : BaseObject {
             return false;
 
         // make sure there's a folder to work with
-        if (drafts_folder == null || drafts_folder.get_open_state() == Folder.OpenState.CLOSED) {
-            fatal(new EngineError.SERVER_UNAVAILABLE("%s: premature drafts folder close", to_string()));
+        if (this.drafts_folder == null ||
+            this.drafts_folder.get_open_state() == CLOSED) {
+            fatal(
+                new EngineError.SERVER_UNAVAILABLE(
+                    "%s: premature drafts folder close", to_string()
+                )
+            );
 
             return false;
         }
@@ -417,44 +422,52 @@ public class Geary.App.DraftManager : BaseObject {
         // at this point, only operation left is PUSH
         assert(op.op_type == OperationType.PUSH);
 
-        draft_state = DraftState.STORING;
+        this.draft_state = DraftState.STORING;
 
-        // delete old draft for all PUSHes: best effort ... since create_email_async() will handle
-        // replacement in a transactional-kinda-way, only outright delete if not using create
-        if (current_draft_id != null && op.draft == null) {
-            bool success = false;
-            try {
-                yield remove_support.remove_email_async(
-                    iterate<EmailIdentifier>(current_draft_id).to_array_list());
-                success = true;
-            } catch (Error err) {
-                debug("%s: Unable to remove existing draft %s: %s", to_string(), current_draft_id.to_string(),
-                    err.message);
-            }
-
-            // always clear draft id (assuming that retrying a failed remove is unnecessary), but
-            // only signal the discard if it actually was removed
-            current_draft_id = null;
-            if (success)
-                notify_discarded();
-        }
-
-        // if draft supplied, save it
+        // if draft supplied, save it, and delete the old one if it
+        // exists
         if (op.draft != null) {
             try {
-                current_draft_id = yield create_support.create_email_async(op.draft, op.flags,
-                    op.date_received, current_draft_id, null);
+                EmailIdentifier? old_id = this.current_draft_id;
+                this.current_draft_id =
+                    yield this.create_support.create_email_async(
+                        op.draft,
+                        op.flags,
+                        op.date_received,
+                        null
+                    );
 
-                draft_state = DraftState.STORED;
+                if (old_id != null) {
+                    yield this.remove_support.remove_email_async(
+                        Collection.single(old_id), null
+                    );
+                }
+
+                this.draft_state = DraftState.STORED;
                 notify_stored(op.draft);
-            } catch (Error err) {
-                draft_state = DraftState.ERROR;
-
-                // notify subscribers
+            } catch (GLib.Error err) {
+                this.draft_state = DraftState.ERROR;
                 draft_failed(op.draft, err);
             }
         } else {
-            draft_state = DraftState.NOT_STORED;
+            this.draft_state = DraftState.NOT_STORED;
+
+            // Delete the old draft if present so it's not hanging
+            // around
+            if (this.current_draft_id != null) {
+                try {
+                    yield this.remove_support.remove_email_async(
+                        Collection.single(this.current_draft_id),
+                        null
+                    );
+                    notify_discarded();
+                } catch (GLib.Error err) {
+                    warning("%s: Unable to remove existing draft %s: %s",
+                            to_string(),
+                            current_draft_id.to_string(),
+                            err.message);
+                }
+            }
         }
 
         return true;
@@ -463,5 +476,5 @@ public class Geary.App.DraftManager : BaseObject {
     public string to_string() {
         return "%s DraftManager".printf(account.to_string());
     }
-}
 
+}

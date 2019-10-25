@@ -83,7 +83,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     }
 
     public new ConversationListStore? get_model() {
-        return (this as Gtk.TreeView).get_model() as ConversationListStore;
+        return base.get_model() as ConversationListStore;
     }
 
     public new void set_model(ConversationListStore? new_store) {
@@ -117,7 +117,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         // fire selection signals while changing the model.
         Gtk.TreeSelection selection = get_selection();
         selection.changed.disconnect(on_selection_changed);
-        (this as Gtk.TreeView).set_model(new_store);
+        base.set_model(new_store);
         this.selected.clear();
         selection.changed.connect(on_selection_changed);
     }

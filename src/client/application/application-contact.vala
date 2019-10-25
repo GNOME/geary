@@ -74,12 +74,15 @@ public class Application.Contact : Geary.BaseObject {
     /** The Folks individual for the contact, if any. */
     internal Folks.Individual? individual { get; private set; }
 
+    /** The Engine contact, if any. */
+    private Geary.Contact? engine = null;
+
     private weak ContactStore store;
 
 
     private Contact(ContactStore store, Folks.Individual? source) {
         this.store = store;
-        update_individual(source);
+        update_from_individual(source);
         update();
     }
 
@@ -92,15 +95,20 @@ public class Application.Contact : Geary.BaseObject {
                                 string display_name,
                                 Geary.Contact source) {
         this(store, null);
-        Geary.RFC822.MailboxAddress mailbox = source.get_rfc822_address();
+        this.engine = source;
+        this.engine.flags.added.connect(on_engine_flags_changed);
+        this.engine.flags.removed.connect(on_engine_flags_changed);
         update_name(display_name);
-        this._email_addresses = Geary.Collection.single(mailbox);
-        this.load_remote_resources = source.flags.always_load_remote_images();
+        update_from_engine();
     }
 
     ~Contact() {
         // Disconnect from signals if any
-        update_individual(null);
+        update_from_individual(null);
+        if (this.engine != null) {
+            this.engine.flags.added.disconnect(on_engine_flags_changed);
+            this.engine.flags.removed.disconnect(on_engine_flags_changed);
+        }
     }
 
     /**
@@ -201,7 +209,7 @@ public class Application.Contact : Geary.BaseObject {
             );
         }
 
-        update_individual(individual);
+        update_from_individual(individual);
         update();
         changed();
 
@@ -309,7 +317,7 @@ public class Application.Contact : Geary.BaseObject {
             Geary.RFC822.MailboxAddress.is_valid_address(name);
     }
 
-    private void update_individual(Folks.Individual? replacement) {
+    private void update_from_individual(Folks.Individual? replacement) {
         if (this.individual != null) {
             this.individual.notify.disconnect(this.on_individual_notify);
             this.individual.removed.disconnect(this.on_individual_removed);
@@ -321,6 +329,12 @@ public class Application.Contact : Geary.BaseObject {
             this.individual.notify.connect(this.on_individual_notify);
             this.individual.removed.connect(this.on_individual_removed);
         }
+    }
+
+    private void update_from_engine() {
+        Geary.RFC822.MailboxAddress mailbox = this.engine.get_rfc822_address();
+        this._email_addresses = Geary.Collection.single(mailbox);
+        this.load_remote_resources = this.engine.flags.always_load_remote_images();
     }
 
     private void update() {
@@ -353,7 +367,7 @@ public class Application.Contact : Geary.BaseObject {
             }
         }
 
-        update_individual(replacement);
+        update_from_individual(replacement);
         update();
         changed();
     }
@@ -365,6 +379,10 @@ public class Application.Contact : Geary.BaseObject {
 
     private void on_individual_removed(Folks.Individual? replacement) {
         this.update_replacement.begin(replacement);
+    }
+
+    private void on_engine_flags_changed() {
+        update_from_engine();
     }
 
 }

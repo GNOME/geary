@@ -1,19 +1,41 @@
-# Common vala options
-geary_vala_options = [
-  '--target-glib=@0@'.format(target_glib),
+# Build source configuration
+config_h_dir = include_directories('.')
+
+conf = configuration_data()
+conf.set_quoted('GETTEXT_PACKAGE', meson.project_name())
+conf.set_quoted('G_LOG_DOMAIN', meson.project_name())
+conf.set_quoted('_APP_ID', geary_id)
+conf.set_quoted('_BUILD_ROOT_DIR', meson.build_root())
+conf.set_quoted('_GSETTINGS_DIR', join_paths(meson.build_root(), 'desktop'))
+conf.set_quoted('_INSTALL_PREFIX', geary_prefix)
+conf.set_quoted('_ISO_CODE_3166_XML', iso_3166_xml)
+conf.set_quoted('_ISO_CODE_639_XML', iso_639_xml)
+conf.set_quoted('_LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
+conf.set_quoted('_NAME_SUFFIX', name_suffix)
+conf.set_quoted('_PLUGINS_DIR', plugins_dir)
+conf.set_quoted('_PROFILE', profile)
+conf.set_quoted('_REVNO', revno)
+conf.set_quoted('_SOURCE_ROOT_DIR', meson.source_root())
+conf.set_quoted('_VERSION', geary_version)
+conf.set_quoted('_WEB_EXTENSIONS_DIR', web_extensions_dir)
+configure_file(output: 'config.h', configuration: conf)
+
+# Common valac options
+geary_vala_args = [
   '--enable-checking',
 ]
 
 # Symbols for valac's preprocessor must be defined as compiler args,
 # not in the code or in config.h
 if reference_tracking
-  geary_vala_options += [ '--define=REF_TRACKING' ]
+  geary_vala_args += [ '--define=REF_TRACKING' ]
 endif
 if not poodle
-  geary_vala_options += [ '--define=DISABLE_POODLE' ]
+  geary_vala_args += [ '--define=DISABLE_POODLE' ]
 endif
 
-geary_c_options = [
+# Common cc options
+geary_c_args = [
   '-include', 'config.h',
   # Enable GLib structured logging
   '-DG_LOG_USE_STRUCTURED',
@@ -22,6 +44,7 @@ geary_c_options = [
   '-DUNW_LOCAL_ONLY',
   # None of these kids want to hang out unless you are cool enough
   '-DGCK_API_SUBJECT_TO_CHANGE',
+  '-DGCR_API_SUBJECT_TO_CHANGE',
   '-DGOA_API_IS_SUBJECT_TO_CHANGE',
   '-DHANDY_USE_UNSTABLE_API',
 ]
@@ -40,13 +63,15 @@ geary_web_process_sources = files(
 # Web process extension library
 geary_web_process = library('geary-web-process',
   geary_web_process_sources,
-  c_args: geary_c_options,
   dependencies: [
     geary_engine_dep,
     gee,
     gmime,
     webkit2gtk_web_extension,
   ],
+  include_directories: config_h_dir,
+  vala_args: geary_client_vala_args,
+  c_args: geary_c_args,
   install: true,
   install_dir: web_extensions_dir
 )
@@ -72,6 +97,7 @@ geary_bin_dependencies = [
   javascriptcoregtk,
   libhandy,
   libmath,
+  libpeas,
   libsoup,
   webkit2gtk,
 ]
@@ -79,8 +105,8 @@ geary_bin_dependencies = [
 geary_bin = executable('geary',
   geary_bin_sources,
   dependencies: geary_bin_dependencies,
-  vala_args: geary_vala_options,
-  c_args: geary_c_options,
+  vala_args: geary_vala_args,
+  c_args: geary_c_args,
   install: true,
 )
 
@@ -94,15 +120,22 @@ if enable_valadoc
       '--verbose',
       '--force',
       '--internal',
-      '--package-name=@0@-@1@'.format(meson.project_name(), meson.project_version()),
+      '--package-name=@0@'.format(meson.project_name()),
       '--package-version=@0@'.format(meson.project_version()),
-      '--target-glib=@0@'.format(target_glib),
       '-b', meson.current_source_dir(),
       '-o', '@OUTPUT@',
       '--vapidir=@0@'.format(vapi_dir),
       '--vapidir=@0@'.format(meson.current_build_dir()),
-      # Hopefully, Meson gets baked-in valadoc support, so we don't have to do this (see also https://github.com/mesonbuild/meson/issues/894)
-      '--pkg', 'glib-2.0', '--pkg', 'gio-2.0', '--pkg', 'gee-0.8', '--pkg', 'sqlite3', '--pkg', 'gmime-2.6', '--pkg', 'javascriptcoregtk-4.0', '--pkg', 'libxml-2.0', '--pkg', 'libunwind',
+      # Hopefully, Meson gets baked-in valadoc support, so we don't
+      # have to do this (see https://github.com/mesonbuild/meson/issues/894)
+      '--pkg', 'glib-2.0',
+      '--pkg', 'gio-2.0',
+      '--pkg', 'gee-0.8',
+      '--pkg', 'sqlite3',
+      '--pkg', 'gmime-2.6',
+      '--pkg', 'javascriptcoregtk-4.0',
+      '--pkg', 'libxml-2.0',
+      '--pkg', 'libunwind',
       '@INPUT@',
     ]
   )

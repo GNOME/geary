@@ -1,91 +1,52 @@
-/*
- * Flatpak builder manifest for Geary.
- *
- * When updating this file after branching a new stable release,
- * the following should be updated:
- *
- * - app branch and geary source branches
- * - remove app tags and desktop-file-name-prefix
- *
- * When updating the Flathub manifest, copy the stable manifest over
- * it and pin each source to a specific tarball.
- */
-
+/* Automatically generated from org.gnome.Geary.yml, do not modify. */
 {
-    "app-id": "org.gnome.GearyDevel",
+    "app-id": "org.gnome.Geary.Devel",
     "branch": "master",
     "runtime": "org.gnome.Platform",
     "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
-
-    "tags": ["nightly"],
     "desktop-file-name-suffix": " (Development)",
-
+    "tags": [
+        "nightly"
+    ],
     "finish-args": [
-        /* X11 + XShm access */
-        "--share=ipc", "--socket=x11",
-
-        /* Wayland access */
+        "--share=ipc",
+        "--socket=x11",
         "--socket=wayland",
-
-        /* OpenGL access for WK2 */
         "--device=dri",
-
-        /* Pulseaudio */
-        "--socket=pulseaudio",
-
-        /* Needs to talk to the network: */
         "--share=network",
-
-        /* Secrets access */
         "--talk-name=org.freedesktop.secrets",
-
-        /* GOA support */
+        "--talk-name=org.gnome.Contacts",
         "--talk-name=org.gnome.ControlCenter",
         "--talk-name=org.gnome.OnlineAccounts",
-
-        /* Folks contact and avatar support (via EDS) */
         "--talk-name=org.gnome.evolution.dataserver.AddressBook9",
         "--talk-name=org.gnome.evolution.dataserver.Sources5",
         "--filesystem=xdg-cache/evolution/addressbook:ro",
-
-        /* Migrate GSettings into the sandbox */
         "--metadata=X-DConf=migrate-path=/org/gnome/Geary/",
-
-        /* Let view source keep on working as-sis for now. Bug 779311. */
         "--filesystem=/tmp"
     ],
-    "cleanup": ["/include", "/lib/pkgconfig",
-                "/share/pkgconfig", "/share/aclocal",
-                "/man", "/share/man", "/share/gtk-doc",
-                "/share/vala", "/share/girepository-1", "/share/gir-1.0",
-                "*.la", "*.a"],
+    "cleanup": [
+        "/include",
+        "/lib/pkgconfig",
+        "/man",
+        "/share/aclocal",
+        "/share/gir-1.0",
+        "/share/girepository-1",
+        "/share/gtk-doc",
+        "/share/man",
+        "/share/pkgconfig",
+        "/share/vala",
+        "*.la",
+        "*.a"
+    ],
     "modules": [
-        {
-            "name": "libgee",
-            "config-opts" : [
-                "--enable-introspection=no"
-            ],
-            "sources": [
-                {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libgee.git",
-                    "branch": "master"
-                }
-            ]
-        },
         {
             "name": "gnome-online-accounts",
             "config-opts": [
                 "--disable-telepathy",
                 "--disable-documentation",
                 "--disable-backend",
-                /* Enabling debug via configure causes both -g and -O0
-                   to be set, which is bad since the former is
-                   redundant with the default fd.o build-options,
-                   and the latter conflicts with them. So disable
-                   debug instead. */
                 "--enable-debug=no"
             ],
             "sources": [
@@ -97,31 +58,25 @@
             ]
         },
         {
-            "name" : "gspell",
-            "config-opts" : [
+            "name": "gspell",
+            "config-opts": [
                 "--disable-gtk-doc",
                 "--disable-gtk-doc-html"
             ],
-            "cleanup" : [
-                "/bin",
-                "/include",
-                "/lib/pkgconfig",
-                "*.la",
-                "/share"
-            ],
-            "sources" : [
+            "sources": [
                 {
-                    "type" : "archive",
+                    "type": "archive",
                     "url": "https://download.gnome.org/sources/gspell/1.8/gspell-1.8.1.tar.xz",
                     "sha256": "819a1d23c7603000e73f5e738bdd284342e0cd345fb0c7650999c31ec741bbe5"
                 }
+            ],
+            "cleanup": [
+                "/bin",
+                "/share"
             ]
         },
         {
             "name": "libical",
-            "cleanup": [
-              "/lib/cmake"
-            ],
             "buildsystem": "cmake-ninja",
             "config-opts": [
                 "-DCMAKE_BUILD_TYPE=Release",
@@ -138,27 +93,27 @@
                     "url": "https://github.com/libical/libical/releases/download/v3.0.5/libical-3.0.5.tar.gz",
                     "sha256": "7ad550c8c49c9b9983658e3ab3e68b1eee2439ec17b169a6b1e6ecb5274e78e6"
                 }
+            ],
+            "cleanup": [
+                "/lib/cmake"
             ]
         },
         {
             "name": "intltool",
-            "cleanup": [ "*" ],
             "sources": [
                 {
                     "type": "archive",
                     "url": "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
                     "sha256": "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd"
                 }
+            ],
+            "cleanup": [
+                "*"
             ]
         },
         {
             "name": "evolution-data-server",
-            "cleanup": [
-                "/lib/cmake",
-                "/lib/evolution-data-server/*-backends",
-                "/libexec",
-                "/share/dbus-1/services"
-            ],
+            "buildsystem": "cmake-ninja",
             "config-opts": [
                 "-DCMAKE_BUILD_TYPE=Release",
                 "-DENABLE_GTK=ON",
@@ -176,20 +131,22 @@
                 "-DENABLE_GTK_DOC=OFF",
                 "-DENABLE_EXAMPLES=OFF"
             ],
-            "buildsystem": "cmake-ninja",
             "sources": [
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git"
                 }
+            ],
+            "cleanup": [
+                "/lib/cmake",
+                "/lib/evolution-data-server/*-backends",
+                "/libexec",
+                "/share/dbus-1/services"
             ]
         },
         {
             "name": "folks",
             "buildsystem": "meson",
-            "cleanup": [
-                "/bin"
-            ],
             "config-opts": [
                 "-Dtelepathy_backend=false",
                 "-Dinspect_tool=false",
@@ -200,6 +157,9 @@
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/folks.git"
                 }
+            ],
+            "cleanup": [
+                "/bin"
             ]
         },
         {
@@ -215,7 +175,6 @@
         {
             "name": "libhandy",
             "buildsystem": "meson",
-            "builddir": true,
             "config-opts": [
                 "-Dglade_catalog=disabled"
             ],
@@ -227,12 +186,12 @@
             ]
         },
         {
-            "name": "libunwind",
+            "name": "libpeas",
+            "buildsystem": "meson",
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://git.savannah.gnu.org/git/libunwind.git",
-                    "branch": "master"
+                    "url": "https://gitlab.gnome.org/GNOME/libpeas.git"
                 }
             ]
         },
@@ -249,8 +208,9 @@
         {
             "name": "geary",
             "buildsystem": "meson",
-            "builddir": true,
-            "config-opts" : ["-Dprofile=development"],
+            "config-opts": [
+                "-Dprofile=development"
+            ],
             "sources": [
                 {
                     "type": "git",

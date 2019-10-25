@@ -343,21 +343,21 @@ build_dir = meson.current_build_dir()
 # Generate internal VAPI for unit testing. See Meson issue
 # https://github.com/mesonbuild/meson/issues/1781 for official
 # internal VAPI support.
-geary_engine_vala_options = geary_vala_options
-geary_engine_vala_options += [
+geary_engine_vala_args = geary_vala_args
+geary_engine_vala_args += [
   '--internal-header=@0@/geary-engine-internal.h'.format(build_dir),
   '--internal-vapi=@0@/geary-engine-internal.vapi'.format(build_dir)
 ]
 
 if libunwind_dep.found()
-  geary_engine_vala_options += [
+  geary_engine_vala_args += [
     '-D', 'HAVE_LIBUNWIND',
   ]
 endif
 
 if get_option('tnef-support')
   geary_engine_dependencies += libytnef
-  geary_engine_vala_options += [
+  geary_engine_vala_args += [
     '-D', 'WITH_TNEF_SUPPORT'
   ]
 endif
@@ -366,8 +366,8 @@ geary_engine_lib = static_library('geary-engine',
   geary_engine_sources,
   dependencies: geary_engine_dependencies,
   include_directories: config_h_dir,
-  vala_args: geary_engine_vala_options,
-  c_args: geary_c_options,
+  vala_args: geary_engine_vala_args,
+  c_args: geary_c_args,
 )
 
 # Dummy target to tell Meson about the internal VAPI given the

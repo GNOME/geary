@@ -1,67 +1,59 @@
 project('geary', [ 'vala', 'c' ],
-  version: '3.33.91',
+  version: '3.35.1',
   license: 'LGPL2.1+',
-  meson_version: '>= 0.49',
+  meson_version: '>= 0.50',
 )
 
-gnome = import('gnome')
-i18n = import('i18n')
-
-# Option
-install_contractor_file = get_option('contractor')
-iso_639_xml = get_option('iso_639_xml')
-iso_3166_xml = get_option('iso_3166_xml')
-reference_tracking = get_option('ref_tracking')
-poodle = get_option('poodle')
+# Build-time configuration options
 enable_valadoc = get_option('valadoc')
-
-revno = run_command('build-aux/git_version.py').stdout().strip()
+install_contractor_file = get_option('contractor')
+iso_3166_xml = get_option('iso_3166_xml')
+iso_639_xml = get_option('iso_639_xml')
+poodle = get_option('poodle')
+reference_tracking = get_option('ref_tracking')
 
 # Build type
 if get_option('profile') == 'development'
-  profile = 'Devel'
+  profile = '.Devel'
   name_suffix = ' (Development)'
 elif get_option('profile') == 'beta'
-  profile = 'Beta'
+  profile = '.Beta'
   name_suffix = ' (Beta)'
 else
   profile = ''
   name_suffix = ''
 endif
 
-geary_id = 'org.gnome.Geary@0@'.format(profile)
-geary_version = meson.project_version()
-
-# Some variables
-cc = meson.get_compiler('c')
-valac = meson.get_compiler('vala')
-config_h_dir = include_directories('.')
+# Configurable install dirs
 geary_prefix = get_option('prefix')
-bindir = join_paths(geary_prefix, get_option('bindir'))
-datadir = join_paths(geary_prefix, get_option('datadir'))
-libdir = join_paths(geary_prefix, get_option('libdir'))
+bin_dir = join_paths(geary_prefix, get_option('bindir'))
+data_dir = join_paths(geary_prefix, get_option('datadir'))
+lib_dir = join_paths(geary_prefix, get_option('libdir'))
 locale_dir = join_paths(geary_prefix, get_option('localedir'))
+
+# Source dirs
+metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
 po_dir = join_paths(meson.source_root(), 'po')
 vapi_dir = join_paths(meson.source_root(), 'bindings', 'vapi')
-metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
-dbus_services_dir = join_paths(datadir, 'dbus-1', 'services')
-web_extensions_dir = join_paths(libdir, 'geary', 'web-extensions')
 
-# Make sure Meson can find our custom VAPI's
+# Compiler configuration
 add_project_arguments([
+    # Make sure Meson can find custom VAPIs
     '--vapidir', vapi_dir,
     '--metadatadir', metadata_dir,
   ],
   language: 'vala'
 )
+cc = meson.get_compiler('c')
+valac = meson.get_compiler('vala')
 
 #
 # Required libraries and other dependencies
 #
 
-target_glib = '2.54' # Also passed to valac, so don't include a point rev
+target_glib = '2.60.4'
 target_gtk = '3.24.7'
-target_webkit = '2.20'
+target_webkit = '2.24'
 
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
@@ -87,9 +79,9 @@ gthread = dependency('gthread-2.0', version: '>=' + target_glib)
 iso_codes = dependency('iso-codes')
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
-libcanberra = dependency('libcanberra', version: '>= 0.28')
 libhandy = dependency('libhandy-0.0', version: '>= 0.0.9', required: false)
 libmath = cc.find_library('m')
+libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
 libsoup = dependency('libsoup-2.4', version: '>= 2.48')
 libunwind_dep = dependency(
@@ -149,20 +141,22 @@ desktop_file_validate = find_program('desktop-file-validate', required: false)
 libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', required: false)
 libunity = dependency('unity', version: '>= 5.12.0', required: false)
 
-if libmessagingmenu_dep.found()
-  # The libmessagingmenu dependency above determines if the lib is
-  # present, but since it uses a broken name for its VAPI we have to
-  # find that and the C libs separately.
-  libmessagingmenu = declare_dependency(
-    include_directories: include_directories(
-      libmessagingmenu_dep.get_pkgconfig_variable('includedir')
-    ),
-    dependencies: [
-      valac.find_library('MessagingMenu-1.0', dirs: [ '/usr/share/vala/vapi' ]),
-      cc.find_library('messaging-menu')
-    ],
-  )
-endif
+#
+# Internal build configuration
+#
+
+# Build variables
+geary_id = 'org.gnome.Geary@0@'.format(profile)
+geary_version = meson.project_version()
+revno = run_command('build-aux/git_version.py').stdout().strip()
+
+gnome = import('gnome')
+i18n = import('i18n')
+
+# Static install dirs
+dbus_services_dir = join_paths(data_dir, 'dbus-1', 'services')
+plugins_dir = join_paths(lib_dir, 'geary', 'plugins')
+web_extensions_dir = join_paths(lib_dir, 'geary', 'web-extensions')
 
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
@@ -188,31 +182,19 @@ if iso_3166_xml == ''
 endif
 files(iso_639_xml, iso_3166_xml) # Check to make sure these exist
 
-# Configuration
-conf = configuration_data()
-conf.set_quoted('GETTEXT_PACKAGE', meson.project_name())
-conf.set_quoted('G_LOG_DOMAIN', meson.project_name())
-conf.set_quoted('PACKAGE_NAME', meson.project_name())
-conf.set_quoted('PACKAGE_STRING', '@0@-@1@'.format(meson.project_name(), meson.project_version()))
-conf.set_quoted('PACKAGE_VERSION', meson.project_version())
-conf.set_quoted('_BUILD_ROOT_DIR', meson.build_root())
-conf.set_quoted('_SOURCE_ROOT_DIR', meson.source_root())
-conf.set_quoted('_GSETTINGS_DIR', join_paths(meson.build_root(), 'desktop'))
-conf.set_quoted('_INSTALL_PREFIX', geary_prefix)
-conf.set_quoted('_WEB_EXTENSIONS_DIR', web_extensions_dir)
-conf.set_quoted('LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
-conf.set_quoted('ISO_CODE_639_XML', iso_639_xml)
-conf.set_quoted('ISO_CODE_3166_XML', iso_3166_xml)
-conf.set('GCR_API_SUBJECT_TO_CHANGE', true)
-conf.set_quoted('_VERSION', geary_version)
-conf.set_quoted('_APP_ID', geary_id)
-conf.set_quoted('_PROFILE', profile)
-conf.set_quoted('_NAME_SUFFIX', name_suffix)
-conf.set_quoted('_REVNO', revno)
-configure_file(output: 'config.h', configuration: conf)
-
 # Post-install scripts
 meson.add_install_script(join_paths('build-aux', 'post_install.py'))
+
+# GNOME Builder doesn't support YAML manifests, so generate a JSON
+# version from the YAML and commit it. :( GNOME/gnome-builder#520
+yaml_to_json = find_program('build-aux' / 'yaml_to_json.py')
+custom_target(
+  'org.gnome.Geary.json',
+  build_by_default: true,
+  command: [yaml_to_json, '@INPUT@', meson.source_root(), '@OUTPUT@'],
+  input: files('org.gnome.Geary.yml'),
+  output: 'org.gnome.Geary.json'
+)
 
 # Subfolders
 subdir('desktop')

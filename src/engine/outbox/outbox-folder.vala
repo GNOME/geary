@@ -112,7 +112,6 @@ private class Geary.Outbox.Folder :
         create_email_async(RFC822.Message rfc822,
                            Geary.EmailFlags? flags,
                            GLib.DateTime? date_received,
-                           Geary.EmailIdentifier? id = null,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_open();

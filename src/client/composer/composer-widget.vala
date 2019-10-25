@@ -161,11 +161,17 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
 
+    // Keep these in sync with the next const below.
+    private const string ATTACHMENT_KEYWORDS =
+        "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures";
     // Translators: This is list of keywords, separated by pipe ("|")
     // characters, that suggest an attachment; since this is full-word
-    // checking, include all variants of each word.  No spaces are
-    // allowed.
-    private const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
+    // checking, include all variants of each word. No spaces are
+    // allowed. The words will be converted to lower case based on
+    // locale and English versions included automatically.
+    private const string ATTACHMENT_KEYWORDS_LOCALISED =
+        _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
+
 
     private const string PASTED_IMAGE_FILENAME_TEMPLATE = "geary-pasted-image-%u.png";
 
@@ -247,9 +253,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private string body_html = "";
 
     [GtkChild]
-    private Gtk.Box composer_container;
-
-    [GtkChild]
     internal Gtk.Grid editor_container;
 
     [GtkChild]
@@ -303,9 +306,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild]
     private Gtk.Box header_area;
     [GtkChild]
-
-    private Gtk.Box composer_toolbar;
-    [GtkChild]
     private Gtk.Box insert_buttons;
     [GtkChild]
     private Gtk.Box font_style_buttons;
@@ -321,9 +321,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private Gtk.MenuButton menu_button;
     [GtkChild]
     private Gtk.Label info_label;
-
-    [GtkChild]
-    private Gtk.Box message_area;
 
     private SimpleActionGroup composer_actions = new SimpleActionGroup();
     private SimpleActionGroup editor_actions = new SimpleActionGroup();
@@ -540,16 +537,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.content_loaded.connect(on_content_loaded);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect(on_selection_changed);
-
-        // Place the message area before the compose toolbar in the focus chain, so that
-        // the user can tab directly from the Subject: field to the message area.
-        // TODO: after bumping the min. GTK+ version to 3.16, we can/should do this in the UI file.
-        List<Gtk.Widget> chain = new List<Gtk.Widget>();
-        chain.append(this.hidden_on_attachment_drag_over);
-        chain.append(this.message_area);
-        chain.append(this.composer_toolbar);
-        chain.append(this.attachments_box);
-        this.composer_container.set_focus_chain(chain);
 
         update_composer_view();
         load_entry_completions();
@@ -1342,7 +1329,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             confirmation = _("Send message with an empty body?");
         } else if (!has_attachment &&
                    yield this.editor.contains_attachment_keywords(
-                       ATTACHMENT_KEYWORDS_LOCALIZED, this.subject)) {
+                       string.join(
+                           "|",
+                           ATTACHMENT_KEYWORDS,
+                           ATTACHMENT_KEYWORDS_LOCALISED
+                       ),
+                       this.subject)) {
             confirmation = _("Send message without an attachment?");
         }
         if (confirmation != null) {
@@ -2401,7 +2393,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 this.editor.insert_link(popover.link_uri, selection_id);
             });
         popover.link_delete.connect(() => {
-                this.editor.delete_link();
+                this.editor.delete_link(selection_id);
             });
         popover.link_open.connect(() => { link_activated(popover.link_uri); });
         return popover;
