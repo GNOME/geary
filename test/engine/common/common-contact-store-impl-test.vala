@@ -269,7 +269,23 @@ class Geary.ContactStoreImplTest : TestCase {
         assert_string("test@example.com", updated.normalized_email, "Updated normalized_email");
         assert_string("Updated", updated.real_name, "Updated real_name");
         assert_int(100, updated.highest_importance, "Updated highest_importance");
-        assert_true(updated.flags.always_load_remote_images(), "Updated real_name");
+        assert_true(updated.flags.always_load_remote_images(), "Added flags");
+
+        // Now try removing the flag and ensure it sticks
+        not_updated.flags.remove(Contact.Flags.ALWAYS_LOAD_REMOTE_IMAGES);
+        test_article.update_contacts.begin(
+            Collection.single(not_updated),
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        test_article.update_contacts.end(async_result());
+        test_article.get_by_rfc822.begin(
+            new RFC822.MailboxAddress(null, "Test@example.com"),
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        Contact? updated_again = test_article.get_by_rfc822.end(async_result());
+        assert_false(updated_again.flags.always_load_remote_images(), "Removed flags");
     }
 
 }
