@@ -60,9 +60,15 @@ public class Geary.Contact : BaseObject {
     }
 
 
+    /** Normalises an email address as for {@link normalized_email}. */
+    public static string normalise_email(string address) {
+        return address.normalize().casefold();
+    }
+
+
     public string normalized_email { get; private set; }
     public string email { get; private set; }
-    public string? real_name { get; private set; }
+    public string? real_name { get; set; }
     public int highest_importance { get; set; }
     public Flags flags { get; set; default = new Flags(); }
 
@@ -70,7 +76,7 @@ public class Geary.Contact : BaseObject {
                    string? real_name,
                    int highest_importance,
                    string? normalized_email = null) {
-        this.normalized_email = normalized_email ?? email.normalize().casefold();
+        this.normalized_email = normalized_email ?? normalise_email(email);
         this.email = email;
         this.real_name = (
             (real_name != email && real_name != normalized_email)
