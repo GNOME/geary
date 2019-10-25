@@ -140,31 +140,22 @@ internal class Geary.ContactStoreImpl : ContactStore, BaseObject {
                                    Contact updated,
                                    GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Contact? existing = do_fetch_contact(
-            cx, updated.email, cancellable
-        );
+        Db.Statement stmt = cx.prepare("""
+            INSERT INTO ContactTable(
+                normalized_email, email, real_name, flags, highest_importance
+            ) VALUES(?, ?, ?, ?, ?)
+            ON CONFLICT(email) DO UPDATE SET
+              real_name = excluded.real_name,
+              flags = excluded.flags,
+              highest_importance = excluded.highest_importance
+        """);
+        stmt.bind_string(0, updated.normalized_email);
+        stmt.bind_string(1, updated.email.make_valid());
+        stmt.bind_string(2, updated.real_name.make_valid());
+        stmt.bind_string(3, updated.flags.serialize());
+        stmt.bind_int(4, updated.highest_importance);
 
-        if (existing == null) {
-            // Not found, so just insert it
-            Db.Statement stmt = cx.prepare(
-                "INSERT INTO ContactTable(normalized_email, email, real_name, flags, highest_importance) "
-                + "VALUES(?, ?, ?, ?, ?)");
-            stmt.bind_string(0, updated.normalized_email);
-            stmt.bind_string(1, updated.email);
-            stmt.bind_string(2, updated.real_name);
-            stmt.bind_string(3, updated.flags.serialize());
-            stmt.bind_int(4, updated.highest_importance);
-
-            stmt.exec(cancellable);
-        } else {
-            Db.Statement stmt = cx.prepare(
-                "UPDATE ContactTable SET real_name=?, flags=?, highest_importance=? WHERE email=?");
-            stmt.bind_string(0, updated.real_name);
-            stmt.bind_string(1, updated.flags.serialize());
-            stmt.bind_int(2, updated.highest_importance);
-            stmt.bind_string(3, updated.email);
-            stmt.exec(cancellable);
-        }
+        stmt.exec(cancellable);
     }
 
 }
