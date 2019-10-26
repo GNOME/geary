@@ -387,7 +387,6 @@ ComposerPageState.prototype = {
  * Determines if any keywords are present in a string.
  */
 ComposerPageState.containsKeywords = function(line, wordKeys, suffixKeys) {
-    let urlRegex = ComposerPageState.URL_REGEX;
     let lastToken = -1;
     let lastSpace = -1;
     for (var i = 0; i <= line.length; i++) {
