@@ -88,18 +88,17 @@ public class Geary.ComposedEmail : BaseObject {
     public bool replace_inline_img_src(string orig, string replacement) {
         // XXX This and contains_inline_img_src are pretty
         // hacky. Should probably be working with a DOM tree.
-        bool found = false;
+        int index = -1;
         if (this.body_html != null) {
             string prefixed_orig = IMG_SRC_TEMPLATE.printf(this.img_src_prefix + orig);
-            found = this.body_html.contains(prefixed_orig);
-            if (found) {
-                this.body_html = this.body_html.replace(
-                    prefixed_orig,
-                    IMG_SRC_TEMPLATE.printf(replacement)
-                );
+            index = this.body_html.index_of(prefixed_orig);
+            if (index != -1) {
+                this.body_html = this.body_html.substring(0, index) +
+                     IMG_SRC_TEMPLATE.printf(replacement) +
+                     this.body_html.substring(index + prefixed_orig.length);
             }
         }
-        return found;
+        return index != -1;
     }
 
 }
