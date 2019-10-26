@@ -59,7 +59,7 @@ target_webkit = '2.24'
 glib = dependency('glib-2.0', version: '>=' + target_glib)
 gmime = dependency('gmime-2.6', version: '>= 2.6.17')
 gtk = dependency('gtk+-3.0', version: '>=' + target_gtk)
-sqlite = dependency('sqlite3', version: '>= 3.12')
+sqlite = dependency('sqlite3', version: '>= 3.24')
 webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 
 # Secondary deps - keep sorted alphabetically
