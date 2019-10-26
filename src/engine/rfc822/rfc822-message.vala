@@ -476,12 +476,9 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         GMime.Part part = new GMime.Part();
         part.set_disposition(disposition.serialize());
         part.set_filename(basename);
-
         part.set_content_type(content_type);
 
-        // TODO seems inefficient, surely there's a way to create a Glib.Stream using, say Memory.Buffer's InputStream.
-        GMime.StreamMem stream = new GMime.StreamMem.with_buffer(buffer.get_uint8_array());
-        stream.set_owner(false);
+        GMime.StreamMem stream = Utils.create_stream_mem(buffer);
 
         return yield finalise_attachment_part(stream, part, content_type, cancellable);
     }
