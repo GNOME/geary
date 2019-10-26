@@ -234,6 +234,8 @@ http://example1.com
 <a href="blarg">http://example5.com</a>
 
 unknown://example6.com
+
+I can send email through smtp.gmail.com:587 or through https://www.gmail.com/
 """);
 
         string expected = """
@@ -246,6 +248,8 @@ unknown://example6.com
 <a href="blarg">http://example5.com</a>
 
 unknown://example6.com
+
+I can send email through smtp.gmail.com:587 or through <a href="https://www.gmail.com/">https://www.gmail.com/</a>
 """;
 
         try {
