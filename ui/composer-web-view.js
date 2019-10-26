@@ -398,9 +398,16 @@ ComposerPageState.prototype = {
 
             const reader = new FileReader();
             reader.onload = (function(filename, imageType) { return function(loadEvent) {
-                window.webkit.messageHandlers.dragDropReceived.postMessage(
-                    encodeURIComponent(filename) + "," + imageType + "," + loadEvent.target.result
-                );
+                // Remove prefixed file type and encoding type
+                var parts = loadEvent.target.result.split(",");
+                if (parts.length < 2)
+                    return;
+
+                window.webkit.messageHandlers.dragDropReceived.postMessage({
+                    fileName: encodeURIComponent(filename),
+                    fileType: imageType,
+                    content: parts[1]
+                });
             }; })(file.name, file.type);
             reader.readAsDataURL(file);
         }

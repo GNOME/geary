@@ -529,37 +529,36 @@ public class ComposerWebView : ClientWebView {
      *  Handle a dropped image
      */
     private void on_drag_drop_received(WebKit.JavascriptResult result) {
-        string native_result;
+
         try {
-            native_result = Util.JS.to_string(result.get_js_value());
+            JSC.Value object = result.get_js_value();
+            string filename = Util.JS.to_string(
+                Util.JS.get_property(object, "fileName")
+            );
+            string filename_unescaped = GLib.Uri.unescape_string(filename);
+
+            string file_type = Util.JS.to_string(
+                Util.JS.get_property(object, "fileType")
+            );
+
+            string content_base64 = Util.JS.to_string(
+                Util.JS.get_property(object, "content")
+            );
+            uint8[] image = GLib.Base64.decode(content_base64);
+
+            if (image.length == 0) {
+                warning("%s is empty", filename);
+                return;
+            }
+
+            // A simple check to see if the file looks like an image. A problem here
+            // will be this accepting types which won't be supported by WebKit
+            // or recipients.
+            if (file_type.index_of("image/") == 0) {
+                image_file_dropped(filename_unescaped, file_type, image);
+            }
         } catch (Util.JS.Error err) {
-            warning("Failed to decode drag & drop data: %s", err.message);
-            return;
-        }
-
-        string[] pieces = native_result.split(",");
-
-        if (pieces.length != 4) {
-            warning("Invalid data received in drag & drop: %s", native_result);
-            return;
-        }
-
-        string filename = pieces[0];
-        string filename_unescaped = GLib.Uri.unescape_string(filename);
-        string file_type = pieces[1];
-        string content_base64 = pieces[3];
-        uint8[] image = GLib.Base64.decode(content_base64);
-
-        if (image.length == 0) {
-            warning("%s is empty", filename);
-            return;
-        }
-
-        // A simple check to see if the file looks like an image. A problem here
-        // will be this accepting types which won't be supported by WebKit
-        // or recipients.
-        if (file_type.index_of("image/") == 0) {
-            image_file_dropped(filename_unescaped, file_type, image);
+            debug("Could not get deceptive link param: %s", err.message);
         }
     }
 }
