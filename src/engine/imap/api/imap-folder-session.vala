@@ -346,10 +346,14 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         return (search_results.size > 0) ? search_results : null;
     }
 
-    private Gee.Collection<FetchCommand> assemble_list_commands(Imap.MessageSet msg_set,
-        Geary.Email.Field fields, out FetchBodyDataSpecifier? header_specifier,
-        out FetchBodyDataSpecifier? body_specifier, out FetchBodyDataSpecifier? preview_specifier,
-        out FetchBodyDataSpecifier? preview_charset_specifier) {
+    private Gee.Collection<FetchCommand> assemble_list_commands(
+        Imap.MessageSet msg_set,
+        Geary.Email.Field fields,
+        out FetchBodyDataSpecifier[]? header_specifiers,
+        out FetchBodyDataSpecifier? body_specifier,
+        out FetchBodyDataSpecifier? preview_specifier,
+        out FetchBodyDataSpecifier? preview_charset_specifier
+    ) {
         // getting all the fields can require multiple FETCH commands (some servers don't handle
         // well putting every required data item into single command), so aggregate FetchCommands
         Gee.Collection<FetchCommand> cmds = new Gee.ArrayList<FetchCommand>();
@@ -365,19 +369,57 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         // convert bulk of the "basic" fields into a one or two FETCH commands (some servers have
         // exhibited bugs or return NO when too many FETCH data types are combined on a single
         // command)
+        header_specifiers = null;
         if (fields.requires_any(BASIC_FETCH_FIELDS)) {
-            Gee.List<FetchDataSpecifier> data_types = new Gee.ArrayList<FetchDataSpecifier>();
-            fields_to_fetch_data_types(fields, data_types, out header_specifier);
+            Gee.List<FetchDataSpecifier> basic_types =
+                new Gee.LinkedList<FetchDataSpecifier>();
+            Gee.List<string> header_fields = new Gee.LinkedList<string>();
+
+            fields_to_fetch_data_types(fields, basic_types, header_fields);
 
             // Add all simple data types as one FETCH command
-            if (data_types.size > 0)
-                cmds.add(new FetchCommand(msg_set, data_types, null));
+            if (!basic_types.is_empty) {
+                cmds.add(new FetchCommand(msg_set, basic_types, null));
+            }
 
-            // Add all body data types as separate FETCH command
-            if (header_specifier != null)
-                cmds.add(new FetchCommand.body_data_type(msg_set, header_specifier));
-        } else {
-            header_specifier = null;
+            // Add all header field requests as separate FETCH
+            // command(s). If the HEADER.FIELDS hack is enabled and
+            // there is more than one header that needs fetching, we
+            // need to send multiple commands since we can't separate
+            // them by spaces in the same command.
+            //
+            // See <https://gitlab.gnome.org/GNOME/geary/issues/571>
+            if (!header_fields.is_empty) {
+                if (!this.imap_header_fields_hack || header_fields.size == 1) {
+                    header_specifiers = new FetchBodyDataSpecifier[1];
+                    header_specifiers[0] = new FetchBodyDataSpecifier.peek(
+                        FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS,
+                        null,
+                        -1,
+                        -1,
+                        header_fields.to_array()
+                    );
+                } else {
+                    header_specifiers = new FetchBodyDataSpecifier[header_fields.size];
+                    int i = 0;
+                    foreach (string name in header_fields) {
+                        header_specifiers[i++] = new FetchBodyDataSpecifier.peek(
+                            FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS,
+                            null,
+                            -1,
+                            -1,
+                            new string[] { name }
+                        );
+                    }
+                }
+
+                foreach (FetchBodyDataSpecifier header in header_specifiers) {
+                    if (this.imap_header_fields_hack) {
+                        header.omit_request_header_fields_space();
+                    }
+                    cmds.add(new FetchCommand.body_data_type(msg_set, header));
+                }
+            }
         }
 
         // RFC822 BODY is a separate command
@@ -440,15 +482,20 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         throws Error {
         Gee.HashMap<SequenceNumber, FetchedData> fetched =
             new Gee.HashMap<SequenceNumber, FetchedData>();
-        FetchBodyDataSpecifier? header_specifier = null;
+        FetchBodyDataSpecifier[]? header_specifiers = null;
         FetchBodyDataSpecifier? body_specifier = null;
         FetchBodyDataSpecifier? preview_specifier = null;
         FetchBodyDataSpecifier? preview_charset_specifier = null;
         bool success = false;
         while (!success) {
-            Gee.Collection<FetchCommand> cmds = assemble_list_commands(msg_set, fields,
-                out header_specifier, out body_specifier, out preview_specifier,
-                out preview_charset_specifier);
+            Gee.Collection<FetchCommand> cmds = assemble_list_commands(
+                msg_set,
+                fields,
+                out header_specifiers,
+                out body_specifier,
+                out preview_specifier,
+                out preview_charset_specifier
+            );
             if (cmds.size == 0) {
                 throw new ImapError.INVALID("No FETCH commands generate for list request %s %s",
                     msg_set.to_string(), fields.to_list_string());
@@ -491,8 +538,16 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 }
 
                 try {
-                    Geary.Email email = fetched_data_to_email(to_string(), uid, fetched_data, fields,
-                        header_specifier, body_specifier, preview_specifier, preview_charset_specifier);
+                    Geary.Email email = fetched_data_to_email(
+                        to_string(),
+                        uid,
+                        fetched_data,
+                        fields,
+                        header_specifiers,
+                        body_specifier,
+                        preview_specifier,
+                        preview_charset_specifier
+                    );
                     if (!email.fields.fulfills(fields)) {
                         message("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
                             fields.clear(email.fields).to_list_string(), fetched_data.to_string());
@@ -669,18 +724,16 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     // NOTE: If fields are added or removed from this method, BASIC_FETCH_FIELDS *must* be updated
     // as well
     private void fields_to_fetch_data_types(Geary.Email.Field fields,
-        Gee.List<FetchDataSpecifier> data_types_list, out FetchBodyDataSpecifier? header_specifier) {
-        // pack all the needed headers into a single FetchBodyDataType
-        string[] field_names = new string[0];
-
+                                            Gee.List<FetchDataSpecifier> basic_types,
+                                            Gee.List<string> header_fields) {
         // The assumption here is that because ENVELOPE is such a common fetch command, the
         // server will have optimizations for it, whereas if we called for each header in the
         // envelope separately, the server has to chunk harder parsing the RFC822 header ... have
         // to add References because IMAP ENVELOPE doesn't return them for some reason (but does
         // return Message-ID and In-Reply-To)
         if (fields.is_all_set(Geary.Email.Field.ENVELOPE)) {
-            data_types_list.add(FetchDataSpecifier.ENVELOPE);
-            field_names += "References";
+            basic_types.add(FetchDataSpecifier.ENVELOPE);
+            header_fields.add("References");
 
             // remove those flags and process any remaining
             fields = fields.clear(Geary.Email.Field.ENVELOPE);
@@ -689,35 +742,35 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         foreach (Geary.Email.Field field in Geary.Email.Field.all()) {
             switch (fields & field) {
                 case Geary.Email.Field.DATE:
-                    field_names += "Date";
+                    header_fields.add("Date");
                 break;
 
                 case Geary.Email.Field.ORIGINATORS:
-                    field_names += "From";
-                    field_names += "Sender";
-                    field_names += "Reply-To";
+                    header_fields.add("From");
+                    header_fields.add("Sender");
+                    header_fields.add("Reply-To");
                 break;
 
                 case Geary.Email.Field.RECEIVERS:
-                    field_names += "To";
-                    field_names += "Cc";
-                    field_names += "Bcc";
+                    header_fields.add("To");
+                    header_fields.add("Cc");
+                    header_fields.add("Bcc");
                 break;
 
                 case Geary.Email.Field.REFERENCES:
-                    field_names += "References";
-                    field_names += "Message-ID";
-                    field_names += "In-Reply-To";
+                    header_fields.add("References");
+                    header_fields.add("Message-ID");
+                    header_fields.add("In-Reply-To");
                 break;
 
                 case Geary.Email.Field.SUBJECT:
-                    field_names += "Subject";
+                    header_fields.add("Subject");
                 break;
 
                 case Geary.Email.Field.HEADER:
                     // TODO: If the entire header is being pulled, then no need to pull down partial
                     // headers; simply get them all and decode what is needed directly
-                    data_types_list.add(FetchDataSpecifier.RFC822_HEADER);
+                    basic_types.add(FetchDataSpecifier.RFC822_HEADER);
                 break;
 
                 case Geary.Email.Field.NONE:
@@ -732,22 +785,18 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     assert_not_reached();
             }
         }
-
-        // convert field names into single FetchBodyDataType object
-        if (field_names.length > 0) {
-            header_specifier = new FetchBodyDataSpecifier.peek(
-                FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS, null, -1, -1, field_names);
-            if (imap_header_fields_hack)
-                header_specifier.omit_request_header_fields_space();
-        } else {
-            header_specifier = null;
-        }
     }
 
-    private static Geary.Email fetched_data_to_email(string folder_name, UID uid,
-        FetchedData fetched_data, Geary.Email.Field required_fields,
-        FetchBodyDataSpecifier? header_specifier, FetchBodyDataSpecifier? body_specifier,
-        FetchBodyDataSpecifier? preview_specifier, FetchBodyDataSpecifier? preview_charset_specifier) throws Error {
+    private static Geary.Email fetched_data_to_email(
+        string folder_name,
+        UID uid,
+        FetchedData fetched_data,
+        Geary.Email.Field required_fields,
+        FetchBodyDataSpecifier[]? header_specifiers,
+        FetchBodyDataSpecifier? body_specifier,
+        FetchBodyDataSpecifier? preview_specifier,
+        FetchBodyDataSpecifier? preview_charset_specifier
+    ) throws GLib.Error {
         // note the use of INVALID_ROWID, as the rowid for this email (if one is present in the
         // database) is unknown at this time; this means ImapDB *must* create a new EmailIdentifier
         // for this email after create/merge is completed
@@ -816,20 +865,32 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         if (internaldate != null && rfc822_size != null)
             email.set_email_properties(new Geary.Imap.EmailProperties(internaldate, rfc822_size));
 
-        // if the header was requested, convert its fields now
-        bool has_header_specifier = fetched_data.body_data_map.has_key(header_specifier);
-        if (header_specifier != null && !has_header_specifier) {
-            message("[%s] No header specifier \"%s\" found:", folder_name,
-                header_specifier.to_string());
-            foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys)
-                message("[%s] has %s", folder_name, specifier.to_string());
-        } else if (header_specifier != null && has_header_specifier) {
-            RFC822.Header headers = new RFC822.Header(
-                fetched_data.body_data_map.get(header_specifier));
+        // if any headers were requested, convert its fields now
+        if (header_specifiers != null) {
+            Gee.Map<string,string> headers = new Gee.HashMap<string,string>();
+            foreach (FetchBodyDataSpecifier header_specifier in header_specifiers) {
+                Memory.Buffer fetched_headers =
+                    fetched_data.body_data_map.get(header_specifier);
+                if (fetched_headers != null) {
+                    RFC822.Header parsed_headers = new RFC822.Header(fetched_headers);
+                    foreach (string name in parsed_headers.get_header_names()) {
+                        headers.set(name, parsed_headers.get_header(name));
+                    }
+                } else {
+                    warning(
+                        "[%s] No header specifier \"%s\" found in response:",
+                        folder_name,
+                        header_specifier.to_string()
+                    );
+                    foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys) {
+                        message("[%s] - has %s", folder_name, specifier.to_string());
+                    }
+                }
+            }
 
             // DATE
             if (required_but_not_set(Geary.Email.Field.DATE, required_fields, email)) {
-                string? value = headers.get_header("Date");
+                string? value = headers.get("Date");
                 RFC822.Date? date = null;
                 if (!String.is_empty(value)) {
                     try {
@@ -847,17 +908,17 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             // ORIGINATORS
             if (required_but_not_set(Geary.Email.Field.ORIGINATORS, required_fields, email)) {
                 RFC822.MailboxAddresses? from = null;
-                string? value = headers.get_header("From");
+                string? value = headers.get("From");
                 if (!String.is_empty(value))
                     from = new RFC822.MailboxAddresses.from_rfc822_string(value);
 
                 RFC822.MailboxAddress? sender = null;
-                value = headers.get_header("Sender");
+                value = headers.get("Sender");
                 if (!String.is_empty(value))
                     sender = new RFC822.MailboxAddress.from_rfc822_string(value);
 
                 RFC822.MailboxAddresses? reply_to = null;
-                value = headers.get_header("Reply-To");
+                value = headers.get("Reply-To");
                 if (!String.is_empty(value))
                     reply_to = new RFC822.MailboxAddresses.from_rfc822_string(value);
 
@@ -867,17 +928,17 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             // RECEIVERS
             if (required_but_not_set(Geary.Email.Field.RECEIVERS, required_fields, email)) {
                 RFC822.MailboxAddresses? to = null;
-                string? value = headers.get_header("To");
+                string? value = headers.get("To");
                 if (!String.is_empty(value))
                     to = new RFC822.MailboxAddresses.from_rfc822_string(value);
 
                 RFC822.MailboxAddresses? cc = null;
-                value = headers.get_header("Cc");
+                value = headers.get("Cc");
                 if (!String.is_empty(value))
                     cc = new RFC822.MailboxAddresses.from_rfc822_string(value);
 
                 RFC822.MailboxAddresses? bcc = null;
-                value = headers.get_header("Bcc");
+                value = headers.get("Bcc");
                 if (!String.is_empty(value))
                     bcc = new RFC822.MailboxAddresses.from_rfc822_string(value);
 
@@ -889,19 +950,19 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             // References header will be present if REFERENCES were required, which is why
             // REFERENCES is set at the bottom of the method, when all information has been gathered
             if (message_id == null) {
-                string? value = headers.get_header("Message-ID");
+                string? value = headers.get("Message-ID");
                 if (!String.is_empty(value))
                     message_id = new RFC822.MessageID(value);
             }
 
             if (in_reply_to == null) {
-                string? value = headers.get_header("In-Reply-To");
+                string? value = headers.get("In-Reply-To");
                 if (!String.is_empty(value))
                     in_reply_to = new RFC822.MessageIDList.from_rfc822_string(value);
             }
 
             if (references == null) {
-                string? value = headers.get_header("References");
+                string? value = headers.get("References");
                 if (!String.is_empty(value))
                     references = new RFC822.MessageIDList.from_rfc822_string(value);
             }
@@ -909,7 +970,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             // SUBJECT
             // Unlike DATE, allow for empty subjects
             if (required_but_not_set(Geary.Email.Field.SUBJECT, required_fields, email)) {
-                string? value = headers.get_header("Subject");
+                string? value = headers.get("Subject");
                 if (value != null)
                     email.set_message_subject(new RFC822.Subject.decode(value));
                 else
@@ -1038,7 +1099,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                         // before response returned
                         if (specifier.request_header_fields_space) {
                             this.imap_header_fields_hack = true;
-                        return true;
+                            return true;
                         }
                     }
                 }
