@@ -1416,7 +1416,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.on_shift_key.connect(view.shift_key_changed);
 
         foreach (ConversationMessage msg_view in view) {
-            msg_view.link_activated.connect(on_link_activated);
             msg_view.save_image.connect((url, alt_text, buf) => {
                     on_save_image_extended(view, url, alt_text, buf);
                 });
@@ -1870,12 +1869,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
 
         foreach (Geary.Attachment attachment in attachments) {
-            string uri = attachment.file.get_uri();
-            try {
-                this.application.show_uri(uri);
-            } catch (Error err) {
-                message("Unable to open attachment \"%s\": %s", uri, err.message);
-            }
+            this.application.show_uri.begin(attachment.file.get_uri());
         }
     }
 
@@ -1911,7 +1905,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             FileUtils.chmod(temporary_filename, (int) (Posix.S_IRUSR | Posix.S_IWUSR));
 
             string temporary_uri = Filename.to_uri(temporary_filename, null);
-            this.application.show_uri(temporary_uri);
+            this.application.show_uri.begin(temporary_uri);
         } catch (Error error) {
             ErrorDialog dialog = new ErrorDialog(
                 this,
@@ -1965,21 +1959,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                         handle_error(source.account.information, err);
                     }
                 }
-            );
-        }
-    }
-
-    private void on_link_activated(string uri) {
-        try {
-            if (uri.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-                this.application.controller.compose(uri);
-            } else {
-                this.application.show_uri(uri);
-            }
-        } catch (GLib.Error err) {
-            handle_error(
-                this.selected_account != null ? this.selected_account.information : null,
-                err
             );
         }
     }

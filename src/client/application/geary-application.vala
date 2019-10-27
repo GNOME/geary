@@ -158,6 +158,7 @@ public class GearyApplication : Gtk.Application {
         { null }
     };
 
+    private const string MAILTO_URI_SCHEME_PREFIX = "mailto:";
     private const int64 USEC_PER_SEC = 1000000;
     private const int64 FORCE_SHUTDOWN_USEC = 5 * USEC_PER_SEC;
 
@@ -478,10 +479,11 @@ public class GearyApplication : Gtk.Application {
                 string mailto = target.get_uri();
                 // Due to GNOME/glib#1886, the email address may be
                 // prefixed by a '///'. If so, remove it.
-                if (mailto.has_prefix("mailto:///")) {
+                const string B0RKED_GLIB_MAILTO_PREFIX = "mailto:///";
+                if (mailto.has_prefix(B0RKED_GLIB_MAILTO_PREFIX)) {
                     mailto = (
-                        Geary.ComposedEmail.MAILTO_SCHEME +
-                        mailto.substring("mailto:///".length)
+                        MAILTO_URI_SCHEME_PREFIX +
+                        mailto.substring(B0RKED_GLIB_MAILTO_PREFIX.length)
                     );
                 }
                 this.new_composer.begin(mailto);
@@ -635,19 +637,25 @@ public class GearyApplication : Gtk.Application {
     }
 
     /** Displays a URI on the current active window, if any. */
-    public void show_uri(string uri) throws Error {
-        string uri_ = uri;
+    public async void show_uri(string uri) {
+        yield create_controller();
 
-        // Support web URLs that omit the protocol.
-        if (!uri.contains(":")) {
-            uri_ = "http://" + uri;
-        }
+        if (uri.down().has_prefix(MAILTO_URI_SCHEME_PREFIX)) {
+            yield this.new_composer(uri);
+        } else {
+            string uri_ = uri;
+            // Support web URLs that omit the protocol.
+            if (!uri.contains(":")) {
+                uri_ = "http://" + uri;
+            }
 
-        bool success = Gtk.show_uri_on_window(
-            get_active_window(), uri, Gdk.CURRENT_TIME
-        );
-        if (!success) {
-            throw new IOError.FAILED("gtk_show_uri() returned false");
+            try {
+                Gtk.show_uri_on_window(
+                    get_active_window(), uri_, Gdk.CURRENT_TIME
+                );
+            } catch (GLib.Error err) {
+                this.controller.report_problem(new Geary.ProblemReport(err));
+            }
         }
     }
 
@@ -864,10 +872,10 @@ public class GearyApplication : Gtk.Application {
             ).get_strv();
             foreach (string arg in args) {
                 // the only acceptable arguments are mailto:'s
-                if (arg == Geary.ComposedEmail.MAILTO_SCHEME) {
+                if (arg == MAILTO_URI_SCHEME_PREFIX) {
                     activate_action(GearyApplication.ACTION_COMPOSE, null);
                     activated = true;
-                } else if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+                } else if (arg.down().has_prefix(MAILTO_URI_SCHEME_PREFIX)) {
                     activate_action(
                         GearyApplication.ACTION_MAILTO,
                         new GLib.Variant.string(arg)
@@ -1000,7 +1008,7 @@ public class GearyApplication : Gtk.Application {
     private void on_activate_help() {
         try {
             if (this.is_installed) {
-                show_uri("help:geary");
+                this.show_uri.begin("help:geary");
             } else {
                 Pid pid;
                 File exec_dir = this.exec_dir;

@@ -164,6 +164,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
 
+    private const string MAILTO_URI_PREFIX = "mailto:";
+
     // Keep these in sync with the next const below.
     private const string ATTACHMENT_KEYWORDS =
         "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures";
@@ -566,9 +568,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this(application, initial_account, null, ComposeType.NEW_MESSAGE);
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
-        if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {
+        if (mailto.has_prefix(MAILTO_URI_PREFIX)) {
             // Parse the mailto link.
-            string[] parts = mailto.substring(Geary.ComposedEmail.MAILTO_SCHEME.length).split("?", 2);
+            string[] parts = mailto.substring(MAILTO_URI_PREFIX.length).split("?", 2);
             string email = Uri.unescape_string(parts[0]);
             string[] params = parts.length == 2 ? parts[1].split("&") : new string[0];
             foreach (string param in params) {
@@ -2337,11 +2339,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 this.editor.delete_link(selection_id);
             });
         popover.link_open.connect(() => {
-                try {
-                    this.application.show_uri(popover.link_uri);
-                } catch (GLib.Error err) {
-                    debug("Failed to open URI: %s", err.message);
-                }
+                this.application.show_uri.begin(popover.link_uri);
             });
         return popover;
     }
