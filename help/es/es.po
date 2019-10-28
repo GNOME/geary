@@ -8,8 +8,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2019-09-24 07:37+0000\n"
-"PO-Revision-Date: 2019-10-24 10:54+0200\n"
+"POT-Creation-Date: 2019-10-24 10:12+0000\n"
+"PO-Revision-Date: 2019-10-28 12:48+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -20,7 +20,6 @@ msgstr ""
 "X-Generator: Gtranslator 3.34.0\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-#| msgid "translator-credits"
 msgctxt "_"
 msgid "translator-credits"
 msgstr ""
@@ -34,7 +33,6 @@ msgstr "Cuentas"
 
 #. (itstool) path: section/title
 #: C/accounts.page:13
-#| msgid "Accounts"
 msgid "Accounts Editor"
 msgstr "Editor de cuentas"
 
@@ -85,7 +83,6 @@ msgstr ""
 
 #. (itstool) path: section/title
 #: C/accounts.page:48
-#| msgid "Editing existing accounts"
 msgid "Updating existing accounts"
 msgstr "Actualizar las cuentas existentes"
 
@@ -100,10 +97,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/accounts.page:56
-#| msgid ""
-#| "The <gui>Download mail</gui> drop-down allows you to configure how much "
-#| "mail Geary will keep locally. Geary can only use locally available mail "
-#| "when searching and forming conversations."
 msgid ""
 "The <gui>Download mail</gui> setting allows you to configure how much mail "
 "Geary will download and store locally. Geary can only use locally available "
@@ -155,6 +148,10 @@ msgid ""
 "Settings</app> must also be removed from there. To do so, open <app>Online "
 "Accounts</app>, select the account, and click <gui>Remove</gui>."
 msgstr ""
+"Las cuentas añadidas mediante el panel <app>Cuentas en línea</app> de la "
+"<app>Configuración de GNOME</app> también se puede quitar desde ahí. Para "
+"hacerlo, abra <app>Cuentas en línea</app>, seleccione la cuenta y pulse "
+"<gui>Quitar</gui>."
 
 #. (itstool) path: section/p
 #: C/accounts.page:90
@@ -228,6 +225,9 @@ msgid ""
 "gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it can be "
 "fixed."
 msgstr ""
+"si cree que ha encontrado un error en Geary <link href=\"https://wiki.gnome."
+"org/Apps/Geary/Contact\">póngase en contacto</link> para informarnos y que "
+"podamos arreglarlo."
 
 #. (itstool) path: page/p
 #: C/bugs.page:16
@@ -235,6 +235,8 @@ msgid ""
 "To help diagnose the problem as fast as possible, please include the "
 "following information:"
 msgstr ""
+"Para ayudar a diagnosticar el problema lo antes posible incluya la siguiente "
+"información:"
 
 #. (itstool) path: item/p
 #: C/bugs.page:20
@@ -252,6 +254,7 @@ msgstr "Su escritorio (GNOME, KDE o cualquier otro)"
 msgid ""
 "Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
 msgstr ""
+"Su sistema operativo y su versión (¿Ubuntu 16.04, Fedora 28, uno propio?)"
 
 #. (itstool) path: item/p
 #: C/bugs.page:25
@@ -287,7 +290,7 @@ msgstr "Contribuir con Geary"
 #: C/contributing.page:12
 msgid ""
 "Want to help improve Geary? There are a number of ways you can contribute:"
-msgstr ""
+msgstr "¿Quiere ayudar a mejorar Geary? Hay varias formas de colaborar:"
 
 #. (itstool) path: item/p
 #: C/contributing.page:16
@@ -354,7 +357,6 @@ msgstr ""
 
 #. (itstool) path: page/title
 #: C/index.page:5
-#| msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
 msgid ""
 "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
 "<span>Geary</span>"
@@ -374,7 +376,6 @@ msgstr "Uso de Geary"
 
 #. (itstool) path: section/title
 #: C/index.page:19
-#| msgid "Composing and replying"
 msgid "Contributing and bug reporting"
 msgstr "Colaborar e informar de errores"
 
@@ -512,12 +513,13 @@ msgstr ""
 
 #. (itstool) path: page/p
 #: C/overview.page:18
-#, fuzzy
 #| msgid "The main Geary window is divided into several areas:"
 msgid ""
 "The main Geary window is divided into several areas: The folder list, the "
 "conversation list, and the conversation viewer."
-msgstr "La ventana principal de Geary se divide en varias áreas:"
+msgstr ""
+"La ventana principal de Geary se divide en varias áreas: la lista de "
+"carpetas, la lista de conversaciones y el visor de conversaciones."
 
 #. (itstool) path: section/title
 #: C/overview.page:22
@@ -526,7 +528,6 @@ msgstr "Lista de carpetas"
 
 #. (itstool) path: section/p
 #: C/overview.page:24
-#, fuzzy
 #| msgid ""
 #| "The <em>folder list</em> at the left displays all <em>folders</em> and "
 #| "<em>labels</em> in your mail account. Geary uses the term <em>label</em> "
@@ -537,11 +538,10 @@ msgid ""
 "for your email accounts. Geary uses the term <em>label</em> for any folder "
 "that you have created to organize your email messages."
 msgstr ""
-"La <em>lista de carpetas</em> de la izquierda muestra todas las "
-"<em>carpetas</em> y <em>etiquetas</em> en la cuenta de correo. Geary usa el "
-"término <em>etiqueta</em> para cualquier carpeta que se crea para organizar "
-"los mensajes. (La interfaz web de Gmail también usa éste término; la mayoría "
-"de otros servicios de correo no lo usan)."
+"La <em>lista de carpetas</em> muestra todas las <em>carpetas</em> y "
+"<em>etiquetas</em> de sus cuentas de correo. Geary usa el término "
+"<em>etiqueta</em> para cualquier carpeta que se crea para organizar los "
+"mensajes."
 
 #. (itstool) path: section/p
 #: C/overview.page:29
@@ -620,14 +620,12 @@ msgstr ""
 
 #. (itstool) path: section/title
 #: C/overview.page:58
-#, fuzzy
 #| msgid "Conversation list"
 msgid "Conversation viewer"
-msgstr "Lista de conversaciones"
+msgstr "Visor de conversaciones"
 
 #. (itstool) path: section/p
 #: C/overview.page:60
-#, fuzzy
 #| msgid ""
 #| "The <em>message area</em> displays all messages in the selected "
 #| "conversation, with the oldest message at the top."
@@ -635,8 +633,8 @@ msgid ""
 "The <em>conversation viewer</em> displays all email messages in the selected "
 "conversation, with the oldest message at the top."
 msgstr ""
-"El <em>área de mensajes</em> muestra todos los mensajes en la conversación "
-"seleccionada, con el mensaje más antiguo en la parte superior."
+"El <em>visor de conversaciones</em> muestra todos los mensajes en la "
+"conversación seleccionada, con el mensaje más antiguo en la parte superior."
 
 #. (itstool) path: section/p
 #: C/overview.page:63
@@ -728,7 +726,6 @@ msgstr "Lectura"
 
 #. (itstool) path: item/title
 #: C/preferences.page:20
-#| msgid "Automatically select next message"
 msgid "<gui>Automatically select next message</gui>"
 msgstr "<gui>Seleccionar automáticamente el mensaje siguiente</gui>"
 
@@ -745,7 +742,6 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:26
-#| msgid "Display conversation preview"
 msgid "<gui>Display conversation preview</gui>"
 msgstr "<gui>Mostrar la vista previa de la conversación</gui>"
 
@@ -760,7 +756,6 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:31
-#| msgid "Use three pane view"
 msgid "<gui>Use three pane view</gui>"
 msgstr "<gui>Usar la vista de tres paneles</gui>"
 
@@ -782,7 +777,6 @@ msgstr "Notificaciones"
 
 #. (itstool) path: item/title
 #: C/preferences.page:43
-#| msgid "Play notification sounds"
 msgid "<gui>Play notification sounds</gui>"
 msgstr "<gui>Reproducir sonidos de notificación</gui>"
 
@@ -795,7 +789,6 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:47
-#| msgid "Show notifications for new mail"
 msgid "<gui>Show notifications for new mail</gui>"
 msgstr "<gui>Mostrar notificaciones de mensajes nuevos</gui>"
 
@@ -817,11 +810,10 @@ msgstr ""
 #. (itstool) path: item/title
 #: C/preferences.page:54
 msgid "<gui>Watch for new mail when closed</gui>"
-msgstr ""
+msgstr "<gui>Revisar si hay mensajes nuevos al cerrar</gui>"
 
 #. (itstool) path: item/p
 #: C/preferences.page:55
-#, fuzzy
 #| msgid ""
 #| "Geary will watch your accounts for new mail even when the main window is "
 #| "not open. To do this, it will silently start when you log in to your "
@@ -834,7 +826,7 @@ msgstr ""
 "Geary comprobará si hay correo nuevo en sus cuentas incluso cuando la "
 "ventana principal no esté abierta. Para hacer esto, se iniciará "
 "sigilosamente cuando inicie sesión en su equipo y seguirá ejecutándose "
-"después de que haya cerrado la ventana principal."
+"después de que haya cerrado todas las ventanas."
 
 #. (itstool) path: page/title
 #: C/search.page:10
@@ -895,8 +887,8 @@ msgstr "<input>attachment:<var>nombre de archivo</var></input>"
 #: C/search.page:28
 msgid "Finds messages with attachments whose name matches <var>filename</var>."
 msgstr ""
-"Encuentra mensajes con adjuntos cuyo nombre coincida con <var>Nombre de "
-"archivo</var>."
+"Busca mensajes con adjuntos cuyo nombre coincida con <var>Nombre de archivo</"
+"var>."
 
 #. (itstool) path: td/p
 #: C/search.page:31
@@ -905,12 +897,10 @@ msgstr "<input>bcc:<var>destinatario</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:32
-#, fuzzy
 #| msgid "Finds messages where <var>recipient</var> matches the BCC header."
 msgid "Finds messages where <var>recipient</var> matches email BCC fields."
 msgstr ""
-"Encuentra mensajes donde <var>destinatario</var> coincida con la cabecera de "
-"CCO."
+"Busca mensajes donde <var>destinatario</var> coincida con la cabecera de CCO."
 
 #. (itstool) path: td/p
 #: C/search.page:35
@@ -920,7 +910,7 @@ msgstr "<input>body:<var>texto</var></input>"
 #. (itstool) path: td/p
 #: C/search.page:36
 msgid "Finds messages whose body contains <var>text</var>."
-msgstr "Encuentra mensajes cuyo cuerpo contenga <var>texto</var>."
+msgstr "Busca mensajes cuyo cuerpo contenga <var>texto</var>."
 
 #. (itstool) path: td/p
 #: C/search.page:39
@@ -929,11 +919,10 @@ msgstr "<input>cc:<var>destinatario</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:40
-#, fuzzy
 #| msgid "Finds messages where <var>recipient</var> matches the CC header."
 msgid "Finds messages where <var>recipient</var> matches email CC fields."
 msgstr ""
-"Encuentra mensajes donde <var>destinatario</var> coincida la cabecera de CC."
+"Busca mensajes donde <var>destinatario</var> coincida con la cabecera de CC."
 
 #. (itstool) path: td/p
 #: C/search.page:43
@@ -942,12 +931,11 @@ msgstr "<input>from:<var>remitente</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:44
-#, fuzzy
 #| msgid "Finds messages where <var>sender</var> matches the From header."
 msgid "Finds messages where <var>sender</var> matches email From fields."
 msgstr ""
-"Encuentra mensajes donde <var>remitente</var> coincide el encabezado De "
-"parte de."
+"Busca mensajes donde <var>remitente</var> coincide con la cabecera De parte "
+"de."
 
 #. (itstool) path: td/p
 #: C/search.page:47
@@ -996,14 +984,13 @@ msgstr "<input>to:<var>destinatario</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:64
-#, fuzzy
 #| msgid ""
 #| "Finds messages where <var>sender</var> matches the To, CC, or BCC header."
 msgid ""
 "Finds messages where <var>recipient</var> matches email To, CC, or BCC "
 "fields."
 msgstr ""
-"Encuentra mensajes donde <var>remitente</var> coincide las cabeceras Para, "
+"Busca mensajes donde <var>remitente</var> coincide con las cabeceras Para, "
 "CC, o CCO."
 
 #. (itstool) path: section/p
@@ -1039,6 +1026,8 @@ msgid ""
 "The following keyboard shortcuts can be used to access on-line help from "
 "Geary:"
 msgstr ""
+"Se puede usar los siguiente atajos del teclado para acceder a la ayuda en "
+"línea de Geary:"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:22
@@ -1047,21 +1036,16 @@ msgstr "Mostrar este manual de usuario"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:23
-#| msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
 msgid "<keyseq><key>F1</key></keyseq>"
 msgstr "<keyseq><key>F1</key></keyseq>"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:26
-#| msgid "Keyboard shortcuts"
 msgid "Display all keyboard shortcuts"
 msgstr "Mostrar los atajos del teclado"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:27
-#| msgid ""
-#| "<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
-#| "key><key>Up</key></keyseq>"
 msgid ""
 "<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
 "key><key>F1</key></keyseq>"
@@ -1228,9 +1212,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/write.page:36
-#| msgid ""
-#| "A number of keyboard shortcuts are available in the composer; see <link "
-#| "xref=\"shortcuts#composer\"/> for details."
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
 "\"shortcuts\"/> for details."
