@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <menu id="attachments_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Open</attribute>
+        <attribute name="action">cap.open</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Save</attribute>
+        <attribute name="action">cap.save</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Save _All</attribute>
+        <attribute name="action">cap.save-all</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

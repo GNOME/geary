@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 namespace GtkUtil {
@@ -78,5 +80,50 @@ public inline int get_border_box_height(Gtk.Widget widget) {
 
     return widget.get_allocated_height() - margin.top - margin.bottom;
 }
+
+}
+
+namespace Util.Gtk {
+
+    /** Copies a GLib menu, setting targets for the given actions. */
+    public GLib.Menu copy_menu_with_targets(GLib.Menu template,
+                                            string group,
+                                            Gee.Map<string,GLib.Variant> targets) {
+        string group_prefix = group + ".";
+        GLib.Menu copy = new GLib.Menu();
+        for (int i = 0; i < template.get_n_items(); i++) {
+            GLib.MenuItem item = new GLib.MenuItem.from_model(template, i);
+            GLib.Menu? section = (GLib.Menu) item.get_link(
+                GLib.Menu.LINK_SECTION
+            );
+            GLib.Menu? submenu = (GLib.Menu) item.get_link(
+                GLib.Menu.LINK_SUBMENU
+            );
+
+            if (section != null) {
+                item.set_section(
+                    copy_menu_with_targets(section, group, targets)
+                );
+            } else if (submenu != null) {
+                item.set_submenu(
+                    copy_menu_with_targets(submenu, group, targets)
+                );
+            } else {
+                string? action = (string) item.get_attribute_value(
+                    GLib.Menu.ATTRIBUTE_ACTION, GLib.VariantType.STRING
+                );
+                if (action != null && action.has_prefix(group_prefix)) {
+                    GLib.Variant? target = targets.get(
+                        action.substring(group_prefix.length)
+                    );
+                    if (target != null) {
+                        item.set_action_and_target_value(action, target);
+                    }
+                }
+            }
+            copy.append_item(item);
+        }
+        return copy;
+    }
 
 }

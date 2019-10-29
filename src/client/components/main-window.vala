@@ -171,6 +171,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         get; private set; default = null;
     }
 
+    /** The attachment manager for this window. */
+    public Application.AttachmentManager attachments { get; private set; }
+
     /** Determines if a composer is currently open in this window. */
     public bool has_composer {
         get {
@@ -267,6 +270,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         update_command_actions();
         update_conversation_actions(NONE);
+
+        this.attachments = new Application.AttachmentManager(this);
 
         this.application.engine.account_available.connect(on_account_available);
         this.application.engine.account_unavailable.connect(on_account_unavailable);
@@ -1398,9 +1403,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         view.reply_all_message.connect(on_reply_all_message);
         view.reply_to_message.connect(on_reply_to_message);
         view.edit_draft.connect(on_edit_draft);
-
-        view.attachments_activated.connect(on_attachments_activated);
-        view.save_attachments.connect(on_save_attachments);
         view.view_source.connect(on_view_source);
 
         Geary.App.Conversation conversation = this.conversation_viewer.current_list.conversation;
@@ -1414,12 +1416,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         view.delete_message.connect(on_delete_message);
         view.set_folder_actions_enabled(supports_trash, supports_delete);
         this.on_shift_key.connect(view.shift_key_changed);
-
-        foreach (ConversationMessage msg_view in view) {
-            msg_view.save_image.connect((url, alt_text, buf) => {
-                    on_save_image_extended(view, url, alt_text, buf);
-                });
-        }
     }
 
     // Window-level action callbacks
@@ -1854,42 +1850,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_attachments_activated(Gee.Collection<Geary.Attachment> attachments) {
-        if (this.application.config.ask_open_attachment) {
-            QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(
-                this,
-                _("Are you sure you want to open these attachments?"),
-                _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
-                Stock._OPEN_BUTTON, Stock._CANCEL, _("Don’t _ask me again"), false);
-            if (ask_to_open.run() != Gtk.ResponseType.OK) {
-                return;
-            }
-            // only save checkbox state if OK was selected
-            this.application.config.ask_open_attachment = !ask_to_open.is_checked;
-        }
-
-        foreach (Geary.Attachment attachment in attachments) {
-            this.application.show_uri.begin(attachment.file.get_uri());
-        }
-    }
-
-    private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
-        if (this.selected_account != null) {
-            if (attachments.size == 1) {
-                this.application.controller.save_attachment_to_file.begin(
-                    this.selected_account,
-                    attachments.to_array()[0],
-                    null
-                );
-            } else {
-                this.application.controller.save_attachments_to_file.begin(
-                    this.selected_account,
-                    attachments
-                );
-            }
-        }
-    }
-
     private void on_view_source(ConversationEmail email_view) {
         string source = (email_view.email.header.buffer.to_string() +
                          email_view.email.body.buffer.to_string());
@@ -1913,17 +1873,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 error.message
             );
             dialog.run();
-        }
-    }
-
-    private void on_save_image_extended(ConversationEmail view,
-                                        string url,
-                                        string? alt_text,
-                                        Geary.Memory.Buffer resource_buf) {
-        if (this.selected_account != null) {
-            this.application.controller.save_image_extended.begin(
-                this.selected_account, view, url, alt_text, resource_buf
-            );
         }
     }
 

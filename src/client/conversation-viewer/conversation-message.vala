@@ -342,7 +342,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public signal void flag_remote_images();
 
     /** Fired when the user saves an inline displayed image. */
-    public signal void save_image(string? uri, string? alt_text, Geary.Memory.Buffer buffer);
+    public signal void save_image(
+        string uri, string? alt_text, Geary.Memory.Buffer? buffer
+    );
 
 
     /**
@@ -1232,27 +1234,35 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void on_save_image(Variant? param) {
-        string cid_url = param.get_child_value(0).get_string();
-
+        string uri = (string) param.get_child_value(0);
         string? alt_text = null;
         Variant? alt_maybe = param.get_child_value(1).get_maybe();
         if (alt_maybe != null) {
-            alt_text = alt_maybe.get_string();
+            alt_text = (string) alt_maybe;
         }
-        WebKit.WebResource response = this.resources.get(cid_url);
-        response.get_data.begin(null, (obj, res) => {
-                try {
-                    uint8[] data = response.get_data.end(res);
-                    save_image(response.get_uri(),
-                               alt_text,
-                               new Geary.Memory.ByteBuffer(data, data.length));
-                } catch (Error err) {
-                    debug(
-                        "Failed to get image data from web view: %s",
-                        err.message
-                    );
-                }
-            });
+
+        if (uri.has_prefix(ClientWebView.CID_URL_PREFIX)) {
+            // We can get the data directly from the attachment, so
+            // don't bother getting it from the web view
+            save_image(uri, alt_text, null);
+        } else {
+            WebKit.WebResource response = this.resources.get(uri);
+            response.get_data.begin(null, (obj, res) => {
+                    try {
+                        uint8[] data = response.get_data.end(res);
+                        save_image(
+                            uri,
+                            alt_text,
+                            new Geary.Memory.ByteBuffer(data, data.length)
+                        );
+                    } catch (GLib.Error err) {
+                        debug(
+                            "Failed to get image data from web view: %s",
+                            err.message
+                        );
+                    }
+                });
+        }
     }
 
     private void on_link_activated(GLib.Variant? param) {
