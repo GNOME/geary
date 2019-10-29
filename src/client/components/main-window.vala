@@ -1397,8 +1397,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_conversation_viewer_email_added(ConversationEmail view) {
-        view.load_error.connect(on_email_load_error);
-
         view.forward_message.connect(on_forward_message);
         view.reply_all_message.connect(on_reply_all_message);
         view.reply_to_message.connect(on_reply_to_message);
@@ -1795,13 +1793,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 }
             );
         }
-    }
-
-    private void on_email_load_error(ConversationEmail view, GLib.Error err) {
-        handle_error(
-            this.selected_account != null ? this.selected_account.information : null,
-            err
-        );
     }
 
     private void on_reply_to_message(ConversationEmail target_view) {

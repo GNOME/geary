@@ -248,9 +248,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private bool shift_key_down;
 
 
-    /** Fired when an error occurs loading the message body. */
-    public signal void load_error(GLib.Error err);
-
     /** Fired when the user clicks "reply" in the message menu. */
     public signal void reply_to_message();
 
@@ -768,10 +765,17 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         }
     }
 
-    private void handle_load_failure(GLib.Error err) {
-        load_error(err);
+    private void handle_load_failure(GLib.Error error) {
         this.message_body_state = FAILED;
         this.primary_message.show_load_error_pane();
+
+        MainWindow? main = get_toplevel() as MainWindow;
+        if (main != null) {
+            Geary.AccountInformation account = this.email_store.account.information;
+            main.application.controller.report_problem(
+                new Geary.ServiceProblemReport(account, account.incoming, error)
+            );
+        }
     }
 
     private void handle_load_offline() {
