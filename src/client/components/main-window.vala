@@ -1403,7 +1403,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         view.reply_all_message.connect(on_reply_all_message);
         view.reply_to_message.connect(on_reply_to_message);
         view.edit_draft.connect(on_edit_draft);
-        view.view_source.connect(on_view_source);
 
         Geary.App.Conversation conversation = this.conversation_viewer.current_list.conversation;
         bool in_selected_folder = (
@@ -1847,32 +1846,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             this.application.controller.compose_with_context_email(
                 account, NEW_MESSAGE, target_view.email, null
             );
-        }
-    }
-
-    private void on_view_source(ConversationEmail email_view) {
-        string source = (email_view.email.header.buffer.to_string() +
-                         email_view.email.body.buffer.to_string());
-        string temporary_filename;
-        try {
-            int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",
-                                                      out temporary_filename);
-            FileUtils.set_contents(temporary_filename, source);
-            FileUtils.close(temporary_handle);
-
-            // ensure this file is only readable by the user ... this
-            // needs to be done after the file is closed
-            FileUtils.chmod(temporary_filename, (int) (Posix.S_IRUSR | Posix.S_IWUSR));
-
-            string temporary_uri = Filename.to_uri(temporary_filename, null);
-            this.application.show_uri.begin(temporary_uri);
-        } catch (Error error) {
-            ErrorDialog dialog = new ErrorDialog(
-                this,
-                _("Failed to open default text editor."),
-                error.message
-            );
-            dialog.run();
         }
     }
 

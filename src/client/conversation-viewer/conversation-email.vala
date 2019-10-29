@@ -279,9 +279,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /** Fired the edit draft button is clicked. */
     public signal void edit_draft();
 
-    /** Fired when the view source action is activated. */
-    public signal void view_source();
-
     /** Fired when a internal link is activated */
     public signal void internal_link_activated(int y);
 
@@ -353,9 +350,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         add_action(ACTION_UNSTAR).activate.connect(() => {
                 mark_email(null, Geary.EmailFlags.FLAGGED);
             });
-        add_action(ACTION_VIEW_SOURCE).activate.connect(() => {
-                view_source();
-            });
+        add_action(ACTION_VIEW_SOURCE).activate.connect(on_view_source);
         insert_action_group("eml", message_actions);
 
         // Construct the view for the primary message, hook into it
@@ -807,6 +802,48 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         }
     }
 
+    private async void view_source() {
+        MainWindow? main = get_toplevel() as MainWindow;
+        if (main != null) {
+            Geary.Email email = this.email;
+            try {
+                yield Geary.Nonblocking.Concurrent.global.schedule_async(
+                    () => {
+                        string source = (
+                            email.header.buffer.to_string() +
+                            email.body.buffer.to_string()
+                        );
+                        string temporary_filename;
+                        int temporary_handle = GLib.FileUtils.open_tmp(
+                            "geary-message-XXXXXX.txt",
+                            out temporary_filename
+                        );
+                        GLib.FileUtils.set_contents(temporary_filename, source);
+                        GLib.FileUtils.close(temporary_handle);
+
+                        // ensure this file is only readable by the
+                        // user ... this needs to be done after the
+                        // file is closed
+                        GLib.FileUtils.chmod(
+                            temporary_filename,
+                            (int) (Posix.S_IRUSR | Posix.S_IWUSR)
+                        );
+
+                        string temporary_uri = GLib.Filename.to_uri(
+                            temporary_filename, null
+                        );
+                        main.application.show_uri.begin(temporary_uri);
+                    },
+                    null
+                );
+            } catch (GLib.Error error) {
+                main.application.controller.report_problem(
+                    new Geary.ProblemReport(error)
+                );
+            }
+        }
+    }
+
     private async void print() throws Error {
         Json.Builder builder = new Json.Builder();
         builder.begin_object();
@@ -957,6 +994,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             // attachments.
             this.update_displayed_attachments();
         }
+    }
+
+    private void on_view_source() {
+        this.view_source.begin();
     }
 
     private void on_service_status_change() {
