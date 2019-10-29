@@ -798,7 +798,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             bool supports_trash = get_action_enabled(ACTION_TRASH_MESSAGE);
             bool supports_delete = get_action_enabled(ACTION_DELETE_MESSAGE);
             bool show_trash_button = !this.shift_key_down && (supports_trash || !supports_delete);
-            GtkUtil.menu_foreach(this.email_menu_model, (label, name, target, section) => {
+            Util.Gtk.menu_foreach(this.email_menu_model, (label, name, target, section) => {
                 if ((section != this.email_menu_trash || show_trash_button) &&
                     (section != this.email_menu_delete || !show_trash_button)) {
                     this.email_menu.append_item(new MenuItem.section(label, section));
