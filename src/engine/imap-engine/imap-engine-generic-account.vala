@@ -416,7 +416,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         char type = (char) serialised.get_child_value(0).get_byte();
         if (type == 'i')
             return new ImapDB.EmailIdentifier.from_variant(serialised);
-        if (type == 's')
+        if (type == 'o')
             return new Outbox.EmailIdentifier.from_variant(serialised);
 
         throw new EngineError.BAD_PARAMETERS("Unknown serialised type: %c", type);

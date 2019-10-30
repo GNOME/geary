@@ -88,6 +88,9 @@ public class Geary.ImapEngine.GenericAccountTest : TestCase {
         assert_non_null(
             test_article.to_email_identifier(new GLib.Variant("(yxx)", 'i', 1, 2))
         );
+        assert_non_null(
+            test_article.to_email_identifier(new GLib.Variant("(yxx)", 'o', 1, 2))
+        );
     }
 
 }
