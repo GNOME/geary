@@ -21,6 +21,17 @@ public class Application.Controller : Geary.BaseObject {
     private const uint MAX_AUTH_ATTEMPTS = 3;
 
 
+    /** Determines if conversations can be trashed from the given folder. */
+    public static bool does_folder_support_trash(Geary.Folder? target) {
+        return (
+            target != null &&
+            target.special_folder_type != TRASH &&
+            !target.properties.is_local_only &&
+            (target as Geary.FolderSupport.Move) != null
+        );
+    }
+
+
     /**
      * Collects objects and state related to a single open account.
      */

@@ -174,6 +174,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     /** The attachment manager for this window. */
     public Application.AttachmentManager attachments { get; private set; }
 
+    /** Determines if conversations in the selected folder can be trashed. */
+    public bool selected_folder_supports_trash {
+        get {
+            return Application.Controller.does_folder_support_trash(
+                this.selected_folder
+            );
+        }
+    }
+
     /** Determines if a composer is currently open in this window. */
     public bool has_composer {
         get {
@@ -692,7 +701,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             update_conversation_actions(NONE);
             this.conversation_viewer.show_loading();
             this.main_toolbar.update_trash_button(
-                !this.is_shift_down && selected_folder_supports_trash()
+                !this.is_shift_down && this.selected_folder_supports_trash
             );
 
             if (folder != null) {
@@ -1178,7 +1187,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             sensitive && (selected_folder is Geary.FolderSupport.Archive)
         );
         get_action(ACTION_TRASH_CONVERSATION).set_enabled(
-            sensitive && selected_folder_supports_trash()
+            sensitive && this.selected_folder_supports_trash
         );
         get_action(ACTION_DELETE_CONVERSATION).set_enabled(
             sensitive && (selected_folder is Geary.FolderSupport.Remove)
@@ -1258,16 +1267,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private SimpleAction get_action(string name) {
         return (SimpleAction) lookup_action(name);
-    }
-
-    private bool selected_folder_supports_trash() {
-        Geary.Folder? current = this.selected_folder;
-        return (
-            current != null &&
-            current.special_folder_type != TRASH &&
-            !selected_folder.properties.is_local_only &&
-            (selected_folder as Geary.FolderSupport.Move) != null
-        );
     }
 
     private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
