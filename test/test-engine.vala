@@ -61,6 +61,7 @@ int main(string[] args) {
     engine.add_suite(new Geary.ImapDB.EmailIdentifierTest().get_suite());
     engine.add_suite(new Geary.ImapDB.FolderTest().get_suite());
     engine.add_suite(new Geary.ImapEngine.AccountProcessorTest().get_suite());
+    engine.add_suite(new Geary.ImapEngine.GenericAccountTest().get_suite());
 
     // Depends on ImapDb.Database working correctly
     engine.add_suite(new Geary.ContactStoreImplTest().get_suite());
