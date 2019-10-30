@@ -30,6 +30,24 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         Geary.Email.Field.ORIGINATORS
     );
 
+    internal const string EMAIL_ACTION_GROUP_NAME = "eml";
+
+    internal const string ACTION_DELETE = "delete";
+    internal const string ACTION_EDIT = "edit";
+    internal const string ACTION_FORWARD = "forward";
+    internal const string ACTION_MARK_LOAD_REMOTE = "mark-load-remote";
+    internal const string ACTION_MARK_READ = "mark-read";
+    internal const string ACTION_MARK_STARRED = "mark-starred";
+    internal const string ACTION_MARK_UNREAD = "mark-unread";
+    internal const string ACTION_MARK_UNREAD_DOWN = "mark-unread-down";
+    internal const string ACTION_MARK_UNSTARRED = "mark-unstarred";
+    internal const string ACTION_PRINT = "print";
+    internal const string ACTION_REPLY_ALL = "reply-all";
+    internal const string ACTION_REPLY_SENDER = "reply-sender";
+    internal const string ACTION_SAVE_ALL_ATTACHMENTS = "save-all-attachments";
+    internal const string ACTION_TRASH = "trash";
+    internal const string ACTION_VIEW_SOURCE = "view-source";
+
     // Offset from the top of the list box which emails views will
     // scrolled to, so the user can see there are additional messages
     // above it. XXX This is currently approx 0.5 times the height of
@@ -46,6 +64,27 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // Amount of pixels that need to be shown of an email's body to
     // mark it as read
     private const int MARK_READ_PADDING = 50;
+
+    private const string ACTION_TARGET_TYPE = (
+        Geary.EmailIdentifier.BASE_VARIANT_TYPE
+    );
+    private const ActionEntry[] email_action_entries = {
+        { ACTION_DELETE, on_email_delete, ACTION_TARGET_TYPE },
+        { ACTION_EDIT, on_email_edit, ACTION_TARGET_TYPE },
+        { ACTION_FORWARD, on_email_forward, ACTION_TARGET_TYPE },
+        { ACTION_MARK_LOAD_REMOTE, on_email_load_remote, ACTION_TARGET_TYPE },
+        { ACTION_MARK_READ, on_email_mark_read, ACTION_TARGET_TYPE },
+        { ACTION_MARK_STARRED, on_email_mark_starred, ACTION_TARGET_TYPE },
+        { ACTION_MARK_UNREAD, on_email_mark_unread, ACTION_TARGET_TYPE },
+        { ACTION_MARK_UNREAD_DOWN, on_email_mark_unread_down, ACTION_TARGET_TYPE },
+        { ACTION_MARK_UNSTARRED, on_email_mark_unstarred, ACTION_TARGET_TYPE },
+        { ACTION_PRINT, on_email_print, ACTION_TARGET_TYPE },
+        { ACTION_REPLY_ALL, on_email_reply_all, ACTION_TARGET_TYPE },
+        { ACTION_REPLY_SENDER, on_email_reply_sender, ACTION_TARGET_TYPE },
+        { ACTION_SAVE_ALL_ATTACHMENTS, on_email_save_all_attachments, ACTION_TARGET_TYPE },
+        { ACTION_TRASH, on_email_trash, ACTION_TARGET_TYPE },
+        { ACTION_VIEW_SOURCE, on_email_view_source, ACTION_TARGET_TYPE },
+    };
 
 
     /** Manages find/search term matching in a conversation. */
@@ -492,6 +531,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     private Geary.TimeoutManager mark_read_timer;
 
+    private GLib.SimpleActionGroup email_actions = new GLib.SimpleActionGroup();
+
 
     /** Keyboard action to scroll the conversation. */
     [Signal (action=true)]
@@ -536,19 +577,28 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.mark_read_timer.start();
     }
 
-    /** Fired when an email view is added to the conversation list. */
-    public signal void email_added(ConversationEmail email);
+    /** Fired when the user clicks "reply" in the message menu. */
+    public signal void reply_to_sender_email(Geary.Email email, string? quote);
 
-    /** Fired when an email view is removed from the conversation list. */
-    public signal void email_removed(ConversationEmail email);
+    /** Fired when the user clicks "reply all" in the message menu. */
+    public signal void reply_to_all_email(Geary.Email email, string? quote);
 
-    /** Fired when the user updates the flags for a set of emails. */
-    public signal void mark_emails(
-        Geary.App.Conversation conversation,
-        Gee.Collection<Geary.EmailIdentifier> emails,
-        Geary.EmailFlags? flags_to_add,
-        Geary.EmailFlags? flags_to_remove
-    );
+    /** Fired when the user clicks "forward" in the message menu. */
+    public signal void forward_email(Geary.Email email, string? quote);
+
+    /** Emitted when email message flags are to be updated. */
+    public signal void mark_email(Gee.Collection<Geary.EmailIdentifier> email,
+                                  Geary.NamedFlag? to_add,
+                                  Geary.NamedFlag? to_remove);
+
+    /** Fired when the user clicks "trash" in the message menu. */
+    public signal void trash_email(Geary.Email email);
+
+    /** Fired when the user clicks "delete" in the message menu. */
+    public signal void delete_email(Geary.Email email);
+
+    /** Fired the edit draft button is clicked. */
+    public signal void edit_email(Geary.Email email);
 
 
     /**
@@ -578,6 +628,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         set_adjustment(adjustment);
         set_sort_func(ConversationListBox.on_sort);
+
+        this.email_actions.add_action_entries(email_action_entries, this);
+        insert_action_group(EMAIL_ACTION_GROUP_NAME, this.email_actions);
 
         this.row_activated.connect(on_row_activated);
 
@@ -923,6 +976,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
 
         ConversationEmail view = new ConversationEmail(
+            conversation,
             email,
             this.email_store,
             this.contacts,
@@ -931,8 +985,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             is_draft(email),
             this.cancellable
         );
-        view.mark_email.connect(on_mark_email);
-        view.mark_email_from_here.connect(on_mark_email_from_here);
         view.internal_link_activated.connect(on_internal_link_activated);
         view.body_selection_changed.connect((email, has_selection) => {
                 this.body_selected_view = has_selection ? email : null;
@@ -957,7 +1009,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         } else {
             insert(row, 0);
         }
-        email_added(view);
 
         return row;
     }
@@ -967,7 +1018,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         EmailRow? row = null;
         if (this.email_rows.unset(email.id, out row)) {
             remove(row);
-            email_removed(row.view);
         }
     }
 
@@ -1048,9 +1098,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         });
 
         if (email_ids.size > 0) {
-            Geary.EmailFlags flags = new Geary.EmailFlags();
-            flags.add(Geary.EmailFlags.UNREAD);
-            mark_emails(this.conversation, email_ids, null, flags);
+            mark_email(email_ids, null, Geary.EmailFlags.UNREAD);
         }
     }
 
@@ -1098,6 +1146,19 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         );
     }
 
+    private ConversationEmail action_target_to_view(GLib.Variant target) {
+        Geary.EmailIdentifier? id = null;
+        try {
+            id = this.conversation.base_folder.account.to_email_identifier(target);
+        } catch (Geary.EngineError err) {
+            debug("Failed to get email id for action target: %s", err.message);
+        }
+        debug("XXX have id? %s", (id != null).to_string());
+        EmailRow? row = (id != null) ? this.email_rows[id] : null;
+        debug("XXX have row? %s", (row != null).to_string());
+        return (row != null) ? row.view : null;
+    }
+
     private void on_conversation_appended(Geary.App.Conversation conversation,
                                           Geary.Email email) {
         on_conversation_appended_async.begin(conversation, email);
@@ -1135,59 +1196,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         row.view.update_flags(email);
     }
 
-    private void on_mark_email(ConversationEmail view,
-                               Geary.NamedFlag? to_add,
-                               Geary.NamedFlag? to_remove) {
-        Gee.Collection<Geary.EmailIdentifier> ids =
-            new Gee.LinkedList<Geary.EmailIdentifier>();
-        ids.add(view.email.id);
-        mark_emails(
-            this.conversation,
-            ids,
-            flag_to_flags(to_add),
-            flag_to_flags(to_remove)
-        );
-    }
-
-    private void on_mark_email_from_here(ConversationEmail view,
-                                         Geary.NamedFlag? to_add,
-                                         Geary.NamedFlag? to_remove) {
-        Geary.Email email = view.email;
-        Gee.Collection<Geary.EmailIdentifier> ids =
-            new Gee.LinkedList<Geary.EmailIdentifier>();
-        ids.add(email.id);
-        this.foreach((row) => {
-                if (row.get_visible()) {
-                    Geary.Email other = ((EmailRow) row).view.email;
-                    if (Geary.Email.compare_sent_date_ascending(
-                            email, other) < 0) {
-                        ids.add(other.id);
-                    }
-                }
-            });
-        mark_emails(
-            this.conversation,
-            ids,
-            flag_to_flags(to_add),
-            flag_to_flags(to_remove)
-        );
-    }
-
     private void on_message_body_state_notify(GLib.Object obj,
                                               GLib.ParamSpec param) {
         ConversationEmail? view = obj as ConversationEmail;
         if (view != null && view.message_body_state == COMPLETED) {
             this.mark_read_timer.start();
         }
-    }
-
-    private Geary.EmailFlags? flag_to_flags(Geary.NamedFlag? flag) {
-        Geary.EmailFlags flags = null;
-        if (flag != null) {
-            flags = new Geary.EmailFlags();
-            flags.add(flag);
-        }
-        return flags;
     }
 
     private void on_row_activated(Gtk.ListBoxRow widget) {
@@ -1210,6 +1224,171 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     private void on_internal_link_activated(ConversationEmail email, int y) {
         EmailRow row = get_email_row_by_id(email.email.id);
         scroll_to_anchor(row, y);
+    }
+
+    // Email action callbacks
+
+    private void on_email_reply_sender(GLib.SimpleAction action,
+                                       GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            view.get_selection_for_quoting.begin((obj, res) => {
+                    string? quote = view.get_selection_for_quoting.end(res);
+                    reply_to_sender_email(view.email, quote);
+                });
+        }
+    }
+
+    private void on_email_reply_all(GLib.SimpleAction action,
+                                    GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            view.get_selection_for_quoting.begin((obj, res) => {
+                    string? quote = view.get_selection_for_quoting.end(res);
+                    reply_to_all_email(view.email, quote);
+                });
+        }
+    }
+
+    private void on_email_forward(GLib.SimpleAction action,
+                                  GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            view.get_selection_for_quoting.begin((obj, res) => {
+                    string? quote = view.get_selection_for_quoting.end(res);
+                    forward_email(view.email, quote);
+                });
+        }
+    }
+
+    private void on_email_mark_read(GLib.SimpleAction action,
+                                    GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            mark_email(
+                Geary.Collection.single(view.email.id),
+                null,
+                Geary.EmailFlags.UNREAD
+            );
+        }
+    }
+
+    private void on_email_mark_unread(GLib.SimpleAction action,
+                                      GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            mark_email(
+                Geary.Collection.single(view.email.id),
+                Geary.EmailFlags.UNREAD,
+                null
+            );
+        }
+    }
+
+    private void on_email_mark_unread_down(GLib.SimpleAction action,
+                                           GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            Geary.Email email = view.email;
+            var ids = new Gee.LinkedList<Geary.EmailIdentifier>();
+            ids.add(email.id);
+            this.foreach((row) => {
+                    if (row.get_visible()) {
+                        Geary.Email other = ((EmailRow) row).view.email;
+                        if (Geary.Email.compare_sent_date_ascending(
+                                email, other) < 0) {
+                            ids.add(other.id);
+                        }
+                    }
+                });
+            mark_email(ids, Geary.EmailFlags.UNREAD, null);
+        }
+    }
+
+    private void on_email_mark_starred(GLib.SimpleAction action,
+                                       GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            mark_email(
+                Geary.Collection.single(view.email.id),
+                Geary.EmailFlags.FLAGGED,
+                null
+            );
+        }
+    }
+
+    private void on_email_mark_unstarred(GLib.SimpleAction action,
+                                         GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            mark_email(
+                Geary.Collection.single(view.email.id),
+                null,
+                Geary.EmailFlags.FLAGGED
+            );
+        }
+    }
+
+    private void on_email_load_remote(GLib.SimpleAction action,
+                                      GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            mark_email(
+                Geary.Collection.single(view.email.id),
+                Geary.EmailFlags.LOAD_REMOTE_IMAGES,
+                null
+            );
+        }
+    }
+
+    private void on_email_edit(GLib.SimpleAction action,
+                               GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            edit_email(view.email);
+        }
+    }
+
+    private void on_email_trash(GLib.SimpleAction action,
+                                GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            trash_email(view.email);
+        }
+    }
+
+    private void on_email_delete(GLib.SimpleAction action,
+                                 GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            delete_email(view.email);
+        }
+    }
+
+    private void on_email_save_all_attachments(GLib.SimpleAction action,
+                                               GLib.Variant? param) {
+        debug("XXX save all: %s", param.print(true));
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null && view.attachments_pane != null) {
+            debug("XXX really save all");
+            view.attachments_pane.save_all();
+        }
+    }
+
+    private void on_email_print(GLib.SimpleAction action,
+                                GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            view.print.begin();
+        }
+    }
+
+    private void on_email_view_source(GLib.SimpleAction action,
+                                      GLib.Variant? param) {
+        ConversationEmail? view = action_target_to_view(param);
+        if (view != null) {
+            view.view_source.begin();
+        }
     }
 
 }

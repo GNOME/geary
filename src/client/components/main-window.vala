@@ -1390,27 +1390,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_conversation_view_added(ConversationListBox list) {
-        list.email_added.connect(on_conversation_viewer_email_added);
-        list.mark_emails.connect(on_mark_messages);
-    }
-
-    private void on_conversation_viewer_email_added(ConversationEmail view) {
-        view.forward_message.connect(on_forward_message);
-        view.reply_all_message.connect(on_reply_all_message);
-        view.reply_to_message.connect(on_reply_to_message);
-        view.edit_draft.connect(on_edit_draft);
-
-        Geary.App.Conversation conversation = this.conversation_viewer.current_list.conversation;
-        bool in_selected_folder = (
-            conversation.is_in_base_folder(view.email.id) &&
-            conversation.base_folder == selected_folder
-        );
-        bool supports_trash = in_selected_folder && selected_folder_supports_trash();
-        bool supports_delete = in_selected_folder && selected_folder is Geary.FolderSupport.Remove;
-        view.trash_message.connect(on_trash_message);
-        view.delete_message.connect(on_delete_message);
-        view.set_folder_actions_enabled(supports_trash, supports_delete);
-        this.on_shift_key.connect(view.shift_key_changed);
+        list.mark_email.connect(on_email_mark);
+        list.reply_to_all_email.connect(on_email_reply_to_all);
+        list.reply_to_sender_email.connect(on_email_reply_to_sender);
+        list.forward_email.connect(on_email_forward);
+        list.edit_email.connect(on_email_edit);
+        list.trash_email.connect(on_email_trash);
+        list.delete_email.connect(on_email_delete);
     }
 
     // Window-level action callbacks
@@ -1768,20 +1754,30 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    // Individual message view action callbacks
+    // Individual conversation email view action callbacks
 
-    private void on_mark_messages(Geary.App.Conversation conversation,
-                                  Gee.Collection<Geary.EmailIdentifier> messages,
-                                  Geary.EmailFlags? to_add,
-                                  Geary.EmailFlags? to_remove) {
+    private void on_email_mark(ConversationListBox view,
+                               Gee.Collection<Geary.EmailIdentifier> messages,
+                               Geary.NamedFlag? to_add,
+                               Geary.NamedFlag? to_remove) {
         Geary.Account? target = this.selected_account;
         if (target != null) {
+            Geary.EmailFlags add_flags = null;
+            if (to_add != null) {
+                add_flags = new Geary.EmailFlags();
+                add_flags.add(to_add);
+            }
+            Geary.EmailFlags remove_flags = null;
+            if (to_remove != null) {
+                remove_flags = new Geary.EmailFlags();
+                remove_flags.add(to_remove);
+            }
             this.application.controller.mark_messages.begin(
                 target,
-                Geary.Collection.single(conversation),
+                Geary.Collection.single(view.conversation),
                 messages,
-                to_add,
-                to_remove,
+                add_flags,
+                remove_flags,
                 (obj, res) => {
                     try {
                         this.application.controller.mark_messages.end(res);
@@ -1793,58 +1789,49 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_reply_to_message(ConversationEmail target_view) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            target_view.get_selection_for_quoting.begin((obj, res) => {
-                    string? quote = target_view.get_selection_for_quoting.end(res);
-                    this.application.controller.compose_with_context_email(
-                        account, REPLY, target_view.email, quote
-                    );
-                });
-        }
-    }
-
-    private void on_reply_all_message(ConversationEmail target_view) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            target_view.get_selection_for_quoting.begin((obj, res) => {
-                    string? quote = target_view.get_selection_for_quoting.end(res);
-                    this.application.controller.compose_with_context_email(
-                        account, REPLY_ALL, target_view.email, quote
-                    );
-                });
-        }
-    }
-
-    private void on_forward_message(ConversationEmail target_view) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            target_view.get_selection_for_quoting.begin((obj, res) => {
-                    string? quote = target_view.get_selection_for_quoting.end(res);
-                    this.application.controller.compose_with_context_email(
-                        account, FORWARD, target_view.email, quote
-                    );
-                });
-        }
-    }
-
-    private void on_edit_draft(ConversationEmail target_view) {
+    private void on_email_reply_to_sender(Geary.Email target, string? quote) {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, NEW_MESSAGE, target_view.email, null
+                account, REPLY, target, quote
             );
         }
     }
 
-    private void on_trash_message(ConversationEmail target_view) {
+    private void on_email_reply_to_all(Geary.Email target, string? quote) {
+        Geary.Account? account = this.selected_account;
+        if (account != null) {
+            this.application.controller.compose_with_context_email(
+                account, REPLY_ALL, target, quote
+            );
+        }
+    }
+
+    private void on_email_forward(Geary.Email target, string? quote) {
+        Geary.Account? account = this.selected_account;
+        if (account != null) {
+            this.application.controller.compose_with_context_email(
+                account, FORWARD, target, quote
+            );
+        }
+    }
+
+    private void on_email_edit(Geary.Email target) {
+        Geary.Account? account = this.selected_account;
+        if (account != null) {
+            this.application.controller.compose_with_context_email(
+                account, NEW_MESSAGE, target, null
+            );
+        }
+    }
+
+    private void on_email_trash(Geary.Email target) {
         Geary.Folder? source = this.selected_folder;
         if (source != null) {
             this.application.controller.move_messages_special.begin(
                 source,
                 TRASH,
-                Geary.Collection.single(target_view.email.id),
+                Geary.Collection.single(target.id),
                 (obj, res) => {
                     try {
                         this.application.controller.move_messages_special.end(res);
@@ -1856,13 +1843,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_delete_message(ConversationEmail target_view) {
+    private void on_email_delete(Geary.Email target) {
         Geary.FolderSupport.Remove? source =
             this.selected_folder as Geary.FolderSupport.Remove;
         if (source != null && prompt_delete_messages(1)) {
             this.application.controller.delete_messages.begin(
                 source,
-                Geary.Collection.single(target_view.email.id),
+                Geary.Collection.single(target.id),
                 (obj, res) => {
                     try {
                         this.application.controller.delete_messages.end(res);

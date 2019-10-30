@@ -26,7 +26,7 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Save all attachments</property>
         <property name="valign">start</property>
-        <property name="action_name">eml.save_all_attachments</property>
+        <property name="action_name">eml.save-all-attachments</property>
         <property name="relief">none</property>
         <child>
           <object class="GtkImage">
@@ -49,7 +49,7 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as unstar_button, one will always be hidden.">Mark this message as starred</property>
         <property name="valign">start</property>
-        <property name="action_name">eml.star</property>
+        <property name="action_name">eml.mark-starred</property>
         <property name="relief">none</property>
         <child>
           <object class="GtkImage">
@@ -71,7 +71,7 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as star_button, one will always be hidden.">Mark this message as not starred</property>
         <property name="valign">start</property>
-        <property name="action_name">eml.unstar</property>
+        <property name="action_name">eml.mark-unstarred</property>
         <property name="relief">none</property>
         <child>
           <object class="GtkImage">
@@ -92,9 +92,9 @@
         <property name="sensitive">False</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="tooltip_text" translatable="yes">Display the message menu</property>
         <property name="valign">start</property>
         <property name="relief">none</property>
+        <signal name="toggled" handler="on_email_menu" swapped="no"/>
         <child>
           <object class="GtkImage">
             <property name="visible">True</property>
