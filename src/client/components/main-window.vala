@@ -1506,10 +1506,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
                                        Geary.NamedFlag flag) {
-        Geary.Account? target = this.selected_account;
-        if (target != null) {
+        Geary.Folder? location = this.selected_folder;
+        if (location != null) {
             this.application.controller.mark_conversations.begin(
-                target,
+                location,
                 conversations,
                 flag,
                 true,
@@ -1517,7 +1517,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                     try {
                         this.application.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
-                        handle_error(target.information, err);
+                        handle_error(location.account.information, err);
                     }
                 }
             );
@@ -1525,10 +1525,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_read() {
-        Geary.Account? target = this.selected_account;
-        if (target != null) {
+        Geary.Folder? location = this.selected_folder;
+        if (location != null) {
             this.application.controller.mark_conversations.begin(
-                target,
+                location,
                 this.conversation_list_view.get_selected_conversations(),
                 Geary.EmailFlags.UNREAD,
                 false,
@@ -1536,7 +1536,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                     try {
                         this.application.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
-                        handle_error(target.information, err);
+                        handle_error(location.account.information, err);
                     }
                 }
             );
@@ -1544,10 +1544,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_unread() {
-        Geary.Account? target = this.selected_account;
-        if (target != null) {
+        Geary.Folder? location = this.selected_folder;
+        if (location != null) {
             this.application.controller.mark_conversations.begin(
-                target,
+                location,
                 this.conversation_list_view.get_selected_conversations(),
                 Geary.EmailFlags.UNREAD,
                 true,
@@ -1555,7 +1555,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                     try {
                         this.application.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
-                        handle_error(target.information, err);
+                        handle_error(location.account.information, err);
                     }
                 }
             );
@@ -1563,10 +1563,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_starred() {
-        Geary.Account? target = this.selected_account;
-        if (target != null) {
+        Geary.Folder? location = this.selected_folder;
+        if (location != null) {
             this.application.controller.mark_conversations.begin(
-                target,
+                location,
                 this.conversation_list_view.get_selected_conversations(),
                 Geary.EmailFlags.FLAGGED,
                 true,
@@ -1574,7 +1574,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                     try {
                         this.application.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
-                        handle_error(target.information, err);
+                        handle_error(location.account.information, err);
                     }
                 }
             );
@@ -1582,10 +1582,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_mark_as_unstarred() {
-        Geary.Account? target = this.selected_account;
-        if (target != null) {
+        Geary.Folder? location = this.selected_folder;
+        if (location != null) {
             this.application.controller.mark_conversations.begin(
-                target,
+                location,
                 this.conversation_list_view.get_selected_conversations(),
                 Geary.EmailFlags.FLAGGED,
                 false,
@@ -1593,7 +1593,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                     try {
                         this.application.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
-                        handle_error(target.information, err);
+                        handle_error(location.account.information, err);
                     }
                 }
             );
@@ -1760,8 +1760,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                                Gee.Collection<Geary.EmailIdentifier> messages,
                                Geary.NamedFlag? to_add,
                                Geary.NamedFlag? to_remove) {
-        Geary.Account? target = this.selected_account;
-        if (target != null) {
+        Geary.Folder? location = this.selected_folder;
+        if (location != null) {
             Geary.EmailFlags add_flags = null;
             if (to_add != null) {
                 add_flags = new Geary.EmailFlags();
@@ -1773,7 +1773,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 remove_flags.add(to_remove);
             }
             this.application.controller.mark_messages.begin(
-                target,
+                location,
                 Geary.Collection.single(view.conversation),
                 messages,
                 add_flags,
@@ -1782,7 +1782,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                     try {
                         this.application.controller.mark_messages.end(res);
                     } catch (GLib.Error err) {
-                        handle_error(target.information, err);
+                        handle_error(location.account.information, err);
                     }
                 }
             );
@@ -1825,12 +1825,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_email_trash(Geary.Email target) {
+    private void on_email_trash(ConversationListBox view, Geary.Email target) {
         Geary.Folder? source = this.selected_folder;
         if (source != null) {
             this.application.controller.move_messages_special.begin(
                 source,
                 TRASH,
+                Geary.Collection.single(view.conversation),
                 Geary.Collection.single(target.id),
                 (obj, res) => {
                     try {
@@ -1843,12 +1844,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_email_delete(Geary.Email target) {
+    private void on_email_delete(ConversationListBox view, Geary.Email target) {
         Geary.FolderSupport.Remove? source =
             this.selected_folder as Geary.FolderSupport.Remove;
         if (source != null && prompt_delete_messages(1)) {
             this.application.controller.delete_messages.begin(
                 source,
+                Geary.Collection.single(view.conversation),
                 Geary.Collection.single(target.id),
                 (obj, res) => {
                     try {

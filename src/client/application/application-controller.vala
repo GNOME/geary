@@ -505,7 +505,7 @@ public class Application.Controller : Geary.BaseObject {
      * will remove the flag if not set on all conversations or else
      * add it.
      */
-    public async void mark_conversations(Geary.Account target,
+    public async void mark_conversations(Geary.Folder location,
                                          Gee.Collection<Geary.App.Conversation> conversations,
                                          Geary.NamedFlag flag,
                                          bool prefer_adding)
@@ -557,7 +557,7 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         yield mark_messages(
-            target,
+            location,
             conversations,
             messages,
             do_add ? flags : null,
@@ -573,18 +573,20 @@ public class Application.Controller : Geary.BaseObject {
      * rather than when working with whole conversations. In that
      * case, use {@link mark_conversations}.
      */
-    public async void mark_messages(Geary.Account target,
+    public async void mark_messages(Geary.Folder location,
                                     Gee.Collection<Geary.App.Conversation> conversations,
                                     Gee.Collection<Geary.EmailIdentifier> messages,
                                     Geary.EmailFlags? to_add,
                                     Geary.EmailFlags? to_remove)
         throws GLib.Error {
-        AccountContext? context = this.accounts.get(target.information);
+        AccountContext? context = this.accounts.get(location.account.information);
         if (context != null) {
             yield context.commands.execute(
                 new MarkEmailCommand(
-                    context.emails,
+                    location,
+                    conversations,
                     messages,
+                    context.emails,
                     to_add,
                     to_remove,
                     /// Translators: Label for in-app notification
@@ -615,6 +617,7 @@ public class Application.Controller : Geary.BaseObject {
                 new MoveEmailCommand(
                     source,
                     destination,
+                    conversations,
                     to_in_folder_email_ids(conversations),
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
@@ -667,6 +670,7 @@ public class Application.Controller : Geary.BaseObject {
                 }
                 command = new ArchiveEmailCommand(
                     archive_source,
+                    conversations,
                     messages,
                     /// Translators: Label for in-app notification.
                     ngettext(
@@ -697,6 +701,7 @@ public class Application.Controller : Geary.BaseObject {
                 command = new MoveEmailCommand(
                     move_source,
                     dest,
+                    conversations,
                     messages,
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
@@ -716,6 +721,7 @@ public class Application.Controller : Geary.BaseObject {
 
     public async void move_messages_special(Geary.Folder source,
                                             Geary.SpecialFolderType destination,
+                                            Gee.Collection<Geary.App.Conversation> conversations,
                                             Gee.Collection<Geary.EmailIdentifier> messages)
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
@@ -741,6 +747,7 @@ public class Application.Controller : Geary.BaseObject {
                 }
                 command = new ArchiveEmailCommand(
                     archive_source,
+                    conversations,
                     messages,
                     /// Translators: Label for in-app notification.
                     ngettext(
@@ -773,6 +780,7 @@ public class Application.Controller : Geary.BaseObject {
                 command = new MoveEmailCommand(
                     move_source,
                     dest,
+                    conversations,
                     messages,
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
@@ -800,6 +808,7 @@ public class Application.Controller : Geary.BaseObject {
                 new CopyEmailCommand(
                     source,
                     destination,
+                    conversations,
                     to_in_folder_email_ids(conversations),
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
@@ -826,24 +835,20 @@ public class Application.Controller : Geary.BaseObject {
     public async void delete_conversations(Geary.FolderSupport.Remove target,
                                            Gee.Collection<Geary.App.Conversation> conversations)
         throws GLib.Error {
-        AccountContext? context = this.accounts.get(target.account.information);
-        if (context != null) {
-            Gee.Collection<Geary.EmailIdentifier> ids =
-                to_in_folder_email_ids(conversations);
-            Command command = new DeleteEmailCommand(target, ids);
-            command.executed.connect(
-                () => context.controller_stack.email_removed(target, ids)
-            );
-            yield context.commands.execute(command, context.cancellable);
-        }
+        yield delete_messages(
+            target, conversations, to_in_folder_email_ids(conversations)
+        );
     }
 
     public async void delete_messages(Geary.FolderSupport.Remove target,
+                                      Gee.Collection<Geary.App.Conversation> conversations,
                                       Gee.Collection<Geary.EmailIdentifier> messages)
         throws GLib.Error {
         AccountContext? context = this.accounts.get(target.account.information);
         if (context != null) {
-            Command command = new DeleteEmailCommand(target, messages);
+            Command command = new DeleteEmailCommand(
+                target, conversations, messages
+            );
             command.executed.connect(
                 () => context.controller_stack.email_removed(target, messages)
             );
@@ -2148,8 +2153,8 @@ internal class Application.ControllerCommandStack : CommandStack {
 }
 
 
-/** Mixin for email-related commands. */
-public interface Application.EmailCommand : Command {
+/** Base class for email-related commands. */
+public abstract class Application.EmailCommand : Command {
 
 
     /** Specifies a command's response to external mail state changes. */
@@ -2159,6 +2164,52 @@ public interface Application.EmailCommand : Command {
 
         /** The command is no longer valid and should be removed */
         REMOVE;
+    }
+
+
+    /**
+     * Returns the folder where the command was initially executed.
+     *
+     * This is used by the main window to return to the folder where
+     * the command was first carried out.
+     */
+    public Geary.Folder location {
+        get; protected set;
+    }
+
+    /**
+     * Returns the conversations which the command was initially applied to.
+     *
+     * This is used by the main window to return to the conversation where
+     * the command was first carried out.
+     */
+    public Gee.Collection<Geary.App.Conversation> conversations {
+        get; private set;
+    }
+
+    /**
+     * Returns the email which the command was initially applied to.
+     *
+     * This is used by the main window to return to the conversation where
+     * the command was first carried out.
+     */
+    public Gee.Collection<Geary.EmailIdentifier> email {
+        get; private set;
+    }
+
+    private Gee.Collection<Geary.App.Conversation> mutable_conversations;
+    private Gee.Collection<Geary.EmailIdentifier> mutable_email;
+
+
+    protected EmailCommand(Geary.Folder location,
+                           Gee.Collection<Geary.App.Conversation> conversations,
+                           Gee.Collection<Geary.EmailIdentifier> email) {
+        this.location = location;
+        this.conversations = conversations.read_only_view;
+        this.email = email.read_only_view;
+
+        this.mutable_conversations = conversations;
+        this.mutable_email = email;
     }
 
 
@@ -2173,9 +2224,15 @@ public interface Application.EmailCommand : Command {
      * by the change and hence can remain on the stack, or is no
      * longer valid and hence must be removed.
      */
-    internal abstract StateChangePolicy folders_removed(
+    internal virtual StateChangePolicy folders_removed(
         Gee.Collection<Geary.Folder> removed
-    );
+    ) {
+        return (
+            this.location in removed
+            ? StateChangePolicy.REMOVE
+            : StateChangePolicy.IGNORE
+        );
+    }
 
     /**
      * Determines the command's response when email is removed.
@@ -2188,10 +2245,37 @@ public interface Application.EmailCommand : Command {
      * by the change and hence can remain on the stack, or is no
      * longer valid and hence must be removed.
      */
-    internal abstract StateChangePolicy email_removed(
+    internal virtual StateChangePolicy email_removed(
         Geary.Folder location,
         Gee.Collection<Geary.EmailIdentifier> targets
-    );
+    ) {
+        StateChangePolicy ret = IGNORE;
+        if (this.location == location) {
+            // Any removed email should have already been removed from
+            // their conversations by the time we here, so just remove
+            // any conversations that don't have any messages left.
+            Gee.Iterator<Geary.App.Conversation> conversations =
+                this.mutable_conversations.iterator();
+            while (conversations.next()) {
+                var conversation = conversations.get();
+                if (!conversation.has_any_non_deleted_email()) {
+                    conversations.remove();
+                }
+            }
+
+            // Update message set to remove all removed messages
+            this.mutable_email.remove_all(targets);
+
+            // If we have no more conversations or messages, then the
+            // command won't be able to do anything and should be
+            // removed.
+            if (this.mutable_conversations.is_empty ||
+                this.mutable_email.is_empty) {
+                ret = REMOVE;
+            }
+        }
+        return ret;
+    }
 
 }
 
@@ -2207,24 +2291,24 @@ public interface Application.TrivialCommand : Command {
 }
 
 
-private class Application.MarkEmailCommand :
-    TrivialCommand, EmailCommand, Command {
+private class Application.MarkEmailCommand : TrivialCommand, EmailCommand {
 
 
     private Geary.App.EmailStore store;
-    private Gee.Collection<Geary.EmailIdentifier> messages;
     private Geary.EmailFlags? to_add;
     private Geary.EmailFlags? to_remove;
 
 
-    public MarkEmailCommand(Geary.App.EmailStore store,
+    public MarkEmailCommand(Geary.Folder location,
+                            Gee.Collection<Geary.App.Conversation> conversations,
                             Gee.Collection<Geary.EmailIdentifier> messages,
+                            Geary.App.EmailStore store,
                             Geary.EmailFlags? to_add,
                             Geary.EmailFlags? to_remove,
                             string? executed_label = null,
                             string? undone_label = null) {
+        base(location, conversations, messages);
         this.store = store;
-        this.messages = messages;
         this.to_add = to_add;
         this.to_remove = to_remove;
 
@@ -2235,41 +2319,21 @@ private class Application.MarkEmailCommand :
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
         yield this.store.mark_email_async(
-            this.messages, this.to_add, this.to_remove, cancellable
+            this.email, this.to_add, this.to_remove, cancellable
         );
     }
 
     public override async void undo(GLib.Cancellable? cancellable)
         throws GLib.Error {
         yield this.store.mark_email_async(
-            this.messages, this.to_remove, this.to_add, cancellable
-        );
-    }
-
-    internal override EmailCommand.StateChangePolicy folders_removed(
-        Gee.Collection<Geary.Folder> removed
-    ) {
-        // Not much we can do here without expensive DB querying, so
-        // assume we are okay
-        return IGNORE;
-    }
-
-    internal override EmailCommand.StateChangePolicy email_removed(
-        Geary.Folder location,
-        Gee.Collection<Geary.EmailIdentifier> targets
-    ) {
-        this.messages.remove_all(targets);
-        return (
-            this.messages.is_empty
-            ? EmailCommand.StateChangePolicy.REMOVE
-            : EmailCommand.StateChangePolicy.IGNORE
+            this.email, this.to_remove, this.to_add, cancellable
         );
     }
 
 }
 
 
-private abstract class Application.RevokableCommand : Command {
+private abstract class Application.RevokableCommand : EmailCommand {
 
 
     public override bool can_undo {
@@ -2278,6 +2342,12 @@ private abstract class Application.RevokableCommand : Command {
 
     private Geary.Revokable? revokable = null;
 
+
+    protected RevokableCommand(Geary.Folder location,
+                               Gee.Collection<Geary.App.Conversation> conversations,
+                               Gee.Collection<Geary.EmailIdentifier> email) {
+        base(location, conversations, email);
+    }
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -2322,22 +2392,22 @@ private abstract class Application.RevokableCommand : Command {
 }
 
 
-private class Application.MoveEmailCommand : EmailCommand, RevokableCommand {
+private class Application.MoveEmailCommand : RevokableCommand {
 
 
     private Geary.FolderSupport.Move source;
-    private Gee.Collection<Geary.EmailIdentifier> source_messages;
-
     private Geary.Folder destination;
 
 
     public MoveEmailCommand(Geary.FolderSupport.Move source,
                             Geary.Folder destination,
+                            Gee.Collection<Geary.App.Conversation> conversations,
                             Gee.Collection<Geary.EmailIdentifier> messages,
                             string? executed_label = null,
                             string? undone_label = null) {
+        base(source, conversations, messages);
+
         this.source = source;
-        this.source_messages = messages;
         this.destination = destination;
 
         this.executed_label = executed_label;
@@ -2348,9 +2418,9 @@ private class Application.MoveEmailCommand : EmailCommand, RevokableCommand {
         Gee.Collection<Geary.Folder> removed
     ) {
         return (
-            this.source in removed || this.destination in removed
+            this.destination in removed
             ? EmailCommand.StateChangePolicy.REMOVE
-            : EmailCommand.StateChangePolicy.IGNORE
+            : base.folders_removed(removed)
         );
     }
 
@@ -2358,18 +2428,15 @@ private class Application.MoveEmailCommand : EmailCommand, RevokableCommand {
         Geary.Folder location,
         Gee.Collection<Geary.EmailIdentifier> targets
     ) {
-        EmailCommand.StateChangePolicy ret = IGNORE;
-        if (location == this.source) {
-            this.source_messages.remove_all(targets);
-            if (this.source_messages.is_empty) {
-                ret = REMOVE;
-            }
-        } else if (location == this.destination) {
-            // Don't actually know because of the revokable impl, so
-            // assume the worst
-            ret = REMOVE;
-        }
-        return ret;
+        // With the current revokable mechanism we can't determine if
+        // specific messages removed from the destination are
+        // affected, so if the dest is the location, just assume they
+        // are for now.
+        return (
+            location == this.destination
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : base.email_removed(location, targets)
+        );
     }
 
     protected override async Geary.Revokable
@@ -2382,7 +2449,7 @@ private class Application.MoveEmailCommand : EmailCommand, RevokableCommand {
             );
             open = true;
             return yield this.source.move_email_async(
-                this.source_messages,
+                this.email,
                 this.destination.path,
                 cancellable
             );
@@ -2400,19 +2467,34 @@ private class Application.MoveEmailCommand : EmailCommand, RevokableCommand {
 }
 
 
-private class Application.ArchiveEmailCommand : EmailCommand, RevokableCommand {
+private class Application.ArchiveEmailCommand : RevokableCommand {
 
+
+    /** {@inheritDoc} */
+    public Geary.Folder command_location {
+        get; protected set;
+    }
+
+    /** {@inheritDoc} */
+    public Gee.Collection<Geary.EmailIdentifier> command_conversations {
+        get; protected set;
+    }
+
+    /** {@inheritDoc} */
+    public Gee.Collection<Geary.EmailIdentifier> command_email {
+        get; protected set;
+    }
 
     private Geary.FolderSupport.Archive source;
-    private Gee.Collection<Geary.EmailIdentifier> source_messages;
+
 
     public ArchiveEmailCommand(Geary.FolderSupport.Archive source,
+                               Gee.Collection<Geary.App.Conversation> conversations,
                                Gee.Collection<Geary.EmailIdentifier> messages,
                                string? executed_label = null,
                                string? undone_label = null) {
+        base(source, conversations, messages);
         this.source = source;
-        this.source_messages = messages;
-
         this.executed_label = executed_label;
         this.undone_label = undone_label;
     }
@@ -2420,10 +2502,18 @@ private class Application.ArchiveEmailCommand : EmailCommand, RevokableCommand {
     internal override EmailCommand.StateChangePolicy folders_removed(
         Gee.Collection<Geary.Folder> removed
     ) {
-        EmailCommand.StateChangePolicy ret = IGNORE;
-        if (this.source in removed ||
-            Geary.traverse(removed).any(f => f.special_folder_type == ARCHIVE)) {
-            ret = REMOVE;
+        EmailCommand.StateChangePolicy ret = base.folders_removed(removed);
+        if (ret == IGNORE) {
+            // With the current revokable mechanism we can't determine
+            // if specific messages removed from the destination are
+            // affected, so if the dest is the location, just assume
+            // they are for now.
+            foreach (var folder in removed) {
+                if (folder.special_folder_type == ARCHIVE) {
+                    ret = REMOVE;
+                    break;
+                }
+            }
         }
         return ret;
     }
@@ -2432,18 +2522,15 @@ private class Application.ArchiveEmailCommand : EmailCommand, RevokableCommand {
         Geary.Folder location,
         Gee.Collection<Geary.EmailIdentifier> targets
     ) {
-        EmailCommand.StateChangePolicy ret = IGNORE;
-        if (location == this.source) {
-            this.source_messages.remove_all(targets);
-            if (this.source_messages.is_empty) {
-                ret = REMOVE;
-            }
-        } else if (location.special_folder_type == ARCHIVE) {
-            // Don't actually know because of the revokable impl, so
-            // assume the worst
-            ret = REMOVE;
-        }
-        return ret;
+        // With the current revokable mechanism we can't determine if
+        // specific messages removed from the destination are
+        // affected, so if the dest is the location, just assume they
+        // are for now.
+        return (
+            location.special_folder_type == ARCHIVE
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : base.email_removed(location, targets)
+        );
     }
 
     protected override async Geary.Revokable
@@ -2456,8 +2543,7 @@ private class Application.ArchiveEmailCommand : EmailCommand, RevokableCommand {
             );
             open = true;
             return yield this.source.archive_email_async(
-                this.source_messages,
-                cancellable
+                this.email, cancellable
             );
         } finally {
             if (open) {
@@ -2473,7 +2559,7 @@ private class Application.ArchiveEmailCommand : EmailCommand, RevokableCommand {
 }
 
 
-private class Application.CopyEmailCommand : EmailCommand, Command {
+private class Application.CopyEmailCommand : EmailCommand {
 
 
     public override bool can_undo {
@@ -2482,17 +2568,17 @@ private class Application.CopyEmailCommand : EmailCommand, Command {
     }
 
     private Geary.FolderSupport.Copy source;
-    private Gee.Collection<Geary.EmailIdentifier> source_messages;
     private Geary.Folder destination;
 
 
     public CopyEmailCommand(Geary.FolderSupport.Copy source,
                             Geary.Folder destination,
+                            Gee.Collection<Geary.App.Conversation> conversations,
                             Gee.Collection<Geary.EmailIdentifier> messages,
                             string? executed_label = null,
                             string? undone_label = null) {
+        base(source, conversations, messages);
         this.source = source;
-        this.source_messages = messages;
         this.destination = destination;
 
         this.executed_label = executed_label;
@@ -2508,7 +2594,7 @@ private class Application.CopyEmailCommand : EmailCommand, Command {
             );
             open = true;
             yield this.source.copy_email_async(
-                this.source_messages, this.destination.path, cancellable
+                this.email, this.destination.path, cancellable
             );
         } finally {
             if (open) {
@@ -2532,9 +2618,9 @@ private class Application.CopyEmailCommand : EmailCommand, Command {
         Gee.Collection<Geary.Folder> removed
     ) {
         return (
-            this.source in removed || this.destination in removed
+            this.destination in removed
             ? EmailCommand.StateChangePolicy.REMOVE
-            : EmailCommand.StateChangePolicy.IGNORE
+            : base.folders_removed(removed)
         );
     }
 
@@ -2542,24 +2628,21 @@ private class Application.CopyEmailCommand : EmailCommand, Command {
         Geary.Folder location,
         Gee.Collection<Geary.EmailIdentifier> targets
     ) {
-        EmailCommand.StateChangePolicy ret = IGNORE;
-        if (location == this.source) {
-            this.source_messages.remove_all(targets);
-            if (this.source_messages.is_empty) {
-                ret = REMOVE;
-            }
-        } else if (location == this.destination) {
-            // Don't actually know because of the revokable impl, so
-            // assume the worst
-            ret = REMOVE;
-        }
-        return ret;
+        // With the current revokable mechanism we can't determine if
+        // specific messages removed from the destination are
+        // affected, so if the dest is the location, just assume they
+        // are for now.
+        return (
+            location == this.destination
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : base.email_removed(location, targets)
+        );
     }
 
 }
 
 
-private class Application.DeleteEmailCommand : Command {
+private class Application.DeleteEmailCommand : EmailCommand {
 
 
     public override bool can_undo {
@@ -2567,13 +2650,13 @@ private class Application.DeleteEmailCommand : Command {
     }
 
     private Geary.FolderSupport.Remove target;
-    private Gee.Collection<Geary.EmailIdentifier> messages;
 
 
     public DeleteEmailCommand(Geary.FolderSupport.Remove target,
-                              Gee.Collection<Geary.EmailIdentifier> messages) {
+                              Gee.Collection<Geary.App.Conversation> conversations,
+                              Gee.Collection<Geary.EmailIdentifier> email) {
+        base(target, conversations, email);
         this.target = target;
-        this.messages = messages;
     }
 
     public override async void execute(GLib.Cancellable? cancellable)
@@ -2584,7 +2667,7 @@ private class Application.DeleteEmailCommand : Command {
                 Geary.Folder.OpenFlags.NO_DELAY, cancellable
             );
             open = true;
-            yield this.target.remove_email_async(this.messages, cancellable);
+            yield this.target.remove_email_async(this.email, cancellable);
         } finally {
             if (open) {
                 try {

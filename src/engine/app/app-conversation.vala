@@ -133,6 +133,13 @@ public class Geary.App.Conversation : BaseObject {
     }
 
     /**
+     * Determines if the conversation contains un-deleted email messages.
+     */
+    public bool has_any_non_deleted_email() {
+        return traverse(this.emails.values).any(e => !e.email_flags.is_deleted());
+    }
+
+    /**
      * Returns the earliest (first sent) email in the Conversation.
      *
      * Note that here, sent denotes the value of the Date header, not
