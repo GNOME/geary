@@ -19,6 +19,10 @@
  */
 
 public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.EmailIdentifier> {
+
+    /** Base variant type returned by {@link to_variant}. */
+    public const string BASE_VARIANT_TYPE = "(y??)";
+
     // Warning: only change this if you know what you are doing.
     protected string unique;
 
@@ -37,7 +41,8 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
      * Action parameters, and so on.
      *
      * @return a serialised form of this id, that will match the
-     * GVariantType `(*)`
+     * GVariantType given by {@link BASE_VARIANT_TYPE}.
+     *
      * @see Account.to_email_identifier
      */
     public abstract GLib.Variant to_variant();
