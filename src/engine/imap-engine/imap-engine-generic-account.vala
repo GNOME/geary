@@ -25,7 +25,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Geary.SpecialFolderType.ARCHIVE,
     };
 
-    private static GLib.VariantType email_id_type = new GLib.VariantType("(y*)");
+    private static GLib.VariantType email_id_type = new GLib.VariantType(
+        EmailIdentifier.BASE_VARIANT_TYPE
+    );
 
 
     /** Service for incoming IMAP connections. */
@@ -408,15 +410,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     /** {@inheritDoc} */
     public override EmailIdentifier to_email_identifier(GLib.Variant serialised)
         throws EngineError.BAD_PARAMETERS {
-        if (serialised.is_of_type(GenericAccount.email_id_type)) {
-            throw new EngineError.BAD_PARAMETERS(
-                "Invalid outer serialised type: (y*)"
-            );
+        if (!serialised.is_of_type(GenericAccount.email_id_type)) {
+            throw new EngineError.BAD_PARAMETERS("Invalid outer serialised type");
         }
         char type = (char) serialised.get_child_value(0).get_byte();
         if (type == 'i')
             return new ImapDB.EmailIdentifier.from_variant(serialised);
-        if (type == 's')
+        if (type == 'o')
             return new Outbox.EmailIdentifier.from_variant(serialised);
 
         throw new EngineError.BAD_PARAMETERS("Unknown serialised type: %c", type);

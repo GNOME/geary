@@ -45,7 +45,7 @@ private class Geary.Outbox.EmailIdentifier : Geary.EmailIdentifier {
         // Return a tuple to satisfy the API contract, add an 's' to
         // inform GenericAccount that it's an SMTP id.
         return new GLib.Variant.tuple(new Variant[] {
-                new GLib.Variant.byte('s'),
+                new GLib.Variant.byte('o'),
                 new GLib.Variant.int64(this.message_id),
                 new GLib.Variant.int64(this.ordering)
             });
