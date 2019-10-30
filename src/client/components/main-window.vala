@@ -258,9 +258,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     /** Fired when the user requests an account status be retried. */
     public signal void retry_service_problem(Geary.ClientService.Status problem);
 
-    /** Fired when the shift key is pressed or released. */
-    public signal void on_shift_key(bool pressed);
-
 
     public MainWindow(GearyApplication application) {
         Object(
@@ -1247,6 +1244,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
+    private void set_shift_key_down(bool down) {
+        this.is_shift_down = down;
+        this.main_toolbar.update_trash_button(
+            !down && this.selected_folder_supports_trash
+        );
+    }
+
     private inline void check_shift_event(Gdk.EventKey event) {
         // FIXME: it's possible the user will press two shift keys.  We want
         // the shift key to report as released when they release ALL of them.
@@ -1255,12 +1259,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             Gtk.Widget? focus = get_focus();
             if (focus == null ||
                 (!(focus is Gtk.Entry) && !(focus is ComposerWebView))) {
-                this.is_shift_down = (event.type == Gdk.EventType.KEY_PRESS);
-                this.main_toolbar.update_trash_button(
-                    !this.is_shift_down &&
-                    selected_folder_supports_trash()
-                );
-                on_shift_key(this.is_shift_down);
+                set_shift_key_down(event.type == Gdk.EventType.KEY_PRESS);
             }
         }
     }
@@ -1308,7 +1307,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     [GtkCallback]
     private bool on_focus_event() {
-        on_shift_key(false);
+        this.set_shift_key_down(false);
         return false;
     }
 
