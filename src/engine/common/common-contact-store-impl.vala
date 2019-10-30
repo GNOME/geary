@@ -149,11 +149,21 @@ internal class Geary.ContactStoreImpl : ContactStore, BaseObject {
               flags = excluded.flags,
               highest_importance = excluded.highest_importance
         """);
-        stmt.bind_string(0, updated.normalized_email);
-        stmt.bind_string(1, updated.email.make_valid());
-        stmt.bind_string(2, updated.real_name.make_valid());
-        stmt.bind_string(3, updated.flags.serialize());
-        stmt.bind_int(4, updated.highest_importance);
+        stmt.bind_string(
+            0, updated.normalized_email
+        );
+        stmt.bind_string(
+            1, updated.email.make_valid()
+        );
+        stmt.bind_string(
+            2, updated.real_name != null ? updated.real_name.make_valid() : null
+        );
+        stmt.bind_string(
+            3, updated.flags.serialize()
+        );
+        stmt.bind_int(
+            4, updated.highest_importance
+        );
 
         stmt.exec(cancellable);
     }
