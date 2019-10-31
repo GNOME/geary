@@ -145,6 +145,11 @@ public abstract class Application.Command : GLib.Object {
         yield execute(cancellable);
     }
 
+    /** Determines if this command is equal to another. */
+    public virtual bool equal_to(Command other) {
+        return (this == other);
+    }
+
     /** Returns a string representation of the command for debugging. */
     public virtual string to_string() {
         return get_type().name();
@@ -366,7 +371,7 @@ public class Application.CommandStack : GLib.Object {
      * This calls {@link Command.execute} and if no error is thrown,
      * pushes the command onto the undo stack.
      */
-    public async void execute(Command target, GLib.Cancellable? cancellable)
+    public virtual async void execute(Command target, GLib.Cancellable? cancellable)
         throws GLib.Error {
         debug("Executing: %s", target.to_string());
         yield target.execute(cancellable);
@@ -389,7 +394,7 @@ public class Application.CommandStack : GLib.Object {
      * stack. If an error is thrown, the command is discarded and the
      * redo stack is emptied.
      */
-    public async void undo(GLib.Cancellable? cancellable)
+    public virtual async void undo(GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (!this.undo_stack.is_empty) {
             Command target = this.undo_stack.poll_head();
@@ -423,7 +428,7 @@ public class Application.CommandStack : GLib.Object {
      * stack. If an error is thrown, the command is discarded and the
      * redo stack is emptied.
      */
-    public async void redo(GLib.Cancellable? cancellable)
+    public virtual async void redo(GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (!this.redo_stack.is_empty) {
             Command target = this.redo_stack.poll_head();

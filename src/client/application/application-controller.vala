@@ -2106,6 +2106,35 @@ public class Application.Controller : Geary.BaseObject {
 internal class Application.ControllerCommandStack : CommandStack {
 
 
+    private EmailCommand? last_executed = null;
+
+
+    /** {@inheritDoc} */
+    public override async void execute(Command target,
+                                       GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        // Guard against things like Delete being held down by only
+        // executing a command if it is different to the last one.
+        if (this.last_executed == null || !this.last_executed.equal_to(target)) {
+            this.last_executed = target as EmailCommand;
+            yield base.execute(target, cancellable);
+        }
+    }
+
+    /** {@inheritDoc} */
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.last_executed = null;
+        yield base.undo(cancellable);
+    }
+
+    /** {@inheritDoc} */
+    public override async void redo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.last_executed = null;
+        yield base.redo(cancellable);
+    }
+
     /**
      * Notifies the stack that one or more folders were removed.
      *
@@ -2212,6 +2241,29 @@ public abstract class Application.EmailCommand : Command {
         this.mutable_email = email;
     }
 
+
+    public override bool equal_to(Command other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (this.get_type() != other.get_type()) {
+            return false;
+        }
+
+        EmailCommand? other_email = other as EmailCommand;
+        if (other_email == null) {
+            return false;
+        }
+
+        return (
+            this.location == other_email.location &&
+            this.conversations.size == other_email.conversations.size &&
+            this.email.size == other_email.email.size &&
+            this.conversations.contains_all(other_email.conversations) &&
+            this.email.contains_all(other_email.email)
+        );
+    }
 
     /**
      * Determines the command's response when a folder is removed.
@@ -2327,6 +2379,24 @@ private class Application.MarkEmailCommand : TrivialCommand, EmailCommand {
         throws GLib.Error {
         yield this.store.mark_email_async(
             this.email, this.to_remove, this.to_add, cancellable
+        );
+    }
+
+    public override bool equal_to(Command other) {
+        if (!base.equal_to(other)) {
+            return false;
+        }
+
+        MarkEmailCommand other_mark = (MarkEmailCommand) other;
+        return (
+            ((this.to_add == other_mark.to_add) ||
+             (this.to_add != null &&
+              other_mark.to_add != null &&
+              this.to_add.equal_to(other_mark.to_add))) &&
+            ((this.to_remove == other_mark.to_remove) ||
+             (this.to_remove != null &&
+              other_mark.to_remove != null &&
+              this.to_remove.equal_to(other_mark.to_remove)))
         );
     }
 
@@ -2730,6 +2800,12 @@ private class Application.EmptyFolderCommand : Command {
             "Cannot undo emptying a folder: %s",
             this.target.path.to_string()
         );
+    }
+
+    /** Determines if this command is equal to another. */
+    public override bool equal_to(Command other) {
+        EmptyFolderCommand? other_type = other as EmptyFolderCommand;
+        return (other_type != null && this.target == other_type.target);
     }
 
 }
