@@ -1155,8 +1155,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.to_entry.modified = this.cc_entry.modified = false;
         }
 
-        in_reply_to.add(referred.message_id);
-        referred_ids.add(referred.id);
+        if (referred.message_id != null) {
+            this.in_reply_to.add(referred.message_id);
+        }
+        this.referred_ids.add(referred.id);
     }
 
     public CloseStatus should_close() {
