@@ -497,8 +497,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 out preview_charset_specifier
             );
             if (cmds.size == 0) {
-                throw new ImapError.INVALID("No FETCH commands generate for list request %s %s",
-                    msg_set.to_string(), fields.to_list_string());
+                throw new ImapError.INVALID(
+                    "No FETCH commands generate for list request %s %s",
+                    msg_set.to_string(),
+                    fields.to_string()
+                );
             }
 
             // Commands prepped, do the fetch and accumulate all the responses
@@ -549,9 +552,13 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                         preview_charset_specifier
                     );
                     if (!email.fields.fulfills(fields)) {
-                        message("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
-                            fields.clear(email.fields).to_list_string(), fetched_data.to_string());
-
+                        message(
+                            "%s: %s missing=%s fetched=%s",
+                            to_string(),
+                            email.id.to_string(),
+                            fields.clear(email.fields).to_string(),
+                            fetched_data.to_string()
+                        );
                         continue;
                     }
 

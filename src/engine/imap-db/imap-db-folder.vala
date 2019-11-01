@@ -1288,10 +1288,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         int64 id = -1;
         // if fields not present, then no duplicate can reliably be found
         if (!email.fields.is_all_set(REQUIRED_FIELDS)) {
-            debug("%s: Unable to detect duplicates for %s, fields available: %s",
-                  this.to_string(),
-                  email.id.to_string(),
-                  email.fields.to_list_string()
+            debug(
+                "%s: Unable to detect duplicates for %s, fields available: %s",
+                this.to_string(),
+                email.id.to_string(),
+                email.fields.to_string()
             );
             return id;
         }
@@ -1304,8 +1305,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         int64 rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
 
         if (String.is_empty(internaldate) || rfc822_size < 0) {
-            debug("Unable to detect duplicates for %s (%s available but invalid)", email.id.to_string(),
-                email.fields.to_list_string());
+            debug(
+                "Unable to detect duplicates for %s (%s available but invalid)",
+                email.id.to_string(),
+                email.fields.to_string()
+            );
             return id;
         }
 
