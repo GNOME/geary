@@ -867,7 +867,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         // if any headers were requested, convert its fields now
         if (header_specifiers != null) {
-            Gee.Map<string,string> headers = new Gee.HashMap<string,string>();
+            // Header fields are case insensitive, so use a
+            // case-insensitive map.
+            Gee.Map<string,string> headers = new Gee.HashMap<string,string>(
+                String.stri_hash, String.stri_equal
+            );
             foreach (FetchBodyDataSpecifier header_specifier in header_specifiers) {
                 Memory.Buffer fetched_headers =
                     fetched_data.body_data_map.get(header_specifier);
