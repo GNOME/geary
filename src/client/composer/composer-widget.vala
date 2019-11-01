@@ -16,6 +16,9 @@ private errordomain AttachmentError {
 public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
 
+    /** The email fields the composer requires for referred email. */
+    public const Geary.Email.Field REQUIRED_FIELDS = ENVELOPE | BODY;
+
     public enum ComposeType {
         NEW_MESSAGE,
         REPLY,
@@ -621,6 +624,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public async void load(Geary.Email? referred = null,
                            string? quote = null,
                            GLib.Cancellable? cancellable) {
+        if (referred != null &&
+            !referred.fields.is_all_set(REQUIRED_FIELDS)) {
+            throw new Geary.EngineError.INCOMPLETE_MESSAGE(
+                "Required fields not met: %s", referred.fields.to_string()
+            );
+        }
         bool is_referred_draft = (
             referred != null &&
             this.draft_id != null &&
@@ -1146,8 +1155,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.to_entry.modified = this.cc_entry.modified = false;
         }
 
-        in_reply_to.add(referred.message_id);
-        referred_ids.add(referred.id);
+        if (referred.message_id != null) {
+            this.in_reply_to.add(referred.message_id);
+        }
+        this.referred_ids.add(referred.id);
     }
 
     public CloseStatus should_close() {

@@ -497,8 +497,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 out preview_charset_specifier
             );
             if (cmds.size == 0) {
-                throw new ImapError.INVALID("No FETCH commands generate for list request %s %s",
-                    msg_set.to_string(), fields.to_list_string());
+                throw new ImapError.INVALID(
+                    "No FETCH commands generate for list request %s %s",
+                    msg_set.to_string(),
+                    fields.to_string()
+                );
             }
 
             // Commands prepped, do the fetch and accumulate all the responses
@@ -549,9 +552,13 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                         preview_charset_specifier
                     );
                     if (!email.fields.fulfills(fields)) {
-                        message("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
-                            fields.clear(email.fields).to_list_string(), fetched_data.to_string());
-
+                        message(
+                            "%s: %s missing=%s fetched=%s",
+                            to_string(),
+                            email.id.to_string(),
+                            fields.clear(email.fields).to_string(),
+                            fetched_data.to_string()
+                        );
                         continue;
                     }
 
@@ -867,7 +874,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         // if any headers were requested, convert its fields now
         if (header_specifiers != null) {
-            Gee.Map<string,string> headers = new Gee.HashMap<string,string>();
+            // Header fields are case insensitive, so use a
+            // case-insensitive map.
+            Gee.Map<string,string> headers = new Gee.HashMap<string,string>(
+                String.stri_hash, String.stri_equal
+            );
             foreach (FetchBodyDataSpecifier header_specifier in header_specifiers) {
                 Memory.Buffer fetched_headers =
                     fetched_data.body_data_map.get(header_specifier);

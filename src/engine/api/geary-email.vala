@@ -157,18 +157,25 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
             return is_any_set(required_fields);
         }
 
-        public string to_list_string() {
-            StringBuilder builder = new StringBuilder();
-            foreach (Field f in all()) {
-                if (is_all_set(f)) {
-                    if (!String.is_empty(builder.str))
-                        builder.append(", ");
-
-                    builder.append(f.to_string());
+        public string to_string() {
+            string value = "NONE";
+            if (this == ALL) {
+                value = "ALL";
+            } else if (this > 0) {
+                StringBuilder builder = new StringBuilder();
+                foreach (Field f in all()) {
+                    if (is_all_set(f)) {
+                        if (!String.is_empty(builder.str)) {
+                            builder.append(",");
+                        }
+                        builder.append(
+                            ObjectUtils.to_enum_nick(typeof(Field), f).up()
+                        );
+                    }
                 }
+                value = builder.str;
             }
-
-            return builder.str;
+            return value;
         }
     }
 
