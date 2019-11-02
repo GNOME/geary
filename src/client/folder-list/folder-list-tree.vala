@@ -16,6 +16,8 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     public signal void copy_conversation(Geary.Folder folder);
     public signal void move_conversation(Geary.Folder folder);
 
+    public Geary.Folder? selected { get ; private set; default = null; }
+
     private Gee.HashMap<Geary.Account, AccountBranch> account_branches
         = new Gee.HashMap<Geary.Account, AccountBranch>();
     private InboxesBranch inboxes_branch = new InboxesBranch();
@@ -64,8 +66,10 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
     private void on_entry_selected(Sidebar.SelectableEntry selectable) {
         AbstractFolderEntry? abstract_folder_entry = selectable as AbstractFolderEntry;
-        if (abstract_folder_entry != null)
+        if (abstract_folder_entry != null) {
+            this.selected = abstract_folder_entry.folder;
             folder_selected(abstract_folder_entry.folder);
+        }
     }
 
     private void on_new_messages_changed(Geary.Folder folder, int count) {
@@ -131,8 +135,10 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         }
 
         // if found and selected, report nothing is selected in preparation for its removal
-        if (entry != null && is_selected(entry))
+        if (entry != null && is_selected(entry)) {
+            this.selected = null;
             folder_selected(null);
+        }
 
         // if Inbox, remove from inboxes branch, selected or not
         if (folder.special_folder_type == Geary.SpecialFolderType.INBOX)
@@ -148,6 +154,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
             // If a folder on this account is selected, unselect it.
             foreach (FolderEntry entry in account_branch.folder_entries.values) {
                 if (is_selected(entry)) {
+                    this.selected = null;
                     folder_selected(null);
                     break;
                 }
@@ -159,8 +166,10 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         }
 
         Sidebar.Entry? entry = inboxes_branch.get_entry_for_account(account);
-        if (entry != null && is_selected(entry))
+        if (entry != null && is_selected(entry)) {
+            this.selected = null;
             folder_selected(null);
+        }
 
         inboxes_branch.remove_inbox(account);
 
@@ -168,10 +177,20 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
             prune(inboxes_branch);
     }
 
-    public void select_folder(Geary.Folder folder) {
-        FolderEntry? entry = get_folder_entry(folder);
-        if (entry != null)
-            place_cursor(entry, false);
+    public void select_folder(Geary.Folder to_select) {
+        if (this.selected != to_select) {
+            bool selected = false;
+            if (to_select.special_folder_type == INBOX) {
+                selected = select_inbox(to_select.account);
+            }
+
+            if (!selected) {
+                FolderEntry? entry = get_folder_entry(to_select);
+                if (entry != null) {
+                    place_cursor(entry, false);
+                }
+            }
+        }
     }
 
     public bool select_inbox(Geary.Account account) {
@@ -184,6 +203,10 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
         place_cursor(entry, false);
         return true;
+    }
+
+    public void deselect_folder() {
+        get_selection().unselect_all();
     }
 
     public override bool drag_motion(Gdk.DragContext context, int x, int y, uint time) {

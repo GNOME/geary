@@ -17,7 +17,6 @@ public class Application.Controller : Geary.BaseObject {
 
 
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
-    private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
     private const uint MAX_AUTH_ATTEMPTS = 3;
 
 
@@ -163,17 +162,8 @@ public class Application.Controller : Geary.BaseObject {
 
     private PluginManager plugin_manager;
 
-    // Null if none selected
-    private Geary.Folder? current_folder = null;
-
-    private Cancellable cancellable_folder = new Cancellable();
-    private Cancellable cancellable_search = new Cancellable();
     private Cancellable cancellable_open_account = new Cancellable();
     private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
-    private uint select_folder_timeout_id = 0;
-    private int64 next_folder_select_allowed_usec = 0;
-    private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
-    private Geary.Folder? previous_non_search_folder = null;
     private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
 
     // List of windows we're waiting to close before Geary closes.
@@ -246,15 +236,10 @@ public class Application.Controller : Geary.BaseObject {
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
         main_window.retry_service_problem.connect(on_retry_service_problem);
-        main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
         engine.account_available.connect(on_account_available);
 
         // Connect to various UI signals.
-        main_window.conversation_list_view.conversation_activated.connect(on_conversation_activated);
-        main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
-        main_window.folder_list.folder_selected.connect(on_folder_selected);
-        main_window.search_bar.search_text_changed.connect((text) => { do_search(text); });
         this.main_window.folder_list.set_new_messages_monitor(
             this.plugin_manager.notifications
         );
@@ -336,12 +321,7 @@ public class Application.Controller : Geary.BaseObject {
         this.application.engine.account_available.disconnect(on_account_available);
 
         // Release folder and conversations in the main window
-        on_folder_selected(null);
-
-        // Disconnect from various UI signals.
-        this.main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
-        this.main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
-        this.main_window.folder_list.folder_selected.disconnect(on_folder_selected);
+        yield this.main_window.select_folder(null);
 
         // hide window while shutting down, as this can take a few
         // seconds under certain conditions
@@ -423,9 +403,6 @@ public class Application.Controller : Geary.BaseObject {
             this.main_window.destroy();
         }
 
-        this.current_folder = null;
-        this.previous_non_search_folder = null;
-
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
         this.waiting_to_close.clear();
@@ -442,7 +419,7 @@ public class Application.Controller : Geary.BaseObject {
         Geary.Account? selected = this.main_window.selected_account;
         if (selected == null) {
             // Schedule the send for after we have an account open.
-            pending_mailtos.add(mailto);
+            this.pending_mailtos.add(mailto);
         } else {
             create_compose_widget(selected, NEW_MESSAGE, null, null, mailto);
         }
@@ -463,6 +440,19 @@ public class Application.Controller : Geary.BaseObject {
         debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");
         widget.destroy.connect(this.on_composer_widget_destroy);
         this.composer_widgets.add(widget);
+    }
+
+    /** Returns a read-only collection of currently open composers .*/
+    public Gee.Collection<ComposerWidget> get_composers() {
+        return this.composer_widgets.read_only_view;
+    }
+
+    /** Opens any pending composers. */
+    public void process_pending_composers() {
+        foreach (string? mailto in this.pending_mailtos) {
+            compose(mailto);
+        }
+        this.pending_mailtos.clear();
     }
 
     /** Displays a problem report when an error has been encountered. */
@@ -909,8 +899,6 @@ public class Application.Controller : Geary.BaseObject {
             Geary.Account account = context.account;
             if (this.main_window.selected_account == account) {
                 this.main_window.deselect_account();
-                cancel_folder();
-                this.previous_non_search_folder = null;
             }
 
             // Stop updating status and showing errors when closing
@@ -1311,136 +1299,6 @@ public class Application.Controller : Geary.BaseObject {
         return is_descendent;
     }
 
-    private void on_folder_selected(Geary.Folder? folder) {
-        debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
-        if (folder == null) {
-            this.current_folder = null;
-            main_window.conversation_list_view.set_model(null);
-            main_window.main_toolbar.folder = null;
-            this.main_window.folder_selected(null, null);
-        } else if (folder != this.current_folder) {
-            // To prevent the user from selecting folders too quickly,
-            // we prevent additional selection changes to occur until
-            // after a timeout has expired from the last one
-            int64 now = get_monotonic_time();
-            int64 diff = now - this.next_folder_select_allowed_usec;
-            if (diff < SELECT_FOLDER_TIMEOUT_USEC) {
-                // only start timeout if another timeout is not
-                // running ... this means the user can click madly and
-                // will see the last clicked-on folder 100ms after the
-                // first one was clicked on
-                if (this.select_folder_timeout_id == 0) {
-                    this.select_folder_timeout_id = Timeout.add(
-                        (uint) (diff / 1000),
-                        () => {
-                            this.select_folder_timeout_id = 0;
-                            this.next_folder_select_allowed_usec = 0;
-                            if (folder != this.current_folder) {
-                                do_select_folder.begin(
-                                    folder, on_select_folder_completed
-                                );
-                            }
-                            return false;
-                        });
-                }
-            } else {
-                do_select_folder.begin(folder, on_select_folder_completed);
-                this.next_folder_select_allowed_usec =
-                    now + SELECT_FOLDER_TIMEOUT_USEC;
-            }
-        }
-    }
-
-    private async void do_select_folder(Geary.Folder folder) throws Error {
-        debug("Switching to %s...", folder.to_string());
-
-        closed_folder();
-
-        // This function is not reentrant.  It should be, because it can be
-        // called reentrant-ly if you select folders quickly enough.  This
-        // mutex lock is a bandaid solution to make the function safe to
-        // reenter.
-        int mutex_token = yield select_folder_mutex.claim_async(cancellable_folder);
-
-        // re-enable copy/move to the last selected folder
-        if (current_folder != null) {
-            main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, true);
-            main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, true);
-        }
-
-        this.current_folder = folder;
-
-        if (this.main_window.selected_account != folder.account) {
-            // If we were waiting for an account to be selected before
-            // issuing mailtos, do that now.
-            if (pending_mailtos.size > 0) {
-                foreach(string? mailto in pending_mailtos)
-                    compose(mailto);
-
-                pending_mailtos.clear();
-            }
-        }
-
-        if (!(current_folder is Geary.SearchFolder))
-            previous_non_search_folder = current_folder;
-
-        // disable copy/move to the new folder
-        main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
-        main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
-
-        this.main_window.folder_selected(folder, this.cancellable_folder);
-
-        clear_new_messages("do_select_folder", null);
-
-        select_folder_mutex.release(ref mutex_token);
-
-        debug("Switched to %s", folder.to_string());
-    }
-
-    private void on_select_folder_completed(Object? source, AsyncResult result) {
-        try {
-            do_select_folder.end(result);
-        } catch (Error err) {
-            debug("Unable to select folder: %s", err.message);
-        }
-    }
-
-    private void on_conversation_activated(Geary.App.Conversation activated) {
-        // Currently activating a conversation is only available for drafts folders.
-        if (current_folder == null || current_folder.special_folder_type !=
-            Geary.SpecialFolderType.DRAFTS)
-            return;
-
-        // TODO: Determine how to map between conversations and drafts correctly.
-        Geary.Email draft = activated.get_latest_recv_email(
-            Geary.App.Conversation.Location.IN_FOLDER
-        );
-
-        // Check all known composers since the draft may be open in a
-        // detached composer
-        bool already_open = false;
-        foreach (ComposerWidget composer in this.composer_widgets) {
-            if (composer.draft_id != null &&
-                composer.draft_id.equal_to(draft.id)) {
-                already_open = true;
-                composer.present();
-                composer.set_focus();
-                break;
-            }
-        }
-
-        if (!already_open) {
-            create_compose_widget(
-                activated.base_folder.account,
-                NEW_MESSAGE,
-                draft,
-                null,
-                null,
-                true
-            );
-        }
-    }
-
     private void on_special_folder_type_changed(Geary.Folder folder,
                                                 Geary.SpecialFolderType old_type,
                                                 Geary.SpecialFolderType new_type) {
@@ -1583,26 +1441,6 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void cancel_folder() {
-        Cancellable old_cancellable = cancellable_folder;
-        cancellable_folder = new Cancellable();
-
-        old_cancellable.cancel();
-    }
-
-    // Like cancel_folder() but doesn't cancel outstanding operations, allowing them to complete
-    // in the background
-    private void closed_folder() {
-        cancellable_folder = new Cancellable();
-    }
-
-    private void cancel_search() {
-        Cancellable old_cancellable = this.cancellable_search;
-        this.cancellable_search = new Cancellable();
-
-        old_cancellable.cancel();
-    }
-
     // We need to include the second parameter, or valac doesn't recognize the function as matching
     // GearyApplication.exiting's signature.
     private bool on_application_exiting(GearyApplication sender, bool panicked) {
@@ -1612,42 +1450,36 @@ public class Application.Controller : Geary.BaseObject {
         return sender.cancel_exit();
     }
 
-    // this signal does not necessarily indicate that the application previously didn't have
-    // focus and now it does
-    private void on_has_toplevel_focus() {
-        clear_new_messages("on_has_toplevel_focus", null);
-    }
-
-    private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
-        clear_new_messages("on_visible_conversations_changed", visible);
-    }
-
     private bool should_notify_new_messages(Geary.Folder folder) {
         // A monitored folder must be selected to squelch notifications;
         // if conversation list is at top of display, don't display
         // and don't display if main window has top-level focus
-        return folder != current_folder
-            || main_window.conversation_list_view.vadjustment.value != 0.0
-            || !main_window.has_toplevel_focus;
+        return (
+            folder != this.main_window.selected_folder ||
+            this.main_window.conversation_list_view.vadjustment.value != 0.0 ||
+            !this.main_window.has_toplevel_focus
+        );
     }
 
     // Clears messages if conditions are true: anything in should_notify_new_messages() is
     // false and the supplied visible messages are visible in the conversation list view
-    private void clear_new_messages(string caller, Gee.Set<Geary.App.Conversation>? supplied) {
+    public void clear_new_messages(string caller,
+                                   Gee.Set<Geary.App.Conversation>? supplied) {
+        Geary.Folder? selected = this.main_window.selected_folder;
         NotificationContext notifications = this.plugin_manager.notifications;
-        if (current_folder != null && (
-                !notifications.get_folders().contains(current_folder) ||
-                should_notify_new_messages(current_folder))) {
+        if (selected != null && (
+                !notifications.get_folders().contains(selected) ||
+                should_notify_new_messages(selected))) {
 
             Gee.Set<Geary.App.Conversation> visible =
                 supplied ?? main_window.conversation_list_view.get_visible_conversations();
 
             foreach (Geary.App.Conversation conversation in visible) {
                 try {
-                    if (notifications.are_any_new_messages(current_folder,
+                    if (notifications.are_any_new_messages(selected,
                                                            conversation.get_email_ids())) {
                         debug("Clearing new messages: %s", caller);
-                        notifications.clear_new_messages(current_folder);
+                        notifications.clear_new_messages(selected);
                         break;
                     }
                 } catch (Geary.EngineError.NOT_FOUND err) {
@@ -1795,20 +1627,20 @@ public class Application.Controller : Geary.BaseObject {
             account,
             widget,
             referred,
-            quote,
-            this.cancellable_folder
+            quote
         );
     }
 
     private async void load_composer(Geary.Account account,
                                      ComposerWidget widget,
                                      Geary.Email? referred = null,
-                                     string? quote = null,
-                                     GLib.Cancellable? cancellable) {
+                                     string? quote = null) {
         Geary.Email? full = null;
+        GLib.Cancellable? cancellable = null;
         if (referred != null) {
             AccountContext? context = this.accounts.get(account.information);
             if (context != null) {
+                cancellable = context.cancellable;
                 try {
                     full = yield context.emails.fetch_email_async(
                         referred.id,
@@ -1861,40 +1693,6 @@ public class Application.Controller : Geary.BaseObject {
             .to_linked_list();
 
         return ret.size >= 1 ? ret : null;
-    }
-
-    private void do_search(string search_text) {
-        Geary.SearchFolder? search_folder = null;
-        if (this.main_window.selected_account != null) {
-            search_folder = this.main_window.selected_account.get_special_folder(
-                Geary.SpecialFolderType.SEARCH
-            ) as Geary.SearchFolder;
-        }
-
-        if (Geary.String.is_empty_or_whitespace(search_text)) {
-            if (this.previous_non_search_folder != null &&
-                this.current_folder is Geary.SearchFolder) {
-                this.main_window.folder_list.select_folder(
-                    this.previous_non_search_folder
-                );
-            }
-
-            this.main_window.folder_list.remove_search();
-
-            if (search_folder !=  null) {
-                search_folder.clear();
-            }
-        } else if (search_folder != null) {
-            cancel_search(); // Stop any search in progress
-
-            search_folder.search(
-                search_text,
-                this.application.config.get_search_strategy(),
-                this.cancellable_search
-            );
-
-            this.main_window.folder_list.set_search(search_folder);
-        }
     }
 
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,
