@@ -651,7 +651,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         base.destroy();
     }
 
-    public async void load_conversation(Geary.SearchQuery? query)
+    public async void load_conversation(Geary.SearchQuery? query,
+                                        bool start_mark_timer)
         throws GLib.Error {
         set_sort_func(null);
 
@@ -702,7 +703,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             query, uninteresting, post_interesting
         );
 
-        this.mark_read_timer.start();
+        if (start_mark_timer) {
+            this.mark_read_timer.start();
+        }
     }
 
     /** Cancels loading the current conversation, if still in progress */

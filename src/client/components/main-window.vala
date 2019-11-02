@@ -209,6 +209,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private Application.Controller.AccountContext? context = null;
 
+    // Determines if the conversation viewer should autoselect on next
+    // load
+    private bool previous_selection_was_interactive = false;
+
     // Caches the last non-search folder so it can be re-selected on
     // the search folder closing
     private Geary.Folder? previous_non_search_folder = null;
@@ -349,8 +353,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_infobar_frame();
     }
 
-    /** Selects and open the given folder. */
-    public async void select_folder(Geary.Folder? to_select) {
+    /**
+     * Selects and open the given folder.
+     *
+     * If is_interactive is true, the selection is treated as being
+     * caused directly by human request (e.g. clicking on a folder in
+     * the folder list), as opposed to some side effect.
+     */
+    public async void select_folder(Geary.Folder? to_select,
+                                    bool is_interactive) {
         if (this.selected_folder != to_select) {
             // Cancel any existing folder loading
             this.folder_open.cancel();
@@ -404,6 +415,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 !this.is_shift_down && this.selected_folder_supports_trash
             );
             this.conversation_viewer.show_loading();
+            this.previous_selection_was_interactive = is_interactive;
 
             debug("Folder selected: %s",
                   (to_select != null) ? to_select.to_string() : "(null)");
@@ -455,8 +467,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     /** Selects the given account, folder and email. */
-    public async void show_email(Geary.Folder folder, Geary.EmailIdentifier id) {
-        yield select_folder(folder);
+    public async void show_email(Geary.Folder folder,
+                                 Geary.EmailIdentifier id,
+                                 bool is_interactive) {
+        yield select_folder(folder, is_interactive);
         Geary.App.Conversation? conversation =
             this.conversations.get_by_email_identifier(id);
         if (conversation != null) {
@@ -483,7 +497,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         // XXX do other things like select the first/next most highest
         // account's inbox?
         this.search_bar.set_search_text(""); // Reset search.
-        this.select_folder.begin(null);
+        this.select_folder.begin(null, false);
     }
 
     /** Displays a composer addressed to a specific email address. */
@@ -532,7 +546,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         return closed;
     }
 
-    public void search(string text) {
+    public void search(string text, bool is_interactive) {
         Geary.SearchFolder? search_folder = null;
         if (this.selected_account != null) {
             search_folder = this.selected_account.get_special_folder(
@@ -547,7 +561,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         if (Geary.String.is_empty_or_whitespace(text)) {
             if (this.previous_non_search_folder != null &&
                 this.selected_folder is Geary.SearchFolder) {
-                this.select_folder.begin(this.previous_non_search_folder);
+                this.select_folder.begin(
+                    this.previous_non_search_folder, is_interactive
+                );
             }
             this.folder_list.remove_search();
             if (search_folder !=  null) {
@@ -1067,6 +1083,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                         convo,
                         context.emails,
                         context.contacts,
+                        this.previous_selection_was_interactive,
                         (obj, ret) => {
                             try {
                                 this.conversation_viewer.load_conversation.end(ret);
@@ -1088,6 +1105,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 break;
             }
         }
+
+        this.previous_selection_was_interactive = true;
     }
 
     private void on_conversation_count_changed() {
@@ -1477,11 +1496,11 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_folder_selected(Geary.Folder? folder) {
-        this.select_folder.begin(folder);
+        this.select_folder.begin(folder, true);
     }
 
     private void do_search(string text) {
-        search(text);
+        search(text, true);
     }
 
     private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {

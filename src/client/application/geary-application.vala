@@ -535,12 +535,12 @@ public class GearyApplication : Gtk.Application {
     public async void show_email(Geary.Folder? folder,
                                  Geary.EmailIdentifier id) {
         yield this.present();
-        yield this.controller.main_window.show_email(folder, id);
+        yield this.controller.main_window.show_email(folder, id, true);
     }
 
     public async void show_folder(Geary.Folder? folder) {
         yield this.present();
-        yield this.controller.main_window.select_folder(folder);
+        yield this.controller.main_window.select_folder(folder, true);
     }
 
     public async void show_inspector() {

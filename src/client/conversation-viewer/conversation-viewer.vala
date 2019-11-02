@@ -233,7 +233,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      */
     public async void load_conversation(Geary.App.Conversation conversation,
                                         Geary.App.EmailStore emails,
-                                        Application.ContactStore contacts)
+                                        Application.ContactStore contacts,
+                                        bool start_mark_timer)
         throws GLib.Error {
         remove_current_list();
 
@@ -280,7 +281,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             }
         }
 
-        yield new_list.load_conversation(query);
+        yield new_list.load_conversation(query, start_mark_timer);
     }
 
     // Add a new conversation list to the UI

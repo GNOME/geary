@@ -321,7 +321,7 @@ public class Application.Controller : Geary.BaseObject {
         this.application.engine.account_available.disconnect(on_account_available);
 
         // Release folder and conversations in the main window
-        yield this.main_window.select_folder(null);
+        yield this.main_window.select_folder(null, false);
 
         // hide window while shutting down, as this can take a few
         // seconds under certain conditions
