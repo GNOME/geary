@@ -465,15 +465,77 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_headerbar();
     }
 
+    /** Selects the given account, folder and conversations. */
+    public async void show_conversations(Geary.Folder location,
+                                         Gee.Collection<Geary.App.Conversation> to_show,
+                                         bool is_interactive) {
+        yield select_folder(location, is_interactive);
+        // The folder may have changed again by the type the async
+        // call returns, so only continue if still current
+        if (this.selected_folder == location) {
+            // Since conversation ids don't persist between
+            // conversation monitor instances, need to load
+            // conversations based on their messages.
+            var latest_email = new Gee.HashSet<Geary.EmailIdentifier>();
+            foreach (var stale in to_show) {
+                Geary.Email? first = stale.get_latest_recv_email(IN_FOLDER);
+                if (first != null) {
+                    latest_email.add(first.id);
+                }
+            }
+            var loaded = yield load_conversations_for_email(
+                location, latest_email
+            );
+            if (!loaded.is_empty) {
+                yield select_conversations(
+                    loaded,
+                    Gee.Collection.empty<Geary.EmailIdentifier>(),
+                    is_interactive
+                );
+            }
+        }
+    }
+
     /** Selects the given account, folder and email. */
-    public async void show_email(Geary.Folder folder,
-                                 Geary.EmailIdentifier id,
+    public async void show_email(Geary.Folder location,
+                                 Gee.Collection<Geary.EmailIdentifier> to_show,
                                  bool is_interactive) {
-        yield select_folder(folder, is_interactive);
-        Geary.App.Conversation? conversation =
-            this.conversations.get_by_email_identifier(id);
-        if (conversation != null) {
-            this.conversation_list_view.select_conversation(conversation);
+        yield select_folder(location, is_interactive);
+        // The folder may have changed again by the type the async
+        // call returns, so only continue if still current
+        if (this.selected_folder == location) {
+            var loaded = yield load_conversations_for_email(location, to_show);
+
+            if (loaded.size == 1) {
+                // A single conversation was loaded, so ensure we
+                // scroll to the email in the conversation.
+                Geary.App.Conversation target = Geary.Collection.get_first(loaded);
+                ConversationListBox? current_list =
+                    this.conversation_viewer.current_list;
+                if (current_list != null &&
+                    current_list.conversation == target) {
+                    // The target conversation is already loaded, just
+                    // scroll to the messages.
+                    //
+                    // XXX this is actually racy, since the view may
+                    // still be in the middle of loading the messages
+                    // obtained from the conversation monitor when
+                    // this call is made.
+                    current_list.scroll_to_messages(to_show);
+                } else {
+                    // The target conversation is not loaded, select
+                    // it and scroll to the messages.
+                    yield select_conversations(loaded, to_show, is_interactive);
+                }
+            } else if (!loaded.is_empty) {
+                // Multiple conversations found, just select those
+                yield select_conversations(
+                    loaded,
+                    Gee.Collection.empty<Geary.EmailIdentifier>(),
+                    is_interactive
+                );
+            } else {
+            }
         }
     }
 
@@ -961,6 +1023,42 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         return (dialog.run() == Gtk.ResponseType.OK);
     }
 
+
+    private async Gee.Collection<Geary.App.Conversation>
+        load_conversations_for_email(
+            Geary.Folder location,
+            Gee.Collection<Geary.EmailIdentifier> to_load) {
+        bool was_loaded = false;
+        // Can't assume the conversation monitor is valid, so check
+        // it first.
+        if (this.conversations != null &&
+            this.conversations.base_folder == location) {
+            try {
+                yield this.conversations.load_email(to_load, this.folder_open);
+                was_loaded = true;
+            } catch (GLib.Error err) {
+                debug("Error loading conversations to show them: %s",
+                      err.message);
+            }
+        }
+
+        // Conversation monitor may have changed since resuming from
+        // the last async statement, so check it's still valid again.
+        var loaded = new Gee.HashSet<Geary.App.Conversation>();
+        if (was_loaded &&
+            this.conversations != null &&
+            this.conversations.base_folder == location) {
+            foreach (var id in to_load) {
+                Geary.App.Conversation? conversation =
+                    this.conversations.get_by_email_identifier(id);
+                if (conversation != null) {
+                    loaded.add(conversation);
+                }
+            }
+        }
+        return loaded;
+    }
+
     private inline void handle_error(Geary.AccountInformation? account,
                                      GLib.Error error) {
         Geary.ProblemReport? report = (account != null)
@@ -1022,6 +1120,63 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             }
 
             update_command_actions();
+        }
+    }
+
+    private async void select_conversations(Gee.Collection<Geary.App.Conversation> to_select,
+                                            Gee.Collection<Geary.EmailIdentifier> scroll_to,
+                                            bool is_interactive) {
+        bool start_mark_timer = (
+            this.previous_selection_was_interactive && is_interactive
+        );
+        this.previous_selection_was_interactive = is_interactive;
+
+        // Ensure that the conversations are selected in the UI if
+        // this was called by something other than the selection
+        // changed callback. That will check to ensure that we're not
+        // setting it again.
+        this.conversation_list_view.select_conversations(to_select);
+
+        this.main_toolbar.selected_conversations = to_select.size;
+        if (this.selected_folder != null && !this.has_composer) {
+            switch(to_select.size) {
+            case 0:
+                update_conversation_actions(NONE);
+                this.conversation_viewer.show_none_selected();
+                break;
+
+            case 1:
+                update_conversation_actions(SINGLE);
+                Geary.App.Conversation convo = Geary.Collection.get_first(to_select);
+
+                // It's possible for a conversation with zero email to
+                // be selected, when it has just evaporated after its
+                // last email was removed but the conversation monitor
+                // hasn't signalled its removal yet. In this case,
+                // just don't load it since it will soon disappear.
+                Application.Controller.AccountContext? context = this.context;
+                if (context != null && convo.get_count() > 0) {
+                    try {
+                        yield this.conversation_viewer.load_conversation(
+                            convo,
+                            scroll_to,
+                            context.emails,
+                            context.contacts,
+                            start_mark_timer
+                        );
+                    } catch (GLib.IOError.CANCELLED err) {
+                        // All good
+                    } catch (GLib.Error err) {
+                        handle_error(convo.base_folder.account.information, err);
+                    }
+                }
+                break;
+
+            default:
+                update_conversation_actions(MULTIPLE);
+                this.conversation_viewer.show_multiple_selected();
+                break;
+            }
         }
     }
 
@@ -1100,54 +1255,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
-        this.main_toolbar.selected_conversations = selected.size;
-        if (this.selected_folder != null && !this.has_composer) {
-            switch(selected.size) {
-            case 0:
-                update_conversation_actions(NONE);
-                this.conversation_viewer.show_none_selected();
-                break;
-
-            case 1:
-                Geary.App.Conversation convo = Geary.Collection.get_first(
-                    selected
-                );
-
-                // It's possible for a conversation with zero email to
-                // be selected, when it has just evaporated after its
-                // last email was removed but the conversation monitor
-                // hasn't signalled its removal yet. In this case,
-                // just don't load it since it will soon disappear.
-                Application.Controller.AccountContext? context = this.context;
-                if (context != null && convo.get_count() > 0) {
-                    this.conversation_viewer.load_conversation.begin(
-                        convo,
-                        context.emails,
-                        context.contacts,
-                        this.previous_selection_was_interactive,
-                        (obj, ret) => {
-                            try {
-                                this.conversation_viewer.load_conversation.end(ret);
-                                update_conversation_actions(SINGLE);
-                            } catch (GLib.IOError.CANCELLED err) {
-                                // All good
-                            } catch (Error err) {
-                                debug("Unable to load conversation: %s",
-                                      err.message);
-                            }
-                        }
-                    );
-                }
-                break;
-
-            default:
-                update_conversation_actions(MULTIPLE);
-                this.conversation_viewer.show_multiple_selected();
-                break;
-            }
-        }
-
-        this.previous_selection_was_interactive = true;
+        this.select_conversations.begin(selected, Gee.Collection.empty(), true);
     }
 
     private void on_conversation_count_changed() {
@@ -1487,6 +1595,18 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_command_undo(Application.Command command) {
+        Application.EmailCommand? email = command as Application.EmailCommand;
+        if (email != null) {
+            if (email.conversations.size > 1) {
+                this.show_conversations.begin(
+                    email.location, email.conversations, false
+                );
+            } else {
+                this.show_email.begin(
+                    email.location, email.email, false
+                );
+            }
+        }
         if (command.undone_label != null) {
             Components.InAppNotification ian =
                 new Components.InAppNotification(command.undone_label);

@@ -496,18 +496,17 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         scheduled_update_visible_conversations = Geary.Scheduler.on_idle(update_visible_conversations);
     }
 
-    public void select_conversation(Geary.App.Conversation conversation) {
-        Gtk.TreePath path = get_model().get_path_for_conversation(conversation);
-        if (path != null)
-            set_cursor(path, null, false);
-    }
-
-    public void select_conversations(Gee.Set<Geary.App.Conversation> conversations) {
-        Gtk.TreeSelection selection = get_selection();
-        foreach (Geary.App.Conversation conversation in conversations) {
-            Gtk.TreePath path = get_model().get_path_for_conversation(conversation);
-            if (path != null)
-                selection.select_path(path);
+    public void select_conversations(Gee.Collection<Geary.App.Conversation> new_selection) {
+        if (this.selected.size != new_selection.size ||
+            !this.selected.contains_all(new_selection)) {
+            Gtk.TreeSelection selection = get_selection();
+            selection.unselect_all();
+            foreach (var conversation in new_selection) {
+                Gtk.TreePath path = get_model().get_path_for_conversation(conversation);
+                if (path != null) {
+                    selection.select_path(path);
+                }
+            }
         }
     }
 

@@ -121,7 +121,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         /**
          * Loads search term matches for this list's emails.
          */
-        public async void highlight_matching_email(Geary.SearchQuery query)
+        public async void highlight_matching_email(Geary.SearchQuery query,
+                                                   bool enable_scroll)
             throws GLib.Error {
             cancel();
 
@@ -164,8 +165,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                             first = row;
                         }
                     }
-                    if (first != null) {
-                        this.list.scroll_to(first);
+                    if (first != null && enable_scroll) {
+                        this.list.scroll_to_row(first);
                     }
 
                     // Now expand them all
@@ -529,6 +530,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // The id of the draft referred to by the current composer.
     private Geary.EmailIdentifier? draft_id = null;
 
+    private bool suppress_mark_timer;
     private Geary.TimeoutManager mark_read_timer;
 
     private GLib.SimpleActionGroup email_actions = new GLib.SimpleActionGroup();
@@ -605,6 +607,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Constructs a new conversation list box instance.
      */
     public ConversationListBox(Geary.App.Conversation conversation,
+                               bool suppress_mark_timer,
                                Geary.App.EmailStore email_store,
                                Application.ContactStore contacts,
                                Configuration config,
@@ -617,6 +620,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         this.search = new SearchManager(this, conversation);
 
+        this.suppress_mark_timer = suppress_mark_timer;
         this.mark_read_timer = new Geary.TimeoutManager.milliseconds(
             MARK_READ_TIMEOUT_MSEC, this.check_mark_read
         );
@@ -651,8 +655,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         base.destroy();
     }
 
-    public async void load_conversation(Geary.SearchQuery? query,
-                                        bool start_mark_timer)
+    public async void load_conversation(Gee.Collection<Geary.EmailIdentifier> scroll_to,
+                                        Geary.SearchQuery? query)
         throws GLib.Error {
         set_sort_func(null);
 
@@ -668,17 +672,44 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         Geary.Email? first_interesting = null;
         Gee.LinkedList<Geary.Email> post_interesting =
             new Gee.LinkedList<Geary.Email>();
-        foreach (Geary.Email email in all_email) {
-            if (first_interesting == null) {
-                if (is_interesting(email)) {
-                    first_interesting = email;
-                } else {
-                    // Inserted reversed so most recent uninteresting
-                    // rows are added first.
-                    uninteresting.insert(0, email);
+
+        if (!scroll_to.is_empty) {
+            var valid_scroll_to = Geary.traverse(scroll_to).filter(
+                id => this.conversation.contains_email_by_id(id)
+            ).to_array_list();
+            valid_scroll_to.sort((a, b) => a.natural_sort_comparator(b));
+            var first_scroll = Geary.Collection.get_first(valid_scroll_to);
+
+            if (first_scroll != null) {
+                foreach (Geary.Email email in all_email) {
+                    if (first_interesting == null) {
+                        if (email.id == first_scroll) {
+                            first_interesting = email;
+                        } else {
+                            // Inserted reversed so most recent uninteresting
+                            // rows are added first.
+                            uninteresting.insert(0, email);
+                        }
+                    } else {
+                        post_interesting.add(email);
+                    }
                 }
-            } else {
-                post_interesting.add(email);
+            }
+        }
+
+        if (first_interesting == null) {
+            foreach (Geary.Email email in all_email) {
+                if (first_interesting == null) {
+                    if (is_interesting(email)) {
+                        first_interesting = email;
+                    } else {
+                        // Inserted reversed so most recent uninteresting
+                        // rows are added first.
+                        uninteresting.insert(0, email);
+                    }
+                } else {
+                    post_interesting.add(email);
+                }
             }
         }
 
@@ -700,17 +731,61 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         yield interesting_row.view.load_contacts();
         yield interesting_row.expand();
         this.finish_loading.begin(
-            query, uninteresting, post_interesting
+            query, scroll_to.is_empty, uninteresting, post_interesting
         );
-
-        if (start_mark_timer) {
-            this.mark_read_timer.start();
-        }
     }
 
     /** Cancels loading the current conversation, if still in progress */
     public void cancel_conversation_load() {
         this.cancellable.cancel();
+    }
+
+    /** Scrolls to the closest message in the current conversation. */
+    public void scroll_to_messages(Gee.Collection<Geary.EmailIdentifier> targets) {
+        // Get the currently displayed email, allowing for some
+        // padding at the top
+        Gtk.ListBoxRow? current_child = get_row_at_y(32);
+
+        // Find the row currently at the top of the viewport
+        EmailRow? current = null;
+        if (current_child != null) {
+            int pos = current_child.get_index();
+            do {
+                current = current_child as EmailRow;
+                current_child = get_row_at_index(--pos);
+            } while (current == null && pos > 0);
+        }
+
+        EmailRow? best = null;
+        // Find the message closest to the current message, preferring
+        // an earlier one. If there's no current message, the list is
+        // empty and we don't have anything to scroll to anyway.
+        if (current != null) {
+            uint closest_distance = uint.MAX;
+            foreach (var id in targets) {
+                EmailRow? target = this.email_rows[id];
+                if (target != null) {
+                    uint distance = (
+                        current.get_index() - target.get_index()
+                    ).abs();
+                    if (distance < closest_distance ||
+                        (distance == closest_distance &&
+                         Geary.Email.compare_sent_date_ascending(
+                             target.email, best.email
+                         ) < 0)) {
+                        debug("XXX have new best row....");
+                        closest_distance = distance;
+                        best = target;
+                    }
+
+                }
+            }
+        }
+
+        if (best != null) {
+            scroll_to_row(best);
+            best.expand.begin();
+        }
     }
 
     /**
@@ -772,7 +847,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         row.enable_should_scroll();
         // Use row param rather than row var from closure to avoid a
         // circular ref.
-        row.should_scroll.connect((row) => { scroll_to(row); });
+        row.should_scroll.connect((row) => { scroll_to_row(row); });
         add(row);
         this.has_composer = true;
 
@@ -862,6 +937,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
     private async void finish_loading(Geary.SearchQuery? query,
+                                      bool enable_query_scroll,
                                       Gee.LinkedList<Geary.Email> to_insert,
                                       Gee.LinkedList<Geary.Email> to_append)
         throws GLib.Error {
@@ -917,7 +993,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // XXX this sucks for large conversations because it can take
             // a long time for the load to complete and hence for
             // matches to show up.
-            yield this.search.highlight_matching_email(query);
+            yield this.search.highlight_matching_email(
+                query, enable_query_scroll
+            );
         }
     }
 
@@ -1024,7 +1102,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
     }
 
-    private void scroll_to(ConversationRow row) {
+    private void scroll_to_row(ConversationRow row) {
         Gtk.Allocation? alloc = null;
         row.get_allocation(out alloc);
         int y = 0;
@@ -1203,7 +1281,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                                               GLib.ParamSpec param) {
         ConversationEmail? view = obj as ConversationEmail;
         if (view != null && view.message_body_state == COMPLETED) {
-            this.mark_read_timer.start();
+            if (!this.suppress_mark_timer) {
+                this.mark_read_timer.start();
+            }
+            this.suppress_mark_timer = false;
         }
     }
 

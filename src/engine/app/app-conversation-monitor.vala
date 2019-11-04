@@ -46,8 +46,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * These fields will be retrieved regardless of the Field
      * parameter passed to the constructor.
      */
-    public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES |
-        Geary.Email.Field.FLAGS | Geary.Email.Field.DATE;
+    public const Geary.Email.Field REQUIRED_FIELDS = (
+        Geary.Email.Field.REFERENCES |
+        Geary.Email.Field.FLAGS |
+        Geary.Email.Field.DATE
+    );
 
 
     private struct ProcessJobContext {
@@ -376,6 +379,28 @@ public class Geary.App.ConversationMonitor : BaseObject {
             is_closing = yield stop_monitoring_internal(true, cancellable);
         }
         return is_closing;
+    }
+
+    /** Ensures the given email are loaded in the monitor. */
+    public async void load_email(Gee.Collection<Geary.EmailIdentifier> to_load,
+                                 GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (!this.is_monitoring) {
+            throw new EngineError.OPEN_REQUIRED("Monitor is not open");
+        }
+
+        var remaining = traverse(to_load).filter(
+            id => this.conversations.get_by_email_identifier(id) == null
+        ).to_array_list();
+
+        if (!remaining.is_empty) {
+            remaining.sort((a, b) => a.natural_sort_comparator(b));
+            var op = new LoadOperation(
+                this, remaining[0], this.operation_cancellable
+            );
+            this.queue.add(op);
+            yield op.wait_until_complete(cancellable);
+        }
     }
 
     /**

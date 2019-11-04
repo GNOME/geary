@@ -232,7 +232,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      * Shows a conversation in the viewer.
      */
     public async void load_conversation(Geary.App.Conversation conversation,
-                                        Geary.App.EmailStore emails,
+                                        Gee.Collection<Geary.EmailIdentifier> scroll_to,
+                                        Geary.App.EmailStore store,
                                         Application.ContactStore contacts,
                                         bool start_mark_timer)
         throws GLib.Error {
@@ -240,7 +241,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
         ConversationListBox new_list = new ConversationListBox(
             conversation,
-            emails,
+            !start_mark_timer,
+            store,
             contacts,
             this.config,
             this.conversation_scroller.get_vadjustment()
@@ -281,7 +283,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             }
         }
 
-        yield new_list.load_conversation(query, start_mark_timer);
+        yield new_list.load_conversation(scroll_to, query);
     }
 
     // Add a new conversation list to the UI
@@ -380,7 +382,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                     cancellable
                 );
                 if (query != null) {
-                    yield list.search.highlight_matching_email(query);
+                    yield list.search.highlight_matching_email(query, true);
                 }
             } catch (GLib.Error err) {
                 warning("Error updating find results: %s", err.message);
@@ -433,7 +435,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                     Geary.SearchQuery? search_query = search_folder.search_query;
                     if (search_query != null) {
                         this.current_list.search.highlight_matching_email.begin(
-                            search_query
+                            search_query,
+                            true
                         );
                     }
                 }
