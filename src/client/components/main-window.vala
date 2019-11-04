@@ -577,6 +577,24 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
+    /** Adds a folder to the window. */
+    public void add_folder(Geary.Folder to_add) {
+        this.folder_list.add_folder(to_add);
+        if (to_add.account == this.selected_account) {
+            this.main_toolbar.copy_folder_menu.add_folder(to_add);
+            this.main_toolbar.move_folder_menu.add_folder(to_add);
+        }
+    }
+
+    /** Removes a folder from the window. */
+    public void remove_folder(Geary.Folder to_remove) {
+        if (to_remove.account == this.selected_account) {
+            this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
+            this.main_toolbar.move_folder_menu.remove_folder(to_remove);
+        }
+        this.folder_list.remove_folder(to_remove);
+    }
+
     private void load_config(Configuration config) {
         // This code both loads AND saves the pane positions with live updating. This is more
         // resilient against crashes because the value in dconf changes *immediately*, and

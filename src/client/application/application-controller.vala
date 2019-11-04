@@ -1341,17 +1341,10 @@ public class Application.Controller : Geary.BaseObject {
                 if (!should_add_folder(available, folder)) {
                     continue;
                 }
-
-                main_window.folder_list.add_folder(folder);
-                if (folder.account == main_window.selected_account) {
-                    if (!main_window.main_toolbar.copy_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.copy_folder_menu.add_folder(folder);
-                    if (!main_window.main_toolbar.move_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.move_folder_menu.add_folder(folder);
-                }
+                folder.special_folder_type_changed.connect(on_special_folder_type_changed);
+                this.main_window.add_folder(folder);
 
                 GLib.Cancellable cancellable = context.cancellable;
-
                 switch (folder.special_folder_type) {
                 case Geary.SpecialFolderType.INBOX:
                     // Special case handling of inboxes
@@ -1388,8 +1381,6 @@ public class Application.Controller : Geary.BaseObject {
                     }
                     break;
                 }
-
-                folder.special_folder_type_changed.connect(on_special_folder_type_changed);
             }
         }
 
@@ -1399,14 +1390,8 @@ public class Application.Controller : Geary.BaseObject {
             bool has_prev = unavailable_iterator.last();
             while (has_prev) {
                 Geary.Folder folder = unavailable_iterator.get();
-
-                main_window.folder_list.remove_folder(folder);
-                if (folder.account == this.main_window.selected_account) {
-                    if (main_window.main_toolbar.copy_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.copy_folder_menu.remove_folder(folder);
-                    if (main_window.main_toolbar.move_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.move_folder_menu.remove_folder(folder);
-                }
+                folder.special_folder_type_changed.disconnect(on_special_folder_type_changed);
+                this.main_window.remove_folder(folder);
 
                 switch (folder.special_folder_type) {
                 case Geary.SpecialFolderType.INBOX:
@@ -1422,8 +1407,6 @@ public class Application.Controller : Geary.BaseObject {
                     }
                     break;
                 }
-
-                folder.special_folder_type_changed.disconnect(on_special_folder_type_changed);
 
                 has_prev = unavailable_iterator.previous();
             }
