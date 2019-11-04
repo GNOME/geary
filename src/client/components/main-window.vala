@@ -429,7 +429,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
                 this.conversations = new Geary.App.ConversationMonitor(
                     to_select,
-                    NO_DELAY,
                     // Include fields for the conversation viewer as well so
                     // conversations can be displayed without having to go
                     // back to the db
@@ -1035,11 +1034,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         to_open.conversations_added.connect(on_conversation_count_changed);
         to_open.conversations_removed.connect(on_conversation_count_changed);
 
-        to_open.start_monitoring_async.begin(
+        to_open.start_monitoring.begin(
+            NO_DELAY,
             cancellable,
             (obj, res) => {
                 try {
-                    to_open.start_monitoring_async.end(res);
+                    to_open.start_monitoring.end(res);
                 } catch (GLib.Error err) {
                     handle_error(to_open.base_folder.account.information, err);
                 }
@@ -1055,11 +1055,11 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         to_close.conversations_added.disconnect(on_conversation_count_changed);
         to_close.conversations_removed.disconnect(on_conversation_count_changed);
 
-        to_close.stop_monitoring_async.begin(
+        to_close.stop_monitoring.begin(
             null,
             (obj, res) => {
                 try {
-                    to_close.stop_monitoring_async.end(res);
+                    to_close.stop_monitoring.end(res);
                 } catch (GLib.Error err) {
                     warning(
                         "Error closing conversation monitor %s: %s",

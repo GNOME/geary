@@ -20,7 +20,7 @@
  * conversations can be loaded afterwards as needed.
  *
  * When monitoring starts via a call to {@link
- * start_monitoring_async}, the folder will perform an initial
+ * start_monitoring}, the folder will perform an initial
  * //scan// of messages in the base folder and load conversation load
  * based on that. Increasing {@link min_window_count} will cause
  * additional scan operations to be executed as needed to fill the new
@@ -138,9 +138,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
     internal bool fill_complete { get; set; default = false; }
 
     private Geary.Email.Field required_fields;
-    private Geary.Folder.OpenFlags open_flags;
-    private ConversationOperationQueue queue = null;
-    private Cancellable? operation_cancellable = null;
+    private ConversationOperationQueue queue;
+    private GLib.Cancellable operation_cancellable = new GLib.Cancellable();
 
     // Set of known, in-folder emails, explicitly loaded for the
     // monitor's window. This exists purely to support the window_size
@@ -276,19 +275,18 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * Creates a conversation monitor for the given folder.
      *
      * @param base_folder a Folder to monitor for conversations
-     * @param open_flags See {@link Geary.Folder}
      * @param required_fields See {@link Geary.Folder}
      * @param min_window_count Minimum number of conversations that will be loaded
      */
     public ConversationMonitor(Folder base_folder,
-                               Folder.OpenFlags open_flags,
                                Email.Field required_fields,
                                int min_window_count) {
         this.base_folder = base_folder;
-        this.open_flags = open_flags;
         this.required_fields = required_fields | REQUIRED_FIELDS;
         this._min_window_count = min_window_count;
         this.conversations = new ConversationSet(base_folder);
+        this.operation_cancellable = new Cancellable();
+        this.queue = new ConversationOperationQueue(this.progress_monitor);
     }
 
     /**
@@ -301,16 +299,19 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * The //cancellable// parameter will be used when opening the
      * folder, but not subsequently when scanning for new messages. To
      * cancel any such operations, simply close the monitor via {@link
-     * stop_monitoring_async}.
+     * stop_monitoring}.
+     *
+     * @param open_flags See {@link Geary.Folder}
+     * @param cancellable Passed to the folder open operation
      */
-    public async bool start_monitoring_async(Cancellable? cancellable = null)
-        throws Error {
+    public async bool start_monitoring(Folder.OpenFlags open_flags,
+                                       GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (this.is_monitoring)
             return false;
 
         // Set early yield to guard against reentrancy
         this.is_monitoring = true;
-        this.operation_cancellable = new Cancellable();
 
         this.base_folder.email_appended.connect(on_folder_email_appended);
         this.base_folder.email_inserted.connect(on_folder_email_inserted);
@@ -323,25 +324,37 @@ public class Geary.App.ConversationMonitor : BaseObject {
         this.base_folder.account.email_removed.connect(on_account_email_removed);
         this.base_folder.account.email_flags_changed.connect(on_account_email_flags_changed);
 
-        this.queue = new ConversationOperationQueue(this.progress_monitor);
         this.queue.operation_error.connect(on_operation_error);
         this.queue.add(new FillWindowOperation(this));
 
+        // Take the union of the two cancellables so that of the
+        // monitor is closed while it is opening, the folder open is
+        // also cancelled
+        GLib.Cancellable opening = new GLib.Cancellable();
+        if (cancellable != null) {
+            cancellable.cancelled.connect(() => opening.cancel());
+        }
+        this.operation_cancellable.cancelled.connect(() => opening.cancel());
+
         try {
-            yield this.base_folder.open_async(open_flags, cancellable);
+            yield this.base_folder.open_async(open_flags, opening);
         } catch (Error err) {
-            try {
-                yield stop_monitoring_internal(false, null);
-            } catch (Error stop_error) {
-                warning(
-                    "Error cleaning up after folder open error: %s", err.message
-                );
+            if (this.is_monitoring) {
+                try {
+                    yield stop_monitoring_internal(false, null);
+                } catch (Error stop_error) {
+                    warning(
+                        "Error cleaning up after folder open error: %s", err.message
+                    );
+                }
+                throw err;
             }
-            throw err;
         }
 
         // Now the folder is open, start the queue running
-        this.queue.run_process_async.begin();
+        if (this.is_monitoring) {
+            this.queue.run_process_async.begin();
+        }
 
         return true;
     }
@@ -356,11 +369,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * internal monitor operations to complete, but will not prevent
      * attempts to close the base folder.
      */
-    public async bool stop_monitoring_async(Cancellable? cancellable) throws Error {
-        if (!is_monitoring)
-            return false;
-
-        return yield stop_monitoring_internal(true, cancellable);
+    public async bool stop_monitoring(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        bool is_closing = false;
+        if (this.is_monitoring) {
+            is_closing = yield stop_monitoring_internal(true, cancellable);
+        }
+        return is_closing;
     }
 
     /**
@@ -603,7 +618,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         email_flags_changed(conversation, email);
     }
 
-    private async bool stop_monitoring_internal(bool close_folder,
+    private async bool stop_monitoring_internal(bool folder_was_opened,
                                                 Cancellable? cancellable)
         throws Error {
         // set now to prevent reentrancy during yield or signal
@@ -631,19 +646,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
         } catch (Error err) {
             close_err = err;
         }
-        this.queue = null;
-
-        this.operation_cancellable = null;
 
         bool closing = false;
-        if (close_folder) {
+        if (folder_was_opened) {
             try {
                 // Always close the folder to prevent open leaks
                 closing = yield this.base_folder.close_async(null);
             } catch (Error err) {
                 warning("Unable to close monitored folder %s: %s",
                         this.base_folder.to_string(), err.message);
-                close_err = err;
             }
         }
 
