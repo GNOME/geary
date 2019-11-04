@@ -18,7 +18,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.IdleManager selection_update;
-    private bool suppress_selection = false;
 
     public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
 
@@ -158,22 +157,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             }
 
             set_cursor(target_path, null, false);
-        }
-    }
-
-    /**
-     * Specifies an action is currently changing the view's selection.
-     */
-    public void set_changing_selection(bool is_changing) {
-        // Make sure that when not autoselecting, and if the user is
-        // causing selected rows to be removed, the next row is not
-        // automatically selected by GtkTreeView
-        if (is_changing) {
-            this.suppress_selection =
-                !GearyApplication.instance.config.autoselect;
-        } else {
-            // If no longer changing, always re-enable selection
-            get_selection().set_mode(Gtk.SelectionMode.MULTIPLE);
         }
     }
 
