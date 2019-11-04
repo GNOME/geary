@@ -337,36 +337,16 @@ public class Application.Controller : Geary.BaseObject {
         // explode if accounts are removed while iterating.
         AccountContext[] accounts = this.accounts.values.to_array();
 
-        // Close all inboxes. Launch these in parallel first so we're
-        // not wasting time waiting for each one to close. The account
-        // will wait around for them to actually close.
-        foreach (AccountContext context in accounts) {
-            Geary.Folder? inbox = context.inbox;
-            if (inbox != null) {
-                debug("Closing inbox: %s...", inbox.to_string());
-                inbox.close_async.begin(null, (obj, ret) => {
-                        try {
-                            inbox.close_async.end(ret);
-                        } catch (Error err) {
-                            debug(
-                                "Error closing Inbox %s at shutdown: %s",
-                                inbox.to_string(), err.message
-                            );
-                        }
-                    });
-                context.inbox = null;
-            }
-        }
-
-        // Close all Accounts. Again, this is done in parallel to
-        // minimise time taken to close, but here use a barrier to
-        // wait for all to actually finish closing.
+        // Close all Accounts. Launch these in parallel to minimise
+        // time taken to close, but here use a barrier to wait for all
+        // to actually finish closing.
         Geary.Nonblocking.CountingSemaphore close_barrier =
             new Geary.Nonblocking.CountingSemaphore(null);
         foreach (AccountContext context in accounts) {
             close_barrier.acquire();
             this.close_account.begin(
                 context.account.information,
+                true,
                 (obj, ret) => {
                     this.close_account.end(ret);
                     close_barrier.blind_notify();
@@ -893,13 +873,15 @@ public class Application.Controller : Geary.BaseObject {
         connect_account_async.begin(account, cancellable_open_account);
     }
 
-    private async void close_account(Geary.AccountInformation config) {
+    private async void close_account(Geary.AccountInformation config,
+                                     bool is_shutdown) {
         AccountContext? context = this.accounts.get(config);
         if (context != null) {
+            debug("Closing account: %s", context.account.information.id);
             Geary.Account account = context.account;
-            if (this.main_window.selected_account == account) {
-                this.main_window.deselect_account();
-            }
+
+            // Guard against trying to close the account twice
+            this.accounts.unset(account.information);
 
             // Stop updating status and showing errors when closing
             // the account - the user doesn't care any more
@@ -912,7 +894,53 @@ public class Application.Controller : Geary.BaseObject {
                 on_account_status_notify
             );
 
-            yield disconnect_account_async(context);
+            account.email_sent.disconnect(on_sent);
+            account.email_removed.disconnect(on_account_email_removed);
+            account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
+            account.sending_monitor.start.disconnect(on_sending_started);
+            account.sending_monitor.finish.disconnect(on_sending_finished);
+
+            // Now the account is not in the accounts map, reset any
+            // status notifications for it
+            update_account_status();
+
+            // If we're not shutting down, select the inbox of the
+            // first account so that we show something other than
+            // empty conversation list/viewer.
+            Geary.Folder? to_select = null;
+            if (!is_shutdown) {
+                Geary.AccountInformation? first_account = get_first_account();
+                if (first_account != null) {
+                    AccountContext? first_context = this.accounts[first_account];
+                    if (first_context != null) {
+                        to_select = first_context.inbox;
+                    }
+                }
+            }
+
+            yield this.main_window.remove_account(account, to_select);
+
+            context.cancellable.cancel();
+            context.contacts.close();
+
+            // Explicitly close the inbox since we explicitly open it
+            Geary.Folder? inbox = context.inbox;
+            if (inbox != null) {
+                try {
+                    yield inbox.close_async(null);
+                } catch (Error close_inbox_err) {
+                    debug("Unable to close monitored inbox: %s", close_inbox_err.message);
+                }
+                context.inbox = null;
+            }
+
+            try {
+                yield account.close_async(null);
+            } catch (Error close_err) {
+                debug("Unable to close account %s: %s", account.to_string(), close_err.message);
+            }
+
+            debug("Account closed: %s", account.to_string());
         }
     }
 
@@ -1201,48 +1229,6 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         return retry;
-    }
-
-    private async void disconnect_account_async(AccountContext context, Cancellable? cancellable = null) {
-        debug("Disconnecting account: %s", context.account.information.id);
-
-        Geary.Account account = context.account;
-
-        // Guard against trying to disconnect the account twice
-        this.accounts.unset(account.information);
-
-        // Now the account is not in the accounts map, reset any
-        // status notifications for it
-        update_account_status();
-
-        account.email_sent.disconnect(on_sent);
-        account.email_removed.disconnect(on_account_email_removed);
-        account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
-        account.sending_monitor.start.disconnect(on_sending_started);
-        account.sending_monitor.finish.disconnect(on_sending_finished);
-
-        main_window.folder_list.remove_account(account);
-
-        context.cancellable.cancel();
-        context.contacts.close();
-
-        Geary.Folder? inbox = context.inbox;
-        if (inbox != null) {
-            try {
-                yield inbox.close_async(cancellable);
-            } catch (Error close_inbox_err) {
-                debug("Unable to close monitored inbox: %s", close_inbox_err.message);
-            }
-            context.inbox = null;
-        }
-
-        try {
-            yield account.close_async(cancellable);
-        } catch (Error close_err) {
-            debug("Unable to close account %s: %s", account.to_string(), close_err.message);
-        }
-
-        debug("Account closed: %s", account.to_string());
     }
 
     /**
@@ -1753,6 +1739,7 @@ public class Application.Controller : Geary.BaseObject {
             if (this.application.engine.has_account(changed.id)) {
                 this.close_account.begin(
                     changed,
+                    false,
                     (obj, res) => {
                         this.close_account.end(res);
                         try {
@@ -1773,6 +1760,7 @@ public class Application.Controller : Geary.BaseObject {
         debug("%s: Closing account for removal", removed.id);
         this.close_account.begin(
             removed,
+            false,
             (obj, res) => {
                 this.close_account.end(res);
                 debug("%s: Account closed", removed.id);

@@ -492,14 +492,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.info_bar_frame.show();
     }
 
-    /** Deselected the currently selected account, if any. */
-    public void deselect_account() {
-        // XXX do other things like select the first/next most highest
-        // account's inbox?
-        this.search_bar.set_search_text(""); // Reset search.
-        this.select_folder.begin(null, false);
-    }
-
     /** Displays a composer addressed to a specific email address. */
     public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
         Application.Controller controller = this.application.controller;
@@ -593,6 +585,37 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             this.main_toolbar.move_folder_menu.remove_folder(to_remove);
         }
         this.folder_list.remove_folder(to_remove);
+    }
+
+    /**
+     * Removes the given account from the main window.
+     *
+     * If `to_select` is not null, the given folder will be selected,
+     * otherwise no folder will be.
+     */
+    public async void remove_account(Geary.Account to_remove,
+                                     Geary.Folder? to_select) {
+        // Explicitly unset the selected folder if it belongs to the
+        // account so we block until it's gone. This also clears the
+        // previous search folder, so it won't try to re-load that
+        // that when the account is gone.
+        if (this.selected_folder != null &&
+            this.selected_folder.account == to_remove) {
+            Geary.SearchFolder? current_search = (
+                this.selected_folder as Geary.SearchFolder
+            );
+
+            yield select_folder(to_select, false);
+
+            // Clear the account's search folder if it existed
+            if (current_search != null) {
+                this.search_bar.set_search_text("");
+                this.search_bar.search_mode_enabled = false;
+            }
+        }
+
+        // Finally, remove the account and its folders
+        this.folder_list.remove_account(to_remove);
     }
 
     private void load_config(Configuration config) {

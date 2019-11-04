@@ -136,8 +136,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
         // if found and selected, report nothing is selected in preparation for its removal
         if (entry != null && is_selected(entry)) {
-            this.selected = null;
-            folder_selected(null);
+            deselect_folder();
         }
 
         // if Inbox, remove from inboxes branch, selected or not
@@ -149,26 +148,18 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
     public void remove_account(Geary.Account account) {
         account.information.notify["ordinal"].disconnect(on_ordinal_changed);
+
+        // If a folder on this account is selected, unselect it.
+        if (this.selected != null &&
+            this.selected.account == account) {
+            deselect_folder();
+        }
+
         AccountBranch? account_branch = account_branches.get(account);
         if (account_branch != null) {
-            // If a folder on this account is selected, unselect it.
-            foreach (FolderEntry entry in account_branch.folder_entries.values) {
-                if (is_selected(entry)) {
-                    this.selected = null;
-                    folder_selected(null);
-                    break;
-                }
-            }
-
             if (has_branch(account_branch))
                 prune(account_branch);
             account_branches.unset(account);
-        }
-
-        Sidebar.Entry? entry = inboxes_branch.get_entry_for_account(account);
-        if (entry != null && is_selected(entry)) {
-            this.selected = null;
-            folder_selected(null);
         }
 
         inboxes_branch.remove_inbox(account);
@@ -206,7 +197,18 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     }
 
     public void deselect_folder() {
+        Gtk.TreeModel model = get_model();
+        Gtk.TreeIter iter;
+        if (model.get_iter_first(out iter)) {
+            Gtk.TreePath? first = model.get_path(iter);
+            if (first != null) {
+                set_cursor(first, null, false);
+            }
+        }
+
         get_selection().unselect_all();
+        this.selected = null;
+        folder_selected(null);
     }
 
     public override bool drag_motion(Gdk.DragContext context, int x, int y, uint time) {
