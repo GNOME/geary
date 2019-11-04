@@ -1361,20 +1361,12 @@ public class Application.Controller : Geary.BaseObject {
                         // Select this inbox if there isn't an
                         // existing folder selected and it is the
                         // inbox for the first account
-                        if (!main_window.folder_list.is_any_selected()) {
-                            Geary.AccountInformation? first_account = null;
-                            foreach (Geary.AccountInformation info in this.accounts.keys) {
-                                if (first_account == null ||
-                                    info.ordinal < first_account.ordinal) {
-                                    first_account = info;
-                                }
-                            }
-                            if (folder.account.information == first_account) {
-                                // First we try to select the Inboxes branch inbox if
-                                // it's there, falling back to the main folder list.
-                                if (!main_window.folder_list.select_inbox(folder.account))
-                                    main_window.folder_list.select_folder(folder);
-                            }
+                        if (!this.main_window.folder_list.is_any_selected() &&
+                            folder.account.information == get_first_account()) {
+                            // First we try to select the Inboxes branch inbox if
+                            // it's there, falling back to the main folder list.
+                            if (!main_window.folder_list.select_inbox(folder.account))
+                                main_window.folder_list.select_folder(folder);
                         }
                     }
 
@@ -1693,6 +1685,15 @@ public class Application.Controller : Geary.BaseObject {
             .to_linked_list();
 
         return ret.size >= 1 ? ret : null;
+    }
+
+    private Geary.AccountInformation? get_first_account() {
+        return this.accounts.keys.iterator().fold<Geary.AccountInformation?>(
+            (next, prev) => {
+                return prev == null || next.ordinal < prev.ordinal ? next : prev;
+            },
+            null
+        );
     }
 
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,
