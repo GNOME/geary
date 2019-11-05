@@ -29,6 +29,11 @@ This is the second line.
 
 """;
 
+    private static string SIMPLE_MULTIRECIPIENT_TO_CC_BCC = "From: Jill Smith <jill@somewhere.tld>\r\nTo: Jane Doe <jdoe@somewhere.tld>\r\nCc: Jane Doe CC <jdoe_cc@somewhere.tld>\r\nBcc: Jane Doe BCC <jdoe_bcc@somewhere.tld>\r\nSubject: Re: Saying Hello\r\nDate: Fri, 21 Nov 1997 10:01:10 -0600\r\n\r\nThis is a reply to your hello.\r\n\r\n";
+    private static string NETWORK_BUFFER_EXPECTED = "From: Alice <alice@example.net>\r\nSender: Bob <bob@example.net>\r\nTo: Charlie <charlie@example.net>\r\nCC: Dave <dave@example.net>\r\nBCC: Eve <eve@example.net>\r\nReply-To: \"Alice: Personal Account\" <alice@example.org>\r\nSubject: Re: Basic text/plain message\r\nDate: Fri, 21 Nov 1997 10:01:10 -0600\r\nMessage-ID: <3456@example.net>\r\nIn-Reply-To: <1234@local.machine.example>\r\nReferences: <1234@local.machine.example>\r\nX-Mailer: Geary Test Suite 1.0\r\n\r\nThis is the first line.\r\n\r\nThis is the second line.\r\n\r\n";
+
+    private static string TEST_ATTACHMENT_IMAGE_FILENAME = "test-attachment-image.png";
+
     public MessageTest() {
         base("Geary.RFC822.MessageTest");
         add_test("basic_message_from_buffer", basic_message_from_buffer);
@@ -49,6 +54,11 @@ This is the second line.
         add_test("multipart_alternative_as_html",
                  multipart_alternative_as_html);
         add_test("get_preview", get_preview);
+        add_test("get_recipients", get_recipients);
+        add_test("get_searchable_body", get_searchable_body);
+        add_test("get_searchable_recipients", get_searchable_recipients);
+        add_test("get_network_buffer", get_network_buffer);
+        add_test("from_composed_email_inline_attachments", from_composed_email_inline_attachments);
     }
 
     public void basic_message_from_buffer() throws Error {
@@ -169,6 +179,106 @@ This is the second line.
         assert(multipart_signed.get_preview() == MULTIPART_SIGNED_MESSAGE_PREVIEW);
     }
 
+    public void get_recipients() throws Error {
+        Message test = string_to_message(SIMPLE_MULTIRECIPIENT_TO_CC_BCC);
+
+        Gee.List<RFC822.MailboxAddress>? addresses = test.get_recipients();
+
+        Gee.List<string> verify_list = new Gee.ArrayList<string>();
+        verify_list.add("Jane Doe <jdoe@somewhere.tld>");
+        verify_list.add("Jane Doe CC <jdoe_cc@somewhere.tld>");
+        verify_list.add("Jane Doe BCC <jdoe_bcc@somewhere.tld>");
+
+        assert_addresses_list(addresses, verify_list, "get_recipients");
+    }
+
+    public void get_searchable_body() throws Error {
+        Message test = resource_to_message(BASIC_TEXT_HTML);
+        string searchable = test.get_searchable_body();
+        assert_true(searchable.contains("This is the first line"), "Expected body text");
+        assert_false(searchable.contains("<P>"), "Expected html removed");
+    }
+
+    public void get_searchable_recipients() throws Error {
+        Message test = string_to_message(SIMPLE_MULTIRECIPIENT_TO_CC_BCC);
+        string searchable = test.get_searchable_recipients();
+        assert_true(searchable.contains("Jane Doe <jdoe@somewhere.tld>"), "Expected to address");
+        assert_true(searchable.contains("Jane Doe CC <jdoe_cc@somewhere.tld>"), "Expected cc address");
+        assert_true(searchable.contains("Jane Doe BCC <jdoe_bcc@somewhere.tld>"), "Expected bcc address");
+    }
+
+    public void get_network_buffer() throws Error {
+        Message test = resource_to_message(BASIC_TEXT_PLAIN);
+        Memory.Buffer buffer =  test.get_network_buffer(true);
+        assert_true(buffer.to_string() == NETWORK_BUFFER_EXPECTED, "Network buffer differs");
+    }
+
+    public void from_composed_email_inline_attachments() throws Error {
+        RFC822.MailboxAddress to = new RFC822.MailboxAddress(
+            "Test", "test@example.com"
+        );
+        RFC822.MailboxAddress from = new RFC822.MailboxAddress(
+            "Sender", "sender@example.com"
+        );
+
+       Geary.ComposedEmail composed = new Geary.ComposedEmail(
+            new GLib.DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.single(from),
+            new Geary.RFC822.MailboxAddresses.single(to),
+            null,
+            null,
+            null,
+            null,
+            "<img src=\"cid:test-attachment-image.png\" /><img src=\"needing_cid.png\" />"
+        );
+
+        GLib.File resource =
+            GLib.File.new_for_uri(RESOURCE_URI).resolve_relative_path(TEST_ATTACHMENT_IMAGE_FILENAME);
+        uint8[] contents;
+        resource.load_contents(null, out contents, null);
+        Geary.Memory.ByteBuffer buffer = new Geary.Memory.ByteBuffer(contents, contents.length);
+        composed.cid_files[TEST_ATTACHMENT_IMAGE_FILENAME] = buffer;
+        Geary.Memory.ByteBuffer buffer2 = new Geary.Memory.ByteBuffer(contents, contents.length);
+        composed.inline_files["needing_cid.png"] = buffer2;
+
+        this.message_from_composed_email.begin(
+            composed,
+            async_complete_full
+        );
+        Geary.RFC822.Message message = message_from_composed_email.end(async_result());
+
+        Gee.List<Part> attachments = message.get_attachments();
+
+        bool found_first = false;
+        bool found_second = false;
+        bool second_id_renamed = false;
+        foreach (Part part in attachments) {
+            if (part.get_clean_filename() == TEST_ATTACHMENT_IMAGE_FILENAME) {
+                found_first = true;
+            } else if (part.get_clean_filename() == "needing_cid.png") {
+                found_second = true;
+                second_id_renamed = part.content_id != "needing_cid.png";
+            }
+        }
+        assert_true(found_first, "Expected CID attachment");
+        assert_true(found_second, "Expected inline attachment");
+        assert_true(second_id_renamed, "Expected inline attachment renamed");
+
+        string html_body = message.get_html_body(null);
+        assert_false(html_body.contains("src=\"needing_cid.png\""), "Expected updated attachment content ID");
+
+        Memory.Buffer out_buffer =  message.get_native_buffer();
+        assert_true(out_buffer.size > (buffer.size+buffer2.size), "Expected sizeable message");
+    }
+
+    private async Geary.RFC822.Message message_from_composed_email(Geary.ComposedEmail composed) {
+        return yield new Geary.RFC822.Message.from_composed_email(
+            composed,
+            GMime.utils_generate_message_id(composed.from.get(0).domain),
+            null
+        );
+    }
+
     private Message resource_to_message(string path) throws Error {
         GLib.File resource =
             GLib.File.new_for_uri(RESOURCE_URI).resolve_relative_path(path);
@@ -206,6 +316,17 @@ This is the second line.
         throws Error {
         assert_non_null(addresses, expected);
         assert_string(expected, addresses.to_rfc822_string());
+    }
+
+    private void assert_addresses_list(Gee.List<RFC822.MailboxAddress>? addresses,
+                                  Gee.List<string> expected,
+                                  string context)
+        throws Error {
+        assert_non_null(addresses, context + " not null");
+        assert_true(addresses.size == expected.size, context + " size");
+        foreach (RFC822.MailboxAddress address in addresses) {
+            assert_true(expected.contains(address.to_rfc822_string()), context + " missing");
+        }
     }
 
     private void assert_message_id_list(Geary.RFC822.MessageIDList? ids,
