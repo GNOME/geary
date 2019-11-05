@@ -623,7 +623,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
      */
     public async void load(Geary.Email? referred = null,
                            string? quote = null,
-                           GLib.Cancellable? cancellable) {
+                           GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (referred != null &&
             !referred.fields.is_all_set(REQUIRED_FIELDS)) {
             throw new Geary.EngineError.INCOMPLETE_MESSAGE(

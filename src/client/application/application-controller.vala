@@ -2094,8 +2094,9 @@ public class Application.Controller : Geary.BaseObject {
                 try {
                     full = yield context.emails.fetch_email_async(
                         referred.id,
-                        Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
-                        Geary.Folder.ListFlags.NONE,
+                        Geary.ComposedEmail.REQUIRED_REPLY_FIELDS |
+                        ComposerWidget.REQUIRED_FIELDS,
+                        NONE,
                         cancellable
                     );
                 } catch (Error e) {
@@ -2103,7 +2104,11 @@ public class Application.Controller : Geary.BaseObject {
                 }
             }
         }
-        yield widget.load(full, quote, cancellable);
+        try {
+            yield widget.load(full, quote, cancellable);
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
+        }
         widget.set_focus();
     }
 
