@@ -893,6 +893,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
          * ConversationWebView instances, since none of them handle
          * events.
          *
+         * See also the note in EmailEntry::on_key_press.
+         *
          * The work around here is completely override the default
          * implementation to reverse it. So if something related to
          * key handling breaks in the future, this might be a good

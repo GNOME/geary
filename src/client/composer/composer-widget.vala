@@ -268,30 +268,43 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild]
     private Gtk.ComboBoxText from_multiple;
     private Gee.ArrayList<FromAddressMap> from_list = new Gee.ArrayList<FromAddressMap>();
+
     [GtkChild]
     private Gtk.EventBox to_box;
     [GtkChild]
     private Gtk.Label to_label;
     private EmailEntry to_entry;
+    private Components.EntryUndo to_undo;
+
     [GtkChild]
     private Gtk.EventBox cc_box;
     [GtkChild]
     private Gtk.Label cc_label;
     private EmailEntry cc_entry;
+    private Components.EntryUndo cc_undo;
+
     [GtkChild]
     private Gtk.EventBox bcc_box;
     [GtkChild]
     private Gtk.Label bcc_label;
     private EmailEntry bcc_entry;
+    private Components.EntryUndo bcc_undo;
+
     [GtkChild]
     private Gtk.EventBox reply_to_box;
     [GtkChild]
     private Gtk.Label reply_to_label;
     private EmailEntry reply_to_entry;
+    private Components.EntryUndo reply_to_undo;
+
     [GtkChild]
     private Gtk.Label subject_label;
     [GtkChild]
     private Gtk.Entry subject_entry;
+    private Components.EntryUndo subject_undo;
+    private Gspell.Checker subject_spell_checker = new Gspell.Checker(null);
+    private Gspell.Entry subject_spell_entry;
+
     [GtkChild]
     private Gtk.Label message_overlay_label;
     [GtkChild]
@@ -386,9 +399,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         get { return (ComposerContainer) parent; }
     }
 
-    private Gspell.Checker subject_spell_checker = new Gspell.Checker(null);
-    private Gspell.Entry subject_spell_entry;
-
     private GearyApplication application;
 
 
@@ -454,23 +464,30 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.to_entry = new EmailEntry(this);
         this.to_entry.changed.connect(on_envelope_changed);
         this.to_box.add(to_entry);
+        this.to_label.set_mnemonic_widget(this.to_entry);
+        this.to_undo = new Components.EntryUndo(this.to_entry);
+
         this.cc_entry = new EmailEntry(this);
         this.cc_entry.changed.connect(on_envelope_changed);
         this.cc_box.add(cc_entry);
+        this.cc_label.set_mnemonic_widget(this.cc_entry);
+        this.cc_undo = new Components.EntryUndo(this.cc_entry);
+
         this.bcc_entry = new EmailEntry(this);
         this.bcc_entry.changed.connect(on_envelope_changed);
         this.bcc_box.add(bcc_entry);
+        this.bcc_label.set_mnemonic_widget(this.bcc_entry);
+        this.bcc_undo = new Components.EntryUndo(this.bcc_entry);
+
         this.reply_to_entry = new EmailEntry(this);
         this.reply_to_entry.changed.connect(on_envelope_changed);
         this.reply_to_box.add(reply_to_entry);
-
-        this.to_label.set_mnemonic_widget(this.to_entry);
-        this.cc_label.set_mnemonic_widget(this.cc_entry);
-        this.bcc_label.set_mnemonic_widget(this.bcc_entry);
         this.reply_to_label.set_mnemonic_widget(this.reply_to_entry);
+        this.reply_to_undo = new Components.EntryUndo(this.reply_to_entry);
 
         this.to_entry.margin_top = this.cc_entry.margin_top = this.bcc_entry.margin_top = this.reply_to_entry.margin_top = 6;
 
+        this.subject_undo = new Components.EntryUndo(this.subject_entry);
         this.subject_spell_entry = Gspell.Entry.get_from_gtk_entry(
             this.subject_entry
         );
