@@ -449,6 +449,7 @@ public class GearyApplication : Gtk.Application {
 
         MainWindow.add_window_accelerators(this);
         ComposerWidget.add_window_accelerators(this);
+        Components.EntryUndo.add_window_accelerators(this);
         Components.Inspector.add_window_accelerators(this);
 
         if (this.is_background_service) {

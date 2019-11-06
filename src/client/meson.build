@@ -27,6 +27,7 @@ geary_client_vala_sources = files(
 
   'components/client-web-view.vala',
   'components/components-attachment-pane.vala',
+  'components/components-entry-undo.vala',
   'components/components-inspector.vala',
   'components/components-in-app-notification.vala',
   'components/components-inspector-error-view.vala',
