@@ -1030,23 +1030,31 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public async Geary.ComposedEmail get_composed_email(DateTime? date_override = null,
         bool only_html = false) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
-            date_override ?? new DateTime.now_local(), from);
-
-        email.to = this.to_entry.addresses ?? email.to;
-        email.cc = this.cc_entry.addresses ?? email.cc;
-        email.bcc = this.bcc_entry.addresses ?? email.bcc;
-        email.reply_to = this.reply_to_entry.addresses ?? email.reply_to;
+            date_override ?? new DateTime.now_local(),
+            from
+        ).set_to(
+            this.to_entry.addresses
+        ).set_cc(
+            this.cc_entry.addresses
+        ).set_bcc(
+            this.bcc_entry.addresses
+        ).set_reply_to(
+            this.reply_to_entry.addresses
+        ).set_subject(
+            this.subject
+        );
 
         if ((this.compose_type == ComposeType.REPLY || this.compose_type == ComposeType.REPLY_ALL) &&
             !this.in_reply_to.is_empty)
-            email.in_reply_to =
-                new Geary.RFC822.MessageIDList.from_collection(in_reply_to).to_rfc822_string();
+            email.set_in_reply_to(
+                new Geary.RFC822.MessageIDList.from_collection(this.in_reply_to)
+            );
 
-        if (!Geary.String.is_empty(this.references))
-            email.references = this.references;
-
-        if (!Geary.String.is_empty(this.subject))
-            email.subject = this.subject;
+        if (!Geary.String.is_empty(this.references)) {
+            email.set_references(
+                new Geary.RFC822.MessageIDList.from_rfc822_string(this.references)
+            );
+        }
 
         email.attached_files.add_all(this.attached_files);
         email.inline_files.set_all(this.inline_files);

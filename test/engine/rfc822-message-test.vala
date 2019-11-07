@@ -223,14 +223,9 @@ This is the second line.
 
        Geary.ComposedEmail composed = new Geary.ComposedEmail(
             new GLib.DateTime.now_local(),
-            new Geary.RFC822.MailboxAddresses.single(from),
-            new Geary.RFC822.MailboxAddresses.single(to),
-            null,
-            null,
-            null,
-            null,
-            "<img src=\"cid:test-attachment-image.png\" /><img src=\"needing_cid.png\" />"
-        );
+            new Geary.RFC822.MailboxAddresses.single(from)
+       ).set_to(new Geary.RFC822.MailboxAddresses.single(to));
+       composed.body_html = "<img src=\"cid:test-attachment-image.png\" /><img src=\"needing_cid.png\" />";
 
         GLib.File resource =
             GLib.File.new_for_uri(RESOURCE_URI).resolve_relative_path(TEST_ATTACHMENT_IMAGE_FILENAME);

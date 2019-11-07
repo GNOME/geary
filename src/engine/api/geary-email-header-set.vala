@@ -6,7 +6,7 @@
  */
 
 /**
- * Denotes an object that has a set of RFC822 headers.
+ * Denotes an object with the standard set of RFC822 headers.
  */
 public interface Geary.EmailHeaderSet : BaseObject {
 
