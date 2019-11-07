@@ -11,10 +11,9 @@
 public class Components.EntryUndo : Geary.BaseObject {
 
 
-    private const string ACTION_GROUP = "ceu";
-    private const ActionEntry[] action_entries = {
-        { GearyApplication.ACTION_UNDO, on_undo },
-        { GearyApplication.ACTION_REDO, on_redo },
+    private const ActionEntry[] EDIT_ACTIONS = {
+        { Action.Edit.UNDO, on_undo },
+        { Action.Edit.REDO, on_redo },
     };
 
 
@@ -94,18 +93,6 @@ public class Components.EntryUndo : Geary.BaseObject {
     }
 
 
-    public static void add_window_accelerators(GearyApplication application) {
-        application.set_accels_for_action(
-            ACTION_GROUP + "." + GearyApplication.ACTION_UNDO,
-            { "<Ctrl>z" }
-        );
-        application.set_accels_for_action(
-            ACTION_GROUP + "." + GearyApplication.ACTION_REDO,
-            { "<Ctrl><Shift>z" }
-        );
-    }
-
-
     /** The entry being managed */
     public Gtk.Entry target { get; private set; }
 
@@ -117,12 +104,14 @@ public class Components.EntryUndo : Geary.BaseObject {
 
     private bool events_enabled = true;
 
-    private GLib.SimpleActionGroup entry_actions = new SimpleActionGroup();
+    private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
 
 
     public EntryUndo(Gtk.Entry target) {
+        this.edit_actions.add_action_entries(EDIT_ACTIONS, this);
+
         this.target = target;
-        this.target.insert_action_group(ACTION_GROUP, this.entry_actions);
+        this.target.insert_action_group(Action.Edit.GROUP_NAME, this.edit_actions);
         this.target.insert_text.connect(on_inserted);
         this.target.delete_text.connect(on_deleted);
 
@@ -130,8 +119,6 @@ public class Components.EntryUndo : Geary.BaseObject {
         this.commands.executed.connect(this.update_command_actions);
         this.commands.undone.connect(this.update_command_actions);
         this.commands.redone.connect(this.update_command_actions);
-
-        this.entry_actions.add_action_entries(EntryUndo.action_entries, this);
     }
 
     ~EntryUndo() {
@@ -234,10 +221,10 @@ public class Components.EntryUndo : Geary.BaseObject {
     }
 
     private void update_command_actions() {
-        ((GLib.SimpleAction) this.entry_actions.lookup_action(
-            GearyApplication.ACTION_UNDO)).set_enabled(this.commands.can_undo);
-        ((GLib.SimpleAction) this.entry_actions.lookup_action(
-            GearyApplication.ACTION_REDO)).set_enabled(this.commands.can_redo);
+        ((GLib.SimpleAction) this.edit_actions.lookup_action(Action.Edit.UNDO))
+            .set_enabled(this.commands.can_undo);
+        ((GLib.SimpleAction) this.edit_actions.lookup_action(Action.Edit.REDO))
+            .set_enabled(this.commands.can_redo);
     }
 
     private void on_inserted(string inserted, int inserted_len, ref int pos) {

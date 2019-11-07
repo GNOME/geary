@@ -34,14 +34,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public const string ACTION_TRASH_CONVERSATION = "trash-conversation";
     public const string ACTION_ZOOM = "zoom";
 
-    private const int STATUS_BAR_HEIGHT = 18;
-    private const int UPDATE_UI_INTERVAL = 60;
-    private const int MIN_CONVERSATION_COUNT = 50;
+    private const ActionEntry[] EDIT_ACTIONS = {
+        { Action.Edit.UNDO, on_undo },
+        { Action.Edit.REDO, on_redo },
+    };
 
-    private const ActionEntry[] win_action_entries = {
-        { GearyApplication.ACTION_CLOSE, on_close },
-        { GearyApplication.ACTION_UNDO, on_undo },
-        { GearyApplication.ACTION_REDO, on_redo },
+    private const ActionEntry[] WINDOW_ACTIONS = {
+        { Action.Window.CLOSE, on_close },
 
         { ACTION_CONVERSATION_LIST, on_conversation_list },
         { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
@@ -70,8 +69,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         { ACTION_ZOOM, on_zoom, "s" },
     };
 
+    private const int STATUS_BAR_HEIGHT = 18;
+    private const int UPDATE_UI_INTERVAL = 60;
+    private const int MIN_CONVERSATION_COUNT = 50;
 
-    public static void add_window_accelerators(GearyApplication owner) {
+
+    public static void add_accelerators(GearyApplication owner) {
         // Marking actions
         //
         // Unread is the primary action, so it doesn't get the <Shift>
@@ -209,6 +212,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private Application.Controller.AccountContext? context = null;
 
+    private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
+
     // Determines if the conversation viewer should autoselect on next
     // load
     private bool previous_selection_was_interactive = false;
@@ -277,7 +282,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         load_config(application.config);
         restore_saved_window_state();
-        add_action_entries(win_action_entries, this);
+
+        // Edit actions
+        this.edit_actions.add_action_entries(EDIT_ACTIONS, this);
+        insert_action_group(Action.Edit.GROUP_NAME, this.edit_actions);
+
+        // Window actions
+        add_action_entries(MainWindow.WINDOW_ACTIONS, this);
 
         set_styling();
         setup_layout(application.config);
@@ -572,7 +583,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             new ComposerWindow(composer, this.application);
         } else {
             this.conversation_viewer.do_compose(composer);
-            get_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
+            get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
         }
     }
 
@@ -971,10 +982,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void update_command_actions() {
         Application.Controller.AccountContext? selected = this.context;
-        get_action(GearyApplication.ACTION_UNDO).set_enabled(
+        get_edit_action(Action.Edit.UNDO).set_enabled(
             selected != null && selected.commands.can_undo
         );
-        get_action(GearyApplication.ACTION_REDO).set_enabled(
+        get_edit_action(Action.Edit.REDO).set_enabled(
             selected != null && selected.commands.can_redo
         );
     }
@@ -1381,7 +1392,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         bool sensitive = (count != NONE);
         bool multiple = (count == MULTIPLE);
 
-        get_action(ACTION_FIND_IN_CONVERSATION).set_enabled(
+        get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(
             sensitive && !multiple
         );
 
@@ -1391,29 +1402,29 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             this.selected_folder != null &&
             this.selected_folder.special_folder_type != DRAFTS
         );
-        get_action(ACTION_REPLY_CONVERSATION).set_enabled(reply_sensitive);
-        get_action(ACTION_REPLY_ALL_CONVERSATION).set_enabled(reply_sensitive);
-        get_action(ACTION_FORWARD_CONVERSATION).set_enabled(reply_sensitive);
+        get_window_action(ACTION_REPLY_CONVERSATION).set_enabled(reply_sensitive);
+        get_window_action(ACTION_REPLY_ALL_CONVERSATION).set_enabled(reply_sensitive);
+        get_window_action(ACTION_FORWARD_CONVERSATION).set_enabled(reply_sensitive);
 
         bool move_enabled = (
             sensitive && (selected_folder is Geary.FolderSupport.Move)
         );
         this.main_toolbar.move_message_button.set_sensitive(move_enabled);
-        get_action(ACTION_SHOW_MOVE_MENU).set_enabled(move_enabled);
+        get_window_action(ACTION_SHOW_MOVE_MENU).set_enabled(move_enabled);
 
         bool copy_enabled = (
             sensitive && (selected_folder is Geary.FolderSupport.Copy)
         );
         this.main_toolbar.copy_message_button.set_sensitive(copy_enabled);
-        get_action(ACTION_SHOW_COPY_MENU).set_enabled(move_enabled);
+        get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(move_enabled);
 
-        get_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(
+        get_window_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(
             sensitive && (selected_folder is Geary.FolderSupport.Archive)
         );
-        get_action(ACTION_TRASH_CONVERSATION).set_enabled(
+        get_window_action(ACTION_TRASH_CONVERSATION).set_enabled(
             sensitive && this.selected_folder_supports_trash
         );
-        get_action(ACTION_DELETE_CONVERSATION).set_enabled(
+        get_window_action(ACTION_DELETE_CONVERSATION).set_enabled(
             sensitive && (selected_folder is Geary.FolderSupport.Remove)
         );
 
@@ -1456,15 +1467,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 supported_operations.add_all(selected_operations.get_values());
             }
 
-            get_action(ACTION_SHOW_MARK_MENU).set_enabled(
+            get_window_action(ACTION_SHOW_MARK_MENU).set_enabled(
                 sensitive &&
                 (typeof(Geary.FolderSupport.Mark) in supported_operations)
             );
-            get_action(ACTION_SHOW_COPY_MENU).set_enabled(
+            get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(
                 sensitive &&
                 (supported_operations.contains(typeof(Geary.FolderSupport.Copy)))
             );
-            get_action(ACTION_SHOW_MOVE_MENU).set_enabled(
+            get_window_action(ACTION_SHOW_MOVE_MENU).set_enabled(
                 sensitive &&
                 (supported_operations.contains(typeof(Geary.FolderSupport.Move)))
             );
@@ -1491,8 +1502,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private SimpleAction get_action(string name) {
+    private SimpleAction get_window_action(string name) {
         return (SimpleAction) lookup_action(name);
+    }
+
+    private SimpleAction get_edit_action(string name) {
+        return (SimpleAction) this.edit_actions.lookup_action(name);
     }
 
     private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
@@ -1612,7 +1627,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         if (command.undone_label != null) {
             Components.InAppNotification ian =
                 new Components.InAppNotification(command.undone_label);
-            ian.set_button(_("Redo"), "win." + GearyApplication.ACTION_REDO);
+            ian.set_button(_("Redo"), Action.Edit.prefix(Action.Edit.REDO));
             add_notification(ian);
         }
         update_command_actions();
@@ -1621,8 +1636,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private void on_command_redo(Application.Command command) {
         if (command.executed_label != null) {
             Components.InAppNotification ian =
-            new Components.InAppNotification(command.executed_label);
-            ian.set_button(_("Undo"), "win." + GearyApplication.ACTION_UNDO);
+                new Components.InAppNotification(command.executed_label);
+            ian.set_button(_("Undo"), Action.Edit.prefix(Action.Edit.UNDO));
             add_notification(ian);
         }
         update_command_actions();
@@ -1783,14 +1798,14 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 unstarred_selected = true;
             }
         }
-        get_action(ACTION_MARK_AS_READ).set_enabled(unread_selected);
-        get_action(ACTION_MARK_AS_UNREAD).set_enabled(read_selected);
-        get_action(ACTION_MARK_AS_STARRED).set_enabled(unstarred_selected);
-        get_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
+        get_window_action(ACTION_MARK_AS_READ).set_enabled(unread_selected);
+        get_window_action(ACTION_MARK_AS_UNREAD).set_enabled(read_selected);
+        get_window_action(ACTION_MARK_AS_STARRED).set_enabled(unstarred_selected);
+        get_window_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
 
         // If we're in Drafts/Outbox, we also shouldn't set a message as SPAM.
         bool in_spam_folder = selected_folder.special_folder_type == Geary.SpecialFolderType.SPAM;
-        get_action(ACTION_TOGGLE_SPAM).set_enabled(!in_spam_folder &&
+        get_window_action(ACTION_TOGGLE_SPAM).set_enabled(!in_spam_folder &&
             selected_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
             selected_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
     }

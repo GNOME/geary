@@ -28,16 +28,20 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     private const string ACTION_SEARCH_TOGGLE = "toggle-search";
     private const string ACTION_SEARCH_ACTIVATE = "activate-search";
 
-    private const ActionEntry[] action_entries = {
-        {GearyApplication.ACTION_CLOSE, on_close },
-        {GearyApplication.ACTION_COPY,  on_copy_clicked },
-        {ACTION_CLOSE,                  on_close },
-        {ACTION_PLAY_TOGGLE,            on_logs_play_toggled, null, "true" },
-        {ACTION_SEARCH_TOGGLE,          on_logs_search_toggled, null, "false" },
-        {ACTION_SEARCH_ACTIVATE,        on_logs_search_activated },
+    private const ActionEntry[] EDIT_ACTIONS = {
+        { Action.Edit.COPY,  on_copy_clicked },
     };
 
-    public static void add_window_accelerators(GearyApplication app) {
+    private const ActionEntry[] WINDOW_ACTIONS = {
+        { Action.Window.CLOSE, on_close },
+        { ACTION_CLOSE,                  on_close },
+        { ACTION_PLAY_TOGGLE,            on_logs_play_toggled, null, "true" },
+        { ACTION_SEARCH_TOGGLE,          on_logs_search_toggled, null, "false" },
+        { ACTION_SEARCH_ACTIVATE,        on_logs_search_activated },
+    };
+
+
+    public static void add_accelerators(GearyApplication app) {
         app.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         app.add_window_accelerators(ACTION_PLAY_TOGGLE, { "space" } );
         app.add_window_accelerators(ACTION_SEARCH_ACTIVATE, { "<Ctrl>F" } );
@@ -67,7 +71,13 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         Object(application: application);
         this.title = this.header_bar.title = _("Inspector");
 
-        add_action_entries(Inspector.action_entries, this);
+        // Edit actions
+        GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
+        edit_actions.add_action_entries(EDIT_ACTIONS, this);
+        insert_action_group(Action.Edit.GROUP_NAME, edit_actions);
+
+        // Window actions
+        add_action_entries(WINDOW_ACTIONS, this);
 
         this.log_pane = new InspectorLogView(application.config, null);
         this.log_pane.record_selection_changed.connect(

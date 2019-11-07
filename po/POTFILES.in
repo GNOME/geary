@@ -28,6 +28,7 @@ src/client/application/geary-application.vala
 src/client/application/goa-mediator.vala
 src/client/application/main.vala
 src/client/application/secret-mediator.vala
+src/client/client-action.vala
 src/client/components/client-web-view.vala
 src/client/components/components-attachment-pane.vala
 src/client/components/components-entry-undo.vala

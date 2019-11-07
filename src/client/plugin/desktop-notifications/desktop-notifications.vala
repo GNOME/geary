@@ -149,9 +149,9 @@ public class Plugin.DesktopNotifications : Notification {
         };
 
         if (id == null) {
-            action = GearyApplication.ACTION_SHOW_FOLDER;
+            action = Action.Application.SHOW_FOLDER;
         } else {
-            action = GearyApplication.ACTION_SHOW_EMAIL;
+            action = Action.Application.SHOW_EMAIL;
             target_param += new GLib.Variant.variant(id.to_variant());
         }
 
@@ -159,7 +159,7 @@ public class Plugin.DesktopNotifications : Notification {
             ARRIVED_ID,
             summary,
             body,
-            "app." + action,
+            Action.Application.prefix(action),
             new GLib.Variant.tuple(target_param)
         );
     }
