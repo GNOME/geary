@@ -1299,18 +1299,34 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_account_available(Geary.AccountInformation account) {
         try {
-            this.progress_monitor.add(this.application.engine.get_account_instance(account).opening_monitor);
-            this.progress_monitor.add(this.application.engine.get_account_instance(account).sending_monitor);
-        } catch (Error e) {
+            Geary.Account? engine = this.application.engine.get_account_instance(account);
+            if (engine != null) {
+                this.progress_monitor.add(engine.opening_monitor);
+                Geary.Smtp.ClientService? smtp = (
+                    engine.outgoing as Geary.Smtp.ClientService
+                );
+                if (smtp != null) {
+                    this.progress_monitor.add(smtp.sending_monitor);
+                }
+            }
+        } catch (GLib.Error e) {
             debug("Could not access account progress monitors: %s", e.message);
         }
     }
 
     private void on_account_unavailable(Geary.AccountInformation account) {
         try {
-            this.progress_monitor.remove(this.application.engine.get_account_instance(account).opening_monitor);
-            this.progress_monitor.remove(this.application.engine.get_account_instance(account).sending_monitor);
-        } catch (Error e) {
+            Geary.Account? engine = this.application.engine.get_account_instance(account);
+            if (engine != null) {
+                this.progress_monitor.remove(engine.opening_monitor);
+                Geary.Smtp.ClientService? smtp = (
+                    engine.outgoing as Geary.Smtp.ClientService
+                );
+                if (smtp != null) {
+                    this.progress_monitor.remove(smtp.sending_monitor);
+                }
+            }
+        } catch (GLib.Error e) {
             debug("Could not access account progress monitors: %s", e.message);
         }
     }

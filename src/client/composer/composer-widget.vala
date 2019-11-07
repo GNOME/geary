@@ -1397,7 +1397,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // Perform send.
         try {
             yield this.editor.clean_content();
-            yield this.account.send_email_async(yield get_composed_email());
+            yield ((Geary.Smtp.ClientService) this.account.outgoing)
+            .send_email(yield get_composed_email(), null);
         } catch (Error e) {
             GLib.message("Error sending email: %s", e.message);
         }

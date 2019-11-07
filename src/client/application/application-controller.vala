@@ -894,11 +894,17 @@ public class Application.Controller : Geary.BaseObject {
                 on_account_status_notify
             );
 
-            account.email_sent.disconnect(on_sent);
             account.email_removed.disconnect(on_account_email_removed);
             account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
-            account.sending_monitor.start.disconnect(on_sending_started);
-            account.sending_monitor.finish.disconnect(on_sending_finished);
+
+            Geary.Smtp.ClientService? smtp = (
+                account.outgoing as Geary.Smtp.ClientService
+            );
+            if (smtp != null) {
+                smtp.email_sent.disconnect(on_sent);
+                smtp.sending_monitor.start.disconnect(on_sending_started);
+                smtp.sending_monitor.finish.disconnect(on_sending_finished);
+            }
 
             // Now the account is not in the accounts map, reset any
             // status notifications for it
@@ -1157,11 +1163,17 @@ public class Application.Controller : Geary.BaseObject {
         // on_folders_available_unavailable expects it to be there
         this.accounts.set(account.information, context);
 
-        account.email_sent.connect(on_sent);
         account.email_removed.connect(on_account_email_removed);
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
-        account.sending_monitor.start.connect(on_sending_started);
-        account.sending_monitor.finish.connect(on_sending_finished);
+
+        Geary.Smtp.ClientService? smtp = (
+            account.outgoing as Geary.Smtp.ClientService
+        );
+        if (smtp != null) {
+            smtp.email_sent.connect(on_sent);
+            smtp.sending_monitor.start.connect(on_sending_started);
+            smtp.sending_monitor.finish.connect(on_sending_finished);
+        }
 
         bool retry = false;
         do {
@@ -1635,16 +1647,21 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void on_sent(Geary.Account account, Geary.RFC822.Message sent) {
         // Translators: The label for an in-app notification. The
         // string substitution is a list of recipients of the email.
+    private void on_sent(Geary.Smtp.ClientService service,
+                         Geary.RFC822.Message sent) {
         string message = _(
             "Successfully sent mail to %s."
         ).printf(Util.Email.to_short_recipient_display(sent));
         Components.InAppNotification notification =
             new Components.InAppNotification(message);
         this.main_window.add_notification(notification);
-        this.plugin_manager.notifications.email_sent(account, sent);
+
+        AccountContext? context = this.accounts.get(service.account);
+        if (context != null) {
+            this.plugin_manager.notifications.email_sent(context.account, sent);
+        }
     }
 
     // Returns a list of composer windows for an account, or null if none.

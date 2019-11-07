@@ -7,9 +7,9 @@
  */
 
 /**
- * Local folder for storing outgoing mail.
+ * A folder for storing outgoing mail.
  */
-private class Geary.Outbox.Folder :
+public class Geary.Outbox.Folder :
     Geary.AbstractLocalFolder,
     Geary.FolderSupport.Create,
     Geary.FolderSupport.Mark,
@@ -54,7 +54,7 @@ private class Geary.Outbox.Folder :
      * Returns the path to this folder.
      *
      * This is always the child of the root given to the constructor,
-     * with the name given by @{link MAGIC_BASENAME}.
+     * with the name given by {@link MAGIC_BASENAME}.
      */
     public override FolderPath path {
         get {
@@ -81,9 +81,7 @@ private class Geary.Outbox.Folder :
     private int64 next_ordering = 0;
 
 
-    // Requires the Database from the get-go because it runs a background task that access it
-    // whether open or not
-    public Folder(Account account, FolderRoot root, ImapDB.Account local) {
+    internal Folder(Account account, FolderRoot root, ImapDB.Account local) {
         this._account = account;
         this._path = root.get_child(MAGIC_BASENAME, Trillian.TRUE);
         this.local = local;

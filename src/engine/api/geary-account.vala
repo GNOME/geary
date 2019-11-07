@@ -135,14 +135,12 @@ public abstract class Geary.Account : BaseObject, Loggable {
     public Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
     public Geary.ProgressMonitor db_vacuum_monitor { get; protected set; }
     public Geary.ProgressMonitor opening_monitor { get; protected set; }
-    public Geary.ProgressMonitor sending_monitor { get; protected set; }
 
 
     public signal void opened();
 
     public signal void closed();
 
-    public signal void email_sent(Geary.RFC822.Message rfc822);
 
     /**
      * Emitted to notify the client that some problem has occurred.
@@ -403,15 +401,6 @@ public abstract class Geary.Account : BaseObject, Loggable {
         Cancellable? cancellable = null) throws Error;
 
     /**
-     * Submits a ComposedEmail for delivery.  Messages may be scheduled for later delivery or immediately
-     * sent.  Subscribe to the "email-sent" signal to be notified of delivery.  Note that that signal
-     * does not return the ComposedEmail object but an RFC822-formatted object.  Allowing for the
-     * subscriber to attach some kind of token for later comparison is being considered.
-     */
-    public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
-        throws Error;
-
-    /**
      * Search the local account for emails referencing a Message-ID value
      * (which can appear in the Message-ID header itself, as well as the
      * In-Reply-To header, and maybe more places).  Fetch the requested fields,
@@ -555,10 +544,6 @@ public abstract class Geary.Account : BaseObject, Loggable {
     protected virtual void notify_email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
         email_flags_changed(folder, flag_map);
-    }
-
-    protected virtual void notify_email_sent(RFC822.Message message) {
-        email_sent(message);
     }
 
     /** Fires a {@link report_problem} signal for this account. */
