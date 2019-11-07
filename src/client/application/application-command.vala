@@ -16,13 +16,27 @@ public abstract class Application.Command : GLib.Object {
      * Determines if a command can be undone.
      *
      * When passed to {@link CommandStack}, the stack will check this
-     * property after the command has been executed, and if false undo
-     * stack will be emptied and the non-undo-able command dropped.
+     * property after the command has been executed, and if false the
+     * non-undo-able command will not be put on the undo stack.
      *
      * Returns true by default, derived classes may override if their
      * {@link undo} method should not be called.
      */
     public virtual bool can_undo {
+        get { return true; }
+    }
+
+    /**
+     * Determines if a command can be redone.
+     *
+     * After this command has been undone by the stack, it will check
+     * this property and if false the non-redo-able command will not
+     * be put on the redo stack.
+     *
+     * Returns true by default, derived classes may override if their
+     * {@link undo} method should not be called.
+     */
+    public virtual bool can_redo {
         get { return true; }
     }
 
@@ -412,8 +426,8 @@ public class Application.CommandStack : GLib.Object {
                 throw err;
             }
 
-            this.redo_stack.offer_head(target);
-            this.can_redo = true;
+            update_redo_stack(target);
+            this.can_redo = !this.redo_stack.is_empty;
 
             undone(target);
             target.undone();
@@ -481,6 +495,18 @@ public class Application.CommandStack : GLib.Object {
     protected virtual void update_undo_stack(Command target) {
         if (target.can_undo) {
             this.undo_stack.offer_head(target);
+        }
+    }
+
+    /**
+     * Updates the redo stack when a command is undone.
+     *
+     * By default, this pushes the command to the head of the redo
+     * stack if {@link Command.can_undo} is true.
+     */
+    protected virtual void update_redo_stack(Command target) {
+        if (target.can_redo) {
+            this.redo_stack.offer_head(target);
         }
     }
 
