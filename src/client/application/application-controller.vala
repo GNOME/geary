@@ -1640,7 +1640,7 @@ public class Application.Controller : Geary.BaseObject {
         // string substitution is a list of recipients of the email.
         string message = _(
             "Successfully sent mail to %s."
-        ).printf(Util.Email.to_short_recipient_display(sent.to));
+        ).printf(Util.Email.to_short_recipient_display(sent));
         Components.InAppNotification notification =
             new Components.InAppNotification(message);
         this.main_window.add_notification(notification);
