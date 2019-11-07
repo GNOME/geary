@@ -9,7 +9,12 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
     public const string COMPLETE_BODY_TEMPLATE =
         """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div><div id="geary-signature" dir="auto"></div>""";
-    public const string CLEAN_BODY_TEMPLATE = "%s<div><br></div><div><br></div>";
+    public const string DIRTY_BODY_TEMPLATE =
+        """
+<div id="geary-body" dir="auto" class="geary-focus" contenteditable="true">%s<div><br></div><div><br></div></div>
+<div id="geary-signature" class="geary-no-display" dir="auto" contenteditable="true"></div>
+""";
+    public const string CLEAN_BODY_TEMPLATE = """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div>""";
 
     public ComposerPageStateTest() {
         base("ComposerPageStateTest");
@@ -254,12 +259,11 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
 
         try {
             run_javascript("geary.cleanContent();");
-            assert(
-                Util.JS.to_string(
-                    run_javascript("geary.bodyPart.innerHTML;")
-                    .get_js_value()
-                ) == CLEAN_BODY_TEMPLATE.printf(expected)
+            string result = Util.JS.to_string(
+                run_javascript("window.document.body.innerHTML;")
+                .get_js_value()
             );
+            assert(result == DIRTY_BODY_TEMPLATE.printf(expected));
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -273,12 +277,10 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
         string html = "<p>para</p>";
         load_body_fixture(html);
         try {
-            assert(
-                Util.JS.to_string(
-                   run_javascript(@"window.geary.getHtml();")
-                   .get_js_value()
-                ) == COMPLETE_BODY_TEMPLATE.printf(html)
+            string result = Util.JS.to_string(
+                run_javascript(@"window.geary.getHtml();").get_js_value()
             );
+            assert(result == CLEAN_BODY_TEMPLATE.printf(html));
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();

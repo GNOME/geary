@@ -183,6 +183,15 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
+     * Returns the view's content as HTML without being cleaned.
+     */
+    public async string? get_html_for_draft() throws Error {
+        return Util.JS.to_string(
+            yield call(Util.JS.callable("geary.getHtml").bool(false), null)
+        );
+    }
+
+    /**
      * Makes the view uneditable and stops signals from being sent.
      */
     public void disable() {

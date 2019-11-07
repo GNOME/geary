@@ -1027,8 +1027,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         return true;
     }
 
-    public async Geary.ComposedEmail get_composed_email(DateTime? date_override = null,
-        bool only_html = false) {
+    public async Geary.ComposedEmail get_composed_email(GLib.DateTime? date_override = null,
+                                                        bool for_draft = false) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
             date_override ?? new DateTime.now_local(),
             from
@@ -1063,10 +1063,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         email.img_src_prefix = ClientWebView.INTERNAL_URL_PREFIX;
 
         try {
-            if (this.editor.is_rich_text || only_html)
-                email.body_html = yield this.editor.get_html();
-            if (!only_html)
+            if (!for_draft) {
+                if (this.editor.is_rich_text) {
+                    email.body_html = yield this.editor.get_html();
+                }
                 email.body_text = yield this.editor.get_text();
+            } else {
+                email.body_html = yield this.editor.get_html_for_draft();
+            }
         } catch (Error error) {
             debug("Error getting composer message body: %s", error.message);
         }

@@ -60,6 +60,9 @@ ComposerPageState.prototype = {
         }
 
         this.signaturePart = document.getElementById("geary-signature");
+        if (this.signaturePart != null) {
+            ComposerPageState.linkify(this.signaturePart);
+        }
         this.quotePart = document.getElementById("geary-quote");
 
         // Should be using 'e.key' in listeners below instead of
@@ -289,38 +292,32 @@ ComposerPageState.prototype = {
     },
     cleanContent: function() {
         // Prevent any modification signals being sent when mutating
-        // the document below.
+        // the document
         this.stopBodyObserver();
-
-        ComposerPageState.cleanPart(this.bodyPart, false);
         ComposerPageState.linkify(this.bodyPart);
-
-        this.signaturePart = ComposerPageState.cleanPart(this.signaturePart, true);
-        this.quotePart = ComposerPageState.cleanPart(this.quotePart, true);
+        this.startBodyObserver();
     },
-    getHtml: function() {
-        // Clone the message parts so we can clean them without
-        // modifiying the DOM, needed when saving drafts. In contrast
-        // with cleanContent above, we don't remove empty elements so
-        // they still exist when restoring from draft
+    getHtml: function(removeEmpty) {
+        if (removeEmpty === undefined) {
+            removeEmpty = true;
+        }
+
         let parent = document.createElement("DIV");
         parent.appendChild(
-            ComposerPageState.cleanPart(this.bodyPart.cloneNode(true), false)
+            ComposerPageState.cleanPart(this.bodyPart.cloneNode(true))
         );
 
-        if (this.signaturePart != null) {
+        if (this.signaturePart != null &&
+            (!removeEmpty || this.signaturePart.innerText.trim() != "")) {
             parent.appendChild(
-                ComposerPageState.cleanPart(
-                    this.signaturePart.cloneNode(true), false
-                )
+                ComposerPageState.cleanPart(this.signaturePart.cloneNode(true))
             );
         }
 
-        if (this.quotePart != null) {
+        if (this.quotePart != null &&
+            (!removeEmpty || this.quotePart.innerText.trim() != "")) {
             parent.appendChild(
-                ComposerPageState.cleanPart(
-                    this.quotePart.cloneNode(true), false
-                )
+                ComposerPageState.cleanPart(this.quotePart.cloneNode(true))
             );
         }
 
@@ -464,17 +461,12 @@ ComposerPageState.containsKeywords = function(line, wordKeys, suffixKeys) {
 };
 
 /**
- * Removes internal attributes from a composer part..
+ * Removes internal attributes from a composer part.
  */
-ComposerPageState.cleanPart = function(part, removeIfEmpty) {
+ComposerPageState.cleanPart = function(part) {
     if (part != null) {
         part.removeAttribute("class");
         part.removeAttribute("contenteditable");
-
-        if (removeIfEmpty && part.innerText.trim() == "") {
-            part.parentNode.removeChild(part);
-            part = null;
-        }
     }
     return part;
 };

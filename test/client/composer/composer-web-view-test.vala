@@ -13,6 +13,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("load_resources", load_resources);
         add_test("edit_context", edit_context);
         add_test("get_html", get_html);
+        add_test("get_html_for_draft", get_html_for_draft);
         add_test("get_text", get_text);
         add_test("get_text_with_quote", get_text_with_quote);
         add_test("get_text_with_nested_quote", get_text_with_nested_quote);
@@ -49,6 +50,14 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         string BODY = "<p>para</p>";
         load_body_fixture(BODY);
         this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
+        string html = this.test_view.get_html.end(async_result());
+        assert_string(ComposerPageStateTest.CLEAN_BODY_TEMPLATE.printf(BODY), html);
+    }
+
+    public void get_html_for_draft() throws GLib.Error {
+        string BODY = "<p>para</p>";
+        load_body_fixture(BODY);
+        this.test_view.get_html_for_draft.begin((obj, ret) => { async_complete(ret); });
         string html = this.test_view.get_html.end(async_result());
         assert_string(ComposerPageStateTest.COMPLETE_BODY_TEMPLATE.printf(BODY), html);
     }
