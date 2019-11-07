@@ -14,7 +14,9 @@ public class ClientWebViewTest : TestCase {
     }
 
     public void init_web_context() throws Error {
-        Configuration config = new Configuration(GearyApplication.SCHEMA_ID);
+        Application.Configuration config = new Application.Configuration(
+            GearyApplication.SCHEMA_ID
+        );
         config.enable_debug = true;
         ClientWebView.init_web_context(
             config,

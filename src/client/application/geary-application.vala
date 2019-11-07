@@ -197,7 +197,7 @@ public class GearyApplication : Gtk.Application {
      * This will be null until {@link startup} has been called, and
      * hence will only ever become non-null for the primary instance.
      */
-    public Configuration? config {
+    public Application.Configuration? config {
         get; private set; default = null;
     }
 
@@ -393,7 +393,7 @@ public class GearyApplication : Gtk.Application {
         Environment.set_application_name(NAME);
         Util.International.init(GETTEXT_PACKAGE, this.binary);
 
-        Configuration.init(this.is_installed, GSETTINGS_DIR);
+        Application.Configuration.init(this.is_installed, GSETTINGS_DIR);
         Geary.Logging.init();
         Geary.Logging.log_to(stderr);
         GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
@@ -408,7 +408,7 @@ public class GearyApplication : Gtk.Application {
         // Calls Gtk.init(), amongst other things
         base.startup();
 
-        this.config = new Configuration(SCHEMA_ID);
+        this.config = new Application.Configuration(SCHEMA_ID);
         this.autostart = new Application.StartupManager(
             this.config, this.get_desktop_directory()
         );

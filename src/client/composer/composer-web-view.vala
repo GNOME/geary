@@ -115,7 +115,7 @@ public class ComposerWebView : ClientWebView {
     internal signal bool button_release_event_done(Gdk.Event event);
 
 
-    public ComposerWebView(Configuration config) {
+    public ComposerWebView(Application.Configuration config) {
         base(config);
 
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);

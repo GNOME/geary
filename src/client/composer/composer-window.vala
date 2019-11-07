@@ -39,7 +39,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
         add(this.composer);
 
-        if (application.config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+        if (application.config.desktop_environment == UNITY) {
             composer.embed_header();
         } else {
             composer.header.show_close_button = true;
@@ -129,7 +129,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
         }
 
         switch (this.application.config.desktop_environment) {
-        case Configuration.DesktopEnvironment.UNITY:
+        case UNITY:
             this.title = subject;
             break;
 

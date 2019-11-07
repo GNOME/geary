@@ -21,7 +21,7 @@ public class SpellCheckPopover {
     private Gtk.SearchEntry search_box;
     private Gtk.ScrolledWindow view;
     private Gtk.Box content;
-    private Configuration config;
+    private Application.Configuration config;
 
     private enum SpellCheckStatus {
         INACTIVE,
@@ -175,7 +175,7 @@ public class SpellCheckPopover {
 
     }
 
-    public SpellCheckPopover(Gtk.Widget button, Configuration config) {
+    public SpellCheckPopover(Gtk.Widget button, Application.Configuration config) {
         this.popover = new Gtk.Popover(button);
         this.config = config;
         this.selected_rows = new GLib.GenericSet<string>(GLib.str_hash, GLib.str_equal);

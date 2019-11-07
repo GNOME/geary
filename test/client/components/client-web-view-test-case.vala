@@ -9,11 +9,11 @@
 public abstract class ClientWebViewTestCase<V> : TestCase {
 
     protected V? test_view = null;
-    protected Configuration? config = null;
+    protected Application.Configuration? config = null;
 
     protected ClientWebViewTestCase(string name) {
         base(name);
-        this.config = new Configuration(GearyApplication.SCHEMA_ID);
+        this.config = new Application.Configuration(GearyApplication.SCHEMA_ID);
         this.config.enable_debug = true;
         ClientWebView.init_web_context(
             this.config,

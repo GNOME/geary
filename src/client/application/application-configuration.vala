@@ -7,26 +7,27 @@
 /**
  * Provides convenience properties to current Geary GSettings values.
  */
-public class Configuration {
+public class Application.Configuration {
 
-    public const string WINDOW_WIDTH_KEY = "window-width";
+
+    public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
+    public const string AUTOSELECT_KEY = "autoselect";
+    public const string COMPOSER_WINDOW_SIZE_KEY = "composer-window-size";
+    public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
+    public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
+    public const string DISPLAY_PREVIEW_KEY = "display-preview";
+    public const string FOLDER_LIST_PANE_HORIZONTAL_KEY = "folder-list-pane-horizontal";
+    public const string FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY = "folder-list-pane-position-horizontal";
+    public const string FOLDER_LIST_PANE_POSITION_KEY = "folder-list-pane-position";
+    public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
+    public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
+    public const string SEARCH_STRATEGY_KEY = "search-strategy";
+    public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
+    public const string SPELL_CHECK_VISIBLE_LANGUAGES = "spell-check-visible-languages";
+    public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
     public const string WINDOW_HEIGHT_KEY = "window-height";
     public const string WINDOW_MAXIMIZE_KEY = "window-maximize";
-    public const string FOLDER_LIST_PANE_POSITION_KEY = "folder-list-pane-position";
-    public const string FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY = "folder-list-pane-position-horizontal";
-    public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
-    public const string FOLDER_LIST_PANE_HORIZONTAL_KEY = "folder-list-pane-horizontal";
-    public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
-    public const string AUTOSELECT_KEY = "autoselect";
-    public const string DISPLAY_PREVIEW_KEY = "display-preview";
-    public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
-    public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
-    public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
-    public const string SPELL_CHECK_VISIBLE_LANGUAGES = "spell-check-visible-languages";
-    public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
-    public const string SEARCH_STRATEGY_KEY = "search-strategy";
-    public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
-    public const string COMPOSER_WINDOW_SIZE_KEY = "composer-window-size";
+    public const string WINDOW_WIDTH_KEY = "window-width";
 
 
     public enum DesktopEnvironment {

@@ -690,21 +690,22 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.folder_list.remove_account(to_remove);
     }
 
-    private void load_config(Configuration config) {
+    private void load_config(Application.Configuration config) {
         // This code both loads AND saves the pane positions with live updating. This is more
         // resilient against crashes because the value in dconf changes *immediately*, and
         // stays saved in the event of a crash.
-        config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, this.conversations_paned, "position");
-        config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
-        config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
-        config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
+        config.bind(Application.Configuration.MESSAGES_PANE_POSITION_KEY, this.conversations_paned, "position");
+        config.bind(Application.Configuration.WINDOW_WIDTH_KEY, this, "window-width");
+        config.bind(Application.Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
+        config.bind(Application.Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
         // Update to layout
         if (config.folder_list_pane_position_horizontal == -1) {
             config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
             config.messages_pane_position += config.folder_list_pane_position_old;
         }
-        config.settings.changed[Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY]
-            .connect(on_change_orientation);
+        config.settings.changed[
+            Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY
+        ].connect(on_change_orientation);
     }
 
     private void restore_saved_window_state() {
@@ -801,7 +802,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void setup_layout(Configuration config) {
+    private void setup_layout(Application.Configuration config) {
         this.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
         // Search bar
@@ -841,7 +842,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         this.main_toolbar.bind_property("find-open", this.conversation_viewer.conversation_find_bar,
                 "search-mode-enabled", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+        if (config.desktop_environment == UNITY) {
             BindingTransformFunc title_func = (binding, source, ref target) => {
                 string folder = selected_folder != null ? selected_folder.get_display_name() + " " : "";
                 string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
@@ -1340,8 +1341,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
 
         this.application.config.bind(
-            horizontal ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
-            : Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
+            horizontal
+            ? Application.Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
+            : Application.Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
             this.folder_paned, "position");
     }
 

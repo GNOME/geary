@@ -7,7 +7,7 @@
 [GtkTemplate (ui = "/org/gnome/Geary/composer-headerbar.ui")]
 public class ComposerHeaderbar : Gtk.HeaderBar {
 
-    public Configuration config { get; set; }
+    public Application.Configuration config { get; set; }
 
     public ComposerWidget.ComposerState state { get; set; }
 
@@ -32,7 +32,7 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
     /** Fired when the user wants to expand a compact composer. */
     public signal void expand_composer();
 
-    public ComposerHeaderbar(Configuration config, bool is_compact) {
+    public ComposerHeaderbar(Application.Configuration config, bool is_compact) {
         this.config = config;
 
         this.recipients_button.set_visible(is_compact);
@@ -64,7 +64,7 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
     }
 
     private void set_detach_button_side() {
-        if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+        if (config.desktop_environment == UNITY) {
             detach_start.visible = false;
             detach_end.visible = true;
         } else {

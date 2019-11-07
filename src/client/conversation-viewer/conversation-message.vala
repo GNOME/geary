@@ -228,7 +228,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     // The message headers represented by this view
     private Geary.EmailHeaderSet headers;
 
-    private Configuration config;
+    private Application.Configuration config;
 
     // Store from which to lookup contacts
     private Application.ContactStore contacts;
@@ -357,7 +357,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public ConversationMessage.from_email(Geary.Email email,
                                           bool load_remote_resources,
                                           Application.ContactStore contacts,
-                                          Configuration config) {
+                                          Application.Configuration config) {
         this(
             email,
             email.preview != null ? email.preview.buffer.get_valid_utf8() : null,
@@ -377,7 +377,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public ConversationMessage.from_message(Geary.RFC822.Message message,
                                             bool load_remote_resources,
                                             Application.ContactStore contacts,
-                                            Configuration config) {
+                                            Application.Configuration config) {
         this(
             message,
             message.get_preview(),
@@ -391,7 +391,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                 string? preview,
                                 bool load_remote_resources,
                                 Application.ContactStore contacts,
-                                Configuration config) {
+                                Application.Configuration config) {
         base_ref();
         this.headers = headers;
         this.load_remote_resources = load_remote_resources;

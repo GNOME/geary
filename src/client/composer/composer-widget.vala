@@ -2168,7 +2168,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_select_dictionary(SimpleAction action, Variant? param) {
         if (this.spell_check_popover == null) {
-            Configuration config = this.application.config;
+            Application.Configuration config = this.application.config;
             this.spell_check_popover = new SpellCheckPopover(
                 this.select_dictionary_button, config
             );

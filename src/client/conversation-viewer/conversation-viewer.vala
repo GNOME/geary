@@ -24,7 +24,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         get; private set; default = null;
     }
 
-    private Configuration config;
+    private Application.Configuration config;
 
     private Gee.Set<Geary.App.Conversation>? selection_while_composing = null;
     private GLib.Cancellable? find_cancellable = null;
@@ -71,7 +71,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     /**
      * Constructs a new conversation view instance.
      */
-    public ConversationViewer(Configuration config) {
+    public ConversationViewer(Application.Configuration config) {
         base_ref();
         this.config = config;
 

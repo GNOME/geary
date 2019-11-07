@@ -58,7 +58,7 @@ public class Components.InspectorLogView : Gtk.Grid {
     public signal void record_selection_changed();
 
 
-    public InspectorLogView(Configuration config,
+    public InspectorLogView(Application.Configuration config,
                             Geary.AccountInformation? filter_by = null) {
         GLib.Settings system = config.gnome_interface;
         system.bind(

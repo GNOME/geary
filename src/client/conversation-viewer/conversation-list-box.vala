@@ -515,7 +515,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     private Application.ContactStore contacts;
 
     // App config
-    private Configuration config;
+    private Application.Configuration config;
 
     // Cancellable for this conversation's data loading.
     private Cancellable cancellable = new Cancellable();
@@ -610,7 +610,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                                bool suppress_mark_timer,
                                Geary.App.EmailStore email_store,
                                Application.ContactStore contacts,
-                               Configuration config,
+                               Application.Configuration config,
                                Gtk.Adjustment adjustment) {
         base_ref();
         this.conversation = conversation;
