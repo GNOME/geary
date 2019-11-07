@@ -3,27 +3,23 @@
   <menu id="mark_message_menu">
     <item>
       <attribute name="label" translatable="yes">Mark as _Read</attribute>
-      <attribute name="action">win.mark-message-read</attribute>
+      <attribute name="action">win.mark-conversation-read</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">Mark as _Unread</attribute>
-      <attribute name="action">win.mark-message-unread</attribute>
+      <attribute name="action">win.mark-conversation-unread</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">_Star</attribute>
-      <attribute name="action">win.mark-message-starred</attribute>
+      <attribute name="action">win.mark-conversation-starred</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">U_nstar</attribute>
-      <attribute name="action">win.mark-message-unstarred</attribute>
+      <attribute name="action">win.mark-conversation-unstarred</attribute>
     </item>
     <item>
-      <attribute name="label" translatable="yes">Mark as S_pam</attribute>
-      <attribute name="action">win.mark-message-spam</attribute>
-    </item>
-    <item>
-      <attribute name="label" translatable="yes">Mark as not S_pam</attribute>
-      <attribute name="action">win.mark-message-not-spam</attribute>
+      <attribute name="label" translatable="yes">Toggle as S_pam</attribute>
+      <attribute name="action">win.toggle-conversation-spam</attribute>
     </item>
   </menu>
   <menu id="main_menu">

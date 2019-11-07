@@ -14,6 +14,7 @@ src/client/accounts/accounts-editor-row.vala
 src/client/accounts/accounts-editor-servers-pane.vala
 src/client/accounts/accounts-manager.vala
 src/client/accounts/accounts-signature-web-view.vala
+src/client/application/application-attachment-manager.vala
 src/client/application/application-avatar-store.vala
 src/client/application/application-certificate-manager.vala
 src/client/application/application-command.vala
@@ -28,6 +29,7 @@ src/client/application/goa-mediator.vala
 src/client/application/main.vala
 src/client/application/secret-mediator.vala
 src/client/components/client-web-view.vala
+src/client/components/components-attachment-pane.vala
 src/client/components/components-in-app-notification.vala
 src/client/components/components-inspector.vala
 src/client/components/components-placeholder-pane.vala
@@ -156,6 +158,7 @@ src/engine/app/conversation-monitor/app-external-append-operation.vala
 src/engine/app/conversation-monitor/app-fill-window-operation.vala
 src/engine/app/conversation-monitor/app-insert-operation.vala
 src/engine/app/conversation-monitor/app-local-search-operation.vala
+src/engine/app/conversation-monitor/app-load-operation.vala
 src/engine/app/conversation-monitor/app-remove-operation.vala
 src/engine/app/conversation-monitor/app-reseed-operation.vala
 src/engine/app/conversation-monitor/app-terminate-operation.vala
@@ -412,6 +415,9 @@ ui/composer-headerbar.ui
 ui/composer-link-popover.ui
 ui/composer-menus.ui
 ui/composer-widget.ui
+ui/components-attachment-pane.ui
+ui/components-attachment-pane-menus.ui
+ui/components-attachment-view.ui
 ui/components-in-app-notification.ui
 ui/components-inspector-error-view.ui
 ui/components-inspector-log-view.ui
@@ -419,7 +425,6 @@ ui/components-inspector.ui
 ui/components-placeholder-pane.ui
 ui/conversation-contact-popover.ui
 ui/conversation-email.ui
-ui/conversation-email-attachment-view.ui
 ui/conversation-email-menus.ui
 ui/conversation-message-menus.ui
 ui/conversation-message.ui

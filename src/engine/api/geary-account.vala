@@ -369,34 +369,28 @@ public abstract class Geary.Account : BaseObject, Loggable {
         throws EngineError.NOT_FOUND;
 
     /**
-     * Lists all the currently-available folders found under the parent path
-     * unless it's null, in which case it lists all the root folders.  If the
-     * parent path cannot be found, EngineError.NOT_FOUND is thrown.  If no
-     * folders exist in the root, EngineError.NOT_FOUND may be thrown as well.
-     * However, the caller should be prepared to deal with an empty list being
-     * returned instead.
+     * Lists all currently-available folders.
      *
-     * The same Geary.Folder objects (instances) will be returned if the same path is submitted
-     * multiple times.  This means that multiple callers may be holding references to the same
-     * Folders.  This is important when thinking of opening and closing folders and signal
-     * notifications.
+     * @see list_matching_folders
      */
-    public abstract Gee.Collection<Geary.Folder> list_matching_folders(Geary.FolderPath? parent)
-        throws Error;
+    public abstract Gee.Collection<Folder> list_folders();
 
     /**
-     * Lists all currently-available folders.  See caveats under
-     * list_matching_folders().
+     * Lists all currently-available folders found a under parent.
+     *
+     * If the parent path cannot be found, EngineError.NOT_FOUND is
+     * thrown. However, the caller should be prepared to deal with an
+     * empty list being returned instead.
      */
-    public abstract Gee.Collection<Geary.Folder> list_folders() throws Error;
+    public abstract Gee.Collection<Folder> list_matching_folders(FolderPath? parent)
+        throws EngineError.NOT_FOUND;
 
     /**
-     * Returns the folder representing the given special folder type.  If no such folder exists,
-     * null is returned.
+     * Returns a folder for the given special folder type, it is exists.
      */
-    public virtual Geary.Folder? get_special_folder(Geary.SpecialFolderType special) throws Error {
+    public virtual Geary.Folder? get_special_folder(Geary.SpecialFolderType type){
         return traverse<Folder>(list_folders())
-            .first_matching(f => f.special_folder_type == special);
+            .first_matching(f => f.special_folder_type == type);
     }
 
     /**

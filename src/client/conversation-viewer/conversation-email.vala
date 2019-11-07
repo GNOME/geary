@@ -20,6 +20,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // This isn't a Gtk.Grid since when added to a Gtk.ListBoxRow the
     // hover style isn't applied to it.
 
+    private const string MANUAL_READ_CLASS = "geary-manual-read";
+    private const string SENT_CLASS = "geary-sent";
+    private const string STARRED_CLASS = "geary-starred";
+    private const string UNREAD_CLASS = "geary-unread";
 
     /** Fields that must be available for constructing the view. */
     internal const Geary.Email.Field REQUIRED_FOR_CONSTRUCT = (
@@ -127,139 +131,20 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
 
-    // Displays an attachment's icon and details
-    [GtkTemplate (ui = "/org/gnome/Geary/conversation-email-attachment-view.ui")]
-    private class AttachmentView : Gtk.Grid {
+    private static GLib.MenuModel email_menu_template;
+    private static GLib.MenuModel email_menu_trash_section;
+    private static GLib.MenuModel email_menu_delete_section;
 
-        public Geary.Attachment attachment { get; private set; }
 
-        [GtkChild]
-        private Gtk.Image icon;
-
-        [GtkChild]
-        private Gtk.Label filename;
-
-        [GtkChild]
-        private Gtk.Label description;
-
-        private string gio_content_type;
-
-        public AttachmentView(Geary.Attachment attachment) {
-            this.attachment = attachment;
-            string mime_content_type = attachment.content_type.get_mime_type();
-            this.gio_content_type = ContentType.from_mime_type(
-                mime_content_type
-            );
-
-            string? file_name = attachment.content_filename;
-            string file_desc = ContentType.get_description(gio_content_type);
-            if (ContentType.is_unknown(gio_content_type)) {
-                // Translators: This is the file type displayed for
-                // attachments with unknown file types.
-                file_desc = _("Unknown");
-            }
-            string file_size = Files.get_filesize_as_string(attachment.filesize);
-
-            if (Geary.String.is_empty(file_name)) {
-                // XXX Check for unknown types here and try to guess
-                // using attachment data.
-                file_name = file_desc;
-                file_desc = file_size;
-            } else {
-                // Translators: The first argument will be a
-                // description of the document type, the second will
-                // be a human-friendly size string. For example:
-                // Document (100.9MB)
-                file_desc = _("%s (%s)".printf(file_desc, file_size));
-            }
-            this.filename.set_text(file_name);
-            this.description.set_text(file_desc);
-        }
-
-        internal async void load_icon(Cancellable load_cancelled) {
-            if (load_cancelled.is_cancelled()) {
-                return;
-            }
-
-            Gdk.Pixbuf? pixbuf = null;
-
-            // XXX We need to hook up to GtkWidget::style-set and
-            // reload the icon when the theme changes.
-
-            int window_scale = get_scale_factor();
-            try {
-                // If the file is an image, use it. Otherwise get the
-                // icon for this mime_type.
-                if (this.attachment.content_type.has_media_type("image")) {
-                    // Get a thumbnail for the image.
-                    // TODO Generate and save the thumbnail when
-                    // extracting the attachments rather than when showing
-                    // them in the viewer.
-                    int preview_size = ATTACHMENT_PREVIEW_SIZE * window_scale;
-                    InputStream stream = yield this.attachment.file.read_async(
-                        Priority.DEFAULT,
-                        load_cancelled
-                    );
-                    pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(
-                        stream, preview_size, preview_size, true, load_cancelled
-                    );
-                    pixbuf = pixbuf.apply_embedded_orientation();
-                } else {
-                    // Load the icon for this mime type
-                    Icon icon = ContentType.get_icon(this.gio_content_type);
-                    Gtk.IconTheme theme = Gtk.IconTheme.get_default();
-                    Gtk.IconLookupFlags flags = Gtk.IconLookupFlags.DIR_LTR;
-                    if (get_direction() == Gtk.TextDirection.RTL) {
-                        flags = Gtk.IconLookupFlags.DIR_RTL;
-                    }
-                    Gtk.IconInfo? icon_info = theme.lookup_by_gicon_for_scale(
-                        icon, ATTACHMENT_ICON_SIZE, window_scale, flags
-                    );
-                    if (icon_info != null) {
-                        pixbuf = yield icon_info.load_icon_async(load_cancelled);
-                    }
-                }
-            } catch (Error error) {
-                debug("Failed to load icon for attachment '%s': %s",
-                      this.attachment.file.get_path(),
-                      error.message);
-            }
-
-            if (pixbuf != null) {
-                Cairo.Surface surface = Gdk.cairo_surface_create_from_pixbuf(
-                    pixbuf, window_scale, get_window()
-                );
-                this.icon.set_from_surface(surface);
-            }
-        }
-
+    static construct {
+        Gtk.Builder builder = new Gtk.Builder.from_resource(
+            "/org/gnome/Geary/conversation-email-menus.ui"
+        );
+        email_menu_template = (GLib.MenuModel) builder.get_object("email_menu");
+        email_menu_trash_section  = (GLib.MenuModel) builder.get_object("email_menu_trash");
+        email_menu_delete_section = (GLib.MenuModel) builder.get_object("email_menu_delete");
     }
 
-
-    private const int ATTACHMENT_ICON_SIZE = 32;
-    private const int ATTACHMENT_PREVIEW_SIZE = 64;
-
-    private const string ACTION_FORWARD = "forward";
-    private const string ACTION_MARK_READ = "mark_read";
-    private const string ACTION_MARK_UNREAD = "mark_unread";
-    private const string ACTION_MARK_UNREAD_DOWN = "mark_unread_down";
-    private const string ACTION_TRASH_MESSAGE = "trash_msg";
-    private const string ACTION_DELETE_MESSAGE = "delete_msg";
-    private const string ACTION_OPEN_ATTACHMENTS = "open_attachments";
-    private const string ACTION_PRINT = "print";
-    private const string ACTION_REPLY_SENDER = "reply_sender";
-    private const string ACTION_REPLY_ALL = "reply_all";
-    private const string ACTION_SAVE_ATTACHMENTS = "save_attachments";
-    private const string ACTION_SAVE_ALL_ATTACHMENTS = "save_all_attachments";
-    private const string ACTION_SELECT_ALL_ATTACHMENTS = "select_all_attachments";
-    private const string ACTION_STAR = "star";
-    private const string ACTION_UNSTAR = "unstar";
-    private const string ACTION_VIEW_SOURCE = "view_source";
-
-    private const string MANUAL_READ_CLASS = "geary-manual-read";
-    private const string SENT_CLASS = "geary-sent";
-    private const string STARRED_CLASS = "geary-starred";
-    private const string UNREAD_CLASS = "geary-unread";
 
     /**
      * The specific email that is displayed by this view.
@@ -270,6 +155,22 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      * object.
      */
     public Geary.Email email { get; private set; }
+
+    /** Determines if this email currently flagged as unread. */
+    public bool is_unread {
+        get {
+            Geary.EmailFlags? flags = this.email.email_flags;
+            return (flags != null && flags.is_unread());
+        }
+    }
+
+    /** Determines if this email currently flagged as starred. */
+    public bool is_starred {
+        get {
+            Geary.EmailFlags? flags = this.email.email_flags;
+            return (flags != null && flags.is_flagged());
+        }
+    }
 
     /** Determines if the email is showing a preview or the full message. */
     public bool is_collapsed = true;
@@ -292,6 +193,10 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /** The view displaying the email's primary message headers and body. */
     public ConversationMessage primary_message { get; private set; }
 
+    public Components.AttachmentPane? attachments_pane {
+        get; private set; default = null;
+    }
+
     /** Views for attached messages. */
     public Gee.List<ConversationMessage> attached_messages {
         owned get { return this._attached_messages.read_only_view; }
@@ -301,6 +206,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     /** Determines the message body loading state. */
     public LoadState message_body_state { get; private set; default = NOT_STARTED; }
+
+    public Geary.App.Conversation conversation;
 
     // Store from which to load message content, if needed
     private Geary.App.EmailStore email_store;
@@ -315,7 +222,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     private Geary.TimeoutManager body_loading_timeout;
 
-
     /** Determines if all message's web views have finished loading. */
     private Geary.Nonblocking.Spinlock message_bodies_loaded_lock;
 
@@ -327,8 +233,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private Gee.List<Geary.Attachment> displayed_attachments =
          new Gee.LinkedList<Geary.Attachment>();
 
-    // Message-specific actions
-    private SimpleActionGroup message_actions = new SimpleActionGroup();
+    // Tracks if Shift key handler has been installed on the main
+    // window, for updating email menu trash/delete actions.
+    private bool shift_handler_installed = false;
 
     [GtkChild]
     private Gtk.Grid actions;
@@ -354,70 +261,9 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     [GtkChild]
     private Gtk.Grid sub_messages;
 
-    [GtkChild]
-    private Gtk.Grid attachments;
-
-    [GtkChild]
-    private Gtk.FlowBox attachments_view;
-
-    [GtkChild]
-    private Gtk.Button select_all_attachments;
-
-    private Gtk.Menu attachments_menu;
-
-    private Menu email_menu;
-    private Menu email_menu_model;
-    private Menu email_menu_trash;
-    private Menu email_menu_delete;
-    private bool shift_key_down;
-
-
-    /** Fired when an error occurs loading the message body. */
-    public signal void load_error(GLib.Error err);
-
-    /** Fired when the user clicks "reply" in the message menu. */
-    public signal void reply_to_message();
-
-    /** Fired when the user clicks "reply all" in the message menu. */
-    public signal void reply_all_message();
-
-    /** Fired when the user clicks "forward" in the message menu. */
-    public signal void forward_message();
-
-    /** Fired when the user updates the email's flags. */
-    public signal void mark_email(
-        Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
-    );
-
-    /** Fired when the user updates flags for this email and all others down. */
-    public signal void mark_email_from_here(
-        Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
-    );
-
-    /** Fired when the user clicks "trash" in the message menu. */
-    public signal void trash_message();
-
-    /** Fired when the user clicks "delete" in the message menu. */
-    public signal void delete_message();
-
-    /** Fired when the user activates an attachment. */
-    public signal void attachments_activated(
-        Gee.Collection<Geary.Attachment> attachments
-    );
-
-    /** Fired when the user saves an attachment. */
-    public signal void save_attachments(
-        Gee.Collection<Geary.Attachment> attachments
-    );
-
-    /** Fired the edit draft button is clicked. */
-    public signal void edit_draft();
-
-    /** Fired when the view source action is activated. */
-    public signal void view_source();
 
     /** Fired when a internal link is activated */
-    public signal void internal_link_activated(int y);
+    internal signal void internal_link_activated(int y);
 
     /** Fired when the user selects text in a message. */
     internal signal void body_selection_changed(bool has_selection);
@@ -430,7 +276,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      * the complete email, but does not attempt any possibly
      * long-running loading processes.
      */
-    public ConversationEmail(Geary.Email email,
+    public ConversationEmail(Geary.App.Conversation conversation,
+                             Geary.Email email,
                              Geary.App.EmailStore email_store,
                              Application.ContactStore contacts,
                              Configuration config,
@@ -438,6 +285,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                              bool is_draft,
                              GLib.Cancellable load_cancellable) {
         base_ref();
+        this.conversation = conversation;
         this.email = email;
         this.is_draft = is_draft;
         this.email_store = email_store;
@@ -451,56 +299,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             get_style_context().add_class(SENT_CLASS);
         }
 
-        add_action(ACTION_FORWARD).activate.connect(() => {
-                forward_message();
-            });
-        add_action(ACTION_PRINT).activate.connect(() => {
-                print.begin();
-            });
-        add_action(ACTION_MARK_READ).activate.connect(() => {
-                mark_email(null, Geary.EmailFlags.UNREAD);
-            });
-        add_action(ACTION_MARK_UNREAD).activate.connect(() => {
-                mark_email(Geary.EmailFlags.UNREAD, null);
-            });
-        add_action(ACTION_MARK_UNREAD_DOWN).activate.connect(() => {
-                mark_email_from_here(Geary.EmailFlags.UNREAD, null);
-            });
-        add_action(ACTION_TRASH_MESSAGE).activate.connect(() => {
-                trash_message();
-            });
-        add_action(ACTION_DELETE_MESSAGE).activate.connect(() => {
-                delete_message();
-            });
-        add_action(ACTION_OPEN_ATTACHMENTS, false).activate.connect(() => {
-                attachments_activated(get_selected_attachments());
-            });
-        add_action(ACTION_REPLY_ALL).activate.connect(() => {
-                reply_all_message();
-            });
-        add_action(ACTION_REPLY_SENDER).activate.connect(() => {
-                reply_to_message();
-            });
-        add_action(ACTION_SAVE_ATTACHMENTS, false).activate.connect(() => {
-                save_attachments(get_selected_attachments());
-            });
-        add_action(ACTION_SAVE_ALL_ATTACHMENTS).activate.connect(() => {
-                save_attachments(this.displayed_attachments);
-            });
-        add_action(ACTION_SELECT_ALL_ATTACHMENTS, false).activate.connect(() => {
-                this.attachments_view.select_all();
-            });
-        add_action(ACTION_STAR).activate.connect(() => {
-                mark_email(Geary.EmailFlags.FLAGGED, null);
-            });
-        add_action(ACTION_UNSTAR).activate.connect(() => {
-                mark_email(null, Geary.EmailFlags.FLAGGED);
-            });
-        add_action(ACTION_VIEW_SOURCE).activate.connect(() => {
-                view_source();
-            });
-        insert_action_group("eml", message_actions);
-
         // Construct the view for the primary message, hook into it
 
         this.primary_message = new ConversationMessage.from_email(
@@ -512,34 +310,18 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         connect_message_view_signals(this.primary_message);
 
         this.primary_message.summary.add(this.actions);
-
-        // Wire up the rest of the UI
-
-        Gtk.Builder builder = new Gtk.Builder.from_resource(
-            "/org/gnome/Geary/conversation-email-menus.ui"
-        );
-        this.email_menu = new Menu();
-        this.email_menu_model = (Menu) builder.get_object("email_menu");
-        this.email_menu_trash = (Menu) builder.get_object("email_menu_trash");
-        this.email_menu_delete = (Menu) builder.get_object("email_menu_delete");
-        this.email_menubutton.set_menu_model(this.email_menu);
-        this.email_menubutton.set_sensitive(false);
-        this.email_menubutton.toggled.connect(this.on_email_menu);
-
-        this.attachments_menu = new Gtk.Menu.from_model(
-            (MenuModel) builder.get_object("attachments_menu")
-        );
-        this.attachments_menu.attach_to_widget(this, null);
-
         this.primary_message.infobars.add(this.draft_infobar);
         if (is_draft) {
             this.draft_infobar.show();
             this.draft_infobar.response.connect((infobar, response_id) => {
-                    if (response_id == 1) { edit_draft(); }
+                    if (response_id == 1) {
+                        activate_email_action(ConversationListBox.ACTION_EDIT);
+                    }
                 });
         }
-
         this.primary_message.infobars.add(this.not_saved_infobar);
+
+        // Wire up the rest of the UI
 
         email_store.account.incoming.notify["current-status"].connect(
             on_service_status_change
@@ -640,30 +422,22 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     /**
-     * Enables or disables actions that require folder support.
-     */
-    public void set_folder_actions_enabled(bool supports_trash, bool supports_delete) {
-        set_action_enabled(ACTION_TRASH_MESSAGE, supports_trash);
-        set_action_enabled(ACTION_DELETE_MESSAGE, supports_delete);
-    }
-
-    /**
-     * Substitutes the "Delete Message" button for the "Move Message to Trash"
-     * button if the Shift key is pressed.
-     */
-    public void shift_key_changed(bool pressed) {
-        this.shift_key_down = pressed;
-        this.on_email_menu();
-    }
-
-    /**
      * Shows the complete message: headers, body and attachments.
      */
     public void expand_email(bool include_transitions=true) {
         this.is_collapsed = false;
         update_email_state();
         this.attachments_button.set_sensitive(true);
-        this.email_menubutton.set_sensitive(true);
+        // Needs at least some menu set otherwise it won't be enabled,
+        // also has the side effect of making it sensitive
+        this.email_menubutton.set_menu_model(new GLib.Menu());
+
+        // Set targets to enable the actions
+        GLib.Variant email_target = email.id.to_variant();
+        this.attachments_button.set_action_target_value(email_target);
+        this.star_button.set_action_target_value(email_target);
+        this.unstar_button.set_action_target_value(email_target);
+
         foreach (ConversationMessage message in this) {
             message.show_message_body(include_transitions);
         }
@@ -677,6 +451,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         update_email_state();
         attachments_button.set_sensitive(false);
         email_menubutton.set_sensitive(false);
+
+        // Clear targets to disable the actions
+        this.attachments_button.set_action_target_value(null);
+        this.star_button.set_action_target_value(null);
+        this.unstar_button.set_action_target_value(null);
+
         primary_message.hide_message_body();
         foreach (ConversationMessage attached in this._attached_messages) {
             attached.hide_message_body();
@@ -723,6 +503,115 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         return selection;
     }
 
+    /** Displays the raw RFC 822 source for this email. */
+    public async void view_source() {
+        MainWindow? main = get_toplevel() as MainWindow;
+        if (main != null) {
+            Geary.Email email = this.email;
+            try {
+                yield Geary.Nonblocking.Concurrent.global.schedule_async(
+                    () => {
+                        string source = (
+                            email.header.buffer.to_string() +
+                            email.body.buffer.to_string()
+                        );
+                        string temporary_filename;
+                        int temporary_handle = GLib.FileUtils.open_tmp(
+                            "geary-message-XXXXXX.txt",
+                            out temporary_filename
+                        );
+                        GLib.FileUtils.set_contents(temporary_filename, source);
+                        GLib.FileUtils.close(temporary_handle);
+
+                        // ensure this file is only readable by the
+                        // user ... this needs to be done after the
+                        // file is closed
+                        GLib.FileUtils.chmod(
+                            temporary_filename,
+                            (int) (Posix.S_IRUSR | Posix.S_IWUSR)
+                        );
+
+                        string temporary_uri = GLib.Filename.to_uri(
+                            temporary_filename, null
+                        );
+                        main.application.show_uri.begin(temporary_uri);
+                    },
+                    null
+                );
+            } catch (GLib.Error error) {
+                main.application.controller.report_problem(
+                    new Geary.ProblemReport(error)
+                );
+            }
+        }
+    }
+
+    /** Print this view's email. */
+    public async void print() throws Error {
+        Json.Builder builder = new Json.Builder();
+        builder.begin_object();
+        if (this.email.from != null) {
+            builder.set_member_name(_("From:"));
+            builder.add_string_value(this.email.from.to_string());
+        }
+        if (this.email.to != null) {
+            // Translators: Human-readable version of the RFC 822 To header
+            builder.set_member_name(_("To:"));
+            builder.add_string_value(this.email.to.to_string());
+        }
+        if (this.email.cc != null) {
+            // Translators: Human-readable version of the RFC 822 CC header
+            builder.set_member_name(_("Cc:"));
+            builder.add_string_value(this.email.cc.to_string());
+        }
+        if (this.email.bcc != null) {
+            // Translators: Human-readable version of the RFC 822 BCC header
+            builder.set_member_name(_("Bcc:"));
+            builder.add_string_value(this.email.bcc.to_string());
+        }
+        if (this.email.date != null) {
+            // Translators: Human-readable version of the RFC 822 Date header
+            builder.set_member_name(_("Date:"));
+            builder.add_string_value(
+                Util.Date.pretty_print_verbose(
+                    this.email.date.value.to_local(),
+                    this.config.clock_format
+                )
+            );
+        }
+        if (this.email.subject != null) {
+            // Translators: Human-readable version of the RFC 822 Subject header
+            builder.set_member_name(_("Subject:"));
+            builder.add_string_value(this.email.subject.to_string());
+        }
+        builder.end_object();
+        Json.Generator generator = new Json.Generator();
+        generator.set_root(builder.get_root());
+        string js = "geary.addPrintHeaders(" + generator.to_data(null) + ");";
+        yield this.primary_message.web_view.run_javascript(js, null);
+
+        Gtk.Window? window = get_toplevel() as Gtk.Window;
+        WebKit.PrintOperation op = new WebKit.PrintOperation(
+            this.primary_message.web_view
+        );
+        Gtk.PrintSettings settings = new Gtk.PrintSettings();
+
+        if (this.email.subject != null) {
+            string file_name = Geary.String.reduce_whitespace(this.email.subject.value);
+            file_name = file_name.replace("/", "_");
+            if (file_name.char_count() > 128) {
+                file_name = Geary.String.safe_byte_substring(file_name, 128);
+            }
+
+            if (!Geary.String.is_empty(file_name)) {
+                settings.set(Gtk.PRINT_SETTINGS_OUTPUT_BASENAME, file_name);
+            }
+        }
+
+        op.set_print_settings(settings);
+        op.run_dialog(window);
+    }
+
     /**
      * Returns a new Iterable over all message views in this email view
      */
@@ -730,36 +619,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         return new MessageViewIterator(this);
     }
 
-    private SimpleAction add_action(string name, bool enabled = true) {
-        SimpleAction action = new SimpleAction(name, null);
-        action.set_enabled(enabled);
-        message_actions.add_action(action);
-        return action;
-    }
-
-    private bool get_action_enabled(string name) {
-        SimpleAction? action =
-            this.message_actions.lookup_action(name) as SimpleAction;
-        if (action != null) {
-            return action.get_enabled();
-        } else {
-            return false;
-        }
-    }
-
-    private void set_action_enabled(string name, bool enabled) {
-        SimpleAction? action =
-            this.message_actions.lookup_action(name) as SimpleAction;
-        if (action != null) {
-            action.set_enabled(enabled);
-        }
-    }
-
     private void connect_message_view_signals(ConversationMessage view) {
         view.flag_remote_images.connect(on_flag_remote_images);
         view.internal_link_activated.connect((y) => {
                 internal_link_activated(y);
             });
+        view.save_image.connect(on_save_image);
         view.web_view.internal_resource_loaded.connect(on_resource_loaded);
         view.web_view.content_loaded.connect(on_content_loaded);
         view.web_view.selection_changed.connect((has_selection) => {
@@ -870,70 +735,133 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     private void update_email_state() {
-        Geary.EmailFlags? flags = this.email.email_flags;
         Gtk.StyleContext style = get_style_context();
 
-        bool is_unread = (flags != null && flags.is_unread());
-        set_action_enabled(ACTION_MARK_READ, is_unread);
-        set_action_enabled(ACTION_MARK_UNREAD, !is_unread);
-        set_action_enabled(ACTION_MARK_UNREAD_DOWN, !is_unread);
-        if (is_unread) {
+        if (this.is_unread) {
             style.add_class(UNREAD_CLASS);
         } else {
             style.remove_class(UNREAD_CLASS);
         }
 
-        bool is_flagged = (flags != null && flags.is_flagged());
-        set_action_enabled(ACTION_STAR, !this.is_collapsed && !is_flagged);
-        set_action_enabled(ACTION_UNSTAR, !this.is_collapsed && is_flagged);
-        if (is_flagged) {
+        if (this.is_starred) {
             style.add_class(STARRED_CLASS);
-            star_button.hide();
-            unstar_button.show();
+            this.star_button.hide();
+            this.unstar_button.show();
         } else {
             style.remove_class(STARRED_CLASS);
-            star_button.show();
-            unstar_button.hide();
+            this.star_button.show();
+            this.unstar_button.hide();
         }
 
-        if (flags != null && flags.is_outbox_sent()) {
+        if (this.email.email_flags != null &&
+            this.email.email_flags.is_outbox_sent()) {
             this.not_saved_infobar.show();
         }
+
+        update_email_menu();
     }
+
+    private void update_email_menu() {
+        if (this.email_menubutton.active) {
+            bool in_base_folder = this.conversation.is_in_base_folder(
+                this.email.id
+            );
+            bool supports_trash = (
+                in_base_folder &&
+                Application.Controller.does_folder_support_trash(
+                    this.conversation.base_folder
+                )
+            );
+            bool supports_delete = (
+                in_base_folder &&
+                this.conversation.base_folder is Geary.FolderSupport.Remove
+            );
+            bool is_shift_down = false;
+            MainWindow? main = get_toplevel() as MainWindow;
+            if (main != null) {
+                is_shift_down = main.is_shift_down;
+
+                if (!this.shift_handler_installed) {
+                    this.shift_handler_installed = true;
+                    main.notify["is-shift-down"].connect(on_shift_changed);
+                }
+            }
+
+            string[] blacklist = {};
+            if (this.is_unread) {
+                blacklist += (
+                    ConversationListBox.EMAIL_ACTION_GROUP_NAME + "." +
+                    ConversationListBox.ACTION_MARK_UNREAD
+                );
+                blacklist += (
+                    ConversationListBox.EMAIL_ACTION_GROUP_NAME + "." +
+                    ConversationListBox.ACTION_MARK_UNREAD_DOWN
+                );
+            } else {
+                blacklist += (
+                    ConversationListBox.EMAIL_ACTION_GROUP_NAME + "." +
+                    ConversationListBox.ACTION_MARK_READ
+                );
+            }
+
+            bool show_trash = !is_shift_down && supports_trash;
+            bool show_delete = !show_trash && supports_delete;
+            GLib.Variant email_target = email.id.to_variant();
+            GLib.Menu new_model = Util.Gtk.construct_menu(
+                email_menu_template,
+                (menu, submenu, action, item) => {
+                    bool accept = true;
+                    if (submenu == email_menu_trash_section && !show_trash) {
+                        accept = false;
+                    }
+                    if (submenu == email_menu_delete_section && !show_delete) {
+                        accept = false;
+                    }
+                    if (action != null && !(action in blacklist)) {
+                        item.set_action_and_target_value(
+                            action, email_target
+                        );
+                    }
+                    return accept;
+                }
+            );
+
+            this.email_menubutton.popover.bind_model(new_model, null);
+            this.email_menubutton.popover.grab_focus();
+        }
+    }
+
 
     private void update_displayed_attachments() {
         bool has_attachments = !this.displayed_attachments.is_empty;
         this.attachments_button.set_visible(has_attachments);
-        if (has_attachments) {
-            this.primary_message.body_container.add(this.attachments);
+        MainWindow? main = get_toplevel() as MainWindow;
 
-            if (this.displayed_attachments.size > 1) {
-                this.select_all_attachments.show();
-                set_action_enabled(ACTION_SELECT_ALL_ATTACHMENTS, true);
-            }
+        if (has_attachments && main != null) {
+            this.attachments_pane = new Components.AttachmentPane(
+                false, main.attachments
+            );
+            this.primary_message.body_container.add(this.attachments_pane);
 
-            foreach (Geary.Attachment attachment in this.displayed_attachments) {
-                AttachmentView view = new AttachmentView(attachment);
-                this.attachments_view.add(view);
-                view.load_icon.begin(this.load_cancellable);
+            foreach (var attachment in this.displayed_attachments) {
+                this.attachments_pane.add_attachment(
+                    attachment, this.load_cancellable
+                );
             }
         }
     }
 
-    internal Gee.Collection<Geary.Attachment> get_selected_attachments() {
-        Gee.LinkedList<Geary.Attachment> selected =
-            new Gee.LinkedList<Geary.Attachment>();
-        foreach (Gtk.FlowBoxChild child in
-                 this.attachments_view.get_selected_children()) {
-            selected.add(((AttachmentView) child.get_child()).attachment);
-        }
-        return selected;
-    }
-
-    private void handle_load_failure(GLib.Error err) {
-        load_error(err);
+    private void handle_load_failure(GLib.Error error) {
         this.message_body_state = FAILED;
         this.primary_message.show_load_error_pane();
+
+        MainWindow? main = get_toplevel() as MainWindow;
+        if (main != null) {
+            Geary.AccountInformation account = this.email_store.account.information;
+            main.application.controller.report_problem(
+                new Geary.ServiceProblemReport(account, account.incoming, error)
+            );
+        }
     }
 
     private void handle_load_offline() {
@@ -945,88 +873,22 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         return (this.email_store.account.incoming.current_status == CONNECTED);
     }
 
-    /**
-     * Updates the email menu if it is open.
-     */
-    private void on_email_menu() {
-        if (this.email_menubutton.active) {
-            this.email_menu.remove_all();
-
-            bool supports_trash = get_action_enabled(ACTION_TRASH_MESSAGE);
-            bool supports_delete = get_action_enabled(ACTION_DELETE_MESSAGE);
-            bool show_trash_button = !this.shift_key_down && (supports_trash || !supports_delete);
-            GtkUtil.menu_foreach(this.email_menu_model, (label, name, target, section) => {
-                if ((section != this.email_menu_trash || show_trash_button) &&
-                    (section != this.email_menu_delete || !show_trash_button)) {
-                    this.email_menu.append_item(new MenuItem.section(label, section));
-                }
-            });
+    private void activate_email_action(string name) {
+        GLib.ActionGroup? email_actions = get_action_group(
+            ConversationListBox.EMAIL_ACTION_GROUP_NAME
+        );
+        if (email_actions != null) {
+            email_actions.activate_action(name, this.email.id.to_variant());
         }
     }
 
-    private async void print() throws Error {
-        Json.Builder builder = new Json.Builder();
-        builder.begin_object();
-        if (this.email.from != null) {
-            builder.set_member_name(_("From:"));
-            builder.add_string_value(this.email.from.to_string());
-        }
-        if (this.email.to != null) {
-            // Translators: Human-readable version of the RFC 822 To header
-            builder.set_member_name(_("To:"));
-            builder.add_string_value(this.email.to.to_string());
-        }
-        if (this.email.cc != null) {
-            // Translators: Human-readable version of the RFC 822 CC header
-            builder.set_member_name(_("Cc:"));
-            builder.add_string_value(this.email.cc.to_string());
-        }
-        if (this.email.bcc != null) {
-            // Translators: Human-readable version of the RFC 822 BCC header
-            builder.set_member_name(_("Bcc:"));
-            builder.add_string_value(this.email.bcc.to_string());
-        }
-        if (this.email.date != null) {
-            // Translators: Human-readable version of the RFC 822 Date header
-            builder.set_member_name(_("Date:"));
-            builder.add_string_value(
-                Util.Date.pretty_print_verbose(
-                    this.email.date.value.to_local(),
-                    this.config.clock_format
-                )
-            );
-        }
-        if (this.email.subject != null) {
-            // Translators: Human-readable version of the RFC 822 Subject header
-            builder.set_member_name(_("Subject:"));
-            builder.add_string_value(this.email.subject.to_string());
-        }
-        builder.end_object();
-        Json.Generator generator = new Json.Generator();
-        generator.set_root(builder.get_root());
-        string js = "geary.addPrintHeaders(" + generator.to_data(null) + ");";
-        yield this.primary_message.web_view.run_javascript(js, null);
+    [GtkCallback]
+    private void on_email_menu() {
+        update_email_menu();
+    }
 
-        Gtk.Window? window = get_toplevel() as Gtk.Window;
-        WebKit.PrintOperation op = new WebKit.PrintOperation(
-            this.primary_message.web_view
-        );
-        Gtk.PrintSettings settings = new Gtk.PrintSettings();
-
-        if (this.email.subject != null) {
-            string file_name = Geary.String.reduce_whitespace(this.email.subject.value);
-            file_name = file_name.replace("/", "_");
-            if (file_name.char_count() > 128) {
-                file_name = Geary.String.safe_byte_substring(file_name, 128);
-            }
-
-            if (!Geary.String.is_empty(file_name)) {
-                settings.set(Gtk.PRINT_SETTINGS_OUTPUT_BASENAME, file_name);
-            }
-        }
-
-        op.set_print_settings(settings);
-        op.run_dialog(window);
+    private void on_shift_changed() {
+        update_email_menu();
     }
 
     private void on_body_loading_timeout() {
@@ -1037,11 +899,45 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         this.body_loading_timeout.reset();
     }
 
-    private void on_flag_remote_images(ConversationMessage view) {
-        if (!email.email_flags.contains(Geary.EmailFlags.LOAD_REMOTE_IMAGES)) {
-            // Don't pass a cancellable in to make sure the flag is
-            // always saved
-            mark_email(Geary.EmailFlags.LOAD_REMOTE_IMAGES, null);
+    private void on_flag_remote_images() {
+        activate_email_action(ConversationListBox.ACTION_MARK_LOAD_REMOTE);
+    }
+
+    private void on_save_image(string uri,
+                               string? alt_text,
+                               Geary.Memory.Buffer? content) {
+        MainWindow? main = get_toplevel() as MainWindow;
+        if (main != null) {
+            if (uri.has_prefix(ClientWebView.CID_URL_PREFIX)) {
+                string cid = uri.substring(ClientWebView.CID_URL_PREFIX.length);
+                try {
+                    Geary.Attachment attachment = this.email.get_attachment_by_content_id(
+                        cid
+                    );
+                    main.attachments.save_attachment.begin(
+                        attachment,
+                        alt_text,
+                        null // XXX no cancellable yet, need UI for it
+                    );
+                } catch (GLib.Error err) {
+                    debug("Could not get attachment \"%s\": %s", cid, err.message);
+                }
+            } else if (content != null) {
+                GLib.File source = GLib.File.new_for_uri(uri);
+                // Querying the URL-based file for the display name
+                // results in it being looked up, so just get the basename
+                // from it directly. GIO seems to decode any %-encoded
+                // chars anyway.
+                string? display_name = source.get_basename();
+                if (Geary.String.is_empty_or_whitespace(display_name)) {
+                    display_name = Application.AttachmentManager.untitled_file_name;
+                }
+                main.attachments.save_buffer.begin(
+                    display_name,
+                    content,
+                    null // XXX no cancellable yet, need UI for it
+                );
+            }
         }
     }
 
@@ -1076,26 +972,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             // attachments.
             this.update_displayed_attachments();
         }
-    }
-
-    [GtkCallback]
-    private void on_attachments_child_activated(Gtk.FlowBox view,
-                                                Gtk.FlowBoxChild child) {
-        attachments_activated(
-            Geary.iterate<Geary.Attachment>(
-                ((AttachmentView) child.get_child()).attachment
-            ).to_array_list()
-        );
-    }
-
-    [GtkCallback]
-    private void on_attachments_selected_changed(Gtk.FlowBox view) {
-        uint len = view.get_selected_children().length();
-        bool not_empty = len > 0;
-        set_action_enabled(ACTION_OPEN_ATTACHMENTS, not_empty);
-        set_action_enabled(ACTION_SAVE_ATTACHMENTS, not_empty);
-        set_action_enabled(ACTION_SELECT_ALL_ATTACHMENTS,
-                           len < this.displayed_attachments.size);
     }
 
     private void on_service_status_change() {

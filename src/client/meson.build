@@ -1,5 +1,6 @@
 # Geary client
 geary_client_vala_sources = files(
+  'application/application-attachment-manager.vala',
   'application/application-avatar-store.vala',
   'application/application-certificate-manager.vala',
   'application/application-command.vala',
@@ -25,6 +26,7 @@ geary_client_vala_sources = files(
   'accounts/accounts-manager.vala',
 
   'components/client-web-view.vala',
+  'components/components-attachment-pane.vala',
   'components/components-inspector.vala',
   'components/components-in-app-notification.vala',
   'components/components-inspector-error-view.vala',

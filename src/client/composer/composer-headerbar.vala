@@ -68,10 +68,9 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
             detach_start.visible = false;
             detach_end.visible = true;
         } else {
-            bool at_end = GtkUtil.close_button_at_end();
+            bool at_end = Util.Gtk.close_button_at_end();
             detach_start.visible = !at_end;
             detach_end.visible = at_end;
         }
     }
 }
-

@@ -9,8 +9,6 @@
  */
 public class Geary.ComposedEmail : BaseObject {
 
-    public const string MAILTO_SCHEME = "mailto:";
-
     private const string IMG_SRC_TEMPLATE = "src=\"%s\"";
 
     public const Geary.Email.Field REQUIRED_REPLY_FIELDS =

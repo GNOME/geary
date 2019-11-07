@@ -64,7 +64,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
     public void start_stop_monitoring() throws Error {
         ConversationMonitor monitor = new ConversationMonitor(
-            this.base_folder, Folder.OpenFlags.NONE, Email.Field.NONE, 10
+            this.base_folder, Email.Field.NONE, 10
         );
         Cancellable test_cancellable = new Cancellable();
 
@@ -73,27 +73,24 @@ class Geary.App.ConversationMonitorTest : TestCase {
         monitor.scan_started.connect(() => { saw_scan_started = true; });
         monitor.scan_completed.connect(() => { saw_scan_completed = true; });
 
-        this.base_folder.expect_call(
-            "open_async",
-            { MockObject.int_arg(Folder.OpenFlags.NONE), test_cancellable }
-        );
+        this.base_folder.expect_call("open_async");
         this.base_folder.expect_call("list_email_by_id_async");
         this.base_folder.expect_call("close_async");
 
-        monitor.start_monitoring_async.begin(
-            test_cancellable, (obj, res) => { async_complete(res); }
+        monitor.start_monitoring.begin(
+            NONE, test_cancellable, (obj, res) => { async_complete(res); }
         );
-        monitor.start_monitoring_async.end(async_result());
+        monitor.start_monitoring.end(async_result());
 
         // Process all of the async tasks arising from the open
         while (this.main_loop.pending()) {
             this.main_loop.iteration(true);
         }
 
-        monitor.stop_monitoring_async.begin(
+        monitor.stop_monitoring.begin(
             test_cancellable, (obj, res) => { async_complete(res); }
         );
-        monitor.stop_monitoring_async.end(async_result());
+        monitor.stop_monitoring.end(async_result());
 
         assert_true(saw_scan_started, "scan_started not fired");
         assert_true(saw_scan_completed, "scan_completed not fired");
@@ -103,18 +100,18 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
     public void open_error() throws Error {
         ConversationMonitor monitor = new ConversationMonitor(
-            this.base_folder, Folder.OpenFlags.NONE, Email.Field.NONE, 10
+            this.base_folder, Email.Field.NONE, 10
         );
 
         ExpectedCall open = this.base_folder
             .expect_call("open_async")
             .throws(new EngineError.SERVER_UNAVAILABLE("Mock error"));
 
-        monitor.start_monitoring_async.begin(
-            null, (obj, res) => { async_complete(res); }
+        monitor.start_monitoring.begin(
+            NONE, null, (obj, res) => { async_complete(res); }
         );
         try {
-            monitor.start_monitoring_async.end(async_result());
+            monitor.start_monitoring.end(async_result());
             assert_not_reached();
         } catch (Error err) {
             assert_error(open.throw_error, err);
@@ -248,10 +245,10 @@ class Geary.App.ConversationMonitorTest : TestCase {
         // Close the monitor to cancel the final load so it does not
         // error out during later tests
         this.base_folder.expect_call("close_async");
-        monitor.stop_monitoring_async.begin(
+        monitor.stop_monitoring.begin(
             null, (obj, res) => { async_complete(res); }
         );
-        monitor.stop_monitoring_async.end(async_result());
+        monitor.stop_monitoring.end(async_result());
     }
 
     public void external_folder_message_appended() throws Error {
@@ -387,7 +384,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
                       Gee.MultiMap<Email,FolderPath>[] related_paths = {})
         throws Error {
         ConversationMonitor monitor = new ConversationMonitor(
-            this.base_folder, Folder.OpenFlags.NONE, Email.Field.NONE, 10
+            this.base_folder, Email.Field.NONE, 10
         );
         Cancellable test_cancellable = new Cancellable();
 
@@ -479,10 +476,10 @@ class Geary.App.ConversationMonitorTest : TestCase {
             }
         }
 
-        monitor.start_monitoring_async.begin(
-            test_cancellable, (obj, res) => { async_complete(res); }
+        monitor.start_monitoring.begin(
+            NONE, test_cancellable, (obj, res) => { async_complete(res); }
         );
-        monitor.start_monitoring_async.end(async_result());
+        monitor.start_monitoring.end(async_result());
 
         if (base_folder_email.length == 0) {
             wait_for_call(list_call);

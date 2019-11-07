@@ -7,13 +7,13 @@
       <item>
         <!-- Translators: Menu item to reply to a specific message. -->
         <attribute name="label" translatable="yes">_Reply</attribute>
-        <attribute name="action">eml.reply_sender</attribute>
+        <attribute name="action">eml.reply-sender</attribute>
         <attribute name="verb-icon">mail-reply-sender-symbolic</attribute>
       </item>
       <item>
         <!-- Translators: Menu item to reply to a specific message. -->
         <attribute name="label" translatable="yes">Reply to _All</attribute>
-        <attribute name="action">eml.reply_all</attribute>
+        <attribute name="action">eml.reply-all</attribute>
         <attribute name="verb-icon">mail-reply-all-symbolic</attribute>
       </item>
       <item>
@@ -28,19 +28,19 @@
         <!-- Translators: Menu item to mark a specific message as
              read. -->
         <attribute name="label" translatable="yes">_Mark Read</attribute>
-        <attribute name="action">eml.mark_read</attribute>
+        <attribute name="action">eml.mark-read</attribute>
       </item>
         <!-- Translators: Menu item to mark a specific message as
              unread. -->
       <item>
         <attribute name="label" translatable="yes">_Mark Unread</attribute>
-        <attribute name="action">eml.mark_unread</attribute>
+        <attribute name="action">eml.mark-unread</attribute>
       </item>
       <item>
         <!-- Translators: Menu item to mark all messages in a
              conversation from this one as unread. -->
         <attribute name="label" translatable="yes">Mark Unread From _Here</attribute>
-        <attribute name="action">eml.mark_unread_down</attribute>
+        <attribute name="action">eml.mark-unread-down</attribute>
       </item>
     </section>
     <section id="email_menu_trash">
@@ -48,14 +48,14 @@
         <!-- Translators: Menu item to move a single, specific message
              to the trash folder -->
         <attribute name="label" translatable="yes">Move message to _Trash</attribute>
-        <attribute name="action">eml.trash_msg</attribute>
+        <attribute name="action">eml.trash</attribute>
       </item>
     </section>
     <section id="email_menu_delete">
       <item>
         <!-- Translators: Menu item to delete a single, specific message -->
         <attribute name="label" translatable="yes">_Delete message…</attribute>
-        <attribute name="action">eml.delete_msg</attribute>
+        <attribute name="action">eml.delete</attribute>
       </item>
     </section>
     <section>
@@ -67,25 +67,7 @@
       <item>
         <!-- Translators: Menu item to view the source for a message -->
         <attribute name="label" translatable="yes">_View Source</attribute>
-        <attribute name="action">eml.view_source</attribute>
-      </item>
-    </section>
-  </menu>
-  <menu id="attachments_menu">
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">_Open</attribute>
-        <attribute name="action">eml.open_attachments</attribute>
-      </item>
-    </section>
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">_Save</attribute>
-        <attribute name="action">eml.save_attachments</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">_Save All</attribute>
-        <attribute name="action">eml.save_all_attachments</attribute>
+        <attribute name="action">eml.view-source</attribute>
       </item>
     </section>
   </menu>

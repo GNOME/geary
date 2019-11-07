@@ -450,27 +450,26 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override Gee.Collection<Geary.Folder> list_matching_folders(Geary.FolderPath? parent)
-        throws Error {
-        check_open();
+    public override Gee.Collection<Folder> list_folders() {
+        Gee.HashSet<Folder> all_folders = new Gee.HashSet<Folder>();
+        all_folders.add_all(this.folder_map.values);
+        all_folders.add_all(this.local_only.values);
 
-        return Geary.traverse<FolderPath>(folder_map.keys)
+        return all_folders;
+    }
+
+    /** {@inheritDoc} */
+    public override Gee.Collection<Folder> list_matching_folders(FolderPath? parent)
+        throws EngineError.NOT_FOUND {
+        return traverse<FolderPath>(folder_map.keys)
             .filter(p => {
                 FolderPath? path_parent = p.parent;
                 return ((parent == null && path_parent == null) ||
-                    (parent != null && path_parent != null && path_parent.equal_to(parent)));
+                    (parent != null && path_parent != null &&
+                     path_parent.equal_to(parent)));
             })
             .map<Geary.Folder>(p => folder_map.get(p))
             .to_array_list();
-    }
-
-    public override Gee.Collection<Geary.Folder> list_folders() throws Error {
-        check_open();
-        Gee.HashSet<Geary.Folder> all_folders = new Gee.HashSet<Geary.Folder>();
-        all_folders.add_all(folder_map.values);
-        all_folders.add_all(local_only.values);
-
-        return all_folders;
     }
 
     public override async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
@@ -652,13 +651,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 minimal.set_special_folder_type(special);
                 changed.add(minimal);
 
-                MinimalFolder? existing = null;
-                try {
-                    existing = get_special_folder(special) as MinimalFolder;
-                } catch (Error err) {
-                    debug("Error getting special folder: %s", err.message);
-                }
-
+                MinimalFolder? existing =
+                    get_special_folder(special) as MinimalFolder;
                 if (existing != null && existing != minimal) {
                     existing.set_special_folder_type(SpecialFolderType.NONE);
                     changed.add(existing);

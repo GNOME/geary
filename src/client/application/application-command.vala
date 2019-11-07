@@ -13,6 +13,20 @@ public abstract class Application.Command : GLib.Object {
 
 
     /**
+     * Determines if a command can be undone.
+     *
+     * When passed to {@link CommandStack}, the stack will check this
+     * property after the command has been executed, and if false undo
+     * stack will be emptied and the non-undo-able command dropped.
+     *
+     * Returns true by default, derived classes may override if their
+     * {@link undo} method should not be called.
+     */
+    public virtual bool can_undo {
+        get { return true; }
+    }
+
+    /**
      * A human-readable label describing the effect of calling {@link undo}.
      *
      * This can be used in a user interface, perhaps as a tooltip for
@@ -51,6 +65,37 @@ public abstract class Application.Command : GLib.Object {
      * from Trash".
      */
     public string? undone_label { get; protected set; default = null; }
+
+
+    /**
+     * Emitted when the command was successfully executed.
+     *
+     * Command implementations must not manage this signal, it will be
+     * emitted by {@link CommandStack} as needed.
+     */
+    public virtual signal void executed() {
+        // no-op
+    }
+
+    /**
+     * Emitted when the command was successfully undone.
+     *
+     * Command implementations must not manage this signal, it will be
+     * emitted by {@link CommandStack} as needed.
+     */
+    public virtual signal void undone() {
+        // no-op
+    }
+
+    /**
+     * Emitted when the command was successfully redone.
+     *
+     * Command implementations must not manage this signal, it will be
+     * emitted by {@link CommandStack} as needed.
+     */
+    public virtual signal void redone() {
+        // no-op
+    }
 
 
     /**
@@ -100,6 +145,11 @@ public abstract class Application.Command : GLib.Object {
         yield execute(cancellable);
     }
 
+    /** Determines if this command is equal to another. */
+    public virtual bool equal_to(Command other) {
+        return (this == other);
+    }
+
     /** Returns a string representation of the command for debugging. */
     public virtual string to_string() {
         return get_type().name();
@@ -110,13 +160,53 @@ public abstract class Application.Command : GLib.Object {
 
 /**
  * A command that executes a sequence of other commands.
+ *
+ * When initially executed or redone, commands will be processed
+ * individually in the given order. When undone, commands will be
+ * processed individually in reverse order.
  */
 public class Application.CommandSequence : Command {
 
 
-    public Gee.List<Command> commands {
-        get; private set; default = new Gee.LinkedList<Command>();
+    /**
+     * Emitted when the command was successfully executed.
+     *
+     * Ensures the same signal is emitted on all commands in the
+     * sequence, in order.
+     */
+    public override void executed() {
+       foreach (Command command in this.commands) {
+           command.executed();
+       }
     }
+
+    /**
+     * Emitted when the command was successfully undone.
+     *
+     * Ensures the same signal is emitted on all commands in the
+     * sequence, in reverse order.
+     */
+    public override void undone() {
+       foreach (Command command in reversed_commands()) {
+           command.undone();
+       }
+    }
+
+    /**
+     * Emitted when the command was successfully redone.
+     *
+     * Ensures the same signal is emitted on all commands in the
+     * sequence, in order.
+     */
+    public override void redone() {
+       foreach (Command command in this.commands) {
+           command.redone();
+       }
+    }
+
+
+    private Gee.List<Command> commands = new Gee.LinkedList<Command>();
+
 
     public CommandSequence(Command[]? commands = null) {
         if (commands != null) {
@@ -140,11 +230,7 @@ public class Application.CommandSequence : Command {
      */
     public override async void undo(GLib.Cancellable? cancellable)
        throws GLib.Error {
-       Gee.LinkedList<Command> reversed = new Gee.LinkedList<Command>();
-       foreach (Command command in this.commands) {
-           reversed.insert(0, command);
-       }
-       foreach (Command command in this.commands) {
+       foreach (Command command in reversed_commands()) {
            yield command.undo(cancellable);
        }
     }
@@ -157,6 +243,14 @@ public class Application.CommandSequence : Command {
        foreach (Command command in this.commands) {
            yield command.redo(cancellable);
        }
+    }
+
+    private Gee.List<Command> reversed_commands() {
+       var reversed = new Gee.LinkedList<Command>();
+       foreach (Command command in this.commands) {
+           reversed.insert(0, command);
+       }
+       return reversed;
     }
 
 }
@@ -254,8 +348,11 @@ public class Application.CommandStack : GLib.Object {
     public bool can_redo { get; private set; }
 
 
-    private Gee.LinkedList<Command> undo_stack = new Gee.LinkedList<Command>();
-    private Gee.LinkedList<Command> redo_stack = new Gee.LinkedList<Command>();
+    /** Stack of commands that can be undone. */
+    protected Gee.Deque<Command> undo_stack = new Gee.LinkedList<Command>();
+
+    /** Stack of commands that can be redone. */
+    protected Gee.Deque<Command> redo_stack = new Gee.LinkedList<Command>();
 
 
     /** Fired when a command is first executed */
@@ -274,18 +371,19 @@ public class Application.CommandStack : GLib.Object {
      * This calls {@link Command.execute} and if no error is thrown,
      * pushes the command onto the undo stack.
      */
-    public async void execute(Command target, GLib.Cancellable? cancellable)
+    public virtual async void execute(Command target, GLib.Cancellable? cancellable)
         throws GLib.Error {
         debug("Executing: %s", target.to_string());
         yield target.execute(cancellable);
 
-        this.undo_stack.insert(0, target);
-        this.can_undo = true;
+        update_undo_stack(target);
+        this.can_undo = !this.undo_stack.is_empty;
 
         this.redo_stack.clear();
         this.can_redo = false;
 
         executed(target);
+        target.executed();
     }
 
     /**
@@ -296,10 +394,10 @@ public class Application.CommandStack : GLib.Object {
      * stack. If an error is thrown, the command is discarded and the
      * redo stack is emptied.
      */
-    public async void undo(GLib.Cancellable? cancellable)
+    public virtual async void undo(GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (!this.undo_stack.is_empty) {
-            Command target = this.undo_stack.remove_at(0);
+            Command target = this.undo_stack.poll_head();
 
             if (this.undo_stack.is_empty) {
                 this.can_undo = false;
@@ -314,9 +412,11 @@ public class Application.CommandStack : GLib.Object {
                 throw err;
             }
 
-            this.redo_stack.insert(0, target);
+            this.redo_stack.offer_head(target);
             this.can_redo = true;
+
             undone(target);
+            target.undone();
         }
     }
 
@@ -328,10 +428,10 @@ public class Application.CommandStack : GLib.Object {
      * stack. If an error is thrown, the command is discarded and the
      * redo stack is emptied.
      */
-    public async void redo(GLib.Cancellable? cancellable)
+    public virtual async void redo(GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (!this.redo_stack.is_empty) {
-            Command target = this.redo_stack.remove_at(0);
+            Command target = this.redo_stack.poll_head();
 
             if (this.redo_stack.is_empty) {
                 this.can_redo = false;
@@ -346,20 +446,22 @@ public class Application.CommandStack : GLib.Object {
                 throw err;
             }
 
-            this.undo_stack.insert(0, target);
-            this.can_undo = true;
+            update_undo_stack(target);
+            this.can_undo = !this.undo_stack.is_empty;
+
             redone(target);
+            target.redone();
         }
     }
 
     /** Returns the command at the top of the undo stack, if any. */
     public Command? peek_undo() {
-        return this.undo_stack.is_empty ? null : this.undo_stack[0];
+        return this.undo_stack.is_empty ? null : this.undo_stack.peek_head();
     }
 
     /** Returns the command at the top of the redo stack, if any. */
     public Command? peek_redo() {
-        return this.redo_stack.is_empty ? null : this.redo_stack[0];
+        return this.redo_stack.is_empty ? null : this.redo_stack.peek_head();
     }
 
     /** Clears all commands from both the undo and redo stacks. */
@@ -368,6 +470,18 @@ public class Application.CommandStack : GLib.Object {
         this.can_undo = false;
         this.redo_stack.clear();
         this.can_redo = false;
+    }
+
+    /**
+     * Updates the undo stack when a command is executed or re-done.
+     *
+     * By default, this pushes the command to the head of the undo
+     * stack if {@link Command.can_undo} is true.
+     */
+    protected virtual void update_undo_stack(Command target) {
+        if (target.can_undo) {
+            this.undo_stack.offer_head(target);
+        }
     }
 
 }

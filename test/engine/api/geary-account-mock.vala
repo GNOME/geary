@@ -151,17 +151,24 @@ public class Geary.MockAccount : Account, MockObject {
         }
     }
 
-    public override Gee.Collection<Folder> list_folders() throws Error {
-        return object_call<Gee.Collection<Folder>>(
-            "list_folders", {}, Gee.List.empty<Folder>()
-        );
+    public override Gee.Collection<Folder> list_folders() {
+        try {
+            return object_call<Gee.Collection<Folder>>(
+                "list_folders", {}, Gee.List.empty<Folder>()
+            );
+        } catch (GLib.Error err) {
+            return Gee.List.empty<Folder>();
+        }
     }
 
-    public override Folder? get_special_folder(SpecialFolderType special)
-        throws Error {
-        return object_call<Folder?>(
-            "get_special_folder", {box_arg(special)}, null
-        );
+    public override Folder? get_special_folder(SpecialFolderType special) {
+        try {
+            return object_call<Folder?>(
+                "get_special_folder", {box_arg(special)}, null
+            );
+        } catch (GLib.Error err) {
+            return null;
+        }
     }
 
     public override async Folder get_required_special_folder_async(SpecialFolderType special,

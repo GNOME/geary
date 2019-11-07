@@ -111,7 +111,7 @@
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Reply</property>
-                <property name="action_name">win.reply-to-message</property>
+                <property name="action_name">win.reply-conversation</property>
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="reply_sender_image">
@@ -134,7 +134,7 @@
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Reply All</property>
-                <property name="action_name">win.reply-all-message</property>
+                <property name="action_name">win.reply-all-conversation</property>
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="reply_all_image">
@@ -157,7 +157,7 @@
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Forward</property>
-                <property name="action_name">win.forward-message</property>
+                <property name="action_name">win.forward-conversation</property>
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="forward_image">
@@ -189,7 +189,6 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
-                <property name="action_name">win.mark-message-menu</property>
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="mark_message_image">
@@ -288,7 +287,7 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
-                <property name="action_name">win.archive-conv</property>
+                <property name="action_name">win.archive-conversation</property>
                 <property name="image">archive_image</property>
                 <property name="use_underline">True</property>
                 <property name="always_show_image">True</property>
@@ -305,7 +304,7 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
-                <property name="action_name">win.trash-conv</property>
+                <property name="action_name">win.trash-conversation</property>
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="trash_delete_image">

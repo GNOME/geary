@@ -1259,13 +1259,16 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     // delete/archive question.  This method will mark the message as
     // deleted and expunge it.
     protected async void
-        expunge_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
+        expunge_email_async(Gee.Collection<Geary.EmailIdentifier> to_expunge,
                             GLib.Cancellable? cancellable)
         throws GLib.Error {
         check_open("expunge_email_async");
-        check_ids("expunge_email_async", email_ids);
+        check_ids("expunge_email_async", to_expunge);
 
-        RemoveEmail remove = new RemoveEmail(this, (Gee.List<ImapDB.EmailIdentifier>) email_ids,
+        RemoveEmail remove = new RemoveEmail(
+            this,
+            (Gee.List<ImapDB.EmailIdentifier>)
+            traverse(to_expunge).to_array_list(),
             cancellable);
         replay_queue.schedule(remove);
 
@@ -1316,7 +1319,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         check_open("mark_email_async");
         check_ids("mark_email_async", to_mark);
 
-        MarkEmail mark = new MarkEmail(this, (Gee.List<ImapDB.EmailIdentifier>) to_mark, flags_to_add, flags_to_remove, cancellable);
+        MarkEmail mark = new MarkEmail(
+            this,
+            (Gee.List<ImapDB.EmailIdentifier>)
+            traverse(to_mark).to_array_list(),
+            flags_to_add,
+            flags_to_remove,
+            cancellable
+        );
         replay_queue.schedule(mark);
 
         yield mark.wait_for_ready_async(cancellable);
@@ -1347,7 +1357,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (destination.equal_to(path))
             return null;
 
-        CopyEmail copy = new CopyEmail(this, (Gee.List<ImapDB.EmailIdentifier>) to_copy, destination);
+        CopyEmail copy = new CopyEmail(
+            this,
+            (Gee.List<ImapDB.EmailIdentifier>)
+            traverse(to_copy).to_array_list(),
+            destination
+        );
         replay_queue.schedule(copy);
 
         yield copy.wait_for_ready_async(cancellable);
@@ -1367,7 +1382,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (destination.equal_to(path))
             return null;
 
-        MoveEmailPrepare prepare = new MoveEmailPrepare(this, (Gee.List<ImapDB.EmailIdentifier>) to_move,
+        MoveEmailPrepare prepare = new MoveEmailPrepare(
+            this,
+            (Gee.List<ImapDB.EmailIdentifier>)
+            traverse(to_move).to_array_list(),
             cancellable);
         replay_queue.schedule(prepare);
 

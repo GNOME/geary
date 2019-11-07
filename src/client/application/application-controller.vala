@@ -10,71 +10,84 @@
 /**
  * Primary controller for an application instance.
  *
- * @see GearyAplication
+ * A single instance of this class is constructed by {@link
+ * GearyAplication} when the primary application instance is started.
  */
 public class Application.Controller : Geary.BaseObject {
 
-    // Named actions.
-    public const string ACTION_REPLY_TO_MESSAGE = "reply-to-message";
-    public const string ACTION_REPLY_ALL_MESSAGE = "reply-all-message";
-    public const string ACTION_FORWARD_MESSAGE = "forward-message";
-    public const string ACTION_ARCHIVE_CONVERSATION = "archive-conv";
-    public const string ACTION_TRASH_CONVERSATION = "trash-conv";
-    public const string ACTION_DELETE_CONVERSATION = "delete-conv";
-    public const string ACTION_EMPTY_SPAM = "empty-spam";
-    public const string ACTION_EMPTY_TRASH = "empty-trash";
-    public const string ACTION_FIND_IN_CONVERSATION = "conv-find";
-    public const string ACTION_ZOOM = "zoom";
-    public const string ACTION_SHOW_MARK_MENU = "mark-message-menu";
-    public const string ACTION_MARK_AS_READ = "mark-message-read";
-    public const string ACTION_MARK_AS_UNREAD = "mark-message-unread";
-    public const string ACTION_MARK_AS_STARRED = "mark-message-starred";
-    public const string ACTION_MARK_AS_UNSTARRED = "mark-message-unstarred";
-    public const string ACTION_MARK_AS_SPAM = "mark-message-spam";
-    public const string ACTION_MARK_AS_NOT_SPAM = "mark-message-not-spam";
-    public const string ACTION_COPY_MENU = "show-copy-menu";
-    public const string ACTION_MOVE_MENU = "show-move-menu";
-    public const string ACTION_SEARCH = "search-conv";
-    public const string ACTION_CONVERSATION_LIST = "focus-conv-list";
-    public const string ACTION_TOGGLE_SEARCH = "toggle-search";
-    public const string ACTION_TOGGLE_FIND = "toggle-find";
-    public const string ACTION_CONVERSATION_UP = "up-conversation";
-    public const string ACTION_CONVERSATION_DOWN = "down-conversation";
-
-    // Properties
-    public const string PROP_SELECTED_CONVERSATIONS ="selected-conversations";
-
-    private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
 
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
-
     private const uint MAX_AUTH_ATTEMPTS = 3;
 
-    private static string untitled_file_name;
 
-
-    static construct {
-        // Translators: File name used in save chooser when saving
-        // attachments that do not otherwise have a name.
-        Controller.untitled_file_name = _("Untitled");
+    /** Determines if conversations can be trashed from the given folder. */
+    public static bool does_folder_support_trash(Geary.Folder? target) {
+        return (
+            target != null &&
+            target.special_folder_type != TRASH &&
+            !target.properties.is_local_only &&
+            (target as Geary.FolderSupport.Move) != null
+        );
     }
 
 
-    internal class AccountContext : Geary.BaseObject {
+    /**
+     * Collects objects and state related to a single open account.
+     */
+    public class AccountContext : Geary.BaseObject {
 
+        /** The account for this context. */
         public Geary.Account account { get; private set; }
+
+        /** The account's Inbox folder */
         public Geary.Folder? inbox = null;
+
+        /** The account's email store */
         public Geary.App.EmailStore emails { get; private set; }
-        public Application.ContactStore contacts { get; private set; }
 
-        public bool authentication_failed = false;
-        public bool authentication_prompting = false;
-        public uint authentication_attempts = 0;
+        /** The account's contact store */
+        public ContactStore contacts { get; private set; }
 
-        public bool tls_validation_failed = false;
-        public bool tls_validation_prompting = false;
+        /** The account's application command stack. */
+        public CommandStack commands {
+            get { return this.controller_stack; }
+        }
 
-        public Cancellable cancellable { get; private set; default = new Cancellable(); }
+        /** A cancellable tied to the life-cycle of the account. */
+        public Cancellable cancellable {
+            get; private set; default = new Cancellable();
+        }
+
+        /** The account's application command stack. */
+        internal ControllerCommandStack controller_stack {
+            get; protected set; default = new ControllerCommandStack();
+        }
+
+        /** Determines if the account has an authentication problem. */
+        internal bool authentication_failed {
+            get; private set; default = false;
+        }
+
+        /** Determines if the account is prompting for a pasword. */
+        internal bool authentication_prompting {
+            get; private set; default = false;
+        }
+
+        /** Determines if currently prompting for a password. */
+        internal uint authentication_attempts {
+            get; private set; default = 0;
+        }
+
+        /** Determines if any TLS certificate errors have been seen. */
+        internal bool tls_validation_failed {
+            get; private set; default = false;
+        }
+
+        /** Determines if currently prompting about TLS certificate errors. */
+        internal bool tls_validation_prompting {
+            get; private set; default = false;
+        }
+
 
         public AccountContext(Geary.Account account,
                               Geary.App.EmailStore emails,
@@ -84,6 +97,7 @@ public class Application.Controller : Geary.BaseObject {
             this.contacts = contacts;
         }
 
+        /** Returns the current effective status for the account. */
         public Geary.Account.Status get_effective_status() {
             Geary.Account.Status current = this.account.current_status;
             Geary.Account.Status effective = 0;
@@ -117,6 +131,7 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** The primary application instance that owns this controller. */
     public weak GearyApplication application { get; private set; } // circular ref
 
     /** Account management for the application. */
@@ -147,66 +162,12 @@ public class Application.Controller : Geary.BaseObject {
 
     private PluginManager plugin_manager;
 
-    // Null if none selected
-    private Geary.Folder? current_folder = null;
-
-    // Null if no folder ever selected
-    private Geary.Account? current_account = null;
-
-    private Cancellable cancellable_folder = new Cancellable();
-    private Cancellable cancellable_search = new Cancellable();
     private Cancellable cancellable_open_account = new Cancellable();
-    private Cancellable cancellable_context_dependent_buttons = new Cancellable();
-    private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
-    private Geary.App.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
-    private uint select_folder_timeout_id = 0;
-    private int64 next_folder_select_allowed_usec = 0;
-    private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
-    private Geary.Folder? previous_non_search_folder = null;
     private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
-
-    private uint operation_count = 0;
-    private Geary.Revokable? revokable = null;
-
-    // Store the description for the revokable for tooltip display.
-    // This was previously stored within the context of undo button of the main toolbar.
-    private string revokable_description { get; set; }
 
     // List of windows we're waiting to close before Geary closes.
     private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
-
-    private const ActionEntry[] win_action_entries = {
-        {GearyApplication.ACTION_CLOSE, on_close                       },
-        {GearyApplication.ACTION_UNDO,  on_revoke                      },
-
-        {ACTION_CONVERSATION_LIST,     on_conversation_list            },
-        {ACTION_FIND_IN_CONVERSATION,  on_find_in_conversation_action  },
-        {ACTION_SEARCH,                on_search_activated             },
-        {ACTION_EMPTY_SPAM,            on_empty_spam                   },
-        {ACTION_EMPTY_TRASH,           on_empty_trash                  },
-        // Message actions
-        {ACTION_REPLY_TO_MESSAGE,      on_reply_to_message_action   },
-        {ACTION_REPLY_ALL_MESSAGE,     on_reply_all_message_action  },
-        {ACTION_FORWARD_MESSAGE,       on_forward_message_action    },
-        {ACTION_ARCHIVE_CONVERSATION,  on_archive_conversation      },
-        {ACTION_TRASH_CONVERSATION,    on_trash_conversation        },
-        {ACTION_DELETE_CONVERSATION,   on_delete_conversation       },
-        {ACTION_COPY_MENU,             on_show_copy_menu            },
-        {ACTION_MOVE_MENU,             on_show_move_menu            },
-        {ACTION_CONVERSATION_UP,       on_conversation_up           },
-        {ACTION_CONVERSATION_DOWN,     on_conversation_down         },
-        // Message marking actions
-        {ACTION_SHOW_MARK_MENU,     on_show_mark_menu           },
-        {ACTION_MARK_AS_READ,       on_mark_as_read             },
-        {ACTION_MARK_AS_UNREAD,     on_mark_as_unread           },
-        {ACTION_MARK_AS_STARRED,    on_mark_as_starred          },
-        {ACTION_MARK_AS_UNSTARRED,  on_mark_as_unstarred        },
-        {ACTION_MARK_AS_SPAM,       on_mark_as_spam_toggle      },
-        {ACTION_MARK_AS_NOT_SPAM,   on_mark_as_spam_toggle      },
-        // Message viewer
-        {ACTION_ZOOM,  on_zoom,  "s"  },
-    };
 
 
     /**
@@ -275,36 +236,15 @@ public class Application.Controller : Geary.BaseObject {
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
         main_window.retry_service_problem.connect(on_retry_service_problem);
-        main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
-
-        setup_actions();
-
-        enable_message_buttons(false);
 
         engine.account_available.connect(on_account_available);
 
         // Connect to various UI signals.
-        main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
-        main_window.conversation_list_view.conversation_activated.connect(on_conversation_activated);
-        main_window.conversation_list_view.mark_conversations.connect(on_mark_conversations);
-        main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
-        main_window.folder_list.folder_selected.connect(on_folder_selected);
-        main_window.folder_list.copy_conversation.connect(on_copy_conversation);
-        main_window.folder_list.move_conversation.connect(on_move_conversation);
-        main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
-        main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
-        main_window.search_bar.search_text_changed.connect((text) => { do_search(text); });
-        main_window.conversation_viewer.conversation_added.connect(
-            on_conversation_view_added
-        );
         this.main_window.folder_list.set_new_messages_monitor(
             this.plugin_manager.notifications
         );
 
         this.main_window.conversation_list_view.grab_focus();
-
-        // initialize revokable
-        save_revokable(null, null);
 
         // Migrate configuration if necessary.
         try {
@@ -367,6 +307,11 @@ public class Application.Controller : Geary.BaseObject {
         this.expunge_accounts.begin();
     }
 
+    /** Returns a context for an account, if any. */
+    public AccountContext? get_context_for_account(Geary.AccountInformation account) {
+        return this.accounts.get(account);
+    }
+
     /** Closes all accounts and windows, releasing held resources. */
     public async void close_async() {
         // Cancel internal processes early so they don't block
@@ -376,22 +321,7 @@ public class Application.Controller : Geary.BaseObject {
         this.application.engine.account_available.disconnect(on_account_available);
 
         // Release folder and conversations in the main window
-        on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
-        on_folder_selected(null);
-
-        // Disconnect from various UI signals.
-        this.main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
-        this.main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
-        this.main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
-        this.main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
-        this.main_window.folder_list.folder_selected.disconnect(on_folder_selected);
-        this.main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
-        this.main_window.folder_list.move_conversation.disconnect(on_move_conversation);
-        this.main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
-        this.main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
-        this.main_window.conversation_viewer.conversation_added.disconnect(
-            on_conversation_view_added
-        );
+        yield this.main_window.select_folder(null, false);
 
         // hide window while shutting down, as this can take a few
         // seconds under certain conditions
@@ -401,45 +331,22 @@ public class Application.Controller : Geary.BaseObject {
         // be freed up
         this.plugin_manager.notifications.clear_folders();
 
-        // drop the Revokable, which will commit it if necessary
-        save_revokable(null, null);
-
         this.cancellable_open_account.cancel();
 
         // Create an array of known accounts so the loops below do not
         // explode if accounts are removed while iterating.
         AccountContext[] accounts = this.accounts.values.to_array();
 
-        // Close all inboxes. Launch these in parallel first so we're
-        // not wasting time waiting for each one to close. The account
-        // will wait around for them to actually close.
-        foreach (AccountContext context in accounts) {
-            Geary.Folder? inbox = context.inbox;
-            if (inbox != null) {
-                debug("Closing inbox: %s...", inbox.to_string());
-                inbox.close_async.begin(null, (obj, ret) => {
-                        try {
-                            inbox.close_async.end(ret);
-                        } catch (Error err) {
-                            debug(
-                                "Error closing Inbox %s at shutdown: %s",
-                                inbox.to_string(), err.message
-                            );
-                        }
-                    });
-                context.inbox = null;
-            }
-        }
-
-        // Close all Accounts. Again, this is done in parallel to
-        // minimise time taken to close, but here use a barrier to
-        // wait for all to actually finish closing.
+        // Close all Accounts. Launch these in parallel to minimise
+        // time taken to close, but here use a barrier to wait for all
+        // to actually finish closing.
         Geary.Nonblocking.CountingSemaphore close_barrier =
             new Geary.Nonblocking.CountingSemaphore(null);
         foreach (AccountContext context in accounts) {
             close_barrier.acquire();
             this.close_account.begin(
                 context.account.information,
+                true,
                 (obj, ret) => {
                     this.close_account.end(ret);
                     close_barrier.blind_notify();
@@ -476,14 +383,6 @@ public class Application.Controller : Geary.BaseObject {
             this.main_window.destroy();
         }
 
-        this.current_folder = null;
-        this.previous_non_search_folder = null;
-
-        this.current_account = null;
-
-        this.selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
-        this.last_deleted_conversation = null;
-
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
         this.waiting_to_close.clear();
@@ -497,20 +396,43 @@ public class Application.Controller : Geary.BaseObject {
      * Opens or queues a new composer addressed to a specific email address.
      */
     public void compose(string? mailto = null) {
-        if (current_account == null) {
+        Geary.Account? selected = this.main_window.selected_account;
+        if (selected == null) {
             // Schedule the send for after we have an account open.
-            pending_mailtos.add(mailto);
+            this.pending_mailtos.add(mailto);
         } else {
-            create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, null, null, mailto);
+            create_compose_widget(selected, NEW_MESSAGE, null, null, mailto);
         }
+    }
+
+    /**
+     * Opens new composer with an existing message as context.
+     */
+    public void compose_with_context_email(Geary.Account account,
+                                           ComposerWidget.ComposeType type,
+                                           Geary.Email context,
+                                           string? quote) {
+        create_compose_widget(account, type, context, quote);
     }
 
     /** Adds a new composer to be kept track of. */
     public void add_composer(ComposerWidget widget) {
         debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");
         widget.destroy.connect(this.on_composer_widget_destroy);
-        widget.link_activated.connect((uri) => { open_uri(uri); });
         this.composer_widgets.add(widget);
+    }
+
+    /** Returns a read-only collection of currently open composers .*/
+    public Gee.Collection<ComposerWidget> get_composers() {
+        return this.composer_widgets.read_only_view;
+    }
+
+    /** Opens any pending composers. */
+    public void process_pending_composers() {
+        foreach (string? mailto in this.pending_mailtos) {
+            compose(mailto);
+        }
+        this.pending_mailtos.clear();
     }
 
     /** Displays a problem report when an error has been encountered. */
@@ -545,6 +467,391 @@ public class Application.Controller : Geary.BaseObject {
         return (context != null) ? context.contacts : null;
     }
 
+    /**
+     * Updates flags for a collection of conversations.
+     *
+     * If `prefer_adding` is true, this will add the flag if not set
+     * on all conversations or else will remove it. If false, this
+     * will remove the flag if not set on all conversations or else
+     * add it.
+     */
+    public async void mark_conversations(Geary.Folder location,
+                                         Gee.Collection<Geary.App.Conversation> conversations,
+                                         Geary.NamedFlag flag,
+                                         bool prefer_adding)
+        throws GLib.Error {
+        Geary.Iterable<Geary.App.Conversation> selecting =
+            Geary.traverse(conversations);
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+
+        if (flag.equal_to(Geary.EmailFlags.UNREAD)) {
+            selecting = selecting.filter(c => prefer_adding ^ c.is_unread());
+            flags.add(Geary.EmailFlags.UNREAD);
+        } else if (flag.equal_to(Geary.EmailFlags.FLAGGED)) {
+            selecting = selecting.filter(c => prefer_adding ^ c.is_flagged());
+            flags.add(Geary.EmailFlags.FLAGGED);
+        } else {
+            throw new Geary.EngineError.UNSUPPORTED(
+                "Marking as %s is not supported", flag.to_string()
+            );
+        }
+
+        Gee.Collection<Geary.EmailIdentifier>? messages = null;
+        Gee.Collection<Geary.App.Conversation> selected =
+            selecting.to_linked_list();
+
+        bool do_add = prefer_adding ^ selected.is_empty;
+        if (selected.is_empty) {
+            selected = conversations;
+        }
+
+        if (do_add) {
+            // Only apply to the latest in-folder message in
+            // conversations that don't already have the flag, since
+            // we don't want to flag every message in the conversation
+            messages = Geary.traverse(selected).map<Geary.EmailIdentifier>(
+                c => c.get_latest_recv_email(IN_FOLDER_OUT_OF_FOLDER).id
+            ).to_linked_list();
+        } else {
+            // Remove the flag from those that have it
+            messages = new Gee.LinkedList<Geary.EmailIdentifier>();
+            foreach (Geary.App.Conversation convo in selected) {
+                foreach (Geary.Email email in
+                         convo.get_emails(RECV_DATE_DESCENDING)) {
+                    if (email.email_flags != null &&
+                        email.email_flags.contains(flag)) {
+                        messages.add(email.id);
+                    }
+                }
+            }
+        }
+
+        yield mark_messages(
+            location,
+            conversations,
+            messages,
+            do_add ? flags : null,
+            do_add ? null : flags
+        );
+    }
+
+    /**
+     * Updates flags for a collection of email.
+     *
+     * This should only be used when working with specific messages
+     * (for example, marking a specific message in a conversation)
+     * rather than when working with whole conversations. In that
+     * case, use {@link mark_conversations}.
+     */
+    public async void mark_messages(Geary.Folder location,
+                                    Gee.Collection<Geary.App.Conversation> conversations,
+                                    Gee.Collection<Geary.EmailIdentifier> messages,
+                                    Geary.EmailFlags? to_add,
+                                    Geary.EmailFlags? to_remove)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(location.account.information);
+        if (context != null) {
+            yield context.commands.execute(
+                new MarkEmailCommand(
+                    location,
+                    conversations,
+                    messages,
+                    context.emails,
+                    to_add,
+                    to_remove,
+                    /// Translators: Label for in-app notification
+                    ngettext(
+                        "Conversation marked",
+                        "Conversations marked",
+                        conversations.size
+                    ),
+                    /// Translators: Label for in-app notification
+                    ngettext(
+                        "Conversation un-marked",
+                        "Conversations un-marked",
+                        conversations.size
+                    )
+                ),
+                context.cancellable
+            );
+        }
+    }
+
+    public async void move_conversations(Geary.FolderSupport.Move source,
+                                         Geary.Folder destination,
+                                         Gee.Collection<Geary.App.Conversation> conversations)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.account.information);
+        if (context != null) {
+            yield context.commands.execute(
+                new MoveEmailCommand(
+                    source,
+                    destination,
+                    conversations,
+                    to_in_folder_email_ids(conversations),
+                    /// Translators: Label for in-app
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Conversation moved to %s",
+                        "Conversations moved to %s",
+                        conversations.size
+                    ).printf(destination.get_display_name()),
+                    /// Translators: Label for in-app
+                    /// notification. String substitution is the name
+                    /// of the source folder.
+                    ngettext(
+                        "Conversation restored to %s",
+                        "Conversations restored to %s",
+                        conversations.size
+                    ).printf(source.get_display_name())
+                ),
+                context.cancellable
+            );
+        }
+    }
+
+    public async void move_conversations_special(Geary.Folder source,
+                                                 Geary.SpecialFolderType destination,
+                                                 Gee.Collection<Geary.App.Conversation> conversations)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.account.information);
+        if (context != null) {
+            Command? command = null;
+            Gee.Collection<Geary.EmailIdentifier> messages =
+                to_in_folder_email_ids(conversations);
+            /// Translators: Label for in-app notification. String
+            /// substitution is the name of the destination folder.
+            string undone_tooltip = ngettext(
+                "Conversation restored to %s",
+                "Conversations restored to %s",
+                messages.size
+            ).printf(source.get_display_name());
+
+            if (destination == ARCHIVE) {
+                Geary.FolderSupport.Archive? archive_source = (
+                    source as Geary.FolderSupport.Archive
+                );
+                if (archive_source == null) {
+                    throw new Geary.EngineError.UNSUPPORTED(
+                        "Folder does not support archiving: %s",
+                        source.to_string()
+                    );
+                }
+                command = new ArchiveEmailCommand(
+                    archive_source,
+                    conversations,
+                    messages,
+                    /// Translators: Label for in-app notification.
+                    ngettext(
+                        "Conversation archived",
+                        "Conversations archived",
+                        messages.size
+                    ),
+                    undone_tooltip
+                );
+            } else {
+                Geary.FolderSupport.Move? move_source = (
+                    source as Geary.FolderSupport.Move
+                );
+                if (move_source == null) {
+                    throw new Geary.EngineError.UNSUPPORTED(
+                        "Folder does not support moving: %s",
+                        source.to_string()
+                    );
+                }
+                Geary.Folder? dest = source.account.get_special_folder(
+                    destination
+                );
+                if (dest == null) {
+                    throw new Geary.EngineError.NOT_FOUND(
+                        "No folder found for: %s", destination.to_string()
+                    );
+                }
+                command = new MoveEmailCommand(
+                    move_source,
+                    dest,
+                    conversations,
+                    messages,
+                    /// Translators: Label for in-app
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Conversation moved to %s",
+                        "Conversations moved to %s",
+                        messages.size
+                    ).printf(destination.get_display_name()),
+                    undone_tooltip
+                );
+            }
+
+            yield context.commands.execute(command, context.cancellable);
+        }
+    }
+
+    public async void move_messages_special(Geary.Folder source,
+                                            Geary.SpecialFolderType destination,
+                                            Gee.Collection<Geary.App.Conversation> conversations,
+                                            Gee.Collection<Geary.EmailIdentifier> messages)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.account.information);
+        if (context != null) {
+            Command? command = null;
+            /// Translators: Label for in-app notification. String
+            /// substitution is the name of the destination folder.
+            string undone_tooltip = ngettext(
+                "Message restored to %s",
+                "Messages restored to %s",
+                messages.size
+            ).printf(source.get_display_name());
+
+            if (destination == ARCHIVE) {
+                Geary.FolderSupport.Archive? archive_source = (
+                    source as Geary.FolderSupport.Archive
+                );
+                if (archive_source == null) {
+                    throw new Geary.EngineError.UNSUPPORTED(
+                        "Folder does not support archiving: %s",
+                        source.to_string()
+                    );
+                }
+                command = new ArchiveEmailCommand(
+                    archive_source,
+                    conversations,
+                    messages,
+                    /// Translators: Label for in-app notification.
+                    ngettext(
+                        "Message archived",
+                        "Messages archived",
+                        messages.size
+                    ),
+                    undone_tooltip
+                );
+            } else {
+                Geary.FolderSupport.Move? move_source = (
+                    source as Geary.FolderSupport.Move
+                );
+                if (move_source == null) {
+                    throw new Geary.EngineError.UNSUPPORTED(
+                        "Folder does not support moving: %s",
+                        source.to_string()
+                    );
+                }
+
+                Geary.Folder? dest = source.account.get_special_folder(
+                    destination
+                );
+                if (dest == null) {
+                    throw new Geary.EngineError.NOT_FOUND(
+                        "No folder found for: %s", destination.to_string()
+                    );
+                }
+
+                command = new MoveEmailCommand(
+                    move_source,
+                    dest,
+                    conversations,
+                    messages,
+                    /// Translators: Label for in-app
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Message moved to %s",
+                        "Messages moved to %s",
+                        messages.size
+                    ).printf(destination.get_display_name()),
+                    undone_tooltip
+                );
+            }
+
+            yield context.commands.execute(command, context.cancellable);
+        }
+    }
+
+    public async void copy_conversations(Geary.FolderSupport.Copy source,
+                                         Geary.Folder destination,
+                                         Gee.Collection<Geary.App.Conversation> conversations)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.account.information);
+        if (context != null) {
+            yield context.commands.execute(
+                new CopyEmailCommand(
+                    source,
+                    destination,
+                    conversations,
+                    to_in_folder_email_ids(conversations),
+                    /// Translators: Label for in-app
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Conversation labelled as %s",
+                        "Conversations labelled as %s",
+                        conversations.size
+                    ).printf(destination.get_display_name()),
+                    /// Translators: Label for in-app
+                    /// notification. String substitution is the name
+                    /// of the destination folder.
+                    ngettext(
+                        "Conversation un-labelled as %s",
+                        "Conversations un-labelled as %s",
+                        conversations.size
+                    ).printf(destination.get_display_name())
+                ),
+                context.cancellable
+            );
+        }
+    }
+
+    public async void delete_conversations(Geary.FolderSupport.Remove target,
+                                           Gee.Collection<Geary.App.Conversation> conversations)
+        throws GLib.Error {
+        yield delete_messages(
+            target, conversations, to_in_folder_email_ids(conversations)
+        );
+    }
+
+    public async void delete_messages(Geary.FolderSupport.Remove target,
+                                      Gee.Collection<Geary.App.Conversation> conversations,
+                                      Gee.Collection<Geary.EmailIdentifier> messages)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(target.account.information);
+        if (context != null) {
+            Command command = new DeleteEmailCommand(
+                target, conversations, messages
+            );
+            command.executed.connect(
+                () => context.controller_stack.email_removed(target, messages)
+            );
+            yield context.commands.execute(command, context.cancellable);
+        }
+    }
+
+    public async void empty_folder_special(Geary.Account source,
+                                           Geary.SpecialFolderType type)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(source.information);
+        if (context != null) {
+            Geary.FolderSupport.Empty? emptyable = (
+                source.get_special_folder(type)
+                as Geary.FolderSupport.Empty
+            );
+            if (emptyable == null) {
+                throw new Geary.EngineError.UNSUPPORTED(
+                    "Special folder type not supported %s", type.to_string()
+                );
+            }
+
+            Command command = new EmptyFolderCommand(emptyable);
+            command.executed.connect(
+                // Not quite accurate, but close enough
+                () => context.controller_stack.folders_removed(
+                    Geary.Collection.single(emptyable)
+                )
+            );
+            yield context.commands.execute(command, context.cancellable);
+        }
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -552,50 +859,6 @@ public class Application.Controller : Geary.BaseObject {
         } catch (GLib.Error err) {
             report_problem(new Geary.ProblemReport(err));
         }
-    }
-
-    private void setup_actions() {
-        this.main_window.add_action_entries(win_action_entries, this);
-
-        // Marking actions
-        //
-        // Unmark is the primary action
-        add_window_accelerators(ACTION_MARK_AS_READ, { "<Ctrl><Shift>U", "<Shift>I" });
-        add_window_accelerators(ACTION_MARK_AS_UNREAD, { "<Ctrl>U", "<Shift>U" });
-        // Ephy uses Ctrl+D for bookmarking
-        add_window_accelerators(ACTION_MARK_AS_STARRED, { "<Ctrl>D", "S" });
-        add_window_accelerators(ACTION_MARK_AS_UNSTARRED, { "<Ctrl><Shift>D", "D" });
-        add_window_accelerators(ACTION_MARK_AS_SPAM, { "<Ctrl>J", "exclam" }); // Exclamation mark (!)
-
-        // Replying & forwarding
-        add_window_accelerators(ACTION_REPLY_TO_MESSAGE, { "<Ctrl>R", "R" });
-        add_window_accelerators(ACTION_REPLY_ALL_MESSAGE, { "<Ctrl><Shift>R", "<Shift>R" });
-        add_window_accelerators(ACTION_FORWARD_MESSAGE, { "<Ctrl>L", "F" });
-
-        // Moving & labelling
-        add_window_accelerators(ACTION_COPY_MENU, { "<Ctrl>L", "L" });
-        add_window_accelerators(ACTION_MOVE_MENU, { "<Ctrl>M", "M" });
-        add_window_accelerators(ACTION_ARCHIVE_CONVERSATION, { "<Ctrl>K", "A", "Y" });
-        add_window_accelerators(ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" });
-        add_window_accelerators(ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" });
-
-        // Find & search
-        add_window_accelerators(ACTION_FIND_IN_CONVERSATION, { "<Ctrl>F", "slash" });
-        add_window_accelerators(ACTION_SEARCH, { "<Ctrl>S" });
-
-        // Zoom
-        add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "<Ctrl>plus" });
-        add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus" });
-        add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0" });
-
-        // Navigation
-        add_window_accelerators(ACTION_CONVERSATION_LIST, { "<Ctrl>B" });
-        add_window_accelerators(ACTION_CONVERSATION_UP, { "<Ctrl>bracketleft", "K" });
-        add_window_accelerators(ACTION_CONVERSATION_DOWN, { "<Ctrl>bracketright", "J" });
-    }
-
-    private void add_window_accelerators(string action, string[] accelerators, Variant? param = null) {
-        this.application.set_accels_for_action("win."+action, accelerators);
     }
 
     private void open_account(Geary.Account account) {
@@ -610,18 +873,15 @@ public class Application.Controller : Geary.BaseObject {
         connect_account_async.begin(account, cancellable_open_account);
     }
 
-    private async void close_account(Geary.AccountInformation config) {
+    private async void close_account(Geary.AccountInformation config,
+                                     bool is_shutdown) {
         AccountContext? context = this.accounts.get(config);
         if (context != null) {
+            debug("Closing account: %s", context.account.information.id);
             Geary.Account account = context.account;
-            if (this.current_account == account) {
-                this.current_account = null;
 
-                previous_non_search_folder = null;
-                main_window.search_bar.set_search_text(""); // Reset search.
-
-                cancel_folder();
-            }
+            // Guard against trying to close the account twice
+            this.accounts.unset(account.information);
 
             // Stop updating status and showing errors when closing
             // the account - the user doesn't care any more
@@ -634,7 +894,53 @@ public class Application.Controller : Geary.BaseObject {
                 on_account_status_notify
             );
 
-            yield disconnect_account_async(context);
+            account.email_sent.disconnect(on_sent);
+            account.email_removed.disconnect(on_account_email_removed);
+            account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
+            account.sending_monitor.start.disconnect(on_sending_started);
+            account.sending_monitor.finish.disconnect(on_sending_finished);
+
+            // Now the account is not in the accounts map, reset any
+            // status notifications for it
+            update_account_status();
+
+            // If we're not shutting down, select the inbox of the
+            // first account so that we show something other than
+            // empty conversation list/viewer.
+            Geary.Folder? to_select = null;
+            if (!is_shutdown) {
+                Geary.AccountInformation? first_account = get_first_account();
+                if (first_account != null) {
+                    AccountContext? first_context = this.accounts[first_account];
+                    if (first_context != null) {
+                        to_select = first_context.inbox;
+                    }
+                }
+            }
+
+            yield this.main_window.remove_account(account, to_select);
+
+            context.cancellable.cancel();
+            context.contacts.close();
+
+            // Explicitly close the inbox since we explicitly open it
+            Geary.Folder? inbox = context.inbox;
+            if (inbox != null) {
+                try {
+                    yield inbox.close_async(null);
+                } catch (Error close_inbox_err) {
+                    debug("Unable to close monitored inbox: %s", close_inbox_err.message);
+                }
+                context.inbox = null;
+            }
+
+            try {
+                yield account.close_async(null);
+            } catch (Error close_err) {
+                debug("Unable to close account %s: %s", account.to_string(), close_err.message);
+            }
+
+            debug("Account closed: %s", account.to_string());
         }
     }
 
@@ -925,48 +1231,6 @@ public class Application.Controller : Geary.BaseObject {
         return retry;
     }
 
-    private async void disconnect_account_async(AccountContext context, Cancellable? cancellable = null) {
-        debug("Disconnecting account: %s", context.account.information.id);
-
-        Geary.Account account = context.account;
-
-        // Guard against trying to disconnect the account twice
-        this.accounts.unset(account.information);
-
-        // Now the account is not in the accounts map, reset any
-        // status notifications for it
-        update_account_status();
-
-        account.email_sent.disconnect(on_sent);
-        account.email_removed.disconnect(on_account_email_removed);
-        account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
-        account.sending_monitor.start.disconnect(on_sending_started);
-        account.sending_monitor.finish.disconnect(on_sending_finished);
-
-        main_window.folder_list.remove_account(account);
-
-        context.cancellable.cancel();
-        context.contacts.close();
-
-        Geary.Folder? inbox = context.inbox;
-        if (inbox != null) {
-            try {
-                yield inbox.close_async(cancellable);
-            } catch (Error close_inbox_err) {
-                debug("Unable to close monitored inbox: %s", close_inbox_err.message);
-            }
-            context.inbox = null;
-        }
-
-        try {
-            yield account.close_async(cancellable);
-        } catch (Error close_err) {
-            debug("Unable to close account %s: %s", account.to_string(), close_err.message);
-        }
-
-        debug("Account closed: %s", account.to_string());
-    }
-
     /**
      * Returns true if we've attempted to open all accounts at this point.
      */
@@ -1013,229 +1277,12 @@ public class Application.Controller : Geary.BaseObject {
         bool is_descendent = false;
 
         Geary.Account account = target.account;
-        Geary.Folder? inbox = null;
-        try {
-            inbox = account.get_special_folder(Geary.SpecialFolderType.INBOX);
-        } catch (Error err) {
-            debug("Failed to get inbox for account %s", account.information.id);
-        }
+        Geary.Folder? inbox = account.get_special_folder(Geary.SpecialFolderType.INBOX);
 
         if (inbox != null) {
             is_descendent = inbox.path.is_descendant(target.path);
         }
         return is_descendent;
-    }
-
-    // Update widgets and such to match capabilities of the current folder ... sensitivity is handled
-    // by other utility methods
-    private void update_ui() {
-        this.main_window.main_toolbar.selected_conversations =
-            this.selected_conversations.size;
-        this.main_window.main_toolbar.update_trash_button(
-            !this.main_window.is_shift_down &&
-            current_folder_supports_trash()
-        );
-    }
-
-    private void on_folder_selected(Geary.Folder? folder) {
-        debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
-        if (folder == null) {
-            this.current_folder = null;
-            main_window.conversation_list_view.set_model(null);
-            main_window.main_toolbar.folder = null;
-            this.main_window.folder_selected(null, null);
-        } else if (folder != this.current_folder) {
-            this.main_window.conversation_viewer.show_loading();
-            get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
-            enable_message_buttons(false);
-
-            // To prevent the user from selecting folders too quickly,
-            // we prevent additional selection changes to occur until
-            // after a timeout has expired from the last one
-            int64 now = get_monotonic_time();
-            int64 diff = now - this.next_folder_select_allowed_usec;
-            if (diff < SELECT_FOLDER_TIMEOUT_USEC) {
-                // only start timeout if another timeout is not
-                // running ... this means the user can click madly and
-                // will see the last clicked-on folder 100ms after the
-                // first one was clicked on
-                if (this.select_folder_timeout_id == 0) {
-                    this.select_folder_timeout_id = Timeout.add(
-                        (uint) (diff / 1000),
-                        () => {
-                            this.select_folder_timeout_id = 0;
-                            this.next_folder_select_allowed_usec = 0;
-                            if (folder != this.current_folder) {
-                                do_select_folder.begin(
-                                    folder, on_select_folder_completed
-                                );
-                            }
-                            return false;
-                        });
-                }
-            } else {
-                do_select_folder.begin(folder, on_select_folder_completed);
-                this.next_folder_select_allowed_usec =
-                    now + SELECT_FOLDER_TIMEOUT_USEC;
-            }
-        }
-    }
-
-    private async void do_select_folder(Geary.Folder folder) throws Error {
-        debug("Switching to %s...", folder.to_string());
-
-        closed_folder();
-
-        // This function is not reentrant.  It should be, because it can be
-        // called reentrant-ly if you select folders quickly enough.  This
-        // mutex lock is a bandaid solution to make the function safe to
-        // reenter.
-        int mutex_token = yield select_folder_mutex.claim_async(cancellable_folder);
-
-        // clear Revokable, as Undo is only available while a folder is selected
-        save_revokable(null, null);
-
-        // re-enable copy/move to the last selected folder
-        if (current_folder != null) {
-            main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, true);
-            main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, true);
-        }
-
-        this.current_folder = folder;
-
-        if (this.current_account != folder.account) {
-            this.current_account = folder.account;
-            this.main_window.search_bar.set_account(this.current_account);
-
-            // If we were waiting for an account to be selected before issuing mailtos, do that now.
-            if (pending_mailtos.size > 0) {
-                foreach(string? mailto in pending_mailtos)
-                    compose(mailto);
-
-                pending_mailtos.clear();
-            }
-
-            main_window.main_toolbar.copy_folder_menu.clear();
-            main_window.main_toolbar.move_folder_menu.clear();
-            foreach(Geary.Folder f in current_folder.account.list_folders()) {
-                main_window.main_toolbar.copy_folder_menu.add_folder(f);
-                main_window.main_toolbar.move_folder_menu.add_folder(f);
-            }
-        }
-
-        if (!(current_folder is Geary.SearchFolder))
-            previous_non_search_folder = current_folder;
-
-        // disable copy/move to the new folder
-        main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
-        main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
-
-        update_ui();
-
-        this.main_window.folder_selected(folder, this.cancellable_folder);
-
-        clear_new_messages("do_select_folder", null);
-
-        select_folder_mutex.release(ref mutex_token);
-
-        debug("Switched to %s", folder.to_string());
-    }
-
-    private void on_select_folder_completed(Object? source, AsyncResult result) {
-        try {
-            do_select_folder.end(result);
-        } catch (Error err) {
-            debug("Unable to select folder: %s", err.message);
-        }
-    }
-
-    private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
-        this.selected_conversations = selected;
-        get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
-        ConversationViewer viewer = this.main_window.conversation_viewer;
-        if (this.current_folder != null && !this.main_window.has_composer) {
-            switch(selected.size) {
-            case 0:
-                enable_message_buttons(false);
-                viewer.show_none_selected();
-                break;
-
-            case 1:
-                // Cancel existing avatar loads before loading new
-                // convo since that will start loading more avatars
-                Geary.App.Conversation convo = Geary.Collection.get_first(
-                    selected
-                );
-
-                AccountContext? context = this.accounts.get(
-                    convo.base_folder.account.information
-                );
-
-                // It's possible for a conversation with zero email to
-                // be selected, when it has just evaporated after its
-                // last email was removed but the conversation monitor
-                // hasn't signalled its removal yet. In this case,
-                // just don't load it since it will soon disappear.
-                if (context != null && convo.get_count() > 0) {
-                    viewer.load_conversation.begin(
-                        convo,
-                        context.emails,
-                        context.contacts,
-                        (obj, ret) => {
-                            try {
-                                viewer.load_conversation.end(ret);
-                                enable_message_buttons(true);
-                                get_window_action(
-                                    ACTION_FIND_IN_CONVERSATION
-                                ).set_enabled(true);
-                            } catch (GLib.IOError.CANCELLED err) {
-                                // All good
-                            } catch (Error err) {
-                                debug("Unable to load conversation: %s",
-                                      err.message);
-                            }
-                        }
-                    );
-                }
-                break;
-
-            default:
-                enable_multiple_message_buttons();
-                viewer.show_multiple_selected();
-                break;
-            }
-        }
-    }
-
-    private void on_conversation_activated(Geary.App.Conversation activated) {
-        // Currently activating a conversation is only available for drafts folders.
-        if (current_folder == null || current_folder.special_folder_type !=
-            Geary.SpecialFolderType.DRAFTS)
-            return;
-
-        // TODO: Determine how to map between conversations and drafts correctly.
-        Geary.Email draft = activated.get_latest_recv_email(
-            Geary.App.Conversation.Location.IN_FOLDER
-        );
-
-        // Check all known composers since the draft may be open in a
-        // detached composer
-        bool already_open = false;
-        foreach (ComposerWidget composer in this.composer_widgets) {
-            if (composer.draft_id != null &&
-                composer.draft_id.equal_to(draft.id)) {
-                already_open = true;
-                composer.present();
-                composer.set_focus();
-                break;
-            }
-        }
-
-        if (!already_open) {
-            create_compose_widget(
-                ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
-            );
-        }
     }
 
     private void on_special_folder_type_changed(Geary.Folder folder,
@@ -1280,17 +1327,10 @@ public class Application.Controller : Geary.BaseObject {
                 if (!should_add_folder(available, folder)) {
                     continue;
                 }
-
-                main_window.folder_list.add_folder(folder);
-                if (folder.account == current_account) {
-                    if (!main_window.main_toolbar.copy_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.copy_folder_menu.add_folder(folder);
-                    if (!main_window.main_toolbar.move_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.move_folder_menu.add_folder(folder);
-                }
+                folder.special_folder_type_changed.connect(on_special_folder_type_changed);
+                this.main_window.add_folder(folder);
 
                 GLib.Cancellable cancellable = context.cancellable;
-
                 switch (folder.special_folder_type) {
                 case Geary.SpecialFolderType.INBOX:
                     // Special case handling of inboxes
@@ -1300,20 +1340,12 @@ public class Application.Controller : Geary.BaseObject {
                         // Select this inbox if there isn't an
                         // existing folder selected and it is the
                         // inbox for the first account
-                        if (!main_window.folder_list.is_any_selected()) {
-                            Geary.AccountInformation? first_account = null;
-                            foreach (Geary.AccountInformation info in this.accounts.keys) {
-                                if (first_account == null ||
-                                    info.ordinal < first_account.ordinal) {
-                                    first_account = info;
-                                }
-                            }
-                            if (folder.account.information == first_account) {
-                                // First we try to select the Inboxes branch inbox if
-                                // it's there, falling back to the main folder list.
-                                if (!main_window.folder_list.select_inbox(folder.account))
-                                    main_window.folder_list.select_folder(folder);
-                            }
+                        if (!this.main_window.folder_list.is_any_selected() &&
+                            folder.account.information == get_first_account()) {
+                            // First we try to select the Inboxes branch inbox if
+                            // it's there, falling back to the main folder list.
+                            if (!main_window.folder_list.select_inbox(folder.account))
+                                main_window.folder_list.select_folder(folder);
                         }
                     }
 
@@ -1335,8 +1367,6 @@ public class Application.Controller : Geary.BaseObject {
                     }
                     break;
                 }
-
-                folder.special_folder_type_changed.connect(on_special_folder_type_changed);
             }
         }
 
@@ -1346,14 +1376,8 @@ public class Application.Controller : Geary.BaseObject {
             bool has_prev = unavailable_iterator.last();
             while (has_prev) {
                 Geary.Folder folder = unavailable_iterator.get();
-
-                main_window.folder_list.remove_folder(folder);
-                if (folder.account == current_account) {
-                    if (main_window.main_toolbar.copy_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.copy_folder_menu.remove_folder(folder);
-                    if (main_window.main_toolbar.move_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.move_folder_menu.remove_folder(folder);
-                }
+                folder.special_folder_type_changed.disconnect(on_special_folder_type_changed);
+                this.main_window.remove_folder(folder);
 
                 switch (folder.special_folder_type) {
                 case Geary.SpecialFolderType.INBOX:
@@ -1370,38 +1394,12 @@ public class Application.Controller : Geary.BaseObject {
                     break;
                 }
 
-                folder.special_folder_type_changed.disconnect(on_special_folder_type_changed);
-
                 has_prev = unavailable_iterator.previous();
             }
+
+            // Notify the command stack that folders have gone away
+            context.controller_stack.folders_removed(unavailable);
         }
-    }
-
-    private void cancel_folder() {
-        Cancellable old_cancellable = cancellable_folder;
-        cancellable_folder = new Cancellable();
-
-        old_cancellable.cancel();
-    }
-
-    // Like cancel_folder() but doesn't cancel outstanding operations, allowing them to complete
-    // in the background
-    private void closed_folder() {
-        cancellable_folder = new Cancellable();
-    }
-
-    private void cancel_search() {
-        Cancellable old_cancellable = this.cancellable_search;
-        this.cancellable_search = new Cancellable();
-
-        old_cancellable.cancel();
-    }
-
-    private void cancel_context_dependent_buttons() {
-        Cancellable old_cancellable = cancellable_context_dependent_buttons;
-        cancellable_context_dependent_buttons = new Cancellable();
-
-        old_cancellable.cancel();
     }
 
     // We need to include the second parameter, or valac doesn't recognize the function as matching
@@ -1413,152 +1411,36 @@ public class Application.Controller : Geary.BaseObject {
         return sender.cancel_exit();
     }
 
-    // this signal does not necessarily indicate that the application previously didn't have
-    // focus and now it does
-    private void on_has_toplevel_focus() {
-        clear_new_messages("on_has_toplevel_focus", null);
-    }
-
-    // latest_sent_only uses Email's Date: field, which corresponds to
-    // how they're sorted in the ConversationViewer, not whether they
-    // are in the sent folder.
-    private Gee.Collection<Geary.EmailIdentifier> get_conversation_email_ids(
-        Gee.Collection<Geary.App.Conversation> conversations,
-        bool latest_sent_only) {
-
-        Gee.Collection<Geary.EmailIdentifier> ids =
-            new Gee.ArrayList<Geary.EmailIdentifier>();
-
-        // Blacklist the Outbox unless that's currently selected since
-        // we don't want any operations to apply to messages there
-        // normally.
-        Gee.Collection<Geary.FolderPath>? blacklist = null;
-        if (this.current_folder != null &&
-            this.current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX) {
-            Geary.Folder? outbox = null;
-            try {
-                outbox = this.current_account.get_special_folder(
-                    Geary.SpecialFolderType.OUTBOX
-                );
-
-                blacklist = new Gee.ArrayList<Geary.FolderPath>();
-                blacklist.add(outbox.path);
-            } catch (GLib.Error err) {
-                // Oh well
-            }
-        }
-
-        foreach(Geary.App.Conversation conversation in conversations) {
-            if (latest_sent_only) {
-                Geary.Email? latest = conversation.get_latest_sent_email(
-                    Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER,
-                    blacklist
-                );
-                if (latest != null) {
-                    ids.add(latest.id);
-                }
-            } else {
-                Geary.traverse<Geary.Email>(
-                    conversation.get_emails(
-                        Geary.App.Conversation.Ordering.NONE,
-                        Geary.App.Conversation.Location.ANYWHERE,
-                        blacklist
-                    )
-                ).map<Geary.EmailIdentifier>(e => e.id)
-                .add_all_to(ids);
-            }
-        }
-
-        return ids;
-    }
-
-    private Gee.Collection<Geary.EmailIdentifier>
-        get_selected_email_ids(bool latest_sent_only) {
-        return get_conversation_email_ids(
-            this.selected_conversations, latest_sent_only
-        );
-    }
-
-    private void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
-        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
-        if (ids.size > 0) {
-            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
-            if (store != null) {
-                store.mark_email_async.begin(
-                    ids, flags_to_add, flags_to_remove, cancellable_folder
-                );
-            }
-        }
-    }
-
-    private void on_show_mark_menu() {
-        bool unread_selected = false;
-        bool read_selected = false;
-        bool starred_selected = false;
-        bool unstarred_selected = false;
-        foreach (Geary.App.Conversation conversation in selected_conversations) {
-            if (conversation.is_unread())
-                unread_selected = true;
-
-            // Only check the messages that "Mark as Unread" would mark, so we
-            // don't add the menu option and have it not do anything.
-            //
-            // Sort by Date: field to correspond with ConversationViewer ordering
-            Geary.Email? latest = conversation.get_latest_sent_email(
-                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
-            if (latest != null && latest.email_flags != null
-                && !latest.email_flags.contains(Geary.EmailFlags.UNREAD))
-                read_selected = true;
-
-            if (conversation.is_flagged()) {
-                starred_selected = true;
-            } else {
-                unstarred_selected = true;
-            }
-        }
-        get_window_action(ACTION_MARK_AS_READ).set_enabled(unread_selected);
-        get_window_action(ACTION_MARK_AS_UNREAD).set_enabled(read_selected);
-        get_window_action(ACTION_MARK_AS_STARRED).set_enabled(unstarred_selected);
-        get_window_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
-
-        bool in_spam_folder = current_folder.special_folder_type == Geary.SpecialFolderType.SPAM;
-        get_window_action(ACTION_MARK_AS_NOT_SPAM).set_enabled(in_spam_folder);
-        // If we're in Drafts/Outbox, we also shouldn't set a message as SPAM.
-        get_window_action(ACTION_MARK_AS_SPAM).set_enabled(!in_spam_folder &&
-            current_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
-            current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
-    }
-
-    private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
-        clear_new_messages("on_visible_conversations_changed", visible);
-    }
-
     private bool should_notify_new_messages(Geary.Folder folder) {
         // A monitored folder must be selected to squelch notifications;
         // if conversation list is at top of display, don't display
         // and don't display if main window has top-level focus
-        return folder != current_folder
-            || main_window.conversation_list_view.vadjustment.value != 0.0
-            || !main_window.has_toplevel_focus;
+        return (
+            folder != this.main_window.selected_folder ||
+            this.main_window.conversation_list_view.vadjustment.value != 0.0 ||
+            !this.main_window.has_toplevel_focus
+        );
     }
 
     // Clears messages if conditions are true: anything in should_notify_new_messages() is
     // false and the supplied visible messages are visible in the conversation list view
-    private void clear_new_messages(string caller, Gee.Set<Geary.App.Conversation>? supplied) {
+    public void clear_new_messages(string caller,
+                                   Gee.Set<Geary.App.Conversation>? supplied) {
+        Geary.Folder? selected = this.main_window.selected_folder;
         NotificationContext notifications = this.plugin_manager.notifications;
-        if (current_folder != null && (
-                !notifications.get_folders().contains(current_folder) ||
-                should_notify_new_messages(current_folder))) {
+        if (selected != null && (
+                !notifications.get_folders().contains(selected) ||
+                should_notify_new_messages(selected))) {
 
             Gee.Set<Geary.App.Conversation> visible =
                 supplied ?? main_window.conversation_list_view.get_visible_conversations();
 
             foreach (Geary.App.Conversation conversation in visible) {
                 try {
-                    if (notifications.are_any_new_messages(current_folder,
+                    if (notifications.are_any_new_messages(selected,
                                                            conversation.get_email_ids())) {
                         debug("Clearing new messages: %s", caller);
-                        notifications.clear_new_messages(current_folder);
+                        notifications.clear_new_messages(selected);
                         break;
                     }
                 } catch (Geary.EngineError.NOT_FOUND err) {
@@ -1566,352 +1448,6 @@ public class Application.Controller : Geary.BaseObject {
                 }
             }
         }
-    }
-
-    private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
-        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove,
-        bool latest_only = false) {
-        mark_email(get_conversation_email_ids(conversations, latest_only),
-            flags_to_add, flags_to_remove);
-    }
-
-    private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
-        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
-        mark_email(emails, flags_to_add, flags_to_remove);
-    }
-
-    private void on_mark_as_read(SimpleAction action) {
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.UNREAD);
-
-        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
-        mark_email(ids, null, flags);
-
-        ConversationListBox? list =
-            main_window.conversation_viewer.current_list;
-        if (list != null) {
-            foreach (Geary.EmailIdentifier id in ids)
-                list.mark_manual_read(id);
-        }
-    }
-
-    private void on_mark_as_unread(SimpleAction action) {
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.UNREAD);
-
-        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(true);
-        mark_email(ids, flags, null);
-
-        ConversationListBox? list =
-            main_window.conversation_viewer.current_list;
-        if (list != null) {
-            foreach (Geary.EmailIdentifier id in ids)
-                list.mark_manual_unread(id);
-        }
-    }
-
-    private void on_mark_as_starred(SimpleAction action) {
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.FLAGGED);
-        mark_email(get_selected_email_ids(true), flags, null);
-    }
-
-    private void on_mark_as_unstarred(SimpleAction action) {
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.FLAGGED);
-        mark_email(get_selected_email_ids(false), null, flags);
-    }
-
-    private void on_show_move_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.move_message_button.clicked();
-    }
-
-    private void on_show_copy_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.copy_message_button.clicked();
-    }
-
-    private async void mark_as_spam_toggle_async(Cancellable? cancellable) {
-        Geary.Folder? destination_folder = null;
-        if (current_folder.special_folder_type != Geary.SpecialFolderType.SPAM) {
-            // Move to spam folder.
-            try {
-                destination_folder = yield current_account.get_required_special_folder_async(
-                    Geary.SpecialFolderType.SPAM, cancellable);
-            } catch (Error e) {
-                debug("Error getting spam folder: %s", e.message);
-            }
-        } else {
-            // Move out of spam folder, back to inbox.
-            try {
-                destination_folder = current_account.get_special_folder(Geary.SpecialFolderType.INBOX);
-            } catch (Error e) {
-                debug("Error getting inbox folder: %s", e.message);
-            }
-        }
-
-        if (destination_folder != null)
-            on_move_conversation(destination_folder);
-    }
-
-    private void on_mark_as_spam_toggle(SimpleAction action) {
-        mark_as_spam_toggle_async.begin(null);
-    }
-
-    private void copy_email(Gee.Collection<Geary.EmailIdentifier> ids,
-        Geary.FolderPath destination) {
-        if (ids.size > 0) {
-            Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
-            if (store != null) {
-                store.copy_email_async.begin(
-                    ids, destination, cancellable_folder
-                );
-            }
-        }
-    }
-
-    private void on_copy_conversation(Geary.Folder destination) {
-        copy_email(get_selected_email_ids(false), destination.path);
-    }
-
-    private void on_move_conversation(Geary.Folder destination) {
-        // Nothing to do if nothing selected.
-        if (selected_conversations == null || selected_conversations.size == 0)
-            return;
-
-        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
-        if (ids.size == 0)
-            return;
-
-        selection_operation_started();
-
-        Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
-        if (supports_move != null)
-            move_conversation_async.begin(
-                supports_move, ids, destination.path, cancellable_folder,
-                (obj, ret) => {
-                    move_conversation_async.end(ret);
-                    selection_operation_finished();
-                });
-    }
-
-    private async void move_conversation_async(Geary.FolderSupport.Move source_folder,
-                                               Gee.Collection<Geary.EmailIdentifier> ids,
-                                               Geary.FolderPath destination,
-                                               Cancellable? cancellable) {
-        try {
-            save_revokable(yield source_folder.move_email_async(ids, destination, cancellable),
-                ngettext("Moved %d message to %s", "Moved %d messages to %s", ids.size).printf(ids.size, destination.to_string()));
-        } catch (Error err) {
-            debug("%s: Unable to move %d emails: %s", source_folder.to_string(), ids.size,
-                err.message);
-        }
-    }
-
-    private void on_attachments_activated(Gee.Collection<Geary.Attachment> attachments) {
-        if (this.application.config.ask_open_attachment) {
-            QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
-                _("Are you sure you want to open these attachments?"),
-                _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
-                Stock._OPEN_BUTTON, Stock._CANCEL, _("Don’t _ask me again"), false);
-            if (ask_to_open.run() != Gtk.ResponseType.OK) {
-                return;
-            }
-            // only save checkbox state if OK was selected
-            this.application.config.ask_open_attachment = !ask_to_open.is_checked;
-        }
-
-        foreach (Geary.Attachment attachment in attachments) {
-            string uri = attachment.file.get_uri();
-            try {
-                this.application.show_uri(uri);
-            } catch (Error err) {
-                message("Unable to open attachment \"%s\": %s", uri, err.message);
-            }
-        }
-    }
-
-    private async void save_attachment_to_file(Geary.Attachment attachment,
-                                               string? alt_text,
-                                               GLib.Cancellable cancellable) {
-        string alt_display_name = Geary.String.is_empty_or_whitespace(alt_text)
-            ? Application.Controller.untitled_file_name : alt_text;
-        string display_name = yield attachment.get_safe_file_name(
-            alt_display_name
-        );
-
-        Geary.Memory.FileBuffer? content = null;
-        try {
-            content = new Geary.Memory.FileBuffer(attachment.file, true);
-        } catch (GLib.Error err) {
-            warning(
-                "Error opening attachment file \"%s\": %s",
-                attachment.file.get_uri(), err.message
-            );
-            report_problem(new Geary.ProblemReport(err));
-        }
-
-        yield this.prompt_save_buffer(display_name, content, cancellable);
-    }
-
-    private async void
-        save_attachments_to_file(Gee.Collection<Geary.Attachment> attachments,
-                                 GLib.Cancellable? cancellable) {
-        Gtk.FileChooserNative dialog = new_save_chooser(Gtk.FileChooserAction.SELECT_FOLDER);
-
-        bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
-        string? filename = dialog.get_filename();
-        dialog.destroy();
-        if (!accepted || Geary.String.is_empty(filename))
-            return;
-
-        File dest_dir = File.new_for_path(filename);
-        foreach (Geary.Attachment attachment in attachments) {
-            Geary.Memory.FileBuffer? content = null;
-            GLib.File? dest = null;
-            try {
-                content = new Geary.Memory.FileBuffer(attachment.file, true);
-                dest = dest_dir.get_child_for_display_name(
-                    yield attachment.get_safe_file_name(
-                        Application.Controller.untitled_file_name
-                    )
-                );
-            } catch (GLib.Error err) {
-                warning(
-                    "Error opening attachment files \"%s\": %s",
-                    attachment.file.get_uri(), err.message
-                );
-                report_problem(new Geary.ProblemReport(err));
-            }
-
-            if (content != null &&
-                dest != null &&
-                yield check_overwrite(dest, cancellable)) {
-                yield write_buffer_to_file(content, dest, cancellable);
-            }
-        }
-    }
-
-    private async void prompt_save_buffer(string display_name,
-                                          Geary.Memory.Buffer buffer,
-                                          GLib.Cancellable? cancellable) {
-        Gtk.FileChooserNative dialog = new_save_chooser(
-            Gtk.FileChooserAction.SAVE
-        );
-        dialog.set_current_name(display_name);
-
-        string? accepted_path = null;
-        if (dialog.run() == Gtk.ResponseType.ACCEPT) {
-            accepted_path = dialog.get_filename();
-        }
-        dialog.destroy();
-
-        if (!Geary.String.is_empty_or_whitespace(accepted_path)) {
-            GLib.File dest_file = File.new_for_path(accepted_path);
-            if (yield check_overwrite(dest_file, cancellable)) {
-                yield write_buffer_to_file(buffer, dest_file, cancellable);
-            }
-        }
-    }
-
-    private async bool check_overwrite(GLib.File to_overwrite,
-                                       GLib.Cancellable? cancellable) {
-        bool overwrite = true;
-        try {
-            GLib.FileInfo file_info = yield to_overwrite.query_info_async(
-                GLib.FileAttribute.STANDARD_DISPLAY_NAME,
-                GLib.FileQueryInfoFlags.NONE,
-                GLib.Priority.DEFAULT,
-                cancellable
-            );
-            GLib.FileInfo parent_info = yield to_overwrite.get_parent()
-                .query_info_async(
-                    GLib.FileAttribute.STANDARD_DISPLAY_NAME,
-                    GLib.FileQueryInfoFlags.NONE,
-                    GLib.Priority.DEFAULT,
-                    cancellable
-                );
-
-            // Translators: Dialog primary label when prompting to
-            // overwrite a file. The string substitution is the file'sx
-            // name.
-            string primary = _(
-                "A file named “%s” already exists.  Do you want to replace it?"
-            ).printf(file_info.get_display_name());
-
-            // Translators: Dialog secondary label when prompting to
-            // overwrite a file. The string substitution is the parent
-            // folder's name.
-            string secondary = _(
-                "The file already exists in “%s”.  Replacing it will overwrite its contents."
-            ).printf(parent_info.get_display_name());
-
-            ConfirmationDialog dialog = new ConfirmationDialog(
-                main_window, primary, secondary, _("_Replace"), "destructive-action"
-            );
-            overwrite = (dialog.run() == Gtk.ResponseType.OK);
-        } catch (GLib.Error err) {
-            // Oh well
-        }
-        return overwrite;
-    }
-
-    private async void write_buffer_to_file(Geary.Memory.Buffer buffer,
-                                            File dest,
-                                            GLib.Cancellable? cancellable) {
-        try {
-            FileOutputStream outs = dest.replace(
-                null, false, FileCreateFlags.REPLACE_DESTINATION, cancellable
-            );
-            yield outs.splice_async(
-                buffer.get_input_stream(),
-                OutputStreamSpliceFlags.CLOSE_SOURCE | OutputStreamSpliceFlags.CLOSE_TARGET,
-                Priority.DEFAULT,
-                cancellable
-            );
-        } catch (GLib.IOError.CANCELLED err) {
-            try {
-                yield dest.delete_async(GLib.Priority.HIGH, null);
-            } catch (GLib.Error err) {
-                // Oh well
-            }
-        } catch (GLib.Error err) {
-            warning(
-                "Error writing buffer \"%s\": %s",
-                dest.get_uri(), err.message
-            );
-            report_problem(new Geary.ProblemReport(err));
-        }
-    }
-
-    private inline Gtk.FileChooserNative new_save_chooser(Gtk.FileChooserAction action) {
-        Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(
-            null,
-            this.main_window,
-            action,
-            Stock._SAVE,
-            Stock._CANCEL
-        );
-        dialog.set_local_only(false);
-        return dialog;
-    }
-
-    // Opens a link in an external browser.
-    private bool open_uri(string _link) {
-        string link = _link;
-
-        // Support web URLs that omit the protocol.
-        if (!link.contains(":"))
-            link = "http://" + link;
-
-        bool success = true;
-        try {
-            this.application.show_uri(link);
-        } catch (Error err) {
-            success = false;
-            debug("Unable to open URL: \"%s\" %s", link, err.message);
-        }
-
-        return success;
     }
 
     internal bool close_composition_windows(bool main_window_only = false) {
@@ -1966,29 +1502,6 @@ public class Application.Controller : Geary.BaseObject {
         return true;
     }
 
-    // View contains the email from whose menu this reply or forward
-    // was triggered.  If null, this was triggered from the headerbar
-    // or shortcut.
-    private void create_reply_forward_widget(ComposerWidget.ComposeType compose_type,
-                                             owned ConversationEmail? email_view) {
-        if (email_view == null) {
-            ConversationListBox? list_view =
-                main_window.conversation_viewer.current_list;
-            if (list_view != null) {
-                email_view = list_view.get_reply_target();
-            }
-        }
-
-        if (email_view != null) {
-            email_view.get_selection_for_quoting.begin((obj, res) => {
-                    string? quote = email_view.get_selection_for_quoting.end(res);
-                    create_compose_widget(compose_type, email_view.email, quote);
-                });
-        } else {
-            create_compose_widget(compose_type, email_view.email, null);
-        }
-    }
-
     /**
      * Creates a composer widget.
      *
@@ -2004,14 +1517,12 @@ public class Application.Controller : Geary.BaseObject {
      * @param is_draft - Whether we're starting from a draft (true) or
      * a new mail (false)
      */
-    private void create_compose_widget(ComposerWidget.ComposeType compose_type,
+    private void create_compose_widget(Geary.Account account,
+                                       ComposerWidget.ComposeType compose_type,
                                        Geary.Email? referred = null,
                                        string? quote = null,
                                        string? mailto = null,
                                        bool is_draft = false) {
-        if (current_account == null)
-            return;
-
         // There's a few situations where we can re-use an existing
         // composer, check for these first.
 
@@ -2051,12 +1562,12 @@ public class Application.Controller : Geary.BaseObject {
         ComposerWidget widget;
         if (mailto != null) {
             widget = new ComposerWidget.from_mailto(
-                this.application, current_account, mailto
+                this.application, account, mailto
             );
         } else {
             widget = new ComposerWidget(
                 this.application,
-                current_account,
+                account,
                 is_draft ? referred.id : null,
                 compose_type
             );
@@ -2074,23 +1585,23 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         this.load_composer.begin(
-            this.current_account,
+            account,
             widget,
             referred,
-            quote,
-            this.cancellable_folder
+            quote
         );
     }
 
     private async void load_composer(Geary.Account account,
                                      ComposerWidget widget,
                                      Geary.Email? referred = null,
-                                     string? quote = null,
-                                     GLib.Cancellable? cancellable) {
+                                     string? quote = null) {
         Geary.Email? full = null;
+        GLib.Cancellable? cancellable = null;
         if (referred != null) {
             AccountContext? context = this.accounts.get(account.information);
             if (context != null) {
+                cancellable = context.cancellable;
                 try {
                     full = yield context.emails.fetch_email_async(
                         referred.id,
@@ -2124,332 +1635,6 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void on_close() {
-        this.main_window.close();
-    }
-
-    private void on_reply_to_message(ConversationEmail target_view) {
-        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY, target_view);
-    }
-
-    private void on_reply_to_message_action(SimpleAction action) {
-        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY, null);
-    }
-
-    private void on_reply_all_message(ConversationEmail target_view) {
-        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY_ALL, target_view);
-    }
-
-    private void on_reply_all_message_action(SimpleAction action) {
-        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY_ALL, null);
-    }
-
-    private void on_forward_message(ConversationEmail target_view) {
-        create_reply_forward_widget(ComposerWidget.ComposeType.FORWARD, target_view);
-    }
-
-    private void on_forward_message_action(SimpleAction action) {
-        create_reply_forward_widget(ComposerWidget.ComposeType.FORWARD, null);
-    }
-
-    private void on_find_in_conversation_action(SimpleAction action) {
-        this.main_window.conversation_viewer.enable_find();
-    }
-
-    private void on_search_activated(SimpleAction action) {
-        this.main_window.show_search_bar();
-    }
-
-    private void on_archive_conversation(SimpleAction action) {
-        archive_or_delete_selection_async.begin(true, false, cancellable_folder,
-            on_archive_or_delete_selection_finished);
-    }
-
-    private void on_trash_conversation(SimpleAction action) {
-        archive_or_delete_selection_async.begin(false, true, cancellable_folder,
-            on_archive_or_delete_selection_finished);
-    }
-
-    private void on_delete_conversation(SimpleAction action) {
-        archive_or_delete_selection_async.begin(false, false, cancellable_folder,
-            on_archive_or_delete_selection_finished);
-    }
-
-    private void on_empty_spam(SimpleAction action) {
-        on_empty_trash_or_spam(Geary.SpecialFolderType.SPAM);
-    }
-
-    private void on_empty_trash(SimpleAction action) {
-        on_empty_trash_or_spam(Geary.SpecialFolderType.TRASH);
-    }
-
-    private void on_empty_trash_or_spam(Geary.SpecialFolderType special_folder_type) {
-        // Account must be in place, must have the specified special folder type, and that folder
-        // must support Empty in order for this command to proceed
-        if (current_account == null)
-            return;
-
-        Geary.Folder? folder = null;
-        try {
-            folder = current_account.get_special_folder(special_folder_type);
-        } catch (Error err) {
-            debug("%s: Unable to get special folder %s: %s", current_account.to_string(),
-                special_folder_type.to_string(), err.message);
-
-            // fall through
-        }
-
-        if (folder == null)
-            return;
-
-        Geary.FolderSupport.Empty? emptyable = folder as Geary.FolderSupport.Empty;
-        if (emptyable == null) {
-            debug("%s: Special folder %s (%s) does not support emptying", current_account.to_string(),
-                folder.path.to_string(), special_folder_type.to_string());
-
-            return;
-        }
-
-        ConfirmationDialog dialog = new ConfirmationDialog(main_window,
-            _("Empty all email from your %s folder?").printf(special_folder_type.get_display_name()),
-            _("This removes the email from Geary and your email server.")
-                + "  <b>" + _("This cannot be undone.") + "</b>",
-            _("Empty %s").printf(special_folder_type.get_display_name()), "destructive-action");
-        dialog.use_secondary_markup(true);
-        dialog.set_focus_response(Gtk.ResponseType.CANCEL);
-
-        if (dialog.run() == Gtk.ResponseType.OK)
-            empty_folder_async.begin(emptyable, cancellable_folder);
-    }
-
-    private async void empty_folder_async(Geary.FolderSupport.Empty emptyable, Cancellable? cancellable) {
-        try {
-            yield do_empty_folder_async(emptyable, cancellable);
-        } catch (Error err) {
-            // don't report to user if cancelled
-            if (err is IOError.CANCELLED)
-                return;
-
-            ErrorDialog dialog = new ErrorDialog(main_window,
-                _("Error emptying %s").printf(emptyable.get_display_name()), err.message);
-            dialog.run();
-        }
-    }
-
-    private async void do_empty_folder_async(Geary.FolderSupport.Empty emptyable, Cancellable? cancellable)
-        throws Error {
-        bool open = false;
-        try {
-            yield emptyable.open_async(Geary.Folder.OpenFlags.NO_DELAY, cancellable);
-            open = true;
-            yield emptyable.empty_folder_async(cancellable);
-        } finally {
-            if (open) {
-                try {
-                    yield emptyable.close_async(null);
-                } catch (Error err) {
-                    // ignored
-                }
-            }
-        }
-    }
-
-    private bool current_folder_supports_trash() {
-        return (current_folder != null && current_folder.special_folder_type != Geary.SpecialFolderType.TRASH
-            && !current_folder.properties.is_local_only && current_account != null
-            && (current_folder as Geary.FolderSupport.Move) != null);
-    }
-
-    private bool confirm_delete(int num_messages) {
-        ConfirmationDialog dialog = new ConfirmationDialog(main_window, ngettext(
-            "Do you want to permanently delete this message?",
-            "Do you want to permanently delete these messages?", num_messages),
-            null, _("Delete"), "destructive-action");
-
-        return (dialog.run() == Gtk.ResponseType.OK);
-    }
-
-    private async void trash_messages_async(Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable)
-            throws Error {
-        debug("Trashing selected messages");
-
-        Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
-        if (current_folder_supports_trash() && supports_move != null) {
-            Geary.FolderPath trash_path = (yield current_account.get_required_special_folder_async(
-                Geary.SpecialFolderType.TRASH, cancellable)).path;
-            save_revokable(yield supports_move.move_email_async(ids, trash_path, cancellable),
-                ngettext("Trashed %d message", "Trashed %d messages", ids.size).printf(ids.size));
-        } else {
-            debug("Folder %s doesn't support move or account %s doesn't have a trash folder",
-                current_folder.to_string(), current_account.to_string());
-        }
-    }
-
-    private async void delete_messages_async(Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable)
-            throws Error {
-        debug("Deleting selected messages");
-
-        Geary.FolderSupport.Remove? supports_remove = current_folder as Geary.FolderSupport.Remove;
-        if (supports_remove != null) {
-            if (confirm_delete(ids.size)) {
-                yield supports_remove.remove_email_async(ids, cancellable);
-            } else {
-                last_deleted_conversation = null;
-            }
-        } else {
-            debug("Folder %s doesn't support remove", current_folder.to_string());
-        }
-    }
-
-    private async void archive_or_delete_selection_async(bool archive, bool trash,
-        Cancellable? cancellable) throws Error {
-        ConversationListBox list_view =
-            main_window.conversation_viewer.current_list;
-        if (list_view != null &&
-            list_view.conversation == last_deleted_conversation) {
-            debug("Not archiving/trashing/deleting; viewed conversation is last deleted conversation");
-            return;
-        }
-
-        selection_operation_started();
-
-        last_deleted_conversation = selected_conversations.size > 0
-            ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
-
-        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
-        if (archive) {
-            debug("Archiving selected messages");
-
-            Geary.FolderSupport.Archive? supports_archive = current_folder as Geary.FolderSupport.Archive;
-            if (supports_archive == null) {
-                debug("Folder %s doesn't support archive", current_folder.to_string());
-            } else {
-                save_revokable(yield supports_archive.archive_email_async(ids, cancellable),
-                    ngettext("Archived %d message", "Archived %d messages", ids.size).printf(ids.size));
-            }
-
-            return;
-        }
-
-        if (trash) {
-            yield trash_messages_async(ids, cancellable);
-        } else {
-            yield delete_messages_async(ids, cancellable);
-        }
-    }
-
-    private void on_archive_or_delete_selection_finished(Object? source, AsyncResult result) {
-        try {
-            archive_or_delete_selection_async.end(result);
-        } catch (Error e) {
-            debug("Unable to archive/trash/delete messages: %s", e.message);
-        }
-        selection_operation_finished();
-    }
-
-    private void save_revokable(Geary.Revokable? new_revokable, string? description) {
-        // disconnect old revokable & blindly commit it
-        if (revokable != null) {
-            revokable.notify[Geary.Revokable.PROP_VALID].disconnect(on_revokable_valid_changed);
-            revokable.notify[Geary.Revokable.PROP_IN_PROCESS].disconnect(update_revokable_action);
-            revokable.committed.disconnect(on_revokable_committed);
-
-            revokable.commit_async.begin();
-        }
-
-        // store new revokable
-        this.revokable = new_revokable;
-        this.revokable_description = description;
-
-        // connect to new revokable
-        if (revokable != null) {
-            revokable.notify[Geary.Revokable.PROP_VALID].connect(on_revokable_valid_changed);
-            revokable.notify[Geary.Revokable.PROP_IN_PROCESS].connect(update_revokable_action);
-            revokable.committed.connect(on_revokable_committed);
-        }
-
-        if (this.main_window != null) {
-            if (this.revokable != null && this.revokable_description != null) {
-                Components.InAppNotification ian =
-                    new Components.InAppNotification(this.revokable_description);
-                ian.set_button(_("Undo"), "win." + GearyApplication.ACTION_UNDO);
-                this.main_window.add_notification(ian);
-            }
-            update_revokable_action();
-        }
-    }
-
-    private void update_revokable_action() {
-        get_window_action(GearyApplication.ACTION_UNDO).set_enabled(
-            this.revokable != null &&
-            this.revokable.valid &&
-            !this.revokable.in_process
-        );
-    }
-
-    private void on_revokable_valid_changed() {
-        // remove revokable if it goes invalid
-        if (revokable != null && !revokable.valid)
-            save_revokable(null, null);
-    }
-
-    private void on_revokable_committed(Geary.Revokable? committed_revokable) {
-        if (committed_revokable == null)
-            return;
-
-        save_revokable(committed_revokable, this.revokable_description);
-    }
-
-    private void on_revoke() {
-        if (revokable != null && revokable.valid)
-            revokable.revoke_async.begin(null, on_revoke_completed);
-    }
-
-    private void on_revoke_completed(Object? object, AsyncResult result) {
-        // Don't use the "revokable" instance because it might have gone null before this callback
-        // was reached
-        Geary.Revokable? origin = object as Geary.Revokable;
-        if (origin == null)
-            return;
-
-        try {
-            origin.revoke_async.end(result);
-        } catch (Error err) {
-            debug("Unable to revoke operation: %s", err.message);
-        }
-    }
-
-    private void selection_operation_started() {
-        this.operation_count += 1;
-        if (this.operation_count == 1) {
-            this.main_window.conversation_list_view.set_changing_selection(true);
-        }
-    }
-
-    private void selection_operation_finished() {
-        this.operation_count -= 1;
-        if (this.operation_count == 0) {
-            this.main_window.conversation_list_view.set_changing_selection(false);
-        }
-    }
-
-    private void on_zoom(SimpleAction action, Variant? parameter) {
-        ConversationListBox? view = main_window.conversation_viewer.current_list;
-        if (view != null && parameter != null) {
-            string zoom_action = parameter.get_string();
-            if (zoom_action == "in")
-                view.zoom_in();
-            else if (zoom_action == "out")
-                view.zoom_out();
-            else
-                view.zoom_reset();
-        }
-    }
-
-    private void on_conversation_list() {
-        this.main_window.conversation_list_view.grab_focus();
-    }
-
     private void on_sent(Geary.Account account, Geary.RFC822.Message sent) {
         // Translators: The label for an in-app notification. The
         // string substitution is a list of recipients of the email.
@@ -2462,155 +1647,6 @@ public class Application.Controller : Geary.BaseObject {
         this.plugin_manager.notifications.email_sent(account, sent);
     }
 
-    private void on_conversation_view_added(ConversationListBox list) {
-        list.email_added.connect(on_conversation_viewer_email_added);
-        list.mark_emails.connect(on_conversation_viewer_mark_emails);
-    }
-
-    private void on_conversation_viewer_email_added(ConversationEmail view) {
-        view.attachments_activated.connect(on_attachments_activated);
-        view.forward_message.connect(on_forward_message);
-        view.load_error.connect(on_email_load_error);
-        view.reply_to_message.connect(on_reply_to_message);
-        view.reply_all_message.connect(on_reply_all_message);
-
-        Geary.App.Conversation conversation = main_window.conversation_viewer.current_list.conversation;
-        bool in_current_folder = (conversation.is_in_base_folder(view.email.id) &&
-            conversation.base_folder == current_folder);
-        bool supports_trash = in_current_folder && current_folder_supports_trash();
-        bool supports_delete = in_current_folder && current_folder is Geary.FolderSupport.Remove;
-        view.trash_message.connect(on_trash_message);
-        view.delete_message.connect(on_delete_message);
-        view.set_folder_actions_enabled(supports_trash, supports_delete);
-        main_window.on_shift_key.connect(view.shift_key_changed);
-
-        view.edit_draft.connect((draft_view) => {
-                create_compose_widget(
-                    ComposerWidget.ComposeType.NEW_MESSAGE,
-                    draft_view.email, null, null, true
-                );
-            });
-        foreach (ConversationMessage msg_view in view) {
-            msg_view.link_activated.connect(on_link_activated);
-            msg_view.save_image.connect((url, alt_text, buf) => {
-                    on_save_image_extended(view, url, alt_text, buf);
-                });
-        }
-        view.save_attachments.connect(on_save_attachments);
-        view.view_source.connect(on_view_source);
-    }
-
-    private void on_trash_message(ConversationEmail target_view) {
-        Gee.Collection<Geary.EmailIdentifier> ids =
-            new Gee.ArrayList<Geary.EmailIdentifier>();
-        ids.add(target_view.email.id);
-        trash_messages_async.begin(ids, cancellable_folder);
-    }
-
-    private void on_delete_message(ConversationEmail target_view) {
-        Gee.Collection<Geary.EmailIdentifier> ids =
-            new Gee.ArrayList<Geary.EmailIdentifier>();
-        ids.add(target_view.email.id);
-        delete_messages_async.begin(ids, cancellable_folder);
-    }
-
-    private void on_view_source(ConversationEmail email_view) {
-        string source = (email_view.email.header.buffer.to_string() +
-                         email_view.email.body.buffer.to_string());
-        string temporary_filename;
-        try {
-            int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",
-                                                      out temporary_filename);
-            FileUtils.set_contents(temporary_filename, source);
-            FileUtils.close(temporary_handle);
-
-            // ensure this file is only readable by the user ... this
-            // needs to be done after the file is closed
-            FileUtils.chmod(temporary_filename, (int) (Posix.S_IRUSR | Posix.S_IWUSR));
-
-            string temporary_uri = Filename.to_uri(temporary_filename, null);
-            this.application.show_uri(temporary_uri);
-        } catch (Error error) {
-            ErrorDialog dialog = new ErrorDialog(
-                main_window,
-                _("Failed to open default text editor."),
-                error.message
-            );
-            dialog.run();
-        }
-    }
-
-    private SimpleAction get_window_action(string action_name) {
-        return (SimpleAction) this.main_window.lookup_action(action_name);
-    }
-
-    // Disables all single-message buttons and enables all multi-message buttons.
-    public void enable_multiple_message_buttons() {
-        main_window.main_toolbar.selected_conversations = this.selected_conversations.size;
-
-        // Single message only buttons.
-        get_window_action(ACTION_REPLY_TO_MESSAGE).set_enabled(false);
-        get_window_action(ACTION_REPLY_ALL_MESSAGE).set_enabled(false);
-        get_window_action(ACTION_FORWARD_MESSAGE).set_enabled(false);
-
-        // Mutliple message buttons.
-        get_window_action(ACTION_MOVE_MENU).set_enabled(current_folder is Geary.FolderSupport.Move);
-        get_window_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(current_folder is Geary.FolderSupport.Archive);
-        get_window_action(ACTION_TRASH_CONVERSATION).set_enabled(current_folder_supports_trash());
-        get_window_action(ACTION_DELETE_CONVERSATION).set_enabled(current_folder is Geary.FolderSupport.Remove);
-
-        cancel_context_dependent_buttons();
-        enable_context_dependent_buttons_async.begin(true, cancellable_context_dependent_buttons);
-    }
-
-    // Enables or disables the message buttons on the toolbar.
-    public void enable_message_buttons(bool sensitive) {
-        main_window.main_toolbar.selected_conversations = this.selected_conversations.size;
-
-        // No reply/forward in drafts folder.
-        bool respond_sensitive = sensitive;
-        if (current_folder != null && current_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS)
-            respond_sensitive = false;
-
-        get_window_action(ACTION_REPLY_TO_MESSAGE).set_enabled(respond_sensitive);
-        get_window_action(ACTION_REPLY_ALL_MESSAGE).set_enabled(respond_sensitive);
-        get_window_action(ACTION_FORWARD_MESSAGE).set_enabled(respond_sensitive);
-        get_window_action(ACTION_MOVE_MENU).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Move));
-        get_window_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Archive));
-        get_window_action(ACTION_TRASH_CONVERSATION).set_enabled(sensitive && current_folder_supports_trash());
-        get_window_action(ACTION_DELETE_CONVERSATION).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Remove));
-
-        cancel_context_dependent_buttons();
-        enable_context_dependent_buttons_async.begin(sensitive, cancellable_context_dependent_buttons);
-    }
-
-    private async void enable_context_dependent_buttons_async(bool sensitive, Cancellable? cancellable) {
-        Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
-        try {
-            if (current_folder != null) {
-                Geary.App.EmailStore? store = get_email_store_for_folder(current_folder);
-                if (store != null) {
-                    selected_operations = yield store
-                        .get_supported_operations_async(get_selected_email_ids(false), cancellable);
-                }
-            }
-        } catch (Error e) {
-            debug("Error checking for what operations are supported in the selected conversations: %s",
-                e.message);
-        }
-
-        // Exit here if the user has cancelled.
-        if (cancellable != null && cancellable.is_cancelled())
-            return;
-
-        Gee.HashSet<Type> supported_operations = new Gee.HashSet<Type>();
-        if (selected_operations != null)
-            supported_operations.add_all(selected_operations.get_values());
-
-        get_window_action(ACTION_SHOW_MARK_MENU).set_enabled(sensitive && (typeof(Geary.FolderSupport.Mark) in supported_operations));
-        get_window_action(ACTION_COPY_MENU).set_enabled(sensitive && (supported_operations.contains(typeof(Geary.FolderSupport.Copy))));
-    }
-
     // Returns a list of composer windows for an account, or null if none.
     public Gee.List<ComposerWidget>? get_composer_widgets_for_account(Geary.AccountInformation account) {
         Gee.LinkedList<ComposerWidget> ret = Geary.traverse<ComposerWidget>(composer_widgets)
@@ -2620,55 +1656,13 @@ public class Application.Controller : Geary.BaseObject {
         return ret.size >= 1 ? ret : null;
     }
 
-    private void do_search(string search_text) {
-        Geary.SearchFolder? search_folder = null;
-        if (this.current_account != null) {
-            try {
-                search_folder =
-                    this.current_account.get_special_folder(
-                        Geary.SpecialFolderType.SEARCH
-                    ) as Geary.SearchFolder;
-            } catch (Error e) {
-                debug("Could not get search folder: %s", e.message);
-            }
-        }
-
-        if (Geary.String.is_empty_or_whitespace(search_text)) {
-            if (this.previous_non_search_folder != null &&
-                this.current_folder is Geary.SearchFolder) {
-                this.main_window.folder_list.select_folder(
-                    this.previous_non_search_folder
-                );
-            }
-
-            this.main_window.folder_list.remove_search();
-
-            if (search_folder !=  null) {
-                search_folder.clear();
-            }
-        } else if (search_folder != null) {
-            cancel_search(); // Stop any search in progress
-
-            search_folder.search(
-                search_text,
-                this.application.config.get_search_strategy(),
-                this.cancellable_search
-            );
-
-            this.main_window.folder_list.set_search(search_folder);
-        }
-    }
-
-    /**
-     * Returns a read-only set of currently selected conversations.
-     */
-    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
-        return selected_conversations.read_only_view;
-    }
-
-    private inline Geary.App.EmailStore? get_email_store_for_folder(Geary.Folder target) {
-        AccountContext? context = this.accounts.get(target.account.information);
-        return (context != null) ? context.emails : null;
+    private Geary.AccountInformation? get_first_account() {
+        return this.accounts.keys.iterator().fold<Geary.AccountInformation?>(
+            (next, prev) => {
+                return prev == null || next.ordinal < prev.ordinal ? next : prev;
+            },
+            null
+        );
     }
 
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,
@@ -2687,6 +1681,19 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         return false;
+    }
+
+    private Gee.Collection<Geary.EmailIdentifier>
+        to_in_folder_email_ids(Gee.Collection<Geary.App.Conversation> conversations) {
+        Gee.Collection<Geary.EmailIdentifier> messages =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        foreach (Geary.App.Conversation conversation in conversations) {
+            foreach (Geary.Email email in
+                     conversation.get_emails(RECV_DATE_ASCENDING, IN_FOLDER)) {
+                messages.add(email.id);
+            }
+        }
+        return messages;
     }
 
     private void on_account_available(Geary.AccountInformation info) {
@@ -2732,6 +1739,7 @@ public class Application.Controller : Geary.BaseObject {
             if (this.application.engine.has_account(changed.id)) {
                 this.close_account.begin(
                     changed,
+                    false,
                     (obj, res) => {
                         this.close_account.end(res);
                         try {
@@ -2752,6 +1760,7 @@ public class Application.Controller : Geary.BaseObject {
         debug("%s: Closing account for removal", removed.id);
         this.close_account.begin(
             removed,
+            false,
             (obj, res) => {
                 this.close_account.end(res);
                 debug("%s: Account closed", removed.id);
@@ -2860,94 +1869,713 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void on_email_load_error(ConversationEmail view, GLib.Error err) {
-        report_problem(
-            new Geary.ServiceProblemReport(
-                this.current_account.information,
-                this.current_account.information.incoming,
-                err
-            )
+}
+
+
+/** Base class for all application controller commands. */
+internal class Application.ControllerCommandStack : CommandStack {
+
+
+    private EmailCommand? last_executed = null;
+
+
+    /** {@inheritDoc} */
+    public override async void execute(Command target,
+                                       GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        // Guard against things like Delete being held down by only
+        // executing a command if it is different to the last one.
+        if (this.last_executed == null || !this.last_executed.equal_to(target)) {
+            this.last_executed = target as EmailCommand;
+            yield base.execute(target, cancellable);
+        }
+    }
+
+    /** {@inheritDoc} */
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.last_executed = null;
+        yield base.undo(cancellable);
+    }
+
+    /** {@inheritDoc} */
+    public override async void redo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.last_executed = null;
+        yield base.redo(cancellable);
+    }
+
+    /**
+     * Notifies the stack that one or more folders were removed.
+     *
+     * This will cause any commands involving the given folder to be
+     * removed from the stack. It should only be called as a response
+     * to un-recoverable changes, e.g. when the server notifies that a
+     * folder has been removed.
+     */
+    internal void folders_removed(Gee.Collection<Geary.Folder> removed) {
+        Gee.Iterator<Command> commands = this.undo_stack.iterator();
+        while (commands.next()) {
+            EmailCommand? email = commands.get() as EmailCommand;
+            if (email != null) {
+                if (email.folders_removed(removed) == REMOVE) {
+                    commands.remove();
+                }
+            }
+        }
+    }
+
+    /**
+     * Notifies the stack that email was removed from a folder.
+     *
+     * This will cause any commands involving the given email
+     * identifiers to be removed from commands where they are present,
+     * potentially also causing the command to be removed from the
+     * stack. It should only be called as a response to un-recoverable
+     * changes, e.g. when the server notifies that an email has been
+     * removed as a result of some other client removing it, or the
+     * message being deleted completely.
+     */
+    internal void email_removed(Geary.Folder location,
+                                Gee.Collection<Geary.EmailIdentifier> targets) {
+        Gee.Iterator<Command> commands = this.undo_stack.iterator();
+        while (commands.next()) {
+            EmailCommand? email = commands.get() as EmailCommand;
+            if (email != null) {
+                if (email.email_removed(location, targets) == REMOVE) {
+                    commands.remove();
+                }
+            }
+        }
+    }
+
+}
+
+
+/** Base class for email-related commands. */
+public abstract class Application.EmailCommand : Command {
+
+
+    /** Specifies a command's response to external mail state changes. */
+    public enum StateChangePolicy {
+        /** The change can be ignored */
+        IGNORE,
+
+        /** The command is no longer valid and should be removed */
+        REMOVE;
+    }
+
+
+    /**
+     * Returns the folder where the command was initially executed.
+     *
+     * This is used by the main window to return to the folder where
+     * the command was first carried out.
+     */
+    public Geary.Folder location {
+        get; protected set;
+    }
+
+    /**
+     * Returns the conversations which the command was initially applied to.
+     *
+     * This is used by the main window to return to the conversation where
+     * the command was first carried out.
+     */
+    public Gee.Collection<Geary.App.Conversation> conversations {
+        get; private set;
+    }
+
+    /**
+     * Returns the email which the command was initially applied to.
+     *
+     * This is used by the main window to return to the conversation where
+     * the command was first carried out.
+     */
+    public Gee.Collection<Geary.EmailIdentifier> email {
+        get; private set;
+    }
+
+    private Gee.Collection<Geary.App.Conversation> mutable_conversations;
+    private Gee.Collection<Geary.EmailIdentifier> mutable_email;
+
+
+    protected EmailCommand(Geary.Folder location,
+                           Gee.Collection<Geary.App.Conversation> conversations,
+                           Gee.Collection<Geary.EmailIdentifier> email) {
+        this.location = location;
+        this.conversations = conversations.read_only_view;
+        this.email = email.read_only_view;
+
+        this.mutable_conversations = conversations;
+        this.mutable_email = email;
+    }
+
+
+    public override bool equal_to(Command other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (this.get_type() != other.get_type()) {
+            return false;
+        }
+
+        EmailCommand? other_email = other as EmailCommand;
+        if (other_email == null) {
+            return false;
+        }
+
+        return (
+            this.location == other_email.location &&
+            this.conversations.size == other_email.conversations.size &&
+            this.email.size == other_email.email.size &&
+            this.conversations.contains_all(other_email.conversations) &&
+            this.email.contains_all(other_email.email)
         );
     }
 
-    private void on_conversation_up() {
-        this.main_window.conversation_list_view.scroll(Gtk.ScrollType.STEP_UP);
+    /**
+     * Determines the command's response when a folder is removed.
+     *
+     * This is called when some external means (such as another
+     * command, or another email client altogether) has caused a
+     * folder to be removed.
+     *
+     * The returned policy will determine if the command is unaffected
+     * by the change and hence can remain on the stack, or is no
+     * longer valid and hence must be removed.
+     */
+    internal virtual StateChangePolicy folders_removed(
+        Gee.Collection<Geary.Folder> removed
+    ) {
+        return (
+            this.location in removed
+            ? StateChangePolicy.REMOVE
+            : StateChangePolicy.IGNORE
+        );
     }
 
-    private void on_conversation_down() {
-        this.main_window.conversation_list_view.scroll(Gtk.ScrollType.STEP_DOWN);
-    }
+    /**
+     * Determines the command's response when email is removed.
+     *
+     * This is called when some external means (such as another
+     * command, or another email client altogether) has caused a
+     * email in a folder to be removed.
+     *
+     * The returned policy will determine if the command is unaffected
+     * by the change and hence can remain on the stack, or is no
+     * longer valid and hence must be removed.
+     */
+    internal virtual StateChangePolicy email_removed(
+        Geary.Folder location,
+        Gee.Collection<Geary.EmailIdentifier> targets
+    ) {
+        StateChangePolicy ret = IGNORE;
+        if (this.location == location) {
+            // Any removed email should have already been removed from
+            // their conversations by the time we here, so just remove
+            // any conversations that don't have any messages left.
+            Gee.Iterator<Geary.App.Conversation> conversations =
+                this.mutable_conversations.iterator();
+            while (conversations.next()) {
+                var conversation = conversations.get();
+                if (!conversation.has_any_non_deleted_email()) {
+                    conversations.remove();
+                }
+            }
 
-    private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
-        GLib.Cancellable? cancellable = null;
-        if (this.current_account != null) {
-            cancellable = this.accounts.get(
-                this.current_account.information
-            ).cancellable;
+            // Update message set to remove all removed messages
+            this.mutable_email.remove_all(targets);
+
+            // If we have no more conversations or messages, then the
+            // command won't be able to do anything and should be
+            // removed.
+            if (this.mutable_conversations.is_empty ||
+                this.mutable_email.is_empty) {
+                ret = REMOVE;
+            }
         }
-        if (attachments.size == 1) {
-            this.save_attachment_to_file.begin(
-                attachments.to_array()[0], null, cancellable
+        return ret;
+    }
+
+}
+
+
+/**
+ * Mixin for trivial application commands.
+ *
+ * Trivial commands should not cause a notification to be shown when
+ * initially executed.
+ */
+public interface Application.TrivialCommand : Command {
+
+}
+
+
+private class Application.MarkEmailCommand : TrivialCommand, EmailCommand {
+
+
+    private Geary.App.EmailStore store;
+    private Geary.EmailFlags? to_add;
+    private Geary.EmailFlags? to_remove;
+
+
+    public MarkEmailCommand(Geary.Folder location,
+                            Gee.Collection<Geary.App.Conversation> conversations,
+                            Gee.Collection<Geary.EmailIdentifier> messages,
+                            Geary.App.EmailStore store,
+                            Geary.EmailFlags? to_add,
+                            Geary.EmailFlags? to_remove,
+                            string? executed_label = null,
+                            string? undone_label = null) {
+        base(location, conversations, messages);
+        this.store = store;
+        this.to_add = to_add;
+        this.to_remove = to_remove;
+
+        this.executed_label = executed_label;
+        this.undone_label = undone_label;
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.store.mark_email_async(
+            this.email, this.to_add, this.to_remove, cancellable
+        );
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.store.mark_email_async(
+            this.email, this.to_remove, this.to_add, cancellable
+        );
+    }
+
+    public override bool equal_to(Command other) {
+        if (!base.equal_to(other)) {
+            return false;
+        }
+
+        MarkEmailCommand other_mark = (MarkEmailCommand) other;
+        return (
+            ((this.to_add == other_mark.to_add) ||
+             (this.to_add != null &&
+              other_mark.to_add != null &&
+              this.to_add.equal_to(other_mark.to_add))) &&
+            ((this.to_remove == other_mark.to_remove) ||
+             (this.to_remove != null &&
+              other_mark.to_remove != null &&
+              this.to_remove.equal_to(other_mark.to_remove)))
+        );
+    }
+
+}
+
+
+private abstract class Application.RevokableCommand : EmailCommand {
+
+
+    public override bool can_undo {
+        get { return this.revokable != null && this.revokable.valid; }
+    }
+
+    private Geary.Revokable? revokable = null;
+
+
+    protected RevokableCommand(Geary.Folder location,
+                               Gee.Collection<Geary.App.Conversation> conversations,
+                               Gee.Collection<Geary.EmailIdentifier> email) {
+        base(location, conversations, email);
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        set_revokable(yield execute_impl(cancellable));
+        if (this.revokable != null && this.revokable.valid) {
+            yield this.revokable.commit_async(cancellable);
+        }
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (this.revokable == null) {
+            throw new Geary.EngineError.UNSUPPORTED(
+                "Cannot undo command, no revokable available"
             );
-        } else {
-            this.save_attachments_to_file.begin(attachments, cancellable);
+        }
+
+        yield this.revokable.revoke_async(cancellable);
+        set_revokable(null);
+    }
+
+    protected abstract async Geary.Revokable
+        execute_impl(GLib.Cancellable cancellable)
+        throws GLib.Error;
+
+    private void set_revokable(Geary.Revokable? updated) {
+        if (this.revokable != null) {
+            this.revokable.committed.disconnect(on_revokable_committed);
+        }
+
+        this.revokable = updated;
+
+        if (this.revokable != null) {
+            this.revokable.committed.connect(on_revokable_committed);
         }
     }
 
-    private void on_link_activated(string uri) {
-        if (uri.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-            compose(uri);
-        } else {
-            open_uri(uri);
-        }
+    private void on_revokable_committed(Geary.Revokable? updated) {
+        set_revokable(updated);
     }
 
-    private void on_save_image_extended(ConversationEmail view,
-                                        string url,
-                                        string? alt_text,
-                                        Geary.Memory.Buffer resource_buf) {
-        GLib.Cancellable? cancellable = null;
-        if (this.current_account != null) {
-            cancellable = this.accounts.get(
-                this.current_account.information
-            ).cancellable;
-        }
+}
 
-        // This is going to be either an inline image, or a remote
-        // image, so either treat it as an attachment to assume we'll
-        // have a valid filename in the URL
-        bool handled = false;
-        if (url.has_prefix(ClientWebView.CID_URL_PREFIX)) {
-            string cid = url.substring(ClientWebView.CID_URL_PREFIX.length);
-            Geary.Attachment? attachment = null;
-            try {
-                attachment = view.email.get_attachment_by_content_id(cid);
-            } catch (Error err) {
-                debug("Could not get attachment \"%s\": %s", cid, err.message);
-            }
-            if (attachment != null) {
-                this.save_attachment_to_file.begin(
-                    attachment, alt_text, cancellable
-                );
-                handled = true;
-            }
-        }
 
-        if (!handled) {
-            GLib.File source = GLib.File.new_for_uri(url);
-            // Querying the URL-based file for the display name
-            // results in it being looked up, so just get the basename
-            // from it directly. GIO seems to decode any %-encoded
-            // chars anyway.
-            string? display_name = source.get_basename();
-            if (Geary.String.is_empty_or_whitespace(display_name)) {
-                display_name = Application.Controller.untitled_file_name;
-            }
+private class Application.MoveEmailCommand : RevokableCommand {
 
-            this.prompt_save_buffer.begin(
-                display_name, resource_buf, cancellable
+
+    private Geary.FolderSupport.Move source;
+    private Geary.Folder destination;
+
+
+    public MoveEmailCommand(Geary.FolderSupport.Move source,
+                            Geary.Folder destination,
+                            Gee.Collection<Geary.App.Conversation> conversations,
+                            Gee.Collection<Geary.EmailIdentifier> messages,
+                            string? executed_label = null,
+                            string? undone_label = null) {
+        base(source, conversations, messages);
+
+        this.source = source;
+        this.destination = destination;
+
+        this.executed_label = executed_label;
+        this.undone_label = undone_label;
+    }
+
+    internal override EmailCommand.StateChangePolicy folders_removed(
+        Gee.Collection<Geary.Folder> removed
+    ) {
+        return (
+            this.destination in removed
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : base.folders_removed(removed)
+        );
+    }
+
+    internal override EmailCommand.StateChangePolicy email_removed(
+        Geary.Folder location,
+        Gee.Collection<Geary.EmailIdentifier> targets
+    ) {
+        // With the current revokable mechanism we can't determine if
+        // specific messages removed from the destination are
+        // affected, so if the dest is the location, just assume they
+        // are for now.
+        return (
+            location == this.destination
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : base.email_removed(location, targets)
+        );
+    }
+
+    protected override async Geary.Revokable
+        execute_impl(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.source.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
             );
+            open = true;
+            return yield this.source.move_email_async(
+                this.email,
+                this.destination.path,
+                cancellable
+            );
+        } finally {
+            if (open) {
+                try {
+                    yield this.source.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
         }
+    }
+
+}
+
+
+private class Application.ArchiveEmailCommand : RevokableCommand {
+
+
+    /** {@inheritDoc} */
+    public Geary.Folder command_location {
+        get; protected set;
+    }
+
+    /** {@inheritDoc} */
+    public Gee.Collection<Geary.EmailIdentifier> command_conversations {
+        get; protected set;
+    }
+
+    /** {@inheritDoc} */
+    public Gee.Collection<Geary.EmailIdentifier> command_email {
+        get; protected set;
+    }
+
+    private Geary.FolderSupport.Archive source;
+
+
+    public ArchiveEmailCommand(Geary.FolderSupport.Archive source,
+                               Gee.Collection<Geary.App.Conversation> conversations,
+                               Gee.Collection<Geary.EmailIdentifier> messages,
+                               string? executed_label = null,
+                               string? undone_label = null) {
+        base(source, conversations, messages);
+        this.source = source;
+        this.executed_label = executed_label;
+        this.undone_label = undone_label;
+    }
+
+    internal override EmailCommand.StateChangePolicy folders_removed(
+        Gee.Collection<Geary.Folder> removed
+    ) {
+        EmailCommand.StateChangePolicy ret = base.folders_removed(removed);
+        if (ret == IGNORE) {
+            // With the current revokable mechanism we can't determine
+            // if specific messages removed from the destination are
+            // affected, so if the dest is the location, just assume
+            // they are for now.
+            foreach (var folder in removed) {
+                if (folder.special_folder_type == ARCHIVE) {
+                    ret = REMOVE;
+                    break;
+                }
+            }
+        }
+        return ret;
+    }
+
+    internal override EmailCommand.StateChangePolicy email_removed(
+        Geary.Folder location,
+        Gee.Collection<Geary.EmailIdentifier> targets
+    ) {
+        // With the current revokable mechanism we can't determine if
+        // specific messages removed from the destination are
+        // affected, so if the dest is the location, just assume they
+        // are for now.
+        return (
+            location.special_folder_type == ARCHIVE
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : base.email_removed(location, targets)
+        );
+    }
+
+    protected override async Geary.Revokable
+        execute_impl(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.source.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
+            );
+            open = true;
+            return yield this.source.archive_email_async(
+                this.email, cancellable
+            );
+        } finally {
+            if (open) {
+                try {
+                    yield this.source.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
+        }
+    }
+
+}
+
+
+private class Application.CopyEmailCommand : EmailCommand {
+
+
+    public override bool can_undo {
+        // Engine doesn't yet support it :(
+        get { return false; }
+    }
+
+    private Geary.FolderSupport.Copy source;
+    private Geary.Folder destination;
+
+
+    public CopyEmailCommand(Geary.FolderSupport.Copy source,
+                            Geary.Folder destination,
+                            Gee.Collection<Geary.App.Conversation> conversations,
+                            Gee.Collection<Geary.EmailIdentifier> messages,
+                            string? executed_label = null,
+                            string? undone_label = null) {
+        base(source, conversations, messages);
+        this.source = source;
+        this.destination = destination;
+
+        this.executed_label = executed_label;
+        this.undone_label = undone_label;
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.source.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
+            );
+            open = true;
+            yield this.source.copy_email_async(
+                this.email, this.destination.path, cancellable
+            );
+        } finally {
+            if (open) {
+                try {
+                    yield this.source.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
+        }
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        throw new Geary.EngineError.UNSUPPORTED(
+            "Cannot undo copy, not yet supported"
+        );
+    }
+
+    internal override EmailCommand.StateChangePolicy folders_removed(
+        Gee.Collection<Geary.Folder> removed
+    ) {
+        return (
+            this.destination in removed
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : base.folders_removed(removed)
+        );
+    }
+
+    internal override EmailCommand.StateChangePolicy email_removed(
+        Geary.Folder location,
+        Gee.Collection<Geary.EmailIdentifier> targets
+    ) {
+        // With the current revokable mechanism we can't determine if
+        // specific messages removed from the destination are
+        // affected, so if the dest is the location, just assume they
+        // are for now.
+        return (
+            location == this.destination
+            ? EmailCommand.StateChangePolicy.REMOVE
+            : base.email_removed(location, targets)
+        );
+    }
+
+}
+
+
+private class Application.DeleteEmailCommand : EmailCommand {
+
+
+    public override bool can_undo {
+        get { return false; }
+    }
+
+    private Geary.FolderSupport.Remove target;
+
+
+    public DeleteEmailCommand(Geary.FolderSupport.Remove target,
+                              Gee.Collection<Geary.App.Conversation> conversations,
+                              Gee.Collection<Geary.EmailIdentifier> email) {
+        base(target, conversations, email);
+        this.target = target;
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.target.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
+            );
+            open = true;
+            yield this.target.remove_email_async(this.email, cancellable);
+        } finally {
+            if (open) {
+                try {
+                    yield this.target.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
+        }
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        throw new Geary.EngineError.UNSUPPORTED(
+            "Cannot undo emptying a folder: %s",
+            this.target.path.to_string()
+        );
+    }
+
+}
+
+
+private class Application.EmptyFolderCommand : Command {
+
+
+    public override bool can_undo {
+        get { return false; }
+    }
+
+    private Geary.FolderSupport.Empty target;
+
+
+    public EmptyFolderCommand(Geary.FolderSupport.Empty target) {
+        this.target = target;
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        bool open = false;
+        try {
+            yield this.target.open_async(
+                Geary.Folder.OpenFlags.NO_DELAY, cancellable
+            );
+            open = true;
+            yield this.target.empty_folder_async(cancellable);
+        } finally {
+            if (open) {
+                try {
+                    yield this.target.close_async(null);
+                } catch (GLib.Error err) {
+                    // ignored
+                }
+            }
+        }
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        throw new Geary.EngineError.UNSUPPORTED(
+            "Cannot undo emptying a folder: %s",
+            this.target.path.to_string()
+        );
+    }
+
+    /** Determines if this command is equal to another. */
+    public override bool equal_to(Command other) {
+        EmptyFolderCommand? other_type = other as EmptyFolderCommand;
+        return (other_type != null && this.target == other_type.target);
     }
 
 }

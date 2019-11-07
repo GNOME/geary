@@ -198,6 +198,16 @@ grid.geary-message-summary {
   border-radius: 0px;
 }
 
+/* AttachmentPane  */
+
+.geary-attachment-pane flowbox {
+  margin: 6px;
+}
+
+.geary-attachment-pane flowboxchild {
+  border-radius: 3px;
+}
+
 /* PlaceholderPane  */
 
 .geary-placeholder-pane.geary-has-text > image {

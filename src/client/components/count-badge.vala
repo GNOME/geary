@@ -77,7 +77,7 @@ public class CountBadge : Geary.BaseObject {
             ctx.close_path();
 
             // Colorize our shape.
-            GtkUtil.set_source_color_from_string(ctx, UNREAD_BG_COLOR);
+            Util.Gtk.set_source_color_from_string(ctx, UNREAD_BG_COLOR);
             ctx.fill_preserve();
             ctx.set_line_width(2.0);
             ctx.stroke();

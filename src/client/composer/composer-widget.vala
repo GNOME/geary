@@ -164,6 +164,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
 
+    private const string MAILTO_URI_PREFIX = "mailto:";
+
     // Keep these in sync with the next const below.
     private const string ATTACHMENT_KEYWORDS =
         "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures";
@@ -566,9 +568,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this(application, initial_account, null, ComposeType.NEW_MESSAGE);
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
-        if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {
+        if (mailto.has_prefix(MAILTO_URI_PREFIX)) {
             // Parse the mailto link.
-            string[] parts = mailto.substring(Geary.ComposedEmail.MAILTO_SCHEME.length).split("?", 2);
+            string[] parts = mailto.substring(MAILTO_URI_PREFIX.length).split("?", 2);
             string email = Uri.unescape_string(parts[0]);
             string[] params = parts.length == 2 ? parts[1].split("&") : new string[0];
             foreach (string param in params) {
@@ -2020,7 +2022,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
         // Step 3.
 
-        GtkUtil.menu_foreach(context_menu_model, (label, name, target, section) => {
+        Util.Gtk.menu_foreach(context_menu_model, (label, name, target, section) => {
                 if (context_menu.last() != null) {
                     context_menu.append(new WebKit.ContextMenuItem.separator());
                 }
@@ -2058,7 +2060,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     private inline void append_menu_section(WebKit.ContextMenu context_menu,
                                             Menu section) {
-        GtkUtil.menu_foreach(section, (label, name, target, section) => {
+        Util.Gtk.menu_foreach(section, (label, name, target, section) => {
                 string simple_name = name;
                 if ("." in simple_name) {
                     simple_name = simple_name.split(".")[1];
@@ -2336,7 +2338,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         popover.link_delete.connect(() => {
                 this.editor.delete_link(selection_id);
             });
-        popover.link_open.connect(() => { link_activated(popover.link_uri); });
+        popover.link_open.connect(() => {
+                this.application.show_uri.begin(popover.link_uri);
+            });
         return popover;
     }
 

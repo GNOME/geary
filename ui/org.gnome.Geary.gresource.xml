@@ -10,6 +10,9 @@
     <file compressed="true" preprocess="xml-stripblanks">certificate_warning_dialog.glade</file>
     <file compressed="true">client-web-view.js</file>
     <file compressed="true">client-web-view-allow-remote-images.js</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane-menus.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-attachment-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-in-app-notification.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector-error-view.ui</file>
@@ -24,7 +27,6 @@
     <file compressed="true">composer-web-view.js</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-contact-popover.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-email.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-email-attachment-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-email-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-message.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-message-menus.ui</file>

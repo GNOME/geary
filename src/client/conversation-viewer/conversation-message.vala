@@ -25,6 +25,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private const string REPLACED_CID_TEMPLATE = "replaced_%02u@geary";
     private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
 
+    private const string MAILTO_URI_PREFIX = "mailto:";
+
+
     private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
 
     private const int SHOW_PROGRESS_TIMEOUT_MSEC = 1000;
@@ -332,9 +335,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private Geary.TimeoutManager progress_pulse;
 
 
-    /** Fired when the user clicks a link in the email. */
-    public signal void link_activated(string link);
-
     /** Fired when the user clicks a internal link in the email. */
     public signal void internal_link_activated(int y);
 
@@ -342,7 +342,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public signal void flag_remote_images();
 
     /** Fired when the user saves an inline displayed image. */
-    public signal void save_image(string? uri, string? alt_text, Geary.Memory.Buffer buffer);
+    public signal void save_image(
+        string uri, string? alt_text, Geary.Memory.Buffer? buffer
+    );
 
 
     /**
@@ -400,7 +402,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         // Actions
 
         add_action(ACTION_CONVERSATION_NEW, true, VariantType.STRING)
-            .activate.connect(on_new_conversation);
+            .activate.connect(on_link_activated);
         add_action(ACTION_COPY_EMAIL, true, VariantType.STRING)
             .activate.connect(on_copy_email_address);
         add_action(ACTION_COPY_LINK, true, VariantType.STRING)
@@ -1104,7 +1106,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         if (hit_test.context_is_link()) {
             string link_url = hit_test.get_link_uri();
             MenuModel link_menu =
-                link_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)
+                link_url.has_prefix(MAILTO_URI_PREFIX)
                 ? context_menu_email
                 : context_menu_link;
             model.append_section(
@@ -1221,26 +1223,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         clipboard.store();
     }
 
-    private void on_new_conversation(Variant? param) {
-        string value = param.get_string();
-        if (value.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-            value = value.substring(Geary.ComposedEmail.MAILTO_SCHEME.length, -1);
-        }
-
-        MainWindow? main = this.get_toplevel() as MainWindow;
-        if (main != null &&
-            Geary.RFC822.MailboxAddress.is_valid_address(value)) {
-            Geary.RFC822.MailboxAddress mailbox = new Geary.RFC822.MailboxAddress(
-                null, value
-            );
-            main.open_composer_for_mailbox(mailbox);
-        }
-    }
-
     private void on_copy_email_address(Variant? param) {
         string value = param.get_string();
-        if (value.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-            value = value.substring(Geary.ComposedEmail.MAILTO_SCHEME.length, -1);
+        if (value.has_prefix(MAILTO_URI_PREFIX)) {
+            value = value.substring(MAILTO_URI_PREFIX.length, -1);
         }
         Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
         clipboard.set_text(value, -1);
@@ -1248,27 +1234,35 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void on_save_image(Variant? param) {
-        string cid_url = param.get_child_value(0).get_string();
-
+        string uri = (string) param.get_child_value(0);
         string? alt_text = null;
         Variant? alt_maybe = param.get_child_value(1).get_maybe();
         if (alt_maybe != null) {
-            alt_text = alt_maybe.get_string();
+            alt_text = (string) alt_maybe;
         }
-        WebKit.WebResource response = this.resources.get(cid_url);
-        response.get_data.begin(null, (obj, res) => {
-                try {
-                    uint8[] data = response.get_data.end(res);
-                    save_image(response.get_uri(),
-                               alt_text,
-                               new Geary.Memory.ByteBuffer(data, data.length));
-                } catch (Error err) {
-                    debug(
-                        "Failed to get image data from web view: %s",
-                        err.message
-                    );
-                }
-            });
+
+        if (uri.has_prefix(ClientWebView.CID_URL_PREFIX)) {
+            // We can get the data directly from the attachment, so
+            // don't bother getting it from the web view
+            save_image(uri, alt_text, null);
+        } else {
+            WebKit.WebResource response = this.resources.get(uri);
+            response.get_data.begin(null, (obj, res) => {
+                    try {
+                        uint8[] data = response.get_data.end(res);
+                        save_image(
+                            uri,
+                            alt_text,
+                            new Geary.Memory.ByteBuffer(data, data.length)
+                        );
+                    } catch (GLib.Error err) {
+                        debug(
+                            "Failed to get image data from web view: %s",
+                            err.message
+                        );
+                    }
+                });
+        }
     }
 
     private void on_link_activated(GLib.Variant? param) {
@@ -1291,7 +1285,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     }
                 });
         } else {
-            link_activated(link);
+            MainWindow? main = this.get_toplevel() as MainWindow;
+            if (main != null) {
+                main.application.show_uri.begin(link);
+            }
         }
     }
 
