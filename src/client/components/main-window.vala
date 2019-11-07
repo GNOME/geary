@@ -1612,6 +1612,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_command_undo(Application.Command command) {
+        update_command_actions();
         Application.EmailCommand? email = command as Application.EmailCommand;
         if (email != null) {
             if (email.conversations.size > 1) {
@@ -1630,17 +1631,16 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             ian.set_button(_("Redo"), Action.Edit.prefix(Action.Edit.REDO));
             add_notification(ian);
         }
-        update_command_actions();
     }
 
     private void on_command_redo(Application.Command command) {
+        update_command_actions();
         if (command.executed_label != null) {
             Components.InAppNotification ian =
                 new Components.InAppNotification(command.executed_label);
             ian.set_button(_("Undo"), Action.Edit.prefix(Action.Edit.UNDO));
             add_notification(ian);
         }
-        update_command_actions();
     }
 
     private void on_conversation_view_added(ConversationListBox list) {
