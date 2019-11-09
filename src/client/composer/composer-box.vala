@@ -8,13 +8,13 @@
  * A ComposerBox is a ComposerContainer that is used to compose mails in the main-window
  * (i.e. not-detached), yet separate from a conversation.
  */
-public class ComposerBox : Gtk.Frame, ComposerContainer {
+public class Composer.Box : Gtk.Frame, Container {
 
     public Gtk.ApplicationWindow top_window {
         get { return (Gtk.ApplicationWindow) get_toplevel(); }
     }
 
-    internal ComposerWidget composer { get; set; }
+    internal Widget composer { get; set; }
 
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
@@ -24,7 +24,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
     public signal void vanished();
 
 
-    public ComposerBox(ComposerWidget composer) {
+    public Box(Widget composer) {
         this.composer = composer;
         this.composer.free_header();
 
@@ -48,7 +48,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
     public void vanish() {
         hide();
         this.main_toolbar.remove_conversation_header(composer.header);
-        this.composer.state = ComposerWidget.ComposerState.DETACHED;
+        this.composer.state = Widget.ComposerState.DETACHED;
         vanished();
     }
 

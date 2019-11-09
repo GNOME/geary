@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
+class Composer.PageStateTest : ClientWebViewTestCase<Composer.WebView> {
 
     public const string COMPLETE_BODY_TEMPLATE =
         """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div><div id="geary-signature" dir="auto"></div>""";
@@ -16,8 +16,8 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 """;
     public const string CLEAN_BODY_TEMPLATE = """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div>""";
 
-    public ComposerPageStateTest() {
-        base("ComposerPageStateTest");
+    public PageStateTest() {
+        base("Composer.PageStateTest");
         add_test("html_to_text", html_to_text);
         add_test("html_to_text_with_quote", html_to_text_with_quote);
         add_test("html_to_text_with_nested_quote", html_to_text_with_nested_quote);
@@ -34,7 +34,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("replace_non_breaking_space", replace_non_breaking_space);
 
         try {
-            ComposerWebView.load_resources();
+            WebView.load_resources();
         } catch (Error err) {
             assert_not_reached();
         }
@@ -418,8 +418,8 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
         }
     }
 
-    protected override ComposerWebView set_up_test_view() {
-        return new ComposerWebView(this.config);
+    protected override Composer.WebView set_up_test_view() {
+        return new Composer.WebView(this.config);
     }
 
     protected override void load_body_fixture(string body = "") {

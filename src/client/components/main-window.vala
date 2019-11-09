@@ -567,7 +567,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     /** Displays a composer addressed to a specific email address. */
     public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
         Application.Controller controller = this.application.controller;
-        ComposerWidget composer = new ComposerWidget(
+        Composer.Widget composer = new Composer.Widget(
             this.application, this.selected_folder.account, null, NEW_MESSAGE
         );
         composer.to = to.to_full_display();
@@ -577,10 +577,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     /** Displays a composer in the window if possible, else in a new window. */
-    public void show_composer(ComposerWidget composer) {
+    public void show_composer(Composer.Widget composer) {
         if (this.has_composer) {
-            composer.state = ComposerWidget.ComposerState.DETACHED;
-            new ComposerWindow(composer, this.application);
+            composer.state = Composer.Widget.ComposerState.DETACHED;
+            new Composer.Window(composer, this.application);
         } else {
             this.conversation_viewer.do_compose(composer);
             get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
@@ -595,7 +595,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
      */
     public bool close_composer() {
         bool closed = true;
-        ComposerWidget? composer = this.conversation_viewer.current_composer;
+        Composer.Widget? composer = this.conversation_viewer.current_composer;
         if (composer != null) {
             switch (composer.should_close()) {
             case DO_CLOSE:
@@ -1242,7 +1242,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.conversations = null;
     }
 
-    private void create_composer_from_viewer(ComposerWidget.ComposeType compose_type) {
+    private void create_composer_from_viewer(Composer.Widget.ComposeType compose_type) {
         Geary.Account? account = this.selected_account;
         ConversationEmail? email_view = null;
         ConversationListBox? list_view = this.conversation_viewer.current_list;
@@ -1514,7 +1514,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         if (event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R) {
             Gtk.Widget? focus = get_focus();
             if (focus == null ||
-                (!(focus is Gtk.Entry) && !(focus is ComposerWebView))) {
+                (!(focus is Gtk.Entry) && !(focus is Composer.WebView))) {
                 set_shift_key_down(event.type == Gdk.EventType.KEY_PRESS);
             }
         }
@@ -1715,7 +1715,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             // Check all known composers since the draft may be open
             // in a detached composer
             bool already_open = false;
-            foreach (ComposerWidget composer
+            foreach (Composer.Widget composer
                      in this.application.controller.get_composers()) {
                 if (composer.draft_id != null &&
                     composer.draft_id.equal_to(draft.id)) {

@@ -427,10 +427,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     internal class ComposerRow : ConversationRow {
 
         // The embedded composer for this row
-        public ComposerEmbed view { get; private set; }
+        public Composer.Embed view { get; private set; }
 
 
-        public ComposerRow(ComposerEmbed view) {
+        public ComposerRow(Composer.Embed view) {
             base(view.referred);
             this.view = view;
             this.is_expanded = true;
@@ -834,7 +834,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /**
      * Adds an an embedded composer to the view.
      */
-    public void add_embedded_composer(ComposerEmbed embed, bool is_draft) {
+    public void add_embedded_composer(Composer.Embed embed, bool is_draft) {
         if (is_draft) {
             this.draft_id = embed.referred.id;
             EmailRow? draft = this.email_rows.get(embed.referred.id);

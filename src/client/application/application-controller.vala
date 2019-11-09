@@ -163,11 +163,17 @@ public class Application.Controller : Geary.BaseObject {
     private PluginManager plugin_manager;
 
     private Cancellable cancellable_open_account = new Cancellable();
-    private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
-    private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
 
-    // List of windows we're waiting to close before Geary closes.
-    private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
+    // Currently open composers
+    private Gee.Collection<Composer.Widget> composer_widgets =
+        new Gee.LinkedList<Composer.Widget>();
+
+    // Composers that are in the process of closing
+    private Gee.Collection<Composer.Widget> waiting_to_close =
+        new Gee.LinkedList<Composer.Widget>();
+
+    // Requested mailto composers not yet fullfulled
+    private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
 
 
     /**
@@ -204,7 +210,7 @@ public class Application.Controller : Geary.BaseObject {
             ClientWebView.load_resources(
                 this.application.get_user_config_directory()
             );
-            ComposerWebView.load_resources();
+            Composer.WebView.load_resources();
             ConversationWebView.load_resources();
             Accounts.SignatureWebView.load_resources();
         } catch (Error err) {
@@ -409,21 +415,21 @@ public class Application.Controller : Geary.BaseObject {
      * Opens new composer with an existing message as context.
      */
     public void compose_with_context_email(Geary.Account account,
-                                           ComposerWidget.ComposeType type,
+                                           Composer.Widget.ComposeType type,
                                            Geary.Email context,
                                            string? quote) {
         create_compose_widget(account, type, context, quote);
     }
 
     /** Adds a new composer to be kept track of. */
-    public void add_composer(ComposerWidget widget) {
+    public void add_composer(Composer.Widget widget) {
         debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");
         widget.destroy.connect(this.on_composer_widget_destroy);
         this.composer_widgets.add(widget);
     }
 
     /** Returns a read-only collection of currently open composers .*/
-    public Gee.Collection<ComposerWidget> get_composers() {
+    public Gee.Collection<Composer.Widget> get_composers() {
         return this.composer_widgets.read_only_view;
     }
 
@@ -1463,38 +1469,39 @@ public class Application.Controller : Geary.BaseObject {
     }
 
     internal bool close_composition_windows(bool main_window_only = false) {
-        Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
+        Gee.List<Composer.Widget> composers_to_destroy = new Gee.ArrayList<Composer.Widget>();
         bool quit_cancelled = false;
 
         // If there's composer windows open, give the user a chance to
         // save or cancel.
-        foreach(ComposerWidget cw in composer_widgets) {
+        foreach(Composer.Widget cw in composer_widgets) {
             if (!main_window_only ||
-                cw.state != ComposerWidget.ComposerState.DETACHED) {
+                cw.state != Composer.Widget.ComposerState.DETACHED) {
                 // Check if we should close the window immediately, or
                 // if we need to wait.
-                ComposerWidget.CloseStatus status = cw.should_close();
-                if (status == ComposerWidget.CloseStatus.PENDING_CLOSE) {
+                Composer.Widget.CloseStatus status = cw.should_close();
+                if (status == Composer.Widget.CloseStatus.PENDING_CLOSE) {
                     // Window is currently busy saving.
                     waiting_to_close.add(cw);
-                } else if (status == ComposerWidget.CloseStatus.CANCEL_CLOSE) {
+                } else if (status == Composer.Widget.CloseStatus.CANCEL_CLOSE) {
                     // User cancelled operation.
                     quit_cancelled = true;
                     break;
-                } else if (status == ComposerWidget.CloseStatus.DO_CLOSE) {
+                } else if (status == Composer.Widget.CloseStatus.DO_CLOSE) {
                     // Hide any existing composer windows for the
                     // moment; actually deleting the windows will
                     // result in their removal from composer_windows,
                     // which could crash this loop.
                     composers_to_destroy.add(cw);
-                    ((ComposerContainer) cw.parent).vanish();
+                    ((Composer.Container) cw.parent).vanish();
                 }
             }
         }
 
         // Safely destroy windows.
-        foreach(ComposerWidget cw in composers_to_destroy)
-            ((ComposerContainer) cw.parent).close_container();
+        foreach(Composer.Widget cw in composers_to_destroy) {
+            ((Composer.Container) cw.parent).close_container();
+        }
 
         // If we cancelled the quit we can bail here.
         if (quit_cancelled) {
@@ -1530,7 +1537,7 @@ public class Application.Controller : Geary.BaseObject {
      * a new mail (false)
      */
     private void create_compose_widget(Geary.Account account,
-                                       ComposerWidget.ComposeType compose_type,
+                                       Composer.Widget.ComposeType compose_type,
                                        Geary.Email? referred = null,
                                        string? quote = null,
                                        string? mailto = null,
@@ -1541,7 +1548,7 @@ public class Application.Controller : Geary.BaseObject {
         if (compose_type == NEW_MESSAGE && !is_draft) {
             // We're creating a new message that isn't a draft, if
             // there's already a composer open, just use that
-            ComposerWidget? existing =
+            Composer.Widget? existing =
                 this.main_window.conversation_viewer.current_composer;
             if (existing != null &&
                 existing.state == PANED &&
@@ -1553,7 +1560,7 @@ public class Application.Controller : Geary.BaseObject {
         } else if (compose_type != NEW_MESSAGE) {
             // We're replying, see whether we already have a reply for
             // that message and if so, insert a quote into that.
-            foreach (ComposerWidget existing in this.composer_widgets) {
+            foreach (Composer.Widget existing in this.composer_widgets) {
                 if (existing.state != DETACHED &&
                     ((referred != null && existing.referred_ids.contains(referred.id)) ||
                      quote != null)) {
@@ -1571,13 +1578,13 @@ public class Application.Controller : Geary.BaseObject {
             }
         }
 
-        ComposerWidget widget;
+        Composer.Widget widget;
         if (mailto != null) {
-            widget = new ComposerWidget.from_mailto(
+            widget = new Composer.Widget.from_mailto(
                 this.application, account, mailto
             );
         } else {
-            widget = new ComposerWidget(
+            widget = new Composer.Widget(
                 this.application,
                 account,
                 is_draft ? referred.id : null,
@@ -1605,7 +1612,7 @@ public class Application.Controller : Geary.BaseObject {
     }
 
     private async void load_composer(Geary.Account account,
-                                     ComposerWidget widget,
+                                     Composer.Widget widget,
                                      Geary.Email? referred = null,
                                      string? quote = null) {
         Geary.Email? full = null;
@@ -1618,7 +1625,7 @@ public class Application.Controller : Geary.BaseObject {
                     full = yield context.emails.fetch_email_async(
                         referred.id,
                         Geary.ComposedEmail.REQUIRED_REPLY_FIELDS |
-                        ComposerWidget.REQUIRED_FIELDS,
+                        Composer.Widget.REQUIRED_FIELDS,
                         NONE,
                         cancellable
                     );
@@ -1636,11 +1643,11 @@ public class Application.Controller : Geary.BaseObject {
     }
 
     private void on_composer_widget_destroy(Gtk.Widget sender) {
-        composer_widgets.remove((ComposerWidget) sender);
-        debug(@"Destroying composer of type $(((ComposerWidget) sender).compose_type); "
+        composer_widgets.remove((Composer.Widget) sender);
+        debug(@"Destroying composer of type $(((Composer.Widget) sender).compose_type); "
             + @"$(composer_widgets.size) composers remaining");
 
-        if (waiting_to_close.remove((ComposerWidget) sender)) {
+        if (waiting_to_close.remove((Composer.Widget) sender)) {
             // If we just removed the last window in the waiting to close list, it's time to exit!
             if (waiting_to_close.size == 0)
                 this.application.exit();
@@ -1665,8 +1672,8 @@ public class Application.Controller : Geary.BaseObject {
     }
 
     // Returns a list of composer windows for an account, or null if none.
-    public Gee.List<ComposerWidget>? get_composer_widgets_for_account(Geary.AccountInformation account) {
-        Gee.LinkedList<ComposerWidget> ret = Geary.traverse<ComposerWidget>(composer_widgets)
+    public Gee.List<Composer.Widget>? get_composer_widgets_for_account(Geary.AccountInformation account) {
+        Gee.LinkedList<Composer.Widget> ret = Geary.traverse<Composer.Widget>(composer_widgets)
             .filter(w => w.account.information == account)
             .to_linked_list();
 

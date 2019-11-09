@@ -5,11 +5,11 @@
  */
 
 [GtkTemplate (ui = "/org/gnome/Geary/composer-headerbar.ui")]
-public class ComposerHeaderbar : Gtk.HeaderBar {
+public class Composer.Headerbar : Gtk.HeaderBar {
 
     public Application.Configuration config { get; set; }
 
-    public ComposerWidget.ComposerState state { get; set; }
+    public Widget.ComposerState state { get; set; }
 
     public bool show_pending_attachments { get; set; default = false; }
 
@@ -32,7 +32,7 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
     /** Fired when the user wants to expand a compact composer. */
     public signal void expand_composer();
 
-    public ComposerHeaderbar(Application.Configuration config, bool is_compact) {
+    public Headerbar(Application.Configuration config, bool is_compact) {
         this.config = config;
 
         this.recipients_button.set_visible(is_compact);

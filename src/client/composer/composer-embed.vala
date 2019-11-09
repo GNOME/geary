@@ -8,7 +8,7 @@
  * A ComposerEmbed is a widget that is used to compose emails that are inlined into a
  * conversation view, e.g. for reply or forward mails.
  */
-public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
+public class Composer.Embed : Gtk.EventBox, Container {
 
     private const int MIN_EDITOR_HEIGHT = 200;
 
@@ -18,7 +18,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         get { return (Gtk.ApplicationWindow) get_toplevel(); }
     }
 
-    internal ComposerWidget composer { get; set; }
+    internal Widget composer { get; set; }
 
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
@@ -28,9 +28,9 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     public signal void vanished();
 
 
-    public ComposerEmbed(Geary.Email referred,
-                         ComposerWidget composer,
-                         Gtk.ScrolledWindow outer_scroller) {
+    public Embed(Geary.Email referred,
+                 Widget composer,
+                 Gtk.ScrolledWindow outer_scroller) {
         this.referred = referred;
         this.composer = composer;
         this.outer_scroller = outer_scroller;
@@ -179,7 +179,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
 
     public void vanish() {
         hide();
-        this.composer.state = ComposerWidget.ComposerState.DETACHED;
+        this.composer.state = Widget.ComposerState.DETACHED;
         vanished();
     }
 

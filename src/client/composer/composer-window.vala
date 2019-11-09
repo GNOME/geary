@@ -8,7 +8,7 @@
  * A ComposerWindow is a ComposerContainer that is used to compose mails in a separate window
  * (i.e. detached) of its own.
  */
-public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
+public class Composer.Window : Gtk.ApplicationWindow, Container {
 
 
     private const string DEFAULT_TITLE = _("New Message");
@@ -23,13 +23,13 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
         get { return this; }
     }
 
-    internal ComposerWidget composer { get; set; }
+    internal Widget composer { get; set; }
 
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
     private bool closing = false;
 
-    public ComposerWindow(ComposerWidget composer, GearyApplication application) {
+    public Window(Widget composer, GearyApplication application) {
         Object(application: application, type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
         this.composer.header.detached();
@@ -111,7 +111,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
     public override bool delete_event(Gdk.EventAny event) {
         return !(this.closing ||
-            ((ComposerWidget) get_child()).should_close() == ComposerWidget.CloseStatus.DO_CLOSE);
+            ((Widget) get_child()).should_close() == Widget.CloseStatus.DO_CLOSE);
     }
 
     public void vanish() {

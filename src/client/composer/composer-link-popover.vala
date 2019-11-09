@@ -18,7 +18,7 @@
  *   an update, delete and open buttons.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/composer-link-popover.ui")]
-public class ComposerLinkPopover : Gtk.Popover {
+public class Composer.LinkPopover : Gtk.Popover {
 
     private const string[] HTTP_SCHEMES = { "http", "https" };
     private const string[] OTHER_SCHEMES = {
@@ -71,7 +71,7 @@ public class ComposerLinkPopover : Gtk.Popover {
     public signal void link_delete();
 
 
-    public ComposerLinkPopover(Type type) {
+    public LinkPopover(Type type) {
         set_default_widget(this.url);
         set_focus_child(this.url);
         switch (type) {

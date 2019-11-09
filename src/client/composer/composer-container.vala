@@ -7,10 +7,10 @@
 /**
  * A generic interface for widgets that have a single ComposerWidget-child.
  */
-public interface ComposerContainer {
+public interface Composer.Container {
 
     // The ComposerWidget-child.
-    internal abstract ComposerWidget composer { get; set; }
+    internal abstract Widget composer { get; set; }
 
     // We use old_accelerators to keep track of the accelerators we temporarily disabled.
     protected abstract Gee.MultiMap<string, string>? old_accelerators { get; set; }

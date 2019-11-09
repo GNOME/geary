@@ -11,9 +11,13 @@ private errordomain AttachmentError {
     DUPLICATE
 }
 
-// The actual widget for sending messages. Should be put in a ComposerContainer
+/**
+ * A widget for editing an email message.
+ *
+ * Composers must always be placed in an instance of {@link Container}.
+ */
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
-public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
+public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
 
     /** The email fields the composer requires for referred email. */
@@ -250,9 +254,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    public ComposerHeaderbar header { get; private set; }
+    public Headerbar header { get; private set; }
 
-    public ComposerWebView editor { get; private set; }
+    public WebView editor { get; private set; }
 
     public string window_title { get; set; }
 
@@ -398,8 +402,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     // Is the composer closing (e.g. saving a draft or sending)?
     private bool is_closing = false;
 
-    private ComposerContainer container {
-        get { return (ComposerContainer) parent; }
+    private Container container {
+        get { return (Container) parent; }
     }
 
     private GearyApplication application;
@@ -415,7 +419,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     public signal void subject_changed(string new_subject);
 
 
-    public ComposerWidget(GearyApplication application,
+    public Widget(GearyApplication application,
                           Geary.Account initial_account,
                           Geary.EmailIdentifier? draft_id,
                           ComposeType compose_type) {
@@ -442,7 +446,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.state = ComposerState.INLINE_COMPACT;
         }
 
-        this.header = new ComposerHeaderbar(
+        this.header = new Headerbar(
             application.config,
             this.state == ComposerState.INLINE_COMPACT
         );
@@ -496,7 +500,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         );
         update_subject_spell_checker();
 
-        this.editor = new ComposerWebView(application.config);
+        this.editor = new WebView(application.config);
         this.editor.set_hexpand(true);
         this.editor.set_vexpand(true);
         this.editor.content_loaded.connect(on_editor_content_loaded);
@@ -565,7 +569,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         load_entry_completions();
     }
 
-    ~ComposerWidget() {
+    ~Widget() {
         base_unref();
     }
 
@@ -588,9 +592,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         base.destroy();
     }
 
-    public ComposerWidget.from_mailto(GearyApplication application,
-                                      Geary.Account initial_account,
-                                      string mailto) {
+    public Widget.from_mailto(GearyApplication application,
+                              Geary.Account initial_account,
+                              string mailto) {
         this(application, initial_account, null, ComposeType.NEW_MESSAGE);
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
@@ -1100,7 +1104,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
                 if (this.state != ComposerState.PANED &&
                     this.state != ComposerState.DETACHED) {
-                    this.state = ComposerWidget.ComposerState.PANED;
+                    this.state = Widget.ComposerState.PANED;
                     // XXX move the two lines below to the controller
                     this.container.remove_composer();
                     GearyApplication.instance.controller.main_window.conversation_viewer.do_compose(this);
@@ -1280,7 +1284,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
         Gtk.Widget? focused_widget = this.container.top_window.get_focus();
         this.container.remove_composer();
-        ComposerWindow new_window = new ComposerWindow(this, this.application);
+        Window new_window = new Window(this, this.application);
 
         // Workaround a GTK+ crasher, Bug 771812. When the composer is
         // re-parented, its menu_button's popover keeps a reference to
@@ -1295,15 +1299,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.application.config.compose_as_html
         );
 
-        this.state = ComposerWidget.ComposerState.DETACHED;
+        this.state = DETACHED;
         update_composer_view();
 
         // If the previously focused widget is in the new composer
         // window then focus that, else focus something useful.
         bool refocus = true;
         if (focused_widget != null) {
-            ComposerWindow? focused_window =
-                focused_widget.get_toplevel() as ComposerWindow;
+            Window? focused_window = focused_widget.get_toplevel() as Window;
             if (new_window == focused_window) {
                 focused_widget.grab_focus();
                 refocus = false;
@@ -2418,15 +2421,15 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         buffer.spell_checker = checker;
     }
 
-    private async ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,
-                                                       string url) {
+    private async LinkPopover new_link_popover(LinkPopover.Type type,
+                                               string url) {
         var selection_id = "";
         try {
             selection_id = yield this.editor.save_selection();
         } catch (Error err) {
             debug("Error saving selection: %s", err.message);
         }
-        ComposerLinkPopover popover = new ComposerLinkPopover(type);
+        LinkPopover popover = new LinkPopover(type);
         popover.set_link_url(url);
         popover.closed.connect(() => {
                 this.editor.free_selection(selection_id);
@@ -2497,9 +2500,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             location.y = (int) button.y;
 
             this.new_link_popover.begin(
-                ComposerLinkPopover.Type.EXISTING_LINK, this.pointer_url,
+                LinkPopover.Type.EXISTING_LINK, this.pointer_url,
                 (obj, res) => {
-                    ComposerLinkPopover popover = this.new_link_popover.end(res);
+                    LinkPopover popover = this.new_link_popover.end(res);
                     popover.set_relative_to(this.editor);
                     popover.set_pointing_to(location);
                     popover.show();
@@ -2508,7 +2511,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         return Gdk.EVENT_PROPAGATE;
     }
 
-    private void on_cursor_context_changed(ComposerWebView.EditContext context) {
+    private void on_cursor_context_changed(WebView.EditContext context) {
         this.cursor_url = context.is_link ? context.link_url : null;
         update_cursor_actions();
 
@@ -2602,15 +2605,15 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_insert_link(SimpleAction action, Variant? param) {
-        ComposerLinkPopover.Type type = ComposerLinkPopover.Type.NEW_LINK;
+        LinkPopover.Type type = LinkPopover.Type.NEW_LINK;
         string url = "https://";
         if (this.cursor_url != null) {
-            type = ComposerLinkPopover.Type.EXISTING_LINK;
+            type = LinkPopover.Type.EXISTING_LINK;
             url = this.cursor_url;
         }
 
         this.new_link_popover.begin(type, url, (obj, res) => {
-                ComposerLinkPopover popover = this.new_link_popover.end(res);
+                LinkPopover popover = this.new_link_popover.end(res);
 
                 // We have to disconnect then reconnect the selection
                 // changed signal for the duration of the popover

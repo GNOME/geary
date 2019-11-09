@@ -434,7 +434,7 @@ public class GearyApplication : Gtk.Application {
         add_edit_accelerators(Action.Edit.UNDO, { "<Ctrl>Z" });
 
         MainWindow.add_accelerators(this);
-        ComposerWidget.add_accelerators(this);
+        Composer.Widget.add_accelerators(this);
         Components.Inspector.add_accelerators(this);
         Dialogs.ProblemDetailsDialog.add_accelerators(this);
 

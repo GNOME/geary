@@ -20,7 +20,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     }
 
     /** Returns the currently displayed composer if any. */
-    public ComposerWidget? current_composer {
+    public Composer.Widget? current_composer {
         get; private set; default = null;
     }
 
@@ -145,8 +145,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     /**
      * Puts the view into composer mode, showing a full-height composer.
      */
-    public void do_compose(ComposerWidget composer) {
-        ComposerBox box = new ComposerBox(composer);
+    public void do_compose(Composer.Widget composer) {
+        Composer.Box box = new Composer.Box(composer);
         this.current_composer = composer;
 
         // XXX move the ConversationListView management code into
@@ -166,10 +166,10 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     /**
      * Puts the view into composer mode, showing an embedded composer.
      */
-    public void do_compose_embedded(ComposerWidget composer,
+    public void do_compose_embedded(Composer.Widget composer,
                                     Geary.Email? referred) {
         this.current_composer = composer;
-        ComposerEmbed embed = new ComposerEmbed(
+        Composer.Embed embed = new Composer.Embed(
             referred,
             composer,
             this.conversation_scroller

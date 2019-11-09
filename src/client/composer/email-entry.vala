@@ -16,11 +16,11 @@ public class EmailEntry : Gtk.Entry {
     // null or valid addresses
     public Geary.RFC822.MailboxAddresses? addresses { get; set; default = null; }
 
-    private weak ComposerWidget composer;
+    private weak Composer.Widget composer;
 
     private bool updating = false;
 
-    public EmailEntry(ComposerWidget composer) {
+    public EmailEntry(Composer.Widget composer) {
         changed.connect(on_changed);
         key_press_event.connect(on_key_press);
         this.composer = composer;
