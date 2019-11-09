@@ -113,6 +113,13 @@
         <description>The last recorded size of the detached composer window.</description>
     </key>
 
+    <key name="undo-send-delay" type="i">
+        <default>5</default>
+        <summary>Undo sending email delay</summary>
+        <description>The number of seconds to wait before sending an
+        email. Set to zero or less to disable.</description>
+    </key>
+
     <key name="migrated-config" type="b">
         <default>false</default>
         <summary>Whether we migrated the old settings</summary>

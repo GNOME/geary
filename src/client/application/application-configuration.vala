@@ -1,11 +1,13 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * Provides convenience properties to current Geary GSettings values.
+ * Provides properties to access application GSettings values.
  */
 public class Application.Configuration {
 
@@ -25,6 +27,7 @@ public class Application.Configuration {
     public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
     public const string SPELL_CHECK_VISIBLE_LANGUAGES = "spell-check-visible-languages";
     public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
+    public const string UNDO_SEND_DELAY = "undo-send-delay";
     public const string WINDOW_HEIGHT_KEY = "window-height";
     public const string WINDOW_MAXIMIZE_KEY = "window-maximize";
     public const string WINDOW_WIDTH_KEY = "window-width";
@@ -199,6 +202,12 @@ public class Application.Configuration {
             settings.set_value(COMPOSER_WINDOW_SIZE_KEY, value);
         }
     }
+
+    /** The number of seconds to wait before sending an email. */
+    public int undo_send_delay {
+        get { return settings.get_int(UNDO_SEND_DELAY); }
+    }
+
 
     // Creates a configuration object.
     public Configuration(string schema_id) {
