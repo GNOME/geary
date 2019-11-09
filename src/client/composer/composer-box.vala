@@ -1,26 +1,28 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * A ComposerBox is a ComposerContainer that is used to compose mails in the main-window
- * (i.e. not-detached), yet separate from a conversation.
+ * A container for full-height paned composers in the main window.
  */
 public class Composer.Box : Gtk.Frame, Container {
 
-    public Gtk.ApplicationWindow top_window {
-        get { return (Gtk.ApplicationWindow) get_toplevel(); }
+    /** {@inheritDoc} */
+    public Gtk.ApplicationWindow? top_window {
+        get { return get_toplevel() as Gtk.ApplicationWindow; }
     }
 
+    /** {@inheritDoc} */
     internal Widget composer { get; set; }
-
-    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
     private MainToolbar main_toolbar { get; private set; }
 
 
+    /** Emitted when the container is closed. */
     public signal void vanished();
 
 
@@ -40,21 +42,12 @@ public class Composer.Box : Gtk.Frame, Container {
         show();
     }
 
-    public void remove_composer() {
-        remove(this.composer);
-        close_container();
-    }
-
-    public void vanish() {
-        hide();
+    /** {@inheritDoc} */
+    public void close() {
         this.main_toolbar.remove_conversation_header(composer.header);
-        this.composer.state = Widget.ComposerState.DETACHED;
         vanished();
-    }
 
-    public void close_container() {
-        if (this.visible)
-            vanish();
+        remove(this.composer);
         destroy();
     }
 

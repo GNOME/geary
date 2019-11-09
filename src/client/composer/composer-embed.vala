@@ -1,30 +1,33 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * A ComposerEmbed is a widget that is used to compose emails that are inlined into a
- * conversation view, e.g. for reply or forward mails.
+ * A container for full-height paned composers in the main window.
  */
 public class Composer.Embed : Gtk.EventBox, Container {
 
     private const int MIN_EDITOR_HEIGHT = 200;
 
-    public Geary.Email referred { get; private set; }
-
-    public Gtk.ApplicationWindow top_window {
-        get { return (Gtk.ApplicationWindow) get_toplevel(); }
+    /** {@inheritDoc} */
+    public Gtk.ApplicationWindow? top_window {
+        get { return get_toplevel() as Gtk.ApplicationWindow; }
     }
 
-    internal Widget composer { get; set; }
+    /** The email this composer was originally a reply to. */
+    public Geary.Email referred { get; private set; }
 
-    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
+    /** {@inheritDoc} */
+    internal Widget composer { get; set; }
 
     private Gtk.ScrolledWindow outer_scroller;
 
 
+    /** Emitted when the container is closed. */
     public signal void vanished();
 
 
@@ -43,6 +46,15 @@ public class Composer.Embed : Gtk.EventBox, Container {
         add(composer);
         realize.connect(on_realize);
         show();
+    }
+
+    /** {@inheritDoc} */
+    public void close() {
+        disable_scroll_reroute(this);
+        vanished();
+
+        remove(this.composer);
+        destroy();
     }
 
     private void on_realize() {
@@ -66,12 +78,6 @@ public class Composer.Embed : Gtk.EventBox, Container {
             foreach (Gtk.Widget child in container.get_children())
                 disable_scroll_reroute(child);
         }
-    }
-
-    public void remove_composer() {
-        disable_scroll_reroute(this);
-        remove(this.composer);
-        close_container();
     }
 
     // This method intercepts scroll events destined for the embedded
@@ -177,15 +183,4 @@ public class Composer.Embed : Gtk.EventBox, Container {
         return ret;
     }
 
-    public void vanish() {
-        hide();
-        this.composer.state = Widget.ComposerState.DETACHED;
-        vanished();
-    }
-
-    public void close_container() {
-        if (this.visible)
-            vanish();
-        destroy();
-    }
 }

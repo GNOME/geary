@@ -566,21 +566,18 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     /** Displays a composer addressed to a specific email address. */
     public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
-        Application.Controller controller = this.application.controller;
-        Composer.Widget composer = new Composer.Widget(
-            this.application, this.selected_folder.account, null, NEW_MESSAGE
+        var composer = new Composer.Widget.from_mailbox(
+            this.application, this.selected_folder.account, to
         );
-        composer.to = to.to_full_display();
-        controller.add_composer(composer);
+        this.application.controller.add_composer(composer);
         show_composer(composer);
-        composer.load.begin(null, null, null);
+        composer.load.begin(null, false, null, null);
     }
 
     /** Displays a composer in the window if possible, else in a new window. */
     public void show_composer(Composer.Widget composer) {
         if (this.has_composer) {
-            composer.state = Composer.Widget.ComposerState.DETACHED;
-            new Composer.Window(composer, this.application);
+            composer.detach();
         } else {
             this.conversation_viewer.do_compose(composer);
             get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
@@ -599,7 +596,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         if (composer != null) {
             switch (composer.should_close()) {
             case DO_CLOSE:
-                composer.close();
+                composer.close.begin();
                 break;
 
             case CANCEL_CLOSE:
@@ -1256,7 +1253,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                         account,
                         compose_type,
                         email_view.email,
-                        quote
+                        quote,
+                        false
                     );
                 });
         }
@@ -1717,8 +1715,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             bool already_open = false;
             foreach (Composer.Widget composer
                      in this.application.controller.get_composers()) {
-                if (composer.draft_id != null &&
-                    composer.draft_id.equal_to(draft.id)) {
+                if (composer.current_draft_id != null &&
+                    composer.current_draft_id.equal_to(draft.id)) {
                     already_open = true;
                     composer.present();
                     composer.set_focus();
@@ -1731,7 +1729,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                     activated.base_folder.account,
                     NEW_MESSAGE,
                     draft,
-                    null
+                    null,
+                    true
                 );
             }
         }
@@ -2117,7 +2116,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, REPLY, target, quote
+                account, REPLY, target, quote, false
             );
         }
     }
@@ -2126,7 +2125,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, REPLY_ALL, target, quote
+                account, REPLY_ALL, target, quote, false
             );
         }
     }
@@ -2135,7 +2134,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, FORWARD, target, quote
+                account, FORWARD, target, quote, false
             );
         }
     }
@@ -2144,7 +2143,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, NEW_MESSAGE, target, null
+                account, NEW_MESSAGE, target, null, true
             );
         }
     }

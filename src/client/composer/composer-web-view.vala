@@ -192,13 +192,6 @@ public class Composer.WebView : ClientWebView {
     }
 
     /**
-     * Makes the view uneditable and stops signals from being sent.
-     */
-    public void disable() {
-        set_sensitive(false);
-    }
-
-    /**
      * Sets whether the editor is in rich text or plain text mode.
      */
     public void set_rich_text(bool enabled) {

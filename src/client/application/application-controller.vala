@@ -407,7 +407,9 @@ public class Application.Controller : Geary.BaseObject {
             // Schedule the send for after we have an account open.
             this.pending_mailtos.add(mailto);
         } else {
-            create_compose_widget(selected, NEW_MESSAGE, null, null, mailto);
+            create_compose_widget(
+                selected, NEW_MESSAGE, mailto, null, null, false
+            );
         }
     }
 
@@ -417,8 +419,9 @@ public class Application.Controller : Geary.BaseObject {
     public void compose_with_context_email(Geary.Account account,
                                            Composer.Widget.ComposeType type,
                                            Geary.Email context,
-                                           string? quote) {
-        create_compose_widget(account, type, context, quote);
+                                           string? quote,
+                                           bool is_draft) {
+        create_compose_widget(account, type, null, context, quote, is_draft);
     }
 
     /** Adds a new composer to be kept track of. */
@@ -1493,14 +1496,14 @@ public class Application.Controller : Geary.BaseObject {
                     // result in their removal from composer_windows,
                     // which could crash this loop.
                     composers_to_destroy.add(cw);
-                    ((Composer.Container) cw.parent).vanish();
+                    cw.set_enabled(false);
                 }
             }
         }
 
         // Safely destroy windows.
-        foreach(Composer.Widget cw in composers_to_destroy) {
-            ((Composer.Container) cw.parent).close_container();
+        foreach (Composer.Widget cw in composers_to_destroy) {
+            cw.close.begin();
         }
 
         // If we cancelled the quit we can bail here.
@@ -1538,10 +1541,10 @@ public class Application.Controller : Geary.BaseObject {
      */
     private void create_compose_widget(Geary.Account account,
                                        Composer.Widget.ComposeType compose_type,
-                                       Geary.Email? referred = null,
-                                       string? quote = null,
-                                       string? mailto = null,
-                                       bool is_draft = false) {
+                                       string? mailto,
+                                       Geary.Email? referred,
+                                       string? quote,
+                                       bool is_draft) {
         // There's a few situations where we can re-use an existing
         // composer, check for these first.
 
@@ -1554,18 +1557,25 @@ public class Application.Controller : Geary.BaseObject {
                 existing.state == PANED &&
                 existing.is_blank) {
                 existing.present();
-                existing.set_focus();
                 return;
             }
-        } else if (compose_type != NEW_MESSAGE) {
-            // We're replying, see whether we already have a reply for
-            // that message and if so, insert a quote into that.
+        } else if (compose_type != NEW_MESSAGE && referred != null) {
+            // A reply/forward was requested, see whether there is
+            // already an inline message that is either a
+            // reply/forward for that message, or there is a quote
+            // to insert into it.
             foreach (Composer.Widget existing in this.composer_widgets) {
-                if (existing.state != DETACHED &&
-                    ((referred != null && existing.referred_ids.contains(referred.id)) ||
+                if ((existing.state == INLINE ||
+                     existing.state == INLINE_COMPACT) &&
+                    (referred.id in existing.get_referred_ids() ||
                      quote != null)) {
-                    existing.change_compose_type(compose_type, referred, quote);
-                    return;
+                    try {
+                        existing.append_to_email(referred, quote, compose_type);
+                        existing.present();
+                        return;
+                    } catch (Geary.EngineError error) {
+                        report_problem(new Geary.ProblemReport(error));
+                    }
                 }
             }
 
@@ -1585,10 +1595,7 @@ public class Application.Controller : Geary.BaseObject {
             );
         } else {
             widget = new Composer.Widget(
-                this.application,
-                account,
-                is_draft ? referred.id : null,
-                compose_type
+                this.application, account, compose_type
             );
         }
 
@@ -1607,6 +1614,7 @@ public class Application.Controller : Geary.BaseObject {
             account,
             widget,
             referred,
+            is_draft,
             quote
         );
     }
@@ -1614,6 +1622,7 @@ public class Application.Controller : Geary.BaseObject {
     private async void load_composer(Geary.Account account,
                                      Composer.Widget widget,
                                      Geary.Email? referred = null,
+                                     bool is_draft,
                                      string? quote = null) {
         Geary.Email? full = null;
         GLib.Cancellable? cancellable = null;
@@ -1635,7 +1644,7 @@ public class Application.Controller : Geary.BaseObject {
             }
         }
         try {
-            yield widget.load(full, quote, cancellable);
+            yield widget.load(full, is_draft, quote, cancellable);
         } catch (GLib.Error err) {
             report_problem(new Geary.ProblemReport(err));
         }

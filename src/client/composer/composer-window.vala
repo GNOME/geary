@@ -1,12 +1,13 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * A ComposerWindow is a ComposerContainer that is used to compose mails in a separate window
- * (i.e. detached) of its own.
+ * A container detached composers, i.e. in their own separate window.
  */
 public class Composer.Window : Gtk.ApplicationWindow, Container {
 
@@ -14,20 +15,20 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
     private const string DEFAULT_TITLE = _("New Message");
 
 
-    public new GearyApplication application {
-        get { return (GearyApplication) base.get_application(); }
-        set { base.set_application(value); }
-    }
-
-    public Gtk.ApplicationWindow top_window {
+    /** {@inheritDoc} */
+    public Gtk.ApplicationWindow? top_window {
         get { return this; }
     }
 
+    /** {@inheritDoc} */
+    public new GearyApplication? application {
+        get { return base.get_application() as GearyApplication; }
+        set { base.set_application(value); }
+    }
+
+    /** {@inheritDoc} */
     internal Widget composer { get; set; }
 
-    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
-
-    private bool closing = false;
 
     public Window(Widget composer, GearyApplication application) {
         Object(application: application, type: Gtk.WindowType.TOPLEVEL);
@@ -47,11 +48,17 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
             set_titlebar(this.composer.header);
         }
 
-        composer.subject_changed.connect(() => { update_title(); } );
+        composer.notify["subject"].connect(() => { update_title(); } );
         update_title();
 
         show();
         set_position(Gtk.WindowPosition.CENTER);
+    }
+
+    /** {@inheritDoc} */
+    public new void close() {
+        remove(this.composer);
+        destroy();
     }
 
     public override void show() {
@@ -104,22 +111,13 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
         this.save_window_geometry();
     }
 
-    public void close_container() {
-        this.closing = true;
-        destroy();
-    }
-
     public override bool delete_event(Gdk.EventAny event) {
-        return !(this.closing ||
-            ((Widget) get_child()).should_close() == Widget.CloseStatus.DO_CLOSE);
-    }
-
-    public void vanish() {
-        hide();
-    }
-
-    public void remove_composer() {
-        warning("Detached composer received remove");
+        bool ret = Gdk.EVENT_PROPAGATE;
+        Widget? composer = get_child() as Widget;
+        if (composer != null && composer.should_close() == CANCEL_CLOSE) {
+            ret = Gdk.EVENT_STOP;
+        }
+        return ret;
     }
 
     private void update_title() {
