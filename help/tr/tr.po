@@ -6,9 +6,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2019-06-19 10:27+0000\n"
-"PO-Revision-Date: 2019-07-21 00:34+0300\n"
+"Project-Id-Version: geary help mainline\n"
+"POT-Creation-Date: 2019-09-27 12:58+0000\n"
+"PO-Revision-Date: 2019-11-10 09:05+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -30,7 +30,6 @@ msgstr "Hesaplar"
 
 #. (itstool) path: section/title
 #: C/accounts.page:13
-#| msgid "Accounts"
 msgid "Accounts Editor"
 msgstr "Hesap Düzenleyici"
 
@@ -100,7 +99,6 @@ msgstr ""
 
 #. (itstool) path: section/title
 #: C/accounts.page:48
-#| msgid "Editing existing accounts"
 msgid "Updating existing accounts"
 msgstr "Var olan hesapları güncelleme"
 
@@ -119,10 +117,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/accounts.page:56
-#| msgid ""
-#| "The <gui>Download mail</gui> drop-down allows you to configure how much "
-#| "mail Geary will keep locally. Geary can only use locally available mail "
-#| "when searching and forming conversations."
 msgid ""
 "The <gui>Download mail</gui> setting allows you to configure how much mail "
 "Geary will download and store locally. Geary can only use locally available "
@@ -394,9 +388,6 @@ msgstr "Gearyʼyi daha iyi yapmaya yardım ettiğiniz için teşekkürler!"
 #. update your localized copy. The msgstr is not used at all. Set it to
 #. whatever you like once you have updated your copy of the file.
 #: C/index.page:6
-#| msgctxt "_"
-#| msgid ""
-#| "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
 msgctxt "_"
 msgid "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
 msgstr ""
@@ -404,7 +395,6 @@ msgstr ""
 
 #. (itstool) path: page/title
 #: C/index.page:5
-#| msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
 msgid ""
 "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
 "<span>Geary</span>"
@@ -564,7 +554,6 @@ msgstr ""
 
 #. (itstool) path: page/p
 #: C/overview.page:18
-#| msgid "The main Geary window is divided into several areas:"
 msgid ""
 "The main Geary window is divided into several areas: The folder list, the "
 "conversation list, and the conversation viewer."
@@ -579,11 +568,6 @@ msgstr "Klasör listesi"
 
 #. (itstool) path: section/p
 #: C/overview.page:24
-#| msgid ""
-#| "The <em>folder list</em> at the left displays all <em>folders</em> and "
-#| "<em>labels</em> in your mail account. Geary uses the term <em>label</em> "
-#| "for any folder that you have created to help organize your messages. (The "
-#| "Gmail web interface also uses this term; most other mail services do not.)"
 msgid ""
 "The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
 "for your email accounts. Geary uses the term <em>label</em> for any folder "
@@ -619,10 +603,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:40
-#| msgid ""
-#| "Each sender's name appears bold if there are unread messages from that "
-#| "sender. If a conversation has more than one message, Geary displays a "
-#| "count of messages in the conversation."
 msgid ""
 "Each sender’s name appears bold if there are unread messages from that "
 "sender. If a conversation has more than one message, Geary displays a count "
@@ -634,12 +614,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:44
-#| msgid ""
-#| "Geary does not automatically download all messages in all of your mail "
-#| "folders. When you first visit your Inbox or any other folder, Geary "
-#| "downloads the 50 most recent messages in that folder. To see more "
-#| "messages, simply scroll down the conversation list and Geary will fetch "
-#| "more messages automatically."
 msgid ""
 "Geary does not automatically download all messages in all of your mail "
 "folders. When you first visit your Inbox or any other folder, Geary "
@@ -670,15 +644,11 @@ msgstr ""
 
 #. (itstool) path: section/title
 #: C/overview.page:58
-#| msgid "Conversation list"
 msgid "Conversation viewer"
 msgstr "Konuşma görüntüleyici"
 
 #. (itstool) path: section/p
 #: C/overview.page:60
-#| msgid ""
-#| "The <em>message area</em> displays all messages in the selected "
-#| "conversation, with the oldest message at the top."
 msgid ""
 "The <em>conversation viewer</em> displays all email messages in the selected "
 "conversation, with the oldest message at the top."
@@ -688,10 +658,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:63
-#| msgid ""
-#| "When you view a conversation, Geary collapses messages that you've "
-#| "already read. Click collapsed messages to expand them. Click an expanded "
-#| "message's header to collapse it."
 msgid ""
 "When you view a conversation, Geary collapses messages that you’ve already "
 "read. Click collapsed messages to expand them. Click an expanded message’s "
@@ -752,9 +718,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:89
-#| msgid ""
-#| "Any attachments in a message appear at the bottom of the message. You can "
-#| "click an attachment to open it or right-click to save it."
 msgid ""
 "Any attachments in a message appear at the bottom of the message. Double "
 "click an attachment to open it, or use the Open and Save buttons to open and "
@@ -770,30 +733,25 @@ msgid "Preferences"
 msgstr "Tercihler"
 
 #. (itstool) path: page/p
-#: C/preferences.page:11
+#: C/preferences.page:12
 msgid ""
-"The <gui>Preferences</gui> option is available in either Geary's application "
-"menu or the gear menu in the upper-right of the toolbar. (The location "
-"depends on the install desktop shell. For GNOME Shell and Unity, the "
-"application menu is available near the top-left corner of the screen.)"
+"Geary allows you to customise how it works via its <gui>Preferences</gui> "
+"window. To open the window, select <gui>Preferences</gui> from the "
+"application menu on the main window's toolbar. You can change the following "
+"options:"
 msgstr ""
-"<gui>Tercihler</gui> seçeneği, Gearyʼnin uygulama menüsünde veya araç "
-"çubuğunun sağ üst köşesindeki dişli menüde bulunabilir. (Konum, kurulu "
-"masaüstü kabuğuna bağlıdır. GNOME Shell ve Unity için uygulama menüsü "
-"ekranın sol üst köşesine yakın bulunur.)"
-
-#. (itstool) path: section/title
-#: C/preferences.page:17
-msgid "Reading"
-msgstr "Okuma"
+"Gearyʼnin çalışmasını özelleştirmek için <gui>Tercihler</gui> penceresini "
+"kullanabilirsiniz. Pencereyi açmak için ana pencerenin araç çubuğundaki "
+"uygulama menüsünden <gui>Tercihler</gui>i seçin. Şu seçenekleri "
+"değiştirebilirsiniz:"
 
 #. (itstool) path: item/title
-#: C/preferences.page:20
+#: C/preferences.page:19
 msgid "<gui>Automatically select next message</gui>"
 msgstr "<gui>Bir sonraki iletiyi kendiliğinden seç</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:21
+#: C/preferences.page:20
 msgid ""
 "When this option is enabled, Geary automatically selects the latest message "
 "in a folder when you enter the folder. In addition, after archiving a "
@@ -833,48 +791,13 @@ msgstr ""
 "göster. Eğer seçilmediyse, klasör listesi ve konuşma listesi tek bölmeye "
 "dikey olarak yığılacaktır."
 
-#. (itstool) path: section/title
-#: C/preferences.page:40
-msgid "Notifications"
-msgstr "Bildirimler"
-
 #. (itstool) path: item/title
-#: C/preferences.page:43
-msgid "<gui>Play notification sounds</gui>"
-msgstr "<gui>Bildirim seslerini oynat</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:44
-msgid "When set, Geary plays a sound whenever a new message arrives."
-msgstr "Ayarlandığında; Geary, yeni ileti geldiğinde ses oynatır."
-
-#. (itstool) path: item/title
-#: C/preferences.page:47
-msgid "<gui>Show notifications for new mail</gui>"
-msgstr "<gui>Yeni postalar için bildirim göster</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:48
-msgid ""
-"When set, Geary displays a <em>notification</em> each time a new message "
-"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
-"Shell, notifications appear at the bottom of the display (older versions) or "
-"centered just below the top bar (newer versions). In Ubuntu Unity, "
-"notifications appear at the upper right of the display."
-msgstr ""
-"Ayarlandığında; Geary, yeni ileti geldiğinde her defasında <em>bildirim</em> "
-"gösterir. Bildirimler, sisteme bağlı biçimde gösterilir. GNOME Shellʼde, "
-"(eski sürümlerde) bildirimler ekranın altında veya (yeni sürümlerde) üst "
-"çubuğun azıcık altında ortalanmış gözükür. Ubuntu Unityʼde, bildirimler "
-"ekranın sağ üst köşesinde gözükür."
-
-#. (itstool) path: item/title
-#: C/preferences.page:54
+#: C/preferences.page:38
 msgid "<gui>Watch for new mail when closed</gui>"
 msgstr "<gui>Kapatıldığında yeni postayı gözetle</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:55
+#: C/preferences.page:39
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
@@ -950,7 +873,6 @@ msgstr "<input>bcc:<var>alıcı</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:32
-#| msgid "Finds messages where <var>recipient</var> matches the BCC header."
 msgid "Finds messages where <var>recipient</var> matches email BCC fields."
 msgstr "E-posta BCC alanları <var>alıcı</var> ile eşleşen iletileri bulur."
 
@@ -971,7 +893,6 @@ msgstr "<input>cc:<var>alıcı</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:40
-#| msgid "Finds messages where <var>recipient</var> matches the CC header."
 msgid "Finds messages where <var>recipient</var> matches email CC fields."
 msgstr "E-posta CC alanları <var>alıcı</var> ile eşleşen iletileri bulur."
 
@@ -982,7 +903,6 @@ msgstr "<input>kimden:<var>gönderici</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:44
-#| msgid "Finds messages where <var>sender</var> matches the From header."
 msgid "Finds messages where <var>sender</var> matches email From fields."
 msgstr ""
 "E-posta Kimden alanları <var>gönderici</var> ile eşleşen iletileri bulur."
@@ -1034,9 +954,6 @@ msgstr "<input>kime:<var>alıcı</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:64
-#| msgid ""
-#| "Finds messages where <var>recipient</var> matches the To, CC, or BCC "
-#| "header."
 msgid ""
 "Finds messages where <var>recipient</var> matches email To, CC, or BCC "
 "fields."
@@ -1307,6 +1224,45 @@ msgstr ""
 #: C/write.page:51
 msgid "Geary deletes the draft when you send the message."
 msgstr "Geary, iletiyi gönderdiğinizde taslağı siler."
+
+#~ msgid ""
+#~ "The <gui>Preferences</gui> option is available in either Geary's "
+#~ "application menu or the gear menu in the upper-right of the toolbar. (The "
+#~ "location depends on the install desktop shell. For GNOME Shell and Unity, "
+#~ "the application menu is available near the top-left corner of the screen.)"
+#~ msgstr ""
+#~ "<gui>Tercihler</gui> seçeneği, Gearyʼnin uygulama menüsünde veya araç "
+#~ "çubuğunun sağ üst köşesindeki dişli menüde bulunabilir. (Konum, kurulu "
+#~ "masaüstü kabuğuna bağlıdır. GNOME Shell ve Unity için uygulama menüsü "
+#~ "ekranın sol üst köşesine yakın bulunur.)"
+
+#~ msgid "Reading"
+#~ msgstr "Okuma"
+
+#~ msgid "Notifications"
+#~ msgstr "Bildirimler"
+
+#~ msgid "<gui>Play notification sounds</gui>"
+#~ msgstr "<gui>Bildirim seslerini oynat</gui>"
+
+#~ msgid "When set, Geary plays a sound whenever a new message arrives."
+#~ msgstr "Ayarlandığında; Geary, yeni ileti geldiğinde ses oynatır."
+
+#~ msgid "<gui>Show notifications for new mail</gui>"
+#~ msgstr "<gui>Yeni postalar için bildirim göster</gui>"
+
+#~ msgid ""
+#~ "When set, Geary displays a <em>notification</em> each time a new message "
+#~ "arrives. Notifications are displayed in a system-dependent manner. On "
+#~ "GNOME Shell, notifications appear at the bottom of the display (older "
+#~ "versions) or centered just below the top bar (newer versions). In Ubuntu "
+#~ "Unity, notifications appear at the upper right of the display."
+#~ msgstr ""
+#~ "Ayarlandığında; Geary, yeni ileti geldiğinde her defasında <em>bildirim</"
+#~ "em> gösterir. Bildirimler, sisteme bağlı biçimde gösterilir. GNOME "
+#~ "Shellʼde, (eski sürümlerde) bildirimler ekranın altında veya (yeni "
+#~ "sürümlerde) üst çubuğun azıcık altında ortalanmış gözükür. Ubuntu "
+#~ "Unityʼde, bildirimler ekranın sağ üst köşesinde gözükür."
 
 #~ msgid ""
 #~ "The first time you start Geary, you will be prompted to add an email "
