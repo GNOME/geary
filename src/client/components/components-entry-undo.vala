@@ -129,6 +129,7 @@ public class Components.EntryUndo : Geary.BaseObject {
     /** Resets the editing stack for the target entry. */
     public void reset() {
         this.last_edit = NONE;
+        this.edit_accumuluator.truncate();
         this.commands.clear();
     }
 
@@ -186,7 +187,7 @@ public class Components.EntryUndo : Geary.BaseObject {
                     this.commands.redo.end(res);
                 } catch (GLib.Error thrown) {
                     debug(
-                        "Failed to undo entry edit command: %s",
+                        "Failed to redo entry edit command: %s",
                         thrown.message
                     );
                 }
