@@ -618,16 +618,16 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     /**
-     * Closes any open composers after prompting the user.
+     * Closes any open composers, after prompting the user if requested.
      *
      * Returns true if none were open or the user approved closing
      * them.
      */
-    public bool close_composer() {
+    public bool close_composer(bool should_prompt, bool is_shutdown = false) {
         bool closed = true;
         Composer.Widget? composer = this.conversation_viewer.current_composer;
         if (composer != null &&
-            composer.confirm_close() == CANCELLED) {
+            composer.conditional_close(should_prompt, is_shutdown) == CANCELLED) {
             closed = false;
         }
         return closed;
@@ -1598,11 +1598,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     [GtkCallback]
     private bool on_delete_event() {
         if (this.application.config.startup_notifications) {
-            if (close_composer()) {
+            if (close_composer(true, false)) {
                 hide();
             }
         } else {
-            this.application.exit();
+            if (close_composer(true, false)) {
+                this.application.exit();
+            }
         }
         return Gdk.EVENT_STOP;
     }

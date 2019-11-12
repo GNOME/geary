@@ -297,7 +297,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         if (event.type == Gdk.EventType.BUTTON_PRESS &&
             !get_selection().path_is_selected(path)) {
             MainWindow? parent = get_toplevel() as MainWindow;
-            if (parent != null && !parent.close_composer()) {
+            if (parent != null && !parent.close_composer(false)) {
                 return true;
             }
         }

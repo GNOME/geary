@@ -1550,7 +1550,7 @@ public class Application.Controller : Geary.BaseObject {
                 this.waiting_to_close.add(composer);
                 composer.close.begin();
             } else {
-                switch (composer.confirm_close()) {
+                switch (composer.conditional_close(true, true)) {
                 case Composer.Widget.CloseStatus.PENDING:
                     this.waiting_to_close.add(composer);
                     break;
@@ -1637,7 +1637,7 @@ public class Application.Controller : Geary.BaseObject {
             // new one. Replies must open inline in the main window,
             // so we need to ensure there are no composers open there
             // first.
-            if (!this.main_window.close_composer()) {
+            if (!this.main_window.close_composer(true)) {
                 return;
             }
         }

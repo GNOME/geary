@@ -229,7 +229,7 @@
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Discard and Close</property>
-            <property name="action_name">cmh.close-and-discard</property>
+            <property name="action_name">cmh.discard</property>
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="discard_and_close_image">
@@ -253,7 +253,7 @@
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Save and Close</property>
-            <property name="action_name">cmh.close-and-save</property>
+            <property name="action_name">cmh.close</property>
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="save_and_close_image">
