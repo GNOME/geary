@@ -464,6 +464,27 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** Saves the email in a composer as a draft on the server. */
+    public async void save_composed_email(Composer.Widget composer) {
+        // XXX this doesn't actually do what it says on the tin, since
+        // the composer's draft manager is already saving drafts on
+        // the server. Until we get that saving local-only, this will
+        // only be around for pushing the composer onto the undo stack
+        AccountContext? context = this.accounts.get(
+            composer.account.information
+        );
+        if (context != null) {
+            try {
+                yield context.commands.execute(
+                    new SaveComposerCommand(this, composer),
+                    context.cancellable
+                );
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
+        }
+    }
+
     /** Queues a composer to be discarded. */
     public async void discard_composed_email(Composer.Widget composer) {
         AccountContext? context = this.accounts.get(
@@ -2739,6 +2760,64 @@ private class Application.SendComposerCommand : ComposerCommand {
 }
 
 
+private class Application.SaveComposerCommand : ComposerCommand {
+
+
+    private const int DESTROY_TIMEOUT_SEC = 30 * 60;
+
+    public override bool can_redo {
+        get { return false; }
+    }
+
+    private Controller controller;
+
+    private Geary.TimeoutManager destroy_timer;
+
+
+    public SaveComposerCommand(Controller controller,
+                               Composer.Widget composer) {
+        base(composer);
+        this.controller = controller;
+
+        this.destroy_timer = new Geary.TimeoutManager.seconds(
+            DESTROY_TIMEOUT_SEC,
+            on_destroy_timeout
+        );
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Geary.ComposedEmail email = yield this.composer.get_composed_email();
+        /// Translators: The label for an in-app notification. The
+        /// string substitution is a list of recipients of the email.
+        this.executed_label = _(
+            "Email to %s saved"
+        ).printf(Util.Email.to_short_recipient_display(email));
+        this.destroy_timer.start();
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        if (this.composer != null) {
+            this.destroy_timer.reset();
+            this.composer.set_enabled(true);
+            this.controller.show_composer(this.composer, null);
+            clear_composer();
+        } else {
+            /// Translators: A label for an in-app notification.
+            this.undone_label = _(
+                "Composer could not be restored"
+            );
+        }
+    }
+
+    private void on_destroy_timeout() {
+        close_composer();
+    }
+
+}
+
+
 private class Application.DiscardComposerCommand : ComposerCommand {
 
 
@@ -2783,6 +2862,7 @@ private class Application.DiscardComposerCommand : ComposerCommand {
             this.controller.show_composer(this.composer, null);
             clear_composer();
         } else {
+            /// Translators: A label for an in-app notification.
             this.undone_label = _(
                 "Composer could not be restored"
             );

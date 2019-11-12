@@ -1621,16 +1621,28 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private async void save_and_exit_async() {
         this.is_closing = true;
         set_enabled(false);
-        try {
-            yield save_draft();
-        } catch (GLib.Error error) {
-            this.application.controller.report_problem(
-                new Geary.AccountProblemReport(
-                    this.account.information, error
-                )
-            );
+
+        if (!is_blank) {
+            try {
+                yield save_draft();
+            } catch (GLib.Error error) {
+                this.application.controller.report_problem(
+                    new Geary.AccountProblemReport(
+                        this.account.information, error
+                    )
+                );
+            }
+
+            // Pass on to the controller so the draft can be re-opened
+            // on undo
+            if (this.container != null) {
+                this.container.close();
+            }
+            yield this.application.controller.save_composed_email(this);
+        } else {
+            // The composer is blank, so drop the mic and walk away
+            yield close();
         }
-        yield close();
     }
 
     private async void discard_and_exit_async() {
