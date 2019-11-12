@@ -19,7 +19,7 @@ public void peas_register_types(TypeModule module) {
 public class Plugin.NotificationBadge : Notification {
 
 
-    public override GearyApplication application {
+    public override Application.Client application {
         get; construct set;
     }
 
@@ -31,7 +31,7 @@ public class Plugin.NotificationBadge : Notification {
 
     public override void activate() {
         this.entry = Unity.LauncherEntry.get_for_desktop_id(
-            GearyApplication.APP_ID + ".desktop"
+            Application.Client.APP_ID + ".desktop"
         );
         this.context.notify["total-new-messages"].connect(on_total_changed);
         update_count();

@@ -132,7 +132,7 @@ public class Application.Controller : Geary.BaseObject {
     }
 
     /** The primary application instance that owns this controller. */
-    public weak GearyApplication application { get; private set; } // circular ref
+    public weak Client application { get; private set; } // circular ref
 
     /** Account management for the application. */
     public Accounts.Manager account_manager { get; private set; }
@@ -175,7 +175,7 @@ public class Application.Controller : Geary.BaseObject {
     /**
      * Constructs a new instance of the controller.
      */
-    public async Controller(GearyApplication application,
+    public async Controller(Client application,
                             GLib.Cancellable cancellable) {
         this.application = application;
         this.open_cancellable = cancellable;
@@ -2673,14 +2673,14 @@ private class Application.SendComposerCommand : ComposerCommand {
         get { return this.application.config.undo_send_delay > 0; }
     }
 
-    private GearyApplication application;
+    private Client application;
     private Controller.AccountContext context;
     private Geary.Smtp.ClientService smtp;
     private Geary.TimeoutManager commit_timer;
     private Geary.EmailIdentifier? saved = null;
 
 
-    public SendComposerCommand(GearyApplication application,
+    public SendComposerCommand(Client application,
                                Controller.AccountContext context,
                                Composer.Widget composer) {
         base(composer);

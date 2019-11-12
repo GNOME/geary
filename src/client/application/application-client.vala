@@ -22,9 +22,9 @@ extern const string _REVNO;
 
 
 /**
- * The interface between Geary and the desktop environment.
+ * The client application's main point of entry and desktop integration.
  */
-public class GearyApplication : Gtk.Application {
+public class Application.Client : Gtk.Application {
 
     public const string NAME = "Geary" + _NAME_SUFFIX;
     public const string APP_ID = _APP_ID;
@@ -163,7 +163,7 @@ public class GearyApplication : Gtk.Application {
      * after initial activation, or after startup if {@link
      * is_background_service} is true.
      */
-    public Application.Controller? controller {
+    public Controller? controller {
         get; private set; default = null;
     }
 
@@ -185,7 +185,7 @@ public class GearyApplication : Gtk.Application {
      * This will be null until {@link startup} has been called, and
      * hence will only ever become non-null for the primary instance.
      */
-    public Application.Configuration? config {
+    public Configuration? config {
         get; private set; default = null;
     }
 
@@ -195,7 +195,7 @@ public class GearyApplication : Gtk.Application {
      * This will be null until {@link startup} has been called, and
      * hence will only ever become non-null for the primary instance.
      */
-    public Application.StartupManager? autostart {
+    public StartupManager? autostart {
         get; private set; default = null;
     }
 
@@ -326,7 +326,7 @@ public class GearyApplication : Gtk.Application {
     }
 
 
-    public GearyApplication() {
+    public Client() {
         Object(
             application_id: APP_ID,
             flags: (
@@ -356,7 +356,7 @@ public class GearyApplication : Gtk.Application {
     public override int handle_local_options(GLib.VariantDict options) {
         if (options.contains(OPTION_VERSION)) {
             GLib.stdout.printf(
-                "%s: %s\n", this.binary, GearyApplication.VERSION
+                "%s: %s\n", this.binary, Client.VERSION
             );
             return 0;
         }
@@ -367,7 +367,7 @@ public class GearyApplication : Gtk.Application {
         Environment.set_application_name(NAME);
         Util.International.init(GETTEXT_PACKAGE, this.binary);
 
-        Application.Configuration.init(this.is_installed, GSETTINGS_DIR);
+        Configuration.init(this.is_installed, GSETTINGS_DIR);
         Geary.Logging.init();
         Geary.Logging.log_to(stderr);
         GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
@@ -382,8 +382,8 @@ public class GearyApplication : Gtk.Application {
         // Calls Gtk.init(), amongst other things
         base.startup();
 
-        this.config = new Application.Configuration(SCHEMA_ID);
-        this.autostart = new Application.StartupManager(
+        this.config = new Configuration(SCHEMA_ID);
+        this.autostart = new StartupManager(
             this.config, this.get_desktop_directory()
         );
 
@@ -688,7 +688,7 @@ public class GearyApplication : Gtk.Application {
         GLib.Notification error = new GLib.Notification(summary);
         error.set_body(body);
         error.set_icon(
-            new GLib.ThemedIcon("%s-symbolic".printf(GearyApplication.APP_ID))
+            new GLib.ThemedIcon("%s-symbolic".printf(Client.APP_ID))
         );
         send_notification(ERROR_NOTIFICATION_ID, error);
         this.error_notification = error;
@@ -727,7 +727,7 @@ public class GearyApplication : Gtk.Application {
                     this.is_installed.to_string()
                 );
 
-                this.controller = yield new Application.Controller(
+                this.controller = yield new Controller(
                     this, this.controller_cancellable
                 );
                 first_run = !this.engine.has_accounts;
@@ -963,7 +963,7 @@ public class GearyApplication : Gtk.Application {
                 File exec_dir = this.exec_dir;
                 string[] argv = new string[3];
                 argv[0] = "yelp";
-                argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help/C/";
+                argv[1] = Client.SOURCE_ROOT_DIR + "/help/C/";
                 argv[2] = null;
                 if (!Process.spawn_async(
                         exec_dir.get_path(),

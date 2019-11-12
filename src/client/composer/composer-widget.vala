@@ -185,7 +185,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         { ACTION_SHOW_EXTENDED_HEADERS,    on_toggle_action, null, "false", on_show_extended_headers_toggled },
     };
 
-    public static void add_accelerators(GearyApplication application) {
+    public static void add_accelerators(Application.Client application) {
         application.add_window_accelerators(ACTION_DISCARD, { "Escape" } );
         application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );
         application.add_window_accelerators(ACTION_DETACH, { "<Ctrl>d" } );
@@ -462,10 +462,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         get { return this.parent as Container; }
     }
 
-    private GearyApplication application;
+    private Application.Client application;
 
 
-    public Widget(GearyApplication application,
+    public Widget(Application.Client application,
                           Geary.Account initial_account,
                           ComposeType compose_type) {
         base_ref();
@@ -592,14 +592,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         load_entry_completions();
     }
 
-    public Widget.from_mailbox(GearyApplication application,
+    public Widget.from_mailbox(Application.Client application,
                                Geary.Account initial_account,
                                Geary.RFC822.MailboxAddress to) {
         this(application, initial_account, ComposeType.NEW_MESSAGE);
         this.to = to.to_full_display();
     }
 
-    public Widget.from_mailto(GearyApplication application,
+    public Widget.from_mailto(Application.Client application,
                               Geary.Account initial_account,
                               string mailto) {
         this(application, initial_account, ComposeType.NEW_MESSAGE);
@@ -1292,7 +1292,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         // User-Agent
-        email.mailer = Environment.get_prgname() + "/" + GearyApplication.VERSION;
+        email.mailer = Environment.get_prgname() + "/" + Application.Client.VERSION;
 
         return email;
     }

@@ -41,7 +41,7 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     };
 
 
-    public static void add_accelerators(GearyApplication app) {
+    public static void add_accelerators(Application.Client app) {
         app.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         app.add_window_accelerators(ACTION_PLAY_TOGGLE, { "space" } );
         app.add_window_accelerators(ACTION_SEARCH_ACTIVATE, { "<Ctrl>F" } );
@@ -67,7 +67,7 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     private InspectorSystemView system_pane;
 
 
-    public Inspector(GearyApplication application) {
+    public Inspector(Application.Client application) {
         Object(application: application);
         this.title = this.header_bar.title = _("Inspector");
 

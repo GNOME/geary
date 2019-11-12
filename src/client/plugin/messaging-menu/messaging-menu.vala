@@ -19,7 +19,7 @@ public void peas_register_types(TypeModule module) {
 public class Plugin.MessagingMenu : Notification {
 
 
-    public override GearyApplication application {
+    public override Application.Client application {
         get; construct set;
     }
 
@@ -32,7 +32,7 @@ public class Plugin.MessagingMenu : Notification {
 
     public override void activate() {
         this.app = new global::MessagingMenu.App(
-            "%s.desktop".printf(GearyApplication.APP_ID)
+            "%s.desktop".printf(Application.Client.APP_ID)
         );
         this.app.register();
         this.app.activate_source.connect(on_activate_source);

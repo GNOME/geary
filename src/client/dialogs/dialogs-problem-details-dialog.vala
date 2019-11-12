@@ -27,7 +27,7 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
         { ACTION_SEARCH_ACTIVATE, on_logs_search_activated },
     };
 
-    public static void add_accelerators(GearyApplication app) {
+    public static void add_accelerators(Application.Client app) {
         app.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         app.add_window_accelerators(ACTION_SEARCH_ACTIVATE, { "<Ctrl>F" } );
     }

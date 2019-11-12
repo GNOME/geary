@@ -74,7 +74,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private const int MIN_CONVERSATION_COUNT = 50;
 
 
-    public static void add_accelerators(GearyApplication owner) {
+    public static void add_accelerators(Application.Client owner) {
         // Marking actions
         //
         // Unread is the primary action, so it doesn't get the <Shift>
@@ -158,8 +158,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private enum ConversationCount { NONE, SINGLE, MULTIPLE; }
 
 
-    public new GearyApplication application {
-        get { return (GearyApplication) base.get_application(); }
+    /** Returns the window's associated client application instance. */
+    public new Application.Client application {
+        get { return (Application.Client) base.get_application(); }
         set { base.set_application(value); }
     }
 
@@ -273,7 +274,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public signal void retry_service_problem(Geary.ClientService.Status problem);
 
 
-    public MainWindow(GearyApplication application) {
+    public MainWindow(Application.Client application) {
         Object(
             application: application,
             show_menubar: false
@@ -873,7 +874,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 string folder = selected_folder != null ? selected_folder.get_display_name() + " " : "";
                 string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
 
-                target = "%s%s - %s".printf(folder, account, GearyApplication.NAME);
+                target = "%s%s - %s".printf(folder, account, Application.Client.NAME);
 
                 return true;
             };

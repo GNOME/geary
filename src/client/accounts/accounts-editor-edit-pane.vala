@@ -86,9 +86,7 @@ internal class Accounts.EditorEditPane :
         }
         this.senders_list.add(new AddMailboxRow());
 
-        this.signature_preview = new SignatureWebView(
-            ((GearyApplication) editor.application).config
-        );
+        this.signature_preview = new SignatureWebView(editor.application.config);
         this.signature_preview.events = (
             this.signature_preview.events | Gdk.EventType.FOCUS_CHANGE
         );

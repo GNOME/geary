@@ -24,8 +24,8 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
     }
 
     /** {@inheritDoc} */
-    public new GearyApplication? application {
-        get { return base.get_application() as GearyApplication; }
+    public new Application.Client application {
+        get { return (Application.Client) base.get_application(); }
         set { base.set_application(value); }
     }
 
@@ -33,7 +33,7 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
     internal Widget composer { get; set; }
 
 
-    public Window(Widget composer, GearyApplication application) {
+    public Window(Widget composer, Application.Client application) {
         Object(application: application, type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
         this.composer.set_mode(DETACHED);

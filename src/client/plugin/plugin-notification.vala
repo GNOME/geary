@@ -11,7 +11,7 @@
 public abstract class Plugin.Notification : GLib.Object {
 
     /** The application instance containing the plugin. */
-    public abstract GearyApplication application {
+    public abstract Application.Client application {
         get; construct set;
     }
 

@@ -3,6 +3,7 @@ geary_client_vala_sources = files(
   'application/application-attachment-manager.vala',
   'application/application-avatar-store.vala',
   'application/application-certificate-manager.vala',
+  'application/application-client.vala',
   'application/application-command.vala',
   'application/application-configuration.vala',
   'application/application-contact-store.vala',
@@ -11,7 +12,6 @@ geary_client_vala_sources = files(
   'application/application-notification-context.vala',
   'application/application-plugin-manager.vala',
   'application/application-startup-manager.vala',
-  'application/geary-application.vala',
   'application/goa-mediator.vala',
   'application/secret-mediator.vala',
 

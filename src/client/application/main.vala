@@ -25,7 +25,7 @@ int main(string[] args) {
     // proper fix lands. See GNOME/geary#558.
     Environment.set_variable("WEBKIT_USE_SINGLE_WEB_PROCESS", "1", true);
 
-    GearyApplication app = new GearyApplication();
+    Application.Client app = new Application.Client();
 
     int ec = app.run(args);
 

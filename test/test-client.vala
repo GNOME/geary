@@ -49,10 +49,10 @@ int main(string[] args) {
     // Keep this before other ClientWebView based tests since it tests
     // WebContext init
     client.add_suite(new Accounts.ManagerTest().get_suite());
+    client.add_suite(new Application.ClientTest().get_suite());
     client.add_suite(new Application.ConfigurationTest().get_suite());
     client.add_suite(new ClientWebViewTest().get_suite());
     client.add_suite(new Composer.WebViewTest().get_suite());
-    client.add_suite(new GearyApplicationTest().get_suite());
     client.add_suite(new Util.Avatar.Test().get_suite());
     client.add_suite(new Util.Cache.Test().get_suite());
     client.add_suite(new Util.Email.Test().get_suite());
