@@ -8,6 +8,9 @@
 
 /**
  * A container for full-height paned composers in the main window.
+ *
+ * Adding a composer to this container places it in {@link
+ * PresentationMode.PANED} mode.
  */
 public class Composer.Box : Gtk.Frame, Container {
 
@@ -28,6 +31,7 @@ public class Composer.Box : Gtk.Frame, Container {
 
     public Box(Widget composer, MainToolbar main_toolbar) {
         this.composer = composer;
+        this.composer.set_mode(PANED);
 
         this.main_toolbar = main_toolbar;
         this.main_toolbar.set_conversation_header(composer.header);
@@ -48,6 +52,10 @@ public class Composer.Box : Gtk.Frame, Container {
         this.main_toolbar.remove_conversation_header(composer.header);
         remove(this.composer);
         destroy();
+    }
+
+    public override void destroy() {
+        debug("Composer.Box::destroy");
     }
 
 }

@@ -570,17 +570,50 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             this.application, this.selected_folder.account, to
         );
         this.application.controller.add_composer(composer);
-        show_composer(composer);
+        show_composer(composer, null);
         composer.load.begin(null, false, null, null);
     }
 
-    /** Displays a composer in the window if possible, else in a new window. */
-    public void show_composer(Composer.Widget composer) {
+    /**
+     * Displays a composer in the window if possible, else in a new window.
+     *
+     * If the given collection of identifiers is not null and any are
+     * contained in the current conversation then the composer will be
+     * displayed inline under the latest matching message. If null,
+     * the composer's {@link Composer.Widget.get_referred_ids} will be
+     * used.
+     */
+    public void show_composer(Composer.Widget composer,
+                              Gee.Collection<Geary.EmailIdentifier>? refers_to) {
         if (this.has_composer) {
             composer.detach();
         } else {
-            this.conversation_viewer.do_compose(composer);
-            get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
+            // See if the currently displayed conversation contains
+            // any of the composer's referred emails (preferring the
+            // latest), and if so add it inline, otherwise add it full
+            // paned.
+            Geary.Email? latest_referred = null;
+            if (this.conversation_viewer.current_list != null) {
+                Gee.Collection<Geary.EmailIdentifier>? referrants = refers_to;
+                if (referrants == null) {
+                    referrants = composer.get_referred_ids();
+                }
+                Geary.App.Conversation selected =
+                    this.conversation_viewer.current_list.conversation;
+                latest_referred = selected.get_emails(
+                    RECV_DATE_DESCENDING
+                ).first_match(
+                    (email) => email.id in referrants
+                );
+            }
+
+            if (latest_referred != null) {
+                this.conversation_viewer.do_compose_embedded(
+                    composer, latest_referred
+                );
+            } else {
+                this.conversation_viewer.do_compose(composer);
+            }
         }
     }
 

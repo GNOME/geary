@@ -8,6 +8,9 @@
 
 /**
  * A container detached composers, i.e. in their own separate window.
+ *
+ * Adding a composer to this container places it in {@link
+ * PresentationMode.DETACHED} mode.
  */
 public class Composer.Window : Gtk.ApplicationWindow, Container {
 
@@ -33,6 +36,7 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
     public Window(Widget composer, GearyApplication application) {
         Object(application: application, type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
+        this.composer.set_mode(DETACHED);
 
         // XXX Bug 764622
         set_property("name", "GearyComposerWindow");

@@ -8,6 +8,10 @@
 
 /**
  * A container for full-height paned composers in the main window.
+ *
+ * Adding a composer to this container places it in {@link
+ * PresentationMode.INLINE} or {@link PresentationMode.INLINE_COMPACT}
+ * mode.
  */
 public class Composer.Embed : Gtk.EventBox, Container {
 
@@ -37,6 +41,13 @@ public class Composer.Embed : Gtk.EventBox, Container {
         this.referred = referred;
         this.composer = composer;
         this.composer.embed_header();
+
+        Widget.PresentationMode mode = INLINE_COMPACT;
+        if (composer.compose_type == FORWARD ||
+            composer.has_multiple_from_addresses) {
+            mode = INLINE;
+        }
+        composer.set_mode(mode);
 
         this.outer_scroller = outer_scroller;
 

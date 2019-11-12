@@ -37,10 +37,37 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         CANCEL_CLOSE
     }
 
-    public enum ComposerState {
+    /** Defines different supported user interface modes. */
+    public enum PresentationMode {
+        /** Composer is not currently visible. */
+        NONE,
+
+        /**
+         * Composer is in its own window, not in a main windows.
+         *
+         * @see Window
+         */
         DETACHED,
+
+        /**
+         * Composer is in a full-height box in a main window.
+         *
+         * @see Box
+         */
         PANED,
+
+        /**
+         * Composer is embedded inline in a conversation.
+         *
+         * @see Embed
+         */
         INLINE,
+
+        /**
+         * Composer is embedded inline with header fields hidden.
+         *
+         * @see Embed
+         */
         INLINE_COMPACT
     }
 
@@ -197,7 +224,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    public ComposerState state { get; private set; }
+    /** Determines the composer's current presentation mode. */
+    public PresentationMode current_mode { get; set; default = NONE; }
 
     /** Determines the type of email being composed. */
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
@@ -218,6 +246,15 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     public WebView editor { get; private set; }
 
     internal Headerbar header { get; private set; }
+
+    internal bool has_multiple_from_addresses {
+        get {
+            return (
+                this.accounts.size > 1 ||
+                this.account.information.has_sender_aliases
+            );
+        }
+    }
 
     internal string subject {
         get { return this.subject_entry.get_text(); }
@@ -433,27 +470,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         this.compose_type = compose_type;
-        if (this.compose_type == ComposeType.NEW_MESSAGE) {
-            this.state = ComposerState.PANED;
-        }
-        else if (this.compose_type == ComposeType.FORWARD ||
-                 this.accounts.size > 1 || this.account.information.has_sender_aliases) {
-            this.state = ComposerState.INLINE;
-        }
-        else {
-            this.state = ComposerState.INLINE_COMPACT;
-        }
 
-        this.header = new Headerbar(
-            application.config,
-            this.state == ComposerState.INLINE_COMPACT
-        );
-        this.header.expand_composer.connect(() => {
-                if (this.state == ComposerState.INLINE_COMPACT) {
-                    this.state = ComposerState.INLINE;
-                    update_composer_view();
-                }
-            });
+        this.header = new Headerbar(application.config);
+        this.header.expand_composer.connect(on_expand_compact_headers);
 
         // Setup drag 'n drop
         const Gtk.TargetEntry[] target_entries = { { URI_LIST_MIME_TYPE, 0, 0 } };
@@ -561,7 +580,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect(on_selection_changed);
 
-        update_composer_view();
         load_entry_completions();
     }
 
@@ -668,10 +686,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             }
         }
 
-        if (this.state == ComposerState.INLINE_COMPACT)
-            set_compact_header_recipients();
-
-        update_composer_view();
         update_attachments_view();
         update_pending_attachments(this.pending_include, true);
 
@@ -694,43 +708,40 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     /** Detaches the composer and opens it in a new window. */
     public void detach() {
-        if (this.state != ComposerState.DETACHED) {
-            Gtk.Widget? focused_widget = this.container.top_window.get_focus();
-            if (this.container != null) {
-                this.container.close();
-            }
-            Window new_window = new Window(this, this.application);
+        Gtk.Widget? focused_widget = this.container.top_window.get_focus();
+        if (this.container != null) {
+            this.container.close();
+        }
+        Window new_window = new Window(this, this.application);
 
-            // Workaround a GTK+ crasher, Bug 771812. When the
-            // composer is re-parented, its menu_button's popover
-            // keeps a reference to the conversation window's
-            // viewport, so when that is removed it has a null parent
-            // and we crash. To reproduce: Reply inline, detach the
-            // composer, then choose a different conversation back in
-            // the main window. The workaround here sets a new menu
-            // model and hence the menu_button constructs a new
-            // popover.
-            this.composer_actions.change_action_state(
-                ACTION_COMPOSE_AS_HTML,
-                this.application.config.compose_as_html
-            );
+        // Workaround a GTK+ crasher, Bug 771812. When the
+        // composer is re-parented, its menu_button's popover
+        // keeps a reference to the conversation window's
+        // viewport, so when that is removed it has a null parent
+        // and we crash. To reproduce: Reply inline, detach the
+        // composer, then choose a different conversation back in
+        // the main window. The workaround here sets a new menu
+        // model and hence the menu_button constructs a new
+        // popover.
+        this.composer_actions.change_action_state(
+            ACTION_COMPOSE_AS_HTML,
+            this.application.config.compose_as_html
+        );
 
-            this.state = DETACHED;
-            update_composer_view();
+        set_mode(DETACHED);
 
-            // If the previously focused widget is in the new composer
-            // window then focus that, else focus something useful.
-            bool refocus = true;
-            if (focused_widget != null) {
-                Window? focused_window = focused_widget.get_toplevel() as Window;
-                if (new_window == focused_window) {
-                    focused_widget.grab_focus();
-                    refocus = false;
-                }
+        // If the previously focused widget is in the new composer
+        // window then focus that, else focus something useful.
+        bool refocus = true;
+        if (focused_widget != null) {
+            Window? focused_window = focused_widget.get_toplevel() as Window;
+            if (new_window == focused_window) {
+                focused_widget.grab_focus();
+                refocus = false;
             }
-            if (refocus) {
-                set_focus();
-            }
+        }
+        if (refocus) {
+            set_focus();
         }
     }
 
@@ -776,6 +787,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      * and will stop periodically saving drafts.
      */
     public void set_enabled(bool enabled) {
+        this.current_mode = NONE;
         this.is_closing = !enabled;
         this.set_sensitive(enabled);
 
@@ -864,14 +876,24 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (bcc != "")
             this.bcc_entry.modified = true;
 
-        if (in_reply_to.size > 1) {
-            this.state = ComposerState.PANED;
-        } else if (this.compose_type == ComposeType.FORWARD || this.to_entry.modified
-                   || this.cc_entry.modified || this.bcc_entry.modified
-                   || this.accounts.size > 1 || this.account.information.has_sender_aliases) {
-            this.state = ComposerState.INLINE;
-        } else {
-            this.state = ComposerState.INLINE_COMPACT;
+        // We're in compact inline mode, but there are modified email
+        // addresses, so set us to use plain inline mode instead so
+        // the modified addresses can be seen. If there are CC
+        if (this.current_mode == INLINE_COMPACT && (
+                this.to_entry.modified ||
+                this.cc_entry.modified ||
+                this.bcc_entry.modified ||
+                this.reply_to_entry.modified)) {
+            set_mode(INLINE);
+        }
+
+        // If there's a modified header that would normally be hidden,
+        // show full fields.
+        if (this.bcc_entry.modified ||
+            this.reply_to_entry.modified) {
+            this.editor_actions.change_action_state(
+                ACTION_SHOW_EXTENDED_HEADERS, true
+            );
         }
     }
 
@@ -957,7 +979,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     public void set_focus() {
-        bool not_compact = (this.state != ComposerState.INLINE_COMPACT);
+        bool not_compact = this.current_mode != INLINE_COMPACT;
         if (not_compact && Geary.String.is_empty(to))
             this.to_entry.grab_focus();
         else if (not_compact && Geary.String.is_empty(subject))
@@ -1204,8 +1226,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 )
             );
         }
-
-        update_composer_view();
     }
 
     private void add_recipients_and_ids(ComposeType type, Geary.Email referred,
@@ -1326,6 +1346,35 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         return check_send_on_return(event) && base.key_press_event(event);
     }
 
+    internal void set_mode(PresentationMode new_mode) {
+        this.current_mode = new_mode;
+        this.header.set_mode(new_mode);
+
+        switch (new_mode) {
+        case PresentationMode.DETACHED:
+        case PresentationMode.PANED:
+            this.recipients.set_visible(true);
+            this.subject_label.set_visible(true);
+            this.subject_entry.set_visible(true);
+            break;
+
+        case PresentationMode.INLINE:
+            this.recipients.set_visible(true);
+            this.subject_label.set_visible(false);
+            this.subject_entry.set_visible(false);
+            break;
+
+        case PresentationMode.INLINE_COMPACT:
+            this.recipients.set_visible(false);
+            this.subject_label.set_visible(false);
+            this.subject_entry.set_visible(false);
+            set_compact_header_recipients();
+            break;
+        }
+
+        update_from_field();
+    }
+
     internal void embed_header() {
         if (this.header.parent == null) {
             this.header_area.add(this.header);
@@ -1336,20 +1385,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     internal void free_header() {
         if (this.header.parent != null) {
             this.header.parent.remove(this.header);
-    }
-
-    // Updates the composer's UI after its state has changed
-    private void update_composer_view() {
-        this.recipients.set_visible(this.state != ComposerState.INLINE_COMPACT);
-
-        bool not_inline = (this.state != ComposerState.INLINE &&
-                           this.state != ComposerState.INLINE_COMPACT);
-        this.subject_label.set_visible(not_inline);
-        this.subject_entry.set_visible(not_inline);
-
-        this.header.state = this.state;
-
-        update_from_field();
+        }
     }
 
     private async bool should_send() {
@@ -1431,7 +1467,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                                                 GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (!this.account.information.save_drafts) {
-            this.header.save_and_close_button.hide();
+            this.header.show_save_and_close = false;
             return;
         }
 
@@ -1453,7 +1489,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             yield new_manager.open_async(editing_draft_id, internal_cancellable);
             debug("Draft manager opened");
         } catch (GLib.Error err) {
-            this.header.save_and_close_button.hide();
+            this.header.show_save_and_close = false;
             throw err;
         } finally {
             this.draft_manager_opening = null;
@@ -1469,8 +1505,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         update_draft_state();
         get_action(ACTION_CLOSE_AND_SAVE).set_enabled(true);
-        this.header.save_and_close_button.show();
-
+        this.header.show_save_and_close = true;
     }
 
     /**
@@ -1663,7 +1698,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 }
             }
         }
-        this.header.show_pending_attachments = manual_enabled;
+        this.header.set_show_pending_attachments(manual_enabled);
         return have_added;
     }
 
@@ -1994,7 +2029,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.application.config.compose_as_html = compose_as_html;
     }
 
-    private void on_show_extended_toggled(SimpleAction? action, Variant? new_state) {
+    private void on_show_extended_headers_toggled(GLib.SimpleAction? action,
+                                                  GLib.Variant? new_state) {
         bool show_extended = new_state.get_boolean();
         action.set_state(show_extended);
         this.bcc_label.visible =
@@ -2002,9 +2038,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.reply_to_label.visible =
             this.reply_to_entry.visible = show_extended;
 
-        if (show_extended && this.state == ComposerState.INLINE_COMPACT) {
-            this.state = ComposerState.INLINE;
-            update_composer_view();
+        if (show_extended && this.current_mode == INLINE_COMPACT) {
+            set_mode(INLINE);
         }
     }
 
@@ -2259,9 +2294,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // Don't show in inline unless the current account has
         // multiple email accounts or aliases, since these will be replies to a
         // conversation
-        if ((this.state == ComposerState.INLINE || this.state == ComposerState.INLINE_COMPACT) &&
-            !(this.accounts.size > 1 || this.account.information.has_sender_aliases)) {
-            return false;         
+        if ((this.current_mode == INLINE ||
+             this.current_mode == INLINE_COMPACT) &&
+            !this.has_multiple_from_addresses) {
+            return false;
         }
 
         // If there's only one account and it not have any aliases,
@@ -2463,6 +2499,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         } catch (Error err) {
             debug("Error updating from address: %s", err.message);
         }
+    }
+
+    private void on_expand_compact_headers() {
+        set_mode(INLINE);
     }
 
     private void on_detach() {

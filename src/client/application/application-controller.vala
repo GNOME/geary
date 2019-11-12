@@ -1471,6 +1471,13 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** Displays a composer on the last active main window. */
+    internal void show_composer(Composer.Widget composer,
+                                Gee.Collection<Geary.EmailIdentifier>? refers_to) {
+        this.main_window.show_composer(composer, refers_to);
+        composer.set_focus();
+    }
+
     internal bool close_composition_windows(bool main_window_only = false) {
         Gee.List<Composer.Widget> composers_to_destroy = new Gee.ArrayList<Composer.Widget>();
         bool quit_cancelled = false;
@@ -1547,14 +1554,13 @@ public class Application.Controller : Geary.BaseObject {
                                        bool is_draft) {
         // There's a few situations where we can re-use an existing
         // composer, check for these first.
-
         if (compose_type == NEW_MESSAGE && !is_draft) {
             // We're creating a new message that isn't a draft, if
             // there's already a composer open, just use that
             Composer.Widget? existing =
                 this.main_window.conversation_viewer.current_composer;
             if (existing != null &&
-                existing.state == PANED &&
+                existing.current_mode == PANED &&
                 existing.is_blank) {
                 existing.present();
                 return;
@@ -1565,8 +1571,8 @@ public class Application.Controller : Geary.BaseObject {
             // reply/forward for that message, or there is a quote
             // to insert into it.
             foreach (Composer.Widget existing in this.composer_widgets) {
-                if ((existing.state == INLINE ||
-                     existing.state == INLINE_COMPACT) &&
+                if ((existing.current_mode == INLINE ||
+                     existing.current_mode == INLINE_COMPACT) &&
                     (referred.id in existing.get_referred_ids() ||
                      quote != null)) {
                     try {
@@ -1600,15 +1606,10 @@ public class Application.Controller : Geary.BaseObject {
         }
 
         add_composer(widget);
-
-        if (widget.state == INLINE || widget.state == INLINE_COMPACT) {
-            this.main_window.conversation_viewer.do_compose_embedded(
-                widget,
-                referred
-            );
-        } else {
-            this.main_window.show_composer(widget);
-        }
+        show_composer(
+            widget,
+            referred != null ? Geary.Collection.single(referred.id) : null
+        );
 
         this.load_composer.begin(
             account,
@@ -1648,7 +1649,6 @@ public class Application.Controller : Geary.BaseObject {
         } catch (GLib.Error err) {
             report_problem(new Geary.ProblemReport(err));
         }
-        widget.set_focus();
     }
 
     private void on_composer_widget_destroy(Gtk.Widget sender) {
