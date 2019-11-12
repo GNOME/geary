@@ -31,10 +31,18 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         FORWARD
     }
 
+    /**
+     * Determines the result of prompting whether to close the composer.
+     *
+     * @see confirm_close
+     */
     public enum CloseStatus {
-        DO_CLOSE,
-        PENDING_CLOSE,
-        CANCEL_CLOSE
+
+        /** The composer is being closed. */
+        PENDING,
+
+        /** Closing the composer was not confirmed by a human. */
+        CANCELLED;
     }
 
     /** Defines different supported user interface modes. */
@@ -745,8 +753,79 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    /**
+     * Prompts to close the composer if needed, before closing it.
+     *
+     * The return value specifies whether the composer is being
+     * closed, if it was already being closed, or the prompt was
+     * cancelled by a human.
+     */
+    public CloseStatus confirm_close() {
+        CloseStatus status = PENDING;
+
+        if (this.is_blank) {
+            this.close.begin();
+        }
+
+        if (!this.is_closing && !this.is_blank) {
+            present();
+
+            if (this.can_save) {
+                var dialog = new TernaryConfirmationDialog(
+                    this.container.top_window,
+                    // Translators: This dialog text is displayed to the
+                    // user when closing a composer where the options are
+                    // Keep, Discard or Cancel.
+                    _("Do you want to keep or discard this draft message?"),
+                    null,
+                    Stock._KEEP,
+                    Stock._DISCARD, Gtk.ResponseType.CLOSE,
+                    "",
+                    "destructive-action",
+                    Gtk.ResponseType.OK // Default == Keep
+                );
+                Gtk.ResponseType response = dialog.run();
+                if (response == CANCEL ||
+                    response == DELETE_EVENT) {
+                    // Cancel
+                    status = CANCELLED;
+                } else if (response == OK) {
+                    // Keep
+                    if (!this.is_draft_saved) {
+                        this.save_and_exit_async.begin();
+                    } else {
+                        this.close.begin();
+                    }
+                } else {
+                    // Discard
+                    this.discard_and_exit_async.begin();
+                }
+            } else {
+                AlertDialog dialog = new ConfirmationDialog(
+                    container.top_window,
+                    // Translators: This dialog text is displayed to the
+                    // user when closing a composer where the options are
+                    // only Discard or Cancel.
+                    _("Do you want to discard this draft message?"),
+                    null,
+                    Stock._DISCARD,
+                    "destructive-action"
+                );
+                Gtk.ResponseType response = dialog.run();
+                if (response == OK) {
+                    this.discard_and_exit_async.begin();
+                } else {
+                    status = CANCELLED;
+                }
+            }
+        }
+
+        return status;
+    }
+
     /** Closes the composer unconditionally. */
     public async void close() {
+        this.is_closing = true;
         set_enabled(false);
 
         if (this.draft_manager_opening != null) {
@@ -788,7 +867,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      */
     public void set_enabled(bool enabled) {
         this.current_mode = NONE;
-        this.is_closing = !enabled;
         this.set_sensitive(enabled);
 
         // Need to update this separately since it may be detached
@@ -796,6 +874,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.header.set_sensitive(enabled);
 
         if (enabled) {
+            this.is_closing = false;
             this.open_draft_manager_async.begin(null, null);
         } else {
             if (this.container != null) {
@@ -1278,67 +1357,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.referred_ids.add(referred.id);
     }
 
-    public CloseStatus should_close() {
-        if (this.is_closing)
-            return CloseStatus.PENDING_CLOSE;
-        if (this.is_blank)
-            return CloseStatus.DO_CLOSE;
-
-        present();
-
-        CloseStatus status = CloseStatus.PENDING_CLOSE;
-        if (this.can_save) {
-            AlertDialog dialog = new TernaryConfirmationDialog(
-                container.top_window,
-                // Translators: This dialog text is displayed to the
-                // user when closing a composer where the options are
-                // Keep, Discard or Cancel.
-                _("Do you want to keep or discard this draft message?"),
-                null,
-                Stock._KEEP,
-                Stock._DISCARD, Gtk.ResponseType.CLOSE,
-                "",
-                "destructive-action",
-                Gtk.ResponseType.OK // Default == Keep
-            );
-            Gtk.ResponseType response = dialog.run();
-            if (response == Gtk.ResponseType.CANCEL ||
-                response == Gtk.ResponseType.DELETE_EVENT) {
-                // Cancel
-                status = CloseStatus.CANCEL_CLOSE;
-            } else if (response == Gtk.ResponseType.OK) {
-                // Keep
-                if (!this.is_draft_saved) {
-                    save_and_exit_async.begin();
-                } else {
-                    status = CloseStatus.DO_CLOSE;
-                }
-            } else {
-                // Discard
-                discard_and_exit_async.begin();
-            }
-        } else {
-            AlertDialog dialog = new ConfirmationDialog(
-                container.top_window,
-                // Translators: This dialog text is displayed to the
-                // user when closing a composer where the options are
-                // only Discard or Cancel.
-                _("Do you want to discard this draft message?"),
-                null,
-                Stock._DISCARD,
-                "destructive-action"
-            );
-            Gtk.ResponseType response = dialog.run();
-            if (response == Gtk.ResponseType.OK) {
-                discard_and_exit_async.begin();
-            } else {
-                status = CloseStatus.CANCEL_CLOSE;
-            }
-        }
-
-        return status;
-    }
-
     public override bool key_press_event(Gdk.EventKey event) {
         // Override the method since key-press-event is run last, and
         // we want this behaviour to take precedence over the default
@@ -1618,12 +1636,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private async void save_and_exit_async() {
+        this.is_closing = true;
         set_enabled(false);
         yield save_draft();
         yield close();
     }
 
     private async void discard_and_exit_async() {
+        this.is_closing = true;
         set_enabled(false);
         if (this.draft_manager != null) {
             discard_draft();
@@ -2662,9 +2682,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_close(SimpleAction action, Variant? param) {
-        if (should_close() == CloseStatus.DO_CLOSE) {
-            this.close.begin();
-        }
+        confirm_close();
     }
 
     private void on_close_and_save(SimpleAction action, Variant? param) {

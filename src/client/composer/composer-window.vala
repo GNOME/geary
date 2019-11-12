@@ -116,8 +116,12 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
 
     public override bool delete_event(Gdk.EventAny event) {
         bool ret = Gdk.EVENT_PROPAGATE;
-        Widget? composer = get_child() as Widget;
-        if (composer != null && composer.should_close() == CANCEL_CLOSE) {
+        // Use the child instead of the `composer` property so we don't check
+        // with the composer if it has already been removed from the
+        // container.
+        Widget? child = get_child() as Widget;
+        if (child != null &&
+            child.confirm_close() == CANCELLED) {
             ret = Gdk.EVENT_STOP;
         }
         return ret;

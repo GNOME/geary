@@ -626,16 +626,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public bool close_composer() {
         bool closed = true;
         Composer.Widget? composer = this.conversation_viewer.current_composer;
-        if (composer != null) {
-            switch (composer.should_close()) {
-            case DO_CLOSE:
-                composer.close.begin();
-                break;
-
-            case CANCEL_CLOSE:
-                closed = false;
-                break;
-            }
+        if (composer != null &&
+            composer.confirm_close() == CANCELLED) {
+            closed = false;
         }
         return closed;
     }
@@ -1605,7 +1598,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     [GtkCallback]
     private bool on_delete_event() {
         if (this.application.config.startup_notifications) {
-            if (this.application.controller.close_composition_windows(true)) {
+            if (close_composer()) {
                 hide();
             }
         } else {

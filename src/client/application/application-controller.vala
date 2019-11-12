@@ -427,7 +427,7 @@ public class Application.Controller : Geary.BaseObject {
     /** Adds a new composer to be kept track of. */
     public void add_composer(Composer.Widget widget) {
         debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");
-        widget.destroy.connect(this.on_composer_widget_destroy);
+        widget.destroy.connect_after(this.on_composer_widget_destroy);
         this.composer_widgets.add(widget);
     }
 
@@ -1478,56 +1478,46 @@ public class Application.Controller : Geary.BaseObject {
         composer.set_focus();
     }
 
-    internal bool close_composition_windows(bool main_window_only = false) {
-        Gee.List<Composer.Widget> composers_to_destroy = new Gee.ArrayList<Composer.Widget>();
+    internal bool close_composition_windows() {
+        // Take a copy of the collection of composers since closing
+        // any will cause the underlying collection to change.
+        var composers = new Gee.LinkedList<Composer.Widget>();
+        composers.add_all(this.composer_widgets);
         bool quit_cancelled = false;
 
-        // If there's composer windows open, give the user a chance to
-        // save or cancel.
-        foreach(Composer.Widget cw in composer_widgets) {
-            if (!main_window_only ||
-                cw.state != Composer.Widget.ComposerState.DETACHED) {
-                // Check if we should close the window immediately, or
-                // if we need to wait.
-                Composer.Widget.CloseStatus status = cw.should_close();
-                if (status == Composer.Widget.CloseStatus.PENDING_CLOSE) {
-                    // Window is currently busy saving.
-                    waiting_to_close.add(cw);
-                } else if (status == Composer.Widget.CloseStatus.CANCEL_CLOSE) {
-                    // User cancelled operation.
+        foreach (var composer in composers) {
+            if (composer.current_mode == NONE) {
+                // Composer currently isn't being presented at all
+                // (it's probably in the undo stack), so just close it
+                this.waiting_to_close.add(composer);
+                composer.close.begin();
+            } else {
+                switch (composer.confirm_close()) {
+                case Composer.Widget.CloseStatus.PENDING:
+                    this.waiting_to_close.add(composer);
+                    break;
+
+                case Composer.Widget.CloseStatus.CANCELLED:
                     quit_cancelled = true;
                     break;
-                } else if (status == Composer.Widget.CloseStatus.DO_CLOSE) {
-                    // Hide any existing composer windows for the
-                    // moment; actually deleting the windows will
-                    // result in their removal from composer_windows,
-                    // which could crash this loop.
-                    composers_to_destroy.add(cw);
-                    cw.set_enabled(false);
                 }
             }
         }
 
-        // Safely destroy windows.
-        foreach (Composer.Widget cw in composers_to_destroy) {
-            cw.close.begin();
-        }
-
         // If we cancelled the quit we can bail here.
         if (quit_cancelled) {
-            waiting_to_close.clear();
-
+            this.waiting_to_close.clear();
             return false;
         }
 
-        // If there's still windows saving, we can't exit just yet.  Hide the main window and wait.
-        if (waiting_to_close.size > 0) {
-            main_window.hide();
-
+        // If there's still windows saving, we can't exit just yet.
+        if (this.waiting_to_close.size > 0) {
+            this.main_window.set_sensitive(false);
             return false;
         }
 
-        // If we deleted all composer windows without the user cancelling, we can exit.
+        // If we deleted all composer windows without the user
+        // cancelling, we can exit.
         return true;
     }
 
