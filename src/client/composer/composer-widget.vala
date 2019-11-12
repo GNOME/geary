@@ -1443,10 +1443,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     // Sends the current message.
-    private void on_send(SimpleAction action, Variant? param) {
+    private void on_send() {
         this.should_send.begin((obj, res) => {
                 if (this.should_send.end(res)) {
-                    on_send_async.begin();
+                    this.on_send_async.begin();
                 }
             });
     }
@@ -1458,8 +1458,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // Perform send.
         try {
             yield this.editor.clean_content();
-            yield ((Geary.Smtp.ClientService) this.account.outgoing)
-            .send_email(yield get_composed_email(), null);
+            yield this.application.controller.send_email(this);
         } catch (Error e) {
             GLib.message("Error sending email: %s", e.message);
         }

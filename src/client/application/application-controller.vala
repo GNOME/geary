@@ -447,6 +447,23 @@ public class Application.Controller : Geary.BaseObject {
         this.pending_mailtos.clear();
     }
 
+    /** Queues the email in a composer for delivery. */
+    public async void send_email(Composer.Widget composer) {
+        AccountContext? context = this.accounts.get(
+            composer.account.information
+        );
+        if (context != null) {
+            try {
+                yield context.commands.execute(
+                    new SendComposerCommand(this.application, context, composer),
+                    context.cancellable
+                );
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
+        }
+    }
+
     /** Displays a problem report when an error has been encountered. */
     public void report_problem(Geary.ProblemReport report) {
         debug("Problem reported: %s", report.to_string());
@@ -1656,12 +1673,12 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-        // Translators: The label for an in-app notification. The
-        // string substitution is a list of recipients of the email.
     private void on_sent(Geary.Smtp.ClientService service,
                          Geary.RFC822.Message sent) {
+        /// Translators: The label for an in-app notification. The
+        /// string substitution is a list of recipients of the email.
         string message = _(
-            "Successfully sent mail to %s."
+            "Email sent to %s"
         ).printf(Util.Email.to_short_recipient_display(sent));
         Components.InAppNotification notification =
             new Components.InAppNotification(message);
@@ -2602,6 +2619,83 @@ private class Application.EmptyFolderCommand : Command {
     public override bool equal_to(Command other) {
         EmptyFolderCommand? other_type = other as EmptyFolderCommand;
         return (other_type != null && this.target == other_type.target);
+    }
+
+}
+
+
+private class Application.SendComposerCommand : Command {
+
+
+    public override bool can_undo {
+        get { return this.application.config.undo_send_delay > 0; }
+    }
+
+    public override bool can_redo {
+        get { return false; }
+    }
+
+    private GearyApplication application;
+    private Controller.AccountContext context;
+    private Composer.Widget? composer;
+    private Geary.Smtp.ClientService smtp;
+    private Geary.TimeoutManager commit_timer;
+    private Geary.EmailIdentifier? saved = null;
+
+
+    public SendComposerCommand(GearyApplication application,
+                               Controller.AccountContext context,
+                               Composer.Widget composer) {
+        this.application = application;
+        this.context = context;
+        this.composer = composer;
+        this.smtp = (Geary.Smtp.ClientService) context.account.outgoing;
+
+        int send_delay = this.application.config.undo_send_delay;
+        this.commit_timer = new Geary.TimeoutManager.seconds(
+            send_delay > 0 ? send_delay : 0,
+            on_commit_timeout
+        );
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Geary.ComposedEmail email = yield this.composer.get_composed_email();
+        /// Translators: The label for an in-app notification. The
+        /// string substitution is a list of recipients of the email.
+        this.executed_label = _(
+            "Email to %s queued for delivery"
+        ).printf(Util.Email.to_short_recipient_display(email));
+
+        if (this.can_undo) {
+            this.saved = yield this.smtp.save_email(email, cancellable);
+            this.commit_timer.start();
+        } else {
+            yield this.smtp.send_email(email, cancellable);
+        }
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.commit_timer.reset();
+        yield this.smtp.outbox.remove_email_async(
+            Geary.Collection.single(this.saved),
+            cancellable
+        );
+        this.composer.set_enabled(true);
+        this.application.controller.show_composer(this.composer, null);
+        this.composer = null;
+        this.saved = null;
+    }
+
+    private void on_commit_timeout() {
+        this.smtp.queue_email(this.saved);
+        // Calling close then immediately erasing the reference looks
+        // sketchy, but works since Controller still maintains a
+        // reference to the composer until it destroys itself.
+        this.composer.close.begin();
+        this.composer = null;
+        this.saved = null;
     }
 
 }
