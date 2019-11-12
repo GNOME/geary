@@ -26,11 +26,11 @@ public class Composer.Box : Gtk.Frame, Container {
     public signal void vanished();
 
 
-    public Box(Widget composer) {
+    public Box(Widget composer, MainToolbar main_toolbar) {
         this.composer = composer;
-        this.composer.free_header();
 
-        this.main_toolbar = GearyApplication.instance.controller.main_window.main_toolbar;
+        this.main_toolbar = main_toolbar;
+        this.main_toolbar.set_conversation_header(composer.header);
 
         get_style_context().add_class("geary-composer-box");
         this.halign = Gtk.Align.FILL;
@@ -38,15 +38,14 @@ public class Composer.Box : Gtk.Frame, Container {
         this.vexpand_set = true;
 
         add(this.composer);
-        this.main_toolbar.set_conversation_header(composer.header);
         show();
     }
 
     /** {@inheritDoc} */
     public void close() {
-        this.main_toolbar.remove_conversation_header(composer.header);
         vanished();
 
+        this.main_toolbar.remove_conversation_header(composer.header);
         remove(this.composer);
         destroy();
     }

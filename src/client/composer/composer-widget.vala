@@ -519,8 +519,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.context_menu_webkit_spelling = (Menu) builder.get_object("context_menu_webkit_spelling");
         this.context_menu_webkit_text_entry = (Menu) builder.get_object("context_menu_webkit_text_entry");
 
-        embed_header();
-
         // Listen to account signals to update from menu.
         this.application.engine.account_available.connect(
             on_account_available
@@ -780,6 +778,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     public void set_enabled(bool enabled) {
         this.is_closing = !enabled;
         this.set_sensitive(enabled);
+
+        // Need to update this separately since it may be detached
+        // from the widget itself.
+        this.header.set_sensitive(enabled);
 
         if (enabled) {
             this.open_draft_manager_async.begin(null, null);
@@ -1332,7 +1334,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     internal void free_header() {
-        if (this.header.parent != null)
+        if (this.header.parent != null) {
             this.header.parent.remove(this.header);
     }
 

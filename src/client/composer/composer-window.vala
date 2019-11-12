@@ -33,7 +33,6 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
     public Window(Widget composer, GearyApplication application) {
         Object(application: application, type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
-        this.composer.header.detached();
 
         // XXX Bug 764622
         set_property("name", "GearyComposerWindow");
@@ -44,7 +43,6 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
             composer.embed_header();
         } else {
             composer.header.show_close_button = true;
-            composer.free_header();
             set_titlebar(this.composer.header);
         }
 
@@ -57,6 +55,7 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
 
     /** {@inheritDoc} */
     public new void close() {
+        this.composer.free_header();
         remove(this.composer);
         destroy();
     }

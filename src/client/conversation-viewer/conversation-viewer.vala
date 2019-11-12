@@ -146,21 +146,23 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      * Puts the view into composer mode, showing a full-height composer.
      */
     public void do_compose(Composer.Widget composer) {
-        Composer.Box box = new Composer.Box(composer);
-        this.current_composer = composer;
-
-        // XXX move the ConversationListView management code into
-        // MainWindow or somewhere more appropriate
         MainWindow? main_window = get_toplevel() as MainWindow;
         if (main_window != null) {
+            Composer.Box box = new Composer.Box(
+                composer, main_window.main_toolbar
+            );
+            this.current_composer = composer;
+
+            // XXX move the ConversationListView management code into
+            // MainWindow or somewhere more appropriate
             ConversationListView conversation_list = main_window.conversation_list_view;
             this.selection_while_composing = conversation_list.get_selected_conversations();
             conversation_list.get_selection().unselect_all();
-        }
 
-        box.vanished.connect(on_composer_closed);
-        this.composer_page.add(box);
-        set_visible_child(this.composer_page);
+            box.vanished.connect(on_composer_closed);
+            this.composer_page.add(box);
+            set_visible_child(this.composer_page);
+        }
     }
 
     /**

@@ -36,6 +36,8 @@ public class Composer.Embed : Gtk.EventBox, Container {
                  Gtk.ScrolledWindow outer_scroller) {
         this.referred = referred;
         this.composer = composer;
+        this.composer.embed_header();
+
         this.outer_scroller = outer_scroller;
 
         get_style_context().add_class("geary-composer-embed");
@@ -53,6 +55,7 @@ public class Composer.Embed : Gtk.EventBox, Container {
         disable_scroll_reroute(this);
         vanished();
 
+        this.composer.free_header();
         remove(this.composer);
         destroy();
     }
