@@ -1454,7 +1454,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         try {
             yield this.editor.clean_content();
-            yield this.application.controller.send_email(this);
+            yield this.application.controller.send_composed_email(this);
 
             if (this.draft_manager != null) {
                 yield discard_draft();

@@ -448,7 +448,7 @@ public class Application.Controller : Geary.BaseObject {
     }
 
     /** Queues the email in a composer for delivery. */
-    public async void send_email(Composer.Widget composer) {
+    public async void send_composed_email(Composer.Widget composer) {
         AccountContext? context = this.accounts.get(
             composer.account.information
         );
@@ -2624,20 +2624,44 @@ private class Application.EmptyFolderCommand : Command {
 }
 
 
-private class Application.SendComposerCommand : Command {
+private abstract class Application.ComposerCommand : Command {
+
+
+    public override bool can_redo {
+        get { return false; }
+    }
+
+    protected Composer.Widget? composer { get; private set; }
+
+
+    protected ComposerCommand(Composer.Widget composer) {
+        this.composer = composer;
+    }
+
+    protected void clear_composer() {
+        this.composer = null;
+    }
+
+    protected void close_composer() {
+        // Calling close then immediately erasing the reference looks
+        // sketchy, but works since Controller still maintains a
+        // reference to the composer until it destroys itself.
+        this.composer.close.begin();
+        this.composer = null;
+    }
+
+}
+
+
+private class Application.SendComposerCommand : ComposerCommand {
 
 
     public override bool can_undo {
         get { return this.application.config.undo_send_delay > 0; }
     }
 
-    public override bool can_redo {
-        get { return false; }
-    }
-
     private GearyApplication application;
     private Controller.AccountContext context;
-    private Composer.Widget? composer;
     private Geary.Smtp.ClientService smtp;
     private Geary.TimeoutManager commit_timer;
     private Geary.EmailIdentifier? saved = null;
@@ -2646,9 +2670,9 @@ private class Application.SendComposerCommand : Command {
     public SendComposerCommand(GearyApplication application,
                                Controller.AccountContext context,
                                Composer.Widget composer) {
+        base(composer);
         this.application = application;
         this.context = context;
-        this.composer = composer;
         this.smtp = (Geary.Smtp.ClientService) context.account.outgoing;
 
         int send_delay = this.application.config.undo_send_delay;
@@ -2682,20 +2706,17 @@ private class Application.SendComposerCommand : Command {
             Geary.Collection.single(this.saved),
             cancellable
         );
+        this.saved = null;
+
         this.composer.set_enabled(true);
         this.application.controller.show_composer(this.composer, null);
-        this.composer = null;
-        this.saved = null;
+        clear_composer();
     }
 
     private void on_commit_timeout() {
         this.smtp.queue_email(this.saved);
-        // Calling close then immediately erasing the reference looks
-        // sketchy, but works since Controller still maintains a
-        // reference to the composer until it destroys itself.
-        this.composer.close.begin();
-        this.composer = null;
         this.saved = null;
+        close_composer();
     }
 
 }
