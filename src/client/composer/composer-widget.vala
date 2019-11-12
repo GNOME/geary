@@ -564,7 +564,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
 
         this.draft_timer = new Geary.TimeoutManager.seconds(
-            10, () => { this.save_draft.begin(); }
+            10, on_draft_timeout
         );
 
         // Add actions once every element has been initialized and added
@@ -705,10 +705,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
 
         try {
-            yield open_draft_manager_async(
-                is_draft ? referred.id : null,
-                cancellable
-            );
+            yield open_draft_manager(is_draft ? referred.id : null, cancellable);
         } catch (Error e) {
             debug("Could not open draft manager: %s", e.message);
         }
@@ -835,7 +832,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         if (this.draft_manager != null) {
             try {
-                yield close_draft_manager_async(null);
+                yield close_draft_manager(null);
             } catch (Error err) {
                 debug("Error closing draft manager on composer close");
             }
@@ -875,7 +872,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         if (enabled) {
             this.is_closing = false;
-            this.open_draft_manager_async.begin(null, null);
+            this.open_draft_manager.begin(null, null);
         } else {
             if (this.container != null) {
                 this.container.close();
@@ -1455,33 +1452,32 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private async void on_send_async() {
         set_enabled(false);
 
-        // Perform send.
         try {
             yield this.editor.clean_content();
             yield this.application.controller.send_email(this);
-        } catch (Error e) {
-            GLib.message("Error sending email: %s", e.message);
-        }
 
-        Geary.Nonblocking.Semaphore? semaphore = discard_draft();
-        if (semaphore != null) {
-            try {
-                yield semaphore.wait_async();
-            } catch (Error err) {
-                // ignored
+            if (this.draft_manager != null) {
+                yield discard_draft();
+                yield close_draft_manager(null);
             }
-        }
 
-        if (this.container != null) {
-            this.container.close();
+            if (this.container != null) {
+                this.container.close();
+            }
+        } catch (GLib.Error error) {
+            this.application.controller.report_problem(
+                new Geary.AccountProblemReport(
+                    this.account.information, error
+                )
+            );
         }
     }
 
     /**
      * Creates and opens the composer's draft manager.
      */
-    private async void open_draft_manager_async(Geary.EmailIdentifier? editing_draft_id,
-                                                GLib.Cancellable? cancellable)
+    private async void open_draft_manager(Geary.EmailIdentifier? editing_draft_id,
+                                          GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (!this.account.information.save_drafts) {
             this.header.show_save_and_close = false;
@@ -1528,19 +1524,19 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /**
      * Closes current draft manager, if any, then opens a new one.
      */
-    private async void reopen_draft_manager_async()
-    throws Error {
+    private async void reopen_draft_manager(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (this.draft_manager != null) {
             // Discard the draft, if any, since it may be on a
             // different account
-            discard_draft();
-            this.draft_manager.discard_on_close = true;
-            yield close_draft_manager_async(null);
+            yield discard_draft();
+            yield close_draft_manager(cancellable);
         }
-        yield open_draft_manager_async(null, null);
+        yield open_draft_manager(null, cancellable);
+        yield save_draft();
     }
 
-    private async void close_draft_manager_async(Cancellable? cancellable)
+    private async void close_draft_manager(GLib.Cancellable? cancellable)
         throws GLib.Error {
         this.draft_status_text = "";
 
@@ -1555,12 +1551,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             .disconnect(on_draft_id_changed);
         old_manager.fatal.disconnect(on_draft_manager_fatal);
 
-        // drop ref even if close failed
-        try {
-            yield old_manager.close_async(cancellable);
-        } catch (Error err) {
-            debug("Error closing draft manager: %s", err.message);
-        }
+        yield old_manager.close_async(cancellable);
         debug("Draft manager closed");
     }
 
@@ -1602,51 +1593,62 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     // Note that drafts are NOT "linkified."
-    private async void save_draft() {
+    private async void save_draft() throws GLib.Error {
+        debug("Saving draft");
+
         // cancel timer in favor of just doing it now
         this.draft_timer.reset();
 
         if (this.draft_manager != null) {
-            try {
-                Geary.ComposedEmail draft = yield get_composed_email(null, true);
-                this.draft_manager.update(
-                    yield draft.to_rfc822_message(null, null),
-                    this.draft_flags,
-                    null
-                );
-            } catch (Error err) {
-                GLib.message("Unable to save draft: %s", err.message);
-            }
+            Geary.ComposedEmail draft = yield get_composed_email(null, true);
+            yield this.draft_manager.update(
+                yield draft.to_rfc822_message(null, null),
+                this.draft_flags,
+                null,
+                null
+            );
         }
     }
 
-    private Geary.Nonblocking.Semaphore? discard_draft() {
+    private async void discard_draft() throws GLib.Error {
+        debug("Discarding draft");
+
         // cancel timer in favor of this operation
         this.draft_timer.reset();
-
-        try {
-            if (this.draft_manager != null)
-                return this.draft_manager.discard();
-        } catch (Error err) {
-            GLib.message("Unable to discard draft: %s", err.message);
-        }
-
-        return null;
+        yield this.draft_manager.discard(null);
     }
 
     private async void save_and_exit_async() {
         this.is_closing = true;
         set_enabled(false);
-        yield save_draft();
+        try {
+            yield save_draft();
+        } catch (GLib.Error error) {
+            this.application.controller.report_problem(
+                new Geary.AccountProblemReport(
+                    this.account.information, error
+                )
+            );
+        }
         yield close();
     }
 
     private async void discard_and_exit_async() {
         this.is_closing = true;
         set_enabled(false);
+
         if (this.draft_manager != null) {
-            discard_draft();
-            draft_manager.discard_on_close = true;
+            try {
+                yield discard_draft();
+                yield close_draft_manager(null);
+            } catch (GLib.Error error) {
+                this.application.controller.report_problem(
+                    new Geary.AccountProblemReport(
+                        this.account.information, error
+                    )
+                );
+            }
+        }
         }
         yield close();
     }
@@ -2372,7 +2374,22 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 this.account = selected.account;
                 this.update_signature.begin(null);
                 load_entry_completions();
-                this.reopen_draft_manager_async.begin();
+
+                var current_account = this.account;
+                this.reopen_draft_manager.begin(
+                    null,
+                    (obj, res) => {
+                        try {
+                            this.reopen_draft_manager.end(res);
+                        } catch (GLib.Error error) {
+                            this.application.controller.report_problem(
+                                new Geary.AccountProblemReport(
+                                    current_account.information, error
+                                )
+                            );
+                        }
+                    }
+                );
             }
         }
     }
@@ -2694,6 +2711,23 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_close_and_discard(SimpleAction action, Variant? param) {
         discard_and_exit_async.begin();
+    }
+
+    private void on_draft_timeout() {
+        var current_account = this.account;
+        this.save_draft.begin(
+            (obj, res) => {
+                try {
+                    this.save_draft.end(res);
+                } catch (GLib.Error error) {
+                    this.application.controller.report_problem(
+                        new Geary.AccountProblemReport(
+                            current_account.information, error
+                        )
+                    );
+                }
+            }
+        );
     }
 
     private void on_account_available() {
