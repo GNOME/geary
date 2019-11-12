@@ -339,16 +339,16 @@ public class Application.Controller : Geary.BaseObject {
 
         this.cancellable_open_account.cancel();
 
-        // Create an array of known accounts so the loops below do not
+        // Create a copy of known accounts so the loop below does not
         // explode if accounts are removed while iterating.
-        AccountContext[] accounts = this.accounts.values.to_array();
+        var closing_accounts = new Gee.LinkedList<AccountContext>();
+        closing_accounts.add_all(this.accounts.values);
 
         // Close all Accounts. Launch these in parallel to minimise
         // time taken to close, but here use a barrier to wait for all
         // to actually finish closing.
-        Geary.Nonblocking.CountingSemaphore close_barrier =
-            new Geary.Nonblocking.CountingSemaphore(null);
-        foreach (AccountContext context in accounts) {
+        var close_barrier = new Geary.Nonblocking.CountingSemaphore(null);
+        foreach (AccountContext context in closing_accounts) {
             close_barrier.acquire();
             this.close_account.begin(
                 context.account.information,
@@ -365,10 +365,13 @@ public class Application.Controller : Geary.BaseObject {
             debug("Error waiting at shutdown barrier: %s", err.message);
         }
 
+        // Release last refs to the accounts
+        closing_accounts.clear();
+
         // Turn off the lights and lock the door behind you
         try {
             debug("Closing Engine...");
-            yield Geary.Engine.instance.close_async(null);
+            yield this.application.engine.close_async(null);
             debug("Closed Engine");
         } catch (Error err) {
             message("Error closing Geary Engine instance: %s", err.message);
