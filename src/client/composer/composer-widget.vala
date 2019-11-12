@@ -1649,8 +1649,18 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 );
             }
         }
+
+        if (!is_blank) {
+            // Pass on to the controller so the discarded email can be
+            // re-opened on undo
+            if (this.container != null) {
+                this.container.close();
+            }
+            yield this.application.controller.discard_composed_email(this);
+        } else {
+            // The composer is blank, so drop the mic and walk away
+            yield close();
         }
-        yield close();
     }
 
     private void update_attachments_view() {
