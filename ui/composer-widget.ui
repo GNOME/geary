@@ -351,7 +351,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Undo last edit (Ctrl+Z)</property>
-                        <property name="action_name">win.undo</property>
+                        <property name="action_name">edt.undo</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage">
@@ -375,7 +375,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Redo last edit  (Ctrl+Shift+Z)</property>
-                        <property name="action_name">win.redo</property>
+                        <property name="action_name">edt.redo</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage">
@@ -413,7 +413,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Bold (Ctrl+B)</property>
-                        <property name="action_name">win.bold</property>
+                        <property name="action_name">edt.bold</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage" id="bold_image">
@@ -437,7 +437,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Italic (Ctrl+I)</property>
-                        <property name="action_name">win.italic</property>
+                        <property name="action_name">edt.italic</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage" id="italics_image">
@@ -461,7 +461,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Underline (Ctrl+U)</property>
-                        <property name="action_name">win.underline</property>
+                        <property name="action_name">edt.underline</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage" id="underline_image">
@@ -485,7 +485,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Strikethrough (Ctrl+K)</property>
-                        <property name="action_name">win.strikethrough</property>
+                        <property name="action_name">edt.strikethrough</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage" id="strikethrough_image">
@@ -523,7 +523,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Insert unordered list</property>
-                        <property name="action_name">win.ulist</property>
+                        <property name="action_name">edt.ulist</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage" id="ulist_image">
@@ -547,7 +547,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Insert ordered list</property>
-                        <property name="action_name">win.olist</property>
+                        <property name="action_name">edt.olist</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage" id="olist_image">
@@ -585,7 +585,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Quote text  (Ctrl+])</property>
-                        <property name="action_name">win.indent</property>
+                        <property name="action_name">edt.indent</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage" id="indent_image">
@@ -609,7 +609,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Unquote text  (Ctrl+[)</property>
-                        <property name="action_name">win.outdent</property>
+                        <property name="action_name">edt.outdent</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage" id="outdent_image">
@@ -647,7 +647,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Insert or update selection link (Ctrl+L)</property>
-                        <property name="action_name">win.insert-link</property>
+                        <property name="action_name">edt.insert-link</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage" id="insert_link_image">
@@ -671,7 +671,7 @@
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Insert an image (Ctrl+G)</property>
-                        <property name="action_name">win.insert-image</property>
+                        <property name="action_name">edt.insert-image</property>
                         <property name="always_show_image">True</property>
                         <child>
                           <object class="GtkImage">
@@ -705,7 +705,7 @@
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
                     <property name="tooltip_text" translatable="yes">Remove selection formatting (Ctrl+Space)</property>
-                    <property name="action_name">win.remove-format</property>
+                    <property name="action_name">edt.remove-format</property>
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage" id="remove_format_image">

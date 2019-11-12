@@ -81,13 +81,26 @@ public class EmailEntry : Gtk.Entry {
     }
 
     private bool on_key_press(Gtk.Widget widget, Gdk.EventKey event) {
+        bool ret = Gdk.EVENT_PROPAGATE;
         if (event.keyval == Gdk.Key.Tab) {
-            ((ContactEntryCompletion) get_completion()).trigger_selection();
-            composer.child_focus(Gtk.DirectionType.TAB_FORWARD);
-            return true;
+            ContactEntryCompletion? completion = (
+                get_completion() as ContactEntryCompletion
+            );
+            if (completion != null) {
+                completion.trigger_selection();
+                composer.child_focus(Gtk.DirectionType.TAB_FORWARD);
+                ret = Gdk.EVENT_STOP;
+            }
+        } else {
+            // Keyboard shortcuts for undo/redo won't work when the
+            // completion UI is visible unless we explicitly check for
+            // them there. This may be related to the
+            // single-key-shortcut handling hack in the MainWindow.
+            Gtk.Window? window = get_toplevel() as Gtk.Window;
+            if (window != null) {
+                ret = window.activate_key(event);
+            }
         }
-
-        return false;
+        return ret;
     }
 }
-

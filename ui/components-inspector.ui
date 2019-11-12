@@ -82,7 +82,7 @@
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes"
                       comments="Tooltip for inspector button">Copy to clipboard</property>
-            <property name="action_name">win.copy</property>
+            <property name="action_name">edt.copy</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>

@@ -34,7 +34,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
     private string current_key = "";
 
     // List of (possibly incomplete) email addresses in the entry.
-    private string[] email_addresses = {};
+    private Gee.ArrayList<string> address_parts = new Gee.ArrayList<string>();
 
     // Index of the email address the cursor is currently at
     private int cursor_at_address = -1;
@@ -98,10 +98,11 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
             model.clear();
         }
     }
+
     public void trigger_selection() {
-        if (last_iter != null) {
-            on_match_selected(model, last_iter);
-            last_iter = null;
+        if (this.last_iter != null) {
+            insert_address_at_cursor(this.last_iter);
+            this.last_iter = null;
         }
     }
 
@@ -110,7 +111,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
         if (entry != null) {
             this.current_key = "";
             this.cursor_at_address = -1;
-            this.email_addresses = {};
+            this.address_parts.clear();
 
             string text = entry.get_text();
             int cursor_pos = entry.get_position();
@@ -123,7 +124,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
             while (text.get_next_char(ref next_idx, out c)) {
                 if (current_char == cursor_pos) {
                     this.current_key = text.slice(start_idx, next_idx).strip();
-                    this.cursor_at_address = this.email_addresses.length;
+                    this.cursor_at_address = this.address_parts.size;
                 }
 
                 switch (c) {
@@ -131,7 +132,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
                     if (!in_quote) {
                         // Don't include the comma in the address
                         string address = text.slice(start_idx, next_idx -1);
-                        this.email_addresses += address.strip();
+                        this.address_parts.add(address);
                         // Don't include it in the next one, either
                         start_idx = next_idx;
                     }
@@ -147,12 +148,66 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
 
             // Add any remaining text after the last comma
             string address = text.substring(start_idx);
-            this.email_addresses += address.strip();
+            this.address_parts.add(address);
         }
     }
 
-    public async void search_contacts(string query,
-                                      GLib.Cancellable? cancellable) {
+    private void insert_address_at_cursor(Gtk.TreeIter iter) {
+        Gtk.Entry? entry = get_entry() as Gtk.Entry;
+        if (entry != null) {
+            // Take care to do a delete then an insert here so that
+            // Component.EntryUndo can combine the two into a single
+            // undoable command
+            int start_char = this.address_parts.slice(
+                0, this.cursor_at_address
+            ).fold<int>(
+                // address parts don't contain commas, so need to add
+                // an char width for it
+                (a, chars) => a.char_count() + chars + 1, 0
+            );
+            int end_char = (
+                start_char +
+                this.address_parts[this.cursor_at_address].char_count()
+            );
+
+            // Format and use the selected address
+            GLib.Value value;
+            this.model.get_value(iter, Column.MAILBOX, out value);
+            Geary.RFC822.MailboxAddress mailbox =
+                (Geary.RFC822.MailboxAddress) value.get_object();
+            string formatted = mailbox.to_full_display();
+            if (this.cursor_at_address != 0) {
+                // This isn't the first address, so add some
+                // whitespace to pad it out
+                formatted = " " + formatted;
+            }
+            this.address_parts[this.cursor_at_address] = formatted;
+
+            // Update the entry text
+            entry.delete_text(start_char, end_char);
+            entry.insert_text(
+                formatted, formatted.char_count(), ref start_char
+            );
+
+            // Update the entry cursor position. The previous call
+            // updates the start so just use that, but add extra space
+            // for the comma and any white space at the start of the
+            // next address.
+            ++start_char;
+            string? next_address = (
+                this.cursor_at_address + 1 < this.address_parts.size
+                ? this.address_parts[this.cursor_at_address + 1]
+                : ""
+            );
+            for (int i = 0; i < next_address.length && next_address[i] == ' '; i++) {
+                ++start_char;
+            }
+            entry.set_position(start_char);
+        }
+    }
+
+    private async void search_contacts(string query,
+                                       GLib.Cancellable? cancellable) {
         Gee.Collection<Application.Contact>? results = null;
         try {
             results = yield this.contacts.search(
@@ -283,37 +338,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
     }
 
     private bool on_match_selected(Gtk.TreeModel model, Gtk.TreeIter iter) {
-        Gtk.Entry? entry = get_entry() as Gtk.Entry;
-        if (entry != null) {
-            // Update the address
-            GLib.Value value;
-            model.get_value(iter, Column.MAILBOX, out value);
-            Geary.RFC822.MailboxAddress mailbox =
-                (Geary.RFC822.MailboxAddress) value.get_object();
-            this.email_addresses[this.cursor_at_address] =
-                mailbox.to_full_display();
-
-            // Update the entry text
-            bool current_is_last = (
-                this.cursor_at_address == this.email_addresses.length - 1
-            );
-            int new_cursor_pos = -1;
-            GLib.StringBuilder text = new GLib.StringBuilder();
-            int i = 0;
-            while (i < this.email_addresses.length) {
-                text.append(this.email_addresses[i]);
-                if (i == this.cursor_at_address) {
-                    new_cursor_pos = text.str.char_count();
-                }
-
-                i++;
-                if (i != this.email_addresses.length || current_is_last) {
-                    text.append(", ");
-                }
-            }
-            entry.text = text.str;
-            entry.set_position(current_is_last ? -1 : new_cursor_pos);
-        }
+        insert_address_at_cursor(iter);
         return true;
     }
 

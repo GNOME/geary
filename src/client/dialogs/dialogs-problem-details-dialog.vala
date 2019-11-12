@@ -16,15 +16,18 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
     private const string ACTION_SEARCH_TOGGLE = "toggle-search";
     private const string ACTION_SEARCH_ACTIVATE = "activate-search";
 
-    private const ActionEntry[] action_entries = {
-        {GearyApplication.ACTION_CLOSE, on_close },
-        {GearyApplication.ACTION_COPY,  on_copy_clicked },
-        {ACTION_CLOSE,                  on_close },
-        {ACTION_SEARCH_TOGGLE,          on_logs_search_toggled, null, "false" },
-        {ACTION_SEARCH_ACTIVATE,        on_logs_search_activated },
+    private const ActionEntry[] EDIT_ACTIONS = {
+        { Action.Edit.COPY,  on_copy_clicked },
     };
 
-    public static void add_window_accelerators(GearyApplication app) {
+    private const ActionEntry[] WINDOW_ACTIONS = {
+        { Action.Window.CLOSE, on_close },
+        { ACTION_CLOSE, on_close },
+        { ACTION_SEARCH_TOGGLE, on_logs_search_toggled, null, "false" },
+        { ACTION_SEARCH_ACTIVATE, on_logs_search_activated },
+    };
+
+    public static void add_accelerators(GearyApplication app) {
         app.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         app.add_window_accelerators(ACTION_SEARCH_ACTIVATE, { "<Ctrl>F" } );
     }
@@ -64,9 +67,15 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
         this.account = (account_report != null) ? account_report.account : null;
         this.service = (service_report != null) ? service_report.service : null;
 
-        GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
-        actions.add_action_entries(ProblemDetailsDialog.action_entries, this);
-        insert_action_group("win", actions);
+        // Edit actions
+        GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
+        edit_actions.add_action_entries(EDIT_ACTIONS, this);
+        insert_action_group(Action.Edit.GROUP_NAME, edit_actions);
+
+        // Window actions
+        GLib.SimpleActionGroup window_actions = new GLib.SimpleActionGroup();
+        window_actions.add_action_entries(WINDOW_ACTIONS, this);
+        insert_action_group(Action.Window.GROUP_NAME, window_actions);
 
         this.error_pane = new Components.InspectorErrorView(
             error, account, service

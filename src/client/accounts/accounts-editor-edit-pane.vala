@@ -264,6 +264,7 @@ internal class Accounts.EditorEditPane :
 private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
 
 
+    private Components.EntryUndo value_undo;
     private Application.CommandStack commands;
     private GLib.Cancellable? cancellable;
 
@@ -284,12 +285,19 @@ private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
 
         update();
 
+        // Hook up after updating the value so the default value isn't
+        // undoable
+        this.value_undo = new Components.EntryUndo(this.value);
+
         this.value.focus_out_event.connect(on_focus_out);
     }
 
     public override void update() {
-        this.value.set_placeholder_text(this.account.primary_mailbox.address);
-        this.value.set_text(this.account.display_name);
+        this.value.placeholder_text = this.account.primary_mailbox.address;
+        // Only update if changed to avoid adding more undo edits
+        if (this.value.text != this.account.display_name) {
+            this.value.text = this.account.display_name;
+        }
     }
 
     private void commit() {
@@ -434,7 +442,9 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
 
 
     private Gtk.Entry name_entry = new Gtk.Entry();
+    private Components.EntryUndo name_undo;
     private Gtk.Entry address_entry = new Gtk.Entry();
+    private Components.EntryUndo address_undo;
     private Components.EmailValidator address_validator;
     private Gtk.Button remove_button;
 
@@ -460,6 +470,8 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
         this.name_entry.activate.connect(on_activate);
         this.name_entry.show();
 
+        this.name_undo = new Components.EntryUndo(this.name_entry);
+
         this.address_entry.input_purpose = Gtk.InputPurpose.EMAIL;
         this.address_entry.set_text(address ?? "");
         this.address_entry.set_placeholder_text(
@@ -472,6 +484,8 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
         this.address_entry.changed.connect(on_address_changed);
         this.address_entry.activate.connect(on_activate);
         this.address_entry.show();
+
+        this.address_undo = new Components.EntryUndo(this.address_entry);
 
         this.address_validator =
             new Components.EmailValidator(this.address_entry);

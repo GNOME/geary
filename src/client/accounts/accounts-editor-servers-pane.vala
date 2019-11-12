@@ -711,6 +711,7 @@ private class Accounts.ServiceHostRow :
         }
     }
 
+    private Components.EntryUndo value_undo;
     private Application.CommandStack commands;
     private GLib.Cancellable? cancellable;
 
@@ -741,9 +742,11 @@ private class Accounts.ServiceHostRow :
         this.validator = new Components.NetworkAddressValidator(this.value);
 
         // Update after the validator is wired up to ensure the value
-        // is validated
+        // is validated, wire up undo after updating so the default
+        // value isn't undoable.
         setup_validator();
         update();
+        this.value_undo = new Components.EntryUndo(this.value);
     }
 
     public override void update() {
@@ -862,6 +865,7 @@ private class Accounts.ServiceLoginRow :
         }
     }
 
+    private Components.EntryUndo value_undo;
     private Application.CommandStack commands;
     private GLib.Cancellable? cancellable;
     private ServicePasswordRow? password_row;
@@ -894,9 +898,11 @@ private class Accounts.ServiceLoginRow :
         }
 
         // Update after the validator is wired up to ensure the value
-        // is validated
-        update();
+        // is validated, wire up undo after updating so the default
+        // value isn't undoable.
         setup_validator();
+        update();
+        this.value_undo = new Components.EntryUndo(this.value);
     }
 
     public override void update() {
@@ -983,6 +989,7 @@ private class Accounts.ServicePasswordRow :
         }
     }
 
+    private Components.EntryUndo value_undo;
     private Application.CommandStack commands;
     private GLib.Cancellable? cancellable;
 
@@ -1008,9 +1015,11 @@ private class Accounts.ServicePasswordRow :
         this.validator = new Components.Validator(this.value);
 
         // Update after the validator is wired up to ensure the value
-        // is validated
-        update();
+        // is validated, wire up undo after updating so the default
+        // value isn't undoable.
         setup_validator();
+        update();
+        this.value_undo = new Components.EntryUndo(this.value);
     }
 
     public override void update() {

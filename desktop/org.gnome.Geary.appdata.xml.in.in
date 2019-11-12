@@ -93,7 +93,8 @@
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
-          <li>Improved and pervasive undo support for email actions</li>
+          <li>Unlimited undo for all email actions such as archiving, marking</li>
+          <li>Undo support for all text entry fields, including the composer</li>
           <li>App-wide notification preferences now handled by desktop</li>
           <li>Improved missing attachment detection in composer</li>
           <li>Initial plugin system</li>

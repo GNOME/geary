@@ -20,6 +20,7 @@ extern const string _PROFILE;
 extern const string _VERSION;
 extern const string _REVNO;
 
+
 /**
  * The interface between Geary and the desktop environment.
  */
@@ -52,25 +53,6 @@ public class GearyApplication : Gtk.Application {
         null
     };
 
-    // Common window actions
-    public const string ACTION_CLOSE = "close";
-    public const string ACTION_COPY = "copy";
-    public const string ACTION_HELP_OVERLAY = "show-help-overlay";
-    public const string ACTION_REDO = "redo";
-    public const string ACTION_UNDO = "undo";
-
-    // App-wide actions
-    public const string ACTION_ABOUT = "about";
-    public const string ACTION_ACCOUNTS = "accounts";
-    public const string ACTION_COMPOSE = "compose";
-    public const string ACTION_INSPECT = "inspect";
-    public const string ACTION_HELP = "help";
-    public const string ACTION_MAILTO = "mailto";
-    public const string ACTION_PREFERENCES = "preferences";
-    public const string ACTION_SHOW_EMAIL = "show-email";
-    public const string ACTION_SHOW_FOLDER = "show-folder";
-    public const string ACTION_QUIT = "quit";
-
     // Local-only command line options
     private const string OPTION_VERSION = "version";
 
@@ -90,16 +72,16 @@ public class GearyApplication : Gtk.Application {
     private const string OPTION_REVOKE_CERTS = "revoke-certs";
 
     private const ActionEntry[] ACTION_ENTRIES = {
-        {ACTION_ABOUT, on_activate_about},
-        {ACTION_ACCOUNTS, on_activate_accounts},
-        {ACTION_COMPOSE, on_activate_compose},
-        {ACTION_HELP, on_activate_help},
-        {ACTION_INSPECT, on_activate_inspect},
-        {ACTION_MAILTO, on_activate_mailto, "s"},
-        {ACTION_PREFERENCES, on_activate_preferences},
-        {ACTION_QUIT, on_activate_quit},
-        {ACTION_SHOW_EMAIL, on_activate_show_email, "(svv)"},
-        {ACTION_SHOW_FOLDER, on_activate_show_folder, "(sv)"}
+        { Action.Application.ABOUT, on_activate_about},
+        { Action.Application.ACCOUNTS, on_activate_accounts},
+        { Action.Application.COMPOSE, on_activate_compose},
+        { Action.Application.HELP, on_activate_help},
+        { Action.Application.INSPECT, on_activate_inspect},
+        { Action.Application.MAILTO, on_activate_mailto, "s"},
+        { Action.Application.PREFERENCES, on_activate_preferences},
+        { Action.Application.QUIT, on_activate_quit},
+        { Action.Application.SHOW_EMAIL, on_activate_show_email, "(svv)"},
+        { Action.Application.SHOW_FOLDER, on_activate_show_folder, "(sv)"}
     };
 
     // This is also the order in which they are presented to the user,
@@ -435,21 +417,26 @@ public class GearyApplication : Gtk.Application {
         Gtk.Window.set_default_icon_name(APP_ID);
 
         // Application accels
-        add_app_accelerators(ACTION_COMPOSE, { "<Ctrl>N" });
-        add_app_accelerators(ACTION_HELP, { "F1" });
-        add_app_accelerators(ACTION_INSPECT, { "<Alt><Shift>I" });
-        add_app_accelerators(ACTION_QUIT, { "<Ctrl>Q" });
+        add_app_accelerators(Action.Application.COMPOSE, { "<Ctrl>N" });
+        add_app_accelerators(Action.Application.HELP, { "F1" });
+        add_app_accelerators(Action.Application.INSPECT, { "<Alt><Shift>I" });
+        add_app_accelerators(Action.Application.QUIT, { "<Ctrl>Q" });
 
         // Common window accels
-        add_window_accelerators(ACTION_CLOSE, { "<Ctrl>W" });
-        add_window_accelerators(ACTION_COPY, { "<Ctrl>C" });
-        add_window_accelerators(ACTION_HELP_OVERLAY, { "<Ctrl>F1", "<Ctrl>question" });
-        add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>Z" });
-        add_window_accelerators(ACTION_UNDO, { "<Ctrl>Z" });
+        add_window_accelerators(Action.Window.CLOSE, { "<Ctrl>W" });
+        add_window_accelerators(
+            Action.Window.SHORTCUT_HELP, { "<Ctrl>F1", "<Ctrl>question" }
+        );
 
-        MainWindow.add_window_accelerators(this);
-        ComposerWidget.add_window_accelerators(this);
-        Components.Inspector.add_window_accelerators(this);
+        // Common edit accels
+        add_edit_accelerators(Action.Edit.COPY, { "<Ctrl>C" });
+        add_edit_accelerators(Action.Edit.REDO, { "<Ctrl><Shift>Z" });
+        add_edit_accelerators(Action.Edit.UNDO, { "<Ctrl>Z" });
+
+        MainWindow.add_accelerators(this);
+        ComposerWidget.add_accelerators(this);
+        Components.Inspector.add_accelerators(this);
+        Dialogs.ProblemDetailsDialog.add_accelerators(this);
 
         if (this.is_background_service) {
             // Since command_line won't be called below if running as
@@ -494,7 +481,18 @@ public class GearyApplication : Gtk.Application {
     public void add_window_accelerators(string action,
                                         string[] accelerators,
                                         Variant? param = null) {
-        string name = "win." + action;
+        string name = Action.Window.prefix(action);
+        string[] all_accel = get_accels_for_action(name);
+        foreach (string accel in accelerators) {
+            all_accel += accel;
+        }
+        set_accels_for_action(name, all_accel);
+    }
+
+    public void add_edit_accelerators(string action,
+                                      string[] accelerators,
+                                      Variant? param = null) {
+        string name = Action.Edit.prefix(action);
         string[] all_accel = get_accels_for_action(name);
         foreach (string accel in accelerators) {
             all_accel += accel;
@@ -875,13 +873,10 @@ public class GearyApplication : Gtk.Application {
             foreach (string arg in args) {
                 // the only acceptable arguments are mailto:'s
                 if (arg == MAILTO_URI_SCHEME_PREFIX) {
-                    activate_action(GearyApplication.ACTION_COMPOSE, null);
+                    activate_action(Action.Application.COMPOSE, null);
                     activated = true;
                 } else if (arg.down().has_prefix(MAILTO_URI_SCHEME_PREFIX)) {
-                    activate_action(
-                        GearyApplication.ACTION_MAILTO,
-                        new GLib.Variant.string(arg)
-                    );
+                    activate_action(Action.Application.MAILTO, new GLib.Variant.string(arg));
                     activated = true;
                 } else {
                     command_line.printerr("%s: ", this.binary);

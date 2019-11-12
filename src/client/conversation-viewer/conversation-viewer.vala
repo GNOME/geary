@@ -52,6 +52,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
     [GtkChild]
     internal Gtk.SearchEntry conversation_find_entry;
+    private Components.EntryUndo conversation_find_undo;
 
     [GtkChild]
     private Gtk.Button conversation_find_next;
@@ -125,6 +126,10 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             "Your search returned no results, try refining your search terms"
         );
         this.empty_search_page.add(empty_search);
+
+        this.conversation_find_undo = new Components.EntryUndo(
+            this.conversation_find_entry
+        );
 
         // XXX GTK+ Bug 778190 workaround
         new_conversation_scroller();
@@ -431,6 +436,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                     this.current_list.conversation.base_folder
                     as Geary.SearchFolder
                 );
+                this.conversation_find_undo.reset();
                 if (search_folder != null) {
                     Geary.SearchQuery? search_query = search_folder.search_query;
                     if (search_query != null) {

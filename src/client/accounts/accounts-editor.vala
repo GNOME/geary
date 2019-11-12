@@ -18,9 +18,9 @@
 public class Accounts.Editor : Gtk.Dialog {
 
 
-    private const ActionEntry[] ACTION_ENTRIES = {
-        { GearyApplication.ACTION_REDO, on_redo },
-        { GearyApplication.ACTION_UNDO, on_undo },
+    private const ActionEntry[] EDIT_ACTIONS = {
+        { Action.Edit.REDO, on_redo },
+        { Action.Edit.UNDO, on_undo },
     };
 
 
@@ -40,7 +40,7 @@ public class Accounts.Editor : Gtk.Dialog {
         get; private set;
     }
 
-    private SimpleActionGroup actions = new SimpleActionGroup();
+    private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
 
     [GtkChild]
     private Gtk.Overlay notifications_pane;
@@ -67,8 +67,8 @@ public class Accounts.Editor : Gtk.Dialog {
 
         this.accounts = application.controller.account_manager;
 
-        this.actions.add_action_entries(ACTION_ENTRIES, this);
-        insert_action_group("win", this.actions);
+        this.edit_actions.add_action_entries(EDIT_ACTIONS, this);
+        insert_action_group(Action.Edit.GROUP_NAME, this.edit_actions);
 
         this.editor_list_pane = new EditorListPane(this);
         push(this.editor_list_pane);
@@ -227,8 +227,8 @@ public class Accounts.Editor : Gtk.Dialog {
             can_redo = pane.commands.can_redo;
         }
 
-        get_action(GearyApplication.ACTION_UNDO).set_enabled(can_undo);
-        get_action(GearyApplication.ACTION_REDO).set_enabled(can_redo);
+        get_action(Action.Edit.UNDO).set_enabled(can_undo);
+        get_action(Action.Edit.REDO).set_enabled(can_redo);
     }
 
     private inline EditorPane? get_current_pane() {
@@ -236,7 +236,7 @@ public class Accounts.Editor : Gtk.Dialog {
     }
 
     private inline GLib.SimpleAction get_action(string name) {
-        return (GLib.SimpleAction) this.actions.lookup_action(name);
+        return (GLib.SimpleAction) this.edit_actions.lookup_action(name);
     }
 
     private void on_undo() {

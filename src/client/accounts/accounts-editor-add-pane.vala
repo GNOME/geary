@@ -517,11 +517,19 @@ private abstract class Accounts.AddPaneRow<Value> :
 private abstract class Accounts.EntryRow : AddPaneRow<Gtk.Entry> {
 
 
-    protected EntryRow(string label, string? placeholder = null) {
+    private Components.EntryUndo undo;
+
+
+    protected EntryRow(string label,
+                       string? initial_value = null,
+                       string? placeholder = null) {
         base(label, new Gtk.Entry());
 
+        this.value.text = initial_value ?? "";
         this.value.placeholder_text = placeholder ?? "";
         this.value.width_chars = 32;
+
+        this.undo = new Components.EntryUndo(this.value);
     }
 
     public override bool focus(Gtk.DirectionType direction) {
@@ -548,12 +556,12 @@ private class Accounts.NameRow : EntryRow {
     public NameRow(string default_name) {
         // Translators: Label for the person's actual name when adding
         // an account
-        base(_("Your name"));
+        base(_("Your name"), default_name.strip());
         this.validator = new Components.Validator(this.value);
-        if (default_name.strip() != "") {
-            // Set the text after hooking up the validator, so if the
-            // string is non-null it will already be valid
-            this.value.set_text(default_name);
+        if (this.value.text != "") {
+            // Validate if the string is non-empty so it will be good
+            // to go from the start
+            this.value.activate();
         }
     }
 
@@ -566,6 +574,7 @@ private class Accounts.EmailRow : EntryRow {
     public EmailRow() {
         base(
             _("Email address"),
+            null,
             // Translators: Placeholder for the default sender address
             // when adding an account
             _("person@example.com")
@@ -634,7 +643,7 @@ private class Accounts.HostnameRow : EntryRow {
             break;
         }
 
-        base(label, placeholder);
+        base(label, null, placeholder);
         this.type = type;
 
         this.validator = new Components.NetworkAddressValidator(this.value, 0);

@@ -11,6 +11,7 @@ public class SearchBar : Gtk.SearchBar {
     public bool search_entry_has_focus { get { return search_entry.has_focus; } }
 
     private Gtk.SearchEntry search_entry = new Gtk.SearchEntry();
+    private Components.EntryUndo search_undo;
     private Geary.ProgressMonitor? search_upgrade_progress_monitor = null;
     private MonitoredProgressBar search_upgrade_progress_bar = new MonitoredProgressBar();
     private Geary.Account? current_account = null;
@@ -29,6 +30,10 @@ public class SearchBar : Gtk.SearchBar {
         });
         search_entry.has_focus = true;
 
+        this.search_undo = new Components.EntryUndo(this.search_entry);
+
+        this.notify["search-mode-enabled"].connect(on_search_mode_changed);
+
         // Search upgrade progress bar.
         search_upgrade_progress_bar.show_text = true;
         search_upgrade_progress_bar.visible = false;
@@ -41,7 +46,7 @@ public class SearchBar : Gtk.SearchBar {
     }
 
     public void set_search_text(string text) {
-        search_entry.text = text;
+        this.search_entry.text = text;
     }
 
     public void give_search_focus() {
@@ -110,4 +115,9 @@ public class SearchBar : Gtk.SearchBar {
             _("Search %s account").printf(current_account.information.display_name));
     }
 
+    private void on_search_mode_changed() {
+        if (!this.search_mode_enabled) {
+            this.search_undo.reset();
+        }
+    }
 }
