@@ -224,10 +224,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     /** The identifier of the draft this composer holds, if any. */
     public Geary.EmailIdentifier? current_draft_id {
-        get {
-            return this.draft_manager != null
-                ? this.draft_manager.current_draft_id : null;
-        }
+        get; private set; default = null;
     }
 
     /** Determines the composer's current presentation mode. */
@@ -870,7 +867,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         if (enabled) {
             this.is_closing = false;
-            this.open_draft_manager.begin(null, null);
+            this.open_draft_manager.begin(this.current_draft_id, null);
         } else {
             if (this.container != null) {
                 this.container.close();
@@ -1609,7 +1606,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         // cancel timer in favor of this operation
         this.draft_timer.reset();
+
         yield this.draft_manager.discard(null);
+        this.current_draft_id = null;
     }
 
     private async void save_and_close() {
@@ -2515,7 +2514,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_draft_id_changed() {
-        notify_property("current-draft-id");
+        this.current_draft_id = this.draft_manager.current_draft_id;
     }
 
     private void on_draft_manager_fatal(Error err) {
