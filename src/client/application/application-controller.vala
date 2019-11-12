@@ -185,7 +185,7 @@ public class Application.Controller : Geary.BaseObject {
         // This initializes the IconFactory, important to do before
         // the actions are created (as they refer to some of Geary's
         // custom icons)
-        IconFactory.instance.init();
+        IconFactory.init(application.get_resource_directory());
 
         // Create DB upgrade dialog.
         this.upgrade_dialog = new UpgradeDialog();

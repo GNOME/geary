@@ -8,8 +8,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     const int LOAD_MORE_HEIGHT = 100;
 
 
-    // Used to be able to refer to the action names of the MainWindow
-    private weak MainWindow main_window;
+    private Application.Configuration config;
 
     private bool enable_load_more = true;
 
@@ -34,11 +33,12 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
 
 
-    public ConversationListView(MainWindow parent) {
+    public ConversationListView(Application.Configuration config) {
         base_ref();
         set_show_expanders(false);
         set_headers_visible(false);
-        this.main_window = parent;
+
+        this.config = config;
 
         append_column(create_column(ConversationListStore.Column.CONVERSATION_DATA,
             new ConversationListCellRenderer(), ConversationListStore.Column.CONVERSATION_DATA.to_string(),
@@ -56,7 +56,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.Tree.TARGET_ENTRY_LIST,
             Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
 
-        GearyApplication.instance.config.settings.changed[
+        this.config.settings.changed[
             Application.Configuration.DISPLAY_PREVIEW_KEY
         ].connect(on_display_preview_changed);
 
@@ -193,7 +193,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         // Select the first conversation, if autoselect is enabled,
         // nothing has been selected yet and we're not showing a
         // composer.
-        if (GearyApplication.instance.config.autoselect &&
+        if (this.config.autoselect &&
             get_selection().count_selected_rows() == 0) {
             MainWindow? parent = get_toplevel() as MainWindow;
             if (parent != null && !parent.has_composer) {
@@ -222,7 +222,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     }
 
     private void on_conversations_removed(bool start) {
-        if (!GearyApplication.instance.config.autoselect) {
+        if (!this.config.autoselect) {
             Gtk.SelectionMode mode = start
                 // Stop GtkTreeView from automatically selecting the
                 // next row after the removed rows
@@ -262,7 +262,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             // Click positions depend on whether the preview is enabled.
             bool read_clicked = false;
             bool star_clicked = false;
-            if (GearyApplication.instance.config.display_preview) {
+            if (this.config.display_preview) {
                 read_clicked = cell_x < 25 && cell_y >= 14 && cell_y <= 30;
                 star_clicked = cell_x < 25 && cell_y >= 40 && cell_y <= 62;
             } else {
@@ -306,26 +306,29 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
 
             GLib.Menu context_menu_model = new GLib.Menu();
-            if (!this.main_window.is_shift_down) {
-                context_menu_model.append(
-                    /// Translators: Context menu item
-                    ngettext(
-                        "Move conversation to _Trash",
-                        "Move conversations to _Trash",
-                        this.selected.size
-                    ),
-                    "win." + MainWindow.ACTION_ARCHIVE_CONVERSATION
-                );
-            } else {
-                context_menu_model.append(
-                    /// Translators: Context menu item
-                    ngettext(
-                        "_Delete conversation",
-                        "_Delete conversations",
-                        this.selected.size
-                    ),
-                    "win." + MainWindow.ACTION_DELETE_CONVERSATION
-                );
+            MainWindow? main = get_toplevel() as MainWindow;
+            if (main != null) {
+                if (main.is_shift_down) {
+                    context_menu_model.append(
+                        /// Translators: Context menu item
+                        ngettext(
+                            "Move conversation to _Trash",
+                            "Move conversations to _Trash",
+                            this.selected.size
+                        ),
+                        "win." + MainWindow.ACTION_ARCHIVE_CONVERSATION
+                    );
+                } else {
+                    context_menu_model.append(
+                        /// Translators: Context menu item
+                        ngettext(
+                            "_Delete conversation",
+                            "_Delete conversations",
+                            this.selected.size
+                        ),
+                        "win." + MainWindow.ACTION_DELETE_CONVERSATION
+                    );
+                }
             }
 
             if (conversation.is_unread())

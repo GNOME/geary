@@ -46,8 +46,11 @@ public class ConversationListCellRenderer : Gtk.CellRenderer {
     // Recalculates size when the style changed.
     // Note: this must be called by the parent TreeView.
     public static void style_changed(Gtk.Widget widget) {
-        if (example_data == null) {
-            example_data = new FormattedConversationData.create_example();
+        MainWindow? window = widget.get_toplevel() as MainWindow;
+        if (window != null && example_data == null) {
+            example_data = new FormattedConversationData.create_example(
+                window.application.config
+            );
         }
 
         example_data.calculate_sizes(widget);

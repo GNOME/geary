@@ -91,6 +91,8 @@ public class ConversationListStore : Gtk.ListStore {
     public Geary.ProgressMonitor preview_monitor { get; private set; default =
         new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
 
+    private Application.Configuration config;
+
     private Gee.HashMap<Geary.App.Conversation, RowWrapper> row_map = new Gee.HashMap<
         Geary.App.Conversation, RowWrapper>();
     private Geary.App.EmailStore? email_store = null;
@@ -101,7 +103,8 @@ public class ConversationListStore : Gtk.ListStore {
     public signal void conversations_added(bool start);
     public signal void conversations_removed(bool start);
 
-    public ConversationListStore(Geary.App.ConversationMonitor conversations) {
+    public ConversationListStore(Geary.App.ConversationMonitor conversations,
+                                 Application.Configuration config) {
         set_column_types(Column.get_types());
         set_default_sort_func(ConversationListStore.sort_by_date);
         set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
@@ -110,7 +113,8 @@ public class ConversationListStore : Gtk.ListStore {
         this.email_store = new Geary.App.EmailStore(
             conversations.base_folder.account
         );
-        GearyApplication.instance.config.settings.changed[
+        this.config = config;
+        this.config.settings.changed[
             Application.Configuration.DISPLAY_PREVIEW_KEY
         ].connect(on_display_preview_changed);
 
@@ -175,7 +179,7 @@ public class ConversationListStore : Gtk.ListStore {
 
     // should only be called by refresh_previews_async()
     private async void do_refresh_previews_async(Geary.App.ConversationMonitor conversation_monitor) {
-        if (conversation_monitor == null || !GearyApplication.instance.config.display_preview)
+        if (conversation_monitor == null || !this.config.display_preview)
             return;
 
         Gee.Set<Geary.EmailIdentifier> needing_previews = get_emails_needing_previews();
@@ -283,6 +287,7 @@ public class ConversationListStore : Gtk.ListStore {
 
     private void set_row(Gtk.TreeIter iter, Geary.App.Conversation conversation, Geary.Email preview) {
         FormattedConversationData conversation_data = new FormattedConversationData(
+            this.config,
             conversation,
             preview,
             this.conversations.base_folder,

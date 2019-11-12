@@ -156,18 +156,6 @@ public class GearyApplication : Gtk.Application {
 
     }
 
-    [Version (deprecated = true)]
-    public static GearyApplication instance {
-        get { return _instance; }
-        private set {
-            // Ensure singleton behavior.
-            assert (_instance == null);
-            _instance = value;
-        }
-    }
-    private static GearyApplication _instance = null;
-
-
     /**
      * The global controller for this application instance.
      *
@@ -347,7 +335,6 @@ public class GearyApplication : Gtk.Application {
             )
         );
         this.add_main_option_entries(OPTION_ENTRIES);
-        _instance = this;
     }
 
     public override bool local_command_line(ref unowned string[] args,

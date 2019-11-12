@@ -451,7 +451,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 this.progress_monitor.add(this.conversations.progress_monitor);
 
                 conversations_model = new ConversationListStore(
-                    this.conversations
+                    this.conversations, this.application.config
+
                 );
                 this.progress_monitor.add(conversations_model.preview_monitor);
                 this.conversation_list_view.set_model(conversations_model);
@@ -839,7 +840,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.folder_list_scrolled.add(this.folder_list);
 
         // Conversation list
-        this.conversation_list_view = new ConversationListView(this);
+        this.conversation_list_view = new ConversationListView(
+            this.application.config
+        );
         this.conversation_list_view.load_more.connect(on_load_more);
         this.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         this.conversation_list_view.conversations_selected.connect(on_conversations_selected);

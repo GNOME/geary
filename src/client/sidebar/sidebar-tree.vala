@@ -1069,7 +1069,14 @@ public class Sidebar.Tree : Gtk.TreeView {
             return;
         }
 
-        bool success = targetable.internal_drop_received(context, selection_data);
+        bool success = false;
+
+        MainWindow? main = get_toplevel() as MainWindow;
+        if (main != null) {
+            success = targetable.internal_drop_received(
+                main, context, selection_data
+            );
+        }
 
         Gtk.drag_finish(context, success, false, time);
     }
