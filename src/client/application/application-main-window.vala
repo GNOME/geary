@@ -208,9 +208,10 @@ public class Application.MainWindow :
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
+
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
-    private AccountContext? context = null;
+    private Gee.Set<AccountContext> accounts = new Gee.HashSet<AccountContext>();
 
     private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
 
@@ -273,7 +274,7 @@ public class Application.MainWindow :
     public signal void retry_service_problem(Geary.ClientService.Status problem);
 
 
-    public MainWindow(Client application) {
+    internal MainWindow(Client application, Controller controller) {
         Object(
             application: application,
             show_menubar: false
@@ -299,20 +300,41 @@ public class Application.MainWindow :
 
         this.attachments = new AttachmentManager(this);
 
-        this.application.engine.account_available.connect(on_account_available);
-        this.application.engine.account_unavailable.connect(on_account_unavailable);
-
         this.update_ui_timeout = new Geary.TimeoutManager.seconds(
             UPDATE_UI_INTERVAL, on_update_ui_timeout
         );
         this.update_ui_timeout.repetition = FOREVER;
 
+        // Add future and existing accounts to the main window
+        controller.account_available.connect(
+            on_account_available
+        );
+        controller.account_unavailable.connect(
+            on_account_unavailable
+        );
+        foreach (AccountContext context in controller.get_account_contexts()) {
+            add_account(context);
+        }
+
         this.main_layout.show_all();
     }
 
     ~MainWindow() {
-        this.update_ui_timeout.reset();
         base_unref();
+    }
+
+    /** {@inheritDoc} */
+    public override void destroy() {
+        if (this.application != null) {
+            this.application.controller.account_available.disconnect(
+                on_account_available
+            );
+            this.application.controller.account_unavailable.disconnect(
+                on_account_unavailable
+            );
+        }
+        this.update_ui_timeout.reset();
+        base.destroy();
     }
 
     /** Updates the window's account status info bars. */
@@ -666,7 +688,7 @@ public class Application.MainWindow :
     }
 
     /** Adds a folder to the window. */
-    public void add_folder(Geary.Folder to_add) {
+    internal void add_folder(Geary.Folder to_add) {
         this.folder_list.add_folder(to_add);
         if (to_add.account == this.selected_account) {
             this.main_toolbar.copy_folder_menu.add_folder(to_add);
@@ -675,12 +697,34 @@ public class Application.MainWindow :
     }
 
     /** Removes a folder from the window. */
-    public void remove_folder(Geary.Folder to_remove) {
+    internal void remove_folder(Geary.Folder to_remove) {
         if (to_remove.account == this.selected_account) {
             this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
             this.main_toolbar.move_folder_menu.remove_folder(to_remove);
         }
         this.folder_list.remove_folder(to_remove);
+    }
+
+    private void add_account(AccountContext to_add) {
+        if (!this.accounts.contains(to_add)) {
+            this.folder_list.set_user_folders_root_name(
+                to_add.account, _("Labels")
+            );
+
+            this.progress_monitor.add(to_add.account.opening_monitor);
+            Geary.Smtp.ClientService? smtp = (
+                to_add.account.outgoing as Geary.Smtp.ClientService
+            );
+            if (smtp != null) {
+                this.progress_monitor.add(smtp.sending_monitor);
+            }
+
+            to_add.commands.executed.connect(on_command_execute);
+            to_add.commands.undone.connect(on_command_undo);
+            to_add.commands.redone.connect(on_command_redo);
+
+            this.accounts.add(to_add);
+        }
     }
 
     /**
@@ -689,29 +733,54 @@ public class Application.MainWindow :
      * If `to_select` is not null, the given folder will be selected,
      * otherwise no folder will be.
      */
-    public async void remove_account(Geary.Account to_remove,
-                                     Geary.Folder? to_select) {
-        // Explicitly unset the selected folder if it belongs to the
-        // account so we block until it's gone. This also clears the
-        // previous search folder, so it won't try to re-load that
-        // that when the account is gone.
-        if (this.selected_folder != null &&
-            this.selected_folder.account == to_remove) {
-            Geary.SearchFolder? current_search = (
-                this.selected_folder as Geary.SearchFolder
-            );
+    private async void remove_account(AccountContext to_remove,
+                                      Geary.Folder? to_select) {
+        if (this.accounts.contains(to_remove)) {
+            // Explicitly unset the selected folder if it belongs to the
+            // account so we block until it's gone. This also clears the
+            // previous search folder, so it won't try to re-load that
+            // that when the account is gone.
+            if (this.selected_folder != null &&
+                this.selected_folder.account == to_remove.account) {
+                Geary.SearchFolder? current_search = (
+                    this.selected_folder as Geary.SearchFolder
+                );
 
-            yield select_folder(to_select, false);
+                yield select_folder(to_select, false);
 
-            // Clear the account's search folder if it existed
-            if (current_search != null) {
-                this.search_bar.set_search_text("");
-                this.search_bar.search_mode_enabled = false;
+                // Clear the account's search folder if it existed
+                if (current_search != null) {
+                    this.search_bar.set_search_text("");
+                    this.search_bar.search_mode_enabled = false;
+                }
             }
-        }
 
-        // Finally, remove the account and its folders
-        this.folder_list.remove_account(to_remove);
+            to_remove.commands.executed.disconnect(on_command_execute);
+            to_remove.commands.undone.disconnect(on_command_undo);
+            to_remove.commands.redone.disconnect(on_command_redo);
+
+            this.progress_monitor.remove(to_remove.account.opening_monitor);
+            Geary.Smtp.ClientService? smtp = (
+                to_remove.account.outgoing as Geary.Smtp.ClientService
+            );
+            if (smtp != null) {
+                this.progress_monitor.remove(smtp.sending_monitor);
+            }
+
+            // Finally, remove the account and its folders
+            this.folder_list.remove_account(to_remove.account);
+            this.accounts.remove(to_remove);
+        }
+    }
+
+    private AccountContext? get_selected_account_context() {
+        AccountContext? context = null;
+        if (this.selected_account != null) {
+            context = this.application.controller.get_context_for_account(
+                this.selected_account.information
+            );
+        }
+        return context;
     }
 
     private void load_config(Configuration config) {
@@ -975,7 +1044,7 @@ public class Application.MainWindow :
 
     /** Un-does the last executed application command, if any. */
     private async void undo() {
-        AccountContext? selected = this.context;
+        AccountContext? selected = get_selected_account_context();
         if (selected != null) {
             selected.commands.undo.begin(
                 selected.cancellable,
@@ -992,7 +1061,7 @@ public class Application.MainWindow :
 
     /** Re-does the last undone application command, if any. */
     private async void redo() {
-        AccountContext? selected = this.context;
+        AccountContext? selected = get_selected_account_context();
         if (selected != null) {
             selected.commands.redo.begin(
                 selected.cancellable,
@@ -1008,7 +1077,7 @@ public class Application.MainWindow :
     }
 
     private void update_command_actions() {
-        AccountContext? selected = this.context;
+        AccountContext? selected = get_selected_account_context();
         get_edit_action(Action.Edit.UNDO).set_enabled(
             selected != null && selected.commands.can_undo
         );
@@ -1130,29 +1199,12 @@ public class Application.MainWindow :
             if (this.selected_account != null) {
                 this.main_toolbar.copy_folder_menu.clear();
                 this.main_toolbar.move_folder_menu.clear();
-
-                AccountContext? context = this.context;
-                if (context != null) {
-                    context.commands.executed.disconnect(on_command_execute);
-                    context.commands.undone.disconnect(on_command_undo);
-                    context.commands.redone.disconnect(on_command_redo);
-                }
-                this.context = null;
             }
 
             this.selected_account = account;
             this.search_bar.set_account(account);
 
             if (account != null) {
-                this.context = this.application.controller.get_context_for_account(
-                    account.information
-                );
-                if (this.context != null) {
-                    this.context.commands.executed.connect(on_command_execute);
-                    this.context.commands.undone.connect(on_command_undo);
-                    this.context.commands.redone.connect(on_command_redo);
-                }
-
                 foreach (Geary.Folder folder in account.list_folders()) {
                     this.main_toolbar.copy_folder_menu.add_folder(folder);
                     this.main_toolbar.move_folder_menu.add_folder(folder);
@@ -1194,7 +1246,7 @@ public class Application.MainWindow :
                 // last email was removed but the conversation monitor
                 // hasn't signalled its removal yet. In this case,
                 // just don't load it since it will soon disappear.
-                AccountContext? context = this.context;
+                AccountContext? context = get_selected_account_context();
                 if (context != null && convo.get_count() > 0) {
                     try {
                         yield this.conversation_viewer.load_conversation(
@@ -1321,40 +1373,6 @@ public class Application.MainWindow :
                     update_conversation_actions(NONE);
                 }
             }
-        }
-    }
-
-    private void on_account_available(Geary.AccountInformation account) {
-        try {
-            Geary.Account? engine = this.application.engine.get_account_instance(account);
-            if (engine != null) {
-                this.progress_monitor.add(engine.opening_monitor);
-                Geary.Smtp.ClientService? smtp = (
-                    engine.outgoing as Geary.Smtp.ClientService
-                );
-                if (smtp != null) {
-                    this.progress_monitor.add(smtp.sending_monitor);
-                }
-            }
-        } catch (GLib.Error e) {
-            debug("Could not access account progress monitors: %s", e.message);
-        }
-    }
-
-    private void on_account_unavailable(Geary.AccountInformation account) {
-        try {
-            Geary.Account? engine = this.application.engine.get_account_instance(account);
-            if (engine != null) {
-                this.progress_monitor.remove(engine.opening_monitor);
-                Geary.Smtp.ClientService? smtp = (
-                    engine.outgoing as Geary.Smtp.ClientService
-                );
-                if (smtp != null) {
-                    this.progress_monitor.remove(smtp.sending_monitor);
-                }
-            }
-        } catch (GLib.Error e) {
-            debug("Could not access account progress monitors: %s", e.message);
         }
     }
 
@@ -1646,6 +1664,32 @@ public class Application.MainWindow :
         update_ui();
     }
 
+    private void on_account_available(AccountContext account) {
+        add_account(account);
+    }
+
+    private void on_account_unavailable(AccountContext account,
+                                        bool is_shutdown) {
+        // If we're not shutting down, select the inbox of the first
+        // account so that we show something other than empty
+        // conversation list/viewer.
+        Geary.Folder? to_select = null;
+        if (!is_shutdown) {
+            Geary.AccountInformation? first_account =
+                this.application.controller.get_first_account();
+            if (first_account != null) {
+                AccountContext? first_context =
+                    this.application.controller.get_context_for_account(
+                        first_account
+                    );
+                if (first_context != null) {
+                    to_select = first_context.inbox;
+                }
+            }
+        }
+
+        this.remove_account.begin(account, to_select);
+    }
     private void on_command_execute(Command command) {
         if (!(command is TrivialCommand)) {
             // Only show an execute notification for non-trivial

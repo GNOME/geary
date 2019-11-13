@@ -34,7 +34,7 @@ internal class Application.Controller : Geary.BaseObject {
     /** Determines if the controller is open. */
     public bool is_open {
         get {
-            return !this.open_cancellable.is_cancelled();
+            return !this.controller_open.is_cancelled();
         }
     }
 
@@ -62,14 +62,12 @@ internal class Application.Controller : Geary.BaseObject {
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
 
     // Cancelled if the controller is closed
-    private GLib.Cancellable open_cancellable;
+    private GLib.Cancellable controller_open;
 
     private UpgradeDialog upgrade_dialog;
     private Folks.IndividualAggregator folks;
 
     private PluginManager plugin_manager;
-
-    private Cancellable cancellable_open_account = new Cancellable();
 
     // List composers that have not yet been closed
     private Gee.Collection<Composer.Widget> composer_widgets =
@@ -80,12 +78,37 @@ internal class Application.Controller : Geary.BaseObject {
 
 
     /**
+     * Emitted when an account is added or is enabled.
+     *
+     * This will be emitted after an account is opened and added to
+     * the controller.
+     */
+    public signal void account_available(AccountContext context);
+
+    /**
+     * Emitted when an account is removed or is disabled.
+     *
+     * This will be emitted after the account is removed from the
+     * controller's collection of accounts, but before the {@link
+     * AccountContext.cancellable} is cancelled and before the account
+     * itself is closed.
+     *
+     * The `is_shutdown` argument will be true if the application is
+     * in the middle of quitting, otherwise if the account was simply
+     * removed but the application will keep running, then it will be
+     * false.
+     */
+    public signal void account_unavailable(AccountContext context,
+                                           bool is_shutdown);
+
+
+    /**
      * Constructs a new instance of the controller.
      */
     public async Controller(Client application,
                             GLib.Cancellable cancellable) {
         this.application = application;
-        this.open_cancellable = cancellable;
+        this.controller_open = cancellable;
 
         Geary.Engine engine = this.application.engine;
 
@@ -139,9 +162,8 @@ internal class Application.Controller : Geary.BaseObject {
         );
         this.plugin_manager.load();
 
-        // Create the main window (must be done after creating actions.)
-        main_window = new MainWindow(this.application);
-        main_window.retry_service_problem.connect(on_retry_service_problem);
+        this.main_window = new MainWindow(application, this);
+        this.main_window.retry_service_problem.connect(on_retry_service_problem);
 
         engine.account_available.connect(on_account_available);
 
@@ -265,7 +287,7 @@ internal class Application.Controller : Geary.BaseObject {
         // Now that all composers are closed, we can shut down the
         // rest of the client and engine. Cancel internal processes
         // first so they don't block shutdown.
-        this.open_cancellable.cancel();
+        this.controller_open.cancel();
 
         // Release folder and conversations in the main window
         yield this.main_window.select_folder(null, false);
@@ -277,8 +299,6 @@ internal class Application.Controller : Geary.BaseObject {
         // Release notification monitoring early so held resources can
         // be freed up
         this.plugin_manager.notifications.clear_folders();
-
-        this.cancellable_open_account.cancel();
 
         // Create a copy of known accounts so the loop below does not
         // explode if accounts are removed while iterating.
@@ -859,16 +879,35 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** Returns the first open account, sorted by ordinal. */
+    internal Geary.AccountInformation? get_first_account() {
+        return this.accounts.keys.iterator().fold<Geary.AccountInformation?>(
+            (next, prev) => {
+                return prev == null || next.ordinal < prev.ordinal ? next : prev;
+            },
+            null
+        );
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
-            yield this.account_manager.expunge_accounts(this.open_cancellable);
+            yield this.account_manager.expunge_accounts(this.controller_open);
         } catch (GLib.Error err) {
             report_problem(new Geary.ProblemReport(err));
         }
     }
 
-    private void open_account(Geary.Account account) {
+    private async void open_account(Geary.Account account) {
+        AccountContext context = new AccountContext(
+            account,
+            new Geary.App.EmailStore(account),
+            new Application.ContactStore(account, this.folks)
+        );
+        this.accounts.set(account.information, context);
+
+        this.upgrade_dialog.add_account(account, this.controller_open);
+
         account.information.authentication_failure.connect(
             on_authentication_failure
         );
@@ -876,8 +915,49 @@ internal class Application.Controller : Geary.BaseObject {
         account.notify["current-status"].connect(
             on_account_status_notify
         );
+        account.email_removed.connect(on_account_email_removed);
+        account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.report_problem.connect(on_report_problem);
-        connect_account_async.begin(account, cancellable_open_account);
+
+        Geary.Smtp.ClientService? smtp = (
+            account.outgoing as Geary.Smtp.ClientService
+        );
+        if (smtp != null) {
+            smtp.email_sent.connect(on_sent);
+            smtp.sending_monitor.start.connect(on_sending_started);
+            smtp.sending_monitor.finish.connect(on_sending_finished);
+        }
+
+        bool retry = false;
+        do {
+            try {
+                account.set_data(PROP_ATTEMPT_OPEN_ACCOUNT, true);
+                yield account.open_async(this.controller_open);
+                retry = false;
+            } catch (Error open_err) {
+                debug("Unable to open account %s: %s", account.to_string(), open_err.message);
+
+                if (open_err is Geary.EngineError.CORRUPT) {
+                    retry = yield account_database_error_async(account);
+                }
+
+                if (!retry) {
+                    report_problem(
+                        new Geary.AccountProblemReport(
+                            account.information,
+                            open_err
+                        )
+                    );
+
+                    this.account_manager.disable_account(account.information);
+                    this.accounts.unset(account.information);
+                }
+            }
+        } while (retry);
+
+        account_available(context);
+        display_main_window_if_ready();
+        update_account_status();
     }
 
     private async void close_account(Geary.AccountInformation config,
@@ -889,6 +969,8 @@ internal class Application.Controller : Geary.BaseObject {
 
             // Guard against trying to close the account twice
             this.accounts.unset(account.information);
+
+            this.upgrade_dialog.remove_account(account);
 
             // Stop updating status and showing errors when closing
             // the account - the user doesn't care any more
@@ -917,21 +999,7 @@ internal class Application.Controller : Geary.BaseObject {
             // status notifications for it
             update_account_status();
 
-            // If we're not shutting down, select the inbox of the
-            // first account so that we show something other than
-            // empty conversation list/viewer.
-            Geary.Folder? to_select = null;
-            if (!is_shutdown) {
-                Geary.AccountInformation? first_account = get_first_account();
-                if (first_account != null) {
-                    AccountContext? first_context = this.accounts[first_account];
-                    if (first_context != null) {
-                        to_select = first_context.inbox;
-                    }
-                }
-            }
-
-            yield this.main_window.remove_account(account, to_select);
+            account_unavailable(context, is_shutdown);
 
             context.cancellable.cancel();
             context.contacts.close();
@@ -1159,61 +1227,6 @@ internal class Application.Controller : Geary.BaseObject {
         main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SENDING);
     }
 
-    private async void connect_account_async(Geary.Account account, Cancellable? cancellable = null) {
-        AccountContext context = new AccountContext(
-            account,
-            new Geary.App.EmailStore(account),
-            new Application.ContactStore(account, this.folks)
-        );
-
-        // XXX Need to set this early since
-        // on_folders_available_unavailable expects it to be there
-        this.accounts.set(account.information, context);
-
-        account.email_removed.connect(on_account_email_removed);
-        account.folders_available_unavailable.connect(on_folders_available_unavailable);
-
-        Geary.Smtp.ClientService? smtp = (
-            account.outgoing as Geary.Smtp.ClientService
-        );
-        if (smtp != null) {
-            smtp.email_sent.connect(on_sent);
-            smtp.sending_monitor.start.connect(on_sending_started);
-            smtp.sending_monitor.finish.connect(on_sending_finished);
-        }
-
-        bool retry = false;
-        do {
-            try {
-                account.set_data(PROP_ATTEMPT_OPEN_ACCOUNT, true);
-                yield account.open_async(cancellable);
-                retry = false;
-            } catch (Error open_err) {
-                debug("Unable to open account %s: %s", account.to_string(), open_err.message);
-
-                if (open_err is Geary.EngineError.CORRUPT) {
-                    retry = yield account_database_error_async(account);
-                }
-
-                if (!retry) {
-                    report_problem(
-                        new Geary.AccountProblemReport(
-                            account.information,
-                            open_err
-                        )
-                    );
-
-                    this.account_manager.disable_account(account.information);
-                    this.accounts.unset(account.information);
-                }
-            }
-        } while (retry);
-
-        main_window.folder_list.set_user_folders_root_name(account, _("Labels"));
-        display_main_window_if_ready();
-        update_account_status();
-    }
-
     // Returns true if the caller should try opening the account again
     private async bool account_database_error_async(Geary.Account account) {
         bool retry = true;
@@ -1272,8 +1285,8 @@ internal class Application.Controller : Geary.BaseObject {
      */
     private void display_main_window_if_ready() {
         if (did_attempt_open_all_accounts() &&
-            !upgrade_dialog.visible &&
-            !cancellable_open_account.is_cancelled() &&
+            !this.upgrade_dialog.visible &&
+            !this.controller_open.is_cancelled() &&
             !this.application.is_background_service)
             main_window.show();
     }
@@ -1624,15 +1637,6 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private Geary.AccountInformation? get_first_account() {
-        return this.accounts.keys.iterator().fold<Geary.AccountInformation?>(
-            (next, prev) => {
-                return prev == null || next.ordinal < prev.ordinal ? next : prev;
-            },
-            null
-        );
-    }
-
     private bool should_add_folder(Gee.Collection<Geary.Folder>? all,
                                    Geary.Folder folder) {
         // if folder is openable, add it
@@ -1673,8 +1677,7 @@ internal class Application.Controller : Geary.BaseObject {
         }
 
         if (account != null) {
-            upgrade_dialog.add_account(account, cancellable_open_account);
-            open_account(account);
+            this.open_account.begin(account);
         }
     }
 

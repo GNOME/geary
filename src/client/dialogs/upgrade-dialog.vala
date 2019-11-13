@@ -56,13 +56,25 @@ public class UpgradeDialog : Object {
     }
 
     /**
-     * Add accounts before opening them.
+     * Adds an account to be monitored for upgrades by the dialog.
+     *
+     * Accounts should be added before being opened.
      */
-    public void add_account(Geary.Account account, Cancellable? cancellable = null) {
+    public void add_account(Geary.Account account,
+                            GLib.Cancellable? cancellable = null) {
         monitor.add(account.db_upgrade_monitor);
         monitor.add(account.db_vacuum_monitor);
-        if (cancellable != null)
+        if (cancellable != null) {
             cancellables.add(cancellable);
+        }
     }
-}
 
+    /**
+     * Stops an account from being monitored.
+     */
+    public void remove_account(Geary.Account account) {
+        monitor.remove(account.db_upgrade_monitor);
+        monitor.remove(account.db_vacuum_monitor);
+    }
+
+}
