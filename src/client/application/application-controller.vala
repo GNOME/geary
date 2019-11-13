@@ -13,7 +13,7 @@
  * A single instance of this class is constructed by {@link
  * GearyAplication} when the primary application instance is started.
  */
-public class Application.Controller : Geary.BaseObject {
+internal class Application.Controller : Geary.BaseObject {
 
 
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";

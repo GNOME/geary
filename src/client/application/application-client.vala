@@ -157,17 +157,6 @@ public class Application.Client : Gtk.Application {
     }
 
     /**
-     * The global controller for this application instance.
-     *
-     * This will be non-null in the primary application instance, only
-     * after initial activation, or after startup if {@link
-     * is_background_service} is true.
-     */
-    public Controller? controller {
-        get; private set; default = null;
-    }
-
-    /**
      * The global email subsystem controller for this app instance.
      */
     public Geary.Engine engine {
@@ -213,6 +202,17 @@ public class Application.Client : Gtk.Application {
                 this.start_hidden
             );
         }
+    }
+
+    /**
+     * The global controller for this application instance.
+     *
+     * This will be non-null in the primary application instance, only
+     * after initial activation, or after startup if {@link
+     * is_background_service} is true.
+     */
+    internal Controller? controller {
+        get; private set; default = null;
     }
 
     /**
