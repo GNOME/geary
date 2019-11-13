@@ -31,99 +31,6 @@ public class Application.Controller : Geary.BaseObject {
     }
 
 
-    /**
-     * Collects objects and state related to a single open account.
-     */
-    public class AccountContext : Geary.BaseObject {
-
-        /** The account for this context. */
-        public Geary.Account account { get; private set; }
-
-        /** The account's Inbox folder */
-        public Geary.Folder? inbox = null;
-
-        /** The account's email store */
-        public Geary.App.EmailStore emails { get; private set; }
-
-        /** The account's contact store */
-        public ContactStore contacts { get; private set; }
-
-        /** The account's application command stack. */
-        public CommandStack commands {
-            get { return this.controller_stack; }
-        }
-
-        /** A cancellable tied to the life-cycle of the account. */
-        public Cancellable cancellable {
-            get; private set; default = new Cancellable();
-        }
-
-        /** The account's application command stack. */
-        internal ControllerCommandStack controller_stack {
-            get; protected set; default = new ControllerCommandStack();
-        }
-
-        /** Determines if the account has an authentication problem. */
-        internal bool authentication_failed {
-            get; private set; default = false;
-        }
-
-        /** Determines if the account is prompting for a pasword. */
-        internal bool authentication_prompting {
-            get; private set; default = false;
-        }
-
-        /** Determines if currently prompting for a password. */
-        internal uint authentication_attempts {
-            get; private set; default = 0;
-        }
-
-        /** Determines if any TLS certificate errors have been seen. */
-        internal bool tls_validation_failed {
-            get; private set; default = false;
-        }
-
-        /** Determines if currently prompting about TLS certificate errors. */
-        internal bool tls_validation_prompting {
-            get; private set; default = false;
-        }
-
-
-        public AccountContext(Geary.Account account,
-                              Geary.App.EmailStore emails,
-                              Application.ContactStore contacts) {
-            this.account = account;
-            this.emails = emails;
-            this.contacts = contacts;
-        }
-
-        /** Returns the current effective status for the account. */
-        public Geary.Account.Status get_effective_status() {
-            Geary.Account.Status current = this.account.current_status;
-            Geary.Account.Status effective = 0;
-            if (current.is_online()) {
-                effective |= ONLINE;
-            }
-            if (current.has_service_problem()) {
-                // Only retain this flag if the problem isn't auth or
-                // cert related, that is handled elsewhere.
-                Geary.ClientService.Status incoming =
-                    account.incoming.current_status;
-                Geary.ClientService.Status outgoing =
-                    account.outgoing.current_status;
-                if (incoming != AUTHENTICATION_FAILED &&
-                    incoming != TLS_VALIDATION_FAILED &&
-                    outgoing != AUTHENTICATION_FAILED &&
-                    outgoing != TLS_VALIDATION_FAILED) {
-                    effective |= SERVICE_PROBLEM;
-                }
-            }
-            return effective;
-        }
-
-    }
-
-
     /** Determines if the controller is open. */
     public bool is_open {
         get {
@@ -307,8 +214,13 @@ public class Application.Controller : Geary.BaseObject {
     }
 
     /** Returns a context for an account, if any. */
-    public AccountContext? get_context_for_account(Geary.AccountInformation account) {
+    internal AccountContext? get_context_for_account(Geary.AccountInformation account) {
         return this.accounts.get(account);
+    }
+
+    /** Returns a read-only collection of contexts each active account. */
+    internal Gee.Collection<AccountContext> get_account_contexts() {
+        return this.accounts.values.read_only_view;
     }
 
     /** Closes all windows and accounts, releasing held resources. */
@@ -1928,6 +1840,99 @@ public class Application.Controller : Geary.BaseObject {
 }
 
 
+/**
+ * Collects application state related to a single open account.
+ */
+internal class Application.AccountContext : Geary.BaseObject {
+
+    /** The account for this context. */
+    public Geary.Account account { get; private set; }
+
+    /** The account's Inbox folder */
+    public Geary.Folder? inbox = null;
+
+    /** The account's email store */
+    public Geary.App.EmailStore emails { get; private set; }
+
+    /** The account's contact store */
+    public ContactStore contacts { get; private set; }
+
+    /** The account's application command stack. */
+    public CommandStack commands {
+        get { return this.controller_stack; }
+    }
+
+    /** A cancellable tied to the life-cycle of the account. */
+    public Cancellable cancellable {
+        get; private set; default = new Cancellable();
+    }
+
+    /** The account's application command stack. */
+    internal ControllerCommandStack controller_stack {
+        get; protected set; default = new ControllerCommandStack();
+    }
+
+    /** Determines if the account has an authentication problem. */
+    internal bool authentication_failed {
+        get; private set; default = false;
+    }
+
+    /** Determines if the account is prompting for a pasword. */
+    internal bool authentication_prompting {
+        get; private set; default = false;
+    }
+
+    /** Determines if currently prompting for a password. */
+    internal uint authentication_attempts {
+        get; private set; default = 0;
+    }
+
+    /** Determines if any TLS certificate errors have been seen. */
+    internal bool tls_validation_failed {
+        get; private set; default = false;
+    }
+
+    /** Determines if currently prompting about TLS certificate errors. */
+    internal bool tls_validation_prompting {
+        get; private set; default = false;
+    }
+
+
+    public AccountContext(Geary.Account account,
+                          Geary.App.EmailStore emails,
+                          Application.ContactStore contacts) {
+        this.account = account;
+        this.emails = emails;
+        this.contacts = contacts;
+    }
+
+    /** Returns the current effective status for the account. */
+    public Geary.Account.Status get_effective_status() {
+        Geary.Account.Status current = this.account.current_status;
+        Geary.Account.Status effective = 0;
+        if (current.is_online()) {
+            effective |= ONLINE;
+        }
+        if (current.has_service_problem()) {
+            // Only retain this flag if the problem isn't auth or
+            // cert related, that is handled elsewhere.
+            Geary.ClientService.Status incoming =
+            account.incoming.current_status;
+            Geary.ClientService.Status outgoing =
+            account.outgoing.current_status;
+            if (incoming != AUTHENTICATION_FAILED &&
+                incoming != TLS_VALIDATION_FAILED &&
+                outgoing != AUTHENTICATION_FAILED &&
+                outgoing != TLS_VALIDATION_FAILED) {
+                effective |= SERVICE_PROBLEM;
+            }
+        }
+        return effective;
+    }
+
+}
+
+
 /** Base class for all application controller commands. */
 internal class Application.ControllerCommandStack : CommandStack {
 
@@ -2674,14 +2679,14 @@ private class Application.SendComposerCommand : ComposerCommand {
     }
 
     private Client application;
-    private Controller.AccountContext context;
+    private AccountContext context;
     private Geary.Smtp.ClientService smtp;
     private Geary.TimeoutManager commit_timer;
     private Geary.EmailIdentifier? saved = null;
 
 
     public SendComposerCommand(Client application,
-                               Controller.AccountContext context,
+                               AccountContext context,
                                Composer.Widget composer) {
         base(composer);
         this.application = application;

@@ -210,7 +210,7 @@ public class Application.MainWindow :
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
-    private Application.Controller.AccountContext? context = null;
+    private AccountContext? context = null;
 
     private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
 
@@ -975,7 +975,7 @@ public class Application.MainWindow :
 
     /** Un-does the last executed application command, if any. */
     private async void undo() {
-        Controller.AccountContext? selected = this.context;
+        AccountContext? selected = this.context;
         if (selected != null) {
             selected.commands.undo.begin(
                 selected.cancellable,
@@ -992,7 +992,7 @@ public class Application.MainWindow :
 
     /** Re-does the last undone application command, if any. */
     private async void redo() {
-        Controller.AccountContext? selected = this.context;
+        AccountContext? selected = this.context;
         if (selected != null) {
             selected.commands.redo.begin(
                 selected.cancellable,
@@ -1008,7 +1008,7 @@ public class Application.MainWindow :
     }
 
     private void update_command_actions() {
-        Controller.AccountContext? selected = this.context;
+        AccountContext? selected = this.context;
         get_edit_action(Action.Edit.UNDO).set_enabled(
             selected != null && selected.commands.can_undo
         );
@@ -1131,7 +1131,7 @@ public class Application.MainWindow :
                 this.main_toolbar.copy_folder_menu.clear();
                 this.main_toolbar.move_folder_menu.clear();
 
-                Controller.AccountContext? context = this.context;
+                AccountContext? context = this.context;
                 if (context != null) {
                     context.commands.executed.disconnect(on_command_execute);
                     context.commands.undone.disconnect(on_command_undo);
@@ -1194,7 +1194,7 @@ public class Application.MainWindow :
                 // last email was removed but the conversation monitor
                 // hasn't signalled its removal yet. In this case,
                 // just don't load it since it will soon disappear.
-                Controller.AccountContext? context = this.context;
+                AccountContext? context = this.context;
                 if (context != null && convo.get_count() > 0) {
                     try {
                         yield this.conversation_viewer.load_conversation(
@@ -1484,7 +1484,7 @@ public class Application.MainWindow :
 
         Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
         if (this.selected_folder != null) {
-            Controller.AccountContext? context =
+            AccountContext? context =
                 this.application.controller.get_context_for_account(
                     this.selected_folder.account.information
                 );
