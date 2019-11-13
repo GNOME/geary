@@ -413,6 +413,7 @@ ui/accounts_editor_edit_pane.ui
 ui/accounts_editor_list_pane.ui
 ui/accounts_editor_remove_pane.ui
 ui/accounts_editor_servers_pane.ui
+ui/application-main-window.ui
 ui/certificate_warning_dialog.glade
 ui/composer-headerbar.ui
 ui/composer-link-popover.ui
@@ -437,7 +438,6 @@ ui/folder-popover.ui
 ui/gtk/help-overlay.ui
 ui/main-toolbar.ui
 ui/main-toolbar-menus.ui
-ui/main-window.ui
 ui/main-window-info-bar.ui
 ui/password-dialog.glade
 ui/preferences-dialog.ui

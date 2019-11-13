@@ -505,7 +505,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     /** Displays the raw RFC 822 source for this email. */
     public async void view_source() {
-        MainWindow? main = get_toplevel() as MainWindow;
+        var main = get_toplevel() as Application.MainWindow;
         if (main != null) {
             Geary.Email email = this.email;
             try {
@@ -777,7 +777,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 this.conversation.base_folder is Geary.FolderSupport.Remove
             );
             bool is_shift_down = false;
-            MainWindow? main = get_toplevel() as MainWindow;
+            var main = get_toplevel() as Application.MainWindow;
             if (main != null) {
                 is_shift_down = main.is_shift_down;
 
@@ -835,7 +835,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void update_displayed_attachments() {
         bool has_attachments = !this.displayed_attachments.is_empty;
         this.attachments_button.set_visible(has_attachments);
-        MainWindow? main = get_toplevel() as MainWindow;
+        var main = get_toplevel() as Application.MainWindow;
 
         if (has_attachments && main != null) {
             this.attachments_pane = new Components.AttachmentPane(
@@ -855,7 +855,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         this.message_body_state = FAILED;
         this.primary_message.show_load_error_pane();
 
-        MainWindow? main = get_toplevel() as MainWindow;
+        var main = get_toplevel() as Application.MainWindow;
         if (main != null) {
             Geary.AccountInformation account = this.email_store.account.information;
             main.application.controller.report_problem(
@@ -906,7 +906,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void on_save_image(string uri,
                                string? alt_text,
                                Geary.Memory.Buffer? content) {
-        MainWindow? main = get_toplevel() as MainWindow;
+        var main = get_toplevel() as Application.MainWindow;
         if (main != null) {
             if (uri.has_prefix(ClientWebView.CID_URL_PREFIX)) {
                 string cid = uri.substring(ClientWebView.CID_URL_PREFIX.length);

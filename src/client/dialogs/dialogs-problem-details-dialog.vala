@@ -51,7 +51,8 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
     private Geary.ServiceInformation? service;
 
 
-    public ProblemDetailsDialog(MainWindow parent, Geary.ProblemReport report) {
+    public ProblemDetailsDialog(Application.MainWindow parent,
+                                Geary.ProblemReport report) {
         Object(
             transient_for: parent,
             use_header_bar: 1

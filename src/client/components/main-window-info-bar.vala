@@ -128,9 +128,9 @@ public class MainWindowInfoBar : Gtk.InfoBar {
     private void show_details() {
         Dialogs.ProblemDetailsDialog dialog =
             new Dialogs.ProblemDetailsDialog(
-                get_toplevel() as MainWindow,
+                get_toplevel() as Application.MainWindow,
                 this.report
-        );
+            );
         dialog.run();
         dialog.destroy();
     }

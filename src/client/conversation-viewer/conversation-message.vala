@@ -639,7 +639,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
      */
     public async void load_contacts(GLib.Cancellable cancellable)
         throws GLib.Error {
-        MainWindow? main = this.get_toplevel() as MainWindow;
+        var main = this.get_toplevel() as Application.MainWindow;
         if (main != null && !cancellable.is_cancelled()) {
             // Load the primary contact and avatar
             if (this.primary_originator != null) {
@@ -1285,7 +1285,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     }
                 });
         } else {
-            MainWindow? main = this.get_toplevel() as MainWindow;
+            var main = this.get_toplevel() as Application.MainWindow;
             if (main != null) {
                 main.application.show_uri.begin(link);
             }

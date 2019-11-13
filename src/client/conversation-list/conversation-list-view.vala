@@ -195,7 +195,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         // composer.
         if (this.config.autoselect &&
             get_selection().count_selected_rows() == 0) {
-            MainWindow? parent = get_toplevel() as MainWindow;
+            var parent = get_toplevel() as Application.MainWindow;
             if (parent != null && !parent.has_composer) {
                 set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
             }
@@ -296,7 +296,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         // doesn't attempt to load it then close it straight away.
         if (event.type == Gdk.EventType.BUTTON_PRESS &&
             !get_selection().path_is_selected(path)) {
-            MainWindow? parent = get_toplevel() as MainWindow;
+            var parent = get_toplevel() as Application.MainWindow;
             if (parent != null && !parent.close_composer(false)) {
                 return true;
             }
@@ -306,7 +306,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
 
             GLib.Menu context_menu_model = new GLib.Menu();
-            MainWindow? main = get_toplevel() as MainWindow;
+            var main = get_toplevel() as Application.MainWindow;
             if (main != null) {
                 if (main.is_shift_down) {
                     context_menu_model.append(
@@ -316,7 +316,9 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
                             "Move conversations to _Trash",
                             this.selected.size
                         ),
-                        "win." + MainWindow.ACTION_ARCHIVE_CONVERSATION
+                        Action.Window.prefix(
+                            Application.MainWindow.ACTION_ARCHIVE_CONVERSATION
+                        )
                     );
                 } else {
                     context_menu_model.append(
@@ -326,26 +328,64 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
                             "_Delete conversations",
                             this.selected.size
                         ),
-                        "win." + MainWindow.ACTION_DELETE_CONVERSATION
+                        Action.Window.prefix(
+                            Application.MainWindow.ACTION_DELETE_CONVERSATION
+                        )
                     );
                 }
             }
 
             if (conversation.is_unread())
-                context_menu_model.append(_("Mark as _Read"), "win."+MainWindow.ACTION_MARK_AS_READ);
+                context_menu_model.append(
+                    _("Mark as _Read"),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_MARK_AS_READ
+                    )
+                );
 
             if (conversation.has_any_read_message())
-                context_menu_model.append(_("Mark as _Unread"), "win."+MainWindow.ACTION_MARK_AS_UNREAD);
+                context_menu_model.append(
+                    _("Mark as _Unread"),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_MARK_AS_UNREAD
+                    )
+                );
 
-            if (conversation.is_flagged())
-                context_menu_model.append(_("U_nstar"), "win."+MainWindow.ACTION_MARK_AS_UNSTARRED);
-            else
-                context_menu_model.append(_("_Star"), "win."+MainWindow.ACTION_MARK_AS_STARRED);
+            if (conversation.is_flagged()) {
+                context_menu_model.append(
+                    _("U_nstar"),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_MARK_AS_UNSTARRED
+                    )
+                );
+            } else {
+                context_menu_model.append(
+                    _("_Star"),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_MARK_AS_STARRED
+                    )
+                );
+            }
 
             Menu actions_section = new Menu();
-            actions_section.append(_("_Reply"), "win."+MainWindow.ACTION_REPLY_CONVERSATION);
-            actions_section.append(_("R_eply All"), "win."+MainWindow.ACTION_REPLY_ALL_CONVERSATION);
-            actions_section.append(_("_Forward"), "win."+MainWindow.ACTION_FORWARD_CONVERSATION);
+            actions_section.append(
+                _("_Reply"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_REPLY_CONVERSATION
+                )
+            );
+            actions_section.append(
+                _("R_eply All"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_REPLY_ALL_CONVERSATION
+                )
+            );
+            actions_section.append(
+                _("_Forward"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_FORWARD_CONVERSATION
+                )
+            );
             context_menu_model.append_section(null, actions_section);
 
             // Use a popover rather than a regular context menu since

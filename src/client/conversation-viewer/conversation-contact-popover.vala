@@ -105,7 +105,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
      * Starts loading the avatar for the message's sender.
      */
     public async void load_avatar() {
-        MainWindow? main = this.get_toplevel() as MainWindow;
+        var main = this.get_toplevel() as Application.MainWindow;
         if (main != null) {
             Application.AvatarStore loader = main.application.controller.avatars;
             int window_scale = get_scale_factor();
@@ -238,7 +238,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_new_conversation() {
-        MainWindow? main = this.get_toplevel() as MainWindow;
+        var main = this.get_toplevel() as Application.MainWindow;
         if (main != null) {
             main.open_composer_for_mailbox(this.mailbox);
         }
@@ -253,7 +253,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_show_conversations() {
-        MainWindow? main = this.get_toplevel() as MainWindow;
+        var main = this.get_toplevel() as Application.MainWindow;
         if (main != null) {
             main.show_search_bar("from:%s".printf(this.mailbox.address));
         }

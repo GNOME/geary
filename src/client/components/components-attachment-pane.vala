@@ -369,7 +369,7 @@ public class Components.AttachmentPane : Gtk.Grid {
     }
 
     private void open_attachments(Gee.Collection<Geary.Attachment> attachments) {
-        MainWindow? main = this.get_toplevel() as MainWindow;
+        var main = this.get_toplevel() as Application.MainWindow;
         if (main != null) {
             Application.Client app = main.application;
             bool confirmed = true;

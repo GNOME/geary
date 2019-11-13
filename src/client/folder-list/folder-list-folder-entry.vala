@@ -99,7 +99,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
         is_emphasized_changed(has_new);
     }
 
-    public bool internal_drop_received(MainWindow main_window,
+    public bool internal_drop_received(Application.MainWindow main_window,
                                        Gdk.DragContext context,
                                        Gtk.SelectionData data) {
         // Copy or move?

@@ -1071,7 +1071,7 @@ public class Sidebar.Tree : Gtk.TreeView {
 
         bool success = false;
 
-        MainWindow? main = get_toplevel() as MainWindow;
+        var main = get_toplevel() as Application.MainWindow;
         if (main != null) {
             success = targetable.internal_drop_received(
                 main, context, selection_data

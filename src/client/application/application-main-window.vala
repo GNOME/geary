@@ -6,8 +6,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-[GtkTemplate (ui = "/org/gnome/Geary/main-window.ui")]
-public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
+[GtkTemplate (ui = "/org/gnome/Geary/application-main-window.ui")]
+public class Application.MainWindow :
+    Gtk.ApplicationWindow, Geary.BaseInterface {
 
 
     // Named actions.
@@ -74,7 +75,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private const int MIN_CONVERSATION_COUNT = 50;
 
 
-    public static void add_accelerators(Application.Client owner) {
+    public static void add_accelerators(Client owner) {
         // Marking actions
         //
         // Unread is the primary action, so it doesn't get the <Shift>
@@ -159,8 +160,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
 
     /** Returns the window's associated client application instance. */
-    public new Application.Client application {
-        get { return (Application.Client) base.get_application(); }
+    public new Client application {
+        get { return (Client) base.get_application(); }
         set { base.set_application(value); }
     }
 
@@ -176,14 +177,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     /** The attachment manager for this window. */
-    public Application.AttachmentManager attachments { get; private set; }
+    public AttachmentManager attachments { get; private set; }
 
     /** Determines if conversations in the selected folder can be trashed. */
     public bool selected_folder_supports_trash {
         get {
-            return Application.Controller.does_folder_support_trash(
-                this.selected_folder
-            );
+            return Controller.does_folder_support_trash(this.selected_folder);
         }
     }
 
@@ -274,7 +273,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public signal void retry_service_problem(Geary.ClientService.Status problem);
 
 
-    public MainWindow(Application.Client application) {
+    public MainWindow(Client application) {
         Object(
             application: application,
             show_menubar: false
@@ -298,7 +297,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_command_actions();
         update_conversation_actions(NONE);
 
-        this.attachments = new Application.AttachmentManager(this);
+        this.attachments = new AttachmentManager(this);
 
         this.application.engine.account_available.connect(on_account_available);
         this.application.engine.account_unavailable.connect(on_account_unavailable);
@@ -715,21 +714,21 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.folder_list.remove_account(to_remove);
     }
 
-    private void load_config(Application.Configuration config) {
+    private void load_config(Configuration config) {
         // This code both loads AND saves the pane positions with live updating. This is more
         // resilient against crashes because the value in dconf changes *immediately*, and
         // stays saved in the event of a crash.
-        config.bind(Application.Configuration.MESSAGES_PANE_POSITION_KEY, this.conversations_paned, "position");
-        config.bind(Application.Configuration.WINDOW_WIDTH_KEY, this, "window-width");
-        config.bind(Application.Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
-        config.bind(Application.Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
+        config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, this.conversations_paned, "position");
+        config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
+        config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
+        config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
         // Update to layout
         if (config.folder_list_pane_position_horizontal == -1) {
             config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
             config.messages_pane_position += config.folder_list_pane_position_old;
         }
         config.settings.changed[
-            Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY
+            Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY
         ].connect(on_change_orientation);
     }
 
@@ -827,7 +826,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void setup_layout(Application.Configuration config) {
+    private void setup_layout(Configuration config) {
         this.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
         // Search bar
@@ -874,7 +873,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 string folder = selected_folder != null ? selected_folder.get_display_name() + " " : "";
                 string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
 
-                target = "%s%s - %s".printf(folder, account, Application.Client.NAME);
+                target = "%s%s - %s".printf(folder, account, Client.NAME);
 
                 return true;
             };
@@ -976,7 +975,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     /** Un-does the last executed application command, if any. */
     private async void undo() {
-        Application.Controller.AccountContext? selected = this.context;
+        Controller.AccountContext? selected = this.context;
         if (selected != null) {
             selected.commands.undo.begin(
                 selected.cancellable,
@@ -993,7 +992,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     /** Re-does the last undone application command, if any. */
     private async void redo() {
-        Application.Controller.AccountContext? selected = this.context;
+        Controller.AccountContext? selected = this.context;
         if (selected != null) {
             selected.commands.redo.begin(
                 selected.cancellable,
@@ -1009,7 +1008,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void update_command_actions() {
-        Application.Controller.AccountContext? selected = this.context;
+        Controller.AccountContext? selected = this.context;
         get_edit_action(Action.Edit.UNDO).set_enabled(
             selected != null && selected.commands.can_undo
         );
@@ -1132,7 +1131,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 this.main_toolbar.copy_folder_menu.clear();
                 this.main_toolbar.move_folder_menu.clear();
 
-                Application.Controller.AccountContext? context = this.context;
+                Controller.AccountContext? context = this.context;
                 if (context != null) {
                     context.commands.executed.disconnect(on_command_execute);
                     context.commands.undone.disconnect(on_command_undo);
@@ -1195,7 +1194,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 // last email was removed but the conversation monitor
                 // hasn't signalled its removal yet. In this case,
                 // just don't load it since it will soon disappear.
-                Application.Controller.AccountContext? context = this.context;
+                Controller.AccountContext? context = this.context;
                 if (context != null && convo.get_count() > 0) {
                     try {
                         yield this.conversation_viewer.load_conversation(
@@ -1386,8 +1385,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         this.application.config.bind(
             horizontal
-            ? Application.Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
-            : Application.Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
+            ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
+            : Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
             this.folder_paned, "position");
     }
 
@@ -1485,7 +1484,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
         if (this.selected_folder != null) {
-            Application.Controller.AccountContext? context =
+            Controller.AccountContext? context =
                 this.application.controller.get_context_for_account(
                     this.selected_folder.account.information
                 );
@@ -1647,8 +1646,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_ui();
     }
 
-    private void on_command_execute(Application.Command command) {
-        if (!(command is Application.TrivialCommand)) {
+    private void on_command_execute(Command command) {
+        if (!(command is TrivialCommand)) {
             // Only show an execute notification for non-trivial
             // commands
             on_command_redo(command);
@@ -1659,9 +1658,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_command_undo(Application.Command command) {
+    private void on_command_undo(Command command) {
         update_command_actions();
-        Application.EmailCommand? email = command as Application.EmailCommand;
+        EmailCommand? email = command as EmailCommand;
         if (email != null) {
             if (email.conversations.size > 1) {
                 this.show_conversations.begin(
@@ -1681,7 +1680,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_command_redo(Application.Command command) {
+    private void on_command_redo(Command command) {
         update_command_actions();
         if (command.executed_label != null) {
             Components.InAppNotification ian =

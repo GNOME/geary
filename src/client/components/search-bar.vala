@@ -110,7 +110,7 @@ public class SearchBar : Gtk.SearchBar {
     }
 
     private void on_information_changed() {
-        MainWindow? main = get_toplevel() as MainWindow;
+        var main = get_toplevel() as Application.MainWindow;
         if (main != null) {
             set_search_placeholder_text(
                 current_account == null ||

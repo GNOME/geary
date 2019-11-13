@@ -161,7 +161,9 @@ public class MainToolbar : Gtk.Box {
         );
 
         if (this.show_trash_button) {
-            this.trash_delete_button.action_name = "win."+MainWindow.ACTION_TRASH_CONVERSATION;
+            this.trash_delete_button.action_name = Action.Window.prefix(
+                Application.MainWindow.ACTION_TRASH_CONVERSATION
+            );
             this.trash_delete_button.image = trash_image;
             this.trash_delete_button.tooltip_text = ngettext(
                 "Move conversation to Trash",
@@ -169,7 +171,9 @@ public class MainToolbar : Gtk.Box {
                 this.selected_conversations
             );
         } else {
-            this.trash_delete_button.action_name = "win."+MainWindow.ACTION_DELETE_CONVERSATION;
+            this.trash_delete_button.action_name = Action.Window.prefix(
+                Application.MainWindow.ACTION_DELETE_CONVERSATION
+            );
             this.trash_delete_button.image = delete_image;
             this.trash_delete_button.tooltip_text = ngettext(
                 "Delete conversation",
