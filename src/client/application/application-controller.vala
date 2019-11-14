@@ -1728,15 +1728,6 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    // Returns a list of composer windows for an account, or null if none.
-    public Gee.List<Composer.Widget>? get_composer_widgets_for_account(Geary.AccountInformation account) {
-        Gee.LinkedList<Composer.Widget> ret = Geary.traverse<Composer.Widget>(composer_widgets)
-            .filter(w => w.account.information == account)
-            .to_linked_list();
-
-        return ret.size >= 1 ? ret : null;
-    }
-
     private Geary.AccountInformation? get_first_account() {
         return this.accounts.keys.iterator().fold<Geary.AccountInformation?>(
             (next, prev) => {
