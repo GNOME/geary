@@ -47,8 +47,9 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         Gtk.TreeSelection selection = get_selection();
         selection.set_mode(Gtk.SelectionMode.MULTIPLE);
         style_updated.connect(on_style_changed);
-        show.connect(on_show);
         row_activated.connect(on_row_activated);
+
+        notify["vadjustment"].connect(on_vadjustment_changed);
 
         button_press_event.connect(on_button_press);
 
@@ -72,6 +73,8 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
 
         this.selection_update = new Geary.IdleManager(do_selection_changed);
         this.selection_update.priority = Geary.IdleManager.Priority.LOW;
+
+        this.visible = true;
     }
 
     ~ConversationListView() {
@@ -415,11 +418,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         schedule_visible_conversations_changed();
     }
 
-    private void on_show() {
-        // Wait until we're visible to set this signal up.
-        ((Gtk.Scrollable) this).get_vadjustment().value_changed.connect(on_value_changed);
-    }
-
     private void on_value_changed() {
         if (this.enable_load_more) {
             check_load_more();
@@ -582,6 +580,10 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         }
         return Gdk.EVENT_PROPAGATE;
 
+    }
+
+    private void on_vadjustment_changed() {
+        this.vadjustment.value_changed.connect(on_value_changed);
     }
 
 }

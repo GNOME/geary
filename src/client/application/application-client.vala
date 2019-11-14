@@ -179,6 +179,17 @@ public class Application.Client : Gtk.Application {
     }
 
     /**
+     * The last active main window.
+     *
+     * This will be null if no main windows exist, see {@link
+     * get_active_main_window} if you want to be guaranteed an
+     * instance.
+     */
+    public MainWindow? last_active_main_window {
+        get; private set; default = null;
+    }
+
+    /**
      * Manages the autostart desktop file.
      *
      * This will be null until {@link startup} has been called, and
@@ -335,6 +346,7 @@ public class Application.Client : Gtk.Application {
             )
         );
         this.add_main_option_entries(OPTION_ENTRIES);
+        this.window_removed.connect_after(on_window_removed);
     }
 
     public override bool local_command_line(ref unowned string[] args,
@@ -458,6 +470,38 @@ public class Application.Client : Gtk.Application {
         }
     }
 
+    /**
+     * Returns a collection of open main windows.
+     */
+    public Gee.Collection<MainWindow> get_main_windows() {
+        var windows = new Gee.LinkedList<MainWindow>();
+        foreach (Gtk.Window window in get_windows()) {
+            MainWindow? main = window as MainWindow;
+            if (main != null) {
+                windows.add(main);
+            }
+        }
+        return windows;
+    }
+
+    /**
+     * Returns the mostly recently active main window or a new instance.
+     *
+     * This returns the value of {@link last_active_main_window} if
+     * not null, else it constructs a new MainWindow instance and
+     * shows it.
+     */
+    public MainWindow get_active_main_window() {
+        MainWindow? active = this.last_active_main_window;
+        if (active == null) {
+            active = new MainWindow(this);
+            this.controller.register_window(active);
+            this.last_active_main_window = active;
+            active.show();
+        }
+        return active;
+    }
+
     public void add_window_accelerators(string action,
                                         string[] accelerators,
                                         Variant? param = null) {
@@ -512,17 +556,13 @@ public class Application.Client : Gtk.Application {
 
     public async void show_email(Geary.Folder? folder,
                                  Geary.EmailIdentifier id) {
-        yield this.present();
-        this.controller.main_window.show_email.begin(
-            folder,
-            Geary.Collection.single(id),
-            true
-        );
+        MainWindow main = yield this.present();
+        main.show_email.begin(folder, Geary.Collection.single(id), true);
     }
 
     public async void show_folder(Geary.Folder? folder) {
-        yield this.present();
-        yield this.controller.main_window.select_folder(folder, true);
+        MainWindow main = yield this.present();
+        yield main.select_folder(folder, true);
     }
 
     public async void show_inspector() {
@@ -699,11 +739,13 @@ public class Application.Client : Gtk.Application {
         withdraw_notification(ERROR_NOTIFICATION_ID);
     }
 
-    // Presents a main window. If the controller is not open, opens it
-    // first.
-    private async void present() {
+    // Presents a main window, opening the controller and window if
+    // needed.
+    private async MainWindow present() {
         yield create_controller();
-        this.controller.main_window.present();
+        MainWindow main = get_active_main_window();
+        main.present();
+        return main;
     }
 
     // Opens the controller
@@ -988,6 +1030,18 @@ public class Application.Client : Gtk.Application {
             );
             dialog.show_all();
             dialog.run();
+        }
+    }
+
+    private void on_window_removed(Gtk.Window window) {
+        MainWindow? main = window as MainWindow;
+        if (main != null) {
+            this.controller.unregister_window(main);
+            if (this.last_active_main_window == main) {
+                this.last_active_main_window = Geary.Collection.get_first(
+                    get_main_windows()
+                );
+            }
         }
     }
 

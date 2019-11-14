@@ -274,7 +274,7 @@ public class Application.MainWindow :
     public signal void retry_service_problem(Geary.ClientService.Status problem);
 
 
-    internal MainWindow(Client application, Controller controller) {
+    internal MainWindow(Client application) {
         Object(
             application: application,
             show_menubar: false
@@ -306,17 +306,18 @@ public class Application.MainWindow :
         this.update_ui_timeout.repetition = FOREVER;
 
         // Add future and existing accounts to the main window
-        controller.account_available.connect(
+        this.application.controller.account_available.connect(
             on_account_available
         );
-        controller.account_unavailable.connect(
+        this.application.controller.account_unavailable.connect(
             on_account_unavailable
         );
-        foreach (AccountContext context in controller.get_account_contexts()) {
+        foreach (AccountContext context in
+                 this.application.controller.get_account_contexts()) {
             add_account(context);
         }
 
-        this.main_layout.show_all();
+        this.conversation_list_view.grab_focus();
     }
 
     ~MainWindow() {
@@ -687,24 +688,6 @@ public class Application.MainWindow :
         }
     }
 
-    /** Adds a folder to the window. */
-    internal void add_folder(Geary.Folder to_add) {
-        this.folder_list.add_folder(to_add);
-        if (to_add.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.add_folder(to_add);
-            this.main_toolbar.move_folder_menu.add_folder(to_add);
-        }
-    }
-
-    /** Removes a folder from the window. */
-    internal void remove_folder(Geary.Folder to_remove) {
-        if (to_remove.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
-            this.main_toolbar.move_folder_menu.remove_folder(to_remove);
-        }
-        this.folder_list.remove_folder(to_remove);
-    }
-
     private void add_account(AccountContext to_add) {
         if (!this.accounts.contains(to_add)) {
             this.folder_list.set_user_folders_root_name(
@@ -722,6 +705,15 @@ public class Application.MainWindow :
             to_add.commands.executed.connect(on_command_execute);
             to_add.commands.undone.connect(on_command_undo);
             to_add.commands.redone.connect(on_command_redo);
+
+            to_add.account.folders_available_unavailable.connect(
+                on_folders_available_unavailable
+            );
+
+            folders_available(
+                to_add.account,
+                Geary.Account.sort_by_path(to_add.account.list_folders())
+            );
 
             this.accounts.add(to_add);
         }
@@ -755,6 +747,10 @@ public class Application.MainWindow :
                 }
             }
 
+            to_remove.account.folders_available_unavailable.disconnect(
+                on_folders_available_unavailable
+            );
+
             to_remove.commands.executed.disconnect(on_command_execute);
             to_remove.commands.undone.disconnect(on_command_undo);
             to_remove.commands.redone.disconnect(on_command_redo);
@@ -771,6 +767,30 @@ public class Application.MainWindow :
             this.folder_list.remove_account(to_remove.account);
             this.accounts.remove(to_remove);
         }
+    }
+
+    /** Adds a folder to the window. */
+    private void add_folder(Geary.Folder to_add) {
+        this.folder_list.add_folder(to_add);
+        if (to_add.account == this.selected_account) {
+            this.main_toolbar.copy_folder_menu.add_folder(to_add);
+            this.main_toolbar.move_folder_menu.add_folder(to_add);
+        }
+        to_add.special_folder_type_changed.connect(
+            on_special_folder_type_changed
+        );
+    }
+
+    /** Removes a folder from the window. */
+    private void remove_folder(Geary.Folder to_remove) {
+        to_remove.special_folder_type_changed.disconnect(
+            on_special_folder_type_changed
+        );
+        if (to_remove.account == this.selected_account) {
+            this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
+            this.main_toolbar.move_folder_menu.remove_folder(to_remove);
+        }
+        this.folder_list.remove_folder(to_remove);
     }
 
     private AccountContext? get_selected_account_context() {
@@ -960,13 +980,6 @@ public class Application.MainWindow :
         this.spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
         this.spinner.set_progress_monitor(progress_monitor);
         this.status_bar.add(this.spinner);
-    }
-
-    // Returns true when there's a conversation list scrollbar visible, i.e. the list is tall
-    // enough to need one.  Otherwise returns false.
-    public bool conversation_list_has_scrollbar() {
-        Gtk.Scrollbar? scrollbar = this.conversation_list_scrolled.get_vscrollbar() as Gtk.Scrollbar;
-        return scrollbar != null && scrollbar.get_visible();
     }
 
     /** {@inheritDoc} */
@@ -1272,6 +1285,44 @@ public class Application.MainWindow :
         }
     }
 
+    private void folders_available(Geary.Account account,
+                                   Gee.BidirSortedSet<Geary.Folder> available) {
+        foreach (Geary.Folder folder in available) {
+            if (Controller.should_add_folder(available, folder)) {
+                add_folder(folder);
+
+                if (folder.special_folder_type == INBOX) {
+                    // Select this inbox if there isn't an existing
+                    // folder selected and it is the inbox for the
+                    // first account
+                    Geary.AccountInformation? first_account =
+                        this.application.controller.get_first_account();
+                    if (!this.folder_list.is_any_selected() &&
+                        folder.account.information == first_account) {
+                        // First we try to select the Inboxes branch
+                        // inbox if it's there, falling back to the
+                        // main folder list.
+                        if (!this.folder_list.select_inbox(folder.account)) {
+                            this.folder_list.select_folder(folder);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void folders_unavailable(Geary.Account account,
+                                     Gee.BidirSortedSet<Geary.Folder> unavailable) {
+        var unavailable_iterator = unavailable.bidir_iterator();
+        bool has_prev = unavailable_iterator.last();
+        while (has_prev) {
+            Geary.Folder folder = unavailable_iterator.get();
+            remove_folder(folder);
+
+            has_prev = unavailable_iterator.previous();
+        }
+    }
+
     private async void open_conversation_monitor(Geary.App.ConversationMonitor to_open,
                                                  GLib.Cancellable cancellable) {
         to_open.scan_completed.connect(on_scan_completed);
@@ -1331,6 +1382,7 @@ public class Application.MainWindow :
             email_view.get_selection_for_quoting.begin((obj, res) => {
                     string? quote = email_view.get_selection_for_quoting.end(res);
                     this.application.controller.compose_with_context_email(
+                        this,
                         account,
                         compose_type,
                         email_view.email,
@@ -1576,8 +1628,11 @@ public class Application.MainWindow :
     private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
+        Gtk.Scrollbar? scrollbar = (
+            this.conversation_list_scrolled.get_vscrollbar() as Gtk.Scrollbar
+        );
         if (is_visible() &&
-            !conversation_list_has_scrollbar() &&
+            (scrollbar == null || !scrollbar.get_visible()) &&
             monitor == this.conversations &&
             monitor.can_load_more) {
             debug("Not enough messages, loading more for folder %s",
@@ -1690,6 +1745,40 @@ public class Application.MainWindow :
 
         this.remove_account.begin(account, to_select);
     }
+
+    private void on_folders_available_unavailable(
+        Geary.Account account,
+        Gee.BidirSortedSet<Geary.Folder>? available,
+        Gee.BidirSortedSet<Geary.Folder>? unavailable
+    ) {
+        if (available != null) {
+            folders_available(account, available);
+        }
+        if (unavailable != null) {
+            folders_unavailable(account, unavailable);
+        }
+    }
+
+    private void on_special_folder_type_changed(Geary.Folder folder,
+                                                Geary.SpecialFolderType old_type,
+                                                Geary.SpecialFolderType new_type) {
+        // Update the main window
+        this.folder_list.remove_folder(folder);
+        this.folder_list.add_folder(folder);
+
+        // Since removing the folder will also remove its children
+        // from the folder list, we need to check for any and re-add
+        // them. See issue #11.
+        try {
+            foreach (Geary.Folder child in
+                     folder.account.list_matching_folders(folder.path)) {
+                this.folder_list.add_folder(child);
+            }
+        } catch (Error err) {
+            // Oh well
+        }
+    }
+
     private void on_command_execute(Command command) {
         if (!(command is TrivialCommand)) {
             // Only show an execute notification for non-trivial
@@ -1801,6 +1890,7 @@ public class Application.MainWindow :
 
             if (!already_open) {
                 this.application.controller.compose_with_context_email(
+                    this,
                     activated.base_folder.account,
                     NEW_MESSAGE,
                     draft,
@@ -2191,7 +2281,7 @@ public class Application.MainWindow :
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, REPLY, target, quote, false
+                this, account, REPLY, target, quote, false
             );
         }
     }
@@ -2200,7 +2290,7 @@ public class Application.MainWindow :
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, REPLY_ALL, target, quote, false
+                this, account, REPLY_ALL, target, quote, false
             );
         }
     }
@@ -2209,7 +2299,7 @@ public class Application.MainWindow :
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, FORWARD, target, quote, false
+                this, account, FORWARD, target, quote, false
             );
         }
     }
@@ -2218,7 +2308,7 @@ public class Application.MainWindow :
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, NEW_MESSAGE, target, null, true
+                this, account, NEW_MESSAGE, target, null, true
             );
         }
     }
