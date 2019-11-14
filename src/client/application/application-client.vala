@@ -801,14 +801,13 @@ public class Application.Client : Gtk.Application {
         window.focus_in_event.connect(on_main_window_focus_in);
         if (select_first_inbox) {
             try {
-                var config = this.controller.get_first_account();
-                if (config != null) {
-                    var first = this.engine.get_account_instance(config);
-                    if (first != null) {
-                        Geary.Folder? inbox = first.get_special_folder(INBOX);
-                        if (inbox != null) {
-                            window.select_folder.begin(inbox, true);
-                        }
+                Geary.Account first = Geary.Collection.get_first(
+                    this.engine.get_accounts()
+                );
+                if (first != null) {
+                    Geary.Folder? inbox = first.get_special_folder(INBOX);
+                    if (inbox != null) {
+                        window.select_folder.begin(inbox, true);
                     }
                 }
             } catch (GLib.Error error) {
@@ -970,12 +969,9 @@ public class Application.Client : Gtk.Application {
 
     private Geary.Folder? get_folder_from_action_target(GLib.Variant target) {
         Geary.Folder? folder = null;
-        string account_id = (string) target.get_child_value(0);
+        string id = (string) target.get_child_value(0);
         try {
-            Geary.AccountInformation? account_config =
-                this.engine.get_account(account_id);
-            Geary.Account? account =
-                this.engine.get_account_instance(account_config);
+            Geary.Account account = this.engine.get_account_for_id(id);
             Geary.FolderPath? path =
                 account.to_folder_path(
                     target.get_child_value(1).get_variant()

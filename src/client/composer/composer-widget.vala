@@ -413,7 +413,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private Gee.Map<string, Geary.AccountInformation> accounts;
+    private Gee.Collection<Geary.Account> accounts;
 
     private string body_html = "";
 
@@ -478,7 +478,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         try {
             this.accounts = this.application.engine.get_accounts();
-        } catch (Error e) {
+        } catch (GLib.Error e) {
             warning("Could not fetch account info: %s", e.message);
         }
 
@@ -2379,7 +2379,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // show nothing.
         if (this.accounts.size < 1 ||
             (this.accounts.size == 1 &&
-            !Geary.traverse<Geary.AccountInformation>(this.accounts.values).first().has_sender_aliases)) {
+            !Geary.traverse<Geary.Account>(this.accounts).first().information.has_sender_aliases)) {
             return false;
         }
 
@@ -2397,13 +2397,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // is set to true if the current message's from address has
         // been set in the ComboBox.
         bool set_active = add_account_emails_to_from_list(this.account);
-        foreach (Geary.AccountInformation info in this.accounts.values) {
-            try {
-                Geary.Account a = this.application.engine.get_account_instance(info);
-                if (a != this.account)
-                    set_active = add_account_emails_to_from_list(a, set_active);
-            } catch (Error e) {
-                debug("Error getting account in composer: %s", e.message);
+        foreach (var account in this.accounts) {
+            if (account != this.account) {
+                set_active = add_account_emails_to_from_list(
+                    account, set_active
+                );
             }
         }
 

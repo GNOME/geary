@@ -1695,9 +1695,14 @@ internal class Application.Controller : Geary.BaseObject {
     private void on_account_available(Geary.AccountInformation info) {
         Geary.Account? account = null;
         try {
-            account = Geary.Engine.instance.get_account_instance(info);
-        } catch (Error e) {
-            error("Error creating account instance: %s", e.message);
+            account = this.application.engine.get_account(info);
+        } catch (GLib.Error error) {
+            report_problem(new Geary.ProblemReport(error));
+            warning(
+                "Error creating account %s instance: %s",
+                info.id,
+                error.message
+            );
         }
 
         if (account != null) {
@@ -1720,7 +1725,7 @@ internal class Application.Controller : Geary.BaseObject {
                                            Accounts.Manager.Status status) {
         switch (status) {
         case Accounts.Manager.Status.ENABLED:
-            if (!this.application.engine.has_account(changed.id)) {
+            if (!this.application.engine.has_account(changed)) {
                 try {
                     this.application.engine.add_account(changed);
                 } catch (GLib.Error err) {
@@ -1731,7 +1736,7 @@ internal class Application.Controller : Geary.BaseObject {
 
         case Accounts.Manager.Status.UNAVAILABLE:
         case Accounts.Manager.Status.DISABLED:
-            if (this.application.engine.has_account(changed.id)) {
+            if (this.application.engine.has_account(changed)) {
                 this.close_account.begin(
                     changed,
                     false,
