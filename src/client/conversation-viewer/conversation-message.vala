@@ -1155,11 +1155,13 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private string get_link_uri(string uri) {
+        string new_uri = "";
         if (uri.length < 90) {
-            return uri;
+            new_uri = uri;
         } else {
-            return uri.substring(0,40) + "..." + uri.substring(-40);
+            new_uri = uri.substring(0,40) + "..." + uri.substring(-40);
         }
+        return new_uri;
     }
 
     // Check for possible phishing links, displays a popover if found.
