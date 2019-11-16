@@ -1935,7 +1935,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                     pixbuf.save_to_buffer(out buffer, "png");
                     Geary.Memory.ByteBuffer byte_buffer = new Geary.Memory.ByteBuffer(buffer, buffer.length);
 
-                    // TODO Review placeholder filename generation
                     GLib.DateTime time_now = new GLib.DateTime.now();
                     string filename = PASTED_IMAGE_FILENAME_TEMPLATE.printf(time_now.hash());
 
