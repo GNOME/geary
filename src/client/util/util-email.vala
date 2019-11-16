@@ -261,4 +261,14 @@ namespace Util.Email {
 
         return body_text;
     }
+
+    private string shorten_url(string url) {
+        string new_url = "";
+        if (url.length < 90) {
+            new_url = url;
+        } else {
+            new_url = url.substring(0,40) + "..." + url.substring(-40);
+        }
+        return new_url;
+    }
 }

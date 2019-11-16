@@ -1149,19 +1149,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                          WebKit.HitTestResult hit_test,
                                          uint modifiers) {
         this.body_container.set_tooltip_text(
-            hit_test.context_is_link() ? this.get_link_uri(hit_test.get_link_uri()) : null
+            hit_test.context_is_link() ? Util.Email.shorten_url(hit_test.get_link_uri()) : null
         );
         this.body_container.trigger_tooltip_query();
-    }
-
-    private string get_link_uri(string uri) {
-        string new_uri = "";
-        if (uri.length < 90) {
-            new_uri = uri;
-        } else {
-            new_uri = uri.substring(0,40) + "..." + uri.substring(-40);
-        }
-        return new_uri;
     }
 
     // Check for possible phishing links, displays a popover if found.
