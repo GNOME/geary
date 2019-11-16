@@ -1928,6 +1928,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
      * Handle a pasted image, adding it as an inline attachment
      */
     private void paste_image() {
+        // The slow operations here are creating the PNG and, to a lesser extent,
+        // requesting the image from the clipboard
+        this.container.top_window.application.mark_busy();
+
         get_clipboard(Gdk.SELECTION_CLIPBOARD).request_image((clipboard, pixbuf) => {
             if (pixbuf != null) {
                 try {
@@ -1949,6 +1953,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             } else {
                 warning("Failed to get image from clipboard");
             }
+            this.container.top_window.application.unmark_busy();
         });
     }
 
