@@ -71,7 +71,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     /**
      * Initialises WebKit.WebContext for use by the client.
      */
-    public static void init_web_context(Configuration config,
+    public static void init_web_context(Application.Configuration config,
                                         File web_extension_dir,
                                         File cache_dir) {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
@@ -107,7 +107,9 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
             });
 
         update_spellcheck(context, config);
-        config.settings.changed[Configuration.SPELL_CHECK_LANGUAGES].connect(() => {
+        config.settings.changed[
+            Application.Configuration.SPELL_CHECK_LANGUAGES
+        ].connect(() => {
                 update_spellcheck(context, config);
             });
 
@@ -181,7 +183,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     private static inline void update_spellcheck(WebKit.WebContext context,
-                                                 Configuration config) {
+                                                 Application.Configuration config) {
         context.set_spell_checking_enabled(config.spell_check_languages.length > 0);
         context.set_spell_checking_languages(config.spell_check_languages);
     }
@@ -296,7 +298,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     public signal void remote_image_load_blocked();
 
 
-    protected ClientWebView(Configuration config,
+    protected ClientWebView(Application.Configuration config,
                             WebKit.UserContentManager? custom_manager = null) {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
@@ -357,7 +359,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         );
 
         // Manage zoom level, ensure it's sane
-        config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
+        config.bind(Application.Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
         if (this.zoom_level < ZOOM_MIN) {
             this.zoom_level = ZOOM_MIN;
         } else if (this.zoom_level > ZOOM_MAX) {

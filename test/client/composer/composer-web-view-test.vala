@@ -5,14 +5,15 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
+public class Composer.WebViewTest : ClientWebViewTestCase<Composer.WebView> {
 
 
-    public ComposerWebViewTest() {
-        base("ComposerWebViewTest");
+    public WebViewTest() {
+        base("Composer.WebViewTest");
         add_test("load_resources", load_resources);
         add_test("edit_context", edit_context);
         add_test("get_html", get_html);
+        add_test("get_html_for_draft", get_html_for_draft);
         add_test("get_text", get_text);
         add_test("get_text_with_quote", get_text_with_quote);
         add_test("get_text_with_nested_quote", get_text_with_nested_quote);
@@ -27,22 +28,22 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
 
     public void load_resources() throws Error {
         try {
-            ComposerWebView.load_resources();
+            WebView.load_resources();
         } catch (Error err) {
             assert_not_reached();
         }
     }
 
     public void edit_context() throws Error {
-        assert(!(new ComposerWebView.EditContext("0,,,").is_link));
-        assert(new ComposerWebView.EditContext("1,,,").is_link);
-        assert(new ComposerWebView.EditContext("1,url,,").link_url == "url");
+        assert(!(new WebView.EditContext("0,,,").is_link));
+        assert(new WebView.EditContext("1,,,").is_link);
+        assert(new WebView.EditContext("1,url,,").link_url == "url");
 
-        assert(new ComposerWebView.EditContext("0,,Helvetica,").font_family == "sans");
-        assert(new ComposerWebView.EditContext("0,,Times New Roman,").font_family == "serif");
-        assert(new ComposerWebView.EditContext("0,,Courier,").font_family == "monospace");
+        assert(new WebView.EditContext("0,,Helvetica,").font_family == "sans");
+        assert(new WebView.EditContext("0,,Times New Roman,").font_family == "serif");
+        assert(new WebView.EditContext("0,,Courier,").font_family == "monospace");
 
-        assert(new ComposerWebView.EditContext("0,,,12").font_size == 12);
+        assert(new WebView.EditContext("0,,,12").font_size == 12);
     }
 
     public void get_html() throws GLib.Error {
@@ -50,7 +51,15 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         load_body_fixture(BODY);
         this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
         string html = this.test_view.get_html.end(async_result());
-        assert_string(ComposerPageStateTest.COMPLETE_BODY_TEMPLATE.printf(BODY), html);
+        assert_string(PageStateTest.CLEAN_BODY_TEMPLATE.printf(BODY), html);
+    }
+
+    public void get_html_for_draft() throws GLib.Error {
+        string BODY = "<p>para</p>";
+        load_body_fixture(BODY);
+        this.test_view.get_html_for_draft.begin((obj, ret) => { async_complete(ret); });
+        string html = this.test_view.get_html.end(async_result());
+        assert_string(PageStateTest.COMPLETE_BODY_TEMPLATE.printf(BODY), html);
     }
 
     public void get_text() throws Error {
@@ -233,8 +242,8 @@ long, long, long, long, long, long, long, long, long, long,
         assert_false(SIG2 in html, "Signature 2 still present");
     }
 
-    protected override ComposerWebView set_up_test_view() {
-        return new ComposerWebView(this.config);
+    protected override Composer.WebView set_up_test_view() {
+        return new Composer.WebView(this.config);
     }
 
     protected override void load_body_fixture(string html = "") {

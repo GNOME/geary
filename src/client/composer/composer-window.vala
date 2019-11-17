@@ -1,57 +1,67 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * A ComposerWindow is a ComposerContainer that is used to compose mails in a separate window
- * (i.e. detached) of its own.
+ * A container detached composers, i.e. in their own separate window.
+ *
+ * Adding a composer to this container places it in {@link
+ * PresentationMode.DETACHED} mode.
  */
-public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
+public class Composer.Window : Gtk.ApplicationWindow, Container {
 
 
     private const string DEFAULT_TITLE = _("New Message");
 
 
-    public new GearyApplication application {
-        get { return (GearyApplication) base.get_application(); }
-        set { base.set_application(value); }
-    }
-
-    public Gtk.ApplicationWindow top_window {
+    /** {@inheritDoc} */
+    public Gtk.ApplicationWindow? top_window {
         get { return this; }
     }
 
-    internal ComposerWidget composer { get; set; }
+    /** {@inheritDoc} */
+    public new GearyApplication? application {
+        get { return base.get_application() as GearyApplication; }
+        set { base.set_application(value); }
+    }
 
-    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
+    /** {@inheritDoc} */
+    internal Widget composer { get; set; }
 
-    private bool closing = false;
 
-    public ComposerWindow(ComposerWidget composer, GearyApplication application) {
+    public Window(Widget composer, GearyApplication application) {
         Object(application: application, type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
-        this.composer.header.detached();
+        this.composer.set_mode(DETACHED);
 
         // XXX Bug 764622
         set_property("name", "GearyComposerWindow");
 
         add(this.composer);
 
-        if (application.config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+        if (application.config.desktop_environment == UNITY) {
             composer.embed_header();
         } else {
             composer.header.show_close_button = true;
-            composer.free_header();
             set_titlebar(this.composer.header);
         }
 
-        composer.subject_changed.connect(() => { update_title(); } );
+        composer.notify["subject"].connect(() => { update_title(); } );
         update_title();
 
         show();
         set_position(Gtk.WindowPosition.CENTER);
+    }
+
+    /** {@inheritDoc} */
+    public new void close() {
+        this.composer.free_header();
+        remove(this.composer);
+        destroy();
     }
 
     public override void show() {
@@ -104,22 +114,17 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
         this.save_window_geometry();
     }
 
-    public void close_container() {
-        this.closing = true;
-        destroy();
-    }
-
     public override bool delete_event(Gdk.EventAny event) {
-        return !(this.closing ||
-            ((ComposerWidget) get_child()).should_close() == ComposerWidget.CloseStatus.DO_CLOSE);
-    }
-
-    public void vanish() {
-        hide();
-    }
-
-    public void remove_composer() {
-        warning("Detached composer received remove");
+        // Use the child instead of the `composer` property so we
+        // don't check with the composer if it has already been
+        // removed from the container.
+        Widget? child = get_child() as Widget;
+        bool ret = Gdk.EVENT_PROPAGATE;
+        if (child != null &&
+            child.conditional_close(true) == CANCELLED) {
+            ret = Gdk.EVENT_STOP;
+        }
+        return ret;
     }
 
     private void update_title() {
@@ -129,7 +134,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
         }
 
         switch (this.application.config.desktop_environment) {
-        case Configuration.DesktopEnvironment.UNITY:
+        case UNITY:
             this.title = subject;
             break;
 

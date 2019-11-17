@@ -29,11 +29,11 @@ public class PreferencesDialog : Gtk.Dialog {
         set_titlebar(this.header);
         this.app = app;
 
-        Configuration config = app.config;
-        config.bind(Configuration.AUTOSELECT_KEY, autoselect, "active");
-        config.bind(Configuration.DISPLAY_PREVIEW_KEY, display_preview, "active");
-        config.bind(Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY, three_pane_view, "active");
-        config.bind(Configuration.STARTUP_NOTIFICATIONS_KEY, startup_notifications, "active");
+        Application.Configuration config = app.config;
+        config.bind(Application.Configuration.AUTOSELECT_KEY, autoselect, "active");
+        config.bind(Application.Configuration.DISPLAY_PREVIEW_KEY, display_preview, "active");
+        config.bind(Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY, three_pane_view, "active");
+        config.bind(Application.Configuration.STARTUP_NOTIFICATIONS_KEY, startup_notifications, "active");
     }
 
     public new void run() {

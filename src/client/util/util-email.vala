@@ -108,29 +108,48 @@ namespace Util.Email {
      * list contains more mailboxes then an indication of how many
      * additional are present.
      */
-    public string to_short_recipient_display(Geary.RFC822.MailboxAddresses mailboxes) {
-        if (mailboxes.size == 0) {
-            // Translators: This is shown for displaying a list of
-            // email recipients that happens to be empty,
-            // i.e. contains no email addresses.
-            return _("(No recipients)");
+    public string to_short_recipient_display(Geary.EmailHeaderSet headers) {
+        Geary.RFC822.MailboxAddresses? mailboxes = null;
+        int total = 0;
+        if (headers.to != null) {
+            mailboxes = headers.to;
+            total += headers.to.size;
+        }
+        if (headers.cc != null) {
+            if (mailboxes == null) {
+                mailboxes = headers.cc;
+            }
+            total += headers.cc.size;
+        }
+        if (headers.bcc != null) {
+            if (mailboxes == null) {
+                mailboxes = headers.bcc;
+            }
+            total += headers.bcc.size;
         }
 
-        // Always mention the first recipient
-        string first_recipient = mailboxes.get(0).to_short_display();
-        if (mailboxes.size == 1)
-            return first_recipient;
+        /// Translators: This is shown for displaying a list of email
+        /// recipients that happens to be empty, i.e. contains no
+        /// email addresses.
+        string display = _("(No recipients)");
+        if (total > 0) {
+            // Always mention the first recipient
+            display = mailboxes.get(0).to_short_display();
 
-        // Translators: This is used for displaying a short list of
-        // email recipients lists with two or more addresses. The
-        // first (string) substitution is address of the first, the
-        // second substitution is the number of n - 1 remaining
-        // recipients.
-        return GLib.ngettext(
-            "%s and %d other",
-            "%s and %d others",
-            mailboxes.size - 1
-        ).printf(first_recipient, mailboxes.size - 1);
+            if (total > 1) {
+                /// Translators: This is used for displaying a short
+                /// list of email recipients lists with two or more
+                /// addresses. The first (string) substitution is
+                /// address of the first, the second substitution is
+                /// the number of n - 1 remaining recipients.
+                display = GLib.ngettext(
+                    "%s and %d other",
+                    "%s and %d others",
+                    total - 1
+                ).printf(display, total - 1);
+            }
+        }
+        return display;
     }
 
     /**

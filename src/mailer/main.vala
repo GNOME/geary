@@ -25,7 +25,7 @@ async void main_async() throws Error {
                 File.new_for_path(arg_full_file), true));
         } else {
             string subj_msg = "#%d".printf(ctr + 1);
-            composed_email.subject = subj_msg;
+            composed_email.set_subject(subj_msg);
 
             if (Geary.String.is_empty(arg_file)) {
                 composed_email.body_text = subj_msg;
@@ -173,10 +173,12 @@ int main(string[] args) {
     );
 
     if (arg_full_file == null) {
-        composed_email = new Geary.ComposedEmail(new DateTime.now_local(),
-            new Geary.RFC822.MailboxAddresses.single(new Geary.RFC822.MailboxAddress(null, arg_from)));
-        composed_email.to = new Geary.RFC822.MailboxAddresses.single(
-            new Geary.RFC822.MailboxAddress(null, arg_to));
+        composed_email = new Geary.ComposedEmail(
+            new GLib.DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.single(new Geary.RFC822.MailboxAddress(null, arg_from))
+        ).set_to(
+            new Geary.RFC822.MailboxAddresses.single(new Geary.RFC822.MailboxAddress(null, arg_to))
+        );
     }
 
     main_loop = new MainLoop();

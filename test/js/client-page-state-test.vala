@@ -10,7 +10,7 @@ class ClientPageStateTest : ClientWebViewTestCase<ClientWebView> {
 
     private class TestClientWebView : ClientWebView {
 
-        public TestClientWebView(Configuration config) {
+        public TestClientWebView(Application.Configuration config) {
             base(config);
         }
 

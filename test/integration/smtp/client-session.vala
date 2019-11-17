@@ -121,14 +121,13 @@ class Integration.Smtp.ClientSession : TestCase {
                                                    Geary.RFC822.MailboxAddress to) {
         Geary.ComposedEmail composed = new Geary.ComposedEmail(
             new GLib.DateTime.now_local(),
-            new Geary.RFC822.MailboxAddresses.single(from),
-            new Geary.RFC822.MailboxAddresses.single(to),
-            null,
-            null,
-            "Geary integration test subject",
-            "Geary integration test message",
-            null
+            new Geary.RFC822.MailboxAddresses.single(from)
+        ).set_to(
+            new Geary.RFC822.MailboxAddresses.single(to)
+        ).set_subject(
+            "Geary integration test subject"
         );
+        composed.body_text = "Geary integration test message";
 
         return yield new Geary.RFC822.Message.from_composed_email(
             composed,

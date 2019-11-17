@@ -58,13 +58,17 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Image delete_image = new Gtk.Image.from_icon_name("edit-delete-symbolic", Gtk.IconSize.MENU);
 
 
-    public MainToolbar(Configuration config) {
+    public MainToolbar(Application.Configuration config) {
         // Sync headerbar width with left pane
-        config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, this, "left-pane-width",
-            SettingsBindFlags.GET);
+        config.bind(
+            Application.Configuration.MESSAGES_PANE_POSITION_KEY,
+            this,
+            "left-pane-width",
+            SettingsBindFlags.GET
+        );
         this.bind_property("left-pane-width", this.folder_header, "width-request", BindingFlags.SYNC_CREATE);
 
-        if (config.desktop_environment != Configuration.DesktopEnvironment.UNITY) {
+        if (config.desktop_environment != UNITY) {
             this.bind_property("account", this.folder_header, "title", BindingFlags.SYNC_CREATE);
             this.bind_property("folder", this.folder_header, "subtitle", BindingFlags.SYNC_CREATE);
         }

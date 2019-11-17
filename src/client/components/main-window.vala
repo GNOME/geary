@@ -566,46 +566,69 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     /** Displays a composer addressed to a specific email address. */
     public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
-        Application.Controller controller = this.application.controller;
-        ComposerWidget composer = new ComposerWidget(
-            this.application, this.selected_folder.account, null, NEW_MESSAGE
+        var composer = new Composer.Widget.from_mailbox(
+            this.application, this.selected_folder.account, to
         );
-        composer.to = to.to_full_display();
-        controller.add_composer(composer);
-        show_composer(composer);
-        composer.load.begin(null, null, null);
+        this.application.controller.add_composer(composer);
+        show_composer(composer, null);
+        composer.load.begin(null, false, null, null);
     }
 
-    /** Displays a composer in the window if possible, else in a new window. */
-    public void show_composer(ComposerWidget composer) {
+    /**
+     * Displays a composer in the window if possible, else in a new window.
+     *
+     * If the given collection of identifiers is not null and any are
+     * contained in the current conversation then the composer will be
+     * displayed inline under the latest matching message. If null,
+     * the composer's {@link Composer.Widget.get_referred_ids} will be
+     * used.
+     */
+    public void show_composer(Composer.Widget composer,
+                              Gee.Collection<Geary.EmailIdentifier>? refers_to) {
         if (this.has_composer) {
-            composer.state = ComposerWidget.ComposerState.DETACHED;
-            new ComposerWindow(composer, this.application);
+            composer.detach();
         } else {
-            this.conversation_viewer.do_compose(composer);
-            get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
+            // See if the currently displayed conversation contains
+            // any of the composer's referred emails (preferring the
+            // latest), and if so add it inline, otherwise add it full
+            // paned.
+            Geary.Email? latest_referred = null;
+            if (this.conversation_viewer.current_list != null) {
+                Gee.Collection<Geary.EmailIdentifier>? referrants = refers_to;
+                if (referrants == null) {
+                    referrants = composer.get_referred_ids();
+                }
+                Geary.App.Conversation selected =
+                    this.conversation_viewer.current_list.conversation;
+                latest_referred = selected.get_emails(
+                    RECV_DATE_DESCENDING
+                ).first_match(
+                    (email) => email.id in referrants
+                );
+            }
+
+            if (latest_referred != null) {
+                this.conversation_viewer.do_compose_embedded(
+                    composer, latest_referred
+                );
+            } else {
+                this.conversation_viewer.do_compose(composer);
+            }
         }
     }
 
     /**
-     * Closes any open composers after prompting the user.
+     * Closes any open composers, after prompting the user if requested.
      *
      * Returns true if none were open or the user approved closing
      * them.
      */
-    public bool close_composer() {
+    public bool close_composer(bool should_prompt, bool is_shutdown = false) {
         bool closed = true;
-        ComposerWidget? composer = this.conversation_viewer.current_composer;
-        if (composer != null) {
-            switch (composer.should_close()) {
-            case DO_CLOSE:
-                composer.close();
-                break;
-
-            case CANCEL_CLOSE:
-                closed = false;
-                break;
-            }
+        Composer.Widget? composer = this.conversation_viewer.current_composer;
+        if (composer != null &&
+            composer.conditional_close(should_prompt, is_shutdown) == CANCELLED) {
+            closed = false;
         }
         return closed;
     }
@@ -690,21 +713,22 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.folder_list.remove_account(to_remove);
     }
 
-    private void load_config(Configuration config) {
+    private void load_config(Application.Configuration config) {
         // This code both loads AND saves the pane positions with live updating. This is more
         // resilient against crashes because the value in dconf changes *immediately*, and
         // stays saved in the event of a crash.
-        config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, this.conversations_paned, "position");
-        config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
-        config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
-        config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
+        config.bind(Application.Configuration.MESSAGES_PANE_POSITION_KEY, this.conversations_paned, "position");
+        config.bind(Application.Configuration.WINDOW_WIDTH_KEY, this, "window-width");
+        config.bind(Application.Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
+        config.bind(Application.Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
         // Update to layout
         if (config.folder_list_pane_position_horizontal == -1) {
             config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
             config.messages_pane_position += config.folder_list_pane_position_old;
         }
-        config.settings.changed[Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY]
-            .connect(on_change_orientation);
+        config.settings.changed[
+            Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY
+        ].connect(on_change_orientation);
     }
 
     private void restore_saved_window_state() {
@@ -801,7 +825,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void setup_layout(Configuration config) {
+    private void setup_layout(Application.Configuration config) {
         this.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
         // Search bar
@@ -841,7 +865,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         this.main_toolbar.bind_property("find-open", this.conversation_viewer.conversation_find_bar,
                 "search-mode-enabled", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+        if (config.desktop_environment == UNITY) {
             BindingTransformFunc title_func = (binding, source, ref target) => {
                 string folder = selected_folder != null ? selected_folder.get_display_name() + " " : "";
                 string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
@@ -1241,7 +1265,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.conversations = null;
     }
 
-    private void create_composer_from_viewer(ComposerWidget.ComposeType compose_type) {
+    private void create_composer_from_viewer(Composer.Widget.ComposeType compose_type) {
         Geary.Account? account = this.selected_account;
         ConversationEmail? email_view = null;
         ConversationListBox? list_view = this.conversation_viewer.current_list;
@@ -1255,7 +1279,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                         account,
                         compose_type,
                         email_view.email,
-                        quote
+                        quote,
+                        false
                     );
                 });
         }
@@ -1298,18 +1323,34 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     private void on_account_available(Geary.AccountInformation account) {
         try {
-            this.progress_monitor.add(this.application.engine.get_account_instance(account).opening_monitor);
-            this.progress_monitor.add(this.application.engine.get_account_instance(account).sending_monitor);
-        } catch (Error e) {
+            Geary.Account? engine = this.application.engine.get_account_instance(account);
+            if (engine != null) {
+                this.progress_monitor.add(engine.opening_monitor);
+                Geary.Smtp.ClientService? smtp = (
+                    engine.outgoing as Geary.Smtp.ClientService
+                );
+                if (smtp != null) {
+                    this.progress_monitor.add(smtp.sending_monitor);
+                }
+            }
+        } catch (GLib.Error e) {
             debug("Could not access account progress monitors: %s", e.message);
         }
     }
 
     private void on_account_unavailable(Geary.AccountInformation account) {
         try {
-            this.progress_monitor.remove(this.application.engine.get_account_instance(account).opening_monitor);
-            this.progress_monitor.remove(this.application.engine.get_account_instance(account).sending_monitor);
-        } catch (Error e) {
+            Geary.Account? engine = this.application.engine.get_account_instance(account);
+            if (engine != null) {
+                this.progress_monitor.remove(engine.opening_monitor);
+                Geary.Smtp.ClientService? smtp = (
+                    engine.outgoing as Geary.Smtp.ClientService
+                );
+                if (smtp != null) {
+                    this.progress_monitor.remove(smtp.sending_monitor);
+                }
+            }
+        } catch (GLib.Error e) {
             debug("Could not access account progress monitors: %s", e.message);
         }
     }
@@ -1340,8 +1381,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
 
         this.application.config.bind(
-            horizontal ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
-            : Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
+            horizontal
+            ? Application.Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
+            : Application.Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
             this.folder_paned, "position");
     }
 
@@ -1496,7 +1538,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         if (event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R) {
             Gtk.Widget? focus = get_focus();
             if (focus == null ||
-                (!(focus is Gtk.Entry) && !(focus is ComposerWebView))) {
+                (!(focus is Gtk.Entry) && !(focus is Composer.WebView))) {
                 set_shift_key_down(event.type == Gdk.EventType.KEY_PRESS);
             }
         }
@@ -1556,11 +1598,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     [GtkCallback]
     private bool on_delete_event() {
         if (this.application.config.startup_notifications) {
-            if (this.application.controller.close_composition_windows(true)) {
+            if (close_composer(true, false)) {
                 hide();
             }
         } else {
-            this.application.exit();
+            if (close_composer(true, false)) {
+                this.application.quit();
+            }
         }
         return Gdk.EVENT_STOP;
     }
@@ -1697,10 +1741,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             // Check all known composers since the draft may be open
             // in a detached composer
             bool already_open = false;
-            foreach (ComposerWidget composer
+            foreach (Composer.Widget composer
                      in this.application.controller.get_composers()) {
-                if (composer.draft_id != null &&
-                    composer.draft_id.equal_to(draft.id)) {
+                if (composer.current_draft_id != null &&
+                    composer.current_draft_id.equal_to(draft.id)) {
                     already_open = true;
                     composer.present();
                     composer.set_focus();
@@ -1713,7 +1757,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                     activated.base_folder.account,
                     NEW_MESSAGE,
                     draft,
-                    null
+                    null,
+                    true
                 );
             }
         }
@@ -2099,7 +2144,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, REPLY, target, quote
+                account, REPLY, target, quote, false
             );
         }
     }
@@ -2108,7 +2153,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, REPLY_ALL, target, quote
+                account, REPLY_ALL, target, quote, false
             );
         }
     }
@@ -2117,7 +2162,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, FORWARD, target, quote
+                account, FORWARD, target, quote, false
             );
         }
     }
@@ -2126,7 +2171,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, NEW_MESSAGE, target, null
+                account, NEW_MESSAGE, target, null, true
             );
         }
     }

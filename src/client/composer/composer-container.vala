@@ -5,38 +5,37 @@
  */
 
 /**
- * A generic interface for widgets that have a single ComposerWidget-child.
+ * A generic interface for widgets that have a single composer child.
  */
-public interface ComposerContainer {
+public interface Composer.Container {
 
-    // The ComposerWidget-child.
-    internal abstract ComposerWidget composer { get; set; }
+    /** The top-level window for the container, if any. */
+    public abstract Gtk.ApplicationWindow? top_window { get; }
 
-    // We use old_accelerators to keep track of the accelerators we temporarily disabled.
-    protected abstract Gee.MultiMap<string, string>? old_accelerators { get; set; }
+    /** The container's current composer, if any. */
+    internal abstract Widget composer { get; set; }
 
-    // The toplevel window for the container. Note that it needs to be a GtkApplicationWindow.
-    public abstract Gtk.ApplicationWindow top_window { get; }
-
+    /** Causes the composer's top-level window to be presented. */
     public virtual void present() {
-        this.top_window.present();
+        Gtk.ApplicationWindow top = top_window;
+        if (top != null) {
+            top.present();
+        }
     }
 
-    public virtual unowned Gtk.Widget get_focus() {
-        return this.top_window.get_focus();
+    /** Returns the top-level window's current focus widget, if any. */
+    public virtual Gtk.Widget? get_focus() {
+        Gtk.Widget? focus = null;
+        Gtk.ApplicationWindow top = top_window;
+        if (top != null) {
+            focus = top.get_focus();
+        }
+        return focus;
     }
 
-    public abstract void close_container();
-
     /**
-     * Hides the widget (and possibly its parent). Usecase is when you don't want to close just yet
-     * but the composer should not be visible any longer (e.g. when you're still saving a draft).
+     * Removes the composer and destroys the container.
      */
-    public abstract void vanish();
-
-    /**
-     * Removes the composer from this ComposerContainer (e.g. when detaching)
-     */
-    public abstract void remove_composer();
+    public abstract void close();
 
 }

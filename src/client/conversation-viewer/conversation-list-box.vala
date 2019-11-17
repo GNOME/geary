@@ -427,10 +427,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     internal class ComposerRow : ConversationRow {
 
         // The embedded composer for this row
-        public ComposerEmbed view { get; private set; }
+        public Composer.Embed view { get; private set; }
 
 
-        public ComposerRow(ComposerEmbed view) {
+        public ComposerRow(Composer.Embed view) {
             base(view.referred);
             this.view = view;
             this.is_expanded = true;
@@ -515,7 +515,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     private Application.ContactStore contacts;
 
     // App config
-    private Configuration config;
+    private Application.Configuration config;
 
     // Cancellable for this conversation's data loading.
     private Cancellable cancellable = new Cancellable();
@@ -610,7 +610,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                                bool suppress_mark_timer,
                                Geary.App.EmailStore email_store,
                                Application.ContactStore contacts,
-                               Configuration config,
+                               Application.Configuration config,
                                Gtk.Adjustment adjustment) {
         base_ref();
         this.conversation = conversation;
@@ -834,7 +834,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /**
      * Adds an an embedded composer to the view.
      */
-    public void add_embedded_composer(ComposerEmbed embed, bool is_draft) {
+    public void add_embedded_composer(Composer.Embed embed, bool is_draft) {
         if (is_draft) {
             this.draft_id = embed.referred.id;
             EmailRow? draft = this.email_rows.get(embed.referred.id);
@@ -851,7 +851,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         add(row);
         this.has_composer = true;
 
-        embed.composer.draft_id_changed.connect((id) => { this.draft_id = id; });
+        embed.composer.notify["current-draft-id"].connect(
+            (id) => { this.draft_id = embed.composer.current_draft_id; }
+        );
         embed.vanished.connect(() => {
                 this.has_composer = false;
                 this.draft_id = null;

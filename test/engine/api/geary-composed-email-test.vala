@@ -39,15 +39,11 @@ class Geary.ComposedEmailTest: TestCase {
             "Sender", "sender@example.com"
         );
 
-        return new Geary.ComposedEmail(
+        var composed = new Geary.ComposedEmail(
             new GLib.DateTime.now_local(),
-            new Geary.RFC822.MailboxAddresses.single(from),
-            new Geary.RFC822.MailboxAddresses.single(to),
-            null,
-            null,
-            null,
-            null,
-            IMG_CONTAINING_HTML_BODY
-        );
+            new Geary.RFC822.MailboxAddresses.single(from)
+        ).set_to(new Geary.RFC822.MailboxAddresses.single(to));
+        composed.body_html = IMG_CONTAINING_HTML_BODY;
+        return composed;
     }
 }

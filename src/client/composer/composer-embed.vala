@@ -1,38 +1,54 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * A ComposerEmbed is a widget that is used to compose emails that are inlined into a
- * conversation view, e.g. for reply or forward mails.
+ * A container for full-height paned composers in the main window.
+ *
+ * Adding a composer to this container places it in {@link
+ * PresentationMode.INLINE} or {@link PresentationMode.INLINE_COMPACT}
+ * mode.
  */
-public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
+public class Composer.Embed : Gtk.EventBox, Container {
 
     private const int MIN_EDITOR_HEIGHT = 200;
 
-    public Geary.Email referred { get; private set; }
-
-    public Gtk.ApplicationWindow top_window {
-        get { return (Gtk.ApplicationWindow) get_toplevel(); }
+    /** {@inheritDoc} */
+    public Gtk.ApplicationWindow? top_window {
+        get { return get_toplevel() as Gtk.ApplicationWindow; }
     }
 
-    internal ComposerWidget composer { get; set; }
+    /** The email this composer was originally a reply to. */
+    public Geary.Email referred { get; private set; }
 
-    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
+    /** {@inheritDoc} */
+    internal Widget composer { get; set; }
 
     private Gtk.ScrolledWindow outer_scroller;
 
 
+    /** Emitted when the container is closed. */
     public signal void vanished();
 
 
-    public ComposerEmbed(Geary.Email referred,
-                         ComposerWidget composer,
-                         Gtk.ScrolledWindow outer_scroller) {
+    public Embed(Geary.Email referred,
+                 Widget composer,
+                 Gtk.ScrolledWindow outer_scroller) {
         this.referred = referred;
         this.composer = composer;
+        this.composer.embed_header();
+
+        Widget.PresentationMode mode = INLINE_COMPACT;
+        if (composer.compose_type == FORWARD ||
+            composer.has_multiple_from_addresses) {
+            mode = INLINE;
+        }
+        composer.set_mode(mode);
+
         this.outer_scroller = outer_scroller;
 
         get_style_context().add_class("geary-composer-embed");
@@ -43,6 +59,16 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         add(composer);
         realize.connect(on_realize);
         show();
+    }
+
+    /** {@inheritDoc} */
+    public void close() {
+        disable_scroll_reroute(this);
+        vanished();
+
+        this.composer.free_header();
+        remove(this.composer);
+        destroy();
     }
 
     private void on_realize() {
@@ -66,12 +92,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
             foreach (Gtk.Widget child in container.get_children())
                 disable_scroll_reroute(child);
         }
-    }
-
-    public void remove_composer() {
-        disable_scroll_reroute(this);
-        remove(this.composer);
-        close_container();
     }
 
     // This method intercepts scroll events destined for the embedded
@@ -177,15 +197,4 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         return ret;
     }
 
-    public void vanish() {
-        hide();
-        this.composer.state = ComposerWidget.ComposerState.DETACHED;
-        vanished();
-    }
-
-    public void close_container() {
-        if (this.visible)
-            vanish();
-        destroy();
-    }
 }

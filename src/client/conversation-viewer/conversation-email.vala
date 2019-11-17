@@ -218,7 +218,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // Cancellable to use when loading message content
     private GLib.Cancellable load_cancellable;
 
-    private Configuration config;
+    private Application.Configuration config;
 
     private Geary.TimeoutManager body_loading_timeout;
 
@@ -280,7 +280,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                              Geary.Email email,
                              Geary.App.EmailStore email_store,
                              Application.ContactStore contacts,
-                             Configuration config,
+                             Application.Configuration config,
                              bool is_sent,
                              bool is_draft,
                              GLib.Cancellable load_cancellable) {

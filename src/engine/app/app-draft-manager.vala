@@ -31,7 +31,6 @@ public class Geary.App.DraftManager : BaseObject {
     public const string PROP_CURRENT_DRAFT_ID = "current-draft-id";
     public const string PROP_VERSIONS_SAVED = "versions-saved";
     public const string PROP_VERSIONS_DROPPED = "versions-dropped";
-    public const string PROP_DISCARD_ON_CLOSE = "discard-on-close";
 
     /**
      * Current saved state of the draft.
@@ -114,13 +113,6 @@ public class Geary.App.DraftManager : BaseObject {
      */
     public int versions_dropped { get; private set; default = 0; }
 
-    /**
-     * When set, the draft will be discarded when {@link close_async} is called.
-     *
-     * In addition, when set all future {@link update}s will result in the draft being dropped.
-     */
-    public bool discard_on_close { get; set; default = false; }
-
     private Account account;
     private Folder? drafts_folder = null;
     private FolderSupport.Create? create_support = null;
@@ -129,6 +121,7 @@ public class Geary.App.DraftManager : BaseObject {
         new Nonblocking.Queue<Operation?>.fifo();
     private bool was_opened = false;
     private Error? fatal_err = null;
+
 
     /**
      * Fired when a draft is successfully saved.
@@ -272,13 +265,6 @@ public class Geary.App.DraftManager : BaseObject {
 
         // don't flush a CLOSE down the pipe if failed, the operation loop is closed for business
         if (fatal_err == null) {
-            // if discarding on close, do so now
-            if (discard_on_close) {
-                // don't use discard(), which checks if open, but submit_push() directly,
-                // which doesn't
-                submit_push(null, null, null);
-            }
-
             // flush pending I/O
             Nonblocking.Semaphore semaphore = new Nonblocking.Semaphore(cancellable);
             mailbox.send(new Operation(OperationType.CLOSE, null, null, null, semaphore));
@@ -316,15 +302,13 @@ public class Geary.App.DraftManager : BaseObject {
      *
      * See {@link FolderSupport.Create.create_email_async} for more information on the flags and
      * date_received arguments.
-     *
-     * @return A {@link Nonblocking.Semaphore} that is notified when the operation completes (with
-     * or without error)
      */
-    public Geary.Nonblocking.Semaphore? update(Geary.RFC822.Message draft, Geary.EmailFlags? flags,
-        DateTime? date_received) throws Error {
+    public async void update(Geary.RFC822.Message draft,
+                             Geary.EmailFlags? flags,
+                             DateTime? date_received,
+                             GLib.Cancellable? cancellable) throws GLib.Error {
         check_open();
-
-        return submit_push(draft, flags, date_received);
+        yield submit_push(draft, flags, date_received).wait_async(cancellable);
     }
 
     /**
@@ -335,27 +319,16 @@ public class Geary.App.DraftManager : BaseObject {
      *
      * Note: Replaced drafts are deleted, but on some services (i.e. Gmail) those deleted messages
      * are actually moved to the Trash.  This call does not currently solve that problem.
-     *
-     * @return A {@link Nonblocking.Semaphore} that is notified when the operation completes (with
-     * or without error)
      */
-    public Geary.Nonblocking.Semaphore? discard() throws Error {
+    public async void discard(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         check_open();
-
-        return submit_push(null, null, null);
+        yield submit_push(null, null, null).wait_async(cancellable);
     }
 
     // Note that this call doesn't check_open(), important when used within close_async()
-    private Nonblocking.Semaphore? submit_push(RFC822.Message? draft, EmailFlags? flags,
+    private Nonblocking.Semaphore submit_push(RFC822.Message? draft, EmailFlags? flags,
         DateTime? date_received) {
-        // no drafts are pushed when discarding on close
-        if (draft != null && discard_on_close) {
-            versions_dropped++;
-            dropped(draft);
-
-            return null;
-        }
-
         // clear out pending pushes (which can be updates or discards)
         mailbox.revoke_matching((op) => {
             // count and notify of dropped drafts

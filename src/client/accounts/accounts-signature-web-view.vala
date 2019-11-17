@@ -21,7 +21,7 @@ public class Accounts.SignatureWebView : ClientWebView {
     }
 
 
-    public SignatureWebView(Configuration config) {
+    public SignatureWebView(Application.Configuration config) {
         base(config);
         this.user_content_manager.add_script(SignatureWebView.app_script);
     }

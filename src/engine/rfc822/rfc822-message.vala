@@ -134,7 +134,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         assert(email.from.size > 0);
         this.sender = email.sender;
         this.from = email.from;
-        this.date = new RFC822.Date.from_date_time(email.date);
+        this.date = email.date;
 
         // GMimeMessage.set_sender actually sets the From header - and
         // although the API docs make it sound otherwise, it also
@@ -167,7 +167,8 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
         if (email.sender != null) {
             this.sender = email.sender;
-            this.message.set_header(HEADER_SENDER, email.sender.to_rfc822_string());
+            this.message.set_header(HEADER_SENDER,
+                                    email.sender.to_rfc822_string());
         }
 
         if (email.reply_to != null) {
@@ -176,18 +177,20 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
 
         if (email.in_reply_to != null) {
-            this.in_reply_to = new Geary.RFC822.MessageIDList.from_rfc822_string(email.in_reply_to);
-            this.message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to);
+            this.in_reply_to = email.in_reply_to;
+            this.message.set_header(HEADER_IN_REPLY_TO,
+                                    email.in_reply_to.to_rfc822_string());
         }
 
         if (email.references != null) {
-            this.references = new Geary.RFC822.MessageIDList.from_rfc822_string(email.references);
-            this.message.set_header(HEADER_REFERENCES, email.references);
+            this.references = email.references;
+            this.message.set_header(HEADER_REFERENCES,
+                                    email.references.to_rfc822_string());
         }
 
         if (email.subject != null) {
-            this.subject = new Geary.RFC822.Subject(email.subject);
-            this.message.set_subject(email.subject);
+            this.subject = email.subject;
+            this.message.set_subject(email.subject.value);
         }
 
         // User-Agent

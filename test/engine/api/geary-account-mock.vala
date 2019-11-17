@@ -181,12 +181,6 @@ public class Geary.MockAccount : Account, MockObject {
         );
     }
 
-    public override async void send_email_async(ComposedEmail composed,
-                                                Cancellable? cancellable = null)
-        throws Error {
-        void_call("send_email_async", {composed, cancellable});
-    }
-
     public override async Gee.MultiMap<Email,FolderPath?>?
         local_search_message_id_async(RFC822.MessageID message_id,
                                       Email.Field requested_fields,

@@ -56,8 +56,9 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.Tree.TARGET_ENTRY_LIST,
             Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
 
-        GearyApplication.instance.config.settings.changed[Configuration.DISPLAY_PREVIEW_KEY].connect(
-            on_display_preview_changed);
+        GearyApplication.instance.config.settings.changed[
+            Application.Configuration.DISPLAY_PREVIEW_KEY
+        ].connect(on_display_preview_changed);
 
         // Watch for mouse events.
         motion_notify_event.connect(on_motion_notify_event);
@@ -296,7 +297,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         if (event.type == Gdk.EventType.BUTTON_PRESS &&
             !get_selection().path_is_selected(path)) {
             MainWindow? parent = get_toplevel() as MainWindow;
-            if (parent != null && !parent.close_composer()) {
+            if (parent != null && !parent.close_composer(false)) {
                 return true;
             }
         }

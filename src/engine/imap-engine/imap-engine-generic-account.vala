@@ -95,7 +95,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.imap = imap;
 
         smtp.outbox = new Outbox.Folder(this, local_folder_root, local);
-        smtp.email_sent.connect(on_email_sent);
         smtp.report_problem.connect(notify_report_problem);
         smtp.set_loggable_parent(this);
         this.smtp = smtp;
@@ -108,7 +107,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
          );
 
         this.opening_monitor = new ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
-        this.sending_monitor = this.smtp.sending_monitor;
         this.search_upgrade_monitor = local.search_index_monitor;
         this.db_upgrade_monitor = local.upgrade_monitor;
         this.db_vacuum_monitor = local.vacuum_monitor;
@@ -491,28 +489,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             }
         }
         return folder;
-    }
-
-    public override async void send_email_async(Geary.ComposedEmail composed,
-                                                GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        check_open();
-
-        // XXX work out what our public IP address is somehow and use
-        // that in preference to the sender's domain
-        string domain = composed.sender != null
-            ? composed.sender.domain
-            : this.information.primary_mailbox.domain;
-        Geary.RFC822.Message rfc822 =
-            yield new Geary.RFC822.Message.from_composed_email(
-                composed, GMime.utils_generate_message_id(domain), cancellable
-            );
-
-        yield this.smtp.queue_email(rfc822, cancellable);
-    }
-
-    private void on_email_sent(Geary.RFC822.Message rfc822) {
-        notify_email_sent(rfc822);
     }
 
     private ImapDB.EmailIdentifier check_id(Geary.EmailIdentifier id) throws EngineError {

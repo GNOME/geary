@@ -177,7 +177,7 @@ public class Plugin.DesktopNotifications : Notification {
 
         /* We do not show notification action under Unity */
 
-        if (this.application.config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+        if (this.application.config.desktop_environment == UNITY) {
             this.application.send_notification(id, notification);
             return notification;
         } else {

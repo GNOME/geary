@@ -12,7 +12,7 @@ public class AttachmentDialog : Object {
     private const int PREVIEW_SIZE = 180;
     private const int PREVIEW_PADDING = 3;
 
-    private Configuration config;
+    private Application.Configuration config;
 
     private Gtk.FileChooserNative? chooser = null;
 
@@ -20,7 +20,7 @@ public class AttachmentDialog : Object {
 
     public delegate bool Attacher(File attachment_file, bool alert_errors = true);
 
-    public AttachmentDialog(Gtk.Window? parent, Configuration config) {
+    public AttachmentDialog(Gtk.Window? parent, Application.Configuration config) {
         this.config = config;
         this.chooser = new Gtk.FileChooserNative(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, _("_Attach"), Stock._CANCEL);
 

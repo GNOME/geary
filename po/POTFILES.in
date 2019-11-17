@@ -18,6 +18,7 @@ src/client/application/application-attachment-manager.vala
 src/client/application/application-avatar-store.vala
 src/client/application/application-certificate-manager.vala
 src/client/application/application-command.vala
+src/client/application/application-configuration.vala
 src/client/application/application-contact-store.vala
 src/client/application/application-contact.vala
 src/client/application/application-controller.vala

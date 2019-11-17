@@ -110,8 +110,9 @@ public class ConversationListStore : Gtk.ListStore {
         this.email_store = new Geary.App.EmailStore(
             conversations.base_folder.account
         );
-        GearyApplication.instance.config.settings.changed[Configuration.DISPLAY_PREVIEW_KEY].connect(
-            on_display_preview_changed);
+        GearyApplication.instance.config.settings.changed[
+            Application.Configuration.DISPLAY_PREVIEW_KEY
+        ].connect(on_display_preview_changed);
 
         conversations.scan_completed.connect(on_scan_completed);
         conversations.conversations_added.connect(on_conversations_added);

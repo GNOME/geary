@@ -5,16 +5,17 @@
  */
 
 [GtkTemplate (ui = "/org/gnome/Geary/composer-headerbar.ui")]
-public class ComposerHeaderbar : Gtk.HeaderBar {
+public class Composer.Headerbar : Gtk.HeaderBar {
 
-    public Configuration config { get; set; }
 
-    public ComposerWidget.ComposerState state { get; set; }
+    public bool show_save_and_close {
+        get { return this.save_and_close_button.visible; }
+        set { this.save_and_close_button.visible = value; }
+    }
 
-    public bool show_pending_attachments { get; set; default = false; }
+    private Application.Configuration config;
 
-    [GtkChild]
-    internal Gtk.Button save_and_close_button; // { get; private set; }
+    private bool is_attached = true;
 
     [GtkChild]
     private Gtk.Box detach_start;
@@ -28,28 +29,26 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
     private Gtk.Button new_message_attach_button;
     [GtkChild]
     private Gtk.Box conversation_attach_buttons;
+    [GtkChild]
+    private Gtk.Button save_and_close_button;
+
 
     /** Fired when the user wants to expand a compact composer. */
     public signal void expand_composer();
 
-    public ComposerHeaderbar(Configuration config, bool is_compact) {
+
+    public Headerbar(Application.Configuration config) {
         this.config = config;
-
-        this.recipients_button.set_visible(is_compact);
-        this.recipients_button.clicked.connect(() => {
-                this.recipients_button.hide();
-                expand_composer();
-            });
-
-        bind_property("show-pending-attachments", new_message_attach_button, "visible",
-            BindingFlags.SYNC_CREATE | BindingFlags.INVERT_BOOLEAN);
-        bind_property("show-pending-attachments", conversation_attach_buttons, "visible",
-            BindingFlags.SYNC_CREATE);
-
-        set_detach_button_side();
         Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(
-            () => { set_detach_button_side(); }
+            on_gtk_decoration_layout_changed
         );
+    }
+
+    public override void destroy() {
+        Gtk.Settings.get_default().notify["gtk-decoration-layout"].disconnect(
+            on_gtk_decoration_layout_changed
+        );
+        base.destroy();
     }
 
     public void set_recipients(string label, string tooltip) {
@@ -57,20 +56,60 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
         recipients_button.tooltip_text = tooltip;
     }
 
-    public void detached() {
-        notify["decoration-layout"].disconnect(set_detach_button_side);
-        this.recipients_button.hide();
-        this.detach_start.visible = this.detach_end.visible = false;
+    public void set_show_pending_attachments(bool show) {
+        this.new_message_attach_button.visible = !show;
+        this.conversation_attach_buttons.visible = show;
+    }
+
+    internal void set_mode(Widget.PresentationMode mode) {
+        switch (mode) {
+        case Widget.PresentationMode.DETACHED:
+            this.recipients_button.visible = false;
+            this.set_attached(false);
+            break;
+
+        case Widget.PresentationMode.PANED:
+        case Widget.PresentationMode.INLINE:
+            this.recipients_button.visible = false;
+            this.set_attached(true);
+            break;
+
+        case Widget.PresentationMode.INLINE_COMPACT:
+            this.recipients_button.visible = true;
+            this.set_attached(true);
+            break;
+        }
+    }
+
+    private void set_attached(bool is_attached) {
+        this.is_attached = is_attached;
+        if (is_attached) {
+            set_detach_button_side();
+        } else {
+            this.detach_start.visible = this.detach_end.visible = false;
+        }
     }
 
     private void set_detach_button_side() {
-        if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
-            detach_start.visible = false;
-            detach_end.visible = true;
-        } else {
-            bool at_end = Util.Gtk.close_button_at_end();
-            detach_start.visible = !at_end;
-            detach_end.visible = at_end;
+        if (this.is_attached) {
+            if (this.config.desktop_environment == UNITY) {
+                this.detach_start.visible = false;
+                this.detach_end.visible = true;
+            } else {
+                bool at_end = Util.Gtk.close_button_at_end();
+                this.detach_start.visible = !at_end;
+                this.detach_end.visible = at_end;
+            }
         }
     }
+
+    [GtkCallback]
+    private void on_recipients_button_clicked() {
+        expand_composer();
+    }
+
+    private void on_gtk_decoration_layout_changed() {
+        set_detach_button_side();
+    }
+
 }

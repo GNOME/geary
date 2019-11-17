@@ -12,13 +12,16 @@
  * This class maintains a queue of email messages to be delivered, and
  * opens SMTP connections to deliver queued messages as needed.
  */
-internal class Geary.Smtp.ClientService : Geary.ClientService {
+public class Geary.Smtp.ClientService : Geary.ClientService {
 
 
-    // Used solely for debugging, hence "(no subject)" not marked for translation
-    private static string message_subject(RFC822.Message message) {
-        return (message.subject != null && !String.is_empty(message.subject.to_string()))
-            ? message.subject.to_string() : "(no subject)";
+    // Used solely for debugging, hence "(no subject)" not marked for
+    // translation
+    private static string email_subject(EmailHeaderSet email) {
+        return (
+            email.subject != null && !String.is_empty(email.subject.to_string()))
+            ? email.subject.to_string()
+            : "(no subject)";
     }
 
 
@@ -79,17 +82,60 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
     }
 
     /**
-     * Saves and queues an email in the outbox for delivery.
+     * Saves and queues email for immediate delivery.
+     *
+     * This is a convenience method that calls {@link save_email} then
+     * {@link queue_email} with the resulting id.
      */
-    public async void queue_email(RFC822.Message rfc822,
-                                  GLib.Cancellable? cancellable)
+    public async void send_email(Geary.ComposedEmail composed,
+                                 GLib.Cancellable? cancellable)
         throws GLib.Error {
-        debug("Queuing message for sending: %s", message_subject(rfc822));
+        queue_email(yield save_email(composed, cancellable));
+    }
+
+    /**
+     * Saves a composed email in the outbox.
+     *
+     * This sets a suitable MessageID header for the message, then
+     * saves the updated message in {@link outbox}. Returns the
+     * identifier for the saved email, suitable for use with {@link
+     * queue_email}.
+     *
+     * @see send_email
+     */
+    public async EmailIdentifier save_email(Geary.ComposedEmail composed,
+                                            GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        debug("Saving composed email: %s", email_subject(composed));
+
+        // XXX work out what our public IP address is somehow and use
+        // that in preference to the sender's domain
+        string domain = composed.sender != null
+            ? composed.sender.domain
+            : this.account.primary_mailbox.domain;
+        Geary.RFC822.Message rfc822 =
+            yield new Geary.RFC822.Message.from_composed_email(
+                composed, GMime.utils_generate_message_id(domain), cancellable
+            );
 
         EmailIdentifier id = yield this.outbox.create_email_async(
             rfc822, null, null, cancellable
         );
-        this.outbox_queue.send(id);
+        debug("Saved composed email as %s", id.to_string());
+        return id;
+    }
+
+    /**
+     * Queues an email for immediate delivery.
+     *
+     * The given identifier must be for {@link outbox}, for example as
+     * given by {@link save_email}.
+     *
+     * @see send_email
+     */
+    public void queue_email(EmailIdentifier outbox_identifier) {
+        debug("Queuing email for sending: %s", outbox_identifier.to_string());
+        this.outbox_queue.send(outbox_identifier);
     }
 
     /** Starts the postie delivering messages. */
@@ -204,8 +250,8 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         if (!email.email_flags.contains(EmailFlags.OUTBOX_SENT)) {
             RFC822.Message message = email.get_message();
             debug("Outbox postie: Sending \"%s\" (ID:%s)...",
-                  message_subject(message), email.id.to_string());
-            yield send_email(message, cancellable);
+                  email_subject(message), email.id.to_string());
+            yield send_email_internal(message, cancellable);
 
             // Mark as sent, so if there's a problem pushing up to
             // Sent, we don't retry sending. Don't pass the
@@ -243,7 +289,7 @@ internal class Geary.Smtp.ClientService : Geary.ClientService {
         yield this.outbox.remove_email_async(Collection.single(email.id), null);
     }
 
-    private async void send_email(Geary.RFC822.Message rfc822, Cancellable? cancellable)
+    private async void send_email_internal(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
         Credentials? login = this.account.get_outgoing_credentials();
         if (login != null && !login.is_complete()) {

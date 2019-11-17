@@ -1,34 +1,40 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * A ComposerBox is a ComposerContainer that is used to compose mails in the main-window
- * (i.e. not-detached), yet separate from a conversation.
+ * A container for full-height paned composers in the main window.
+ *
+ * Adding a composer to this container places it in {@link
+ * PresentationMode.PANED} mode.
  */
-public class ComposerBox : Gtk.Frame, ComposerContainer {
+public class Composer.Box : Gtk.Frame, Container {
 
-    public Gtk.ApplicationWindow top_window {
-        get { return (Gtk.ApplicationWindow) get_toplevel(); }
+    /** {@inheritDoc} */
+    public Gtk.ApplicationWindow? top_window {
+        get { return get_toplevel() as Gtk.ApplicationWindow; }
     }
 
-    internal ComposerWidget composer { get; set; }
-
-    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
+    /** {@inheritDoc} */
+    internal Widget composer { get; set; }
 
     private MainToolbar main_toolbar { get; private set; }
 
 
+    /** Emitted when the container is closed. */
     public signal void vanished();
 
 
-    public ComposerBox(ComposerWidget composer) {
+    public Box(Widget composer, MainToolbar main_toolbar) {
         this.composer = composer;
-        this.composer.free_header();
+        this.composer.set_mode(PANED);
 
-        this.main_toolbar = GearyApplication.instance.controller.main_window.main_toolbar;
+        this.main_toolbar = main_toolbar;
+        this.main_toolbar.set_conversation_header(composer.header);
 
         get_style_context().add_class("geary-composer-box");
         this.halign = Gtk.Align.FILL;
@@ -36,26 +42,20 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
         this.vexpand_set = true;
 
         add(this.composer);
-        this.main_toolbar.set_conversation_header(composer.header);
         show();
     }
 
-    public void remove_composer() {
-        remove(this.composer);
-        close_container();
-    }
-
-    public void vanish() {
-        hide();
-        this.main_toolbar.remove_conversation_header(composer.header);
-        this.composer.state = ComposerWidget.ComposerState.DETACHED;
+    /** {@inheritDoc} */
+    public void close() {
         vanished();
+
+        this.main_toolbar.remove_conversation_header(composer.header);
+        remove(this.composer);
+        destroy();
     }
 
-    public void close_container() {
-        if (this.visible)
-            vanish();
-        destroy();
+    public override void destroy() {
+        debug("Composer.Box::destroy");
     }
 
 }

@@ -20,11 +20,11 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     }
 
     /** Returns the currently displayed composer if any. */
-    public ComposerWidget? current_composer {
+    public Composer.Widget? current_composer {
         get; private set; default = null;
     }
 
-    private Configuration config;
+    private Application.Configuration config;
 
     private Gee.Set<Geary.App.Conversation>? selection_while_composing = null;
     private GLib.Cancellable? find_cancellable = null;
@@ -71,7 +71,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     /**
      * Constructs a new conversation view instance.
      */
-    public ConversationViewer(Configuration config) {
+    public ConversationViewer(Application.Configuration config) {
         base_ref();
         this.config = config;
 
@@ -145,31 +145,33 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     /**
      * Puts the view into composer mode, showing a full-height composer.
      */
-    public void do_compose(ComposerWidget composer) {
-        ComposerBox box = new ComposerBox(composer);
-        this.current_composer = composer;
-
-        // XXX move the ConversationListView management code into
-        // MainWindow or somewhere more appropriate
+    public void do_compose(Composer.Widget composer) {
         MainWindow? main_window = get_toplevel() as MainWindow;
         if (main_window != null) {
+            Composer.Box box = new Composer.Box(
+                composer, main_window.main_toolbar
+            );
+            this.current_composer = composer;
+
+            // XXX move the ConversationListView management code into
+            // MainWindow or somewhere more appropriate
             ConversationListView conversation_list = main_window.conversation_list_view;
             this.selection_while_composing = conversation_list.get_selected_conversations();
             conversation_list.get_selection().unselect_all();
-        }
 
-        box.vanished.connect(on_composer_closed);
-        this.composer_page.add(box);
-        set_visible_child(this.composer_page);
+            box.vanished.connect(on_composer_closed);
+            this.composer_page.add(box);
+            set_visible_child(this.composer_page);
+        }
     }
 
     /**
      * Puts the view into composer mode, showing an embedded composer.
      */
-    public void do_compose_embedded(ComposerWidget composer,
+    public void do_compose_embedded(Composer.Widget composer,
                                     Geary.Email? referred) {
         this.current_composer = composer;
-        ComposerEmbed embed = new ComposerEmbed(
+        Composer.Embed embed = new Composer.Embed(
             referred,
             composer,
             this.conversation_scroller
@@ -184,7 +186,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         if (this.current_list != null) {
             this.current_list.add_embedded_composer(
                 embed,
-                composer.draft_id != null
+                composer.current_draft_id != null
             );
         }
 

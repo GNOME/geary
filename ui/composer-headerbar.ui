@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <template class="ComposerHeaderbar" parent="GtkHeaderBar">
@@ -72,7 +73,6 @@
     </child>
     <child>
       <object class="GtkBox" id="conversation_attach_buttons">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
           <object class="GtkButton" id="conversation_attach_new_button">
@@ -137,6 +137,7 @@
         <property name="focus_on_click">False</property>
         <property name="receives_default">False</property>
         <property name="relief">none</property>
+        <signal name="clicked" handler="on_recipients_button_clicked" swapped="no"/>
         <child>
           <object class="GtkLabel" id="recipients_label">
             <property name="visible">True</property>
@@ -228,7 +229,7 @@
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Discard and Close</property>
-            <property name="action_name">cmh.close-and-discard</property>
+            <property name="action_name">cmh.discard</property>
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="discard_and_close_image">
@@ -252,7 +253,7 @@
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Save and Close</property>
-            <property name="action_name">cmh.close-and-save</property>
+            <property name="action_name">cmh.close</property>
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="save_and_close_image">

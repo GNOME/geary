@@ -7,34 +7,58 @@
 /**
  * Encapsulates a message created by the user in the composer.
  */
-public class Geary.ComposedEmail : BaseObject {
+public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
 
     private const string IMG_SRC_TEMPLATE = "src=\"%s\"";
 
-    public const Geary.Email.Field REQUIRED_REPLY_FIELDS =
+    public const Geary.Email.Field REQUIRED_REPLY_FIELDS = (
         Geary.Email.Field.HEADER
         | Geary.Email.Field.BODY
         | Geary.Email.Field.ORIGINATORS
         | Geary.Email.Field.RECEIVERS
         | Geary.Email.Field.REFERENCES
         | Geary.Email.Field.SUBJECT
-        | Geary.Email.Field.DATE;
+        | Geary.Email.Field.DATE
+    );
 
-    public DateTime date { get; set; }
-    // TODO: sender goes here, but not beyond, as it's not properly supported by GMime yet.
-    public RFC822.MailboxAddress? sender { get; set; default = null; }
-    public RFC822.MailboxAddresses from { get; set; }
-    public RFC822.MailboxAddresses? to { get; set; default = null; }
-    public RFC822.MailboxAddresses? cc { get; set; default = null; }
-    public RFC822.MailboxAddresses? bcc { get; set; default = null; }
-    public RFC822.MailboxAddresses? reply_to { get; set; default = null; }
-    public string? in_reply_to { get; set; default = null; }
-    public Geary.Email? reply_to_email { get; set; default = null; }
-    public string? references { get; set; default = null; }
-    public string? subject { get; set; default = null; }
+    /** {@inheritDoc} */
+    public RFC822.Date? date { get; protected set; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? from { get; protected set; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddress? sender { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? to { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? cc { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? bcc { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddresses? reply_to { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MessageID? message_id { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MessageIDList? in_reply_to { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MessageIDList? references { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.Subject? subject { get; protected set; default = null; }
+
     public string? body_text { get; set; default = null; }
     public string? body_html { get; set; default = null; }
     public string? mailer { get; set; default = null; }
+
+    public Geary.Email? reply_to_email { get; set; default = null; }
 
     public Gee.Set<File> attached_files { get; private set;
         default = new Gee.HashSet<File>(Geary.Files.nullable_hash, Geary.Files.nullable_equal); }
@@ -45,18 +69,58 @@ public class Geary.ComposedEmail : BaseObject {
 
     public string img_src_prefix { get; set; default = ""; }
 
-    public ComposedEmail(DateTime date, RFC822.MailboxAddresses from,
-        RFC822.MailboxAddresses? to = null, RFC822.MailboxAddresses? cc = null,
-        RFC822.MailboxAddresses? bcc = null, string? subject = null,
-        string? body_text = null, string? body_html = null) {
-        this.date = date;
+    public ComposedEmail(DateTime date, RFC822.MailboxAddresses from) {
+        this.date = new RFC822.Date.from_date_time(date);
         this.from = from;
-        this.to = to;
-        this.cc = cc;
-        this.bcc = bcc;
-        this.subject = subject;
-        this.body_text = body_text;
-        this.body_html = body_html;
+    }
+
+    public ComposedEmail set_sender(RFC822.MailboxAddress? sender) {
+        this.sender = sender;
+        return this;
+    }
+
+    public ComposedEmail set_to(RFC822.MailboxAddresses? recipients) {
+        this.to = recipients;
+        return this;
+    }
+
+    public ComposedEmail set_cc(RFC822.MailboxAddresses? recipients) {
+        this.cc = recipients;
+        return this;
+    }
+
+    public ComposedEmail set_bcc(RFC822.MailboxAddresses? recipients) {
+        this.bcc = recipients;
+        return this;
+    }
+
+    public ComposedEmail set_reply_to(RFC822.MailboxAddresses? recipients) {
+        this.reply_to = recipients;
+        return this;
+    }
+
+    public ComposedEmail set_message_id(RFC822.MessageID? id) {
+        this.message_id = id;
+        return this;
+    }
+
+    public ComposedEmail set_in_reply_to(RFC822.MessageIDList? messages) {
+        this.in_reply_to = messages;
+        return this;
+    }
+
+    public ComposedEmail set_references(RFC822.MessageIDList? messages) {
+        this.references = messages;
+        return this;
+    }
+
+    public ComposedEmail set_subject(string? subject) {
+        this.subject = (
+            String.is_empty_or_whitespace(subject)
+            ? null
+            : new RFC822.Subject(subject)
+        );
+        return this;
     }
 
     public async Geary.RFC822.Message to_rfc822_message(string? message_id,

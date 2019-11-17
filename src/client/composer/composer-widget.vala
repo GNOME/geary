@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -11,9 +11,14 @@ private errordomain AttachmentError {
     DUPLICATE
 }
 
-// The actual widget for sending messages. Should be put in a ComposerContainer
+
+/**
+ * A widget for editing an email message.
+ *
+ * Composers must always be placed in an instance of {@link ComposerContainer}.
+ */
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
-public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
+public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
 
     /** The email fields the composer requires for referred email. */
@@ -26,17 +31,61 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         FORWARD
     }
 
+    /**
+     * Determines the result of prompting whether to close the composer.
+     *
+     * @see conditional_close
+     */
     public enum CloseStatus {
-        DO_CLOSE,
-        PENDING_CLOSE,
-        CANCEL_CLOSE
+
+        /** The composer is already closed. */
+        CLOSED,
+
+        /** The composer is ready to be closed, but is not yet. */
+        READY,
+
+        /** Closing the composer was not confirmed by a human. */
+        CANCELLED;
+
     }
 
-    public enum ComposerState {
+    /** Defines different supported user interface modes. */
+    public enum PresentationMode {
+
+        /** Composer has been closed. */
+        CLOSED,
+
+        /** Composer is not currently visible. */
+        NONE,
+
+        /**
+         * Composer is in its own window, not in a main windows.
+         *
+         * @see Window
+         */
         DETACHED,
+
+        /**
+         * Composer is in a full-height box in a main window.
+         *
+         * @see Box
+         */
         PANED,
+
+        /**
+         * Composer is embedded inline in a conversation.
+         *
+         * @see Embed
+         */
         INLINE,
-        INLINE_COMPACT
+
+        /**
+         * Composer is embedded inline with header fields hidden.
+         *
+         * @see Embed
+         */
+        INLINE_COMPACT;
+
     }
 
     private enum AttachPending { ALL, INLINE_ONLY }
@@ -78,9 +127,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private const string ACTION_INSERT_IMAGE = "insert-image";
     private const string ACTION_INSERT_LINK = "insert-link";
     private const string ACTION_COMPOSE_AS_HTML = "compose-as-html";
-    private const string ACTION_SHOW_EXTENDED = "show-extended";
-    private const string ACTION_CLOSE_AND_SAVE = "close-and-save";
-    private const string ACTION_CLOSE_AND_DISCARD = "close-and-discard";
+    private const string ACTION_SHOW_EXTENDED_HEADERS = "show-extended-headers";
+    private const string ACTION_DISCARD = "discard";
     private const string ACTION_DETACH = "detach";
     private const string ACTION_SEND = "send";
     private const string ACTION_ADD_ATTACHMENT = "add-attachment";
@@ -128,18 +176,17 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         { ACTION_ADD_ATTACHMENT,           on_add_attachment                                          },
         { ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments                                     },
         { ACTION_CLOSE,                    on_close                                                   },
-        { ACTION_CLOSE_AND_DISCARD,        on_close_and_discard                                       },
-        { ACTION_CLOSE_AND_SAVE,           on_close_and_save                                          },
+        { ACTION_DISCARD,                  on_discard                                       },
         { ACTION_COMPOSE_AS_HTML,          on_toggle_action, null, "true", on_compose_as_html_toggled },
         { ACTION_DETACH,                   on_detach                                                  },
         { ACTION_OPEN_INSPECTOR,           on_open_inspector                  },
         { ACTION_SELECT_DICTIONARY,        on_select_dictionary                                       },
         { ACTION_SEND,                     on_send                                                    },
-        { ACTION_SHOW_EXTENDED,            on_toggle_action, null, "false", on_show_extended_toggled  },
+        { ACTION_SHOW_EXTENDED_HEADERS,    on_toggle_action, null, "false", on_show_extended_headers_toggled },
     };
 
     public static void add_accelerators(GearyApplication application) {
-        application.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
+        application.add_window_accelerators(ACTION_DISCARD, { "Escape" } );
         application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );
         application.add_window_accelerators(ACTION_DETACH, { "<Ctrl>d" } );
 
@@ -178,50 +225,22 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private const string ATTACHMENT_KEYWORDS_LOCALISED =
         _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
 
-
     private const string PASTED_IMAGE_FILENAME_TEMPLATE = "geary-pasted-image-%u.png";
 
+
+    /** The account the email is being sent from. */
     public Geary.Account account { get; private set; }
-    private Gee.Map<string, Geary.AccountInformation> accounts;
 
     /** The identifier of the draft this composer holds, if any. */
-    public Geary.EmailIdentifier? draft_id { get; private set; default = null; }
-
-    public Geary.RFC822.MailboxAddresses from { get; private set; }
-
-    public string to {
-        get { return this.to_entry.get_text(); }
-        set { this.to_entry.set_text(value); }
+    public Geary.EmailIdentifier? current_draft_id {
+        get; private set; default = null;
     }
 
-    public string cc {
-        get { return this.cc_entry.get_text(); }
-        set { this.cc_entry.set_text(value); }
-    }
+    /** Determines the composer's current presentation mode. */
+    public PresentationMode current_mode { get; set; default = NONE; }
 
-    public string bcc {
-        get { return this.bcc_entry.get_text(); }
-        set { this.bcc_entry.set_text(value); }
-    }
-
-    public string reply_to {
-        get { return this.reply_to_entry.get_text(); }
-        set { this.reply_to_entry.set_text(value); }
-    }
-
-    public Gee.Set<Geary.RFC822.MessageID> in_reply_to = new Gee.HashSet<Geary.RFC822.MessageID>();
-    public string references { get; set; }
-
-    public string subject {
-        get { return this.subject_entry.get_text(); }
-        set { this.subject_entry.set_text(value); }
-    }
-
-    public ComposerState state { get; internal set; }
-
+    /** Determines the type of email being composed. */
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
-
-    public Gee.Set<Geary.EmailIdentifier> referred_ids = new Gee.HashSet<Geary.EmailIdentifier>();
 
     /** Determines if the composer is completely empty. */
     public bool is_blank {
@@ -236,33 +255,55 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    /** Determines if the composer can currently save a draft. */
-    private bool can_save {
-        get { return this.draft_manager != null; }
-    }
+    public WebView editor { get; private set; }
 
-    /** Determines if current message should be saved as draft. */
-    private bool should_save {
+    internal Headerbar header { get; private set; }
+
+    internal bool has_multiple_from_addresses {
         get {
-            return this.can_save
-                && !this.is_draft_saved
-                && !this.is_blank;
+            return (
+                this.accounts.size > 1 ||
+                this.account.information.has_sender_aliases
+            );
         }
     }
 
-    public ComposerHeaderbar header { get; private set; }
+    internal string subject {
+        get { return this.subject_entry.get_text(); }
+        private set { this.subject_entry.set_text(value); }
+    }
 
-    public ComposerWebView editor { get; private set; }
+    private Geary.RFC822.MailboxAddresses from { get; private set; }
 
-    public string window_title { get; set; }
+    private string to {
+        get { return this.to_entry.get_text(); }
+        set { this.to_entry.set_text(value); }
+    }
 
-    private string body_html = "";
+    private string cc {
+        get { return this.cc_entry.get_text(); }
+        set { this.cc_entry.set_text(value); }
+    }
+
+    private string bcc {
+        get { return this.bcc_entry.get_text(); }
+        set { this.bcc_entry.set_text(value); }
+    }
+
+    private string reply_to {
+        get { return this.reply_to_entry.get_text(); }
+        set { this.reply_to_entry.set_text(value); }
+    }
+
+    private Gee.Set<Geary.RFC822.MessageID> in_reply_to = new Gee.HashSet<Geary.RFC822.MessageID>();
+
+    private string references { get; private set; }
 
     [GtkChild]
-    internal Gtk.Grid editor_container;
+    private Gtk.Grid editor_container;
 
     [GtkChild]
-    internal Gtk.Grid body_container;
+    private Gtk.Grid body_container;
 
     [GtkChild]
     private Gtk.Label from_label;
@@ -354,6 +395,24 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private Menu context_menu_webkit_text_entry;
     private Menu context_menu_inspector;
 
+    /** Determines if the composer can currently save a draft. */
+    private bool can_save {
+        get { return this.draft_manager != null; }
+    }
+
+    /** Determines if current message should be saved as draft. */
+    private bool should_save {
+        get {
+            return this.can_save
+                && !this.is_draft_saved
+                && !this.is_blank;
+        }
+    }
+
+    private Gee.Map<string, Geary.AccountInformation> accounts;
+
+    private string body_html = "";
+
     private SpellCheckPopover? spell_check_popover = null;
     private string? pointer_url = null;
     private string? cursor_url = null;
@@ -364,6 +423,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private string forward_subject = "";
     private bool top_posting = true;
     private string? last_quote = null;
+
+    // The message(s) this email is in reply to/forwarded from
+    private Gee.Set<Geary.EmailIdentifier> referred_ids =
+        new Gee.HashSet<Geary.EmailIdentifier>();
 
     private Gee.List<Geary.Attachment>? pending_attachments = null;
     private AttachPending pending_include = AttachPending.INLINE_ONLY;
@@ -395,34 +458,19 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
     private bool _can_delete_quote = false;
 
-    // Is the composer closing (e.g. saving a draft or sending)?
-    private bool is_closing = false;
-
-    private ComposerContainer container {
-        get { return (ComposerContainer) parent; }
+    private Container? container {
+        get { return this.parent as Container; }
     }
 
     private GearyApplication application;
 
 
-    /** Fired when the current saved draft's id has changed. */
-    public signal void draft_id_changed(Geary.EmailIdentifier? id);
-
-    /** Fired when the user opens a link in the composer. */
-    public signal void link_activated(string url);
-
-    /** Fired when the user has changed the composer's subject. */
-    public signal void subject_changed(string new_subject);
-
-
-    public ComposerWidget(GearyApplication application,
+    public Widget(GearyApplication application,
                           Geary.Account initial_account,
-                          Geary.EmailIdentifier? draft_id,
                           ComposeType compose_type) {
         base_ref();
         this.application = application;
         this.account = initial_account;
-        this.draft_id = draft_id;
 
         try {
             this.accounts = this.application.engine.get_accounts();
@@ -431,27 +479,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         this.compose_type = compose_type;
-        if (this.compose_type == ComposeType.NEW_MESSAGE) {
-            this.state = ComposerState.PANED;
-        }
-        else if (this.compose_type == ComposeType.FORWARD ||
-                 this.accounts.size > 1 || this.account.information.has_sender_aliases) {
-            this.state = ComposerState.INLINE;
-        }
-        else {
-            this.state = ComposerState.INLINE_COMPACT;
-        }
 
-        this.header = new ComposerHeaderbar(
-            application.config,
-            this.state == ComposerState.INLINE_COMPACT
-        );
-        this.header.expand_composer.connect(() => {
-                if (this.state == ComposerState.INLINE_COMPACT) {
-                    this.state = ComposerState.INLINE;
-                    update_composer_view();
-                }
-            });
+        this.header = new Headerbar(application.config);
+        this.header.expand_composer.connect(on_expand_compact_headers);
 
         // Setup drag 'n drop
         const Gtk.TargetEntry[] target_entries = { { URI_LIST_MIME_TYPE, 0, 0 } };
@@ -496,7 +526,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         );
         update_subject_spell_checker();
 
-        this.editor = new ComposerWebView(application.config);
+        this.editor = new WebView(application.config);
         this.editor.set_hexpand(true);
         this.editor.set_vexpand(true);
         this.editor.content_loaded.connect(on_editor_content_loaded);
@@ -517,8 +547,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.context_menu_webkit_spelling = (Menu) builder.get_object("context_menu_webkit_spelling");
         this.context_menu_webkit_text_entry = (Menu) builder.get_object("context_menu_webkit_text_entry");
 
-        embed_header();
-
         // Listen to account signals to update from menu.
         this.application.engine.account_available.connect(
             on_account_available
@@ -537,7 +565,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
 
         this.draft_timer = new Geary.TimeoutManager.seconds(
-            10, () => { this.save_draft.begin(); }
+            10, on_draft_timeout
         );
 
         // Add actions once every element has been initialized and added
@@ -561,37 +589,20 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect(on_selection_changed);
 
-        update_composer_view();
         load_entry_completions();
     }
 
-    ~ComposerWidget() {
-        base_unref();
+    public Widget.from_mailbox(GearyApplication application,
+                               Geary.Account initial_account,
+                               Geary.RFC822.MailboxAddress to) {
+        this(application, initial_account, ComposeType.NEW_MESSAGE);
+        this.to = to.to_full_display();
     }
 
-    public override void destroy() {
-        this.draft_timer.reset();
-        if (this.draft_manager_opening != null) {
-            this.draft_manager_opening.cancel();
-            this.draft_manager_opening = null;
-        }
-        if (this.draft_manager != null)
-            close_draft_manager_async.begin(null);
-
-        this.application.engine.account_available.disconnect(
-            on_account_available
-        );
-        this.application.engine.account_unavailable.disconnect(
-            on_account_unavailable
-        );
-
-        base.destroy();
-    }
-
-    public ComposerWidget.from_mailto(GearyApplication application,
-                                      Geary.Account initial_account,
-                                      string mailto) {
-        this(application, initial_account, null, ComposeType.NEW_MESSAGE);
+    public Widget.from_mailto(GearyApplication application,
+                              Geary.Account initial_account,
+                              string mailto) {
+        this(application, initial_account, ComposeType.NEW_MESSAGE);
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.has_prefix(MAILTO_URI_PREFIX)) {
@@ -641,15 +652,26 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    /** Closes the composer unconditionally. */
-    public void close() {
-        this.container.close_container();
+    ~Widget() {
+        base_unref();
+    }
+
+    /**
+     * Returns the emails referred to by the composed email.
+     *
+     * A referred email is the email this composer is a reply to, or
+     * forwarded from. There may be multiple if a composer was already
+     * open and another email was replied to.
+     */
+    public Gee.Set<Geary.EmailIdentifier> get_referred_ids() {
+        return this.referred_ids.read_only_view;
     }
 
     /**
      * Loads the message into the composer editor.
      */
     public async void load(Geary.Email? referred = null,
+                           bool is_draft,
                            string? quote = null,
                            GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -659,29 +681,20 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 "Required fields not met: %s", referred.fields.to_string()
             );
         }
-        bool is_referred_draft = (
-            referred != null &&
-            this.draft_id != null &&
-            referred.id.equal_to(this.draft_id)
-        );
         string referred_quote = "";
         this.last_quote = quote;
         if (referred != null) {
             referred_quote = fill_in_from_referred(referred, quote);
-            if (is_referred_draft ||
+            if (is_draft ||
                 compose_type == ComposeType.NEW_MESSAGE ||
                 compose_type == ComposeType.FORWARD) {
                 this.pending_include = AttachPending.ALL;
             }
-            if (is_referred_draft) {
+            if (is_draft) {
                 yield restore_reply_to_state();
             }
         }
 
-        if (this.state == ComposerState.INLINE_COMPACT)
-            set_compact_header_recipients();
-
-        update_composer_view();
         update_attachments_view();
         update_pending_attachments(this.pending_include, true);
 
@@ -689,16 +702,206 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.body_html,
             referred_quote,
             this.top_posting,
-            is_referred_draft
+            is_draft
         );
 
         try {
-            yield open_draft_manager_async(
-                is_referred_draft ? referred.id : null,
-                cancellable
-            );
+            yield open_draft_manager(is_draft ? referred.id : null, cancellable);
         } catch (Error e) {
             debug("Could not open draft manager: %s", e.message);
+        }
+    }
+
+    /** Detaches the composer and opens it in a new window. */
+    public void detach() {
+        Gtk.Widget? focused_widget = this.container.top_window.get_focus();
+        if (this.container != null) {
+            this.container.close();
+        }
+        Window new_window = new Window(this, this.application);
+
+        // Workaround a GTK+ crasher, Bug 771812. When the
+        // composer is re-parented, its menu_button's popover
+        // keeps a reference to the conversation window's
+        // viewport, so when that is removed it has a null parent
+        // and we crash. To reproduce: Reply inline, detach the
+        // composer, then choose a different conversation back in
+        // the main window. The workaround here sets a new menu
+        // model and hence the menu_button constructs a new
+        // popover.
+        this.composer_actions.change_action_state(
+            ACTION_COMPOSE_AS_HTML,
+            this.application.config.compose_as_html
+        );
+
+        set_mode(DETACHED);
+
+        // If the previously focused widget is in the new composer
+        // window then focus that, else focus something useful.
+        bool refocus = true;
+        if (focused_widget != null) {
+            Window? focused_window = focused_widget.get_toplevel() as Window;
+            if (new_window == focused_window) {
+                focused_widget.grab_focus();
+                refocus = false;
+            }
+        }
+        if (refocus) {
+            set_focus();
+        }
+    }
+
+    /**
+     * Prompts to close the composer if needed, before closing it.
+     *
+     * If the composer is already closed no action is taken.  If the
+     * composer is blank then this method will call {@link exit},
+     * destroying the composer, else the composer will either be saved
+     * or discarded as needed then closed.
+     *
+     * The return value specifies whether the composer is being closed
+     * or if the prompt was cancelled by a human.
+     */
+    public CloseStatus conditional_close(bool should_prompt,
+                                         bool is_shutdown = false) {
+        CloseStatus status = CLOSED;
+        switch (this.current_mode) {
+        case PresentationMode.CLOSED:
+            // no-op
+            break;
+
+        case PresentationMode.NONE:
+            status = READY;
+            break;
+
+        default:
+            if (this.is_blank) {
+                this.close.begin();
+                // This may be a bit of a lie but will very soon
+                // become true.
+                status = CLOSED;
+            } else if (should_prompt) {
+                present();
+                if (this.can_save) {
+                    var dialog = new TernaryConfirmationDialog(
+                        this.container.top_window,
+                        // Translators: This dialog text is displayed to the
+                        // user when closing a composer where the options are
+                        // Keep, Discard or Cancel.
+                        _("Do you want to keep or discard this draft message?"),
+                        null,
+                        Stock._KEEP,
+                        Stock._DISCARD, Gtk.ResponseType.CLOSE,
+                        "",
+                        is_shutdown ? "destructive-action" : "",
+                        Gtk.ResponseType.OK // Default == Keep
+                    );
+                    Gtk.ResponseType response = dialog.run();
+                    if (response == CANCEL ||
+                        response == DELETE_EVENT) {
+                        // Cancel
+                        status = CANCELLED;
+                    } else if (response == OK) {
+                        // Keep
+                        this.save_and_close.begin();
+                    } else {
+                        // Discard
+                        this.discard_and_close.begin();
+                    }
+                } else {
+                    AlertDialog dialog = new ConfirmationDialog(
+                        container.top_window,
+                        // Translators: This dialog text is displayed to the
+                        // user when closing a composer where the options are
+                        // only Discard or Cancel.
+                        _("Do you want to discard this draft message?"),
+                        null,
+                        Stock._DISCARD,
+                        ""
+                    );
+                    Gtk.ResponseType response = dialog.run();
+                    if (response == OK) {
+                        this.discard_and_close.begin();
+                    } else {
+                        status = CANCELLED;
+                    }
+                }
+            } else if (this.can_save) {
+                this.save_and_close.begin();
+            } else {
+                this.discard_and_close.begin();
+            }
+            break;
+        }
+
+        return status;
+    }
+
+    /**
+     * Closes the composer and any drafts unconditionally.
+     *
+     * This method disables the composer, closes the draft manager,
+     * then destroys the composer itself.
+     */
+    public async void close() {
+        if (this.current_mode != CLOSED) {
+            // this will set current_mode to NONE first
+            set_enabled(false);
+            this.current_mode = CLOSED;
+
+            if (this.draft_manager_opening != null) {
+                this.draft_manager_opening.cancel();
+                this.draft_manager_opening = null;
+            }
+
+            if (this.draft_manager != null) {
+                try {
+                    yield close_draft_manager(null);
+                } catch (Error err) {
+                    debug("Error closing draft manager on composer close");
+                }
+            }
+
+            destroy();
+        }
+    }
+
+    public override void destroy() {
+        if (this.draft_manager != null) {
+            warning("Draft manager still open on composer destroy");
+        }
+
+        this.application.engine.account_available.disconnect(
+            on_account_available
+        );
+        this.application.engine.account_unavailable.disconnect(
+            on_account_unavailable
+        );
+
+        base.destroy();
+    }
+
+    /**
+     * Sets whether the composer is able to be used.
+     *
+     * If disabled, the composer hidden, detached from its container
+     * and will stop periodically saving drafts.
+     */
+    public void set_enabled(bool enabled) {
+        this.current_mode = NONE;
+        this.set_sensitive(enabled);
+
+        // Need to update this separately since it may be detached
+        // from the widget itself.
+        this.header.set_sensitive(enabled);
+
+        if (enabled) {
+            this.open_draft_manager.begin(this.current_draft_id, null);
+        } else {
+            if (this.container != null) {
+                this.container.close();
+            }
+            this.draft_timer.reset();
         }
     }
 
@@ -773,14 +976,24 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         if (bcc != "")
             this.bcc_entry.modified = true;
 
-        if (in_reply_to.size > 1) {
-            this.state = ComposerState.PANED;
-        } else if (this.compose_type == ComposeType.FORWARD || this.to_entry.modified
-                   || this.cc_entry.modified || this.bcc_entry.modified
-                   || this.accounts.size > 1 || this.account.information.has_sender_aliases) {
-            this.state = ComposerState.INLINE;
-        } else {
-            this.state = ComposerState.INLINE_COMPACT;
+        // We're in compact inline mode, but there are modified email
+        // addresses, so set us to use plain inline mode instead so
+        // the modified addresses can be seen. If there are CC
+        if (this.current_mode == INLINE_COMPACT && (
+                this.to_entry.modified ||
+                this.cc_entry.modified ||
+                this.bcc_entry.modified ||
+                this.reply_to_entry.modified)) {
+            set_mode(INLINE);
+        }
+
+        // If there's a modified header that would normally be hidden,
+        // show full fields.
+        if (this.bcc_entry.modified ||
+            this.reply_to_entry.modified) {
+            this.editor_actions.change_action_state(
+                ACTION_SHOW_EXTENDED_HEADERS, true
+            );
         }
     }
 
@@ -829,10 +1042,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 }
                 if (show_extended) {
                     this.editor_actions.change_action_state(
-                        ACTION_SHOW_EXTENDED, true
+                        ACTION_SHOW_EXTENDED_HEADERS, true
                     );
                     this.composer_actions.change_action_state(
-                        ACTION_SHOW_EXTENDED, true
+                        ACTION_SHOW_EXTENDED_HEADERS, true
                     );
                 }
             break;
@@ -862,10 +1075,11 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     public void present() {
         this.container.present();
+        set_focus();
     }
 
     public void set_focus() {
-        bool not_compact = (this.state != ComposerState.INLINE_COMPACT);
+        bool not_compact = this.current_mode != INLINE_COMPACT;
         if (not_compact && Geary.String.is_empty(to))
             this.to_entry.grab_focus();
         else if (not_compact && Geary.String.is_empty(subject))
@@ -901,13 +1115,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.editor_actions, this.composer_actions
         };
         foreach (var entries_users in composer_action_entries_users) {
-            entries_users.change_action_state(ACTION_SHOW_EXTENDED, false);
+            entries_users.change_action_state(
+                ACTION_SHOW_EXTENDED_HEADERS, false
+            );
             entries_users.change_action_state(
                 ACTION_COMPOSE_AS_HTML, this.application.config.compose_as_html
             );
         }
 
-        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
         get_action(Action.Edit.UNDO).set_enabled(false);
         get_action(Action.Edit.REDO).set_enabled(false);
 
@@ -1027,26 +1242,35 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         return true;
     }
 
-    public async Geary.ComposedEmail get_composed_email(DateTime? date_override = null,
-        bool only_html = false) {
+    /** Returns a representation of the current message. */
+    public async Geary.ComposedEmail get_composed_email(GLib.DateTime? date_override = null,
+                                                        bool for_draft = false) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
-            date_override ?? new DateTime.now_local(), from);
-
-        email.to = this.to_entry.addresses ?? email.to;
-        email.cc = this.cc_entry.addresses ?? email.cc;
-        email.bcc = this.bcc_entry.addresses ?? email.bcc;
-        email.reply_to = this.reply_to_entry.addresses ?? email.reply_to;
+            date_override ?? new DateTime.now_local(),
+            from
+        ).set_to(
+            this.to_entry.addresses
+        ).set_cc(
+            this.cc_entry.addresses
+        ).set_bcc(
+            this.bcc_entry.addresses
+        ).set_reply_to(
+            this.reply_to_entry.addresses
+        ).set_subject(
+            this.subject
+        );
 
         if ((this.compose_type == ComposeType.REPLY || this.compose_type == ComposeType.REPLY_ALL) &&
             !this.in_reply_to.is_empty)
-            email.in_reply_to =
-                new Geary.RFC822.MessageIDList.from_collection(in_reply_to).to_rfc822_string();
+            email.set_in_reply_to(
+                new Geary.RFC822.MessageIDList.from_collection(this.in_reply_to)
+            );
 
-        if (!Geary.String.is_empty(this.references))
-            email.references = this.references;
-
-        if (!Geary.String.is_empty(this.subject))
-            email.subject = this.subject;
+        if (!Geary.String.is_empty(this.references)) {
+            email.set_references(
+                new Geary.RFC822.MessageIDList.from_rfc822_string(this.references)
+            );
+        }
 
         email.attached_files.add_all(this.attached_files);
         email.inline_files.set_all(this.inline_files);
@@ -1055,10 +1279,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         email.img_src_prefix = ClientWebView.INTERNAL_URL_PREFIX;
 
         try {
-            if (this.editor.is_rich_text || only_html)
-                email.body_html = yield this.editor.get_html();
-            if (!only_html)
+            if (!for_draft) {
+                if (this.editor.is_rich_text) {
+                    email.body_html = yield this.editor.get_html();
+                }
                 email.body_text = yield this.editor.get_text();
+            } else {
+                email.body_html = yield this.editor.get_html_for_draft();
+            }
         } catch (Error error) {
             debug("Error getting composer message body: %s", error.message);
         }
@@ -1069,69 +1297,34 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         return email;
     }
 
-    public void change_compose_type(ComposeType new_type, Geary.Email? referred = null,
-        string? quote = null) {
-        if (referred != null && quote != null && quote != this.last_quote) {
-            this.last_quote = quote;
-            // Always use reply styling, since forward styling doesn't work for inline quotes
+    /** Appends an email or fragment quoted into the composer. */
+    public void append_to_email(Geary.Email referred,
+                                string? to_quote,
+                                ComposeType type)
+        throws Geary.EngineError {
+        if (!referred.fields.is_all_set(REQUIRED_FIELDS)) {
+            throw new Geary.EngineError.INCOMPLETE_MESSAGE(
+                "Required fields not met: %s", referred.fields.to_string()
+            );
+        }
+
+        if (!this.referred_ids.contains(referred.id)) {
+            add_recipients_and_ids(type, referred);
+        }
+
+        if (this.last_quote != to_quote) {
+            this.last_quote = to_quote;
+            // Always use reply styling, since forward styling doesn't
+            // work for inline quotes
             this.editor.insert_html(
                 Util.Email.quote_email_for_reply(
                     referred,
-                    quote,
+                    to_quote,
                     this.application.config.clock_format,
                     Geary.RFC822.TextFormat.HTML
                 )
             );
-
-            if (!referred_ids.contains(referred.id)) {
-                add_recipients_and_ids(new_type, referred);
-
-                if (this.state != ComposerState.PANED &&
-                    this.state != ComposerState.DETACHED) {
-                    this.state = ComposerWidget.ComposerState.PANED;
-                    // XXX move the two lines below to the controller
-                    this.container.remove_composer();
-                    GearyApplication.instance.controller.main_window.conversation_viewer.do_compose(this);
-                }
-            }
-        } else if (new_type != this.compose_type) {
-            bool recipients_modified = this.to_entry.modified || this.cc_entry.modified || this.bcc_entry.modified;
-            switch (new_type) {
-                case ComposeType.REPLY:
-                case ComposeType.REPLY_ALL:
-                    this.subject = this.reply_subject;
-                    if (!recipients_modified) {
-                        this.to_entry.addresses = reply_to_addresses;
-                        this.cc_entry.addresses = (new_type == ComposeType.REPLY_ALL) ?
-                            reply_cc_addresses : null;
-                        this.to_entry.modified = this.cc_entry.modified = false;
-                    } else {
-                        this.to_entry.select_region(0, -1);
-                    }
-                break;
-
-                case ComposeType.FORWARD:
-                    if (this.state == ComposerState.INLINE_COMPACT)
-                        this.state = ComposerState.INLINE;
-                    this.subject = forward_subject;
-                    if (!recipients_modified) {
-                        this.to = "";
-                        this.cc = "";
-                        this.to_entry.modified = this.cc_entry.modified = false;
-                    } else {
-                        this.to_entry.select_region(0, -1);
-                    }
-                break;
-
-                default:
-                    assert_not_reached();
-            }
-            this.compose_type = new_type;
         }
-
-        update_composer_view();
-        this.container.present();
-        set_focus();
     }
 
     private void add_recipients_and_ids(ComposeType type, Geary.Email referred,
@@ -1184,136 +1377,6 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.referred_ids.add(referred.id);
     }
 
-    public CloseStatus should_close() {
-        if (this.is_closing)
-            return CloseStatus.PENDING_CLOSE;
-        if (this.is_blank)
-            return CloseStatus.DO_CLOSE;
-
-        this.container.present();
-
-        CloseStatus status = CloseStatus.PENDING_CLOSE;
-        if (this.can_save) {
-            AlertDialog dialog = new TernaryConfirmationDialog(
-                container.top_window,
-                // Translators: This dialog text is displayed to the
-                // user when closing a composer where the options are
-                // Keep, Discard or Cancel.
-                _("Do you want to keep or discard this draft message?"),
-                null,
-                Stock._KEEP,
-                Stock._DISCARD, Gtk.ResponseType.CLOSE,
-                "",
-                "destructive-action",
-                Gtk.ResponseType.OK // Default == Keep
-            );
-            Gtk.ResponseType response = dialog.run();
-            if (response == Gtk.ResponseType.CANCEL ||
-                response == Gtk.ResponseType.DELETE_EVENT) {
-                // Cancel
-                status = CloseStatus.CANCEL_CLOSE;
-            } else if (response == Gtk.ResponseType.OK) {
-                // Keep
-                if (!this.is_draft_saved) {
-                    save_and_exit_async.begin();
-                } else {
-                    status = CloseStatus.DO_CLOSE;
-                }
-            } else {
-                // Discard
-                discard_and_exit_async.begin();
-            }
-        } else {
-            AlertDialog dialog = new ConfirmationDialog(
-                container.top_window,
-                // Translators: This dialog text is displayed to the
-                // user when closing a composer where the options are
-                // only Discard or Cancel.
-                _("Do you want to discard this draft message?"),
-                null,
-                Stock._DISCARD,
-                "destructive-action"
-            );
-            Gtk.ResponseType response = dialog.run();
-            if (response == Gtk.ResponseType.OK) {
-                discard_and_exit_async.begin();
-            } else {
-                status = CloseStatus.CANCEL_CLOSE;
-            }
-        }
-
-        return status;
-    }
-
-    private void on_close(SimpleAction action, Variant? param) {
-        if (should_close() == CloseStatus.DO_CLOSE) {
-            close();
-        }
-    }
-
-    private void on_close_and_save(SimpleAction action, Variant? param) {
-        if (this.should_save)
-            save_and_exit_async.begin();
-        else
-            this.container.close_container();
-    }
-
-    private void on_close_and_discard(SimpleAction action, Variant? param) {
-        discard_and_exit_async.begin();
-    }
-
-    private void on_detach() {
-        if (this.state == ComposerState.DETACHED)
-            return;
-
-        Gtk.Widget? focused_widget = this.container.top_window.get_focus();
-        this.container.remove_composer();
-        ComposerWindow new_window = new ComposerWindow(this, this.application);
-
-        // Workaround a GTK+ crasher, Bug 771812. When the composer is
-        // re-parented, its menu_button's popover keeps a reference to
-        // the conversation window's viewport, so when that is removed
-        // it has a null parent and we crash. To reproduce: Reply
-        // inline, detach the composer, then choose a different
-        // conversation back in the main window. The workaround here
-        // sets a new menu model and hence the menu_button constructs
-        // a new popover.
-        this.composer_actions.change_action_state(
-            ACTION_COMPOSE_AS_HTML,
-            this.application.config.compose_as_html
-        );
-
-        this.state = ComposerWidget.ComposerState.DETACHED;
-        update_composer_view();
-
-        // If the previously focused widget is in the new composer
-        // window then focus that, else focus something useful.
-        bool refocus = true;
-        if (focused_widget != null) {
-            ComposerWindow? focused_window =
-                focused_widget.get_toplevel() as ComposerWindow;
-            if (new_window == focused_window) {
-                focused_widget.grab_focus();
-                refocus = false;
-            }
-        }
-        if (refocus) {
-            set_focus();
-        }
-    }
-
-    public void embed_header() {
-        if (this.header.parent == null) {
-            this.header_area.add(this.header);
-            this.header.hexpand = true;
-        }
-    }
-
-    public void free_header() {
-        if (this.header.parent != null)
-            this.header.parent.remove(this.header);
-    }
-
     public override bool key_press_event(Gdk.EventKey event) {
         // Override the method since key-press-event is run last, and
         // we want this behaviour to take precedence over the default
@@ -1321,18 +1384,46 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         return check_send_on_return(event) && base.key_press_event(event);
     }
 
-    // Updates the composer's UI after its state has changed
-    private void update_composer_view() {
-        this.recipients.set_visible(this.state != ComposerState.INLINE_COMPACT);
+    internal void set_mode(PresentationMode new_mode) {
+        this.current_mode = new_mode;
+        this.header.set_mode(new_mode);
 
-        bool not_inline = (this.state != ComposerState.INLINE &&
-                           this.state != ComposerState.INLINE_COMPACT);
-        this.subject_label.set_visible(not_inline);
-        this.subject_entry.set_visible(not_inline);
+        switch (new_mode) {
+        case PresentationMode.DETACHED:
+        case PresentationMode.PANED:
+            this.recipients.set_visible(true);
+            this.subject_label.set_visible(true);
+            this.subject_entry.set_visible(true);
+            break;
 
-        this.header.state = this.state;
+        case PresentationMode.INLINE:
+            this.recipients.set_visible(true);
+            this.subject_label.set_visible(false);
+            this.subject_entry.set_visible(false);
+            break;
+
+        case PresentationMode.INLINE_COMPACT:
+            this.recipients.set_visible(false);
+            this.subject_label.set_visible(false);
+            this.subject_entry.set_visible(false);
+            set_compact_header_recipients();
+            break;
+        }
 
         update_from_field();
+    }
+
+    internal void embed_header() {
+        if (this.header.parent == null) {
+            this.header_area.add(this.header);
+            this.header.hexpand = true;
+        }
+    }
+
+    internal void free_header() {
+        if (this.header.parent != null) {
+            this.header.parent.remove(this.header);
+        }
     }
 
     private async bool should_send() {
@@ -1372,49 +1463,47 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     // Sends the current message.
-    private void on_send(SimpleAction action, Variant? param) {
+    private void on_send() {
         this.should_send.begin((obj, res) => {
                 if (this.should_send.end(res)) {
-                    on_send_async.begin();
+                    this.on_send_async.begin();
                 }
             });
     }
 
     // Used internally by on_send()
     private async void on_send_async() {
-        this.editor.disable();
-        this.container.vanish();
-        this.is_closing = true;
+        set_enabled(false);
 
-        // Perform send.
         try {
             yield this.editor.clean_content();
-            yield this.account.send_email_async(yield get_composed_email());
-        } catch (Error e) {
-            GLib.message("Error sending email: %s", e.message);
-        }
+            yield this.application.controller.send_composed_email(this);
 
-        Geary.Nonblocking.Semaphore? semaphore = discard_draft();
-        if (semaphore != null) {
-            try {
-                yield semaphore.wait_async();
-            } catch (Error err) {
-                // ignored
+            if (this.draft_manager != null) {
+                yield discard_draft();
+                yield close_draft_manager(null);
             }
-        }
 
-        // Only close window after draft is deleted; this closes the drafts folder.
-        this.container.close_container();
+            if (this.container != null) {
+                this.container.close();
+            }
+        } catch (GLib.Error error) {
+            this.application.controller.report_problem(
+                new Geary.AccountProblemReport(
+                    this.account.information, error
+                )
+            );
+        }
     }
 
     /**
      * Creates and opens the composer's draft manager.
      */
-    private async void open_draft_manager_async(Geary.EmailIdentifier? editing_draft_id,
-                                                GLib.Cancellable? cancellable)
+    private async void open_draft_manager(Geary.EmailIdentifier? editing_draft_id,
+                                          GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (!this.account.information.save_drafts) {
-            this.header.save_and_close_button.hide();
+            this.header.show_save_and_close = false;
             return;
         }
 
@@ -1436,7 +1525,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             yield new_manager.open_async(editing_draft_id, internal_cancellable);
             debug("Draft manager opened");
         } catch (GLib.Error err) {
-            this.header.save_and_close_button.hide();
+            this.header.show_save_and_close = false;
             throw err;
         } finally {
             this.draft_manager_opening = null;
@@ -1451,34 +1540,29 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.draft_manager = new_manager;
 
         update_draft_state();
-        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(true);
-        this.header.save_and_close_button.show();
-
+        this.header.show_save_and_close = true;
     }
 
     /**
      * Closes current draft manager, if any, then opens a new one.
      */
-    private async void reopen_draft_manager_async()
-    throws Error {
+    private async void reopen_draft_manager(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         if (this.draft_manager != null) {
             // Discard the draft, if any, since it may be on a
             // different account
-            discard_draft();
-            this.draft_manager.discard_on_close = true;
-            yield close_draft_manager_async(null);
+            yield discard_draft();
+            yield close_draft_manager(cancellable);
         }
-        yield open_draft_manager_async(null, null);
+        yield open_draft_manager(null, cancellable);
+        yield save_draft();
     }
 
-    private async void close_draft_manager_async(Cancellable? cancellable)
-    throws Error {
-        this.draft_status_text = "";
-
-        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
-
+    private async void close_draft_manager(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         Geary.App.DraftManager old_manager = this.draft_manager;
         this.draft_manager = null;
+        this.draft_status_text = "";
 
         old_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
             .disconnect(on_draft_state_changed);
@@ -1486,12 +1570,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             .disconnect(on_draft_id_changed);
         old_manager.fatal.disconnect(on_draft_manager_fatal);
 
-        // drop ref even if close failed
-        try {
-            yield old_manager.close_async(cancellable);
-        } catch (Error err) {
-            debug("Error closing draft manager: %s", err.message);
-        }
+        yield old_manager.close_async(cancellable);
         debug("Draft manager closed");
     }
 
@@ -1533,74 +1612,78 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     // Note that drafts are NOT "linkified."
-    private async void save_draft() {
+    private async void save_draft() throws GLib.Error {
+        debug("Saving draft");
+
         // cancel timer in favor of just doing it now
         this.draft_timer.reset();
 
         if (this.draft_manager != null) {
-            try {
-                Geary.ComposedEmail draft = yield get_composed_email(null, true);
-                this.draft_manager.update(
-                    yield draft.to_rfc822_message(null, null),
-                    this.draft_flags,
-                    null
-                );
-            } catch (Error err) {
-                GLib.message("Unable to save draft: %s", err.message);
-            }
+            Geary.ComposedEmail draft = yield get_composed_email(null, true);
+            yield this.draft_manager.update(
+                yield draft.to_rfc822_message(null, null),
+                this.draft_flags,
+                null,
+                null
+            );
         }
     }
 
-    private Geary.Nonblocking.Semaphore? discard_draft() {
+    private async void discard_draft() throws GLib.Error {
+        debug("Discarding draft");
+
         // cancel timer in favor of this operation
         this.draft_timer.reset();
 
-        try {
-            if (this.draft_manager != null)
-                return this.draft_manager.discard();
-        } catch (Error err) {
-            GLib.message("Unable to discard draft: %s", err.message);
-        }
-
-        return null;
+        yield this.draft_manager.discard(null);
+        this.current_draft_id = null;
     }
 
-    // Used while waiting for draft to save before closing widget.
-    private void make_gui_insensitive() {
-        this.container.vanish();
-        this.draft_timer.reset();
-    }
+    private async void save_and_close() {
+        set_enabled(false);
 
-    private async void save_and_exit_async() {
-        make_gui_insensitive();
-        this.is_closing = true;
-
-        yield save_draft();
-        try {
-            yield close_draft_manager_async(null);
-        } catch (Error err) {
-            // ignored
-        }
-        container.close_container();
-    }
-
-    private async void discard_and_exit_async() {
-        make_gui_insensitive();
-        this.is_closing = true;
-
-        // This method can be called even if drafts are not being
-        // saved, hence we need to check the draft manager
-        if (draft_manager != null) {
-            discard_draft();
-            draft_manager.discard_on_close = true;
+        if (this.should_save) {
             try {
-                yield close_draft_manager_async(null);
-            } catch (Error err) {
-                // ignored
+                yield save_draft();
+            } catch (GLib.Error error) {
+                this.application.controller.report_problem(
+                    new Geary.AccountProblemReport(
+                        this.account.information, error
+                    )
+                );
             }
         }
 
-        this.container.close_container();
+        // Pass on to the controller so the draft can be re-opened
+        // on undo
+        if (this.container != null) {
+            this.container.close();
+        }
+        yield this.application.controller.save_composed_email(this);
+    }
+
+    private async void discard_and_close() {
+        set_enabled(false);
+
+        if (this.draft_manager != null) {
+            try {
+                yield discard_draft();
+                yield close_draft_manager(null);
+            } catch (GLib.Error error) {
+                this.application.controller.report_problem(
+                    new Geary.AccountProblemReport(
+                        this.account.information, error
+                    )
+                );
+            }
+        }
+
+        // Pass on to the controller so the discarded email can be
+        // re-opened on undo
+        if (this.container != null) {
+            this.container.close();
+        }
+        yield this.application.controller.discard_composed_email(this);
     }
 
     private void update_attachments_view() {
@@ -1669,7 +1752,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 }
             }
         }
-        this.header.show_pending_attachments = manual_enabled;
+        this.header.set_show_pending_attachments(manual_enabled);
         return have_added;
     }
 
@@ -2000,7 +2083,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.application.config.compose_as_html = compose_as_html;
     }
 
-    private void on_show_extended_toggled(SimpleAction? action, Variant? new_state) {
+    private void on_show_extended_headers_toggled(GLib.SimpleAction? action,
+                                                  GLib.Variant? new_state) {
         bool show_extended = new_state.get_boolean();
         action.set_state(show_extended);
         this.bcc_label.visible =
@@ -2008,9 +2092,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             this.reply_to_label.visible =
             this.reply_to_entry.visible = show_extended;
 
-        if (show_extended && this.state == ComposerState.INLINE_COMPACT) {
-            this.state = ComposerState.INLINE;
-            update_composer_view();
+        if (show_extended && this.current_mode == INLINE_COMPACT) {
+            set_mode(INLINE);
         }
     }
 
@@ -2168,7 +2251,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_select_dictionary(SimpleAction action, Variant? param) {
         if (this.spell_check_popover == null) {
-            Configuration config = this.application.config;
+            Application.Configuration config = this.application.config;
             this.spell_check_popover = new SpellCheckPopover(
                 this.select_dictionary_button, config
             );
@@ -2265,9 +2348,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         // Don't show in inline unless the current account has
         // multiple email accounts or aliases, since these will be replies to a
         // conversation
-        if ((this.state == ComposerState.INLINE || this.state == ComposerState.INLINE_COMPACT) &&
-            !(this.accounts.size > 1 || this.account.information.has_sender_aliases)) {
-            return false;         
+        if ((this.current_mode == INLINE ||
+             this.current_mode == INLINE_COMPACT) &&
+            !this.has_multiple_from_addresses) {
+            return false;
         }
 
         // If there's only one account and it not have any aliases,
@@ -2323,7 +2407,22 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                 this.account = selected.account;
                 this.update_signature.begin(null);
                 load_entry_completions();
-                this.reopen_draft_manager_async.begin();
+
+                var current_account = this.account;
+                this.reopen_draft_manager.begin(
+                    null,
+                    (obj, res) => {
+                        try {
+                            this.reopen_draft_manager.end(res);
+                        } catch (GLib.Error error) {
+                            this.application.controller.report_problem(
+                                new Geary.AccountProblemReport(
+                                    current_account.information, error
+                                )
+                            );
+                        }
+                    }
+                );
             }
         }
     }
@@ -2405,15 +2504,15 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         buffer.spell_checker = checker;
     }
 
-    private async ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,
-                                                       string url) {
+    private async LinkPopover new_link_popover(LinkPopover.Type type,
+                                               string url) {
         var selection_id = "";
         try {
             selection_id = yield this.editor.save_selection();
         } catch (Error err) {
             debug("Error saving selection: %s", err.message);
         }
-        ComposerLinkPopover popover = new ComposerLinkPopover(type);
+        LinkPopover popover = new LinkPopover(type);
         popover.set_link_url(url);
         popover.closed.connect(() => {
                 this.editor.free_selection(selection_id);
@@ -2441,7 +2540,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_draft_id_changed() {
-        draft_id_changed(this.draft_manager.current_draft_id);
+        this.current_draft_id = this.draft_manager.current_draft_id;
     }
 
     private void on_draft_manager_fatal(Error err) {
@@ -2455,7 +2554,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     [GtkCallback]
     private void on_subject_changed() {
         draft_changed();
-        subject_changed(this.subject);
+        notify_property("subject");
     }
 
     [GtkCallback]
@@ -2471,6 +2570,14 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    private void on_expand_compact_headers() {
+        set_mode(INLINE);
+    }
+
+    private void on_detach() {
+        detach();
+    }
+
     private bool on_button_release(Gdk.Event event) {
         // Show the link popover on mouse release (instead of press)
         // so the user can still select text with a link in it,
@@ -2484,9 +2591,9 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             location.y = (int) button.y;
 
             this.new_link_popover.begin(
-                ComposerLinkPopover.Type.EXISTING_LINK, this.pointer_url,
+                LinkPopover.Type.EXISTING_LINK, this.pointer_url,
                 (obj, res) => {
-                    ComposerLinkPopover popover = this.new_link_popover.end(res);
+                    LinkPopover popover = this.new_link_popover.end(res);
                     popover.set_relative_to(this.editor);
                     popover.set_pointing_to(location);
                     popover.show();
@@ -2495,7 +2602,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         return Gdk.EVENT_PROPAGATE;
     }
 
-    private void on_cursor_context_changed(ComposerWebView.EditContext context) {
+    private void on_cursor_context_changed(WebView.EditContext context) {
         this.cursor_url = context.is_link ? context.link_url : null;
         update_cursor_actions();
 
@@ -2589,15 +2696,15 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_insert_link(SimpleAction action, Variant? param) {
-        ComposerLinkPopover.Type type = ComposerLinkPopover.Type.NEW_LINK;
+        LinkPopover.Type type = LinkPopover.Type.NEW_LINK;
         string url = "https://";
         if (this.cursor_url != null) {
-            type = ComposerLinkPopover.Type.EXISTING_LINK;
+            type = LinkPopover.Type.EXISTING_LINK;
             url = this.cursor_url;
         }
 
         this.new_link_popover.begin(type, url, (obj, res) => {
-                ComposerLinkPopover popover = this.new_link_popover.end(res);
+                LinkPopover popover = this.new_link_popover.end(res);
 
                 // We have to disconnect then reconnect the selection
                 // changed signal for the duration of the popover
@@ -2621,6 +2728,35 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_selection_changed(bool has_selection) {
         update_cursor_actions();
+    }
+
+    private void on_close() {
+        conditional_close(this.container is Window);
+    }
+
+    private void on_discard() {
+        if (this.container is Window) {
+            conditional_close(true);
+        } else {
+            this.discard_and_close.begin();
+        }
+    }
+
+    private void on_draft_timeout() {
+        var current_account = this.account;
+        this.save_draft.begin(
+            (obj, res) => {
+                try {
+                    this.save_draft.end(res);
+                } catch (GLib.Error error) {
+                    this.application.controller.report_problem(
+                        new Geary.AccountProblemReport(
+                            current_account.information, error
+                        )
+                    );
+                }
+            }
+        );
     }
 
     private void on_account_available() {

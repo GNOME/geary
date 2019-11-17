@@ -9,7 +9,7 @@
 /**
  * A WebView for editing messages in the composer.
  */
-public class ComposerWebView : ClientWebView {
+public class Composer.WebView : ClientWebView {
 
 
     // WebKit message handler names
@@ -83,10 +83,10 @@ public class ComposerWebView : ClientWebView {
 
     public static new void load_resources()
         throws Error {
-        ComposerWebView.app_style = ClientWebView.load_app_stylesheet(
+        WebView.app_style = ClientWebView.load_app_stylesheet(
             "composer-web-view.css"
         );
-        ComposerWebView.app_script = ClientWebView.load_app_script(
+        WebView.app_script = ClientWebView.load_app_script(
             "composer-web-view.js"
         );
     }
@@ -115,13 +115,13 @@ public class ComposerWebView : ClientWebView {
     internal signal bool button_release_event_done(Gdk.Event event);
 
 
-    public ComposerWebView(Configuration config) {
+    public WebView(Application.Configuration config) {
         base(config);
 
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
 
-        this.user_content_manager.add_style_sheet(ComposerWebView.app_style);
-        this.user_content_manager.add_script(ComposerWebView.app_script);
+        this.user_content_manager.add_style_sheet(WebView.app_style);
+        this.user_content_manager.add_script(WebView.app_script);
 
         register_message_handler(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
         register_message_handler(DRAG_DROP_RECEIVED, on_drag_drop_received);
@@ -183,10 +183,12 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
-     * Makes the view uneditable and stops signals from being sent.
+     * Returns the view's content as HTML without being cleaned.
      */
-    public void disable() {
-        set_sensitive(false);
+    public async string? get_html_for_draft() throws Error {
+        return Util.JS.to_string(
+            yield call(Util.JS.callable("geary.getHtml").bool(false), null)
+        );
     }
 
     /**
