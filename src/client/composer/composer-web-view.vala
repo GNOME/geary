@@ -14,7 +14,7 @@ public class ComposerWebView : ClientWebView {
 
     // WebKit message handler names
     private const string CURSOR_CONTEXT_CHANGED = "cursorContextChanged";
-
+    private const string DRAG_DROP_RECEIVED = "dragDropReceived";
 
     /**
      * Encapsulates editing-related state for a specific DOM node.
@@ -108,6 +108,9 @@ public class ComposerWebView : ClientWebView {
     /** Emitted when the cursor's edit context has changed. */
     public signal void cursor_context_changed(EditContext cursor_context);
 
+    /** Emitted when an image file has been dropped on the composer */
+    public signal void image_file_dropped(string filename, string type, uint8[] contents);
+
     /** Workaround for WebView eating the button event */
     internal signal bool button_release_event_done(Gdk.Event event);
 
@@ -121,6 +124,7 @@ public class ComposerWebView : ClientWebView {
         this.user_content_manager.add_script(ComposerWebView.app_script);
 
         register_message_handler(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
+        register_message_handler(DRAG_DROP_RECEIVED, on_drag_drop_received);
 
         // XXX this is a bit of a hack given the docs for is_empty,
         // above
@@ -521,4 +525,40 @@ public class ComposerWebView : ClientWebView {
         }
     }
 
+    /**
+     *  Handle a dropped image
+     */
+    private void on_drag_drop_received(WebKit.JavascriptResult result) {
+
+        try {
+            JSC.Value object = result.get_js_value();
+            string filename = Util.JS.to_string(
+                Util.JS.get_property(object, "fileName")
+            );
+            string filename_unescaped = GLib.Uri.unescape_string(filename);
+
+            string file_type = Util.JS.to_string(
+                Util.JS.get_property(object, "fileType")
+            );
+
+            string content_base64 = Util.JS.to_string(
+                Util.JS.get_property(object, "content")
+            );
+            uint8[] image = GLib.Base64.decode(content_base64);
+
+            if (image.length == 0) {
+                warning("%s is empty", filename);
+                return;
+            }
+
+            // A simple check to see if the file looks like an image. A problem here
+            // will be this accepting types which won't be supported by WebKit
+            // or recipients.
+            if (file_type.index_of("image/") == 0) {
+                image_file_dropped(filename_unescaped, file_type, image);
+            }
+        } catch (Util.JS.Error err) {
+            debug("Could not get deceptive link param: %s", err.message);
+        }
+    }
 }

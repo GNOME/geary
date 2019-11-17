@@ -179,6 +179,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
 
 
+    private const string PASTED_IMAGE_FILENAME_TEMPLATE = "geary-pasted-image-%u.png";
+
     public Geary.Account account { get; private set; }
     private Gee.Map<string, Geary.AccountInformation> accounts;
 
@@ -367,8 +369,8 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private AttachPending pending_include = AttachPending.INLINE_ONLY;
     private Gee.Set<File> attached_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
         Geary.Files.nullable_equal);
-    private Gee.Map<string,File> inline_files = new Gee.HashMap<string,File>();
-    private Gee.Map<string,File> cid_files = new Gee.HashMap<string,File>();
+    private Gee.Map<string,Geary.Memory.Buffer> inline_files = new Gee.HashMap<string,Geary.Memory.Buffer>();
+    private Gee.Map<string,Geary.Memory.Buffer> cid_files = new Gee.HashMap<string,Geary.Memory.Buffer>();
 
     private Geary.App.DraftManager? draft_manager = null;
     private GLib.Cancellable? draft_manager_opening = null;
@@ -524,6 +526,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         this.application.engine.account_unavailable.connect(
             on_account_unavailable
         );
+
+        // Listen for drag and dropped image file
+        this.editor.image_file_dropped.connect(
+            on_image_file_dropped
+        );
+
         // TODO: also listen for account updates to allow adding identities while writing an email
 
         this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
@@ -1623,9 +1631,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                         // using a cid: URL anyway, so treat it as an
                         // attachment instead.
                         if (content_id != null) {
-                            this.cid_files[content_id] = file;
+                            Geary.Memory.FileBuffer file_buffer = new Geary.Memory.FileBuffer(file, true);
+                            this.cid_files[content_id] = file_buffer;
                             this.editor.add_internal_resource(
-                                content_id, new Geary.Memory.FileBuffer(file, true)
+                                content_id, file_buffer
                             );
                         } else {
                             type = Geary.Mime.DispositionType.ATTACHMENT;
@@ -1641,7 +1650,10 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                             !this.attached_files.contains(file) &&
                             !this.inline_files.has_key(content_id)) {
                             if (type == Geary.Mime.DispositionType.INLINE) {
-                                add_inline_part(file, content_id);
+                                check_attachment_file(file);
+                                Geary.Memory.FileBuffer file_buffer = new Geary.Memory.FileBuffer(file, true);
+                                string unused;
+                                add_inline_part(file_buffer, content_id, out unused);
                             } else {
                                 add_attachment_part(file);
                             }
@@ -1690,18 +1702,41 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         update_attachments_view();
     }
 
-    private void add_inline_part(File target, string content_id)
+    private void add_inline_part(Geary.Memory.Buffer target, string content_id, out string unique_contentid)
         throws AttachmentError {
-        check_attachment_file(target);
-        this.inline_files[content_id] = target;
-        try {
-            this.editor.add_internal_resource(
-                content_id, new Geary.Memory.FileBuffer(target, true)
+
+        const string UNIQUE_RENAME_TEMPLATE = "%s_%02u";
+
+        if (target.size == 0)
+            throw new AttachmentError.FILE(
+                _("“%s” is an empty file.").printf(content_id)
             );
-        } catch (Error err) {
-            // unlikely
-            debug("Failed to re-open file for attachment: %s", err.message);
+
+        // Avoid filename conflicts
+        unique_contentid = content_id;
+        int suffix_index = 0;
+        string unsuffixed_filename = "";
+        while (this.inline_files.has_key(unique_contentid)) {
+            string[] filename_parts = unique_contentid.split(".");
+
+            // Handle no file extension
+            int partindex;
+            if (filename_parts.length > 1) {
+                partindex = filename_parts.length-2;
+            } else {
+                partindex = 0;
+            }
+            if (unsuffixed_filename == "")
+                unsuffixed_filename = filename_parts[partindex];
+            filename_parts[partindex] = UNIQUE_RENAME_TEMPLATE.printf(unsuffixed_filename, suffix_index++);
+
+            unique_contentid = string.joinv(".", filename_parts);
         }
+
+        this.inline_files[unique_contentid] = target;
+        this.editor.add_internal_resource(
+            unique_contentid, target
+        );
     }
 
     private FileInfo check_attachment_file(File target)
@@ -1873,13 +1908,53 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private void on_paste(SimpleAction action, Variant? param) {
         if (this.container.get_focus() == this.editor) {
             if (this.editor.is_rich_text) {
-                this.editor.paste_rich_text();
+                // Check for pasted image in clipboard
+                Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+                bool has_image = clipboard.wait_is_image_available();
+                if (has_image) {
+                    paste_image();
+                } else {
+                    this.editor.paste_rich_text();
+                }
             } else {
                 this.editor.paste_plain_text();
             }
         } else if (this.container.get_focus() is Gtk.Editable) {
             ((Gtk.Editable) this.container.get_focus()).paste_clipboard();
         }
+    }
+
+    /**
+     * Handle a pasted image, adding it as an inline attachment
+     */
+    private void paste_image() {
+        // The slow operations here are creating the PNG and, to a lesser extent,
+        // requesting the image from the clipboard
+        this.container.top_window.application.mark_busy();
+
+        get_clipboard(Gdk.SELECTION_CLIPBOARD).request_image((clipboard, pixbuf) => {
+            if (pixbuf != null) {
+                try {
+                    uint8[] buffer;
+                    pixbuf.save_to_buffer(out buffer, "png");
+                    Geary.Memory.ByteBuffer byte_buffer = new Geary.Memory.ByteBuffer(buffer, buffer.length);
+
+                    GLib.DateTime time_now = new GLib.DateTime.now();
+                    string filename = PASTED_IMAGE_FILENAME_TEMPLATE.printf(time_now.hash());
+
+                    string unique_filename;
+                    add_inline_part(byte_buffer, filename, out unique_filename);
+                    this.editor.insert_image(
+                        ClientWebView.INTERNAL_URL_PREFIX + unique_filename
+                    );
+                } catch (Error error) {
+                    warning("Failed to paste image %s", error.message);
+                }
+            } else {
+                warning("Failed to get image from clipboard");
+            }
+            this.container.top_window.application.unmark_busy();
+        });
     }
 
     private void on_paste_without_formatting(SimpleAction action, Variant? param) {
@@ -2496,10 +2571,13 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             dialog.hide();
             foreach (File file in dialog.get_files()) {
                 try {
+                    check_attachment_file(file);
+                    Geary.Memory.FileBuffer file_buffer = new Geary.Memory.FileBuffer(file, true);
                     string path = file.get_path();
-                    add_inline_part(file, path);
+                    string unique_filename;
+                    add_inline_part(file_buffer, path, out unique_filename);
                     this.editor.insert_image(
-                        ClientWebView.INTERNAL_URL_PREFIX + path
+                        ClientWebView.INTERNAL_URL_PREFIX + unique_filename
                     );
                 } catch (Error err) {
                     attachment_failed(err.message);
@@ -2555,4 +2633,21 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    /**
+     * Handle a dropped image file, adding it as an inline attachment
+     */
+    private void on_image_file_dropped(string filename, string file_type, uint8[] contents) {
+        Geary.Memory.ByteBuffer buffer = new Geary.Memory.ByteBuffer(contents, contents.length);
+        string unique_filename;
+        try {
+            add_inline_part(buffer, filename, out unique_filename);
+        } catch (AttachmentError err) {
+            warning("Couldn't attach dropped empty file %s", filename);
+            return;
+        }
+
+        this.editor.insert_image(
+            ClientWebView.INTERNAL_URL_PREFIX + unique_filename
+        );
+    }
 }
