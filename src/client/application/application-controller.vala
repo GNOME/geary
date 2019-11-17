@@ -164,12 +164,8 @@ public class Application.Controller : Geary.BaseObject {
 
     private Cancellable cancellable_open_account = new Cancellable();
 
-    // Currently open composers
+    // List composers that have not yet been closed
     private Gee.Collection<Composer.Widget> composer_widgets =
-        new Gee.LinkedList<Composer.Widget>();
-
-    // Composers that are in the process of closing
-    private Gee.Collection<Composer.Widget> waiting_to_close =
         new Gee.LinkedList<Composer.Widget>();
 
     // Requested mailto composers not yet fullfulled
@@ -190,9 +186,6 @@ public class Application.Controller : Geary.BaseObject {
         // the actions are created (as they refer to some of Geary's
         // custom icons)
         IconFactory.instance.init();
-
-        // Listen for attempts to close the application.
-        this.application.exiting.connect(on_application_exiting);
 
         // Create DB upgrade dialog.
         this.upgrade_dialog = new UpgradeDialog();
@@ -318,13 +311,49 @@ public class Application.Controller : Geary.BaseObject {
         return this.accounts.get(account);
     }
 
-    /** Closes all accounts and windows, releasing held resources. */
-    public async void close_async() {
-        // Cancel internal processes early so they don't block
-        // shutdown
-        this.open_cancellable.cancel();
+    /** Closes all windows and accounts, releasing held resources. */
+    public async void close() {
+        this.application.engine.account_available.disconnect(
+            on_account_available
+        );
 
-        this.application.engine.account_available.disconnect(on_account_available);
+        this.main_window.set_sensitive(false);
+
+        // Close any open composers up-front before anything else is
+        // shut down so any pending operations have a chance to
+        // complete.
+        //
+        // Close them in parallel to minimise time taken for this to
+        // complete, but use a barrier to wait for them all to
+        // actually finish closing.
+        var composer_barrier = new Geary.Nonblocking.CountingSemaphore(null);
+
+        // Take a copy of the collection of composers since
+        // closing any will cause the underlying collection to change.
+        var composers = new Gee.LinkedList<Composer.Widget>();
+        composers.add_all(this.composer_widgets);
+        foreach (var composer in composers) {
+            if (composer.current_mode != CLOSED) {
+                composer_barrier.acquire();
+                composer.close.begin(
+                    (obj, res) => {
+                        composer.close.end(res);
+                        composer_barrier.blind_notify();
+                    }
+                );
+            }
+        }
+
+        try {
+            yield composer_barrier.wait_async();
+        } catch (GLib.Error err) {
+            debug("Error waiting at composer barrier: %s", err.message);
+        }
+
+        // Now that all composers are closed, we can shut down the
+        // rest of the client and engine. Cancel internal processes
+        // first so they don't block shutdown.
+        this.open_cancellable.cancel();
 
         // Release folder and conversations in the main window
         yield this.main_window.select_folder(null, false);
@@ -394,7 +423,6 @@ public class Application.Controller : Geary.BaseObject {
 
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
-        this.waiting_to_close.clear();
 
         this.avatars.close();
 
@@ -1481,15 +1509,6 @@ public class Application.Controller : Geary.BaseObject {
         }
     }
 
-    // We need to include the second parameter, or valac doesn't recognize the function as matching
-    // GearyApplication.exiting's signature.
-    private bool on_application_exiting(GearyApplication sender, bool panicked) {
-        if (close_composition_windows())
-            return true;
-
-        return sender.cancel_exit();
-    }
-
     private bool should_notify_new_messages(Geary.Folder folder) {
         // A monitored folder must be selected to squelch notifications;
         // if conversation list is at top of display, don't display
@@ -1536,47 +1555,15 @@ public class Application.Controller : Geary.BaseObject {
         composer.set_focus();
     }
 
-    internal bool close_composition_windows() {
-        // Take a copy of the collection of composers since closing
-        // any will cause the underlying collection to change.
-        var composers = new Gee.LinkedList<Composer.Widget>();
-        composers.add_all(this.composer_widgets);
-        bool quit_cancelled = false;
-
-        foreach (var composer in composers) {
-            if (composer.current_mode == NONE) {
-                // Composer currently isn't being presented at all
-                // (it's probably in the undo stack), so just close it
-                this.waiting_to_close.add(composer);
-                composer.close.begin();
-            } else {
-                switch (composer.conditional_close(true, true)) {
-                case Composer.Widget.CloseStatus.PENDING:
-                    this.waiting_to_close.add(composer);
-                    break;
-
-                case Composer.Widget.CloseStatus.CANCELLED:
-                    quit_cancelled = true;
-                    break;
-                }
+    internal bool check_open_composers() {
+        var do_quit = true;
+        foreach (var composer in this.composer_widgets) {
+            if (composer.conditional_close(true, true) == CANCELLED) {
+                do_quit = false;
+                break;
             }
         }
-
-        // If we cancelled the quit we can bail here.
-        if (quit_cancelled) {
-            this.waiting_to_close.clear();
-            return false;
-        }
-
-        // If there's still windows saving, we can't exit just yet.
-        if (this.waiting_to_close.size > 0) {
-            this.main_window.set_sensitive(false);
-            return false;
-        }
-
-        // If we deleted all composer windows without the user
-        // cancelling, we can exit.
-        return true;
+        return do_quit;
     }
 
     /**
@@ -1700,14 +1687,11 @@ public class Application.Controller : Geary.BaseObject {
     }
 
     private void on_composer_widget_destroy(Gtk.Widget sender) {
-        composer_widgets.remove((Composer.Widget) sender);
-        debug(@"Destroying composer of type $(((Composer.Widget) sender).compose_type); "
-            + @"$(composer_widgets.size) composers remaining");
-
-        if (waiting_to_close.remove((Composer.Widget) sender)) {
-            // If we just removed the last window in the waiting to close list, it's time to exit!
-            if (waiting_to_close.size == 0)
-                this.application.exit();
+        Composer.Widget? composer = sender as Composer.Widget;
+        if (composer != null) {
+            composer_widgets.remove((Composer.Widget) sender);
+            debug(@"Composer type $(composer.compose_type) destroyed; " +
+                  @"$(this.composer_widgets.size) composers remaining");
         }
     }
 

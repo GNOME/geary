@@ -245,9 +245,6 @@ public class GearyApplication : Gtk.Application {
     private File exec_dir;
     private string binary;
     private bool start_hidden = false;
-    private bool exiting_fired = false;
-    private int exitcode = 0;
-    private bool is_destroyed = false;
     private GLib.Cancellable controller_cancellable = new GLib.Cancellable();
     private Components.Inspector? inspector = null;
     private Geary.Nonblocking.Mutex controller_mutex = new Geary.Nonblocking.Mutex();
@@ -338,16 +335,6 @@ public class GearyApplication : Gtk.Application {
         info.add({ _("Installation prefix"), INSTALL_PREFIX });
 
         return info;
-    }
-
-    /**
-     * Signal that is activated when 'exit' is called, but before the application actually exits.
-     *
-     * To cancel an exit, a callback should return GearyApplication.cancel_exit(). To proceed with
-     * an exit, a callback should return true.
-     */
-    public virtual signal bool exiting(bool panicked) {
-        return true;
     }
 
 
@@ -453,6 +440,12 @@ public class GearyApplication : Gtk.Application {
             return exit_value;
 
         return -1;
+    }
+
+    public override void shutdown() {
+        Util.Date.terminate();
+        Geary.Logging.clear();
+        base.shutdown();
     }
 
     public override void activate() {
@@ -659,67 +652,40 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
-    // This call will fire "exiting" only if it's not already been fired.
-    public void exit(int exitcode = 0) {
-        if (this.exiting_fired)
-            return;
-
-        this.exitcode = exitcode;
-
-        exiting_fired = true;
-        if (!exiting(false)) {
-            exiting_fired = false;
-            this.exitcode = 0;
-
-            return;
-        }
-
-        this.controller_cancellable.cancel();
-
-        // Give asynchronous destroy_controller() a chance to
-        // complete, but to avoid bug(s) where Geary hangs at exit,
-        // shut the whole thing down if destroy_controller() takes too
-        // long to complete
-        int64 start_usec = get_monotonic_time();
-        destroy_controller.begin();
-        while (!is_destroyed || Gtk.events_pending()) {
-            Gtk.main_iteration();
-
-            int64 delta_usec = get_monotonic_time() - start_usec;
-            if (delta_usec >= FORCE_SHUTDOWN_USEC) {
-                debug("Forcing shutdown of Geary, %ss passed...", (delta_usec / USEC_PER_SEC).to_string());
-                Posix.exit(2);
-            }
-        }
-
-        quit();
-
-        Geary.Logging.clear();
-        Util.Date.terminate();
-    }
-
     /**
-     * A callback for GearyApplication.exiting should return
-     * cancel_exit() to prevent the application from exiting.
-     */
-    public bool cancel_exit() {
-        Signal.stop_emission_by_name(this, "exiting");
-        return false;
-    }
-
-    /**
-     * Causes the application to exit immediately.
+     * Closes the controller and all open windows, exiting if possible.
      *
-     * This call will fire "exiting" only if it's not already been
-     * fired and halt the application in its tracks
+     * Any open composers with unsaved or un-savable changes will be
+     * prompted about and if cancelled, will cancel shut-down here.
      */
-    public void panic() {
-        if (!exiting_fired) {
-            exiting_fired = true;
-            exiting(true);
-        }
+    public new void quit() {
+        if (this.controller == null ||
+            this.controller.check_open_composers()) {
 
-        Posix.exit(1);
+            bool controller_closed = false;
+            this.destroy_controller.begin((obj, res) => {
+                    this.destroy_controller.end(res);
+                    controller_closed = true;
+                });
+
+            // Give asynchronous destroy_controller() a chance to
+            // complete, but to avoid bug(s) where Geary hangs at exit,
+            // shut the whole thing down if destroy_controller() takes too
+            // long to complete
+            int64 start_usec = get_monotonic_time();
+            while (!controller_closed) {
+                Gtk.main_iteration();
+
+                int64 delta_usec = get_monotonic_time() - start_usec;
+                if (delta_usec >= FORCE_SHUTDOWN_USEC) {
+                    debug("Forcing shutdown of Geary, %ss passed...",
+                          (delta_usec / USEC_PER_SEC).to_string());
+                    Posix.exit(2);
+                }
+            }
+
+            base.quit();
+        }
     }
 
     /**
@@ -804,22 +770,21 @@ public class GearyApplication : Gtk.Application {
         try {
             int mutex_token = yield this.controller_mutex.claim_async();
             if (this.controller != null) {
-                yield this.controller.close_async();
+                yield this.controller.close();
                 this.controller = null;
             }
             this.controller_mutex.release(ref mutex_token);
-        } catch (Error err) {
+        } catch (GLib.Error err) {
             debug("Error destroying controller: %s", err.message);
         }
 
         release();
-        this.is_destroyed = true;
     }
 
     private int handle_general_options(GLib.ApplicationCommandLine command_line) {
         GLib.VariantDict options = command_line.get_options_dict();
         if (options.contains(OPTION_QUIT)) {
-            exit();
+            quit();
             return 0;
         }
 
@@ -966,7 +931,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_quit() {
-        exit();
+        quit();
     }
 
     private void on_activate_show_email(GLib.SimpleAction action,

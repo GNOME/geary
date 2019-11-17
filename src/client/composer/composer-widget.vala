@@ -34,19 +34,27 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /**
      * Determines the result of prompting whether to close the composer.
      *
-     * @see confirm_close
+     * @see conditional_close
      */
     public enum CloseStatus {
 
-        /** The composer is being closed. */
-        PENDING,
+        /** The composer is already closed. */
+        CLOSED,
+
+        /** The composer is ready to be closed, but is not yet. */
+        READY,
 
         /** Closing the composer was not confirmed by a human. */
         CANCELLED;
+
     }
 
     /** Defines different supported user interface modes. */
     public enum PresentationMode {
+
+        /** Composer has been closed. */
+        CLOSED,
+
         /** Composer is not currently visible. */
         NONE,
 
@@ -76,7 +84,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
          *
          * @see Embed
          */
-        INLINE_COMPACT
+        INLINE_COMPACT;
+
     }
 
     private enum AttachPending { ALL, INLINE_ONLY }
@@ -449,9 +458,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
     private bool _can_delete_quote = false;
 
-    // Is the composer closing (e.g. saving a draft or sending)?
-    private bool is_closing = false;
-
     private Container? container {
         get { return this.parent as Container; }
     }
@@ -748,17 +754,32 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /**
      * Prompts to close the composer if needed, before closing it.
      *
-     * The return value specifies whether the composer is being
-     * closed, if it was already being closed, or the prompt was
-     * cancelled by a human.
+     * If the composer is already closed no action is taken.  If the
+     * composer is blank then this method will call {@link exit},
+     * destroying the composer, else the composer will either be saved
+     * or discarded as needed then closed.
+     *
+     * The return value specifies whether the composer is being closed
+     * or if the prompt was cancelled by a human.
      */
     public CloseStatus conditional_close(bool should_prompt,
                                          bool is_shutdown = false) {
-        CloseStatus status = PENDING;
+        CloseStatus status = CLOSED;
+        switch (this.current_mode) {
+        case PresentationMode.CLOSED:
+            // no-op
+            break;
 
-        if (!this.is_closing) {
+        case PresentationMode.NONE:
+            status = READY;
+            break;
+
+        default:
             if (this.is_blank) {
                 this.close.begin();
+                // This may be a bit of a lie but will very soon
+                // become true.
+                status = CLOSED;
             } else if (should_prompt) {
                 present();
                 if (this.can_save) {
@@ -810,30 +831,39 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             } else {
                 this.discard_and_close.begin();
             }
+            break;
         }
 
         return status;
     }
 
-    /** Closes the composer unconditionally. */
+    /**
+     * Closes the composer and any drafts unconditionally.
+     *
+     * This method disables the composer, closes the draft manager,
+     * then destroys the composer itself.
+     */
     public async void close() {
-        this.is_closing = true;
-        set_enabled(false);
+        if (this.current_mode != CLOSED) {
+            // this will set current_mode to NONE first
+            set_enabled(false);
+            this.current_mode = CLOSED;
 
-        if (this.draft_manager_opening != null) {
-            this.draft_manager_opening.cancel();
-            this.draft_manager_opening = null;
-        }
-
-        if (this.draft_manager != null) {
-            try {
-                yield close_draft_manager(null);
-            } catch (Error err) {
-                debug("Error closing draft manager on composer close");
+            if (this.draft_manager_opening != null) {
+                this.draft_manager_opening.cancel();
+                this.draft_manager_opening = null;
             }
-        }
 
-        destroy();
+            if (this.draft_manager != null) {
+                try {
+                    yield close_draft_manager(null);
+                } catch (Error err) {
+                    debug("Error closing draft manager on composer close");
+                }
+            }
+
+            destroy();
+        }
     }
 
     public override void destroy() {
@@ -866,7 +896,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.header.set_sensitive(enabled);
 
         if (enabled) {
-            this.is_closing = false;
             this.open_draft_manager.begin(this.current_draft_id, null);
         } else {
             if (this.container != null) {
@@ -1444,7 +1473,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     // Used internally by on_send()
     private async void on_send_async() {
-        this.is_closing = true;
         set_enabled(false);
 
         try {
@@ -1612,7 +1640,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private async void save_and_close() {
-        this.is_closing = true;
         set_enabled(false);
 
         if (this.should_save) {
@@ -1636,7 +1663,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private async void discard_and_close() {
-        this.is_closing = true;
         set_enabled(false);
 
         if (this.draft_manager != null) {

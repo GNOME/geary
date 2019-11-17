@@ -1603,7 +1603,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             }
         } else {
             if (close_composer(true, false)) {
-                this.application.exit();
+                this.application.quit();
             }
         }
         return Gdk.EVENT_STOP;
