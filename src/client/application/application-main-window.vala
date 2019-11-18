@@ -1860,37 +1860,45 @@ public class Application.MainWindow :
     }
 
     private void on_conversation_activated(Geary.App.Conversation activated) {
-        // Currently activating a conversation is only available for
-        // drafts folders.
-        if (this.selected_folder != null &&
-            this.selected_folder.special_folder_type == DRAFTS) {
-            // TODO: Determine how to map between conversations and
-            // drafts correctly.
-            Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
-
-            // Check all known composers since the draft may be open
-            // in a detached composer
-            bool already_open = false;
-            foreach (Composer.Widget composer
-                     in this.application.controller.get_composers()) {
-                if (composer.current_draft_id != null &&
-                    composer.current_draft_id.equal_to(draft.id)) {
-                    already_open = true;
-                    composer.present();
-                    composer.set_focus();
-                    break;
-                }
-            }
-
-            if (!already_open) {
-                this.application.controller.compose_with_context_email(
-                    this,
-                    activated.base_folder.account,
-                    NEW_MESSAGE,
-                    draft,
-                    null,
-                    true
+        if (this.selected_folder != null) {
+            if (this.selected_folder.special_folder_type != DRAFTS) {
+                // Make a copy of the selection so the underlying
+                // collection doesn't change as the selection does.
+                this.application.new_window.begin(
+                    this.selected_folder,
+                    Geary.traverse(
+                        this.conversation_list_view.get_selected_conversations()
+                    ).to_linked_list()
                 );
+            } else {
+                // TODO: Determine how to map between conversations
+                // and drafts correctly.
+                Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
+
+                // Check all known composers since the draft may be
+                // open in a detached composer
+                bool already_open = false;
+                foreach (Composer.Widget composer
+                         in this.application.controller.get_composers()) {
+                    if (composer.current_draft_id != null &&
+                        composer.current_draft_id.equal_to(draft.id)) {
+                        already_open = true;
+                        composer.present();
+                        composer.set_focus();
+                        break;
+                    }
+                }
+
+                if (!already_open) {
+                    this.application.controller.compose_with_context_email(
+                        this,
+                        activated.base_folder.account,
+                        NEW_MESSAGE,
+                        draft,
+                        null,
+                        true
+                    );
+                }
             }
         }
     }
