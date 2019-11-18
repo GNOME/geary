@@ -962,9 +962,9 @@ public class Application.MainWindow :
         this.main_toolbar.bind_property("find-open", this.conversation_viewer.conversation_find_bar,
                 "search-mode-enabled", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         if (config.desktop_environment == UNITY) {
+            this.main_toolbar.show_close_button = false;
             this.main_layout.pack_start(main_toolbar, false, true, 0);
         } else {
-            main_toolbar.show_close_button = true;
             set_titlebar(this.main_toolbar);
         }
 
