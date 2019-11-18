@@ -23,6 +23,7 @@ src/client/application/application-configuration.vala
 src/client/application/application-contact-store.vala
 src/client/application/application-contact.vala
 src/client/application/application-controller.vala
+src/client/application/application-main-window.vala
 src/client/application/application-notification-context.vala
 src/client/application/application-plugin-manager.vala
 src/client/application/application-startup-manager.vala
@@ -41,7 +42,6 @@ src/client/components/count-badge.vala
 src/client/components/folder-popover.vala
 src/client/components/icon-factory.vala
 src/client/components/main-toolbar.vala
-src/client/components/main-window.vala
 src/client/components/main-window-info-bar.vala
 src/client/components/monitored-progress-bar.vala
 src/client/components/monitored-spinner.vala
