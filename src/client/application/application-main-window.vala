@@ -1576,7 +1576,7 @@ public class Application.MainWindow :
                 Gee.Collection<Geary.EmailIdentifier> ids =
                     new Gee.LinkedList<Geary.EmailIdentifier>();
                 foreach (Geary.App.Conversation convo in
-                         this.conversation_list_view.get_selected_conversations()) {
+                         this.conversation_list_view.get_selected()) {
                     ids.add_all(convo.get_email_ids());
                 }
                 try {
@@ -1874,13 +1874,9 @@ public class Application.MainWindow :
     private void on_conversation_activated(Geary.App.Conversation activated) {
         if (this.selected_folder != null) {
             if (this.selected_folder.special_folder_type != DRAFTS) {
-                // Make a copy of the selection so the underlying
-                // collection doesn't change as the selection does.
                 this.application.new_window.begin(
                     this.selected_folder,
-                    Geary.traverse(
-                        this.conversation_list_view.get_selected_conversations()
-                    ).to_linked_list()
+                    this.conversation_list_view.copy_selected()
                 );
             } else {
                 // TODO: Determine how to map between conversations
@@ -1974,7 +1970,7 @@ public class Application.MainWindow :
         bool starred_selected = false;
         bool unstarred_selected = false;
         foreach (Geary.App.Conversation conversation in
-                 this.conversation_list_view.get_selected_conversations()) {
+                 this.conversation_list_view.get_selected()) {
             if (conversation.is_unread())
                 unread_selected = true;
 
@@ -2031,7 +2027,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.application.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.get_selected_conversations(),
+                this.conversation_list_view.copy_selected(),
                 Geary.EmailFlags.UNREAD,
                 false,
                 (obj, res) => {
@@ -2050,7 +2046,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.application.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.get_selected_conversations(),
+                this.conversation_list_view.copy_selected(),
                 Geary.EmailFlags.UNREAD,
                 true,
                 (obj, res) => {
@@ -2069,7 +2065,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.application.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.get_selected_conversations(),
+                this.conversation_list_view.copy_selected(),
                 Geary.EmailFlags.FLAGGED,
                 true,
                 (obj, res) => {
@@ -2088,7 +2084,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.application.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.get_selected_conversations(),
+                this.conversation_list_view.copy_selected(),
                 Geary.EmailFlags.FLAGGED,
                 false,
                 (obj, res) => {
@@ -2112,7 +2108,7 @@ public class Application.MainWindow :
             this.application.controller.move_conversations_special.begin(
                 source,
                 destination,
-                this.conversation_list_view.get_selected_conversations(),
+                this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
                         this.application.controller.move_conversations_special.end(res);
@@ -2131,7 +2127,7 @@ public class Application.MainWindow :
             this.application.controller.move_conversations.begin(
                 source,
                 destination,
-                this.conversation_list_view.get_selected_conversations(),
+                this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
                         this.application.controller.move_conversations.end(res);
@@ -2151,7 +2147,7 @@ public class Application.MainWindow :
             this.application.controller.copy_conversations.begin(
                 source,
                 destination,
-                this.conversation_list_view.get_selected_conversations(),
+                this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
                         this.application.controller.copy_conversations.end(res);
@@ -2170,7 +2166,7 @@ public class Application.MainWindow :
             this.application.controller.move_conversations_special.begin(
                 source,
                 ARCHIVE,
-                this.conversation_list_view.get_selected_conversations(),
+                this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
                         this.application.controller.move_conversations_special.end(res);
@@ -2188,7 +2184,7 @@ public class Application.MainWindow :
             this.application.controller.move_conversations_special.begin(
                 source,
                 Geary.SpecialFolderType.TRASH,
-                this.conversation_list_view.get_selected_conversations(),
+                this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
                         this.application.controller.move_conversations_special.end(res);
@@ -2204,7 +2200,7 @@ public class Application.MainWindow :
         Geary.FolderSupport.Remove target =
             this.selected_folder as Geary.FolderSupport.Remove;
         Gee.Collection<Geary.App.Conversation> conversations =
-            this.conversation_list_view.get_selected_conversations();
+            this.conversation_list_view.copy_selected();
         if (target != null && this.prompt_delete_conversations(conversations.size)) {
             this.application.controller.delete_conversations.begin(
                 target,

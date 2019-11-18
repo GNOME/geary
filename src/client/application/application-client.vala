@@ -1021,13 +1021,9 @@ public class Application.Client : Gtk.Application {
         // If there was an existing active main, select the same
         // account/folder/conversation.
         MainWindow? current = this.last_active_main_window;
-        // Make a copy of the selection so the underlying collection
-        // doesn't change as the selection does.
         this.new_window.begin(
             current.selected_folder,
-            Geary.traverse(
-                current.conversation_list_view.get_selected_conversations()
-            ).to_linked_list()
+            current.conversation_list_view.copy_selected()
         );
     }
 

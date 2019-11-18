@@ -131,9 +131,16 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         selection.changed.connect(on_selection_changed);
     }
 
-    /** Returns a read-only collection of the current selection. */
-    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
+    /** Returns a read-only iteration of the current selection. */
+    public Gee.Set<Geary.App.Conversation> get_selected() {
         return this.selected.read_only_view;
+    }
+
+    /** Returns a copy of the current selection. */
+    public Gee.Set<Geary.App.Conversation> copy_selected() {
+        var copy = new Gee.HashSet<Geary.App.Conversation>();
+        copy.add_all(this.selected);
+        return copy;
     }
 
     public void inhibit_next_autoselect() {
@@ -288,13 +295,11 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             // Get the current conversation.  If it's selected, we'll apply the mark operation to
             // all selected conversations; otherwise, it just applies to this one.
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
-            Gee.Collection<Geary.App.Conversation> to_mark;
-            if (this.selected.contains(conversation))
-                // take a copy of currently selected for handling to
-                // the signal
-                to_mark = get_selected_conversations();
-            else
-                to_mark = Geary.Collection.single(conversation);
+            Gee.Collection<Geary.App.Conversation> to_mark = (
+                this.selected.contains(conversation)
+                ? copy_selected()
+                : Geary.Collection.single(conversation)
+            );
 
             if (read_clicked) {
                 mark_conversations(to_mark, Geary.EmailFlags.UNREAD);
