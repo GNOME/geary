@@ -1,56 +1,156 @@
 <page xmlns="http://projectmallard.org/1.0/"
       type="guide"
       id="write">
+  <info>
+    <link type="guide" xref="index#overview"/>
+  </info>
+  <title>Writing new email and replying</title>
 
-    <info>
-        <link type="guide" xref="index#overview"/>
-        
-    </info>
-	<title>Write a message</title>
-	
-	<section id="overview">
-	<title>Composing and replying</title>
-	<p>To compose a new message in Geary, press the <gui>New Message</gui> button
-	on the toolbar.</p>
-	
-	<p>To reply to a message, open the message menu in the upper right corner of the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui>. You can also reply to the last message in a conversation via the <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui> buttons on the toolbar. </p>
-	
-	</section>
-	
-	<section id="features">
-	<title>Features</title>
-	
-	<p>Geary's email composer lets you adjust the font, size and color of text. You can also insert hyperlinks into messages.</p>
-	
-	<p>Geary can also send plain text messages.  In the drop-down menu, check or uncheck "Rich Text"
-	to toggle between plain text and rich text mode.</p>
-	
-	<p>You can attach a file to a message you're writing in either of these ways:</p>
-	<list>
-	<item><p>Press the <gui>Attach File</gui>	button at the lower left
-	of the composer window, then select a file to attach.</p></item>
-	<item><p>Drag the file from the Nautilus file manager to the composer window, and drop it
-	either on the text fields at the top of the window or on the toolbar at the bottom.</p></item>
-	</list>
-	
-	<p>A number of keyboard shortcuts are available in the composer; see <link xref="shortcuts"/> for details.</p>
-	
-	<p>You may specify a signature to be inserted into the composer in the <link xref="accounts" />
-	dialog.</p>
-	
-	</section>
-	<section id="drafts">
-	<title>Drafts</title>
-	
-	<p>For mail servers that support drafts, Geary will automatically save the message as you type.
-	If you close the composer without sending, Geary will prompt you to keep the draft or to discard it.</p>
-	
-	<p>To edit an existing draft, select the Drafts folder in the folder list, select the message,
-	and click "Edit Draft" in the message viewer.</p>
-	
-	<p>Geary deletes the draft when you send the message.</p>
-	
-	</section>
-	
+  <section id="overview">
+    <title>Composing and replying</title>
+
+    <p>To start a new email conversation, click the <gui
+    style="button">Compose</gui> button on the toolbar. Type the email
+    address of the people to receive the message in the <gui
+    style="input">To</gui> text field, and a subject line in the <gui
+    style="input">Subject</gui> field. You can then type your message
+    in the text area below these. Once the message is read to send,
+    click <gui style="button">Send</gui> or type
+    <keyseq><key>Ctrl</key><key>Enter</key></keyseq> to send the
+    message.</p>
+
+    <note style="tip">
+      <title>Undoing sending</title>
+      <p>When sending an email, Geary will wait 5 seconds before
+      delivering the message. During this time, you will be able to
+      click <gui style="button">Undo</gui> on the pop-up notification
+      that appears or type
+      <keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the
+      email, and make more changes to it.</p>
+    </note>
+
+    <p>When entering an email address in the <gui
+    style="input">To</gui> and <gui style="input">Cc</gui> fields,
+    Geary will provide suggestions from your desktop address book and
+    from previously sent and received email messages. To choose one of
+    these suggestions, simply click on it. In addition, <gui
+    style="input">Bcc</gui> and <gui style="input">Reply-to</gui>
+    fields can be shown by selecting <gui style="menu">Show extended
+    fields</gui> from the formatting toolbar menu.</p>
+
+    <p>To reply to the currently selected conversation, click one of
+    the <gui style="button">Reply</gui>, <gui style="button">Reply
+    All</gui> or <gui style="button">Forward</gui> toolbar
+    buttons. This will open a new reply or forwarded email composer
+    for the latest message in the conversation.</p>
+
+    <p>When replying, the message being replied to will be quoted and
+    copied into the footer of the new reply. This can be deleted
+    before typing a reply by pressing
+    <key>Backspace</key>. Alternatively, text can be selectively
+    quoted by selecting the desired text in a message and clicking
+    <gui style="button">Reply</gui> or <gui style="button">Reply
+    All</gui>, only the selected text will be quoted.</p>
+
+    <p>To reply to a specific email message, open the message menu in the
+    top corner of the message and choose <gui>Reply</gui>, <gui>Reply
+    All</gui> or <gui>Forward</gui>.</p>
+  </section>
+
+  <section id="features">
+    <title>Text formatting, images and attachments</title>
+
+    <p>Geary's email composer lets you use text styles such as
+    <em>bold</em> and <em>italic</em>, indent text to quote it and
+    links to web pages. Simply select the text and click the
+    appropriate button on the formatting toolbar.</p>
+
+    <p>Bulleted and numbered lists can be inserted or removed by
+    clicking the <gui style="button">Bulleted list</gui> and <gui
+    style="button">Numbered list</gui> buttons on the formatting
+    toolbar. The level of indentation of list items can be adjusted
+    using the <gui style="button">Indent</gui> and <gui
+    style="button">Un-indent</gui> formatting toolbar buttons.</p>
+
+    <p>Images can be inserted into rich text messages by clicking the
+    <gui style="button">Insert Image</gui> button on the formatting
+    toolbar and selecting the image to attach, by dragging an image
+    from the <gui>Files</gui> application into the email body and then
+    dropping it, or by pasting an image that has been copied to the
+    clipboard from another application.</p>
+
+    <p>Documents, music, videos, and other files can be attached to
+    the email by clicking the <gui style="button">Attach File</gui>
+    button at the top of the composer window and selecting the
+    document to attach, or by dragging a file from the
+    <gui>Files</gui> application to the composer window, and dropping
+    it either on the text fields at the top of the window or on the
+    toolbar at the bottom.</p>
+
+    <p>A number of keyboard shortcuts are available in the composer;
+    see <link xref="shortcuts"/> for details.</p>
+
+    <p>You may specify a signature to be inserted into the footer of
+    email in the composer via the <link xref="accounts"/> dialog.</p>
+  </section>
+
+  <section id="spellcheck">
+    <title>Checking spelling</title>
+
+    <p>Geary supports spell-checking your composed email in one or
+    more languages, as you type. To enable spell-checking, first
+    ensure your computer has spell-check dictionaries installed for
+    the desired languages. Consult your computer's help to determine
+    how to install dictionaries if not present.</p>
+
+    <p>To select languages for spell-checking, click the <gui
+    style="button">Spell check</gui> button on the formatting toolbar,
+    and the language selection popover will appear. Click on a
+    language in the list to toggle it on or off, and click the <gui
+    style="button">-</gui> button to remove it from the list. If a
+    language does not appear in the list, search for it by typing its
+    name in the search box, then click the <gui style="button">+</gui>
+    button to add it.</p>
+  </section>
+
+  <section id="drafts">
+    <title>Saving drafts and restoring discarded messages</title>
+
+    <p>For mail servers that support drafts, Geary will automatically
+    save the message as you type on the server after a short
+    delay.</p>
+
+    <p>To edit an existing draft, select the <gui>Drafts</gui> folder
+    in the folder list, select the message, and click "Edit Draft" in
+    the conversation viewer.</p>
+
+    <p>Geary will delete the draft when you send the message.</p>
+
+    <note style="tip">
+      <p>If you save or discard a composed email, you can re-open it
+      by clicking <gui style="button">Undo</gui> on the pop-up
+      notification that appears or by typing
+      <keyseq><key>Ctrl</key><key>Z</key></keyseq>. The ability to
+      restore a saved or discarded composer will be remain for up to
+      30 minutes. After that you will need to re-open the message via
+      the <gui>Drafts</gui> folder, if present.</p>
+    </note>
+  </section>
+
+  <section id="plain-text">
+    <title>Plain text messages</title>
+
+    <p>Geary can also send plain text messages. In the drop-down menu,
+    check or uncheck <gui style="menu">Rich Text</gui> to toggle
+    between plain text and rich text mode. Plain text mode is useful
+    when sending email to mailing lists that prohibit rich text (HTML)
+    messages, or when sending email to people that do no use modern
+    clients like Geary.</p>
+
+    <p>In plain text mode, text will be automatically wrapped using
+    soft line breaks so that it is no longer than 74 characters wide,
+    and indented text will be wrapped and quoted using a “>” character
+    for each level of quoting.</p>
+  </section>
+
 </page>
-
