@@ -1367,8 +1367,6 @@ public class Application.MainWindow :
                 }
             }
         );
-
-        this.conversations = null;
     }
 
     private void create_composer_from_viewer(Composer.Widget.ComposeType compose_type) {
@@ -1673,14 +1671,16 @@ public class Application.MainWindow :
 
     [GtkCallback]
     private bool on_delete_event() {
-        if (this.application.config.startup_notifications) {
-            if (close_composer(true, false)) {
-                hide();
-            }
-        } else {
-            if (close_composer(true, false)) {
-                this.application.quit();
-            }
+        if (close_composer(true, false)) {
+            this.sensitive = false;
+            this.select_folder.begin(
+                null,
+                false,
+                (obj, res) => {
+                    this.select_folder.end(res);
+                    destroy();
+                }
+            );
         }
         return Gdk.EVENT_STOP;
     }

@@ -251,23 +251,29 @@ internal class Application.Controller : Geary.BaseObject {
 
     /** Closes all windows and accounts, releasing held resources. */
     public async void close() {
+        // Stop listening for account changes up front so we don't
+        // attempt to add new accounts while shutting down.
+        this.account_manager.account_added.disconnect(
+            on_account_added
+        );
+        this.account_manager.account_status_changed.disconnect(
+            on_account_status_changed
+        );
+        this.account_manager.account_removed.disconnect(
+            on_account_removed
+        );
         this.application.engine.account_available.disconnect(
             on_account_available
         );
 
         foreach (MainWindow window in this.application.get_main_windows()) {
-            window.set_sensitive(false);
+            window.sensitive = false;
         }
 
         // Close any open composers up-front before anything else is
         // shut down so any pending operations have a chance to
         // complete.
-        //
-        // Close them in parallel to minimise time taken for this to
-        // complete, but use a barrier to wait for them all to
-        // actually finish closing.
         var composer_barrier = new Geary.Nonblocking.CountingSemaphore(null);
-
         // Take a copy of the collection of composers since
         // closing any will cause the underlying collection to change.
         var composers = new Gee.LinkedList<Composer.Widget>();
@@ -295,40 +301,54 @@ internal class Application.Controller : Geary.BaseObject {
         // first so they don't block shutdown.
         this.controller_open.cancel();
 
-        // Release folder and conversations in main windows
+        // Release folder and conversations in main windows before
+        // closing them so we know they are released before closing
+        // the accounts
+        var window_barrier = new Geary.Nonblocking.CountingSemaphore(null);
         foreach (MainWindow window in this.application.get_main_windows()) {
-            yield window.select_folder(null, false);
-            window.hide();
+            window_barrier.acquire();
+            window.select_folder.begin(
+                null,
+                false,
+                (obj, res) => {
+                    window.select_folder.end(res);
+                    window.close();
+                    window_barrier.blind_notify();
+                }
+            );
+        }
+        try {
+            yield window_barrier.wait_async();
+        } catch (GLib.Error err) {
+            debug("Error waiting at window barrier: %s", err.message);
         }
 
-        // Release notification monitoring early so held resources can
-        // be freed up
+        // Release general resources now there's no more UI
         this.plugin_manager.notifications.clear_folders();
+        this.avatars.close();
+        this.pending_mailtos.clear();
+        this.composer_widgets.clear();
 
         // Create a copy of known accounts so the loop below does not
         // explode if accounts are removed while iterating.
         var closing_accounts = new Gee.LinkedList<AccountContext>();
         closing_accounts.add_all(this.accounts.values);
-
-        // Close all Accounts. Launch these in parallel to minimise
-        // time taken to close, but here use a barrier to wait for all
-        // to actually finish closing.
-        var close_barrier = new Geary.Nonblocking.CountingSemaphore(null);
+        var account_barrier = new Geary.Nonblocking.CountingSemaphore(null);
         foreach (AccountContext context in closing_accounts) {
-            close_barrier.acquire();
+            account_barrier.acquire();
             this.close_account.begin(
                 context.account.information,
                 true,
                 (obj, ret) => {
                     this.close_account.end(ret);
-                    close_barrier.blind_notify();
+                    account_barrier.blind_notify();
                 }
             );
         }
         try {
-            yield close_barrier.wait_async();
-        } catch (Error err) {
-            debug("Error waiting at shutdown barrier: %s", err.message);
+            yield account_barrier.wait_async();
+        } catch (GLib.Error err) {
+            debug("Error waiting at account barrier: %s", err.message);
         }
 
         // Release last refs to the accounts
@@ -338,29 +358,9 @@ internal class Application.Controller : Geary.BaseObject {
         try {
             debug("Closing Engine...");
             yield this.application.engine.close_async(null);
-            debug("Closed Engine");
-        } catch (Error err) {
-            message("Error closing Geary Engine instance: %s", err.message);
+        } catch (GLib.Error err) {
+            warning("Error closing Geary Engine instance: %s", err.message);
         }
-
-        this.account_manager.account_added.disconnect(
-            on_account_added
-        );
-        this.account_manager.account_status_changed.disconnect(
-            on_account_status_changed
-        );
-        this.account_manager.account_removed.disconnect(
-            on_account_removed
-        );
-
-        foreach (MainWindow window in this.application.get_main_windows()) {
-            window.destroy();
-        }
-
-        this.pending_mailtos.clear();
-        this.composer_widgets.clear();
-
-        this.avatars.close();
 
         debug("Closed Application.Controller");
     }
