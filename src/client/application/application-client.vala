@@ -68,6 +68,7 @@ public class Application.Client : Gtk.Application {
     private const string OPTION_LOG_SERIALIZER = "log-serializer";
     private const string OPTION_LOG_SQL = "log-sql";
     private const string OPTION_HIDDEN = "hidden";
+    private const string OPTION_NEW_WINDOW = "new-window";
     private const string OPTION_QUIT = "quit";
     private const string OPTION_REVOKE_CERTS = "revoke-certs";
 
@@ -78,6 +79,7 @@ public class Application.Client : Gtk.Application {
         { Action.Application.HELP, on_activate_help},
         { Action.Application.INSPECT, on_activate_inspect},
         { Action.Application.MAILTO, on_activate_mailto, "s"},
+        { Action.Application.NEW_WINDOW, on_activate_new_window },
         { Action.Application.PREFERENCES, on_activate_preferences},
         { Action.Application.QUIT, on_activate_quit},
         { Action.Application.SHOW_EMAIL, on_activate_show_email, "(svv)"},
@@ -128,6 +130,8 @@ public class Application.Client : Gtk.Application {
         { OPTION_QUIT, 'q', 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Perform a graceful quit"), null },
+        { OPTION_NEW_WINDOW, 'n', 0, GLib.OptionArg.NONE, null,
+          N_("Open a new window"), null },
         { OPTION_REVOKE_CERTS, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Revoke all pinned TLS server certificates"), null },
@@ -406,6 +410,7 @@ public class Application.Client : Gtk.Application {
         add_app_accelerators(Action.Application.COMPOSE, { "<Ctrl>N" });
         add_app_accelerators(Action.Application.HELP, { "F1" });
         add_app_accelerators(Action.Application.INSPECT, { "<Alt><Shift>I" });
+        add_app_accelerators(Action.Application.NEW_WINDOW, { "<Ctrl><Shift>N" });
         add_app_accelerators(Action.Application.QUIT, { "<Ctrl>Q" });
 
         // Common window accels
@@ -493,14 +498,10 @@ public class Application.Client : Gtk.Application {
      * shows it.
      */
     public MainWindow get_active_main_window() {
-        MainWindow? active = this.last_active_main_window;
-        if (active == null) {
-            active = new MainWindow(this);
-            this.controller.register_window(active);
-            this.last_active_main_window = active;
-            active.show();
+        if (this.last_active_main_window == null) {
+            this.last_active_main_window = new_main_window();
         }
-        return active;
+        return last_active_main_window;
     }
 
     public void add_window_accelerators(string action,
@@ -549,7 +550,9 @@ public class Application.Client : Gtk.Application {
     public async void show_accounts() {
         yield this.present();
 
-        Accounts.Editor editor = new Accounts.Editor(this, get_active_window());
+        Accounts.Editor editor = new Accounts.Editor(
+            this, get_active_main_window()
+        );
         editor.run();
         editor.destroy();
         this.controller.expunge_accounts.begin();
@@ -593,6 +596,12 @@ public class Application.Client : Gtk.Application {
         yield this.present();
 
         this.controller.compose(mailto);
+    }
+
+    public async void new_window() {
+        yield create_controller();
+
+        new_main_window().present();
     }
 
     /** Returns the application's base user configuration directory. */
@@ -749,6 +758,13 @@ public class Application.Client : Gtk.Application {
         return main;
     }
 
+    private MainWindow new_main_window() {
+        MainWindow window = new MainWindow(this);
+        this.controller.register_window(window);
+        window.focus_in_event.connect(on_main_window_focus_in);
+        return window;
+    }
+
     // Opens the controller
     private async void create_controller() {
         bool first_run = false;
@@ -837,6 +853,10 @@ public class Application.Client : Gtk.Application {
             this.update_autostart_file.begin();
             // Then manually start the controller
             this.create_controller.begin();
+            activated = true;
+        }
+        if (options.contains(OPTION_NEW_WINDOW)) {
+            activate_action(Action.Application.NEW_WINDOW, null);
             activated = true;
         }
 
@@ -936,6 +956,10 @@ public class Application.Client : Gtk.Application {
         }
     }
 
+    private void on_activate_new_window() {
+        this.new_window.begin();
+    }
+
     private void on_activate_preferences() {
         this.show_preferences.begin();
     }
@@ -1012,6 +1036,15 @@ public class Application.Client : Gtk.Application {
             dialog.show_all();
             dialog.run();
         }
+    }
+
+    private bool on_main_window_focus_in(Gtk.Widget widget,
+                                         Gdk.EventFocus event) {
+        MainWindow? main = widget as MainWindow;
+        if (main != null) {
+            this.last_active_main_window = main;
+        }
+        return Gdk.EVENT_PROPAGATE;
     }
 
     private void on_window_removed(Gtk.Window window) {

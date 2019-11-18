@@ -21,6 +21,7 @@ namespace Action {
         public const string INSPECT = "inspect";
         public const string HELP = "help";
         public const string MAILTO = "mailto";
+        public const string NEW_WINDOW = "new-window";
         public const string PREFERENCES = "preferences";
         public const string SHOW_EMAIL = "show-email";
         public const string SHOW_FOLDER = "show-folder";

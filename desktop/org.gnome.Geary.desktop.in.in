@@ -14,9 +14,13 @@ Categories=GNOME;GTK;Network;Email;
 MimeType=x-scheme-handler/mailto;
 StartupNotify=true
 DBusActivatable=true
+Actions=compose;new-window
 X-GNOME-UsesNotifications=true
-Actions=Compose;
 
-[Desktop Action Compose]
+[Desktop Action compose]
 Name=Compose Message
 Exec=geary mailto:
+
+[Desktop Action new-window]
+Name=New Window
+Exec=geary --new-window
