@@ -615,10 +615,24 @@ public class Application.Client : Gtk.Application {
         this.controller.compose(mailto);
     }
 
-    public async void new_window() {
+    public async void new_window(Geary.Folder? select_folder,
+                                 Gee.Collection<Geary.App.Conversation>? select_conversations) {
         yield create_controller();
 
-        new_main_window().present();
+        MainWindow main = new_main_window();
+        main.present();
+
+        if (select_folder != null) {
+            if (select_conversations == null || select_conversations.is_empty) {
+                main.select_folder.begin(select_folder, true);
+            } else {
+                main.show_conversations.begin(
+                    select_folder,
+                    select_conversations,
+                    true
+                );
+            }
+        }
     }
 
     /** Returns the application's base user configuration directory. */
@@ -974,7 +988,17 @@ public class Application.Client : Gtk.Application {
     }
 
     private void on_activate_new_window() {
-        this.new_window.begin();
+        // If there was an existing active main, select the same
+        // account/folder/conversation.
+        MainWindow? current = this.last_active_main_window;
+        // Make a copy of the selection so the underlying collection
+        // doesn't change as the selection does.
+        this.new_window.begin(
+            current.selected_folder,
+            Geary.traverse(
+                current.conversation_list_view.get_selected_conversations()
+            ).to_linked_list()
+        );
     }
 
     private void on_activate_preferences() {
