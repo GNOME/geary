@@ -424,12 +424,14 @@ public class Application.Client : Gtk.Application {
         Components.Inspector.add_accelerators(this);
         Dialogs.ProblemDetailsDialog.add_accelerators(this);
 
-        if (this.is_background_service) {
-            // Since command_line won't be called below if running as
-            // a DBus service, disable logging spew and start the
-            // controller running.
-            this.create_controller.begin();
-        }
+        // Manually place a hold on the application otherwise the
+        // application will exit when the async call to
+        // ::create_controller next returns without having yet created
+        // a window.
+        hold();
+
+        // Finally, start the controller.
+        this.create_controller.begin();
     }
 
     public override int command_line(GLib.ApplicationCommandLine command_line) {
@@ -749,11 +751,6 @@ public class Application.Client : Gtk.Application {
 
     // Opens the controller
     private async void create_controller() {
-        // Manually keep the main loop around for the duration of this
-        // call. Without this, the main loop will exit as soon as we
-        // hit the yield below, before we create the main window.
-        hold();
-
         bool first_run = false;
         try {
             int mutex_token = yield this.controller_mutex.claim_async();
@@ -786,15 +783,10 @@ public class Application.Client : Gtk.Application {
                 quit();
             }
         }
-
-        release();
     }
 
     // Closes the controller, if running
     private async void destroy_controller() {
-        // see create_controller() for reasoning hold/release is used
-        hold();
-
         try {
             int mutex_token = yield this.controller_mutex.claim_async();
             if (this.controller != null) {
@@ -805,8 +797,6 @@ public class Application.Client : Gtk.Application {
         } catch (GLib.Error err) {
             debug("Error destroying controller: %s", err.message);
         }
-
-        release();
     }
 
     private int handle_general_options(GLib.ApplicationCommandLine command_line) {
@@ -1033,6 +1023,13 @@ public class Application.Client : Gtk.Application {
                     get_main_windows()
                 );
             }
+        }
+
+        // Since ::startup above took out a manual hold on the
+        // application, manually work out if the application should
+        // quit here.
+        if (!this.is_background_service && get_windows().length() == 0) {
+            this.quit();
         }
     }
 
