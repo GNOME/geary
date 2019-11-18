@@ -16,7 +16,6 @@
 internal class Application.Controller : Geary.BaseObject {
 
 
-    private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
     private const uint MAX_AUTH_ATTEMPTS = 3;
 
 
@@ -132,10 +131,7 @@ internal class Application.Controller : Geary.BaseObject {
         IconFactory.init(application.get_resource_directory());
 
         // Create DB upgrade dialog.
-        this.upgrade_dialog = new UpgradeDialog();
-        this.upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(
-            display_main_window_if_ready
-        );
+        this.upgrade_dialog = new UpgradeDialog(application);
 
         // Initialise WebKit and WebViews
         ClientWebView.init_web_context(
@@ -980,10 +976,9 @@ internal class Application.Controller : Geary.BaseObject {
         bool retry = false;
         do {
             try {
-                account.set_data(PROP_ATTEMPT_OPEN_ACCOUNT, true);
                 yield account.open_async(this.controller_open);
                 retry = false;
-            } catch (Error open_err) {
+            } catch (GLib.Error open_err) {
                 debug("Unable to open account %s: %s", account.to_string(), open_err.message);
 
                 if (open_err is Geary.EngineError.CORRUPT) {
@@ -1005,7 +1000,6 @@ internal class Application.Controller : Geary.BaseObject {
         } while (retry);
 
         account_available(context);
-        display_main_window_if_ready();
         update_account_status();
     }
 
@@ -1316,35 +1310,6 @@ internal class Application.Controller : Geary.BaseObject {
         }
 
         return retry;
-    }
-
-    /**
-     * Returns true if we've attempted to open all accounts at this point.
-     */
-    private bool did_attempt_open_all_accounts() {
-        try {
-            foreach (Geary.AccountInformation info in Geary.Engine.instance.get_accounts().values) {
-                Geary.Account a = Geary.Engine.instance.get_account_instance(info);
-                if (a.get_data<bool?>(PROP_ATTEMPT_OPEN_ACCOUNT) == null)
-                    return false;
-            }
-        } catch(Error e) {
-            error("Could not open accounts: %s", e.message);
-        }
-
-        return true;
-    }
-
-    /**
-     * Displays the main window if we're ready.  Otherwise does nothing.
-     */
-    private void display_main_window_if_ready() {
-        if (did_attempt_open_all_accounts() &&
-            !this.upgrade_dialog.visible &&
-            !this.controller_open.is_cancelled() &&
-            !this.application.is_background_service) {
-            this.application.get_active_main_window().present();
-        }
     }
 
     /**
