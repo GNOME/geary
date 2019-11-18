@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -10,10 +10,10 @@
  * Manages email account instances and their life-cycle.
  *
  * An engine represents and contains interfaces into the rest of the
- * email library. Instances are initialized by calling {@link
- * open_async} and closed with {@link close_async}. Use this class for
- * verifying and adding {@link AccountInformation} objects to check
- * and start using email accounts.
+ * email library. Instances are initialized by constructing them and
+ * closed by calling {@link close}. Also use this class for verifying
+ * and adding {@link AccountInformation} objects to check and start
+ * using email accounts.
  */
 public class Geary.Engine : BaseObject {
 
@@ -21,14 +21,6 @@ public class Geary.Engine : BaseObject {
     // Set low to avoid leaving the user hanging too long when
     // validating a service.
     private const uint VALIDATION_TIMEOUT = 15;
-
-
-    public static Engine instance {
-        get {
-            return (_instance != null) ? _instance : (_instance = new Engine());
-        }
-    }
-    private static Engine? _instance = null;
 
 
     // Workaround for Vala issue #659. See shared_endpoints below.
@@ -47,18 +39,44 @@ public class Geary.Engine : BaseObject {
     }
 
 
+    private static bool is_initialized = false;
+
+
+    // This can't be called from within the ctor, as initialization
+    // code may want to access the Engine instance to make their own
+    // calls and, in particular, subscribe to signals.
+    //
+    // TODO: It would make sense to have a terminate_library() call,
+    // but it technically should not be called until the application
+    // is exiting, not merely if the Engine is closed, as termination
+    // means shutting down resources for good
+    private static void initialize_library() {
+        if (!Engine.is_initialized) {
+            Engine.is_initialized = true;
+
+            Logging.init();
+            RFC822.init();
+            Imap.init();
+            HTML.init();
+        }
+    }
+
+
     /** Determines if any accounts have been added to this instance. */
     public bool has_accounts {
-        get { return this.accounts != null && !this.accounts.is_empty; }
+        get { return this.is_open && !this.accounts.is_empty; }
+    }
+
+    /** Determines the number of accounts added to this instance. */
+    public uint accounts_count {
+        get { return this.accounts.size; }
     }
 
     /** Location of the directory containing shared resource files. */
-    public File? resource_dir { get; private set; default = null; }
+    public File resource_dir { get; private set; }
 
-    private Gee.HashMap<string, AccountInformation>? accounts = null;
-    private Gee.HashMap<string, Account>? account_instances = null;
-    private bool is_initialized = false;
-    private bool is_open = false;
+    private bool is_open = true;
+    private Gee.List<Account> accounts = new Gee.ArrayList<Account>();
 
     // Would use a `weak Endpoint` value type for this map instead of
     // the custom class, but we can't currently reassign built-in
@@ -66,16 +84,6 @@ public class Geary.Engine : BaseObject {
     // GLib.WeakRef as a generics param. See Vala issue #659.
     private Gee.Map<string,EndpointWeakRef?> shared_endpoints =
         new Gee.HashMap<string,EndpointWeakRef?>();
-
-    /**
-     * Fired when the engine is opened and all the existing accounts are loaded.
-     */
-    public signal void opened();
-
-    /**
-     * Fired when the engine is closed.
-     */
-    public signal void closed();
 
     /**
      * Fired when an account becomes available in the engine.
@@ -94,109 +102,165 @@ public class Geary.Engine : BaseObject {
     public signal void account_unavailable(AccountInformation account);
 
 
-    // Public so it can be tested
-    public Engine() {
-    }
-
-    private void check_opened() throws EngineError {
-        if (!is_open)
-            throw new EngineError.OPEN_REQUIRED("Geary.Engine instance not open");
-    }
-
-    // This can't be called from within the ctor, as initialization code may want to access the
-    // Engine instance to make their own calls and, in particular, subscribe to signals.
-    //
-    // TODO: It would make sense to have a terminate_library() call, but it technically should not
-    // be called until the application is exiting, not merely if the Engine is closed, as termination
-    // means shutting down resources for good
-    private void initialize_library() {
-        if (is_initialized)
-            return;
-
-        is_initialized = true;
-
-        Logging.init();
-        RFC822.init();
-        Imap.init();
-        HTML.init();
-    }
-
-    /**
-     * Initializes the engine so that accounts can be added to it.
-     */
-    public async void open_async(GLib.File resource_dir,
-                                 GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        // initialize *before* opening the Engine ... all initialize code should assume the Engine
-        // is closed
-        initialize_library();
-
-        if (is_open)
-            throw new EngineError.ALREADY_OPEN("Geary.Engine instance already open");
-
+    /** Constructs a new engine instance. */
+    public Engine(GLib.File resource_dir) {
+        Engine.initialize_library();
         this.resource_dir = resource_dir;
-
-        accounts = new Gee.HashMap<string, AccountInformation>();
-        account_instances = new Gee.HashMap<string, Account>();
-
-        is_open = true;
-
-        opened();
    }
 
     /**
      * Uninitializes the engine, and removes all known accounts.
      */
-    public async void close_async(Cancellable? cancellable = null) throws Error {
-        if (!is_open)
-            return;
-
-        Gee.Collection<AccountInformation> unavailable_accounts = accounts.values;
-        accounts.clear();
-
-        foreach(AccountInformation account in unavailable_accounts)
-            account_unavailable(account);
-
-        resource_dir = null;
-        accounts = null;
-        account_instances = null;
-
-        is_open = false;
-        closed();
+    public void close()
+        throws GLib.Error {
+        if (is_open) {
+            // Copy the collection of accounts so they can be removed
+            // from it
+            foreach (var account in traverse(this.accounts).to_linked_list()) {
+                remove_account(account.information);
+            }
+            this.accounts.clear();
+            this.is_open = false;
+        }
     }
 
     /**
-     * Determines if an account with a specific id has added.
+     * Determines if an account with a specific configuration has been added.
      */
-    public bool has_account(string id) {
-        return (this.accounts != null && this.accounts.has_key(id));
+    public bool has_account(AccountInformation config) {
+        return this.accounts.any_match(account => account.information == config);
     }
 
     /**
-     * Returns a current account given its id.
+     * Returns the account for the given configuration, if present.
      *
      * Throws an error if the engine has not been opened or if the
      * requested account does not exist.
      */
-    public AccountInformation get_account(string id) throws Error {
+    public Account get_account(AccountInformation config) throws GLib.Error {
         check_opened();
 
-        AccountInformation? info = accounts.get(id);
-        if (info == null) {
-            throw new EngineError.NOT_FOUND("No such account: %s", id);
+        Account? account = this.accounts.first_match(
+            account => account.information == config
+        );
+        if (account == null) {
+            throw new EngineError.NOT_FOUND("No such account");
         }
-        return info;
+        return account;
     }
 
     /**
-     * Returns the current accounts list as a map keyed by account id.
+     * Returns the account for the given configuration id, if present.
+     *
+     * Throws an error if the engine has not been opened or if the
+     * requested account does not exist.
+     */
+    public Account get_account_for_id(string id) throws GLib.Error {
+        check_opened();
+
+        Account? account = this.accounts.first_match(
+            account => account.information.id == id
+        );
+        if (account == null) {
+            throw new EngineError.NOT_FOUND("No such account");
+        }
+        return account;
+    }
+
+    /**
+     * Returns a read-only collection of current accounts.
+     *
+     * The collection is guaranteed to be ordered by {@link
+     * AccountInformation.compare_ascending}.
      *
      * Throws an error if the engine has not been opened.
      */
-    public Gee.Map<string, AccountInformation> get_accounts() throws Error {
+    public Gee.Collection<Account> get_accounts() throws GLib.Error {
         check_opened();
 
         return accounts.read_only_view;
+    }
+
+    /**
+     * Adds the account to the engine.
+     *
+     * The account will not be automatically opened, this must be done
+     * once added.
+     */
+    public void add_account(AccountInformation config) throws GLib.Error {
+        check_opened();
+
+        if (has_account(config)) {
+            throw new EngineError.ALREADY_EXISTS("Account already exists");
+        }
+
+        ImapDB.Account local = new ImapDB.Account(
+            config,
+            config.data_dir,
+            this.resource_dir.get_child("sql")
+        );
+        Endpoint incoming_remote = get_shared_endpoint(
+            config.service_provider, config.incoming
+        );
+        Endpoint outgoing_remote = get_shared_endpoint(
+            config.service_provider, config.outgoing
+        );
+
+        Geary.Account account;
+        switch (config.service_provider) {
+            case ServiceProvider.GMAIL:
+                account = new ImapEngine.GmailAccount(
+                    config, local, incoming_remote, outgoing_remote
+                );
+            break;
+
+            case ServiceProvider.YAHOO:
+                account = new ImapEngine.YahooAccount(
+                    config, local, incoming_remote, outgoing_remote
+                );
+            break;
+
+            case ServiceProvider.OUTLOOK:
+                account = new ImapEngine.OutlookAccount(
+                    config, local, incoming_remote, outgoing_remote
+                );
+            break;
+
+            case ServiceProvider.OTHER:
+                account = new ImapEngine.OtherAccount(
+                    config, local, incoming_remote, outgoing_remote
+                );
+            break;
+
+            default:
+                assert_not_reached();
+        }
+
+        config.notify["ordinal"].connect(on_account_ordinal_changed);
+        this.accounts.add(account);
+        sort_accounts();
+        account_available(config);
+    }
+
+    /**
+     * Removes an account from the engine.
+     *
+     * The account must be closed before removing it.
+     */
+    public void remove_account(AccountInformation config) throws GLib.Error {
+        check_opened();
+
+        Account account = get_account(config);
+        if (account.is_open()) {
+            throw new EngineError.CLOSE_REQUIRED(
+                "Account must be closed before removal"
+            );
+        }
+
+        config.notify["ordinal"].disconnect(on_account_ordinal_changed);
+        this.accounts.remove(account);
+
+        account_unavailable(config);
     }
 
     /**
@@ -301,105 +365,6 @@ public class Geary.Engine : BaseObject {
     }
 
     /**
-     * Creates a Geary.Account from a Geary.AccountInformation (which is what
-     * other methods in this interface deal in).
-     */
-    public Geary.Account get_account_instance(AccountInformation config)
-        throws Error {
-        check_opened();
-
-        if (account_instances.has_key(config.id))
-            return account_instances.get(config.id);
-
-        ImapDB.Account local = new ImapDB.Account(
-            config,
-            config.data_dir,
-            this.resource_dir.get_child("sql")
-        );
-        Endpoint incoming_remote = get_shared_endpoint(
-            config.service_provider, config.incoming
-        );
-        Endpoint outgoing_remote = get_shared_endpoint(
-            config.service_provider, config.outgoing
-        );
-
-        Geary.Account account;
-        switch (config.service_provider) {
-            case ServiceProvider.GMAIL:
-                account = new ImapEngine.GmailAccount(
-                    config, local, incoming_remote, outgoing_remote
-                );
-            break;
-
-            case ServiceProvider.YAHOO:
-                account = new ImapEngine.YahooAccount(
-                    config, local, incoming_remote, outgoing_remote
-                );
-            break;
-
-            case ServiceProvider.OUTLOOK:
-                account = new ImapEngine.OutlookAccount(
-                    config, local, incoming_remote, outgoing_remote
-                );
-            break;
-
-            case ServiceProvider.OTHER:
-                account = new ImapEngine.OtherAccount(
-                    config, local, incoming_remote, outgoing_remote
-                );
-            break;
-
-            default:
-                assert_not_reached();
-        }
-
-        account_instances.set(config.id, account);
-        return account;
-    }
-
-    /**
-     * Adds the account to be tracked by the engine.
-     */
-    public void add_account(AccountInformation account) throws Error {
-        check_opened();
-
-        if (accounts.has_key(account.id)) {
-            throw new EngineError.ALREADY_EXISTS(
-                "Account id '%s' already exists", account.id
-            );
-        }
-
-        accounts.set(account.id, account);
-        account_available(account);
-    }
-
-    /**
-     * Removes an account from the engine.
-     */
-    public void remove_account(AccountInformation account)
-        throws GLib.Error {
-        check_opened();
-
-        // Ensure account is closed.
-        if (this.account_instances.has_key(account.id) &&
-            this.account_instances.get(account.id).is_open()) {
-            throw new EngineError.CLOSE_REQUIRED(
-                "Account %s must be closed before removal", account.id
-            );
-        }
-
-        if (this.accounts.has_key(account.id)) {
-            // Send the account-unavailable signal, account will be
-            // removed client side.
-            account_unavailable(account);
-
-            // Then remove the account data from the engine.
-            this.accounts.unset(account.id);
-            this.account_instances.unset(account.id);
-        }
-    }
-
-    /**
      * Changes the service configuration for an account.
      *
      * This updates an account's service configuration with the given
@@ -409,33 +374,28 @@ public class Geary.Engine : BaseObject {
      * will also be updated so that the new configuration will start
      * taking effect immediately.
      */
-    public async void update_account_service(AccountInformation account,
+    public async void update_account_service(AccountInformation config,
                                              ServiceInformation updated,
                                              GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Account? impl = this.account_instances.get(account.id);
-        if (impl == null) {
-            throw new EngineError.BAD_PARAMETERS(
-                "Account has not been added to the engine: %s", account.id
-            );
-        }
+        Account account = get_account(config);
 
         ClientService? service = null;
         switch (updated.protocol) {
         case Protocol.IMAP:
-            account.incoming = updated;
-            service = impl.incoming;
+            config.incoming = updated;
+            service = account.incoming;
             break;
 
         case Protocol.SMTP:
-            account.outgoing = updated;
-            service = impl.outgoing;
+            config.outgoing = updated;
+            service = account.outgoing;
             break;
         }
 
-        Endpoint remote = get_shared_endpoint(account.service_provider, updated);
+        Endpoint remote = get_shared_endpoint(config.service_provider, updated);
         yield service.update_configuration(updated, remote, cancellable);
-        account.changed();
+        config.changed();
     }
 
     private Geary.Endpoint get_shared_endpoint(ServiceProvider provider,
@@ -479,6 +439,11 @@ public class Geary.Engine : BaseObject {
         return shared;
     }
 
+    private void check_opened() throws EngineError {
+        if (!is_open)
+            throw new EngineError.OPEN_REQUIRED("Geary.Engine instance not open");
+    }
+
     private inline Geary.Endpoint new_endpoint(ServiceProvider provider,
                                                ServiceInformation service,
                                                uint timeout) {
@@ -487,6 +452,18 @@ public class Geary.Engine : BaseObject {
             service.transport_security,
             timeout
         );
+    }
+
+    private void sort_accounts() {
+        this.accounts.sort((a, b) => {
+                return AccountInformation.compare_ascending(
+                    a.information, b.information
+                );
+            });
+    }
+
+    private void on_account_ordinal_changed() {
+        sort_accounts();
     }
 
 }

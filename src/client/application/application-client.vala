@@ -163,13 +163,8 @@ public class Application.Client : Gtk.Application {
     /**
      * The global email subsystem controller for this app instance.
      */
-    public Geary.Engine engine {
-        get {
-            // XXX We should be managing the engine's lifecycle here,
-            // but until that happens provide this property to
-            // encourage access via the application anyway
-            return Geary.Engine.instance;
-        }
+    public Geary.Engine? engine {
+        get; private set; default = null;
     }
 
     /**
@@ -398,6 +393,7 @@ public class Application.Client : Gtk.Application {
         // Calls Gtk.init(), amongst other things
         base.startup();
 
+        this.engine = new Geary.Engine(get_resource_directory());
         this.config = new Configuration(SCHEMA_ID);
         this.autostart = new StartupManager(
             this.config, this.get_desktop_directory()
@@ -465,6 +461,16 @@ public class Application.Client : Gtk.Application {
     }
 
     public override void shutdown() {
+        try {
+            this.engine.close();
+        } catch (GLib.Error error) {
+            warning("Error shutting down the engine: %s", error.message);
+        }
+
+        this.engine = null;
+        this.config = null;
+        this.autostart = null;
+
         Util.Date.terminate();
         Geary.Logging.clear();
         base.shutdown();
@@ -736,6 +742,8 @@ public class Application.Client : Gtk.Application {
         if (this.controller == null ||
             this.controller.check_open_composers()) {
 
+            this.last_active_main_window = null;
+
             bool controller_closed = false;
             this.destroy_controller.begin((obj, res) => {
                     this.destroy_controller.end(res);
@@ -800,20 +808,7 @@ public class Application.Client : Gtk.Application {
         this.controller.register_window(window);
         window.focus_in_event.connect(on_main_window_focus_in);
         if (select_first_inbox) {
-            try {
-                var config = this.controller.get_first_account();
-                if (config != null) {
-                    var first = this.engine.get_account_instance(config);
-                    if (first != null) {
-                        Geary.Folder? inbox = first.get_special_folder(INBOX);
-                        if (inbox != null) {
-                            window.select_folder.begin(inbox, true);
-                        }
-                    }
-                }
-            } catch (GLib.Error error) {
-                debug("Error getting Inbox for first account");
-            }
+            window.select_first_inbox(true);
         }
         return window;
     }
@@ -970,12 +965,9 @@ public class Application.Client : Gtk.Application {
 
     private Geary.Folder? get_folder_from_action_target(GLib.Variant target) {
         Geary.Folder? folder = null;
-        string account_id = (string) target.get_child_value(0);
+        string id = (string) target.get_child_value(0);
         try {
-            Geary.AccountInformation? account_config =
-                this.engine.get_account(account_id);
-            Geary.Account? account =
-                this.engine.get_account_instance(account_config);
+            Geary.Account account = this.engine.get_account_for_id(id);
             Geary.FolderPath? path =
                 account.to_folder_path(
                     target.get_child_value(1).get_variant()

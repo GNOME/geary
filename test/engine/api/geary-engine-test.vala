@@ -44,13 +44,7 @@ class Geary.EngineTest : TestCase {
         this.res = this.tmp.get_child("res");
         this.res.make_directory();
 
-        this.engine = new Engine();
-        this.engine.open_async.begin(
-            res, null,
-            (obj, res) => {
-                async_complete(res);
-            });
-        this.engine.open_async.end(async_result());
+        this.engine = new Engine(res);
 
         this.account = new AccountInformation(
             "test",
@@ -58,6 +52,7 @@ class Geary.EngineTest : TestCase {
             new MockCredentialsMediator(),
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
+        this.account.set_account_directories(this.tmp, this.tmp);
     }
 
     public override void tear_down () {
@@ -72,10 +67,10 @@ class Geary.EngineTest : TestCase {
     }
 
     public void add_account() throws GLib.Error {
-        assert_false(this.engine.has_account(this.account.id));
+        assert_false(this.engine.has_account(this.account));
 
         this.engine.add_account(this.account);
-        assert_true(this.engine.has_account(this.account.id), "Account not added");
+        assert_true(this.engine.has_account(this.account), "Account not added");
 
         try {
             this.engine.add_account(this.account);
@@ -87,23 +82,27 @@ class Geary.EngineTest : TestCase {
 
     public void remove_account() throws GLib.Error {
         this.engine.add_account(this.account);
-        assert_true(this.engine.has_account(this.account.id));
+        assert_true(this.engine.has_account(this.account));
 
         this.engine.remove_account(this.account);
-        assert_false(this.engine.has_account(this.account.id), "Account not rmoeved");
+        assert_false(this.engine.has_account(this.account), "Account not removed");
 
-        // Should not throw an error
-        this.engine.remove_account(this.account);
+        try {
+            this.engine.remove_account(this.account);
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            // expected
+        }
     }
 
     public void re_add_account() throws GLib.Error {
-        assert_false(this.engine.has_account(this.account.id));
+        assert_false(this.engine.has_account(this.account));
 
         this.engine.add_account(this.account);
         this.engine.remove_account(this.account);
         this.engine.add_account(this.account);
 
-        assert_true(this.engine.has_account(this.account.id));
+        assert_true(this.engine.has_account(this.account));
     }
 
    private void delete(File parent) throws Error {

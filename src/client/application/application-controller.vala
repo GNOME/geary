@@ -220,37 +220,31 @@ internal class Application.Controller : Geary.BaseObject {
             warning("Error opening GOA: %s", err.message);
         }
 
-        // Start the engine and load our accounts
+        // Start loading accounts
         try {
-            yield application.engine.open_async(
-                this.application.get_resource_directory(), cancellable
-            );
             yield this.account_manager.load_accounts(cancellable);
         } catch (Error e) {
-            warning("Error opening Geary.Engine instance: %s", e.message);
+            warning("Error loading accounts: %s", e.message);
         }
 
         // Since the accounts may still be loading folders, when the
         // main window first opens no folder might be available to be
         // selected. Add look for the inbox and if not found, add a
         // listener here as a once off for when it is loaded.
-        var config = get_first_account();
-        if (config != null) {
-            var first = this.accounts.get(config);
-            if (first != null) {
-                var inbox = first.account.get_special_folder(INBOX);
-                if (inbox != null) {
-                    application.get_active_main_window().select_folder.begin(
-                        inbox, true
-                    );
-
-                } else {
-                    // Connect after so the folder is added to any
-                    // open main windows first.
-                    first.account.folders_available_unavailable.connect_after(
+        if (!application.get_active_main_window().select_first_inbox(true)) {
+            // Connect after so the folder is added to any
+            // open main windows first.
+            try {
+                Geary.Account first = Geary.Collection.get_first(
+                    application.engine.get_accounts()
+                );
+                if (first != null) {
+                    first.folders_available_unavailable.connect_after(
                         on_folders_first_available
                     );
                 }
+            } catch (GLib.Error error) {
+                debug("Error getting Inbox for first account");
             }
         }
 
@@ -370,17 +364,6 @@ internal class Application.Controller : Geary.BaseObject {
             yield account_barrier.wait_async();
         } catch (GLib.Error err) {
             debug("Error waiting at account barrier: %s", err.message);
-        }
-
-        // Release last refs to the accounts
-        closing_accounts.clear();
-
-        // Turn off the lights and lock the door behind you
-        try {
-            debug("Closing Engine...");
-            yield this.application.engine.close_async(null);
-        } catch (GLib.Error err) {
-            warning("Error closing Geary Engine instance: %s", err.message);
         }
 
         debug("Closed Application.Controller");
@@ -924,16 +907,6 @@ internal class Application.Controller : Geary.BaseObject {
         window.retry_service_problem.disconnect(on_retry_service_problem);
     }
 
-    /** Returns the first open account, sorted by ordinal. */
-    internal Geary.AccountInformation? get_first_account() {
-        return this.accounts.keys.iterator().fold<Geary.AccountInformation?>(
-            (next, prev) => {
-                return prev == null || next.ordinal < prev.ordinal ? next : prev;
-            },
-            null
-        );
-    }
-
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -1312,20 +1285,6 @@ internal class Application.Controller : Geary.BaseObject {
         return retry;
     }
 
-    /**
-     * Returns the number of accounts that exist in Geary.  Note that not all accounts may be
-     * open.  Zero is returned on an error.
-     */
-    public int get_num_accounts() {
-        try {
-            return Geary.Engine.instance.get_accounts().size;
-        } catch (Error e) {
-            debug("Error getting number of accounts: %s", e.message);
-        }
-
-        return 0; // on error
-    }
-
     private bool is_inbox_descendant(Geary.Folder target) {
         bool is_descendent = false;
 
@@ -1428,30 +1387,11 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void on_folders_first_available(
-        Geary.Account account,
+    private void on_folders_first_available(Geary.Account account,
         Gee.BidirSortedSet<Geary.Folder>? available,
         Gee.BidirSortedSet<Geary.Folder>? unavailable
     ) {
-        debug("XXX folders first loaded");
-        bool inbox_found = false;
-        if (available != null) {
-            foreach (Geary.Folder folder in available) {
-                debug("XXX folder: %s/%s",
-                      folder.get_display_name(),
-                      folder.special_folder_type.to_string());
-                if (Controller.should_add_folder(available, folder) &&
-                    folder.special_folder_type == INBOX) {
-                    debug("XXX found inbox");
-                    inbox_found = true;
-                    this.application.get_active_main_window().select_folder.begin(
-                        folder, true
-                    );
-                }
-            }
-        }
-
-        if (inbox_found) {
+        if (application.get_active_main_window().select_first_inbox(true)) {
             // The handler has done its job, so disconnect it
             account.folders_available_unavailable.disconnect(
                 on_folders_first_available
@@ -1695,9 +1635,14 @@ internal class Application.Controller : Geary.BaseObject {
     private void on_account_available(Geary.AccountInformation info) {
         Geary.Account? account = null;
         try {
-            account = Geary.Engine.instance.get_account_instance(info);
-        } catch (Error e) {
-            error("Error creating account instance: %s", e.message);
+            account = this.application.engine.get_account(info);
+        } catch (GLib.Error error) {
+            report_problem(new Geary.ProblemReport(error));
+            warning(
+                "Error creating account %s instance: %s",
+                info.id,
+                error.message
+            );
         }
 
         if (account != null) {
@@ -1720,7 +1665,7 @@ internal class Application.Controller : Geary.BaseObject {
                                            Accounts.Manager.Status status) {
         switch (status) {
         case Accounts.Manager.Status.ENABLED:
-            if (!this.application.engine.has_account(changed.id)) {
+            if (!this.application.engine.has_account(changed)) {
                 try {
                     this.application.engine.add_account(changed);
                 } catch (GLib.Error err) {
@@ -1731,7 +1676,7 @@ internal class Application.Controller : Geary.BaseObject {
 
         case Accounts.Manager.Status.UNAVAILABLE:
         case Accounts.Manager.Status.DISABLED:
-            if (this.application.engine.has_account(changed.id)) {
+            if (this.application.engine.has_account(changed)) {
                 this.close_account.begin(
                     changed,
                     false,
