@@ -234,23 +234,20 @@ internal class Application.Controller : Geary.BaseObject {
         // main window first opens no folder might be available to be
         // selected. Add look for the inbox and if not found, add a
         // listener here as a once off for when it is loaded.
-        var config = get_first_account();
-        if (config != null) {
-            var first = this.accounts.get(config);
-            if (first != null) {
-                var inbox = first.account.get_special_folder(INBOX);
-                if (inbox != null) {
-                    application.get_active_main_window().select_folder.begin(
-                        inbox, true
-                    );
-
-                } else {
-                    // Connect after so the folder is added to any
-                    // open main windows first.
-                    first.account.folders_available_unavailable.connect_after(
+        if (!application.get_active_main_window().select_first_inbox(true)) {
+            // Connect after so the folder is added to any
+            // open main windows first.
+            try {
+                Geary.Account first = Geary.Collection.get_first(
+                    application.engine.get_accounts()
+                );
+                if (first != null) {
+                    first.folders_available_unavailable.connect_after(
                         on_folders_first_available
                     );
                 }
+            } catch (GLib.Error error) {
+                debug("Error getting Inbox for first account");
             }
         }
 
@@ -924,16 +921,6 @@ internal class Application.Controller : Geary.BaseObject {
         window.retry_service_problem.disconnect(on_retry_service_problem);
     }
 
-    /** Returns the first open account, sorted by ordinal. */
-    internal Geary.AccountInformation? get_first_account() {
-        return this.accounts.keys.iterator().fold<Geary.AccountInformation?>(
-            (next, prev) => {
-                return prev == null || next.ordinal < prev.ordinal ? next : prev;
-            },
-            null
-        );
-    }
-
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -1312,20 +1299,6 @@ internal class Application.Controller : Geary.BaseObject {
         return retry;
     }
 
-    /**
-     * Returns the number of accounts that exist in Geary.  Note that not all accounts may be
-     * open.  Zero is returned on an error.
-     */
-    public int get_num_accounts() {
-        try {
-            return Geary.Engine.instance.get_accounts().size;
-        } catch (Error e) {
-            debug("Error getting number of accounts: %s", e.message);
-        }
-
-        return 0; // on error
-    }
-
     private bool is_inbox_descendant(Geary.Folder target) {
         bool is_descendent = false;
 
@@ -1428,30 +1401,11 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void on_folders_first_available(
-        Geary.Account account,
+    private void on_folders_first_available(Geary.Account account,
         Gee.BidirSortedSet<Geary.Folder>? available,
         Gee.BidirSortedSet<Geary.Folder>? unavailable
     ) {
-        debug("XXX folders first loaded");
-        bool inbox_found = false;
-        if (available != null) {
-            foreach (Geary.Folder folder in available) {
-                debug("XXX folder: %s/%s",
-                      folder.get_display_name(),
-                      folder.special_folder_type.to_string());
-                if (Controller.should_add_folder(available, folder) &&
-                    folder.special_folder_type == INBOX) {
-                    debug("XXX found inbox");
-                    inbox_found = true;
-                    this.application.get_active_main_window().select_folder.begin(
-                        folder, true
-                    );
-                }
-            }
-        }
-
-        if (inbox_found) {
+        if (application.get_active_main_window().select_first_inbox(true)) {
             // The handler has done its job, so disconnect it
             account.folders_available_unavailable.disconnect(
                 on_folders_first_available

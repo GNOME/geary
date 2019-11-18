@@ -114,7 +114,7 @@ public class SearchBar : Gtk.SearchBar {
         if (main != null) {
             set_search_placeholder_text(
                 current_account == null ||
-                main.application.controller.get_num_accounts() == 1
+                main.application.engine.accounts_count == 1
                 ? DEFAULT_SEARCH_TEXT :
                 _("Search %s account").printf(
                     current_account.information.display_name

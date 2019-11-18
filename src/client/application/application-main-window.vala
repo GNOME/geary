@@ -730,6 +730,16 @@ public class Application.MainWindow :
         }
     }
 
+    internal bool select_first_inbox(bool is_interactive) {
+        bool success = false;
+        Geary.Folder? inbox = get_first_inbox();
+        if (inbox != null) {
+            this.select_folder.begin(inbox, is_interactive);
+            success = true;
+        }
+        return success;
+    }
+
     private void add_account(AccountContext to_add) {
         if (!this.accounts.contains(to_add)) {
             this.folder_list.set_user_folders_root_name(
@@ -843,6 +853,21 @@ public class Application.MainWindow :
             );
         }
         return context;
+    }
+
+    private Geary.Folder? get_first_inbox() {
+        Geary.Folder? inbox = null;
+        try {
+            Geary.Account first = Geary.Collection.get_first(
+                this.application.engine.get_accounts()
+            );
+            if (first != null) {
+                inbox = first.get_special_folder(INBOX);
+            }
+        } catch (GLib.Error error) {
+            debug("Error getting inbox for first account");
+        }
+        return inbox;
     }
 
     private void load_config(Configuration config) {
@@ -1720,19 +1745,8 @@ public class Application.MainWindow :
         // conversation list/viewer.
         Geary.Folder? to_select = null;
         if (!is_shutdown) {
-            Geary.AccountInformation? first_account =
-                this.application.controller.get_first_account();
-            if (first_account != null) {
-                AccountContext? first_context =
-                    this.application.controller.get_context_for_account(
-                        first_account
-                    );
-                if (first_context != null) {
-                    to_select = first_context.inbox;
-                }
-            }
+            to_select = get_first_inbox();
         }
-
         this.remove_account.begin(account, to_select);
     }
 

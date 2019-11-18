@@ -800,19 +800,7 @@ public class Application.Client : Gtk.Application {
         this.controller.register_window(window);
         window.focus_in_event.connect(on_main_window_focus_in);
         if (select_first_inbox) {
-            try {
-                Geary.Account first = Geary.Collection.get_first(
-                    this.engine.get_accounts()
-                );
-                if (first != null) {
-                    Geary.Folder? inbox = first.get_special_folder(INBOX);
-                    if (inbox != null) {
-                        window.select_folder.begin(inbox, true);
-                    }
-                }
-            } catch (GLib.Error error) {
-                debug("Error getting Inbox for first account");
-            }
+            window.select_first_inbox(true);
         }
         return window;
     }
