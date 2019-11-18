@@ -284,6 +284,10 @@ public class Application.MainWindow :
         load_config(application.config);
         restore_saved_window_state();
 
+        if (_PROFILE != "") {
+            this.get_style_context().add_class("devel");
+        }
+
         // Edit actions
         this.edit_actions.add_action_entries(EDIT_ACTIONS, this);
         insert_action_group(Action.Edit.GROUP_NAME, this.edit_actions);
@@ -291,7 +295,6 @@ public class Application.MainWindow :
         // Window actions
         add_action_entries(MainWindow.WINDOW_ACTIONS, this);
 
-        set_styling();
         setup_layout(application.config);
         on_change_orientation();
 
@@ -887,32 +890,6 @@ public class Application.MainWindow :
     public void add_notification(Components.InAppNotification notification) {
         this.overlay.add_overlay(notification);
         notification.show();
-    }
-
-    private void set_styling() {
-        Gtk.CssProvider provider = new Gtk.CssProvider();
-        Gtk.StyleContext.add_provider_for_screen(Gdk.Display.get_default().get_default_screen(),
-            provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-        if (_PROFILE != "") {
-            Gtk.StyleContext ctx = this.get_style_context();
-            ctx.add_class("devel");
-        }
-
-        provider.parsing_error.connect((section, error) => {
-            uint start = section.get_start_line();
-            uint end = section.get_end_line();
-            if (start == end)
-                debug("Error parsing css on line %u: %s", start, error.message);
-            else
-                debug("Error parsing css on lines %u-%u: %s", start, end, error.message);
-        });
-        try {
-            File file = File.new_for_uri(@"resource:///org/gnome/Geary/geary.css");
-            provider.load_from_file(file);
-        } catch (Error e) {
-            error("Could not load CSS: %s", e.message);
-        }
     }
 
     private void setup_layout(Configuration config) {

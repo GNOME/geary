@@ -424,6 +424,23 @@ public class Application.Client : Gtk.Application {
         add_edit_accelerators(Action.Edit.REDO, { "<Ctrl><Shift>Z" });
         add_edit_accelerators(Action.Edit.UNDO, { "<Ctrl>Z" });
 
+        // Load Geary GTK CSS
+        var provider = new Gtk.CssProvider();
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Display.get_default().get_default_screen(),
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        );
+        provider.parsing_error.connect(on_css_parse_error);
+        try {
+            var file = GLib.File.new_for_uri(
+                "resource:///org/gnome/Geary/geary.css"
+            );
+            provider.load_from_file(file);
+        } catch (GLib.Error error) {
+            warning("Could not load CSS: %s", error.message);
+        }
+
         MainWindow.add_accelerators(this);
         Composer.Widget.add_accelerators(this);
         Components.Inspector.add_accelerators(this);
@@ -1066,4 +1083,19 @@ public class Application.Client : Gtk.Application {
         }
     }
 
+    private void on_css_parse_error(Gtk.CssSection section, GLib.Error error) {
+        uint start = section.get_start_line();
+        uint end = section.get_end_line();
+        if (start == end) {
+            warning(
+                "Error parsing %s:%u: %s",
+                section.get_file().get_uri(), start, error.message
+            );
+        } else {
+            warning(
+                "Error parsing %s:%u-%u: %s",
+                section.get_file().get_uri(), start, end, error.message
+            );
+        }
+    }
 }
