@@ -15,17 +15,14 @@
 public class Composer.Window : Gtk.ApplicationWindow, Container {
 
 
-    private const string DEFAULT_TITLE = _("New Message");
-
-
     /** {@inheritDoc} */
     public Gtk.ApplicationWindow? top_window {
         get { return this; }
     }
 
     /** {@inheritDoc} */
-    public new GearyApplication? application {
-        get { return base.get_application() as GearyApplication; }
+    public new Application.Client application {
+        get { return (Application.Client) base.get_application(); }
         set { base.set_application(value); }
     }
 
@@ -33,7 +30,7 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
     internal Widget composer { get; set; }
 
 
-    public Window(Widget composer, GearyApplication application) {
+    public Window(Widget composer, Application.Client application) {
         Object(application: application, type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
         this.composer.set_mode(DETACHED);
@@ -43,15 +40,13 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
 
         add(this.composer);
 
+        this.composer.update_window_title();
         if (application.config.desktop_environment == UNITY) {
+            composer.header.show_close_button = false;
             composer.embed_header();
         } else {
-            composer.header.show_close_button = true;
             set_titlebar(this.composer.header);
         }
-
-        composer.notify["subject"].connect(() => { update_title(); } );
-        update_title();
 
         show();
         set_position(Gtk.WindowPosition.CENTER);
@@ -125,23 +120,6 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
             ret = Gdk.EVENT_STOP;
         }
         return ret;
-    }
-
-    private void update_title() {
-        string subject = this.composer.subject.strip();
-        if (Geary.String.is_empty_or_whitespace(subject)) {
-            subject = DEFAULT_TITLE;
-        }
-
-        switch (this.application.config.desktop_environment) {
-        case UNITY:
-            this.title = subject;
-            break;
-
-        default:
-            this.composer.header.title = subject;
-            break;
-        }
     }
 
 }

@@ -14,29 +14,31 @@ public class UpgradeDialog : Object {
     // Whether or not this dialog is visible.
     public bool visible { get; set; }
 
-    private Gtk.Dialog dialog;
+    private weak Application.Client application;
+
+    private Gtk.Dialog? dialog = null;
     private Gee.HashSet<Cancellable> cancellables = new Gee.HashSet<Cancellable>();
 
     /**
      * Creates and loads the upgrade progress dialog.
      */
-    public UpgradeDialog() {
-        // Load UI.
-        Gtk.Builder builder = GioUtil.create_builder("upgrade_dialog.glade");
-        dialog = (Gtk.Dialog) builder.get_object("dialog");
+    public UpgradeDialog(Application.Client application) {
+        this.application = application;
 
+        // Load UI.
         // Hook up signals.
         monitor.start.connect(on_start);
         monitor.finish.connect(on_close);
-        dialog.delete_event.connect(on_delete_event);
-
-        // Bind visibility flag.
-        dialog.bind_property(PROP_VISIBLE_NAME, this, PROP_VISIBLE_NAME, BindingFlags.BIDIRECTIONAL |
-            BindingFlags.SYNC_CREATE);
     }
 
     private void on_start() {
-        dialog.show();
+        Gtk.Builder builder = GioUtil.create_builder("upgrade_dialog.glade");
+        this.dialog = (Gtk.Dialog) builder.get_object("dialog");
+        this.dialog.set_transient_for(
+            this.application.get_active_main_window()
+        );
+        this.dialog.delete_event.connect(on_delete_event);
+        this.dialog.show();
     }
 
     private bool on_delete_event() {
@@ -51,18 +53,33 @@ public class UpgradeDialog : Object {
                 c.cancel();
         }
 
-        if (dialog.visible)
-            dialog.hide();
+        if (this.dialog != null &&
+            this.dialog.visible) {
+            this.dialog.hide();
+            this.dialog = null;
+        }
     }
 
     /**
-     * Add accounts before opening them.
+     * Adds an account to be monitored for upgrades by the dialog.
+     *
+     * Accounts should be added before being opened.
      */
-    public void add_account(Geary.Account account, Cancellable? cancellable = null) {
+    public void add_account(Geary.Account account,
+                            GLib.Cancellable? cancellable = null) {
         monitor.add(account.db_upgrade_monitor);
         monitor.add(account.db_vacuum_monitor);
-        if (cancellable != null)
+        if (cancellable != null) {
             cancellables.add(cancellable);
+        }
     }
-}
 
+    /**
+     * Stops an account from being monitored.
+     */
+    public void remove_account(Geary.Account account) {
+        monitor.remove(account.db_upgrade_monitor);
+        monitor.remove(account.db_vacuum_monitor);
+    }
+
+}

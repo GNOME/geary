@@ -8,8 +8,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     const int LOAD_MORE_HEIGHT = 100;
 
 
-    // Used to be able to refer to the action names of the MainWindow
-    private weak MainWindow main_window;
+    private Application.Configuration config;
 
     private bool enable_load_more = true;
 
@@ -18,6 +17,11 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.IdleManager selection_update;
+
+    // Determines if the next folder scan should avoid selecting a
+    // conversation when autoselect is enabled
+    private bool should_inhibit_autoselect = false;
+
 
     public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
 
@@ -34,11 +38,12 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
 
 
-    public ConversationListView(MainWindow parent) {
+    public ConversationListView(Application.Configuration config) {
         base_ref();
         set_show_expanders(false);
         set_headers_visible(false);
-        this.main_window = parent;
+
+        this.config = config;
 
         append_column(create_column(ConversationListStore.Column.CONVERSATION_DATA,
             new ConversationListCellRenderer(), ConversationListStore.Column.CONVERSATION_DATA.to_string(),
@@ -47,8 +52,9 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         Gtk.TreeSelection selection = get_selection();
         selection.set_mode(Gtk.SelectionMode.MULTIPLE);
         style_updated.connect(on_style_changed);
-        show.connect(on_show);
         row_activated.connect(on_row_activated);
+
+        notify["vadjustment"].connect(on_vadjustment_changed);
 
         button_press_event.connect(on_button_press);
 
@@ -56,7 +62,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.Tree.TARGET_ENTRY_LIST,
             Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
 
-        GearyApplication.instance.config.settings.changed[
+        this.config.settings.changed[
             Application.Configuration.DISPLAY_PREVIEW_KEY
         ].connect(on_display_preview_changed);
 
@@ -72,6 +78,8 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
 
         this.selection_update = new Geary.IdleManager(do_selection_changed);
         this.selection_update.priority = Geary.IdleManager.Priority.LOW;
+
+        this.visible = true;
     }
 
     ~ConversationListView() {
@@ -126,6 +134,10 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     /** Returns a read-only collection of the current selection. */
     public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
         return this.selected.read_only_view;
+    }
+
+    public void inhibit_next_autoselect() {
+        this.should_inhibit_autoselect = true;
     }
 
     public void scroll(Gtk.ScrollType where) {
@@ -193,13 +205,16 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         // Select the first conversation, if autoselect is enabled,
         // nothing has been selected yet and we're not showing a
         // composer.
-        if (GearyApplication.instance.config.autoselect &&
+        if (this.config.autoselect &&
+            !this.should_inhibit_autoselect &&
             get_selection().count_selected_rows() == 0) {
-            MainWindow? parent = get_toplevel() as MainWindow;
+            var parent = get_toplevel() as Application.MainWindow;
             if (parent != null && !parent.has_composer) {
                 set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
             }
         }
+
+        this.should_inhibit_autoselect = false;
     }
 
     private void on_conversations_added(bool start) {
@@ -222,7 +237,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     }
 
     private void on_conversations_removed(bool start) {
-        if (!GearyApplication.instance.config.autoselect) {
+        if (!this.config.autoselect) {
             Gtk.SelectionMode mode = start
                 // Stop GtkTreeView from automatically selecting the
                 // next row after the removed rows
@@ -262,7 +277,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             // Click positions depend on whether the preview is enabled.
             bool read_clicked = false;
             bool star_clicked = false;
-            if (GearyApplication.instance.config.display_preview) {
+            if (this.config.display_preview) {
                 read_clicked = cell_x < 25 && cell_y >= 14 && cell_y <= 30;
                 star_clicked = cell_x < 25 && cell_y >= 40 && cell_y <= 62;
             } else {
@@ -296,7 +311,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         // doesn't attempt to load it then close it straight away.
         if (event.type == Gdk.EventType.BUTTON_PRESS &&
             !get_selection().path_is_selected(path)) {
-            MainWindow? parent = get_toplevel() as MainWindow;
+            var parent = get_toplevel() as Application.MainWindow;
             if (parent != null && !parent.close_composer(false)) {
                 return true;
             }
@@ -306,43 +321,86 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
 
             GLib.Menu context_menu_model = new GLib.Menu();
-            if (!this.main_window.is_shift_down) {
-                context_menu_model.append(
-                    /// Translators: Context menu item
-                    ngettext(
-                        "Move conversation to _Trash",
-                        "Move conversations to _Trash",
-                        this.selected.size
-                    ),
-                    "win." + MainWindow.ACTION_ARCHIVE_CONVERSATION
-                );
-            } else {
-                context_menu_model.append(
-                    /// Translators: Context menu item
-                    ngettext(
-                        "_Delete conversation",
-                        "_Delete conversations",
-                        this.selected.size
-                    ),
-                    "win." + MainWindow.ACTION_DELETE_CONVERSATION
-                );
+            var main = get_toplevel() as Application.MainWindow;
+            if (main != null) {
+                if (main.is_shift_down) {
+                    context_menu_model.append(
+                        /// Translators: Context menu item
+                        ngettext(
+                            "Move conversation to _Trash",
+                            "Move conversations to _Trash",
+                            this.selected.size
+                        ),
+                        Action.Window.prefix(
+                            Application.MainWindow.ACTION_ARCHIVE_CONVERSATION
+                        )
+                    );
+                } else {
+                    context_menu_model.append(
+                        /// Translators: Context menu item
+                        ngettext(
+                            "_Delete conversation",
+                            "_Delete conversations",
+                            this.selected.size
+                        ),
+                        Action.Window.prefix(
+                            Application.MainWindow.ACTION_DELETE_CONVERSATION
+                        )
+                    );
+                }
             }
 
             if (conversation.is_unread())
-                context_menu_model.append(_("Mark as _Read"), "win."+MainWindow.ACTION_MARK_AS_READ);
+                context_menu_model.append(
+                    _("Mark as _Read"),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_MARK_AS_READ
+                    )
+                );
 
             if (conversation.has_any_read_message())
-                context_menu_model.append(_("Mark as _Unread"), "win."+MainWindow.ACTION_MARK_AS_UNREAD);
+                context_menu_model.append(
+                    _("Mark as _Unread"),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_MARK_AS_UNREAD
+                    )
+                );
 
-            if (conversation.is_flagged())
-                context_menu_model.append(_("U_nstar"), "win."+MainWindow.ACTION_MARK_AS_UNSTARRED);
-            else
-                context_menu_model.append(_("_Star"), "win."+MainWindow.ACTION_MARK_AS_STARRED);
+            if (conversation.is_flagged()) {
+                context_menu_model.append(
+                    _("U_nstar"),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_MARK_AS_UNSTARRED
+                    )
+                );
+            } else {
+                context_menu_model.append(
+                    _("_Star"),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_MARK_AS_STARRED
+                    )
+                );
+            }
 
             Menu actions_section = new Menu();
-            actions_section.append(_("_Reply"), "win."+MainWindow.ACTION_REPLY_CONVERSATION);
-            actions_section.append(_("R_eply All"), "win."+MainWindow.ACTION_REPLY_ALL_CONVERSATION);
-            actions_section.append(_("_Forward"), "win."+MainWindow.ACTION_FORWARD_CONVERSATION);
+            actions_section.append(
+                _("_Reply"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_REPLY_CONVERSATION
+                )
+            );
+            actions_section.append(
+                _("R_eply All"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_REPLY_ALL_CONVERSATION
+                )
+            );
+            actions_section.append(
+                _("_Forward"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_FORWARD_CONVERSATION
+                )
+            );
             context_menu_model.append_section(null, actions_section);
 
             // Use a popover rather than a regular context menu since
@@ -370,11 +428,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         ConversationListCellRenderer.style_changed(this);
 
         schedule_visible_conversations_changed();
-    }
-
-    private void on_show() {
-        // Wait until we're visible to set this signal up.
-        ((Gtk.Scrollable) this).get_vadjustment().value_changed.connect(on_value_changed);
     }
 
     private void on_value_changed() {
@@ -539,6 +592,10 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         }
         return Gdk.EVENT_PROPAGATE;
 
+    }
+
+    private void on_vadjustment_changed() {
+        this.vadjustment.value_changed.connect(on_value_changed);
     }
 
 }

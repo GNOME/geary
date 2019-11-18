@@ -22,9 +22,9 @@ public class PreferencesDialog : Gtk.Dialog {
     [GtkChild]
     private Gtk.HeaderBar header;
 
-    private GearyApplication app;
+    private Application.Client app;
 
-    public PreferencesDialog(Gtk.Window parent, GearyApplication app) {
+    public PreferencesDialog(Gtk.Window parent, Application.Client app) {
         set_transient_for(parent);
         set_titlebar(this.header);
         this.app = app;

@@ -7,6 +7,7 @@
     <file compressed="true" preprocess="xml-stripblanks">accounts_editor_list_pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">accounts_editor_remove_pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">accounts_editor_servers_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">application-main-window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">certificate_warning_dialog.glade</file>
     <file compressed="true">client-web-view.js</file>
     <file compressed="true">client-web-view-allow-remote-images.js</file>
@@ -38,7 +39,6 @@
     <file compressed="true" preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">main-toolbar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">main-toolbar-menus.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">main-window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">main-window-info-bar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">password-dialog.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">preferences-dialog.ui</file>

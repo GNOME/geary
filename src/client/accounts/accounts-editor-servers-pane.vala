@@ -90,7 +90,7 @@ internal class Accounts.EditorServersPane :
     public EditorServersPane(Editor editor, Geary.AccountInformation account) {
         this.editor = editor;
         this.account = account;
-        this.engine = ((GearyApplication) editor.application).engine;
+        this.engine = editor.application.engine;
         this.incoming_mutable = new Geary.ServiceInformation.copy(account.incoming);
         this.outgoing_mutable = new Geary.ServiceInformation.copy(account.outgoing);
 

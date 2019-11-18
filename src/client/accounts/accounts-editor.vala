@@ -34,6 +34,12 @@ public class Accounts.Editor : Gtk.Dialog {
     }
 
 
+    /** Returns the editor's associated client application instance. */
+    public new Application.Client application {
+        get { return (Application.Client) base.get_application(); }
+        set { base.set_application(value); }
+    }
+
     internal Manager accounts { get; private set; }
 
     internal Application.CertificateManager certificates {
@@ -54,10 +60,10 @@ public class Accounts.Editor : Gtk.Dialog {
         new Gee.LinkedList<EditorPane>();
 
 
-    public Editor(GearyApplication application, Gtk.Window parent) {
+    public Editor(Application.Client application, Gtk.Window parent) {
         this.application = application;
         this.transient_for = parent;
-        this.icon_name = GearyApplication.APP_ID;
+        this.icon_name = Application.Client.APP_ID;
 
         this.accounts = application.controller.account_manager;
         this.certificates = application.controller.certificate_manager;

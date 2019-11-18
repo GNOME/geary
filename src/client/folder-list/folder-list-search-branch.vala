@@ -18,8 +18,17 @@ public class FolderList.SearchBranch : Sidebar.RootOnlyBranch {
 }
 
 public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
+
+    private int account_count = 0;
+
     public SearchEntry(Geary.SearchFolder folder) {
         base(folder);
+
+        try {
+            this.account_count = Geary.Engine.instance.get_accounts().size;
+        } catch (GLib.Error error) {
+            debug("Failed to get account count: %s", error.message);
+        }
 
         Geary.Engine.instance.account_available.connect(on_accounts_changed);
         Geary.Engine.instance.account_unavailable.connect(on_accounts_changed);
@@ -35,8 +44,9 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     }
 
     public override string get_sidebar_name() {
-        return GearyApplication.instance.controller.get_num_accounts() == 1 ? _("Search") :
-            _("Search %s account").printf(folder.account.information.display_name);
+        return this.account_count == 1
+        ? _("Search")
+        : _("Search %s account").printf(folder.account.information.display_name);
     }
 
     public override string? get_sidebar_tooltip() {
@@ -55,6 +65,12 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     private void on_accounts_changed() {
         sidebar_name_changed(get_sidebar_name());
         sidebar_tooltip_changed(get_sidebar_tooltip());
+
+        try {
+            this.account_count = Geary.Engine.instance.get_accounts().size;
+        } catch (GLib.Error error) {
+            debug("Failed to get account count: %s", error.message);
+        }
     }
 
     private void on_email_total_changed() {

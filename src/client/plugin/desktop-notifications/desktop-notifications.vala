@@ -24,7 +24,7 @@ public class Plugin.DesktopNotifications : Notification {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.SUBJECT;
 
-    public override GearyApplication application {
+    public override Application.Client application {
         get; construct set;
     }
 
@@ -172,7 +172,7 @@ public class Plugin.DesktopNotifications : Notification {
         GLib.Notification notification = new GLib.Notification(summary);
         notification.set_body(body);
         notification.set_icon(
-            new GLib.ThemedIcon("%s-symbolic".printf(GearyApplication.APP_ID))
+            new GLib.ThemedIcon("%s-symbolic".printf(Application.Client.APP_ID))
         );
 
         /* We do not show notification action under Unity */

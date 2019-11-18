@@ -25,7 +25,13 @@ int main(string[] args) {
     // proper fix lands. See GNOME/geary#558.
     Environment.set_variable("WEBKIT_USE_SINGLE_WEB_PROCESS", "1", true);
 
-    GearyApplication app = new GearyApplication();
+
+    // Init logging right up front so as to capture as many log
+    // messages as possible
+    Geary.Logging.init();
+    GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
+
+    Application.Client app = new Application.Client();
 
     int ec = app.run(args);
 

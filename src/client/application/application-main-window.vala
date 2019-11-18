@@ -6,8 +6,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-[GtkTemplate (ui = "/org/gnome/Geary/main-window.ui")]
-public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
+[GtkTemplate (ui = "/org/gnome/Geary/application-main-window.ui")]
+public class Application.MainWindow :
+    Gtk.ApplicationWindow, Geary.BaseInterface {
 
 
     // Named actions.
@@ -74,7 +75,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private const int MIN_CONVERSATION_COUNT = 50;
 
 
-    public static void add_accelerators(GearyApplication owner) {
+    public static void add_accelerators(Client owner) {
         // Marking actions
         //
         // Unread is the primary action, so it doesn't get the <Shift>
@@ -158,8 +159,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private enum ConversationCount { NONE, SINGLE, MULTIPLE; }
 
 
-    public new GearyApplication application {
-        get { return (GearyApplication) base.get_application(); }
+    /** Returns the window's associated client application instance. */
+    public new Client application {
+        get { return (Client) base.get_application(); }
         set { base.set_application(value); }
     }
 
@@ -175,14 +177,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     /** The attachment manager for this window. */
-    public Application.AttachmentManager attachments { get; private set; }
+    public AttachmentManager attachments { get; private set; }
 
     /** Determines if conversations in the selected folder can be trashed. */
     public bool selected_folder_supports_trash {
         get {
-            return Application.Controller.does_folder_support_trash(
-                this.selected_folder
-            );
+            return Controller.does_folder_support_trash(this.selected_folder);
         }
     }
 
@@ -208,14 +208,15 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
+
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
-    private Application.Controller.AccountContext? context = null;
+    private Gee.Set<AccountContext> accounts = new Gee.HashSet<AccountContext>();
 
     private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
 
-    // Determines if the conversation viewer should autoselect on next
-    // load
+    // Determines if the conversation viewer should auto-mark messages
+    // on next load
     private bool previous_selection_was_interactive = false;
 
     // Caches the last non-search folder so it can be re-selected on
@@ -273,7 +274,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public signal void retry_service_problem(Geary.ClientService.Status problem);
 
 
-    public MainWindow(GearyApplication application) {
+    internal MainWindow(Client application) {
         Object(
             application: application,
             show_menubar: false
@@ -283,6 +284,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         load_config(application.config);
         restore_saved_window_state();
 
+        if (_PROFILE != "") {
+            this.get_style_context().add_class("devel");
+        }
+
         // Edit actions
         this.edit_actions.add_action_entries(EDIT_ACTIONS, this);
         insert_action_group(Action.Edit.GROUP_NAME, this.edit_actions);
@@ -290,29 +295,76 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         // Window actions
         add_action_entries(MainWindow.WINDOW_ACTIONS, this);
 
-        set_styling();
         setup_layout(application.config);
         on_change_orientation();
 
         update_command_actions();
         update_conversation_actions(NONE);
 
-        this.attachments = new Application.AttachmentManager(this);
-
-        this.application.engine.account_available.connect(on_account_available);
-        this.application.engine.account_unavailable.connect(on_account_unavailable);
+        this.attachments = new AttachmentManager(this);
 
         this.update_ui_timeout = new Geary.TimeoutManager.seconds(
             UPDATE_UI_INTERVAL, on_update_ui_timeout
         );
         this.update_ui_timeout.repetition = FOREVER;
 
-        this.main_layout.show_all();
+        // Add future and existing accounts to the main window
+        this.application.controller.account_available.connect(
+            on_account_available
+        );
+        this.application.controller.account_unavailable.connect(
+            on_account_unavailable
+        );
+        foreach (AccountContext context in
+                 this.application.controller.get_account_contexts()) {
+            add_account(context);
+        }
+
+        this.conversation_list_view.grab_focus();
     }
 
     ~MainWindow() {
-        this.update_ui_timeout.reset();
         base_unref();
+    }
+
+    /** {@inheritDoc} */
+    public override void destroy() {
+        if (this.application != null) {
+            this.application.controller.account_available.disconnect(
+                on_account_available
+            );
+            this.application.controller.account_unavailable.disconnect(
+                on_account_unavailable
+            );
+        }
+        this.update_ui_timeout.reset();
+        base.destroy();
+    }
+
+    /** Updates the window's title and headerbar titles. */
+    public void update_title() {
+        string title = _("Geary");
+        if (this.selected_folder != null) {
+            /// Translators: Main window title, first string
+            /// substitution being the currently selected folder name,
+            /// the second being the selected account name.
+            title = _("%s — %s").printf(
+                this.selected_folder.get_display_name(),
+                this.selected_folder.account.information.display_name
+            );
+        }
+        this.title = title;
+
+        this.main_toolbar.account = (
+            this.selected_folder != null
+            ? this.selected_folder.account.information.display_name
+            : ""
+        );
+        this.main_toolbar.folder = (
+            this.selected_folder != null
+            ? this.selected_folder.get_display_name()
+            : ""
+        );
     }
 
     /** Updates the window's account status info bars. */
@@ -372,7 +424,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
      * the folder list), as opposed to some side effect.
      */
     public async void select_folder(Geary.Folder? to_select,
-                                    bool is_interactive) {
+                                    bool is_interactive,
+                                    bool inhibit_autoselect = false) {
         if (this.selected_folder != to_select) {
             // Cancel any existing folder loading
             this.folder_open.cancel();
@@ -409,19 +462,26 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
             select_account(to_select != null ? to_select.account : null);
             this.selected_folder = to_select;
+
             // Ensure that the folder is selected in the UI if
             // this was called by something other than the
             // selection changed callback. That will check to
             // ensure that we're not setting it again.
             if (to_select != null) {
-                this.folder_list.select_folder(to_select);
+                // Prefer the inboxes branch if it exists
+                if (to_select.special_folder_type != INBOX ||
+                    !this.folder_list.select_inbox(to_select.account)) {
+                    this.folder_list.select_folder(to_select);
+                }
             } else {
                 this.folder_list.deselect_folder();
             }
+
             if (!(to_select is Geary.SearchFolder)) {
                 this.previous_non_search_folder = to_select;
             }
             update_conversation_actions(NONE);
+            update_title();
             this.main_toolbar.update_trash_button(
                 !this.is_shift_down && this.selected_folder_supports_trash
             );
@@ -451,9 +511,13 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 this.progress_monitor.add(this.conversations.progress_monitor);
 
                 conversations_model = new ConversationListStore(
-                    this.conversations
+                    this.conversations, this.application.config
+
                 );
                 this.progress_monitor.add(conversations_model.preview_monitor);
+                if (inhibit_autoselect) {
+                    this.conversation_list_view.inhibit_next_autoselect();
+                }
                 this.conversation_list_view.set_model(conversations_model);
 
                 // disable copy/move to the new folder
@@ -480,7 +544,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public async void show_conversations(Geary.Folder location,
                                          Gee.Collection<Geary.App.Conversation> to_show,
                                          bool is_interactive) {
-        yield select_folder(location, is_interactive);
+        bool inhibit_autoselect = (location != this.selected_folder);
+        yield select_folder(location, is_interactive, inhibit_autoselect);
         // The folder may have changed again by the type the async
         // call returns, so only continue if still current
         if (this.selected_folder == location) {
@@ -511,7 +576,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public async void show_email(Geary.Folder location,
                                  Gee.Collection<Geary.EmailIdentifier> to_show,
                                  bool is_interactive) {
-        yield select_folder(location, is_interactive);
+        bool inhibit_autoselect = (location != this.selected_folder);
+        yield select_folder(location, is_interactive, inhibit_autoselect);
         // The folder may have changed again by the type the async
         // call returns, so only continue if still current
         if (this.selected_folder == location) {
@@ -664,22 +730,35 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    /** Adds a folder to the window. */
-    public void add_folder(Geary.Folder to_add) {
-        this.folder_list.add_folder(to_add);
-        if (to_add.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.add_folder(to_add);
-            this.main_toolbar.move_folder_menu.add_folder(to_add);
-        }
-    }
+    private void add_account(AccountContext to_add) {
+        if (!this.accounts.contains(to_add)) {
+            this.folder_list.set_user_folders_root_name(
+                to_add.account, _("Labels")
+            );
 
-    /** Removes a folder from the window. */
-    public void remove_folder(Geary.Folder to_remove) {
-        if (to_remove.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
-            this.main_toolbar.move_folder_menu.remove_folder(to_remove);
+            this.progress_monitor.add(to_add.account.opening_monitor);
+            Geary.Smtp.ClientService? smtp = (
+                to_add.account.outgoing as Geary.Smtp.ClientService
+            );
+            if (smtp != null) {
+                this.progress_monitor.add(smtp.sending_monitor);
+            }
+
+            to_add.commands.executed.connect(on_command_execute);
+            to_add.commands.undone.connect(on_command_undo);
+            to_add.commands.redone.connect(on_command_redo);
+
+            to_add.account.folders_available_unavailable.connect(
+                on_folders_available_unavailable
+            );
+
+            folders_available(
+                to_add.account,
+                Geary.Account.sort_by_path(to_add.account.list_folders())
+            );
+
+            this.accounts.add(to_add);
         }
-        this.folder_list.remove_folder(to_remove);
     }
 
     /**
@@ -688,46 +767,99 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
      * If `to_select` is not null, the given folder will be selected,
      * otherwise no folder will be.
      */
-    public async void remove_account(Geary.Account to_remove,
-                                     Geary.Folder? to_select) {
-        // Explicitly unset the selected folder if it belongs to the
-        // account so we block until it's gone. This also clears the
-        // previous search folder, so it won't try to re-load that
-        // that when the account is gone.
-        if (this.selected_folder != null &&
-            this.selected_folder.account == to_remove) {
-            Geary.SearchFolder? current_search = (
-                this.selected_folder as Geary.SearchFolder
+    private async void remove_account(AccountContext to_remove,
+                                      Geary.Folder? to_select) {
+        if (this.accounts.contains(to_remove)) {
+            // Explicitly unset the selected folder if it belongs to the
+            // account so we block until it's gone. This also clears the
+            // previous search folder, so it won't try to re-load that
+            // that when the account is gone.
+            if (this.selected_folder != null &&
+                this.selected_folder.account == to_remove.account) {
+                Geary.SearchFolder? current_search = (
+                    this.selected_folder as Geary.SearchFolder
+                );
+
+                yield select_folder(to_select, false);
+
+                // Clear the account's search folder if it existed
+                if (current_search != null) {
+                    this.search_bar.set_search_text("");
+                    this.search_bar.search_mode_enabled = false;
+                }
+            }
+
+            to_remove.account.folders_available_unavailable.disconnect(
+                on_folders_available_unavailable
             );
 
-            yield select_folder(to_select, false);
+            to_remove.commands.executed.disconnect(on_command_execute);
+            to_remove.commands.undone.disconnect(on_command_undo);
+            to_remove.commands.redone.disconnect(on_command_redo);
 
-            // Clear the account's search folder if it existed
-            if (current_search != null) {
-                this.search_bar.set_search_text("");
-                this.search_bar.search_mode_enabled = false;
+            this.progress_monitor.remove(to_remove.account.opening_monitor);
+            Geary.Smtp.ClientService? smtp = (
+                to_remove.account.outgoing as Geary.Smtp.ClientService
+            );
+            if (smtp != null) {
+                this.progress_monitor.remove(smtp.sending_monitor);
             }
-        }
 
-        // Finally, remove the account and its folders
-        this.folder_list.remove_account(to_remove);
+            // Finally, remove the account and its folders
+            this.folder_list.remove_account(to_remove.account);
+            this.accounts.remove(to_remove);
+        }
     }
 
-    private void load_config(Application.Configuration config) {
+    /** Adds a folder to the window. */
+    private void add_folder(Geary.Folder to_add) {
+        this.folder_list.add_folder(to_add);
+        if (to_add.account == this.selected_account) {
+            this.main_toolbar.copy_folder_menu.add_folder(to_add);
+            this.main_toolbar.move_folder_menu.add_folder(to_add);
+        }
+        to_add.special_folder_type_changed.connect(
+            on_special_folder_type_changed
+        );
+    }
+
+    /** Removes a folder from the window. */
+    private void remove_folder(Geary.Folder to_remove) {
+        to_remove.special_folder_type_changed.disconnect(
+            on_special_folder_type_changed
+        );
+        if (to_remove.account == this.selected_account) {
+            this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
+            this.main_toolbar.move_folder_menu.remove_folder(to_remove);
+        }
+        this.folder_list.remove_folder(to_remove);
+    }
+
+    private AccountContext? get_selected_account_context() {
+        AccountContext? context = null;
+        if (this.selected_account != null) {
+            context = this.application.controller.get_context_for_account(
+                this.selected_account.information
+            );
+        }
+        return context;
+    }
+
+    private void load_config(Configuration config) {
         // This code both loads AND saves the pane positions with live updating. This is more
         // resilient against crashes because the value in dconf changes *immediately*, and
         // stays saved in the event of a crash.
-        config.bind(Application.Configuration.MESSAGES_PANE_POSITION_KEY, this.conversations_paned, "position");
-        config.bind(Application.Configuration.WINDOW_WIDTH_KEY, this, "window-width");
-        config.bind(Application.Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
-        config.bind(Application.Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
+        config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, this.conversations_paned, "position");
+        config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
+        config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
+        config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
         // Update to layout
         if (config.folder_list_pane_position_horizontal == -1) {
             config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
             config.messages_pane_position += config.folder_list_pane_position_old;
         }
         config.settings.changed[
-            Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY
+            Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY
         ].connect(on_change_orientation);
     }
 
@@ -799,33 +931,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         notification.show();
     }
 
-    private void set_styling() {
-        Gtk.CssProvider provider = new Gtk.CssProvider();
-        Gtk.StyleContext.add_provider_for_screen(Gdk.Display.get_default().get_default_screen(),
-            provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-        if (_PROFILE != "") {
-            Gtk.StyleContext ctx = this.get_style_context();
-            ctx.add_class("devel");
-        }
-
-        provider.parsing_error.connect((section, error) => {
-            uint start = section.get_start_line();
-            uint end = section.get_end_line();
-            if (start == end)
-                debug("Error parsing css on line %u: %s", start, error.message);
-            else
-                debug("Error parsing css on lines %u-%u: %s", start, end, error.message);
-        });
-        try {
-            File file = File.new_for_uri(@"resource:///org/gnome/Geary/geary.css");
-            provider.load_from_file(file);
-        } catch (Error e) {
-            error("Could not load CSS: %s", e.message);
-        }
-    }
-
-    private void setup_layout(Application.Configuration config) {
+    private void setup_layout(Configuration config) {
         this.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
         // Search bar
@@ -839,7 +945,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.folder_list_scrolled.add(this.folder_list);
 
         // Conversation list
-        this.conversation_list_view = new ConversationListView(this);
+        this.conversation_list_view = new ConversationListView(
+            this.application.config
+        );
         this.conversation_list_view.load_more.connect(on_load_more);
         this.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         this.conversation_list_view.conversations_selected.connect(on_conversations_selected);
@@ -866,20 +974,10 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.main_toolbar.bind_property("find-open", this.conversation_viewer.conversation_find_bar,
                 "search-mode-enabled", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         if (config.desktop_environment == UNITY) {
-            BindingTransformFunc title_func = (binding, source, ref target) => {
-                string folder = selected_folder != null ? selected_folder.get_display_name() + " " : "";
-                string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
-
-                target = "%s%s - %s".printf(folder, account, GearyApplication.NAME);
-
-                return true;
-            };
-            bind_property("current-folder", this, "title", BindingFlags.SYNC_CREATE, (owned) title_func);
-            main_toolbar.bind_property("account", this, "title", BindingFlags.SYNC_CREATE, (owned) title_func);
-            main_layout.pack_start(main_toolbar, false, true, 0);
+            this.main_toolbar.show_close_button = false;
+            this.main_layout.pack_start(main_toolbar, false, true, 0);
         } else {
-            main_toolbar.show_close_button = true;
-            set_titlebar(main_toolbar);
+            set_titlebar(this.main_toolbar);
         }
 
         // Status bar
@@ -888,13 +986,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         this.spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
         this.spinner.set_progress_monitor(progress_monitor);
         this.status_bar.add(this.spinner);
-    }
-
-    // Returns true when there's a conversation list scrollbar visible, i.e. the list is tall
-    // enough to need one.  Otherwise returns false.
-    public bool conversation_list_has_scrollbar() {
-        Gtk.Scrollbar? scrollbar = this.conversation_list_scrolled.get_vscrollbar() as Gtk.Scrollbar;
-        return scrollbar != null && scrollbar.get_visible();
     }
 
     /** {@inheritDoc} */
@@ -972,7 +1063,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     /** Un-does the last executed application command, if any. */
     private async void undo() {
-        Application.Controller.AccountContext? selected = this.context;
+        AccountContext? selected = get_selected_account_context();
         if (selected != null) {
             selected.commands.undo.begin(
                 selected.cancellable,
@@ -989,7 +1080,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     /** Re-does the last undone application command, if any. */
     private async void redo() {
-        Application.Controller.AccountContext? selected = this.context;
+        AccountContext? selected = get_selected_account_context();
         if (selected != null) {
             selected.commands.redo.begin(
                 selected.cancellable,
@@ -1005,7 +1096,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void update_command_actions() {
-        Application.Controller.AccountContext? selected = this.context;
+        AccountContext? selected = get_selected_account_context();
         get_edit_action(Action.Edit.UNDO).set_enabled(
             selected != null && selected.commands.can_undo
         );
@@ -1127,29 +1218,12 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             if (this.selected_account != null) {
                 this.main_toolbar.copy_folder_menu.clear();
                 this.main_toolbar.move_folder_menu.clear();
-
-                Application.Controller.AccountContext? context = this.context;
-                if (context != null) {
-                    context.commands.executed.disconnect(on_command_execute);
-                    context.commands.undone.disconnect(on_command_undo);
-                    context.commands.redone.disconnect(on_command_redo);
-                }
-                this.context = null;
             }
 
             this.selected_account = account;
             this.search_bar.set_account(account);
 
             if (account != null) {
-                this.context = this.application.controller.get_context_for_account(
-                    account.information
-                );
-                if (this.context != null) {
-                    this.context.commands.executed.connect(on_command_execute);
-                    this.context.commands.undone.connect(on_command_undo);
-                    this.context.commands.redone.connect(on_command_redo);
-                }
-
                 foreach (Geary.Folder folder in account.list_folders()) {
                     this.main_toolbar.copy_folder_menu.add_folder(folder);
                     this.main_toolbar.move_folder_menu.add_folder(folder);
@@ -1191,7 +1265,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 // last email was removed but the conversation monitor
                 // hasn't signalled its removal yet. In this case,
                 // just don't load it since it will soon disappear.
-                Application.Controller.AccountContext? context = this.context;
+                AccountContext? context = get_selected_account_context();
                 if (context != null && convo.get_count() > 0) {
                     try {
                         yield this.conversation_viewer.load_conversation(
@@ -1214,6 +1288,27 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 this.conversation_viewer.show_multiple_selected();
                 break;
             }
+        }
+    }
+
+    private void folders_available(Geary.Account account,
+                                   Gee.BidirSortedSet<Geary.Folder> available) {
+        foreach (Geary.Folder folder in available) {
+            if (Controller.should_add_folder(available, folder)) {
+                add_folder(folder);
+            }
+        }
+    }
+
+    private void folders_unavailable(Geary.Account account,
+                                     Gee.BidirSortedSet<Geary.Folder> unavailable) {
+        var unavailable_iterator = unavailable.bidir_iterator();
+        bool has_prev = unavailable_iterator.last();
+        while (has_prev) {
+            Geary.Folder folder = unavailable_iterator.get();
+            remove_folder(folder);
+
+            has_prev = unavailable_iterator.previous();
         }
     }
 
@@ -1261,8 +1356,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 }
             }
         );
-
-        this.conversations = null;
     }
 
     private void create_composer_from_viewer(Composer.Widget.ComposeType compose_type) {
@@ -1276,6 +1369,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             email_view.get_selection_for_quoting.begin((obj, res) => {
                     string? quote = email_view.get_selection_for_quoting.end(res);
                     this.application.controller.compose_with_context_email(
+                        this,
                         account,
                         compose_type,
                         email_view.email,
@@ -1321,40 +1415,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_account_available(Geary.AccountInformation account) {
-        try {
-            Geary.Account? engine = this.application.engine.get_account_instance(account);
-            if (engine != null) {
-                this.progress_monitor.add(engine.opening_monitor);
-                Geary.Smtp.ClientService? smtp = (
-                    engine.outgoing as Geary.Smtp.ClientService
-                );
-                if (smtp != null) {
-                    this.progress_monitor.add(smtp.sending_monitor);
-                }
-            }
-        } catch (GLib.Error e) {
-            debug("Could not access account progress monitors: %s", e.message);
-        }
-    }
-
-    private void on_account_unavailable(Geary.AccountInformation account) {
-        try {
-            Geary.Account? engine = this.application.engine.get_account_instance(account);
-            if (engine != null) {
-                this.progress_monitor.remove(engine.opening_monitor);
-                Geary.Smtp.ClientService? smtp = (
-                    engine.outgoing as Geary.Smtp.ClientService
-                );
-                if (smtp != null) {
-                    this.progress_monitor.remove(smtp.sending_monitor);
-                }
-            }
-        } catch (GLib.Error e) {
-            debug("Could not access account progress monitors: %s", e.message);
-        }
-    }
-
     private void on_change_orientation() {
         bool horizontal = this.application.config.folder_list_pane_horizontal;
         bool initial = true;
@@ -1382,8 +1442,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         this.application.config.bind(
             horizontal
-            ? Application.Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
-            : Application.Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
+            ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
+            : Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
             this.folder_paned, "position");
     }
 
@@ -1481,7 +1541,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
         Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
         if (this.selected_folder != null) {
-            Application.Controller.AccountContext? context =
+            AccountContext? context =
                 this.application.controller.get_context_for_account(
                     this.selected_folder.account.information
                 );
@@ -1555,8 +1615,11 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
+        Gtk.Scrollbar? scrollbar = (
+            this.conversation_list_scrolled.get_vscrollbar() as Gtk.Scrollbar
+        );
         if (is_visible() &&
-            !conversation_list_has_scrollbar() &&
+            (scrollbar == null || !scrollbar.get_visible()) &&
             monitor == this.conversations &&
             monitor.can_load_more) {
             debug("Not enough messages, loading more for folder %s",
@@ -1597,14 +1660,17 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
 
     [GtkCallback]
     private bool on_delete_event() {
-        if (this.application.config.startup_notifications) {
-            if (close_composer(true, false)) {
-                hide();
-            }
-        } else {
-            if (close_composer(true, false)) {
-                this.application.quit();
-            }
+        if (close_composer(true, false)) {
+            this.sensitive = false;
+            this.select_folder.begin(
+                null,
+                false,
+                true,
+                (obj, res) => {
+                    this.select_folder.end(res);
+                    destroy();
+                }
+            );
         }
         return Gdk.EVENT_STOP;
     }
@@ -1643,8 +1709,68 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         update_ui();
     }
 
-    private void on_command_execute(Application.Command command) {
-        if (!(command is Application.TrivialCommand)) {
+    private void on_account_available(AccountContext account) {
+        add_account(account);
+    }
+
+    private void on_account_unavailable(AccountContext account,
+                                        bool is_shutdown) {
+        // If we're not shutting down, select the inbox of the first
+        // account so that we show something other than empty
+        // conversation list/viewer.
+        Geary.Folder? to_select = null;
+        if (!is_shutdown) {
+            Geary.AccountInformation? first_account =
+                this.application.controller.get_first_account();
+            if (first_account != null) {
+                AccountContext? first_context =
+                    this.application.controller.get_context_for_account(
+                        first_account
+                    );
+                if (first_context != null) {
+                    to_select = first_context.inbox;
+                }
+            }
+        }
+
+        this.remove_account.begin(account, to_select);
+    }
+
+    private void on_folders_available_unavailable(
+        Geary.Account account,
+        Gee.BidirSortedSet<Geary.Folder>? available,
+        Gee.BidirSortedSet<Geary.Folder>? unavailable
+    ) {
+        if (available != null) {
+            folders_available(account, available);
+        }
+        if (unavailable != null) {
+            folders_unavailable(account, unavailable);
+        }
+    }
+
+    private void on_special_folder_type_changed(Geary.Folder folder,
+                                                Geary.SpecialFolderType old_type,
+                                                Geary.SpecialFolderType new_type) {
+        // Update the main window
+        this.folder_list.remove_folder(folder);
+        this.folder_list.add_folder(folder);
+
+        // Since removing the folder will also remove its children
+        // from the folder list, we need to check for any and re-add
+        // them. See issue #11.
+        try {
+            foreach (Geary.Folder child in
+                     folder.account.list_matching_folders(folder.path)) {
+                this.folder_list.add_folder(child);
+            }
+        } catch (Error err) {
+            // Oh well
+        }
+    }
+
+    private void on_command_execute(Command command) {
+        if (!(command is TrivialCommand)) {
             // Only show an execute notification for non-trivial
             // commands
             on_command_redo(command);
@@ -1655,9 +1781,9 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_command_undo(Application.Command command) {
+    private void on_command_undo(Command command) {
         update_command_actions();
-        Application.EmailCommand? email = command as Application.EmailCommand;
+        EmailCommand? email = command as EmailCommand;
         if (email != null) {
             if (email.conversations.size > 1) {
                 this.show_conversations.begin(
@@ -1677,7 +1803,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         }
     }
 
-    private void on_command_redo(Application.Command command) {
+    private void on_command_redo(Command command) {
         update_command_actions();
         if (command.executed_label != null) {
             Components.InAppNotification ian =
@@ -1730,36 +1856,45 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void on_conversation_activated(Geary.App.Conversation activated) {
-        // Currently activating a conversation is only available for
-        // drafts folders.
-        if (this.selected_folder != null &&
-            this.selected_folder.special_folder_type == DRAFTS) {
-            // TODO: Determine how to map between conversations and
-            // drafts correctly.
-            Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
-
-            // Check all known composers since the draft may be open
-            // in a detached composer
-            bool already_open = false;
-            foreach (Composer.Widget composer
-                     in this.application.controller.get_composers()) {
-                if (composer.current_draft_id != null &&
-                    composer.current_draft_id.equal_to(draft.id)) {
-                    already_open = true;
-                    composer.present();
-                    composer.set_focus();
-                    break;
-                }
-            }
-
-            if (!already_open) {
-                this.application.controller.compose_with_context_email(
-                    activated.base_folder.account,
-                    NEW_MESSAGE,
-                    draft,
-                    null,
-                    true
+        if (this.selected_folder != null) {
+            if (this.selected_folder.special_folder_type != DRAFTS) {
+                // Make a copy of the selection so the underlying
+                // collection doesn't change as the selection does.
+                this.application.new_window.begin(
+                    this.selected_folder,
+                    Geary.traverse(
+                        this.conversation_list_view.get_selected_conversations()
+                    ).to_linked_list()
                 );
+            } else {
+                // TODO: Determine how to map between conversations
+                // and drafts correctly.
+                Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
+
+                // Check all known composers since the draft may be
+                // open in a detached composer
+                bool already_open = false;
+                foreach (Composer.Widget composer
+                         in this.application.controller.get_composers()) {
+                    if (composer.current_draft_id != null &&
+                        composer.current_draft_id.equal_to(draft.id)) {
+                        already_open = true;
+                        composer.present();
+                        composer.set_focus();
+                        break;
+                    }
+                }
+
+                if (!already_open) {
+                    this.application.controller.compose_with_context_email(
+                        this,
+                        activated.base_folder.account,
+                        NEW_MESSAGE,
+                        draft,
+                        null,
+                        true
+                    );
+                }
             }
         }
     }
@@ -2144,7 +2279,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, REPLY, target, quote, false
+                this, account, REPLY, target, quote, false
             );
         }
     }
@@ -2153,7 +2288,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, REPLY_ALL, target, quote, false
+                this, account, REPLY_ALL, target, quote, false
             );
         }
     }
@@ -2162,7 +2297,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, FORWARD, target, quote, false
+                this, account, FORWARD, target, quote, false
             );
         }
     }
@@ -2171,7 +2306,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Geary.Account? account = this.selected_account;
         if (account != null) {
             this.application.controller.compose_with_context_email(
-                account, NEW_MESSAGE, target, null, true
+                this, account, NEW_MESSAGE, target, null, true
             );
         }
     }

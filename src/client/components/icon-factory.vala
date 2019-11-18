@@ -9,17 +9,14 @@ public class IconFactory {
     public const Gtk.IconSize ICON_TOOLBAR = Gtk.IconSize.LARGE_TOOLBAR;
     public const Gtk.IconSize ICON_SIDEBAR = Gtk.IconSize.MENU;
 
-    private static IconFactory? _instance = null;
-    public static IconFactory instance {
-        get {
-            if (_instance == null)
-                _instance = new IconFactory();
 
-            return _instance;
-        }
+    public static IconFactory? instance { get; private set; }
 
-        private set { _instance = value; }
+
+    public static void init(GLib.File resource_directory) {
+        IconFactory.instance = new IconFactory(resource_directory);
     }
+
 
     public const int UNREAD_ICON_SIZE = 16;
     public const int STAR_ICON_SIZE = 16;
@@ -29,15 +26,10 @@ public class IconFactory {
     private File icons_dir;
 
     // Creates the icon factory.
-    private IconFactory() {
-        icons_dir = GearyApplication.instance.get_resource_directory().get_child("icons");
+    private IconFactory(GLib.File resource_directory) {
+        icons_dir = resource_directory.get_child("icons");
         icon_theme = Gtk.IconTheme.get_default();
         icon_theme.append_search_path(icons_dir.get_path());
-    }
-
-    public void init() {
-        // perform any additional initialization here; at this time, everything is done in the
-        // constructor
     }
 
     private int icon_size_to_pixels(Gtk.IconSize icon_size) {

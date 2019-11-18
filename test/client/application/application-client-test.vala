@@ -6,19 +6,19 @@
  */
 
 
-class GearyApplicationTest : TestCase {
+class Application.ClientTest : TestCase {
 
 
-    private GearyApplication? test_article = null;
+    private Client? test_article = null;
 
 
-    public GearyApplicationTest() {
-        base("GearyApplicationTest");
+    public ClientTest() {
+        base("Application.ClientTest");
         add_test("paths_when_installed", paths_when_installed);
     }
 
     public override void set_up() {
-        this.test_article = new GearyApplication();
+        this.test_article = new Client();
     }
 
     public override void tear_down() {

@@ -13,7 +13,7 @@ public abstract class ClientWebViewTestCase<V> : TestCase {
 
     protected ClientWebViewTestCase(string name) {
         base(name);
-        this.config = new Application.Configuration(GearyApplication.SCHEMA_ID);
+        this.config = new Application.Configuration(Application.Client.SCHEMA_ID);
         this.config.enable_debug = true;
         ClientWebView.init_web_context(
             this.config,

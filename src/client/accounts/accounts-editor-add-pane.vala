@@ -90,9 +90,8 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         this.editor = editor;
         this.provider = provider;
 
-        GearyApplication application = (GearyApplication) editor.application;
-        this.accounts = application.controller.account_manager;
-        this.engine = application.engine;
+        this.accounts = editor.application.controller.account_manager;
+        this.engine = editor.application.engine;
 
         this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 

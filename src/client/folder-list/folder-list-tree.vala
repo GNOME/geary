@@ -38,6 +38,8 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         unowned Gtk.BindingSet? binding_set = Gtk.BindingSet.find("GtkTreeView");
         assert(binding_set != null);
         Gtk.BindingEntry.remove(binding_set, Gdk.Key.N, Gdk.ModifierType.CONTROL_MASK);
+
+        this.visible = true;
     }
 
     ~Tree() {
@@ -57,7 +59,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
     public override bool accept_cursor_changed() {
         bool can_switch = true;
-        MainWindow? parent = get_toplevel() as MainWindow;
+        var parent = get_toplevel() as Application.MainWindow;
         if (parent != null) {
             can_switch = parent.close_composer(false);
         }

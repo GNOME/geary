@@ -22,9 +22,9 @@ extern const string _REVNO;
 
 
 /**
- * The interface between Geary and the desktop environment.
+ * The client application's main point of entry and desktop integration.
  */
-public class GearyApplication : Gtk.Application {
+public class Application.Client : Gtk.Application {
 
     public const string NAME = "Geary" + _NAME_SUFFIX;
     public const string APP_ID = _APP_ID;
@@ -68,6 +68,7 @@ public class GearyApplication : Gtk.Application {
     private const string OPTION_LOG_SERIALIZER = "log-serializer";
     private const string OPTION_LOG_SQL = "log-sql";
     private const string OPTION_HIDDEN = "hidden";
+    private const string OPTION_NEW_WINDOW = "new-window";
     private const string OPTION_QUIT = "quit";
     private const string OPTION_REVOKE_CERTS = "revoke-certs";
 
@@ -78,6 +79,7 @@ public class GearyApplication : Gtk.Application {
         { Action.Application.HELP, on_activate_help},
         { Action.Application.INSPECT, on_activate_inspect},
         { Action.Application.MAILTO, on_activate_mailto, "s"},
+        { Action.Application.NEW_WINDOW, on_activate_new_window },
         { Action.Application.PREFERENCES, on_activate_preferences},
         { Action.Application.QUIT, on_activate_quit},
         { Action.Application.SHOW_EMAIL, on_activate_show_email, "(svv)"},
@@ -128,6 +130,8 @@ public class GearyApplication : Gtk.Application {
         { OPTION_QUIT, 'q', 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Perform a graceful quit"), null },
+        { OPTION_NEW_WINDOW, 'n', 0, GLib.OptionArg.NONE, null,
+          N_("Open a new window"), null },
         { OPTION_REVOKE_CERTS, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Revoke all pinned TLS server certificates"), null },
@@ -156,29 +160,6 @@ public class GearyApplication : Gtk.Application {
 
     }
 
-    [Version (deprecated = true)]
-    public static GearyApplication instance {
-        get { return _instance; }
-        private set {
-            // Ensure singleton behavior.
-            assert (_instance == null);
-            _instance = value;
-        }
-    }
-    private static GearyApplication _instance = null;
-
-
-    /**
-     * The global controller for this application instance.
-     *
-     * This will be non-null in the primary application instance, only
-     * after initial activation, or after startup if {@link
-     * is_background_service} is true.
-     */
-    public Application.Controller? controller {
-        get; private set; default = null;
-    }
-
     /**
      * The global email subsystem controller for this app instance.
      */
@@ -197,7 +178,18 @@ public class GearyApplication : Gtk.Application {
      * This will be null until {@link startup} has been called, and
      * hence will only ever become non-null for the primary instance.
      */
-    public Application.Configuration? config {
+    public Configuration? config {
+        get; private set; default = null;
+    }
+
+    /**
+     * The last active main window.
+     *
+     * This will be null if no main windows exist, see {@link
+     * get_active_main_window} if you want to be guaranteed an
+     * instance.
+     */
+    public MainWindow? last_active_main_window {
         get; private set; default = null;
     }
 
@@ -207,7 +199,7 @@ public class GearyApplication : Gtk.Application {
      * This will be null until {@link startup} has been called, and
      * hence will only ever become non-null for the primary instance.
      */
-    public Application.StartupManager? autostart {
+    public StartupManager? autostart {
         get; private set; default = null;
     }
 
@@ -225,6 +217,17 @@ public class GearyApplication : Gtk.Application {
                 this.start_hidden
             );
         }
+    }
+
+    /**
+     * The global controller for this application instance.
+     *
+     * This will be non-null in the primary application instance, only
+     * after initial activation, or after startup if {@link
+     * is_background_service} is true.
+     */
+    internal Controller? controller {
+        get; private set; default = null;
     }
 
     /**
@@ -338,7 +341,7 @@ public class GearyApplication : Gtk.Application {
     }
 
 
-    public GearyApplication() {
+    public Client() {
         Object(
             application_id: APP_ID,
             flags: (
@@ -347,7 +350,7 @@ public class GearyApplication : Gtk.Application {
             )
         );
         this.add_main_option_entries(OPTION_ENTRIES);
-        _instance = this;
+        this.window_removed.connect_after(on_window_removed);
     }
 
     public override bool local_command_line(ref unowned string[] args,
@@ -367,25 +370,25 @@ public class GearyApplication : Gtk.Application {
     }
 
     public override int handle_local_options(GLib.VariantDict options) {
+        int ret = -1;
+        if (options.contains(OPTION_DEBUG)) {
+            Geary.Logging.log_to(GLib.stdout);
+        }
         if (options.contains(OPTION_VERSION)) {
             GLib.stdout.printf(
-                "%s: %s\n", this.binary, GearyApplication.VERSION
+                "%s: %s\n", this.binary, Client.VERSION
             );
-            return 0;
+            ret = 0;
         }
-        return -1;
+        return ret;
     }
 
     public override void startup() {
         Environment.set_application_name(NAME);
         Util.International.init(GETTEXT_PACKAGE, this.binary);
-
-        Application.Configuration.init(this.is_installed, GSETTINGS_DIR);
-        Geary.Logging.init();
-        Geary.Logging.log_to(stderr);
-        GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
-
         Util.Date.init();
+
+        Configuration.init(this.is_installed, GSETTINGS_DIR);
 
         // Add application's actions before chaining up so they are
         // present when the application is first registered on the
@@ -395,8 +398,8 @@ public class GearyApplication : Gtk.Application {
         // Calls Gtk.init(), amongst other things
         base.startup();
 
-        this.config = new Application.Configuration(SCHEMA_ID);
-        this.autostart = new Application.StartupManager(
+        this.config = new Configuration(SCHEMA_ID);
+        this.autostart = new StartupManager(
             this.config, this.get_desktop_directory()
         );
 
@@ -407,6 +410,7 @@ public class GearyApplication : Gtk.Application {
         add_app_accelerators(Action.Application.COMPOSE, { "<Ctrl>N" });
         add_app_accelerators(Action.Application.HELP, { "F1" });
         add_app_accelerators(Action.Application.INSPECT, { "<Alt><Shift>I" });
+        add_app_accelerators(Action.Application.NEW_WINDOW, { "<Ctrl><Shift>N" });
         add_app_accelerators(Action.Application.QUIT, { "<Ctrl>Q" });
 
         // Common window accels
@@ -420,18 +424,36 @@ public class GearyApplication : Gtk.Application {
         add_edit_accelerators(Action.Edit.REDO, { "<Ctrl><Shift>Z" });
         add_edit_accelerators(Action.Edit.UNDO, { "<Ctrl>Z" });
 
+        // Load Geary GTK CSS
+        var provider = new Gtk.CssProvider();
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Display.get_default().get_default_screen(),
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        );
+        provider.parsing_error.connect(on_css_parse_error);
+        try {
+            var file = GLib.File.new_for_uri(
+                "resource:///org/gnome/Geary/geary.css"
+            );
+            provider.load_from_file(file);
+        } catch (GLib.Error error) {
+            warning("Could not load CSS: %s", error.message);
+        }
+
         MainWindow.add_accelerators(this);
         Composer.Widget.add_accelerators(this);
         Components.Inspector.add_accelerators(this);
         Dialogs.ProblemDetailsDialog.add_accelerators(this);
 
-        if (this.is_background_service) {
-            // Since command_line won't be called below if running as
-            // a DBus service, disable logging spew and start the
-            // controller running.
-            Geary.Logging.log_to(null);
-            this.create_controller.begin();
-        }
+        // Manually place a hold on the application otherwise the
+        // application will exit when the async call to
+        // ::create_controller next returns without having yet created
+        // a window.
+        hold();
+
+        // Finally, start the controller.
+        this.create_controller.begin();
     }
 
     public override int command_line(GLib.ApplicationCommandLine command_line) {
@@ -469,6 +491,34 @@ public class GearyApplication : Gtk.Application {
                 this.new_composer.begin(mailto);
             }
         }
+    }
+
+    /**
+     * Returns a collection of open main windows.
+     */
+    public Gee.Collection<MainWindow> get_main_windows() {
+        var windows = new Gee.LinkedList<MainWindow>();
+        foreach (Gtk.Window window in get_windows()) {
+            MainWindow? main = window as MainWindow;
+            if (main != null) {
+                windows.add(main);
+            }
+        }
+        return windows;
+    }
+
+    /**
+     * Returns the mostly recently active main window or a new instance.
+     *
+     * This returns the value of {@link last_active_main_window} if
+     * not null, else it constructs a new MainWindow instance and
+     * shows it.
+     */
+    public MainWindow get_active_main_window() {
+        if (this.last_active_main_window == null) {
+            this.last_active_main_window = new_main_window(true);
+        }
+        return last_active_main_window;
     }
 
     public void add_window_accelerators(string action,
@@ -517,7 +567,9 @@ public class GearyApplication : Gtk.Application {
     public async void show_accounts() {
         yield this.present();
 
-        Accounts.Editor editor = new Accounts.Editor(this, get_active_window());
+        Accounts.Editor editor = new Accounts.Editor(
+            this, get_active_main_window()
+        );
         editor.run();
         editor.destroy();
         this.controller.expunge_accounts.begin();
@@ -525,17 +577,13 @@ public class GearyApplication : Gtk.Application {
 
     public async void show_email(Geary.Folder? folder,
                                  Geary.EmailIdentifier id) {
-        yield this.present();
-        this.controller.main_window.show_email.begin(
-            folder,
-            Geary.Collection.single(id),
-            true
-        );
+        MainWindow main = yield this.present();
+        main.show_email.begin(folder, Geary.Collection.single(id), true);
     }
 
     public async void show_folder(Geary.Folder? folder) {
-        yield this.present();
-        yield this.controller.main_window.select_folder(folder, true);
+        MainWindow main = yield this.present();
+        yield main.select_folder(folder, true);
     }
 
     public async void show_inspector() {
@@ -565,6 +613,32 @@ public class GearyApplication : Gtk.Application {
         yield this.present();
 
         this.controller.compose(mailto);
+    }
+
+    public async void new_window(Geary.Folder? select_folder,
+                                 Gee.Collection<Geary.App.Conversation>? select_conversations) {
+        yield create_controller();
+
+        bool do_select = (
+            select_folder != null &&
+            select_conversations != null &&
+            !select_conversations.is_empty
+        );
+
+        MainWindow main = new_main_window(!do_select);
+        main.present();
+
+        if (do_select) {
+            if (select_conversations == null || select_conversations.is_empty) {
+                main.select_folder.begin(select_folder, true);
+            } else {
+                main.show_conversations.begin(
+                    select_folder,
+                    select_conversations,
+                    true
+                );
+            }
+        }
     }
 
     /** Returns the application's base user configuration directory. */
@@ -701,7 +775,7 @@ public class GearyApplication : Gtk.Application {
         GLib.Notification error = new GLib.Notification(summary);
         error.set_body(body);
         error.set_icon(
-            new GLib.ThemedIcon("%s-symbolic".printf(GearyApplication.APP_ID))
+            new GLib.ThemedIcon("%s-symbolic".printf(Client.APP_ID))
         );
         send_notification(ERROR_NOTIFICATION_ID, error);
         this.error_notification = error;
@@ -712,20 +786,40 @@ public class GearyApplication : Gtk.Application {
         withdraw_notification(ERROR_NOTIFICATION_ID);
     }
 
-    // Presents a main window. If the controller is not open, opens it
-    // first.
-    private async void present() {
+    // Presents a main window, opening the controller and window if
+    // needed.
+    private async MainWindow present() {
         yield create_controller();
-        this.controller.main_window.present();
+        MainWindow main = get_active_main_window();
+        main.present();
+        return main;
+    }
+
+    private MainWindow new_main_window(bool select_first_inbox) {
+        MainWindow window = new MainWindow(this);
+        this.controller.register_window(window);
+        window.focus_in_event.connect(on_main_window_focus_in);
+        if (select_first_inbox) {
+            try {
+                var config = this.controller.get_first_account();
+                if (config != null) {
+                    var first = this.engine.get_account_instance(config);
+                    if (first != null) {
+                        Geary.Folder? inbox = first.get_special_folder(INBOX);
+                        if (inbox != null) {
+                            window.select_folder.begin(inbox, true);
+                        }
+                    }
+                }
+            } catch (GLib.Error error) {
+                debug("Error getting Inbox for first account");
+            }
+        }
+        return window;
     }
 
     // Opens the controller
     private async void create_controller() {
-        // Manually keep the main loop around for the duration of this
-        // call. Without this, the main loop will exit as soon as we
-        // hit the yield below, before we create the main window.
-        hold();
-
         bool first_run = false;
         try {
             int mutex_token = yield this.controller_mutex.claim_async();
@@ -740,7 +834,7 @@ public class GearyApplication : Gtk.Application {
                     this.is_installed.to_string()
                 );
 
-                this.controller = yield new Application.Controller(
+                this.controller = yield new Controller(
                     this, this.controller_cancellable
                 );
                 first_run = !this.engine.has_accounts;
@@ -758,15 +852,10 @@ public class GearyApplication : Gtk.Application {
                 quit();
             }
         }
-
-        release();
     }
 
     // Closes the controller, if running
     private async void destroy_controller() {
-        // see create_controller() for reasoning hold/release is used
-        hold();
-
         try {
             int mutex_token = yield this.controller_mutex.claim_async();
             if (this.controller != null) {
@@ -777,8 +866,6 @@ public class GearyApplication : Gtk.Application {
         } catch (GLib.Error err) {
             debug("Error destroying controller: %s", err.message);
         }
-
-        release();
     }
 
     private int handle_general_options(GLib.ApplicationCommandLine command_line) {
@@ -786,14 +873,6 @@ public class GearyApplication : Gtk.Application {
         if (options.contains(OPTION_QUIT)) {
             quit();
             return 0;
-        }
-
-        bool enable_debug = options.contains(OPTION_DEBUG);
-        // Will be logging to stderr until this point
-        if (enable_debug) {
-            Geary.Logging.log_to(GLib.stdout);
-        } else {
-            Geary.Logging.log_to(null);
         }
 
         bool activated = false;
@@ -829,6 +908,10 @@ public class GearyApplication : Gtk.Application {
             this.create_controller.begin();
             activated = true;
         }
+        if (options.contains(OPTION_NEW_WINDOW)) {
+            activate_action(Action.Application.NEW_WINDOW, null);
+            activated = true;
+        }
 
         if (options.contains(GLib.OPTION_REMAINING)) {
             string[] args = options.lookup_value(
@@ -856,7 +939,7 @@ public class GearyApplication : Gtk.Application {
             }
         }
 
-        this.config.enable_debug = enable_debug;
+        this.config.enable_debug = options.contains(OPTION_DEBUG);
         this.config.enable_inspector = options.contains(OPTION_INSPECTOR);
         this.config.revoke_certs = options.contains(OPTION_REVOKE_CERTS);
 
@@ -926,6 +1009,20 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
+    private void on_activate_new_window() {
+        // If there was an existing active main, select the same
+        // account/folder/conversation.
+        MainWindow? current = this.last_active_main_window;
+        // Make a copy of the selection so the underlying collection
+        // doesn't change as the selection does.
+        this.new_window.begin(
+            current.selected_folder,
+            Geary.traverse(
+                current.conversation_list_view.get_selected_conversations()
+            ).to_linked_list()
+        );
+    }
+
     private void on_activate_preferences() {
         this.show_preferences.begin();
     }
@@ -976,7 +1073,7 @@ public class GearyApplication : Gtk.Application {
                 File exec_dir = this.exec_dir;
                 string[] argv = new string[3];
                 argv[0] = "yelp";
-                argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help/C/";
+                argv[1] = Client.SOURCE_ROOT_DIR + "/help/C/";
                 argv[2] = null;
                 if (!Process.spawn_async(
                         exec_dir.get_path(),
@@ -1004,4 +1101,47 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
+    private bool on_main_window_focus_in(Gtk.Widget widget,
+                                         Gdk.EventFocus event) {
+        MainWindow? main = widget as MainWindow;
+        if (main != null) {
+            this.last_active_main_window = main;
+        }
+        return Gdk.EVENT_PROPAGATE;
+    }
+
+    private void on_window_removed(Gtk.Window window) {
+        MainWindow? main = window as MainWindow;
+        if (main != null) {
+            this.controller.unregister_window(main);
+            if (this.last_active_main_window == main) {
+                this.last_active_main_window = Geary.Collection.get_first(
+                    get_main_windows()
+                );
+            }
+        }
+
+        // Since ::startup above took out a manual hold on the
+        // application, manually work out if the application should
+        // quit here.
+        if (!this.is_background_service && get_windows().length() == 0) {
+            this.quit();
+        }
+    }
+
+    private void on_css_parse_error(Gtk.CssSection section, GLib.Error error) {
+        uint start = section.get_start_line();
+        uint end = section.get_end_line();
+        if (start == end) {
+            warning(
+                "Error parsing %s:%u: %s",
+                section.get_file().get_uri(), start, error.message
+            );
+        } else {
+            warning(
+                "Error parsing %s:%u-%u: %s",
+                section.get_file().get_uri(), start, end, error.message
+            );
+        }
+    }
 }

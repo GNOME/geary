@@ -13,13 +13,13 @@ public class Application.PluginManager : GLib.Object {
 
     public NotificationContext notifications { get; set; }
 
-    private GearyApplication application;
+    private Client application;
     private Peas.Engine engine;
     private Peas.ExtensionSet? notification_extensions = null;
     private bool is_shutdown = false;
 
 
-    public PluginManager(GearyApplication application) {
+    public PluginManager(Client application) {
         this.application = application;
         this.engine = Peas.Engine.get_default();
         this.engine.add_search_path(

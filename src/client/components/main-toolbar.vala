@@ -13,7 +13,7 @@ public class MainToolbar : Gtk.Box {
     public string account { get; set; }
     public string folder { get; set; }
     // Close button settings
-    public bool show_close_button { get; set; default = false; }
+    public bool show_close_button { get; set; default = true; }
     public bool show_close_button_left { get; private set; default = true; }
     public bool show_close_button_right { get; private set; default = true; }
     // Search and find bar
@@ -115,7 +115,6 @@ public class MainToolbar : Gtk.Box {
         header.get_style_context().remove_class("geary-titlebar");
         header.get_style_context().remove_class("geary-titlebar-right");
         guest_header_binding.unbind();
-        header.show_close_button = false;
         header.decoration_layout = Gtk.Settings.get_default().gtk_decoration_layout;
         conversation_header.show();
     }
@@ -161,7 +160,9 @@ public class MainToolbar : Gtk.Box {
         );
 
         if (this.show_trash_button) {
-            this.trash_delete_button.action_name = "win."+MainWindow.ACTION_TRASH_CONVERSATION;
+            this.trash_delete_button.action_name = Action.Window.prefix(
+                Application.MainWindow.ACTION_TRASH_CONVERSATION
+            );
             this.trash_delete_button.image = trash_image;
             this.trash_delete_button.tooltip_text = ngettext(
                 "Move conversation to Trash",
@@ -169,7 +170,9 @@ public class MainToolbar : Gtk.Box {
                 this.selected_conversations
             );
         } else {
-            this.trash_delete_button.action_name = "win."+MainWindow.ACTION_DELETE_CONVERSATION;
+            this.trash_delete_button.action_name = Action.Window.prefix(
+                Application.MainWindow.ACTION_DELETE_CONVERSATION
+            );
             this.trash_delete_button.image = delete_image;
             this.trash_delete_button.tooltip_text = ngettext(
                 "Delete conversation",

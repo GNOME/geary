@@ -99,12 +99,13 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
         is_emphasized_changed(has_new);
     }
 
-    public bool internal_drop_received(Gdk.DragContext context, Gtk.SelectionData data) {
+    public bool internal_drop_received(Application.MainWindow main_window,
+                                       Gdk.DragContext context,
+                                       Gtk.SelectionData data) {
         // Copy or move?
         Gdk.ModifierType mask;
         double[] axes = new double[2];
         context.get_device().get_state(context.get_dest_window(), axes, out mask);
-        MainWindow main_window = GearyApplication.instance.controller.main_window;
         if ((mask & Gdk.ModifierType.CONTROL_MASK) != 0) {
             main_window.folder_list.copy_conversation(folder);
         } else {

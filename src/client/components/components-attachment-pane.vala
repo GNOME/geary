@@ -369,9 +369,9 @@ public class Components.AttachmentPane : Gtk.Grid {
     }
 
     private void open_attachments(Gee.Collection<Geary.Attachment> attachments) {
-        MainWindow? main = this.get_toplevel() as MainWindow;
+        var main = this.get_toplevel() as Application.MainWindow;
         if (main != null) {
-            GearyApplication app = main.application;
+            Application.Client app = main.application;
             bool confirmed = true;
             if (app.config.ask_open_attachment) {
                 QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(

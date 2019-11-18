@@ -110,9 +110,17 @@ public class SearchBar : Gtk.SearchBar {
     }
 
     private void on_information_changed() {
-        set_search_placeholder_text(current_account == null ||
-            GearyApplication.instance.controller.get_num_accounts() == 1 ? DEFAULT_SEARCH_TEXT :
-            _("Search %s account").printf(current_account.information.display_name));
+        var main = get_toplevel() as Application.MainWindow;
+        if (main != null) {
+            set_search_placeholder_text(
+                current_account == null ||
+                main.application.controller.get_num_accounts() == 1
+                ? DEFAULT_SEARCH_TEXT :
+                _("Search %s account").printf(
+                    current_account.information.display_name
+                )
+            );
+        }
     }
 
     private void on_search_mode_changed() {

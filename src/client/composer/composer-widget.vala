@@ -24,6 +24,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** The email fields the composer requires for referred email. */
     public const Geary.Email.Field REQUIRED_FIELDS = ENVELOPE | BODY;
 
+    /// Translators: Title for an empty composer window
+    private const string DEFAULT_TITLE = _("New Message");
+
+
     public enum ComposeType {
         NEW_MESSAGE,
         REPLY,
@@ -185,7 +189,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         { ACTION_SHOW_EXTENDED_HEADERS,    on_toggle_action, null, "false", on_show_extended_headers_toggled },
     };
 
-    public static void add_accelerators(GearyApplication application) {
+    public static void add_accelerators(Application.Client application) {
         application.add_window_accelerators(ACTION_DISCARD, { "Escape" } );
         application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );
         application.add_window_accelerators(ACTION_DETACH, { "<Ctrl>d" } );
@@ -462,10 +466,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         get { return this.parent as Container; }
     }
 
-    private GearyApplication application;
+    private Application.Client application;
 
 
-    public Widget(GearyApplication application,
+    public Widget(Application.Client application,
                           Geary.Account initial_account,
                           ComposeType compose_type) {
         base_ref();
@@ -592,14 +596,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         load_entry_completions();
     }
 
-    public Widget.from_mailbox(GearyApplication application,
+    public Widget.from_mailbox(Application.Client application,
                                Geary.Account initial_account,
                                Geary.RFC822.MailboxAddress to) {
         this(application, initial_account, ComposeType.NEW_MESSAGE);
         this.to = to.to_full_display();
     }
 
-    public Widget.from_mailto(GearyApplication application,
+    public Widget.from_mailto(Application.Client application,
                               Geary.Account initial_account,
                               string mailto) {
         this(application, initial_account, ComposeType.NEW_MESSAGE);
@@ -714,8 +718,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     /** Detaches the composer and opens it in a new window. */
     public void detach() {
-        Gtk.Widget? focused_widget = this.container.top_window.get_focus();
+        Gtk.Widget? focused_widget = null;
         if (this.container != null) {
+            focused_widget = this.container.top_window.get_focus();
             this.container.close();
         }
         Window new_window = new Window(this, this.application);
@@ -1292,7 +1297,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         // User-Agent
-        email.mailer = Environment.get_prgname() + "/" + GearyApplication.VERSION;
+        email.mailer = Environment.get_prgname() + "/" + Application.Client.VERSION;
 
         return email;
     }
@@ -1382,6 +1387,22 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // we want this behaviour to take precedence over the default
         // key handling
         return check_send_on_return(event) && base.key_press_event(event);
+    }
+
+    /** Updates the composer's top level window and headerbar title. */
+    public void update_window_title() {
+        string subject = this.subject.strip();
+        if (Geary.String.is_empty(subject)) {
+            subject = DEFAULT_TITLE;
+        }
+
+        if (this.container != null) {
+            this.container.top_window.title = subject;
+        }
+
+        if (this.application.config.desktop_environment != UNITY) {
+            this.header.title = subject;
+        }
     }
 
     internal void set_mode(PresentationMode new_mode) {
@@ -2554,7 +2575,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkCallback]
     private void on_subject_changed() {
         draft_changed();
-        notify_property("subject");
+        update_window_title();
     }
 
     [GtkCallback]

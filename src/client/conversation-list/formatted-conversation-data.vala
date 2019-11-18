@@ -103,6 +103,8 @@ public class FormattedConversationData : Geary.BaseObject {
     public int num_emails { get; set; }
     public Geary.Email? preview { get; private set; default = null; }
 
+    private Application.Configuration config;
+
     private Geary.App.Conversation? conversation = null;
     private Gee.List<Geary.RFC822.MailboxAddress>? account_owner_emails = null;
     private bool use_to = true;
@@ -111,9 +113,12 @@ public class FormattedConversationData : Geary.BaseObject {
     private Participants participants = Participants(){markup = null};
 
     // Creates a formatted message data from an e-mail.
-    public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email preview,
-        Geary.Folder folder, Gee.List<Geary.RFC822.MailboxAddress> account_owner_emails) {
-
+    public FormattedConversationData(Application.Configuration config,
+                                     Geary.App.Conversation conversation,
+                                     Geary.Email preview,
+                                     Geary.Folder folder,
+                                     Gee.List<Geary.RFC822.MailboxAddress> account_owner_emails) {
+        this.config = config;
         this.conversation = conversation;
         this.account_owner_emails = account_owner_emails;
         use_to = (folder != null) && folder.special_folder_type.is_outgoing();
@@ -150,7 +155,7 @@ public class FormattedConversationData : Geary.BaseObject {
         // Date:
         string new_date = Util.Date.pretty_print(
             latest.properties.date_received.to_local(),
-            GearyApplication.instance.config.clock_format
+            this.config.clock_format
         );
         if (new_date == date)
             return false;
@@ -161,7 +166,8 @@ public class FormattedConversationData : Geary.BaseObject {
     }
 
     // Creates an example message (used internally for styling calculations.)
-    public FormattedConversationData.create_example() {
+    public FormattedConversationData.create_example(Application.Configuration config) {
+        this.config = config;
         this.is_unread = false;
         this.is_flagged = false;
         this.date = STYLE_EXAMPLE;
@@ -287,7 +293,7 @@ public class FormattedConversationData : Geary.BaseObject {
     private void render_internal(Gtk.Widget widget, Gdk.Rectangle? cell_area,
         Cairo.Context? ctx, Gtk.CellRendererState flags, bool recalc_dims,
         bool hover_select) {
-        bool display_preview = GearyApplication.instance.config.display_preview;
+        bool display_preview = this.config.display_preview;
         int y = LINE_SPACING + (cell_area != null ? cell_area.y : 0);
 
         bool selected = (flags & Gtk.CellRendererState.SELECTED) != 0;
