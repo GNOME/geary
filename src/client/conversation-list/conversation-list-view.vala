@@ -18,6 +18,11 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.IdleManager selection_update;
 
+    // Determines if the next folder scan should avoid selecting a
+    // conversation when autoselect is enabled
+    private bool should_inhibit_autoselect = false;
+
+
     public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
 
     // Signal for when a conversation has been double-clicked, or selected and enter is pressed.
@@ -131,6 +136,10 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         return this.selected.read_only_view;
     }
 
+    public void inhibit_next_autoselect() {
+        this.should_inhibit_autoselect = true;
+    }
+
     public void scroll(Gtk.ScrollType where) {
         Gtk.TreeSelection selection = get_selection();
         weak Gtk.TreeModel model;
@@ -197,12 +206,15 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         // nothing has been selected yet and we're not showing a
         // composer.
         if (this.config.autoselect &&
+            !this.should_inhibit_autoselect &&
             get_selection().count_selected_rows() == 0) {
             var parent = get_toplevel() as Application.MainWindow;
             if (parent != null && !parent.has_composer) {
                 set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
             }
         }
+
+        this.should_inhibit_autoselect = false;
     }
 
     private void on_conversations_added(bool start) {

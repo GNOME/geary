@@ -310,6 +310,7 @@ internal class Application.Controller : Geary.BaseObject {
             window.select_folder.begin(
                 null,
                 false,
+                true,
                 (obj, res) => {
                     window.select_folder.end(res);
                     window.close();

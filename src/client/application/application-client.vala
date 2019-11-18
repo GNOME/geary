@@ -516,7 +516,7 @@ public class Application.Client : Gtk.Application {
      */
     public MainWindow get_active_main_window() {
         if (this.last_active_main_window == null) {
-            this.last_active_main_window = new_main_window();
+            this.last_active_main_window = new_main_window(true);
         }
         return last_active_main_window;
     }
@@ -619,10 +619,16 @@ public class Application.Client : Gtk.Application {
                                  Gee.Collection<Geary.App.Conversation>? select_conversations) {
         yield create_controller();
 
-        MainWindow main = new_main_window();
+        bool do_select = (
+            select_folder != null &&
+            select_conversations != null &&
+            !select_conversations.is_empty
+        );
+
+        MainWindow main = new_main_window(!do_select);
         main.present();
 
-        if (select_folder != null) {
+        if (do_select) {
             if (select_conversations == null || select_conversations.is_empty) {
                 main.select_folder.begin(select_folder, true);
             } else {
@@ -789,10 +795,26 @@ public class Application.Client : Gtk.Application {
         return main;
     }
 
-    private MainWindow new_main_window() {
+    private MainWindow new_main_window(bool select_first_inbox) {
         MainWindow window = new MainWindow(this);
         this.controller.register_window(window);
         window.focus_in_event.connect(on_main_window_focus_in);
+        if (select_first_inbox) {
+            try {
+                var config = this.controller.get_first_account();
+                if (config != null) {
+                    var first = this.engine.get_account_instance(config);
+                    if (first != null) {
+                        Geary.Folder? inbox = first.get_special_folder(INBOX);
+                        if (inbox != null) {
+                            window.select_folder.begin(inbox, true);
+                        }
+                    }
+                }
+            } catch (GLib.Error error) {
+                debug("Error getting Inbox for first account");
+            }
+        }
         return window;
     }
 

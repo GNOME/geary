@@ -215,8 +215,8 @@ public class Application.MainWindow :
 
     private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
 
-    // Determines if the conversation viewer should autoselect on next
-    // load
+    // Determines if the conversation viewer should auto-mark messages
+    // on next load
     private bool previous_selection_was_interactive = false;
 
     // Caches the last non-search folder so it can be re-selected on
@@ -424,7 +424,8 @@ public class Application.MainWindow :
      * the folder list), as opposed to some side effect.
      */
     public async void select_folder(Geary.Folder? to_select,
-                                    bool is_interactive) {
+                                    bool is_interactive,
+                                    bool inhibit_autoselect = false) {
         if (this.selected_folder != to_select) {
             // Cancel any existing folder loading
             this.folder_open.cancel();
@@ -461,15 +462,21 @@ public class Application.MainWindow :
 
             select_account(to_select != null ? to_select.account : null);
             this.selected_folder = to_select;
+
             // Ensure that the folder is selected in the UI if
             // this was called by something other than the
             // selection changed callback. That will check to
             // ensure that we're not setting it again.
             if (to_select != null) {
-                this.folder_list.select_folder(to_select);
+                // Prefer the inboxes branch if it exists
+                if (to_select.special_folder_type != INBOX ||
+                    !this.folder_list.select_inbox(to_select.account)) {
+                    this.folder_list.select_folder(to_select);
+                }
             } else {
                 this.folder_list.deselect_folder();
             }
+
             if (!(to_select is Geary.SearchFolder)) {
                 this.previous_non_search_folder = to_select;
             }
@@ -508,6 +515,9 @@ public class Application.MainWindow :
 
                 );
                 this.progress_monitor.add(conversations_model.preview_monitor);
+                if (inhibit_autoselect) {
+                    this.conversation_list_view.inhibit_next_autoselect();
+                }
                 this.conversation_list_view.set_model(conversations_model);
 
                 // disable copy/move to the new folder
@@ -534,7 +544,8 @@ public class Application.MainWindow :
     public async void show_conversations(Geary.Folder location,
                                          Gee.Collection<Geary.App.Conversation> to_show,
                                          bool is_interactive) {
-        yield select_folder(location, is_interactive);
+        bool inhibit_autoselect = (location != this.selected_folder);
+        yield select_folder(location, is_interactive, inhibit_autoselect);
         // The folder may have changed again by the type the async
         // call returns, so only continue if still current
         if (this.selected_folder == location) {
@@ -565,7 +576,8 @@ public class Application.MainWindow :
     public async void show_email(Geary.Folder location,
                                  Gee.Collection<Geary.EmailIdentifier> to_show,
                                  bool is_interactive) {
-        yield select_folder(location, is_interactive);
+        bool inhibit_autoselect = (location != this.selected_folder);
+        yield select_folder(location, is_interactive, inhibit_autoselect);
         // The folder may have changed again by the type the async
         // call returns, so only continue if still current
         if (this.selected_folder == location) {
@@ -1284,23 +1296,6 @@ public class Application.MainWindow :
         foreach (Geary.Folder folder in available) {
             if (Controller.should_add_folder(available, folder)) {
                 add_folder(folder);
-
-                if (folder.special_folder_type == INBOX) {
-                    // Select this inbox if there isn't an existing
-                    // folder selected and it is the inbox for the
-                    // first account
-                    Geary.AccountInformation? first_account =
-                        this.application.controller.get_first_account();
-                    if (!this.folder_list.is_any_selected() &&
-                        folder.account.information == first_account) {
-                        // First we try to select the Inboxes branch
-                        // inbox if it's there, falling back to the
-                        // main folder list.
-                        if (!this.folder_list.select_inbox(folder.account)) {
-                            this.folder_list.select_folder(folder);
-                        }
-                    }
-                }
             }
         }
     }
@@ -1670,6 +1665,7 @@ public class Application.MainWindow :
             this.select_folder.begin(
                 null,
                 false,
+                true,
                 (obj, res) => {
                     this.select_folder.end(res);
                     destroy();
