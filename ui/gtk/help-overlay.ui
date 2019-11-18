@@ -203,7 +203,14 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Close current window</property>
+                                <property name="title" translatable="yes" context="shortcut window">Open a new window</property>
+                                <property name="accelerator">&lt;primary&gt;&lt;Shift&gt;N</property>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                                <property name="title" translatable="yes" context="shortcut window">Close the current window</property>
                                 <property name="accelerator">&lt;primary&gt;W</property>
                             </object>
                         </child>
