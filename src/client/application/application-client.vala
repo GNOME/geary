@@ -366,25 +366,25 @@ public class Application.Client : Gtk.Application {
     }
 
     public override int handle_local_options(GLib.VariantDict options) {
+        int ret = -1;
+        if (options.contains(OPTION_DEBUG)) {
+            Geary.Logging.log_to(GLib.stdout);
+        }
         if (options.contains(OPTION_VERSION)) {
             GLib.stdout.printf(
                 "%s: %s\n", this.binary, Client.VERSION
             );
-            return 0;
+            ret = 0;
         }
-        return -1;
+        return ret;
     }
 
     public override void startup() {
         Environment.set_application_name(NAME);
         Util.International.init(GETTEXT_PACKAGE, this.binary);
+        Util.Date.init();
 
         Configuration.init(this.is_installed, GSETTINGS_DIR);
-        Geary.Logging.init();
-        Geary.Logging.log_to(stderr);
-        GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
-
-        Util.Date.init();
 
         // Add application's actions before chaining up so they are
         // present when the application is first registered on the
@@ -428,7 +428,6 @@ public class Application.Client : Gtk.Application {
             // Since command_line won't be called below if running as
             // a DBus service, disable logging spew and start the
             // controller running.
-            Geary.Logging.log_to(null);
             this.create_controller.begin();
         }
     }
@@ -817,14 +816,6 @@ public class Application.Client : Gtk.Application {
             return 0;
         }
 
-        bool enable_debug = options.contains(OPTION_DEBUG);
-        // Will be logging to stderr until this point
-        if (enable_debug) {
-            Geary.Logging.log_to(GLib.stdout);
-        } else {
-            Geary.Logging.log_to(null);
-        }
-
         bool activated = false;
 
         // Logging flags
@@ -885,7 +876,7 @@ public class Application.Client : Gtk.Application {
             }
         }
 
-        this.config.enable_debug = enable_debug;
+        this.config.enable_debug = options.contains(OPTION_DEBUG);
         this.config.enable_inspector = options.contains(OPTION_INSPECTOR);
         this.config.revoke_certs = options.contains(OPTION_REVOKE_CERTS);
 

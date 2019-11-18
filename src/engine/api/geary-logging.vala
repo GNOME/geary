@@ -497,15 +497,27 @@ public Record? get_latest_record() {
 }
 
 /**
- * Registers a FileStream to receive all log output from the Engine, be it via the specialized
- * Logging calls (which use the topic-based {@link Flag} or GLib's standard issue
- * debug/message/error/etc. calls ... thus, calling this will also affect the Engine user's calls
- * to those functions.
+ * Registers a FileStream to receive all log output from the engine.
  *
- * If stream is null, no logging occurs.  This is default.
+ * This may be via the specialized Logging calls (which use the
+ * topic-based {@link Flag} or GLib's standard issue
+ * debug/message/error/etc. calls ... thus, calling this will also
+ * affect the Engine user's calls to those functions.
+ *
+ * If stream is null, no logging occurs (the default). If non-null and
+ * the stream was previously null, all pending log records will be
+ * output before proceeding.
  */
 public void log_to(FileStream? stream) {
+    bool catch_up = (stream != null && Logging.stream == null);
     Logging.stream = stream;
+    if (catch_up) {
+        Record? record = Logging.first_record;
+        while (record != null) {
+            write_record(record, record.levels);
+            record = record.next;
+        }
+    }
 }
 
 
@@ -550,6 +562,13 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
             });
     }
 
+    write_record(record, levels);
+
+    return GLib.LogWriterOutput.HANDLED;
+}
+
+private inline void write_record(Record record,
+                                 GLib.LogLevelFlags levels) {
     // Print a log message to the stream if configured, or if the
     // priority is high enough.
     unowned FileStream? out = stream;
@@ -569,8 +588,6 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
         out.putc('\n');
         writer_lock.unlock();
     }
-
-    return GLib.LogWriterOutput.HANDLED;
 }
 
 
