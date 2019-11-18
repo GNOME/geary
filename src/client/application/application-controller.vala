@@ -234,6 +234,30 @@ internal class Application.Controller : Geary.BaseObject {
             warning("Error opening Geary.Engine instance: %s", e.message);
         }
 
+        // Since the accounts may still be loading folders, when the
+        // main window first opens no folder might be available to be
+        // selected. Add look for the inbox and if not found, add a
+        // listener here as a once off for when it is loaded.
+        var config = get_first_account();
+        if (config != null) {
+            var first = this.accounts.get(config);
+            if (first != null) {
+                var inbox = first.account.get_special_folder(INBOX);
+                if (inbox != null) {
+                    application.get_active_main_window().select_folder.begin(
+                        inbox, true
+                    );
+
+                } else {
+                    // Connect after so the folder is added to any
+                    // open main windows first.
+                    first.account.folders_available_unavailable.connect_after(
+                        on_folders_first_available
+                    );
+                }
+            }
+        }
+
         // Expunge any deleted accounts in the background, so we're
         // not blocking the app continuing to open.
         this.expunge_accounts.begin();
@@ -1436,6 +1460,37 @@ internal class Application.Controller : Geary.BaseObject {
 
             // Notify the command stack that folders have gone away
             context.controller_stack.folders_removed(unavailable);
+        }
+    }
+
+    private void on_folders_first_available(
+        Geary.Account account,
+        Gee.BidirSortedSet<Geary.Folder>? available,
+        Gee.BidirSortedSet<Geary.Folder>? unavailable
+    ) {
+        debug("XXX folders first loaded");
+        bool inbox_found = false;
+        if (available != null) {
+            foreach (Geary.Folder folder in available) {
+                debug("XXX folder: %s/%s",
+                      folder.get_display_name(),
+                      folder.special_folder_type.to_string());
+                if (Controller.should_add_folder(available, folder) &&
+                    folder.special_folder_type == INBOX) {
+                    debug("XXX found inbox");
+                    inbox_found = true;
+                    this.application.get_active_main_window().select_folder.begin(
+                        folder, true
+                    );
+                }
+            }
+        }
+
+        if (inbox_found) {
+            // The handler has done its job, so disconnect it
+            account.folders_available_unavailable.disconnect(
+                on_folders_first_available
+            );
         }
     }
 
