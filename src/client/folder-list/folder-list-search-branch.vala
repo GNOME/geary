@@ -8,8 +8,8 @@
  * This branch is a top-level container for a search entry.
  */
 public class FolderList.SearchBranch : Sidebar.RootOnlyBranch {
-    public SearchBranch(Geary.SearchFolder folder) {
-        base(new SearchEntry(folder));
+    public SearchBranch(Geary.SearchFolder folder, Geary.Engine engine) {
+        base(new SearchEntry(folder, engine));
     }
 
     public Geary.SearchFolder get_search_folder() {
@@ -19,28 +19,33 @@ public class FolderList.SearchBranch : Sidebar.RootOnlyBranch {
 
 public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
 
+    Geary.Engine engine;
     private int account_count = 0;
 
-    public SearchEntry(Geary.SearchFolder folder) {
+    public SearchEntry(Geary.SearchFolder folder,
+                       Geary.Engine engine) {
         base(folder);
+        this.engine = engine;
 
         try {
-            this.account_count = Geary.Engine.instance.get_accounts().size;
+            this.account_count = engine.get_accounts().size;
         } catch (GLib.Error error) {
             debug("Failed to get account count: %s", error.message);
         }
 
-        Geary.Engine.instance.account_available.connect(on_accounts_changed);
-        Geary.Engine.instance.account_unavailable.connect(on_accounts_changed);
-        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].connect(
-            on_email_total_changed);
+        this.engine.account_available.connect(on_accounts_changed);
+        this.engine.account_unavailable.connect(on_accounts_changed);
+        folder.properties.notify[
+            Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL
+        ].connect(on_email_total_changed);
     }
 
     ~SearchEntry() {
-        Geary.Engine.instance.account_available.disconnect(on_accounts_changed);
-        Geary.Engine.instance.account_unavailable.disconnect(on_accounts_changed);
-        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].disconnect(
-            on_email_total_changed);
+        this.engine.account_available.disconnect(on_accounts_changed);
+        this.engine.account_unavailable.disconnect(on_accounts_changed);
+        folder.properties.notify[
+            Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL
+        ].disconnect(on_email_total_changed);
     }
 
     public override string get_sidebar_name() {
@@ -62,12 +67,13 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
         return "SearchEntry: " + folder.to_string();
     }
 
-    private void on_accounts_changed() {
+    private void on_accounts_changed(Geary.Engine engine,
+                                     Geary.AccountInformation config) {
         sidebar_name_changed(get_sidebar_name());
         sidebar_tooltip_changed(get_sidebar_tooltip());
 
         try {
-            this.account_count = Geary.Engine.instance.get_accounts().size;
+            this.account_count = engine.get_accounts().size;
         } catch (GLib.Error error) {
             debug("Failed to get account count: %s", error.message);
         }
@@ -81,4 +87,3 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
         return 0;
     }
 }
-

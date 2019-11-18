@@ -726,7 +726,9 @@ public class Application.MainWindow :
             search_folder.search(
                 text, this.application.config.get_search_strategy(), cancellable
             );
-            this.folder_list.set_search(search_folder);
+            this.folder_list.set_search(
+                this.application.engine, search_folder
+            );
         }
     }
 

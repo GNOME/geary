@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -23,14 +23,6 @@ public class Geary.Engine : BaseObject {
     private const uint VALIDATION_TIMEOUT = 15;
 
 
-    public static Engine instance {
-        get {
-            return (_instance != null) ? _instance : (_instance = new Engine());
-        }
-    }
-    private static Engine? _instance = null;
-
-
     // Workaround for Vala issue #659. See shared_endpoints below.
     private class EndpointWeakRef {
 
@@ -47,6 +39,29 @@ public class Geary.Engine : BaseObject {
     }
 
 
+    private static bool is_initialized = false;
+
+
+    // This can't be called from within the ctor, as initialization
+    // code may want to access the Engine instance to make their own
+    // calls and, in particular, subscribe to signals.
+    //
+    // TODO: It would make sense to have a terminate_library() call,
+    // but it technically should not be called until the application
+    // is exiting, not merely if the Engine is closed, as termination
+    // means shutting down resources for good
+    private static void initialize_library() {
+        if (!Engine.is_initialized) {
+            Engine.is_initialized = true;
+
+            Logging.init();
+            RFC822.init();
+            Imap.init();
+            HTML.init();
+        }
+    }
+
+
     /** Determines if any accounts have been added to this instance. */
     public bool has_accounts {
         get { return this.is_open && !this.accounts.is_empty; }
@@ -60,7 +75,6 @@ public class Geary.Engine : BaseObject {
     /** Location of the directory containing shared resource files. */
     public File? resource_dir { get; private set; default = null; }
 
-    private bool is_initialized = false;
     private bool is_open = false;
     private Gee.List<Account> accounts = new Gee.ArrayList<Account>();
 
@@ -98,31 +112,9 @@ public class Geary.Engine : BaseObject {
     public signal void account_unavailable(AccountInformation account);
 
 
-    // Public so it can be tested
+    /** Constructs a new engine instance. */
     public Engine() {
-    }
-
-    private void check_opened() throws EngineError {
-        if (!is_open)
-            throw new EngineError.OPEN_REQUIRED("Geary.Engine instance not open");
-    }
-
-    // This can't be called from within the ctor, as initialization code may want to access the
-    // Engine instance to make their own calls and, in particular, subscribe to signals.
-    //
-    // TODO: It would make sense to have a terminate_library() call, but it technically should not
-    // be called until the application is exiting, not merely if the Engine is closed, as termination
-    // means shutting down resources for good
-    private void initialize_library() {
-        if (is_initialized)
-            return;
-
-        is_initialized = true;
-
-        Logging.init();
-        RFC822.init();
-        Imap.init();
-        HTML.init();
+        Engine.initialize_library();
     }
 
     /**
@@ -131,10 +123,6 @@ public class Geary.Engine : BaseObject {
     public async void open_async(GLib.File resource_dir,
                                  GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        // initialize *before* opening the Engine ... all initialize
-        // code should assume the Engine is closed
-        initialize_library();
-
         if (is_open) {
             throw new EngineError.ALREADY_OPEN("Already open");
         }
@@ -475,6 +463,11 @@ public class Geary.Engine : BaseObject {
         }
 
         return shared;
+    }
+
+    private void check_opened() throws EngineError {
+        if (!is_open)
+            throw new EngineError.OPEN_REQUIRED("Geary.Engine instance not open");
     }
 
     private inline Geary.Endpoint new_endpoint(ServiceProvider provider,

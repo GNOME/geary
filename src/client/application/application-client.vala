@@ -163,13 +163,8 @@ public class Application.Client : Gtk.Application {
     /**
      * The global email subsystem controller for this app instance.
      */
-    public Geary.Engine engine {
-        get {
-            // XXX We should be managing the engine's lifecycle here,
-            // but until that happens provide this property to
-            // encourage access via the application anyway
-            return Geary.Engine.instance;
-        }
+    public Geary.Engine? engine {
+        get; private set; default = null;
     }
 
     /**

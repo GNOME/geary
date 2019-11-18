@@ -247,7 +247,8 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
             graft(branch, branch.account.information.ordinal);
     }
 
-    public void set_search(Geary.SearchFolder search_folder) {
+    public void set_search(Geary.Engine engine,
+                           Geary.SearchFolder search_folder) {
         if (search_branch != null && has_branch(search_branch)) {
             // We already have a search folder.  If it's the same one, just
             // select it.  If it's a new search folder, remove the old one and
@@ -260,7 +261,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
             }
         }
 
-        search_branch = new SearchBranch(search_folder);
+        search_branch = new SearchBranch(search_folder, engine);
         graft(search_branch, SEARCH_ORDINAL);
         place_cursor(search_branch.get_root(), false);
     }
