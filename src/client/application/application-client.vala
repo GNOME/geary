@@ -808,7 +808,23 @@ public class Application.Client : Gtk.Application {
         this.controller.register_window(window);
         window.focus_in_event.connect(on_main_window_focus_in);
         if (select_first_inbox) {
-            window.select_first_inbox(true);
+            if (!window.select_first_inbox(true)) {
+                // The first inbox wasn't selected, so the account is
+                // likely still loading folders after being
+                // opened. Add a listener to try again later.
+                try {
+                    Geary.Account first = Geary.Collection.get_first(
+                        this.engine.get_accounts()
+                    );
+                    if (first != null) {
+                        first.folders_available_unavailable.connect_after(
+                            on_folders_first_available
+                        );
+                    }
+                } catch (GLib.Error error) {
+                    debug("Error getting Inbox for first account");
+                }
+            }
         }
         return window;
     }
@@ -1090,6 +1106,18 @@ public class Application.Client : Gtk.Application {
             );
             dialog.show_all();
             dialog.run();
+        }
+    }
+
+    private void on_folders_first_available(Geary.Account account,
+        Gee.BidirSortedSet<Geary.Folder>? available,
+        Gee.BidirSortedSet<Geary.Folder>? unavailable
+    ) {
+        if (get_active_main_window().select_first_inbox(true)) {
+            // The handler has done its job, so disconnect it
+            account.folders_available_unavailable.disconnect(
+                on_folders_first_available
+            );
         }
     }
 
