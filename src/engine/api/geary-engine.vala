@@ -10,10 +10,10 @@
  * Manages email account instances and their life-cycle.
  *
  * An engine represents and contains interfaces into the rest of the
- * email library. Instances are initialized by calling {@link
- * open_async} and closed with {@link close_async}. Use this class for
- * verifying and adding {@link AccountInformation} objects to check
- * and start using email accounts.
+ * email library. Instances are initialized by constructing them and
+ * closed by calling {@link close}. Also use this class for verifying
+ * and adding {@link AccountInformation} objects to check and start
+ * using email accounts.
  */
 public class Geary.Engine : BaseObject {
 
@@ -73,9 +73,9 @@ public class Geary.Engine : BaseObject {
     }
 
     /** Location of the directory containing shared resource files. */
-    public File? resource_dir { get; private set; default = null; }
+    public File resource_dir { get; private set; }
 
-    private bool is_open = false;
+    private bool is_open = true;
     private Gee.List<Account> accounts = new Gee.ArrayList<Account>();
 
     // Would use a `weak Endpoint` value type for this map instead of
@@ -84,16 +84,6 @@ public class Geary.Engine : BaseObject {
     // GLib.WeakRef as a generics param. See Vala issue #659.
     private Gee.Map<string,EndpointWeakRef?> shared_endpoints =
         new Gee.HashMap<string,EndpointWeakRef?>();
-
-    /**
-     * Fired when the engine is opened and all the existing accounts are loaded.
-     */
-    public signal void opened();
-
-    /**
-     * Fired when the engine is closed.
-     */
-    public signal void closed();
 
     /**
      * Fired when an account becomes available in the engine.
@@ -113,40 +103,24 @@ public class Geary.Engine : BaseObject {
 
 
     /** Constructs a new engine instance. */
-    public Engine() {
+    public Engine(GLib.File resource_dir) {
         Engine.initialize_library();
-    }
-
-    /**
-     * Initializes the engine so that accounts can be added to it.
-     */
-    public async void open_async(GLib.File resource_dir,
-                                 GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        if (is_open) {
-            throw new EngineError.ALREADY_OPEN("Already open");
-        }
-
         this.resource_dir = resource_dir;
-        this.is_open = true;
-
-        opened();
    }
 
     /**
      * Uninitializes the engine, and removes all known accounts.
      */
-    public async void close_async(Cancellable? cancellable = null)
+    public void close()
         throws GLib.Error {
         if (is_open) {
-            foreach (var account in this.accounts) {
-                account_unavailable(account.information);
+            // Copy the collection of accounts so they can be removed
+            // from it
+            foreach (var account in traverse(this.accounts).to_linked_list()) {
+                remove_account(account.information);
             }
             this.accounts.clear();
-            this.resource_dir = null;
             this.is_open = false;
-
-            closed();
         }
     }
 

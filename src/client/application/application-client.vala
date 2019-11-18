@@ -393,6 +393,7 @@ public class Application.Client : Gtk.Application {
         // Calls Gtk.init(), amongst other things
         base.startup();
 
+        this.engine = new Geary.Engine(get_resource_directory());
         this.config = new Configuration(SCHEMA_ID);
         this.autostart = new StartupManager(
             this.config, this.get_desktop_directory()
@@ -460,6 +461,16 @@ public class Application.Client : Gtk.Application {
     }
 
     public override void shutdown() {
+        try {
+            this.engine.close();
+        } catch (GLib.Error error) {
+            warning("Error shutting down the engine: %s", error.message);
+        }
+
+        this.engine = null;
+        this.config = null;
+        this.autostart = null;
+
         Util.Date.terminate();
         Geary.Logging.clear();
         base.shutdown();
@@ -730,6 +741,8 @@ public class Application.Client : Gtk.Application {
     public new void quit() {
         if (this.controller == null ||
             this.controller.check_open_composers()) {
+
+            this.last_active_main_window = null;
 
             bool controller_closed = false;
             this.destroy_controller.begin((obj, res) => {

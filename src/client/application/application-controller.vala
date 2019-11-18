@@ -220,14 +220,11 @@ internal class Application.Controller : Geary.BaseObject {
             warning("Error opening GOA: %s", err.message);
         }
 
-        // Start the engine and load our accounts
+        // Start loading accounts
         try {
-            yield application.engine.open_async(
-                this.application.get_resource_directory(), cancellable
-            );
             yield this.account_manager.load_accounts(cancellable);
         } catch (Error e) {
-            warning("Error opening Geary.Engine instance: %s", e.message);
+            warning("Error loading accounts: %s", e.message);
         }
 
         // Since the accounts may still be loading folders, when the
@@ -367,17 +364,6 @@ internal class Application.Controller : Geary.BaseObject {
             yield account_barrier.wait_async();
         } catch (GLib.Error err) {
             debug("Error waiting at account barrier: %s", err.message);
-        }
-
-        // Release last refs to the accounts
-        closing_accounts.clear();
-
-        // Turn off the lights and lock the door behind you
-        try {
-            debug("Closing Engine...");
-            yield this.application.engine.close_async(null);
-        } catch (GLib.Error err) {
-            warning("Error closing Geary Engine instance: %s", err.message);
         }
 
         debug("Closed Application.Controller");

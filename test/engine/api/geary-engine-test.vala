@@ -44,13 +44,7 @@ class Geary.EngineTest : TestCase {
         this.res = this.tmp.get_child("res");
         this.res.make_directory();
 
-        this.engine = new Engine();
-        this.engine.open_async.begin(
-            res, null,
-            (obj, res) => {
-                async_complete(res);
-            });
-        this.engine.open_async.end(async_result());
+        this.engine = new Engine(res);
 
         this.account = new AccountInformation(
             "test",
