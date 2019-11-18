@@ -24,6 +24,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** The email fields the composer requires for referred email. */
     public const Geary.Email.Field REQUIRED_FIELDS = ENVELOPE | BODY;
 
+    /// Translators: Title for an empty composer window
+    private const string DEFAULT_TITLE = _("New Message");
+
+
     public enum ComposeType {
         NEW_MESSAGE,
         REPLY,
@@ -714,8 +718,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     /** Detaches the composer and opens it in a new window. */
     public void detach() {
-        Gtk.Widget? focused_widget = this.container.top_window.get_focus();
+        Gtk.Widget? focused_widget = null;
         if (this.container != null) {
+            focused_widget = this.container.top_window.get_focus();
             this.container.close();
         }
         Window new_window = new Window(this, this.application);
@@ -1382,6 +1387,22 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // we want this behaviour to take precedence over the default
         // key handling
         return check_send_on_return(event) && base.key_press_event(event);
+    }
+
+    /** Updates the composer's top level window and headerbar title. */
+    public void update_window_title() {
+        string subject = this.subject.strip();
+        if (Geary.String.is_empty(subject)) {
+            subject = DEFAULT_TITLE;
+        }
+
+        if (this.container != null) {
+            this.container.top_window.title = subject;
+        }
+
+        if (this.application.config.desktop_environment != UNITY) {
+            this.header.title = subject;
+        }
     }
 
     internal void set_mode(PresentationMode new_mode) {
@@ -2554,7 +2575,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkCallback]
     private void on_subject_changed() {
         draft_changed();
-        notify_property("subject");
+        update_window_title();
     }
 
     [GtkCallback]

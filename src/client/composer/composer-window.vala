@@ -15,9 +15,6 @@
 public class Composer.Window : Gtk.ApplicationWindow, Container {
 
 
-    private const string DEFAULT_TITLE = _("New Message");
-
-
     /** {@inheritDoc} */
     public Gtk.ApplicationWindow? top_window {
         get { return this; }
@@ -43,15 +40,13 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
 
         add(this.composer);
 
+        this.composer.update_window_title();
         if (application.config.desktop_environment == UNITY) {
             composer.embed_header();
         } else {
             composer.header.show_close_button = true;
             set_titlebar(this.composer.header);
         }
-
-        composer.notify["subject"].connect(() => { update_title(); } );
-        update_title();
 
         show();
         set_position(Gtk.WindowPosition.CENTER);
@@ -125,23 +120,6 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
             ret = Gdk.EVENT_STOP;
         }
         return ret;
-    }
-
-    private void update_title() {
-        string subject = this.composer.subject.strip();
-        if (Geary.String.is_empty_or_whitespace(subject)) {
-            subject = DEFAULT_TITLE;
-        }
-
-        switch (this.application.config.desktop_environment) {
-        case UNITY:
-            this.title = subject;
-            break;
-
-        default:
-            this.composer.header.title = subject;
-            break;
-        }
     }
 
 }

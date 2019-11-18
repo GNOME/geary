@@ -162,6 +162,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             box.vanished.connect(on_composer_closed);
             this.composer_page.add(box);
             set_visible_child(this.composer_page);
+            composer.update_window_title();
         }
     }
 
@@ -188,6 +189,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                 embed,
                 composer.current_draft_id != null
             );
+            composer.update_window_title();
         }
 
         conversation_scroller.kinetic_scrolling = true;
@@ -487,21 +489,23 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
             // Restore the old selection
             var main_window = get_toplevel() as Application.MainWindow;
-            if (main_window != null &&
-                this.selection_while_composing != null) {
-                ConversationListView conversation_list =
-                    main_window.conversation_list_view;
-                if (this.selection_while_composing.is_empty) {
-                    conversation_list.conversations_selected(
-                        this.selection_while_composing
-                    );
-                } else {
-                    conversation_list.select_conversations(
-                        this.selection_while_composing
-                    );
-                }
+            if (main_window != null) {
+                main_window.update_title();
 
-                this.selection_while_composing = null;
+                if (this.selection_while_composing != null) {
+                    var conversation_list = main_window.conversation_list_view;
+                    if (this.selection_while_composing.is_empty) {
+                        conversation_list.conversations_selected(
+                            this.selection_while_composing
+                        );
+                    } else {
+                        conversation_list.select_conversations(
+                            this.selection_while_composing
+                        );
+                    }
+
+                    this.selection_while_composing = null;
+                }
             }
         }
     }

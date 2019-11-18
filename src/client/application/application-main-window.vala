@@ -341,6 +341,32 @@ public class Application.MainWindow :
         base.destroy();
     }
 
+    /** Updates the window's title and headerbar titles. */
+    public void update_title() {
+        string title = _("Geary");
+        if (this.selected_folder != null) {
+            /// Translators: Main window title, first string
+            /// substitution being the currently selected folder name,
+            /// the second being the selected account name.
+            title = _("%s — %s").printf(
+                this.selected_folder.get_display_name(),
+                this.selected_folder.account.information.display_name
+            );
+        }
+        this.title = title;
+
+        this.main_toolbar.account = (
+            this.selected_folder != null
+            ? this.selected_folder.account.information.display_name
+            : ""
+        );
+        this.main_toolbar.folder = (
+            this.selected_folder != null
+            ? this.selected_folder.get_display_name()
+            : ""
+        );
+    }
+
     /** Updates the window's account status info bars. */
     public void update_account_status(Geary.Account.Status status,
                                       bool has_auth_error,
@@ -448,6 +474,7 @@ public class Application.MainWindow :
                 this.previous_non_search_folder = to_select;
             }
             update_conversation_actions(NONE);
+            update_title();
             this.main_toolbar.update_trash_button(
                 !this.is_shift_down && this.selected_folder_supports_trash
             );
@@ -935,20 +962,10 @@ public class Application.MainWindow :
         this.main_toolbar.bind_property("find-open", this.conversation_viewer.conversation_find_bar,
                 "search-mode-enabled", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         if (config.desktop_environment == UNITY) {
-            BindingTransformFunc title_func = (binding, source, ref target) => {
-                string folder = selected_folder != null ? selected_folder.get_display_name() + " " : "";
-                string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
-
-                target = "%s%s - %s".printf(folder, account, Client.NAME);
-
-                return true;
-            };
-            bind_property("current-folder", this, "title", BindingFlags.SYNC_CREATE, (owned) title_func);
-            main_toolbar.bind_property("account", this, "title", BindingFlags.SYNC_CREATE, (owned) title_func);
-            main_layout.pack_start(main_toolbar, false, true, 0);
+            this.main_layout.pack_start(main_toolbar, false, true, 0);
         } else {
             main_toolbar.show_close_button = true;
-            set_titlebar(main_toolbar);
+            set_titlebar(this.main_toolbar);
         }
 
         // Status bar
