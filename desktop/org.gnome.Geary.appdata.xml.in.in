@@ -93,8 +93,12 @@
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
-          <li>Unlimited undo for all email actions such as archiving, marking</li>
-          <li>Undo support for all text entry fields, including the composer</li>
+          <li>Drag and drop image files into rich text messages</li>
+          <li>Paste images from the clipboard into rich text messages</li>
+          <li>Open more than one main window</li>
+          <li>Extend undo for email actions such as archiving, marking</li>
+          <li>Undo sending, saving and discarding composed email</li>
+          <li>Undo editing in text fields, including in the composer</li>
           <li>App-wide notification preferences now handled by desktop</li>
           <li>Improved missing attachment detection in composer</li>
           <li>Initial plugin system</li>
