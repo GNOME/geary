@@ -1,25 +1,43 @@
 <page xmlns="http://projectmallard.org/1.0/"
       type="guide"
       id="archive">
+  <info>
+    <link type="guide" xref="index#overview"/>
+    <link type="next" xref="shortcuts"/>
+  </info>
+  <title>Archive, trash and delete messages</title>
 
-    <info>
-        <link type="guide" xref="index#overview"/>
-        
-        <link type="next" xref="shortcuts"/>
-    </info>
-	<title>Delete or archive a message</title>
+  <p>Geary lets you archive messages if your server supports
+  it. Clicking the <gui style="button">Archive</gui> toolbar button
+  moves the conversation from the current folder to the
+  <gui>Archive</gui> folder for most email services, or to <gui>All
+  Mail</gui> for GMail. Archiving helps keep your email organised by
+  moving old and replied-to email out of the way.</p>
 
-	<p>When you use Geary with a Gmail account, Geary lets you <em>archive</em> messages.
-	The <gui>Archive</gui> toolbar button archives the selected conversation(s).
-	Archived messages appear in the <gui>All Mail</gui> folder.</p>
+  <p>To move conversations to the <gui>Trash</gui> folder, select them
+  and click the <gui style="button">Trash</gui> toolbar button. To
+  permanently delete conversations, hold down <key>Shift</key> and
+  click the <gui style="button">Delete</gui> button that appears in
+  place of the <gui>Trash</gui> button, or open the conversation in
+  the <gui>Trash</gui> folder and click <gui
+  style="button">Delete</gui> there.</p>
 
-	<p>With other mail servers, you can trash or delete, but not archive, messages.  To move
-	one or more conversations to the <gui>Trash</gui> folder, select them and press the <gui>Trash</gui>
-	button on the toolbar.  To permanently delete the conversations, hold down <key>Shift</key> and press
-	the <gui>Delete</gui> button that appears in place of the <gui>Trash</gui> button.</p>
+  <note style="tip">
+    <title>Undoing changes</title>
+    <p>Note that you can always undo archiving or trashing a message
+    if you change your mind. Click <gui style="button">Undo</gui> on
+    the pop-up notification that appears, or type
+    <keyseq><key>Ctrl</key><key>Z</key></keyseq>, or open the folder,
+    find the message, then move it back to your <gui>Inbox</gui></p>
+  </note>
 
-	<p>Delete is not available from every folder, such as Search.  Delete is also unavailable for Gmail.
-	For Gmail, <gui>Trash</gui> will move messages to the Trash folder on the server, where the user can
-	then manually delete them.  The server will automatically remove trashed messages after 30 days.</p>
+  <p>While both <gui style="button">Archive</gui> and <gui
+  style="button">Trash</gui> removes conversations from your
+  <gui>Inbox</gui> folder, there is an important difference. Clicking
+  <gui style="button">Archive</gui> will ensure your conversations are
+  kept so you can find them again later. Clicking <gui
+  style="button">Trash</gui> will cause conversations to be hidden
+  from <link xref="search"/>, and they will likely be deleted in the
+  future.</p>
+
 </page>
-
