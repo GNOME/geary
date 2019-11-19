@@ -813,7 +813,7 @@ public class Application.Client : Gtk.Application {
                 // likely still loading folders after being
                 // opened. Add a listener to try again later.
                 try {
-                    Geary.Account? first = Geary.Collection.first(
+                    Geary.Account? first = Geary.Collection.first<Geary.Account>(
                         this.engine.get_accounts()
                     );
                     if (first != null) {

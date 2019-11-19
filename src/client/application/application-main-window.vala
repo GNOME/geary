@@ -860,7 +860,7 @@ public class Application.MainWindow :
     private Geary.Folder? get_first_inbox() {
         Geary.Folder? inbox = null;
         try {
-            Geary.Account? first = Geary.Collection.first(
+            Geary.Account? first = Geary.Collection.first<Geary.Account>(
                 this.application.engine.get_accounts()
             );
             if (first != null) {
