@@ -125,7 +125,7 @@ class Geary.ContactStoreImplTest : TestCase {
         );
         assert_int(1, results.size, "results.size");
 
-        Contact search_hit = Collection.get_first(results);
+        Contact search_hit = Collection.first(results);
         assert_string("Test@example.com", search_hit.email, "Existing email");
         assert_string("test@example.com", search_hit.normalized_email, "Existing normalized_email");
         assert_string("Test Name", search_hit.real_name, "Existing real_name");
@@ -146,7 +146,7 @@ class Geary.ContactStoreImplTest : TestCase {
         );
         assert_int(1, results.size, "results.size");
 
-        Contact search_hit = Collection.get_first(results);
+        Contact search_hit = Collection.first(results);
         assert_string("Test@example.com", search_hit.email, "Existing email");
         assert_string("test@example.com", search_hit.normalized_email, "Existing normalized_email");
         assert_string("Test Name", search_hit.real_name, "Existing real_name");
@@ -180,7 +180,7 @@ class Geary.ContactStoreImplTest : TestCase {
         );
         assert_int(1, results.size, "results.size");
 
-        Contact search_hit = Collection.get_first(results);
+        Contact search_hit = Collection.first(results);
         assert_string("Germán", search_hit.real_name, "Existing real_name");
     }
 
@@ -211,7 +211,7 @@ class Geary.ContactStoreImplTest : TestCase {
         );
         assert_int(1, results.size, "results.size");
 
-        Contact search_hit = Collection.get_first(results);
+        Contact search_hit = Collection.first(results);
         assert_string("年収1億円目指せ", search_hit.real_name, "Existing real_name");
     }
 

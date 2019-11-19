@@ -132,7 +132,7 @@ public class ConversationWebView : ClientWebView {
             });
 
         controller.search(
-            Geary.Collection.get_first(terms),
+            Geary.Collection.first(terms),
             WebKit.FindOptions.CASE_INSENSITIVE |
             WebKit.FindOptions.WRAP_AROUND,
             128

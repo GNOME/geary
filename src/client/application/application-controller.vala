@@ -227,27 +227,6 @@ internal class Application.Controller : Geary.BaseObject {
             warning("Error loading accounts: %s", e.message);
         }
 
-        // Since the accounts may still be loading folders, when the
-        // main window first opens no folder might be available to be
-        // selected. Add look for the inbox and if not found, add a
-        // listener here as a once off for when it is loaded.
-        if (!application.get_active_main_window().select_first_inbox(true)) {
-            // Connect after so the folder is added to any
-            // open main windows first.
-            try {
-                Geary.Account first = Geary.Collection.get_first(
-                    application.engine.get_accounts()
-                );
-                if (first != null) {
-                    first.folders_available_unavailable.connect_after(
-                        on_folders_first_available
-                    );
-                }
-            } catch (GLib.Error error) {
-                debug("Error getting Inbox for first account");
-            }
-        }
-
         // Expunge any deleted accounts in the background, so we're
         // not blocking the app continuing to open.
         this.expunge_accounts.begin();
@@ -1384,18 +1363,6 @@ internal class Application.Controller : Geary.BaseObject {
 
             // Notify the command stack that folders have gone away
             context.controller_stack.folders_removed(unavailable);
-        }
-    }
-
-    private void on_folders_first_available(Geary.Account account,
-        Gee.BidirSortedSet<Geary.Folder>? available,
-        Gee.BidirSortedSet<Geary.Folder>? unavailable
-    ) {
-        if (application.get_active_main_window().select_first_inbox(true)) {
-            // The handler has done its job, so disconnect it
-            account.folders_available_unavailable.disconnect(
-                on_folders_first_available
-            );
         }
     }
 

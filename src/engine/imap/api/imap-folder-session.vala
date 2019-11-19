@@ -688,7 +688,8 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 debug("Unable to retrieve COPYUID UIDs: %s", ierr.message);
             }
 
-            if (!Collection.is_empty(src_uids) && !Collection.is_empty(dst_uids)) {
+            if (src_uids != null && !src_uids.is_empty &&
+                dst_uids != null && !dst_uids.is_empty) {
                 Gee.Map<UID, UID> copyuids = new Gee.HashMap<UID, UID>();
                 int ctr = 0;
                 for (;;) {

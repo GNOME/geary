@@ -131,9 +131,16 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         selection.changed.connect(on_selection_changed);
     }
 
-    /** Returns a read-only collection of the current selection. */
-    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
+    /** Returns a read-only iteration of the current selection. */
+    public Gee.Set<Geary.App.Conversation> get_selected() {
         return this.selected.read_only_view;
+    }
+
+    /** Returns a copy of the current selection. */
+    public Gee.Set<Geary.App.Conversation> copy_selected() {
+        var copy = new Gee.HashSet<Geary.App.Conversation>();
+        copy.add_all(this.selected);
+        return copy;
     }
 
     public void inhibit_next_autoselect() {
@@ -288,13 +295,11 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             // Get the current conversation.  If it's selected, we'll apply the mark operation to
             // all selected conversations; otherwise, it just applies to this one.
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
-            Gee.Collection<Geary.App.Conversation> to_mark;
-            if (this.selected.contains(conversation))
-                // take a copy of currently selected for handling to
-                // the signal
-                to_mark = get_selected_conversations();
-            else
-                to_mark = Geary.Collection.single(conversation);
+            Gee.Collection<Geary.App.Conversation> to_mark = (
+                this.selected.contains(conversation)
+                ? copy_selected()
+                : Geary.Collection.single(conversation)
+            );
 
             if (read_clicked) {
                 mark_conversations(to_mark, Geary.EmailFlags.UNREAD);
@@ -487,8 +492,8 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         }
 
         // only notify if different than what was previously reported
-        if (!Geary.Collection.are_sets_equal<Geary.App.Conversation>(
-                this.selected, new_selection)) {
+        if (this.selected.size != new_selection.size ||
+            !this.selected.contains_all(new_selection)) {
             this.selected = new_selection;
             conversations_selected(this.selected.read_only_view);
         }
@@ -515,18 +520,18 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
 
     // Always returns false, so it can be used as a one-time SourceFunc
     private bool update_visible_conversations() {
+        bool changed = false;
         Gee.Set<Geary.App.Conversation> visible_conversations = get_visible_conversations();
-        if (current_visible_conversations != null
-            && Geary.Collection.are_sets_equal<Geary.App.Conversation>(
-            current_visible_conversations, visible_conversations)) {
-            return false;
+        if (this.current_visible_conversations == null ||
+            this.current_visible_conversations.size != visible_conversations.size ||
+            !this.current_visible_conversations.contains_all(visible_conversations)) {
+            this.current_visible_conversations = visible_conversations;
+            visible_conversations_changed(
+                this.current_visible_conversations.read_only_view
+            );
+            changed = true;
         }
-
-        current_visible_conversations = visible_conversations;
-
-        visible_conversations_changed(current_visible_conversations.read_only_view);
-
-        return false;
+        return changed;
     }
 
     private void schedule_visible_conversations_changed() {

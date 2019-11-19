@@ -133,7 +133,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         assert_non_null(monitor.window_lowest, "Lowest window id");
         assert_equal(e1.id, monitor.window_lowest, "Lowest window id");
 
-        Conversation c1 = Geary.Collection.get_first(monitor.read_only_view);
+        Conversation c1 = Collection.first(monitor.read_only_view);
         assert_equal(e1, c1.get_email_by_id(e1.id), "Email not present in conversation");
     }
 
@@ -175,7 +175,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         assert_non_null(monitor.window_lowest, "Lowest window id");
         assert_equal(e2.id, monitor.window_lowest, "Lowest window id");
 
-        Conversation c1 = Geary.Collection.get_first(monitor.read_only_view);
+        Conversation c1 = Collection.first(monitor.read_only_view);
         assert_equal(e1, c1.get_email_by_id(e1.id), "Related email not present in conversation");
         assert_equal(e2, c1.get_email_by_id(e2.id), "In folder not present in conversation");
     }
@@ -329,7 +329,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
         assert_int(1, monitor.size, "Conversation count");
 
-        Conversation c1 = Geary.Collection.get_first(monitor.read_only_view);
+        Conversation c1 = Collection.first(monitor.read_only_view);
         assert_int(2, c1.get_count(), "Conversation message count");
         assert_equal(e3, c1.get_email_by_id(e3.id),
                      "Appended email not present in conversation");

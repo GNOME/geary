@@ -624,24 +624,26 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
             // Assemble the headers.
             if (email.length > 0 && headers.contains("to"))
-                this.to = "%s,%s".printf(email, Geary.Collection.get_first(headers.get("to")));
+                this.to = "%s,%s".printf(
+                    email, Geary.Collection.first(headers.get("to"))
+                );
             else if (email.length > 0)
                 this.to = email;
             else if (headers.contains("to"))
-                this.to = Geary.Collection.get_first(headers.get("to"));
+                this.to = Geary.Collection.first(headers.get("to"));
 
             if (headers.contains("cc"))
-                this.cc = Geary.Collection.get_first(headers.get("cc"));
+                this.cc = Geary.Collection.first(headers.get("cc"));
 
             if (headers.contains("bcc"))
-                this.bcc = Geary.Collection.get_first(headers.get("bcc"));
+                this.bcc = Geary.Collection.first(headers.get("bcc"));
 
             if (headers.contains("subject"))
-                this.subject = Geary.Collection.get_first(headers.get("subject"));
+                this.subject = Geary.Collection.first(headers.get("subject"));
 
             if (headers.contains("body"))
                 this.body_html = Geary.HTML.preserve_whitespace(Geary.HTML.escape_markup(
-                    Geary.Collection.get_first(headers.get("body"))));
+                    Geary.Collection.first(headers.get("body"))));
 
             Gee.List<string> attachments = new Gee.LinkedList<string>();
             attachments.add_all(headers.get("attach"));

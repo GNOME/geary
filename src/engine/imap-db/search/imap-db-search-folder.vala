@@ -319,8 +319,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
                 yield folder.open_async(Geary.Folder.OpenFlags.NONE, cancellable);
                 open = true;
                 yield remove.remove_email_async(
-                    Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids),
-                    cancellable
+                    Collection.copy(ids), cancellable
                 );
             } finally {
                 if (open) {

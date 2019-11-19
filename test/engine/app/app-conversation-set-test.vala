@@ -116,7 +116,7 @@ class Geary.App.ConversationSetTest : TestCase {
         assert(this.test.get_email_count() == 1);
 
         assert(added.size == 1);
-        assert(Geary.Collection.get_first(added).get_email_by_id(e1.id) == e1);
+        assert(Collection.first(added).get_email_by_id(e1.id) == e1);
 
         assert(appended.size == 0);
         assert(removed.is_empty);
@@ -165,7 +165,7 @@ class Geary.App.ConversationSetTest : TestCase {
 
         assert(added.size == 1);
 
-        Conversation convo1 = Geary.Collection.get_first(added);
+        Conversation convo1 = Collection.first(added);
         assert(convo1.get_email_by_id(e1.id) == e1);
         assert(convo1.get_email_by_id(e2.id) == e2);
 
@@ -195,7 +195,7 @@ class Geary.App.ConversationSetTest : TestCase {
         assert(added.is_empty);
 
         assert(appended.size == 1);
-        Conversation convo2 = Geary.Collection.get_first(appended.get_keys());
+        Conversation convo2 = Collection.first(appended.get_keys());
         assert(convo2.get_email_by_id(e1.id) == e1);
         assert(convo2.get_email_by_id(e2.id) == e2);
         assert(convo2.get_email_by_id(e3.id) == e3);
@@ -234,7 +234,7 @@ class Geary.App.ConversationSetTest : TestCase {
         assert(added.is_empty);
 
         assert(appended.size == 1);
-        Conversation convo = Geary.Collection.get_first(appended.get_keys());
+        Conversation convo = Collection.first(appended.get_keys());
         assert(convo.get_email_by_id(e1.id) == e1);
         assert(convo.get_email_by_id(e2.id) == e2);
 

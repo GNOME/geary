@@ -20,7 +20,9 @@ namespace Geary {
         va_list args = va_list();
         G arg = g;
 
-        Gee.ArrayList<G> list = new Gee.ArrayList<G>();
+        // Use a linked list since we will only ever be iterating over
+        // it
+        var list = new Gee.LinkedList<G>();
         do {
             list.add(arg);
         } while((arg = args.arg()) != null);
@@ -31,8 +33,12 @@ namespace Geary {
     /**
      * Take an array of items and return a Geary.Iterable for convenience.
      */
-    public Geary.Iterable<G> iterate_array<G>(G[] a) {
-        return Geary.traverse<G>(Geary.Collection.array_list_wrap<G>(a));
+    public Geary.Iterable<G> iterate_array<G>(G[] a, owned Gee.EqualDataFunc<G>? equal_func = null) {
+        // Use a linked list since we will only ever be iterating over
+        // it
+        var list = new Gee.LinkedList<G>((owned) equal_func);
+        list.add_all_array(a);
+        return Geary.traverse<G>(list);
     }
 }
 

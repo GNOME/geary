@@ -156,7 +156,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             // XXX move the ConversationListView management code into
             // MainWindow or somewhere more appropriate
             ConversationListView conversation_list = main_window.conversation_list_view;
-            this.selection_while_composing = conversation_list.get_selected_conversations();
+            this.selection_while_composing = conversation_list.copy_selected();
             conversation_list.get_selection().unselect_all();
 
             box.vanished.connect(on_composer_closed);

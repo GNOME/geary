@@ -12,6 +12,7 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
         add_test("from_rfc822_string_encoded", from_rfc822_string_encoded);
         add_test("from_rfc822_string_quoted", from_rfc822_string_quoted);
         add_test("to_rfc822_string", to_rfc822_string);
+        add_test("equal_to", equal_to);
     }
 
     public void from_rfc822_string_encoded() throws Error {
@@ -47,6 +48,38 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
                .to_rfc822_string() == "test1@example.com");
         assert(new_addreses({ "test1@example.com", "test2@example.com" })
                .to_rfc822_string() == "test1@example.com, test2@example.com");
+    }
+
+    public void equal_to() throws Error {
+        var mailboxes_a = new_addreses({ "test1@example.com" });
+        var mailboxes_b = new_addreses({ "test1@example.com" });
+        var mailboxes_c = new_addreses({ "test2@example.com" });
+
+        assert_true(mailboxes_a.equal_to(mailboxes_a));
+        assert_true(mailboxes_a.equal_to(mailboxes_b));
+        assert_false(mailboxes_a.equal_to(mailboxes_c));
+
+        assert_true(
+            new_addreses({ "test1@example.com", "test2@example.com" }).equal_to(
+                new_addreses({ "test1@example.com", "test2@example.com" })
+            )
+        );
+        assert_true(
+            new_addreses({ "test1@example.com", "test2@example.com" }).equal_to(
+                new_addreses({ "test2@example.com", "test1@example.com" })
+            )
+        );
+
+        assert_false(
+            new_addreses({ "test1@example.com", "test2@example.com" }).equal_to(
+                new_addreses({ "test1@example.com" })
+            )
+        );
+        assert_false(
+            new_addreses({ "test1@example.com", "test2@example.com" }).equal_to(
+                new_addreses({ "test1@example.com", "test3@example.com" })
+            )
+        );
     }
 
     private MailboxAddresses new_addreses(string[] address_strings) {

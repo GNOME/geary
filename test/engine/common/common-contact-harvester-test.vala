@@ -73,7 +73,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
 
         Gee.Collection<Contact> contacts = update_call.called_arg<Gee.Collection<Contact>>(0);
         assert_int(1, contacts.size, "contacts length");
-        Contact? created = Collection.get_first<Contact>(contacts) as Contact;
+        Contact? created = Collection.first(contacts) as Contact;
         assert_non_null(created, "contacts contents");
 
         assert_string("Test", created.real_name);
@@ -121,7 +121,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         this.store.assert_expectations();
 
         Gee.Collection<Contact> contacts = update_call.called_arg<Gee.Collection<Contact>>(0);
-        Contact? created = Collection.get_first<Contact>(contacts) as Contact;
+        Contact? created = Collection.first(contacts) as Contact;
         assert_int(
             Contact.Importance.SEEN,
             created.highest_importance,
@@ -150,7 +150,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         this.store.assert_expectations();
 
         Gee.Collection<Contact> contacts = update_call.called_arg<Gee.Collection<Contact>>(0);
-        Contact? created = Collection.get_first<Contact>(contacts) as Contact;
+        Contact? created = Collection.first(contacts) as Contact;
         assert_int(
             Contact.Importance.SENT_TO,
             created.highest_importance,
@@ -179,7 +179,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         this.store.assert_expectations();
 
         Gee.Collection<Contact> contacts = update_call.called_arg<Gee.Collection<Contact>>(0);
-        Contact? created = Collection.get_first<Contact>(contacts) as Contact;
+        Contact? created = Collection.first(contacts) as Contact;
         assert_int(
             Contact.Importance.RECEIVED_FROM,
             created.highest_importance,
