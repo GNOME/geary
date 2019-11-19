@@ -766,17 +766,6 @@ public class Sidebar.Tree : Gtk.TreeView {
         store.set(iter, Columns.ICON, icon);
     }
 
-    private void load_branch_icons(Gtk.TreeIter iter) {
-        load_entry_icons(iter);
-
-        Gtk.TreeIter child_iter;
-        if (store.iter_children(out child_iter, iter)) {
-            do {
-                load_branch_icons(child_iter);
-            } while (store.iter_next(ref child_iter));
-        }
-    }
-
     private bool on_selection(Gtk.TreeSelection selection, Gtk.TreeModel model, Gtk.TreePath path,
         bool path_currently_selected) {
         // only allow selection if a page is selectable
