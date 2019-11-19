@@ -40,7 +40,7 @@ public class Application.AttachmentManager : GLib.Object {
                                        GLib.Cancellable? cancellable) {
         if (attachments.size == 1) {
             return yield save_attachment(
-                Geary.Collection.get_first(attachments), null, cancellable
+                Geary.Collection.first(attachments), null, cancellable
             );
         } else {
             return yield save_all(attachments, cancellable);

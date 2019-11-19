@@ -1281,7 +1281,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             check_unsupported_send_command(cmd);
 
         // only issue one event to the state machine for all commands; either all succeed or all fail
-        MachineParams params = new MachineParams(Geary.Collection.get_first(cmds));
+        MachineParams params = new MachineParams(Collection.first(cmds));
         fsm.issue(Event.SEND_CMD, null, params);
 
         if (params.err != null)

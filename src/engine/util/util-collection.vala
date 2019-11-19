@@ -8,9 +8,6 @@ namespace Geary.Collection {
 
     public delegate uint8 ByteTransformer(uint8 b);
 
-    public inline bool is_empty(Gee.Collection? c) {
-        return c == null || c.size == 0;
-    }
 
     /** Returns a modifiable collection containing a single element. */
     public Gee.Collection<T> single<T>(T element) {
@@ -26,80 +23,34 @@ namespace Geary.Collection {
         return single;
     }
 
-    // A substitute for ArrayList<G>.wrap() for compatibility with older versions of Gee.
-    public Gee.ArrayList<G> array_list_wrap<G>(G[] a, owned Gee.EqualDataFunc<G>? equal_func = null) {
-        Gee.ArrayList<G> list = new Gee.ArrayList<G>((owned) equal_func);
-        add_all_array<G>(list, a);
-        return list;
+    /** Returns a copy of the given collection in a new collection. */
+    public Gee.Collection<V> copy<V>(Gee.Collection<V> original) {
+        // Use a linked list, the returned value can't be accessed by
+        // index anyway
+        var copy = new Gee.LinkedList<V>();
+        copy.add_all(original);
+        return copy;
     }
 
-    public Gee.ArrayList<G> to_array_list<G>(Gee.Collection<G> c) {
-        Gee.ArrayList<G> list = new Gee.ArrayList<G>();
-        list.add_all(c);
-        return list;
-    }
-
-    public Gee.HashMap<Key, Value> to_hash_map<Key, Value>(
-        Gee.Collection<Value> c, Gee.MapFunc<Key, Value> key_selector) {
-        Gee.HashMap<Key, Value> map = new Gee.HashMap<Key, Value>();
-        foreach (Value v in c) {
-            map.set(key_selector(v), v);
-        }
-        return map;
-    }
-
-    public void add_all_array<G>(Gee.Collection<G> c, G[] ar) {
-        foreach (G g in ar) {
-            c.add(g);
-        }
-    }
-
-    public G? get_first<G>(Gee.Collection<G> c) {
+    /** Returns the first element from a collection. */
+    public G? first<G>(Gee.Collection<G> c) {
         Gee.Iterator<G> iter = c.iterator();
         return iter.next() ? iter.get() : null;
     }
 
     /**
-     * Returns the first element in the Collection that passes the Predicte function.
-     *
-     * The Collection is walked in Iterator order.
-     */
-    public G? find_first<G>(Gee.Collection<G> c, owned Gee.Predicate<G> pred) {
-        Gee.Iterator<G> iter = c.iterator();
-        while (iter.next()) {
-            if (pred(iter.get()))
-                return iter.get();
-        }
-
-        return null;
-    }
-
-    public bool are_sets_equal<G>(Gee.Set<G> a, Gee.Set<G> b) {
-        if (a.size != b.size) {
-            return false;
-        }
-
-        foreach (G element in a) {
-            if (!b.contains(element)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Removes all elements from the Collection that do pass the Predicate function.
+     * Removes all elements that pass the given predicate.
      *
      * Note that this modifies the supplied Collection.
      */
-    public Gee.Collection<G> remove_if<G>(Gee.Collection<G> c, owned Gee.Predicate<G> pred) {
+    public Gee.Collection<G> remove_if<G>(Gee.Collection<G> c,
+                                          owned Gee.Predicate<G> pred) {
         Gee.Iterator<G> iter = c.iterator();
         while (iter.next()) {
-            if (pred(iter.get()))
+            if (pred(iter.get())) {
                 iter.remove();
+            }
         }
-
         return c;
     }
 

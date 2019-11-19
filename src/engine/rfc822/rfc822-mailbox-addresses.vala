@@ -184,19 +184,11 @@ public class Geary.RFC822.MailboxAddresses :
     }
 
     public bool equal_to(MailboxAddresses other) {
-        if (this == other)
-            return true;
-
-        if (addrs.size != other.addrs.size)
-            return false;
-
-        Gee.HashSet<RFC822.MailboxAddress> first = new Gee.HashSet<RFC822.MailboxAddress>();
-        first.add_all(addrs);
-
-        Gee.HashSet<RFC822.MailboxAddress> second = new Gee.HashSet<RFC822.MailboxAddress>();
-        second.add_all(other.addrs);
-
-        return Collection.are_sets_equal<RFC822.MailboxAddress>(first, second);
+        return (
+            this == other ||
+            (this.addrs.size == other.addrs.size &&
+             this.addrs.contains_all(other.addrs))
+        );
     }
 
     /**

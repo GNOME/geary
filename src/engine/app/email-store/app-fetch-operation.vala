@@ -20,7 +20,7 @@ private class Geary.App.FetchOperation : Geary.App.AsyncFolderOperation {
         Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids,
         Cancellable? cancellable) throws Error {
         assert(result == null);
-        Geary.EmailIdentifier? id = Geary.Collection.get_first(ids);
+        Geary.EmailIdentifier? id = Collection.first(ids);
         assert(id != null);
 
         result = yield folder.fetch_email_async(

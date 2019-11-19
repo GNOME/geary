@@ -492,8 +492,8 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         }
 
         // only notify if different than what was previously reported
-        if (!Geary.Collection.are_sets_equal<Geary.App.Conversation>(
-                this.selected, new_selection)) {
+        if (this.selected.size != new_selection.size ||
+            !this.selected.contains_all(new_selection)) {
             this.selected = new_selection;
             conversations_selected(this.selected.read_only_view);
         }
@@ -520,18 +520,18 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
 
     // Always returns false, so it can be used as a one-time SourceFunc
     private bool update_visible_conversations() {
+        bool changed = false;
         Gee.Set<Geary.App.Conversation> visible_conversations = get_visible_conversations();
-        if (current_visible_conversations != null
-            && Geary.Collection.are_sets_equal<Geary.App.Conversation>(
-            current_visible_conversations, visible_conversations)) {
-            return false;
+        if (this.current_visible_conversations == null ||
+            this.current_visible_conversations.size != visible_conversations.size ||
+            !this.current_visible_conversations.contains_all(visible_conversations)) {
+            this.current_visible_conversations = visible_conversations;
+            visible_conversations_changed(
+                this.current_visible_conversations.read_only_view
+            );
+            changed = true;
         }
-
-        current_visible_conversations = visible_conversations;
-
-        visible_conversations_changed(current_visible_conversations.read_only_view);
-
-        return false;
+        return changed;
     }
 
     private void schedule_visible_conversations_changed() {

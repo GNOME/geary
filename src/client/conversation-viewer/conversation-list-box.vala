@@ -678,7 +678,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 id => this.conversation.contains_email_by_id(id)
             ).to_array_list();
             valid_scroll_to.sort((a, b) => a.natural_sort_comparator(b));
-            var first_scroll = Geary.Collection.get_first(valid_scroll_to);
+            var first_scroll = Geary.Collection.first(valid_scroll_to);
 
             if (first_scroll != null) {
                 foreach (Geary.Email email in all_email) {

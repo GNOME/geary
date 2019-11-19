@@ -73,7 +73,7 @@ private class Geary.ImapEngine.CreateEmail : SendReplayOperation {
                 );
 
             if (results.size > 0) {
-                this.created_id = Collection.get_first<Email>(results.keys).id;
+                this.created_id = Collection.first(results.keys).id;
             } else {
                 // Something went wrong creating/merging the message,
                 // so pretend we don't know what its UID is so the

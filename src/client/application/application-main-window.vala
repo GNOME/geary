@@ -586,7 +586,7 @@ public class Application.MainWindow :
             if (loaded.size == 1) {
                 // A single conversation was loaded, so ensure we
                 // scroll to the email in the conversation.
-                Geary.App.Conversation target = Geary.Collection.get_first(loaded);
+                Geary.App.Conversation? target = Geary.Collection.first(loaded);
                 ConversationListBox? current_list =
                     this.conversation_viewer.current_list;
                 if (current_list != null &&
@@ -860,7 +860,7 @@ public class Application.MainWindow :
     private Geary.Folder? get_first_inbox() {
         Geary.Folder? inbox = null;
         try {
-            Geary.Account first = Geary.Collection.get_first(
+            Geary.Account? first = Geary.Collection.first(
                 this.application.engine.get_accounts()
             );
             if (first != null) {
@@ -1285,7 +1285,7 @@ public class Application.MainWindow :
 
             case 1:
                 update_conversation_actions(SINGLE);
-                Geary.App.Conversation convo = Geary.Collection.get_first(to_select);
+                Geary.App.Conversation? convo = Geary.Collection.first(to_select);
 
                 // It's possible for a conversation with zero email to
                 // be selected, when it has just evaporated after its

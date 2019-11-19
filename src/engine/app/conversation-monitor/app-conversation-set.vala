@@ -302,7 +302,7 @@ private class Geary.App.ConversationSet : BaseObject {
         } else {
             Gee.Set<Conversation> associated =
                 get_associated_conversations(email);
-            conversation = Collection.get_first<Conversation>(associated);
+            conversation = Collection.first(associated);
             if (conversation == null) {
                 // Not in or related to any existing conversations, so
                 // create one

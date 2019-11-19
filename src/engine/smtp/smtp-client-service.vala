@@ -428,7 +428,7 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
                     null, 1, REFERENCES, NONE, cancellable
                 );
                 if (list != null && !list.is_empty) {
-                    Email listed = Collection.get_first<Email>(list);
+                    Email listed = Collection.first(list);
                     if (listed.message_id != null &&
                         listed.message_id.equal_to(id)) {
                         break;

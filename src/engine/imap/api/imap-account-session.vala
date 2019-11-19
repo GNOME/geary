@@ -397,9 +397,13 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
             cancellable
         );
 
-        assert(responses.size == 1);
-
-        return Geary.Collection.get_first(responses.values);
+        var response = Collection.first(responses.values);
+        if (response == null) {
+            throw new ImapError.SERVER_ERROR(
+                "No status response received from server"
+            );
+        }
+        return response;
     }
 
     private async Gee.Map<Command, StatusResponse>

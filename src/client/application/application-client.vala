@@ -813,7 +813,7 @@ public class Application.Client : Gtk.Application {
                 // likely still loading folders after being
                 // opened. Add a listener to try again later.
                 try {
-                    Geary.Account first = Geary.Collection.get_first(
+                    Geary.Account? first = Geary.Collection.first(
                         this.engine.get_accounts()
                     );
                     if (first != null) {
@@ -1131,7 +1131,7 @@ public class Application.Client : Gtk.Application {
         if (main != null) {
             this.controller.unregister_window(main);
             if (this.last_active_main_window == main) {
-                this.last_active_main_window = Geary.Collection.get_first(
+                this.last_active_main_window = Geary.Collection.first(
                     get_main_windows()
                 );
             }

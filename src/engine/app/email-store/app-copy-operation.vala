@@ -19,9 +19,9 @@ private class Geary.App.CopyOperation : Geary.App.AsyncFolderOperation {
         Geary.FolderSupport.Copy? copy = folder as Geary.FolderSupport.Copy;
         assert(copy != null);
 
-        Gee.List<Geary.EmailIdentifier> list
-            = Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids);
-        yield copy.copy_email_async(list, destination, cancellable);
+        yield copy.copy_email_async(
+            Collection.copy(ids), destination, cancellable
+        );
         return ids;
     }
 }

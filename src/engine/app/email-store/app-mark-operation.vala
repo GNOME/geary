@@ -21,9 +21,9 @@ private class Geary.App.MarkOperation : Geary.App.AsyncFolderOperation {
         Geary.FolderSupport.Mark? mark = folder as Geary.FolderSupport.Mark;
         assert(mark != null);
 
-        Gee.List<Geary.EmailIdentifier> list
-            = Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids);
-        yield mark.mark_email_async(list, flags_to_add, flags_to_remove, cancellable);
+        yield mark.mark_email_async(
+            Collection.copy(ids), flags_to_add, flags_to_remove, cancellable
+        );
         return ids;
     }
 }

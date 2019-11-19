@@ -126,20 +126,20 @@ public class Geary.ConfigFile {
         }
 
         public Gee.List<string> get_string_list(string key) {
+            var strs = new Gee.ArrayList<string>();
             try {
-                string[] list = this.backing.get_string_list(this.name, key);
-                if (list.length > 0)
-                    return Geary.Collection.array_list_wrap<string>(list);
+                strs.add_all_array(this.backing.get_string_list(this.name, key));
             } catch (GLib.KeyFileError err) {
                 // Oh well
             }
-            return new Gee.ArrayList<string>();
+            return strs;
         }
 
         public Gee.List<string> get_required_string_list(string key)
             throws GLib.KeyFileError {
-            string[] list = this.backing.get_string_list(this.name, key);
-            return Geary.Collection.array_list_wrap<string>(list);
+            var strs = new Gee.ArrayList<string>();
+            strs.add_all_array(this.backing.get_string_list(this.name, key));
+            return strs;
         }
 
         public void set_string_list(string key, Gee.List<string> value) {
