@@ -225,6 +225,19 @@ public class Geary.Iterable<G> : BaseObject {
         return (Gee.ArrayList<G>) add_all_to(new Gee.ArrayList<G>((owned) equal_func));
     }
 
+    /**
+     * Returns a new list containing all elements, sorted.
+     *
+     * The ordering is applied after adding all elements to the list,
+     * so as to minimise computational overhead.
+     */
+    public Gee.ArrayList<G> to_sorted_list(owned GLib.CompareDataFunc<G> comparator,
+                                           owned Gee.EqualDataFunc<G>? equal_func = null) {
+        var list = to_array_list((owned) equal_func);
+        list.sort((owned) comparator);
+        return list;
+    }
+
     /** Returns a new linked list containing all elements. */
     public Gee.LinkedList<G> to_linked_list(owned Gee.EqualDataFunc<G>? equal_func = null) {
         return (Gee.LinkedList<G>) add_all_to(new Gee.LinkedList<G>((owned) equal_func));

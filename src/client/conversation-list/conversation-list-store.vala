@@ -226,11 +226,11 @@ public class ConversationListStore : Gtk.ListStore {
 
         // sort the conversations so the previews are fetched from the newest to the oldest, matching
         // the user experience
-        Gee.TreeSet<Geary.App.Conversation> sorted_conversations =
-            new Gee.TreeSet<Geary.App.Conversation>(
-                Util.Email.compare_conversation_descending
-            );
-        sorted_conversations.add_all(this.conversations.read_only_view);
+        var sorted_conversations = Geary.traverse(
+            this.conversations.read_only_view
+        ).to_sorted_list(
+            Util.Email.compare_conversation_descending
+        );
         foreach (Geary.App.Conversation conversation in sorted_conversations) {
             // find oldest unread message for the preview
             Geary.Email? need_preview = null;

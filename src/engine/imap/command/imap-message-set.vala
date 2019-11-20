@@ -328,8 +328,7 @@ public class Geary.Imap.MessageSet : BaseObject {
 
     private static int64[] seq_array_to_int64(Gee.Collection<SequenceNumber> seq_nums) {
         // guarantee sorted (to maximum finding runs in build_sparse_range())
-        Gee.TreeSet<SequenceNumber> sorted = new Gee.TreeSet<SequenceNumber>();
-        sorted.add_all(seq_nums);
+        var sorted = traverse(seq_nums).to_sorted_list((a,b) => a.compare_to(b));
 
         // build sorted array
         int64[] ret = new int64[sorted.size];
@@ -342,8 +341,7 @@ public class Geary.Imap.MessageSet : BaseObject {
 
     private static int64[] uid_array_to_int64(Gee.Collection<UID> msg_uids) {
         // guarantee sorted (to maximize finding runs in build_sparse_range())
-        Gee.TreeSet<UID> sorted = new Gee.TreeSet<UID>();
-        sorted.add_all(msg_uids);
+        var sorted = traverse(msg_uids).to_sorted_list((a,b) => a.compare_to(b));
 
         // build sorted array
         int64[] ret = new int64[sorted.size];

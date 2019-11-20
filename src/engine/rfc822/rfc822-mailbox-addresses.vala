@@ -59,6 +59,9 @@ public class Geary.RFC822.MailboxAddresses :
 
     private Gee.List<MailboxAddress> addrs = new Gee.ArrayList<MailboxAddress>();
 
+    private bool hash_cached = false;
+    private uint hash_value = 0;
+
 
     public MailboxAddresses(Gee.Collection<MailboxAddress>? addrs = null) {
         if (addrs != null) {
@@ -170,17 +173,22 @@ public class Geary.RFC822.MailboxAddresses :
     }
 
     public uint hash() {
-        // create sorted set to ensure ordering no matter the list's order
-        Gee.TreeSet<string> sorted_addresses = traverse<RFC822.MailboxAddress>(addrs)
-            .map<string>(m => m.address)
-            .to_tree_set(String.stri_cmp);
+        if (!this.hash_cached) {
+            // Sort the addresses to ensure a stable hash
+            var sorted_addresses = traverse<RFC822.MailboxAddress>(addrs)
+                .map<string>(m => m.address)
+                .to_sorted_list(String.stri_cmp);
 
-        // xor all strings in sorted order
-        uint xor = 0;
-        foreach (string address in sorted_addresses)
-            xor ^= address.hash();
+            // xor all strings in sorted order
+            uint xor = 0;
+            foreach (string address in sorted_addresses) {
+                xor ^= address.hash();
+            }
+            this.hash_value = xor;
+            this.hash_cached = true;
+        }
 
-        return xor;
+        return this.hash_value;
     }
 
     public bool equal_to(MailboxAddresses other) {

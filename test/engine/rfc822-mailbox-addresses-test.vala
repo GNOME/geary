@@ -13,6 +13,7 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
         add_test("from_rfc822_string_quoted", from_rfc822_string_quoted);
         add_test("to_rfc822_string", to_rfc822_string);
         add_test("equal_to", equal_to);
+        add_test("hash", hash);
     }
 
     public void from_rfc822_string_encoded() throws Error {
@@ -79,6 +80,34 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
             new_addreses({ "test1@example.com", "test2@example.com" }).equal_to(
                 new_addreses({ "test1@example.com", "test3@example.com" })
             )
+        );
+    }
+
+    public void hash() throws Error {
+        var mailboxes_a = new_addreses({ "test1@example.com" });
+        var mailboxes_b = new_addreses({ "test1@example.com" });
+        var mailboxes_c = new_addreses({ "test2@example.com" });
+
+        assert_true(mailboxes_a.hash() == mailboxes_a.hash());
+        assert_true(mailboxes_a.hash() == mailboxes_b.hash());
+        assert_false(mailboxes_a.hash() == mailboxes_c.hash());
+
+        assert_true(
+            new_addreses({ "test1@example.com", "test2@example.com" }).hash() ==
+            new_addreses({ "test1@example.com", "test2@example.com" }).hash()
+        );
+        assert_true(
+            new_addreses({ "test1@example.com", "test2@example.com" }).hash() ==
+            new_addreses({ "test2@example.com", "test1@example.com" }).hash()
+        );
+
+        assert_false(
+            new_addreses({ "test1@example.com", "test2@example.com" }).hash() ==
+            new_addreses({ "test1@example.com" }).hash()
+        );
+        assert_false(
+            new_addreses({ "test1@example.com", "test2@example.com" }).hash() ==
+            new_addreses({ "test1@example.com", "test3@example.com" }).hash()
         );
     }
 
