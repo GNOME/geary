@@ -47,8 +47,8 @@ public class Util.Cache.Lru<T> : Geary.BaseObject {
 
     private Gee.Map<string,CacheEntry<T>> cache =
         new Gee.HashMap<string,CacheEntry<T>>();
-    private Gee.SortedSet<CacheEntry<T>> ordering =
-        new Gee.TreeSet<CacheEntry<T>>(CacheEntry.lru_compare);
+    private GLib.Sequence<CacheEntry<T>> ordering =
+        new GLib.Sequence<CacheEntry<T>>();
 
 
     /**
@@ -76,13 +76,15 @@ public class Util.Cache.Lru<T> : Geary.BaseObject {
         int64 now = GLib.get_monotonic_time();
         CacheEntry<T> entry = new CacheEntry<T>(key, value, now);
         this.cache.set(key, entry);
-        this.ordering.add(entry);
+        this.ordering.append(entry);
 
         // Prune if needed
         if (this.cache.size > this.max_size) {
-            CacheEntry oldest = this.ordering.first();
-            this.cache.unset(oldest.key);
-            this.ordering.remove(oldest);
+            var oldest = this.ordering.get_begin_iter();
+            if (oldest != null) {
+                this.cache.unset(oldest.get().key);
+                oldest.remove();
+            }
         }
     }
 
@@ -101,9 +103,12 @@ public class Util.Cache.Lru<T> : Geary.BaseObject {
             // Need to remove the entry from the ordering before
             // updating the last used time since doing so changes the
             // ordering
-            this.ordering.remove(entry);
+            var to_remove = this.ordering.lookup(entry, CacheEntry.lru_compare);
+            if (to_remove != null) {
+                to_remove.remove();
+            }
             entry.last_used = now;
-            this.ordering.add(entry);
+            this.ordering.append(entry);
         }
         return value;
     }
@@ -114,7 +119,10 @@ public class Util.Cache.Lru<T> : Geary.BaseObject {
         T value = null;
         this.cache.unset(key, out entry);
         if (entry != null) {
-            this.ordering.remove(entry);
+            var to_remove = this.ordering.lookup(entry, CacheEntry.lru_compare);
+            if (to_remove != null) {
+                to_remove.remove();
+            }
             value = entry.value;
         }
         return value;
@@ -123,7 +131,12 @@ public class Util.Cache.Lru<T> : Geary.BaseObject {
     /** Evicts all entries in the cache. */
     public void clear() {
         this.cache.clear();
-        this.ordering.clear();
+
+        var first = this.ordering.get_begin_iter();
+        if (first != null) {
+            var last = this.ordering.get_end_iter();
+            first.remove_range(last);
+        }
     }
 
 }
