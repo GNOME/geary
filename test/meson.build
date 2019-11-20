@@ -84,6 +84,7 @@ geary_test_client_sources = [
   'client/application/application-configuration-test.vala',
   'client/components/client-web-view-test.vala',
   'client/components/client-web-view-test-case.vala',
+  'client/components/components-validator-test.vala',
   'client/composer/composer-web-view-test.vala',
   'client/util/util-avatar-test.vala',
   'client/util/util-cache-test.vala',

@@ -560,7 +560,7 @@ private class Accounts.NameRow : EntryRow {
         if (this.value.text != "") {
             // Validate if the string is non-empty so it will be good
             // to go from the start
-            this.value.activate();
+            this.validator.validate();
         }
     }
 

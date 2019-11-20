@@ -48,7 +48,9 @@ public class Components.Validator : GLib.Object {
 
     /** The cause of a validity check being required. */
     public enum Trigger {
-        /** The entry's contents changed */
+        /** A manual validation was requested via {@link validate}. */
+        MANUAL,
+        /** The entry's contents changed. */
         CHANGED,
         /** The entry lost the keyboard focus. */
         LOST_FOCUS,
@@ -163,6 +165,17 @@ public class Components.Validator : GLib.Object {
     }
 
     /**
+     * Triggers a validation of the entry.
+     *
+     * In the case of an asynchronous validation implementations,
+     * result of the validation will be known sometime after this call
+     * has completed.
+     */
+    public void validate() {
+        validate_entry(MANUAL);
+    }
+
+    /**
      * Called to validate the target entry's value.
      *
      * This method will be called repeatedly as the user edits the
@@ -187,7 +200,7 @@ public class Components.Validator : GLib.Object {
      * By default, this always returns {@link Validity.VALID}, making
      * it useful for required, but otherwise free-form fields only.
      */
-    protected virtual Validity validate(string value, Trigger reason) {
+    protected virtual Validity do_validate(string value, Trigger reason) {
         return Validity.VALID;
     }
 
@@ -206,6 +219,7 @@ public class Components.Validator : GLib.Object {
             // updating the UI so listeners can update UI settings
             // first if needed.
             this.state = new_state;
+            notify_property("is-valid");
             state_changed(reason, old_state);
 
             if (new_state == Validity.VALID || reason != Trigger.CHANGED) {
@@ -254,12 +268,10 @@ public class Components.Validator : GLib.Object {
         string value = this.target.get_text();
         Validity new_state = this.state;
         if (Geary.String.is_empty_or_whitespace(value)) {
-            new_state = this.is_required
-                ? Validity.EMPTY : Validity.INDETERMINATE;
+            new_state = this.is_required ? Validity.EMPTY : Validity.VALID;
         } else {
-            new_state = validate(value, reason);
+            new_state = do_validate(value, reason);
         }
-
         update_state(new_state, reason);
     }
 
@@ -383,8 +395,8 @@ public class Components.EmailValidator : Validator {
     }
 
 
-    protected override Validator.Validity validate(string value,
-                                                   Validator.Trigger reason) {
+    protected override Validator.Validity do_validate(string value,
+                                                      Validator.Trigger reason) {
         return Geary.RFC822.MailboxAddress.is_valid_address(value)
             ? Validator.Validity.VALID : Validator.Validity.INVALID;
     }
@@ -434,8 +446,8 @@ public class Components.NetworkAddressValidator : Validator {
     }
 
 
-    public override Validator.Validity validate(string value,
-                                                Validator.Trigger reason) {
+    public override Validator.Validity do_validate(string value,
+                                                   Validator.Trigger reason) {
         if (this.cancellable != null) {
             this.cancellable.cancel();
         }

@@ -53,6 +53,7 @@ int main(string[] args) {
     client.add_suite(new Application.ConfigurationTest().get_suite());
     client.add_suite(new ClientWebViewTest().get_suite());
     client.add_suite(new Composer.WebViewTest().get_suite());
+    client.add_suite(new Components.ValidatorTest().get_suite());
     client.add_suite(new Util.Avatar.Test().get_suite());
     client.add_suite(new Util.Cache.Test().get_suite());
     client.add_suite(new Util.Email.Test().get_suite());
