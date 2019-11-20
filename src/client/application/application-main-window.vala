@@ -963,6 +963,7 @@ public class Application.MainWindow :
 
         // Search bar
         this.search_bar.search_text_changed.connect(do_search);
+        this.search_bar.show();
         this.search_bar_box.pack_start(this.search_bar, false, false, 0);
 
         // Folder list
