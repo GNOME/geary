@@ -440,6 +440,7 @@ public class Application.Client : Gtk.Application {
         MainWindow.add_accelerators(this);
         Composer.Widget.add_accelerators(this);
         Components.Inspector.add_accelerators(this);
+        Components.PreferencesWindow.add_accelerators(this);
         Dialogs.ProblemDetailsDialog.add_accelerators(this);
 
         // Manually place a hold on the application otherwise the
@@ -609,10 +610,10 @@ public class Application.Client : Gtk.Application {
     public async void show_preferences() {
         yield this.present();
 
-        PreferencesDialog dialog = new PreferencesDialog(
-            get_active_window(), this
+        Components.PreferencesWindow prefs = new Components.PreferencesWindow(
+            get_active_main_window()
         );
-        dialog.run();
+        prefs.show();
     }
 
     public async void new_composer(string? mailto) {

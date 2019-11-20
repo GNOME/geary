@@ -37,6 +37,7 @@ src/client/components/components-entry-undo.vala
 src/client/components/components-in-app-notification.vala
 src/client/components/components-inspector.vala
 src/client/components/components-placeholder-pane.vala
+src/client/components/components-preferences-window.vala
 src/client/components/components-validator.vala
 src/client/components/count-badge.vala
 src/client/components/folder-popover.vala
@@ -73,7 +74,6 @@ src/client/dialogs/attachment-dialog.vala
 src/client/dialogs/certificate-warning-dialog.vala
 src/client/dialogs/dialogs-problem-details-dialog.vala
 src/client/dialogs/password-dialog.vala
-src/client/dialogs/preferences-dialog.vala
 src/client/dialogs/upgrade-dialog.vala
 src/client/folder-list/folder-list-abstract-folder-entry.vala
 src/client/folder-list/folder-list-account-branch.vala
@@ -440,6 +440,5 @@ ui/main-toolbar.ui
 ui/main-toolbar-menus.ui
 ui/main-window-info-bar.ui
 ui/password-dialog.glade
-ui/preferences-dialog.ui
 ui/problem-details-dialog.ui
 ui/upgrade_dialog.glade
