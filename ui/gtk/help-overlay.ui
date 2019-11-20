@@ -280,7 +280,7 @@
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Reply to all</property>
-                                <property name="accelerator">&lt;Shift&gt;R</property>
+                                <property name="accelerator">A</property>
                             </object>
                         </child>
                         <child>
@@ -301,21 +301,21 @@
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Mark/un-mark starred</property>
-                                <property name="accelerator">S D</property>
+                                <property name="accelerator">S</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Archive conversation</property>
-                                <property name="accelerator">A Y</property>
+                                <property name="accelerator">E</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Move conversation</property>
-                                <property name="accelerator">M</property>
+                                <property name="accelerator">V</property>
                             </object>
                         </child>
                         <child>
@@ -330,6 +330,34 @@
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Move to Spam</property>
                                 <property name="accelerator">exclam</property>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                                <property name="title" translatable="yes" context="shortcut window">Delete conversation</property>
+                                <property name="accelerator">numbersign</property>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                                <property name="title" translatable="yes" context="shortcut window">Find in current conversation</property>
+                                <property name="accelerator">slash</property>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                                <property name="title" translatable="yes" context="shortcut window">Select the conversation down</property>
+                                <property name="accelerator">J</property>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                                <property name="title" translatable="yes" context="shortcut window">Select the conversation up</property>
+                                <property name="accelerator">K</property>
                             </object>
                         </child>
                       </object>

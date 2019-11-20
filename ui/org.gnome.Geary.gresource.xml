@@ -45,5 +45,6 @@
     <file compressed="true">signature-web-view.js</file>
     <file compressed="true" preprocess="xml-stripblanks">upgrade_dialog.glade</file>
     <file compressed="true">geary.css</file>
+    <file compressed="true">single-key-shortcuts.css</file>
   </gresource>
 </gresources>

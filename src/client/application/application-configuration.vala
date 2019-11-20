@@ -9,7 +9,7 @@
 /**
  * Provides properties to access application GSettings values.
  */
-public class Application.Configuration {
+public class Application.Configuration : Geary.BaseObject {
 
 
     public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
@@ -24,6 +24,7 @@ public class Application.Configuration {
     public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
+    public const string SINGLE_KEY_SHORTCUTS = "single-key-shortcuts";
     public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
     public const string SPELL_CHECK_VISIBLE_LANGUAGES = "spell-check-visible-languages";
     public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
@@ -115,6 +116,8 @@ public class Application.Configuration {
     public bool display_preview {
         get { return settings.get_boolean(DISPLAY_PREVIEW_KEY); }
     }
+
+    public bool single_key_shortcuts { get; set; default = false; }
 
     /**
      * The set of enabled spell checker languages.
@@ -216,6 +219,8 @@ public class Application.Configuration {
         gnome_interface = new Settings("org.gnome.desktop.interface");
 
         Migrate.old_app_config(settings);
+
+        this.bind(SINGLE_KEY_SHORTCUTS, this, SINGLE_KEY_SHORTCUTS);
     }
 
     public void bind(string key, Object object, string property,

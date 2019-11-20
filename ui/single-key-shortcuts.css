@@ -1,0 +1,39 @@
+/*
+ * Copyright 2019 Michael Gratton <mike@vee.net>
+ *
+ * This software is licensed under the GNU Lesser General Public License
+ * (version 2.1 or later). See the COPYING file in this distribution.
+ */
+
+/*
+ * These match Gmail's as of time of commit. Taken from:
+ * https://support.google.com/mail/answer/6594
+ */
+@binding-set SingleKeyShortcuts {
+  bind "r" { "reply-conversation-sender" () };
+  bind "a" { "reply-conversation-all" () };
+  bind "f" { "forward-conversation" () };
+
+  bind "<Shift>i" { "mark-conversations-read" (1) };
+  bind "<Shift>u" { "mark-conversations-read" (0) };
+  bind "s" { "mark-conversations-starred" (1) };
+
+  bind "l" { "show-copy-menu" () };
+  bind "v" { "show-move-menu" () };
+
+  bind "e" { "archive-conversations" () };
+   /* ! */
+  bind "exclam" { "junk-conversations" () };
+   /* # */
+  bind "numbersign" { "delete-conversations" () };
+
+  /* / */
+  bind "slash" { "find" () };
+
+  bind "k" { "navigate" (step-up) };
+  bind "j" { "navigate" (step-down) };
+}
+
+window.geary-main-window {
+  -gtk-key-bindings: SingleKeyShortcuts;
+}

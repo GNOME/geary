@@ -65,6 +65,19 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         three_pane_view_row.activatable_widget = three_pane_view;
         three_pane_view_row.add_action(three_pane_view);
 
+        var single_key_shortucts = new Gtk.Switch();
+        single_key_shortucts.valign = CENTER;
+
+        var single_key_shortucts_row = new Hdy.ActionRow();
+        /// Translators: Preferences label
+        single_key_shortucts_row.title = _("Use _single key email shortcuts");
+        single_key_shortucts_row.tooltip_text = _(
+            "Enable keyboard shortcuts for email actions that do not require pressing <Ctrl>"
+        );
+        single_key_shortucts_row.use_underline = true;
+        single_key_shortucts_row.activatable_widget = single_key_shortucts;
+        single_key_shortucts_row.add_action(single_key_shortucts);
+
         var startup_notifications = new Gtk.Switch();
         startup_notifications.valign = CENTER;
 
@@ -87,6 +100,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         group.add(autoselect_row);
         group.add(display_preview_row);
         group.add(three_pane_view_row);
+        group.add(single_key_shortucts_row);
         group.add(startup_notifications_row);
 
         var page = new Hdy.PreferencesPage();
@@ -101,10 +115,31 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         insert_action_group(Action.Window.GROUP_NAME, window_actions);
 
         Application.Configuration config = this.application.config;
-        config.bind(Application.Configuration.AUTOSELECT_KEY, autoselect, "state");
-        config.bind(Application.Configuration.DISPLAY_PREVIEW_KEY, display_preview, "state");
-        config.bind(Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY, three_pane_view, "state");
-        config.bind(Application.Configuration.STARTUP_NOTIFICATIONS_KEY, startup_notifications, "state");
+        config.bind(
+            Application.Configuration.AUTOSELECT_KEY,
+            autoselect,
+            "state"
+        );
+        config.bind(
+            Application.Configuration.DISPLAY_PREVIEW_KEY,
+            display_preview,
+            "state"
+        );
+        config.bind(
+            Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY,
+            three_pane_view,
+            "state"
+        );
+        config.bind(
+            Application.Configuration.SINGLE_KEY_SHORTCUTS,
+            single_key_shortucts,
+            "state"
+        );
+        config.bind(
+            Application.Configuration.STARTUP_NOTIFICATIONS_KEY,
+            startup_notifications,
+            "state"
+        );
 
         this.delete_event.connect(on_delete);
     }
