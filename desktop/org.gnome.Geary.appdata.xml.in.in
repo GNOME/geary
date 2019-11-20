@@ -93,6 +93,8 @@
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
+          <li>Using single key shortcuts for email action is now optional</li>
+          <li>Single key shortcuts have been brought up to date with Gmail</li>
           <li>Drag and drop image files into rich text messages</li>
           <li>Paste images from the clipboard into rich text messages</li>
           <li>Open more than one main window</li>
