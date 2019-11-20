@@ -37,6 +37,7 @@ geary_client_vala_sources = files(
   'components/components-inspector-log-view.vala',
   'components/components-inspector-system-view.vala',
   'components/components-placeholder-pane.vala',
+  'components/components-preferences-window.vala',
   'components/components-validator.vala',
   'components/count-badge.vala',
   'components/folder-popover.vala',
@@ -78,7 +79,6 @@ geary_client_vala_sources = files(
   'dialogs/certificate-warning-dialog.vala',
   'dialogs/dialogs-problem-details-dialog.vala',
   'dialogs/password-dialog.vala',
-  'dialogs/preferences-dialog.vala',
   'dialogs/upgrade-dialog.vala',
 
   'folder-list/folder-list-abstract-folder-entry.vala',

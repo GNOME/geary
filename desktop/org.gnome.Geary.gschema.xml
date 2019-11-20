@@ -63,6 +63,14 @@
         <description>True if we should display a short preview of each message.</description>
     </key>
 
+    <key name="single-key-shortcuts" type="b">
+        <default>false</default>
+        <summary>Use single key shortcuts</summary>
+        <description>Enables shortcuts for email actions that do not
+        require pressing &lt;Ctrl> to emulate those used by
+        Gmail.</description>
+    </key>
+
     <key name="spell-check-languages" type="mas">
         <default>nothing</default>
         <summary>Languages that shall be used in the spell checker</summary>

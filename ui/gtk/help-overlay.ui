@@ -56,35 +56,35 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Archive conversation</property>
+                                <property name="title" translatable="yes" context="shortcut window">Archive conversations</property>
                                 <property name="accelerator">&lt;primary&gt;K</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Move conversation</property>
+                                <property name="title" translatable="yes" context="shortcut window">Move conversations</property>
                                 <property name="accelerator">&lt;primary&gt;M</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Label conversation</property>
-                                <property name="accelerator">&lt;primary&gt;L</property>
+                                <property name="title" translatable="yes" context="shortcut window">Label conversations</property>
+                                <property name="accelerator">&lt;primary&gt;B</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Trash conversation</property>
-                                <property name="accelerator">Delete Back</property>
+                                <property name="title" translatable="yes" context="shortcut window">Trash conversations</property>
+                                <property name="accelerator">Delete BackSpace</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Move to Spam</property>
+                                <property name="title" translatable="yes" context="shortcut window">Junk conversations</property>
                                 <property name="accelerator">&lt;primary&gt;J</property>
                             </object>
                         </child>
@@ -92,8 +92,8 @@
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title"
-                                          translatable="yes" context="shortcut window">Delete conversation</property>
-                                <property name="accelerator">&lt;Shift&gt;Delete &lt;Shift&gt;Back</property>
+                                          translatable="yes" context="shortcut window">Delete conversations</property>
+                                <property name="accelerator">&lt;Shift&gt;Delete &lt;Shift&gt;BackSpace</property>
                             </object>
                         </child>
                     </object>
@@ -121,14 +121,14 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Find next in current conversation</property>
+                                <property name="title" translatable="yes" context="shortcut window">Find next in conversation</property>
                                 <property name="accelerator">&lt;primary&gt;G</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Find previous in current conversation</property>
+                                <property name="title" translatable="yes" context="shortcut window">Find previous in conversation</property>
                                 <property name="accelerator">&lt;primary&gt;&lt;Shift&gt;G</property>
                             </object>
                         </child>
@@ -230,36 +230,16 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Focus the next pane</property>
-                                <property name="accelerator">F6</property>
+                                <property name="title" translatable="yes" context="shortcut window">Go to next/previous pane</property>
+                                <property name="accelerator">&lt;Alt&gt;Right &lt;Alt&gt;Left</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Focus the previous pane</property>
-                                <property name="accelerator">&lt;Shift&gt;F6</property>
-                            </object>
-                        </child>
-                        <child>
-                            <object class="GtkShortcutsShortcut">
-                                <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Focus the conversation list</property>
-                                <property name="accelerator">&lt;primary&gt;B</property>
-                            </object>
-                        </child>
-                        <child>
-                            <object class="GtkShortcutsShortcut">
-                                <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Select the conversation down</property>
-                                <property name="accelerator">&lt;primary&gt;bracketright J</property>
-                            </object>
-                        </child>
-                        <child>
-                            <object class="GtkShortcutsShortcut">
-                                <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Select the conversation up</property>
-                                <property name="accelerator">&lt;primary&gt;bracketleft K</property>
+                                <property name="title"
+                                          translatable="yes" context="shortcut window">Select next/previous conversation</property>
+                                <property name="accelerator">&lt;primary&gt;period &lt;primary&gt;comma</property>
                             </object>
                         </child>
                         <child>
@@ -287,7 +267,7 @@
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Reply to all</property>
-                                <property name="accelerator">&lt;Shift&gt;R</property>
+                                <property name="accelerator">A</property>
                             </object>
                         </child>
                         <child>
@@ -308,35 +288,56 @@
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
                                 <property name="title" translatable="yes" context="shortcut window">Mark/un-mark starred</property>
-                                <property name="accelerator">S D</property>
+                                <property name="accelerator">S</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Archive conversation</property>
-                                <property name="accelerator">A Y</property>
+                                <property name="title" translatable="yes" context="shortcut window">Archive conversations</property>
+                                <property name="accelerator">E</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Move conversation</property>
-                                <property name="accelerator">M</property>
+                                <property name="title" translatable="yes" context="shortcut window">Move conversations</property>
+                                <property name="accelerator">V</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Label conversation</property>
+                                <property name="title" translatable="yes" context="shortcut window">Label conversations</property>
                                 <property name="accelerator">L</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Move to Spam</property>
+                                <property name="title" translatable="yes" context="shortcut window">Junk conversations</property>
                                 <property name="accelerator">exclam</property>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                                <property name="title" translatable="yes" context="shortcut window">Delete conversations</property>
+                                <property name="accelerator">numbersign</property>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                                <property name="title" translatable="yes" context="shortcut window">Find in current conversations</property>
+                                <property name="accelerator">slash</property>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                                <property name="title" translatable="yes" context="shortcut window">Select next/previous conversations</property>
+                                <property name="accelerator">J K</property>
                             </object>
                         </child>
                       </object>

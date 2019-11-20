@@ -243,6 +243,7 @@ public class Application.Client : Gtk.Application {
     private File exec_dir;
     private string binary;
     private bool start_hidden = false;
+    private Gtk.CssProvider single_key_shortcuts = new Gtk.CssProvider();
     private GLib.Cancellable controller_cancellable = new GLib.Cancellable();
     private Components.Inspector? inspector = null;
     private Geary.Nonblocking.Mutex controller_mutex = new Geary.Nonblocking.Mutex();
@@ -427,19 +428,19 @@ public class Application.Client : Gtk.Application {
             provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         );
-        provider.parsing_error.connect(on_css_parse_error);
-        try {
-            var file = GLib.File.new_for_uri(
-                "resource:///org/gnome/Geary/geary.css"
-            );
-            provider.load_from_file(file);
-        } catch (GLib.Error error) {
-            warning("Could not load CSS: %s", error.message);
-        }
+        load_css(provider,
+                 "resource:///org/gnome/Geary/geary.css");
+        load_css(this.single_key_shortcuts,
+                 "resource:///org/gnome/Geary/single-key-shortcuts.css");
+        update_single_key_shortcuts();
+        this.config.notify[Configuration.SINGLE_KEY_SHORTCUTS].connect(
+            on_single_key_shortcuts_toggled
+        );
 
         MainWindow.add_accelerators(this);
         Composer.Widget.add_accelerators(this);
         Components.Inspector.add_accelerators(this);
+        Components.PreferencesWindow.add_accelerators(this);
         Dialogs.ProblemDetailsDialog.add_accelerators(this);
 
         // Manually place a hold on the application otherwise the
@@ -609,10 +610,10 @@ public class Application.Client : Gtk.Application {
     public async void show_preferences() {
         yield this.present();
 
-        PreferencesDialog dialog = new PreferencesDialog(
-            get_active_window(), this
+        Components.PreferencesWindow prefs = new Components.PreferencesWindow(
+            get_active_main_window()
         );
-        dialog.run();
+        prefs.show();
     }
 
     public async void new_composer(string? mailto) {
@@ -979,6 +980,21 @@ public class Application.Client : Gtk.Application {
         set_accels_for_action("app." + action, accelerators);
     }
 
+    private void update_single_key_shortcuts() {
+        if (this.config.single_key_shortcuts) {
+            Gtk.StyleContext.add_provider_for_screen(
+                Gdk.Display.get_default().get_default_screen(),
+                this.single_key_shortcuts,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            );
+        } else {
+            Gtk.StyleContext.remove_provider_for_screen(
+                Gdk.Display.get_default().get_default_screen(),
+                this.single_key_shortcuts
+            );
+        }
+    }
+
     private Geary.Folder? get_folder_from_action_target(GLib.Variant target) {
         Geary.Folder? folder = null;
         string id = (string) target.get_child_value(0);
@@ -993,6 +1009,16 @@ public class Application.Client : Gtk.Application {
             debug("Could not find account/folder %s", err.message);
         }
         return folder;
+    }
+
+    private void load_css(Gtk.CssProvider provider, string resource_uri) {
+        provider.parsing_error.connect(on_css_parse_error);
+        try {
+            var file = GLib.File.new_for_uri(resource_uri);
+            provider.load_from_file(file);
+        } catch (GLib.Error error) {
+            warning("Could not load CSS: %s", error.message);
+        }
     }
 
     private void on_activate_about() {
@@ -1143,6 +1169,10 @@ public class Application.Client : Gtk.Application {
         if (!this.is_background_service && get_windows().length() == 0) {
             this.quit();
         }
+    }
+
+    private void on_single_key_shortcuts_toggled() {
+        update_single_key_shortcuts();
     }
 
     private void on_css_parse_error(Gtk.CssSection section, GLib.Error error) {

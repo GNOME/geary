@@ -1,7 +1,7 @@
 <page xmlns="http://projectmallard.org/1.0/"
       type="guide"
       id="preferences">
-  
+
   <info>
     <link type="guide" xref="index#overview"/>
     <link type="next" xref="search" />
@@ -9,10 +9,10 @@
 
   <title>Preferences</title>
 
-  <p>Geary allows you to customise how it works via its
-  <gui>Preferences</gui> window. To open the window, select
-  <gui>Preferences</gui> from the application menu on the main
-  window's toolbar. You can change the following options:</p>
+  <p>Geary allows you to customise how it works via its <gui
+  style="group">Preferences</gui> window. To open the window, select
+  <gui style="menuitem">Preferences</gui> from the application menu on
+  the main window's toolbar. You can change the following options:</p>
 
   <terms>
     <item>
@@ -33,6 +33,12 @@
       side-by-side-by-side in three panes.  If not selected, the
       folder list and conversation list will be stacked vertically in
       a single pane.</p>
+    </item>
+    <item>
+      <title><gui>Use single key email shortcuts</gui></title>
+      <p>Enable keyboard shortcuts for email actions that do not
+      require pressing <key>Ctrl</key>. These match the shortcuts used
+      by GMail. See <link xref="shortcuts"/> for details.</p>
     </item>
     <item>
       <title><gui>Watch for new mail when closed</gui></title>

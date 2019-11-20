@@ -14,7 +14,6 @@ public class Application.MainWindow :
     // Named actions.
     public const string ACTION_ARCHIVE_CONVERSATION = "archive-conversation";
     public const string ACTION_CONVERSATION_DOWN = "down-conversation";
-    public const string ACTION_CONVERSATION_LIST = "focus-conversation-list";
     public const string ACTION_CONVERSATION_UP = "up-conversation";
     public const string ACTION_DELETE_CONVERSATION = "delete-conversation";
     public const string ACTION_EMPTY_SPAM = "empty-spam";
@@ -43,7 +42,6 @@ public class Application.MainWindow :
     private const ActionEntry[] WINDOW_ACTIONS = {
         { Action.Window.CLOSE, on_close },
 
-        { ACTION_CONVERSATION_LIST, on_conversation_list },
         { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
         { ACTION_SEARCH, on_search_activated },
         { ACTION_EMPTY_SPAM, on_empty_spam },
@@ -75,64 +73,154 @@ public class Application.MainWindow :
     private const int MIN_CONVERSATION_COUNT = 50;
 
 
-    public static void add_accelerators(Client owner) {
+    static construct {
+        // Set up default keybindings
+        unowned Gtk.BindingSet bindings = Gtk.BindingSet.by_class(
+            (ObjectClass) typeof(MainWindow).class_ref()
+        );
+
+        //
+        // Replying & forwarding
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.R, CONTROL_MASK,
+            "reply-conversation-sender", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.R, CONTROL_MASK | SHIFT_MASK,
+            "reply-conversation-all", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.L, CONTROL_MASK,
+            "forward-conversation", 0
+        );
+
         // Marking actions
         //
         // Unread is the primary action, so it doesn't get the <Shift>
         // modifier
-        owner.add_window_accelerators(
-            ACTION_MARK_AS_UNREAD, { "<Ctrl>U", "<Shift>U" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.U, CONTROL_MASK,
+            "mark-conversations-read", 1, typeof(bool), true
         );
-        owner.add_window_accelerators(
-            ACTION_MARK_AS_READ, { "<Ctrl><Shift>U", "<Shift>I" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.U, CONTROL_MASK | SHIFT_MASK,
+            "mark-conversations-read", 1, typeof(bool), false
         );
         // Ephy uses Ctrl+D for bookmarking
-        owner.add_window_accelerators(
-            ACTION_MARK_AS_STARRED, { "<Ctrl>D", "S" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.D, CONTROL_MASK,
+            "mark-conversations-starred", 1, typeof(bool), true
         );
-        owner.add_window_accelerators(
-            ACTION_MARK_AS_UNSTARRED, { "<Ctrl><Shift>D", "D" }
-        );
-        owner.add_window_accelerators(
-            ACTION_TOGGLE_SPAM, { "<Ctrl>J", "exclam" } // Exclamation mark (!)
-        );
-
-        // Replying & forwarding
-        owner.add_window_accelerators(
-            ACTION_REPLY_CONVERSATION, { "<Ctrl>R", "R" }
-        );
-        owner.add_window_accelerators(
-            ACTION_REPLY_ALL_CONVERSATION, { "<Ctrl><Shift>R", "<Shift>R" }
-        );
-        owner.add_window_accelerators(
-            ACTION_FORWARD_CONVERSATION, { "<Ctrl>L", "F" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.D, CONTROL_MASK | SHIFT_MASK,
+            "mark-conversations-starred", 1, typeof(bool), false
         );
 
+        //
         // Moving & labelling
-        owner.add_window_accelerators(
-            ACTION_SHOW_COPY_MENU, { "<Ctrl>L", "L" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.B, CONTROL_MASK,
+            "show-copy-menu", 0
         );
-        owner.add_window_accelerators(
-            ACTION_SHOW_MOVE_MENU, { "<Ctrl>M", "M" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.M, CONTROL_MASK,
+            "show-move-menu", 0
         );
-        owner.add_window_accelerators(
-            ACTION_ARCHIVE_CONVERSATION, { "<Ctrl>K", "A", "Y" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.K, CONTROL_MASK,
+            "archive-conversations", 0
         );
-        owner.add_window_accelerators(
-            ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.J, CONTROL_MASK,
+            "junk-conversations", 0
         );
-        owner.add_window_accelerators(
-            ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" }
+        // Many ways to trash
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.BackSpace, 0,
+            "trash-conversations", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.Delete, 0,
+            "trash-conversations", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.KP_Delete, 0,
+            "trash-conversations", 0
+        );
+        // Many ways to delete
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.BackSpace, SHIFT_MASK,
+            "delete-conversations", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.Delete, SHIFT_MASK,
+            "delete-conversations", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.KP_Delete, SHIFT_MASK,
+            "delete-conversations", 0
         );
 
+        //
         // Find & search
-        owner.add_window_accelerators(
-            ACTION_FIND_IN_CONVERSATION, { "<Ctrl>F", "slash" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.F, CONTROL_MASK,
+            "find", 0
         );
-        owner.add_window_accelerators(
-            ACTION_SEARCH, { "<Ctrl>S" }
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.S, CONTROL_MASK,
+            "search", 0
         );
 
+        //
+        // Navigation
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.Left, MOD1_MASK,
+            "navigate", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_LEFT
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.Right, MOD1_MASK,
+            "navigate", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_RIGHT
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.comma, CONTROL_MASK,
+            "navigate", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.STEP_UP
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.period, CONTROL_MASK,
+            "navigate", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.STEP_DOWN
+        );
+    }
+
+
+    public static void add_accelerators(Client owner) {
         // Zoom
         owner.add_window_accelerators(
             ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "<Ctrl>plus" }
@@ -143,18 +231,8 @@ public class Application.MainWindow :
         owner.add_window_accelerators(
             ACTION_ZOOM+("('normal')"), { "<Ctrl>0" }
         );
-
-        // Navigation
-        owner.add_window_accelerators(
-            ACTION_CONVERSATION_LIST, { "<Ctrl>B" }
-        );
-        owner.add_window_accelerators(
-            ACTION_CONVERSATION_UP, { "<Ctrl>bracketleft", "K" }
-        );
-        owner.add_window_accelerators(
-            ACTION_CONVERSATION_DOWN, { "<Ctrl>bracketright", "J" }
-        );
     }
+
 
     private enum ConversationCount { NONE, SINGLE, MULTIPLE; }
 
@@ -272,6 +350,129 @@ public class Application.MainWindow :
 
     /** Fired when the user requests an account status be retried. */
     public signal void retry_service_problem(Geary.ClientService.Status problem);
+
+
+    /** Keybinding signal for replying to sender for the current conversation. */
+    [Signal (action=true)]
+    public virtual signal void reply_conversation_sender() {
+        activate_action(get_window_action(ACTION_REPLY_CONVERSATION));
+    }
+
+    /** Keybinding signal for replying to all for the current conversation. */
+    [Signal (action=true)]
+    public virtual signal void reply_conversation_all() {
+        activate_action(get_window_action(ACTION_REPLY_ALL_CONVERSATION));
+    }
+
+    /** Keybinding signal for forwarding the current conversation. */
+    [Signal (action=true)]
+    public virtual signal void forward_conversation() {
+        activate_action(get_window_action(ACTION_FORWARD_CONVERSATION));
+    }
+
+    /** Keybinding signal for marking the current selection read. */
+    [Signal (action=true)]
+    public virtual signal void mark_conversations_read(bool prefer_read) {
+        activate_action(
+            prefer_read
+            ? get_window_action(ACTION_MARK_AS_READ)
+            : get_window_action(ACTION_MARK_AS_UNREAD)
+        );
+    }
+
+    /** Keybinding signal for marking the current selection starred. */
+    [Signal (action=true)]
+    public virtual signal void mark_conversations_starred(bool prefer_starred) {
+        activate_action(
+            prefer_starred
+            ? get_window_action(ACTION_MARK_AS_STARRED)
+            : get_window_action(ACTION_MARK_AS_UNSTARRED)
+        );
+    }
+
+    /** Keybinding signal for showing the copy/label menu. */
+    [Signal (action=true)]
+    public virtual signal void show_copy_menu() {
+        activate_action(get_window_action(ACTION_SHOW_COPY_MENU));
+    }
+
+    /** Keybinding signal for showing the move menu. */
+    [Signal (action=true)]
+    public virtual signal void show_move_menu() {
+        activate_action(get_window_action(ACTION_SHOW_MOVE_MENU));
+    }
+
+    /** Keybinding signal for archiving the current selection. */
+    [Signal (action=true)]
+    public virtual signal void archive_conversations() {
+        activate_action(get_window_action(ACTION_ARCHIVE_CONVERSATION));
+    }
+
+    /** Keybinding signal for junking the current selection. */
+    [Signal (action=true)]
+    public virtual signal void junk_conversations() {
+        activate_action(get_window_action(ACTION_TOGGLE_SPAM));
+    }
+
+    /** Keybinding signal for trashing the current selection. */
+    [Signal (action=true)]
+    public virtual signal void trash_conversations() {
+        // XXX the Shift+BackSpace combo above doesn't seem to work
+        // for delete, so double-check here.
+        activate_action(
+            !this.is_shift_down
+            ? get_window_action(ACTION_TRASH_CONVERSATION)
+            : get_window_action(ACTION_DELETE_CONVERSATION)
+        );
+    }
+
+    /** Keybinding signal for deleting the current selection. */
+    [Signal (action=true)]
+    public virtual signal void delete_conversations() {
+        activate_action(get_window_action(ACTION_DELETE_CONVERSATION));
+    }
+
+    /** Keybinding signal for activating conversation search. */
+    [Signal (action=true)]
+    public virtual signal void search() {
+        activate_action(get_window_action(ACTION_SEARCH));
+    }
+
+    /** Keybinding signal for activating in-conversation find. */
+    [Signal (action=true)]
+    public virtual signal void find() {
+        activate_action(get_window_action(ACTION_FIND_IN_CONVERSATION));
+    }
+
+    /** Keybinding signal for shifting the keyboard focus. */
+    [Signal (action=true)]
+    public virtual signal void navigate(Gtk.ScrollType type) {
+        switch (type) {
+        case Gtk.ScrollType.PAGE_LEFT:
+            if (get_direction() != RTL) {
+                focus_previous_pane();
+            } else {
+                focus_next_pane();
+            }
+            break;
+        case Gtk.ScrollType.PAGE_RIGHT:
+            if (get_direction() != RTL) {
+                focus_next_pane();
+            } else {
+                focus_previous_pane();
+            }
+            break;
+        case Gtk.ScrollType.STEP_UP:
+            activate_action(get_window_action(ACTION_CONVERSATION_UP));
+            break;
+        case Gtk.ScrollType.STEP_DOWN:
+            activate_action(get_window_action(ACTION_CONVERSATION_DOWN));
+            break;
+        default:
+            this.get_window().beep();
+            break;
+        }
+    }
 
 
     internal MainWindow(Client application) {
@@ -699,7 +900,7 @@ public class Application.MainWindow :
         return closed;
     }
 
-    public void search(string text, bool is_interactive) {
+    public void show_search(string text, bool is_interactive) {
         Geary.SearchFolder? search_folder = null;
         if (this.selected_account != null) {
             search_folder = this.selected_account.get_special_folder(
@@ -962,7 +1163,7 @@ public class Application.MainWindow :
         this.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
         // Search bar
-        this.search_bar.search_text_changed.connect(do_search);
+        this.search_bar.search_text_changed.connect(on_search);
         this.search_bar.show();
         this.search_bar_box.pack_start(this.search_bar, false, false, 0);
 
@@ -1019,68 +1220,7 @@ public class Application.MainWindow :
     /** {@inheritDoc} */
     public override bool key_press_event(Gdk.EventKey event) {
         check_shift_event(event);
-
-        /* Ensure that single-key command (SKC) shortcuts don't
-         * interfere with text input.
-         *
-         * The default GtkWindow::key_press_event implementation calls
-         * gtk_window_activate_key -- which would activate the SKC,
-         * before calling gtk_window_propagate_key_event -- which
-         * would send the event to any focused text entry control, so
-         * we need to override that. A quick hack is to just call
-         * gtk_window_propagate_key_event here, then chain up. But
-         * that means two calls to that method for every key press,
-         * which in the worst case means all widgets in the focus
-         * chain would be consulted to handle the press twice, which
-         * sucks.
-         *
-         * Worse however, is that due to WK2 Bug 136430[0], WebView
-         * instances duplicate any key events they don't handle. For
-         * the editor, that means simple key presses like 'a' will
-         * only result in a single event, since the web view adds the
-         * letter to the document. But if not handled, e.g. when the
-         * user presses Shift, Ctrl, or similar, then it also produces
-         * a second event. Combined with the
-         * gtk_window_propagate_key_event above, this leads to a
-         * cambrian explosion of key events - an exponential number
-         * are generated, which is bad. This problem also applies to
-         * ConversationWebView instances, since none of them handle
-         * events.
-         *
-         * See also the note in EmailEntry::on_key_press.
-         *
-         * The work around here is completely override the default
-         * implementation to reverse it. So if something related to
-         * key handling breaks in the future, this might be a good
-         * place to start looking. Better alternatives welcome.
-         *
-         * [0] - <https://bugs.webkit.org/show_bug.cgi?id=136430>
-         */
-
-        bool handled = false;
-        Gdk.ModifierType state = (
-            event.state & Gtk.accelerator_get_default_mod_mask()
-        );
-        if (state > 0 && state != Gdk.ModifierType.SHIFT_MASK) {
-            // Have a modifier held down (Ctrl, Alt, etc) that is used
-            // as an accelerator so we don't need to worry about SKCs,
-            // and the key press can be handled normally. Can't do
-            // this with Shift though since that will stop chars being
-            // typed in the composer that conflict with accels, like
-            // `!`.
-            handled = base.key_press_event(event);
-        } else {
-            // No modifier used as an accelerator is down, so kluge
-            // input handling to make SKCs work per the above.
-            handled = propagate_key_event(event);
-            if (!handled) {
-                handled = activate_key(event);
-            }
-            if (!handled) {
-                handled = Gtk.bindings_activate_event(this, event);
-            }
-        }
-        return handled;
+        return base.key_press_event(event);
     }
 
     /** {@inheritDoc} */
@@ -1632,12 +1772,65 @@ public class Application.MainWindow :
         }
     }
 
+    private void focus_next_pane() {
+        var focus = get_focus();
+        if (focus != null) {
+            if (focus == this.folder_list ||
+                focus.is_ancestor(this.folder_list)) {
+                focus = this.conversation_list_view;
+            } else if (focus == this.conversation_list_view ||
+                       focus.is_ancestor(this.conversation_list_view)) {
+                focus = this.conversation_viewer.visible_child;
+            } else if (focus == this.conversation_viewer ||
+                       focus.is_ancestor(this.conversation_viewer)) {
+                focus = this.folder_list;
+            }
+        }
+
+        if (focus != null) {
+            focus.focus(TAB_FORWARD);
+        } else {
+            get_window().beep();
+        }
+    }
+
+    private void focus_previous_pane() {
+        var focus = get_focus();
+        if (focus != null) {
+            if (focus == this.folder_list ||
+                focus.is_ancestor(this.folder_list)) {
+                focus = this.conversation_viewer.visible_child;
+            } else if (focus == this.conversation_list_view ||
+                       focus.is_ancestor(this.conversation_list_view)) {
+                focus = this.folder_list;
+            } else if (focus == this.conversation_viewer ||
+                       focus.is_ancestor(this.conversation_viewer)) {
+                focus = this.conversation_list_view;
+            }
+        }
+
+        if (focus != null) {
+            focus.focus(TAB_FORWARD);
+        } else {
+            get_window().beep();
+        }
+
+    }
+
     private SimpleAction get_window_action(string name) {
         return (SimpleAction) lookup_action(name);
     }
 
     private SimpleAction get_edit_action(string name) {
         return (SimpleAction) this.edit_actions.lookup_action(name);
+    }
+
+    private void activate_action(GLib.Action? action) {
+        if (action != null && action.get_enabled()) {
+            action.activate(null);
+        } else {
+            get_window().beep();
+        }
     }
 
     private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
@@ -1864,8 +2057,8 @@ public class Application.MainWindow :
         this.select_folder.begin(folder, true);
     }
 
-    private void do_search(string text) {
-        search(text, true);
+    private void on_search(string text) {
+        show_search(text, true);
     }
 
     private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
@@ -1910,10 +2103,6 @@ public class Application.MainWindow :
                 }
             }
         }
-    }
-
-    private void on_conversation_list() {
-        this.conversation_list_view.grab_focus();
     }
 
     private void on_find_in_conversation_action() {
