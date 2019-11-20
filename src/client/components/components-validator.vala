@@ -206,6 +206,7 @@ public class Components.Validator : GLib.Object {
             // updating the UI so listeners can update UI settings
             // first if needed.
             this.state = new_state;
+            notify_property("is-valid");
             state_changed(reason, old_state);
 
             if (new_state == Validity.VALID || reason != Trigger.CHANGED) {
