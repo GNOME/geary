@@ -8,8 +8,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2019-10-24 10:12+0000\n"
-"PO-Revision-Date: 2019-10-28 12:48+0100\n"
+"POT-Creation-Date: 2019-10-28 11:49+0000\n"
+"PO-Revision-Date: 2019-11-19 09:48+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -80,6 +80,13 @@ msgid ""
 "Geary. Once entered, click <gui>Create</gui> and the account information "
 "will be checked and then added."
 msgstr ""
+"Para añadir cuentas adicionales abra el editor de cuentas y elija el "
+"proveedor de correo de la lista en la parte inferior de la ventana. Para "
+"proveedores soportados por las <app>Cuentas en líneas</app>, la "
+"<app>configuración de GNOME</app> se abrirá y le pedirá la información de su "
+"cuenta. Para otros proveedores Geary le preguntará la configuración de la "
+"cuenta. Una vez introducida, pulse en <gui>Crear</gui> y la información de "
+"la cuenta se comprobará y añadirá."
 
 #. (itstool) path: section/title
 #: C/accounts.page:48
@@ -94,6 +101,10 @@ msgid ""
 "you can add and remove additional sender email addresses, edit your email "
 "signature, and various other settings."
 msgstr ""
+"Para actualizar las cuentas existentes abra el editor de cuentas y elija la "
+"cuenta que quiere actualizar. Geary mostrará su configuración. Desde ahí "
+"puede añadir o quitar remitentes, editar la firma de la cuenta y acceder a "
+"otras opciones."
 
 #. (itstool) path: section/p
 #: C/accounts.page:56
@@ -503,6 +514,9 @@ msgid ""
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
+"Geary es una aplicación de correo-e pensada para las conversaciones, para el "
+"escritorio GNOME 3. Le permite leer, buscar y enviar correos con una "
+"interfaz sencilla y moderna."
 
 #. (itstool) path: page/p
 #: C/overview.page:15
@@ -510,10 +524,11 @@ msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
 msgstr ""
+"Las conversaciones le permiten leer un hilo completo si tener que buscar y "
+"pulsa cada mensaje individual."
 
 #. (itstool) path: page/p
 #: C/overview.page:18
-#| msgid "The main Geary window is divided into several areas:"
 msgid ""
 "The main Geary window is divided into several areas: The folder list, the "
 "conversation list, and the conversation viewer."
@@ -528,11 +543,6 @@ msgstr "Lista de carpetas"
 
 #. (itstool) path: section/p
 #: C/overview.page:24
-#| msgid ""
-#| "The <em>folder list</em> at the left displays all <em>folders</em> and "
-#| "<em>labels</em> in your mail account. Geary uses the term <em>label</em> "
-#| "for any folder that you have created to help organize your messages. (The "
-#| "Gmail web interface also uses this term; most other mail services do not.)"
 msgid ""
 "The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
 "for your email accounts. Geary uses the term <em>label</em> for any folder "
@@ -549,6 +559,8 @@ msgid ""
 "Select a folder or label to display the conversations it contains in the "
 "conversation list."
 msgstr ""
+"Seleccione una carpeta o etiqueta para mostrar la conversación que contiene "
+"en la lista de conversaciones."
 
 #. (itstool) path: section/title
 #: C/overview.page:34
@@ -620,15 +632,11 @@ msgstr ""
 
 #. (itstool) path: section/title
 #: C/overview.page:58
-#| msgid "Conversation list"
 msgid "Conversation viewer"
 msgstr "Visor de conversaciones"
 
 #. (itstool) path: section/p
 #: C/overview.page:60
-#| msgid ""
-#| "The <em>message area</em> displays all messages in the selected "
-#| "conversation, with the oldest message at the top."
 msgid ""
 "The <em>conversation viewer</em> displays all email messages in the selected "
 "conversation, with the oldest message at the top."
@@ -638,7 +646,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:63
-#, fuzzy
 #| msgid ""
 #| "When you view a conversation, Geary collapses messages that you've "
 #| "already read. Click collapsed messages to expand them. Click an expanded "
@@ -687,7 +694,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:89
-#, fuzzy
 #| msgid ""
 #| "Any attachments in a message appear at the bottom of the message. You can "
 #| "click an attachment to open it or right-click to save it."
@@ -697,8 +703,8 @@ msgid ""
 "save selected attachments."
 msgstr ""
 "Los archivos adjuntos de un mensaje aparecerán en la parte inferior de este. "
-"Pulse en un archivo adjunto para abrirlo o use el botón secundario del ratón "
-"para guardarlo."
+"Pulse dos veces sobre un adjunto para abrirlo o use los botones Abrir y "
+"Guardar para abrir y guardar los adjuntos seleccionados."
 
 #. (itstool) path: page/title
 #: C/preferences.page:10
@@ -814,10 +820,6 @@ msgstr "<gui>Revisar si hay mensajes nuevos al cerrar</gui>"
 
 #. (itstool) path: item/p
 #: C/preferences.page:55
-#| msgid ""
-#| "Geary will watch your accounts for new mail even when the main window is "
-#| "not open. To do this, it will silently start when you log in to your "
-#| "computer, and it will continue to run after you close the main window."
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
@@ -897,7 +899,6 @@ msgstr "<input>bcc:<var>destinatario</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:32
-#| msgid "Finds messages where <var>recipient</var> matches the BCC header."
 msgid "Finds messages where <var>recipient</var> matches email BCC fields."
 msgstr ""
 "Busca mensajes donde <var>destinatario</var> coincida con la cabecera de CCO."
@@ -919,7 +920,6 @@ msgstr "<input>cc:<var>destinatario</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:40
-#| msgid "Finds messages where <var>recipient</var> matches the CC header."
 msgid "Finds messages where <var>recipient</var> matches email CC fields."
 msgstr ""
 "Busca mensajes donde <var>destinatario</var> coincida con la cabecera de CC."
@@ -931,7 +931,6 @@ msgstr "<input>from:<var>remitente</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:44
-#| msgid "Finds messages where <var>sender</var> matches the From header."
 msgid "Finds messages where <var>sender</var> matches email From fields."
 msgstr ""
 "Busca mensajes donde <var>remitente</var> coincide con la cabecera De parte "
@@ -984,8 +983,6 @@ msgstr "<input>to:<var>destinatario</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:64
-#| msgid ""
-#| "Finds messages where <var>sender</var> matches the To, CC, or BCC header."
 msgid ""
 "Finds messages where <var>recipient</var> matches email To, CC, or BCC "
 "fields."
