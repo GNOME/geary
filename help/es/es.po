@@ -8,8 +8,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2019-10-28 11:49+0000\n"
-"PO-Revision-Date: 2019-11-19 09:48+0100\n"
+"POT-Creation-Date: 2019-11-21 10:59+0000\n"
+"PO-Revision-Date: 2019-11-21 12:13+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -44,6 +44,10 @@ msgid ""
 "in the main window above the folder list, then click <gui>Accounts</gui> in "
 "the pop-up menu."
 msgstr ""
+"Puede añadir, actualizar y eliminar sus cuentas de correo usando el "
+"<em>editor de cuentas</em>. Para abrirlo pulse el botón de menú de "
+"aplicación de Geary en la ventana principal, encima de la lista de carpetas "
+"y luego pulse<gui>Cuentas</gui> en el menú emergente."
 
 #. (itstool) path: section/p
 #: C/accounts.page:20
@@ -54,6 +58,11 @@ msgid ""
 "keyseq> and <keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the "
 "currently selected account."
 msgstr ""
+"Para cambiar el orden en que se muestran las cuentas mostradas en la lista "
+"de carpetas pulse y arrastre el tirador de una cuenta en el editor de "
+"cuentas o marque una cuenta con <key>Tab</key>, y use <keyseq><key>Ctrl</"
+"key><key>↑</key></keyseq> o <keyseq><key>Ctrl</key><key>↓</key></keyseq> "
+"para mover la cuenta seleccionada."
 
 #. (itstool) path: section/title
 #: C/accounts.page:29
@@ -128,6 +137,14 @@ msgid ""
 "Settings</app> cannot have their server name, security, login, or password "
 "settings changed."
 msgstr ""
+"Para editar la configuración del servidor para la cuenta desplácese hasta la "
+"parte inferior de la ventana y pulse en <gui>Configuración del servidor</"
+"gui>. Se mostrará la configuración del servidor y podrá pulsar sobre ella, "
+"Cuando lo haga pulse <gui>Aplicar</gui> y Geary comprobará la configuración "
+"y actualizará la cuenta. Tenga presente que en las cuentas añadidas mediante "
+"el panel de <app>Cuentas en línea</app> de la <app>Configuración de GNOME</"
+"app> no se puede cambiar el nombre del servidor ni la configuración de "
+"seguridad, inició de sesión o contraseña."
 
 #. (itstool) path: section/p
 #: C/accounts.page:70
@@ -578,7 +595,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:40
-#, fuzzy
 #| msgid ""
 #| "Each sender's name appears bold if there are unread messages from that "
 #| "sender. If a conversation has more than one message, Geary displays a "
@@ -588,13 +604,12 @@ msgid ""
 "sender. If a conversation has more than one message, Geary displays a count "
 "of messages in the conversation."
 msgstr ""
-"Cada nombre de remitente se muestra resaltado si hay mensajes sin leer del "
+"Cada nombre de remitente se muestra en negrita si hay mensajes sin leer del "
 "remitente. Si una conversación tiene más de un mensaje, Geary muestra el "
 "número de mensajes en la conversación."
 
 #. (itstool) path: section/p
 #: C/overview.page:44
-#, fuzzy
 #| msgid ""
 #| "Geary does not automatically download all messages in all of your mail "
 #| "folders. When you first visit your Inbox or any other folder, Geary "
@@ -610,8 +625,8 @@ msgid ""
 msgstr ""
 "Geary no descarga automáticamente todos los mensajes en todas las carpetas "
 "de correo. Cuando se visualiza por primera vez la Bandeja de entrada o "
-"cualquier otra carpeta, Geary descarga los 50 mensajes más recientes. Para "
-"ver más mensajes, desplácese hacia abajo la lista de conversación y Geary "
+"cualquier otra carpeta, Geary descarga los mensajes más recientes. Para ver "
+"más mensajes, desplácese hacia abajo la lista de conversación y Geary "
 "recuperará más mensajes automáticamente."
 
 #. (itstool) path: section/p
@@ -646,10 +661,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:63
-#| msgid ""
-#| "When you view a conversation, Geary collapses messages that you've "
-#| "already read. Click collapsed messages to expand them. Click an expanded "
-#| "message's header to collapse it."
 msgid ""
 "When you view a conversation, Geary collapses messages that you’ve already "
 "read. Click collapsed messages to expand them. Click an expanded message’s "
@@ -691,12 +702,13 @@ msgid ""
 "which messages have been marked as read or unread, print a message, and so "
 "on."
 msgstr ""
+"Pulse el botón de menú presente en cada mensaje para abrir el <em>menú del "
+"mensaje</em> que le permite responder y reenviar un mensaje concreto, "
+"actualizar qué mensajes se han marcado como leídos o no leídos, imprimir un "
+"mensaje y más cosas."
 
 #. (itstool) path: section/p
 #: C/overview.page:89
-#| msgid ""
-#| "Any attachments in a message appear at the bottom of the message. You can "
-#| "click an attachment to open it or right-click to save it."
 msgid ""
 "Any attachments in a message appear at the bottom of the message. Double "
 "click an attachment to open it, or use the Open and Save buttons to open and "
@@ -1016,6 +1028,11 @@ msgid ""
 "accessed via the application menu: <guiseq><gui>Geary</gui><gui>Keyboard "
 "Shortcuts</gui></guiseq> or using the keyboard shortcuts listed below."
 msgstr ""
+"Geary tiene atajos del teclado para la mayoría de operaciones habituales. "
+"Use la ayuda integrada de los atajos del teclado de Geary para descubrir la "
+"lista completa. Puede acceder a ella mediante el menú de la aplicación: "
+"<guiseq><gui>Geary</gui><gui>Atajos del teclado</gui></guiseq> o usando los "
+"atajos del teclado listados a continuación."
 
 #. (itstool) path: page/p
 #: C/shortcuts.page:18
