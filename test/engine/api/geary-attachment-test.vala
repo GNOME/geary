@@ -61,7 +61,7 @@ class Geary.AttachmentTest : TestCase {
 
     public override void set_up() {
         try {
-            this.content_type = Mime.ContentType.deserialize(CONTENT_TYPE);
+            this.content_type = Mime.ContentType.parse(CONTENT_TYPE);
             this.default_type = Mime.ContentType.ATTACHMENT_DEFAULT;
             this.content_disposition = new Mime.ContentDisposition("attachment", null);
 
