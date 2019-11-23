@@ -197,7 +197,15 @@ public class FormattedConversationData : Geary.BaseObject {
     }
 
     private Gdk.RGBA get_foreground_rgba(Gtk.Widget widget, bool selected) {
-        return widget.get_style_context().get_color(selected ? Gtk.StateFlags.SELECTED : Gtk.StateFlags.NORMAL);
+        // Do the https://bugzilla.gnome.org/show_bug.cgi?id=763796 dance
+        Gtk.StyleContext context = widget.get_style_context();
+        context.save();
+        context.set_state(
+            selected ? Gtk.StateFlags.SELECTED : Gtk.StateFlags.NORMAL
+        );
+        Gdk.RGBA colour = context.get_color(context.get_state());
+        context.restore();
+        return colour;
     }
 
     private string get_participants_markup(Gtk.Widget widget, bool selected) {
