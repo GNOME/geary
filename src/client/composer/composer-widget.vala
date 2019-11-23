@@ -161,11 +161,17 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
 
+    // Keep these in sync with the next const below.
+    private const string ATTACHMENT_KEYWORDS =
+        "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures";
     // Translators: This is list of keywords, separated by pipe ("|")
     // characters, that suggest an attachment; since this is full-word
-    // checking, include all variants of each word.  No spaces are
-    // allowed.
-    private const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
+    // checking, include all variants of each word. No spaces are
+    // allowed. The words will be converted to lower case based on
+    // locale and English versions included automatically.
+    private const string ATTACHMENT_KEYWORDS_LOCALISED =
+        _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
+
 
     public Geary.Account account { get; private set; }
     private Gee.Map<string, Geary.AccountInformation> accounts;
@@ -1336,7 +1342,12 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
             confirmation = _("Send message with an empty body?");
         } else if (!has_attachment &&
                    yield this.editor.contains_attachment_keywords(
-                       ATTACHMENT_KEYWORDS_LOCALIZED, this.subject)) {
+                       string.join(
+                           "|",
+                           ATTACHMENT_KEYWORDS,
+                           ATTACHMENT_KEYWORDS_LOCALISED
+                       ),
+                       this.subject)) {
             confirmation = _("Send message without an attachment?");
         }
         if (confirmation != null) {
