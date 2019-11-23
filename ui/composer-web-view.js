@@ -571,33 +571,36 @@ ComposerPageState.htmlToText = function(root) {
 // Linkifies "plain text" link
 ComposerPageState.linkify = function(node) {
     if (node.nodeType == Node.TEXT_NODE) {
-        // Examine text node for something that looks like a URL
-        let input = node.nodeValue;
-        if (input != null) {
-            let output = input.replace(ComposerPageState.URL_REGEX, function(url) {
-                if (url.match(ComposerPageState.PROTOCOL_REGEX) != null) {
-                    url = "\x01" + url + "\x01";
+        while (node.nodeValue) {
+            // Examine text node for something that looks like a URL
+            let urlRegex = new RegExp(ComposerPageState.URL_REGEX);
+            let url;
+            do {
+                let urlMatch = urlRegex.exec(node.nodeValue);
+                if (!urlMatch) {
+                    return;
                 }
-                return url;
-            });
+                url = urlMatch[0];
+            } while (!url.match(ComposerPageState.PROTOCOL_REGEX));
 
-            if (input != output) {
-                // We got one!  Now split the text and swap in a new anchor.
-                let parent = node.parentNode;
-                let sibling = node.nextSibling;
-                for (let part of output.split("\x01")) {
-                    let newNode = null;
-                    if (part.match(ComposerPageState.URL_REGEX) != null) {
-                        newNode = document.createElement("A");
-                        newNode.href = part;
-                        newNode.innerText = part;
-                    } else {
-                        newNode = document.createTextNode(part);
-                    }
-                    parent.insertBefore(newNode, sibling);
-                }
-                parent.removeChild(node);
-            }
+            // We got one! Now split the text and swap in a new anchor.
+            let before = node.nodeValue.substring(0, urlRegex.lastIndex - url.length);
+            let after = node.nodeValue.substring(urlRegex.lastIndex);
+
+            let beforeNode = document.createTextNode(before);
+            let linkNode = document.createElement("A");
+            linkNode.href = url;
+            linkNode.textContent = url;
+            let afterNode = document.createTextNode(after);
+
+            let parentNode = node.parentNode;
+            parentNode.insertBefore(beforeNode, node);
+            parentNode.insertBefore(linkNode, node);
+            parentNode.insertBefore(afterNode, node);
+            parentNode.removeChild(node);
+
+            // Keep searching for URLs after this one
+            node = afterNode;
         }
     } else {
         // Recurse
