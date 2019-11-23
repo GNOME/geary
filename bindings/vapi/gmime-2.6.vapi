@@ -505,7 +505,7 @@ namespace GMime {
 		[CCode (cname = "g_mime_header_list_get")]
 		public unowned string @get (string name);
 		[CCode (cname = "g_mime_header_list_get_iter")]
-		public bool get_iter (out unowned GMime.HeaderIter iter);
+		public bool get_iter (GMime.HeaderIter iter);
 		[CCode (cname = "g_mime_header_list_get_stream")]
 		public unowned GMime.Stream get_stream ();
 		[CCode (cname = "g_mime_header_list_prepend")]
