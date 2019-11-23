@@ -9,14 +9,13 @@
 /**
  * An database-backed implementation of Geary.Contacts
  */
-internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
+internal class Geary.ContactStoreImpl : ContactStore, BaseObject {
 
 
     private Geary.Db.Database backing;
 
 
     internal ContactStoreImpl(Geary.Db.Database backing) {
-        base_ref();
         this.backing = backing;
     }
 
@@ -158,32 +157,12 @@ internal class Geary.ContactStoreImpl : BaseObject, Geary.ContactStore {
 
             stmt.exec(cancellable);
         } else {
-            // Update existing contact
-
-            // Merge two flags sets together
-            updated.flags.add_all(existing.flags);
-
-            // update remaining fields, careful not to overwrite
-            // non-null real_name with null (but using latest
-            // real_name if supplied) ... email is not updated (it's
-            // how existing was keyed), normalized_email is inserted at
-            // the same time as email, leaving only real_name, flags,
-            // and highest_importance
             Db.Statement stmt = cx.prepare(
                 "UPDATE ContactTable SET real_name=?, flags=?, highest_importance=? WHERE email=?");
-            stmt.bind_string(
-                0, !String.is_empty(updated.real_name) ? updated.real_name : existing.real_name
-            );
-            stmt.bind_string(
-                1, updated.flags.serialize()
-            );
-            stmt.bind_int(
-                2, int.max(updated.highest_importance, existing.highest_importance)
-            );
-            stmt.bind_string(
-                3, updated.email
-            );
-
+            stmt.bind_string(0, updated.real_name);
+            stmt.bind_string(1, updated.flags.serialize());
+            stmt.bind_int(2, updated.highest_importance);
+            stmt.bind_string(3, updated.email);
             stmt.exec(cancellable);
         }
     }
