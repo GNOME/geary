@@ -1,3 +1,30 @@
+Version 3.34.2
+~~~~~~~~~~~~~~
+Released: 2019-11-24
+
+Enhancements included in this release:
+
+ * Bug fixes and server compatibility improvements
+ * User interface translation updates
+
+See <https://gitlab.gnome.org/GNOME/geary/-/milestones/14> for full
+details.
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+
+ * Mario Ravalli <mario@raval.li>
+ * Alex Henrie <alexhenrie24@gmail.com>
+
+Thanks also to all who contributed translations, for the user
+interface:
+
+ * Asier Sarasua Garmendia (eu)
+
+And for the user manual:
+ * Daniel Mustieles (es)
+
+
 Version 3.34.1
 ~~~~~~~~~~~~~~
 Released: 2019-10-07
