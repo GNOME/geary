@@ -1,3 +1,40 @@
+Version 3.35.2
+~~~~~~~~~~~~~~~
+Released: 2019-10-11
+
+Changes:
+ * Roll up bugs fixed in 3.34.2
+ * Add drag and drop and paste images into rich text messages
+ * Add account-wide undo of email actions
+ * Add undo composer send/save/discard
+ * Add undo for GtkEntry widgets
+ * Support opening multiple main windows
+ * Update and improve keyboard shortcuts
+ * Make single-key shortcuts optional, brig up to date with Gmail
+ * Substantial client application/controller/main window/composer class
+   cleanup
+ * Geary.Engine API cleanup
+ * Improve logging intialisation
+ * Online manual updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Alex Henrie
+ * Chris Heywood
+ * Mario Ravalli
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Asier Sarasua Garmendia (eu)
+ * Daniel Mustieles (es)
+ * Emin Tufan Çetin (tr)
+ * Jordi Mas (ca)
+ * Piotr Drąg (pl)
+
+And for the user manual:
+ * Daniel Mustieles (es)
+ * Emin Tufan Çetin (tr)
+
 Version 3.35.1
 ~~~~~~~~~~~~~~~
 Released: 2019-10-11
