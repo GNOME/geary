@@ -141,16 +141,6 @@ geary_client_dependencies = [
 
 geary_client_vala_args = geary_vala_args
 
-# Enable shared shecondary process if available.
-# See issues #558 and #559
-webkit_version = webkit2gtk.version().split('.')
-if webkit_version[0].to_int() <= 2 and webkit_version[1].to_int() <= 24
-  message('Enabling WebKitGTK shared process model')
-  geary_client_vala_args += [
-    '-D', 'HAS_WEBKIT_SHARED_PROC'
-  ]
-endif
-
 # Main client application library
 geary_client_lib = static_library('geary-client',
   geary_client_sources,
