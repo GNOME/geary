@@ -8,8 +8,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2019-11-21 10:59+0000\n"
-"PO-Revision-Date: 2019-11-21 12:13+0100\n"
+"POT-Creation-Date: 2019-11-25 09:56+0000\n"
+"PO-Revision-Date: 2019-11-25 11:52+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -77,6 +77,10 @@ msgid ""
 "have any accounts added to <app>Online Accounts</app>, you will be prompted "
 "to add an account the first time you run Geary."
 msgstr ""
+"Geary usará automáticamente cualquier cuenta de corre-e que haya añadido "
+"mediante el panel <app>Cuentas en línea</app> de la <app>configuración de "
+"GNOME</app>. Si no ha añadido ninguna cuenta a las <app>Cuentas en línea</"
+"app> se le pedirá que añada un cuenta la primera vez que use Geary."
 
 #. (itstool) path: section/p
 #: C/accounts.page:37
@@ -154,6 +158,10 @@ msgid ""
 "<gui>Drafts</gui> folder. If de-selected, you will not be able to save draft "
 "messages when closing the composer."
 msgstr ""
+"La opción <gui>Guardar borrador en el servidor</gui> controla si el editor "
+"guardará copias de los correos que se estén escribiendo en la carpeta "
+"<gui>Borradores</gui>. Si la desmarca no podrá guardar los borradores al "
+"cerrar el editor."
 
 #. (itstool) path: section/p
 #: C/accounts.page:75
@@ -163,6 +171,10 @@ msgid ""
 "If de-selected, you will no be able to see any email messages you have sent, "
 "unless your server automatically saves them for you."
 msgstr ""
+"La opción <gui>Guardar correos enviados en el servidor</gui> controla si "
+"Geary guardará copias de los correos enviados en la carpeta <gui>Enviados</"
+"gui>. Si la desmarca no podrá ver los correos que haya enviado, a menos que "
+"el servidor los guarde automáticamente."
 
 #. (itstool) path: section/title
 #: C/accounts.page:83
@@ -192,6 +204,12 @@ msgid ""
 "<gui>Undo</gui> in the popup notification, or by typing <keyseq><key>Ctrl</"
 "key><key>U</key></keyseq>."
 msgstr ""
+"Para quitar una cuenta añadida a Geary abra el editor de cuentas y elija la "
+"cuenta que quiere eliminar. Geary mostrará la configuración de esa cuenta. "
+"Desplácese hasta la parte inferior de la ventana y pulse <gui>Quitar cuenta</"
+"gui>. Se le pedirá confirmación. Una vez eliminada la cuenta, si cambia de "
+"opinión puede deshacer la operación pulsando el botón <gui>Deshacer</gui> en "
+"la ventana emergente o pulsando <keyseq><key>Ctrl</key><key>U</key></keyseq>."
 
 #. (itstool) path: page/title
 #: C/archive.page:10
@@ -595,10 +613,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:40
-#| msgid ""
-#| "Each sender's name appears bold if there are unread messages from that "
-#| "sender. If a conversation has more than one message, Geary displays a "
-#| "count of messages in the conversation."
 msgid ""
 "Each sender’s name appears bold if there are unread messages from that "
 "sender. If a conversation has more than one message, Geary displays a count "
@@ -610,12 +624,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:44
-#| msgid ""
-#| "Geary does not automatically download all messages in all of your mail "
-#| "folders. When you first visit your Inbox or any other folder, Geary "
-#| "downloads the 50 most recent messages in that folder. To see more "
-#| "messages, simply scroll down the conversation list and Geary will fetch "
-#| "more messages automatically."
 msgid ""
 "Geary does not automatically download all messages in all of your mail "
 "folders. When you first visit your Inbox or any other folder, Geary "
@@ -684,6 +692,16 @@ msgid ""
 "them to the address book, and update the remote image loading preference for "
 "that address."
 msgstr ""
+"Pulse en el nombre o la dirección de cualquiera de de los remitentes o "
+"destinatarios de un correo para abrir el <em>menú de contactos</em>, donde "
+"se muestra información adicional y opciones sobre la cuenta de correo. Puede "
+"iniciar una conversación nueva, copiar la dirección de correo al "
+"portapapeles y buscar conversaciones relacionadas. Si la dirección de correo "
+"está en la libreta de direcciones de su escritorio se mostrará la foto, el "
+"nombre preferido y si es un contacto favorito. También puede abrir el "
+"contacto en la libreta de direcciones. Si la dirección de correo no está "
+"guardada puede añadirla a la libreta de direcciones y actualizar las "
+"opciones de carga remota de la imagen para esa dirección."
 
 #. (itstool) path: section/p
 #: C/overview.page:79
@@ -693,6 +711,9 @@ msgid ""
 "starred, and Geary will display the first starred message in a conversation "
 "when returning to it."
 msgstr ""
+"Pulse el botón de estrella de cada mensaje para marcarlo o desmarcarlo como "
+"favorito. Marcar un mensaje como favorito marcará la conversación completa y "
+"Geary mostrará el primer mensaje favorito cuando vuelva a ella."
 
 #. (itstool) path: section/p
 #: C/overview.page:84
