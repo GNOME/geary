@@ -13,8 +13,12 @@ public abstract class Components.WebViewTestCase<V> : TestCase {
 
     protected WebViewTestCase(string name) {
         base(name);
+    }
+
+    public override void set_up() {
         this.config = new Application.Configuration(Application.Client.SCHEMA_ID);
         this.config.enable_debug = true;
+
         WebView.init_web_context(
             this.config,
             File.new_for_path(_BUILD_ROOT_DIR).get_child("src"),
@@ -25,10 +29,13 @@ public abstract class Components.WebViewTestCase<V> : TestCase {
         } catch (GLib.Error err) {
             assert_not_reached();
         }
+
+        this.test_view = set_up_test_view();
     }
 
-    public override void set_up() {
-        this.test_view = set_up_test_view();
+    protected override void tear_down() {
+        this.config = null;
+        this.test_view = null;
     }
 
     protected abstract V set_up_test_view();
