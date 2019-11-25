@@ -6,7 +6,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ConversationWebView : ClientWebView {
+public class ConversationWebView : Components.WebView {
 
 
     private const string DECEPTIVE_LINK_CLICKED = "deceptiveLinkClicked";
@@ -41,10 +41,10 @@ public class ConversationWebView : ClientWebView {
 
     public static new void load_resources()
         throws Error {
-        ConversationWebView.app_script = ClientWebView.load_app_script(
+        ConversationWebView.app_script = Components.WebView.load_app_script(
             "conversation-web-view.js"
         );
-        ConversationWebView.app_stylesheet = ClientWebView.load_app_stylesheet(
+        ConversationWebView.app_stylesheet = Components.WebView.load_app_stylesheet(
             "conversation-web-view.css"
         );
     }

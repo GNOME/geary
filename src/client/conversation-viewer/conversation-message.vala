@@ -1077,7 +1077,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         return "<img alt=\"%s\" class=\"%s\" src=\"%s%s\" />".printf(
             clean_filename,
             REPLACED_IMAGE_CLASS,
-            ClientWebView.CID_URL_PREFIX,
+            Components.WebView.CID_URL_PREFIX,
             Geary.HTML.escape_markup(id)
         );
     }
@@ -1358,7 +1358,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             alt_text = (string) alt_maybe;
         }
 
-        if (uri.has_prefix(ClientWebView.CID_URL_PREFIX)) {
+        if (uri.has_prefix(Components.WebView.CID_URL_PREFIX)) {
             // We can get the data directly from the attachment, so
             // don't bother getting it from the web view
             save_image(uri, alt_text, null);

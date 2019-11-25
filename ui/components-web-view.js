@@ -6,7 +6,7 @@
  */
 
 /**
- * Application logic for ClientWebView and subclasses.
+ * Application logic for Components.WebView and subclasses.
  */
 
 let PageState = function() {

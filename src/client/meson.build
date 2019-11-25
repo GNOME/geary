@@ -28,7 +28,6 @@ geary_client_vala_sources = files(
 
   'client-action.vala',
 
-  'components/client-web-view.vala',
   'components/components-attachment-pane.vala',
   'components/components-entry-undo.vala',
   'components/components-inspector.vala',
@@ -39,6 +38,7 @@ geary_client_vala_sources = files(
   'components/components-placeholder-pane.vala',
   'components/components-preferences-window.vala',
   'components/components-validator.vala',
+  'components/components-web-view.vala',
   'components/count-badge.vala',
   'components/folder-popover.vala',
   'components/icon-factory.vala',

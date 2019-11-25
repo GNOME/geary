@@ -906,8 +906,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                                Geary.Memory.Buffer? content) {
         var main = get_toplevel() as Application.MainWindow;
         if (main != null) {
-            if (uri.has_prefix(ClientWebView.CID_URL_PREFIX)) {
-                string cid = uri.substring(ClientWebView.CID_URL_PREFIX.length);
+            if (uri.has_prefix(Components.WebView.CID_URL_PREFIX)) {
+                string cid = uri.substring(Components.WebView.CID_URL_PREFIX.length);
                 try {
                     Geary.Attachment attachment = this.email.get_attachment_by_content_id(
                         cid

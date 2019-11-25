@@ -14,7 +14,7 @@
  * integration, Inspector support, and remote and inline image
  * handling.
  */
-public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
+public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
 
     /** URI Scheme and delimiter for internal resource loads. */
@@ -86,13 +86,13 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         context.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
 
         context.register_uri_scheme("cid", (req) => {
-                ClientWebView? view = req.get_web_view() as ClientWebView;
+                WebView? view = req.get_web_view() as WebView;
                 if (view != null) {
                     view.handle_cid_request(req);
                 }
             });
         context.register_uri_scheme("geary", (req) => {
-                ClientWebView? view = req.get_web_view() as ClientWebView;
+                WebView? view = req.get_web_view() as WebView;
                 if (view != null) {
                     view.handle_internal_request(req);
                 }
@@ -113,25 +113,25 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                 update_spellcheck(context, config);
             });
 
-        ClientWebView.default_context = context;
+        WebView.default_context = context;
     }
 
     /**
-     * Loads static resources used by ClientWebView.
+     * Loads static resources used by WebView.
      */
     public static void load_resources(GLib.File user_dir)
         throws GLib.Error {
-        ClientWebView.script = load_app_script(
-            "client-web-view.js"
+        WebView.script = load_app_script(
+            "components-web-view.js"
         );
-        ClientWebView.allow_remote_images = load_app_script(
-            "client-web-view-allow-remote-images.js"
+        WebView.allow_remote_images = load_app_script(
+            "components-web-view-allow-remote-images.js"
         );
 
         foreach (string name in new string[] { USER_CSS, USER_CSS_LEGACY }) {
             GLib.File stylesheet = user_dir.get_child(name);
             try {
-                ClientWebView.user_stylesheet = load_user_stylesheet(stylesheet);
+                WebView.user_stylesheet = load_user_stylesheet(stylesheet);
                 break;
             } catch (GLib.IOError.NOT_FOUND err) {
                 // All good, try the next one or just exit
@@ -298,7 +298,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     public signal void remote_image_load_blocked();
 
 
-    protected ClientWebView(Application.Configuration config,
+    protected WebView(Application.Configuration config,
                             WebKit.UserContentManager? custom_manager = null) {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
@@ -320,13 +320,13 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
         WebKit.UserContentManager content_manager =
              custom_manager ?? new WebKit.UserContentManager();
-        content_manager.add_script(ClientWebView.script);
-        if (ClientWebView.user_stylesheet != null) {
-            content_manager.add_style_sheet(ClientWebView.user_stylesheet);
+        content_manager.add_script(WebView.script);
+        if (WebView.user_stylesheet != null) {
+            content_manager.add_style_sheet(WebView.user_stylesheet);
         }
 
         Object(
-            web_context: ClientWebView.default_context,
+            web_context: WebView.default_context,
             user_content_manager: content_manager,
             settings: setts
         );
@@ -375,7 +375,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                              "monospace-font", SettingsBindFlags.DEFAULT);
     }
 
-    ~ClientWebView() {
+    ~WebView() {
         base_unref();
     }
 
@@ -434,11 +434,11 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     public void allow_remote_image_loading() {
         // Use a separate script here since we need to update the
         // value of window.geary.allow_remote_image_loading after it
-        // was first created by client-web-view.js (which is loaded at
+        // was first created by components-web-view.js (which is loaded at
         // the start of page load), but before the page load is
         // started (so that any remote images present are actually
         // loaded).
-        this.user_content_manager.add_script(ClientWebView.allow_remote_images);
+        this.user_content_manager.add_script(WebView.allow_remote_images);
     }
 
     /**
@@ -514,7 +514,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                                                    JavaScriptMessageHandler handler) {
         // XXX can't use the delegate directly, see b.g.o Bug
         // 604781. However the workaround below creates a circular
-        // reference, causing ClientWebView instances to leak. So to
+        // reference, causing WebView instances to leak. So to
         // work around that we need to record handler ids and
         // disconnect them when being destroyed.
         ulong id = this.user_content_manager.script_message_received[name].connect(
