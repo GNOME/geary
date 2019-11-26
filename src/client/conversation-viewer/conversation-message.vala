@@ -510,7 +510,22 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void initialize_web_view() {
-        this.web_view = new ConversationWebView(config);
+        var viewer = get_ancestor(typeof(ConversationViewer)) as ConversationViewer;
+
+        // Ensure we share the same WebProcess with the last one
+        // constructed if possible.
+        if (viewer != null && viewer.previous_web_view != null) {
+            this.web_view = new ConversationWebView.with_related_view(
+                this.config,
+                viewer.previous_web_view
+            );
+        } else {
+            this.web_view = new ConversationWebView(this.config);
+        }
+        if (viewer != null) {
+            viewer.previous_web_view = this.web_view;
+        }
+
         this.web_view.context_menu.connect(on_context_menu);
         this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
         this.web_view.link_activated.connect((link) => {

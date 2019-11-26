@@ -24,6 +24,14 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         get; private set; default = null;
     }
 
+    /**
+     * The most recent web view created in this viewer.
+     *
+     * Keep the last created web view around so others can share the
+     * same WebKitGTK WebProcess.
+     */
+    internal ConversationWebView? previous_web_view { get; set; default = null; }
+
     private Application.Configuration config;
 
     private Gee.Set<Geary.App.Conversation>? selection_while_composing = null;

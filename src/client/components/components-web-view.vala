@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -294,7 +294,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
 
     protected WebView(Application.Configuration config,
-                            WebKit.UserContentManager? custom_manager = null) {
+                      WebKit.UserContentManager? custom_manager = null,
+                      WebView? related = null) {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
         setts.default_charset = "UTF-8";
@@ -321,53 +322,31 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         }
 
         Object(
-            web_context: WebView.default_context,
+            settings: setts,
             user_content_manager: content_manager,
-            settings: setts
+            web_context: WebView.default_context
         );
         base_ref();
+        init(config);
+    }
 
-        // XXX get the allow prefix from the extension somehow
-
-        this.decide_policy.connect(on_decide_policy);
-        this.web_process_terminated.connect((reason) => {
-                warning("Web process crashed: %s", reason.to_string());
-            });
-
-        register_message_handler(
-            COMMAND_STACK_CHANGED, on_command_stack_changed
+    /**
+     * Constructs a new web view with a new shared WebProcess.
+     *
+     * The new view will use the same WebProcess, settings and content
+     * manager as the given related view's.
+     *
+     * @see WebKit.WebView.with_related_view
+     */
+    protected WebView.with_related_view(Application.Configuration config,
+                                        WebView related) {
+        Object(
+            related_view: related,
+            settings: related.get_settings(),
+            user_content_manager: related.user_content_manager
         );
-        register_message_handler(
-            CONTENT_LOADED, on_content_loaded
-        );
-        register_message_handler(
-            DOCUMENT_MODIFIED, on_document_modified
-        );
-        register_message_handler(
-            PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
-        );
-        register_message_handler(
-            REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
-        );
-        register_message_handler(
-            SELECTION_CHANGED, on_selection_changed
-        );
-
-        // Manage zoom level, ensure it's sane
-        config.bind(Application.Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
-        if (this.zoom_level < ZOOM_MIN) {
-            this.zoom_level = ZOOM_MIN;
-        } else if (this.zoom_level > ZOOM_MAX) {
-            this.zoom_level = ZOOM_MAX;
-        }
-        this.scroll_event.connect(on_scroll_event);
-
-        // Watch desktop font settings
-        Settings system_settings = config.gnome_interface;
-        system_settings.bind("document-font-name", this,
-                             "document-font", SettingsBindFlags.DEFAULT);
-        system_settings.bind("monospace-font-name", this,
-                             "monospace-font", SettingsBindFlags.DEFAULT);
+        base_ref();
+        init(config);
     }
 
     ~WebView() {
@@ -519,6 +498,50 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         if (!this.user_content_manager.register_script_message_handler(name)) {
             debug("Failed to register script message handler: %s", name);
         }
+    }
+
+    private void init(Application.Configuration config) {
+        // XXX get the allow prefix from the extension somehow
+
+        this.decide_policy.connect(on_decide_policy);
+        this.web_process_terminated.connect((reason) => {
+                warning("Web process crashed: %s", reason.to_string());
+            });
+
+        register_message_handler(
+            COMMAND_STACK_CHANGED, on_command_stack_changed
+        );
+        register_message_handler(
+            CONTENT_LOADED, on_content_loaded
+        );
+        register_message_handler(
+            DOCUMENT_MODIFIED, on_document_modified
+        );
+        register_message_handler(
+            PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
+        );
+        register_message_handler(
+            REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
+        );
+        register_message_handler(
+            SELECTION_CHANGED, on_selection_changed
+        );
+
+        // Manage zoom level, ensure it's sane
+        config.bind(Application.Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
+        if (this.zoom_level < ZOOM_MIN) {
+            this.zoom_level = ZOOM_MIN;
+        } else if (this.zoom_level > ZOOM_MAX) {
+            this.zoom_level = ZOOM_MAX;
+        }
+        this.scroll_event.connect(on_scroll_event);
+
+        // Watch desktop font settings
+        Settings system_settings = config.gnome_interface;
+        system_settings.bind("document-font-name", this,
+                             "document-font", SettingsBindFlags.DEFAULT);
+        system_settings.bind("monospace-font-name", this,
+                             "monospace-font", SettingsBindFlags.DEFAULT);
     }
 
     private void handle_cid_request(WebKit.URISchemeRequest request) {
