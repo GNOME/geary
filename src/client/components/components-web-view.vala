@@ -65,7 +65,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     private static WebKit.UserStyleSheet? user_stylesheet = null;
 
     private static WebKit.UserScript? script = null;
-    private static WebKit.UserScript? allow_remote_images = null;
 
 
     /**
@@ -118,9 +117,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         throws GLib.Error {
         WebView.script = load_app_script(
             "components-web-view.js"
-        );
-        WebView.allow_remote_images = load_app_script(
-            "components-web-view-allow-remote-images.js"
         );
 
         foreach (string name in new string[] { USER_CSS, USER_CSS_LEGACY }) {
@@ -406,13 +402,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      * effect.
      */
     public void allow_remote_image_loading() {
-        // Use a separate script here since we need to update the
-        // value of window.geary.allow_remote_image_loading after it
-        // was first created by components-web-view.js (which is loaded at
-        // the start of page load), but before the page load is
-        // started (so that any remote images present are actually
-        // loaded).
-        this.user_content_manager.add_script(WebView.allow_remote_images);
+        this.run_javascript.begin("_gearyAllowRemoteResourceLoads = true", null);
     }
 
     /**

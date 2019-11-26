@@ -14,7 +14,6 @@ let PageState = function() {
 };
 PageState.prototype = {
     init: function() {
-        this.allowRemoteImages = false;
         this.isLoaded = false;
         this.undoEnabled = false;
         this.redoEnabled = false;
@@ -108,7 +107,7 @@ PageState.prototype = {
         window.webkit.messageHandlers.contentLoaded.postMessage(null);
     },
     loadRemoteImages: function() {
-        this.allowRemoteImages = true;
+        window._gearyAllowRemoteResourceLoads = true;
         let images = document.getElementsByTagName("IMG");
         for (let i = 0; i < images.length; i++) {
             let img = images.item(i);
