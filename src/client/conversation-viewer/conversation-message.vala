@@ -819,11 +819,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     public async void load_message_body(Geary.RFC822.Message message,
                                         GLib.Cancellable load_cancelled)
         throws GLib.Error {
-        if (this.web_view == null)
-            initialize_web_view();
-
         if (load_cancelled.is_cancelled()) {
             throw new GLib.IOError.CANCELLED("Conversation load cancelled");
+        }
+
+        if (this.web_view == null) {
+            initialize_web_view();
         }
 
         bool contact_load_images = (
