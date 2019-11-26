@@ -222,14 +222,19 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     [GtkChild]
     internal Gtk.Grid infobars;
 
-    /** HTML view that displays the message body. */
-    private ConversationWebView? web_view { get; private set; }
-
-    public bool is_content_loaded {
+    /**
+     * Emitted when web_view's content has finished loaded.
+     *
+     * See {@link Components.WebView.is_content_loaded} for details.
+     */
+    internal bool is_content_loaded {
         get {
-            return (web_view == null)? false : web_view.is_content_loaded;
+            return this.web_view != null && this.web_view.is_content_loaded;
         }
     }
+
+    /** HTML view that displays the message body. */
+    private ConversationWebView? web_view { get; private set; }
 
     // The message headers represented by this view
     private Geary.EmailHeaderSet headers;
@@ -361,8 +366,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /**
      * Emitted when web_view's content has finished loaded.
      *
-     * See {@link is_content_loaded} for detail about when this is
-     * emitted.
+     * See {@link Components.WebView.is_content_loaded} for details.
      */
     public signal void content_loaded();
 
