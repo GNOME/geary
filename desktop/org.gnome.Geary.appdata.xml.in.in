@@ -101,6 +101,7 @@
           <li>Extend undo for email actions such as archiving, marking</li>
           <li>Undo sending, saving and discarding composed email</li>
           <li>Undo editing in text fields, including in the composer</li>
+          <li>Conversation loading performance improvements</li>
           <li>App-wide notification preferences now handled by desktop</li>
           <li>Improved missing attachment detection in composer</li>
           <li>Initial plugin system</li>
