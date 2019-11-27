@@ -29,6 +29,7 @@
     <file compressed="true" preprocess="xml-stripblanks">conversation-email.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-email-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-message.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">conversation-message-link-popover.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-message-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-viewer.ui</file>
     <file compressed="true">conversation-web-view.css</file>

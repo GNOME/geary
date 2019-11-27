@@ -293,13 +293,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private Gtk.ProgressBar body_progress;
 
     [GtkChild]
-    private Gtk.Popover link_popover;
-    [GtkChild]
-    private Gtk.Label good_link_label;
-    [GtkChild]
-    private Gtk.Label bad_link_label;
-
-    [GtkChild]
     private Gtk.InfoBar remote_images_infobar;
 
     private Gtk.Widget? body_placeholder = null;
@@ -1309,23 +1302,42 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         }
         string anchor_label = Soup.URI.decode(anchor_href);
 
+        Gtk.Builder builder = new Gtk.Builder.from_resource(
+            "/org/gnome/Geary/conversation-message-link-popover.ui"
+        );
+        var link_popover = builder.get_object("link_popover") as Gtk.Popover;
+        var good_link = builder.get_object("good_link_label") as Gtk.Label;
+        var bad_link = builder.get_object("bad_link_label") as Gtk.Label;
+
         // Escape text and especially URLs since we got them from the
         // HREF, and Gtk.Label.set_markup is a strict parser.
-        good_link_label.set_markup(
+
+        var main = get_toplevel() as Application.MainWindow;
+
+        good_link.set_markup(
             Markup.printf_escaped("<a href=\"%s\">%s</a>", text_href, text_label)
         );
-        bad_link_label.set_markup(
+        good_link.activate_link.connect((label, uri) => {
+                link_popover.popdown();
+                main.application.show_uri.begin(uri);
+                return Gdk.EVENT_STOP;
+            }
+        );
+
+        bad_link.set_markup(
             Markup.printf_escaped("<a href=\"%s\">%s</a>", anchor_href, anchor_label)
         );
+        bad_link.activate_link.connect((label, uri) => {
+                link_popover.popdown();
+                main.application.show_uri.begin(uri);
+                return Gdk.EVENT_STOP;
+            }
+        );
+
         link_popover.set_relative_to(this.web_view);
         link_popover.set_pointing_to(location);
-        link_popover.show();
-    }
-
-    [GtkCallback]
-    private bool on_link_popover_activated() {
-        this.link_popover.hide();
-        return Gdk.EVENT_PROPAGATE;
+        link_popover.closed.connect_after(() => { link_popover.destroy(); });
+        link_popover.popup();
     }
 
     private void on_selection_changed(bool has_selection) {
