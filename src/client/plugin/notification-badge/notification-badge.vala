@@ -27,12 +27,30 @@ public class Plugin.NotificationBadge : Notification {
         get; construct set;
     }
 
-    private Unity.LauncherEntry? entry = null;
+    private UnityLauncherEntry? entry = null;
+
 
     public override void activate() {
-        this.entry = Unity.LauncherEntry.get_for_desktop_id(
-            Application.Client.APP_ID + ".desktop"
-        );
+        var connection = this.application.get_dbus_connection();
+        var path = this.application.get_dbus_object_path();
+        try {
+            if (connection == null || path == null) {
+                throw new GLib.IOError.NOT_CONNECTED(
+                    "Application does not have a DBus connection or path"
+                );
+            }
+            this.entry = new UnityLauncherEntry(
+                connection,
+                path + "/plugin/notificationbadge",
+                Application.Client.APP_ID + ".desktop"
+            );
+        } catch (GLib.Error error) {
+            warning(
+                "Failed to register Unity Launcher Entry: %s",
+                error.message
+            );
+        }
+
         this.context.notify["total-new-messages"].connect(on_total_changed);
         update_count();
     }
@@ -43,9 +61,14 @@ public class Plugin.NotificationBadge : Notification {
     }
 
     private void update_count() {
-        int count = this.context.total_new_messages;
-        this.entry.count = count;
-        this.entry.count_visible = (count > 0);
+        if (this.entry != null) {
+            int count = this.context.total_new_messages;
+            if (count > 0) {
+                this.entry.set_count(count);
+            } else {
+                this.entry.clear_count();
+            }
+        }
     }
 
     private void on_total_changed() {
