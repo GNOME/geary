@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Composer.WebViewTest : ClientWebViewTestCase<Composer.WebView> {
+public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView> {
 
 
     public WebViewTest() {

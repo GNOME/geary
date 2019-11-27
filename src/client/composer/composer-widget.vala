@@ -1283,7 +1283,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         email.inline_files.set_all(this.inline_files);
         email.cid_files.set_all(this.cid_files);
 
-        email.img_src_prefix = ClientWebView.INTERNAL_URL_PREFIX;
+        email.img_src_prefix = Components.WebView.INTERNAL_URL_PREFIX;
 
         try {
             if (!for_draft) {
@@ -2051,7 +2051,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     string unique_filename;
                     add_inline_part(byte_buffer, filename, out unique_filename);
                     this.editor.insert_image(
-                        ClientWebView.INTERNAL_URL_PREFIX + unique_filename
+                        Components.WebView.INTERNAL_URL_PREFIX + unique_filename
                     );
                 } catch (Error error) {
                     warning("Failed to paste image %s", error.message);
@@ -2705,7 +2705,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     string unique_filename;
                     add_inline_part(file_buffer, path, out unique_filename);
                     this.editor.insert_image(
-                        ClientWebView.INTERNAL_URL_PREFIX + unique_filename
+                        Components.WebView.INTERNAL_URL_PREFIX + unique_filename
                     );
                 } catch (Error err) {
                     attachment_failed(err.message);
@@ -2804,7 +2804,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         this.editor.insert_image(
-            ClientWebView.INTERNAL_URL_PREFIX + unique_filename
+            Components.WebView.INTERNAL_URL_PREFIX + unique_filename
         );
     }
 }
