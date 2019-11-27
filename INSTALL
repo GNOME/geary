@@ -60,9 +60,9 @@ Install them by running this command:
         libpeas-dev libsecret-1-dev libsqlite3-dev libunwind-dev \
         libwebkit2gtk-4.0-dev libxml2-dev libytnef0-dev
 
-And for Ubuntu Unity integration:
+And for Ubuntu Messaging Menu integration:
 
-    sudo apt-get install libmessaging-menu-dev libunity-dev
+    sudo apt-get install libmessaging-menu-dev
 
 Running
 -------

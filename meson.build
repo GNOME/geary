@@ -139,7 +139,6 @@ endif
 appstream_util = find_program('appstream-util', required: false)
 desktop_file_validate = find_program('desktop-file-validate', required: false)
 libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', required: false)
-libunity = dependency('unity', version: '>= 5.12.0', required: false)
 
 #
 # Internal build configuration
