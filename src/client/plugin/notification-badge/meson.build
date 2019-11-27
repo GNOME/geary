@@ -5,7 +5,10 @@ if libunity.found()
   badge_dependencies = plugin_dependencies
   badge_dependencies += libunity
 
-  plugin_src = join_paths(plugin_name + '.vala')
+  plugin_src = files(
+    plugin_name + '.vala',
+    'unity-launcher-entry.vala'
+  )
   plugin_data = join_paths(plugin_name + '.plugin')
   plugin_dest = join_paths(plugins_dir, plugin_name)
 
