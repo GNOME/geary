@@ -73,6 +73,18 @@ cleanup:
 
 modules:
 
+  # Issue #592 Vala MR test
+  - name: vala
+    buildsystem: autotools
+    config-opts:
+      - "--disable-valadoc"
+      - "--enable-unversioned"
+    sources:
+      - type: git
+        url: "https://gitlab.gnome.org/GNOME/vala.git"
+        branch: wip/issue/879
+        disable-shallow-clone: true
+
   # Geary dependency
   - name: gnome-online-accounts
     config-opts:
