@@ -430,6 +430,7 @@ ui/components-placeholder-pane.ui
 ui/conversation-contact-popover.ui
 ui/conversation-email.ui
 ui/conversation-email-menus.ui
+ui/conversation-message-link-popover.ui
 ui/conversation-message-menus.ui
 ui/conversation-message.ui
 ui/conversation-viewer.ui
