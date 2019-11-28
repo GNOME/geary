@@ -325,3 +325,12 @@ popover.geary-editor > grid {
 popover.geary-editor > grid > button.geary-setting-remove {
   margin-top: 12px;
 }
+
+/* FolderList.Tree */
+
+treeview.sidebar:drop(active).after,
+treeview.sidebar:drop(active).before,
+treeview.sidebar:drop(active).into {
+  border-top-style: solid;
+  border-bottom-style: solid;
+}
