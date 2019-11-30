@@ -25,13 +25,9 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     private Application.NotificationContext? monitor = null;
 
     public Tree() {
-        base(new Gtk.TargetEntry[0], Gdk.DragAction.ASK, drop_handler);
+        base(TARGET_ENTRY_LIST, Gdk.DragAction.ASK, drop_handler);
         base_ref();
         entry_selected.connect(on_entry_selected);
-
-        // Set self as a drag destination.
-        Gtk.drag_dest_set(this, Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT,
-            TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
 
         // GtkTreeView binds Ctrl+N to "move cursor to next".  Not so interested in that, so we'll
         // remove it.
@@ -211,22 +207,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         get_selection().unselect_all();
         this.selected = null;
         folder_selected(null);
-    }
-
-    public override bool drag_motion(Gdk.DragContext context, int x, int y, uint time) {
-        // Run the base version first.
-        bool ret = base.drag_motion(context, x, y, time);
-
-        // Update the cursor for copy or move.
-        Gdk.ModifierType mask;
-        double[] axes = new double[2];
-        context.get_device().get_state(context.get_dest_window(), axes, out mask);
-        if ((mask & Gdk.ModifierType.CONTROL_MASK) != 0) {
-            Gdk.drag_status(context, Gdk.DragAction.COPY, time);
-        } else {
-            Gdk.drag_status(context, Gdk.DragAction.MOVE, time);
-        }
-        return ret;
     }
 
     private void on_ordinal_changed() {
