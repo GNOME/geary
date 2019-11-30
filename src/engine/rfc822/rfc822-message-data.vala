@@ -173,27 +173,13 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
     public DateTime value { get; private set; }
 
     public Date(string rfc822) throws ImapError {
-        int offset = 0;
-        int64 time_t_utc = GMime.utils_header_decode_date(rfc822, out offset);
-        if (time_t_utc == 0)
-            throw new ImapError.PARSE_ERROR(
-                "Unable to parse \"%s\": Not ISO-8601 date", rfc822
-            );
-
-        DateTime? value = new DateTime.from_unix_utc(time_t_utc);
+        DateTime? value = GMime.utils_header_decode_date(rfc822);
         if (value == null) {
             throw new ImapError.PARSE_ERROR(
                 "Unable to parse \"%s\": Outside supported range", rfc822
             );
         }
         this.value = value;
-
-        if (offset != 0) {
-            this.value = value.to_timezone(
-                new GLib.TimeZone("%+05d".printf(offset))
-            );
-        }
-
         this.original = rfc822;
     }
 
@@ -206,18 +192,7 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
      * Returns the {@link Date} in RFC 822 format.
      */
     public string to_rfc822_string() {
-        // Although GMime documents its conversion methods as
-        // requiring the tz offset in hours, it appears the number is
-        // handed directly to the string (i.e. an offset of -7:30 becomes
-        // "-0007", whereas we want "-0730").
-        int hours = (int) GLib.Math.floor(value.get_utc_offset() / TimeSpan.HOUR);
-        int minutes = (int) (
-            (value.get_utc_offset() % TimeSpan.HOUR) / (double) TimeSpan.HOUR * 60
-        );
-        return GMime.utils_header_format_date(
-            (time_t) this.value.to_utc().to_unix(),
-            (hours * 100) + minutes
-        );
+        return GMime.utils_header_format_date(this.value);
     }
 
     /**
@@ -261,7 +236,7 @@ public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
     }
 
     public Subject.decode(string value) {
-        base (GMime.utils_header_decode_text(value));
+        base (GMime.utils_header_decode_text(Geary.RFC822.get_parser_options(), value));
         original = value;
     }
 
@@ -337,9 +312,10 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
 
         GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(buffer));
         parser.set_respect_content_length(false);
-        parser.set_scan_from(false);
+        // TODO Could this be omitted?
+        parser.set_format(GMime.Format.MESSAGE);
 
-        message = parser.construct_message();
+        message = parser.construct_message(Geary.RFC822.get_parser_options());
         if (message == null)
             throw new RFC822Error.INVALID("Unable to parse RFC 822 headers");
 
@@ -347,17 +323,15 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
     }
 
     public string? get_header(string name) throws RFC822Error {
-        return get_headers().get(name);
+        return get_headers().get_header(name).get_value();
     }
 
     public string[] get_header_names() throws RFC822Error {
         if (this.names == null) {
             this.names = new string[0];
-            GMime.HeaderIter iter = new GMime.HeaderIter();
-            if (get_headers().get_iter(iter) && iter.first()) {
-                do {
-                    names += iter.get_name();
-                } while (iter.next());
+            GMime.HeaderList headers = get_headers();
+            for (int i = 0; i < headers.get_count(); i++) {
+                names += headers.get_header_at(i).get_name();
             }
         }
         return this.names;
@@ -388,7 +362,7 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         // Parse the header.
         GMime.Stream header_stream = Utils.create_stream_mem(preview_header);
         GMime.Parser parser = new GMime.Parser.with_stream(header_stream);
-        GMime.Part? gpart = parser.construct_part() as GMime.Part;
+        GMime.Part? gpart = parser.construct_part(Geary.RFC822.get_parser_options()) as GMime.Part;
         if (gpart != null) {
             Part part = new Part(gpart);
 
@@ -402,7 +376,7 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
                     new GMime.StreamMem.with_buffer(preview.get_uint8_array()),
                     gpart.get_content_encoding()
                 );
-                gpart.set_content_object(body);
+                gpart.set_content(body);
 
                 try {
                     Memory.Buffer preview_buffer = part.write_to_buffer(

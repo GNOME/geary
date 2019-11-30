@@ -21,7 +21,7 @@ class Geary.ImapDB.AttachmentTest : TestCase {
 
     public void new_from_minimal_mime_part() throws Error {
         GMime.Part part = new_part(null, ATTACHMENT_BODY.data);
-        part.set_header("Content-Type", "");
+        part.set_header("Content-Type", "", Geary.RFC822.get_charset());
 
         Attachment test = new Attachment.from_part(
             1, new Geary.RFC822.Part(part)
@@ -51,7 +51,8 @@ class Geary.ImapDB.AttachmentTest : TestCase {
         part.set_content_id(ID);
         part.set_content_description(DESC);
         part.set_content_disposition(
-            new GMime.ContentDisposition.from_string(
+            GMime.ContentDisposition.parse(
+                Geary.RFC822.get_parser_options(),
                 "attachment; filename=%s".printf(NAME)
             )
         );
@@ -74,7 +75,10 @@ class Geary.ImapDB.AttachmentTest : TestCase {
     public void new_from_inline_mime_part() throws Error {
         GMime.Part part = new_part(null, ATTACHMENT_BODY.data);
         part.set_content_disposition(
-            new GMime.ContentDisposition.from_string("inline")
+            GMime.ContentDisposition.parse(
+                Geary.RFC822.get_parser_options(),
+                "inline"
+            )
         );
 
         Attachment test = new Attachment.from_part(
@@ -205,7 +209,8 @@ CREATE TABLE MessageAttachmentTable (
         part.set_content_id(ID);
         part.set_content_description(DESCRIPTION);
         part.set_content_disposition(
-            new GMime.ContentDisposition.from_string(
+            GMime.ContentDisposition.parse(
+                Geary.RFC822.get_parser_options(),
                 "inline; filename=%s;".printf(FILENAME)
             ));
 
@@ -352,12 +357,15 @@ private GMime.Part new_part(string? mime_type,
                             GMime.ContentEncoding encoding = GMime.ContentEncoding.DEFAULT) {
     GMime.Part part = new GMime.Part();
     if (mime_type != null) {
-        part.set_content_type(new GMime.ContentType.from_string(mime_type));
+        part.set_content_type(GMime.ContentType.parse(
+            Geary.RFC822.get_parser_options(),
+            mime_type
+        ));
     }
     GMime.DataWrapper body_wrapper = new GMime.DataWrapper.with_stream(
         new GMime.StreamMem.with_buffer(body),
         encoding
     );
-    part.set_content_object(body_wrapper);
+    part.set_content(body_wrapper);
     return part;
 }

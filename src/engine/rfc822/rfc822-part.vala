@@ -160,7 +160,7 @@ public class Geary.RFC822.Part : Object {
                                   BodyFormatting format = BodyFormatting.NONE)
         throws RFC822Error {
         GMime.DataWrapper? wrapper = (this.source_part != null)
-            ? this.source_part.get_content_object() : null;
+            ? this.source_part.get_content() : null;
         if (wrapper == null) {
             throw new RFC822Error.INVALID(
                 "Could not get the content wrapper for content-type %s",
@@ -201,7 +201,7 @@ public class Geary.RFC822.Part : Object {
             if ((this.source_part == null ||
                  this.source_part.encoding != BASE64) &&
                 !(content_type.media_subtype in CR_PRESERVING_TEXT_TYPES)) {
-                filter.add(new GMime.FilterCRLF(false, false));
+                filter.add(new GMime.FilterDos2Unix(false));
             }
 
             if (flowed) {

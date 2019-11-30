@@ -180,7 +180,7 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
             target_stream
         );
         stream = new GMime.StreamBuffer(
-            stream, GMime.StreamBufferMode.BLOCK_WRITE
+            stream, GMime.StreamBufferMode.WRITE
         );
 
         part.write_to_stream(stream, RFC822.Part.EncodingConversion.NONE);
