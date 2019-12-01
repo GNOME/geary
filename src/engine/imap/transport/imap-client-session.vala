@@ -82,7 +82,7 @@ public class Geary.Imap.ClientSession : BaseObject {
      *
      * These don't exactly match the states in the IMAP specification.  For one, they count
      * transitions as states unto themselves (due to network latency and the asynchronous nature
-     * of ClientSession's interface).  Also, the LOGOUT (and logging out) state has been melded
+     * of ClientSession's interface).  Also, the LOGOUT state has been melded
      * into {@link ProtocolState.NOT_CONNECTED} on the presumption that the nuances of a disconnected or
      * disconnecting session is uninteresting to the caller.
      *
@@ -172,14 +172,13 @@ public class Geary.Imap.ClientSession : BaseObject {
         NOAUTH,
         AUTHORIZED,
         SELECTED,
-        LOGGED_OUT,
+        LOGOUT,
 
         // transitional states
         CONNECTING,
         AUTHORIZING,
         SELECTING,
         CLOSING_MAILBOX,
-        LOGGING_OUT,
 
         // terminal state
         CLOSED,
@@ -445,29 +444,18 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.RECV_ERROR, on_recv_error),
 
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.CONNECT, on_already_connected),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.LOGIN, on_already_logged_in),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.SEND_CMD, on_late_command),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.SELECT, on_late_command),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.CLOSE_MAILBOX, on_late_command),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.LOGOUT, Geary.State.nop),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_STATUS, on_dropped_response),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_COMPLETION, on_logging_out_recv_completion),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_ERROR, on_recv_error),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.SEND_ERROR, on_send_error),
-
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.CONNECT, on_already_connected),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.LOGIN, on_already_logged_in),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.SEND_CMD, on_late_command),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.SELECT, on_late_command),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.CLOSE_MAILBOX, on_late_command),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.LOGOUT, on_late_command),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_STATUS, on_dropped_response),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_COMPLETION, on_dropped_response),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_ERROR, on_recv_error),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.SEND_ERROR, on_send_error),
+            new Geary.State.Mapping(State.LOGOUT, Event.CONNECT, on_already_connected),
+            new Geary.State.Mapping(State.LOGOUT, Event.LOGIN, on_already_logged_in),
+            new Geary.State.Mapping(State.LOGOUT, Event.SEND_CMD, on_late_command),
+            new Geary.State.Mapping(State.LOGOUT, Event.SELECT, on_late_command),
+            new Geary.State.Mapping(State.LOGOUT, Event.CLOSE_MAILBOX, on_late_command),
+            new Geary.State.Mapping(State.LOGOUT, Event.LOGOUT, on_late_command),
+            new Geary.State.Mapping(State.LOGOUT, Event.DISCONNECT, on_disconnect),
+            new Geary.State.Mapping(State.LOGOUT, Event.DISCONNECTED, on_disconnected),
+            new Geary.State.Mapping(State.LOGOUT, Event.RECV_STATUS, on_logging_out_recv_status),
+            new Geary.State.Mapping(State.LOGOUT, Event.RECV_COMPLETION, on_logging_out_recv_completion),
+            new Geary.State.Mapping(State.LOGOUT, Event.RECV_ERROR, on_recv_error),
+            new Geary.State.Mapping(State.LOGOUT, Event.SEND_ERROR, on_send_error),
 
             new Geary.State.Mapping(State.CLOSED, Event.CONNECT, on_late_command),
             new Geary.State.Mapping(State.CLOSED, Event.LOGIN, on_late_command),
@@ -595,8 +583,7 @@ public class Geary.Imap.ClientSession : BaseObject {
 
         switch (fsm.get_state()) {
             case State.NOT_CONNECTED:
-            case State.LOGGED_OUT:
-            case State.LOGGING_OUT:
+            case State.LOGOUT:
             case State.CLOSED:
                 return ProtocolState.NOT_CONNECTED;
 
@@ -716,7 +703,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         timeout.cancel();
 
         // if session was denied or timeout, ensure the session is disconnected and throw the
-        // original Error ... connect_async shouldn't leave the session in a LOGGED_OUT state,
+        // original Error ... connect_async shouldn't leave the session in the CONNECTING state,
         // but completely disconnected if unsuccessful
         if (connect_err != null) {
             try {
@@ -793,7 +780,7 @@ public class Geary.Imap.ClientSession : BaseObject {
               imap_endpoint.to_string());
 
         // stay in current state -- wait for initial status response
-        // to move into NOAUTH or LOGGED OUT
+        // to move into NOAUTH or LOGOUT
         return state;
     }
 
@@ -805,7 +792,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         debug("[%s] Disconnected from %s",
               to_string(),
               this.imap_endpoint.to_string());
-        return state;
+        return State.CLOSED;
     }
 
     private uint on_connecting_recv_status(uint state, uint event, void *user, Object? object) {
@@ -828,11 +815,14 @@ public class Geary.Imap.ClientSession : BaseObject {
         debug("[%s] Connect denied: %s", to_string(), status_response.to_string());
 
         fsm.do_post_transition(() => { session_denied(status_response.get_text()); });
-        connect_err = new ImapError.UNAVAILABLE(
+
+        // Don't need to manually disconnect here, by setting
+        // connect_err here that will be done in connect_async
+        this.connect_err = new ImapError.UNAVAILABLE(
             "Session denied: %s", status_response.get_text()
         );
 
-        return State.LOGGED_OUT;
+        return State.LOGOUT;
     }
 
     private uint on_connecting_timeout(uint state, uint event) {
@@ -846,10 +836,14 @@ public class Geary.Imap.ClientSession : BaseObject {
 
         debug("[%s] Connect timed-out", to_string());
 
-        connect_err = new IOError.TIMED_OUT("Session greeting not seen in %u seconds",
-            GREETING_TIMEOUT_SEC);
+        // Don't need to manually disconnect here, by setting
+        // connect_err here that will be done in connect_async
+        this.connect_err = new IOError.TIMED_OUT(
+            "Session greeting not seen in %u seconds",
+            GREETING_TIMEOUT_SEC
+        );
 
-        return State.LOGGED_OUT;
+        return State.LOGOUT;
     }
 
     /**
@@ -1352,7 +1346,8 @@ public class Geary.Imap.ClientSession : BaseObject {
             break;
 
             case Status.BYE:
-                debug("[%s] Received BYE from server: %s", to_string(), status_response.to_string());
+                debug("[%s] Received unilateral BYE from server: %s",
+                      to_string(), status_response.to_string());
 
                 // nothing more we can do; drop connection and report disconnect to user
                 cx.disconnect_async.begin(null, on_bye_disconnect_completed);
@@ -1539,8 +1534,17 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (params.err != null)
             throw params.err;
 
-        if(params.proceed)
+        if (params.proceed) {
             yield command_transaction_async(cmd, cancellable);
+            logged_out();
+            this.cx.disconnect_async.begin(
+                cancellable, (obj, res) => {
+                    dispatch_disconnect_results(
+                        DisconnectReason.LOCAL_CLOSE, res
+                    );
+                }
+            );
+        }
     }
 
     private uint on_logout(uint state, uint event, void *user, Object? object) {
@@ -1550,10 +1554,35 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (!reserve_state_change_cmd(params, state, event))
             return state;
 
-        // Leaving AUTHORIZED state, turn off IDLE
-        this.cx.enable_idle_when_quiet(false);
+        return State.LOGOUT;
+    }
 
-        return State.LOGGING_OUT;
+    private uint on_logging_out_recv_status(uint state,
+                                            uint event,
+                                            void *user,
+                                            Object? object) {
+        StatusResponse status_response = (StatusResponse) object;
+
+        switch (status_response.status) {
+            case Status.OK:
+                // some good-feeling text that doesn't need to be
+                // handled when in this state
+            break;
+
+            case Status.BYE:
+                // We're expecting this bye, but don't disconnect yet
+                // since we'll do that when the command is complete
+                debug("[%s] Received bye from server on logout: %s",
+                      to_string(), status_response.to_string());
+            break;
+
+            default:
+                debug("[%s] Received error from server on logout: %s",
+                      to_string(), status_response.to_string());
+            break;
+        }
+
+        return state;
     }
 
     private uint on_logging_out_recv_completion(uint state, uint event, void *user, Object? object) {
@@ -1562,9 +1591,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (!validate_state_change_cmd(completion_response))
             return state;
 
-        fsm.do_post_transition(() => { logged_out(); });
-
-        return State.LOGGED_OUT;
+        return State.CLOSED;
     }
 
     //
