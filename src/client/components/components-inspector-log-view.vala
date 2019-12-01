@@ -214,7 +214,7 @@ public class Components.InspectorLogView : Gtk.Grid {
         // Blacklist GdkPixbuf since it spams us e.g. when window
         // focus changes, including between MainWindow and the
         // Inspector, which is very annoying.
-        record.fill_well_known_loggables();
+        record.fill_well_known_sources();
         return (
             record.domain != "GdkPixbuf" &&
             (record.account == null ||

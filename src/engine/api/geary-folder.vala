@@ -61,7 +61,7 @@
  *
  * @see Geary.SpecialFolderType
  */
-public abstract class Geary.Folder : BaseObject, Loggable {
+public abstract class Geary.Folder : BaseObject, Logging.Source {
 
     /**
      * Indicates if a folder has been opened, and if so in which way.
@@ -239,12 +239,12 @@ public abstract class Geary.Folder : BaseObject, Loggable {
     public abstract Geary.ProgressMonitor opening_monitor { get; }
 
     /** {@inheritDoc} */
-    public Logging.Flag loggable_flags {
+    public Logging.Flag logging_flags {
         get; protected set; default = Logging.Flag.ALL;
     }
 
     /** {@inheritDoc} */
-    public Loggable? loggable_parent {
+    public Logging.Source? logging_parent {
         get { return this.account; }
     }
 

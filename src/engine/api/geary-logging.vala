@@ -153,7 +153,7 @@ public class Record {
     /** The next log record in the buffer, if any. */
     public Record? next { get; internal set; default = null; }
 
-    private Loggable[] loggables;
+    private Source[] sources;
     private bool filled = false;
     private bool old_log_api = false;
 
@@ -170,12 +170,12 @@ public class Record {
 
         // Since GLib.LogField only retains a weak ref to its value,
         // find and ref any values we wish to keep around.
-        this.loggables = new Loggable[fields.length];
-        int loggable_count = 0;
+        this.sources = new Source[fields.length];
+        int source_count = 0;
         foreach (GLib.LogField field in fields) {
             switch (field.key) {
-            case "GEARY_LOGGABLE":
-                this.loggables[loggable_count++] = (Loggable) field.value;
+            case "GEARY_LOGGING_SOURCE":
+                this.sources[source_count++] = (Source) field.value;
                 break;
 
             case "GEARY_FLAGS":
@@ -204,20 +204,20 @@ public class Record {
             }
         }
 
-        this.loggables.length = loggable_count;
+        this.sources.length = source_count;
     }
 
-    /** Returns the record's loggables that aren't well-known. */
-    public Loggable[] get_other_loggables() {
-        fill_well_known_loggables();
+    /** Returns the record's sources that aren't well-known. */
+    public Source[] get_other_sources() {
+        fill_well_known_sources();
 
-        Loggable[] copy = new Loggable[this.loggables.length];
+        Source[] copy = new Source[this.sources.length];
         int count = 0;
-        foreach (Loggable loggable in this.loggables) {
-            if (loggable != this.account &&
-                loggable != this.service &&
-                loggable != this.folder) {
-                copy[count++] = loggable;
+        foreach (Source source in this.sources) {
+            if (source != this.account &&
+                source != this.service &&
+                source != this.folder) {
+                copy[count++] = source;
             }
         }
         copy.length = count;
@@ -225,22 +225,22 @@ public class Record {
     }
 
     /**
-     * Sets the well-known loggable properties.
+     * Sets the well-known logging source properties.
      *
      * Call this before trying to access {@link account}, {@link
      * folder} and {@link service}. Determining these can be
      * computationally complex and hence is not done by default.
      */
-    public void fill_well_known_loggables() {
+    public void fill_well_known_sources() {
         if (!this.filled) {
-            foreach (Loggable loggable in this.loggables) {
-                GLib.Type type = loggable.get_type();
+            foreach (Source source in this.sources) {
+                GLib.Type type = source.get_type();
                 if (type.is_a(typeof(Account))) {
-                    this.account = (Account) loggable;
+                    this.account = (Account) source;
                 } else if (type.is_a(typeof(ClientService))) {
-                    this.service = (ClientService) loggable;
+                    this.service = (ClientService) source;
                 } else if (type.is_a(typeof(Folder))) {
-                    this.folder = (Folder) loggable;
+                    this.folder = (Folder) source;
                 }
             }
             this.filled = true;
@@ -249,7 +249,7 @@ public class Record {
 
     /** Returns a formatted string representation of this record. */
     public string format() {
-        fill_well_known_loggables();
+        fill_well_known_sources();
 
         string domain = this.domain ?? "[no domain]";
         Flag flags = this.flags ?? Flag.NONE;
@@ -271,7 +271,7 @@ public class Record {
             domain
         );
 
-        if (flags != NONE && flags != ALL) {
+        if (flags != NONE) {
             str.append_printf("[%s]: ", flags.to_string());
         } else {
             str.append(": ");
@@ -299,8 +299,10 @@ public class Record {
             str.append(": ");
         }
 
-        foreach (Loggable loggable in get_other_loggables()) {
-            str.append(loggable.to_string());
+        // Append in reverse so leaf sources appears last
+        var sources = get_other_sources();
+        for (int i = sources.length - 1; i >= 0; i--) {
+            str.append(sources[i].to_string());
             str.append_c(' ');
         }
 

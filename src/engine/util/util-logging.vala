@@ -8,14 +8,14 @@
 /**
  * Mixin interface for objects that support structured logging.
  *
- * Loggable objects provide both a standard means to obtain a string
+ * Logging sources provide both a standard means to obtain a string
  * representation of the object for display to humans, and keep a weak
- * reference to some parent loggable, enabling this context to be
+ * reference to some parent source, enabling context to be
  * automatically added to logging calls. For example, if a Foo object
- * is the loggable parent of a Bar object, log calls made by Bar will
- * automatically be decorated with Foo.
+ * is the logging source parent of a Bar object, log calls made by Bar
+ * will automatically be decorated with Foo.
  */
-public interface Geary.Loggable : GLib.Object {
+public interface Geary.Logging.Source : GLib.Object {
 
 
     // Based on function from with the same name from GLib's
@@ -87,8 +87,8 @@ public interface Geary.Loggable : GLib.Object {
             this.count++;
         }
 
-        public inline void append_loggable(Loggable value) {
-            this.append("GEARY_LOGGABLE", value);
+        public inline void append_source(Source value) {
+            this.append("GEARY_LOGGING_SOURCE", value);
         }
 
         public GLib.LogField[] to_array() {
@@ -101,17 +101,17 @@ public interface Geary.Loggable : GLib.Object {
 
 
     /**
-     * Default flags to use for this loggable when logging messages.
+     * Default flags to use for this source when logging messages.
      */
-    public abstract Logging.Flag loggable_flags { get; protected set; }
+    public abstract Logging.Flag logging_flags { get; protected set; }
 
     /**
-     * The parent of this loggable.
+     * The parent of this source.
      *
      * If not null, the parent and its ancestors recursively will be
      * added to to log message context.
      */
-    public abstract Loggable? loggable_parent { get; }
+    public abstract Source? logging_parent { get; }
 
     /**
      * Returns a string representation of the service, for debugging.
@@ -125,7 +125,7 @@ public interface Geary.Loggable : GLib.Object {
     [PrintfFormat]
     public inline void debug(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_DEBUG, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_DEBUG, fmt, va_list()
         );
     }
 
@@ -135,7 +135,7 @@ public interface Geary.Loggable : GLib.Object {
     [PrintfFormat]
     public inline void message(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_MESSAGE, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_MESSAGE, fmt, va_list()
         );
     }
 
@@ -145,7 +145,7 @@ public interface Geary.Loggable : GLib.Object {
     [PrintfFormat]
     public inline void warning(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_WARNING, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_WARNING, fmt, va_list()
         );
     }
 
@@ -156,7 +156,7 @@ public interface Geary.Loggable : GLib.Object {
     [NoReturn]
     public inline void error(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_ERROR, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_ERROR, fmt, va_list()
         );
     }
 
@@ -166,7 +166,7 @@ public interface Geary.Loggable : GLib.Object {
     [PrintfFormat]
     public inline void critical(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_CRITICAL, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_CRITICAL, fmt, va_list()
         );
     }
 
@@ -175,10 +175,10 @@ public interface Geary.Loggable : GLib.Object {
                                        string fmt,
                                        va_list args) {
         Context context = Context(Logging.DOMAIN, flags, levels, fmt, args);
-        Loggable? decorated = this;
+        Source? decorated = this;
         while (decorated != null) {
-            context.append_loggable(decorated);
-            decorated = decorated.loggable_parent;
+            context.append_source(decorated);
+            decorated = decorated.logging_parent;
         }
 
         GLib.log_structured_array(levels, context.to_array());

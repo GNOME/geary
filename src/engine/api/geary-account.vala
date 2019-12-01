@@ -22,7 +22,7 @@
  * A list of all Accounts may be retrieved from the {@link Engine} singleton.
  */
 
-public abstract class Geary.Account : BaseObject, Loggable {
+public abstract class Geary.Account : BaseObject, Logging.Source {
 
 
     /** Number of times to attempt re-authentication. */
@@ -247,12 +247,12 @@ public abstract class Geary.Account : BaseObject, Loggable {
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
 
     /** {@inheritDoc} */
-    public Logging.Flag loggable_flags {
+    public Logging.Flag logging_flags {
         get; protected set; default = Logging.Flag.ALL;
     }
 
     /** {@inheritDoc} */
-    public Loggable? loggable_parent { get { return null; } }
+    public Logging.Source? logging_parent { get { return null; } }
 
 
     protected Account(AccountInformation information,

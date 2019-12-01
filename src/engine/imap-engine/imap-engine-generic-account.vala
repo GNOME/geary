@@ -91,12 +91,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         imap.notify["current-status"].connect(
             on_imap_status_notify
         );
-        imap.set_loggable_parent(this);
+        imap.set_logging_parent(this);
         this.imap = imap;
 
         smtp.outbox = new Outbox.Folder(this, local_folder_root, local);
         smtp.report_problem.connect(notify_report_problem);
-        smtp.set_loggable_parent(this);
+        smtp.set_logging_parent(this);
         this.smtp = smtp;
 
         this.sync = new AccountSynchronizer(this);

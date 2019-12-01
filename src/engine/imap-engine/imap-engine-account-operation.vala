@@ -33,16 +33,16 @@
  * equal_to} method to specify which instances are considered to be
  * duplicates.
  */
-public abstract class Geary.ImapEngine.AccountOperation : BaseObject, Loggable {
+public abstract class Geary.ImapEngine.AccountOperation : BaseObject, Logging.Source {
 
 
     /** {@inheritDoc} */
-    public Logging.Flag loggable_flags {
+    public Logging.Flag logging_flags {
         get; protected set; default = Logging.Flag.ALL;
     }
 
     /** {@inheritDoc} */
-    public Loggable? loggable_parent { get { return account; } }
+    public Logging.Source? logging_parent { get { return account; } }
 
     /** The account this operation applies to. */
     protected weak Geary.Account account { get; private set; }
