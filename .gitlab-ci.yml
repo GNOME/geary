@@ -81,11 +81,10 @@ ubuntu:
 flatpak:
   image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.34'
   variables:
-    APP_ID: org.gnome.GearyDevel
+    APP_ID: org.gnome.Geary
     FLATPAK_MODULE: geary
     MANIFEST_PATH: org.gnome.Geary.yml
-    MESON_ARGS: "-Dprofile=development"
-    RUNTIME_REPO: "https://sdk.gnome.org/gnome-nightly.flatpakrepo"
+    RUNTIME_REPO: "https://dl.flathub.org/repo/flathub.flatpakrepo"
     TEST_RUN_ARGS: $TEST_ARGS
   extends: .flatpak
 
