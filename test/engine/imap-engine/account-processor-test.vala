@@ -26,7 +26,6 @@ public class Geary.ImapEngine.AccountProcessorTest : TestCase {
 
         public override async void execute(Cancellable cancellable)
             throws Error {
-            print("Test op/");
             this.execute_called = true;
             if (this.wait_for_cancel) {
                 yield this.spinlock.wait_async(cancellable);
@@ -62,10 +61,6 @@ public class Geary.ImapEngine.AccountProcessorTest : TestCase {
         add_test("failure", failure);
         add_test("duplicate", duplicate);
         add_test("stop", stop);
-
-        // XXX this has to be here instead of in set_up for some
-        // reason...
-        this.processor = new AccountProcessor("processor");
     }
 
     public override void set_up() {
@@ -76,6 +71,19 @@ public class Geary.ImapEngine.AccountProcessorTest : TestCase {
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
         this.account = new Geary.MockAccount(this.info);
+        this.processor = new AccountProcessor("processor");
+
+        this.succeeded = 0;
+        this.failed = 0;
+        this.completed = 0;
+    }
+
+    public override void tear_down() {
+        this.processor.stop();
+        this.processor = null;
+
+        this.account = null;
+        this.info = null;
 
         this.succeeded = 0;
         this.failed = 0;
