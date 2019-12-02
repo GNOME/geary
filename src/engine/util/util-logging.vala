@@ -203,6 +203,16 @@ public interface Geary.Logging.Source : GLib.Object {
         );
     }
 
+    /**
+     * Logs a message with this object as context.
+     */
+    [PrintfFormat]
+    public inline void log(Logging.Flag flags,
+                           GLib.LogLevelFlags levels,
+                           string fmt, ...) {
+        log_structured(flags, levels, fmt, va_list());
+    }
+
     private inline void log_structured(Logging.Flag flags,
                                        GLib.LogLevelFlags levels,
                                        string fmt,
