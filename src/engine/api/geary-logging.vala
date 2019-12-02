@@ -256,20 +256,17 @@ public class Record {
         );
 
         if (flags != NONE) {
-            str.append_printf("[%s]: ", flags.to_string());
+            str.append_printf("[%s]:", flags.to_string());
         } else {
-            str.append(": ");
+            str.append(":");
         }
 
         // Append in reverse so inner sources appear first
         for (int i = this.states.length - 1; i >= 0; i--) {
-            str.append("[");
+            str.append(" [");
             str.append(this.states[i].format_message());
-            str.append("] ");
+            str.append("]");
         }
-
-        str.append(message);
-
 
         // XXX Don't append source details for the moment because of
         // https://gitlab.gnome.org/GNOME/vala/issues/815
@@ -286,7 +283,16 @@ public class Record {
                 str.append(this.source_function.to_string());
             }
             str.append("]");
+        } else if (this.states.length > 0) {
+            // Print the class name of the leaf logging source to at
+            // least give a general idea of where the message came
+            // from.
+            str.append(" ");
+            str.append(this.states[0].source.get_type().name());
+            str.append(": ");
         }
+
+        str.append(message);
 
         return str.str;
     }
