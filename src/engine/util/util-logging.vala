@@ -5,18 +5,35 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+
 /**
  * Mixin interface for objects that support structured logging.
  *
- * Loggable objects provide both a standard means to obtain a string
+ * Logging sources provide both a standard means to obtain a string
  * representation of the object for display to humans, and keep a weak
- * reference to some parent loggable, enabling this context to be
+ * reference to some parent source, enabling context to be
  * automatically added to logging calls. For example, if a Foo object
- * is the loggable parent of a Bar object, log calls made by Bar will
- * automatically be decorated with Foo.
+ * is the logging source parent of a Bar object, log calls made by Bar
+ * will automatically be decorated with Foo.
  */
-public interface Geary.Loggable : GLib.Object {
+public interface Geary.Logging.Source : GLib.Object {
 
+
+    /**
+     * Returns a string representation of a source based on its state.
+     *
+     * The string returned will include the source's type name, the
+     * its current logging state, and the value of extra_values, if
+     * any.
+     */
+    protected static string default_to_string(Source source,
+                                              string extra_values) {
+        return "%s(%s%s)".printf(
+            source.get_type().name(),
+            source.to_logging_state().format_message(),
+            extra_values
+        );
+    }
 
     // Based on function from with the same name from GLib's
     // gmessages.c. Return value must be 1 byte long (plus nul byte).
@@ -87,8 +104,8 @@ public interface Geary.Loggable : GLib.Object {
             this.count++;
         }
 
-        public inline void append_loggable(Loggable value) {
-            this.append("GEARY_LOGGABLE", value);
+        public inline void append_source(Source value) {
+            this.append("GEARY_LOGGING_SOURCE", value);
         }
 
         public GLib.LogField[] to_array() {
@@ -101,23 +118,39 @@ public interface Geary.Loggable : GLib.Object {
 
 
     /**
-     * Default flags to use for this loggable when logging messages.
+     * Default flags to use for this source when logging messages.
      */
-    public abstract Logging.Flag loggable_flags { get; protected set; }
+    public abstract Logging.Flag logging_flags { get; protected set; }
 
     /**
-     * The parent of this loggable.
+     * The parent of this source.
      *
      * If not null, the parent and its ancestors recursively will be
      * added to to log message context.
      */
-    public abstract Loggable? loggable_parent { get; }
+    public abstract Source? logging_parent { get; }
 
     /**
-     * Returns a string representation of the service, for debugging.
+     * Returns a loggable representation of this source's current state.
+     *
+     * Since this source's internal state may change between being
+     * logged and being used from a log record, this records relevant
+     * state at the time when it was logged so it may be displayed or
+     * recorded as it is right now.
      */
-    public abstract string to_string();
+    public abstract State to_logging_state();
 
+    /**
+     * Returns a string representation of this source based on its state.
+     *
+     * This simply calls {@link default_to_string} with this source
+     * and the empty string, returning the result. Implementations of
+     * this interface can call that method if they need to override
+     * the default behaviour of this method.
+     */
+    public string to_string() {
+        return Source.default_to_string(this, "");
+    }
 
     /**
      * Logs a debug-level log message with this object as context.
@@ -125,7 +158,7 @@ public interface Geary.Loggable : GLib.Object {
     [PrintfFormat]
     public inline void debug(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_DEBUG, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_DEBUG, fmt, va_list()
         );
     }
 
@@ -135,7 +168,7 @@ public interface Geary.Loggable : GLib.Object {
     [PrintfFormat]
     public inline void message(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_MESSAGE, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_MESSAGE, fmt, va_list()
         );
     }
 
@@ -145,7 +178,7 @@ public interface Geary.Loggable : GLib.Object {
     [PrintfFormat]
     public inline void warning(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_WARNING, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_WARNING, fmt, va_list()
         );
     }
 
@@ -156,7 +189,7 @@ public interface Geary.Loggable : GLib.Object {
     [NoReturn]
     public inline void error(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_ERROR, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_ERROR, fmt, va_list()
         );
     }
 
@@ -166,22 +199,76 @@ public interface Geary.Loggable : GLib.Object {
     [PrintfFormat]
     public inline void critical(string fmt, ...) {
         log_structured(
-            this.loggable_flags, LogLevelFlags.LEVEL_CRITICAL, fmt, va_list()
+            this.logging_flags, LogLevelFlags.LEVEL_CRITICAL, fmt, va_list()
         );
+    }
+
+    /**
+     * Logs a message with this object as context.
+     */
+    [PrintfFormat]
+    public inline void log(Logging.Flag flags,
+                           GLib.LogLevelFlags levels,
+                           string fmt, ...) {
+        log_structured(flags, levels, fmt, va_list());
     }
 
     private inline void log_structured(Logging.Flag flags,
                                        GLib.LogLevelFlags levels,
                                        string fmt,
                                        va_list args) {
-        Context context = Context(Logging.DOMAIN, flags, levels, fmt, args);
-        Loggable? decorated = this;
-        while (decorated != null) {
-            context.append_loggable(decorated);
-            decorated = decorated.loggable_parent;
-        }
+        if (flags == ALL || Logging.get_flags().is_any_set(flags)) {
+            Context context = Context(Logging.DOMAIN, flags, levels, fmt, args);
+            Source? decorated = this;
+            while (decorated != null) {
+                context.append_source(decorated);
+                decorated = decorated.logging_parent;
+            }
 
-        GLib.log_structured_array(levels, context.to_array());
+            GLib.log_structured_array(levels, context.to_array());
+        }
+    }
+
+}
+
+/**
+ * A record of the state of a logging source to be recorded.
+ *
+ * @see Source.to_logging_state
+ */
+// This a class rather than a struct so we get pass-by-reference
+// semantics for it, and make its members private
+public class Geary.Logging.State {
+
+
+    public Source source { get; private set; }
+
+
+    private string message;
+    // Would like to use the following but can't because of
+    // https://gitlab.gnome.org/GNOME/vala/issues/884
+    // private va_list args;
+
+
+    /*
+     * Constructs a new logging state.
+     *
+     * The given source should be the source object that constructed
+     * the state during a call to {@link Source.to_logging_state}.
+     */
+    [PrintfFormat]
+    public State(Source source, string message, ...) {
+        this.source = source;
+        this.message = message;
+
+        // this.args = va_list();
+        this.message = message.vprintf(va_list());
+    }
+
+    public string format_message() {
+        // vprint mangles its passed-in args, so copy them
+        // return this.message.vprintf(va_list.copy(this.args));
+        return message;
     }
 
 }

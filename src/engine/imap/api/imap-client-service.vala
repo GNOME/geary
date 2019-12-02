@@ -143,8 +143,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         }
 
         if (this.all_sessions.size > 0) {
-            debug("[%s] Cancelling remaining client sessions...",
-                  this.account.id);
+            debug("Cancelling remaining client sessions...");
             this.close_cancellable.cancel();
         }
     }
@@ -447,6 +446,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         }
 
         ClientSession new_session = new ClientSession(remote);
+        new_session.set_logging_parent(this);
         yield new_session.connect_async(cancellable);
 
         try {
@@ -504,8 +504,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     }
 
     private async void disconnect_session(ClientSession session) {
-        debug("[%s] Logging out session %s",
-              this.account.id, session.to_string());
+        debug("Logging out session: %s", session.to_string());
 
         // Log out before removing the session since close() only
         // hangs around until all sessions have been removed before
@@ -514,15 +513,14 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             yield session.logout_async(this.close_cancellable);
             yield remove_session_async(session);
         } catch (GLib.Error err) {
-            debug("[%s] Error logging out of session: %s",
-                  this.account.id, err.message);
+            debug("Error logging out of session: %s", err.message);
             yield force_disconnect_session(session);
         }
 
     }
 
     private async void force_disconnect_session(ClientSession session) {
-        debug("[%s] Dropping session %s", this.account.id, session.to_string());
+        debug("Dropping session: %s", session.to_string());
 
         try {
             yield remove_session_async(session);
@@ -552,6 +550,10 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     }
 
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
+        debug(
+            "Session unexpected disconnect: %s: %s",
+            session.to_string(), reason.to_string()
+        );
         this.remove_session_async.begin(
             session,
             (obj, res) => {

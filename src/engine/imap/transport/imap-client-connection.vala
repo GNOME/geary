@@ -6,7 +6,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.Imap.ClientConnection : BaseObject {
+public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
     /**
      * Default socket timeout duration.
@@ -58,6 +58,16 @@ public class Geary.Imap.ClientConnection : BaseObject {
      */
     public bool idle_when_quiet { get; private set; default = false; }
 
+
+    /** {@inheritDoc} */
+    public Logging.Flag logging_flags {
+        get; protected set; default = Logging.Flag.NETWORK;
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent { get { return _logging_parent; } }
+    private weak Logging.Source? _logging_parent = null;
+
     private Geary.Endpoint endpoint;
     private SocketConnection? cx = null;
     private IOStream? ios = null;
@@ -80,59 +90,56 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
 
     public virtual signal void connected() {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] connected to %s", to_string(),
-            endpoint.to_string());
+        debug("Connected to %s", endpoint.to_string());
     }
 
     public virtual signal void disconnected() {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] disconnected from %s", to_string(),
-            endpoint.to_string());
+        debug("Disconnected from %s", endpoint.to_string());
     }
 
     public virtual signal void sent_command(Command cmd) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s S] %s", to_string(), cmd.to_string());
+        debug("SEND: %s", cmd.to_string());
     }
 
     public virtual signal void received_status_response(StatusResponse status_response) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), status_response.to_string());
+        debug("RECV: %s", status_response.to_string());
     }
 
     public virtual signal void received_server_data(ServerData server_data) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), server_data.to_string());
+        debug("RECV: %s", server_data.to_string());
     }
 
     public virtual signal void received_continuation_response(ContinuationResponse continuation_response) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), continuation_response.to_string());
+        debug("RECV: %s", continuation_response.to_string());
     }
 
     public virtual signal void received_bytes(size_t bytes) {
         // this generates a *lot* of debug logging if one was placed here, so it's not
     }
 
-    public virtual signal void received_bad_response(RootParameters root, ImapError err) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] recv bad response %s: %s", to_string(),
-            root.to_string(), err.message);
+    public virtual signal void received_bad_response(RootParameters root,
+                                                     ImapError err) {
+        warning("Received bad response: %s", err.message);
     }
 
     public virtual signal void received_eos() {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] recv eos", to_string());
+        debug("Received eos");
     }
 
     public virtual signal void send_failure(Error err) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] send failure: %s", to_string(), err.message);
+        warning("Send failure: %s", err.message);
     }
 
     public virtual signal void receive_failure(Error err) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] recv failure: %s", to_string(), err.message);
+        warning("Receive failure: %s", err.message);
     }
 
     public virtual signal void deserialize_failure(Error err) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] deserialize failure: %s", to_string(),
-            err.message);
+        warning("Deserialize failure: %s", err.message);
     }
 
     public virtual signal void close_error(Error err) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] close error: %s", to_string(), err.message);
+        warning("Close error: %s", err.message);
     }
 
 
@@ -148,30 +155,22 @@ public class Geary.Imap.ClientConnection : BaseObject {
         );
     }
 
-    public SocketAddress? get_remote_address() {
-        if (cx == null)
-            return null;
-
-        try {
-            return cx.get_remote_address();
-        } catch (Error err) {
-            debug("Unable to retrieve remote address: %s", err.message);
+    /** Returns the remote address of this connection, if any. */
+    public GLib.SocketAddress? get_remote_address() throws GLib.Error {
+        GLib.SocketAddress? addr = null;
+        if (cx != null) {
+            addr = cx.get_remote_address();
         }
-
-        return null;
+        return addr;
     }
 
-    public SocketAddress? get_local_address() {
-        if (cx == null)
-            return null;
-
-        try {
-            return cx.get_local_address();
-        } catch (Error err) {
-            debug("Unable to retrieve local address: %s", err.message);
+    /** Returns the local address of this connection, if any. */
+    public SocketAddress? get_local_address() throws GLib.Error {
+        GLib.SocketAddress? addr = null;
+        if (cx != null) {
+            addr = cx.get_local_address();
         }
-
-        return null;
+        return addr;
     }
 
     /**
@@ -203,12 +202,12 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
 
     /**
-     * Returns silently if a connection is already established.
+     * Establishes a connection to the connection's endpoint.
      */
-    public async void connect_async(Cancellable? cancellable = null) throws Error {
+    public async void connect_async(Cancellable? cancellable = null)
+        throws GLib.Error {
         if (this.cx != null) {
-            debug("Already connected/connecting to %s", to_string());
-            return;
+            throw new ImapError.ALREADY_CONNECTED("Client already connected");
         }
 
         this.cx = yield endpoint.connect_async(cancellable);
@@ -258,10 +257,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
         // Cancel any pending commands
         foreach (Command pending in this.pending_queue.get_all()) {
-            debug(
-                "[%s] Cancelling pending command: %s",
-                to_string(), pending.to_brief_string()
-            );
+            debug("Cancelling pending command: %s", pending.to_brief_string());
             pending.disconnected("Disconnected");
         }
         this.pending_queue.clear();
@@ -269,36 +265,38 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // close the actual streams and the connection itself
         Error? close_err = null;
         try {
-            debug("[%s] Disconnecting...", to_string());
             yield ios.close_async(Priority.DEFAULT, cancellable);
             yield close_cx.close_async(Priority.DEFAULT, cancellable);
-            debug("[%s] Disconnected", to_string());
         } catch (Error err) {
-            debug("[%s] Error disconnecting: %s", to_string(), err.message);
             close_err = err;
         } finally {
             ios = null;
 
-            if (close_err != null)
+            if (close_err != null) {
                 close_error(close_err);
+            }
 
             disconnected();
         }
     }
 
-    public async void starttls_async(Cancellable? cancellable = null) throws Error {
-        if (cx == null)
-            throw new ImapError.NOT_SUPPORTED("[%s] Unable to enable TLS: no connection", to_string());
+    public async void starttls_async(Cancellable? cancellable = null)
+        throws GLib.Error {
+        if (cx == null) {
+            throw new ImapError.NOT_CONNECTED(
+                "Cannot start TLS when not connected"
+            );
+        }
 
         // (mostly) silent fail in this case
         if (cx is TlsClientConnection) {
-            debug("[%s] Already TLS connection", to_string());
-
-            return;
+            throw new ImapError.NOT_SUPPORTED(
+                "Cannot start TLS when already established"
+            );
         }
 
         // Close the Serializer/Deserializer, as need to use the TLS streams
-        debug("[%s] Closing serializer to switch to TLS", to_string());
+        debug("Closing serializer to switch to TLS");
         yield close_channels_async(cancellable);
 
         // wrap connection with TLS connection
@@ -319,11 +317,14 @@ public class Geary.Imap.ClientConnection : BaseObject {
         cancel_idle();
     }
 
-    public string to_string() {
-        return "%04X/%s/%s".printf(
+    /** {@inheritDoc} */
+    public Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "%04X/%s/%s",
             cx_id,
             endpoint.to_string(),
-            this.cx != null ? "Connected" : "Disconnected"
+            this.cx != null ? "up" : "down"
         );
     }
 
@@ -344,6 +345,11 @@ public class Geary.Imap.ClientConnection : BaseObject {
             }
         }
         return sent;
+    }
+
+    /** Sets the connection's logging parent. */
+    internal void set_logging_parent(Logging.Source parent) {
+        this._logging_parent = parent;
     }
 
     private async void open_channels_async() throws Error {
@@ -381,10 +387,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // underlying streams are going away.
         this.open_cancellable.cancel();
         foreach (Command sent in this.sent_queue) {
-            debug(
-                "[%s] Cancelling sent command: %s",
-                to_string(), sent.to_brief_string()
-            );
+            debug("Cancelling sent command: %s", sent.to_brief_string());
             sent.disconnected("Connection channels closed");
         }
         this.sent_queue.clear();
@@ -517,8 +520,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 on_continuation_response((ContinuationResponse) response);
             } else {
                 warning(
-                    "[%s] Unknown ServerResponse of type %s received: %s:",
-                    to_string(), response.get_type().name(),
+                    "Unknown ServerResponse of type %s received: %s:",
+                    response.get_type().name(),
                     response.to_string()
                 );
             }
@@ -619,11 +622,11 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
 
     private void on_idle_timeout() {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] Initiating IDLE", to_string());
+        debug("Initiating IDLE");
         try {
             this.send_command(new IdleCommand());
         } catch (ImapError err) {
-            debug("[%s] Error sending IDLE: %s", to_string(), err.message);
+            warning("Error sending IDLE: %s", err.message);
         }
     }
 

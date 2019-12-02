@@ -32,10 +32,8 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     private Gee.List<StatusData>? status_collector = null;
 
 
-    internal AccountSession(string account_id,
-                            FolderRoot root,
-                            ClientSession session) {
-        base("%s:account".printf(account_id), session);
+    internal AccountSession(FolderRoot root, ClientSession session) {
+        base(session);
         this.root = root;
 
         session.list.connect(on_list_data);
@@ -228,8 +226,8 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                 MailboxInformation mailbox_info = info_map.get(mailbox);
 
                 if (response.status != Status.OK) {
-                    message("Unable to get STATUS of %s: %s", mailbox.to_string(), response.to_string());
-                    message("STATUS command: %s", cmd.to_string());
+                    warning("Unable to get STATUS of %s: %s", mailbox.to_string(), response.to_string());
+                    warning("STATUS command: %s", cmd.to_string());
                     continue;
                 }
 
@@ -243,7 +241,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                     }
                 }
                 if (status == null) {
-                    message("Unable to get STATUS of %s: not returned from server", mailbox.to_string());
+                    warning("Unable to get STATUS of %s: not returned from server", mailbox.to_string());
                     continue;
                 }
                 status_results.remove(status);
@@ -292,6 +290,16 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
             old_session.status.disconnect(on_status_data);
         }
         return old_session;
+    }
+
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "%s, folder root: %s",
+            base.to_logging_state().format_message(), // XXX this is cruddy
+            this.root.to_string()
+        );
     }
 
     // Performs a LIST against the server, returning the results

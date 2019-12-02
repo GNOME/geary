@@ -14,7 +14,7 @@
  * itself, rather manages the configuration, status tracking, and
  * life-cycle of concrete implementations.
  */
-public abstract class Geary.ClientService : BaseObject, Loggable {
+public abstract class Geary.ClientService : BaseObject, Logging.Source {
 
 
     private const int BECAME_REACHABLE_TIMEOUT_SEC = 1;
@@ -198,13 +198,13 @@ public abstract class Geary.ClientService : BaseObject, Loggable {
     public ErrorContext? last_error { get; private set; default = null; }
 
     /** {@inheritDoc} */
-    public Logging.Flag loggable_flags {
+    public Logging.Flag logging_flags {
         get; protected set; default = Logging.Flag.ALL;
     }
 
     /** {@inheritDoc} */
-    public Loggable? loggable_parent { get { return _loggable_parent; } }
-    private weak Loggable? _loggable_parent = null;
+    public Logging.Source? logging_parent { get { return _logging_parent; } }
+    private weak Logging.Source? _logging_parent = null;
 
 
     protected ClientService(AccountInformation account,
@@ -293,16 +293,13 @@ public abstract class Geary.ClientService : BaseObject, Loggable {
     }
 
     /** {@inheritDoc} */
-    public virtual string to_string() {
-        return "%s(%s)".printf(
-            this.get_type().name(),
-            this.configuration.protocol.to_value()
-        );
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(this, this.configuration.protocol.to_value());
     }
 
     /** Sets the service's logging parent. */
-    internal void set_loggable_parent(Loggable parent) {
-        this._loggable_parent = parent;
+    internal void set_logging_parent(Logging.Source parent) {
+        this._logging_parent = parent;
     }
 
     /**

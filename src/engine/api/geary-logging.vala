@@ -153,7 +153,7 @@ public class Record {
     /** The next log record in the buffer, if any. */
     public Record? next { get; internal set; default = null; }
 
-    private Loggable[] loggables;
+    private State[] states;
     private bool filled = false;
     private bool old_log_api = false;
 
@@ -170,12 +170,13 @@ public class Record {
 
         // Since GLib.LogField only retains a weak ref to its value,
         // find and ref any values we wish to keep around.
-        this.loggables = new Loggable[fields.length];
-        int loggable_count = 0;
+        this.states = new State[fields.length];
+        int state_count = 0;
         foreach (GLib.LogField field in fields) {
             switch (field.key) {
-            case "GEARY_LOGGABLE":
-                this.loggables[loggable_count++] = (Loggable) field.value;
+            case "GEARY_LOGGING_SOURCE":
+                this.states[state_count++] =
+                    ((Source) field.value).to_logging_state();
                 break;
 
             case "GEARY_FLAGS":
@@ -204,43 +205,26 @@ public class Record {
             }
         }
 
-        this.loggables.length = loggable_count;
-    }
-
-    /** Returns the record's loggables that aren't well-known. */
-    public Loggable[] get_other_loggables() {
-        fill_well_known_loggables();
-
-        Loggable[] copy = new Loggable[this.loggables.length];
-        int count = 0;
-        foreach (Loggable loggable in this.loggables) {
-            if (loggable != this.account &&
-                loggable != this.service &&
-                loggable != this.folder) {
-                copy[count++] = loggable;
-            }
-        }
-        copy.length = count;
-        return copy;
+        this.states.length = state_count;
     }
 
     /**
-     * Sets the well-known loggable properties.
+     * Sets the well-known logging source properties.
      *
      * Call this before trying to access {@link account}, {@link
      * folder} and {@link service}. Determining these can be
      * computationally complex and hence is not done by default.
      */
-    public void fill_well_known_loggables() {
+    public void fill_well_known_sources() {
         if (!this.filled) {
-            foreach (Loggable loggable in this.loggables) {
-                GLib.Type type = loggable.get_type();
+            foreach (unowned State state in this.states) {
+                GLib.Type type = state.source.get_type();
                 if (type.is_a(typeof(Account))) {
-                    this.account = (Account) loggable;
+                    this.account = (Account) state.source;
                 } else if (type.is_a(typeof(ClientService))) {
-                    this.service = (ClientService) loggable;
+                    this.service = (ClientService) state.source;
                 } else if (type.is_a(typeof(Folder))) {
-                    this.folder = (Folder) loggable;
+                    this.folder = (Folder) state.source;
                 }
             }
             this.filled = true;
@@ -249,7 +233,7 @@ public class Record {
 
     /** Returns a formatted string representation of this record. */
     public string format() {
-        fill_well_known_loggables();
+        fill_well_known_sources();
 
         string domain = this.domain ?? "[no domain]";
         Flag flags = this.flags ?? Flag.NONE;
@@ -271,41 +255,18 @@ public class Record {
             domain
         );
 
-        if (flags != NONE && flags != ALL) {
-            str.append_printf("[%s]: ", flags.to_string());
+        if (flags != NONE) {
+            str.append_printf("[%s]:", flags.to_string());
         } else {
-            str.append(": ");
+            str.append(":");
         }
 
-        // Use a compact format for well known ojects
-        if (this.account != null) {
-            str.append(this.account.information.id);
-            str.append_c('[');
-            str.append(this.account.information.service_provider.to_value());
-            if (this.service != null) {
-                str.append_c(':');
-                str.append(this.service.configuration.protocol.to_value());
-            }
-            str.append_c(']');
-            if (this.folder == null) {
-                str.append(": ");
-            }
-        } else if (this.service != null) {
-            str.append(this.service.configuration.protocol.to_value());
-            str.append(": ");
+        // Append in reverse so inner sources appear first
+        for (int i = this.states.length - 1; i >= 0; i--) {
+            str.append(" [");
+            str.append(this.states[i].format_message());
+            str.append("]");
         }
-        if (this.folder != null) {
-            str.append(this.folder.path.to_string());
-            str.append(": ");
-        }
-
-        foreach (Loggable loggable in get_other_loggables()) {
-            str.append(loggable.to_string());
-            str.append_c(' ');
-        }
-
-        str.append(message);
-
 
         // XXX Don't append source details for the moment because of
         // https://gitlab.gnome.org/GNOME/vala/issues/815
@@ -322,7 +283,16 @@ public class Record {
                 str.append(this.source_function.to_string());
             }
             str.append("]");
+        } else if (this.states.length > 0) {
+            // Print the class name of the leaf logging source to at
+            // least give a general idea of where the message came
+            // from.
+            str.append(" ");
+            str.append(this.states[0].source.get_type().name());
+            str.append(": ");
         }
+
+        str.append(message);
 
         return str.str;
     }

@@ -307,7 +307,7 @@ geary_engine_vala_sources = files(
   'util/util-imap-utf7.vala',
   'util/util-inet.vala',
   'util/util-iterable.vala',
-  'util/util-loggable.vala',
+  'util/util-logging.vala',
   'util/util-numeric.vala',
   'util/util-object.vala',
   'util/util-reference-semantics.vala',

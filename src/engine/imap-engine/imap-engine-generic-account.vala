@@ -91,12 +91,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         imap.notify["current-status"].connect(
             on_imap_status_notify
         );
-        imap.set_loggable_parent(this);
+        imap.set_logging_parent(this);
         this.imap = imap;
 
         smtp.outbox = new Outbox.Folder(this, local_folder_root, local);
         smtp.report_problem.connect(notify_report_problem);
-        smtp.set_loggable_parent(this);
+        smtp.set_logging_parent(this);
         this.smtp = smtp;
 
         this.sync = new AccountSynchronizer(this);
@@ -131,8 +131,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.open_cancellable = new Cancellable();
         this.remote_ready_lock = new Nonblocking.Semaphore(this.open_cancellable);
 
-        this.processor = new AccountProcessor(this.to_string());
+        this.processor = new AccountProcessor();
         this.processor.operation_error.connect(on_operation_error);
+        this.processor.set_logging_parent(this);
 
         try {
             yield this.local.open_async(cancellable);
@@ -297,11 +298,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         check_open();
         debug("Acquiring account session");
         yield this.remote_ready_lock.wait_async(cancellable);
-        Imap.ClientSession client =
-            yield this.imap.claim_authorized_session_async(cancellable);
-        return new Imap.AccountSession(
-            this.information.id, this.local.imap_folder_root, client
-        );
+        var client = yield this.imap.claim_authorized_session_async(cancellable);
+        var session = new Imap.AccountSession(this.local.imap_folder_root, client);
+        session.set_logging_parent(this.imap);
+        return session;
     }
 
     /**
@@ -351,8 +351,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Imap.ClientSession? client =
             yield this.imap.claim_authorized_session_async(cancellable);
         Imap.AccountSession account = new Imap.AccountSession(
-            this.information.id, this.local.imap_folder_root, client
+            this.local.imap_folder_root, client
         );
+        account.set_logging_parent(this.imap);
 
         Imap.Folder? folder = null;
         GLib.Error? folder_err = null;
@@ -368,8 +369,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (folder_err == null) {
             try {
                 folder_session = yield new Imap.FolderSession(
-                    this.information.id, client, folder, cancellable
+                    client, folder, cancellable
                 );
+                folder_session.set_logging_parent(this.imap);
             } catch (Error err) {
                 folder_err = err;
             }

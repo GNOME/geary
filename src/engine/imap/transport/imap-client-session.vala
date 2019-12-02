@@ -24,7 +24,7 @@
  * sending a {@link LoginCommand}. Other commands can be sent via
  * {@link send_command_async} and {@link send_multiple_commands_async}.
  */
-public class Geary.Imap.ClientSession : BaseObject {
+public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
 
     /**
      * Maximum keep-alive interval required to maintain a session.
@@ -187,7 +187,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
 
     private static string state_to_string(uint state) {
-        return ((State) state).to_string();
+        return ObjectUtils.to_enum_nick(typeof(State), state);
     }
 
     private enum Event {
@@ -245,6 +245,14 @@ public class Geary.Imap.ClientSession : BaseObject {
      */
     public int64 last_seen = 0;
 
+    /** {@inheritDoc} */
+    public Logging.Flag logging_flags {
+        get; protected set; default = Logging.Flag.ALL;
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent { get { return _logging_parent; } }
+    private weak Logging.Source? _logging_parent = null;
 
     // While the following inbox and namespace data should be server
     // specific, there is a small chance they will differ between
@@ -483,10 +491,8 @@ public class Geary.Imap.ClientSession : BaseObject {
             break;
 
             default:
-                warning("[%s] ClientSession ref dropped while still active", to_string());
+                warning("ClientSession ref dropped while still active");
         }
-
-        debug("DTOR: ClientSession %s", to_string());
     }
 
     public MailboxSpecifier? get_current_mailbox() {
@@ -709,8 +715,10 @@ public class Geary.Imap.ClientSession : BaseObject {
             try {
                 yield disconnect_async(cancellable);
             } catch (Error err) {
-                debug("[%s] Error disconnecting after a failed connect attempt: %s", to_string(),
-                    err.message);
+                warning(
+                    "Error disconnecting after a failed connect attempt: %s",
+                    err.message
+                );
             }
 
             throw connect_err;
@@ -730,6 +738,7 @@ public class Geary.Imap.ClientSession : BaseObject {
 
         assert(cx == null);
         cx = new ClientConnection(imap_endpoint);
+        cx.set_logging_parent(this);
         cx.connected.connect(on_network_connected);
         cx.disconnected.connect(on_network_disconnected);
         cx.sent_command.connect(on_network_sent_command);
@@ -775,9 +784,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
 
     private uint on_connected(uint state, uint event) {
-        debug("[%s] Connected to %s",
-              to_string(),
-              imap_endpoint.to_string());
+        debug("Connected to %s", imap_endpoint.to_string());
 
         // stay in current state -- wait for initial status response
         // to move into NOAUTH or LOGOUT
@@ -789,9 +796,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                                  void *user = null,
                                  GLib.Object? obj = null,
                                  GLib.Error? err = null) {
-        debug("[%s] Disconnected from %s",
-              to_string(),
-              this.imap_endpoint.to_string());
+        debug("Disconnected from %s", this.imap_endpoint.to_string());
         return State.CLOSED;
     }
 
@@ -802,8 +807,10 @@ public class Geary.Imap.ClientSession : BaseObject {
         try {
             connect_waiter.notify();
         } catch (Error err) {
-            message("[%s] Unable to notify connect_waiter of connection: %s", to_string(),
-                err.message);
+            warning(
+                "Unable to notify connect_waiter of connection: %s",
+                err.message
+            );
         }
 
         if (status_response.status == Status.OK) {
@@ -811,8 +818,6 @@ public class Geary.Imap.ClientSession : BaseObject {
 
             return State.NOAUTH;
         }
-
-        debug("[%s] Connect denied: %s", to_string(), status_response.to_string());
 
         fsm.do_post_transition(() => { session_denied(status_response.get_text()); });
 
@@ -830,11 +835,10 @@ public class Geary.Imap.ClientSession : BaseObject {
         try {
             connect_waiter.notify();
         } catch (Error err) {
-            message("[%s] Unable to notify connect_waiter of timeout: %s", to_string(),
-                err.message);
+            warning(
+                "Unable to notify connect_waiter of timeout: %s", err.message
+            );
         }
-
-        debug("[%s] Connect timed-out", to_string());
 
         // Don't need to manually disconnect here, by setting
         // connect_err here that will be done in connect_async
@@ -957,28 +961,15 @@ public class Geary.Imap.ClientSession : BaseObject {
                     "STARTTLS unavailable for %s", to_string());
             }
 
-            debug("[%s] Attempting STARTTLS...", to_string());
-            StatusResponse resp;
-            try {
-                resp = yield send_command_async(
-                    new StarttlsCommand(), cancellable
-                );
-            } catch (Error err) {
-                debug(
-                    "Error attempting STARTTLS command on %s: %s",
-                    to_string(), err.message
-                );
-                throw err;
-            }
+            debug("Attempting STARTTLS...");
+            StatusResponse resp = yield send_command_async(
+                new StarttlsCommand(), cancellable
+            );
 
             if (resp.status == Status.OK) {
                 yield cx.starttls_async(cancellable);
-                debug("[%s] STARTTLS completed", to_string());
+                debug("STARTTLS completed");
             } else {
-                debug(
-                    "[%s} STARTTLS refused: %s",
-                    to_string(), resp.status.to_string()
-                );
                 // Throw an exception and fail rather than send
                 // credentials under suspect conditions
                 throw new ImapError.NOT_SUPPORTED(
@@ -1009,7 +1000,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             );
             if (response.status == Status.OK && !server_data.is_empty) {
                 this.inbox = server_data[0].get_list();
-                debug("[%s] Using as INBOX: %s", to_string(), this.inbox.to_string());
+                debug("Using INBOX: %s", this.inbox.to_string());
             } else {
                 throw new ImapError.INVALID("Unable to find INBOX");
             }
@@ -1027,14 +1018,16 @@ public class Geary.Imap.ClientSession : BaseObject {
                     update_namespaces(ns.user, this.user_namespaces);
                     update_namespaces(ns.shared, this.shared_namespaces);
                 } else {
-                    debug("[%s] NAMESPACE command failed", to_string());
+                    warning("NAMESPACE command failed");
                 }
             }
             server_data.clear();
             if (!this.personal_namespaces.is_empty) {
-                debug("[%s] Default personal namespace: %s", to_string(), this.personal_namespaces[0].to_string());
+                debug(
+                    "Default personal namespace: %s",
+                    this.personal_namespaces[0].to_string()
+                );
             } else {
-                debug("[%s] Personal namespace not found, guessing it", to_string());
                 string? prefix = "";
                 string? delim = this.inbox.delim;
                 if (!this.inbox.attrs.contains(MailboxAttribute.NO_INFERIORS) &&
@@ -1061,8 +1054,8 @@ public class Geary.Imap.ClientSession : BaseObject {
                 }
 
                 this.personal_namespaces.add(new Namespace(prefix, delim));
-                debug("[%s] Personal namespace guessed as: %s",
-                      to_string(), this.personal_namespaces[0].to_string());
+                debug("Personal namespace not specified, guessed as: %s",
+                      this.personal_namespaces[0].to_string());
             }
         } finally {
             disconnect(data_id);
@@ -1114,7 +1107,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                 return State.AUTHORIZED;
 
             default:
-                debug("[%s] Unable to LOGIN: %s", to_string(), completion_response.to_string());
+                debug("LOGIN failed: %s", completion_response.to_string());
                 fsm.do_post_transition((resp) => { login_failed((StatusResponse)resp); }, completion_response);
 
                 return State.NOAUTH;
@@ -1226,7 +1219,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         keepalive_id = 0;
 
         send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
-        Logging.debug(Logging.Flag.PERIODIC, "[%s] Sending keepalive...", to_string());
+        log(PERIODIC, LEVEL_DEBUG, "Sending keepalive...");
 
         // No need to reschedule keepalive, as the notification that the command was sent should
         // do that automatically
@@ -1236,11 +1229,9 @@ public class Geary.Imap.ClientSession : BaseObject {
 
     private void on_keepalive_completed(Object? source, AsyncResult result) {
         try {
-            StatusResponse response = send_command_async.end(result);
-            Logging.debug(Logging.Flag.PERIODIC, "[%s] Keepalive result: %s", to_string(),
-                response.to_string());
-        } catch (Error err) {
-            debug("[%s] Keepalive error: %s", to_string(), err.message);
+            send_command_async.end(result);
+        } catch (GLib.Error err) {
+            log(PERIODIC, LEVEL_WARNING, "Keepalive error: %s", err.message);
         }
     }
 
@@ -1346,8 +1337,8 @@ public class Geary.Imap.ClientSession : BaseObject {
             break;
 
             case Status.BYE:
-                debug("[%s] Received unilateral BYE from server: %s",
-                      to_string(), status_response.to_string());
+                debug("Received unilateral BYE from server: %s",
+                      status_response.to_string());
 
                 // nothing more we can do; drop connection and report disconnect to user
                 cx.disconnect_async.begin(null, on_bye_disconnect_completed);
@@ -1356,7 +1347,8 @@ public class Geary.Imap.ClientSession : BaseObject {
             break;
 
             default:
-                debug("[%s] Received error from server: %s", to_string(), status_response.to_string());
+                debug("Received error from server: %s",
+                      status_response.to_string());
             break;
         }
 
@@ -1454,7 +1446,8 @@ public class Geary.Imap.ClientSession : BaseObject {
                 return State.SELECTED;
 
             default:
-                debug("[%s]: Unable to SELECT/EXAMINE: %s", to_string(), completion_response.to_string());
+                warning("SELECT/EXAMINE failed: %s",
+                        completion_response.to_string());
                 return State.AUTHORIZED;
         }
     }
@@ -1510,7 +1503,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                 return State.AUTHORIZED;
 
             default:
-                debug("[%s] Unable to CLOSE: %s", to_string(), completion_response.to_string());
+                warning("CLOSE failed: %s", completion_response.to_string());
 
                 return State.SELECTED;
         }
@@ -1572,13 +1565,13 @@ public class Geary.Imap.ClientSession : BaseObject {
             case Status.BYE:
                 // We're expecting this bye, but don't disconnect yet
                 // since we'll do that when the command is complete
-                debug("[%s] Received bye from server on logout: %s",
-                      to_string(), status_response.to_string());
+                debug("Received bye from server on logout: %s",
+                      status_response.to_string());
             break;
 
             default:
-                debug("[%s] Received error from server on logout: %s",
-                      to_string(), status_response.to_string());
+                warning("Received error from server on logout: %s",
+                        status_response.to_string());
             break;
         }
 
@@ -1623,6 +1616,35 @@ public class Geary.Imap.ClientSession : BaseObject {
             throw disconnect_err;
     }
 
+    /** {@inheritDoc} */
+    public string to_string() {
+        string cx = ", " + (
+            (this.cx != null) ? this.cx.to_string() : "not connected"
+        );
+        return Logging.Source.default_to_string(this, cx);
+    }
+
+    /** {@inheritDoc} */
+    public Logging.State to_logging_state() {
+        return (this.current_mailbox == null)
+            ? new Logging.State(
+                this,
+                this.fsm.get_state_string(fsm.get_state())
+            )
+            : new Logging.State(
+                this,
+                "%s:%s %s",
+                this.fsm.get_state_string(fsm.get_state()),
+                this.current_mailbox.to_string(),
+                this.current_mailbox_readonly ? "RO" : "RW"
+            );
+    }
+
+    /** Sets the connection's logging parent. */
+    internal void set_logging_parent(Logging.Source parent) {
+        this._logging_parent = parent;
+    }
+
     private uint on_disconnect(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
 
@@ -1645,8 +1667,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                                                void *user,
                                                GLib.Object? object,
                                                GLib.Error? err) {
-        debug("[%s] Connecting send/recv error, dropping client connection: %s",
-              to_string(),
+        debug("Connecting send/recv error, dropping client connection: %s",
               err != null ? err.message : "EOS");
         fsm.do_post_transition(() => { drop_connection(); });
         return State.CLOSED;
@@ -1658,7 +1679,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (err is IOError.CANCELLED)
             return state;
 
-        debug("[%s] Send error, disconnecting: %s", to_string(), err.message);
+        debug("Send error, disconnecting: %s", err.message);
 
         cx.disconnect_async.begin(null, on_fire_send_error_signal);
 
@@ -1674,8 +1695,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                                void *user,
                                GLib.Object? object,
                                GLib.Error? err) {
-        debug("[%s] Receive error, disconnecting: %s",
-              to_string(),
+        debug("Receive error, disconnecting: %s",
               (err != null) ? err.message : "EOS"
         );
         cx.disconnect_async.begin(null, on_fire_recv_error_signal);
@@ -1687,16 +1707,13 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
 
     private void dispatch_disconnect_results(DisconnectReason reason, AsyncResult result) {
-        debug("[%s] Disconnected due to %s", to_string(), reason.to_string());
-
         try {
             cx.disconnect_async.end(result);
         } catch (Error err) {
-            debug("[%s] Send/recv disconnect failed: %s", to_string(), err.message);
+            debug("Send/recv disconnect failed: %s", err.message);
         }
 
         drop_connection();
-
         disconnected(reason);
     }
 
@@ -1745,8 +1762,9 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_dropped_response(uint state, uint event, void *user, Object? object) {
         ServerResponse server_response = (ServerResponse) object;
 
-        debug("[%s] Dropped server response at %s: %s", to_string(), fsm.get_event_issued_string(state, event),
-            server_response.to_string());
+        debug("Dropped server response at %s: %s",
+              fsm.get_event_issued_string(state, event),
+              server_response.to_string());
 
         return state;
     }
@@ -1762,7 +1780,8 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
 
     private uint on_ignored_transition(uint state, uint event) {
-        debug("[%s] Ignored transition: %s", to_string(), fsm.get_event_issued_string(state, event));
+        debug("Ignored transition: %s",
+              fsm.get_event_issued_string(state, event));
 
         return state;
     }
@@ -1826,14 +1845,17 @@ public class Geary.Imap.ClientSession : BaseObject {
                 try {
                     if (response_code.get_response_code_type().is_value(ResponseCodeType.CAPABILITY)) {
                         capabilities = response_code.get_capabilities(ref next_capabilities_revision);
-                        debug("[%s] %s %s", to_string(), status_response.status.to_string(),
+                        debug("%s %s",
+                              status_response.status.to_string(),
                               capabilities.to_string());
 
                         capability(capabilities);
                     }
-                } catch (Error err) {
-                    debug("[%s] Unable to convert response code to capabilities: %s", to_string(),
-                          err.message);
+                } catch (GLib.Error err) {
+                    warning(
+                        "Unable to convert response code to capabilities: %s",
+                        err.message
+                    );
                 }
             }
 
@@ -1855,8 +1877,9 @@ public class Geary.Imap.ClientSession : BaseObject {
                 // update ClientSession capabilities before firing signal, so external signal
                 // handlers that refer back to property aren't surprised
                 capabilities = server_data.get_capabilities(ref next_capabilities_revision);
-                debug("[%s] %s %s", to_string(), server_data.server_data_type.to_string(),
-                    capabilities.to_string());
+                debug("%s %s",
+                      server_data.server_data_type.to_string(),
+                      capabilities.to_string());
 
                 capability(capabilities);
             break;
@@ -1902,8 +1925,8 @@ public class Geary.Imap.ClientSession : BaseObject {
             case ServerDataType.LSUB:
             default:
                 // do nothing
-                debug("[%s] Not notifying of unhandled server data: %s", to_string(),
-                    server_data.to_string());
+                debug("Not notifying of unhandled server data: %s",
+                      server_data.to_string());
             break;
         }
 
@@ -1920,8 +1943,9 @@ public class Geary.Imap.ClientSession : BaseObject {
         try {
             notify_received_data(server_data);
         } catch (ImapError ierr) {
-            debug("[%s] Failure notifying of server data: %s %s", to_string(), server_data.to_string(),
-                ierr.message);
+            debug("Failure notifying of server data: %s %s",
+                  server_data.to_string(),
+                  ierr.message);
         }
     }
 
@@ -1940,7 +1964,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
 
     private void on_received_bad_response(RootParameters root, ImapError err) {
-        debug("[%s] Received bad response %s: %s", to_string(), root.to_string(), err.message);
+        debug("Received bad response %s: %s", root.to_string(), err.message);
         fsm.issue(Event.RECV_ERROR, null, null, err);
     }
 
@@ -1952,12 +1976,4 @@ public class Geary.Imap.ClientSession : BaseObject {
         fsm.issue(Event.RECV_ERROR, null, null, err);
     }
 
-    public string to_string() {
-        if (cx == null) {
-            return "%s %s".printf(imap_endpoint.to_string(), fsm.get_state_string(fsm.get_state()));
-        } else {
-            return "%04X/%s %s".printf(cx.cx_id, imap_endpoint.to_string(),
-                fsm.get_state_string(fsm.get_state()));
-        }
-    }
 }
