@@ -1215,6 +1215,7 @@ public class Application.MainWindow :
         this.spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
         this.spinner.set_progress_monitor(progress_monitor);
         this.status_bar.add(this.spinner);
+        this.status_bar.show_all();
     }
 
     /** {@inheritDoc} */
