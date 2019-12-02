@@ -175,8 +175,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
     private static inline void update_spellcheck(WebKit.WebContext context,
                                                  Application.Configuration config) {
-        context.set_spell_checking_enabled(config.spell_check_languages.length > 0);
-        context.set_spell_checking_languages(config.spell_check_languages);
+        string[] langs = config.get_spell_check_languages();
+        context.set_spell_checking_enabled(langs.length > 0);
+        context.set_spell_checking_languages(langs);
     }
 
     private static inline uint to_wk2_font_size(Pango.FontDescription font) {

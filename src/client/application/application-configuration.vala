@@ -119,47 +119,6 @@ public class Application.Configuration : Geary.BaseObject {
 
     public bool single_key_shortcuts { get; set; default = false; }
 
-    /**
-     * The set of enabled spell checker languages.
-     *
-     * This specifies the languages used for spell checking by the
-     * client. By default, the set will contain languages based on
-     * environment variables.
-     *
-     * @see Util.International.get_user_preferred_languages
-     */
-    public string[] spell_check_languages {
-        owned get {
-            GLib.Variant? value =
-                settings.get_value(SPELL_CHECK_LANGUAGES).get_maybe();
-            string[] langs = (value != null)
-                    ? value.get_strv()
-                    : Util.International.get_user_preferred_languages();
-            return langs;
-        }
-        set {
-            settings.set_value(
-                SPELL_CHECK_LANGUAGES,
-                new GLib.Variant.maybe(null, new GLib.Variant.strv(value))
-            );
-        }
-    }
-
-    /**
-     * The set of visible spell checker languages.
-     *
-     * This is the list of languages shown when selecting languages to
-     * be used for spell checking.
-     */
-    public string[] spell_check_visible_languages {
-        owned get {
-            return settings.get_strv(SPELL_CHECK_VISIBLE_LANGUAGES);
-        }
-        set {
-            settings.set_strv(SPELL_CHECK_VISIBLE_LANGUAGES, value);
-        }
-    }
-
     public bool startup_notifications {
         get { return settings.get_boolean(STARTUP_NOTIFICATIONS_KEY); }
         set { set_boolean(STARTUP_NOTIFICATIONS_KEY, value); }
@@ -190,22 +149,6 @@ public class Application.Configuration : Geary.BaseObject {
         set { settings.set_double(CONVERSATION_VIEWER_ZOOM_KEY, value); }
     }
 
-    public int[] composer_window_size {
-        owned get {
-            int[] size = new int[2];
-            var s = settings.get_value(COMPOSER_WINDOW_SIZE_KEY);
-            if (s.n_children () == 2) {
-                size = { (int) s.get_child_value(0), (int) s.get_child_value(1)};
-            } else {
-                size = {-1,-1};
-            }
-            return size;
-        }
-        set {
-            settings.set_value(COMPOSER_WINDOW_SIZE_KEY, value);
-        }
-    }
-
     /** The number of seconds to wait before sending an email. */
     public int undo_send_delay {
         get { return settings.get_int(UNDO_SEND_DELAY); }
@@ -231,6 +174,78 @@ public class Application.Configuration : Geary.BaseObject {
     private void set_boolean(string name, bool value) {
         if (!settings.set_boolean(name, value))
             message("Unable to set configuration value %s = %s", name, value.to_string());
+    }
+
+    /** Returns the saved size of the composer window. */
+    public int[] get_composer_window_size() {
+        int[] size = new int[2];
+        var s = this.settings.get_value(COMPOSER_WINDOW_SIZE_KEY);
+        if (s.n_children () == 2) {
+            size = { (int) s.get_child_value(0), (int) s.get_child_value(1)};
+        } else {
+            size = {-1,-1};
+        }
+        return size;
+    }
+
+    /** Sets the saved size of the composer window. */
+    public void set_composer_window_size(int[] value) {
+        this.settings.set_value(COMPOSER_WINDOW_SIZE_KEY, value);
+    }
+
+    /**
+     * Returns enabled spell checker languages.
+     *
+     * This specifies the languages used for spell checking by the
+     * client. By default, the set will contain languages based on
+     * environment variables.
+     *
+     * @see Util.International.get_user_preferred_languages
+     */
+    public string[] get_spell_check_languages() {
+        GLib.Variant? value = this.settings.get_value(
+            SPELL_CHECK_LANGUAGES
+        ).get_maybe();
+        string[] langs = (value != null)
+            ? value.get_strv()
+            : Util.International.get_user_preferred_languages();
+        return langs;
+    }
+
+    /**
+     * Sets enabled spell checker languages.
+     *
+     * This specifies the languages used for spell checking by the
+     * client. By default, the set will contain languages based on
+     * environment variables.
+     *
+     * @see Util.International.get_user_preferred_languages
+     */
+    public void set_spell_check_languages(string[] value) {
+        this.settings.set_value(
+            SPELL_CHECK_LANGUAGES,
+            new GLib.Variant.maybe(null, new GLib.Variant.strv(value))
+        );
+    }
+
+    /**
+     * Returns visible spell checker languages.
+     *
+     * This is the list of languages shown when selecting languages to
+     * be used for spell checking.
+     */
+    public string[] get_spell_check_visible_languages() {
+        return this.settings.get_strv(SPELL_CHECK_VISIBLE_LANGUAGES);
+    }
+
+    /**
+     * Sets visible spell checker languages.
+     *
+     * This is the list of languages shown when selecting languages to
+     * be used for spell checking.
+     */
+    public void set_spell_check_visible_languages(string[] value) {
+        this.settings.set_strv(SPELL_CHECK_VISIBLE_LANGUAGES, value);
     }
 
     public Geary.SearchQuery.Strategy get_search_strategy() {
