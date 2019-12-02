@@ -217,14 +217,16 @@ public interface Geary.Logging.Source : GLib.Object {
                                        GLib.LogLevelFlags levels,
                                        string fmt,
                                        va_list args) {
-        Context context = Context(Logging.DOMAIN, flags, levels, fmt, args);
-        Source? decorated = this;
-        while (decorated != null) {
-            context.append_source(decorated);
-            decorated = decorated.logging_parent;
-        }
+        if (flags == ALL || Logging.get_flags().is_any_set(flags)) {
+            Context context = Context(Logging.DOMAIN, flags, levels, fmt, args);
+            Source? decorated = this;
+            while (decorated != null) {
+                context.append_source(decorated);
+                decorated = decorated.logging_parent;
+            }
 
-        GLib.log_structured_array(levels, context.to_array());
+            GLib.log_structured_array(levels, context.to_array());
+        }
     }
 
 }
