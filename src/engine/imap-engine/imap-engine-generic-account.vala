@@ -131,8 +131,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.open_cancellable = new Cancellable();
         this.remote_ready_lock = new Nonblocking.Semaphore(this.open_cancellable);
 
-        this.processor = new AccountProcessor(this.to_string());
+        this.processor = new AccountProcessor();
         this.processor.operation_error.connect(on_operation_error);
+        this.processor.set_logging_parent(this);
 
         try {
             yield this.local.open_async(cancellable);

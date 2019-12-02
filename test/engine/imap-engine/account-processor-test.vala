@@ -71,7 +71,7 @@ public class Geary.ImapEngine.AccountProcessorTest : TestCase {
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
         this.account = new Geary.MockAccount(this.info);
-        this.processor = new AccountProcessor("processor");
+        this.processor = new AccountProcessor();
 
         this.succeeded = 0;
         this.failed = 0;

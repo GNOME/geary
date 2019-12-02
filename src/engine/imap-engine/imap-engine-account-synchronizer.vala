@@ -6,7 +6,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
+private class Geary.ImapEngine.AccountSynchronizer :
+    Geary.BaseObject, Logging.Source {
 
 
     private weak GenericAccount account { get; private set; }
@@ -26,6 +27,26 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         this.account.information.notify["prefetch-period-days"].connect(on_account_prefetch_changed);
         this.account.folders_available_unavailable.connect(on_folders_updated);
         this.account.folders_contents_altered.connect(on_folders_contents_altered);
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Flag logging_flags {
+        get; protected set; default = Logging.Flag.ALL;
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent {
+        get { return this.account; }
+    }
+
+    /** {@inheritDoc} */
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "%s, %s",
+            this.account.information.id,
+            this.max_epoch.to_string()
+        );
     }
 
     private void send_all(Gee.Collection<Folder> folders, bool became_available) {
@@ -53,7 +74,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 try {
                     this.account.queue_operation(op);
                 } catch (Error err) {
-                    debug("Failed to queue sync operation: %s", err.message);
+                    warning("Failed to queue sync operation: %s", err.message);
                 }
             }
         }
@@ -122,7 +143,7 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
         try {
             yield minimal.open_async(Folder.OpenFlags.NO_DELAY, cancellable);
             was_opened = true;
-            debug("Synchronising %s", minimal.to_string());
+            debug("Synchronising");
             yield sync_folder(cancellable);
         } catch (GLib.IOError.CANCELLED err) {
             // All good
@@ -255,11 +276,7 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
                 next_epoch = prefetch_max_epoch;
             }
 
-            debug(
-                "Synchronising %s to: %s",
-                folder.to_string(),
-                next_epoch.to_string()
-            );
+            debug("Fetching to: %s", next_epoch.to_string());
 
             if (local_count < this.folder.properties.email_total &&
                 next_epoch.compare(prefetch_max_epoch) >= 0) {
@@ -295,14 +312,7 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
                                              Geary.Email? current_oldest,
                                              Cancellable cancellable)
         throws Error {
-        // Expand the vector up until the given epoch
-        Logging.debug(
-            Logging.Flag.PERIODIC,
-            "Synchronizing %s:%s to %s",
-            this.account.to_string(),
-            this.folder.to_string(),
-            next_epoch.to_string()
-        );
+        debug("Expanding vector to %s", next_epoch.to_string());
         return yield ((MinimalFolder) this.folder).find_earliest_email_async(
             next_epoch,
             (current_oldest != null) ? current_oldest.id : null,
@@ -323,11 +333,8 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
         // marker of age
         Geary.EmailIdentifier? id =
             (current_oldest != null) ? current_oldest.id : null;
-        Logging.debug(
-            Logging.Flag.PERIODIC,
-            "Unable to locate epoch messages on remote folder %s:%s%s, fetching one past oldest...",
-            this.account.to_string(),
-            this.folder.to_string(),
+        debug(
+            "Unable to locate epoch messages on remote folder%s, fetching one past oldest...",
             (id != null) ? " earlier than oldest local" : ""
         );
         yield this.folder.list_email_by_id_async(
@@ -342,12 +349,9 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
     private async void expand_complete_vector(Cancellable cancellable)
         throws Error {
         // past max_epoch, so just pull in everything and be done with it
-        Logging.debug(
-            Logging.Flag.PERIODIC,
-            "Synchronization reached max epoch of %s, fetching all mail from %s:%s",
-            this.sync_max_epoch.to_string(),
-            this.account.to_string(),
-            this.folder.to_string()
+        debug(
+            "Reached max epoch of %s, fetching all mail",
+            this.sync_max_epoch.to_string()
         );
 
         // Per the contract for list_email_by_id_async, we need to

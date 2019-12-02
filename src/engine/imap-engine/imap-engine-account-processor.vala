@@ -17,7 +17,8 @@
  * occurs the error will be suppressed and it will be re-attempted
  * once, to allow for the network dropping out mid-execution.
  */
-internal class Geary.ImapEngine.AccountProcessor : Geary.BaseObject {
+internal class Geary.ImapEngine.AccountProcessor :
+    Geary.BaseObject, Logging.Source {
 
 
     // Retry ops after network failures at least once before giving up
@@ -38,8 +39,15 @@ internal class Geary.ImapEngine.AccountProcessor : Geary.BaseObject {
     /** Fired when an error occurs processing an operation. */
     public signal void operation_error(AccountOperation op, Error error);
 
+    /** {@inheritDoc} */
+    public Logging.Flag logging_flags {
+        get; protected set; default = Logging.Flag.ALL;
+    }
 
-    private string id;
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent { get { return _logging_parent; } }
+    private weak Logging.Source? _logging_parent = null;
+
 
     private bool is_running;
 
@@ -50,8 +58,7 @@ internal class Geary.ImapEngine.AccountProcessor : Geary.BaseObject {
     private GLib.Cancellable? op_cancellable = null;
 
 
-    public AccountProcessor(string id) {
-        this.id = id;
+    public AccountProcessor() {
         this.queue.allow_duplicates = false;
         this.is_running = true;
         this.run.begin();
@@ -72,6 +79,20 @@ internal class Geary.ImapEngine.AccountProcessor : Geary.BaseObject {
         this.queue.clear();
     }
 
+    /** {@inheritDoc} */
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "queued: %d",
+            this.queue.size
+        );
+    }
+
+    /** Sets the processor's logging parent. */
+    internal void set_logging_parent(Logging.Source parent) {
+        this._logging_parent = parent;
+    }
+
     private async void run() {
         while (this.is_running) {
             this.op_cancellable = new GLib.Cancellable();
@@ -85,7 +106,7 @@ internal class Geary.ImapEngine.AccountProcessor : Geary.BaseObject {
             }
 
             if (op != null) {
-                debug("%s: Executing operation: %s", id, op.to_string());
+                debug("Executing operation: %s", op.to_string());
                 this.current_op = op;
 
                 Error? op_error = null;
