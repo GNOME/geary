@@ -31,4 +31,8 @@ internal class Geary.Imap.Folder : Geary.BaseObject {
         this.properties = properties;
     }
 
+    public string to_string() {
+        return "Imap.Folder(%s)".printf(path.to_string());
+    }
+
 }

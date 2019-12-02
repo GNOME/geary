@@ -297,11 +297,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         check_open();
         debug("Acquiring account session");
         yield this.remote_ready_lock.wait_async(cancellable);
-        Imap.ClientSession client =
-            yield this.imap.claim_authorized_session_async(cancellable);
-        return new Imap.AccountSession(
-            this.information.id, this.local.imap_folder_root, client
-        );
+        var client = yield this.imap.claim_authorized_session_async(cancellable);
+        var session = new Imap.AccountSession(this.local.imap_folder_root, client);
+        session.set_logging_parent(this.imap);
+        return session;
     }
 
     /**
@@ -351,8 +350,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Imap.ClientSession? client =
             yield this.imap.claim_authorized_session_async(cancellable);
         Imap.AccountSession account = new Imap.AccountSession(
-            this.information.id, this.local.imap_folder_root, client
+            this.local.imap_folder_root, client
         );
+        account.set_logging_parent(this.imap);
 
         Imap.Folder? folder = null;
         GLib.Error? folder_err = null;
@@ -368,8 +368,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (folder_err == null) {
             try {
                 folder_session = yield new Imap.FolderSession(
-                    this.information.id, client, folder, cancellable
+                    client, folder, cancellable
                 );
+                folder_session.set_logging_parent(this.imap);
             } catch (Error err) {
                 folder_err = err;
             }
