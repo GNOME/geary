@@ -121,7 +121,8 @@ internal class Application.Controller : Geary.BaseObject {
      * Constructs a new instance of the controller.
      */
     public async Controller(Client application,
-                            GLib.Cancellable cancellable) {
+                            GLib.Cancellable cancellable)
+        throws GLib.Error {
         this.application = application;
         this.controller_open = cancellable;
 
@@ -139,16 +140,12 @@ internal class Application.Controller : Geary.BaseObject {
             this.application.get_web_extensions_dir(),
             this.application.get_user_cache_directory().get_child("web-resources")
         );
-        try {
-            Components.WebView.load_resources(
-                this.application.get_user_config_directory()
-            );
-            Composer.WebView.load_resources();
-            ConversationWebView.load_resources();
-            Accounts.SignatureWebView.load_resources();
-        } catch (Error err) {
-            error("Error loading web resources: %s", err.message);
-        }
+        Components.WebView.load_resources(
+            this.application.get_user_config_directory()
+        );
+        Composer.WebView.load_resources();
+        ConversationWebView.load_resources();
+        Accounts.SignatureWebView.load_resources();
 
         this.folks = Folks.IndividualAggregator.dup();
         if (!this.folks.is_prepared) {
@@ -173,12 +170,8 @@ internal class Application.Controller : Geary.BaseObject {
         this.plugin_manager.load();
 
         // Migrate configuration if necessary.
-        try {
-            Migrate.xdg_config_dir(this.application.get_user_data_directory(),
-                this.application.get_user_config_directory());
-        } catch (Error e) {
-            error("Error migrating configuration directories: %s", e.message);
-        }
+        Migrate.xdg_config_dir(this.application.get_user_data_directory(),
+                               this.application.get_user_config_directory());
 
         // Hook up cert, accounts and credentials machinery
 
@@ -187,12 +180,7 @@ internal class Application.Controller : Geary.BaseObject {
             cancellable
         );
 
-        SecretMediator? libsecret = null;
-        try {
-            libsecret = yield new SecretMediator(cancellable);
-        } catch (GLib.Error err) {
-            error("Error opening libsecret: %s", err.message);
-        }
+        SecretMediator? libsecret = yield new SecretMediator(cancellable);
 
         application.engine.account_available.connect(on_account_available);
 
@@ -214,18 +202,10 @@ internal class Application.Controller : Geary.BaseObject {
             on_report_problem
         );
 
-        try {
-            yield this.account_manager.connect_goa(cancellable);
-        } catch (GLib.Error err) {
-            warning("Error opening GOA: %s", err.message);
-        }
+        yield this.account_manager.connect_goa(cancellable);
 
         // Start loading accounts
-        try {
-            yield this.account_manager.load_accounts(cancellable);
-        } catch (Error e) {
-            warning("Error loading accounts: %s", e.message);
-        }
+        yield this.account_manager.load_accounts(cancellable);
 
         // Expunge any deleted accounts in the background, so we're
         // not blocking the app continuing to open.
