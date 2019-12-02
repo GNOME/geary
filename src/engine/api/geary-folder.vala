@@ -696,12 +696,8 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null) throws Error;
 
     /** {@inheritDoc} */
-    public virtual string to_string() {
-        return "%s(%s:%s)".printf(
-            this.get_type().name(),
-            this.account.information.id,
-            this.path.to_string()
-        );
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(this, this.path.to_string());
     }
 
 }

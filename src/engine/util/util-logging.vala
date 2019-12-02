@@ -5,6 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+
 /**
  * Mixin interface for objects that support structured logging.
  *
@@ -17,6 +18,22 @@
  */
 public interface Geary.Logging.Source : GLib.Object {
 
+
+    /**
+     * Returns a string representation of a source based on its state.
+     *
+     * The string returned will include the source's type name, the
+     * its current logging state, and the value of extra_values, if
+     * any.
+     */
+    protected static string default_to_string(Source source,
+                                              string extra_values) {
+        return "%s(%s%s)".printf(
+            source.get_type().name(),
+            source.to_logging_state().format_message(),
+            extra_values
+        );
+    }
 
     // Based on function from with the same name from GLib's
     // gmessages.c. Return value must be 1 byte long (plus nul byte).
@@ -114,10 +131,26 @@ public interface Geary.Logging.Source : GLib.Object {
     public abstract Source? logging_parent { get; }
 
     /**
-     * Returns a string representation of the service, for debugging.
+     * Returns a loggable representation of this source's current state.
+     *
+     * Since this source's internal state may change between being
+     * logged and being used from a log record, this records relevant
+     * state at the time when it was logged so it may be displayed or
+     * recorded as it is right now.
      */
-    public abstract string to_string();
+    public abstract State to_logging_state();
 
+    /**
+     * Returns a string representation of this source based on its state.
+     *
+     * This simply calls {@link default_to_string} with this source
+     * and the empty string, returning the result. Implementations of
+     * this interface can call that method if they need to override
+     * the default behaviour of this method.
+     */
+    public string to_string() {
+        return Source.default_to_string(this, "");
+    }
 
     /**
      * Logs a debug-level log message with this object as context.
@@ -182,6 +215,48 @@ public interface Geary.Logging.Source : GLib.Object {
         }
 
         GLib.log_structured_array(levels, context.to_array());
+    }
+
+}
+
+/**
+ * A record of the state of a logging source to be recorded.
+ *
+ * @see Source.to_logging_state
+ */
+// This a class rather than a struct so we get pass-by-reference
+// semantics for it, and make its members private
+public class Geary.Logging.State {
+
+
+    public Source source { get; private set; }
+
+
+    private string message;
+    // Would like to use the following but can't because of
+    // https://gitlab.gnome.org/GNOME/vala/issues/884
+    // private va_list args;
+
+
+    /*
+     * Constructs a new logging state.
+     *
+     * The given source should be the source object that constructed
+     * the state during a call to {@link Source.to_logging_state}.
+     */
+    [PrintfFormat]
+    public State(Source source, string message, ...) {
+        this.source = source;
+        this.message = message;
+
+        // this.args = va_list();
+        this.message = message.vprintf(va_list());
+    }
+
+    public string format_message() {
+        // vprint mangles its passed-in args, so copy them
+        // return this.message.vprintf(va_list.copy(this.args));
+        return message;
     }
 
 }

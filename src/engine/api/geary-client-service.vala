@@ -293,11 +293,8 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
     }
 
     /** {@inheritDoc} */
-    public virtual string to_string() {
-        return "%s(%s)".printf(
-            this.get_type().name(),
-            this.configuration.protocol.to_value()
-        );
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(this, this.configuration.protocol.to_value());
     }
 
     /** Sets the service's logging parent. */

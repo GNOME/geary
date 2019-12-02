@@ -153,7 +153,7 @@ public class Record {
     /** The next log record in the buffer, if any. */
     public Record? next { get; internal set; default = null; }
 
-    private Source[] sources;
+    private State[] states;
     private bool filled = false;
     private bool old_log_api = false;
 
@@ -170,12 +170,13 @@ public class Record {
 
         // Since GLib.LogField only retains a weak ref to its value,
         // find and ref any values we wish to keep around.
-        this.sources = new Source[fields.length];
-        int source_count = 0;
+        this.states = new State[fields.length];
+        int state_count = 0;
         foreach (GLib.LogField field in fields) {
             switch (field.key) {
             case "GEARY_LOGGING_SOURCE":
-                this.sources[source_count++] = (Source) field.value;
+                this.states[state_count++] =
+                    ((Source) field.value).to_logging_state();
                 break;
 
             case "GEARY_FLAGS":
@@ -204,24 +205,7 @@ public class Record {
             }
         }
 
-        this.sources.length = source_count;
-    }
-
-    /** Returns the record's sources that aren't well-known. */
-    public Source[] get_other_sources() {
-        fill_well_known_sources();
-
-        Source[] copy = new Source[this.sources.length];
-        int count = 0;
-        foreach (Source source in this.sources) {
-            if (source != this.account &&
-                source != this.service &&
-                source != this.folder) {
-                copy[count++] = source;
-            }
-        }
-        copy.length = count;
-        return copy;
+        this.states.length = state_count;
     }
 
     /**
@@ -233,14 +217,14 @@ public class Record {
      */
     public void fill_well_known_sources() {
         if (!this.filled) {
-            foreach (Source source in this.sources) {
-                GLib.Type type = source.get_type();
+            foreach (unowned State state in this.states) {
+                GLib.Type type = state.source.get_type();
                 if (type.is_a(typeof(Account))) {
-                    this.account = (Account) source;
+                    this.account = (Account) state.source;
                 } else if (type.is_a(typeof(ClientService))) {
-                    this.service = (ClientService) source;
+                    this.service = (ClientService) state.source;
                 } else if (type.is_a(typeof(Folder))) {
-                    this.folder = (Folder) source;
+                    this.folder = (Folder) state.source;
                 }
             }
             this.filled = true;
@@ -277,33 +261,11 @@ public class Record {
             str.append(": ");
         }
 
-        // Use a compact format for well known ojects
-        if (this.account != null) {
-            str.append(this.account.information.id);
-            str.append_c('[');
-            str.append(this.account.information.service_provider.to_value());
-            if (this.service != null) {
-                str.append_c(':');
-                str.append(this.service.configuration.protocol.to_value());
-            }
-            str.append_c(']');
-            if (this.folder == null) {
-                str.append(": ");
-            }
-        } else if (this.service != null) {
-            str.append(this.service.configuration.protocol.to_value());
-            str.append(": ");
-        }
-        if (this.folder != null) {
-            str.append(this.folder.path.to_string());
-            str.append(": ");
-        }
-
-        // Append in reverse so leaf sources appears last
-        var sources = get_other_sources();
-        for (int i = sources.length - 1; i >= 0; i--) {
-            str.append(sources[i].to_string());
-            str.append_c(' ');
+        // Append in reverse so inner sources appear first
+        for (int i = this.states.length - 1; i >= 0; i--) {
+            str.append("[");
+            str.append(this.states[i].format_message());
+            str.append("] ");
         }
 
         str.append(message);

@@ -112,8 +112,8 @@ public abstract class Geary.ImapEngine.AccountOperation : BaseObject, Logging.So
     }
 
     /** {@inheritDoc} */
-    public virtual string to_string() {
-        return get_type().name();
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(this, this.account.information.id);
     }
 
 }
@@ -160,14 +160,14 @@ public abstract class Geary.ImapEngine.FolderOperation : AccountOperation {
         );
     }
 
-    /**
-     * Provides a representation of this operation for debugging.
-     *
-     * The return value will include its folder's path and the name of
-     * the class.
-     */
-    public override string to_string() {
-        return "%s(%s)".printf(base.to_string(), folder.path.to_string());
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "%s:%s",
+            this.account.information.id,
+            this.folder.path.to_string()
+        );
     }
 
 }
