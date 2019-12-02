@@ -949,7 +949,7 @@ public class Application.MainWindow :
                 to_add.account, _("Labels")
             );
 
-            this.progress_monitor.add(to_add.account.opening_monitor);
+            this.progress_monitor.add(to_add.account.background_progress);
             Geary.Smtp.ClientService? smtp = (
                 to_add.account.outgoing as Geary.Smtp.ClientService
             );
@@ -1010,7 +1010,7 @@ public class Application.MainWindow :
             to_remove.commands.undone.disconnect(on_command_undo);
             to_remove.commands.redone.disconnect(on_command_redo);
 
-            this.progress_monitor.remove(to_remove.account.opening_monitor);
+            this.progress_monitor.remove(to_remove.account.background_progress);
             Geary.Smtp.ClientService? smtp = (
                 to_remove.account.outgoing as Geary.Smtp.ClientService
             );

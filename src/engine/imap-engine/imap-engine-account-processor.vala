@@ -57,10 +57,13 @@ internal class Geary.ImapEngine.AccountProcessor :
     private AccountOperation? current_op = null;
     private GLib.Cancellable? op_cancellable = null;
 
+    private ProgressMonitor? progress;
 
-    public AccountProcessor() {
+
+    public AccountProcessor(ProgressMonitor? progress = null) {
         this.queue.allow_duplicates = false;
         this.is_running = true;
+        this.progress = progress;
         this.run.begin();
     }
 
@@ -109,6 +112,10 @@ internal class Geary.ImapEngine.AccountProcessor :
                 debug("Executing operation: %s", op.to_string());
                 this.current_op = op;
 
+                if (this.progress != null) {
+                    this.progress.notify_start();
+                }
+
                 Error? op_error = null;
                 int network_errors = 0;
                 while (op_error == null) {
@@ -139,6 +146,10 @@ internal class Geary.ImapEngine.AccountProcessor :
 
                 this.current_op = null;
                 this.op_cancellable = null;
+
+                if (this.progress != null) {
+                    this.progress.notify_finish();
+                }
             }
         }
     }

@@ -131,10 +131,10 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      */
     public Geary.ContactStore contact_store { get; protected set; }
 
-    public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
-    public Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
-    public Geary.ProgressMonitor db_vacuum_monitor { get; protected set; }
-    public Geary.ProgressMonitor opening_monitor { get; protected set; }
+    public ProgressMonitor background_progress { get; protected set; }
+    public ProgressMonitor search_upgrade_monitor { get; protected set; }
+    public ProgressMonitor db_upgrade_monitor { get; protected set; }
+    public ProgressMonitor db_vacuum_monitor { get; protected set; }
 
 
     public signal void opened();
