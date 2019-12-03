@@ -19,11 +19,6 @@ public enum TextFormat {
  */
 public const string UTF8_CHARSET = "UTF-8";
 
-/**
- * Official IANA charset encoding name for the ASCII  character set.
- */
-public const string ASCII_CHARSET = "US-ASCII";
-
 private int init_count = 0;
 
 internal Regex? invalid_filename_character_re = null;
@@ -50,7 +45,7 @@ public GMime.ParserOptions get_parser_options() {
 }
 
 public string? get_charset() {
-    return null;
+    return UTF8_CHARSET;
 }
 
 internal bool is_utf_8(string charset) {
