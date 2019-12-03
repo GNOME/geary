@@ -29,8 +29,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      */
     public delegate string? InlinePartReplacer(Part part);
 
-    private const string HEADER_DATE = "Date";
-    private const string HEADER_SENDER = "Sender";
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";
     private const string HEADER_REFERENCES = "References";
     private const string HEADER_MAILER = "X-Mailer";
@@ -137,10 +135,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         this.from = email.from;
         this.date = email.date;
 
-        //message.set_date_as_string(this.date.serialize());
-        this.message.set_header(HEADER_DATE,
-                                this.date.serialize(),
-                                Geary.RFC822.get_charset());
+        this.message.set_date(this.date.value);
         
         if (email.from != null) {
             foreach (RFC822.MailboxAddress mailbox in email.from)
@@ -149,10 +144,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
         if (email.sender != null) {
             this.message.add_mailbox(GMime.AddressType.SENDER, this.sender.name, this.sender.address);
-            // TODO Is setting the header still required?
-            this.message.set_header(HEADER_SENDER,
-                                    this.sender.to_rfc822_string(),
-                                    Geary.RFC822.get_charset());
         }
 
         // Optional headers
@@ -176,9 +167,10 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
         if (email.in_reply_to != null) {
             this.in_reply_to = email.in_reply_to;
-            foreach (RFC822.MailboxAddress mailbox in email.reply_to)
-                this.message.add_mailbox(GMime.AddressType.BCC, mailbox.name, mailbox.address);
-            // TODO Is setting the header still required?
+            // We could use `this.message.add_mailbox()` in a similar way like
+            // we did for the other headers, but this would require to change
+            // the type of `email.in_reply_to` and `this.in_reply_to` from
+            // `RFC822.MessageIDList` to `RFC822.MailboxAddresses`.
             this.message.set_header(HEADER_IN_REPLY_TO,
                                     email.in_reply_to.to_rfc822_string(),
                                     Geary.RFC822.get_charset());
