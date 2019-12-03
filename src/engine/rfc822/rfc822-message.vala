@@ -139,30 +139,30 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         
         if (email.from != null) {
             foreach (RFC822.MailboxAddress mailbox in email.from)
-                this.message.add_mailbox(GMime.AddressType.FROM, mailbox.name, mailbox.address);
+                this.message.add_mailbox(FROM, mailbox.name, mailbox.address);
         }
 
         if (email.sender != null) {
-            this.message.add_mailbox(GMime.AddressType.SENDER, this.sender.name, this.sender.address);
+            this.message.add_mailbox(SENDER, this.sender.name, this.sender.address);
         }
 
         // Optional headers
         if (email.to != null) {
             this.to = email.to;
             foreach (RFC822.MailboxAddress mailbox in email.to)
-                this.message.add_mailbox(GMime.AddressType.TO, mailbox.name, mailbox.address);
+                this.message.add_mailbox(TO, mailbox.name, mailbox.address);
         }
 
         if (email.cc != null) {
             this.cc = email.cc;
             foreach (RFC822.MailboxAddress mailbox in email.cc)
-                this.message.add_mailbox(GMime.AddressType.CC, mailbox.name, mailbox.address);
+                this.message.add_mailbox(CC, mailbox.name, mailbox.address);
         }
 
         if (email.bcc != null) {
             this.bcc = email.bcc;
             foreach (RFC822.MailboxAddress mailbox in email.bcc)
-                this.message.add_mailbox(GMime.AddressType.BCC, mailbox.name, mailbox.address);
+                this.message.add_mailbox(BCC, mailbox.name, mailbox.address);
         }
 
         if (email.in_reply_to != null) {
@@ -886,69 +886,70 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
     private void stock_from_gmime() {
         GMime.HeaderList headers = this.message.get_header_list();
-        for (int i=0; i < headers.get_count(); i++) {
+        for (int i = 0; i < headers.get_count(); i++) {
             GMime.Header header = headers.get_header_at(i);
             string name = header.get_name();
             string value = header.get_value();
             switch (name.down()) {
-            case "from":
-                this.from = append_address(this.from, value);
-                break;
+              case "from":
+                  this.from = append_address(this.from, value);
+              break;
 
-            case "sender":
-                try {
-                    this.sender = new RFC822.MailboxAddress.from_rfc822_string(value);
-                } catch (Error err) {
-                    debug("Could parse subject: %s", err.message);
-                }
-                break;
+              case "sender":
+                  try {
+                      this.sender = new RFC822.MailboxAddress.from_rfc822_string(value);
+                  } catch (Error err) {
+                      debug("Could parse subject: %s", err.message);
+                  }
+              break;
 
-            case "reply-to":
-                this.reply_to = append_address(this.reply_to, value);
-                break;
+              case "reply-to":
+                  this.reply_to = append_address(this.reply_to, value);
+              break;
 
-            case "to":
-                this.to = append_address(this.to, value);
-                break;
+              case "to":
+                  this.to = append_address(this.to, value);
+              break;
 
-            case "cc":
-                this.cc = append_address(this.cc, value);
-                break;
+              case "cc":
+                  this.cc = append_address(this.cc, value);
+              break;
 
-            case "bcc":
-                this.bcc = append_address(this.bcc, value);
-                break;
+              case "bcc":
+                  this.bcc = append_address(this.bcc, value);
+              break;
 
-            case "subject":
-                this.subject = new RFC822.Subject.decode(value);
-                break;
+              case "subject":
+                  this.subject = new RFC822.Subject.decode(value);
+              break;
 
-            case "date":
-                try {
-                    this.date = new Geary.RFC822.Date(value);
-                } catch (Error err) {
-                    debug("Could not parse date: %s", err.message);
-                }
-                break;
+              case "date":
+                  try {
+                      this.date = new Geary.RFC822.Date(value);
+                  } catch (Error err) {
+                      debug("Could not parse date: %s", err.message);
+                  }
+              break;
 
-            case "message-id":
-                this.message_id = new MessageID(value);
-                break;
+              case "message-id":
+                  this.message_id = new MessageID(value);
+              break;
 
-            case "in-reply-to":
-                this.in_reply_to = append_message_id(this.in_reply_to, value);
-                break;
+              case "in-reply-to":
+                  this.in_reply_to = append_message_id(this.in_reply_to, value);
+              break;
 
-            case "references":
-                this.references = append_message_id(this.references, value);
-                break;
+              case "references":
+                  this.references = append_message_id(this.references, value);
+              break;
 
-            case "x-mailer":
-                this.mailer = GMime.utils_header_decode_text(Geary.RFC822.get_parser_options(), value);
-                break;
+              case "x-mailer":
+                  this.mailer = GMime.utils_header_decode_text(Geary.RFC822.get_parser_options(), value);
+              break;
 
-            default:
-                break;
+              default:
+                // do nothing
+              break;
             }
         };
     }
@@ -1099,8 +1100,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
         if (encoded) {
             stream_filter.add(new GMime.FilterUnix2Dos(false));
-        }
-        else {
+        } else {
             stream_filter.add(new GMime.FilterDos2Unix(false));
         }
         if (dotstuffed) {
