@@ -175,7 +175,6 @@ modules:
     sources:
       - type: git
         url: https://github.com/jstedfast/gmime.git
-        branch: gmime-2-6
 
   # Geary dependency
   - name: libhandy
