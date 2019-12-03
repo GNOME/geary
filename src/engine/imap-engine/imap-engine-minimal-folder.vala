@@ -1411,9 +1411,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         yield op.wait_for_ready_async(cancellable);
     }
 
-    public override string to_string() {
-        return "%s (open_count=%d remote_opened=%s)".printf(
-            base.to_string(), open_count, (this.remote_session != null).to_string()
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "%s, open_count=%d, remote_opened=%s",
+            this.path.to_string(),
+            this.open_count,
+            (this.remote_session != null).to_string()
         );
     }
 

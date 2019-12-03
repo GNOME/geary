@@ -32,11 +32,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     /** Determines if this folder immutable. */
     public Trillian readonly { get; private set; default = Trillian.UNKNOWN; }
 
-    /** Determines if this folder accepts custom IMAP flags. */
-    public Trillian accepts_user_flags { get; private set; default = Trillian.UNKNOWN; }
+    /** This folder's set of permanent IMAP flags. */
+    public MessageFlags? permanent_flags { get; private set; default = null; }
 
     /** Determines if this folder accepts custom IMAP flags. */
-    public MessageFlags? permanent_flags { get; private set; default = null; }
+    public Trillian accepts_user_flags { get; private set; default = Trillian.UNKNOWN; }
 
     /**
      * Set to true when it's detected that the server doesn't allow a
@@ -87,12 +87,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     public signal void removed(SequenceNumber pos);
 
 
-    public async FolderSession(string account_id,
-                               ClientSession session,
+    public async FolderSession(ClientSession session,
                                Imap.Folder folder,
                                Cancellable cancellable)
         throws Error {
-        base("%s:%s".printf(account_id, folder.path.to_string()), session);
+        base(session);
         this.folder = folder;
 
         if (folder.properties.attrs.is_no_select) {
@@ -173,7 +172,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     }
 
     private void on_exists(int total) {
-        debug("%s EXISTS %d", to_string(), total);
+        debug("EXISTS %d", total);
 
         int old_total = this.folder.properties.select_examine_messages;
         this.folder.properties.set_select_examine_message_count(total);
@@ -185,7 +184,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     }
 
     private void on_expunge(SequenceNumber pos) {
-        debug("%s EXPUNGE %s", to_string(), pos.to_string());
+        debug("EXPUNGE %s", pos.to_string());
 
         int old_total = this.folder.properties.select_examine_messages;
         if (old_total > 0) {
@@ -206,15 +205,13 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 data.seq_num, (existing != null) ? data.combine(existing) : data
             );
         } else {
-            debug("%s: FETCH (unsolicited): %s:",
-                  to_string(),
-                  data.to_string());
+            debug("FETCH (unsolicited): %s:", data.to_string());
             updated(data.seq_num, data);
         }
     }
 
     private void on_recent(int total) {
-        debug("%s RECENT %d", to_string(), total);
+        debug("RECENT %d", total);
         this.folder.properties.recent = total;
         recent(total);
     }
@@ -227,11 +224,12 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 try {
                     this.search_accumulator.add(new UID.checked(uid));
                 } catch (ImapError imaperr) {
-                    debug("%s Unable to process SEARCH UID result: %s", to_string(), imaperr.message);
+                    warning("Unable to process SEARCH UID result: %s",
+                            imaperr.message);
                 }
             }
         } else {
-            debug("%s Not handling unsolicited SEARCH response", to_string());
+            debug("Not handling unsolicited SEARCH response");
         }
     }
 
@@ -280,8 +278,8 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 break;
             }
         } catch (ImapError ierr) {
-            debug("Unable to parse ResponseCode %s: %s", response_code.to_string(),
-                ierr.message);
+            warning("Unable to parse ResponseCode %s: %s", response_code.to_string(),
+                    ierr.message);
         }
     }
 
@@ -512,8 +510,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 if (retry_bad_header_fields_response(cmds)) {
                     // The command failed, but it wasn't using the
                     // header field hack, so retry it.
-                    debug("Retryable server failure detected for %s: %s",
-                          to_string(), err.message);
+                    debug("Retryable server failure detected: %s", err.message);
                 } else {
                     throw err;
                 }
@@ -534,15 +531,14 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 // have come back with the response (if using UID addressing)
                 UID? uid = fetched_data.data_map.get(FetchDataSpecifier.UID) as UID;
                 if (uid == null) {
-                    message("Unable to list message #%s on %s: No UID returned from server",
-                        seq_num.to_string(), to_string());
+                    message("Unable to list message #%s: No UID returned from server",
+                            seq_num.to_string());
 
                     continue;
                 }
 
                 try {
                     Geary.Email email = fetched_data_to_email(
-                        to_string(),
                         uid,
                         fetched_data,
                         fields,
@@ -552,9 +548,8 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                         preview_charset_specifier
                     );
                     if (!email.fields.fulfills(fields)) {
-                        message(
-                            "%s: %s missing=%s fetched=%s",
-                            to_string(),
+                        warning(
+                            "%s missing=%s fetched=%s",
                             email.id.to_string(),
                             fields.clear(email.fields).to_string(),
                             fetched_data.to_string()
@@ -564,8 +559,10 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
                     email_list.add(email);
                 } catch (Error err) {
-                    debug("%s: Unable to convert email for %s %s: %s", to_string(), uid.to_string(),
-                        fetched_data.to_string(), err.message);
+                    warning("Unable to convert email for %s %s: %s",
+                            uid.to_string(),
+                            fetched_data.to_string(),
+                            err.message);
                 }
             }
         }, cancellable);
@@ -685,7 +682,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             try {
                 response.response_code.get_copyuid(null, out src_uids, out dst_uids);
             } catch (ImapError ierr) {
-                debug("Unable to retrieve COPYUID UIDs: %s", ierr.message);
+                warning("Unable to retrieve COPYUID UIDs: %s", ierr.message);
             }
 
             if (src_uids != null && !src_uids.is_empty &&
@@ -795,8 +792,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         }
     }
 
-    private static Geary.Email fetched_data_to_email(
-        string folder_name,
+    private Geary.Email fetched_data_to_email(
         UID uid,
         FetchedData fetched_data,
         Geary.Email.Field required_fields,
@@ -890,12 +886,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     }
                 } else {
                     warning(
-                        "[%s] No header specifier \"%s\" found in response:",
-                        folder_name,
+                        "No header specifier \"%s\" found in response:",
                         header_specifier.to_string()
                     );
                     foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys) {
-                        message("[%s] - has %s", folder_name, specifier.to_string());
+                        warning(" - has %s", specifier.to_string());
                     }
                 }
             }
@@ -908,7 +903,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     try {
                         date = new RFC822.Date(value);
                     } catch (GLib.Error err) {
-                        debug(
+                        warning(
                             "Error parsing date from FETCH response: %s",
                             err.message
                         );
@@ -1006,10 +1001,10 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     fetched_data.body_data_map.get(preview_charset_specifier),
                     fetched_data.body_data_map.get(preview_specifier)));
             } else {
-                message("[%s] No preview specifiers \"%s\" and \"%s\" found", folder_name,
+                warning("No preview specifiers \"%s\" and \"%s\" found",
                     preview_specifier.to_string(), preview_charset_specifier.to_string());
                 foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys)
-                    message("[%s] has %s", folder_name, specifier.to_string());
+                    warning(" - has %s", specifier.to_string());
             }
         }
 
@@ -1042,10 +1037,10 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     );
                 }
             } else {
-                message("[%s] No body specifier \"%s\" found", folder_name,
-                    body_specifier.to_string());
+                warning("No body specifier \"%s\" found",
+                        body_specifier.to_string());
                 foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys)
-                    message("[%s] has %s", folder_name, specifier.to_string());
+                    warning(" - has %s", specifier.to_string());
             }
         }
 
@@ -1093,6 +1088,20 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         return null;
     }
 
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "%s, %s, ro: %s, permanent_flags: %s, accepts_user_flags: %s",
+            base.to_logging_state().format_message(), // XXX this is cruddy
+            this.folder.to_string(),
+            this.readonly.to_string(),
+            this.permanent_flags != null
+                ? this.permanent_flags.to_string() : "(none)",
+            this.accepts_user_flags.to_string()
+        );
+    }
+
     // HACK: See https://bugzilla.gnome.org/show_bug.cgi?id=714902
     //
     // Detect when a server has returned a BAD response to FETCH
@@ -1130,14 +1139,13 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         case Status.NO:
             throw new ImapError.NOT_SUPPORTED(
-                "Request %s failed on %s: %s", cmd.to_string(),
-                to_string(), response.to_string()
+                "Request %s failed: %s", cmd.to_string(), response.to_string()
             );
 
         default:
             throw new ImapError.SERVER_ERROR(
-                "Unknown response status to %s on %s: %s",
-                cmd.to_string(), to_string(), response.to_string()
+                "Unknown response status to %s: %s",
+                cmd.to_string(), response.to_string()
             );
         }
     }

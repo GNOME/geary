@@ -25,7 +25,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     private Application.NotificationContext? monitor = null;
 
     public Tree() {
-        base(TARGET_ENTRY_LIST, Gdk.DragAction.ASK, drop_handler);
+        base(TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE, drop_handler);
         base_ref();
         entry_selected.connect(on_entry_selected);
 
@@ -207,6 +207,22 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         get_selection().unselect_all();
         this.selected = null;
         folder_selected(null);
+    }
+
+    public override bool drag_motion(Gdk.DragContext context, int x, int y, uint time) {
+        // Run the base version first.
+        bool ret = base.drag_motion(context, x, y, time);
+
+        // Update the cursor for copy or move.
+        Gdk.ModifierType mask;
+        double[] axes = new double[2];
+        context.get_device().get_state(context.get_dest_window(), axes, out mask);
+        if ((mask & Gdk.ModifierType.CONTROL_MASK) != 0) {
+            Gdk.drag_status(context, Gdk.DragAction.COPY, time);
+        } else {
+            Gdk.drag_status(context, Gdk.DragAction.MOVE, time);
+        }
+        return ret;
     }
 
     private void on_ordinal_changed() {

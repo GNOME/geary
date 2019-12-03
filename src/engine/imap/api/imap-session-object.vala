@@ -17,13 +17,21 @@
  *
  * This class is ''not'' thread safe.
  */
-public abstract class Geary.Imap.SessionObject : BaseObject {
+public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
 
 
     /** Determines if this object has a valid session or not. */
     public bool is_valid { get { return this.session != null; } }
 
-    private string id;
+    /** {@inheritDoc} */
+    public Logging.Flag logging_flags {
+        get; protected set; default = Logging.Flag.ALL;
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent { get { return _logging_parent; } }
+    private weak Logging.Source? _logging_parent = null;
+
     private ClientSession? session;
 
 
@@ -34,15 +42,14 @@ public abstract class Geary.Imap.SessionObject : BaseObject {
     /**
      * Constructs a new IMAP object with the given session.
      */
-    protected SessionObject(string id, ClientSession session) {
-        this.id = id;
+    protected SessionObject(ClientSession session) {
         this.session = session;
         this.session.disconnected.connect(on_disconnected);
     }
 
     ~SessionObject() {
         if (close() != null) {
-            debug("%s: destroyed without releasing its session".printf(this.id));
+            debug("Destroyed without releasing its session");
         }
     }
 
@@ -67,14 +74,17 @@ public abstract class Geary.Imap.SessionObject : BaseObject {
         return old_session;
     }
 
-    /**
-     * Returns a string representation of this object for debugging.
-     */
-    public virtual string to_string() {
-        return "%s:%s".printf(
-            this.id,
-            this.session != null ? this.session.to_string() : "(session dropped)"
+    /** {@inheritDoc} */
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            this.session != null ? this.session.to_string() : "no session"
         );
+    }
+
+    /** Sets the session's logging parent. */
+    internal void set_logging_parent(Logging.Source parent) {
+        this._logging_parent = parent;
     }
 
     /**
@@ -93,7 +103,7 @@ public abstract class Geary.Imap.SessionObject : BaseObject {
     }
 
     private void on_disconnected(ClientSession.DisconnectReason reason) {
-        debug("%s: DISCONNECTED %s", to_string(), reason.to_string());
+        debug("DISCONNECTED %s", reason.to_string());
 
         close();
         disconnected(reason);
