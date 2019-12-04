@@ -494,6 +494,9 @@ public void log_to(FileStream? stream) {
 public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
                                                GLib.LogField[] fields) {
     Record record = new Record(fields, levels, GLib.get_real_time());
+    if (should_blacklist(record)) {
+        return GLib.LogWriterOutput.HANDLED;
+    }
 
     // Keep the old first record so we don't cause any records to be
     // finalised while under the lock, leading to deadlock if
@@ -535,6 +538,24 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
     write_record(record, levels);
 
     return GLib.LogWriterOutput.HANDLED;
+}
+
+private bool should_blacklist(Record record) {
+    return (
+        // GdkPixbuf spams us e.g. when window focus changes,
+        // including between MainWindow and the Inspector, which is
+        // very annoying.
+        (record.levels == GLib.LogLevelFlags.LEVEL_DEBUG &&
+         record.domain == "GdkPixbuf") ||
+        // GAction does not support disabling parameterised actions
+        // with specific values, but GTK complains if the parameter is
+        // set to null to achieve the same effect, and they aren't
+        // interested in supporting that: GNOME/gtk!1151
+        (record.levels == GLib.LogLevelFlags.LEVEL_WARNING &&
+         record.domain == "Gtk" &&
+         record.message.has_prefix("actionhelper:") &&
+         record.message.has_suffix("target type NULL)"))
+    );
 }
 
 private inline void write_record(Record record,
