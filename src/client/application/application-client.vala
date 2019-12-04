@@ -761,8 +761,12 @@ public class Application.Client : Gtk.Application {
 
                 int64 delta_usec = get_monotonic_time() - start_usec;
                 if (delta_usec >= FORCE_SHUTDOWN_USEC) {
-                    debug("Forcing shutdown of Geary, %ss passed...",
-                          (delta_usec / USEC_PER_SEC).to_string());
+                    // Use a warning here so a) it's usually logged
+                    // and b) we can run under gdb with
+                    // G_DEBUG=fatal-warnings and have it break when
+                    // this happens, and maybe debug it.
+                    warning("Forcing shutdown of Geary, %ss passed...",
+                            (delta_usec / USEC_PER_SEC).to_string());
                     Posix.exit(2);
                 }
             }
