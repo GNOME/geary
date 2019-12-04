@@ -756,7 +756,7 @@ public class Application.Client : Gtk.Application {
             // shut the whole thing down if destroy_controller() takes too
             // long to complete
             int64 start_usec = get_monotonic_time();
-            while (!controller_closed) {
+            while (!controller_closed && Gtk.events_pending()) {
                 Gtk.main_iteration();
 
                 int64 delta_usec = get_monotonic_time() - start_usec;
