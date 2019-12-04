@@ -669,9 +669,11 @@ public class Application.MainWindow :
             // selection changed callback. That will check to
             // ensure that we're not setting it again.
             if (to_select != null) {
-                // Prefer the inboxes branch if it exists
-                if (to_select.special_folder_type != INBOX ||
-                    !this.folder_list.select_inbox(to_select.account)) {
+                // Prefer the inboxes branch if it is a thing, but
+                // only for non-interactive calls
+                if (is_interactive ||
+                    (to_select.special_folder_type != INBOX ||
+                     !this.folder_list.select_inbox(to_select.account))) {
                     this.folder_list.select_folder(to_select);
                 }
             } else {
