@@ -29,6 +29,7 @@ Getting in Touch
  * Geary wiki:   https://wiki.gnome.org/Apps/Geary
  * Mailing list: http://mail.gnome.org/mailman/listinfo/geary-list
  * IRC Channel:  [#geary on irc.gimp.org](irc://irc.gimp.org/%23geary)
+ * Matrix channel: [#_gimpnet_#geary:gnome.org](https://riot.im/app/#/room/#_gimpnet_#geary:gnome.org)
 
 **Code Of Conduct**
 
