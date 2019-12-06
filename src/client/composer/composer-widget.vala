@@ -2279,7 +2279,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 this.select_dictionary_button, config
             );
             this.spell_check_popover.selection_changed.connect((active_langs) => {
-                    config.spell_check_languages = active_langs;
+                    config.set_spell_check_languages(active_langs);
                     update_subject_spell_checker();
                 });
         }
@@ -2482,7 +2482,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void update_subject_spell_checker() {
         Gspell.Language? lang = null;
-        string[] langs = this.application.config.spell_check_languages;
+        string[] langs = this.application.config.get_spell_check_languages();
         if (langs.length == 1) {
             lang = Gspell.Language.lookup(langs[0]);
         } else {

@@ -191,8 +191,8 @@ public class SpellCheckPopover {
     private void setup_popover() {
         // We populate the popover with the list of languages that the user wants to see
         string[] languages = Util.International.get_available_dictionaries();
-        string[] enabled_langs = this.config.spell_check_languages;
-        string[] visible_langs = this.config.spell_check_visible_languages;
+        string[] enabled_langs = this.config.get_spell_check_languages();
+        string[] visible_langs = this.config.get_spell_check_visible_languages();
 
         content = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
         search_box = new Gtk.SearchEntry();
@@ -302,7 +302,7 @@ public class SpellCheckPopover {
                                            bool is_visible) {
         langs_list.invalidate_filter();
 
-        string[] visible_langs = this.config.spell_check_visible_languages;
+        string[] visible_langs = this.config.get_spell_check_visible_languages();
         string lang = row.lang_code;
         if (is_visible) {
             if (!(lang in visible_langs)) {
@@ -317,7 +317,7 @@ public class SpellCheckPopover {
             }
             visible_langs = new_langs;
         }
-        this.config.spell_check_visible_languages = visible_langs;
+        this.config.set_spell_check_visible_languages(visible_langs);
     }
 
 }

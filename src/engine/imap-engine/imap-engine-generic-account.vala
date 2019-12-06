@@ -106,7 +106,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             () => { this.update_remote_folders(); }
          );
 
-        this.opening_monitor = new ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
+        this.background_progress = new ReentrantProgressMonitor(ACTIVITY);
         this.search_upgrade_monitor = local.search_index_monitor;
         this.db_upgrade_monitor = local.upgrade_monitor;
         this.db_vacuum_monitor = local.vacuum_monitor;
@@ -119,11 +119,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
 
-        opening_monitor.notify_start();
+        this.background_progress.notify_start();
         try {
             yield internal_open_async(cancellable);
         } finally {
-            opening_monitor.notify_finish();
+            this.background_progress.notify_finish();
         }
     }
 
@@ -131,7 +131,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.open_cancellable = new Cancellable();
         this.remote_ready_lock = new Nonblocking.Semaphore(this.open_cancellable);
 
-        this.processor = new AccountProcessor();
+        this.processor = new AccountProcessor(this.background_progress);
         this.processor.operation_error.connect(on_operation_error);
         this.processor.set_logging_parent(this);
 

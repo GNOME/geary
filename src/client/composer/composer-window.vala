@@ -66,7 +66,7 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
             if (monitor == null) {
                 monitor = display.get_monitor_at_point(1, 1);
             }
-            int[] size = this.application.config.composer_window_size;
+            int[] size = this.application.config.get_composer_window_size();
             //check if stored values are reasonable
             if (monitor != null &&
                 size[0] >= 0 && size[0] <= monitor.geometry.width &&
@@ -94,9 +94,9 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
                 // Only store if the values are reasonable-looking.
                 if (width > 0 && width <= monitor.geometry.width &&
                     height > 0 && height <= monitor.geometry.height) {
-                    this.application.config.composer_window_size = {
-                        width, height
-                    };
+                    this.application.config.set_composer_window_size({
+                            width, height
+                        });
                 }
             }
         }

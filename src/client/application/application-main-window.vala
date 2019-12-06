@@ -669,9 +669,11 @@ public class Application.MainWindow :
             // selection changed callback. That will check to
             // ensure that we're not setting it again.
             if (to_select != null) {
-                // Prefer the inboxes branch if it exists
-                if (to_select.special_folder_type != INBOX ||
-                    !this.folder_list.select_inbox(to_select.account)) {
+                // Prefer the inboxes branch if it is a thing, but
+                // only for non-interactive calls
+                if (is_interactive ||
+                    (to_select.special_folder_type != INBOX ||
+                     !this.folder_list.select_inbox(to_select.account))) {
                     this.folder_list.select_folder(to_select);
                 }
             } else {
@@ -949,7 +951,7 @@ public class Application.MainWindow :
                 to_add.account, _("Labels")
             );
 
-            this.progress_monitor.add(to_add.account.opening_monitor);
+            this.progress_monitor.add(to_add.account.background_progress);
             Geary.Smtp.ClientService? smtp = (
                 to_add.account.outgoing as Geary.Smtp.ClientService
             );
@@ -1010,7 +1012,7 @@ public class Application.MainWindow :
             to_remove.commands.undone.disconnect(on_command_undo);
             to_remove.commands.redone.disconnect(on_command_redo);
 
-            this.progress_monitor.remove(to_remove.account.opening_monitor);
+            this.progress_monitor.remove(to_remove.account.background_progress);
             Geary.Smtp.ClientService? smtp = (
                 to_remove.account.outgoing as Geary.Smtp.ClientService
             );
@@ -1215,6 +1217,7 @@ public class Application.MainWindow :
         this.spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
         this.spinner.set_progress_monitor(progress_monitor);
         this.status_bar.add(this.spinner);
+        this.status_bar.show_all();
     }
 
     /** {@inheritDoc} */

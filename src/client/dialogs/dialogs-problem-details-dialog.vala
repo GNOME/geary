@@ -51,7 +51,8 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
     private Geary.ServiceInformation? service;
 
 
-    public ProblemDetailsDialog(Application.MainWindow parent,
+    public ProblemDetailsDialog(Gtk.Window? parent,
+                                Application.Client application,
                                 Geary.ProblemReport report) {
         Object(
             transient_for: parent,
@@ -83,7 +84,7 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
         );
 
         this.log_pane = new Components.InspectorLogView(
-            parent.application.config, account
+            application.config, account
         );
         this.log_pane.load(report.earliest_log, report.latest_log);
         this.log_pane.record_selection_changed.connect(
@@ -91,7 +92,7 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
         );
 
         this.system_pane = new Components.InspectorSystemView(
-            parent.application
+            application
         );
 
         /// Translators: Title for problem report dialog error

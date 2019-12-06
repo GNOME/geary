@@ -756,13 +756,17 @@ public class Application.Client : Gtk.Application {
             // shut the whole thing down if destroy_controller() takes too
             // long to complete
             int64 start_usec = get_monotonic_time();
-            while (!controller_closed) {
+            while (!controller_closed && Gtk.events_pending()) {
                 Gtk.main_iteration();
 
                 int64 delta_usec = get_monotonic_time() - start_usec;
                 if (delta_usec >= FORCE_SHUTDOWN_USEC) {
-                    debug("Forcing shutdown of Geary, %ss passed...",
-                          (delta_usec / USEC_PER_SEC).to_string());
+                    // Use a warning here so a) it's usually logged
+                    // and b) we can run under gdb with
+                    // G_DEBUG=fatal-warnings and have it break when
+                    // this happens, and maybe debug it.
+                    warning("Forcing shutdown of Geary, %ss passed...",
+                            (delta_usec / USEC_PER_SEC).to_string());
                     Posix.exit(2);
                 }
             }
@@ -833,8 +837,10 @@ public class Application.Client : Gtk.Application {
     // Opens the controller
     private async void create_controller() {
         bool first_run = false;
+        bool open_failed = false;
+        int mutex_token = Geary.Nonblocking.Mutex.INVALID_TOKEN;
         try {
-            int mutex_token = yield this.controller_mutex.claim_async();
+            mutex_token = yield this.controller_mutex.claim_async();
             if (this.controller == null) {
                 message(
                     "%s %s%s prefix=%s exec_dir=%s is_installed=%s",
@@ -851,9 +857,28 @@ public class Application.Client : Gtk.Application {
                 );
                 first_run = !this.engine.has_accounts;
             }
-            this.controller_mutex.release(ref mutex_token);
         } catch (Error err) {
-            error("Error creating controller: %s", err.message);
+            open_failed = true;
+            warning("Error creating controller: %s", err.message);
+            var dialog = new Dialogs.ProblemDetailsDialog(
+                null,
+                this,
+                new Geary.ProblemReport(err)
+            );
+            dialog.run();
+        }
+
+        if (mutex_token != Geary.Nonblocking.Mutex.INVALID_TOKEN) {
+            try {
+                this.controller_mutex.release(ref mutex_token);
+            } catch (GLib.Error error) {
+                warning("Failed to release controller mutex: %s",
+                        error.message);
+            }
+        }
+
+        if (open_failed) {
+            quit();
         }
 
         if (first_run) {
