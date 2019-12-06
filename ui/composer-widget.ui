@@ -850,6 +850,16 @@
                             </style>
                           </object>
                         </child>
+                        <child type="overlay">
+                          <object class="GtkProgressBar" id="background_progress">
+                            <property name="can_focus">False</property>
+                            <property name="valign">start</property>
+                            <style>
+                              <class name="osd"/>
+                              <class name="top"/>
+                            </style>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>

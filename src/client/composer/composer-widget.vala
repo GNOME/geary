@@ -28,6 +28,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private const string DEFAULT_TITLE = _("New Message");
 
 
+    /** For providing feedback on slow operation for large inline image paste. */
+    private const int SHOW_BACKGROUND_WORK_TIMEOUT_MSEC = 500;
+    private const int PULSE_TIMEOUT_MSEC = 250;
+
     public enum ComposeType {
         NEW_MESSAGE,
         REPLY,
@@ -386,6 +390,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild]
     private Gtk.Label info_label;
 
+    [GtkChild]
+    private Gtk.ProgressBar background_progress;
+
     private GLib.SimpleActionGroup composer_actions = new GLib.SimpleActionGroup();
     private GLib.SimpleActionGroup editor_actions = new GLib.SimpleActionGroup();
 
@@ -467,6 +474,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private Application.Client application;
+
+    // Timeout for showing the slow image paste pulsing bar
+    private Geary.TimeoutManager show_background_work_timeout = null;
+
+    // Timer for pulsing progress bar
+    private Geary.TimeoutManager background_work_pulse;
 
 
     public Widget(Application.Client application,
@@ -592,6 +605,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.content_loaded.connect(on_content_loaded);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect(on_selection_changed);
+
+        this.show_background_work_timeout = new Geary.TimeoutManager.milliseconds(
+            SHOW_BACKGROUND_WORK_TIMEOUT_MSEC, this.on_background_work_timeout
+        );
+        this.background_work_pulse = new Geary.TimeoutManager.milliseconds(
+            PULSE_TIMEOUT_MSEC, this.background_progress.pulse
+        );
+        this.background_work_pulse.repetition = FOREVER;
 
         load_entry_completions();
     }
@@ -884,6 +905,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.application.engine.account_unavailable.disconnect(
             on_account_unavailable
         );
+
+        this.show_background_work_timeout.reset();
+        this.background_work_pulse.reset();
 
         base.destroy();
     }
@@ -2036,30 +2060,36 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private void paste_image() {
         // The slow operations here are creating the PNG and, to a lesser extent,
         // requesting the image from the clipboard
-        this.container.top_window.application.mark_busy();
+        this.show_background_work_timeout.start();
 
         get_clipboard(Gdk.SELECTION_CLIPBOARD).request_image((clipboard, pixbuf) => {
             if (pixbuf != null) {
-                try {
-                    uint8[] buffer;
-                    pixbuf.save_to_buffer(out buffer, "png");
-                    Geary.Memory.ByteBuffer byte_buffer = new Geary.Memory.ByteBuffer(buffer, buffer.length);
+                MemoryOutputStream os = new MemoryOutputStream(null);
+                pixbuf.save_to_stream_async.begin(os, "png", null, (obj, res) => {
+                    try {
+                        pixbuf.save_to_stream_async.end(res);
+                        os.close();
 
-                    GLib.DateTime time_now = new GLib.DateTime.now();
-                    string filename = PASTED_IMAGE_FILENAME_TEMPLATE.printf(time_now.hash());
+                        Geary.Memory.ByteBuffer byte_buffer = new Geary.Memory.ByteBuffer.from_memory_output_stream(os);
 
-                    string unique_filename;
-                    add_inline_part(byte_buffer, filename, out unique_filename);
-                    this.editor.insert_image(
-                        Components.WebView.INTERNAL_URL_PREFIX + unique_filename
-                    );
-                } catch (Error error) {
-                    warning("Failed to paste image %s", error.message);
-                }
+                        GLib.DateTime time_now = new GLib.DateTime.now();
+                        string filename = PASTED_IMAGE_FILENAME_TEMPLATE.printf(time_now.hash());
+
+                        string unique_filename;
+                        add_inline_part(byte_buffer, filename, out unique_filename);
+                        this.editor.insert_image(
+                            Components.WebView.INTERNAL_URL_PREFIX + unique_filename
+                        );
+                    } catch (Error err) {
+                        warning("Failed to convert pasted clipboard image to PNG");
+                    }
+
+                    stop_background_work_pulse();
+                });
             } else {
                 warning("Failed to get image from clipboard");
+                stop_background_work_pulse();
             }
-            this.container.top_window.application.unmark_busy();
         });
     }
 
@@ -2806,5 +2836,19 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.insert_image(
             Components.WebView.INTERNAL_URL_PREFIX + unique_filename
         );
+    }
+
+    /** Shows and starts pulsing the progress meter. */
+    private void on_background_work_timeout() {
+        this.background_progress.fraction = 0.0;
+        this.background_work_pulse.start();
+        this.background_progress.show();
+    }
+
+    /** Hides and stops pulsing the progress meter. */
+    private void stop_background_work_pulse() {
+        this.background_progress.hide();
+        this.background_work_pulse.reset();
+        this.show_background_work_timeout.reset();
     }
 }
