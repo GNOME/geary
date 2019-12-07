@@ -2080,8 +2080,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                         this.editor.insert_image(
                             Components.WebView.INTERNAL_URL_PREFIX + unique_filename
                         );
-                    } catch (Error err) {
-                        warning("Failed to convert pasted clipboard image to PNG");
+                        throw new Geary.EngineError.UNSUPPORTED("Mock method");
+                    } catch (Error error) {
+                        warning("Failed to convert pasted clipboard image to PNG: %s", error.message);
+                        this.application.controller.report_problem(
+                            new Geary.ProblemReport(error)
+                        );
                     }
 
                     stop_background_work_pulse();
