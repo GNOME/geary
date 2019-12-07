@@ -27,11 +27,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /// Translators: Title for an empty composer window
     private const string DEFAULT_TITLE = _("New Message");
 
-
-    /** For providing feedback on slow operation for large inline image paste. */
-    private const int SHOW_BACKGROUND_WORK_TIMEOUT_MSEC = 500;
-    private const int PULSE_TIMEOUT_MSEC = 250;
-
     public enum ComposeType {
         NEW_MESSAGE,
         REPLY,
@@ -2082,7 +2077,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                         );
                         throw new Geary.EngineError.UNSUPPORTED("Mock method");
                     } catch (Error error) {
-                        warning("Failed to convert pasted clipboard image to PNG: %s", error.message);
                         this.application.controller.report_problem(
                             new Geary.ProblemReport(error)
                         );
