@@ -607,10 +607,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.selection_changed.connect(on_selection_changed);
 
         this.show_background_work_timeout = new Geary.TimeoutManager.milliseconds(
-            SHOW_BACKGROUND_WORK_TIMEOUT_MSEC, this.on_background_work_timeout
+            Util.Gtk.SHOW_PROGRESS_TIMEOUT_MSEC, this.on_background_work_timeout
         );
         this.background_work_pulse = new Geary.TimeoutManager.milliseconds(
-            PULSE_TIMEOUT_MSEC, this.background_progress.pulse
+            Util.Gtk.PROGRESS_PULSE_TIMEOUT_MSEC, this.background_progress.pulse
         );
         this.background_work_pulse.repetition = FOREVER;
 
