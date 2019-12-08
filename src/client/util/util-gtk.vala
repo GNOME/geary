@@ -8,6 +8,13 @@
 
 namespace Util.Gtk {
 
+    /** Delay before showing progress bar for background operations. */
+    public const int SHOW_PROGRESS_TIMEOUT_MSEC = 1000;
+    /** Minimum time for display of progress bar for background operations. */
+    public const int HIDE_PROGRESS_TIMEOUT_MSEC = 1000;
+    /** Frequency for pulse of progress bar for background operations. */
+    public const int PROGRESS_PULSE_TIMEOUT_MSEC = 250;
+
     /**
      * Given an HTML-style color spec, parses the color and sets it to
      * the source RGB of the Cairo context. (Borrowed from Shotwell.)
