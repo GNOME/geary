@@ -1,20 +1,27 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.met>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * An object to hold state for various search subsystems that might need to
- * parse the same text string different ways.
+ * Specifies an expression for searching email in a search folder.
  *
- * The only interaction the API user should have with this is creating new ones and then passing
- * them to the search methods in the Engine.
+ * New instances can be constructed via {@link
+ * Account.new_search_query} and then passed to search methods on
+ * {@link Account} or {@link SearchFolder}.
  *
- * @see Geary.Account.open_search
+ * @see Account.new_search_query
+ * @see Account.local_search_async
+ * @see Account.get_search_matches_async
+ * @see SearchFolder.search
  */
 
 public abstract class Geary.SearchQuery : BaseObject {
+
+
     /**
      * An advisory parameter regarding search quality, scope, and breadth.
      *
@@ -50,8 +57,14 @@ public abstract class Geary.SearchQuery : BaseObject {
         HORIZON
     }
 
+
+    /** The account that owns this query. */
+    public Account owner { get; private set; }
+
     /**
-     * The original user search text.
+     * The original search text.
+     *
+     * This is used mostly for debugging.
      */
     public string raw { get; private set; }
 
@@ -60,7 +73,11 @@ public abstract class Geary.SearchQuery : BaseObject {
      */
     public Strategy strategy { get; private set; }
 
-    protected SearchQuery(string raw, Strategy strategy) {
+
+    protected SearchQuery(Account owner,
+                          string raw,
+                          Strategy strategy) {
+        this.owner = owner;
         this.raw = raw;
         this.strategy = strategy;
     }

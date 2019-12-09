@@ -902,36 +902,52 @@ public class Application.MainWindow :
         return closed;
     }
 
-    public void show_search(string text, bool is_interactive) {
-        Geary.SearchFolder? search_folder = null;
-        if (this.selected_account != null) {
-            search_folder = this.selected_account.get_special_folder(
+    internal async void start_search(string query_text, bool is_interactive) {
+        var account = this.selected_account;
+        if (account != null) {
+            var folder = account.get_special_folder(
                 SEARCH
             ) as Geary.SearchFolder;
-        }
 
+            // Stop any search in progress
+            this.search_open.cancel();
+            var cancellable = this.search_open = new GLib.Cancellable();
+
+            var strategy = this.application.config.get_search_strategy();
+            try {
+                var query = yield account.new_search_query(
+                    query_text,
+                    strategy,
+                    cancellable
+                );
+                this.folder_list.set_search(this.application.engine, folder);
+                yield folder.search(query, cancellable);
+            } catch (GLib.Error error) {
+                handle_error(account.information, error);
+            }
+        }
+    }
+
+    internal void stop_search(bool is_interactive) {
         // Stop any search in progress
         this.search_open.cancel();
-        var cancellable = this.search_open = new GLib.Cancellable();
+        this.search_open = new GLib.Cancellable();
 
-        if (Geary.String.is_empty_or_whitespace(text)) {
-            if (this.previous_non_search_folder != null &&
-                this.selected_folder is Geary.SearchFolder) {
-                this.select_folder.begin(
-                    this.previous_non_search_folder, is_interactive
-                );
-            }
-            this.folder_list.remove_search();
-            if (search_folder !=  null) {
-                search_folder.clear();
-            }
-        } else if (search_folder != null) {
-            search_folder.search(
-                text, this.application.config.get_search_strategy(), cancellable
+        if (this.previous_non_search_folder != null &&
+            this.selected_folder is Geary.SearchFolder) {
+            this.select_folder.begin(
+                this.previous_non_search_folder, is_interactive
             );
-            this.folder_list.set_search(
-                this.application.engine, search_folder
-            );
+        }
+        this.folder_list.remove_search();
+
+        if (this.selected_account != null) {
+            var folder = this.selected_account.get_special_folder(
+                SEARCH
+            ) as Geary.SearchFolder;
+            if (folder != null) {
+                folder.clear();
+            }
         }
     }
 
@@ -2061,7 +2077,11 @@ public class Application.MainWindow :
     }
 
     private void on_search(string text) {
-        show_search(text, true);
+        if (Geary.String.is_empty_or_whitespace(text)) {
+            stop_search(true);
+        } else {
+            this.start_search.begin(text, true);
+        }
     }
 
     private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {

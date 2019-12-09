@@ -261,12 +261,13 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     // A list of all search terms, regardless of search op field name
     private Gee.ArrayList<SearchTerm> all = new Gee.ArrayList<SearchTerm>();
 
-    public async SearchQuery(ImapDB.Account account,
+    public async SearchQuery(Geary.Account owner,
+                             ImapDB.Account local,
                              string query,
                              Geary.SearchQuery.Strategy strategy,
                              GLib.Cancellable? cancellable) {
-        base(query, strategy);
-        this.account = account;
+        base(owner, query, strategy);
+        this.account = local;
 
         switch (strategy) {
             case Strategy.EXACT:

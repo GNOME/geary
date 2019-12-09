@@ -1,12 +1,13 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * Special local {@link Folder} used to query and display search results of {@link Email} from
- * across the {@link Account}'s local storage.
+ * A local folder to execute and collect results of search queries.
  *
  * SearchFolder is merely specified to be a Folder, but implementations may add various
  * {@link FolderSupport} interfaces.  In particular {@link FolderSupport.Remove} should be supported,
@@ -17,8 +18,9 @@
  * translate those EmailIdentifiers to their own type for ordering reasons, but in general the
  * expectation is that the results of SearchFolder can then be applied to operations on Email in
  * other remote-backed folders.
+ *
+ * @see SearchQuery
  */
-
 public abstract class Geary.SearchFolder : Geary.AbstractLocalFolder {
     private weak Account _account;
     public override Account account { get { return _account; } }
@@ -35,13 +37,13 @@ public abstract class Geary.SearchFolder : Geary.AbstractLocalFolder {
         }
     }
 
-    public Geary.SearchQuery? search_query { get; protected set; default = null; }
 
-    /**
-     * Fired when the search query has changed.  This signal is fired *after* the search
-     * has completed.
-     */
-    public signal void search_query_changed(Geary.SearchQuery? query);
+    /** The query being evaluated by this folder, if any. */
+    public Geary.SearchQuery? query { get; protected set; default = null; }
+
+    /** Emitted when the current query has been fully evaluated. */
+    public signal void query_evaluation_complete();
+
 
     protected SearchFolder(Account account, FolderProperties properties, FolderPath path) {
         _account = account;
@@ -49,33 +51,36 @@ public abstract class Geary.SearchFolder : Geary.AbstractLocalFolder {
         _path = path;
     }
 
-    protected virtual void notify_search_query_changed(SearchQuery? query) {
-        search_query_changed(query);
-    }
-
     /**
-     * Sets the keyword string for this search.
+     * Sets the query to be evaluated for this folder.
      *
-     * This is a nonblocking call that initiates a background search which can be stopped with the
-     * supplied Cancellable.
-     *
-     * When the search is completed, {@link search_query_changed} will be fired.  It's possible for
-     * the {@link search_query} property to change before completion.
+     * Executes an asynchronous search, which can be stopped via the
+     * supplied cancellable. When the search is complete, {@link
+     * query_evaluation_complete} will be emitted. if an error occurs,
+     * the signal will not be invoked. It is possible for the {@link
+     * query} property to change before completion.
      */
-    public abstract void search(string query, SearchQuery.Strategy strategy, Cancellable? cancellable = null);
+    public abstract async void search(SearchQuery query,
+                                      GLib.Cancellable? cancellable = null)
+        throws GLib.Error;
 
     /**
      * Clears the search query and results.
      *
-     * {@link search_query_changed} will be fired and {@link search_query} will be set to null.
+     * The {@link query_evaluation_complete} signal will be emitted
+     * and {@link query} will be set to null.
      */
     public abstract void clear();
 
     /**
-     * Given a list of mail IDs, returns a set of casefolded words that match for the current
-     * search query.
+     * Returns a set of case-folded words matched by the current query.
+     *
+     * The set contains words from the given collection of email that
+     * match any of the non-negated text operators in {@link query}.
      */
     public abstract async Gee.Set<string>? get_search_matches_async(
-        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
-}
+        Gee.Collection<EmailIdentifier> ids,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
 
+}

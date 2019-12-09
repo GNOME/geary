@@ -200,6 +200,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         // Halt internal tasks early so they stop using local and
         // remote connections.
+        this.search_folder.clear();
         this.refresh_folder_timer.reset();
         this.open_cancellable.cancel();
         this.processor.stop();
@@ -524,11 +525,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return yield local.fetch_email_async(check_id(email_id), required_fields, cancellable);
     }
 
-    public override async Geary.SearchQuery open_search(string query,
-                                                        SearchQuery.Strategy strategy,
-                                                        GLib.Cancellable? cancellable)
+    /** {@inheritDoc} */
+    public override async SearchQuery new_search_query(string query,
+                                                       SearchQuery.Strategy strategy,
+                                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
-        return yield new ImapDB.SearchQuery(local, query, strategy, cancellable);
+        return yield new ImapDB.SearchQuery(
+            this, local, query, strategy, cancellable
+        );
     }
 
     public override async Gee.Collection<Geary.EmailIdentifier>? local_search_async(Geary.SearchQuery query,

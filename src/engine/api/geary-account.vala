@@ -436,13 +436,12 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * baked into the caller's code is up to the caller.  CONSERVATIVE is designed to be a good
      * default.
      *
-     * The SearchQuery object can only be used with calls into this Account.
-     *
-     * Dropping the last reference to the SearchQuery will close it.
+     * The resulting object can only be used with calls into this
+     * account instance.
      */
-    public abstract async Geary.SearchQuery open_search(string query,
-                                                        SearchQuery.Strategy strategy,
-                                                        GLib.Cancellable? cancellable)
+    public abstract async SearchQuery new_search_query(string query,
+                                                       SearchQuery.Strategy strategy,
+                                                       GLib.Cancellable? cancellable)
         throws GLib.Error;
 
     /**
