@@ -211,15 +211,11 @@ public class Components.InspectorLogView : Gtk.Grid {
     }
 
     private inline bool should_append(Geary.Logging.Record record) {
-        // Blacklist GdkPixbuf since it spams us e.g. when window
-        // focus changes, including between MainWindow and the
-        // Inspector, which is very annoying.
         record.fill_well_known_sources();
         return (
-            record.domain != "GdkPixbuf" &&
-            (record.account == null ||
-             this.account_filter == null ||
-             record.account.information == this.account_filter)
+            record.account == null ||
+            this.account_filter == null ||
+            record.account.information == this.account_filter
         );
     }
 

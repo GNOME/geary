@@ -30,10 +30,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
 
-    private const int SHOW_PROGRESS_TIMEOUT_MSEC = 1000;
-    private const int HIDE_PROGRESS_TIMEOUT_MSEC = 1000;
-    private const int PULSE_TIMEOUT_MSEC = 250;
-
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
 
     private const string ACTION_CONVERSATION_NEW = "conversation-new";
@@ -494,14 +490,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         this.body_container.set_has_tooltip(true); // Used to show link URLs
         this.show_progress_timeout = new Geary.TimeoutManager.milliseconds(
-            SHOW_PROGRESS_TIMEOUT_MSEC, this.on_show_progress_timeout
+            Util.Gtk.SHOW_PROGRESS_TIMEOUT_MSEC, this.on_show_progress_timeout
         );
         this.hide_progress_timeout = new Geary.TimeoutManager.milliseconds(
-            HIDE_PROGRESS_TIMEOUT_MSEC, this.on_hide_progress_timeout
+            Util.Gtk.HIDE_PROGRESS_TIMEOUT_MSEC, this.on_hide_progress_timeout
         );
 
         this.progress_pulse = new Geary.TimeoutManager.milliseconds(
-            PULSE_TIMEOUT_MSEC, this.body_progress.pulse
+            Util.Gtk.PROGRESS_PULSE_TIMEOUT_MSEC, this.body_progress.pulse
         );
         this.progress_pulse.repetition = FOREVER;
     }
