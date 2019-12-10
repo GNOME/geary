@@ -575,7 +575,7 @@ private class Geary.ImapDB.Account : BaseObject {
 
         foreach (string? field in query.get_fields()) {
             debug(" - Field \"%s\" terms:", field);
-            foreach (SearchTerm? term in query.get_search_terms(field)) {
+            foreach (SearchQuery.Term? term in query.get_search_terms(field)) {
                 if (term != null) {
                     debug("    - \"%s\": %s, %s",
                           term.original,
@@ -613,7 +613,7 @@ private class Geary.ImapDB.Account : BaseObject {
             // <http://redmine.yorba.org/issues/7372>.
             StringBuilder sql = new StringBuilder();
             sql.append("""
-                SELECT id, internaldate_time_t
+                SELECT id
                 FROM MessageTable
                 INDEXED BY MessageTableInternalDateTimeTIndex
             """);
@@ -650,11 +650,7 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 message_id = result.int64_at(0);
-                int64 internaldate_time_t = result.int64_at(1);
-                DateTime? internaldate = (internaldate_time_t == -1
-                    ? null : new DateTime.from_unix_local(internaldate_time_t));
-
-                ImapDB.EmailIdentifier id = new ImapDB.SearchEmailIdentifier(message_id, internaldate);
+                var id = new ImapDB.EmailIdentifier(message_id, null);
                 matching_ids.add(id);
                 id_map.set(message_id, id);
 
@@ -739,7 +735,7 @@ private class Geary.ImapDB.Account : BaseObject {
             Gee.Set<string>? result = results.get(id);
             if (result != null) {
                 foreach (string match in result) {
-                    foreach (SearchTerm term in query.get_all_terms()) {
+                    foreach (SearchQuery.Term term in query.get_all_terms()) {
                         // if prefix-matches parsed term, then don't strip
                         if (match.has_prefix(term.parsed)) {
                             good_match_found = true;

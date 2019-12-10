@@ -8,7 +8,7 @@
 /**
  * Gmail-specific SearchFolder implementation.
  */
-private class Geary.ImapEngine.GmailSearchFolder : ImapDB.SearchFolder {
+private class Geary.ImapEngine.GmailSearchFolder : Search.FolderImpl {
 
     private Geary.App.EmailStore email_store;
 

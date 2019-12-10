@@ -417,6 +417,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         char type = (char) serialised.get_child_value(0).get_byte();
         if (type == 'i')
             return new ImapDB.EmailIdentifier.from_variant(serialised);
+        if (type == 's')
+            return new Search.EmailIdentifier.from_variant(serialised, this);
         if (type == 'o')
             return new Outbox.EmailIdentifier.from_variant(serialised);
 
@@ -808,7 +810,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * override this to return the correct subclass.
      */
     protected virtual SearchFolder new_search_folder() {
-        return new ImapDB.SearchFolder(this, this.local_folder_root);
+        return new Search.FolderImpl(this, this.local_folder_root);
     }
 
     /** {@inheritDoc} */

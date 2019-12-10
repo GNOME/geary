@@ -229,11 +229,7 @@ src/engine/imap-db/imap-db-email-identifier.vala
 src/engine/imap-db/imap-db-folder.vala
 src/engine/imap-db/imap-db-gc.vala
 src/engine/imap-db/imap-db-message-row.vala
-src/engine/imap-db/search/imap-db-search-email-identifier.vala
-src/engine/imap-db/search/imap-db-search-folder-properties.vala
-src/engine/imap-db/search/imap-db-search-folder.vala
-src/engine/imap-db/search/imap-db-search-query.vala
-src/engine/imap-db/search/imap-db-search-term.vala
+src/engine/imap-db/imap-db-search-query.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-account.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-all-mail-folder.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-drafts-folder.vala
@@ -365,6 +361,8 @@ src/engine/rfc822/rfc822-message.vala
 src/engine/rfc822/rfc822-part.vala
 src/engine/rfc822/rfc822-utils.vala
 src/engine/rfc822/rfc822.vala
+src/engine/search/search-email-identifier.vala
+src/engine/search/search-folder-impl.vala
 src/engine/smtp/smtp-authenticator.vala
 src/engine/smtp/smtp-capabilities.vala
 src/engine/smtp/smtp-client-connection.vala
