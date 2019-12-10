@@ -804,6 +804,48 @@ private class Geary.ImapDB.Account : BaseObject {
         return search_matches;
     }
 
+    public async Gee.List<Email>? list_email(Gee.Collection<EmailIdentifier> ids,
+                                             Email.Field required_fields,
+                                             GLib.Cancellable? cancellable = null)
+    throws GLib.Error {
+        check_open();
+
+        var results = new Gee.ArrayList<Email>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+                foreach (var id in ids) {
+                    // TODO: once we have a way of deleting messages, we won't be able
+                    // to assume that a row id will point to the same email outside of
+                    // transactions, because SQLite will reuse row ids.
+                    Geary.Email.Field db_fields;
+                    MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
+                        cx, id.message_id, required_fields, out db_fields, cancellable
+                    );
+                    if (!row.fields.fulfills(required_fields)) {
+                        throw new EngineError.INCOMPLETE_MESSAGE(
+                            "Message %s only fulfills %Xh fields (required: %Xh)",
+                            id.to_string(), row.fields, required_fields
+                        );
+                    }
+
+                    Email email = row.to_email(id);
+                    Attachment.add_attachments(
+                        cx,
+                        this.db.attachments_path,
+                        email,
+                        id.message_id,
+                        cancellable
+                    );
+
+                    results.add(email);
+                }
+                return Db.TransactionOutcome.DONE;
+            },
+            cancellable
+        );
+
+        return results;
+    }
+
     public async Geary.Email fetch_email_async(ImapDB.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         check_open();

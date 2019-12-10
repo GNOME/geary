@@ -426,6 +426,22 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
 
     /**
+     * Return a collection of email with the given identifiers.
+     *
+     * The returned collection will be in the same order as the
+     * natural ordering of the given identifiers.
+     *
+     * Throws {@link EngineError.NOT_FOUND} if any email is not found
+     * and {@link EngineError.INCOMPLETE_MESSAGE} if the fields aren't
+     * available.
+     */
+    public abstract async Gee.List<Email> list_local_email_async(
+        Gee.Collection<EmailIdentifier> ids,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
+
+    /**
      * Create a new {@link SearchQuery} for this {@link Account}.
      *
      * See {@link Geary.SearchQuery.Strategy} for more information about how its interpreted by the

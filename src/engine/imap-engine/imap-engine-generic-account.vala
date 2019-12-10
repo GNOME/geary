@@ -512,6 +512,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return (Gee.Collection<ImapDB.EmailIdentifier>) ids;
     }
 
+    /** {@inheritDoc} */
+    public override async SearchQuery new_search_query(string query,
+                                                       SearchQuery.Strategy strategy,
+                                                       GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        return yield new ImapDB.SearchQuery(
+            this, local, query, strategy, cancellable
+        );
+    }
+
     public override async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
@@ -526,12 +536,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override async SearchQuery new_search_query(string query,
-                                                       SearchQuery.Strategy strategy,
-                                                       GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        return yield new ImapDB.SearchQuery(
-            this, local, query, strategy, cancellable
+    public override async Gee.List<Email> list_local_email_async(
+        Gee.Collection<EmailIdentifier> ids,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return yield local.list_email(
+            check_ids(ids), required_fields, cancellable
         );
     }
 

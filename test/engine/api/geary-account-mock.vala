@@ -204,6 +204,18 @@ public class Geary.MockAccount : Account, MockObject {
         );
     }
 
+    public override async Gee.List<Email> list_local_email_async(
+        Gee.Collection<EmailIdentifier> ids,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return object_or_throw_call<Gee.List<Email>>(
+            "list_local_email_async",
+            {ids, box_arg(required_fields), cancellable},
+            new EngineError.NOT_FOUND("Mock call")
+        );
+    }
+
     public override async Email local_fetch_email_async(EmailIdentifier email_id,
                                                         Email.Field required_fields,
                                                         Cancellable? cancellable = null)
