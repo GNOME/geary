@@ -9,7 +9,7 @@
 private class Geary.Outbox.EmailIdentifier : Geary.EmailIdentifier {
 
 
-    private const string VARIANT_TYPE = "(yxx)";
+    private const string VARIANT_TYPE = "(y(xx))";
 
     public int64 message_id { get; private set; }
     public int64 ordering { get; private set; }
@@ -28,9 +28,10 @@ private class Geary.Outbox.EmailIdentifier : Geary.EmailIdentifier {
                 "Invalid serialised id type: %s", serialised.get_type_string()
             );
         }
-        GLib.Variant mid = serialised.get_child_value(1);
-        GLib.Variant uid = serialised.get_child_value(2);
-        this(mid.get_int64(), uid.get_int64());
+        GLib.Variant inner = serialised.get_child_value(1);
+        GLib.Variant mid = inner.get_child_value(0);
+        GLib.Variant ord = inner.get_child_value(1);
+        this(mid.get_int64(), ord.get_int64());
     }
 
     public override int natural_sort_comparator(Geary.EmailIdentifier o) {
@@ -46,8 +47,10 @@ private class Geary.Outbox.EmailIdentifier : Geary.EmailIdentifier {
         // inform GenericAccount that it's an SMTP id.
         return new GLib.Variant.tuple(new Variant[] {
                 new GLib.Variant.byte('o'),
-                new GLib.Variant.int64(this.message_id),
-                new GLib.Variant.int64(this.ordering)
+                new GLib.Variant.tuple(new Variant[] {
+                        new GLib.Variant.int64(this.message_id),
+                        new GLib.Variant.int64(this.ordering)
+                    })
             });
     }
 

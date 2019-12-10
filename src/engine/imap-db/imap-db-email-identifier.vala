@@ -9,7 +9,7 @@
 private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
 
 
-    private const string VARIANT_TYPE = "(yxx)";
+    private const string VARIANT_TYPE = "(y(xx))";
 
 
     public int64 message_id { get; private set; }
@@ -41,12 +41,13 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
                 "Invalid serialised id type: %s", serialised.get_type_string()
             );
         }
+        GLib.Variant inner = serialised.get_child_value(1);
         Imap.UID? uid = null;
-        int64 uid_value = serialised.get_child_value(2).get_int64();
+        int64 uid_value = inner.get_child_value(1).get_int64();
         if (uid_value >= 0) {
             uid = new Imap.UID(uid_value);
         }
-        this(serialised.get_child_value(1).get_int64(), uid);
+        this(inner.get_child_value(0).get_int64(), uid);
     }
 
     // Used to promote an id created with no_message_id to one that has a
@@ -84,8 +85,10 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
         int64 uid_value = this.uid != null ? this.uid.value : -1;
         return new GLib.Variant.tuple(new Variant[] {
                 new GLib.Variant.byte('i'),
-                new GLib.Variant.int64(this.message_id),
-                new GLib.Variant.int64(uid_value)
+                new GLib.Variant.tuple(new Variant[] {
+                        new GLib.Variant.int64(this.message_id),
+                        new GLib.Variant.int64(uid_value)
+                    })
             });
     }
 

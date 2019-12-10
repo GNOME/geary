@@ -21,7 +21,7 @@
 public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.EmailIdentifier> {
 
     /** Base variant type returned by {@link to_variant}. */
-    public const string BASE_VARIANT_TYPE = "(y??)";
+    public const string BASE_VARIANT_TYPE = "(yr)";
 
     // Warning: only change this if you know what you are doing.
     protected string unique;
