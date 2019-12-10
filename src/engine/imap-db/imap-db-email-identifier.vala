@@ -18,8 +18,6 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
     public EmailIdentifier(int64 message_id, Imap.UID? uid) {
         assert(message_id != Db.INVALID_ROWID);
 
-        base (message_id.to_string());
-
         this.message_id = message_id;
         this.uid = uid;
     }
@@ -27,8 +25,6 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
     // Used when a new message comes off the wire and doesn't have a rowid associated with it (yet)
     // Requires a UID in order to find or create such an association
     public EmailIdentifier.no_message_id(Imap.UID uid) {
-        base (Db.INVALID_ROWID.to_string());
-
         message_id = Db.INVALID_ROWID;
         this.uid = uid;
     }
@@ -56,13 +52,24 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
     // you not to be able to find them.
     public void promote_with_message_id(int64 message_id) {
         assert(this.message_id == Db.INVALID_ROWID);
-
-        unique = message_id.to_string();
         this.message_id = message_id;
     }
 
     public bool has_uid() {
         return (uid != null) && uid.is_valid();
+    }
+
+    /** {@inheritDoc} */
+    public override uint hash() {
+        return GLib.int64_hash(this.message_id);
+    }
+
+    /** {@inheritDoc} */
+    public override bool equal_to(Geary.EmailIdentifier other) {
+        return (
+            this.get_type() == other.get_type() &&
+            this.message_id == ((EmailIdentifier) other).message_id
+        );
     }
 
     public override int natural_sort_comparator(Geary.EmailIdentifier o) {
@@ -93,7 +100,11 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
     }
 
     public override string to_string() {
-        return "[%s/%s]".printf(message_id.to_string(), (uid == null ? "null" : uid.to_string()));
+        return "%s(%lld,%s)".printf(
+            this.get_type().name(),
+            this.message_id,
+            this.uid != null ? this.uid.to_string() : "null"
+        );
     }
 
     public static Gee.Set<Imap.UID> to_uids(Gee.Collection<ImapDB.EmailIdentifier> ids) {

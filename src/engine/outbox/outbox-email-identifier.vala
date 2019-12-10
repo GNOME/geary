@@ -16,7 +16,6 @@ private class Geary.Outbox.EmailIdentifier : Geary.EmailIdentifier {
 
 
     public EmailIdentifier(int64 message_id, int64 ordering) {
-        base("Outbox.EmailIdentifier:%s".printf(message_id.to_string()));
         this.message_id = message_id;
         this.ordering = ordering;
     }
@@ -32,6 +31,26 @@ private class Geary.Outbox.EmailIdentifier : Geary.EmailIdentifier {
         GLib.Variant mid = inner.get_child_value(0);
         GLib.Variant ord = inner.get_child_value(1);
         this(mid.get_int64(), ord.get_int64());
+    }
+
+    /** {@inheritDoc} */
+    public override uint hash() {
+        return GLib.int64_hash(this.message_id);
+    }
+
+    /** {@inheritDoc} */
+    public override bool equal_to(Geary.EmailIdentifier other) {
+        return (
+            this.get_type() == other.get_type() &&
+            this.message_id == ((EmailIdentifier) other).message_id
+        );
+    }
+
+    /** {@inheritDoc} */
+    public override string to_string() {
+        return "%s(%lld,%lld)".printf(
+            this.get_type().name(), this.message_id, this.ordering
+        );
     }
 
     public override int natural_sort_comparator(Geary.EmailIdentifier o) {
