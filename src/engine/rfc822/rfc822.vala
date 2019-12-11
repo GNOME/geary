@@ -37,11 +37,11 @@ public void init() {
 }
 
 public GMime.FormatOptions get_format_options() {
-    return new GMime.FormatOptions();
+    return GMime.FormatOptions.get_default();
 }
 
 public GMime.ParserOptions get_parser_options() {
-    return new GMime.ParserOptions();
+    return GMime.ParserOptions.get_default();
 }
 
 public string? get_charset() {
