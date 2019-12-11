@@ -142,10 +142,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                 this.message.add_mailbox(FROM, mailbox.name, mailbox.address);
         }
 
-        if (email.sender != null) {
-            this.message.add_mailbox(SENDER, this.sender.name, this.sender.address);
-        }
-
         // Optional headers
         if (email.to != null) {
             this.to = email.to;
@@ -163,6 +159,16 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             this.bcc = email.bcc;
             foreach (RFC822.MailboxAddress mailbox in email.bcc)
                 this.message.add_mailbox(BCC, mailbox.name, mailbox.address);
+        }
+
+        if (email.sender != null) {
+            this.message.add_mailbox(SENDER, this.sender.name, this.sender.address);
+        }
+
+        if (email.reply_to != null) {
+            this.reply_to = email.reply_to;
+            foreach (RFC822.MailboxAddress mailbox in email.reply_to)
+                this.message.add_mailbox(REPLY_TO, mailbox.name, mailbox.address);
         }
 
         if (email.in_reply_to != null) {
