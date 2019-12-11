@@ -430,7 +430,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             FileQueryInfoFlags.NONE
         );
 
-        GMime.Part part = new GMime.Part();
+        GMime.Part part = new GMime.Part.with_type("text", "plain");
         part.set_disposition(disposition.serialize());
         part.set_filename(file.get_basename());
 
@@ -477,7 +477,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                 );
         }
 
-        GMime.Part part = new GMime.Part();
+        GMime.Part part = new GMime.Part.with_type("text", "plain");
         part.set_disposition(disposition.serialize());
         part.set_filename(basename);
         part.set_content_type(content_type);
@@ -1056,7 +1056,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         string filename = (string) filenameProp.data;
         uint8[] data = Bytes.unref_to_data(new Bytes(a.FileData.data));
 
-        GMime.Part part = new GMime.Part();
+        GMime.Part part = new GMime.Part.with_type("text", "plain");
         part.set_filename(filename);
         part.set_content_type(GMime.ContentType.parse(Geary.RFC822.get_parser_options(), GLib.ContentType.guess(filename, data, null)));
         part.set_content(new GMime.DataWrapper.with_stream(new GMime.StreamMem.with_buffer(data), GMime.ContentEncoding.BINARY));
@@ -1181,7 +1181,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             filter_stream, GMime.ContentEncoding.DEFAULT
         );
 
-        GMime.Part body_part = new GMime.Part();
+        GMime.Part body_part = new GMime.Part.with_type("text", "plain");
         body_part.set_content_type(complete_type);
         body_part.set_content(body);
         body_part.set_content_encoding(encoding);

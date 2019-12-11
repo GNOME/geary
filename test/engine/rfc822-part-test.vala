@@ -94,7 +94,7 @@ class Geary.RFC822.PartTest : TestCase {
 
     private GMime.Part new_part(string? mime_type,
                                 uint8[] body) {
-        GMime.Part part = new GMime.Part();
+        GMime.Part part = new GMime.Part.with_type("text", "plain");
         if (mime_type != null) {
             part.set_content_type(GMime.ContentType.parse(
                 Geary.RFC822.get_parser_options(),
