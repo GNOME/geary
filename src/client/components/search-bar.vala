@@ -12,8 +12,6 @@ public class SearchBar : Gtk.SearchBar {
 
     private Gtk.SearchEntry search_entry = new Gtk.SearchEntry();
     private Components.EntryUndo search_undo;
-    private Geary.ProgressMonitor? search_upgrade_progress_monitor = null;
-    private MonitoredProgressBar search_upgrade_progress_bar = new MonitoredProgressBar();
     private Geary.Account? current_account = null;
 
     public signal void search_text_changed(string search_text);
@@ -34,12 +32,6 @@ public class SearchBar : Gtk.SearchBar {
 
         this.notify["search-mode-enabled"].connect(on_search_mode_changed);
 
-        // Search upgrade progress bar.
-        search_upgrade_progress_bar.show_text = true;
-        search_upgrade_progress_bar.visible = false;
-        search_upgrade_progress_bar.no_show_all = true;
-
-        add(search_upgrade_progress_bar);
         add(search_entry);
 
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
@@ -59,54 +51,21 @@ public class SearchBar : Gtk.SearchBar {
     }
 
     public void set_account(Geary.Account? account) {
-        on_search_upgrade_finished(); // Reset search box.
-
-        if (search_upgrade_progress_monitor != null) {
-            search_upgrade_progress_monitor.start.disconnect(on_search_upgrade_start);
-            search_upgrade_progress_monitor.finish.disconnect(on_search_upgrade_finished);
-            search_upgrade_progress_monitor = null;
-        }
-
         if (current_account != null) {
             current_account.information.changed.disconnect(
-                on_information_changed);
+                on_information_changed
+            );
         }
 
         if (account != null) {
-            search_upgrade_progress_monitor = account.search_upgrade_monitor;
-            search_upgrade_progress_bar.set_progress_monitor(search_upgrade_progress_monitor);
-
-            search_upgrade_progress_monitor.start.connect(on_search_upgrade_start);
-            search_upgrade_progress_monitor.finish.connect(on_search_upgrade_finished);
-            if (search_upgrade_progress_monitor.is_in_progress)
-                on_search_upgrade_start(); // Remove search box, we're already in progress.
-
             account.information.changed.connect(
-                on_information_changed);
-
-            search_upgrade_progress_bar.text =
-                _("Indexing %s account").printf(account.information.display_name);
+                on_information_changed
+            );
         }
 
         current_account = account;
 
         on_information_changed(); // Set new account name.
-    }
-
-    private void on_search_upgrade_start() {
-        // Set the progress bar's width to match the search entry's width.
-        int minimum_width = 0;
-        int natural_width = 0;
-        search_entry.get_preferred_width(out minimum_width, out natural_width);
-        search_upgrade_progress_bar.width_request = minimum_width;
-
-        search_entry.hide();
-        search_upgrade_progress_bar.show();
-    }
-
-    private void on_search_upgrade_finished() {
-        search_entry.show();
-        search_upgrade_progress_bar.hide();
     }
 
     private void on_information_changed() {

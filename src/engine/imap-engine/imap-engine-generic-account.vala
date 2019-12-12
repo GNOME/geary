@@ -107,7 +107,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
          );
 
         this.background_progress = new ReentrantProgressMonitor(ACTIVITY);
-        this.search_upgrade_monitor = local.search_index_monitor;
         this.db_upgrade_monitor = local.upgrade_monitor;
         this.db_vacuum_monitor = local.vacuum_monitor;
 
@@ -170,21 +169,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         yield this.imap.start(cancellable);
         this.queue_operation(new StartPostie(this));
 
-        // Kick off a background update of the search table, but since
-        // the database is getting hammered at startup, wait a bit
-        // before starting the update ... use the ordinal to stagger
-        // these being fired off (important for users with many
-        // accounts registered).
+        // Kick off a background update of the search table.
         //
-        // This is an example of an operation for which we need an
-        // engine-wide operation queue, not just an account-wide
-        // queue.
-        const int POPULATE_DELAY_SEC = 5;
-        int account_sec = this.information.ordinal.clamp(0, 10);
-        Timeout.add_seconds(POPULATE_DELAY_SEC + account_sec, () => {
-                this.local.populate_search_table.begin(cancellable);
-            return false;
-        });
+        // XXX since this hammers the database, this is an example of
+        // an operation for which we need an engine-wide operation
+        // queue, not just an account-wide queue.
+        this.queue_operation(new PopulateSearchTable(this));
     }
 
     public override async void close_async(Cancellable? cancellable = null) throws Error {
@@ -1133,6 +1123,26 @@ internal class Geary.ImapEngine.StartPostie : AccountOperation {
     public override async void execute(GLib.Cancellable cancellable)
         throws GLib.Error {
         yield this.account.outgoing.start(cancellable);
+    }
+
+}
+
+
+/**
+ * Account operation for populating the full-text-search table.
+ */
+internal class Geary.ImapEngine.PopulateSearchTable : AccountOperation {
+
+
+    internal PopulateSearchTable(GenericAccount account) {
+        base(account);
+    }
+
+    public override async void execute(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        yield ((GenericAccount) this.account).local.populate_search_table(
+            cancellable
+        );
     }
 
 }

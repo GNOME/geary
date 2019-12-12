@@ -37,13 +37,12 @@ private class Geary.ImapDB.Account : BaseObject {
         get; private set; default = new Imap.FolderRoot("$geary-imap");
     }
 
-    // Only available when the Account is opened
-    public IntervalProgressMonitor search_index_monitor { get; private set;
-        default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
-    public SimpleProgressMonitor upgrade_monitor { get; private set; default = new SimpleProgressMonitor(
-        ProgressType.DB_UPGRADE); }
-    public SimpleProgressMonitor vacuum_monitor { get; private set; default = new SimpleProgressMonitor(
-        ProgressType.DB_VACUUM); }
+    public SimpleProgressMonitor upgrade_monitor {
+        get; private set; default = new SimpleProgressMonitor(DB_UPGRADE);
+    }
+    public SimpleProgressMonitor vacuum_monitor {
+        get; private set; default = new SimpleProgressMonitor(DB_VACUUM);
+    }
 
     /** The backing database for the account. */
     public ImapDB.Database db { get; private set; }
@@ -918,9 +917,6 @@ private class Geary.ImapDB.Account : BaseObject {
             debug("Error populating %s search table: %s", account_information.id, e.message);
         }
 
-        if (search_index_monitor.is_in_progress)
-            search_index_monitor.notify_finish();
-
         debug("%s: Done populating search table", account_information.id);
     }
 
@@ -1014,13 +1010,6 @@ private class Geary.ImapDB.Account : BaseObject {
         if (count > 0) {
             debug("%s: Found %d/%d missing indexed messages, %d remaining...",
                 account_information.id, count, limit, total_unindexed);
-
-            if (!search_index_monitor.is_in_progress) {
-                search_index_monitor.set_interval(0, total_unindexed);
-                search_index_monitor.notify_start();
-            }
-
-            search_index_monitor.increment(count);
         }
 
         return (count < limit);
