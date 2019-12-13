@@ -37,6 +37,7 @@ geary_client_vala_sources = files(
   'components/components-inspector-system-view.vala',
   'components/components-placeholder-pane.vala',
   'components/components-preferences-window.vala',
+  'components/components-search-bar.vala',
   'components/components-validator.vala',
   'components/components-web-view.vala',
   'components/count-badge.vala',
@@ -46,7 +47,6 @@ geary_client_vala_sources = files(
   'components/main-window-info-bar.vala',
   'components/monitored-progress-bar.vala',
   'components/monitored-spinner.vala',
-  'components/search-bar.vala',
   'components/status-bar.vala',
   'components/stock.vala',
 

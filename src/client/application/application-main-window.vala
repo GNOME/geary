@@ -282,7 +282,7 @@ public class Application.MainWindow :
     // Widget descendants
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public MainToolbar main_toolbar { get; private set; }
-    public SearchBar search_bar { get; private set; default = new SearchBar(); }
+    public SearchBar search_bar { get; private set; }
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
@@ -822,9 +822,9 @@ public class Application.MainWindow :
 
     /** Displays and focuses the search bar for the window. */
     public void show_search_bar(string? text = null) {
-        this.search_bar.give_search_focus();
+        this.search_bar.grab_focus();
         if (text != null) {
-            this.search_bar.set_search_text(text);
+            this.search_bar.entry.text = text;
         }
     }
 
@@ -1012,7 +1012,7 @@ public class Application.MainWindow :
                 yield select_folder(to_select, false);
 
                 if (is_account_search_active) {
-                    this.search_bar.set_search_text("");
+                    this.search_bar.entry.text = "";
                     this.search_bar.search_mode_enabled = false;
                 }
             }
@@ -1178,8 +1178,8 @@ public class Application.MainWindow :
         this.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
         // Search bar
+        this.search_bar = new SearchBar(this.application.engine);
         this.search_bar.search_text_changed.connect(on_search);
-        this.search_bar.show();
         this.search_bar_box.pack_start(this.search_bar, false, false, 0);
 
         // Folder list
