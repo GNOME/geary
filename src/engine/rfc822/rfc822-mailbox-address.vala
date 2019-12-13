@@ -254,7 +254,7 @@ public class Geary.RFC822.MailboxAddress :
         // GMime strips source route for us, so the address part
         // should only ever contain a single '@'
         string? name = mailbox.get_name();
-        if (name != null) {
+        if (name != "") {
             this.name = decode_name(name);
         }
 
@@ -469,7 +469,7 @@ public class Geary.RFC822.MailboxAddress :
                 GMime.utils_header_encode_phrase(
                     Geary.RFC822.get_format_options(),
                     this.name,
-                    Geary.RFC822.get_charset()
+                    "iso-8859-1"
                 ),
                 to_rfc822_address()
             )
