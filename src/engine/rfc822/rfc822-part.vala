@@ -226,12 +226,18 @@ public class Geary.RFC822.Part : Object {
                 filter.add(new Geary.RFC822.FilterBlockquotes());
             }
 
-            wrapper.write_to_stream(filter);
-            filter.flush();
+            if (wrapper.write_to_stream(filter) < 0)
+                throw new RFC822Error.FAILED("Unable to write textual RFC822 part to filter stream");
+            if (filter.flush() != 0)
+                throw new RFC822Error.FAILED("Unable to flush textual RFC822 part to destination stream");
+            if (destination.flush() != 0)
+                throw new RFC822Error.FAILED("Unable to flush textual RFC822 part to destination");
         } else {
             // Keep as binary
-            wrapper.write_to_stream(destination);
-            destination.flush();
+            if (wrapper.write_to_stream(destination) < 0)
+                throw new RFC822Error.FAILED("Unable to write binary RFC822 part to destination stream");
+            if (destination.flush() != 0)
+                throw new RFC822Error.FAILED("Unable to flush binary RFC822 part to destination");
         }
     }
 

@@ -1114,9 +1114,12 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
 
         if (message.write_to_stream(Geary.RFC822.get_format_options(), stream_filter) < 0)
-            throw new RFC822Error.FAILED("Unable to write RFC822 message to memory buffer");
+            throw new RFC822Error.FAILED("Unable to write RFC822 message to filter stream");
 
         if (stream_filter.flush() != 0)
+            throw new RFC822Error.FAILED("Unable to flush RFC822 message to memory stream");
+
+        if (stream.flush() != 0)
             throw new RFC822Error.FAILED("Unable to flush RFC822 message to memory buffer");
 
         return new Memory.ByteBuffer.from_byte_array(byte_array);
