@@ -7,20 +7,21 @@
  */
 
 /**
- * A default implementation of a search folder.
+ * A folder for executing and listing an account-wide email search.
  *
- * This implementation of {@link Geary.SearchFolder} uses the search
- * methods on {@link Account} to implement account-wide email search.
+ * This uses the search methods on {@link Account} to implement the
+ * search, then collects search results and presents them via the
+ * folder interface.
  */
-internal class Geary.Search.FolderImpl :
-    Geary.SearchFolder, Geary.FolderSupport.Remove {
+public class Geary.App.SearchFolder :
+    Geary.AbstractLocalFolder, Geary.FolderSupport.Remove {
 
 
-    /** Max number of emails that can ever be in the folder. */
+    /** Number of messages to include in the initial search. */
     public const int MAX_RESULT_EMAILS = 1000;
 
     /** The canonical name of the search folder. */
-    public const string MAGIC_BASENAME = "$GearySearchFolder$";
+    public const string MAGIC_BASENAME = "$GearyAccountSearchFolder$";
 
     private const Geary.SpecialFolderType[] EXCLUDE_TYPES = {
         Geary.SpecialFolderType.SPAM,
@@ -28,6 +29,124 @@ internal class Geary.Search.FolderImpl :
         Geary.SpecialFolderType.DRAFTS,
         // Orphan emails (without a folder) are also excluded; see ct or.
     };
+
+
+    /** Internal identifier used by the search folder */
+    internal class EmailIdentifier :
+        Geary.EmailIdentifier, Gee.Comparable<EmailIdentifier> {
+
+
+        private const string VARIANT_TYPE = "(y(vx))";
+
+
+        public static int compare_descending(EmailIdentifier a, EmailIdentifier b) {
+            return b.compare_to(a);
+        }
+
+        public static Gee.Collection<Geary.EmailIdentifier> to_source_ids(
+            Gee.Collection<Geary.EmailIdentifier> ids
+        ) {
+            var engine_ids = new Gee.LinkedList<Geary.EmailIdentifier>();
+            foreach (var id in ids) {
+                var search_id = id as EmailIdentifier;
+                engine_ids.add(search_id.source_id ?? id);
+            }
+            return engine_ids;
+        }
+
+        public static Geary.EmailIdentifier to_source_id(
+            Geary.EmailIdentifier id
+        ) {
+            var search_id = id as EmailIdentifier;
+            return search_id.source_id ?? id;
+        }
+
+
+        public Geary.EmailIdentifier source_id { get; private set; }
+
+        public GLib.DateTime? date_received { get; private set; }
+
+
+        public EmailIdentifier(Geary.EmailIdentifier source_id,
+                               GLib.DateTime? date_received) {
+            this.source_id = source_id;
+            this.date_received = date_received;
+        }
+
+        public EmailIdentifier.from_variant(GLib.Variant serialised,
+                                            Account account)
+            throws EngineError.BAD_PARAMETERS {
+            if (serialised.get_type_string() != VARIANT_TYPE) {
+            throw new EngineError.BAD_PARAMETERS(
+                "Invalid serialised id type: %s", serialised.get_type_string()
+            );
+            }
+            GLib.Variant inner = serialised.get_child_value(1);
+            this(
+                account.to_email_identifier(
+                    inner.get_child_value(0).get_variant()
+                ),
+                new GLib.DateTime.from_unix_utc(
+                    inner.get_child_value(1).get_int64()
+                )
+            );
+        }
+
+        public override uint hash() {
+            return this.source_id.hash();
+        }
+
+        public override bool equal_to(Geary.EmailIdentifier other) {
+            return (
+                this.get_type() == other.get_type() &&
+                this.source_id.equal_to(((EmailIdentifier) other).source_id)
+            );
+        }
+
+        public override GLib.Variant to_variant() {
+            // Return a tuple to satisfy the API contract, add an 's' to
+            // inform GenericAccount that it's an IMAP id.
+            return new GLib.Variant.tuple(new Variant[] {
+                    new GLib.Variant.byte('s'),
+                    new GLib.Variant.tuple(new Variant[] {
+                            new GLib.Variant.variant(this.source_id.to_variant()),
+                            new GLib.Variant.int64(this.date_received.to_unix())
+                        })
+                });
+        }
+
+        public override string to_string() {
+            return "%s(%s,%lld)".printf(
+                this.get_type().name(),
+                this.source_id.to_string(),
+                this.date_received.to_unix()
+            );
+        }
+
+        public override int natural_sort_comparator(Geary.EmailIdentifier o) {
+            EmailIdentifier? other = o as EmailIdentifier;
+            if (other == null)
+                return 1;
+
+            return compare_to(other);
+        }
+
+        public virtual int compare_to(EmailIdentifier other) {
+            // if both have date received, compare on that, using stable sort if the same
+            if (date_received != null && other.date_received != null) {
+                int compare = date_received.compare(other.date_received);
+                return (compare != 0) ? compare : stable_sort_comparator(other);
+            }
+
+            // if neither have date received, fall back on stable sort
+            if (date_received == null && other.date_received == null)
+                return stable_sort_comparator(other);
+
+            // put identifiers with no date ahead of those with
+            return (date_received == null ? -1 : 1);
+        }
+
+    }
 
 
     private class FolderProperties : Geary.FolderProperties {
@@ -44,6 +163,38 @@ internal class Geary.Search.FolderImpl :
     }
 
 
+    /** {@inheritDoc} */
+    public override Account account {
+        get { return _account; }
+    }
+    private weak Account _account;
+
+    /** {@inheritDoc} */
+    public override Geary.FolderProperties properties {
+        get { return _properties; }
+    }
+    private Geary.FolderProperties _properties;
+
+    /** {@inheritDoc} */
+    public override FolderPath path {
+        get { return _path; }
+    }
+    private FolderPath? _path = null;
+
+    /**
+     * {@inheritDoc}
+     *
+     * Always returns {@link SpecialFolderType.SEARCH}.
+     */
+    public override SpecialFolderType special_folder_type {
+        get {
+            return Geary.SpecialFolderType.SEARCH;
+        }
+    }
+
+    /** The query being evaluated by this folder, if any. */
+    public Geary.SearchQuery? query { get; protected set; default = null; }
+
     // Folders that should be excluded from search
     private Gee.HashSet<Geary.FolderPath?> exclude_folders =
         new Gee.HashSet<Geary.FolderPath?>();
@@ -56,13 +207,13 @@ internal class Geary.Search.FolderImpl :
 
     private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
 
+    private GLib.Cancellable executing = new GLib.Cancellable();
 
-    public FolderImpl(Geary.Account account, FolderRoot root) {
-        base(
-            account,
-            new FolderProperties(0, 0),
-            root.get_child(MAGIC_BASENAME, Trillian.TRUE)
-        );
+
+    public SearchFolder(Geary.Account account, FolderRoot root) {
+        this._account = account;
+        this._properties = new FolderProperties(0, 0);
+        this._path = root.get_child(MAGIC_BASENAME, Trillian.TRUE);
 
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.folders_special_type.connect(on_folders_special_type);
@@ -71,12 +222,12 @@ internal class Geary.Search.FolderImpl :
 
         clear_contents();
 
-        // We always want to exclude emails that don't live anywhere
-        // from search results.
+        // Always exclude emails that don't live anywhere from search
+        // results.
         exclude_orphan_emails();
     }
 
-    ~FolderImpl() {
+    ~SearchFolder() {
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
         account.folders_special_type.disconnect(on_folders_special_type);
         account.email_locally_complete.disconnect(on_email_locally_complete);
@@ -84,17 +235,25 @@ internal class Geary.Search.FolderImpl :
     }
 
     /**
-     * Sets the keyword string for this search.
+     * Executes the given query over the account's local email.
+     *
+     * Calling this will block until the search is complete.
      */
-    public override async void search(Geary.SearchQuery query,
-                                      GLib.Cancellable? cancellable = null)
+    public async void search(SearchQuery query, GLib.Cancellable? cancellable)
         throws GLib.Error {
         int result_mutex_token = yield result_mutex.claim_async();
+
+        clear();
+
+        if (cancellable != null) {
+            GLib.Cancellable @internal = this.executing;
+            cancellable.cancelled.connect(() => { @internal.cancel(); });
+        }
 
         this.query = query;
         GLib.Error? error = null;
         try {
-            yield do_search_async(null, null, cancellable);
+            yield do_search_async(null, null, this.executing);
         } catch(Error e) {
             error = e;
         }
@@ -104,30 +263,32 @@ internal class Geary.Search.FolderImpl :
         if (error != null) {
             throw error;
         }
-
-        this.query_evaluation_complete();
     }
 
     /**
-     * Clears the search query and results.
+     * Cancels and clears the search query and results.
+     *
+     * The {@link query} property will be cleared.
      */
-    public override void clear() {
+    public void clear() {
+        this.executing.cancel();
+        this.executing = new GLib.Cancellable();
+
         var old_contents = this.contents;
         clear_contents();
         notify_email_removed(old_contents);
         notify_email_count_changed(0, Geary.Folder.CountChangeReason.REMOVED);
 
-        if (this.query != null) {
-            this.query = null;
-            this.query_evaluation_complete();
-        }
+        this.query = null;
     }
 
     /**
-     * Given a list of mail IDs, returns a set of casefolded words that match for the current
-     * search query.
+     * Returns a set of case-folded words matched by the current query.
+     *
+     * The set contains words from the given collection of email that
+     * match any of the non-negated text operators in {@link query}.
      */
-    public override async Gee.Set<string>? get_search_matches_async(
+    public async Gee.Set<string>? get_search_matches_async(
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {

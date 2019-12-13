@@ -11,12 +11,12 @@
  *
  * New instances can be constructed via {@link
  * Account.new_search_query} and then passed to search methods on
- * {@link Account} or {@link SearchFolder}.
+ * {@link Account} or {@link App.SearchFolder}.
  *
  * @see Account.new_search_query
  * @see Account.local_search_async
  * @see Account.get_search_matches_async
- * @see SearchFolder.search
+ * @see App.SearchFolder.search
  */
 
 public abstract class Geary.SearchQuery : BaseObject {

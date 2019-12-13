@@ -244,7 +244,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     }
 
     public void set_search(Geary.Engine engine,
-                           Geary.SearchFolder search_folder) {
+                           Geary.App.SearchFolder search_folder) {
         if (search_branch != null && has_branch(search_branch)) {
             // We already have a search folder.  If it's the same one, just
             // select it.  If it's a new search folder, remove the old one and

@@ -131,6 +131,16 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      */
     public Geary.ContactStore contact_store { get; protected set; }
 
+    /**
+     * The root path for all local folders.
+     *
+     * Any local folders create by the engine or clients must use this
+     * as the root for local folders.
+     */
+    public FolderRoot local_folder_root {
+        get; private set; default = new Geary.FolderRoot("$geary-local", true);
+    }
+
     public ProgressMonitor background_progress { get; protected set; }
     public ProgressMonitor db_upgrade_monitor { get; protected set; }
     public ProgressMonitor db_vacuum_monitor { get; protected set; }

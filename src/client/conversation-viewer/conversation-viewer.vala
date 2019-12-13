@@ -296,7 +296,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             conversation.base_folder.account, null
         );
         if (query == null) {
-            var search_folder = conversation.base_folder as Geary.SearchFolder;
+            var search_folder = conversation.base_folder as Geary.App.SearchFolder;
             if (search_folder != null) {
                 query = search_folder.query;
             }
@@ -454,9 +454,9 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             } else {
                 // Find became disabled, re-show search terms if any
                 this.current_list.search.unmark_terms();
-                Geary.SearchFolder? search_folder = (
+                Geary.App.SearchFolder? search_folder = (
                     this.current_list.conversation.base_folder
-                    as Geary.SearchFolder
+                    as Geary.App.SearchFolder
                 );
                 this.conversation_find_undo.reset();
                 if (search_folder != null) {

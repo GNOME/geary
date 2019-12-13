@@ -676,13 +676,14 @@ public class Application.MainWindow :
                      !this.folder_list.select_inbox(to_select.account))) {
                     this.folder_list.select_folder(to_select);
                 }
+
+                if (to_select.special_folder_type == SEARCH) {
+                    this.previous_non_search_folder = to_select;
+                }
             } else {
                 this.folder_list.deselect_folder();
             }
 
-            if (!(to_select is Geary.SearchFolder)) {
-                this.previous_non_search_folder = to_select;
-            }
             update_conversation_actions(NONE);
             update_title();
             this.main_toolbar.update_trash_button(
@@ -903,27 +904,25 @@ public class Application.MainWindow :
     }
 
     internal async void start_search(string query_text, bool is_interactive) {
-        var account = this.selected_account;
-        if (account != null) {
-            var folder = account.get_special_folder(
-                SEARCH
-            ) as Geary.SearchFolder;
-
+        var context = get_selected_account_context();
+        if (context != null) {
             // Stop any search in progress
             this.search_open.cancel();
             var cancellable = this.search_open = new GLib.Cancellable();
 
             var strategy = this.application.config.get_search_strategy();
             try {
-                var query = yield account.new_search_query(
+                var query = yield context.account.new_search_query(
                     query_text,
                     strategy,
                     cancellable
                 );
-                this.folder_list.set_search(this.application.engine, folder);
-                yield folder.search(query, cancellable);
+                this.folder_list.set_search(
+                    this.application.engine, context.search
+                );
+                yield context.search.search(query, cancellable);
             } catch (GLib.Error error) {
-                handle_error(account.information, error);
+                handle_error(context.account.information, error);
             }
         }
     }
@@ -934,20 +933,15 @@ public class Application.MainWindow :
         this.search_open = new GLib.Cancellable();
 
         if (this.previous_non_search_folder != null &&
-            this.selected_folder is Geary.SearchFolder) {
+            this.selected_folder.special_folder_type == SEARCH) {
             this.select_folder.begin(
                 this.previous_non_search_folder, is_interactive
             );
         }
         this.folder_list.remove_search();
 
-        if (this.selected_account != null) {
-            var folder = this.selected_account.get_special_folder(
-                SEARCH
-            ) as Geary.SearchFolder;
-            if (folder != null) {
-                folder.clear();
-            }
+        foreach (var context in this.application.controller.get_account_contexts()) {
+            context.search.clear();
         }
     }
 
@@ -988,6 +982,10 @@ public class Application.MainWindow :
                 Geary.Account.sort_by_path(to_add.account.list_folders())
             );
 
+            add_folder(
+                ((Geary.Smtp.ClientService) to_add.account.outgoing).outbox
+            );
+
             this.accounts.add(to_add);
         }
     }
@@ -1007,14 +1005,13 @@ public class Application.MainWindow :
             // that when the account is gone.
             if (this.selected_folder != null &&
                 this.selected_folder.account == to_remove.account) {
-                Geary.SearchFolder? current_search = (
-                    this.selected_folder as Geary.SearchFolder
+                bool is_account_search_active = (
+                    this.selected_folder.special_folder_type == SEARCH
                 );
 
                 yield select_folder(to_select, false);
 
-                // Clear the account's search folder if it existed
-                if (current_search != null) {
+                if (is_account_search_active) {
                     this.search_bar.set_search_text("");
                     this.search_bar.search_mode_enabled = false;
                 }
@@ -1583,7 +1580,7 @@ public class Application.MainWindow :
         if (!this.has_composer) {
             if (this.conversations.size == 0) {
                 // Let the user know if there's no available conversations
-                if (this.selected_folder is Geary.SearchFolder) {
+                if (this.selected_folder.special_folder_type == SEARCH) {
                     this.conversation_viewer.show_empty_search();
                 } else {
                     this.conversation_viewer.show_empty_folder();

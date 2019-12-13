@@ -37,7 +37,6 @@ geary_engine_vala_sources = files(
   'api/geary-problem-report.vala',
   'api/geary-progress-monitor.vala',
   'api/geary-revokable.vala',
-  'api/geary-search-folder.vala',
   'api/geary-search-query.vala',
   'api/geary-service-information.vala',
   'api/geary-service-provider.vala',
@@ -47,6 +46,7 @@ geary_engine_vala_sources = files(
   'app/app-conversation-monitor.vala',
   'app/app-draft-manager.vala',
   'app/app-email-store.vala',
+  'app/app-search-folder.vala',
 
   'app/conversation-monitor/app-append-operation.vala',
   'app/conversation-monitor/app-conversation-operation-queue.vala',
@@ -197,7 +197,6 @@ geary_engine_vala_sources = files(
   'imap-engine/gmail/imap-engine-gmail-all-mail-folder.vala',
   'imap-engine/gmail/imap-engine-gmail-drafts-folder.vala',
   'imap-engine/gmail/imap-engine-gmail-folder.vala',
-  'imap-engine/gmail/imap-engine-gmail-search-folder.vala',
   'imap-engine/gmail/imap-engine-gmail-spam-trash-folder.vala',
   'imap-engine/other/imap-engine-other-account.vala',
   'imap-engine/other/imap-engine-other-folder.vala',
@@ -269,9 +268,6 @@ geary_engine_vala_sources = files(
   'rfc822/rfc822-message-data.vala',
   'rfc822/rfc822-part.vala',
   'rfc822/rfc822-utils.vala',
-
-  'search/search-email-identifier.vala',
-  'search/search-folder-impl.vala',
 
   'smtp/smtp-authenticator.vala',
   'smtp/smtp-capabilities.vala',
