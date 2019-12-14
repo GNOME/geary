@@ -1226,15 +1226,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         return !op.accumulator.is_empty ? op.accumulator : null;
     }
 
-    public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
-        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
-        check_open("list_local_email_fields_async");
-        check_ids("list_local_email_fields_async", ids);
-
-        return yield local_folder.list_email_fields_by_id_async(
-            (Gee.Collection<Geary.ImapDB.EmailIdentifier>) ids, ImapDB.Folder.ListFlags.NONE, cancellable);
-    }
-
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {

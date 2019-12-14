@@ -317,18 +317,6 @@ public class Geary.App.SearchFolder :
         );
     }
 
-    public override async Gee.Map<EmailIdentifier,Email.Field>? list_local_email_fields_async(
-        Gee.Collection<EmailIdentifier> list,
-        GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        check_ids(list);
-        // TODO: This method is not currently called, but is required
-        // by the interface.  Before completing this feature, it
-        // should either be implemented either here or in
-        // AbstractLocalFolder.
-        error("Search folder does not implement list_local_email_fields_async");
-    }
-
     public override async Email fetch_email_async(EmailIdentifier fetch,
                                                   Email.Field required_fields,
                                                   Folder.ListFlags flags,

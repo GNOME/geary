@@ -325,37 +325,6 @@ public class Geary.Outbox.Folder :
         return (list.size > 0) ? list : null;
     }
 
-    public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>?
-        list_local_email_fields_async(Gee.Collection<Geary.EmailIdentifier> ids,
-                                      GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        check_open();
-
-        Gee.Map<Geary.EmailIdentifier, Geary.Email.Field> map = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.Email.Field>();
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare(
-                "SELECT id FROM SmtpOutboxTable WHERE ordering=?");
-            foreach (Geary.EmailIdentifier id in ids) {
-                EmailIdentifier? outbox_id = id as EmailIdentifier;
-                if (outbox_id == null)
-                    throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
-
-                stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
-                stmt.bind_int64(0, outbox_id.ordering);
-
-                // merely checking for presence, all emails in outbox have same fields
-                Db.Result results = stmt.exec(cancellable);
-                if (!results.finished)
-                    map.set(outbox_id, Geary.Email.Field.ALL);
-            }
-
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-
-        return (map.size > 0) ? map : null;
-    }
-
     public override async Email
         fetch_email_async(Geary.EmailIdentifier id,
                           Geary.Email.Field required_fields,
