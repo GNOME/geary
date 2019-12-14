@@ -99,21 +99,6 @@ public class Geary.ImapEngine.GenericAccountTest : TestCase {
                 )
             )
         );
-        assert_non_null(
-            test_article.to_email_identifier(
-                new GLib.Variant(
-                    "(yr)",
-                    's',
-                    new GLib.Variant(
-                        "(vx)",
-                        new GLib.Variant(
-                            "(yr)", 'o', new GLib.Variant("(xx)", 1, 2)
-                        ),
-                        3
-                    )
-                )
-            )
-        );
     }
 
 }
