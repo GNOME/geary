@@ -1258,9 +1258,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         RemoveEmail remove = new RemoveEmail(
             this,
-            (Gee.List<ImapDB.EmailIdentifier>)
-            traverse(to_expunge).to_array_list(),
-            cancellable);
+            (Gee.Collection<ImapDB.EmailIdentifier>) to_expunge,
+            cancellable
+        );
         replay_queue.schedule(remove);
 
         yield remove.wait_for_ready_async(cancellable);
@@ -1312,8 +1312,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         MarkEmail mark = new MarkEmail(
             this,
-            (Gee.List<ImapDB.EmailIdentifier>)
-            traverse(to_mark).to_array_list(),
+            (Gee.Collection<ImapDB.EmailIdentifier>)
+            to_mark,
             flags_to_add,
             flags_to_remove,
             cancellable
@@ -1374,10 +1374,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return null;
 
         MoveEmailPrepare prepare = new MoveEmailPrepare(
-            this,
-            (Gee.List<ImapDB.EmailIdentifier>)
-            traverse(to_move).to_array_list(),
-            cancellable);
+            this, (Gee.Collection<ImapDB.EmailIdentifier>) to_move, cancellable
+        );
         replay_queue.schedule(prepare);
 
         yield prepare.wait_for_ready_async(cancellable);
