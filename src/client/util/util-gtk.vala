@@ -202,4 +202,13 @@ namespace Util.Gtk {
         return copy;
     }
 
+    /** Returns a truncated form of a URL if it is too long for display. */
+    public string shorten_url(string url) {
+        string new_url = url;
+        if (url.length >= 90) {
+            new_url = url.substring(0,40) + "…" + url.substring(-40);
+        }
+        return new_url;
+    }
+
 }
