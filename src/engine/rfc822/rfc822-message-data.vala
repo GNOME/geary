@@ -323,7 +323,7 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
     }
 
     public string? get_header(string name) throws RFC822Error {
-        return get_headers().get_header(name).get_value();
+        return GMime.utils_header_unfold(get_headers().get_header(name).get_raw_value());
     }
 
     public string[] get_header_names() throws RFC822Error {

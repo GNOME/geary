@@ -895,7 +895,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         for (int i = 0; i < headers.get_count(); i++) {
             GMime.Header header = headers.get_header_at(i);
             string name = header.get_name();
-            string value = header.get_value();
+            string value = GMime.utils_header_unfold(header.get_raw_value());
             switch (name.down()) {
               case "from":
                   this.from = append_address(this.from, value);
