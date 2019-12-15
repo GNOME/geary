@@ -37,11 +37,13 @@ public void init() {
 }
 
 public GMime.FormatOptions get_format_options() {
-    return GMime.FormatOptions.get_default();
+    return GMime.FormatOptions.get_default().clone();
 }
 
 public GMime.ParserOptions get_parser_options() {
-    return GMime.ParserOptions.get_default();
+    GMime.ParserOptions opt = GMime.ParserOptions.get_default().clone();
+    opt.set_allow_addresses_without_domain(true);
+    return opt;
 }
 
 public string? get_charset() {
