@@ -431,6 +431,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             if (text.length >= 2) {
                 var strategy = this.config.get_search_strategy();
                 query = yield account.new_search_query(
+                    new Geary.SearchQuery.TextOperator(ALL, strategy, text),
                     text,
                     strategy,
                     cancellable

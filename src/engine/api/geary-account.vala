@@ -512,7 +512,7 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     ) throws GLib.Error;
 
     /**
-     * Create a new {@link SearchQuery} for this {@link Account}.
+     * Create a new search query for this account.
      *
      * See {@link Geary.SearchQuery.Strategy} for more information about how its interpreted by the
      * Engine.  In particular, note that it's an advisory parameter only and may have no effect,
@@ -525,7 +525,8 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * The resulting object can only be used with calls into this
      * account instance.
      */
-    public abstract async SearchQuery new_search_query(string query,
+    public abstract async SearchQuery new_search_query(SearchQuery.Operator expression,
+                                                       string text,
                                                        SearchQuery.Strategy strategy,
                                                        GLib.Cancellable? cancellable)
         throws GLib.Error;

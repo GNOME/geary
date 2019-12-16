@@ -959,6 +959,7 @@ public class Application.MainWindow :
             var strategy = this.application.config.get_search_strategy();
             try {
                 var query = yield context.account.new_search_query(
+                    new Geary.SearchQuery.TextOperator(ALL, strategy, query_text),
                     query_text,
                     strategy,
                     cancellable

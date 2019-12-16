@@ -7,8 +7,10 @@
 
 public class Mock.SearchQuery : Geary.SearchQuery {
 
-    internal SearchQuery(Geary.Account owner, string raw) {
-        base(owner, raw, Geary.SearchQuery.Strategy.EXACT);
+    internal SearchQuery(Account owner,
+                         Geary.SearchQuery.Operator expression,
+                         string raw) {
+        base(owner, expression, raw, Geary.SearchQuery.Strategy.EXACT);
     }
 
 }

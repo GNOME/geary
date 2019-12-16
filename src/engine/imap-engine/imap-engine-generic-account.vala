@@ -572,12 +572,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override async SearchQuery new_search_query(string query,
+    public override async SearchQuery new_search_query(SearchQuery.Operator expression,
+                                                       string text,
                                                        SearchQuery.Strategy strategy,
                                                        GLib.Cancellable? cancellable)
         throws GLib.Error {
         return yield new ImapDB.SearchQuery(
-            this, local, query, strategy, cancellable
+            this, local, expression, text, strategy, cancellable
         );
     }
 

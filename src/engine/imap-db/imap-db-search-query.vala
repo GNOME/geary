@@ -323,10 +323,11 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
 
     public async SearchQuery(Geary.Account owner,
                              ImapDB.Account local,
+                             Geary.SearchQuery.Operator expression,
                              string query,
                              Geary.SearchQuery.Strategy strategy,
                              GLib.Cancellable? cancellable) {
-        base(owner, query, strategy);
+        base(owner, expression, query, strategy);
         this.account = local;
         this.stemmer = new SnowBall.Stemmer(find_appropriate_search_stemmer());
 
