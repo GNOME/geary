@@ -28,6 +28,7 @@ public void init() {
         return;
 
     GMime.init();
+    GMime.ParserOptions.get_default().set_allow_addresses_without_domain(true);
 
     try {
         invalid_filename_character_re = new Regex("[/\\0]");
@@ -41,9 +42,7 @@ public GMime.FormatOptions get_format_options() {
 }
 
 public GMime.ParserOptions get_parser_options() {
-    GMime.ParserOptions opt = GMime.ParserOptions.get_default().clone();
-    opt.set_allow_addresses_without_domain(true);
-    return opt;
+    return GMime.ParserOptions.get_default().clone();
 }
 
 public string? get_charset() {
