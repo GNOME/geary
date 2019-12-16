@@ -981,11 +981,14 @@ public class Application.MainWindow :
                 this.previous_non_search_folder = this.selected_folder;
             }
 
-            var strategy = this.application.config.get_search_strategy();
             try {
+                var expr_factory = new Util.Email.SearchExpressionFactory(
+                    this.application.config.get_search_strategy(),
+                    context.account.information
+                );
                 var query = yield context.account.new_search_query(
+                    expr_factory.parse_query(query_text),
                     query_text,
-                    strategy,
                     cancellable
                 );
                 this.folder_list.set_search(

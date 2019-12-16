@@ -99,6 +99,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
         }
     }
 
+    private Geary.SearchQuery.Strategy strategy;
 
     // Maps of localised search operator names and values to their
     // internal forms
@@ -323,10 +324,11 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
 
     public async SearchQuery(Geary.Account owner,
                              ImapDB.Account local,
-                             string query,
+                             Gee.Collection<Geary.SearchQuery.Term> expression,
+                             string raw,
                              Geary.SearchQuery.Strategy strategy,
                              GLib.Cancellable? cancellable) {
-        base(owner, query, strategy);
+        base(expression, raw);
         this.account = local;
         this.stemmer = new SnowBall.Stemmer(find_appropriate_search_stemmer());
 

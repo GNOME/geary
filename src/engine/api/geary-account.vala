@@ -512,23 +512,13 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     ) throws GLib.Error;
 
     /**
-     * Create a new {@link SearchQuery} for this {@link Account}.
-     *
-     * See {@link Geary.SearchQuery.Strategy} for more information about how its interpreted by the
-     * Engine.  In particular, note that it's an advisory parameter only and may have no effect,
-     * especially on server searches.  However, it may also have a dramatic effect on what search
-     * results are returned and so should be used with some caution.  Whether this parameter is
-     * user-configurable, available through GSettings or another configuration mechanism, or simply
-     * baked into the caller's code is up to the caller.  CONSERVATIVE is designed to be a good
-     * default.
-     *
-     * The resulting object can only be used with calls into this
-     * account instance.
+     * Create a new search query for this account.
      */
-    public abstract async SearchQuery new_search_query(string query,
-                                                       SearchQuery.Strategy strategy,
-                                                       GLib.Cancellable? cancellable)
-        throws GLib.Error;
+    public abstract async SearchQuery new_search_query(
+        Gee.List<SearchQuery.Term> expression,
+        string text,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error;
 
     /**
      * Performs a search with the given query.  Optionally, a list of folders not to search

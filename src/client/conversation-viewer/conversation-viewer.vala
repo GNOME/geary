@@ -429,10 +429,13 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             // opening every message in the conversation as soon as
             // the user presses a key
             if (text.length >= 2) {
-                var strategy = this.config.get_search_strategy();
+                var expr_factory = new Util.Email.SearchExpressionFactory(
+                    this.config.get_search_strategy(),
+                    account.information
+                );
                 query = yield account.new_search_query(
+                    expr_factory.parse_query(text),
                     text,
-                    strategy,
                     cancellable
                 );
             }
