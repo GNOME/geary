@@ -243,9 +243,15 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
             prefetch_max_epoch = this.sync_max_epoch;
         }
 
+        ImapDB.Folder local_folder = ((MinimalFolder) this.folder).local_folder;
+
+        // Detach older emails outside the prefetch window
+        if (this.account.information.prefetch_period_days >= 0) {
+            yield local_folder.detach_emails_before_timestamp(prefetch_max_epoch, cancellable);
+        }
+
         // get oldest local email and its time, as well as number
         // of messages in local store
-        ImapDB.Folder local_folder = ((MinimalFolder) this.folder).local_folder;
         Gee.List<Geary.Email>? list = yield local_folder.list_email_by_id_async(
             null,
             1,

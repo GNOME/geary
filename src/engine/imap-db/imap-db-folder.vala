@@ -882,6 +882,34 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }, cancellable);
     }
 
+    public async void detach_emails_before_timestamp(DateTime cutoff,
+        Cancellable? cancellable) throws Error {
+        warning("Detaching emails before %s for folder ID %", cutoff.to_string(), this.folder_id.to_string());
+
+        yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+            // Query was found to be faster than other approaches. MessageLocationTable.ordering
+            // isn't relied on due to IMAP folder UIDs not guaranteed to be in order.
+            StringBuilder sql = new StringBuilder();
+            sql.append("""
+                DELETE FROM MessageLocationTable
+                WHERE folder_id = ?
+                AND message_id IN (
+                    SELECT id
+                    FROM MessageTable
+                    INDEXED BY MessageTableInternalDateTimeTIndex
+                    WHERE internaldate_time_t < ?
+                )
+            """);
+
+            Db.Statement stmt = cx.prepare(sql.str);
+            stmt.bind_rowid(0, this.folder_id);
+            stmt.bind_int64(1, cutoff.to_unix());
+            stmt.exec(cancellable);
+
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+    }
+
     public async void mark_email_async(Gee.Collection<ImapDB.EmailIdentifier> to_mark,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, Cancellable? cancellable)
         throws Error {
