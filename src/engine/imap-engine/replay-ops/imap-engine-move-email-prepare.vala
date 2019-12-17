@@ -19,8 +19,9 @@ private class Geary.ImapEngine.MoveEmailPrepare : Geary.ImapEngine.SendReplayOpe
     private Cancellable? cancellable;
     private Gee.List<ImapDB.EmailIdentifier> to_move = new Gee.ArrayList<ImapDB.EmailIdentifier>();
 
-    public MoveEmailPrepare(MinimalFolder engine, Gee.Collection<ImapDB.EmailIdentifier> to_move,
-        Cancellable? cancellable) {
+    public MoveEmailPrepare(MinimalFolder engine,
+                            Gee.Collection<ImapDB.EmailIdentifier> to_move,
+                            GLib.Cancellable? cancellable) {
         base.only_local("MoveEmailPrepare", OnError.RETRY);
 
         this.engine = engine;

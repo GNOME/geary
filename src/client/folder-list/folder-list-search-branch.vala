@@ -8,12 +8,12 @@
  * This branch is a top-level container for a search entry.
  */
 public class FolderList.SearchBranch : Sidebar.RootOnlyBranch {
-    public SearchBranch(Geary.SearchFolder folder, Geary.Engine engine) {
+    public SearchBranch(Geary.App.SearchFolder folder, Geary.Engine engine) {
         base(new SearchEntry(folder, engine));
     }
 
-    public Geary.SearchFolder get_search_folder() {
-        return (Geary.SearchFolder) ((SearchEntry) get_root()).folder;
+    public Geary.App.SearchFolder get_search_folder() {
+        return (Geary.App.SearchFolder) ((SearchEntry) get_root()).folder;
     }
 }
 
@@ -22,7 +22,7 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     Geary.Engine engine;
     private int account_count = 0;
 
-    public SearchEntry(Geary.SearchFolder folder,
+    public SearchEntry(Geary.App.SearchFolder folder,
                        Geary.Engine engine) {
         base(folder);
         this.engine = engine;
