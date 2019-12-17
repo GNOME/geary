@@ -895,6 +895,9 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         for (int i = 0; i < headers.get_count(); i++) {
             GMime.Header header = headers.get_header_at(i);
             string name = header.get_name();
+            // We should not parse the raw-value here, but use GMime's parsing
+            // functionality instead.
+            // See: https://gitlab.gnome.org/GNOME/geary/merge_requests/382#note_669699
             string value = GMime.utils_header_unfold(header.get_raw_value());
             switch (name.down()) {
               case "from":

@@ -312,8 +312,6 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
 
         GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(buffer));
         parser.set_respect_content_length(false);
-        // TODO Could this be omitted?
-        parser.set_format(GMime.Format.MESSAGE);
 
         message = parser.construct_message(Geary.RFC822.get_parser_options());
         if (message == null)
@@ -325,6 +323,9 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
     public string? get_header(string name) throws RFC822Error {
         GMime.Header header = get_headers().get_header(name);
         if (header != null)
+            // We should not parse the raw-value here, but use GMime's parsing
+            // functionality instead.
+            // See: https://gitlab.gnome.org/GNOME/geary/merge_requests/382#note_669699
             return GMime.utils_header_unfold(header.get_raw_value());
         else
             return null;
