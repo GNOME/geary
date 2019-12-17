@@ -12,6 +12,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         add_test("is_valid_address", is_valid_address);
         add_test("unescaped_constructor", unescaped_constructor);
         add_test("from_rfc822_string_encoded", from_rfc822_string_encoded);
+        add_test("prepare_header_text_part", prepare_header_text_part);
         // latter depends on the former, so test that first
         add_test("has_distinct_name", has_distinct_name);
         add_test("is_spoofed", is_spoofed);
@@ -147,12 +148,29 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
             addr = new MailboxAddress.from_rfc822_string("\"=?utf-8?Q?=42=45=47=49=4E=20=2F=20=28=7C=29=7C=3C=7C=3E=7C=40=7C=2C=7C=3B=7C=3A=7C=5C=7C=22=7C=2F=7C=5B=7C=5D=7C=3F=7C=2E=7C=3D=20=2F=20=00=20=50=41=53=53=45=44=20=4E=55=4C=4C=20=42=59=54=45=20=2F=20=0D=0A=20=50=41=53=53=45=44=20=43=52=4C=46=20=2F=20?==?utf-8?b?RU5E=?=\"");
             assert(addr.name == null);
             assert(addr.address == "BEGIN / (|)|<|>|@|,|;|:|\\|\"|/|[|]|?|.|= / ? PASSED NULL BYTE / \r\n PASSED CRLF / END");
+        } catch (Error err) {
+            assert_not_reached();
+        }
+    }
 
-            // Disabled since GMime doen't seem to recognize this as a valid address (might be fixable with different parser options)
-            //addr = new MailboxAddress.from_rfc822_string("=?UTF-8?Q?=22Firstname_=22=C2=AF\\=5F=28=E3=83=84=29=5F/=C2=AF=22_Lastname_via?==?UTF-8?Q?_Vendor=22_<system@vendor.com>?=");
-            //assert(addr.name == "Firstname ¯_(ツ)_/¯ Lastname via=?UTF-8?Q?_Vendor=22_");
-            //assert(addr.mailbox == "system");
-            //assert(addr.domain == "vendor.com");
+    public void prepare_header_text_part() throws Error {
+        try {
+            // Test if prepare_header_text_part() can handle crappy input without grilling the CPU
+            addr = new MailboxAddress.imap(
+                "=?UTF-8?Q?=22Firstname_=22=C2=AF\\=5F=28=E3=83=84=29=5F/=C2=AF=22_Lastname_via?==?UTF-8?Q?_Vendor=22_<system@vendor.com>?=",
+                null,
+                "=?UTF-8?Q?=22Firstname_=22=C2=AF\\=5F=28=E3=83=84=29=5F/=C2=AF=22_Lastname_via?==?UTF-8?Q?_Vendor=22_<system@vendor.com>?=",
+                "vendor.com");
+            assert(addr.name == "\"Firstname \"¯_(ツ)_/¯\" Lastname via Vendor\" <system@vendor.com>");
+            assert(addr.mailbox == "\"Firstname \"¯_(ツ)_/¯\" Lastname via Vendor\" <system@vendor.com>");
+
+            // A second test with the input that have been passed to prepare_header_text_part() by the pre-GMime3 tests
+            MailboxAddress addr = new MailboxAddress.imap(
+                "\"Firstname \"¯_(ツ)_/¯\" Lastname via=?UTF-8?Q?_Vendor=22_",
+                null,
+                "system",
+                "vendor.com");
+            assert(addr.name == "Firstname ¯_(ツ)_/¯ Lastname via=?UTF-8?Q?_Vendor=22_");
         } catch (Error err) {
             assert_not_reached();
         }
