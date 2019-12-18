@@ -110,13 +110,6 @@ public class Geary.MockFolder : Folder, MockObject {
         );
     }
 
-    public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>?
-        list_local_email_fields_async(Gee.Collection<Geary.EmailIdentifier> ids,
-                                      Cancellable? cancellable = null)
-    throws Error {
-        throw new EngineError.UNSUPPORTED("Mock method");
-    }
-
     public override async Geary.Email
         fetch_email_async(Geary.EmailIdentifier email_id,
                           Geary.Email.Field required_fields,

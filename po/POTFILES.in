@@ -37,6 +37,7 @@ src/client/components/components-in-app-notification.vala
 src/client/components/components-inspector.vala
 src/client/components/components-placeholder-pane.vala
 src/client/components/components-preferences-window.vala
+src/client/components/components-search-bar.vala
 src/client/components/components-validator.vala
 src/client/components/components-web-view.vala
 src/client/components/count-badge.vala
@@ -46,7 +47,6 @@ src/client/components/main-toolbar.vala
 src/client/components/main-window-info-bar.vala
 src/client/components/monitored-progress-bar.vala
 src/client/components/monitored-spinner.vala
-src/client/components/search-bar.vala
 src/client/components/status-bar.vala
 src/client/components/stock.vala
 src/client/composer/composer-box.vala
@@ -144,7 +144,6 @@ src/engine/api/geary-named-flags.vala
 src/engine/api/geary-problem-report.vala
 src/engine/api/geary-progress-monitor.vala
 src/engine/api/geary-revokable.vala
-src/engine/api/geary-search-folder.vala
 src/engine/api/geary-search-query.vala
 src/engine/api/geary-service-information.vala
 src/engine/api/geary-service-provider.vala
@@ -153,6 +152,7 @@ src/engine/app/app-conversation-monitor.vala
 src/engine/app/app-conversation.vala
 src/engine/app/app-draft-manager.vala
 src/engine/app/app-email-store.vala
+src/engine/app/app-search-folder.vala
 src/engine/app/conversation-monitor/app-append-operation.vala
 src/engine/app/conversation-monitor/app-conversation-operation-queue.vala
 src/engine/app/conversation-monitor/app-conversation-operation.vala
@@ -229,16 +229,11 @@ src/engine/imap-db/imap-db-email-identifier.vala
 src/engine/imap-db/imap-db-folder.vala
 src/engine/imap-db/imap-db-gc.vala
 src/engine/imap-db/imap-db-message-row.vala
-src/engine/imap-db/search/imap-db-search-email-identifier.vala
-src/engine/imap-db/search/imap-db-search-folder-properties.vala
-src/engine/imap-db/search/imap-db-search-folder.vala
-src/engine/imap-db/search/imap-db-search-query.vala
-src/engine/imap-db/search/imap-db-search-term.vala
+src/engine/imap-db/imap-db-search-query.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-account.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-all-mail-folder.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-drafts-folder.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-folder.vala
-src/engine/imap-engine/gmail/imap-engine-gmail-search-folder.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-spam-trash-folder.vala
 src/engine/imap-engine/imap-engine-account-operation.vala
 src/engine/imap-engine/imap-engine-account-processor.vala

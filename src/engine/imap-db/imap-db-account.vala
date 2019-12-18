@@ -37,13 +37,12 @@ private class Geary.ImapDB.Account : BaseObject {
         get; private set; default = new Imap.FolderRoot("$geary-imap");
     }
 
-    // Only available when the Account is opened
-    public IntervalProgressMonitor search_index_monitor { get; private set;
-        default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
-    public SimpleProgressMonitor upgrade_monitor { get; private set; default = new SimpleProgressMonitor(
-        ProgressType.DB_UPGRADE); }
-    public SimpleProgressMonitor vacuum_monitor { get; private set; default = new SimpleProgressMonitor(
-        ProgressType.DB_VACUUM); }
+    public SimpleProgressMonitor upgrade_monitor {
+        get; private set; default = new SimpleProgressMonitor(DB_UPGRADE);
+    }
+    public SimpleProgressMonitor vacuum_monitor {
+        get; private set; default = new SimpleProgressMonitor(DB_VACUUM);
+    }
 
     /** The backing database for the account. */
     public ImapDB.Database db { get; private set; }
@@ -575,7 +574,7 @@ private class Geary.ImapDB.Account : BaseObject {
 
         foreach (string? field in query.get_fields()) {
             debug(" - Field \"%s\" terms:", field);
-            foreach (SearchTerm? term in query.get_search_terms(field)) {
+            foreach (SearchQuery.Term? term in query.get_search_terms(field)) {
                 if (term != null) {
                     debug("    - \"%s\": %s, %s",
                           term.original,
@@ -613,7 +612,7 @@ private class Geary.ImapDB.Account : BaseObject {
             // <http://redmine.yorba.org/issues/7372>.
             StringBuilder sql = new StringBuilder();
             sql.append("""
-                SELECT id, internaldate_time_t
+                SELECT id
                 FROM MessageTable
                 INDEXED BY MessageTableInternalDateTimeTIndex
             """);
@@ -650,11 +649,7 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 message_id = result.int64_at(0);
-                int64 internaldate_time_t = result.int64_at(1);
-                DateTime? internaldate = (internaldate_time_t == -1
-                    ? null : new DateTime.from_unix_local(internaldate_time_t));
-
-                ImapDB.EmailIdentifier id = new ImapDB.SearchEmailIdentifier(message_id, internaldate);
+                var id = new ImapDB.EmailIdentifier(message_id, null);
                 matching_ids.add(id);
                 id_map.set(message_id, id);
 
@@ -739,7 +734,7 @@ private class Geary.ImapDB.Account : BaseObject {
             Gee.Set<string>? result = results.get(id);
             if (result != null) {
                 foreach (string match in result) {
-                    foreach (SearchTerm term in query.get_all_terms()) {
+                    foreach (SearchQuery.Term term in query.get_all_terms()) {
                         // if prefix-matches parsed term, then don't strip
                         if (match.has_prefix(term.parsed)) {
                             good_match_found = true;
@@ -802,6 +797,48 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
 
         return search_matches;
+    }
+
+    public async Gee.List<Email>? list_email(Gee.Collection<EmailIdentifier> ids,
+                                             Email.Field required_fields,
+                                             GLib.Cancellable? cancellable = null)
+    throws GLib.Error {
+        check_open();
+
+        var results = new Gee.ArrayList<Email>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+                foreach (var id in ids) {
+                    // TODO: once we have a way of deleting messages, we won't be able
+                    // to assume that a row id will point to the same email outside of
+                    // transactions, because SQLite will reuse row ids.
+                    Geary.Email.Field db_fields;
+                    MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
+                        cx, id.message_id, required_fields, out db_fields, cancellable
+                    );
+                    if (!row.fields.fulfills(required_fields)) {
+                        throw new EngineError.INCOMPLETE_MESSAGE(
+                            "Message %s only fulfills %Xh fields (required: %Xh)",
+                            id.to_string(), row.fields, required_fields
+                        );
+                    }
+
+                    Email email = row.to_email(id);
+                    Attachment.add_attachments(
+                        cx,
+                        this.db.attachments_path,
+                        email,
+                        id.message_id,
+                        cancellable
+                    );
+
+                    results.add(email);
+                }
+                return Db.TransactionOutcome.DONE;
+            },
+            cancellable
+        );
+
+        return results;
     }
 
     public async Geary.Email fetch_email_async(ImapDB.EmailIdentifier email_id,
@@ -879,9 +916,6 @@ private class Geary.ImapDB.Account : BaseObject {
         } catch (Error e) {
             debug("Error populating %s search table: %s", account_information.id, e.message);
         }
-
-        if (search_index_monitor.is_in_progress)
-            search_index_monitor.notify_finish();
 
         debug("%s: Done populating search table", account_information.id);
     }
@@ -976,13 +1010,6 @@ private class Geary.ImapDB.Account : BaseObject {
         if (count > 0) {
             debug("%s: Found %d/%d missing indexed messages, %d remaining...",
                 account_information.id, count, limit, total_unindexed);
-
-            if (!search_index_monitor.is_in_progress) {
-                search_index_monitor.set_interval(0, total_unindexed);
-                search_index_monitor.notify_start();
-            }
-
-            search_index_monitor.increment(count);
         }
 
         return (count < limit);
