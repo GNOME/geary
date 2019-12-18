@@ -18,21 +18,18 @@
  * they will be unique throughout the Geary engine.
  */
 
-public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.EmailIdentifier> {
+public abstract class Geary.EmailIdentifier :
+    BaseObject, Gee.Hashable<Geary.EmailIdentifier> {
 
     /** Base variant type returned by {@link to_variant}. */
-    public const string BASE_VARIANT_TYPE = "(y??)";
+    public const string BASE_VARIANT_TYPE = "(yr)";
 
-    // Warning: only change this if you know what you are doing.
-    protected string unique;
 
-    protected EmailIdentifier(string unique) {
-        this.unique = unique;
-    }
+    /** {@inheritDoc} */
+    public abstract uint hash();
 
-    public virtual uint hash() {
-        return unique.hash();
-    }
+    /** {@inheritDoc} */
+    public abstract bool equal_to(EmailIdentifier other);
 
     /**
      * Returns a representation useful for serialisation.
@@ -50,16 +47,7 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
     /**
      * Returns a representation useful for debugging.
      */
-    public virtual string to_string() {
-        return "[%s]".printf(unique.to_string());
-    }
-
-    public virtual bool equal_to(Geary.EmailIdentifier other) {
-        if (this == other)
-            return true;
-
-        return unique == other.unique;
-    }
+    public abstract string to_string();
 
     /**
      * A comparator for stabilizing sorts.
@@ -71,7 +59,7 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
         if (this == other)
             return 0;
 
-        return strcmp(unique, other.unique);
+        return strcmp(to_string(), other.to_string());
     }
 
     /**

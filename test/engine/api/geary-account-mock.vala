@@ -10,8 +10,9 @@ public class Geary.MockAccount : Account, MockObject {
 
     public class MockSearchQuery : SearchQuery {
 
-        internal MockSearchQuery() {
-            base("", SearchQuery.Strategy.EXACT);
+        internal MockSearchQuery(Account owner,
+                                 string raw) {
+            base(owner, raw, SearchQuery.Strategy.EXACT);
         }
 
     }
@@ -203,6 +204,18 @@ public class Geary.MockAccount : Account, MockObject {
         );
     }
 
+    public override async Gee.List<Email> list_local_email_async(
+        Gee.Collection<EmailIdentifier> ids,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return object_or_throw_call<Gee.List<Email>>(
+            "list_local_email_async",
+            {ids, box_arg(required_fields), cancellable},
+            new EngineError.NOT_FOUND("Mock call")
+        );
+    }
+
     public override async Email local_fetch_email_async(EmailIdentifier email_id,
                                                         Email.Field required_fields,
                                                         Cancellable? cancellable = null)
@@ -214,11 +227,11 @@ public class Geary.MockAccount : Account, MockObject {
         );
     }
 
-    public override async SearchQuery open_search(string query,
-                                                  SearchQuery.Strategy strategy,
-                                                  GLib.Cancellable? cancellable)
+    public override async SearchQuery new_search_query(string raw,
+                                                       SearchQuery.Strategy strategy,
+                                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
-        return new MockSearchQuery();
+        return new MockSearchQuery(this, raw);
     }
 
     public override async Gee.Collection<EmailIdentifier>?

@@ -26,6 +26,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         add_test("fetch_base_folder", fetch_base_folder);
         add_test("fetch_child_folder", fetch_child_folder);
         add_test("fetch_nonexistent_folder", fetch_nonexistent_folder);
+        add_test("list_local_email", list_local_email);
     }
 
     public override void set_up() throws GLib.Error {
@@ -307,6 +308,62 @@ class Geary.ImapDB.AccountTest : TestCase {
             assert_not_reached();
         } catch (GLib.Error err) {
             assert_error(new EngineError.NOT_FOUND(""), err);
+        }
+    }
+
+    public void list_local_email() throws GLib.Error {
+        Email.Field fixture_fields = Email.Field.RECEIVERS;
+        string fixture_to = "test1@example.com";
+        this.account.db.exec(
+            "INSERT INTO MessageTable (id, fields, to_field) " +
+            "VALUES (1, %d, '%s');".printf(fixture_fields, fixture_to)
+        );
+        this.account.db.exec(
+            "INSERT INTO MessageTable (id, fields, to_field) " +
+            "VALUES (2, %d, '%s');".printf(fixture_fields, fixture_to)
+        );
+
+        this.account.list_email.begin(
+            iterate_array<Geary.ImapDB.EmailIdentifier>({
+                    new EmailIdentifier(1, null),
+                    new EmailIdentifier(2, null)
+                }).to_linked_list(),
+            Email.Field.RECEIVERS,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        Gee.List<Email> result = this.account.list_email.end(
+            async_result()
+        );
+
+        assert_int(2, result.size, "Not enough email listed");
+        assert_true(new EmailIdentifier(1, null).equal_to(result[0].id));
+        assert_true(new EmailIdentifier(2, null).equal_to(result[1].id));
+
+        this.account.list_email.begin(
+            Collection.single(new EmailIdentifier(3, null)),
+            Email.Field.RECEIVERS,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        try {
+            this.account.list_email.end(async_result());
+            assert_not_reached();
+        } catch (EngineError.NOT_FOUND error) {
+            // All good
+        }
+
+        this.account.list_email.begin(
+            Collection.single(new EmailIdentifier(1, null)),
+            Email.Field.BODY,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        try {
+            this.account.list_email.end(async_result());
+            assert_not_reached();
+        } catch (EngineError.INCOMPLETE_MESSAGE error) {
+            // All good
         }
     }
 

@@ -878,6 +878,7 @@ internal class Application.Controller : Geary.BaseObject {
     private async void open_account(Geary.Account account) {
         AccountContext context = new AccountContext(
             account,
+            new Geary.App.SearchFolder(account, account.local_folder_root),
             new Geary.App.EmailStore(account),
             new Application.ContactStore(account, this.folks)
         );
@@ -976,8 +977,10 @@ internal class Application.Controller : Geary.BaseObject {
 
             account_unavailable(context, is_shutdown);
 
-            context.cancellable.cancel();
+            // Stop any background processes
+            context.search.clear();
             context.contacts.close();
+            context.cancellable.cancel();
 
             // Explicitly close the inbox since we explicitly open it
             Geary.Folder? inbox = context.inbox;
@@ -1770,6 +1773,9 @@ internal class Application.AccountContext : Geary.BaseObject {
     /** The account's Inbox folder */
     public Geary.Folder? inbox = null;
 
+    /** The account's search folder */
+    public Geary.App.SearchFolder search = null;
+
     /** The account's email store */
     public Geary.App.EmailStore emails { get; private set; }
 
@@ -1818,9 +1824,11 @@ internal class Application.AccountContext : Geary.BaseObject {
 
 
     public AccountContext(Geary.Account account,
+                          Geary.App.SearchFolder search,
                           Geary.App.EmailStore emails,
                           Application.ContactStore contacts) {
         this.account = account;
+        this.search = search;
         this.emails = emails;
         this.contacts = contacts;
     }

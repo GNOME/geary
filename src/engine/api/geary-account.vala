@@ -131,8 +131,17 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      */
     public Geary.ContactStore contact_store { get; protected set; }
 
+    /**
+     * The root path for all local folders.
+     *
+     * Any local folders create by the engine or clients must use this
+     * as the root for local folders.
+     */
+    public FolderRoot local_folder_root {
+        get; private set; default = new Geary.FolderRoot("$geary-local", true);
+    }
+
     public ProgressMonitor background_progress { get; protected set; }
-    public ProgressMonitor search_upgrade_monitor { get; protected set; }
     public ProgressMonitor db_upgrade_monitor { get; protected set; }
     public ProgressMonitor db_vacuum_monitor { get; protected set; }
 
@@ -426,6 +435,22 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
 
     /**
+     * Return a collection of email with the given identifiers.
+     *
+     * The returned collection will be in the same order as the
+     * natural ordering of the given identifiers.
+     *
+     * Throws {@link EngineError.NOT_FOUND} if any email is not found
+     * and {@link EngineError.INCOMPLETE_MESSAGE} if the fields aren't
+     * available.
+     */
+    public abstract async Gee.List<Email> list_local_email_async(
+        Gee.Collection<EmailIdentifier> ids,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
+
+    /**
      * Create a new {@link SearchQuery} for this {@link Account}.
      *
      * See {@link Geary.SearchQuery.Strategy} for more information about how its interpreted by the
@@ -436,13 +461,12 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * baked into the caller's code is up to the caller.  CONSERVATIVE is designed to be a good
      * default.
      *
-     * The SearchQuery object can only be used with calls into this Account.
-     *
-     * Dropping the last reference to the SearchQuery will close it.
+     * The resulting object can only be used with calls into this
+     * account instance.
      */
-    public abstract async Geary.SearchQuery open_search(string query,
-                                                        SearchQuery.Strategy strategy,
-                                                        GLib.Cancellable? cancellable)
+    public abstract async SearchQuery new_search_query(string query,
+                                                       SearchQuery.Strategy strategy,
+                                                       GLib.Cancellable? cancellable)
         throws GLib.Error;
 
     /**

@@ -1275,7 +1275,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                          WebKit.HitTestResult hit_test,
                                          uint modifiers) {
         this.body_container.set_tooltip_text(
-            hit_test.context_is_link() ? Util.Email.shorten_url(hit_test.get_link_uri()) : null
+            hit_test.context_is_link()
+            ? Util.Gtk.shorten_url(hit_test.get_link_uri())
+            : null
         );
         this.body_container.trigger_tooltip_query();
     }

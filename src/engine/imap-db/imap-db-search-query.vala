@@ -43,6 +43,63 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     private const string SEARCH_OP_VALUE_UNREAD = "unread";
 
 
+    /**
+     * Various associated state with a single term in a search query.
+     */
+    internal class Term : GLib.Object {
+
+        /**
+         * The original tokenized search term with minimal other processing performed.
+         *
+         * For example, punctuation might be removed, but no casefolding has occurred.
+         */
+        public string original { get; private set; }
+
+        /**
+         * The parsed tokenized search term.
+         *
+         * Casefolding and other normalizing text operations have been performed.
+         */
+        public string parsed { get; private set; }
+
+        /**
+         * The stemmed search term.
+         *
+         * Only used if stemming is being done ''and'' the stem is different than the {@link parsed}
+         * term.
+         */
+        public string? stemmed { get; private set; }
+
+        /**
+         * A list of terms ready for binding to an SQLite statement.
+         *
+         * This should include prefix operators and quotes (i.e. ["party"] or [party*]).  These texts
+         * are guaranteed not to be null or empty strings.
+         */
+        public Gee.List<string> sql { get; private set; default = new Gee.ArrayList<string>(); }
+
+        /**
+         * Returns true if the {@link parsed} term is exact-match only (i.e. starts with quotes) and
+         * there is no {@link stemmed} variant.
+         */
+        public bool is_exact { get { return parsed.has_prefix("\"") && stemmed == null; } }
+
+        public Term(string original, string parsed, string? stemmed, string? sql_parsed, string? sql_stemmed) {
+            this.original = original;
+            this.parsed = parsed;
+            this.stemmed = stemmed;
+
+            // for now, only two variations: the parsed string and the stemmed; since stem is usually
+            // shorter (and will be first in the OR statement), include it first
+            if (!String.is_empty(sql_stemmed))
+                sql.add(sql_stemmed);
+
+            if (!String.is_empty(sql_parsed))
+                sql.add(sql_parsed);
+        }
+    }
+
+
     // Maps of localised search operator names and values to their
     // internal forms
     private static Gee.HashMap<string, string> search_op_names =
@@ -255,18 +312,19 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     // their search term values. Note that terms without an operator
     // are stored with null as the key. Not using a MultiMap because
     // we (might) need a guarantee of order.
-    private Gee.HashMap<string?, Gee.ArrayList<SearchTerm>> field_map
-        = new Gee.HashMap<string?, Gee.ArrayList<SearchTerm>>();
+    private Gee.HashMap<string?, Gee.ArrayList<Term>> field_map
+        = new Gee.HashMap<string?, Gee.ArrayList<Term>>();
 
     // A list of all search terms, regardless of search op field name
-    private Gee.ArrayList<SearchTerm> all = new Gee.ArrayList<SearchTerm>();
+    private Gee.ArrayList<Term> all = new Gee.ArrayList<Term>();
 
-    public async SearchQuery(ImapDB.Account account,
+    public async SearchQuery(Geary.Account owner,
+                             ImapDB.Account local,
                              string query,
                              Geary.SearchQuery.Strategy strategy,
                              GLib.Cancellable? cancellable) {
-        base(query, strategy);
-        this.account = account;
+        base(owner, query, strategy);
+        this.account = local;
 
         switch (strategy) {
             case Strategy.EXACT:
@@ -305,11 +363,11 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
         return field_map.keys;
     }
 
-    public Gee.List<SearchTerm>? get_search_terms(string? field) {
+    public Gee.List<Term>? get_search_terms(string? field) {
         return field_map.has_key(field) ? field_map.get(field) : null;
     }
 
-    public Gee.List<SearchTerm>? get_all_terms() {
+    public Gee.List<Term>? get_all_terms() {
         return all;
     }
 
@@ -329,7 +387,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
         bool strip_results = true;
         if (this.strategy == Geary.SearchQuery.Strategy.HORIZON)
             strip_results = false;
-        else if (traverse<SearchTerm>(this.all).any(
+        else if (traverse<Term>(this.all).any(
                      term => term.stemmed == null || term.is_exact)) {
             strip_results = false;
         }
@@ -341,8 +399,8 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
             new Gee.HashMap<Geary.NamedFlag,bool>();
         foreach (string? field in this.field_map.keys) {
             if (field == SEARCH_OP_IS) {
-                Gee.List<SearchTerm>? terms = get_search_terms(field);
-                foreach (SearchTerm term in terms)
+                Gee.List<Term>? terms = get_search_terms(field);
+                foreach (Term term in terms)
                     if (term.parsed == SEARCH_OP_VALUE_READ)
                         conditions.set(new NamedFlag("UNREAD"), true);
                     else if (term.parsed == SEARCH_OP_VALUE_UNREAD)
@@ -358,11 +416,11 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     internal Gee.HashMap<string, string> get_query_phrases() {
         Gee.HashMap<string, string> phrases = new Gee.HashMap<string, string>();
         foreach (string? field in field_map.keys) {
-            Gee.List<SearchTerm>? terms = get_search_terms(field);
+            Gee.List<Term>? terms = get_search_terms(field);
             if (terms == null || terms.size == 0 || field == "is")
                 continue;
 
-            // Each SearchTerm is an AND but the SQL text within in are OR ... this allows for
+            // Each Term is an AND but the SQL text within in are OR ... this allows for
             // each user term to be AND but the variants of each term are or.  So, if terms are
             // [party] and [eventful] and stems are [parti] and [event], the search would be:
             //
@@ -379,7 +437,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
             //
             // party* OR parti* eventful* OR event*
             StringBuilder builder = new StringBuilder();
-            foreach (SearchTerm term in terms) {
+            foreach (Term term in terms) {
                 if (term.sql.size == 0)
                     continue;
 
@@ -438,12 +496,12 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
                 --quotes;
             }
 
-            SearchTerm? term;
+            Term? term;
             if (in_quote) {
                 // HACK: this helps prevent a syntax error when the user types
                 // something like from:"somebody".  If we ever properly support
                 // quotes after : we can get rid of this.
-                term = new SearchTerm(s, s, null, s.replace(":", " "), null);
+                term = new Term(s, s, null, s.replace(":", " "), null);
             } else {
                 string original = s;
 
@@ -479,7 +537,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
 
                 if (field == SEARCH_OP_IS) {
                     // s will have been de-translated
-                    term = new SearchTerm(original, s, null, null, null);
+                    term = new Term(original, s, null, null, null);
                 } else {
                     // SQL MATCH syntax for parsed term
                     string? sql_s = "%s*".printf(s);
@@ -505,7 +563,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
                     if (String.contains_any_char(s, SEARCH_TERM_CONTINUATION_CHARS))
                         s = "\"%s\"".printf(s);
 
-                    term = new SearchTerm(original, s, stemmed, sql_s, sql_stemmed);
+                    term = new Term(original, s, stemmed, sql_s, sql_stemmed);
                 }
             }
 
@@ -514,7 +572,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
 
             // Finally, add the term
             if (!this.field_map.has_key(field)) {
-                this.field_map.set(field, new Gee.ArrayList<SearchTerm>());
+                this.field_map.set(field, new Gee.ArrayList<Term>());
             }
             this.field_map.get(field).add(term);
             this.all.add(term);
