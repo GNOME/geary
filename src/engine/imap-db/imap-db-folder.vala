@@ -884,7 +884,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
     public async void detach_emails_before_timestamp(DateTime cutoff,
         Cancellable? cancellable) throws Error {
-        warning("Detaching emails before %s for folder ID %", cutoff.to_string(), this.folder_id.to_string());
+        debug("Detaching emails before %s for folder ID %", cutoff.to_string(), this.folder_id.to_string());
 
         yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
             // Query was found to be faster than other approaches. MessageLocationTable.ordering
