@@ -49,7 +49,7 @@ private class Geary.RFC822.FilterBlockquotes : GMime.Filter {
         return new_filter;
     }
 
-    private void do_filter(char[] inbuf, size_t prespace, out unowned char[] processed_buffer,
+    private void do_filter(uint8[] inbuf, size_t prespace, out unowned uint8[] processed_buffer,
         out size_t outprespace, bool flush) {
 
         // This may not be strictly necessary.
@@ -64,7 +64,7 @@ private class Geary.RFC822.FilterBlockquotes : GMime.Filter {
         }
 
         for (uint i = 0; i < inbuf.length; i++) {
-            char c = inbuf[i];
+            uint8 c = inbuf[i];
 
             if (in_prefix && !in_tag) {
                 if (c == Geary.RFC822.Utils.QUOTE_MARKER) {
@@ -122,12 +122,12 @@ private class Geary.RFC822.FilterBlockquotes : GMime.Filter {
         outprespace = this.outpre;
     }
 
-    public override void filter(char[] inbuf, size_t prespace, out unowned char[] processed_buffer,
+    public override void filter(uint8[] inbuf, size_t prespace, out unowned uint8[] processed_buffer,
         out size_t outprespace) {
         do_filter(inbuf, prespace, out processed_buffer, out outprespace, false);
     }
 
-    public override void complete(char[] inbuf, size_t prespace, out unowned char[] processed_buffer,
+    public override void complete(uint8[] inbuf, size_t prespace, out unowned uint8[] processed_buffer,
         out size_t outprespace) {
         do_filter(inbuf, prespace, out processed_buffer, out outprespace, true);
     }

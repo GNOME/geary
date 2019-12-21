@@ -160,7 +160,7 @@ public class Geary.RFC822.Part : Object {
                                   BodyFormatting format = BodyFormatting.NONE)
         throws RFC822Error {
         GMime.DataWrapper? wrapper = (this.source_part != null)
-            ? this.source_part.get_content_object() : null;
+            ? this.source_part.get_content() : null;
         if (wrapper == null) {
             throw new RFC822Error.INVALID(
                 "Could not get the content wrapper for content-type %s",
@@ -201,7 +201,7 @@ public class Geary.RFC822.Part : Object {
             if ((this.source_part == null ||
                  this.source_part.encoding != BASE64) &&
                 !(content_type.media_subtype in CR_PRESERVING_TEXT_TYPES)) {
-                filter.add(new GMime.FilterCRLF(false, false));
+                filter.add(new GMime.FilterDos2Unix(false));
             }
 
             if (flowed) {
@@ -226,12 +226,18 @@ public class Geary.RFC822.Part : Object {
                 filter.add(new Geary.RFC822.FilterBlockquotes());
             }
 
-            wrapper.write_to_stream(filter);
-            filter.flush();
+            if (wrapper.write_to_stream(filter) < 0)
+                throw new RFC822Error.FAILED("Unable to write textual RFC822 part to filter stream");
+            if (filter.flush() != 0)
+                throw new RFC822Error.FAILED("Unable to flush textual RFC822 part to destination stream");
+            if (destination.flush() != 0)
+                throw new RFC822Error.FAILED("Unable to flush textual RFC822 part to destination");
         } else {
             // Keep as binary
-            wrapper.write_to_stream(destination);
-            destination.flush();
+            if (wrapper.write_to_stream(destination) < 0)
+                throw new RFC822Error.FAILED("Unable to write binary RFC822 part to destination stream");
+            if (destination.flush() != 0)
+                throw new RFC822Error.FAILED("Unable to flush binary RFC822 part to destination");
         }
     }
 

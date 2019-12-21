@@ -102,7 +102,7 @@ public class Geary.Mime.ContentDisposition : Geary.BaseObject {
             out is_unknown);
         is_unknown_disposition_type = is_unknown;
         original_disposition_type_string = content_disposition.get_disposition();
-        params = new ContentParameters.from_gmime(content_disposition.get_params());
+        params = new ContentParameters.from_gmime(content_disposition.get_parameters());
     }
 }
 

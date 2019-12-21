@@ -74,7 +74,10 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
         if (!str.contains("/"))
             throw new MimeError.PARSE("Invalid MIME Content-Type: %s", str);
 
-        return new ContentType.from_gmime(new GMime.ContentType.from_string(str));
+        return new ContentType.from_gmime(GMime.ContentType.parse(
+          Geary.RFC822.get_parser_options(),
+          str
+        ));
     }
 
     /**
@@ -158,7 +161,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     internal ContentType.from_gmime(GMime.ContentType content_type) {
         media_type = content_type.get_media_type().strip();
         media_subtype = content_type.get_media_subtype().strip();
-        params = new ContentParameters.from_gmime(content_type.get_params());
+        params = new ContentParameters.from_gmime(content_type.get_parameters());
     }
 
     /**

@@ -186,7 +186,7 @@ public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses
 }
 
 
-public bool comp_char_arr_slice(char[] array, uint start, string comp) {
+public bool comp_char_arr_slice(uint8[] array, uint start, string comp) {
     for (int i = 0; i < comp.length; i++) {
         if (array[start + i] != comp[i])
             return false;
@@ -277,7 +277,7 @@ public async string get_best_charset(GMime.Stream in_stream,
         },
         cancellable
     );
-    return filter.charset();
+    return filter.get_charset();
 }
 
 /**
