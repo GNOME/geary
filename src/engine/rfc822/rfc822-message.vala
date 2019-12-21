@@ -388,21 +388,8 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         // create the new object.  Kinda sucks, but our hands are tied.
         this.from_buffer(email.message_to_memory_buffer(false, false));
 
-        // GMime also drops the ball for the *new* message.  When it comes out of the GMime
-        // Parser, its "mime part" somehow isn't realizing it has a Content-Type header
-        // already, so whenever you manipulate the headers, it adds a duplicate one.  This
-        // odd looking hack ensures that any header manipulation is done while the "mime
-        // part" is an empty object, and when we re-set the "mime part", there's only the
-        // one Content-Type header.  In other words, this hack prevents the duplicate
-        // header, somehow.
-        GMime.Object original_mime_part = message.get_mime_part();
-        GMime.Message empty = new GMime.Message(true);
-        message.set_mime_part(empty.get_mime_part());
-
-        message.remove_header(HEADER_BCC);
-        bcc = null;
-
-        message.set_mime_part(original_mime_part);
+        this.message.remove_header(HEADER_BCC);
+        this.bcc = null;
     }
 
     private GMime.Object? coalesce_related(Gee.List<GMime.Object> parts,
