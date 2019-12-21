@@ -153,27 +153,23 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         }
     }
 
-    public void prepare_header_text_part() throws Error {
-        try {
-            // Test if prepare_header_text_part() can handle crappy input without grilling the CPU
-            MailboxAddress addr = new MailboxAddress.imap(
-                "=?UTF-8?Q?=22Firstname_=22=C2=AF\\=5F=28=E3=83=84=29=5F/=C2=AF=22_Lastname_via?==?UTF-8?Q?_Vendor=22_<system@vendor.com>?=",
-                null,
-                "=?UTF-8?Q?=22Firstname_=22=C2=AF\\=5F=28=E3=83=84=29=5F/=C2=AF=22_Lastname_via?==?UTF-8?Q?_Vendor=22_<system@vendor.com>?=",
-                "vendor.com");
-            assert(addr.name == "\"Firstname \"¯_(ツ)_/¯\" Lastname via Vendor\" <system@vendor.com>");
-            assert(addr.mailbox == "\"Firstname \"¯_(ツ)_/¯\" Lastname via Vendor\" <system@vendor.com>");
+    public void prepare_header_text_part() throws GLib.Error {
+        // Test if prepare_header_text_part() can handle crappy input without grilling the CPU
+        MailboxAddress addr = new MailboxAddress.imap(
+            "=?UTF-8?Q?=22Firstname_=22=C2=AF\\=5F=28=E3=83=84=29=5F/=C2=AF=22_Lastname_via?==?UTF-8?Q?_Vendor=22_<system@vendor.com>?=",
+            null,
+            "=?UTF-8?Q?=22Firstname_=22=C2=AF\\=5F=28=E3=83=84=29=5F/=C2=AF=22_Lastname_via?==?UTF-8?Q?_Vendor=22_<system@vendor.com>?=",
+            "vendor.com");
+        assert(addr.name == "\"Firstname \"¯_(ツ)_/¯\" Lastname via Vendor\" <system@vendor.com>");
+        assert(addr.mailbox == "\"Firstname \"¯_(ツ)_/¯\" Lastname via Vendor\" <system@vendor.com>");
 
-            // A second test with the input that have been passed to prepare_header_text_part() by the pre-GMime3 tests
-            addr = new MailboxAddress.imap(
-                "\"Firstname \"¯_(ツ)_/¯\" Lastname via=?UTF-8?Q?_Vendor=22_",
-                null,
-                "system",
-                "vendor.com");
-            assert(addr.name == "Firstname ¯_(ツ)_/¯ Lastname via=?UTF-8?Q?_Vendor=22_");
-        } catch (Error err) {
-            assert_not_reached();
-        }
+        // A second test with the input that have been passed to prepare_header_text_part() by the pre-GMime3 tests
+        addr = new MailboxAddress.imap(
+            "\"Firstname \"¯_(ツ)_/¯\" Lastname via=?UTF-8?Q?_Vendor=22_",
+            null,
+            "system",
+            "vendor.com");
+        assert(addr.name == "Firstname ¯_(ツ)_/¯ Lastname via=?UTF-8?Q?_Vendor=22_");
     }
 
     public void has_distinct_name() throws Error {
