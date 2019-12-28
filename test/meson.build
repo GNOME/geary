@@ -3,6 +3,7 @@ subdir('data')
 geary_test_lib_sources = [
   'mock-object.vala',
   'test-case.vala',
+  'test-server.vala',
 ]
 
 geary_test_engine_sources = [
