@@ -20,8 +20,10 @@
  */
 public class Geary.Imap.Serializer : BaseObject {
 
+
     private string identifier;
     private GLib.DataOutputStream output;
+
 
     public Serializer(string identifier, GLib.OutputStream output) {
         this.identifier = identifier;
@@ -121,7 +123,15 @@ public class Geary.Imap.Serializer : BaseObject {
      */
     public async void flush_stream(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        yield this.output.flush_async(Priority.DEFAULT, cancellable);
+        yield this.output.flush_async(GLib.Priority.DEFAULT, cancellable);
+    }
+
+    /**
+     * Closes the stream, ensuring a command has been sent.
+     */
+    public async void close_stream(GLib.Cancellable? cancellable)
+        throws GLib.IOError {
+        yield this.output.close_async(GLib.Priority.DEFAULT, cancellable);
     }
 
     /**
