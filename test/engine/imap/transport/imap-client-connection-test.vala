@@ -8,6 +8,14 @@
 class Geary.Imap.ClientConnectionTest : TestCase {
 
 
+    private class TestCommand : Command {
+
+        public TestCommand() {
+            base("TEST");
+        }
+
+    }
+
     private TestServer? server = null;
 
 
@@ -88,7 +96,7 @@ class Geary.Imap.ClientConnectionTest : TestCase {
 
         assert_true(test_article.is_in_idle(), "Post idle command timeout");
 
-        var command = new Command("TEST");
+        var command = new TestCommand();
         test_article.send_command(command);
         command.wait_until_complete.begin(null, this.async_complete_full);
         command.wait_until_complete.end(async_result());
@@ -121,7 +129,7 @@ class Geary.Imap.ClientConnectionTest : TestCase {
         test_article.connect_async.begin(null, this.async_complete_full);
         test_article.connect_async.end(async_result());
 
-        var command = new Command("TEST");
+        var command = new TestCommand();
         command.response_timed_out.connect(() => { timed_out = true; });
 
         test_article.send_command(command);
