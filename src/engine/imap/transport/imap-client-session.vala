@@ -271,16 +271,16 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     // initiate_session_async() has successfully completed.
 
     /** Records the actual name and delimiter used for the inbox */
-    internal MailboxInformation? inbox = null;
+    internal MailboxInformation? inbox { get; private set; default = null; }
 
-    /** The locations personal mailboxes on this  connection. */
-    internal Gee.List<Namespace> personal_namespaces = new Gee.ArrayList<Namespace>();
+    // Locations personal mailboxes for this session
+    private Gee.List<Namespace> personal_namespaces = new Gee.ArrayList<Namespace>();
 
-    /** The locations of other user's mailboxes on this connection. */
-    internal Gee.List<Namespace> user_namespaces = new Gee.ArrayList<Namespace>();
+    // Locations of other user's mailboxes for this session
+    private Gee.List<Namespace> user_namespaces = new Gee.ArrayList<Namespace>();
 
-    /** The locations of shared mailboxes on this connection. */
-    internal Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
+    // The locations of shared mailboxes for this sesion
+    private Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
 
     private Endpoint imap_endpoint;
     private Geary.State.Machine fsm;
@@ -338,8 +338,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     public signal void search(int64[] seq_or_uid);
 
     public signal void status(StatusData status_data);
-
-    public signal void @namespace(NamespaceResponse namespace);
 
     /**
      * If the mailbox name is null it indicates the type of state change that has occurred
@@ -486,6 +484,65 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             default:
                 warning("ClientSession ref dropped while still active");
         }
+    }
+
+    /**
+     * Returns the list of known personal mailbox namespaces.
+     *
+     * A personal namespace is a common prefix of a set of mailboxes
+     * that belong to the currently authenticated account. It may
+     * contain the account's Inbox and Sent mailboxes, for example.
+     *
+     * The list will be empty when the session is not in the
+     * authenticated or selected states, it will contain at least one
+     * after having successfully logged in.
+     *
+     * See [[https://tools.ietf.org/html/rfc2342|RFC 2342]] for more
+     * information.
+     */
+    public Gee.List<Namespace> get_personal_namespaces() {
+        return this.personal_namespaces.read_only_view;
+    }
+
+    /**
+     * Returns the list of known shared mailbox namespaces.
+     *
+     * A shared namespace is a common prefix of a set of mailboxes
+     * that are normally accessible by multiple accounts on the
+     * server, for example shared email mailboxes and NNTP news
+     * mailboxes.
+     *
+     * The list will be empty when the session is not in the
+     * authenticated or selected states, it will only be non-empty
+     * after having successfully logged in and if the server supports
+     * shared mailboxes.
+     *
+     * See [[https://tools.ietf.org/html/rfc2342|RFC 2342]] for more
+     * information.
+     */
+    public Gee.List<Namespace> get_shared_namespaces() {
+        return this.shared_namespaces.read_only_view;
+    }
+
+    /**
+     * Returns the list of known other-users mailbox namespaces.
+     *
+     * An other-user namespace is a common prefix of a set of
+     * mailboxes that are the personal mailboxes of other accounts on
+     * the server. These would not normally be accessible to the
+     * currently authenticated account unless the account has
+     * administration privileges.
+     *
+     * The list will be empty when the session is not in the
+     * authenticated or selected states, it will only be non-empty
+     * after having successfully logged in and if the server or
+     * account supports accessing other account's mailboxes.
+     *
+     * See [[https://tools.ietf.org/html/rfc2342|RFC 2342]] for more
+     * information.
+     */
+    public Gee.List<Namespace> get_other_users_namespaces() {
+        return this.user_namespaces.read_only_view;
     }
 
     public MailboxSpecifier? get_current_mailbox() {
@@ -993,18 +1050,12 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             }
 
             // Try to determine what the connection's namespaces are
-            server_data.clear();
             if (this.capabilities.has_capability(Capabilities.NAMESPACE)) {
                 response = yield send_command_async(
                     new NamespaceCommand(),
                     cancellable
                 );
-                if (response.status == Status.OK && !server_data.is_empty) {
-                    NamespaceResponse ns = server_data[0].get_namespace();
-                    update_namespaces(ns.personal, this.personal_namespaces);
-                    update_namespaces(ns.user, this.user_namespaces);
-                    update_namespaces(ns.shared, this.shared_namespaces);
-                } else {
+                if (response.status != Status.OK) {
                     warning("NAMESPACE command failed");
                 }
             }
@@ -1046,20 +1097,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             }
         } finally {
             disconnect(data_id);
-        }
-    }
-
-    private inline void update_namespaces(Gee.List<Namespace>? response, Gee.List<Namespace> list) {
-        if (response != null) {
-            foreach (Namespace ns in response) {
-                list.add(ns);
-                string prefix = ns.prefix;
-                string? delim = ns.delim;
-                if (delim != null && prefix.has_suffix(delim)) {
-                    prefix = prefix.substring(0, prefix.length - delim.length);
-                }
-                this.namespaces.set(prefix, ns);
-            }
         }
     }
 
@@ -1566,6 +1603,9 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         uint new_state = state;
         if (validate_state_change_cmd(completion_response)) {
             new_state = State.CLOSED;
+
+            // Namespaces are only valid in AUTH and SELECTED states
+            clear_namespaces();
         }
         return new_state;
     }
@@ -1881,7 +1921,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             break;
 
             case ServerDataType.NAMESPACE:
-                namespace(server_data.get_namespace());
+                // Clear namespaces before updating them, since if
+                // they have changed the new ones take full
+                // precedence.
+                clear_namespaces();
+                NamespaceResponse ns = server_data.get_namespace();
+                update_namespaces(ns.personal, this.personal_namespaces);
+                update_namespaces(ns.shared, this.shared_namespaces);
+                update_namespaces(ns.user, this.user_namespaces);
             break;
 
             // TODO: LSUB
@@ -1894,6 +1941,28 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         }
 
         server_data_received(server_data);
+    }
+
+    private void clear_namespaces() {
+        this.namespaces.clear();
+        this.personal_namespaces.clear();
+        this.shared_namespaces.clear();
+        this.user_namespaces.clear();
+    }
+
+    private void update_namespaces(Gee.List<Namespace>? response,
+                                   Gee.List<Namespace> list) {
+        if (response != null) {
+            foreach (Namespace ns in response) {
+                list.add(ns);
+                string prefix = ns.prefix;
+                string? delim = ns.delim;
+                if (delim != null && prefix.has_suffix(delim)) {
+                    prefix = prefix.substring(0, prefix.length - delim.length);
+                }
+                this.namespaces.set(prefix, ns);
+            }
+        }
     }
 
     private void on_received_server_data(ServerData server_data) {

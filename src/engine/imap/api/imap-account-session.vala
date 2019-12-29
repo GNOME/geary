@@ -46,11 +46,12 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     public async FolderPath get_default_personal_namespace(Cancellable? cancellable)
     throws Error {
         ClientSession session = claim_session();
-        if (session.personal_namespaces.is_empty) {
+        Gee.List<Namespace> personal = session.get_personal_namespaces();
+        if (personal.is_empty) {
             throw new ImapError.INVALID("No personal namespace found");
         }
 
-        Namespace ns = session.personal_namespaces[0];
+        Namespace ns = personal[0];
         string prefix = ns.prefix;
         string? delim = ns.delim;
         if (delim != null && prefix.has_suffix(delim)) {

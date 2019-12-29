@@ -25,6 +25,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         add_test("login_logout", login_logout);
         add_test("initiate_request_capabilities", initiate_request_capabilities);
         add_test("initiate_implicit_capabilities", initiate_implicit_capabilities);
+        add_test("initiate_namespace", initiate_namespace);
     }
 
     protected override void set_up() throws GLib.Error {
@@ -319,6 +320,77 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_true(test_article.capabilities.supports_imap4rev1());
         assert_false(test_article.capabilities.has_capability("AUTH"));
         assert_int(2, test_article.capabilities.revision);
+
+        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.end(async_result());
+
+        TestServer.Result result = this.server.wait_for_script(this.main_loop);
+        assert_true(
+            result.succeeded,
+            result.error != null ? result.error.message : "Server result failed"
+        );
+    }
+
+    public void initiate_namespace() throws GLib.Error {
+        this.server.add_script_line(
+            SEND_LINE,
+            "* OK [CAPABILITY IMAP4rev1 LOGIN] localhost test server ready"
+        );
+        this.server.add_script_line(
+            RECEIVE_LINE, "a001 login test password"
+        );
+        this.server.add_script_line(
+            SEND_LINE, "a001 OK [CAPABILITY IMAP4rev1 NAMESPACE] ohhai"
+        );
+        this.server.add_script_line(
+            RECEIVE_LINE, "a002 LIST \"\" INBOX"
+        );
+        this.server.add_script_line(
+            SEND_LINE, "* LIST (\\HasChildren) \".\" Inbox"
+        );
+        this.server.add_script_line(
+            SEND_LINE, "a002 OK there"
+        );
+        this.server.add_script_line(
+            RECEIVE_LINE, "a003 NAMESPACE"
+        );
+        this.server.add_script_line(
+            SEND_LINE,
+            """* NAMESPACE (("INBOX." ".")) (("user." ".")) (("shared." "."))"""
+        );
+        this.server.add_script_line(SEND_LINE, "a003 OK there");
+        this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
+
+        var test_article = new ClientSession(new_endpoint());
+        assert_true(test_article.get_protocol_state(null) == NOT_CONNECTED);
+
+        test_article.connect_async.begin(
+            CONNECT_TIMEOUT, null, this.async_complete_full
+        );
+        test_article.connect_async.end(async_result());
+        assert_true(test_article.get_protocol_state(null) == UNAUTHORIZED);
+
+        test_article.initiate_session_async.begin(
+            new Credentials(PASSWORD, "test", "password"),
+            null,
+            this.async_complete_full
+        );
+        test_article.initiate_session_async.end(async_result());
+
+        assert_int(1, test_article.get_personal_namespaces().size);
+        assert_string(
+            "INBOX.", test_article.get_personal_namespaces()[0].prefix
+        );
+
+        assert_int(1, test_article.get_shared_namespaces().size);
+        assert_string(
+            "shared.", test_article.get_shared_namespaces()[0].prefix
+        );
+
+        assert_int(1, test_article.get_other_users_namespaces().size);
+        assert_string(
+            "user.", test_article.get_other_users_namespaces()[0].prefix
+        );
 
         test_article.disconnect_async.begin(null, this.async_complete_full);
         test_article.disconnect_async.end(async_result());
