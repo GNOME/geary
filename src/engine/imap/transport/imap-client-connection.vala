@@ -605,13 +605,6 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
     private void on_command_timeout(Command command) {
         this.sent_queue.remove(command);
         command.response_timed_out.disconnect(on_command_timeout);
-
-        // turn off graceful disconnect ... if the connection is hung,
-        // don't want to be stalled trying to flush the pipe
-        TcpConnection? tcp_cx = cx as TcpConnection;
-        if (tcp_cx != null)
-            tcp_cx.set_graceful_disconnect(false);
-
         receive_failure(
             new ImapError.TIMED_OUT(
                 "No response to command after %u seconds: %s",
