@@ -96,6 +96,10 @@ public void assert_int64(int64 expected, int64 actual, string? context = null)
     }
 }
 
+public void assert_double(double actual, double expected, double epsilon) {
+    assert(actual + epsilon >= expected && actual - epsilon <= expected);
+}
+
 public void assert_uint(uint expected, uint actual, string? context = null)
     throws GLib.Error {
     if (expected != actual) {
