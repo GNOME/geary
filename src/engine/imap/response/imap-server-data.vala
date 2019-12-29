@@ -50,24 +50,22 @@ public class Geary.Imap.ServerData : ServerResponse {
     /**
      * Parses the {@link ServerData} into {@link Capabilities}, if possible.
      *
-     * Since Capabilities are revised with various {@link ClientSession} states, this method accepts
-     * a ref to an int that will be incremented after handed to the Capabilities constructor.  This
-     * can be used to track the revision of capabilities seen on the connection.
-     *
      * @throws ImapError.INVALID if not a Capability.
      */
-    public Capabilities get_capabilities(ref int next_revision) throws ImapError {
-        if (server_data_type != ServerDataType.CAPABILITY)
+    public Capabilities get_capabilities(int revision) throws ImapError {
+        if (this.server_data_type != ServerDataType.CAPABILITY)
             throw new ImapError.INVALID("Not CAPABILITY data: %s", to_string());
 
-        Capabilities capabilities = new Capabilities(next_revision++);
-        for (int ctr = 2; ctr < size; ctr++) {
+        var params = new StringParameter[this.size];
+        int count = 0;
+        for (int ctr = 1; ctr < size; ctr++) {
             StringParameter? param = get_if_string(ctr);
-            if (param != null)
-                capabilities.add_parameter(param);
+            if (param != null) {
+                params[count++] = param;
+            }
         }
 
-        return capabilities;
+        return new Capabilities(params[0:count], revision);
     }
 
     /**

@@ -228,13 +228,17 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         state_to_string, event_to_string);
 
     /**
-     * {@link ClientSession} tracks server extensions reported via the CAPABILITY server data
-     * response.
+     * Set of IMAP extensions reported as being supported by the server.
      *
-     * ClientSession stores the last seen list as a service for users and uses it internally
-     * (specifically for IDLE support).
+     * The capabilities that an IMAP session offers changes over time,
+     * for example after login or STARTTLS. The instance assigned to
+     * this property will change as these change and the instance's
+     * {@link Capabilities.revision} property will also monotonically
+     * increase over the lifetime of a single session.
      */
-    public Capabilities capabilities { get; private set; default = new Capabilities(0); }
+    public Capabilities capabilities {
+        get; private set; default = new Capabilities.empty(0);
+    }
 
     /** Determines if this session supports the IMAP IDLE extension. */
     public bool is_idle_supported {
@@ -278,7 +282,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     /** The locations of shared mailboxes on this connection. */
     internal Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
 
-
     private Endpoint imap_endpoint;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
@@ -295,7 +298,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     private Nonblocking.Semaphore? connect_waiter = null;
     private Error? connect_err = null;
 
-    private int next_capabilities_revision = 1;
     private Gee.Map<string,Namespace> namespaces = new Gee.HashMap<string,Namespace>();
 
 
@@ -315,8 +317,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
      * {@link expunge}, etc.)
      */
     public signal void server_data_received(ServerData server_data);
-
-    public signal void capability(Capabilities capabilities);
 
     public signal void exists(int count);
 
@@ -929,14 +929,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                                              GLib.Cancellable? cancellable)
         throws GLib.Error {
         // If no capabilities available, get them now
-        if (capabilities.is_empty())
+        if (this.capabilities.is_empty()) {
             yield send_command_async(new CapabilityCommand(), cancellable);
+        }
 
-        // store them for comparison later
-        Imap.Capabilities caps = capabilities;
+        var last_capabilities = this.capabilities.revision;
 
         if (imap_endpoint.tls_method == TlsNegotiationMethod.START_TLS) {
-            if (!caps.has_capability(Capabilities.STARTTLS)) {
+            if (!this.capabilities.has_capability(Capabilities.STARTTLS)) {
                 throw new ImapError.NOT_SUPPORTED(
                     "STARTTLS unavailable for %s", to_string());
             }
@@ -957,18 +957,25 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                     resp.status.to_string()
                 );
             }
+
+            if (last_capabilities == capabilities.revision) {
+                // Per RFC3501 §6.2.1, after TLS is established, all
+                // capabilities must be cleared and re-acquired to
+                // mitigate main-in-the-middle attacks. If the TLS
+                // command response did not update capabilities,
+                // explicitly do so now.
+                yield send_command_async(new CapabilityCommand(), cancellable);
+                last_capabilities = this.capabilities.revision;
+            }
         }
 
         // Login after STARTTLS
         yield login_async(credentials, cancellable);
 
         // if new capabilities not offered after login, get them now
-        if (caps.revision == capabilities.revision) {
+        if (last_capabilities == capabilities.revision) {
             yield send_command_async(new CapabilityCommand(), cancellable);
         }
-
-        // either way, new capabilities should be available
-        caps = capabilities;
 
         Gee.List<ServerData> server_data = new Gee.ArrayList<ServerData>();
         ulong data_id = this.server_data_received.connect((data) => { server_data.add(data); });
@@ -987,7 +994,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
 
             // Try to determine what the connection's namespaces are
             server_data.clear();
-            if (caps.has_capability(Capabilities.NAMESPACE)) {
+            if (this.capabilities.has_capability(Capabilities.NAMESPACE)) {
                 response = yield send_command_async(
                     new NamespaceCommand(),
                     cancellable
@@ -1796,12 +1803,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             if (response_code != null) {
                 try {
                     if (response_code.get_response_code_type().is_value(ResponseCodeType.CAPABILITY)) {
-                        capabilities = response_code.get_capabilities(ref next_capabilities_revision);
-                        debug("%s %s",
-                              status_response.status.to_string(),
-                              capabilities.to_string());
-
-                        capability(capabilities);
+                        this.capabilities = response_code.get_capabilities(
+                            this.capabilities.revision + 1
+                        );
+                        debug(
+                            "%s set capabilities to: %s",
+                            status_response.status.to_string(),
+                            this.capabilities.to_string()
+                        );
                     }
                 } catch (GLib.Error err) {
                     warning(
@@ -1828,12 +1837,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             case ServerDataType.CAPABILITY:
                 // update ClientSession capabilities before firing signal, so external signal
                 // handlers that refer back to property aren't surprised
-                capabilities = server_data.get_capabilities(ref next_capabilities_revision);
-                debug("%s %s",
-                      server_data.server_data_type.to_string(),
-                      capabilities.to_string());
-
-                capability(capabilities);
+                this.capabilities = server_data.get_capabilities(
+                    this.capabilities.revision + 1
+                );
+                debug(
+                    "%s set capabilities to: %s",
+                    server_data.server_data_type.to_string(),
+                    this.capabilities.to_string()
+                );
             break;
 
             case ServerDataType.EXISTS:

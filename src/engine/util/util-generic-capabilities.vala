@@ -32,39 +32,6 @@ public class Geary.GenericCapabilities : BaseObject {
         return (map.size == 0);
     }
 
-    public bool parse_and_add_capability(string text) {
-        string[] name_values = text.split(name_separator, 2);
-        switch (name_values.length) {
-            case 1:
-                add_capability(name_values[0]);
-            break;
-
-            case 2:
-                if (value_separator == null) {
-                    add_capability(name_values[0], name_values[1]);
-                } else {
-                    // break up second token for multiple values
-                    string[] values = name_values[1].split(value_separator);
-                    if (values.length <= 1) {
-                        add_capability(name_values[0], name_values[1]);
-                    } else {
-                        foreach (string value in values)
-                            add_capability(name_values[0], value);
-                    }
-                }
-            break;
-
-            default:
-                return false;
-        }
-
-        return true;
-    }
-
-    public void add_capability(string name, string? setting = null) {
-        map.set(name, String.is_empty(setting) ? null : setting);
-    }
-
     /**
      * Returns true only if the capability was named as available by the server.
      */
@@ -103,13 +70,6 @@ public class Geary.GenericCapabilities : BaseObject {
         return (names.size > 0) ? names : null;
     }
 
-    private void append(StringBuilder builder, string text) {
-        if (!String.is_empty(builder.str))
-            builder.append(String.is_empty(value_separator) ? " " : value_separator);
-
-        builder.append(text);
-    }
-
     public virtual string to_string() {
         Gee.Set<string>? names = get_all_names();
         if (names == null || names.size == 0)
@@ -132,5 +92,45 @@ public class Geary.GenericCapabilities : BaseObject {
 
         return builder.str;
     }
-}
 
+    private inline void append(StringBuilder builder, string text) {
+        if (!String.is_empty(builder.str))
+            builder.append(String.is_empty(value_separator) ? " " : value_separator);
+
+        builder.append(text);
+    }
+
+    protected bool parse_and_add_capability(string text) {
+        string[] name_values = text.split(name_separator, 2);
+        switch (name_values.length) {
+            case 1:
+                add_capability(name_values[0]);
+            break;
+
+            case 2:
+                if (value_separator == null) {
+                    add_capability(name_values[0], name_values[1]);
+                } else {
+                    // break up second token for multiple values
+                    string[] values = name_values[1].split(value_separator);
+                    if (values.length <= 1) {
+                        add_capability(name_values[0], name_values[1]);
+                    } else {
+                        foreach (string value in values)
+                            add_capability(name_values[0], value);
+                    }
+                }
+            break;
+
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
+    private inline void add_capability(string name, string? setting = null) {
+        this.map.set(name, String.is_empty(setting) ? null : setting);
+    }
+
+}
