@@ -59,6 +59,7 @@ int main(string[] args) {
     // Depends on IMAP commands working
     engine.add_suite(new Geary.Imap.DeserializerTest().get_suite());
     engine.add_suite(new Geary.Imap.ClientConnectionTest().get_suite());
+    engine.add_suite(new Geary.Imap.ClientSessionTest().get_suite());
 
     engine.add_suite(new Geary.ImapDB.AccountTest().get_suite());
     engine.add_suite(new Geary.ImapDB.AttachmentTest().get_suite());
