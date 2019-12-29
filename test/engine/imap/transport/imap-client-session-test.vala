@@ -256,7 +256,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(SEND_LINE, "* CAPABILITY IMAP4rev1");
         this.server.add_script_line(SEND_LINE, "a003 OK thanks");
         this.server.add_script_line(RECEIVE_LINE, "a004 LIST \"\" INBOX");
-        this.server.add_script_line(SEND_LINE, "* LIST (\\HasChildren) \".\" INBOX");
+        this.server.add_script_line(SEND_LINE, "* LIST (\\HasChildren) \".\" Inbox");
         this.server.add_script_line(SEND_LINE, "a004 OK there");
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
@@ -280,6 +280,9 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_false(test_article.capabilities.has_capability("AUTH"));
         assert_int(2, test_article.capabilities.revision);
 
+        assert_string("Inbox", test_article.inbox.mailbox.name);
+        assert_true(test_article.inbox.mailbox.is_inbox);
+
         test_article.disconnect_async.begin(null, this.async_complete_full);
         test_article.disconnect_async.end(async_result());
 
@@ -297,7 +300,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(RECEIVE_LINE, "a001 login test password");
         this.server.add_script_line(SEND_LINE, "a001 OK [CAPABILITY IMAP4rev1] ohhai");
         this.server.add_script_line(RECEIVE_LINE, "a002 LIST \"\" INBOX");
-        this.server.add_script_line(SEND_LINE, "* LIST (\\HasChildren) \".\" INBOX");
+        this.server.add_script_line(SEND_LINE, "* LIST (\\HasChildren) \".\" Inbox");
         this.server.add_script_line(SEND_LINE, "a002 OK there");
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
@@ -320,6 +323,9 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_true(test_article.capabilities.supports_imap4rev1());
         assert_false(test_article.capabilities.has_capability("AUTH"));
         assert_int(2, test_article.capabilities.revision);
+
+        assert_string("Inbox", test_article.inbox.mailbox.name);
+        assert_true(test_article.inbox.mailbox.is_inbox);
 
         test_article.disconnect_async.begin(null, this.async_complete_full);
         test_article.disconnect_async.end(async_result());

@@ -312,12 +312,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     /** Emitted when an IMAP command status response is received. */
     public signal void status_response_received(StatusResponse status_response);
 
-    /**
-     * Fired after the specific {@link ServerData} signals (i.e. {@link capability}, {@link exists}
-     * {@link expunge}, etc.)
-     */
-    public signal void server_data_received(ServerData server_data);
-
     public signal void exists(int count);
 
     public signal void expunge(SequenceNumber seq_num);
@@ -1034,16 +1028,19 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             yield send_command_async(new CapabilityCommand(), cancellable);
         }
 
-        Gee.List<ServerData> server_data = new Gee.ArrayList<ServerData>();
-        ulong data_id = this.server_data_received.connect((data) => { server_data.add(data); });
+        var list_results = new Gee.ArrayList<MailboxInformation>();
+        ulong list_id = this.list.connect(
+            (mailbox) => { list_results.add(mailbox); }
+        );
         try {
             // Determine what this connection calls the inbox
             Imap.StatusResponse response = yield send_command_async(
                 new ListCommand(MailboxSpecifier.inbox, false, null),
                 cancellable
             );
-            if (response.status == Status.OK && !server_data.is_empty) {
-                this.inbox = server_data[0].get_list();
+            if (response.status == Status.OK && !list_results.is_empty) {
+                this.inbox = list_results[0];
+                list_results.clear();
                 debug("Using INBOX: %s", this.inbox.to_string());
             } else {
                 throw new ImapError.INVALID("Unable to find INBOX");
@@ -1059,7 +1056,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                     warning("NAMESPACE command failed");
                 }
             }
-            server_data.clear();
             if (!this.personal_namespaces.is_empty) {
                 debug(
                     "Default personal namespace: %s",
@@ -1083,8 +1079,8 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                         new ListCommand(new MailboxSpecifier(prefix), false, null),
                         cancellable
                     );
-                    if (response.status == Status.OK && !server_data.is_empty) {
-                        MailboxInformation list = server_data[0].get_list();
+                    if (response.status == Status.OK && !list_results.is_empty) {
+                        MailboxInformation list = list_results[0];
                         delim = list.delim;
                     } else {
                         throw new ImapError.INVALID("Unable to determine personal namespace delimiter");
@@ -1096,7 +1092,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                       this.personal_namespaces[0].to_string());
             }
         } finally {
-            disconnect(data_id);
+            disconnect(list_id);
         }
     }
 
@@ -1939,8 +1935,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                       server_data.to_string());
             break;
         }
-
-        server_data_received(server_data);
     }
 
     private void clear_namespaces() {
