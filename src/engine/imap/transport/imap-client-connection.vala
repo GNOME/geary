@@ -447,6 +447,7 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
             // Set timeout per session policy
             command.response_timeout = this.command_timeout;
+            command.response_timed_out.connect(on_command_timeout);
 
             this.current_command = command;
             this.sent_queue.add(command);
