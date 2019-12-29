@@ -447,11 +447,13 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
         ClientSession new_session = new ClientSession(remote);
         new_session.set_logging_parent(this);
-        yield new_session.connect_async(cancellable);
+        yield new_session.connect_async(
+            ClientSession.DEFAULT_GREETING_TIMEOUT_SEC, cancellable
+        );
 
         try {
             yield new_session.initiate_session_async(login, cancellable);
-        } catch (Error err) {
+        } catch (GLib.Error err) {
             // need to disconnect before throwing error ... don't
             // honor Cancellable here, it's important to disconnect
             // the client before dropping the ref

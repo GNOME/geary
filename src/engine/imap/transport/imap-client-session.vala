@@ -74,7 +74,9 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     /** Default keep-alive interval when not in the Selected state. */
     public const uint DEFAULT_UNSELECTED_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
 
-    private const uint GREETING_TIMEOUT_SEC = Command.DEFAULT_RESPONSE_TIMEOUT_SEC;
+    /** Default time to wait for the server greeting when connecting. */
+    public const uint DEFAULT_GREETING_TIMEOUT_SEC =
+        Command.DEFAULT_RESPONSE_TIMEOUT_SEC;
 
 
     /**
@@ -659,8 +661,10 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
      * the server (that is, not a network problem).  The {@link
      * ClientSession} should be discarded.
      */
-    public async void connect_async(GLib.Cancellable? cancellable)
-        throws GLib.Error {
+    public async void connect_async(
+        uint greeting_timeout_sec = DEFAULT_GREETING_TIMEOUT_SEC,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
         MachineParams params = new MachineParams(null);
         fsm.issue(Event.CONNECT, null, params);
 
@@ -683,10 +687,13 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         }
 
         // set up timer to wait for greeting from server
-        Scheduler.Scheduled timeout = Scheduler.after_sec(GREETING_TIMEOUT_SEC, on_greeting_timeout);
+        Scheduler.Scheduled timeout = Scheduler.after_sec(
+            greeting_timeout_sec, on_greeting_timeout
+        );
 
-        // wait for the initial greeting or a timeout ... this prevents the caller from turning
-        // around and issuing a command while still in CONNECTING state
+        // wait for the initial greeting or a timeout ... this
+        // prevents the caller from turning around and issuing a
+        // command while still in CONNECTING state
         try {
             yield connect_waiter.wait_async(cancellable);
         } catch (GLib.IOError.CANCELLED err) {
@@ -783,7 +790,16 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     private uint on_connecting_recv_status(uint state, uint event, void *user, Object? object) {
         StatusResponse status_response = (StatusResponse) object;
 
-        // see on_connected() why signals and semaphore are delayed for this event
+        uint new_state = State.NOAUTH;
+        if (status_response.status != Status.OK) {
+            // Don't need to manually disconnect here, by setting
+            // connect_err here that will be done in connect_async
+            this.connect_err = new ImapError.UNAVAILABLE(
+                "Session denied: %s", status_response.get_text()
+            );
+            new_state = State.LOGOUT;
+        }
+
         try {
             connect_waiter.notify();
         } catch (Error err) {
@@ -793,25 +809,16 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             );
         }
 
-        if (status_response.status == Status.OK) {
-            fsm.do_post_transition(() => { connected(); });
-
-            return State.NOAUTH;
-        }
-
-        fsm.do_post_transition(() => { session_denied(status_response.get_text()); });
-
-        // Don't need to manually disconnect here, by setting
-        // connect_err here that will be done in connect_async
-        this.connect_err = new ImapError.UNAVAILABLE(
-            "Session denied: %s", status_response.get_text()
-        );
-
-        return State.LOGOUT;
+        return new_state;
     }
 
     private uint on_connecting_timeout(uint state, uint event) {
-        // wake up the waiting task in connect_async
+        // Don't need to manually disconnect here, by setting
+        // connect_err here that will be done in connect_async
+        this.connect_err = new GLib.IOError.TIMED_OUT(
+            "Session greeting not sent"
+        );
+
         try {
             connect_waiter.notify();
         } catch (Error err) {
@@ -819,13 +826,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                 "Unable to notify connect_waiter of timeout: %s", err.message
             );
         }
-
-        // Don't need to manually disconnect here, by setting
-        // connect_err here that will be done in connect_async
-        this.connect_err = new IOError.TIMED_OUT(
-            "Session greeting not seen in %u seconds",
-            GREETING_TIMEOUT_SEC
-        );
 
         return State.LOGOUT;
     }
@@ -1093,18 +1093,24 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     //
 
     /**
-     * If seconds is negative or zero, keepalives will be disabled.  (This is not recommended.)
+     * Enables sending keep-alive commands for the sesion.
      *
-     * Although keepalives can be enabled at any time, if they're enabled and trigger sending
-     * a command prior to connection, error signals may be fired.
+     * Although keepalives can be enabled at any time, if they're
+     * enabled and trigger sending a command prior to connection,
+     * error signals may be fired.
+     *
+     * If values are negative or zero, keepalives will be disabled.
+     * (This is not recommended.)
      */
     public void enable_keepalives(uint seconds_while_selected,
-        uint seconds_while_unselected, uint seconds_while_selected_with_idle) {
-        selected_keepalive_secs = seconds_while_selected;
-        selected_with_idle_keepalive_secs = seconds_while_selected_with_idle;
-        unselected_keepalive_secs = seconds_while_unselected;
+                                  uint seconds_while_unselected,
+                                  uint seconds_while_selected_with_idle) {
+        this.selected_keepalive_secs = seconds_while_selected;
+        this.selected_with_idle_keepalive_secs = seconds_while_selected_with_idle;
+        this.unselected_keepalive_secs = seconds_while_unselected;
 
-        // schedule one now, although will be rescheduled if traffic is received before it fires
+        // schedule one now, although will be rescheduled if traffic
+        // is received before it fires
         schedule_keepalive();
     }
 
