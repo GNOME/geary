@@ -302,18 +302,10 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     // Connection state changes
     //
 
-    public signal void connected();
-
-    public signal void session_denied(string? reason);
-
-    public signal void authorized();
-
-    public signal void logged_out();
-
-    public signal void login_failed(StatusResponse? response);
-
+    /** Emitted when the session is disconnected for any reason. */
     public signal void disconnected(DisconnectReason reason);
 
+    /** Emitted when an IMAP command status response is received. */
     public signal void status_response_received(StatusResponse status_response);
 
     /**
@@ -658,17 +650,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     /**
      * Connect to the server.
      *
-     * This performs no transaction or session initiation with the server.  See {@link login_async}
-     * and {@link initiate_session_async} for next steps.
+     * This performs no transaction or session initiation with the
+     * server.  See {@link login_async} and {@link
+     * initiate_session_async} for next steps.
      *
-     * The signals {@link connected} or {@link session_denied} will be fired in the context of this
-     * call, depending on the results of the connection greeting from the server.  However,
-     * command should only be transmitted (login, initiate session, etc.) after this call has
-     * completed.
-     *
-     * If the connection fails (if this call throws an Error) the ClientSession will be disconnected,
-     * even if the error was from the server (that is, not a network problem).  The
-     * {@link ClientSession} should be discarded.
+     * If the connection fails (if this call throws an Error) the
+     * ClientSession will be disconnected, even if the error was from
+     * the server (that is, not a network problem).  The {@link
+     * ClientSession} should be discarded.
      */
     public async void connect_async(GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -687,9 +676,9 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         // connect and let ClientConnection's signals drive the show
         try {
             yield cx.connect_async(cancellable);
-        } catch (Error err) {
+            fsm.issue(Event.CONNECTED);
+        } catch (GLib.Error err) {
             fsm.issue(Event.SEND_ERROR, null, null, err);
-
             throw err;
         }
 
@@ -1090,19 +1079,12 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         if (!validate_state_change_cmd(completion_response))
             return state;
 
-        // Remember: only you can prevent firing signals inside state transition handlers
-        switch (completion_response.status) {
-            case Status.OK:
-                fsm.do_post_transition(() => { authorized(); });
-
-                return State.AUTHORIZED;
-
-            default:
-                debug("LOGIN failed: %s", completion_response.to_string());
-                fsm.do_post_transition((resp) => { login_failed((StatusResponse)resp); }, completion_response);
-
-                return State.NOAUTH;
+        uint new_state = State.AUTHORIZED;
+        if (completion_response.status != OK) {
+            debug("LOGIN failed: %s", completion_response.to_string());
+            new_state = State.NOAUTH;
         }
+        return new_state;
     }
 
     //
@@ -1523,7 +1505,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
 
         if (params.proceed) {
             yield command_transaction_async(cmd, cancellable);
-            logged_out();
             yield do_disconnect(DisconnectReason.LOCAL_CLOSE);
         }
     }
@@ -1569,10 +1550,11 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     private uint on_logging_out_recv_completion(uint state, uint event, void *user, Object? object) {
         StatusResponse completion_response = (StatusResponse) object;
 
-        if (!validate_state_change_cmd(completion_response))
-            return state;
-
-        return State.CLOSED;
+        uint new_state = state;
+        if (validate_state_change_cmd(completion_response)) {
+            new_state = State.CLOSED;
+        }
+        return new_state;
     }
 
     //
