@@ -99,22 +99,14 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         debug("RECV: %s", continuation_response.to_string());
     }
 
-    public virtual signal void received_bytes(size_t bytes) {
-        // this generates a *lot* of debug logging if one was placed here, so it's not
-    }
+    public signal void received_bytes(size_t bytes);
 
-    public virtual signal void received_bad_response(RootParameters root,
-                                                     ImapError err) {
-        warning("Received bad response: %s", err.message);
-    }
+    public signal void received_bad_response(RootParameters root,
+                                                     ImapError err);
 
-    public virtual signal void send_failure(Error err) {
-        warning("Send failure: %s", err.message);
-    }
+    public signal void send_failure(Error err);
 
-    public virtual signal void receive_failure(GLib.Error err) {
-        warning("Receive failure: %s", err.message);
-    }
+    public signal void receive_failure(GLib.Error err);
 
 
     public ClientConnection(

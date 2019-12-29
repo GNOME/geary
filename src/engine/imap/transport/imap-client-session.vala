@@ -193,12 +193,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     private enum Event {
         // user-initiated events
         CONNECT,
+        DISCONNECT,
+
+        // command-initiated events
         LOGIN,
         SEND_CMD,
         SELECT,
         CLOSE_MAILBOX,
         LOGOUT,
-        DISCONNECT,
 
         // server events
         CONNECTED,
@@ -366,12 +368,12 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             new Geary.State.Mapping(State.NOT_CONNECTED, Event.DISCONNECT, Geary.State.nop),
 
             new Geary.State.Mapping(State.CONNECTING, Event.CONNECT, on_already_connected),
+            new Geary.State.Mapping(State.CONNECTING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.CONNECTING, Event.LOGIN, on_early_command),
             new Geary.State.Mapping(State.CONNECTING, Event.SEND_CMD, on_early_command),
             new Geary.State.Mapping(State.CONNECTING, Event.SELECT, on_early_command),
             new Geary.State.Mapping(State.CONNECTING, Event.CLOSE_MAILBOX, on_early_command),
             new Geary.State.Mapping(State.CONNECTING, Event.LOGOUT, on_early_command),
-            new Geary.State.Mapping(State.CONNECTING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.CONNECTING, Event.CONNECTED, on_connected),
             new Geary.State.Mapping(State.CONNECTING, Event.RECV_STATUS, on_connecting_recv_status),
             new Geary.State.Mapping(State.CONNECTING, Event.RECV_COMPLETION, on_dropped_response),
@@ -380,99 +382,96 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             new Geary.State.Mapping(State.CONNECTING, Event.TIMEOUT, on_connecting_timeout),
 
             new Geary.State.Mapping(State.NOAUTH, Event.CONNECT, on_already_connected),
+            new Geary.State.Mapping(State.NOAUTH, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.NOAUTH, Event.LOGIN, on_login),
             new Geary.State.Mapping(State.NOAUTH, Event.SEND_CMD, on_send_command),
             new Geary.State.Mapping(State.NOAUTH, Event.SELECT, on_unauthenticated),
             new Geary.State.Mapping(State.NOAUTH, Event.CLOSE_MAILBOX, on_unauthenticated),
             new Geary.State.Mapping(State.NOAUTH, Event.LOGOUT, on_logout),
-            new Geary.State.Mapping(State.NOAUTH, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.NOAUTH, Event.RECV_STATUS, on_recv_status),
             new Geary.State.Mapping(State.NOAUTH, Event.RECV_COMPLETION, on_recv_status),
             new Geary.State.Mapping(State.NOAUTH, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.NOAUTH, Event.RECV_ERROR, on_recv_error),
 
             new Geary.State.Mapping(State.AUTHORIZING, Event.CONNECT, on_already_connected),
+            new Geary.State.Mapping(State.AUTHORIZING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.AUTHORIZING, Event.LOGIN, on_logging_in),
             new Geary.State.Mapping(State.AUTHORIZING, Event.SEND_CMD, on_unauthenticated),
             new Geary.State.Mapping(State.AUTHORIZING, Event.SELECT, on_unauthenticated),
             new Geary.State.Mapping(State.AUTHORIZING, Event.CLOSE_MAILBOX, on_unauthenticated),
             new Geary.State.Mapping(State.AUTHORIZING, Event.LOGOUT, on_logout),
-            new Geary.State.Mapping(State.AUTHORIZING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_STATUS, on_recv_status),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_COMPLETION, on_login_recv_completion),
             new Geary.State.Mapping(State.AUTHORIZING, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_ERROR, on_recv_error),
 
             new Geary.State.Mapping(State.AUTHORIZED, Event.CONNECT, on_already_connected),
+            new Geary.State.Mapping(State.AUTHORIZED, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.AUTHORIZED, Event.LOGIN, on_already_logged_in),
             new Geary.State.Mapping(State.AUTHORIZED, Event.SEND_CMD, on_send_command),
             new Geary.State.Mapping(State.AUTHORIZED, Event.SELECT, on_select),
             new Geary.State.Mapping(State.AUTHORIZED, Event.CLOSE_MAILBOX, on_not_selected),
             new Geary.State.Mapping(State.AUTHORIZED, Event.LOGOUT, on_logout),
-            new Geary.State.Mapping(State.AUTHORIZED, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_STATUS, on_recv_status),
             new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_COMPLETION, on_recv_status),
             new Geary.State.Mapping(State.AUTHORIZED, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_ERROR, on_recv_error),
 
             new Geary.State.Mapping(State.SELECTING, Event.CONNECT, on_already_connected),
+            new Geary.State.Mapping(State.SELECTING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.SELECTING, Event.LOGIN, on_already_logged_in),
             new Geary.State.Mapping(State.SELECTING, Event.SEND_CMD, on_send_command),
             new Geary.State.Mapping(State.SELECTING, Event.SELECT, on_select),
             new Geary.State.Mapping(State.SELECTING, Event.CLOSE_MAILBOX, on_close_mailbox),
             new Geary.State.Mapping(State.SELECTING, Event.LOGOUT, on_logout),
-            new Geary.State.Mapping(State.SELECTING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.SELECTING, Event.RECV_STATUS, on_recv_status),
-
             new Geary.State.Mapping(State.SELECTING, Event.RECV_COMPLETION, on_selecting_recv_completion),
             new Geary.State.Mapping(State.SELECTING, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.SELECTING, Event.RECV_ERROR, on_recv_error),
 
             new Geary.State.Mapping(State.SELECTED, Event.CONNECT, on_already_connected),
+            new Geary.State.Mapping(State.SELECTED, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.SELECTED, Event.LOGIN, on_already_logged_in),
             new Geary.State.Mapping(State.SELECTED, Event.SEND_CMD, on_send_command),
             new Geary.State.Mapping(State.SELECTED, Event.SELECT, on_select),
             new Geary.State.Mapping(State.SELECTED, Event.CLOSE_MAILBOX, on_close_mailbox),
             new Geary.State.Mapping(State.SELECTED, Event.LOGOUT, on_logout),
-            new Geary.State.Mapping(State.SELECTED, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.SELECTED, Event.RECV_STATUS, on_recv_status),
             new Geary.State.Mapping(State.SELECTED, Event.RECV_COMPLETION, on_recv_status),
             new Geary.State.Mapping(State.SELECTED, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.SELECTED, Event.RECV_ERROR, on_recv_error),
 
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.CONNECT, on_already_connected),
+            new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.LOGIN, on_already_logged_in),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.SEND_CMD, on_send_command),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.SELECT, on_select),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.CLOSE_MAILBOX, on_not_selected),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.LOGOUT, on_logout),
-            new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.RECV_STATUS, on_recv_status),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.RECV_COMPLETION, on_closing_recv_completion),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.RECV_ERROR, on_recv_error),
 
             new Geary.State.Mapping(State.LOGOUT, Event.CONNECT, on_already_connected),
+            new Geary.State.Mapping(State.LOGOUT, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.LOGOUT, Event.LOGIN, on_already_logged_in),
             new Geary.State.Mapping(State.LOGOUT, Event.SEND_CMD, on_late_command),
             new Geary.State.Mapping(State.LOGOUT, Event.SELECT, on_late_command),
             new Geary.State.Mapping(State.LOGOUT, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.LOGOUT, Event.LOGOUT, on_late_command),
-            new Geary.State.Mapping(State.LOGOUT, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.LOGOUT, Event.DISCONNECTED, on_disconnected),
             new Geary.State.Mapping(State.LOGOUT, Event.RECV_STATUS, on_logging_out_recv_status),
             new Geary.State.Mapping(State.LOGOUT, Event.RECV_COMPLETION, on_logging_out_recv_completion),
             new Geary.State.Mapping(State.LOGOUT, Event.RECV_ERROR, on_recv_error),
             new Geary.State.Mapping(State.LOGOUT, Event.SEND_ERROR, on_send_error),
 
             new Geary.State.Mapping(State.CLOSED, Event.CONNECT, on_late_command),
+            new Geary.State.Mapping(State.CLOSED, Event.DISCONNECT, Geary.State.nop),
             new Geary.State.Mapping(State.CLOSED, Event.LOGIN, on_late_command),
             new Geary.State.Mapping(State.CLOSED, Event.SEND_CMD, on_late_command),
             new Geary.State.Mapping(State.CLOSED, Event.SELECT, on_late_command),
             new Geary.State.Mapping(State.CLOSED, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.CLOSED, Event.LOGOUT, on_late_command),
-            new Geary.State.Mapping(State.CLOSED, Event.DISCONNECT, Geary.State.nop),
-            new Geary.State.Mapping(State.CLOSED, Event.DISCONNECTED, on_disconnected),
             new Geary.State.Mapping(State.CLOSED, Event.RECV_STATUS, on_dropped_response),
             new Geary.State.Mapping(State.CLOSED, Event.RECV_COMPLETION, on_dropped_response),
             new Geary.State.Mapping(State.CLOSED, Event.SEND_ERROR, Geary.State.nop),
@@ -781,11 +780,11 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         return state;
     }
 
-    private uint on_disconnected(uint state,
-                                 uint event,
-                                 void *user = null,
-                                 GLib.Object? obj = null,
-                                 GLib.Error? err = null) {
+    private uint on_disconnect(uint state,
+                               uint event,
+                               void *user = null,
+                               GLib.Object? object = null,
+                               GLib.Error? err = null) {
         debug("Disconnected from %s", this.imap_endpoint.to_string());
         return State.CLOSED;
     }
@@ -1331,8 +1330,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                       status_response.to_string());
 
                 // nothing more we can do; drop connection and report disconnect to user
-                cx.disconnect_async.begin(null, on_bye_disconnect_completed);
-
+                this.do_disconnect.begin(DisconnectReason.REMOTE_CLOSE);
                 state = State.CLOSED;
             break;
 
@@ -1343,10 +1341,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         }
 
         return state;
-    }
-
-    private void on_bye_disconnect_completed(Object? source, AsyncResult result) {
-        dispatch_disconnect_results(DisconnectReason.REMOTE_CLOSE, result);
     }
 
     //
@@ -1507,6 +1501,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     // logout
     //
 
+    /**
+     * Sends a logout command.
+     *
+     * If the connection is still available and the server still
+     * responding, this will result in the connection being closed
+     * gracefully. Thus unless an error occurs, {@link
+     * disconnect_async} would not need to be called afterwards.
+     */
     public async void logout_async(GLib.Cancellable? cancellable)
         throws GLib.Error {
         LogoutCommand cmd = new LogoutCommand();
@@ -1520,13 +1522,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         if (params.proceed) {
             yield command_transaction_async(cmd, cancellable);
             logged_out();
-            this.cx.disconnect_async.begin(
-                cancellable, (obj, res) => {
-                    dispatch_disconnect_results(
-                        DisconnectReason.LOCAL_CLOSE, res
-                    );
-                }
-            );
+            yield do_disconnect(DisconnectReason.LOCAL_CLOSE);
         }
     }
 
@@ -1635,12 +1631,15 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         this._logging_parent = parent;
     }
 
-    private uint on_disconnect(uint state, uint event, void *user, Object? object) {
-        MachineParams params = (MachineParams) object;
+    private async void do_disconnect(DisconnectReason reason) {
+        try {
+            yield this.cx.disconnect_async();
+        } catch (GLib.Error err) {
+            debug("IMAP disconnect failed: %s", err.message);
+        }
 
-        params.proceed = true;
-
-        return State.CLOSED;
+        drop_connection();
+        disconnected(reason);
     }
 
     //
@@ -1657,27 +1656,22 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                                                void *user,
                                                GLib.Object? object,
                                                GLib.Error? err) {
-        debug("Connecting send/recv error, dropping client connection: %s",
-              err != null ? err.message : "EOS");
+        debug(
+            "Connecting send/recv error, dropping client connection: %s",
+            err != null ? err.message : "(no error)"
+        );
         fsm.do_post_transition(() => { drop_connection(); });
         return State.CLOSED;
     }
 
     private uint on_send_error(uint state, uint event, void *user, Object? object, Error? err) {
-        assert(err != null);
-
-        if (err is IOError.CANCELLED)
+        if (err is IOError.CANCELLED) {
             return state;
+        }
 
         debug("Send error, disconnecting: %s", err.message);
-
-        cx.disconnect_async.begin(null, on_fire_send_error_signal);
-
+        this.do_disconnect.begin(DisconnectReason.LOCAL_ERROR);
         return State.CLOSED;
-    }
-
-    private void on_fire_send_error_signal(Object? object, AsyncResult result) {
-        dispatch_disconnect_results(DisconnectReason.LOCAL_ERROR, result);
     }
 
     private uint on_recv_error(uint state,
@@ -1685,26 +1679,12 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                                void *user,
                                GLib.Object? object,
                                GLib.Error? err) {
-        debug("Receive error, disconnecting: %s",
-              (err != null) ? err.message : "EOS"
+        debug(
+            "Receive error, disconnecting: %s",
+            (err != null) ? err.message : "(no error)"
         );
-        cx.disconnect_async.begin(null, on_fire_recv_error_signal);
+        this.do_disconnect.begin(DisconnectReason.REMOTE_ERROR);
         return State.CLOSED;
-    }
-
-    private void on_fire_recv_error_signal(Object? object, AsyncResult result) {
-        dispatch_disconnect_results(DisconnectReason.REMOTE_ERROR, result);
-    }
-
-    private void dispatch_disconnect_results(DisconnectReason reason, AsyncResult result) {
-        try {
-            cx.disconnect_async.end(result);
-        } catch (Error err) {
-            debug("Send/recv disconnect failed: %s", err.message);
-        }
-
-        drop_connection();
-        disconnected(reason);
     }
 
     // This handles the situation where the user submits a command before the connection has been
