@@ -117,26 +117,28 @@ public class Geary.Imap.Deserializer : BaseObject {
     public signal void bytes_received(size_t bytes);
 
     /**
-     * Fired when the underlying InputStream is closed, whether due to normal EOS or input error.
-     *
-     * @see receive_failure
-     */
-    public signal void eos();
-
-    /**
      * Fired when a syntax error has occurred.
      *
-     * This generally means the data looks like garbage and further deserialization is unlikely
-     * or impossible.
+     * This generally means the data looks like garbage and further
+     * deserialization is unlikely or impossible.
      */
     public signal void deserialize_failure();
 
     /**
      * Fired when an Error is trapped on the input stream.
      *
-     * This is nonrecoverable and means the stream should be closed and this Deserializer destroyed.
+     * This is nonrecoverable and means the stream should be closed
+     * and this Deserializer destroyed.
      */
-    public signal void receive_failure(Error err);
+    public signal void receive_failure(GLib.Error err);
+
+    /**
+     * Fired when the underlying InputStream is closed.
+     *
+     * This is nonrecoverable and means the stream should be closed
+     * and this Deserializer destroyed.
+     */
+    public signal void end_of_stream();
 
 
     public Deserializer(string identifier, InputStream ins) {
@@ -816,8 +818,8 @@ public class Geary.Imap.Deserializer : BaseObject {
         flush_params();
 
         // always signal as closed and notify subscribers
-        closed_semaphore.blind_notify();
-        eos();
+        this.closed_semaphore.blind_notify();
+        end_of_stream();
 
         return State.CLOSED;
     }
@@ -833,9 +835,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         }
 
         // always signal as closed and notify
-        closed_semaphore.blind_notify();
-        eos();
-
+        this.closed_semaphore.blind_notify();
         return State.CLOSED;
     }
 

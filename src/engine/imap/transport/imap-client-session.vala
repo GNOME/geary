@@ -739,8 +739,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         assert(cx == null);
         cx = new ClientConnection(imap_endpoint);
         cx.set_logging_parent(this);
-        cx.connected.connect(on_network_connected);
-        cx.disconnected.connect(on_network_disconnected);
         cx.sent_command.connect(on_network_sent_command);
         cx.send_failure.connect(on_network_send_error);
         cx.received_status_response.connect(on_received_status_response);
@@ -748,9 +746,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         cx.received_continuation_response.connect(on_received_continuation_response);
         cx.received_bytes.connect(on_received_bytes);
         cx.received_bad_response.connect(on_received_bad_response);
-        cx.received_eos.connect(on_received_eos);
         cx.receive_failure.connect(on_network_receive_failure);
-        cx.deserialize_failure.connect(on_network_receive_failure);
 
         assert(connect_waiter == null);
         connect_waiter = new Nonblocking.Semaphore();
@@ -760,14 +756,10 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         return State.CONNECTING;
     }
 
-    // this is used internally to tear-down the ClientConnection object and unhook it from
-    // ClientSession
     private void drop_connection() {
         unschedule_keepalive();
 
         if (cx != null) {
-            cx.connected.disconnect(on_network_connected);
-            cx.disconnected.disconnect(on_network_disconnected);
             cx.sent_command.disconnect(on_network_sent_command);
             cx.send_failure.disconnect(on_network_send_error);
             cx.received_status_response.disconnect(on_received_status_response);
@@ -775,9 +767,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             cx.received_continuation_response.disconnect(on_received_continuation_response);
             cx.received_bytes.disconnect(on_received_bytes);
             cx.received_bad_response.disconnect(on_received_bad_response);
-            cx.received_eos.connect(on_received_eos);
             cx.receive_failure.disconnect(on_network_receive_failure);
-            cx.deserialize_failure.disconnect(on_network_receive_failure);
 
             cx = null;
         }
@@ -1807,14 +1797,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     // network connection event handlers
     //
 
-    private void on_network_connected() {
-        fsm.issue(Event.CONNECTED);
-    }
-
-    private void on_network_disconnected() {
-        fsm.issue(Event.DISCONNECTED);
-    }
-
     private void on_network_sent_command(Command cmd) {
         // resechedule keepalive
         schedule_keepalive();
@@ -1968,11 +1950,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         fsm.issue(Event.RECV_ERROR, null, null, err);
     }
 
-    private void on_received_eos(ClientConnection cx) {
-        fsm.issue(Event.RECV_ERROR, null, null, null);
-    }
-
-    private void on_network_receive_failure(Error err) {
+    private void on_network_receive_failure(GLib.Error err) {
         fsm.issue(Event.RECV_ERROR, null, null, err);
     }
 

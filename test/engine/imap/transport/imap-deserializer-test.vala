@@ -265,7 +265,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(bye.data);
 
         bool eos = false;
-        this.deser.eos.connect(() => { eos = true; });
+        this.deser.end_of_stream.connect(() => { eos = true; });
 
         this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
         RootParameters? message = this.process.end(async_result());
@@ -283,7 +283,7 @@ class Geary.Imap.DeserializerTest : TestCase {
 
         this.deser.parameters_ready.connect((param) => { message = param; });
         this.deser.bytes_received.connect((count) => { bytes_received += count; });
-        this.deser.eos.connect((param) => { eos = true; });
+        this.deser.end_of_stream.connect((param) => { eos = true; });
         this.deser.deserialize_failure.connect(() => { deserialize_failure = true; });
         this.deser.receive_failure.connect((err) => { receive_failure = true;});
 

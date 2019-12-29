@@ -89,14 +89,6 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
     private GLib.Cancellable? open_cancellable = null;
 
 
-    public virtual signal void connected() {
-        debug("Connected to %s", endpoint.to_string());
-    }
-
-    public virtual signal void disconnected() {
-        debug("Disconnected from %s", endpoint.to_string());
-    }
-
     public virtual signal void sent_command(Command cmd) {
         debug("SEND: %s", cmd.to_string());
     }
@@ -122,24 +114,12 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         warning("Received bad response: %s", err.message);
     }
 
-    public virtual signal void received_eos() {
-        debug("Received eos");
-    }
-
     public virtual signal void send_failure(Error err) {
         warning("Send failure: %s", err.message);
     }
 
-    public virtual signal void receive_failure(Error err) {
+    public virtual signal void receive_failure(GLib.Error err) {
         warning("Receive failure: %s", err.message);
-    }
-
-    public virtual signal void deserialize_failure(Error err) {
-        warning("Deserialize failure: %s", err.message);
-    }
-
-    public virtual signal void close_error(Error err) {
-        warning("Close error: %s", err.message);
     }
 
 
@@ -216,8 +196,6 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         this.pending_queue.clear();
         this.sent_queue.clear();
 
-        connected();
-
         try {
             yield open_channels_async();
         } catch (Error err) {
@@ -276,7 +254,6 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
                 close_error(close_err);
             }
 
-            disconnected();
         }
     }
 
@@ -359,20 +336,20 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
         this.open_cancellable = new GLib.Cancellable();
 
-        // Not buffering the Deserializer because it uses a DataInputStream, which is buffered
         ser_buffer = new BufferedOutputStream(ios.output_stream);
         ser_buffer.set_close_base_stream(false);
 
-        // Use ClientConnection cx_id for debugging aid with Serializer/Deserializer
         string id = "%04d".printf(cx_id);
         ser = new Serializer(id, ser_buffer);
-        des = new Deserializer(id, ios.input_stream);
 
-        des.parameters_ready.connect(on_parameters_ready);
+        // Not buffering the Deserializer because it uses a
+        // DataInputStream, which is already buffered
+        des = new Deserializer(id, this.cx.input_stream);
         des.bytes_received.connect(on_bytes_received);
-        des.receive_failure.connect(on_receive_failure);
         des.deserialize_failure.connect(on_deserialize_failure);
-        des.eos.connect(on_eos);
+        des.end_of_stream.connect(on_eos);
+        des.parameters_ready.connect(on_parameters_ready);
+        des.receive_failure.connect(on_receive_failure);
 
         // Start this running in the "background", it will stop when
         // open_cancellable is cancelled
@@ -394,11 +371,11 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
         // disconnect from Deserializer before yielding to stop it
         if (des != null) {
-            des.parameters_ready.disconnect(on_parameters_ready);
             des.bytes_received.disconnect(on_bytes_received);
-            des.receive_failure.disconnect(on_receive_failure);
             des.deserialize_failure.disconnect(on_deserialize_failure);
-            des.eos.disconnect(on_eos);
+            des.end_of_stream.disconnect(on_eos);
+            des.parameters_ready.disconnect(on_parameters_ready);
+            des.receive_failure.disconnect(on_receive_failure);
 
             yield des.stop_async();
         }
@@ -586,20 +563,24 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         received_bytes(bytes);
     }
 
+    private void on_eos() {
+        receive_failure(
+            new ImapError.NOT_CONNECTED(
+                "End of stream reading from %s", to_string()
+            )
+        );
+    }
+
     private void on_receive_failure(Error err) {
         receive_failure(err);
     }
 
     private void on_deserialize_failure() {
-        deserialize_failure(
+        receive_failure(
             new ImapError.PARSE_ERROR(
                 "Unable to deserialize from %s", to_string()
             )
         );
-    }
-
-    private void on_eos() {
-        received_eos();
     }
 
     private void on_command_timeout(Command command) {
