@@ -63,6 +63,11 @@ public errordomain Geary.ImapError {
 
     /**
      * The remote IMAP server not currently available.
+     *
+     * This does not indicate a network error, rather it indicates a
+     * connection to the server was established but the server
+     * indicated it is not currently servicing the connection.
      */
-    UNAVAILABLE
+    UNAVAILABLE;
+
 }
