@@ -786,6 +786,8 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                                GLib.Object? object = null,
                                GLib.Error? err = null) {
         debug("Disconnected from %s", this.imap_endpoint.to_string());
+        MachineParams params = (MachineParams) object;
+        params.proceed = true;
         return State.CLOSED;
     }
 
