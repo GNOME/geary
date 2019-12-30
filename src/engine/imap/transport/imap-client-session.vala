@@ -245,13 +245,18 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         get { return this.capabilities.has_capability(Capabilities.IDLE); }
     }
 
+    /** The currently selected mailbox, if any. */
+    public MailboxSpecifier? selected_mailbox = null;
+
     /**
-     * Determines when the last successful command response was received.
+     * Specifies if the current selected state is readonly.
      *
-     * Returns the system wall clock time the last successful command
-     * response was received, in microseconds since the UNIX epoch.
+     * This property specifies if the current selected state was
+     * entered by a SELECT command -- in which case mailbox access is
+     * read-write, or by an EXAMINE command -- in which case mailbox
+     * access is read-only.
      */
-    public int64 last_seen = 0;
+    public bool selected_readonly = false;
 
     /** {@inheritDoc} */
     public Logging.Flag logging_flags {
@@ -261,6 +266,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     /** {@inheritDoc} */
     public Logging.Source? logging_parent { get { return _logging_parent; } }
     private weak Logging.Source? _logging_parent = null;
+
+    /**
+     * Determines when the last successful command response was received.
+     *
+     * Returns the system wall clock time the last successful command
+     * response was received, in microseconds since the UNIX epoch.
+     */
+    internal int64 last_seen { get; private set; default = 0; }
 
     // While the following inbox and namespace data should be server
     // specific, there is a small chance they will differ between
@@ -285,9 +298,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     private Endpoint imap_endpoint;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
-
-    private MailboxSpecifier? current_mailbox = null;
-    private bool current_mailbox_readonly = false;
 
     private uint keepalive_id = 0;
     private uint selected_keepalive_secs = 0;
@@ -333,13 +343,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
 
     public signal void status(StatusData status_data);
 
-    /**
-     * If the mailbox name is null it indicates the type of state change that has occurred
-     * (authorized -> selected/examined or vice-versa).  If new_name is null readonly should be
-     * ignored.
-     */
-    public signal void current_mailbox_changed(MailboxSpecifier? old_name, MailboxSpecifier? new_name,
-        bool readonly);
 
     public ClientSession(Endpoint imap_endpoint) {
         this.imap_endpoint = imap_endpoint;
@@ -539,14 +542,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         return this.user_namespaces.read_only_view;
     }
 
-    public MailboxSpecifier? get_current_mailbox() {
-        return current_mailbox;
-    }
-
-    public bool is_current_mailbox_readonly() {
-        return current_mailbox_readonly;
-    }
-
     /**
      * Determines the SELECT-able mailbox name for a specific folder path.
      */
@@ -628,9 +623,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
      * Returns the current {@link ProtocolState} of the {@link ClientSession} and, if selected,
      * the current mailbox.
      */
-    public ProtocolState get_protocol_state(out MailboxSpecifier? current_mailbox) {
-        current_mailbox = null;
-
+    public ProtocolState get_protocol_state() {
         switch (fsm.get_state()) {
             case State.NOT_CONNECTED:
             case State.LOGOUT:
@@ -644,8 +637,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
                 return ProtocolState.AUTHORIZED;
 
             case State.SELECTED:
-                current_mailbox = this.current_mailbox;
-
                 return ProtocolState.SELECTED;
 
             case State.CONNECTING:
@@ -1183,7 +1174,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     public void enable_idle()
         throws GLib.Error {
         if (this.is_idle_supported) {
-            switch (get_protocol_state(null)) {
+            switch (get_protocol_state()) {
             case ProtocolState.AUTHORIZING:
             case ProtocolState.AUTHORIZED:
             case ProtocolState.SELECTED:
@@ -1204,7 +1195,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         unschedule_keepalive();
 
         uint seconds;
-        switch (get_protocol_state(null)) {
+        switch (get_protocol_state()) {
             case ProtocolState.NOT_CONNECTED:
             case ProtocolState.CONNECTING:
                 return;
@@ -1429,45 +1420,34 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     }
 
     private uint on_selecting_recv_completion(uint state, uint event, void *user, Object? object) {
+        uint new_state = state;
         StatusResponse completion_response = (StatusResponse) object;
 
-        Command? cmd;
-        if (!validate_state_change_cmd(completion_response, out cmd))
-            return state;
-
-        // get the mailbox from the command
-        MailboxSpecifier? mailbox = null;
-        if (cmd is SelectCommand) {
-            mailbox = ((SelectCommand) cmd).mailbox;
-            current_mailbox_readonly = false;
-        } else if (cmd is ExamineCommand) {
-            mailbox = ((ExamineCommand) cmd).mailbox;
-            current_mailbox_readonly = true;
-        }
-
-        // should only get to this point if cmd was SELECT or EXAMINE
-        assert(mailbox != null);
-
-        switch (completion_response.status) {
+        Command? cmd = null;
+        if (validate_state_change_cmd(completion_response, out cmd)) {
+            switch (completion_response.status) {
             case Status.OK:
-                // mailbox is SELECTED/EXAMINED, report change after completion of transition
-                MailboxSpecifier? old_mailbox = current_mailbox;
-                current_mailbox = mailbox;
-
-                if (old_mailbox != current_mailbox)
-                    fsm.do_post_transition(notify_select_completed, null, old_mailbox);
-
-                return State.SELECTED;
+                if (cmd is SelectCommand) {
+                    this.selected_mailbox = ((SelectCommand) cmd).mailbox;
+                    this.selected_readonly = false;
+                } else if (cmd is ExamineCommand) {
+                    this.selected_mailbox = ((ExamineCommand) cmd).mailbox;
+                    this.selected_readonly = true;
+                }
+                new_state = State.SELECTED;
+                break;
 
             default:
+                this.selected_mailbox = null;
+                this.selected_readonly = false;
+                new_state = State.AUTHORIZED;
                 warning("SELECT/EXAMINE failed: %s",
                         completion_response.to_string());
-                return State.AUTHORIZED;
+                break;
+            }
         }
-    }
 
-    private void notify_select_completed(void *user, Object? object) {
-        current_mailbox_changed((MailboxSpecifier) object, current_mailbox, current_mailbox_readonly);
+        return new_state;
     }
 
     //
@@ -1508,23 +1488,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
 
         switch (completion_response.status) {
             case Status.OK:
-                MailboxSpecifier? old_mailbox = current_mailbox;
-                current_mailbox = null;
-
-                if (old_mailbox != null)
-                    fsm.do_post_transition(notify_mailbox_closed, null, old_mailbox);
-
+                this.selected_mailbox = null;
+                this.selected_readonly = false;
                 return State.AUTHORIZED;
 
             default:
                 warning("CLOSE failed: %s", completion_response.to_string());
-
                 return State.SELECTED;
         }
-    }
-
-    private void notify_mailbox_closed(void *user, Object? object) {
-        current_mailbox_changed((MailboxSpecifier) object, null, false);
     }
 
     //
@@ -1645,17 +1616,17 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
 
     /** {@inheritDoc} */
     public Logging.State to_logging_state() {
-        return (this.current_mailbox == null)
+        return (this.selected_mailbox == null)
             ? new Logging.State(
                 this,
                 this.fsm.get_state_string(fsm.get_state())
             )
             : new Logging.State(
                 this,
-                "%s:%s %s",
+                "%s:%s selected %s",
                 this.fsm.get_state_string(fsm.get_state()),
-                this.current_mailbox.to_string(),
-                this.current_mailbox_readonly ? "RO" : "RW"
+                this.selected_mailbox.to_string(),
+                this.selected_readonly ? "RO" : "RW"
             );
     }
 

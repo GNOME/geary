@@ -227,7 +227,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         } else if (yield check_session(session, false)) {
             bool free = true;
             MailboxSpecifier? mailbox = null;
-            ClientSession.ProtocolState proto = session.get_protocol_state(out mailbox);
+            ClientSession.ProtocolState proto = session.get_protocol_state();
             // If the session has a mailbox selected, close it before
             // adding it back to the pool
             if (proto == ClientSession.ProtocolState.SELECTED ||
@@ -242,7 +242,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                 }
 
                 // Double check the session after closing it
-                switch (session.get_protocol_state(null)) {
+                switch (session.get_protocol_state()) {
                 case AUTHORIZED:
                     // This is the desired state, so all good
                     break;
@@ -381,7 +381,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     /** Determines if a session is valid, disposing of it if not. */
     private async bool check_session(ClientSession target, bool claiming) {
         bool valid = false;
-        switch (target.get_protocol_state(null)) {
+        switch (target.get_protocol_state()) {
         case ClientSession.ProtocolState.AUTHORIZED:
         case ClientSession.ProtocolState.CLOSING_MAILBOX:
             valid = true;
