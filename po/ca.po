@@ -61,7 +61,7 @@ msgstr "Email;Correu electrònic;Correu;"
 #. Translators: The development team's name
 #: desktop/org.gnome.Geary.appdata.xml.in:13
 msgid "Geary Development Team"
-msgstr "Geary Development Team"
+msgstr "Equip de desenvolupament del Geary"
 
 #: desktop/org.gnome.Geary.appdata.xml.in:17
 msgid ""
@@ -306,13 +306,13 @@ msgstr "El darrer registre de la mida de la finestra separada de l'editor."
 
 #: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
-msgstr "Si hem d'emigrar els paràmetres antics"
+msgstr "Si hem de migrar els paràmetres antics"
 
 #: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
-"Fals per comprovar l’antic «org.yorba.geary» -schema i copiar els seus "
+"Fals per comprovar l'antic «org.yorba.geary» -schema i copiar els seus "
 "valors."
 
 #. Translators: In-app notification label, when
@@ -2371,8 +2371,8 @@ msgid ""
 "Removing an account will remove it from Geary and delete locally cached "
 "email data from your computer, but not from your service provider."
 msgstr ""
-"L’eliminació d’un compte l’eliminarà del Geary i esborrarà les dades del "
-"correu a la memòria cau local de l’ordinador, però no del proveïdor de "
+"L'eliminació d’un compte l'eliminarà del Geary i esborrarà les dades del "
+"correu a la memòria cau local de l'ordinador, però no del proveïdor de "
 "serveis."
 
 #: ui/accounts_editor_remove_pane.ui:122
@@ -2778,7 +2778,7 @@ msgstr "Però en realitat va a:"
 
 #: ui/conversation-message.ui:723
 msgid "The link appears to go to:"
-msgstr "L'enllaç apareix en anar a:"
+msgstr "L'enllaç sembla anar a:"
 
 #: ui/conversation-message.ui:735
 msgid "Deceptive link found"
