@@ -317,11 +317,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gee.ArrayList<FromAddressMap> from_list = new Gee.ArrayList<FromAddressMap>();
 
     [GtkChild]
-    private Gtk.EventBox to_box;
+    private Gtk.Box to_box;
     [GtkChild]
     private Gtk.Label to_label;
     private EmailEntry to_entry;
     private Components.EntryUndo to_undo;
+
+    [GtkChild]
+    private Gtk.Revealer extended_fields_revealer;
 
     [GtkChild]
     private Gtk.EventBox cc_box;
@@ -508,7 +511,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         this.to_entry = new EmailEntry(this);
         this.to_entry.changed.connect(on_envelope_changed);
-        this.to_box.add(to_entry);
+        this.to_box.pack_start(to_entry, true, true);
         this.to_label.set_mnemonic_widget(this.to_entry);
         this.to_undo = new Components.EntryUndo(this.to_entry);
 
@@ -529,8 +532,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.reply_to_box.add(reply_to_entry);
         this.reply_to_label.set_mnemonic_widget(this.reply_to_entry);
         this.reply_to_undo = new Components.EntryUndo(this.reply_to_entry);
-
-        this.to_entry.margin_top = this.cc_entry.margin_top = this.bcc_entry.margin_top = this.reply_to_entry.margin_top = 6;
 
         this.subject_undo = new Components.EntryUndo(this.subject_entry);
         this.subject_spell_entry = Gspell.Entry.get_from_gtk_entry(
@@ -2138,10 +2139,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                                                   GLib.Variant? new_state) {
         bool show_extended = new_state.get_boolean();
         action.set_state(show_extended);
-        this.bcc_label.visible =
-            this.bcc_entry.visible =
-            this.reply_to_label.visible =
-            this.reply_to_entry.visible = show_extended;
+        this.extended_fields_revealer.reveal_child = show_extended;
 
         if (show_extended && this.current_mode == INLINE_COMPACT) {
             set_mode(INLINE);
