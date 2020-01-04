@@ -5,7 +5,6 @@
   <template class="ComposerHeaderbar" parent="GtkHeaderBar">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="show_close_button">True</property>
     <child>
       <object class="GtkBox" id="detach_start">
         <property name="visible">True</property>
