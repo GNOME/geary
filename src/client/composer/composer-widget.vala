@@ -131,6 +131,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private const string ACTION_INSERT_LINK = "insert-link";
     private const string ACTION_COMPOSE_AS_HTML = "compose-as-html";
     private const string ACTION_SHOW_EXTENDED_HEADERS = "show-extended-headers";
+    private const string ACTION_SHOW_FORMATTING = "show-formatting";
     private const string ACTION_DISCARD = "discard";
     private const string ACTION_DETACH = "detach";
     private const string ACTION_SEND = "send";
@@ -186,6 +187,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         { ACTION_SELECT_DICTIONARY,        on_select_dictionary                                       },
         { ACTION_SEND,                     on_send                                                    },
         { ACTION_SHOW_EXTENDED_HEADERS,    on_toggle_action, null, "false", on_show_extended_headers_toggled },
+        { ACTION_SHOW_FORMATTING,          on_toggle_action, null, "false", on_show_formatting        },
     };
 
     public static void add_accelerators(Application.Client application) {
@@ -310,6 +312,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     [GtkChild]
     private Gtk.Label from_label;
+    [GtkChild] private Gtk.Box from_row;
     [GtkChild]
     private Gtk.Label from_single;
     [GtkChild]
@@ -347,8 +350,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private EmailEntry reply_to_entry;
     private Components.EntryUndo reply_to_undo;
 
-    [GtkChild]
-    private Gtk.Label subject_label;
+    [GtkChild] private Gtk.Box subject_row;
     [GtkChild]
     private Gtk.Entry subject_entry;
     private Components.EntryUndo subject_undo;
@@ -371,16 +373,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gtk.Widget recipients;
     [GtkChild]
     private Gtk.Box header_area;
-    [GtkChild]
-    private Gtk.Box insert_buttons;
-    [GtkChild]
-    private Gtk.Box font_style_buttons;
-    [GtkChild]
-    private Gtk.Box list_buttons;
+    [GtkChild] private Gtk.Revealer formatting;
     [GtkChild]
     private Gtk.Button insert_link_button;
-    [GtkChild]
-    private Gtk.Button remove_format_button;
     [GtkChild]
     private Gtk.Button select_dictionary_button;
     [GtkChild]
@@ -1150,6 +1145,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             );
         }
 
+        this.composer_actions.change_action_state(
+            ACTION_SHOW_FORMATTING,
+            this.application.config.formatting_toolbar_visible
+        );
+
         get_action(Action.Edit.UNDO).set_enabled(false);
         get_action(Action.Edit.REDO).set_enabled(false);
 
@@ -1435,20 +1435,17 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         case PresentationMode.DETACHED:
         case PresentationMode.PANED:
             this.recipients.set_visible(true);
-            this.subject_label.set_visible(true);
-            this.subject_entry.set_visible(true);
+            this.subject_row.visible = true;
             break;
 
         case PresentationMode.INLINE:
             this.recipients.set_visible(true);
-            this.subject_label.set_visible(false);
-            this.subject_entry.set_visible(false);
+            this.subject_row.visible = false;
             break;
 
         case PresentationMode.INLINE_COMPACT:
             this.recipients.set_visible(false);
-            this.subject_label.set_visible(false);
-            this.subject_entry.set_visible(false);
+            this.subject_row.visible = false;
             set_compact_header_recipients();
             break;
         }
@@ -2123,10 +2120,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         update_cursor_actions();
 
-        this.insert_buttons.visible = compose_as_html;
-        this.font_style_buttons.visible = compose_as_html;
-        this.list_buttons.visible = compose_as_html;
-        this.remove_format_button.visible = compose_as_html;
+        var show_formatting = (SimpleAction) this.composer_actions.lookup_action(ACTION_SHOW_FORMATTING);
+        show_formatting.set_enabled(compose_as_html);
+        update_formatting_toolbar();
 
         this.menu_button.menu_model = (compose_as_html) ? this.html_menu : this.plain_menu;
 
@@ -2144,6 +2140,20 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (show_extended && this.current_mode == INLINE_COMPACT) {
             set_mode(INLINE);
         }
+    }
+
+    private void update_formatting_toolbar() {
+        var show_formatting = (SimpleAction) this.composer_actions.lookup_action(ACTION_SHOW_FORMATTING);
+        var text_format = (SimpleAction) this.composer_actions.lookup_action(ACTION_TEXT_FORMAT);
+        this.formatting.reveal_child = text_format.get_state().get_string() == "html" && show_formatting.get_state().get_boolean();
+    }
+
+    private void on_show_formatting(SimpleAction? action, Variant? new_state) {
+        bool show_formatting = new_state.get_boolean();
+        this.application.config.formatting_toolbar_visible = show_formatting;
+        action.set_state(new_state);
+
+        update_formatting_toolbar();
     }
 
     private void on_font_family(SimpleAction action, Variant? param) {
@@ -2392,7 +2402,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     // the from address had to be set
     private bool update_from_field() {
         this.from_multiple.changed.disconnect(on_from_changed);
-        this.from_single.visible = this.from_multiple.visible = this.from_label.visible = false;
+        this.from_single.visible = this.from_multiple.visible = this.from_row.visible = false;
 
         // Don't show in inline unless the current account has
         // multiple email accounts or aliases, since these will be replies to a
@@ -2411,7 +2421,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             return false;
         }
 
-        this.from_label.visible = true;
+        this.from_row.visible = true;
         this.from_label.set_mnemonic_widget(this.from_multiple);
         // Composer label (with mnemonic underscore) for the account selector
         // when choosing what address to send a message from.
