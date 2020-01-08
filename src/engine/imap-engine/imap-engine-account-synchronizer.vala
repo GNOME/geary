@@ -71,6 +71,9 @@ private class Geary.ImapEngine.AccountSynchronizer :
                     )
                     : new RefreshFolderSync(this.account, imap_folder);
 
+                if (became_available)
+                    ((CheckFolderSync) op).old_message_detached.connect(this.old_messages_removed_during_sync);
+
                 try {
                     this.account.queue_operation(op);
                 } catch (Error err) {
@@ -87,6 +90,13 @@ private class Geary.ImapEngine.AccountSynchronizer :
         if (this.account.is_open()) {
             send_all(this.account.list_folders(), true);
         }
+    }
+
+    private void old_messages_removed_during_sync(Cancellable cancellable) {
+        // This is not a daily cleanup. We've detached some messages, let's GC if
+        // recommended.
+        GenericAccount account = (GenericAccount) this.account;
+        account.local.db.schedule_gc_after_old_messages_cleanup(cancellable);
     }
 
     private void on_account_prefetch_changed() {
@@ -219,6 +229,7 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
  */
 private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
 
+    public signal void old_message_detached(Cancellable cancellable);
 
     private DateTime sync_max_epoch;
 
@@ -250,6 +261,7 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
             Gee.Collection<Geary.EmailIdentifier>? detached_ids = yield local_folder.detach_emails_before_timestamp(prefetch_max_epoch, cancellable);
             if (detached_ids != null) {
                 this.folder.email_locally_removed(detached_ids);
+                old_message_detached(cancellable);
             }
         }
 
