@@ -18,6 +18,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     /** SQLite UTF-8 collation name. */
     public const string UTF8_COLLATE = "UTF8COLL";
 
+    public bool want_background_vacuum { get; set; default = false; }
+
 
     private static void utf8_transliterate_fold(Sqlite.Context context,
                                                 Sqlite.Value[] values) {
@@ -73,6 +75,29 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         throws Error {
         yield base.open(flags, cancellable);
 
+        yield run_gc(cancellable);
+    }
+
+    /**
+     * Run garbage collection
+     *
+     * Reap should only be forced when there is known cleanup to perform and
+     * the interval based recommendation should be bypassed.
+     *
+     * TODO Passing of account is a WIP hack. It is currently used to both
+     *      signify that it's an appropriate time to run a vacuum (ie. we're
+     *      idle in the background) and provide access for stopping IMAP.
+     */
+    public async void run_gc(Cancellable? cancellable,
+                             bool force_reap = false,
+                             Geary.ImapEngine.GenericAccount? account = null)
+                                 throws Error {
+
+        if (this.gc != null) {
+            message("GC abandoned, possibly already running");
+            return;
+        }
+
         // Tie user-supplied Cancellable to internal Cancellable, which is used when close() is
         // called
         if (cancellable != null)
@@ -89,24 +114,35 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         // VACUUM needs to execute in the foreground with the user given a busy prompt (and cannot
         // be run at the same time as REAP)
         if ((recommended & GC.RecommendedOperation.VACUUM) != 0) {
-            if (!vacuum_monitor.is_in_progress)
-                vacuum_monitor.notify_start();
+            if (account != null) {
+                this.want_background_vacuum = false;
+                yield account.imap.stop(gc_cancellable);
 
-            try {
-                yield this.gc.vacuum_async(gc_cancellable);
-            } catch (Error err) {
-                message(
-                    "Vacuum of IMAP database %s failed: %s", this.path, err.message
-                );
-                throw err;
-            } finally {
-                if (vacuum_monitor.is_in_progress)
-                    vacuum_monitor.notify_finish();
-            }
+                if (!vacuum_monitor.is_in_progress)
+                    vacuum_monitor.notify_start();
+
+                try {
+                    yield this.gc.vacuum_async(gc_cancellable);
+                } catch (Error err) {
+                    message(
+                        "Vacuum of IMAP database %s failed: %s", this.path, err.message
+                    );
+                    throw err;
+                } finally {
+                    if (vacuum_monitor.is_in_progress)
+                        vacuum_monitor.notify_finish();
+                }
+
+                yield account.imap.start(gc_cancellable);
+            } else {
+                // Flag a vacuum to run later when we've been idle in the background
+                debug("Flagging desire to GC vacuum");
+                this.want_background_vacuum = true;
+           }
         }
 
         // REAP can run in the background while the application is executing
-        if ((recommended & GC.RecommendedOperation.REAP) != 0) {
+        if (force_reap || (recommended & GC.RecommendedOperation.REAP) != 0) {
             // run in the background and allow application to continue running
             this.gc.reap_async.begin(gc_cancellable, on_reap_async_completed);
         } else {
