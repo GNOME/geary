@@ -18,6 +18,7 @@ internal class Application.Controller : Geary.BaseObject {
 
     private const uint MAX_AUTH_ATTEMPTS = 3;
 
+    private const uint CLEANUP_WORK_AFTER_IDLE_BACKGROUND_MINUTES = 60 * 24;
 
     /** Determines if conversations can be trashed from the given folder. */
     public static bool does_folder_support_trash(Geary.Folder? target) {
@@ -90,6 +91,9 @@ internal class Application.Controller : Geary.BaseObject {
 
     // Requested mailto composers not yet fullfulled
     private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
+
+    // Timeout to do work in idle after all windows have been sent to the background
+    private Geary.TimeoutManager all_windows_backgrounded_timeout = null;
 
 
     /**
@@ -1390,6 +1394,30 @@ internal class Application.Controller : Geary.BaseObject {
                     // all good
                 }
             }
+        }
+    }
+
+    // Track a window receiving focus, for idle background work
+    public void window_focus_in() {
+        if (this.all_windows_backgrounded_timeout != null) {
+            this.all_windows_backgrounded_timeout.reset();
+            this.all_windows_backgrounded_timeout = null;
+        }
+    }
+
+    // Track a window going unfocused, for idle background work
+    public void window_focus_out() {
+        this.all_windows_backgrounded_timeout = new Geary.TimeoutManager.seconds(CLEANUP_WORK_AFTER_IDLE_BACKGROUND_MINUTES * 60, on_unfocused_idle);
+        this.all_windows_backgrounded_timeout.start();
+    }
+
+    private void on_unfocused_idle() {
+        // Schedule later, catching cases where work should occur later while still in background
+        this.all_windows_backgrounded_timeout = null;
+        window_focus_out();
+
+        debug("Checking for backgrounded idle work");
+        foreach (AccountContext context in this.accounts.values) {
         }
     }
 
