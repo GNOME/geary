@@ -936,6 +936,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
                 stmt.exec(cancellable);
 
+                // Update local message count
+                this.properties.set_status_message_count(this.properties.email_total - deleted_ids.size, true);
+
                 return Db.TransactionOutcome.COMMIT;
             } else {
                 return Db.TransactionOutcome.DONE;
