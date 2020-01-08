@@ -132,7 +132,7 @@ if enable_valadoc
       '--pkg', 'gio-2.0',
       '--pkg', 'gee-0.8',
       '--pkg', 'sqlite3',
-      '--pkg', 'gmime-2.6',
+      '--pkg', 'gmime-3.0',
       '--pkg', 'javascriptcoregtk-4.0',
       '--pkg', 'libxml-2.0',
       '--pkg', 'libunwind',

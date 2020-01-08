@@ -57,7 +57,7 @@ target_webkit = '2.24'
 
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
-gmime = dependency('gmime-2.6', version: '>= 2.6.17')
+gmime = dependency('gmime-3.0', version: '>= 3.2.4')
 gtk = dependency('gtk+-3.0', version: '>=' + target_gtk)
 sqlite = dependency('sqlite3', version: '>= 3.24')
 webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)

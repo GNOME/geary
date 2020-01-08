@@ -51,11 +51,13 @@ public class Geary.Mime.ContentParameters : BaseObject {
         }
     }
 
-    internal ContentParameters.from_gmime(GMime.Param? gmime_param) {
+    internal ContentParameters.from_gmime(GMime.ParamList? gmime_params) {
         Gee.Map<string,string> params = new Gee.HashMap<string,string>();
-        while (gmime_param != null) {
-            params.set(gmime_param.get_name(), gmime_param.get_value());
-            gmime_param = gmime_param.get_next();
+        if (gmime_params != null) {
+            for (int i = 0; i < gmime_params.length(); i++) {
+              GMime.Param gmime_param = gmime_params.get_parameter_at(i);
+              params.set(gmime_param.get_name(), gmime_param.get_value());
+            }
         }
         this(params);
     }

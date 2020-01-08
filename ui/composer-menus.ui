@@ -48,12 +48,6 @@
         <attribute name="action">win.compose-as-html</attribute>
       </item>
     </section>
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">Show Extended Fields</attribute>
-        <attribute name="action">win.show-extended</attribute>
-      </item>
-    </section>
   </menu>
 
   <menu id="plain_menu_model">
@@ -61,12 +55,6 @@
       <item>
         <attribute name="label" translatable="yes">_Rich Text</attribute>
         <attribute name="action">win.compose-as-html</attribute>
-      </item>
-    </section>
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">Show Extended Fields</attribute>
-        <attribute name="action">win.show-extended-headers</attribute>
       </item>
     </section>
   </menu>

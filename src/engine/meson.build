@@ -325,7 +325,6 @@ geary_engine_dependencies = [
   gmime,
   libmath,
   libxml,
-  libytnef,
   posix,
   sqlite
 ]

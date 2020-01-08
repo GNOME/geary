@@ -74,27 +74,30 @@ public class Geary.RFC822.MailboxAddresses :
     }
 
     public MailboxAddresses.from_rfc822_string(string rfc822) {
-        InternetAddressList addrlist = InternetAddressList.parse_string(rfc822);
+        GMime.InternetAddressList addrlist = GMime.InternetAddressList.parse(
+            Geary.RFC822.get_parser_options(),
+            rfc822
+        );
         if (addrlist == null)
             return;
 
         int length = addrlist.length();
         for (int ctr = 0; ctr < length; ctr++) {
-            InternetAddress? addr = addrlist.get_address(ctr);
+            GMime.InternetAddress? addr = addrlist.get_address(ctr);
 
-            InternetAddressMailbox? mbox_addr = addr as InternetAddressMailbox;
+            GMime.InternetAddressMailbox? mbox_addr = addr as GMime.InternetAddressMailbox;
             if (mbox_addr != null) {
                 this.addrs.add(new MailboxAddress.gmime(mbox_addr));
             } else {
                 // XXX this is pretty bad - we just flatten the
                 // group's addresses into this list, merging lists and
                 // losing the group names.
-                InternetAddressGroup? mbox_group = addr as InternetAddressGroup;
+                GMime.InternetAddressGroup? mbox_group = addr as GMime.InternetAddressGroup;
                 if (mbox_group != null) {
-                    InternetAddressList group_list = mbox_group.get_members();
+                    GMime.InternetAddressList group_list = mbox_group.get_members();
                     for (int i = 0; i < group_list.length(); i++) {
-                        InternetAddressMailbox? group_addr =
-                            addrlist.get_address(i) as InternetAddressMailbox;
+                        GMime.InternetAddressMailbox? group_addr =
+                            addrlist.get_address(i) as GMime.InternetAddressMailbox;
                         if (group_addr != null) {
                             this.addrs.add(new MailboxAddress.gmime(group_addr));
                         }

@@ -42,11 +42,17 @@ public class Geary.RFC822.MailboxAddress :
     }
 
     private static string decode_name(string name) {
-        return GMime.utils_header_decode_phrase(prepare_header_text_part(name));
+        return GMime.utils_header_decode_phrase(
+            Geary.RFC822.get_parser_options(),
+            prepare_header_text_part(name)
+        );
     }
 
     private static string decode_address_part(string mailbox) {
-        return GMime.utils_header_decode_text(prepare_header_text_part(mailbox));
+        return GMime.utils_header_decode_text(
+          Geary.RFC822.get_parser_options(),
+          prepare_header_text_part(mailbox)
+        );
     }
 
     private static bool display_name_needs_quoting(string name) {
@@ -118,8 +124,9 @@ public class Geary.RFC822.MailboxAddress :
         // _internet_address_decode_name() function.
 
         // see if a broken mailer has sent raw 8-bit information
-        string text = GMime.utils_text_is_8bit(part, part.length)
-            ? part : GMime.utils_decode_8bit(part, part.length);
+        string text = GMime.utils_text_is_8bit(part.data)
+            ? part : GMime.utils_decode_8bit(Geary.RFC822.get_parser_options(),
+                                            part.data);
 
         // unquote the string then decode the text
         GMime.utils_unquote_string(text);
@@ -222,16 +229,19 @@ public class Geary.RFC822.MailboxAddress :
     }
 
     public MailboxAddress.from_rfc822_string(string rfc822) throws RFC822Error {
-        InternetAddressList addrlist = InternetAddressList.parse_string(rfc822);
+        GMime.InternetAddressList addrlist = GMime.InternetAddressList.parse(
+            Geary.RFC822.get_parser_options(),
+            rfc822
+        );
         if (addrlist == null)
             return;
 
         int length = addrlist.length();
         for (int ctr = 0; ctr < length; ctr++) {
-            InternetAddress? addr = addrlist.get_address(ctr);
+            GMime.InternetAddress? addr = addrlist.get_address(ctr);
 
             // TODO: Handle group lists
-            InternetAddressMailbox? mbox_addr = addr as InternetAddressMailbox;
+            GMime.InternetAddressMailbox? mbox_addr = addr as GMime.InternetAddressMailbox;
             if (mbox_addr != null) {
                 this.gmime(mbox_addr);
                 return;
@@ -240,11 +250,11 @@ public class Geary.RFC822.MailboxAddress :
         throw new RFC822Error.INVALID("Could not parse RFC822 address: %s", rfc822);
     }
 
-    public MailboxAddress.gmime(InternetAddressMailbox mailbox) {
+    public MailboxAddress.gmime(GMime.InternetAddressMailbox mailbox) {
         // GMime strips source route for us, so the address part
         // should only ever contain a single '@'
         string? name = mailbox.get_name();
-        if (name != null) {
+        if (name != "") {
             this.name = decode_name(name);
         }
 
@@ -456,7 +466,11 @@ public class Geary.RFC822.MailboxAddress :
     public string to_rfc822_string() {
         return has_distinct_name()
             ? "%s <%s>".printf(
-                GMime.utils_header_encode_phrase(this.name),
+                GMime.utils_header_encode_phrase(
+                    Geary.RFC822.get_format_options(),
+                    this.name,
+                    "iso-8859-1"
+                ),
                 to_rfc822_address()
             )
             : to_rfc822_address();

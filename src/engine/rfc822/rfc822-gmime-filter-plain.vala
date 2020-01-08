@@ -26,7 +26,7 @@ private class Geary.RFC822.FilterPlain : GMime.Filter {
         return new_filter;
     }
 
-    public override void filter(char[] inbuf, size_t prespace, out unowned char[] processed_buffer,
+    public override void filter(uint8[] inbuf, size_t prespace, out unowned uint8[] processed_buffer,
         out size_t outprespace) {
 
         // This may not be strictly necessary.
@@ -34,7 +34,7 @@ private class Geary.RFC822.FilterPlain : GMime.Filter {
 
         uint out_index = 0;
         for (uint i = 0; i < inbuf.length; i++) {
-            char c = inbuf[i];
+            uint8 c = inbuf[i];
 
             if (in_prefix) {
                 if (c == '>') {
@@ -56,7 +56,7 @@ private class Geary.RFC822.FilterPlain : GMime.Filter {
         outprespace = this.outpre;
     }
 
-    public override void complete(char[] inbuf, size_t prespace, out unowned char[] processed_buffer,
+    public override void complete(uint8[] inbuf, size_t prespace, out unowned uint8[] processed_buffer,
         out size_t outprespace) {
         filter(inbuf, prespace, out processed_buffer, out outprespace);
     }
