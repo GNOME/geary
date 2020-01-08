@@ -551,13 +551,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     // Continue backgrounded app cleanup work after the first phase,
     // old message detachment, has completed
     public void app_backgrounded_cleanup_continued(bool messages_detached, Cancellable? cancellable) {
-        if (messages_detached) {
-            // Kick off GC, forcing reap as we've removed messages, allowing vacuum
-            local.db.run_gc.begin(cancellable, true, this);
-        } else {
-            // Kick off GC, allowing vacuum
-            local.db.run_gc.begin(cancellable, false, this);
-        }
+        // Kick off GC, allowing vacuum and forcing reap if we've removed messages
+        local.db.run_gc.begin(cancellable, messages_detached, this);
     }
 
     /**
