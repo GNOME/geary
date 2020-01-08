@@ -882,16 +882,18 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }, cancellable);
     }
 
-    public async void detach_emails_before_timestamp(DateTime cutoff,
+    public async Gee.Collection<Geary.EmailIdentifier>? detach_emails_before_timestamp(DateTime cutoff,
         Cancellable? cancellable) throws Error {
         debug("Detaching emails before %s for folder ID %", cutoff.to_string(), this.folder_id.to_string());
+        Gee.Collection<Geary.EmailIdentifier>? deleted_ids = null;
 
         yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
-            // Query was found to be faster than other approaches. MessageLocationTable.ordering
-            // isn't relied on due to IMAP folder UIDs not guaranteed to be in order.
+            // MessageLocationTable.ordering isn't relied on due to IMAP folder
+            // UIDs not guaranteed to be in order.
             StringBuilder sql = new StringBuilder();
             sql.append("""
-                DELETE FROM MessageLocationTable
+                SELECT id, message_id, ordering
+                FROM MessageLocationTable
                 WHERE folder_id = ?
                 AND message_id IN (
                     SELECT id
@@ -902,12 +904,45 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             """);
 
             Db.Statement stmt = cx.prepare(sql.str);
-            stmt.bind_rowid(0, this.folder_id);
+            stmt.bind_rowid(0, folder_id);
             stmt.bind_int64(1, cutoff.to_unix());
-            stmt.exec(cancellable);
 
-            return Db.TransactionOutcome.COMMIT;
+            Db.Result results = stmt.exec(cancellable);
+
+            StringBuilder? ids_sql_sublist = null;
+            while (!results.finished) {
+                if (ids_sql_sublist == null) {
+                    deleted_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+                    ids_sql_sublist = new StringBuilder();
+                } else {
+                    ids_sql_sublist.append(",");
+                }
+
+                deleted_ids.add(new ImapDB.EmailIdentifier(results.int64_at(1), new Imap.UID(results.int64_at(2))));
+                ids_sql_sublist.append(results.rowid_at(0).to_string());
+
+                results.next(cancellable);
+            }
+
+            if (deleted_ids != null) {
+                sql = new StringBuilder();
+                sql.append("""
+                    DELETE FROM MessageLocationTable
+                    WHERE id IN (
+                """);
+                sql.append(ids_sql_sublist.str);
+                sql.append(")");
+                stmt = cx.prepare(sql.str);
+
+                stmt.exec(cancellable);
+
+                return Db.TransactionOutcome.COMMIT;
+            } else {
+                return Db.TransactionOutcome.DONE;
+            }
         }, cancellable);
+
+        return deleted_ids;
     }
 
     public async void mark_email_async(Gee.Collection<ImapDB.EmailIdentifier> to_mark,

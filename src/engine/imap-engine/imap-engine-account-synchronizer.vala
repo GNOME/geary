@@ -247,7 +247,10 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
 
         // Detach older emails outside the prefetch window
         if (this.account.information.prefetch_period_days >= 0) {
-            yield local_folder.detach_emails_before_timestamp(prefetch_max_epoch, cancellable);
+            Gee.Collection<Geary.EmailIdentifier>? detached_ids = yield local_folder.detach_emails_before_timestamp(prefetch_max_epoch, cancellable);
+            if (detached_ids != null) {
+                this.folder.email_locally_removed(detached_ids);
+            }
         }
 
         // get oldest local email and its time, as well as number
