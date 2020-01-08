@@ -1202,7 +1202,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (visible) {
             int height = hidden_on_attachment_drag_over.get_allocated_height();
             this.hidden_on_attachment_drag_over.remove(this.hidden_on_attachment_drag_over_child);
-            this.visible_on_attachment_drag_over.add(this.visible_on_attachment_drag_over_child);
+            this.visible_on_attachment_drag_over.pack_start(this.visible_on_attachment_drag_over_child, true, true);
             this.visible_on_attachment_drag_over.set_size_request(-1, height);
         } else {
             this.hidden_on_attachment_drag_over.add(this.hidden_on_attachment_drag_over_child);
