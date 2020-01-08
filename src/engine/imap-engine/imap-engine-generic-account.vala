@@ -17,6 +17,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     // we don't need to double check.
     private const int REFRESH_FOLDER_LIST_SEC = 15 * 60;
 
+    // Frequency of account cleanup work, performed when idle with the app
+    // backgrounded
+    private const uint APP_BACKGROUNDED_CLEANUP_WORK_INTERVAL_MINUTES = 60 * 24;
+
     private const Geary.SpecialFolderType[] SUPPORTED_SPECIAL_FOLDERS = {
         Geary.SpecialFolderType.DRAFTS,
         Geary.SpecialFolderType.SENT,
@@ -38,6 +42,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     /** Local database for the account. */
     public ImapDB.Account local { get; private set; }
+
+    public signal void old_messages_background_cleanup_request(Cancellable? cancellable);
 
     private bool open = false;
     private Cancellable? open_cancellable = null;
@@ -522,6 +528,36 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         yield this.local.get_containing_folders_async(ids, map, cancellable);
         yield this.smtp.outbox.add_to_containing_folders_async(ids, map, cancellable);
         return (map.size == 0) ? null : map;
+    }
+
+    /** {@inheritDoc} */
+    public override async void app_backgrounded_cleanup(Cancellable? cancellable) {
+        debug("Backgrounded cleanup check for %s account", this.information.display_name);
+
+        DateTime now = new DateTime.now_local();
+        DateTime? last_cleanup = this.information.last_backgrounded_cleanup_time;
+
+        if (last_cleanup == null ||
+            (now.difference(last_cleanup) / TimeSpan.MINUTE > APP_BACKGROUNDED_CLEANUP_WORK_INTERVAL_MINUTES)) {
+            // Interval check is OK, start by detaching old messages
+            this.information.last_backgrounded_cleanup_time = now;
+            this.old_messages_background_cleanup_request(cancellable);
+        } else if (local.db.want_background_vacuum) {
+            // Vacuum has been flagged as needed, run it
+            local.db.run_gc.begin(cancellable, false, this);
+        }
+    }
+
+    // Continue backgrounded app cleanup work after the first phase,
+    // old message detachment, has completed
+    public void app_backgrounded_cleanup_continued(bool messages_detached, Cancellable? cancellable) {
+        if (messages_detached) {
+            // Kick off GC, forcing reap as we've removed messages, allowing vacuum
+            local.db.run_gc.begin(cancellable, true, this);
+        } else {
+            // Kick off GC, allowing vacuum
+            local.db.run_gc.begin(cancellable, false, this);
+        }
     }
 
     /**

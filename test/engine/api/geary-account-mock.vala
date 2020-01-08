@@ -274,4 +274,7 @@ public class Geary.MockAccount : Account, MockObject {
         );
     }
 
+    public override async void app_backgrounded_cleanup(Cancellable? cancellable) {
+
+    }
 }

@@ -210,6 +210,7 @@ public class Geary.AccountInformation : BaseObject {
         default = new Gee.LinkedList<Geary.RFC822.MailboxAddress>();
     }
 
+    public DateTime? last_backgrounded_cleanup_time { get; set; default = null; }
 
     /**
      * Emitted when a service has reported an authentication failure.
