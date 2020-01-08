@@ -18,7 +18,7 @@ internal class Application.Controller : Geary.BaseObject {
 
     private const uint MAX_AUTH_ATTEMPTS = 3;
 
-    private const uint CLEANUP_WORK_AFTER_IDLE_BACKGROUND_MINUTES = 60 * 24;
+    private const uint CLEANUP_WORK_AFTER_IDLE_BACKGROUND_MINUTES = 5;
 
     /** Determines if conversations can be trashed from the given folder. */
     public static bool does_folder_support_trash(Geary.Folder? target) {
