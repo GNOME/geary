@@ -462,10 +462,30 @@ public class Application.Client : Gtk.Application {
     }
 
     public override void shutdown() {
-        try {
-            this.engine.close();
-        } catch (GLib.Error error) {
-            warning("Error shutting down the engine: %s", error.message);
+        bool controller_closed = false;
+        this.destroy_controller.begin((obj, res) => {
+                this.destroy_controller.end(res);
+                controller_closed = true;
+            });
+
+        // GApplication will stop the main loop, so we need to keep
+        // pumping here to allow destroy_controller() to exit. To
+        // avoid bug(s) where Geary hangs at exit, shut the whole
+        // thing down if it takes too long to complete
+        int64 start_usec = get_monotonic_time();
+        while (!controller_closed) {
+            Gtk.main_iteration();
+
+            int64 delta_usec = get_monotonic_time() - start_usec;
+            if (delta_usec >= FORCE_SHUTDOWN_USEC) {
+                // Use a warning here so a) it's usually logged
+                // and b) we can run under gdb with
+                // G_DEBUG=fatal-warnings and have it break when
+                // this happens, and maybe debug it.
+                warning("Forcing shutdown of Geary, %ss passed...",
+                        (delta_usec / USEC_PER_SEC).to_string());
+                Posix.exit(2);
+            }
         }
 
         this.engine = null;
@@ -474,6 +494,7 @@ public class Application.Client : Gtk.Application {
 
         Util.Date.terminate();
         Geary.Logging.clear();
+
         base.shutdown();
     }
 
@@ -742,35 +763,7 @@ public class Application.Client : Gtk.Application {
     public new void quit() {
         if (this.controller == null ||
             this.controller.check_open_composers()) {
-
             this.last_active_main_window = null;
-
-            bool controller_closed = false;
-            this.destroy_controller.begin((obj, res) => {
-                    this.destroy_controller.end(res);
-                    controller_closed = true;
-                });
-
-            // Give asynchronous destroy_controller() a chance to
-            // complete, but to avoid bug(s) where Geary hangs at exit,
-            // shut the whole thing down if destroy_controller() takes too
-            // long to complete
-            int64 start_usec = get_monotonic_time();
-            while (!controller_closed && Gtk.events_pending()) {
-                Gtk.main_iteration();
-
-                int64 delta_usec = get_monotonic_time() - start_usec;
-                if (delta_usec >= FORCE_SHUTDOWN_USEC) {
-                    // Use a warning here so a) it's usually logged
-                    // and b) we can run under gdb with
-                    // G_DEBUG=fatal-warnings and have it break when
-                    // this happens, and maybe debug it.
-                    warning("Forcing shutdown of Geary, %ss passed...",
-                            (delta_usec / USEC_PER_SEC).to_string());
-                    Posix.exit(2);
-                }
-            }
-
             base.quit();
         }
     }
@@ -901,7 +894,13 @@ public class Application.Client : Gtk.Application {
             }
             this.controller_mutex.release(ref mutex_token);
         } catch (GLib.Error err) {
-            debug("Error destroying controller: %s", err.message);
+            warning("Error destroying controller: %s", err.message);
+        }
+
+        try {
+            this.engine.close();
+        } catch (GLib.Error error) {
+            warning("Error shutting down the engine: %s", error.message);
         }
     }
 
@@ -1192,7 +1191,7 @@ public class Application.Client : Gtk.Application {
         // application, manually work out if the application should
         // quit here.
         if (!this.is_background_service && get_windows().length() == 0) {
-            this.quit();
+            quit();
         }
     }
 
