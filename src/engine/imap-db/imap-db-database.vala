@@ -172,6 +172,24 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     this.path, err.message);
         }
 
+        // Check if after reap we now want to schedule a background vacuum. The idea
+        // here is eg. if we've just reduced prefetch period, reap has detached a
+        // whole lot of messages and we want to vacuum. This check catches that
+        // vacuum recommendation, flagging it to run when in background.
+        this.gc.should_run_async.begin(
+            gc_cancellable,
+            (obj, res) => {
+                try {
+                    GC.RecommendedOperation recommended = this.gc.should_run_async.end(res);
+                    if ((recommended & GC.RecommendedOperation.VACUUM) != 0)
+                        this.want_background_vacuum = true;
+                } catch (Error err) {
+                    debug("Failed to run GC check on %s after REAP: %s",
+                          this.path, err.message);
+                }
+            }
+        );
+
         this.gc = null;
     }
 
