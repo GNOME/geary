@@ -95,6 +95,9 @@ internal class Application.Controller : Geary.BaseObject {
     // Timeout to do work in idle after all windows have been sent to the background
     private Geary.TimeoutManager all_windows_backgrounded_timeout = null;
 
+    // Whether we're fully in the background
+    public bool all_windows_backgrounded { get; private set; default = false; }
+
 
     /**
      * Emitted when an account is added or is enabled.
@@ -1399,6 +1402,7 @@ internal class Application.Controller : Geary.BaseObject {
 
     // Track a window receiving focus, for idle background work
     public void window_focus_in() {
+        this.all_windows_backgrounded = false;
         if (this.all_windows_backgrounded_timeout != null) {
             this.all_windows_backgrounded_timeout.reset();
             this.all_windows_backgrounded_timeout = null;
@@ -1414,6 +1418,7 @@ internal class Application.Controller : Geary.BaseObject {
     private void on_unfocused_idle() {
         // Schedule later, catching cases where work should occur later while still in background
         this.all_windows_backgrounded_timeout = null;
+        this.all_windows_backgrounded = true;
         window_focus_out();
 
         debug("Checking for backgrounded idle work");
