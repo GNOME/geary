@@ -95,6 +95,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private enum AttachPending { ALL, INLINE_ONLY }
 
+    private enum DraftPolicy { DISCARD, KEEP }
+
+
     private class FromAddressMap {
         public Geary.Account account;
         public Geary.RFC822.MailboxAddresses from;
@@ -895,12 +898,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 this.draft_manager_opening = null;
             }
 
-            if (this.draft_manager != null) {
-                try {
-                    yield close_draft_manager(null);
-                } catch (Error err) {
-                    debug("Error closing draft manager on composer close");
-                }
+            try {
+                yield close_draft_manager(KEEP, null);
+            } catch (GLib.Error error) {
+                this.application.controller.report_problem(
+                    new Geary.AccountProblemReport(
+                        this.account.information, error
+                    )
+                );
             }
 
             destroy();
@@ -1528,11 +1533,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         try {
             yield this.editor.clean_content();
             yield this.application.controller.send_composed_email(this);
-
-            if (this.draft_manager != null) {
-                yield discard_draft();
-                yield close_draft_manager(null);
-            }
+            yield close_draft_manager(DISCARD, null);
 
             if (this.container != null) {
                 this.container.close();
@@ -1598,30 +1599,38 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      */
     private async void reopen_draft_manager(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        if (this.draft_manager != null) {
-            // Discard the draft, if any, since it may be on a
-            // different account
-            yield discard_draft();
-            yield close_draft_manager(cancellable);
-        }
+        // Discard the draft, if any, since it may be on a different
+        // account
+        yield close_draft_manager(DISCARD, cancellable);
         yield open_draft_manager(null, cancellable);
         yield save_draft();
     }
 
-    private async void close_draft_manager(GLib.Cancellable? cancellable)
+    private async void close_draft_manager(DraftPolicy draft_policy,
+                                           GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.App.DraftManager old_manager = this.draft_manager;
-        this.draft_manager = null;
-        this.draft_status_text = "";
+        var old_manager = this.draft_manager;
+        if (old_manager != null) {
+            this.draft_timer.reset();
 
-        old_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
-            .disconnect(on_draft_state_changed);
-        old_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
-            .disconnect(on_draft_id_changed);
-        old_manager.fatal.disconnect(on_draft_manager_fatal);
+            this.draft_manager = null;
+            this.draft_status_text = "";
+            this.current_draft_id = null;
 
-        yield old_manager.close_async(cancellable);
-        debug("Draft manager closed");
+            old_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+                .disconnect(on_draft_state_changed);
+            old_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+                .disconnect(on_draft_id_changed);
+            old_manager.fatal.disconnect(on_draft_manager_fatal);
+
+            if (draft_policy == DISCARD) {
+                debug("Discarding draft");
+                yield old_manager.discard(null);
+            }
+
+            yield old_manager.close_async(cancellable);
+            debug("Draft manager closed");
+        }
     }
 
     private void update_draft_state() {
@@ -1679,16 +1688,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private async void discard_draft() throws GLib.Error {
-        debug("Discarding draft");
-
-        // cancel timer in favor of this operation
-        this.draft_timer.reset();
-
-        yield this.draft_manager.discard(null);
-        this.current_draft_id = null;
-    }
-
     private async void save_and_close() {
         set_enabled(false);
 
@@ -1715,17 +1714,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private async void discard_and_close() {
         set_enabled(false);
 
-        if (this.draft_manager != null) {
-            try {
-                yield discard_draft();
-                yield close_draft_manager(null);
-            } catch (GLib.Error error) {
-                this.application.controller.report_problem(
-                    new Geary.AccountProblemReport(
-                        this.account.information, error
-                    )
-                );
-            }
+        try {
+            yield close_draft_manager(DISCARD, null);
+        } catch (GLib.Error error) {
+            this.application.controller.report_problem(
+                new Geary.AccountProblemReport(
+                    this.account.information, error
+                )
+            );
         }
 
         // Pass on to the controller so the discarded email can be
