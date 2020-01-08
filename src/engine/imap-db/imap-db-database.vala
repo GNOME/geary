@@ -109,6 +109,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         if ((recommended & GC.RecommendedOperation.REAP) != 0) {
             // run in the background and allow application to continue running
             this.gc.reap_async.begin(gc_cancellable, on_reap_async_completed);
+        } else {
+            this.gc = null;
         }
 
         if (cancellable != null)
