@@ -320,6 +320,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         this.base_folder.email_inserted.connect(on_folder_email_inserted);
         this.base_folder.email_locally_complete.connect(on_folder_email_complete);
         this.base_folder.email_removed.connect(on_folder_email_removed);
+        this.base_folder.email_locally_removed.connect(on_folder_email_removed);
         this.base_folder.opened.connect(on_folder_opened);
         this.base_folder.account.email_appended.connect(on_account_email_appended);
         this.base_folder.account.email_inserted.connect(on_account_email_inserted);
@@ -653,6 +654,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         this.base_folder.email_inserted.disconnect(on_folder_email_inserted);
         this.base_folder.email_locally_complete.disconnect(on_folder_email_complete);
         this.base_folder.email_removed.disconnect(on_folder_email_removed);
+        this.base_folder.email_locally_removed.disconnect(on_folder_email_removed);
         this.base_folder.opened.disconnect(on_folder_opened);
         this.base_folder.account.email_appended.disconnect(on_account_email_appended);
         this.base_folder.account.email_inserted.disconnect(on_account_email_inserted);

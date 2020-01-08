@@ -764,6 +764,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 folder.email_appended.connect(notify_email_appended);
                 folder.email_inserted.connect(notify_email_inserted);
                 folder.email_removed.connect(notify_email_removed);
+                folder.email_locally_removed.connect(notify_email_locally_removed);
                 folder.email_locally_complete.connect(notify_email_locally_complete);
                 folder.email_flags_changed.connect(notify_email_flags_changed);
             }
@@ -773,6 +774,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 folder.email_appended.disconnect(notify_email_appended);
                 folder.email_inserted.disconnect(notify_email_inserted);
                 folder.email_removed.disconnect(notify_email_removed);
+                folder.email_locally_removed.disconnect(notify_email_locally_removed);
                 folder.email_locally_complete.disconnect(notify_email_locally_complete);
                 folder.email_flags_changed.disconnect(notify_email_flags_changed);
             }
@@ -795,6 +797,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     protected override void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         base.notify_email_removed(folder, ids);
         schedule_unseen_update(folder);
+    }
+
+    /** {@inheritDoc} */
+    protected override void notify_email_locally_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        base.notify_email_locally_removed(folder, ids);
     }
 
     /** {@inheritDoc} */

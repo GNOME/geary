@@ -129,6 +129,7 @@ public class Geary.App.SearchFolder :
         account.folders_special_type.connect(on_folders_special_type);
         account.email_locally_complete.connect(on_email_locally_complete);
         account.email_removed.connect(on_account_email_removed);
+        account.email_locally_removed.connect(on_account_email_removed);
 
         new_contents();
 
@@ -142,6 +143,7 @@ public class Geary.App.SearchFolder :
         account.folders_special_type.disconnect(on_folders_special_type);
         account.email_locally_complete.disconnect(on_email_locally_complete);
         account.email_removed.disconnect(on_account_email_removed);
+        account.email_locally_removed.disconnect(on_account_email_removed);
     }
 
     /**

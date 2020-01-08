@@ -237,6 +237,11 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     public signal void email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
 
     /**
+     * Fired when emails are removed from a local folder in this account.
+     */
+    public signal void email_locally_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+
+    /**
      * Fired when one or more emails have been locally saved to a folder with
      * the full set of Fields.
      */
@@ -547,6 +552,11 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     /** Fires a {@link email_removed} signal. */
     protected virtual void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         email_removed(folder, ids);
+    }
+
+    /** Fires a {@link email_locally_removed} signal. */
+    protected virtual void notify_email_locally_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_removed(folder, ids);
     }
 
     /** Fires a {@link email_locally_complete} signal. */
