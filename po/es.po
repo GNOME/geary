@@ -12,14 +12,14 @@
 # Rodrigo Cares <rcares@gmail.com>, 2012-2013
 # Carlos Córdova <carlosab1802@gmail.com>, 2017.
 # Rodrigo Lledó <rodhos92@gmail.com>, 2019.
-# Daniel Mustieles <daniel.mustieles@gmail.com>, 2014-2019.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2014-2020.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-12-17 23:56+0000\n"
-"PO-Revision-Date: 2019-12-30 12:30+0100\n"
+"POT-Creation-Date: 2020-01-08 10:10+0000\n"
+"PO-Revision-Date: 2020-01-08 12:22+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -1225,7 +1225,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1815
+#: src/client/composer/composer-widget.vala:1816
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1327,7 +1327,6 @@ msgstr "Buscar"
 
 #. / Translators: Search entry tooltip
 #: src/client/components/components-search-bar.vala:32
-#| msgid "Search all mail in account for keywords (Ctrl+S)"
 msgid "Search all mail in account for keywords"
 msgstr "Buscar palabras clave en todo el correo de la cuenta"
 
@@ -1593,90 +1592,90 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:814
+#: src/client/composer/composer-widget.vala:815
 msgid "Do you want to keep or discard this draft message?"
 msgstr "¿Quiere mantener o descartar este mensaje en borrador?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:840
+#: src/client/composer/composer-widget.vala:841
 msgid "Do you want to discard this draft message?"
 msgstr "¿Quiere descartar este mensaje en borrador?"
 
-#: src/client/composer/composer-widget.vala:1484
+#: src/client/composer/composer-widget.vala:1485
 msgid "Send message with an empty subject and body?"
 msgstr "¿Quiere enviar el mensaje sin asunto ni cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1486
+#: src/client/composer/composer-widget.vala:1487
 msgid "Send message with an empty subject?"
 msgstr "¿Quiere enviar el mensaje sin asunto?"
 
-#: src/client/composer/composer-widget.vala:1488
+#: src/client/composer/composer-widget.vala:1489
 msgid "Send message with an empty body?"
 msgstr "¿Quiere enviar el mensaje sin cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1497
+#: src/client/composer/composer-widget.vala:1498
 msgid "Send message without an attachment?"
 msgstr "¿Quiere enviar el mensaje sin el archivo adjunto?"
 
-#: src/client/composer/composer-widget.vala:1807
+#: src/client/composer/composer-widget.vala:1808
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Ya se ha adjuntado «%s» para enviarlo."
 
-#: src/client/composer/composer-widget.vala:1837
-#: src/client/composer/composer-widget.vala:1887
+#: src/client/composer/composer-widget.vala:1838
+#: src/client/composer/composer-widget.vala:1888
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» es un archivo vacío."
 
-#: src/client/composer/composer-widget.vala:1875
+#: src/client/composer/composer-widget.vala:1876
 #, c-format
 msgid "“%s” could not be found."
 msgstr "No se pudo encontrar «%s»."
 
-#: src/client/composer/composer-widget.vala:1881
+#: src/client/composer/composer-widget.vala:1882
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» es una carpeta."
 
-#: src/client/composer/composer-widget.vala:1900
+#: src/client/composer/composer-widget.vala:1901
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "No se pudo abrir «%s» para lectura."
 
-#: src/client/composer/composer-widget.vala:1908
+#: src/client/composer/composer-widget.vala:1909
 msgid "Cannot add attachment"
 msgstr "No se puede adjuntar el archivo"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1965
+#: src/client/composer/composer-widget.vala:1966
 #: src/client/conversation-viewer/conversation-email.vala:559
 #: src/client/util/util-email.vala:235 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Para:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1971
+#: src/client/composer/composer-widget.vala:1972
 #: src/client/conversation-viewer/conversation-email.vala:564
 #: src/client/util/util-email.vala:240 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1977
+#: src/client/composer/composer-widget.vala:1978
 #: src/client/conversation-viewer/conversation-email.vala:569
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Cco:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:1983
+#: src/client/composer/composer-widget.vala:1984
 msgid "Reply-To: "
 msgstr "Responder a:"
 
-#: src/client/composer/composer-widget.vala:2172
+#: src/client/composer/composer-widget.vala:2170
 msgid "Select Color"
 msgstr "Seleccionar color"
 
@@ -1685,20 +1684,20 @@ msgstr "Seleccionar color"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2364
+#: src/client/composer/composer-widget.vala:2362
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s mediante %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2420
+#: src/client/composer/composer-widget.vala:2418
 msgid "_From:"
 msgstr "_De:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2723
+#: src/client/composer/composer-widget.vala:2721
 msgid "Images"
 msgstr "Imágenes"
 
@@ -2119,7 +2118,8 @@ msgstr "%a, %e de %b de %Y a las %H:%M"
 msgid "%a, %b %-e, %Y at %X"
 msgstr "%a, %e de %b de %Y a las %X %p"
 
-#: src/client/util/util-email.vala:38 src/engine/rfc822/rfc822-message.vala:998
+#: src/client/util/util-email.vala:38
+#: src/engine/rfc822/rfc822-message.vala:1000
 msgid "(no subject)"
 msgstr "(sin asunto)"
 
@@ -2460,12 +2460,12 @@ msgstr "Elementos eliminados"
 msgid "Archive | Archives"
 msgstr "Archivo | Archivos"
 
-#: src/engine/rfc822/rfc822-message.vala:467
+#: src/engine/rfc822/rfc822-message.vala:458
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "No se pudo determinar el tipo MIME de «%s»"
 
-#: src/engine/rfc822/rfc822-message.vala:475
+#: src/engine/rfc822/rfc822-message.vala:469
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
@@ -2644,27 +2644,27 @@ msgstr "_Confiar en este servidor"
 msgid "_Don’t Trust This Server"
 msgstr "_No confiar en este servidor"
 
-#: ui/composer-headerbar.ui:19 ui/composer-headerbar.ui:176
+#: ui/composer-headerbar.ui:18 ui/composer-headerbar.ui:175
 msgid "Detach the composer from the window"
 msgstr "Desacoplar el editor de la ventana"
 
-#: ui/composer-headerbar.ui:59 ui/composer-headerbar.ui:84
+#: ui/composer-headerbar.ui:58 ui/composer-headerbar.ui:83
 msgid "Attach a file"
 msgstr "Adjuntar un archivo"
 
-#: ui/composer-headerbar.ui:108
+#: ui/composer-headerbar.ui:107
 msgid "Add original attachments"
 msgstr "Añadir adjuntos originales"
 
-#: ui/composer-headerbar.ui:204
+#: ui/composer-headerbar.ui:203
 msgid "_Send"
 msgstr "_Enviar"
 
-#: ui/composer-headerbar.ui:231
+#: ui/composer-headerbar.ui:230
 msgid "Discard and Close"
 msgstr "Descartar y cerrar"
 
-#: ui/composer-headerbar.ui:255
+#: ui/composer-headerbar.ui:254
 msgid "Save and Close"
 msgstr "Guardar y cerrar"
 
@@ -2718,135 +2718,135 @@ msgstr "_Grande"
 msgid "C_olor"
 msgstr "C_olor"
 
-#: ui/composer-menus.ui:47 ui/composer-menus.ui:62
+#: ui/composer-menus.ui:47 ui/composer-menus.ui:56
 msgid "_Rich Text"
 msgstr "Texto en_riquecido"
 
-#: ui/composer-menus.ui:53 ui/composer-menus.ui:68
-msgid "Show Extended Fields"
-msgstr "Mostrar campos ampliados"
-
-#: ui/composer-menus.ui:78
+#: ui/composer-menus.ui:66
 msgid "_Undo"
 msgstr "_Deshacer"
 
-#: ui/composer-menus.ui:82
+#: ui/composer-menus.ui:70
 msgid "_Redo"
 msgstr "_Rehacer"
 
-#: ui/composer-menus.ui:88 ui/composer-menus.ui:106
+#: ui/composer-menus.ui:76 ui/composer-menus.ui:94
 msgid "Cu_t"
 msgstr "Cor_tar"
 
-#: ui/composer-menus.ui:92 ui/composer-menus.ui:110
+#: ui/composer-menus.ui:80 ui/composer-menus.ui:98
 #: ui/conversation-message-menus.ui:37
 msgid "_Copy"
 msgstr "_Copiar"
 
-#: ui/composer-menus.ui:96 ui/composer-menus.ui:114
+#: ui/composer-menus.ui:84 ui/composer-menus.ui:102
 msgid "_Paste"
 msgstr "_Pegar"
 
-#: ui/composer-menus.ui:100
+#: ui/composer-menus.ui:88
 msgctxt "Clipboard paste as plain text"
 msgid "Paste _Without Formatting"
 msgstr "Pegar _sin formato"
 
-#: ui/composer-menus.ui:120
+#: ui/composer-menus.ui:108
 msgid "Select _All"
 msgstr "Seleccionar _todo"
 
-#: ui/composer-menus.ui:127 ui/conversation-message-menus.ui:43
+#: ui/composer-menus.ui:115 ui/conversation-message-menus.ui:43
 msgid "_Inspect…"
 msgstr "_Inspeccionar…"
 
-#. Address(es) e-mail is to be sent to
-#: ui/composer-widget.ui:56
-msgid "_To"
-msgstr "_Para"
-
-#: ui/composer-widget.ui:75
-msgid "_Cc"
-msgstr "_Cc"
-
-#: ui/composer-widget.ui:130
-msgid "_Subject"
-msgstr "A_sunto"
-
-#: ui/composer-widget.ui:149
-msgid "_Bcc"
-msgstr "Cc_o"
-
-#: ui/composer-widget.ui:179
-msgid "_Reply-To"
-msgstr "_Responder a:"
-
 #. Geary account mail will be sent from
-#: ui/composer-widget.ui:208
+#: ui/composer-widget.ui:61
 msgid "From"
 msgstr "De"
 
-#: ui/composer-widget.ui:293
+#. Address(es) e-mail is to be sent to
+#: ui/composer-widget.ui:131
+msgid "_To"
+msgstr "_Para"
+
+#: ui/composer-widget.ui:159
+msgid "Show Cc, Bcc, and Reply-To fields"
+msgstr "Mostrar los campos Cc, Cco y Responder a"
+
+#: ui/composer-widget.ui:214
+msgid "_Cc"
+msgstr "_Cc"
+
+#: ui/composer-widget.ui:258
+msgid "_Bcc"
+msgstr "Cc_o"
+
+#: ui/composer-widget.ui:302
+msgid "_Reply-To"
+msgstr "_Responder a:"
+
+#: ui/composer-widget.ui:355
+msgid "_Subject"
+msgstr "A_sunto"
+
+#: ui/composer-widget.ui:428
 msgid "Drop files here"
 msgstr "Suelte los archivos aquí"
 
-#: ui/composer-widget.ui:309
+#: ui/composer-widget.ui:444
 msgid "To add them as attachments"
 msgstr "Para añadirlos como adjuntos"
 
-#: ui/composer-widget.ui:353
+#: ui/composer-widget.ui:488
 msgid "Undo last edit"
 msgstr "Deshacer la última edición"
 
-#: ui/composer-widget.ui:377
+#: ui/composer-widget.ui:512
 msgid "Redo last edit"
 msgstr "Deshacer la última edición"
 
-#: ui/composer-widget.ui:415
+#: ui/composer-widget.ui:550
 msgid "Bold text"
 msgstr "Texto en negrita"
 
-#: ui/composer-widget.ui:439
+#: ui/composer-widget.ui:574
 msgid "Italic text"
 msgstr "Texto en cursiva"
 
-#: ui/composer-widget.ui:463
+#: ui/composer-widget.ui:598
 msgid "Underline text"
 msgstr "Subrayar el texto"
 
-#: ui/composer-widget.ui:487
+#: ui/composer-widget.ui:622
 msgid "Strikethrough text"
 msgstr "Tachar el texto"
 
-#: ui/composer-widget.ui:525
+#: ui/composer-widget.ui:660
 msgid "Insert bulleted list"
 msgstr "Insertar lista de topos"
 
-#: ui/composer-widget.ui:549
+#: ui/composer-widget.ui:684
 msgid "Insert numbered list"
 msgstr "Insertar lista numerada"
 
-#: ui/composer-widget.ui:587
+#: ui/composer-widget.ui:722
 msgid "Indent or quote text"
 msgstr "Sangrar o citar texto"
 
-#: ui/composer-widget.ui:611
+#: ui/composer-widget.ui:746
 msgid "Un-indent or unquote text"
 msgstr "Quitar la sangría o la cita del texto"
 
-#: ui/composer-widget.ui:649
+#: ui/composer-widget.ui:784
 msgid "Insert or update text link"
 msgstr "Insertar o actualizar el enlace seleccionado"
 
-#: ui/composer-widget.ui:673
+#: ui/composer-widget.ui:808
 msgid "Insert an image"
 msgstr "Insertar una imagen"
 
-#: ui/composer-widget.ui:707
+#: ui/composer-widget.ui:842
 msgid "Remove text formatting"
 msgstr "Quitar el formato del texto"
 
-#: ui/composer-widget.ui:731
+#: ui/composer-widget.ui:866
 msgid "Select spell checking languages"
 msgstr "Seleccione el idioma de la revisión ortográfica"
 
@@ -3498,6 +3498,9 @@ msgstr "_Autenticar"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Actualización de Geary en proceso…"
+
+#~ msgid "Show Extended Fields"
+#~ msgstr "Mostrar campos ampliados"
 
 #~ msgid "Indexing %s account"
 #~ msgstr "Indexando la cuenta %s"
