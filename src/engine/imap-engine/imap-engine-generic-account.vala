@@ -43,7 +43,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     /** Local database for the account. */
     public ImapDB.Account local { get; private set; }
 
-    public signal void old_messages_background_cleanup_request(Cancellable? cancellable);
+    public signal void old_messages_background_cleanup_request(GLib.Cancellable? cancellable);
 
     private bool open = false;
     private Cancellable? open_cancellable = null;
@@ -531,7 +531,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override async void cleanup_storage(Cancellable? cancellable) {
+    public override async void cleanup_storage(GLib.Cancellable? cancellable) {
         debug("Backgrounded storage cleanup check for %s account", this.information.display_name);
 
         DateTime now = new DateTime.now_local();
@@ -550,7 +550,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     // Continue backgrounded app cleanup work after the first phase,
     // old message detachment, has completed
-    public void app_backgrounded_cleanup_continued(bool messages_detached, Cancellable? cancellable) {
+    public void app_backgrounded_cleanup_continued(bool messages_detached, GLib.Cancellable? cancellable) {
         // TODO bail on remaining work if we've returned from the background
         // if (!application.controller.all_windows_backgrounded)
         //    return;

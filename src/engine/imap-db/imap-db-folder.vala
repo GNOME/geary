@@ -883,7 +883,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     public async Gee.Collection<Geary.EmailIdentifier>? detach_emails_before_timestamp(DateTime cutoff,
-        Cancellable? cancellable) throws Error {
+        GLib.Cancellable? cancellable) throws Error {
         debug("Detaching emails before %s for folder ID %", cutoff.to_string(), this.folder_id.to_string());
         Gee.Collection<Geary.EmailIdentifier>? deleted_ids = null;
 

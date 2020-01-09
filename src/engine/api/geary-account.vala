@@ -527,7 +527,7 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * has been flagged to run this will be executed. Designed to be run
      * while the app is in the background and idle.
      */
-    public abstract async void cleanup_storage(Cancellable? cancellable);
+    public abstract async void cleanup_storage(GLib.Cancellable? cancellable);
 
     /** Fires a {@link opened} signal. */
     protected virtual void notify_opened() {

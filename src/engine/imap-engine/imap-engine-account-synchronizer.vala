@@ -96,7 +96,7 @@ private class Geary.ImapEngine.AccountSynchronizer :
         }
     }
 
-    private void old_messages_background_cleanup(Cancellable? cancellable) {
+    private void old_messages_background_cleanup(GLib.Cancellable? cancellable) {
        if (this.account.is_open()) {
             this.old_message_cleaner = new OldMessageCleaner(this.account, this.max_epoch);
             this.old_message_cleaner.run();
@@ -107,7 +107,7 @@ private class Geary.ImapEngine.AccountSynchronizer :
         }
     }
 
-    private void old_messages_removed_during_sync(Cancellable cancellable) {
+    private void old_messages_removed_during_sync(GLib.Cancellable cancellable) {
         if (this.old_message_cleaner == null) {
             // This is not a daily cleanup. We've detached some messages, let's GC if
             // recommended.
@@ -246,7 +246,7 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
  */
 private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
 
-    public signal void old_message_detached(Cancellable cancellable);
+    public signal void old_message_detached(GLib.Cancellable cancellable);
 
     private DateTime sync_max_epoch;
 

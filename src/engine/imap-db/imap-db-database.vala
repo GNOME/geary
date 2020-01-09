@@ -61,7 +61,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
     private TimeoutManager gc_post_old_message_detach_timer;
     // Cancellable from account synchronizer for GC after old message cleanup
-    private Cancellable? post_gc_cleanup_cancellable;
+    private GLib.Cancellable? post_gc_cleanup_cancellable;
 
     public Database(GLib.File db_file,
                     GLib.File schema_dir,
@@ -99,7 +99,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      *      signify that it's an appropriate time to run a vacuum (ie. we're
      *      idle in the background) and provide access for stopping IMAP.
      */
-    public async void run_gc(Cancellable? cancellable,
+    public async void run_gc(GLib.Cancellable? cancellable,
                              bool force_reap = false,
                              Geary.ImapEngine.GenericAccount? account = null)
                                  throws Error {
@@ -210,7 +210,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         base.close(cancellable);
     }
 
-    public void schedule_gc_after_old_messages_cleanup(Cancellable? cancellable) {
+    public void schedule_gc_after_old_messages_cleanup(GLib.Cancellable? cancellable) {
         this.post_gc_cleanup_cancellable = cancellable;
         this.gc_post_old_message_detach_timer.start();
     }
