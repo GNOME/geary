@@ -67,14 +67,16 @@ private class Geary.ImapEngine.AccountSynchronizer :
                 !folder.properties.is_local_only &&
                 !folder.properties.is_virtual) {
 
-                AccountOperation op = became_available
-                    ? new CheckFolderSync(
+                AccountOperation op;
+                if (became_available) {
+                    CheckFolderSync check_op = new CheckFolderSync(
                         this.account, imap_folder, this.max_epoch
-                    )
-                    : new RefreshFolderSync(this.account, imap_folder);
-
-                if (became_available)
-                    ((CheckFolderSync) op).old_message_detached.connect(this.old_messages_removed_during_sync);
+                    );
+                    check_op.old_message_detached.connect(this.old_messages_removed_during_sync);
+                    op = check_op;
+                } else {
+                    op = new RefreshFolderSync(this.account, imap_folder);
+                }
 
                 try {
                     this.account.queue_operation(op);
