@@ -1792,7 +1792,7 @@ internal class Application.Controller : Geary.BaseObject {
         debug("Checking for backgrounded idle work");
         foreach (AccountContext context in this.accounts.values) {
             Geary.Account account = context.account;
-            account.app_backgrounded_cleanup.begin(context.cancellable);
+            account.cleanup_storage.begin(context.cancellable);
         }
     }
 

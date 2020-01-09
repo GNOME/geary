@@ -531,8 +531,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override async void app_backgrounded_cleanup(Cancellable? cancellable) {
-        debug("Backgrounded cleanup check for %s account", this.information.display_name);
+    public override async void cleanup_storage(Cancellable? cancellable) {
+        debug("Backgrounded storage cleanup check for %s account", this.information.display_name);
 
         DateTime now = new DateTime.now_local();
         DateTime? last_cleanup = this.last_storage_cleanup;

@@ -520,12 +520,14 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     }
 
     /**
-     * Run account cleanup work if the appropriate interval has past since
-     * last execution. Alternatively if the interval has not past but vacuum
-     * GC has been flagged to run this will be executed. Designed to be run
+     * Perform cleanup of account storage.
+     *
+     * Work is performed if the appropriate interval has past since last
+     * execution. Alternatively if the interval has not past but vacuum GC
+     * has been flagged to run this will be executed. Designed to be run
      * while the app is in the background and idle.
      */
-    public abstract async void app_backgrounded_cleanup(Cancellable? cancellable);
+    public abstract async void cleanup_storage(Cancellable? cancellable);
 
     /** Fires a {@link opened} signal. */
     protected virtual void notify_opened() {
