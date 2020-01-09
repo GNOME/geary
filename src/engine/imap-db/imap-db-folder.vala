@@ -41,6 +41,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
     private const int REMOVE_COMPLETE_LOCATIONS_CHUNK_COUNT = 500;
     private const int CREATE_MERGE_EMAIL_CHUNK_COUNT = 25;
+    private const int MAX_DB_SUBLIST_LENGTH = 500000;
 
     [Flags]
     public enum ListFlags {
@@ -885,7 +886,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public async Gee.Collection<Geary.EmailIdentifier>? detach_emails_before_timestamp(DateTime cutoff,
         GLib.Cancellable? cancellable) throws Error {
         debug("Detaching emails before %s for folder ID %", cutoff.to_string(), this.folder_id.to_string());
-        Gee.Collection<Geary.EmailIdentifier>? deleted_ids = null;
+        Gee.Collection<Geary.EmailIdentifier>? deleted_email_ids = null;
+        Gee.ArrayList<string> deleted_primary_keys = null;
 
         yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
             // MessageLocationTable.ordering isn't relied on due to IMAP folder
@@ -909,35 +911,53 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
             Db.Result results = stmt.exec(cancellable);
 
-            StringBuilder? ids_sql_sublist = null;
             while (!results.finished) {
-                if (ids_sql_sublist == null) {
-                    deleted_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-                    ids_sql_sublist = new StringBuilder();
-                } else {
-                    ids_sql_sublist.append(",");
+                if (deleted_email_ids == null) {
+                    deleted_email_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+                    deleted_primary_keys = new Gee.ArrayList<string>();
                 }
 
-                deleted_ids.add(new ImapDB.EmailIdentifier(results.int64_at(1), new Imap.UID(results.int64_at(2))));
-                ids_sql_sublist.append(results.rowid_at(0).to_string());
+                deleted_email_ids.add(
+                    new ImapDB.EmailIdentifier(results.int64_at(1),
+                                               new Imap.UID(results.int64_at(2)))
+                );
+                deleted_primary_keys.add(results.rowid_at(0).to_string());
 
                 results.next(cancellable);
             }
 
-            if (deleted_ids != null) {
-                sql = new StringBuilder();
-                sql.append("""
-                    DELETE FROM MessageLocationTable
-                    WHERE id IN (
-                """);
-                sql.append(ids_sql_sublist.str);
-                sql.append(")");
-                stmt = cx.prepare(sql.str);
+            if (deleted_email_ids != null) {
+                // Delete in batches to avoid hiting SQLite maximum query
+                // length (although quite unlikely)
+                int delete_index = 0;
+                while (delete_index < deleted_primary_keys.size) {
+                    StringBuilder ids_sql_sublist = new StringBuilder();
+                    while (delete_index < deleted_primary_keys.size
+                           && ids_sql_sublist.len < MAX_DB_SUBLIST_LENGTH) {
+                        if (ids_sql_sublist.len > 0)
+                            ids_sql_sublist.append(",");
+                        ids_sql_sublist.append(
+                            deleted_primary_keys.get(delete_index)
+                        );
+                        delete_index++;
+                    }
 
-                stmt.exec(cancellable);
+                    sql = new StringBuilder();
+                    sql.append("""
+                        DELETE FROM MessageLocationTable
+                        WHERE id IN (
+                    """);
+                    sql.append(ids_sql_sublist.str);
+                    sql.append(")");
+                    stmt = cx.prepare(sql.str);
+
+                    stmt.exec(cancellable);
+                }
 
                 // Update local message count
-                this.properties.set_status_message_count(this.properties.email_total - deleted_ids.size, true);
+                this.properties.set_status_message_count(
+                    this.properties.email_total - deleted_email_ids.size, true
+                );
 
                 return Db.TransactionOutcome.COMMIT;
             } else {
@@ -945,7 +965,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             }
         }, cancellable);
 
-        return deleted_ids;
+        return deleted_email_ids;
     }
 
     public async void mark_email_async(Gee.Collection<ImapDB.EmailIdentifier> to_mark,
