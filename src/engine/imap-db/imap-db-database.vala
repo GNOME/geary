@@ -50,18 +50,12 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
     private const int OPEN_PUMP_EVENT_LOOP_MSEC = 100;
 
-    private const uint DELAY_GC_AFTER_OLD_MESSAGE_CLEANUP_SECONDS = 30;
-
     private ProgressMonitor upgrade_monitor;
     private ProgressMonitor vacuum_monitor;
     private bool new_db = false;
 
     private GC? gc = null;
     private Cancellable gc_cancellable = new Cancellable();
-
-    private TimeoutManager gc_post_old_message_detach_timer;
-    // Cancellable from account synchronizer for GC after old message cleanup
-    private GLib.Cancellable? post_gc_cleanup_cancellable;
 
     public Database(GLib.File db_file,
                     GLib.File schema_dir,
@@ -72,12 +66,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         this.attachments_path = attachments_path;
         this.upgrade_monitor = upgrade_monitor;
         this.vacuum_monitor = vacuum_monitor;
-
-        this.gc_post_old_message_detach_timer =
-            new TimeoutManager.seconds(
-                DELAY_GC_AFTER_OLD_MESSAGE_CLEANUP_SECONDS, run_gc_post_old_message_detach
-            );
-    }
+   }
 
     /**
      * Prepares the ImapDB database for use.
@@ -101,6 +90,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      */
     public async void run_gc(GLib.Cancellable? cancellable,
                              bool force_reap = false,
+                             bool allow_vacuum = false,
                              Geary.ImapEngine.GenericAccount? account = null)
                                  throws Error {
 
@@ -125,7 +115,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         // VACUUM needs to execute in the foreground with the user given a busy prompt (and cannot
         // be run at the same time as REAP)
         if ((recommended & GC.RecommendedOperation.VACUUM) != 0) {
-            if (account != null) {
+            if (allow_vacuum) {
                 this.want_background_vacuum = false;
                 yield account.imap.stop(gc_cancellable);
                 yield account.smtp.stop(gc_cancellable);
@@ -208,17 +198,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         }
 
         base.close(cancellable);
-    }
-
-    public void schedule_gc_after_old_messages_cleanup(GLib.Cancellable? cancellable) {
-        this.post_gc_cleanup_cancellable = cancellable;
-        this.gc_post_old_message_detach_timer.start();
-    }
-
-    public void run_gc_post_old_message_detach() {
-        debug("Requesting GC post old message cleanup");
-        run_gc.begin(this.post_gc_cleanup_cancellable);
-        this.post_gc_cleanup_cancellable = null;
     }
 
     protected override void starting_upgrade(int current_version, bool new_db) {
