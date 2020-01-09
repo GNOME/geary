@@ -535,12 +535,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         debug("Backgrounded cleanup check for %s account", this.information.display_name);
 
         DateTime now = new DateTime.now_local();
-        DateTime? last_cleanup = this.information.last_backgrounded_cleanup_time;
+        DateTime? last_cleanup = this.last_storage_cleanup;
 
         if (last_cleanup == null ||
             (now.difference(last_cleanup) / TimeSpan.MINUTE > APP_BACKGROUNDED_CLEANUP_WORK_INTERVAL_MINUTES)) {
             // Interval check is OK, start by detaching old messages
-            this.information.last_backgrounded_cleanup_time = now;
+            this.last_storage_cleanup = now;
             this.old_messages_background_cleanup_request(cancellable);
         } else if (local.db.want_background_vacuum) {
             // Vacuum has been flagged as needed, run it

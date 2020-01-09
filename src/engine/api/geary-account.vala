@@ -145,6 +145,18 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     public ProgressMonitor db_upgrade_monitor { get; protected set; }
     public ProgressMonitor db_vacuum_monitor { get; protected set; }
 
+    /**
+     * The last time the account storage was cleaned.
+     *
+     * This does not imply that a full reap plus vacuum garbage
+     * collection (GC) is performed, merely that:
+     * 1. Any old messages are removed
+     * 2. If any old messages were removed, or the defined period
+     * (in ImapDB.GC) has past, a GC reap is performed
+     * 3. GC vacuum is run if recommended
+     */
+    public DateTime? last_storage_cleanup { get; set; default = null; }
+
 
     public signal void opened();
 
