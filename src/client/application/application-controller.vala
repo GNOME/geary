@@ -98,9 +98,6 @@ internal class Application.Controller : Geary.BaseObject {
     // Track whether storage cleanup is running
     private bool storage_cleanup_running = false;
 
-    // Whether we're fully in the background
-    public bool all_windows_backgrounded { get; private set; default = false; }
-
 
     /**
      * Emitted when an account is added or is enabled.
@@ -1789,7 +1786,6 @@ internal class Application.Controller : Geary.BaseObject {
     private void on_unfocused_idle() {
         // Schedule later, catching cases where work should occur later while still in background
         this.all_windows_backgrounded_timeout.reset();
-        this.all_windows_backgrounded = true;
         window_focus_out();
 
         if (!storage_cleanup_running)
