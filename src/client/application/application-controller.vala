@@ -95,6 +95,9 @@ internal class Application.Controller : Geary.BaseObject {
     // Timeout to do work in idle after all windows have been sent to the background
     private Geary.TimeoutManager all_windows_backgrounded_timeout;
 
+    // Track whether storage cleanup is running
+    private bool storage_cleanup_running = false;
+
     // Whether we're fully in the background
     public bool all_windows_backgrounded { get; private set; default = false; }
 
@@ -1789,11 +1792,18 @@ internal class Application.Controller : Geary.BaseObject {
         this.all_windows_backgrounded = true;
         window_focus_out();
 
+        if (!storage_cleanup_running)
+            do_background_storage_cleanup.begin();
+    }
+
+    private async void do_background_storage_cleanup() {
         debug("Checking for backgrounded idle work");
+        storage_cleanup_running = true;
         foreach (AccountContext context in this.accounts.values) {
             Geary.Account account = context.account;
-            account.cleanup_storage.begin(context.cancellable);
+            yield account.cleanup_storage(context.cancellable);
         }
+        storage_cleanup_running = false;
     }
 
 }
