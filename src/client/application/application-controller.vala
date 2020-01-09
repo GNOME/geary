@@ -93,7 +93,7 @@ internal class Application.Controller : Geary.BaseObject {
     private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
 
     // Timeout to do work in idle after all windows have been sent to the background
-    private Geary.TimeoutManager all_windows_backgrounded_timeout = null;
+    private Geary.TimeoutManager all_windows_backgrounded_timeout;
 
     // Whether we're fully in the background
     public bool all_windows_backgrounded { get; private set; default = false; }
@@ -153,6 +153,9 @@ internal class Application.Controller : Geary.BaseObject {
         Composer.WebView.load_resources();
         ConversationWebView.load_resources();
         Accounts.SignatureWebView.load_resources();
+
+        this.all_windows_backgrounded_timeout =
+            new Geary.TimeoutManager.seconds(CLEANUP_CHECK_AFTER_IDLE_BACKGROUND_MINUTES * 60, on_unfocused_idle);
 
         this.folks = Folks.IndividualAggregator.dup();
         if (!this.folks.is_prepared) {
@@ -1402,22 +1405,17 @@ internal class Application.Controller : Geary.BaseObject {
 
     // Track a window receiving focus, for idle background work
     public void window_focus_in() {
-        this.all_windows_backgrounded = false;
-        if (this.all_windows_backgrounded_timeout != null) {
-            this.all_windows_backgrounded_timeout.reset();
-            this.all_windows_backgrounded_timeout = null;
-        }
+        this.all_windows_backgrounded_timeout.reset();
     }
 
     // Track a window going unfocused, for idle background work
     public void window_focus_out() {
-        this.all_windows_backgrounded_timeout = new Geary.TimeoutManager.seconds(CLEANUP_CHECK_AFTER_IDLE_BACKGROUND_MINUTES * 60, on_unfocused_idle);
         this.all_windows_backgrounded_timeout.start();
     }
 
     private void on_unfocused_idle() {
         // Schedule later, catching cases where work should occur later while still in background
-        this.all_windows_backgrounded_timeout = null;
+        this.all_windows_backgrounded_timeout.reset();
         this.all_windows_backgrounded = true;
         window_focus_out();
 
