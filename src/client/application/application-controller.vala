@@ -1403,27 +1403,18 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
-    // Track a window receiving focus, for idle background work
+    /**
+     * Track a window receiving focus, for idle background work.
+     */
     public void window_focus_in() {
         this.all_windows_backgrounded_timeout.reset();
     }
 
-    // Track a window going unfocused, for idle background work
+    /**
+     * Track a window going unfocused, for idle background work.
+     */
     public void window_focus_out() {
         this.all_windows_backgrounded_timeout.start();
-    }
-
-    private void on_unfocused_idle() {
-        // Schedule later, catching cases where work should occur later while still in background
-        this.all_windows_backgrounded_timeout.reset();
-        this.all_windows_backgrounded = true;
-        window_focus_out();
-
-        debug("Checking for backgrounded idle work");
-        foreach (AccountContext context in this.accounts.values) {
-            Geary.Account account = context.account;
-            account.app_backgrounded_cleanup.begin(context.cancellable);
-        }
     }
 
     /** Displays a composer on the last active main window. */
@@ -1789,6 +1780,19 @@ internal class Application.Controller : Geary.BaseObject {
                     service.restart.begin(context.cancellable);
                 }
             }
+        }
+    }
+
+    private void on_unfocused_idle() {
+        // Schedule later, catching cases where work should occur later while still in background
+        this.all_windows_backgrounded_timeout.reset();
+        this.all_windows_backgrounded = true;
+        window_focus_out();
+
+        debug("Checking for backgrounded idle work");
+        foreach (AccountContext context in this.accounts.values) {
+            Geary.Account account = context.account;
+            account.app_backgrounded_cleanup.begin(context.cancellable);
         }
     }
 
