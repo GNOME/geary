@@ -32,6 +32,11 @@ public class UpgradeDialog : Object {
     }
 
     private void on_start() {
+        // Disable main windows
+        foreach (Application.MainWindow window in this.application.get_main_windows()) {
+            window.sensitive = false;
+        }
+
         Gtk.Builder builder = GioUtil.create_builder("upgrade_dialog.glade");
         this.dialog = (Gtk.Dialog) builder.get_object("dialog");
         this.dialog.set_transient_for(
@@ -57,6 +62,11 @@ public class UpgradeDialog : Object {
             this.dialog.visible) {
             this.dialog.hide();
             this.dialog = null;
+        }
+
+        // Enable main windows
+        foreach (Application.MainWindow window in this.application.get_main_windows()) {
+            window.sensitive = true;
         }
     }
 
