@@ -41,7 +41,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
     private const int REMOVE_COMPLETE_LOCATIONS_CHUNK_COUNT = 500;
     private const int CREATE_MERGE_EMAIL_CHUNK_COUNT = 25;
-    private const int MAX_DB_SUBLIST_LENGTH = 500000;
+    private const int OLD_MSG_DETACH_BATCH_SIZE = 1000;
 
     [Flags]
     public enum ListFlags {
@@ -889,7 +889,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.Collection<Geary.EmailIdentifier>? deleted_email_ids = null;
         Gee.ArrayList<string> deleted_primary_keys = null;
 
-        yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             // MessageLocationTable.ordering isn't relied on due to IMAP folder
             // UIDs not guaranteed to be in order.
             StringBuilder sql = new StringBuilder();
@@ -925,40 +925,47 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
                 results.next(cancellable);
             }
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
 
-            if (deleted_email_ids != null) {
-                // Delete in batches to avoid hiting SQLite maximum query
-                // length (although quite unlikely)
-                int delete_index = 0;
-                while (delete_index < deleted_primary_keys.size) {
+        if (deleted_email_ids != null) {
+            warning("size: %d", deleted_email_ids.size);
+            // Delete in batches to avoid hiting SQLite maximum query
+            // length (although quite unlikely)
+            int delete_index = 0;
+            while (delete_index < deleted_primary_keys.size) {
+                int batch_counter = 0;
+
+                yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
                     StringBuilder ids_sql_sublist = new StringBuilder();
                     while (delete_index < deleted_primary_keys.size
-                           && ids_sql_sublist.len < MAX_DB_SUBLIST_LENGTH) {
-                        if (ids_sql_sublist.len > 0)
+                           && batch_counter < OLD_MSG_DETACH_BATCH_SIZE) {
+                        if (batch_counter > 0)
                             ids_sql_sublist.append(",");
                         ids_sql_sublist.append(
                             deleted_primary_keys.get(delete_index)
                         );
                         delete_index++;
+                        batch_counter++;
                     }
 
-                    sql = new StringBuilder();
+                    StringBuilder sql = new StringBuilder();
                     sql.append("""
                         DELETE FROM MessageLocationTable
                         WHERE id IN (
                     """);
                     sql.append(ids_sql_sublist.str);
                     sql.append(")");
-                    stmt = cx.prepare(sql.str);
+                    Db.Statement stmt = cx.prepare(sql.str);
+                    warning("    batch delete: %s", sql.str);
 
                     stmt.exec(cancellable);
-                }
 
-                return Db.TransactionOutcome.COMMIT;
-            } else {
-                return Db.TransactionOutcome.DONE;
+                    return Db.TransactionOutcome.COMMIT;
+
+                }, cancellable);
             }
-        }, cancellable);
+        }
 
         return deleted_email_ids;
     }
