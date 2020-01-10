@@ -498,11 +498,11 @@ public class Application.MainWindow :
 
         this.focus_in_event.connect((w, e) => {
             application.controller.window_focus_in();
-            return true;
+            return false;
         });
         this.focus_out_event.connect((w, e) => {
             application.controller.window_focus_out();
-            return true;
+            return false;
         });
 
         setup_layout(application.config);

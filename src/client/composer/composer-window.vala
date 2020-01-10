@@ -50,11 +50,11 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
 
         this.focus_in_event.connect((w, e) => {
             application.controller.window_focus_in();
-            return true;
+            return false;
         });
         this.focus_out_event.connect((w, e) => {
             application.controller.window_focus_out();
-            return true;
+            return false;
         });
 
         show();
