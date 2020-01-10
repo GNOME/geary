@@ -103,13 +103,13 @@ private class Geary.ImapEngine.AccountSynchronizer :
         }
     }
 
-    private void old_messages_background_cleanup(GLib.Cancellable cancellable) {
+    private void old_messages_background_cleanup(GLib.Cancellable? cancellable) {
         if (this.account.is_open()) {
             SyncDetachMonitor monitor = new SyncDetachMonitor();
             send_all(this.account.list_folders(), false, true, monitor);
             monitor.initialised = true;
             monitor.completed.connect((messages_detached) => {
-                if (cancellable.is_cancelled())
+                if (cancellable != null && cancellable.is_cancelled())
                     return;
 
                 // Run GC. Reap is forced if messages were detached. Vacuum
