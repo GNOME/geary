@@ -98,6 +98,8 @@ internal class Application.Controller : Geary.BaseObject {
     // Track whether storage cleanup is running
     private bool storage_cleanup_running = false;
 
+    private GLib.Cancellable? storage_cleanup_cancellable;
+
 
     /**
      * Emitted when an account is added or is enabled.
@@ -1408,6 +1410,21 @@ internal class Application.Controller : Geary.BaseObject {
      */
     public void window_focus_in() {
         this.all_windows_backgrounded_timeout.reset();
+
+        if (this.storage_cleanup_cancellable != null) {
+            this.storage_cleanup_cancellable.cancel();
+
+            // Cleanup was still running and we don't know where we got to so
+            // we'll clear each of these so it runs next time we're in the
+            // background
+            foreach (AccountContext context in this.accounts.values) {
+                context.cancellable.cancelled.disconnect(this.storage_cleanup_cancellable.cancel);
+
+                Geary.Account account = context.account;
+                account.last_storage_cleanup = null;
+            }
+            this.storage_cleanup_cancellable = null;
+        }
     }
 
     /**
@@ -1795,9 +1812,15 @@ internal class Application.Controller : Geary.BaseObject {
     private async void do_background_storage_cleanup() {
         debug("Checking for backgrounded idle work");
         storage_cleanup_running = true;
+        this.storage_cleanup_cancellable = new GLib.Cancellable();
+
         foreach (AccountContext context in this.accounts.values) {
             Geary.Account account = context.account;
-            yield account.cleanup_storage(context.cancellable);
+            context.cancellable.cancelled.connect(this.storage_cleanup_cancellable.cancel);
+            yield account.cleanup_storage(this.storage_cleanup_cancellable);
+            if (this.storage_cleanup_cancellable.is_cancelled())
+                break;
+            context.cancellable.cancelled.disconnect(this.storage_cleanup_cancellable.cancel);
         }
         storage_cleanup_running = false;
     }

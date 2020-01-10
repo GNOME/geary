@@ -84,7 +84,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      * Reap should only be forced when there is known cleanup to perform and
      * the interval based recommendation should be bypassed.
      *
-     * TODO Passing of account is a WIP hack. It is currently used to both
+     * TODO Passing of the services is a WIP hack. It is currently used to both
      *      signify that it's an appropriate time to run a vacuum (ie. we're
      *      idle in the background) and provide access for stopping IMAP.
      */
@@ -147,6 +147,12 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 debug("Flagging desire to GC vacuum");
                 this.want_background_vacuum = true;
            }
+        }
+
+        // Abandon REAP if cancelled
+        if (cancellable != null && cancellable.is_cancelled()) {
+            cancellable.cancelled.disconnect(cancel_gc);
+            return;
         }
 
         // REAP can run in the background while the application is executing

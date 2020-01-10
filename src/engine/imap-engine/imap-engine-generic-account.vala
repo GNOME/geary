@@ -17,8 +17,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     // we don't need to double check.
     private const int REFRESH_FOLDER_LIST_SEC = 15 * 60;
 
-    // Frequency of account cleanup work, performed when idle with the app
-    // backgrounded
+    /** Minimum interval between account storage cleanup work */
     private const uint APP_BACKGROUNDED_CLEANUP_WORK_INTERVAL_MINUTES = 60 * 24;
 
     private const Geary.SpecialFolderType[] SUPPORTED_SPECIAL_FOLDERS = {
