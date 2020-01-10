@@ -91,7 +91,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     public async void run_gc(GLib.Cancellable? cancellable,
                              bool force_reap = false,
                              bool allow_vacuum = false,
-                             Geary.ImapEngine.GenericAccount? account = null)
+                             Geary.Imap.ClientService? imap_service = null,
+                             Geary.Smtp.ClientService? smtp_service = null)
                                  throws Error {
 
         if (this.gc != null) {
@@ -117,10 +118,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         if ((recommended & GC.RecommendedOperation.VACUUM) != 0) {
             if (allow_vacuum) {
                 this.want_background_vacuum = false;
-                if (account.imap != null)
-                    yield account.imap.stop(gc_cancellable);
-                if (account.smtp != null)
-                    yield account.smtp.stop(gc_cancellable);
+                if (imap_service != null)
+                    yield imap_service.stop(gc_cancellable);
+                if (smtp_service != null)
+                    yield smtp_service.stop(gc_cancellable);
 
                 if (!vacuum_monitor.is_in_progress)
                     vacuum_monitor.notify_start();
@@ -137,10 +138,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         vacuum_monitor.notify_finish();
                 }
 
-                if (account.imap != null)
-                    yield account.imap.start(gc_cancellable);
-                if (account.smtp != null)
-                    yield account.smtp.start(gc_cancellable);
+                if (imap_service != null)
+                    yield imap_service.start(gc_cancellable);
+                if (smtp_service != null)
+                    yield smtp_service.start(gc_cancellable);
             } else {
                 // Flag a vacuum to run later when we've been idle in the background
                 debug("Flagging desire to GC vacuum");
