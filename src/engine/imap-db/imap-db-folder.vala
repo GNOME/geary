@@ -929,7 +929,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }, cancellable);
 
         if (deleted_email_ids != null) {
-            warning("size: %d", deleted_email_ids.size);
             // Delete in batches to avoid hiting SQLite maximum query
             // length (although quite unlikely)
             int delete_index = 0;
@@ -957,7 +956,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     sql.append(ids_sql_sublist.str);
                     sql.append(")");
                     Db.Statement stmt = cx.prepare(sql.str);
-                    warning("    batch delete: %s", sql.str);
 
                     stmt.exec(cancellable);
 
