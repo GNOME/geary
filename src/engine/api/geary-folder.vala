@@ -364,7 +364,6 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
      */
     public signal void email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
 
-
     /**
      * Fired when emails are removed from the local folder.
      */

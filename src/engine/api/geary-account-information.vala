@@ -210,6 +210,7 @@ public class Geary.AccountInformation : BaseObject {
         default = new Gee.LinkedList<Geary.RFC822.MailboxAddress>();
     }
 
+
     /**
      * Emitted when a service has reported an authentication failure.
      *
