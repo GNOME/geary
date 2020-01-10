@@ -10,14 +10,14 @@
 # Necdet Yücel <necdetyucel@gmail.com>, 2015.
 # Simge Sezgin <simgesezgin88@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2014, 2016.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2016-2019.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2016-2020.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-12-17 23:56+0000\n"
-"PO-Revision-Date: 2019-12-27 16:09+0300\n"
+"POT-Creation-Date: 2020-01-08 10:10+0000\n"
+"PO-Revision-Date: 2020-01-10 19:01+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -1205,7 +1205,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1815
+#: src/client/composer/composer-widget.vala:1816
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1307,7 +1307,6 @@ msgstr "Ara"
 
 #. / Translators: Search entry tooltip
 #: src/client/components/components-search-bar.vala:32
-#| msgid "Search all mail in account for keywords (Ctrl+S)"
 msgid "Search all mail in account for keywords"
 msgstr "Anahtar sözcükleri hesaptaki tüm postalarda ara"
 
@@ -1567,90 +1566,90 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:814
+#: src/client/composer/composer-widget.vala:815
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Bu iletiyi saklamak mı yoksa gözden çıkarmak mı istersiniz?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:840
+#: src/client/composer/composer-widget.vala:841
 msgid "Do you want to discard this draft message?"
 msgstr "Bu taslak iletiyi gözden çıkarmak istiyor musunuz?"
 
-#: src/client/composer/composer-widget.vala:1484
+#: src/client/composer/composer-widget.vala:1485
 msgid "Send message with an empty subject and body?"
 msgstr "İleti konusu ve gövdesi olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1486
+#: src/client/composer/composer-widget.vala:1487
 msgid "Send message with an empty subject?"
 msgstr "İleti konusu olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1488
+#: src/client/composer/composer-widget.vala:1489
 msgid "Send message with an empty body?"
 msgstr "İleti, ileti gövdesi olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1497
+#: src/client/composer/composer-widget.vala:1498
 msgid "Send message without an attachment?"
 msgstr "İleti eki olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1807
+#: src/client/composer/composer-widget.vala:1808
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s” gönderim için zaten eklendi."
 
-#: src/client/composer/composer-widget.vala:1837
-#: src/client/composer/composer-widget.vala:1887
+#: src/client/composer/composer-widget.vala:1838
+#: src/client/composer/composer-widget.vala:1888
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s” boş bir dosya."
 
-#: src/client/composer/composer-widget.vala:1875
+#: src/client/composer/composer-widget.vala:1876
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s” bulunamadı."
 
-#: src/client/composer/composer-widget.vala:1881
+#: src/client/composer/composer-widget.vala:1882
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s” bir klasör."
 
-#: src/client/composer/composer-widget.vala:1900
+#: src/client/composer/composer-widget.vala:1901
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s” okuma için açılamadı."
 
-#: src/client/composer/composer-widget.vala:1908
+#: src/client/composer/composer-widget.vala:1909
 msgid "Cannot add attachment"
 msgstr "Eklenti eklenemiyor"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1965
+#: src/client/composer/composer-widget.vala:1966
 #: src/client/conversation-viewer/conversation-email.vala:559
 #: src/client/util/util-email.vala:235 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Kime:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1971
+#: src/client/composer/composer-widget.vala:1972
 #: src/client/conversation-viewer/conversation-email.vala:564
 #: src/client/util/util-email.vala:240 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1977
+#: src/client/composer/composer-widget.vala:1978
 #: src/client/conversation-viewer/conversation-email.vala:569
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:1983
+#: src/client/composer/composer-widget.vala:1984
 msgid "Reply-To: "
-msgstr "Yanıtla: "
+msgstr "Şuna Yanıtla: "
 
-#: src/client/composer/composer-widget.vala:2172
+#: src/client/composer/composer-widget.vala:2170
 msgid "Select Color"
 msgstr "Renk Seç"
 
@@ -1659,20 +1658,20 @@ msgstr "Renk Seç"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2364
+#: src/client/composer/composer-widget.vala:2362
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%2$s aracılığıyla %1$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2420
+#: src/client/composer/composer-widget.vala:2418
 msgid "_From:"
 msgstr "_Gönderen:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2723
+#: src/client/composer/composer-widget.vala:2721
 msgid "Images"
 msgstr "Resimler"
 
@@ -2075,7 +2074,8 @@ msgstr "%a, %b %-e, %Y / %H:%M"
 msgid "%a, %b %-e, %Y at %X"
 msgstr "%a, %b %-e, %Y / %X"
 
-#: src/client/util/util-email.vala:38 src/engine/rfc822/rfc822-message.vala:998
+#: src/client/util/util-email.vala:38
+#: src/engine/rfc822/rfc822-message.vala:1000
 msgid "(no subject)"
 msgstr "(konu yok)"
 
@@ -2414,12 +2414,12 @@ msgstr "Silinen Ögeler"
 msgid "Archive | Archives"
 msgstr "Arşiv | Arşivler"
 
-#: src/engine/rfc822/rfc822-message.vala:467
+#: src/engine/rfc822/rfc822-message.vala:458
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "“%s” için mime türü saptanamadı."
 
-#: src/engine/rfc822/rfc822-message.vala:475
+#: src/engine/rfc822/rfc822-message.vala:469
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "“%2$s” üstündeki “%1$s” mime türü için içerik türü saptanamadı."
@@ -2596,27 +2596,27 @@ msgstr "Bu Sunucuya _Güven"
 msgid "_Don’t Trust This Server"
 msgstr "Bu Sunucuya Güven_me"
 
-#: ui/composer-headerbar.ui:19 ui/composer-headerbar.ui:176
+#: ui/composer-headerbar.ui:18 ui/composer-headerbar.ui:175
 msgid "Detach the composer from the window"
 msgstr "Oluşturucuyu pencereden ayır"
 
-#: ui/composer-headerbar.ui:59 ui/composer-headerbar.ui:84
+#: ui/composer-headerbar.ui:58 ui/composer-headerbar.ui:83
 msgid "Attach a file"
 msgstr "Dosya ekle"
 
-#: ui/composer-headerbar.ui:108
+#: ui/composer-headerbar.ui:107
 msgid "Add original attachments"
 msgstr "Özgün ekleri ekle"
 
-#: ui/composer-headerbar.ui:204
+#: ui/composer-headerbar.ui:203
 msgid "_Send"
 msgstr "_Gönder"
 
-#: ui/composer-headerbar.ui:231
+#: ui/composer-headerbar.ui:230
 msgid "Discard and Close"
 msgstr "Gözden Çıkar ve Kapat"
 
-#: ui/composer-headerbar.ui:255
+#: ui/composer-headerbar.ui:254
 msgid "Save and Close"
 msgstr "Kaydet ve Kapat"
 
@@ -2670,135 +2670,135 @@ msgstr "Büy_ük"
 msgid "C_olor"
 msgstr "R_enk"
 
-#: ui/composer-menus.ui:47 ui/composer-menus.ui:62
+#: ui/composer-menus.ui:47 ui/composer-menus.ui:56
 msgid "_Rich Text"
 msgstr "_Zengin Metin"
 
-#: ui/composer-menus.ui:53 ui/composer-menus.ui:68
-msgid "Show Extended Fields"
-msgstr "Genişletilmiş Alanları Göster"
-
-#: ui/composer-menus.ui:78
+#: ui/composer-menus.ui:66
 msgid "_Undo"
 msgstr "_Geri Al"
 
-#: ui/composer-menus.ui:82
+#: ui/composer-menus.ui:70
 msgid "_Redo"
 msgstr "_Yinele"
 
-#: ui/composer-menus.ui:88 ui/composer-menus.ui:106
+#: ui/composer-menus.ui:76 ui/composer-menus.ui:94
 msgid "Cu_t"
 msgstr "Ke_s"
 
-#: ui/composer-menus.ui:92 ui/composer-menus.ui:110
+#: ui/composer-menus.ui:80 ui/composer-menus.ui:98
 #: ui/conversation-message-menus.ui:37
 msgid "_Copy"
 msgstr "_Kopyala"
 
-#: ui/composer-menus.ui:96 ui/composer-menus.ui:114
+#: ui/composer-menus.ui:84 ui/composer-menus.ui:102
 msgid "_Paste"
 msgstr "_Yapıştır"
 
-#: ui/composer-menus.ui:100
+#: ui/composer-menus.ui:88
 msgctxt "Clipboard paste as plain text"
 msgid "Paste _Without Formatting"
 msgstr "Biçimlendirmede_n Yapıştır"
 
-#: ui/composer-menus.ui:120
+#: ui/composer-menus.ui:108
 msgid "Select _All"
 msgstr "Tümünü S_eç"
 
-#: ui/composer-menus.ui:127 ui/conversation-message-menus.ui:43
+#: ui/composer-menus.ui:115 ui/conversation-message-menus.ui:43
 msgid "_Inspect…"
 msgstr "_Denetle…"
 
-#. Address(es) e-mail is to be sent to
-#: ui/composer-widget.ui:56
-msgid "_To"
-msgstr "_Kime"
-
-#: ui/composer-widget.ui:75
-msgid "_Cc"
-msgstr "_Cc"
-
-#: ui/composer-widget.ui:130
-msgid "_Subject"
-msgstr "_Konu"
-
-#: ui/composer-widget.ui:149
-msgid "_Bcc"
-msgstr "_Bcc"
-
-#: ui/composer-widget.ui:179
-msgid "_Reply-To"
-msgstr "_Yanıtla"
-
 #. Geary account mail will be sent from
-#: ui/composer-widget.ui:208
+#: ui/composer-widget.ui:61
 msgid "From"
 msgstr "Gönderen"
 
-#: ui/composer-widget.ui:293
+#. Address(es) e-mail is to be sent to
+#: ui/composer-widget.ui:131
+msgid "_To"
+msgstr "_Kime"
+
+#: ui/composer-widget.ui:159
+msgid "Show Cc, Bcc, and Reply-To fields"
+msgstr "Cc, Bcc ve Şuna Yanıtla alanlarını göster"
+
+#: ui/composer-widget.ui:214
+msgid "_Cc"
+msgstr "_Cc"
+
+#: ui/composer-widget.ui:258
+msgid "_Bcc"
+msgstr "_Bcc"
+
+#: ui/composer-widget.ui:302
+msgid "_Reply-To"
+msgstr "_Şuna Yanıtla"
+
+#: ui/composer-widget.ui:355
+msgid "_Subject"
+msgstr "_Konu"
+
+#: ui/composer-widget.ui:428
 msgid "Drop files here"
 msgstr "Dosyaları buraya bırak"
 
-#: ui/composer-widget.ui:309
+#: ui/composer-widget.ui:444
 msgid "To add them as attachments"
 msgstr "Onları ek olarak eklemek için"
 
-#: ui/composer-widget.ui:353
+#: ui/composer-widget.ui:488
 msgid "Undo last edit"
 msgstr "Son düzenlemeyi geri al"
 
-#: ui/composer-widget.ui:377
+#: ui/composer-widget.ui:512
 msgid "Redo last edit"
 msgstr "Son düzenlemeyi yinele"
 
-#: ui/composer-widget.ui:415
+#: ui/composer-widget.ui:550
 msgid "Bold text"
 msgstr "Kalın yazı"
 
-#: ui/composer-widget.ui:439
+#: ui/composer-widget.ui:574
 msgid "Italic text"
 msgstr "Eğik metin"
 
-#: ui/composer-widget.ui:463
+#: ui/composer-widget.ui:598
 msgid "Underline text"
 msgstr "Metnin altını çiz"
 
-#: ui/composer-widget.ui:487
+#: ui/composer-widget.ui:622
 msgid "Strikethrough text"
 msgstr "Çizgili metin"
 
-#: ui/composer-widget.ui:525
+#: ui/composer-widget.ui:660
 msgid "Insert bulleted list"
 msgstr "Sırasız liste yerleştir"
 
-#: ui/composer-widget.ui:549
+#: ui/composer-widget.ui:684
 msgid "Insert numbered list"
 msgstr "Sıralı liste yerleştir"
 
-#: ui/composer-widget.ui:587
+#: ui/composer-widget.ui:722
 msgid "Indent or quote text"
 msgstr "Girintile veya metin alıntıla"
 
-#: ui/composer-widget.ui:611
+#: ui/composer-widget.ui:746
 msgid "Un-indent or unquote text"
 msgstr "Girintiyi veya alıntıyı kaldır"
 
-#: ui/composer-widget.ui:649
+#: ui/composer-widget.ui:784
 msgid "Insert or update text link"
 msgstr "Metin bağlantısı ekle veya güncelle"
 
-#: ui/composer-widget.ui:673
+#: ui/composer-widget.ui:808
 msgid "Insert an image"
 msgstr "Resim yerleştir"
 
-#: ui/composer-widget.ui:707
+#: ui/composer-widget.ui:842
 msgid "Remove text formatting"
 msgstr "Metin biçimlendirmeyi kaldır"
 
-#: ui/composer-widget.ui:731
+#: ui/composer-widget.ui:866
 msgid "Select spell checking languages"
 msgstr "Yazım denetimi dillerini seç"
 
@@ -3449,6 +3449,9 @@ msgstr "_Kimlik Doğrula"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary güncellemesi sürüyor…"
+
+#~ msgid "Show Extended Fields"
+#~ msgstr "Genişletilmiş Alanları Göster"
 
 #~ msgid "Indexing %s account"
 #~ msgstr "%s hesabı dizinleniyor"
