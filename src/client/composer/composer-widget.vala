@@ -605,6 +605,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.background_work_pulse.repetition = FOREVER;
 
+        // Set the from_multiple combo box to ellipsize. This can't be done
+        // from the .ui file.
+        var cells = this.from_multiple.get_cells();
+        ((Gtk.CellRendererText) cells.data).ellipsize = END;
+
         load_entry_completions();
     }
 

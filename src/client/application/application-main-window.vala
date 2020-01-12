@@ -1207,7 +1207,7 @@ public class Application.MainWindow :
             on_conversation_view_added
         );
 
-        this.conversations_paned.pack2(this.conversation_viewer, true, true);
+        this.conversations_paned.pack2(this.conversation_viewer, true, false);
 
         // Main toolbar
         this.main_toolbar = new MainToolbar(config);
