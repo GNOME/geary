@@ -374,6 +374,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild]
     private Gtk.Box header_area;
     [GtkChild] private Gtk.Revealer formatting;
+    [GtkChild] private Gtk.Box toolbar_box;
+    [GtkChild] private Gtk.Box top_buttons;
+    [GtkChild] private Gtk.Box bottom_buttons;
     [GtkChild]
     private Gtk.Button insert_link_button;
     [GtkChild]
@@ -2861,5 +2864,19 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.background_progress.hide();
         this.background_work_pulse.reset();
         this.show_background_work_timeout.reset();
+    }
+
+    [GtkCallback]
+    private void on_toolbar_size_allocate(Gtk.Widget widget, Gtk.Allocation rect) {
+        int top_width = this.top_buttons.get_allocated_width();
+        int bottom_width = this.bottom_buttons.get_allocated_width();
+        // add 6 for spacing
+        int width = top_width + bottom_width + 6;
+
+        if (rect.width <= width) {
+            this.toolbar_box.orientation = VERTICAL;
+        } else {
+            this.toolbar_box.orientation = HORIZONTAL;
+        }
     }
 }
