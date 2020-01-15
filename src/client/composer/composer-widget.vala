@@ -129,7 +129,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private const string ACTION_COLOR = "color";
     private const string ACTION_INSERT_IMAGE = "insert-image";
     private const string ACTION_INSERT_LINK = "insert-link";
-    private const string ACTION_COMPOSE_AS_HTML = "compose-as-html";
+    private const string ACTION_TEXT_FORMAT = "text-format";
     private const string ACTION_SHOW_EXTENDED_HEADERS = "show-extended-headers";
     private const string ACTION_SHOW_FORMATTING = "show-formatting";
     private const string ACTION_DISCARD = "discard";
@@ -181,7 +181,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         { ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments                                     },
         { ACTION_CLOSE,                    on_close                                                   },
         { ACTION_DISCARD,                  on_discard                                       },
-        { ACTION_COMPOSE_AS_HTML,          on_toggle_action, null, "true", on_compose_as_html_toggled },
+        { ACTION_TEXT_FORMAT,              null,            "s", "'html'", on_text_format             },
         { ACTION_DETACH,                   on_detach                                                  },
         { ACTION_OPEN_INSPECTOR,           on_open_inspector                  },
         { ACTION_SELECT_DICTIONARY,        on_select_dictionary                                       },
@@ -377,12 +377,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild] private Gtk.Box toolbar_box;
     [GtkChild] private Gtk.Box top_buttons;
     [GtkChild] private Gtk.Box bottom_buttons;
+    [GtkChild] private Gtk.MenuButton font_button;
+    [GtkChild] private Gtk.Stack font_button_stack;
+    [GtkChild] private Gtk.MenuButton font_size_button;
+    [GtkChild] private Gtk.Image font_color_icon;
+    [GtkChild] private Gtk.MenuButton text_format_button;
+
     [GtkChild]
     private Gtk.Button insert_link_button;
     [GtkChild]
     private Gtk.Button select_dictionary_button;
-    [GtkChild]
-    private Gtk.MenuButton menu_button;
     [GtkChild]
     private Gtk.Label info_label;
 
@@ -391,9 +395,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private GLib.SimpleActionGroup composer_actions = new GLib.SimpleActionGroup();
     private GLib.SimpleActionGroup editor_actions = new GLib.SimpleActionGroup();
-
-    private Menu html_menu;
-    private Menu plain_menu;
 
     private Menu context_menu_model;
     private Menu context_menu_rich_text;
@@ -549,8 +550,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/composer-menus.ui"
         );
-        this.html_menu = (Menu) builder.get_object("html_menu_model");
-        this.plain_menu = (Menu) builder.get_object("plain_menu_model");
         this.context_menu_model = (Menu) builder.get_object("context_menu_model");
         this.context_menu_rich_text = (Menu) builder.get_object("context_menu_rich_text");
         this.context_menu_plain_text = (Menu) builder.get_object("context_menu_plain_text");
@@ -614,6 +613,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         ((Gtk.CellRendererText) cells.data).ellipsize = END;
 
         load_entry_completions();
+
+        update_color_icon.begin(Util.Gtk.rgba(0, 0, 0, 0));
     }
 
     public Widget.from_mailbox(Application.Client application,
@@ -757,8 +758,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // model and hence the menu_button constructs a new
         // popover.
         this.composer_actions.change_action_state(
-            ACTION_COMPOSE_AS_HTML,
-            this.application.config.compose_as_html
+            ACTION_TEXT_FORMAT,
+            this.application.config.compose_as_html ? "html" : "plain"
         );
 
         set_mode(DETACHED);
@@ -1149,7 +1150,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 ACTION_SHOW_EXTENDED_HEADERS, false
             );
             entries_users.change_action_state(
-                ACTION_COMPOSE_AS_HTML, this.application.config.compose_as_html
+                ACTION_TEXT_FORMAT,
+                this.application.config.compose_as_html ? "html" : "plain"
             );
         }
 
@@ -2119,9 +2121,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         action.change_state(!action.state.get_boolean());
     }
 
-    private void on_compose_as_html_toggled(SimpleAction? action, Variant? new_state) {
-        bool compose_as_html = new_state.get_boolean();
-        action.set_state(compose_as_html);
+    private void on_text_format(SimpleAction? action, Variant? new_state) {
+        bool compose_as_html = new_state.get_string() == "html";
+        action.set_state(new_state.get_string());
 
         foreach (string html_action in HTML_ACTIONS)
             get_action(html_action).set_enabled(compose_as_html);
@@ -2132,11 +2134,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         show_formatting.set_enabled(compose_as_html);
         update_formatting_toolbar();
 
-        this.menu_button.menu_model = (compose_as_html) ? this.html_menu : this.plain_menu;
-
         this.editor.set_rich_text(compose_as_html);
 
         this.application.config.compose_as_html = compose_as_html;
+        this.text_format_button.popover.popdown();
     }
 
     private void on_show_extended_headers_toggled(GLib.SimpleAction? action,
@@ -2165,10 +2166,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_font_family(SimpleAction action, Variant? param) {
+        string font = param.get_string();
         this.editor.execute_editing_command_with_argument(
-            "fontname", param.get_string()
+            "fontname", font
         );
-        action.set_state(param.get_string());
+        action.set_state(font);
+
+        this.font_button_stack.visible_child_name = font;
+        this.font_button.popover.popdown();
     }
 
     private void on_font_size(SimpleAction action, Variant? param) {
@@ -2182,15 +2187,35 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         this.editor.execute_editing_command_with_argument("fontsize", size);
         action.set_state(param.get_string());
+
+        this.font_size_button.popover.popdown();
+    }
+
+    private async void update_color_icon(Gdk.RGBA color) {
+        var theme = Gtk.IconTheme.get_default();
+        var icon = theme.lookup_icon("font-color-symbolic", 16, 0);
+        Gdk.RGBA fg_color = Util.Gtk.rgba(0, 0, 0, 1);
+        this.get_style_context().lookup_color("theme_fg_color", out fg_color);
+
+        try {
+            var pixbuf = yield icon.load_symbolic_async(fg_color, color, null, null, null);
+            this.font_color_icon.pixbuf = pixbuf;
+        } catch(Error e) {
+            warning("Could not load icon `font-color-symbolic`!");
+            this.font_color_icon.icon_name = "font-color-symbolic";
+        }
     }
 
     private void on_select_color() {
         Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog(_("Select Color"),
             this.container.top_window);
         if (dialog.run() == Gtk.ResponseType.OK) {
+            var rgba = dialog.get_rgba();
             this.editor.execute_editing_command_with_argument(
-                "forecolor", dialog.get_rgba().to_string()
+                "forecolor", rgba.to_string()
             );
+
+            this.update_color_icon.begin(rgba);
         }
         dialog.destroy();
     }
@@ -2674,6 +2699,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.editor_actions.change_action_state(
             ACTION_FONT_FAMILY, context.font_family
         );
+
+        this.update_color_icon.begin(context.font_color);
 
         if (context.font_size < 11)
             this.editor_actions.change_action_state(ACTION_FONT_SIZE, "small");

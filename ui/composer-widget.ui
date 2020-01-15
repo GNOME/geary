@@ -799,6 +799,137 @@
                               </object>
                             </child>
                             <child>
+                              <object class="GtkButton" id="remove_format_button">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="focus_on_click">False</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Remove text formatting</property>
+                                <property name="action_name">edt.remove-format</property>
+                                <property name="always_show_image">True</property>
+                                <child>
+                                  <object class="GtkImage" id="remove_format_image">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="pixel_size">16</property>
+                                    <property name="icon_name">format-text-remove-symbolic</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="bottom_buttons">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="spacing">6</property>
+                            <property name="halign">start</property>
+                            <child>
+                              <object class="GtkMenuButton" id="font_button">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="menu_model">font_menu</property>
+                                <property name="tooltip_text" translatable="yes">Change font type</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="orientation">horizontal</property>
+                                    <child>
+                                      <object class="GtkStack" id="font_button_stack">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="label" translatable="yes">Sans Serif</property>
+                                            <property name="halign">start</property>
+                                          </object>
+                                          <packing>
+                                            <property name="name">sans</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="label" translatable="yes">Serif</property>
+                                            <property name="halign">start</property>
+                                          </object>
+                                          <packing>
+                                            <property name="name">serif</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="label" translatable="yes">Fixed Width</property>
+                                            <property name="halign">start</property>
+                                          </object>
+                                          <packing>
+                                            <property name="name">monospace</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon-name">pan-down</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="action_name">edt.color</property>
+                                <property name="tooltip_text" translatable="yes">Change font color</property>
+                                <child>
+                                  <object class="GtkImage" id="font_color_icon">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkMenuButton" id="font_size_button">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="menu_model">font_size_menu</property>
+                                <property name="tooltip_text" translatable="yes">Change font size</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="orientation">horizontal</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon-name">font-size-symbolic</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon-name">pan-down</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
                               <object class="GtkBox" id="insert_buttons">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
@@ -853,33 +984,6 @@
                                 <style>
                                   <class name="linked"/>
                                 </style>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="bottom_buttons">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="spacing">6</property>
-                            <property name="halign">start</property>
-                            <child>
-                              <object class="GtkButton" id="remove_format_button">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="focus_on_click">False</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Remove text formatting</property>
-                                <property name="action_name">edt.remove-format</property>
-                                <property name="always_show_image">True</property>
-                                <child>
-                                  <object class="GtkImage" id="remove_format_image">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="pixel_size">16</property>
-                                    <property name="icon_name">format-text-remove-symbolic</property>
-                                  </object>
-                                </child>
                               </object>
                             </child>
                           </object>
@@ -963,15 +1067,16 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkMenuButton" id="menu_button">
+                  <object class="GtkMenuButton" id="text_format_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
+                    <property name="menu_model">rich_text_menu</property>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
-                        <property name="icon_name">view-more-symbolic</property>
+                        <property name="icon_name">format-text-bold-symbolic</property>
                       </object>
                     </child>
                   </object>
@@ -1064,4 +1169,59 @@
       <widget name="subject_label"/>
     </widgets>
   </object>
+
+  <menu id="font_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">S_ans Serif</attribute>
+        <attribute name="action">edt.font-family</attribute>
+        <attribute name="target">sans</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">S_erif</attribute>
+        <attribute name="action">edt.font-family</attribute>
+        <attribute name="target">serif</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Fixed Width</attribute>
+        <attribute name="action">edt.font-family</attribute>
+        <attribute name="target">monospace</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <menu id="font_size_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Small</attribute>
+        <attribute name="action">edt.font-size</attribute>
+        <attribute name="target">small</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Medium</attribute>
+        <attribute name="action">edt.font-size</attribute>
+        <attribute name="target">medium</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Lar_ge</attribute>
+        <attribute name="action">edt.font-size</attribute>
+        <attribute name="target">large</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <menu id="rich_text_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Rich Text</attribute>
+        <attribute name="action">win.text-format</attribute>
+        <attribute name="target">html</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Plain Text</attribute>
+        <attribute name="action">win.text-format</attribute>
+        <attribute name="target">plain</attribute>
+      </item>
+    </section>
+  </menu>
 </interface>
