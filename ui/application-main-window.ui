@@ -138,4 +138,25 @@
       <class name="geary-main-window"/>
     </style>
   </template>
+  <object class="GtkSizeGroup" id="folder_size_group">
+    <property name="mode">horizontal</property>
+    <widgets>
+      <widget name="folder_box"/>
+    </widgets>
+  </object>
+  <object class="GtkSizeGroup" id="folder_separator_size_group">
+    <property name="mode">horizontal</property>
+  </object>
+  <object class="GtkSizeGroup" id="conversations_size_group">
+    <property name="mode">horizontal</property>
+    <widgets>
+      <widget name="conversation_list_box"/>
+    </widgets>
+  </object>
+  <object class="GtkSizeGroup" id="conversations_separator_size_group">
+    <property name="mode">horizontal</property>
+  </object>
+  <object class="GtkSizeGroup" id="conversation_size_group">
+    <property name="mode">horizontal</property>
+  </object>
 </interface>

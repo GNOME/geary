@@ -329,6 +329,17 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.ScrolledWindow conversation_list_scrolled;
     [GtkChild]
+    private Gtk.SizeGroup folder_size_group;
+    [GtkChild]
+    private Gtk.SizeGroup folder_separator_size_group;
+    [GtkChild]
+    private Gtk.SizeGroup conversations_size_group;
+    [GtkChild]
+    private Gtk.SizeGroup conversations_separator_size_group;
+    [GtkChild]
+    private Gtk.SizeGroup conversation_size_group;
+
+    [GtkChild]
     private Gtk.Overlay overlay;
 
     private Components.InfoBarStack info_bars =
@@ -1239,9 +1250,15 @@ public class Application.MainWindow :
         );
 
         this.conversations_paned.pack2(this.conversation_viewer, true, false);
+        this.conversation_size_group.add_widget(this.conversation_viewer);
 
         // Main toolbar
         this.main_toolbar = new MainToolbar(config);
+        this.main_toolbar.add_to_size_groups(this.folder_size_group,
+                                             this.folder_separator_size_group,
+                                             this.conversations_size_group,
+                                             this.conversations_separator_size_group,
+                                             this.conversation_size_group);
         this.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
         this.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",
