@@ -59,15 +59,6 @@ public class MainToolbar : Gtk.Box {
 
 
     public MainToolbar(Application.Configuration config) {
-        // Sync headerbar width with left pane
-        config.bind(
-            Application.Configuration.MESSAGES_PANE_POSITION_KEY,
-            this,
-            "left-pane-width",
-            SettingsBindFlags.GET
-        );
-        this.bind_property("left-pane-width", this.folder_header, "width-request", BindingFlags.SYNC_CREATE);
-
         if (config.desktop_environment != UNITY) {
             this.bind_property("account", this.folder_header, "title", BindingFlags.SYNC_CREATE);
             this.bind_property("folder", this.folder_header, "subtitle", BindingFlags.SYNC_CREATE);

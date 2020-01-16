@@ -21,24 +21,6 @@
         <description>The last recorded height of the application window.</description>
     </key>
 
-    <key name="folder-list-pane-position" type="i">
-        <default>100</default>
-        <summary>Position of folder list pane</summary>
-        <description>Position of the folder list Paned grabber.</description>
-    </key>
-
-    <key name="folder-list-pane-position-horizontal" type="i">
-        <default>-1</default>
-        <summary>Position of folder list pane when horizontal</summary>
-        <description>Position of the folder list Paned grabber in the horizontal orientation.</description>
-    </key>
-
-    <key name="folder-list-pane-position-vertical" type="i">
-        <default>200</default>
-        <summary>Position of folder list pane when vertical</summary>
-        <description>Position of the folder list Paned grabber in the vertical orientation.</description>
-    </key>
-
     <key name="folder-list-pane-horizontal" type="b">
         <default>true</default>
         <summary>Orientation of the folder list pane</summary>
@@ -49,12 +31,6 @@
         <default>false</default>
         <summary>Show/hide formatting toolbar</summary>
         <description>True if the formatting toolbar in the composer is shown.</description>
-    </key>
-
-    <key name="messages-pane-position" type="i">
-        <default>250</default>
-        <summary>Position of message list pane</summary>
-        <description>Position of the message list Paned grabber.</description>
     </key>
 
     <key name="autoselect" type="b">

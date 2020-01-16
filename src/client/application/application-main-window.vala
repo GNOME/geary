@@ -1130,15 +1130,10 @@ public class Application.MainWindow :
         // This code both loads AND saves the pane positions with live updating. This is more
         // resilient against crashes because the value in dconf changes *immediately*, and
         // stays saved in the event of a crash.
-        config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, this.conversations_paned, "position");
         config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
         config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
         config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
         // Update to layout
-        if (config.folder_list_pane_position_horizontal == -1) {
-            config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
-            config.messages_pane_position += config.folder_list_pane_position_old;
-        }
         config.settings.changed[
             Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY
         ].connect(on_change_orientation);
@@ -1655,23 +1650,11 @@ public class Application.MainWindow :
         this.folder_paned.orientation = horizontal ? Gtk.Orientation.HORIZONTAL :
             Gtk.Orientation.VERTICAL;
 
-        int folder_list_width =
-            this.application.config.folder_list_pane_position_horizontal;
         if (horizontal) {
-            if (!initial)
-                this.conversations_paned.position += folder_list_width;
             this.folder_box.pack_start(status_bar, false, false);
         } else {
-            if (!initial)
-                this.conversations_paned.position -= folder_list_width;
             this.conversation_list_box.pack_start(status_bar, false, false);
         }
-
-        this.application.config.bind(
-            horizontal
-            ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
-            : Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
-            this.folder_paned, "position");
     }
 
     private void update_headerbar() {
