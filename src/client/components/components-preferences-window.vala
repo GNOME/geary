@@ -136,16 +136,6 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         display_preview_row.activatable_widget = display_preview;
         display_preview_row.add(display_preview);
 
-        var three_pane_view = new Gtk.Switch();
-        three_pane_view.valign = CENTER;
-
-        var three_pane_view_row = new Hdy.ActionRow();
-        /// Translators: Preferences label
-        three_pane_view_row.title = _("Use _three pane view");
-        three_pane_view_row.use_underline = true;
-        three_pane_view_row.activatable_widget = three_pane_view;
-        three_pane_view_row.add(three_pane_view);
-
         var single_key_shortucts = new Gtk.Switch();
         single_key_shortucts.valign = CENTER;
 
@@ -180,7 +170,6 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         //group.description = _("General application preferences");
         group.add(autoselect_row);
         group.add(display_preview_row);
-        group.add(three_pane_view_row);
         group.add(single_key_shortucts_row);
         group.add(startup_notifications_row);
 
@@ -208,11 +197,6 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
             config.bind(
                 Application.Configuration.DISPLAY_PREVIEW_KEY,
                 display_preview,
-                "state"
-            );
-            config.bind(
-                Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY,
-                three_pane_view,
                 "state"
             );
             config.bind(

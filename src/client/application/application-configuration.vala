@@ -19,7 +19,6 @@ public class Application.Configuration : Geary.BaseObject {
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
     public const string DISPLAY_PREVIEW_KEY = "display-preview";
-    public const string FOLDER_LIST_PANE_HORIZONTAL_KEY = "folder-list-pane-horizontal";
     public const string FORMATTING_TOOLBAR_VISIBLE = "formatting-toolbar-visible";
     public const string OPTIONAL_PLUGINS = "optional-plugins";
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
@@ -84,10 +83,6 @@ public class Application.Configuration : Geary.BaseObject {
 
     public bool window_maximize {
         get { return settings.get_boolean(WINDOW_MAXIMIZE_KEY); }
-    }
-
-    public bool folder_list_pane_horizontal {
-        get { return settings.get_boolean(FOLDER_LIST_PANE_HORIZONTAL_KEY); }
     }
 
     public bool formatting_toolbar_visible {

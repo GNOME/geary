@@ -511,7 +511,8 @@ public class Application.MainWindow :
         });
 
         setup_layout(application.config);
-        on_change_orientation();
+        this.folder_paned.orientation = Gtk.Orientation.HORIZONTAL;
+        this.folder_box.pack_start(status_bar, false, false);
 
         update_command_actions();
         update_conversation_actions(NONE);
@@ -1133,10 +1134,6 @@ public class Application.MainWindow :
         config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
         config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
         config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
-        // Update to layout
-        config.settings.changed[
-            Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY
-        ].connect(on_change_orientation);
     }
 
     private void restore_saved_window_state() {
@@ -1634,26 +1631,6 @@ public class Application.MainWindow :
                     update_conversation_actions(NONE);
                 }
             }
-        }
-    }
-
-    private void on_change_orientation() {
-        bool horizontal = this.application.config.folder_list_pane_horizontal;
-        bool initial = true;
-
-        if (this.status_bar.parent != null) {
-            this.status_bar.parent.remove(status_bar);
-            initial = false;
-        }
-
-        GLib.Settings.unbind(this.folder_paned, "position");
-        this.folder_paned.orientation = horizontal ? Gtk.Orientation.HORIZONTAL :
-            Gtk.Orientation.VERTICAL;
-
-        if (horizontal) {
-            this.folder_box.pack_start(status_bar, false, false);
-        } else {
-            this.conversation_list_box.pack_start(status_bar, false, false);
         }
     }
 
