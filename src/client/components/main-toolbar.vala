@@ -102,8 +102,6 @@ public class MainToolbar : Gtk.Box {
 
     public void set_conversation_header(Gtk.HeaderBar header) {
         conversation_header.hide();
-        header.get_style_context().add_class("geary-titlebar");
-        header.get_style_context().add_class("geary-titlebar-right");
         guest_header_binding = bind_property("show-close-button-right", header,
             "show-close-button", BindingFlags.SYNC_CREATE);
         pack_start(header, true, true);
@@ -112,8 +110,6 @@ public class MainToolbar : Gtk.Box {
 
     public void remove_conversation_header(Gtk.HeaderBar header) {
         remove(header);
-        header.get_style_context().remove_class("geary-titlebar");
-        header.get_style_context().remove_class("geary-titlebar-right");
         guest_header_binding.unbind();
         header.decoration_layout = Gtk.Settings.get_default().gtk_decoration_layout;
         conversation_header.show();

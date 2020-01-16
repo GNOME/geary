@@ -73,10 +73,6 @@
             <property name="position">3</property>
           </packing>
         </child>
-        <style>
-          <class name="geary-titlebar"/>
-          <class name="geary-titlebar-left"/>
-        </style>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -334,11 +330,6 @@
             <property name="position">4</property>
           </packing>
         </child>
-        <style>
-          <class name="geary-titlebar"/>
-          <class name="geary-titlebar-right"/>
-          <class name="titlebar"/>
-        </style>
       </object>
       <packing>
         <property name="expand">True</property>
