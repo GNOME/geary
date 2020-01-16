@@ -30,11 +30,17 @@ public class MainToolbar : Gtk.Box {
     [GtkChild]
     private Gtk.MenuButton main_menu_button;
 
+    [GtkChild]
+    private Gtk.Separator folder_separator;
+
     // Conversations header elements
     [GtkChild]
     private Gtk.HeaderBar conversations_header;
     [GtkChild]
     private Gtk.ToggleButton search_conversations_button;
+
+    [GtkChild]
+    private Gtk.Separator conversations_separator;
 
     // Conversation header elements
     [GtkChild]
@@ -103,6 +109,18 @@ public class MainToolbar : Gtk.Box {
     public void update_trash_button(bool show_trash) {
         this.show_trash_button = show_trash;
         update_conversation_buttons();
+    }
+
+    public void add_to_size_groups(Gtk.SizeGroup folder_group,
+                                   Gtk.SizeGroup folder_separator_group,
+                                   Gtk.SizeGroup conversations_group,
+                                   Gtk.SizeGroup conversations_separator_group,
+                                   Gtk.SizeGroup conversation_group) {
+        folder_group.add_widget(folder_header);
+        folder_separator_group.add_widget(folder_separator);
+        conversations_group.add_widget(conversations_header);
+        conversations_separator_group.add_widget(conversations_separator);
+        conversation_group.add_widget(conversation_header);
     }
 
     // Updates tooltip text depending on number of conversations selected.
