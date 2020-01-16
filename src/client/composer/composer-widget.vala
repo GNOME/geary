@@ -373,6 +373,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gtk.Widget recipients;
     [GtkChild]
     private Gtk.Box header_area;
+
+    [GtkChild] private Gtk.Button new_message_attach_button;
+    [GtkChild] private Gtk.Box conversation_attach_buttons;
+
     [GtkChild] private Gtk.Revealer formatting;
     [GtkChild] private Gtk.Box toolbar_box;
     [GtkChild] private Gtk.Box top_buttons;
@@ -1431,10 +1435,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (this.container != null) {
             this.container.top_window.title = subject;
         }
-
-        if (this.application.config.desktop_environment != UNITY) {
-            this.header.title = subject;
-        }
     }
 
     internal void set_mode(PresentationMode new_mode) {
@@ -1802,7 +1802,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 }
             }
         }
-        this.header.set_show_pending_attachments(manual_enabled);
+
+        this.new_message_attach_button.visible = !manual_enabled;
+        this.conversation_attach_buttons.visible = manual_enabled;
+
         return have_added;
     }
 
