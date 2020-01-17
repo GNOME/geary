@@ -317,8 +317,6 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.Box main_layout;
     [GtkChild]
-    private Gtk.Box search_bar_box;
-    [GtkChild]
     private Gtk.Paned folder_paned;
     [GtkChild]
     private Gtk.Paned conversations_paned;
@@ -1210,7 +1208,7 @@ public class Application.MainWindow :
         // Search bar
         this.search_bar = new SearchBar(this.application.engine);
         this.search_bar.search_text_changed.connect(on_search);
-        this.search_bar_box.pack_start(this.search_bar, false, false, 0);
+        this.conversation_list_box.pack_start(this.search_bar, false, false, 0);
 
         // Folder list
         this.folder_list.folder_selected.connect(on_folder_selected);
