@@ -28,9 +28,13 @@ public class MainToolbar : Gtk.Box {
     [GtkChild]
     private Gtk.HeaderBar folder_header;
     [GtkChild]
-    private Gtk.ToggleButton search_conversations_button;
-    [GtkChild]
     private Gtk.MenuButton main_menu_button;
+
+    // Conversations header elements
+    [GtkChild]
+    private Gtk.HeaderBar conversations_header;
+    [GtkChild]
+    private Gtk.ToggleButton search_conversations_button;
 
     // Conversation header elements
     [GtkChild]
@@ -60,8 +64,8 @@ public class MainToolbar : Gtk.Box {
 
     public MainToolbar(Application.Configuration config) {
         if (config.desktop_environment != UNITY) {
-            this.bind_property("account", this.folder_header, "title", BindingFlags.SYNC_CREATE);
-            this.bind_property("folder", this.folder_header, "subtitle", BindingFlags.SYNC_CREATE);
+            this.bind_property("account", this.conversations_header, "title", BindingFlags.SYNC_CREATE);
+            this.bind_property("folder", this.conversations_header, "subtitle", BindingFlags.SYNC_CREATE);
         }
 
         // Assemble the main/mark menus

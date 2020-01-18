@@ -11,68 +11,97 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkHeaderBar" id="folder_header">
+      <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
         <child>
-          <object class="GtkButton" id="compose_new_message_button">
+          <object class="GtkHeaderBar" id="folder_header">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes" context="tooltip">Compose Message</property>
-            <property name="action_name">app.compose</property>
-            <property name="always_show_image">True</property>
+            <property name="can_focus">False</property>
+            <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
+            <property name="title">Mail</property>
             <child>
-              <object class="GtkImage" id="compose_new_message_image">
+              <object class="GtkMenuButton" id="main_menu_button">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">text-editor-symbolic</property>
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">False</property>
+                <property name="always_show_image">True</property>
+                <child>
+                  <object class="GtkImage" id="main_menu_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">open-menu-symbolic</property>
+                  </object>
+                </child>
               </object>
+              <packing>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
         </child>
         <child>
-          <object class="GtkMenuButton" id="main_menu_button">
+          <object class="GtkSeparator" id="folder_separator">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="main_menu_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">open-menu-symbolic</property>
-              </object>
-            </child>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <style>
+              <class name="sidebar"/>
+            </style>
           </object>
           <packing>
-            <property name="pack_type">end</property>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkToggleButton" id="search_conversations_button">
+          <object class="GtkHeaderBar" id="conversations_header">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Toggle search bar</property>
-            <property name="always_show_image">True</property>
+            <property name="can_focus">False</property>
+            <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
             <child>
-              <object class="GtkImage" id="search_conversations_image">
+              <object class="GtkButton" id="compose_new_message_button">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">preferences-system-search-symbolic</property>
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes" context="tooltip">Compose Message</property>
+                <property name="action_name">app.compose</property>
+                <property name="always_show_image">True</property>
+                <child>
+                  <object class="GtkImage" id="compose_new_message_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">text-editor-symbolic</property>
+                  </object>
+                </child>
               </object>
             </child>
+            <child>
+              <object class="GtkToggleButton" id="search_conversations_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Toggle search bar</property>
+                <property name="always_show_image">True</property>
+                <child>
+                  <object class="GtkImage" id="search_conversations_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">preferences-system-search-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
           </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">3</property>
-          </packing>
         </child>
       </object>
       <packing>
@@ -82,7 +111,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkSeparator" id="header_separator">
+      <object class="GtkSeparator" id="conversations_separator">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
@@ -342,6 +371,7 @@
   <object class="HdyHeaderGroup" id="header_group">
     <headerbars>
       <headerbar name="folder_header"/>
+      <headerbar name="conversations_header"/>
       <headerbar name="conversation_header"/>
     </headerbars>
   </object>
