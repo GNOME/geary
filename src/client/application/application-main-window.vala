@@ -338,6 +338,10 @@ public class Application.MainWindow :
     private Gtk.SizeGroup conversations_separator_size_group;
     [GtkChild]
     private Gtk.SizeGroup conversation_size_group;
+    [GtkChild]
+    private Hdy.SwipeGroup conversations_swipe_group;
+    [GtkChild]
+    private Hdy.SwipeGroup conversation_swipe_group;
 
     [GtkChild]
     private Gtk.Overlay overlay;
@@ -1259,6 +1263,8 @@ public class Application.MainWindow :
                                              this.conversations_size_group,
                                              this.conversations_separator_size_group,
                                              this.conversation_size_group);
+        this.main_toolbar.add_to_swipe_groups(this.conversations_swipe_group,
+                                              this.conversation_swipe_group);
         this.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
         this.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",

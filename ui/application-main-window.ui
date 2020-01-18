@@ -187,4 +187,14 @@
   <object class="GtkSizeGroup" id="conversation_size_group">
     <property name="mode">horizontal</property>
   </object>
+  <object class="HdySwipeGroup" id="conversations_swipe_group">
+    <swipeables>
+      <swipeable name="conversations_leaflet"/>
+    </swipeables>
+  </object>
+  <object class="HdySwipeGroup" id="conversation_swipe_group">
+    <swipeables>
+      <swipeable name="main_leaflet"/>
+    </swipeables>
+  </object>
 </interface>
