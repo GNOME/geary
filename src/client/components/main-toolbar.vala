@@ -24,6 +24,9 @@ public class MainToolbar : Hdy.Leaflet {
     public int selected_conversations { get; set; }
 
 
+    [GtkChild]
+    private Hdy.Leaflet conversations_leaflet;
+
     // Folder header elements
     [GtkChild]
     private Gtk.HeaderBar folder_header;
@@ -122,6 +125,12 @@ public class MainToolbar : Hdy.Leaflet {
         conversations_group.add_widget(conversations_header);
         conversations_separator_group.add_widget(conversations_separator);
         conversation_group.add_widget(conversation_header);
+    }
+
+    public void add_to_swipe_groups(Hdy.SwipeGroup conversations_group,
+                                    Hdy.SwipeGroup conversation_group) {
+        conversations_group.add_swipeable(this.conversations_leaflet);
+        conversation_group.add_swipeable(this);
     }
 
     // Updates tooltip text depending on number of conversations selected.
