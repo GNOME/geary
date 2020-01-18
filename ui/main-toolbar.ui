@@ -14,6 +14,7 @@
       <object class="GtkHeaderBar" id="folder_header">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
         <child>
           <object class="GtkButton" id="compose_new_message_button">
             <property name="visible">True</property>
@@ -100,7 +101,7 @@
       <object class="GtkHeaderBar" id="conversation_header">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="show_close_button">True</property>
+        <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
         <child>
           <object class="GtkBox" id="reply_forward_buttons">
             <property name="visible">True</property>
@@ -344,4 +345,10 @@
       </packing>
     </child>
   </template>
+  <object class="HdyHeaderGroup" id="header_group">
+    <headerbars>
+      <headerbar name="folder_header"/>
+      <headerbar name="conversation_header"/>
+    </headerbars>
+  </object>
 </interface>
