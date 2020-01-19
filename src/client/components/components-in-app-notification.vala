@@ -26,7 +26,9 @@ public class Components.InAppNotification : Gtk.Revealer {
      * @param message The message that should be displayed.
      * @param keepalive The amount of seconds that the notification should stay visible.
      */
-    public InAppNotification(string message, uint keepalive = DEFAULT_KEEPALIVE) {
+    public InAppNotification(string message, uint keepalive = 0) {
+        if (keepalive == 0)
+            keepalive = DEFAULT_KEEPALIVE;
         this.transition_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
         this.message_label.label = message;
 

@@ -128,6 +128,13 @@
         email. Set to zero or less to disable.</description>
     </key>
 
+    <key name="brief-notification-duration" type="i">
+        <default>5</default>
+        <summary>Brief notification display time</summary>
+        <description>The length of time in seconds for which brief notifications should
+        be displayed.</description>
+    </key>
+
     <key name="migrated-config" type="b">
         <default>false</default>
         <summary>Whether we migrated the old settings</summary>

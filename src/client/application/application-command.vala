@@ -72,6 +72,14 @@ public abstract class Application.Command : GLib.Object {
     public string? executed_label { get; protected set; default = null; }
 
     /**
+     * True if executed_label should be displayed only briefly to the user.
+     * Set this to true for very frequent notifications.
+     */
+    public bool executed_notification_brief {
+        get; protected set; default = false;
+    }
+
+    /**
      * A human-readable label describing the result of calling {@link undo}.
      *
      * This can be used in a user interface to indicate the effects of

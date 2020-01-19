@@ -1558,7 +1558,9 @@ internal class Application.Controller : Geary.BaseObject {
             "Email sent to %s"
         ).printf(Util.Email.to_short_recipient_display(sent));
         Components.InAppNotification notification =
-            new Components.InAppNotification(message);
+            new Components.InAppNotification(
+                message, application.config.brief_notification_duration
+                );
         foreach (MainWindow window in this.application.get_main_windows()) {
             window.add_notification(notification);
         }
@@ -2324,6 +2326,7 @@ private class Application.ArchiveEmailCommand : RevokableCommand {
         base(source, conversations, messages);
         this.source = source;
         this.executed_label = executed_label;
+        this.executed_notification_brief = true;
         this.undone_label = undone_label;
     }
 
