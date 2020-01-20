@@ -45,15 +45,6 @@
   border-right: 0;
 }
 
-.geary-titlebar-left:dir(ltr),
-.geary-titlebar-right:dir(rtl) {
-  border-top-right-radius: 0px;
-}
-.geary-titlebar-right:dir(ltr),
-.geary-titlebar-left:dir(rtl) {
-  border-top-left-radius: 0px;
-}
-
 /* MainWindowInfoBarSet */
 
 .geary-info-bar-frame > border {
