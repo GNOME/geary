@@ -382,6 +382,57 @@ private class Geary.ImapDB.Account : BaseObject {
         return create_local_folder(path, folder_id, properties);
     }
 
+    /**
+     * Fetch the last time the account cleanup was run.
+     */
+    public async GLib.DateTime? fetch_last_cleanup_async(Cancellable? cancellable)
+        throws Error {
+        check_open();
+
+        int64 last_cleanup_time_t = -1;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Result result = cx.query("""
+                SELECT last_cleanup_time_t
+                FROM GarbageCollectionTable
+                WHERE id = 0
+            """);
+
+            if (result.finished)
+                return Db.TransactionOutcome.FAILURE;
+
+            last_cleanup_time_t = !result.is_null_at(0) ? result.int64_at(0) : -1;
+
+            return Db.TransactionOutcome.SUCCESS;
+        }, cancellable);
+
+        return (last_cleanup_time_t >= 0) ? new DateTime.from_unix_local(last_cleanup_time_t) : null;
+    }
+
+    /**
+     * Set the last time the account cleanup was run.
+     */
+    public async void set_last_cleanup_async(GLib.DateTime? dt, Cancellable? cancellable)
+        throws Error {
+        check_open();
+
+        yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                UPDATE GarbageCollectionTable
+                SET last_cleanup_time_t = ?
+                WHERE id = 0
+            """);
+            if (dt != null) {
+                stmt.bind_int64(0, dt.to_unix());
+            } else {
+                stmt.bind_null(0);
+            }
+
+            stmt.exec(cancellable);
+
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+    }
+
     private Geary.ImapDB.Folder? get_local_folder(Geary.FolderPath path) {
         FolderReference? folder_ref = folder_refs.get(path);
         if (folder_ref == null)

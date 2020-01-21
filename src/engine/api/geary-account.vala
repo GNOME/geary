@@ -155,7 +155,14 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * (in ImapDB.GC) has past, a GC reap is performed
      * 3. GC vacuum is run if recommended
      */
-    public DateTime? last_storage_cleanup { get; set; default = null; }
+    public GLib.DateTime? last_storage_cleanup {
+        get { return this._last_storage_cleanup; }
+        set {
+            this._last_storage_cleanup = value;
+            this.last_storage_cleanup_changed(value);
+        }
+    }
+    private GLib.DateTime? _last_storage_cleanup = null;
 
 
     public signal void opened();
@@ -271,6 +278,11 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      */
     public signal void email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
+
+    /**
+     * Fired when last_storage_cleanup changes.
+     */
+    public signal void last_storage_cleanup_changed(GLib.DateTime? new_value);
 
     /** {@inheritDoc} */
     public Logging.Flag logging_flags {

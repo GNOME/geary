@@ -140,6 +140,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 throw err;
         }
 
+        this.last_storage_cleanup = yield this.local.fetch_last_cleanup_async(cancellable);
+        this.last_storage_cleanup_changed.connect ((dt) => {
+            this.local.set_last_cleanup_async.begin(dt, cancellable);
+        });
+
         this.open = true;
         notify_opened();
 
