@@ -2633,13 +2633,14 @@ private class Application.SendComposerCommand : ComposerCommand {
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
         Geary.ComposedEmail email = yield this.composer.get_composed_email();
-        /// Translators: The label for an in-app notification. The
-        /// string substitution is a list of recipients of the email.
-        this.executed_label = _(
-            "Email to %s queued for delivery"
-        ).printf(Util.Email.to_short_recipient_display(email));
-
+        
         if (this.can_undo) {
+            /// Translators: The label for an in-app notification. The
+            /// string substitution is a list of recipients of the email.
+            this.executed_label = _(
+                "Email to %s queued for delivery"
+            ).printf(Util.Email.to_short_recipient_display(email));
+
             this.saved = yield this.smtp.save_email(email, cancellable);
             this.commit_timer.start();
         } else {
