@@ -243,8 +243,12 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
     private void on_execute(Application.Command command) {
         if (command.executed_label != null) {
+            int notification_time =
+                command.executed_notification_brief ?
+                    editor.application.config.brief_notification_duration : 0;
             Components.InAppNotification ian =
-                new Components.InAppNotification(command.executed_label);
+                new Components.InAppNotification(
+                    command.executed_label, notification_time);
             ian.set_button(_("Undo"), Action.Edit.prefix(Action.Edit.UNDO));
             this.editor.add_notification(ian);
         }

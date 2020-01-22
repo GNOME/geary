@@ -14,6 +14,7 @@ public class Application.Configuration : Geary.BaseObject {
 
     public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
     public const string AUTOSELECT_KEY = "autoselect";
+    public const string BRIEF_NOTIFICATION_DURATION = "brief-notification-duration";
     public const string COMPOSER_WINDOW_SIZE_KEY = "composer-window-size";
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
@@ -154,6 +155,10 @@ public class Application.Configuration : Geary.BaseObject {
         get { return settings.get_int(UNDO_SEND_DELAY); }
     }
 
+    /** The number of seconds for which brief notifications should be displayed. */
+    public int brief_notification_duration {
+        get { return settings.get_int(BRIEF_NOTIFICATION_DURATION); }
+    }
 
     // Creates a configuration object.
     public Configuration(string schema_id) {
