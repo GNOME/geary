@@ -814,6 +814,7 @@
                           <object class="GtkMenuButton" id="font_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="focus_on_click">False</property>
                             <property name="menu_model">font_menu</property>
                             <property name="tooltip_text" translatable="yes">Change font type</property>
                             <property name="direction">up</property>
@@ -876,6 +877,7 @@
                           <object class="GtkButton">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="focus_on_click">False</property>
                             <property name="action_name">edt.color</property>
                             <property name="tooltip_text" translatable="yes">Change font color</property>
                             <child>
@@ -890,6 +892,7 @@
                           <object class="GtkMenuButton" id="font_size_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="focus_on_click">False</property>
                             <property name="menu_model">font_size_menu</property>
                             <property name="tooltip_text" translatable="yes">Change font size</property>
                             <property name="direction">up</property>
