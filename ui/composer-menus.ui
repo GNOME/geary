@@ -1,64 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <interface>
-  <menu id="html_menu_model">
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">S_ans Serif</attribute>
-        <attribute name="action">edt.font-family</attribute>
-        <attribute name="target">sans</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">S_erif</attribute>
-        <attribute name="action">edt.font-family</attribute>
-        <attribute name="target">serif</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">_Fixed Width</attribute>
-        <attribute name="action">edt.font-family</attribute>
-        <attribute name="target">monospace</attribute>
-      </item>
-    </section>
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">_Small</attribute>
-        <attribute name="action">edt.font-size</attribute>
-        <attribute name="target">small</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">_Medium</attribute>
-        <attribute name="action">edt.font-size</attribute>
-        <attribute name="target">medium</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Lar_ge</attribute>
-        <attribute name="action">edt.font-size</attribute>
-        <attribute name="target">large</attribute>
-      </item>
-    </section>
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">C_olor</attribute>
-        <attribute name="action">edt.color</attribute>
-      </item>
-    </section>
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">_Rich Text</attribute>
-        <attribute name="action">win.compose-as-html</attribute>
-      </item>
-    </section>
-  </menu>
-
-  <menu id="plain_menu_model">
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">_Rich Text</attribute>
-        <attribute name="action">win.compose-as-html</attribute>
-      </item>
-    </section>
-  </menu>
-
   <menu id="context_menu_model">
     <section id="context_menu_webkit_spelling"/>
     <section>

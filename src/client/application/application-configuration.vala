@@ -23,6 +23,7 @@ public class Application.Configuration : Geary.BaseObject {
     public const string FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY = "folder-list-pane-position-horizontal";
     public const string FOLDER_LIST_PANE_POSITION_KEY = "folder-list-pane-position";
     public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
+    public const string FORMATTING_TOOLBAR_VISIBLE = "formatting-toolbar-visible";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string SINGLE_KEY_SHORTCUTS = "single-key-shortcuts";
@@ -103,6 +104,11 @@ public class Application.Configuration : Geary.BaseObject {
 
     public bool folder_list_pane_horizontal {
         get { return settings.get_boolean(FOLDER_LIST_PANE_HORIZONTAL_KEY); }
+    }
+
+    public bool formatting_toolbar_visible {
+        get { return settings.get_boolean(FORMATTING_TOOLBAR_VISIBLE); }
+        set { settings.set_boolean(FORMATTING_TOOLBAR_VISIBLE, value); }
     }
 
     public int messages_pane_position {

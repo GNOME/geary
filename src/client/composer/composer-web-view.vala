@@ -55,11 +55,16 @@ public class Composer.WebView : Components.WebView {
         public string link_url { get; private set; default = ""; }
         public string font_family { get; private set; default = "sans"; }
         public uint font_size { get; private set; default = 12; }
+        public Gdk.RGBA font_color {
+            get;
+            private set;
+            default = Util.Gtk.rgba(0, 0, 0, 1);
+        }
 
         private uint context = 0;
 
         public EditContext(string message) {
-            string[] values = message.split(",");
+            string[] values = message.split(";");
             this.context = (uint) uint64.parse(values[0]);
 
             this.link_url = values[1];
@@ -73,6 +78,10 @@ public class Composer.WebView : Components.WebView {
             }
 
             this.font_size = (uint) uint64.parse(values[3]);
+
+            Gdk.RGBA font_color = {0, 0, 0, 0};
+            font_color.parse(values[4]);
+            this.font_color = font_color;
         }
 
     }

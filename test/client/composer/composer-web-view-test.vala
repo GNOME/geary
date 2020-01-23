@@ -35,15 +35,20 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
     }
 
     public void edit_context() throws Error {
-        assert(!(new WebView.EditContext("0,,,").is_link));
-        assert(new WebView.EditContext("1,,,").is_link);
-        assert(new WebView.EditContext("1,url,,").link_url == "url");
+        assert(!(new WebView.EditContext("0;;;;").is_link));
+        assert(new WebView.EditContext("1;;;;").is_link);
+        assert(new WebView.EditContext("1;url;;;").link_url == "url");
 
-        assert(new WebView.EditContext("0,,Helvetica,").font_family == "sans");
-        assert(new WebView.EditContext("0,,Times New Roman,").font_family == "serif");
-        assert(new WebView.EditContext("0,,Courier,").font_family == "monospace");
+        assert(new WebView.EditContext("0;;Helvetica;;").font_family == "sans");
+        assert(new WebView.EditContext("0;;Times New Roman;;").font_family == "serif");
+        assert(new WebView.EditContext("0;;Courier;;").font_family == "monospace");
 
-        assert(new WebView.EditContext("0,,,12").font_size == 12);
+        assert(new WebView.EditContext("0;;;12;").font_size == 12);
+
+        assert(new WebView.EditContext("0;;;;rgb(0, 0, 0)").font_color == Util.Gtk.rgba(0, 0, 0, 1));
+        assert(new WebView.EditContext("0;;;;rgb(255, 0, 0)").font_color == Util.Gtk.rgba(1, 0, 0, 1));
+        assert(new WebView.EditContext("0;;;;rgb(0, 255, 0)").font_color == Util.Gtk.rgba(0, 1, 0, 1));
+        assert(new WebView.EditContext("0;;;;rgb(0, 0, 255)").font_color == Util.Gtk.rgba(0, 0, 1, 1));
     }
 
     public void get_html() throws GLib.Error {
