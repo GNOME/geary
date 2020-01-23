@@ -14,6 +14,7 @@ public class Application.Configuration : Geary.BaseObject {
 
     public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
     public const string AUTOSELECT_KEY = "autoselect";
+    public const string BRIEF_NOTIFICATION_DURATION = "brief-notification-duration";
     public const string COMPOSER_WINDOW_SIZE_KEY = "composer-window-size";
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
@@ -22,6 +23,7 @@ public class Application.Configuration : Geary.BaseObject {
     public const string FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY = "folder-list-pane-position-horizontal";
     public const string FOLDER_LIST_PANE_POSITION_KEY = "folder-list-pane-position";
     public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
+    public const string FORMATTING_TOOLBAR_VISIBLE = "formatting-toolbar-visible";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string SINGLE_KEY_SHORTCUTS = "single-key-shortcuts";
@@ -104,6 +106,11 @@ public class Application.Configuration : Geary.BaseObject {
         get { return settings.get_boolean(FOLDER_LIST_PANE_HORIZONTAL_KEY); }
     }
 
+    public bool formatting_toolbar_visible {
+        get { return settings.get_boolean(FORMATTING_TOOLBAR_VISIBLE); }
+        set { settings.set_boolean(FORMATTING_TOOLBAR_VISIBLE, value); }
+    }
+
     public int messages_pane_position {
         get { return settings.get_int(MESSAGES_PANE_POSITION_KEY); }
         set { settings.set_int(MESSAGES_PANE_POSITION_KEY, value); }
@@ -154,6 +161,10 @@ public class Application.Configuration : Geary.BaseObject {
         get { return settings.get_int(UNDO_SEND_DELAY); }
     }
 
+    /** The number of seconds for which brief notifications should be displayed. */
+    public int brief_notification_duration {
+        get { return settings.get_int(BRIEF_NOTIFICATION_DURATION); }
+    }
 
     // Creates a configuration object.
     public Configuration(string schema_id) {

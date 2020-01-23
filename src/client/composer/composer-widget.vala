@@ -11,6 +11,8 @@ private errordomain AttachmentError {
     DUPLICATE
 }
 
+[CCode (cname = "components_reflow_box_get_type")]
+private extern Type components_reflow_box_get_type();
 
 /**
  * A widget for editing an email message.
@@ -129,8 +131,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private const string ACTION_COLOR = "color";
     private const string ACTION_INSERT_IMAGE = "insert-image";
     private const string ACTION_INSERT_LINK = "insert-link";
-    private const string ACTION_COMPOSE_AS_HTML = "compose-as-html";
+    private const string ACTION_TEXT_FORMAT = "text-format";
     private const string ACTION_SHOW_EXTENDED_HEADERS = "show-extended-headers";
+    private const string ACTION_SHOW_FORMATTING = "show-formatting";
     private const string ACTION_DISCARD = "discard";
     private const string ACTION_DETACH = "detach";
     private const string ACTION_SEND = "send";
@@ -180,12 +183,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         { ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments                                     },
         { ACTION_CLOSE,                    on_close                                                   },
         { ACTION_DISCARD,                  on_discard                                       },
-        { ACTION_COMPOSE_AS_HTML,          on_toggle_action, null, "true", on_compose_as_html_toggled },
+        { ACTION_TEXT_FORMAT,              null,            "s", "'html'", on_text_format             },
         { ACTION_DETACH,                   on_detach                                                  },
         { ACTION_OPEN_INSPECTOR,           on_open_inspector                  },
         { ACTION_SELECT_DICTIONARY,        on_select_dictionary                                       },
         { ACTION_SEND,                     on_send                                                    },
         { ACTION_SHOW_EXTENDED_HEADERS,    on_toggle_action, null, "false", on_show_extended_headers_toggled },
+        { ACTION_SHOW_FORMATTING,          on_toggle_action, null, "false", on_show_formatting        },
     };
 
     public static void add_accelerators(Application.Client application) {
@@ -310,12 +314,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     [GtkChild]
     private Gtk.Label from_label;
+    [GtkChild] private Gtk.Box from_row;
     [GtkChild]
     private Gtk.Label from_single;
     [GtkChild]
     private Gtk.ComboBoxText from_multiple;
     private Gee.ArrayList<FromAddressMap> from_list = new Gee.ArrayList<FromAddressMap>();
 
+    [GtkChild] Gtk.Box to_row;
     [GtkChild]
     private Gtk.Box to_box;
     [GtkChild]
@@ -323,32 +329,36 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private EmailEntry to_entry;
     private Components.EntryUndo to_undo;
 
-    [GtkChild]
-    private Gtk.Revealer extended_fields_revealer;
+    [GtkChild] private Gtk.Revealer extended_fields_revealer;
+    [GtkChild] Gtk.Box extended_fields_box;
+    [GtkChild] private Gtk.ToggleButton show_extended_fields;
+    [GtkChild] private Gtk.Box filled_fields;
 
+    [GtkChild] Gtk.Box cc_row;
     [GtkChild]
-    private Gtk.EventBox cc_box;
+    private Gtk.Box cc_box;
     [GtkChild]
     private Gtk.Label cc_label;
     private EmailEntry cc_entry;
     private Components.EntryUndo cc_undo;
 
+    [GtkChild] Gtk.Box bcc_row;
     [GtkChild]
-    private Gtk.EventBox bcc_box;
+    private Gtk.Box bcc_box;
     [GtkChild]
     private Gtk.Label bcc_label;
     private EmailEntry bcc_entry;
     private Components.EntryUndo bcc_undo;
 
+    [GtkChild] Gtk.Box reply_to_row;
     [GtkChild]
-    private Gtk.EventBox reply_to_box;
+    private Gtk.Box reply_to_box;
     [GtkChild]
     private Gtk.Label reply_to_label;
     private EmailEntry reply_to_entry;
     private Components.EntryUndo reply_to_undo;
 
-    [GtkChild]
-    private Gtk.Label subject_label;
+    [GtkChild] private Gtk.Box subject_row;
     [GtkChild]
     private Gtk.Entry subject_entry;
     private Components.EntryUndo subject_undo;
@@ -371,20 +381,21 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gtk.Widget recipients;
     [GtkChild]
     private Gtk.Box header_area;
-    [GtkChild]
-    private Gtk.Box insert_buttons;
-    [GtkChild]
-    private Gtk.Box font_style_buttons;
-    [GtkChild]
-    private Gtk.Box list_buttons;
+
+    [GtkChild] private Gtk.Button new_message_attach_button;
+    [GtkChild] private Gtk.Box conversation_attach_buttons;
+
+    [GtkChild] private Gtk.Revealer formatting;
+    [GtkChild] private Gtk.MenuButton font_button;
+    [GtkChild] private Gtk.Stack font_button_stack;
+    [GtkChild] private Gtk.MenuButton font_size_button;
+    [GtkChild] private Gtk.Image font_color_icon;
+    [GtkChild] private Gtk.MenuButton text_format_button;
+
     [GtkChild]
     private Gtk.Button insert_link_button;
     [GtkChild]
-    private Gtk.Button remove_format_button;
-    [GtkChild]
     private Gtk.Button select_dictionary_button;
-    [GtkChild]
-    private Gtk.MenuButton menu_button;
     [GtkChild]
     private Gtk.Label info_label;
 
@@ -393,9 +404,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private GLib.SimpleActionGroup composer_actions = new GLib.SimpleActionGroup();
     private GLib.SimpleActionGroup editor_actions = new GLib.SimpleActionGroup();
-
-    private Menu html_menu;
-    private Menu plain_menu;
 
     private Menu context_menu_model;
     private Menu context_menu_rich_text;
@@ -483,6 +491,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     public Widget(Application.Client application,
                           Geary.Account initial_account,
                           ComposeType compose_type) {
+        components_reflow_box_get_type();
         base_ref();
         this.application = application;
         this.account = initial_account;
@@ -516,18 +525,21 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.to_undo = new Components.EntryUndo(this.to_entry);
 
         this.cc_entry = new EmailEntry(this);
+        this.cc_entry.hexpand = true;
         this.cc_entry.changed.connect(on_envelope_changed);
         this.cc_box.add(cc_entry);
         this.cc_label.set_mnemonic_widget(this.cc_entry);
         this.cc_undo = new Components.EntryUndo(this.cc_entry);
 
         this.bcc_entry = new EmailEntry(this);
+        this.bcc_entry.hexpand = true;
         this.bcc_entry.changed.connect(on_envelope_changed);
         this.bcc_box.add(bcc_entry);
         this.bcc_label.set_mnemonic_widget(this.bcc_entry);
         this.bcc_undo = new Components.EntryUndo(this.bcc_entry);
 
         this.reply_to_entry = new EmailEntry(this);
+        this.reply_to_entry.hexpand = true;
         this.reply_to_entry.changed.connect(on_envelope_changed);
         this.reply_to_box.add(reply_to_entry);
         this.reply_to_label.set_mnemonic_widget(this.reply_to_entry);
@@ -551,8 +563,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/composer-menus.ui"
         );
-        this.html_menu = (Menu) builder.get_object("html_menu_model");
-        this.plain_menu = (Menu) builder.get_object("plain_menu_model");
         this.context_menu_model = (Menu) builder.get_object("context_menu_model");
         this.context_menu_rich_text = (Menu) builder.get_object("context_menu_rich_text");
         this.context_menu_plain_text = (Menu) builder.get_object("context_menu_plain_text");
@@ -610,7 +620,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.background_work_pulse.repetition = FOREVER;
 
+        // Set the from_multiple combo box to ellipsize. This can't be done
+        // from the .ui file.
+        var cells = this.from_multiple.get_cells();
+        ((Gtk.CellRendererText) cells.data).ellipsize = END;
+
         load_entry_completions();
+
+        update_color_icon.begin(Util.Gtk.rgba(0, 0, 0, 0));
     }
 
     public Widget.from_mailbox(Application.Client application,
@@ -754,8 +771,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // model and hence the menu_button constructs a new
         // popover.
         this.composer_actions.change_action_state(
-            ACTION_COMPOSE_AS_HTML,
-            this.application.config.compose_as_html
+            ACTION_TEXT_FORMAT,
+            this.application.config.compose_as_html ? "html" : "plain"
         );
 
         set_mode(DETACHED);
@@ -1036,7 +1053,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         switch (this.compose_type) {
             // Restoring a draft
             case ComposeType.NEW_MESSAGE:
-                bool show_extended = false;
                 if (referred.from != null)
                     this.from = referred.from;
                 if (referred.to != null)
@@ -1044,11 +1060,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 if (referred.cc != null)
                     this.cc_entry.addresses = referred.cc;
                 if (referred.bcc != null) {
-                    show_extended = true;
                     this.bcc_entry.addresses = referred.bcc;
                 }
                 if (referred.reply_to != null) {
-                    show_extended = true;
                     this.reply_to_entry.addresses = referred.reply_to;
                 }
                 if (referred.in_reply_to != null)
@@ -1066,14 +1080,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     }
                 } catch (Error error) {
                     debug("Error getting draft message body: %s", error.message);
-                }
-                if (show_extended) {
-                    this.editor_actions.change_action_state(
-                        ACTION_SHOW_EXTENDED_HEADERS, true
-                    );
-                    this.composer_actions.change_action_state(
-                        ACTION_SHOW_EXTENDED_HEADERS, true
-                    );
                 }
             break;
 
@@ -1097,6 +1103,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     Geary.RFC822.TextFormat.HTML);
             break;
         }
+
+        update_extended_headers();
         return referred_quote;
     }
 
@@ -1146,9 +1154,15 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 ACTION_SHOW_EXTENDED_HEADERS, false
             );
             entries_users.change_action_state(
-                ACTION_COMPOSE_AS_HTML, this.application.config.compose_as_html
+                ACTION_TEXT_FORMAT,
+                this.application.config.compose_as_html ? "html" : "plain"
             );
         }
+
+        this.composer_actions.change_action_state(
+            ACTION_SHOW_FORMATTING,
+            this.application.config.formatting_toolbar_visible
+        );
 
         get_action(Action.Edit.UNDO).set_enabled(false);
         get_action(Action.Edit.REDO).set_enabled(false);
@@ -1421,10 +1435,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (this.container != null) {
             this.container.top_window.title = subject;
         }
-
-        if (this.application.config.desktop_environment != UNITY) {
-            this.header.title = subject;
-        }
     }
 
     internal void set_mode(PresentationMode new_mode) {
@@ -1435,20 +1445,17 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         case PresentationMode.DETACHED:
         case PresentationMode.PANED:
             this.recipients.set_visible(true);
-            this.subject_label.set_visible(true);
-            this.subject_entry.set_visible(true);
+            this.subject_row.visible = true;
             break;
 
         case PresentationMode.INLINE:
             this.recipients.set_visible(true);
-            this.subject_label.set_visible(false);
-            this.subject_entry.set_visible(false);
+            this.subject_row.visible = false;
             break;
 
         case PresentationMode.INLINE_COMPACT:
             this.recipients.set_visible(false);
-            this.subject_label.set_visible(false);
-            this.subject_entry.set_visible(false);
+            this.subject_row.visible = false;
             set_compact_header_recipients();
             break;
         }
@@ -1795,7 +1802,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 }
             }
         }
-        this.header.set_show_pending_attachments(manual_enabled);
+
+        this.new_message_attach_button.visible = !manual_enabled;
+        this.conversation_attach_buttons.visible = manual_enabled;
+
         return have_added;
     }
 
@@ -2114,31 +2124,63 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         action.change_state(!action.state.get_boolean());
     }
 
-    private void on_compose_as_html_toggled(SimpleAction? action, Variant? new_state) {
-        bool compose_as_html = new_state.get_boolean();
-        action.set_state(compose_as_html);
+    private void on_text_format(SimpleAction? action, Variant? new_state) {
+        bool compose_as_html = new_state.get_string() == "html";
+        action.set_state(new_state.get_string());
 
         foreach (string html_action in HTML_ACTIONS)
             get_action(html_action).set_enabled(compose_as_html);
 
         update_cursor_actions();
 
-        this.insert_buttons.visible = compose_as_html;
-        this.font_style_buttons.visible = compose_as_html;
-        this.list_buttons.visible = compose_as_html;
-        this.remove_format_button.visible = compose_as_html;
-
-        this.menu_button.menu_model = (compose_as_html) ? this.html_menu : this.plain_menu;
+        var show_formatting = (SimpleAction) this.composer_actions.lookup_action(ACTION_SHOW_FORMATTING);
+        show_formatting.set_enabled(compose_as_html);
+        update_formatting_toolbar();
 
         this.editor.set_rich_text(compose_as_html);
 
         this.application.config.compose_as_html = compose_as_html;
+        this.text_format_button.popover.popdown();
+    }
+
+    private void reparent_widget(Gtk.Widget child, Gtk.Container new_parent) {
+        ((Gtk.Container) child.get_parent()).remove(child);
+        new_parent.add(child);
+    }
+
+    private void update_extended_headers(bool reorder=true) {
+        bool cc = this.cc_entry.addresses != null;
+        bool bcc = this.bcc_entry.addresses != null;
+        bool reply_to = this.reply_to_entry.addresses != null;
+
+        if (reorder) {
+            if (cc) {
+                reparent_widget(this.cc_row, this.filled_fields);
+            } else {
+                reparent_widget(this.cc_row, this.extended_fields_box);
+            }
+            if (bcc) {
+                reparent_widget(this.bcc_row, this.filled_fields);
+            } else {
+                reparent_widget(this.bcc_row, this.extended_fields_box);
+            }
+            if (reply_to) {
+                reparent_widget(this.reply_to_row, this.filled_fields);
+            } else {
+                reparent_widget(this.reply_to_row, this.extended_fields_box);
+            }
+        }
+
+        this.show_extended_fields.visible = !(cc && bcc && reply_to);
     }
 
     private void on_show_extended_headers_toggled(GLib.SimpleAction? action,
                                                   GLib.Variant? new_state) {
         bool show_extended = new_state.get_boolean();
         action.set_state(show_extended);
+
+        update_extended_headers();
+
         this.extended_fields_revealer.reveal_child = show_extended;
 
         if (show_extended && this.current_mode == INLINE_COMPACT) {
@@ -2146,11 +2188,29 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    private void update_formatting_toolbar() {
+        var show_formatting = (SimpleAction) this.composer_actions.lookup_action(ACTION_SHOW_FORMATTING);
+        var text_format = (SimpleAction) this.composer_actions.lookup_action(ACTION_TEXT_FORMAT);
+        this.formatting.reveal_child = text_format.get_state().get_string() == "html" && show_formatting.get_state().get_boolean();
+    }
+
+    private void on_show_formatting(SimpleAction? action, Variant? new_state) {
+        bool show_formatting = new_state.get_boolean();
+        this.application.config.formatting_toolbar_visible = show_formatting;
+        action.set_state(new_state);
+
+        update_formatting_toolbar();
+    }
+
     private void on_font_family(SimpleAction action, Variant? param) {
+        string font = param.get_string();
         this.editor.execute_editing_command_with_argument(
-            "fontname", param.get_string()
+            "fontname", font
         );
-        action.set_state(param.get_string());
+        action.set_state(font);
+
+        this.font_button_stack.visible_child_name = font;
+        this.font_button.popover.popdown();
     }
 
     private void on_font_size(SimpleAction action, Variant? param) {
@@ -2164,15 +2224,35 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         this.editor.execute_editing_command_with_argument("fontsize", size);
         action.set_state(param.get_string());
+
+        this.font_size_button.popover.popdown();
+    }
+
+    private async void update_color_icon(Gdk.RGBA color) {
+        var theme = Gtk.IconTheme.get_default();
+        var icon = theme.lookup_icon("font-color-symbolic", 16, 0);
+        Gdk.RGBA fg_color = Util.Gtk.rgba(0, 0, 0, 1);
+        this.get_style_context().lookup_color("theme_fg_color", out fg_color);
+
+        try {
+            var pixbuf = yield icon.load_symbolic_async(fg_color, color, null, null, null);
+            this.font_color_icon.pixbuf = pixbuf;
+        } catch(Error e) {
+            warning("Could not load icon `font-color-symbolic`!");
+            this.font_color_icon.icon_name = "font-color-symbolic";
+        }
     }
 
     private void on_select_color() {
         Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog(_("Select Color"),
             this.container.top_window);
         if (dialog.run() == Gtk.ResponseType.OK) {
+            var rgba = dialog.get_rgba();
             this.editor.execute_editing_command_with_argument(
-                "forecolor", dialog.get_rgba().to_string()
+                "forecolor", rgba.to_string()
             );
+
+            this.update_color_icon.begin(rgba);
         }
         dialog.destroy();
     }
@@ -2392,7 +2472,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     // the from address had to be set
     private bool update_from_field() {
         this.from_multiple.changed.disconnect(on_from_changed);
-        this.from_single.visible = this.from_multiple.visible = this.from_label.visible = false;
+        this.from_single.visible = this.from_multiple.visible = this.from_row.visible = false;
 
         // Don't show in inline unless the current account has
         // multiple email accounts or aliases, since these will be replies to a
@@ -2411,7 +2491,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             return false;
         }
 
-        this.from_label.visible = true;
+        this.from_row.visible = true;
         this.from_label.set_mnemonic_widget(this.from_multiple);
         // Composer label (with mnemonic underscore) for the account selector
         // when choosing what address to send a message from.
@@ -2607,6 +2687,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkCallback]
     private void on_envelope_changed() {
         draft_changed();
+        update_extended_headers(false);
     }
 
     private void on_from_changed() {
@@ -2656,6 +2737,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.editor_actions.change_action_state(
             ACTION_FONT_FAMILY, context.font_family
         );
+
+        this.update_color_icon.begin(context.font_color);
 
         if (context.font_size < 11)
             this.editor_actions.change_action_state(ACTION_FONT_SIZE, "small");

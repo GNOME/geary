@@ -26,10 +26,6 @@ public class Composer.Headerbar : Gtk.HeaderBar {
     [GtkChild]
     private Gtk.Label recipients_label;
     [GtkChild]
-    private Gtk.Button new_message_attach_button;
-    [GtkChild]
-    private Gtk.Box conversation_attach_buttons;
-    [GtkChild]
     private Gtk.Button save_and_close_button;
 
 
@@ -55,11 +51,6 @@ public class Composer.Headerbar : Gtk.HeaderBar {
     public void set_recipients(string label, string tooltip) {
         recipients_label.label = label;
         recipients_button.tooltip_text = tooltip;
-    }
-
-    public void set_show_pending_attachments(bool show) {
-        this.new_message_attach_button.visible = !show;
-        this.conversation_attach_buttons.visible = show;
     }
 
     internal void set_mode(Widget.PresentationMode mode) {

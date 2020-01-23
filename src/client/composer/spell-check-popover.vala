@@ -60,6 +60,8 @@ public class SpellCheckPopover {
             this.is_lang_visible = is_active || is_visible;
 
             Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
+            box.margin = 6;
+            box.margin_start = 12;
 
             lang_name = Util.International.language_name_from_locale(lang_code);
             country_name = Util.International.country_name_from_locale(lang_code);
@@ -69,7 +71,6 @@ public class SpellCheckPopover {
                 label_text += " (" + country_name + ")";
             Gtk.Label label = new Gtk.Label(label_text);
             label.set_halign(Gtk.Align.START);
-            label.set_size_request(-1, 24);
 
             box.pack_start(label, false, false);
 

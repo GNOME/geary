@@ -37,6 +37,7 @@ geary_client_vala_sources = files(
   'components/components-inspector-system-view.vala',
   'components/components-placeholder-pane.vala',
   'components/components-preferences-window.vala',
+  'components/components-reflow-box.c',
   'components/components-search-bar.vala',
   'components/components-validator.vala',
   'components/components-web-view.vala',

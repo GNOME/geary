@@ -127,7 +127,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
                 Util.JS.to_string(
                     run_javascript(@"new EditContext(document.getElementById('test')).encode()")
                     .get_js_value()
-                ).has_prefix("1,url,"));
+                ).has_prefix("1;url;"));
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -138,7 +138,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
     }
 
     public void edit_context_font() throws Error {
-        string html = "<p id=\"test\" style=\"font-family: Comic Sans; font-size: 144\">para</p>";
+        string html = "<p id=\"test\" style=\"font-family: Comic Sans; font-size: 144; color: #FF7F01\">para</p>";
         load_body_fixture(html);
 
         try {
@@ -146,7 +146,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
                 Util.JS.to_string(
                     run_javascript(@"new EditContext(document.getElementById('test')).encode()")
                     .get_js_value()
-                ) == "0,,Comic Sans,144");
+                ) == "0;;Comic Sans;144;rgb(255, 127, 1)");
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);
             assert_not_reached();

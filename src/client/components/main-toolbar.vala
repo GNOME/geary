@@ -95,16 +95,12 @@ public class MainToolbar : Gtk.Box {
 
     public void set_conversation_header(Gtk.HeaderBar header) {
         conversation_header.hide();
-        header.get_style_context().add_class("geary-titlebar");
-        header.get_style_context().add_class("geary-titlebar-right");
         this.header_group.add_header_bar(header);
         pack_start(header, true, true);
     }
 
     public void remove_conversation_header(Gtk.HeaderBar header) {
         remove(header);
-        header.get_style_context().remove_class("geary-titlebar");
-        header.get_style_context().remove_class("geary-titlebar-right");
         this.header_group.remove_header_bar(header);
         conversation_header.show();
     }

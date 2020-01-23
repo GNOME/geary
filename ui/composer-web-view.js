@@ -684,21 +684,24 @@ EditContext.prototype = {
         }
         this.fontFamily = fontFamily;
         this.fontSize = styles.getPropertyValue("font-size").replace("px", "");
+        this.fontColor = styles.getPropertyValue("color");
     },
     equals: function(other) {
         return other != null
             && this.context == other.context
             && this.linkUrl == other.linkUrl
             && this.fontFamily == other.fontFamily
-            && this.fontSize == other.fontSize;
+            && this.fontSize == other.fontSize
+            && this.fontColor == other.fontColor;
     },
     encode: function() {
         return [
             this.context.toString(16),
             this.linkUrl,
             this.fontFamily,
-            this.fontSize
-        ].join(",");
+            this.fontSize,
+            this.fontColor
+        ].join(";");
     }
 };
 
