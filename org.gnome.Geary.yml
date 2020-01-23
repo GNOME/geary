@@ -184,6 +184,7 @@ modules:
     sources:
       - type: git
         url: https://source.puri.sm/Librem5/libhandy.git
+        branch: v0.0.13
 
   # Geary dependency
   - name: libpeas
