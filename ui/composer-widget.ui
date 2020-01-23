@@ -117,7 +117,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="to_row">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_bottom">6</property>
@@ -151,7 +151,7 @@
                               <placeholder/>
                             </child>
                             <child>
-                              <object class="GtkToggleButton">
+                              <object class="GtkToggleButton" id="show_extended_fields">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
@@ -190,20 +190,26 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkBox" id="filled_fields">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="orientation">vertical</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkRevealer" id="extended_fields_revealer">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkBox">
+                          <object class="GtkBox" id="extended_fields_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_bottom">6</property>
                             <property name="orientation">vertical</property>
-                            <property name="spacing">6</property>
                             <child>
-                              <object class="GtkBox">
+                              <object class="GtkBox" id="cc_row">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_bottom">6</property>
                                 <property name="spacing">6</property>
                                 <child>
                                   <object class="GtkLabel" id="cc_label">
@@ -226,10 +232,13 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEventBox" id="cc_box">
+                                  <object class="GtkBox" id="cc_box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">True</property>
+                                    <style>
+                                      <class name="linked"/>
+                                    </style>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -245,10 +254,11 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkBox">
+                              <object class="GtkBox" id="bcc_row">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="spacing">6</property>
+                                <property name="margin_bottom">6</property>
                                 <child>
                                   <object class="GtkLabel" id="bcc_label">
                                     <property name="visible">True</property>
@@ -270,10 +280,13 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEventBox" id="bcc_box">
+                                  <object class="GtkBox" id="bcc_box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">True</property>
+                                    <style>
+                                      <class name="linked"/>
+                                    </style>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -289,10 +302,11 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkBox">
+                              <object class="GtkBox" id="reply_to_row">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="spacing">6</property>
+                                <property name="margin_bottom">6</property>
                                 <child>
                                   <object class="GtkLabel" id="reply_to_label">
                                     <property name="visible">True</property>
@@ -314,10 +328,13 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEventBox" id="reply_to_box">
+                                  <object class="GtkBox" id="reply_to_box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">True</property>
+                                    <style>
+                                      <class name="linked"/>
+                                    </style>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>

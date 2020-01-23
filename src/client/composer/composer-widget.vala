@@ -321,6 +321,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gtk.ComboBoxText from_multiple;
     private Gee.ArrayList<FromAddressMap> from_list = new Gee.ArrayList<FromAddressMap>();
 
+    [GtkChild] Gtk.Box to_row;
     [GtkChild]
     private Gtk.Box to_box;
     [GtkChild]
@@ -328,25 +329,30 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private EmailEntry to_entry;
     private Components.EntryUndo to_undo;
 
-    [GtkChild]
-    private Gtk.Revealer extended_fields_revealer;
+    [GtkChild] private Gtk.Revealer extended_fields_revealer;
+    [GtkChild] Gtk.Box extended_fields_box;
+    [GtkChild] private Gtk.ToggleButton show_extended_fields;
+    [GtkChild] private Gtk.Box filled_fields;
 
+    [GtkChild] Gtk.Box cc_row;
     [GtkChild]
-    private Gtk.EventBox cc_box;
+    private Gtk.Box cc_box;
     [GtkChild]
     private Gtk.Label cc_label;
     private EmailEntry cc_entry;
     private Components.EntryUndo cc_undo;
 
+    [GtkChild] Gtk.Box bcc_row;
     [GtkChild]
-    private Gtk.EventBox bcc_box;
+    private Gtk.Box bcc_box;
     [GtkChild]
     private Gtk.Label bcc_label;
     private EmailEntry bcc_entry;
     private Components.EntryUndo bcc_undo;
 
+    [GtkChild] Gtk.Box reply_to_row;
     [GtkChild]
-    private Gtk.EventBox reply_to_box;
+    private Gtk.Box reply_to_box;
     [GtkChild]
     private Gtk.Label reply_to_label;
     private EmailEntry reply_to_entry;
@@ -519,18 +525,21 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.to_undo = new Components.EntryUndo(this.to_entry);
 
         this.cc_entry = new EmailEntry(this);
+        this.cc_entry.hexpand = true;
         this.cc_entry.changed.connect(on_envelope_changed);
         this.cc_box.add(cc_entry);
         this.cc_label.set_mnemonic_widget(this.cc_entry);
         this.cc_undo = new Components.EntryUndo(this.cc_entry);
 
         this.bcc_entry = new EmailEntry(this);
+        this.bcc_entry.hexpand = true;
         this.bcc_entry.changed.connect(on_envelope_changed);
         this.bcc_box.add(bcc_entry);
         this.bcc_label.set_mnemonic_widget(this.bcc_entry);
         this.bcc_undo = new Components.EntryUndo(this.bcc_entry);
 
         this.reply_to_entry = new EmailEntry(this);
+        this.reply_to_entry.hexpand = true;
         this.reply_to_entry.changed.connect(on_envelope_changed);
         this.reply_to_box.add(reply_to_entry);
         this.reply_to_label.set_mnemonic_widget(this.reply_to_entry);
@@ -1044,7 +1053,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         switch (this.compose_type) {
             // Restoring a draft
             case ComposeType.NEW_MESSAGE:
-                bool show_extended = false;
                 if (referred.from != null)
                     this.from = referred.from;
                 if (referred.to != null)
@@ -1052,11 +1060,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 if (referred.cc != null)
                     this.cc_entry.addresses = referred.cc;
                 if (referred.bcc != null) {
-                    show_extended = true;
                     this.bcc_entry.addresses = referred.bcc;
                 }
                 if (referred.reply_to != null) {
-                    show_extended = true;
                     this.reply_to_entry.addresses = referred.reply_to;
                 }
                 if (referred.in_reply_to != null)
@@ -1074,14 +1080,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     }
                 } catch (Error error) {
                     debug("Error getting draft message body: %s", error.message);
-                }
-                if (show_extended) {
-                    this.editor_actions.change_action_state(
-                        ACTION_SHOW_EXTENDED_HEADERS, true
-                    );
-                    this.composer_actions.change_action_state(
-                        ACTION_SHOW_EXTENDED_HEADERS, true
-                    );
                 }
             break;
 
@@ -1105,6 +1103,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     Geary.RFC822.TextFormat.HTML);
             break;
         }
+
+        update_extended_headers();
         return referred_quote;
     }
 
@@ -2143,10 +2143,44 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.text_format_button.popover.popdown();
     }
 
+    private void reparent_widget(Gtk.Widget child, Gtk.Container new_parent) {
+        ((Gtk.Container) child.get_parent()).remove(child);
+        new_parent.add(child);
+    }
+
+    private void update_extended_headers(bool reorder=true) {
+        bool cc = this.cc_entry.addresses != null;
+        bool bcc = this.bcc_entry.addresses != null;
+        bool reply_to = this.reply_to_entry.addresses != null;
+
+        if (reorder) {
+            if (cc) {
+                reparent_widget(this.cc_row, this.filled_fields);
+            } else {
+                reparent_widget(this.cc_row, this.extended_fields_box);
+            }
+            if (bcc) {
+                reparent_widget(this.bcc_row, this.filled_fields);
+            } else {
+                reparent_widget(this.bcc_row, this.extended_fields_box);
+            }
+            if (reply_to) {
+                reparent_widget(this.reply_to_row, this.filled_fields);
+            } else {
+                reparent_widget(this.reply_to_row, this.extended_fields_box);
+            }
+        }
+
+        this.show_extended_fields.visible = !(cc && bcc && reply_to);
+    }
+
     private void on_show_extended_headers_toggled(GLib.SimpleAction? action,
                                                   GLib.Variant? new_state) {
         bool show_extended = new_state.get_boolean();
         action.set_state(show_extended);
+
+        update_extended_headers();
+
         this.extended_fields_revealer.reveal_child = show_extended;
 
         if (show_extended && this.current_mode == INLINE_COMPACT) {
@@ -2653,6 +2687,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkCallback]
     private void on_envelope_changed() {
         draft_changed();
+        update_extended_headers(false);
     }
 
     private void on_from_changed() {
