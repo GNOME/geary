@@ -14,8 +14,6 @@ public class MainToolbar : Gtk.Box {
     public string folder { get; set; }
     // Close button settings
     public bool show_close_button { get; set; default = true; }
-    public bool show_close_button_left { get; private set; default = true; }
-    public bool show_close_button_right { get; private set; default = true; }
     // Search and find bar
     public bool search_open { get; set; default = false; }
     public bool find_open { get; set; default = false; }
@@ -33,7 +31,6 @@ public class MainToolbar : Gtk.Box {
     private Gtk.ToggleButton search_conversations_button;
     [GtkChild]
     private Gtk.MenuButton main_menu_button;
-    private Binding guest_header_binding;
 
     // Conversation header elements
     [GtkChild]
@@ -50,6 +47,9 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Button trash_delete_button;
     [GtkChild]
     private Gtk.ToggleButton find_button;
+
+    [GtkChild]
+    private Hdy.HeaderGroup header_group;
 
     private bool show_trash_button = true;
 
@@ -72,10 +72,6 @@ public class MainToolbar : Gtk.Box {
             this.bind_property("account", this.folder_header, "title", BindingFlags.SYNC_CREATE);
             this.bind_property("folder", this.folder_header, "subtitle", BindingFlags.SYNC_CREATE);
         }
-        this.bind_property("show-close-button-left", this.folder_header, "show-close-button",
-            BindingFlags.SYNC_CREATE);
-        this.bind_property("show-close-button-right", this.conversation_header, "show-close-button",
-            BindingFlags.SYNC_CREATE);
 
         // Assemble the main/mark menus
         Gtk.Builder builder = new Gtk.Builder.from_resource("/org/gnome/Geary/main-toolbar-menus.ui");
@@ -95,41 +91,23 @@ public class MainToolbar : Gtk.Box {
 
         this.bind_property("find-open", this.find_button, "active",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-
-        Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(set_window_buttons);
-        this.realize.connect(set_window_buttons);
     }
 
     public void set_conversation_header(Gtk.HeaderBar header) {
         conversation_header.hide();
-        guest_header_binding = bind_property("show-close-button-right", header,
-            "show-close-button", BindingFlags.SYNC_CREATE);
+        this.header_group.add_header_bar(header);
         pack_start(header, true, true);
-        header.decoration_layout = conversation_header.decoration_layout;
     }
 
     public void remove_conversation_header(Gtk.HeaderBar header) {
         remove(header);
-        guest_header_binding.unbind();
-        header.decoration_layout = Gtk.Settings.get_default().gtk_decoration_layout;
+        this.header_group.remove_header_bar(header);
         conversation_header.show();
     }
 
     public void update_trash_button(bool show_trash) {
         this.show_trash_button = show_trash;
         update_conversation_buttons();
-    }
-
-    private void set_window_buttons() {
-        string[] buttons = Gtk.Settings.get_default().gtk_decoration_layout.split(":");
-        this.show_close_button_left = this.show_close_button;
-        this.show_close_button_right = this.show_close_button;
-        this.folder_header.decoration_layout = buttons[0] + ":";
-        this.conversation_header.decoration_layout = (
-            (buttons.length == 2)
-            ? ":" + buttons[1]
-            : ""
-        );
     }
 
     // Updates tooltip text depending on number of conversations selected.

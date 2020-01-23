@@ -44,7 +44,6 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
         if (application.config.desktop_environment == UNITY) {
             composer.embed_header();
         } else {
-            composer.header.show_close_button = true;
             set_titlebar(this.composer.header);
         }
 
