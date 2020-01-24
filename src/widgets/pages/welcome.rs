@@ -29,7 +29,7 @@ impl WelcomePageWidget {
         title.get_style_context().add_class("large-title");
         self.widget.add(&title);
 
-        let text = gtk::Label::new(Some("Take the tour to learn some essential fatures. It only takes a minute."));
+        let text = gtk::Label::new(Some("Hi there! If you are new to GNOME, you can take the tour to learn some essential features."));
         text.get_style_context().add_class("body");
         text.set_margin_top(12);
         self.widget.add(&text);
@@ -46,7 +46,7 @@ impl WelcomePageWidget {
         start_tour_btn.set_action_name(Some("app.start-tour"));
 
         let skip_tour_btn = gtk::Button::new();
-        skip_tour_btn.add(&gtk::Label::new(Some("Skip")));
+        skip_tour_btn.add(&gtk::Label::new(Some("No Thanks")));
         skip_tour_btn.set_property_height_request(40);
         skip_tour_btn.set_property_width_request(180);
         skip_tour_btn.set_action_name(Some("app.skip-tour"));
