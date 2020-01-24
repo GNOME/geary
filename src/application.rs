@@ -1,20 +1,20 @@
-use gio::prelude::*;
-use gtk::prelude::*;
-use std::env;
-
 use crate::config;
 use crate::utils;
 use crate::widgets::Window;
+use gio::prelude::*;
+use gtk::prelude::*;
+use std::env;
+use std::rc::Rc;
 
 pub struct Application {
     app: gtk::Application,
-    window: Window,
+    window: Rc<Window>,
 }
 
 impl Application {
     pub fn new() -> Self {
         let app = gtk::Application::new(Some(config::APP_ID), gio::ApplicationFlags::FLAGS_NONE).unwrap();
-        let window = Window::new(&app);
+        let window = Rc::new(Window::new(&app));
 
         let application = Self { app, window };
 
@@ -33,7 +33,16 @@ impl Application {
                 app.quit();
             }),
         );
+        // Start Tour
+        utils::action(
+            &self.app,
+            "start-tour",
+            clone!(@strong self.window as window => move |_, _| {
+                window.start_tour();
+            }),
+        );
 
+        // Skip Tour
         utils::action(
             &self.app,
             "skip-tour",
@@ -41,6 +50,22 @@ impl Application {
                 app.quit();
             }),
         );
+
+        utils::action(
+            &self.app,
+            "next-page",
+            clone!(@strong self.window as window => move |_, _| {
+                window.next_page();
+            }),
+        );
+        utils::action(
+            &self.app,
+            "previous-page",
+            clone!(@strong self.window as window => move |_, _| {
+                window.previous_page();
+            }),
+        );
+
         self.app.set_accels_for_action("app.quit", &["<primary>q"]);
     }
 

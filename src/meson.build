@@ -41,11 +41,13 @@ sources = files(
   'widgets/pages/welcome.rs',
   'widgets/headerbar.rs',
   'widgets/mod.rs',
+  'widgets/paginator.rs',
   'widgets/window.rs',
   'application.rs',
   'config.rs',
   'main.rs',
   'static_resources.rs',
+  'utils.rs',
 )
 
 custom_target(

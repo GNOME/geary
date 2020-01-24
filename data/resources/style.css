@@ -4,6 +4,12 @@
    font-size: 24pt;
    letter-spacing: 0.2rem;
 }
+.page-head {
+  font-weight: 300;
+  font-size: 20pt;
+  letter-spacing: 0.2rem;
+}
+
 .title-1 {
    font-weight: 800;
    font-size: 20pt;

@@ -43,6 +43,7 @@ impl WelcomePageWidget {
         start_tour_btn.get_style_context().add_class("suggested-action");
         start_tour_btn.set_property_height_request(40);
         start_tour_btn.set_property_width_request(180);
+        start_tour_btn.set_action_name(Some("app.start-tour"));
 
         let skip_tour_btn = gtk::Button::new();
         skip_tour_btn.add(&gtk::Label::new(Some("Skip")));
