@@ -11,15 +11,15 @@
 # joachimj <joachim.j@gmail.com>, 2013
 # TommyBrunn <tommy.brunn@gmail.com>, 2012
 # Mattias Eriksson <snaggen@gmail.com>, 2014, 2015.
-# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2016, 2018, 2019.
+# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2016, 2018, 2019, 2020.
 # Josef Andersson <l10nl18nsweja@gmail.com>, 2016, 2017, 2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-12-17 23:56+0000\n"
-"PO-Revision-Date: 2019-12-22 22:26+0100\n"
+"POT-Creation-Date: 2020-01-08 10:10+0000\n"
+"PO-Revision-Date: 2020-01-11 17:24+0100\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -1221,7 +1221,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1815
+#: src/client/composer/composer-widget.vala:1816
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1589,90 +1589,90 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:814
+#: src/client/composer/composer-widget.vala:815
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Vill du behålla eller förkasta detta utkast?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:840
+#: src/client/composer/composer-widget.vala:841
 msgid "Do you want to discard this draft message?"
 msgstr "Vill du förkasta detta utkast?"
 
-#: src/client/composer/composer-widget.vala:1484
+#: src/client/composer/composer-widget.vala:1485
 msgid "Send message with an empty subject and body?"
 msgstr "Skicka meddelande med en tom ämnesrad och utan innehåll?"
 
-#: src/client/composer/composer-widget.vala:1486
+#: src/client/composer/composer-widget.vala:1487
 msgid "Send message with an empty subject?"
 msgstr "Skicka meddelande med en tom ämnesrad?"
 
-#: src/client/composer/composer-widget.vala:1488
+#: src/client/composer/composer-widget.vala:1489
 msgid "Send message with an empty body?"
 msgstr "Skicka meddelande utan innehåll?"
 
-#: src/client/composer/composer-widget.vala:1497
+#: src/client/composer/composer-widget.vala:1498
 msgid "Send message without an attachment?"
 msgstr "Skicka meddelande utan att bifoga filer?"
 
-#: src/client/composer/composer-widget.vala:1807
+#: src/client/composer/composer-widget.vala:1808
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "”%s” är redan bifogad och kommer att skickas."
 
-#: src/client/composer/composer-widget.vala:1837
-#: src/client/composer/composer-widget.vala:1887
+#: src/client/composer/composer-widget.vala:1838
+#: src/client/composer/composer-widget.vala:1888
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "”%s” är en tom fil."
 
-#: src/client/composer/composer-widget.vala:1875
+#: src/client/composer/composer-widget.vala:1876
 #, c-format
 msgid "“%s” could not be found."
 msgstr "”%s” kunde inte hittas."
 
-#: src/client/composer/composer-widget.vala:1881
+#: src/client/composer/composer-widget.vala:1882
 #, c-format
 msgid "“%s” is a folder."
 msgstr "”%s” är en mapp."
 
-#: src/client/composer/composer-widget.vala:1900
+#: src/client/composer/composer-widget.vala:1901
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "”%s” kunde inte öppnas för läsning."
 
-#: src/client/composer/composer-widget.vala:1908
+#: src/client/composer/composer-widget.vala:1909
 msgid "Cannot add attachment"
 msgstr "Kan inte bifoga din fil"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1965
+#: src/client/composer/composer-widget.vala:1966
 #: src/client/conversation-viewer/conversation-email.vala:559
 #: src/client/util/util-email.vala:235 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Till:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1971
+#: src/client/composer/composer-widget.vala:1972
 #: src/client/conversation-viewer/conversation-email.vala:564
 #: src/client/util/util-email.vala:240 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1977
+#: src/client/composer/composer-widget.vala:1978
 #: src/client/conversation-viewer/conversation-email.vala:569
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:1983
+#: src/client/composer/composer-widget.vala:1984
 msgid "Reply-To: "
 msgstr "Svara-till: "
 
-#: src/client/composer/composer-widget.vala:2172
+#: src/client/composer/composer-widget.vala:2170
 msgid "Select Color"
 msgstr "Välj färg"
 
@@ -1681,20 +1681,20 @@ msgstr "Välj färg"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2364
+#: src/client/composer/composer-widget.vala:2362
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2420
+#: src/client/composer/composer-widget.vala:2418
 msgid "_From:"
 msgstr "_Från:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2723
+#: src/client/composer/composer-widget.vala:2721
 msgid "Images"
 msgstr "Bilder"
 
@@ -2111,7 +2111,8 @@ msgstr "%a, %-e %b %Y klockan %H:%M"
 msgid "%a, %b %-e, %Y at %X"
 msgstr "%a, %-e %b %Y klockan %X"
 
-#: src/client/util/util-email.vala:38 src/engine/rfc822/rfc822-message.vala:998
+#: src/client/util/util-email.vala:38
+#: src/engine/rfc822/rfc822-message.vala:1000
 msgid "(no subject)"
 msgstr "(inget ämne)"
 
@@ -2450,12 +2451,12 @@ msgstr "Borttaget"
 msgid "Archive | Archives"
 msgstr "Arkiv | Archive | Archives"
 
-#: src/engine/rfc822/rfc822-message.vala:467
+#: src/engine/rfc822/rfc822-message.vala:458
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Kunde inte avgöra mimetyp för ”%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:475
+#: src/engine/rfc822/rfc822-message.vala:469
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Kunde inte avgöra innehållstyp för mimetypen ”%s” på ”%s”."
@@ -2635,27 +2636,27 @@ msgstr "Li_ta på denna server"
 msgid "_Don’t Trust This Server"
 msgstr "Lita inte på _denna server"
 
-#: ui/composer-headerbar.ui:19 ui/composer-headerbar.ui:176
+#: ui/composer-headerbar.ui:18 ui/composer-headerbar.ui:175
 msgid "Detach the composer from the window"
 msgstr "Koppla loss redigeraren från fönstret"
 
-#: ui/composer-headerbar.ui:59 ui/composer-headerbar.ui:84
+#: ui/composer-headerbar.ui:58 ui/composer-headerbar.ui:83
 msgid "Attach a file"
 msgstr "Bifoga en fil"
 
-#: ui/composer-headerbar.ui:108
+#: ui/composer-headerbar.ui:107
 msgid "Add original attachments"
 msgstr "Lägg till ursprungliga bilagor"
 
-#: ui/composer-headerbar.ui:204
+#: ui/composer-headerbar.ui:203
 msgid "_Send"
 msgstr "_Skicka"
 
-#: ui/composer-headerbar.ui:231
+#: ui/composer-headerbar.ui:230
 msgid "Discard and Close"
 msgstr "Förkasta och stäng"
 
-#: ui/composer-headerbar.ui:255
+#: ui/composer-headerbar.ui:254
 msgid "Save and Close"
 msgstr "Spara och stäng"
 
@@ -2709,135 +2710,135 @@ msgstr "_Stor"
 msgid "C_olor"
 msgstr "Fär_g"
 
-#: ui/composer-menus.ui:47 ui/composer-menus.ui:62
+#: ui/composer-menus.ui:47 ui/composer-menus.ui:56
 msgid "_Rich Text"
 msgstr "_Rich Text"
 
-#: ui/composer-menus.ui:53 ui/composer-menus.ui:68
-msgid "Show Extended Fields"
-msgstr "Visa utökade fält"
-
-#: ui/composer-menus.ui:78
+#: ui/composer-menus.ui:66
 msgid "_Undo"
 msgstr "_Ångra"
 
-#: ui/composer-menus.ui:82
+#: ui/composer-menus.ui:70
 msgid "_Redo"
 msgstr "_Upprepa"
 
-#: ui/composer-menus.ui:88 ui/composer-menus.ui:106
+#: ui/composer-menus.ui:76 ui/composer-menus.ui:94
 msgid "Cu_t"
 msgstr "Klipp u_t"
 
-#: ui/composer-menus.ui:92 ui/composer-menus.ui:110
+#: ui/composer-menus.ui:80 ui/composer-menus.ui:98
 #: ui/conversation-message-menus.ui:37
 msgid "_Copy"
 msgstr "_Kopiera"
 
-#: ui/composer-menus.ui:96 ui/composer-menus.ui:114
+#: ui/composer-menus.ui:84 ui/composer-menus.ui:102
 msgid "_Paste"
 msgstr "_Klistra in"
 
-#: ui/composer-menus.ui:100
+#: ui/composer-menus.ui:88
 msgctxt "Clipboard paste as plain text"
 msgid "Paste _Without Formatting"
 msgstr "Klistra in _utan formatering"
 
-#: ui/composer-menus.ui:120
+#: ui/composer-menus.ui:108
 msgid "Select _All"
 msgstr "Välj _alla"
 
-#: ui/composer-menus.ui:127 ui/conversation-message-menus.ui:43
+#: ui/composer-menus.ui:115 ui/conversation-message-menus.ui:43
 msgid "_Inspect…"
 msgstr "_Inspektera…"
 
-#. Address(es) e-mail is to be sent to
-#: ui/composer-widget.ui:56
-msgid "_To"
-msgstr "_Till"
-
-#: ui/composer-widget.ui:75
-msgid "_Cc"
-msgstr "_Cc"
-
-#: ui/composer-widget.ui:130
-msgid "_Subject"
-msgstr "_Ämne"
-
-#: ui/composer-widget.ui:149
-msgid "_Bcc"
-msgstr "_Bcc"
-
-#: ui/composer-widget.ui:179
-msgid "_Reply-To"
-msgstr "Sva_ra-till"
-
 #. Geary account mail will be sent from
-#: ui/composer-widget.ui:208
+#: ui/composer-widget.ui:61
 msgid "From"
 msgstr "Från"
 
-#: ui/composer-widget.ui:293
+#. Address(es) e-mail is to be sent to
+#: ui/composer-widget.ui:131
+msgid "_To"
+msgstr "_Till"
+
+#: ui/composer-widget.ui:159
+msgid "Show Cc, Bcc, and Reply-To fields"
+msgstr "Visa fälten Cc, Bcc och Svara-till"
+
+#: ui/composer-widget.ui:214
+msgid "_Cc"
+msgstr "_Cc"
+
+#: ui/composer-widget.ui:258
+msgid "_Bcc"
+msgstr "_Bcc"
+
+#: ui/composer-widget.ui:302
+msgid "_Reply-To"
+msgstr "Sva_ra-till"
+
+#: ui/composer-widget.ui:355
+msgid "_Subject"
+msgstr "_Ämne"
+
+#: ui/composer-widget.ui:428
 msgid "Drop files here"
 msgstr "Släpp filer här"
 
-#: ui/composer-widget.ui:309
+#: ui/composer-widget.ui:444
 msgid "To add them as attachments"
 msgstr "För att bifoga dem"
 
-#: ui/composer-widget.ui:353
+#: ui/composer-widget.ui:488
 msgid "Undo last edit"
 msgstr "Ångra senaste redigering"
 
-#: ui/composer-widget.ui:377
+#: ui/composer-widget.ui:512
 msgid "Redo last edit"
 msgstr "Gör om senaste redigering"
 
-#: ui/composer-widget.ui:415
+#: ui/composer-widget.ui:550
 msgid "Bold text"
 msgstr "Fet text"
 
-#: ui/composer-widget.ui:439
+#: ui/composer-widget.ui:574
 msgid "Italic text"
 msgstr "Kursiv text"
 
-#: ui/composer-widget.ui:463
+#: ui/composer-widget.ui:598
 msgid "Underline text"
 msgstr "Understryk text"
 
-#: ui/composer-widget.ui:487
+#: ui/composer-widget.ui:622
 msgid "Strikethrough text"
 msgstr "Genomstruken text"
 
-#: ui/composer-widget.ui:525
+#: ui/composer-widget.ui:660
 msgid "Insert bulleted list"
 msgstr "Infoga punktlista"
 
-#: ui/composer-widget.ui:549
+#: ui/composer-widget.ui:684
 msgid "Insert numbered list"
 msgstr "Infoga numrerad lista"
 
-#: ui/composer-widget.ui:587
+#: ui/composer-widget.ui:722
 msgid "Indent or quote text"
 msgstr "Indentera eller citera text"
 
-#: ui/composer-widget.ui:611
+#: ui/composer-widget.ui:746
 msgid "Un-indent or unquote text"
 msgstr "Avindentera eller avcitera text"
 
-#: ui/composer-widget.ui:649
+#: ui/composer-widget.ui:784
 msgid "Insert or update text link"
 msgstr "Infoga eller uppdatera textlänk"
 
-#: ui/composer-widget.ui:673
+#: ui/composer-widget.ui:808
 msgid "Insert an image"
 msgstr "Infoga en bild"
 
-#: ui/composer-widget.ui:707
+#: ui/composer-widget.ui:842
 msgid "Remove text formatting"
 msgstr "Ta bort textformatering"
 
-#: ui/composer-widget.ui:731
+#: ui/composer-widget.ui:866
 msgid "Select spell checking languages"
 msgstr "Välj språk för stavningskontroll"
 
@@ -3487,6 +3488,9 @@ msgstr "_Autentisera"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary-uppgradering pågår…"
+
+#~ msgid "Show Extended Fields"
+#~ msgstr "Visa utökade fält"
 
 #~ msgid "Enable notification sounds"
 #~ msgstr "Aktivera aviseringsljud"

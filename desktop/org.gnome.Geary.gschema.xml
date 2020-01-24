@@ -45,6 +45,12 @@
         <description>True if the folder list Paned is in the horizontal orientation.</description>
     </key>
 
+    <key name="formatting-toolbar-visible" type="b">
+        <default>true</default>
+        <summary>Show/hide formatting toolbar</summary>
+        <description>True if the formatting toolbar in the composer is shown.</description>
+    </key>
+
     <key name="messages-pane-position" type="i">
         <default>250</default>
         <summary>Position of message list pane</summary>
@@ -126,6 +132,13 @@
         <summary>Undo sending email delay</summary>
         <description>The number of seconds to wait before sending an
         email. Set to zero or less to disable.</description>
+    </key>
+
+    <key name="brief-notification-duration" type="i">
+        <default>5</default>
+        <summary>Brief notification display time</summary>
+        <description>The length of time in seconds for which brief notifications should
+        be displayed.</description>
     </key>
 
     <key name="migrated-config" type="b">

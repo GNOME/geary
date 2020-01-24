@@ -5,6 +5,11 @@
   <template class="ComposerHeaderbar" parent="GtkHeaderBar">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <child type="title">
+      <object class="GtkBox">
+        <property name="visible">False</property>
+      </object>
+    </child>
     <child>
       <object class="GtkBox" id="detach_start">
         <property name="visible">True</property>
@@ -50,85 +55,12 @@
       </object>
     </child>
     <child>
-      <object class="GtkButton" id="new_message_attach_button">
+      <object class="GtkButton">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-        <property name="focus_on_click">False</property>
-        <property name="receives_default">False</property>
-        <property name="tooltip_text" translatable="yes">Attach a file</property>
-        <property name="action_name">cmh.add-attachment</property>
-        <property name="always_show_image">True</property>
-        <child>
-          <object class="GtkImage" id="new_message_attach_image">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="pixel_size">16</property>
-            <property name="icon_name">mail-attachment-symbolic</property>
-          </object>
-        </child>
+        <property name="label">Cancel</property>
+        <property name="action_name">cmh.composer-close</property>
       </object>
-      <packing>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkBox" id="conversation_attach_buttons">
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkButton" id="conversation_attach_new_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Attach a file</property>
-            <property name="action_name">cmh.add-attachment</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="conversation_attach_new_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="pixel_size">16</property>
-                <property name="icon_name">mail-attachment-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="conversation_attach_original_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Add original attachments</property>
-            <property name="action_name">cmh.add-original-attachments</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="conversation_attach_original_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="pixel_size">16</property>
-                <property name="icon_name">edit-copy-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <style>
-          <class name="linked"/>
-        </style>
-      </object>
-      <packing>
-        <property name="position">2</property>
-      </packing>
     </child>
     <child>
       <object class="GtkButton" id="recipients_button">

@@ -218,4 +218,13 @@ namespace Util.Gtk {
         return new_url;
     }
 
+    public Gdk.RGBA rgba(double red, double green, double blue, double alpha) {
+        return Gdk.RGBA() {
+            red = red,
+            green = green,
+            blue = blue,
+            alpha = alpha
+        };
+    }
+
 }

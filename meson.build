@@ -79,7 +79,7 @@ gthread = dependency('gthread-2.0', version: '>=' + target_glib)
 iso_codes = dependency('iso-codes')
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
-libhandy = dependency('libhandy-0.0', version: '>= 0.0.9', required: false)
+libhandy = dependency('libhandy-0.0', version: '>= 0.0.10')
 libmath = cc.find_library('m')
 libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
@@ -98,26 +98,6 @@ webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '
 # Can currently use either Enchant 1 or 2
 if not enchant.found()
   enchant = dependency('enchant', version: '>=1.6')
-endif
-
-# Handy isn't necessarily packaged by distros, so fall back to a
-# subproject until it is.
-if not libhandy.found()
-  libhandy_subproj = subproject(
-    'libhandy',
-    default_options: [
-      'examples=false',
-      'glade_catalog=disabled',
-      'tests=false',
-    ]
-  )
-
-  libhandy = declare_dependency(
-    dependencies: [
-      libhandy_subproj.get_variable('libhandy_dep'),
-      libhandy_subproj.get_variable('libhandy_vapi'),
-    ]
-  )
 endif
 
 # Libunwind system dependencies above ensures appropriate versions,
