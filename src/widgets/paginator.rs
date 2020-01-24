@@ -23,6 +23,14 @@ impl PaginatorWidget {
         paginator
     }
 
+    pub fn get_total_pages(&self) -> i32 {
+        self.pages.len().try_into().unwrap_or(1)
+    }
+
+    pub fn get_current_page(&self) -> i32 {
+        self.current_page.borrow().clone()
+    }
+
     pub fn next(&self) {
         let next_page = self.current_page.borrow().clone() + 1;
         self.go_to(next_page);

@@ -35,12 +35,32 @@ impl Window {
         self.headerbar.start_tour();
     }
 
+    fn end_tour(&self) {
+        self.container.set_visible_child_name("welcome");
+        self.headerbar.end_tour();
+    }
+
     pub fn next_page(&self) {
-        self.paginator.next();
+        let total_pages = self.paginator.get_total_pages();
+        let current_page = self.paginator.get_current_page();
+        self.headerbar.set_page_nr(current_page + 1, total_pages);
+
+        if current_page == total_pages {
+            self.widget.destroy();
+        } else {
+            self.paginator.next();
+        }
     }
 
     pub fn previous_page(&self) {
-        self.paginator.previous();
+        let total_pages = self.paginator.get_total_pages();
+        let current_page = self.paginator.get_current_page();
+        self.headerbar.set_page_nr(current_page - 1, total_pages);
+
+        match current_page {
+            1 => self.end_tour(),
+            _ => self.paginator.previous(),
+        }
     }
 
     fn init(&mut self) {

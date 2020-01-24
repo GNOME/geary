@@ -53,6 +53,7 @@ impl WelcomePageWidget {
 
         actions_container.add(&skip_tour_btn);
         actions_container.add(&start_tour_btn);
+        actions_container.set_focus_child(Some(&start_tour_btn));
 
         self.widget.add(&actions_container);
     }

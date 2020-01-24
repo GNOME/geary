@@ -65,7 +65,6 @@ impl Application {
                 window.previous_page();
             }),
         );
-
         self.app.set_accels_for_action("app.quit", &["<primary>q"]);
     }
 
