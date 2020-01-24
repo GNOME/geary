@@ -1,0 +1,27 @@
+#!/bin/sh
+# Source: https://gitlab.gnome.org/GNOME/fractal/blob/master/hooks/pre-commit.hook
+
+if ! which rustup &> /dev/null; then
+    curl https://sh.rustup.rs -sSf  | sh -s -- -y
+    export PATH=$PATH:$HOME/.cargo/bin
+    if ! which rustup &> /dev/null; then
+        echo "Failed to install rustup"
+    fi
+fi
+
+if ! rustup component list|grep rustfmt &> /dev/null; then
+    echo "Installing rustfmt.."
+    rustup component add rustfmt
+fi
+
+echo "--Checking style--"
+cargo fmt --all -- --check
+if test $? != 0; then
+    echo "--Checking style fail--"
+    echo "Please fix the above issues, either manually or by running: cargo fmt --all"
+
+    exit -1
+else
+    echo "--Checking style pass--"
+fi
+

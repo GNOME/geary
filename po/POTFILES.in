@@ -1,0 +1,7 @@
+data/org.gnome.Tour.metainfo.xml.in.in
+data/org.gnome.Tour.desktop.in.in
+data/org.gnome.Tour.gschema.xml.in
+data/resources/ui/about_dialog.ui.in
+data/resources/ui/menu.ui
+data/resources/ui/shortcuts.ui
+data/resources/ui/window.ui.in

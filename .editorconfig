@@ -1,0 +1,13 @@
+root = true
+[*]
+indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
+charset = utf-8
+
+[*.build]
+indent_size = 2
+
+[*.{json,py}]
+indent_size = 4
+

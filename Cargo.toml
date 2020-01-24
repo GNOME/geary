@@ -1,0 +1,21 @@
+[package]
+name = "gnome-tour"
+version = "0.0.1"
+authors = ["Bilal Elmoussaoui <bil.elmoussaoui@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+glib = { git = "https://github.com/gtk-rs/glib.git" }
+gio = { git = "https://github.com/gtk-rs/gio.git"  }
+log = "0.4"
+gettext-rs= { version = "0.4", features = ["gettext-system"] }
+
+
+[dependencies.gdk]
+package = "gdk4"
+git = "https://github.com/gtk-rs/gdk4"
+
+[dependencies.gtk]
+package = "gtk4"
+git = "https://github.com/gtk-rs/gtk4.git"
+

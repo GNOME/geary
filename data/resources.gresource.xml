@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/gnome/Tour/">
+      <file compressed="true" alias="style.css">resources/style.css</file>
+  </gresource>
+</gresources>

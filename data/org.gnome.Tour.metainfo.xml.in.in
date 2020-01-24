@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Bilal Elmoussaoui 2019 <bilal.elmoussaoui@gnome.org> -->
+<component type="desktop-application">
+  <id>@app-id@</id>
+  <metadata_license>CC0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <name>GNOME Tour</name>
+  <summary>A GTK + Rust application template.</summary>
+  <description>
+    <p>A boilerplate template for GTK + Rust. It uses Meson as a build system and has flatpak support by default.</p>
+  </description>
+  <screenshots>
+      <screenshot type="default">
+        <image>https://gitlab.gnome.org/bilelmoussaoui/gtk-rust-template/raw/master/data/resources/screenshots/screenshot1.png</image>
+        <caption>Main Window</caption>
+      </screenshot>
+
+  </screenshots>
+  <url type="homepage">https://gitlab.gnome.org/bilelmoussaoui/gtk-rust-template</url>
+  <url type="bugtracker">https://gitlab.gnome.org/bilelmoussaoui/gtk-rust-template/issues</url>
+  <url type="donation">https://liberapay.com/bielmoussaoui</url>
+  <content_rating type="oars-1.0" />
+  <releases>
+    <release version="0.0.1" date="2019-07-11" />
+  </releases>
+  <kudos>
+      <!--
+        GNOME Software kudos:
+        https://gitlab.gnome.org/GNOME/gnome-software/blob/master/doc/kudos.md
+      -->
+      <kudo>ModernToolkit</kudo>
+      <kudo>HiDpiIcon</kudo>
+  </kudos>
+  <project_group>GNOME</project_group>
+  <developer_name>Bilal Elmoussaoui</developer_name>
+  <update_contact>bilal.elmoussaoui@gnome.org</update_contact>
+  <translation type="gettext">@gettext-package@</translation>
+  <launchable type="desktop-id">@app-id@.desktop</launchable>
+</component>
+
