@@ -57,6 +57,11 @@ public class Geary.RFC822.MailboxAddresses :
         get { return this.addrs.size; }
     }
 
+    /** Determines if there are no addresses in the list. */
+    public bool is_empty {
+        get { return this.addrs.is_empty; }
+    }
+
     private Gee.List<MailboxAddress> addrs = new Gee.ArrayList<MailboxAddress>();
 
     private bool hash_cached = false;
