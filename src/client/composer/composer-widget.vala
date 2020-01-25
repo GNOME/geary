@@ -255,10 +255,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** Determines if the composer is completely empty. */
     public bool is_blank {
         get {
-            return this.to_entry.empty
-                && this.cc_entry.empty
-                && this.bcc_entry.empty
-                && this.reply_to_entry.empty
+            return this.to_entry.is_empty
+                && this.cc_entry.is_empty
+                && this.bcc_entry.is_empty
+                && this.reply_to_entry.is_empty
                 && this.subject_entry.buffer.length == 0
                 && this.editor.is_empty
                 && this.attached_files.size == 0;
@@ -1017,29 +1017,28 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         else
             this.compose_type = ComposeType.REPLY_ALL;
 
-        this.to_entry.modified = this.cc_entry.modified = this.bcc_entry.modified = false;
         if (!to_entry.addresses.equal_to(reply_to_addresses))
-            this.to_entry.modified = true;
+            this.to_entry.set_modified();
         if (cc != "" && !cc_entry.addresses.equal_to(reply_cc_addresses))
-            this.cc_entry.modified = true;
+            this.cc_entry.set_modified();
         if (bcc != "")
-            this.bcc_entry.modified = true;
+            this.bcc_entry.set_modified();
 
         // We're in compact inline mode, but there are modified email
         // addresses, so set us to use plain inline mode instead so
         // the modified addresses can be seen. If there are CC
         if (this.current_mode == INLINE_COMPACT && (
-                this.to_entry.modified ||
-                this.cc_entry.modified ||
-                this.bcc_entry.modified ||
-                this.reply_to_entry.modified)) {
+                this.to_entry.is_modified ||
+                this.cc_entry.is_modified ||
+                this.bcc_entry.is_modified ||
+                this.reply_to_entry.is_modified)) {
             set_mode(INLINE);
         }
 
         // If there's a modified header that would normally be hidden,
         // show full fields.
-        if (this.bcc_entry.modified ||
-            this.reply_to_entry.modified) {
+        if (this.bcc_entry.is_modified ||
+            this.reply_to_entry.is_modified) {
             this.editor_actions.change_action_state(
                 ACTION_SHOW_EXTENDED_HEADERS, true
             );
@@ -1402,7 +1401,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (!modify_headers)
             return;
 
-        bool recipients_modified = this.to_entry.modified || this.cc_entry.modified || this.bcc_entry.modified;
+        bool recipients_modified = this.to_entry.is_modified || this.cc_entry.is_modified || this.bcc_entry.is_modified;
         if (!recipients_modified) {
             if (type == ComposeType.REPLY || type == ComposeType.REPLY_ALL)
                 this.to_entry.addresses = Geary.RFC822.Utils.merge_addresses(to_entry.addresses,
@@ -1414,7 +1413,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             else
                 this.cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(this.cc_entry.addresses,
                     this.to_entry.addresses);
-            this.to_entry.modified = this.cc_entry.modified = false;
         }
 
         if (referred.message_id != null) {
@@ -1953,16 +1951,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // To must be valid (and hence non-empty), the other email
         // fields must be either empty or valid.
         get_action(ACTION_SEND).set_enabled(
-            this.to_entry.valid &&
-            (this.cc_entry.empty || this.cc_entry.valid) &&
-            (this.bcc_entry.empty || this.bcc_entry.valid) &&
-            (this.reply_to_entry.empty || this.reply_to_entry.valid)
+            this.to_entry.is_valid &&
+            (this.cc_entry.is_empty || this.cc_entry.is_valid) &&
+            (this.bcc_entry.is_empty || this.bcc_entry.is_valid) &&
+            (this.reply_to_entry.is_empty || this.reply_to_entry.is_valid)
         );
     }
 
     private void set_compact_header_recipients() {
-        bool tocc = !this.to_entry.empty && !this.cc_entry.empty,
-            ccbcc = !(this.to_entry.empty && this.cc_entry.empty) && !this.bcc_entry.empty;
+        bool tocc = !this.to_entry.is_empty && !this.cc_entry.is_empty,
+            ccbcc = !(this.to_entry.is_empty && this.cc_entry.is_empty) && !this.bcc_entry.is_empty;
         string label = this.to_entry.buffer.text + (tocc ? ", " : "")
             + this.cc_entry.buffer.text + (ccbcc ? ", " : "") + this.bcc_entry.buffer.text;
         StringBuilder tooltip = new StringBuilder();
@@ -2145,9 +2143,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void update_extended_headers(bool reorder=true) {
-        bool cc = this.cc_entry.addresses != null;
-        bool bcc = this.bcc_entry.addresses != null;
-        bool reply_to = this.reply_to_entry.addresses != null;
+        bool cc = !this.cc_entry.is_empty;
+        bool bcc = !this.bcc_entry.is_empty;
+        bool reply_to = !this.reply_to_entry.is_empty;
 
         if (reorder) {
             if (cc) {
