@@ -2041,11 +2041,15 @@ public class Application.MainWindow :
     private void on_command_redo(Command command) {
         update_command_actions();
         if (command.executed_label != null) {
-            int notification_time =
-                command.executed_notification_brief ?
-                    application.config.brief_notification_duration : 0;
-            Components.InAppNotification ian =
-                new Components.InAppNotification(command.executed_label, notification_time);
+            uint notification_time =
+                Components.InAppNotification.DEFAULT_DURATION;
+            if (command.executed_notification_brief) {
+                notification_time =
+                    application.config.brief_notification_duration;
+            }
+            Components.InAppNotification ian = new Components.InAppNotification(
+                command.executed_label, notification_time
+            );
             ian.set_button(_("Undo"), Action.Edit.prefix(Action.Edit.UNDO));
             add_notification(ian);
         }
