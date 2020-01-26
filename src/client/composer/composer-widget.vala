@@ -324,7 +324,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gtk.ComboBoxText from_multiple;
     private Gee.ArrayList<FromAddressMap> from_list = new Gee.ArrayList<FromAddressMap>();
 
-    [GtkChild] Gtk.Box to_row;
     [GtkChild]
     private Gtk.Box to_box;
     [GtkChild]

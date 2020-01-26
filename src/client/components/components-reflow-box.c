@@ -36,7 +36,7 @@ struct _ComponentsReflowBox
   guint row_spacing;
 };
 
-G_DEFINE_TYPE (ComponentsReflowBox, components_reflow_box, GTK_TYPE_CONTAINER);
+G_DEFINE_TYPE (ComponentsReflowBox, components_reflow_box, GTK_TYPE_CONTAINER)
 
 enum {
   PROP_0,
@@ -318,6 +318,7 @@ components_reflow_box_size_allocate(GtkWidget      *widget,
 static GtkSizeRequestMode
 components_reflow_box_get_request_mode(GtkWidget *widget)
 {
+  COMPONENTS_REFLOW_BOX (widget);
   return GTK_SIZE_REQUEST_HEIGHT_FOR_WIDTH;
 }
 
@@ -356,7 +357,7 @@ components_reflow_box_get_preferred_width(GtkWidget *widget,
 
 static void
 components_reflow_box_get_preferred_width_for_height (GtkWidget *widget,
-                                               gint       height,
+                                               G_GNUC_UNUSED gint height,
                                                gint      *minimum_width,
                                                gint      *natural_width)
 {
@@ -406,7 +407,7 @@ components_reflow_box_remove (GtkContainer *container,
 
 static void
 components_reflow_box_forall (GtkContainer *container,
-                       gboolean      include_internals,
+                       G_GNUC_UNUSED gboolean include_internals,
                        GtkCallback   callback,
                        gpointer      callback_data)
 {
