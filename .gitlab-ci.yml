@@ -1,83 +1,27 @@
-stages:
-  - lint
-  - test
-  - review
-
-variables:
-    BUNDLE: "gnome-tour-nightly.flatpak"
+include:
+  - project: 'alatiera/citemplates'
+    file: 'flatpak/flatpak-ci-initiative-sdk-extensions.yml'
+    ref: 'alatiera/fix-flatpak-builder-bundles'
 
 flatpak:
-    image: "registry.gitlab.gnome.org/gnome/gnome-runtime-images/rust_bundle:master"
-    stage: "test"
-    variables:
-        MANIFEST_PATH: "build-aux/org.gnome.TourDevel.json"
-        FLATPAK_MODULE: "gnome-tour"
-        MESON_ARGS: "-Dprofile=development"
-        APP_ID: "org.gnome.TourDevel"
+  image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/rust_bundle:master'
+  variables:
+    BUNDLE: "org.gnome.TourDevel.flatpak"
+    MANIFEST_PATH: "build-aux/org.gnome.TourDevel.json"
+    FLATPAK_MODULE: "gnome-tour"
+    MESON_ARGS: "-Dprofile=development"
+    APP_ID: "org.gnome.TourDevel"
+    RUNTIME_REPO: "https://nightly.gnome.org/gnome-nightly.flatpakrepo"
+  extends: '.flatpak'
 
-    script:
-        - flatpak-builder --stop-at=${FLATPAK_MODULE} app ${MANIFEST_PATH}
-        # Build the flatpak repo
-        - flatpak-builder --run app ${MANIFEST_PATH} meson --prefix=/app ${MESON_ARGS} _build
-        - flatpak-builder --run app ${MANIFEST_PATH} ninja -C _build install
-
-        # Run the tests
-        - flatpak-builder --finish-only app ${MANIFEST_PATH}
-        - >
-          xvfb-run -a -s "-screen 0 1024x768x24"
-          flatpak build
-          --env=LANG=C.UTF-8
-          --env=NO_AT_BRIDGE=1
-          app
-          dbus-run-session
-          meson test -C _build --no-stdsplit --print-errorlogs
-
-        # Create a flatpak bundle
-        - flatpak build-export repo app
-        - flatpak build-bundle repo ${BUNDLE} ${APP_ID}
-
-    artifacts:
-        paths:
-            - $BUNDLE
-        expire_in: 5 days
-
-    cache:
-        key: "flatpak"
-        paths:
-          - .flatpak-builder/downloads/
-          - .flatpak-builder/git/
-          - target/
-          - target_test/
-
-review:
-    stage: review
-    dependencies:
-        - flatpak
-    script:
-        - echo "Generating flatpak deployment"
-    artifacts:
-        paths:
-            - $BUNDLE
-        expire_in: 30 days
-    environment:
-        name: review/$CI_COMMIT_REF_NAME
-        url: https://gitlab.gnome.org/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/raw/${BUNDLE}
-        on_stop: stop_review
-
-stop_review:
-    stage: review
-    script:
-        - echo "Stopping flatpak deployment"
-    when: manual
-    environment:
-        name: review/$CI_COMMIT_REF_NAME
-        action: stop
+nightly:
+  extends: '.publish_nightly'
 
 # Configure and run rustfmt
 # Exits and builds fails if on bad format
 rustfmt:
   image: "rust:slim"
-  stage: "lint"
+  stage: ".pre"
   script:
     - rustup component add rustfmt
     # Create blank versions of our configured files
@@ -87,4 +31,3 @@ rustfmt:
     - rustc -Vv && cargo -Vv
     - cargo fmt --version
     - cargo fmt --all -- --color=always --check
-
