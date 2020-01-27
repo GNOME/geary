@@ -1,5 +1,6 @@
 use gtk::prelude::*;
 
+#[derive(Debug)]
 pub struct ImagePageWidget {
     pub widget: gtk::Box,
 }

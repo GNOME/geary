@@ -4,6 +4,7 @@ use std::convert::TryInto;
 
 use super::pages::ImagePageWidget;
 
+#[derive(Debug)]
 pub struct PaginatorWidget {
     pub widget: gtk::Stack,
     pages: Vec<ImagePageWidget>,

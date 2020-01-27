@@ -27,6 +27,5 @@ fn main() {
 
     static_resources::init().expect("Failed to initialize the resource file.");
 
-    let app = Application::new();
-    app.run();
+    Application::run();
 }

@@ -1,5 +1,6 @@
 use gtk::prelude::*;
 
+#[derive(Debug)]
 pub struct HeaderBar {
     pub widget: gtk::HeaderBar,
     container: gtk::Stack,
