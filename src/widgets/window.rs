@@ -31,6 +31,9 @@ impl Window {
     }
 
     pub fn start_tour(&self) {
+        if let Some(page) = self.paginator.get_current_page() {
+            self.headerbar.set_page_title(&page.get_title());
+        }
         self.container.set_visible_child_name("pages");
         self.headerbar.start_tour();
     }
@@ -42,7 +45,7 @@ impl Window {
 
     pub fn next_page(&self) {
         let total_pages = self.paginator.get_total_pages();
-        let current_page = self.paginator.get_current_page();
+        let current_page = self.paginator.get_current_page_nr();
         self.headerbar.set_page_nr(current_page + 1, total_pages);
 
         if current_page == total_pages {
@@ -50,16 +53,23 @@ impl Window {
         } else {
             self.paginator.next();
         }
+        if let Some(page) = self.paginator.get_current_page() {
+            self.headerbar.set_page_title(&page.get_title());
+        }
     }
 
     pub fn previous_page(&self) {
         let total_pages = self.paginator.get_total_pages();
-        let current_page = self.paginator.get_current_page();
+        let current_page = self.paginator.get_current_page_nr();
         self.headerbar.set_page_nr(current_page - 1, total_pages);
 
         match current_page {
             1 => self.end_tour(),
             _ => self.paginator.previous(),
+        }
+
+        if let Some(page) = self.paginator.get_current_page() {
+            self.headerbar.set_page_title(&page.get_title());
         }
     }
 
@@ -78,20 +88,48 @@ impl Window {
         let welcome_page = WelcomePageWidget::new();
         self.container.add_named(&welcome_page.widget, "welcome");
 
-        self.paginator
-            .add_page(ImagePageWidget::new("/org/gnome/Tour/activities.svg", "Click Activities to view windows, launch apps and search"));
-        self.paginator
-            .add_page(ImagePageWidget::new("/org/gnome/Tour/search.svg", "In the Activities Overview, just start typing to search"));
-        self.paginator
-            .add_page(ImagePageWidget::new("/org/gnome/Tour/calendar.svg", "Click the time to view the calendar, notifications and weather"));
-        self.paginator.add_page(ImagePageWidget::new(
-            "/org/gnome/Tour/status-menu.svg",
-            "Use the status menu to view system information and access settings",
-        ));
-        self.paginator
-            .add_page(ImagePageWidget::new("/org/gnome/Tour/software.svg", "Use the Software app to find and install apps"));
-        self.container.add_named(&self.paginator.widget, "pages");
+        self.paginator.add_page(Box::new(ImagePageWidget::new(
+            "/org/gnome/Tour/activities.svg",
+            "Activities Overview",
+            "Open Activities to start apps",
+            "You can also view open windows, search and use workspaces.",
+        )));
 
+        self.paginator.add_page(Box::new(ImagePageWidget::new(
+            "/org/gnome/Tour/search.svg",
+            "Search",
+            "In the Activities Overview, just start typing to search",
+            "Search can be used to launch apps, find settings, do calculations and much more.",
+        )));
+
+        self.paginator.add_page(Box::new(ImagePageWidget::new(
+            "/org/gnome/Tour/calendar.svg",
+            "Date & Time",
+            "Click the time to see your now and next",
+            "This includes notifications, media controls, calendar events, the weather and world clocks.",
+        )));
+
+        self.paginator.add_page(Box::new(ImagePageWidget::new(
+            "/org/gnome/Tour/status-menu.svg",
+            "System Menu",
+            "View system information and settings",
+            "Get an overview of the system status and quickly change settings.",
+        )));
+        self.paginator.add_page(Box::new(ImagePageWidget::new(
+            "/org/gnome/Tour/software.svg",
+            "Software",
+            "Find and install apps",
+            "The Software app makese it easy to find and install all the apps you need.",
+        )));
+
+        self.paginator.add_page(Box::new(ImagePageWidget::new(
+            "/org/gnome/Tour/help.svg",
+            "Learn More",
+            "That's it! To learn more, see the Help",
+            "The help app contains information, tips and tricks.",
+        )));
+
+        self.container.add_named(&self.paginator.widget, "pages");
         self.widget.add(&self.container);
     }
 }

@@ -1,27 +1,25 @@
 use gtk::prelude::*;
 
 pub struct HeaderBar {
-    pub widget: gtk::HeaderBar,
-    container: gtk::Stack,
+    pub widget: gtk::Stack,
+    headerbar: gtk::HeaderBar,
     next_btn: gtk::Button,
 }
 
 impl HeaderBar {
     pub fn new() -> Self {
-        let widget = gtk::HeaderBar::new();
-        let container = gtk::Stack::new();
+        let widget = gtk::Stack::new();
+        let headerbar = gtk::HeaderBar::new();
         let next_btn = gtk::Button::new();
 
-        widget.set_show_title_buttons(true);
-
-        let headerbar = Self { widget, container, next_btn };
+        let headerbar = Self { widget, headerbar, next_btn };
         headerbar.init();
         headerbar
     }
 
     pub fn start_tour(&self) {
-        self.container.set_visible_child_name("pages");
-        self.widget.set_show_title_buttons(false);
+        self.widget.set_visible_child_name("pages");
+        self.headerbar.set_show_title_buttons(false);
     }
 
     pub fn set_page_nr(&self, page_nr: i32, total_pages: i32) {
@@ -32,18 +30,26 @@ impl HeaderBar {
         }
     }
 
+    pub fn set_page_title(&self, title: &str) {
+        self.headerbar.set_title(Some(title));
+    }
+
     pub fn end_tour(&self) {
-        self.container.set_visible_child_name("welcome");
-        self.widget.set_show_title_buttons(true);
+        self.widget.set_visible_child_name("welcome");
+        self.headerbar.set_show_title_buttons(true);
     }
 
     fn init(&self) {
-        self.container.set_hexpand(true);
-        self.container.set_transition_type(gtk::StackTransitionType::SlideLeftRight);
-        self.container.set_transition_duration(300);
-        self.container.add_named(&gtk::Label::new(None), "welcome");
+        self.headerbar.set_show_title_buttons(true);
+        self.widget.set_hexpand(true);
+        self.widget.set_transition_type(gtk::StackTransitionType::SlideLeftRight);
+        self.widget.set_transition_duration(300);
+        self.widget.get_style_context().add_class("titlebar");
 
-        let pages_container = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        let container = gtk::HeaderBar::new();
+        container.set_show_title_buttons(true);
+        container.set_title(Some("Welcome Tour"));
+        self.widget.add_named(&container, "welcome");
 
         let previous_btn = gtk::Button::new();
         previous_btn.add(&gtk::Label::new(Some("Previous")));
@@ -59,10 +65,8 @@ impl HeaderBar {
         self.next_btn.set_hexpand(true);
         self.next_btn.set_property_width_request(60);
 
-        pages_container.add(&previous_btn);
-        pages_container.add(&self.next_btn);
-        self.container.add_named(&pages_container, "pages");
-
-        self.widget.set_custom_title(Some(&self.container));
+        self.headerbar.pack_start(&previous_btn);
+        self.headerbar.pack_end(&self.next_btn);
+        self.widget.add_named(&self.headerbar, "pages");
     }
 }
