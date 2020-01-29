@@ -1,3 +1,4 @@
+use gettextrs::gettext;
 use gtk::prelude::*;
 
 use super::headerbar::HeaderBar;
@@ -90,43 +91,43 @@ impl Window {
 
         self.paginator.add_page(Box::new(ImagePageWidget::new(
             "/org/gnome/Tour/activities.svg",
-            "Activities Overview",
-            "Open Activities to start apps",
-            "You can also view open windows, search and use workspaces.",
+            gettext("Activities Overview"),
+            gettext("Open Activities to start apps"),
+            gettext("You can also view open windows, search and use workspaces."),
         )));
 
         self.paginator.add_page(Box::new(ImagePageWidget::new(
             "/org/gnome/Tour/search.svg",
-            "Search",
-            "In the Activities Overview, just start typing to search",
-            "Search can be used to launch apps, find settings, do calculations and much more.",
+            gettext("Search"),
+            gettext("In the Activities Overview, just start typing to search"),
+            gettext("Search can be used to launch apps, find settings, do calculations and much more."),
         )));
 
         self.paginator.add_page(Box::new(ImagePageWidget::new(
             "/org/gnome/Tour/calendar.svg",
-            "Date & Time",
-            "Click the time to see your now and next",
-            "This includes notifications, media controls, calendar events, the weather and world clocks.",
+            gettext("Date & Time"),
+            gettext("Click the time to see your now and next"),
+            gettext("This includes notifications, media controls, calendar events, the weather and world clocks."),
         )));
 
         self.paginator.add_page(Box::new(ImagePageWidget::new(
             "/org/gnome/Tour/status-menu.svg",
-            "System Menu",
-            "View system information and settings",
-            "Get an overview of the system status and quickly change settings.",
+            gettext("System Menu"),
+            gettext("View system information and settings"),
+            gettext("Get an overview of the system status and quickly change settings."),
         )));
         self.paginator.add_page(Box::new(ImagePageWidget::new(
             "/org/gnome/Tour/software.svg",
-            "Software",
-            "Find and install apps",
-            "The Software app makese it easy to find and install all the apps you need.",
+            gettext("Software"),
+            gettext("Find and install apps"),
+            gettext("The Software app makese it easy to find and install all the apps you need."),
         )));
 
         self.paginator.add_page(Box::new(ImagePageWidget::new(
             "/org/gnome/Tour/help.svg",
-            "Learn More",
-            "That's it! To learn more, see the Help",
-            "The help app contains information, tips and tricks.",
+            gettext("Learn More"),
+            gettext("That's it! To learn more, see the Help"),
+            gettext("The help app contains information, tips and tricks."),
         )));
 
         self.container.add_named(&self.paginator.widget, "pages");

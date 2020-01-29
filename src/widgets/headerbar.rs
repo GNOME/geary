@@ -1,3 +1,4 @@
+use gettextrs::gettext;
 use gtk::prelude::*;
 
 pub struct HeaderBar {
@@ -24,9 +25,9 @@ impl HeaderBar {
 
     pub fn set_page_nr(&self, page_nr: i32, total_pages: i32) {
         if page_nr == total_pages {
-            self.next_btn.set_label("Done");
+            self.next_btn.set_label(&gettext("Close"));
         } else {
-            self.next_btn.set_label("Next");
+            self.next_btn.set_label(&gettext("Next"));
         }
     }
 
@@ -48,7 +49,7 @@ impl HeaderBar {
 
         let container = gtk::HeaderBar::new();
         container.set_show_title_buttons(true);
-        container.set_title(Some("Welcome Tour"));
+        container.set_title(Some(&gettext("Welcome Tour")));
         self.widget.add_named(&container, "welcome");
 
         let previous_btn = gtk::Button::new();
@@ -58,7 +59,7 @@ impl HeaderBar {
         previous_btn.set_hexpand(true);
         previous_btn.set_property_width_request(60);
 
-        self.next_btn.add(&gtk::Label::new(Some("Next")));
+        self.next_btn.add(&gtk::Label::new(Some(&gettext("Next"))));
         self.next_btn.get_style_context().add_class("suggested-action");
         self.next_btn.set_action_name(Some("app.next-page"));
         self.next_btn.set_halign(gtk::Align::End);

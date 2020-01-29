@@ -28,15 +28,15 @@ impl Pageable for ImagePageWidget {
 }
 
 impl ImagePageWidget {
-    pub fn new(resource_uri: &str, title: &str, head: &str, body: &str) -> Self {
+    pub fn new(resource_uri: &str, title: String, head: String, body: String) -> Self {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 12);
 
         let image_page = Self {
             widget,
             resource_uri: resource_uri.to_string(),
-            title: title.to_string(),
-            head: head.to_string(),
-            body: body.to_string(),
+            title,
+            head,
+            body,
         };
 
         image_page.init();
