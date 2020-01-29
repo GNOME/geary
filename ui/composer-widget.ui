@@ -1153,18 +1153,18 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkMenuButton" id="text_format_button">
+                  <object class="GtkMenuButton" id="more_options_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
-                    <property name="menu_model">rich_text_menu</property>
-                    <property name="tooltip_text" translatable="yes">Enable or disable rich text mode</property>
+                    <property name="menu_model">more_options_menu</property>
+                    <property name="tooltip_text" translatable="yes">More options</property>
                     <property name="direction">up</property>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
-                        <property name="icon_name">format-text-bold-symbolic</property>
+                        <property name="icon_name">view-more-symbolic</property>
                       </object>
                     </child>
                   </object>
@@ -1297,7 +1297,7 @@
     </section>
   </menu>
 
-  <menu id="rich_text_menu">
+  <menu id="more_options_menu">
     <section>
       <item>
         <attribute name="label" translatable="yes">_Rich Text</attribute>

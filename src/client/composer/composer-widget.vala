@@ -392,7 +392,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild] private Gtk.Stack font_button_stack;
     [GtkChild] private Gtk.MenuButton font_size_button;
     [GtkChild] private Gtk.Image font_color_icon;
-    [GtkChild] private Gtk.MenuButton text_format_button;
+    [GtkChild] private Gtk.MenuButton more_options_button;
 
     [GtkChild]
     private Gtk.Button insert_link_button;
@@ -2147,7 +2147,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.set_rich_text(compose_as_html);
 
         this.application.config.compose_as_html = compose_as_html;
-        this.text_format_button.popover.popdown();
+        this.more_options_button.popover.popdown();
     }
 
     private void reparent_widget(Gtk.Widget child, Gtk.Container new_parent) {
