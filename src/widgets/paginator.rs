@@ -2,11 +2,11 @@ use gtk::prelude::*;
 use std::cell::RefCell;
 use std::convert::TryInto;
 
-use super::pages::ImagePageWidget;
+use super::pages::Pageable;
 
 pub struct PaginatorWidget {
     pub widget: gtk::Stack,
-    pages: Vec<ImagePageWidget>,
+    pages: Vec<Box<dyn Pageable>>,
     current_page: RefCell<i32>,
 }
 
@@ -27,8 +27,13 @@ impl PaginatorWidget {
         self.pages.len().try_into().unwrap_or(1)
     }
 
-    pub fn get_current_page(&self) -> i32 {
+    pub fn get_current_page_nr(&self) -> i32 {
         self.current_page.borrow().clone()
+    }
+
+    pub fn get_current_page(&self) -> Option<&Box<dyn Pageable>> {
+        let current_page_idx: usize = (self.get_current_page_nr() - 1).try_into().unwrap_or(0);
+        self.pages.get(current_page_idx)
     }
 
     pub fn next(&self) {
@@ -41,11 +46,11 @@ impl PaginatorWidget {
         self.go_to(previous_page);
     }
 
-    pub fn add_page(&mut self, page: ImagePageWidget) {
+    pub fn add_page(&mut self, page: Box<dyn Pageable>) {
         let page_nr = self.pages.len() + 1;
         let page_name = format!("page-{}", page_nr);
 
-        self.widget.add_named(&page.widget, &page_name);
+        self.widget.add_named(&page.get_widget(), &page_name);
         self.pages.push(page);
     }
 

@@ -1,45 +1,13 @@
-
 .large-title {
    font-weight: 300;
    font-size: 24pt;
    letter-spacing: 0.2rem;
 }
-.page-head {
-  font-weight: 300;
-  font-size: 20pt;
-}
-
-.title-1 {
-   font-weight: 800;
+.page-title {
+   font-weight: 600;
    font-size: 20pt;
 }
-.title-2 {
-   font-weight: 800;
-   font-size: 15pt;
-}
-.title-3 {
-   font-weight: 700;
-   font-size: 15pt;
-}
-.title-4 {
-   font-weight: 700;
-   font-size: 13pt;
-}
-.heading {
-   font-weight: 700;
-   font-size: 11pt;
-}
-.body {
+.page-body {
    font-weight: 400;
-   font-size: 11pt;
+   font-size: 12pt;
 }
-.caption-heading {
-   font-weight: 700;
-   font-size: 9pt;
-}
-.caption {
-   font-weight: 400;
-   font-size: 9pt;
-}
-
-

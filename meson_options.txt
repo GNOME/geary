@@ -8,3 +8,24 @@ option (
   value: 'default',
   description: 'The build profile for GNOME Tour. One of "default" or "development".'
 )
+
+option (
+  'distro_name',
+  type: 'string',
+  value: 'GNOME',
+  description: 'Distro name, used for branding.'
+)
+
+option (
+  'distro_icon_name',
+  type: 'string',
+  value: 'start-here-symbolic',
+  description: 'Distro icon name, used for branding.'
+)
+
+option (
+  'distro_version',
+  type: 'string',
+  value: '3.36',
+  description: 'Distro version, used for branding.'
+)

@@ -5,3 +5,6 @@ pub static NAME_SUFFIX: &'static str = @NAME_SUFFIX@;
 pub static VERSION: &'static str = @VERSION@;
 pub static GETTEXT_PACKAGE: &'static str = @GETTEXT_PACKAGE@;
 pub static LOCALEDIR: &'static str = @LOCALEDIR@;
+pub static DISTRO_NAME: &'static str = @DISTRO_NAME@;
+pub static DISTRO_VERSION: &'static str = @DISTRO_VERSION@;
+pub static DISTRO_ICON_NAME: &'static str = @DISTRO_ICON_NAME@;
