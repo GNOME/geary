@@ -9,6 +9,9 @@
   <shortdesc xml:lang="en">
   GNOME Tour and Greeter
   </shortdesc>
+  <description>
+    A guided tour and greeter for GNOME
+  </description>
   <bug-database rdf:resource="https://gitlab.gnome.org/GNOME/gnome-tour" />
   <category rdf:resource="http://api.gnome.org/doap-extensions#apps" />
   <programming-language>Rust</programming-language>
