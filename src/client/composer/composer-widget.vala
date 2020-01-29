@@ -1821,8 +1821,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 );
         }
 
+        Gtk.Box wrapper_box = new Gtk.Box(VERTICAL, 0);
+        this.attachments_box.pack_start(wrapper_box);
+        wrapper_box.pack_start(new Gtk.Separator(HORIZONTAL));
+
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-        this.attachments_box.pack_start(box);
+        box.margin_top = 6;
+        box.margin_bottom = 6;
+        wrapper_box.pack_start(box);
 
         /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
         string label_text = _("%s (%s)").printf(target.get_basename(),
@@ -1833,9 +1839,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         label.margin_start = 4;
         label.margin_end = 4;
 
-        Gtk.Button remove_button = new Gtk.Button.with_mnemonic(Stock._REMOVE);
+        Gtk.Button remove_button = new Gtk.Button.from_icon_name("user-trash-symbolic", BUTTON);
         box.pack_start(remove_button, false, false);
-        remove_button.clicked.connect(() => remove_attachment(target, box));
+        remove_button.clicked.connect(() => remove_attachment(target, wrapper_box));
 
         update_attachments_view();
     }
