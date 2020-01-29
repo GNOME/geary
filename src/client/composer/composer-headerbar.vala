@@ -38,7 +38,6 @@ public class Composer.Headerbar : Gtk.HeaderBar {
         Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(
             on_gtk_decoration_layout_changed
         );
-        this.show_close_button = this.config.desktop_environment != UNITY;
     }
 
     public override void destroy() {
@@ -71,6 +70,9 @@ public class Composer.Headerbar : Gtk.HeaderBar {
             this.set_attached(true);
             break;
         }
+
+        this.show_close_button = (mode == Widget.PresentationMode.PANED
+                                  && this.config.desktop_environment != UNITY);
     }
 
     private void set_attached(bool is_attached) {
