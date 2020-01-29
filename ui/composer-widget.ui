@@ -1192,7 +1192,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="select_dictionary_button">
+                  <object class="GtkMenuButton" id="select_dictionary_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>

@@ -397,7 +397,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild]
     private Gtk.Button insert_link_button;
     [GtkChild]
-    private Gtk.Button select_dictionary_button;
+    private Gtk.MenuButton select_dictionary_button;
     [GtkChild]
     private Gtk.Label info_label;
 
@@ -432,7 +432,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private string body_html = "";
 
-    private SpellCheckPopover? spell_check_popover = null;
     private string? pointer_url = null;
     private string? cursor_url = null;
     private bool is_attachment_overlay_visible = false;
@@ -626,6 +625,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // from the .ui file.
         var cells = this.from_multiple.get_cells();
         ((Gtk.CellRendererText) cells.data).ellipsize = END;
+
+        // Create spellcheck popover
+        Application.Configuration config = this.application.config;
+        var spell_check_popover = new SpellCheckPopover(
+            this.select_dictionary_button, config
+        );
+        spell_check_popover.selection_changed.connect((active_langs) => {
+            config.set_spell_check_languages(active_langs);
+            update_subject_spell_checker();
+        });
 
         load_entry_completions();
 
@@ -2371,17 +2380,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_select_dictionary(SimpleAction action, Variant? param) {
-        if (this.spell_check_popover == null) {
-            Application.Configuration config = this.application.config;
-            this.spell_check_popover = new SpellCheckPopover(
-                this.select_dictionary_button, config
-            );
-            this.spell_check_popover.selection_changed.connect((active_langs) => {
-                    config.set_spell_check_languages(active_langs);
-                    update_subject_spell_checker();
-                });
-        }
-        this.spell_check_popover.toggle();
+        this.select_dictionary_button.toggled();
     }
 
     private bool on_editor_key_press_event(Gdk.EventKey event) {
