@@ -1,3 +1,4 @@
+use crate::config;
 use gettextrs::gettext;
 use gtk::prelude::*;
 
@@ -21,11 +22,11 @@ impl WelcomePageWidget {
         self.widget.set_margin_top(24);
         self.widget.set_margin_bottom(24);
 
-        let logo = gtk::Image::new_from_icon_name(Some("start-here-symbolic"));
+        let logo = gtk::Image::new_from_icon_name(Some(config::DISTRO_ICON_NAME));
         logo.set_pixel_size(196);
         self.widget.add(&logo);
 
-        let title = gtk::Label::new(Some(&gettext("Welcome to GNOME 3.34")));
+        let title = gtk::Label::new(Some(&gettext(format!("Welcome to {} {}", config::DISTRO_NAME, config::DISTRO_VERSION))));
         title.set_margin_top(36);
         title.get_style_context().add_class("large-title");
         self.widget.add(&title);
