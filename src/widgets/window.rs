@@ -124,7 +124,7 @@ impl Window {
         )));
 
         self.paginator.add_page(Box::new(ImagePageWidget::new(
-            "/org/gnome/Tour/help.svg",
+            "/org/gnome/Tour/ready-to-go.svg",
             gettext("Learn More"),
             gettext("That's it! To learn more, see the Help"),
             gettext("The help app contains information, tips and tricks."),
