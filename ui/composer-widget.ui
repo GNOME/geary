@@ -1183,7 +1183,7 @@
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
-                        <property name="icon_name">format-text-italic-symbolic</property>
+                        <property name="icon_name">format-toolbar-toggle-symbolic</property>
                       </object>
                     </child>
                   </object>
