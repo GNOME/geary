@@ -2640,6 +2640,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         popover.set_link_url(url);
         popover.closed.connect(() => {
                 this.editor.free_selection(selection_id);
+            });
+        popover.hide.connect(() => {
                 Idle.add(() => { popover.destroy(); return Source.REMOVE; });
             });
         popover.link_activate.connect((link_uri) => {
@@ -2647,9 +2649,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             });
         popover.link_delete.connect(() => {
                 this.editor.delete_link(selection_id);
-            });
-        popover.link_open.connect(() => {
-                this.application.show_uri.begin(popover.link_uri);
             });
         return popover;
     }
@@ -2721,7 +2720,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     LinkPopover popover = this.new_link_popover.end(res);
                     popover.set_relative_to(this.editor);
                     popover.set_pointing_to(location);
-                    popover.show();
+                    popover.popup();
                 });
         }
         return Gdk.EVENT_PROPAGATE;
@@ -2833,6 +2832,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.new_link_popover.begin(type, url, (obj, res) => {
                 LinkPopover popover = this.new_link_popover.end(res);
 
+                var style = this.insert_link_button.get_style_context();
+
                 // We have to disconnect then reconnect the selection
                 // changed signal for the duration of the popover
                 // being active since if the user selects the text in
@@ -2842,10 +2843,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 this.editor.selection_changed.disconnect(on_selection_changed);
                 popover.closed.connect(() => {
                         this.editor.selection_changed.connect(on_selection_changed);
+                        style.set_state(NORMAL);
                     });
 
                 popover.set_relative_to(this.insert_link_button);
-                popover.show();
+                popover.popup();
+                style.set_state(ACTIVE);
             });
     }
 

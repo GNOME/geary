@@ -5,6 +5,7 @@
   <template class="ComposerLinkPopover" parent="GtkPopover">
     <property name="can_focus">False</property>
     <property name="position">top</property>
+    <property name="width-request">360</property>
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
@@ -20,7 +21,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="can_default">True</property>
-            <property name="width_chars">40</property>
+            <property name="hexpand">True</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text">https://</property>
@@ -39,14 +40,8 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Note that this button and the Update button will never be shown at the same time to the user.">Insert the new link with this URL</property>
+            <property name="label" translatable="yes">Add</property>
             <signal name="clicked" handler="on_activate_popover" swapped="no"/>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">emblem-ok-symbolic</property>
-              </object>
-            </child>
             <child internal-child="accessible">
               <object class="AtkObject" id="insert-atkobject">
                 <property name="AtkObject::accessible-name" translatable="yes">Link URL</property>
@@ -64,14 +59,8 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Note that this button and the Insert button will never be shown at the same time to the user.">Update this link’s URL</property>
+            <property name="label" translatable="yes">Update</property>
             <signal name="clicked" handler="on_activate_popover" swapped="no"/>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">emblem-ok-symbolic</property>
-              </object>
-            </child>
           </object>
           <packing>
             <property name="left_attach">2</property>
@@ -79,12 +68,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="delete">
+          <object class="GtkButton" id="remove">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Delete this link</property>
-            <signal name="clicked" handler="on_delete_clicked" swapped="no"/>
+            <signal name="clicked" handler="on_remove_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -95,26 +84,6 @@
           </object>
           <packing>
             <property name="left_attach">3</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="open">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Open this link</property>
-            <signal name="clicked" handler="on_open_clicked" swapped="no"/>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">document-open-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="left_attach">4</property>
             <property name="top_attach">0</property>
           </packing>
         </child>
