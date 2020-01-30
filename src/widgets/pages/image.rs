@@ -29,7 +29,7 @@ impl Pageable for ImagePageWidget {
 
 impl ImagePageWidget {
     pub fn new(resource_uri: &str, title: String, head: String, body: String) -> Self {
-        let widget = gtk::Box::new(gtk::Orientation::Vertical, 12);
+        let widget = gtk::Box::new(gtk::Orientation::Vertical, 0);
 
         let image_page = Self {
             widget,
@@ -44,21 +44,24 @@ impl ImagePageWidget {
     }
 
     fn init(&self) {
-        self.widget.set_halign(gtk::Align::Center);
-        self.widget.set_valign(gtk::Align::Center);
-        self.widget.set_property_margin(48);
+        self.widget.set_halign(gtk::Align::Fill);
+        self.widget.set_valign(gtk::Align::Fill);
+
+        let container = gtk::Box::new(gtk::Orientation::Vertical, 12);
+        container.set_halign(gtk::Align::Center);
+        container.set_valign(gtk::Align::Center);
+        container.set_property_margin(48);
 
         let image = gtk::Picture::new_for_resource(Some(&self.resource_uri));
         image.set_valign(gtk::Align::Start);
-        self.widget.add(&image);
+        container.add(&image);
 
         let head_label = gtk::Label::new(Some(&self.get_head()));
         head_label.set_justify(gtk::Justification::Center);
         head_label.set_valign(gtk::Align::Center);
         head_label.set_margin_top(36);
         head_label.get_style_context().add_class("page-title");
-
-        self.widget.add(&head_label);
+        container.add(&head_label);
 
         let body_label = gtk::Label::new(Some(&self.get_body()));
         body_label.set_lines(2);
@@ -67,6 +70,8 @@ impl ImagePageWidget {
         body_label.set_valign(gtk::Align::Center);
         body_label.get_style_context().add_class("page-body");
         body_label.set_margin_top(12);
-        self.widget.add(&body_label);
+        container.add(&body_label);
+
+        self.widget.add(&container);
     }
 }

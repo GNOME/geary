@@ -11,3 +11,11 @@
    font-weight: 400;
    font-size: 12pt;
 }
+
+.last-page {
+  background-color: #4a86cf; /*GNOME blue*/
+}
+
+.last-page .page-title, .last-page .page-body {
+  color: white;
+}
