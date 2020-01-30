@@ -12,10 +12,6 @@
     ],
     "desktop-file-name-suffix" : " (Devel)",
     "finish-args" : [
-        "--filesystem=xdg-run/dconf",
-        "--filesystem=~/.config/dconf:ro",
-        "--talk-name=ca.desrt.dconf",
-        "--env=DCONF_USER_CONFIG_DIR=.config/dconf",
         "--share=ipc",
         "--socket=fallback-x11",
         "--socket=wayland",
