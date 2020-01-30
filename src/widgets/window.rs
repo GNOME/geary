@@ -123,12 +123,14 @@ impl Window {
             gettext("The Software app makese it easy to find and install all the apps you need."),
         )));
 
-        self.paginator.add_page(Box::new(ImagePageWidget::new(
+        let last_page = ImagePageWidget::new(
             "/org/gnome/Tour/ready-to-go.svg",
             gettext("Learn More"),
             gettext("That's it! To learn more, see the Help"),
             gettext("The help app contains information, tips and tricks."),
-        )));
+        );
+        last_page.widget.get_style_context().add_class("last-page");
+        self.paginator.add_page(Box::new(last_page));
 
         self.container.add_named(&self.paginator.widget, "pages");
         self.widget.add(&self.container);
