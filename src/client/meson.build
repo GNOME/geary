@@ -53,6 +53,7 @@ geary_client_vala_sources = files(
 
   'composer/composer-box.vala',
   'composer/composer-container.vala',
+  'composer/composer-email-entry.vala',
   'composer/composer-embed.vala',
   'composer/composer-headerbar.vala',
   'composer/composer-link-popover.vala',
@@ -60,7 +61,6 @@ geary_client_vala_sources = files(
   'composer/composer-widget.vala',
   'composer/composer-window.vala',
   'composer/contact-entry-completion.vala',
-  'composer/email-entry.vala',
   'composer/spell-check-popover.vala',
 
   'conversation-list/conversation-list-cell-renderer.vala',

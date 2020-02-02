@@ -80,22 +80,22 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
     }
 
     public ComposedEmail set_to(RFC822.MailboxAddresses? recipients) {
-        this.to = recipients;
+        this.to = empty_to_null(recipients);
         return this;
     }
 
     public ComposedEmail set_cc(RFC822.MailboxAddresses? recipients) {
-        this.cc = recipients;
+        this.cc = empty_to_null(recipients);
         return this;
     }
 
     public ComposedEmail set_bcc(RFC822.MailboxAddresses? recipients) {
-        this.bcc = recipients;
+        this.bcc = empty_to_null(recipients);
         return this;
     }
 
     public ComposedEmail set_reply_to(RFC822.MailboxAddresses? recipients) {
-        this.reply_to = recipients;
+        this.reply_to = empty_to_null(recipients);
         return this;
     }
 
@@ -105,12 +105,12 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
     }
 
     public ComposedEmail set_in_reply_to(RFC822.MessageIDList? messages) {
-        this.in_reply_to = messages;
+        this.in_reply_to = empty_to_null(messages);
         return this;
     }
 
     public ComposedEmail set_references(RFC822.MessageIDList? messages) {
-        this.references = messages;
+        this.references = empty_to_null(messages);
         return this;
     }
 
@@ -163,6 +163,20 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
             }
         }
         return index != -1;
+    }
+
+    private T empty_to_null<T>(T list) {
+        T ret = list;
+        RFC822.MailboxAddresses? addresses = list as RFC822.MailboxAddresses;
+        if (addresses != null && addresses.size == 0) {
+            ret = null;
+        } else {
+            RFC822.MessageIDList? ids = list as RFC822.MessageIDList;
+            if (ids != null && ids.list.size == 0) {
+                ret = null;
+            }
+        }
+        return ret;
     }
 
 }

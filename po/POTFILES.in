@@ -51,6 +51,7 @@ src/client/components/status-bar.vala
 src/client/components/stock.vala
 src/client/composer/composer-box.vala
 src/client/composer/composer-container.vala
+src/client/composer/composer-email-entry.vala
 src/client/composer/composer-embed.vala
 src/client/composer/composer-headerbar.vala
 src/client/composer/composer-link-popover.vala
@@ -58,7 +59,6 @@ src/client/composer/composer-web-view.vala
 src/client/composer/composer-widget.vala
 src/client/composer/composer-window.vala
 src/client/composer/contact-entry-completion.vala
-src/client/composer/email-entry.vala
 src/client/composer/spell-check-popover.vala
 src/client/conversation-list/conversation-list-cell-renderer.vala
 src/client/conversation-list/conversation-list-store.vala

@@ -12,32 +12,29 @@
 [GtkTemplate (ui = "/org/gnome/Geary/components-in-app-notification.ui")]
 public class Components.InAppNotification : Gtk.Revealer {
 
-    /** Length of the default timeout to close the notification. */
-    public const uint DEFAULT_KEEPALIVE = 5;
+    /** Default length of time to show the notification. */
+    public const uint DEFAULT_DURATION = 5;
 
     [GtkChild]
     private Gtk.Label message_label;
+
     [GtkChild]
     private Gtk.Button action_button;
+
+    private uint duration;
 
     /**
      * Creates an in-app notification.
      *
      * @param message The message that should be displayed.
-     * @param keepalive The amount of seconds that the notification should stay visible.
+     * @param duration The length of time to show the notification,
+     * in seconds.
      */
-    public InAppNotification(string message, uint keepalive = -1) {
-        if (keepalive == 0) {
-            this.message_label.label = "";
-            return;   // skip the notification
-        }
-        if (keepalive == -1)
-            keepalive = DEFAULT_KEEPALIVE;
+    public InAppNotification(string message,
+                             uint duration = DEFAULT_DURATION) {
         this.transition_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
         this.message_label.label = message;
-
-        // Close after the given amount of time.
-        Timeout.add_seconds(keepalive, () => { close(); return false; });
+        this.duration = duration;
     }
 
     /**
@@ -50,9 +47,14 @@ public class Components.InAppNotification : Gtk.Revealer {
     }
 
     public override void show() {
-        if (this.message_label.label != "") {
+        if (this.duration > 0) {
             base.show();
             this.reveal_child = true;
+
+            // Close after the given amount of time
+            GLib.Timeout.add_seconds(
+                this.duration, () => { close(); return false; }
+            );
         }
     }
 
