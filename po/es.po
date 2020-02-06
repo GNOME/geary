@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-tour master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
-"POT-Creation-Date: 2020-01-31 10:47+0000\n"
-"PO-Revision-Date: 2020-02-03 12:08+0100\n"
+"POT-Creation-Date: 2020-02-03 11:09+0000\n"
+"PO-Revision-Date: 2020-02-06 16:50+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -113,7 +113,7 @@ msgstr "Fecha y Hora"
 
 #: src/widgets/window.rs:109
 msgid "Click the time to see your now and next"
-msgstr ""
+msgstr "Pulse sobre el reloj para ver qué está pasando"
 
 #: src/widgets/window.rs:110
 msgid ""
