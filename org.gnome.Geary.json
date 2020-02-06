@@ -149,6 +149,7 @@
             "buildsystem": "meson",
             "config-opts": [
                 "-Dtelepathy_backend=false",
+                "-Dbluez_backend=false",
                 "-Dinspect_tool=false",
                 "-Dimport_tool=false"
             ],
