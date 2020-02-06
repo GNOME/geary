@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-01-08 10:10+0000\n"
-"PO-Revision-Date: 2020-01-14 20:18+0700\n"
+"POT-Creation-Date: 2020-01-23 16:42+0000\n"
+"PO-Revision-Date: 2020-02-04 15:02+0700\n"
 "Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: Indonesian\n"
 "Language: id\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n!=1;\n"
-"X-Generator: Poedit 2.2.4\n"
+"X-Generator: Poedit 2.3\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -190,34 +190,42 @@ msgid "True if the folder list Paned is in the horizontal orientation."
 msgstr "True jika daftar folder Paned berada dalam orientasi horizontal."
 
 #: desktop/org.gnome.Geary.gschema.xml:50
+msgid "Show/hide formatting toolbar"
+msgstr "Tampilkan/sembunyikan bilah alat pemformatan"
+
+#: desktop/org.gnome.Geary.gschema.xml:51
+msgid "True if the formatting toolbar in the composer is shown."
+msgstr "True jika bilah alat pemformatan pada penyusun ditampilkan."
+
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Position of message list pane"
 msgstr "Posisi panel daftar pesan"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid "Position of the message list Paned grabber."
 msgstr "Posisi dari daftar pesan Paned grabber."
 
-#: desktop/org.gnome.Geary.gschema.xml:56
+#: desktop/org.gnome.Geary.gschema.xml:62
 msgid "Autoselect next message"
 msgstr "Otomatis pilih pesan selanjutnya"
 
-#: desktop/org.gnome.Geary.gschema.xml:57
+#: desktop/org.gnome.Geary.gschema.xml:63
 msgid "True if we should autoselect the next available conversation."
 msgstr "True jika kita harus memilih ulang percakapan yang ada selanjutnya."
 
-#: desktop/org.gnome.Geary.gschema.xml:62
+#: desktop/org.gnome.Geary.gschema.xml:68
 msgid "Display message previews"
 msgstr "Tampilkan pratinjau pesan"
 
-#: desktop/org.gnome.Geary.gschema.xml:63
+#: desktop/org.gnome.Geary.gschema.xml:69
 msgid "True if we should display a short preview of each message."
 msgstr "True jika kita harus menampilkan pratinjau singkat setiap pesan."
 
-#: desktop/org.gnome.Geary.gschema.xml:68
+#: desktop/org.gnome.Geary.gschema.xml:74
 msgid "Use single key shortcuts"
 msgstr "Pakai pintasan tombol tunggal"
 
-#: desktop/org.gnome.Geary.gschema.xml:69
+#: desktop/org.gnome.Geary.gschema.xml:75
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -225,11 +233,11 @@ msgstr ""
 "Memfungsikan pintasan untuk aksi surel yang tidak memerlukan menekan <Ctrl> "
 "untuk mengemulasi mereka yang dipakai oleh Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:76
+#: desktop/org.gnome.Geary.gschema.xml:82
 msgid "Languages that shall be used in the spell checker"
 msgstr "Bahasa yang akan digunakan dalam pemeriksa ejaan"
 
-#: desktop/org.gnome.Geary.gschema.xml:77
+#: desktop/org.gnome.Geary.gschema.xml:83
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -237,72 +245,72 @@ msgstr ""
 "Suatu daftar locale POSIX, dengan daftar kosong yang menonaktifkan "
 "pemeriksaan ejaan dan daftar null memakai bahasa-bahasa desktop secara baku."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Bahasa yang ditampilkan dalam popover pemeriksa ejaan"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr "Daftar bahasa yang selalu ditampilkan di popover pemeriksa ejaan."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Notify of new mail at startup"
 msgstr "Beritahu surel baru saat awal mula"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "True to notify of new mail at startup."
 msgstr "True untuk memberitahukan surel baru saat memulai."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Ask when opening an attachment"
 msgstr "Tanyakan saat membuka lampiran"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "True to ask when opening an attachment."
 msgstr "True untuk bertanya saat membuka lampiran."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Whether to compose emails in HTML"
 msgstr "Apakah untuk menulis surel dalam HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "True untuk menulis surel dalam HTML; false untuk teks biasa."
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Advisory strategy for full-text searching"
 msgstr "Strategi penasehat untuk penelusuran teks lengkap"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Nilai yang dapat diterima \"exact\" (tepat), \"conservative\" (konservatif), "
 "\"aggressive\" (agresif), dan \"horizon\" (horizon)."
 
-#: desktop/org.gnome.Geary.gschema.xml:114
+#: desktop/org.gnome.Geary.gschema.xml:120
 msgid "Zoom of conversation viewer"
 msgstr "Zoom penampil percakapan"
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "The zoom to apply on the conservation view."
 msgstr "Zum untuk diterapkan pada tampilan konservasi."
 
-#: desktop/org.gnome.Geary.gschema.xml:120
+#: desktop/org.gnome.Geary.gschema.xml:126
 msgid "Size of detached composer window"
 msgstr "Ukuran jendela penyusun yang terpisah"
 
-#: desktop/org.gnome.Geary.gschema.xml:121
+#: desktop/org.gnome.Geary.gschema.xml:127
 msgid "The last recorded size of the detached composer window."
-msgstr "Ukuran yang terekam terakhir dari jendela komposer yang terpisah."
+msgstr "Ukuran yang terekam terakhir dari jendela penyusun yang terpisah."
 
-#: desktop/org.gnome.Geary.gschema.xml:126
+#: desktop/org.gnome.Geary.gschema.xml:132
 msgid "Undo sending email delay"
 msgstr "Batalkan tundaan pengiriman surel"
 
-#: desktop/org.gnome.Geary.gschema.xml:127
+#: desktop/org.gnome.Geary.gschema.xml:133
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -310,11 +318,22 @@ msgstr ""
 "Berapa detik menunggu sebelum mengirim sebuah surel. Atur ke nol atau kurang "
 "untuk menonaktifkan."
 
-#: desktop/org.gnome.Geary.gschema.xml:133
+#: desktop/org.gnome.Geary.gschema.xml:139
+msgid "Brief notification display time"
+msgstr "Waktu tampilan pemberitahuan singkat"
+
+#: desktop/org.gnome.Geary.gschema.xml:140
+msgid ""
+"The length of time in seconds for which brief notifications should be "
+"displayed."
+msgstr ""
+"Lamanya waktu dalam detik di mana pemberitahuan singkat harus ditampilkan."
+
+#: desktop/org.gnome.Geary.gschema.xml:146
 msgid "Whether we migrated the old settings"
 msgstr "Apakah kita memigrasikan pengaturan lama"
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:147
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -589,56 +608,56 @@ msgid_plural "%d days back"
 msgstr[0] "%d hari ke belakang"
 msgstr[1] "%d hari ke belakang"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:248
-#: src/client/application/application-main-window.vala:2037
+#: src/client/accounts/accounts-editor-list-pane.vala:252
+#: src/client/application/application-main-window.vala:2043
 msgid "Undo"
 msgstr "Tak Jadi"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:257
-#: src/client/application/application-main-window.vala:2027
+#: src/client/accounts/accounts-editor-list-pane.vala:261
+#: src/client/application/application-main-window.vala:2030
 msgid "Redo"
 msgstr "Jadi Lagi"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:351
-#: src/client/accounts/accounts-editor-list-pane.vala:439
+#: src/client/accounts/accounts-editor-list-pane.vala:355
+#: src/client/accounts/accounts-editor-list-pane.vala:443
 #: src/client/accounts/accounts-editor-row.vala:279
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:355
-#: src/client/accounts/accounts-editor-list-pane.vala:443
+#: src/client/accounts/accounts-editor-list-pane.vala:359
+#: src/client/accounts/accounts-editor-list-pane.vala:447
 #: src/client/accounts/accounts-editor-row.vala:283
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:359
-#: src/client/accounts/accounts-editor-list-pane.vala:447
+#: src/client/accounts/accounts-editor-list-pane.vala:363
+#: src/client/accounts/accounts-editor-list-pane.vala:451
 #: src/client/accounts/accounts-editor-row.vala:287
 msgid "Yahoo"
 msgstr "Yahoo"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:377
+#: src/client/accounts/accounts-editor-list-pane.vala:381
 msgid "This account has been disabled"
 msgstr "Akun ini telah dinonaktifkan"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:386
+#: src/client/accounts/accounts-editor-list-pane.vala:390
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Akun ini mengalami masalah dan tidak tersedia"
 
 #. Translators: Label for adding a generic email account
-#: src/client/accounts/accounts-editor-list-pane.vala:436
+#: src/client/accounts/accounts-editor-list-pane.vala:440
 msgid "Other email providers"
 msgstr "Penyedia surel lain"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:553
+#: src/client/accounts/accounts-editor-list-pane.vala:557
 #, c-format
 msgid "Account “%s” removed"
 msgstr "Akun \"%s\" dihapus"
@@ -646,7 +665,7 @@ msgstr "Akun \"%s\" dihapus"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:560
+#: src/client/accounts/accounts-editor-list-pane.vala:564
 #, c-format
 msgid "Account “%s” restored"
 msgstr "Akun \"%s\" dipulihkan"
@@ -1123,27 +1142,27 @@ msgstr "Surel dikirim ke %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2636
+#: src/client/application/application-controller.vala:2641
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Surel ke %s diantrikan untuk pengiriman"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2701
+#: src/client/application/application-controller.vala:2705
 #, c-format
 msgid "Email to %s saved"
 msgstr "Surel ke %s disimpan"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2716
-#: src/client/application/application-controller.vala:2774
+#: src/client/application/application-controller.vala:2720
+#: src/client/application/application-controller.vala:2778
 msgid "Composer could not be restored"
 msgstr "Penyusun tidak dapat dipulihkan"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2759
+#: src/client/application/application-controller.vala:2763
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Surel ke %s dibuang"
@@ -1161,43 +1180,43 @@ msgid "Labels"
 msgstr "Label"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1297
+#: src/client/application/application-main-window.vala:1300
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Anda hendak membuang percakapan ini secara permanen?"
 msgstr[1] "Anda hendak membuang percakapan-percakapan ini secara permanen?"
 
-#: src/client/application/application-main-window.vala:1302
-#: src/client/application/application-main-window.vala:1317
+#: src/client/application/application-main-window.vala:1305
+#: src/client/application/application-main-window.vala:1320
 msgid "Delete"
 msgstr "Hapus"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1312
+#: src/client/application/application-main-window.vala:1315
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Anda mau membuang pesan ini secara permanen?"
 msgstr[1] "Anda mau membuang pesan ini secara permanen?"
 
-#: src/client/application/application-main-window.vala:1325
+#: src/client/application/application-main-window.vala:1328
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Kosongkan semua surel dari folder %s Anda?"
 
-#: src/client/application/application-main-window.vala:1328
+#: src/client/application/application-main-window.vala:1331
 msgid "This removes the email from Geary and your email server."
 msgstr "Ini menghapus surel dari Geary dan server surel Anda."
 
-#: src/client/application/application-main-window.vala:1329
+#: src/client/application/application-main-window.vala:1332
 msgid "This cannot be undone."
 msgstr "Ini tidak bisa dibatalkan."
 
-#: src/client/application/application-main-window.vala:1330
+#: src/client/application/application-main-window.vala:1333
 #, c-format
 msgid "Empty %s"
 msgstr "Kosongkan %s"
 
-#: src/client/application/application-main-window.vala:1660
+#: src/client/application/application-main-window.vala:1663
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1208,7 +1227,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1816
+#: src/client/composer/composer-widget.vala:1826
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1347,37 +1366,37 @@ msgstr "Suatu nama server diperlukan"
 msgid "Could not look up server name"
 msgstr "Tidak bisa mencari nama server"
 
-#: src/client/components/main-toolbar.vala:142
+#: src/client/components/main-toolbar.vala:138
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Tandai percakapan"
 msgstr[1] "Tandai percakapan"
 
-#: src/client/components/main-toolbar.vala:147
+#: src/client/components/main-toolbar.vala:143
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Tambahkan label ke percakapan"
 msgstr[1] "Tambahkan label ke percakapan"
 
-#: src/client/components/main-toolbar.vala:152
+#: src/client/components/main-toolbar.vala:148
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Pindahkan percakapan"
 msgstr[1] "Pindahkan percakapan"
 
-#: src/client/components/main-toolbar.vala:157
+#: src/client/components/main-toolbar.vala:153
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Arsipkan percakapan"
 msgstr[1] "Arsipkan percakapan"
 
-#: src/client/components/main-toolbar.vala:168
+#: src/client/components/main-toolbar.vala:164
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Pindahkan percakapan ke Tong Sampah"
 msgstr[1] "Pindahkan percakapan ke Tong Sampah"
 
-#: src/client/components/main-toolbar.vala:178
+#: src/client/components/main-toolbar.vala:174
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Hapus percakapan"
@@ -1539,23 +1558,23 @@ msgid "Invalid email address"
 msgstr "Alamat surel tidak valid"
 
 #. / Translators: Title for an empty composer window
-#: src/client/composer/composer-widget.vala:28
+#: src/client/composer/composer-widget.vala:30
 msgid "New Message"
 msgstr "Pesan Baru"
 
-#: src/client/composer/composer-widget.vala:210
+#: src/client/composer/composer-widget.vala:214
 msgid "Saved"
 msgstr "Disimpan"
 
-#: src/client/composer/composer-widget.vala:211
+#: src/client/composer/composer-widget.vala:215
 msgid "Saving"
 msgstr "Menyimpan"
 
-#: src/client/composer/composer-widget.vala:212
+#: src/client/composer/composer-widget.vala:216
 msgid "Error saving"
 msgstr "Galat saat menyimpan"
 
-#: src/client/composer/composer-widget.vala:213
+#: src/client/composer/composer-widget.vala:217
 msgid "Press Backspace to delete quote"
 msgstr "Tekan Backspace untuk menghapus kutip"
 
@@ -1564,7 +1583,7 @@ msgstr "Tekan Backspace untuk menghapus kutip"
 #. checking, include all variants of each word. No spaces are
 #. allowed. The words will be converted to lower case based on
 #. locale and English versions included automatically.
-#: src/client/composer/composer-widget.vala:229
+#: src/client/composer/composer-widget.vala:233
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1576,90 +1595,90 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:815
+#: src/client/composer/composer-widget.vala:832
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Anda mau menyimpan atau membuang draf pesan ini?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:841
+#: src/client/composer/composer-widget.vala:858
 msgid "Do you want to discard this draft message?"
 msgstr "Anda mau membuang draf pesan ini?"
 
-#: src/client/composer/composer-widget.vala:1485
+#: src/client/composer/composer-widget.vala:1492
 msgid "Send message with an empty subject and body?"
 msgstr "Kirim pesan dengan subjek dan isi kosong?"
 
-#: src/client/composer/composer-widget.vala:1487
+#: src/client/composer/composer-widget.vala:1494
 msgid "Send message with an empty subject?"
 msgstr "Kirim pesan dengan subjek kosong?"
 
-#: src/client/composer/composer-widget.vala:1489
+#: src/client/composer/composer-widget.vala:1496
 msgid "Send message with an empty body?"
 msgstr "Kirim pesan tanpa isi?"
 
-#: src/client/composer/composer-widget.vala:1498
+#: src/client/composer/composer-widget.vala:1505
 msgid "Send message without an attachment?"
 msgstr "Kirim pesan tanpa lampiran?"
 
-#: src/client/composer/composer-widget.vala:1808
+#: src/client/composer/composer-widget.vala:1818
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "\"%s\" sudah dilampirkan untuk pengiriman."
 
-#: src/client/composer/composer-widget.vala:1838
-#: src/client/composer/composer-widget.vala:1888
+#: src/client/composer/composer-widget.vala:1848
+#: src/client/composer/composer-widget.vala:1898
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "\"%s\" adalah berkas kosong."
 
-#: src/client/composer/composer-widget.vala:1876
+#: src/client/composer/composer-widget.vala:1886
 #, c-format
 msgid "“%s” could not be found."
 msgstr "\"%s\" tidak ditemukan."
 
-#: src/client/composer/composer-widget.vala:1882
+#: src/client/composer/composer-widget.vala:1892
 #, c-format
 msgid "“%s” is a folder."
 msgstr "\"%s\" adalah sebuah folder."
 
-#: src/client/composer/composer-widget.vala:1901
+#: src/client/composer/composer-widget.vala:1911
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "\"%s\" tak bisa dibuka untuk dibaca."
 
-#: src/client/composer/composer-widget.vala:1909
+#: src/client/composer/composer-widget.vala:1919
 msgid "Cannot add attachment"
 msgstr "Tak bisa menambah lampiran"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1966
+#: src/client/composer/composer-widget.vala:1976
 #: src/client/conversation-viewer/conversation-email.vala:559
 #: src/client/util/util-email.vala:235 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Ke:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1972
+#: src/client/composer/composer-widget.vala:1982
 #: src/client/conversation-viewer/conversation-email.vala:564
 #: src/client/util/util-email.vala:240 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1978
+#: src/client/composer/composer-widget.vala:1988
 #: src/client/conversation-viewer/conversation-email.vala:569
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:1984
+#: src/client/composer/composer-widget.vala:1994
 msgid "Reply-To: "
 msgstr "Balas-Ke: "
 
-#: src/client/composer/composer-widget.vala:2170
+#: src/client/composer/composer-widget.vala:2247
 msgid "Select Color"
 msgstr "Pilih Warna"
 
@@ -1668,32 +1687,32 @@ msgstr "Pilih Warna"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2362
+#: src/client/composer/composer-widget.vala:2442
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2418
+#: src/client/composer/composer-widget.vala:2498
 msgid "_From:"
 msgstr "_Dari:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2721
+#: src/client/composer/composer-widget.vala:2804
 msgid "Images"
 msgstr "Citra"
 
-#: src/client/composer/spell-check-popover.vala:108
+#: src/client/composer/spell-check-popover.vala:109
 msgid "Remove this language from the preferred list"
 msgstr "Hapus bahasa ini dari daftar yang disukai"
 
-#: src/client/composer/spell-check-popover.vala:112
+#: src/client/composer/spell-check-popover.vala:113
 msgid "Add this language to the preferred list"
 msgstr "Tambahkan bahasa ini ke daftar yang disukai"
 
-#: src/client/composer/spell-check-popover.vala:199
+#: src/client/composer/spell-check-popover.vala:200
 msgid "Search for more languages"
 msgstr "Cari lebih banyak bahasa lagi"
 
@@ -2622,27 +2641,19 @@ msgstr "_Percayai Server Ini"
 msgid "_Don’t Trust This Server"
 msgstr "_Jangan Percayai Server Ini"
 
-#: ui/composer-headerbar.ui:18 ui/composer-headerbar.ui:175
+#: ui/composer-headerbar.ui:23 ui/composer-headerbar.ui:107
 msgid "Detach the composer from the window"
 msgstr "Copot penyusun dari jendela"
 
-#: ui/composer-headerbar.ui:58 ui/composer-headerbar.ui:83
-msgid "Attach a file"
-msgstr "Lampirkan berkas"
-
-#: ui/composer-headerbar.ui:107
-msgid "Add original attachments"
-msgstr "Tambahkan lampiran asli"
-
-#: ui/composer-headerbar.ui:203
+#: ui/composer-headerbar.ui:135
 msgid "_Send"
 msgstr "_Kirim"
 
-#: ui/composer-headerbar.ui:230
+#: ui/composer-headerbar.ui:162
 msgid "Discard and Close"
 msgstr "Buang dan Tutup"
 
-#: ui/composer-headerbar.ui:254
+#: ui/composer-headerbar.ui:186
 msgid "Save and Close"
 msgstr "Simpan dan Tutup"
 
@@ -2668,165 +2679,205 @@ msgstr "Hapus tautan ini"
 msgid "Open this link"
 msgstr "Buka tautan ini"
 
-#: ui/composer-menus.ui:7
-msgid "S_ans Serif"
-msgstr "S_ans Serif"
-
-#: ui/composer-menus.ui:12
-msgid "S_erif"
-msgstr "S_erif"
-
-#: ui/composer-menus.ui:17
-msgid "_Fixed Width"
-msgstr "Lebar _Tetap"
-
-#: ui/composer-menus.ui:24
-msgid "_Small"
-msgstr "_Kecil"
-
-#: ui/composer-menus.ui:29
-msgid "_Medium"
-msgstr "_Sedang"
-
-#: ui/composer-menus.ui:34
-msgid "Lar_ge"
-msgstr "_Besar"
-
-#: ui/composer-menus.ui:41
-msgid "C_olor"
-msgstr "_Warna"
-
-#: ui/composer-menus.ui:47 ui/composer-menus.ui:56
-msgid "_Rich Text"
-msgstr "_Rich Text"
-
-#: ui/composer-menus.ui:66
+#: ui/composer-menus.ui:8
 msgid "_Undo"
 msgstr "Tak _Jadi"
 
-#: ui/composer-menus.ui:70
+#: ui/composer-menus.ui:12
 msgid "_Redo"
 msgstr "Jadi _Lagi"
 
-#: ui/composer-menus.ui:76 ui/composer-menus.ui:94
+#: ui/composer-menus.ui:18 ui/composer-menus.ui:36
 msgid "Cu_t"
 msgstr "Po_tong"
 
-#: ui/composer-menus.ui:80 ui/composer-menus.ui:98
+#: ui/composer-menus.ui:22 ui/composer-menus.ui:40
 #: ui/conversation-message-menus.ui:37
 msgid "_Copy"
 msgstr "Sali_n"
 
-#: ui/composer-menus.ui:84 ui/composer-menus.ui:102
+#: ui/composer-menus.ui:26 ui/composer-menus.ui:44
 msgid "_Paste"
 msgstr "Tem_pel"
 
-#: ui/composer-menus.ui:88
+#: ui/composer-menus.ui:30
 msgctxt "Clipboard paste as plain text"
 msgid "Paste _Without Formatting"
 msgstr "Tempel _Tanpa Format"
 
-#: ui/composer-menus.ui:108
+#: ui/composer-menus.ui:50
 msgid "Select _All"
 msgstr "Pilih Semu_a"
 
-#: ui/composer-menus.ui:115 ui/conversation-message-menus.ui:43
+#: ui/composer-menus.ui:57 ui/conversation-message-menus.ui:43
 msgid "_Inspect…"
 msgstr "Per_iksa…"
 
 #. Geary account mail will be sent from
-#: ui/composer-widget.ui:61
+#: ui/composer-widget.ui:60
 msgid "From"
 msgstr "Dari"
 
 #. Address(es) e-mail is to be sent to
-#: ui/composer-widget.ui:131
+#: ui/composer-widget.ui:130
 msgid "_To"
 msgstr "_Ke"
 
-#: ui/composer-widget.ui:159
+#: ui/composer-widget.ui:158
 msgid "Show Cc, Bcc, and Reply-To fields"
 msgstr "Tampilkan kolom Cc, Bcc, dan Balas-Ke"
 
-#: ui/composer-widget.ui:214
+#: ui/composer-widget.ui:219
 msgid "_Cc"
 msgstr "_Cc"
 
-#: ui/composer-widget.ui:258
+#: ui/composer-widget.ui:267
 msgid "_Bcc"
 msgstr "_Bcc"
 
-#: ui/composer-widget.ui:302
+#: ui/composer-widget.ui:315
 msgid "_Reply-To"
 msgstr "B_alas-Ke"
 
-#: ui/composer-widget.ui:355
+#: ui/composer-widget.ui:372
 msgid "_Subject"
 msgstr "_Perihal"
 
-#: ui/composer-widget.ui:428
+#: ui/composer-widget.ui:445
 msgid "Drop files here"
 msgstr "Jatuhkan berkas di sini"
 
-#: ui/composer-widget.ui:444
+#: ui/composer-widget.ui:461
 msgid "To add them as attachments"
 msgstr "Untuk menambahkan mereka sebagai lampiran"
 
-#: ui/composer-widget.ui:488
-msgid "Undo last edit"
-msgstr "Batalkan suntingan terakhir"
-
-#: ui/composer-widget.ui:512
-msgid "Redo last edit"
-msgstr "Jadikan lagi penyuntingan terakhir"
-
-#: ui/composer-widget.ui:550
+#: ui/composer-widget.ui:602
 msgid "Bold text"
 msgstr "Teks tebal"
 
-#: ui/composer-widget.ui:574
+#: ui/composer-widget.ui:626
 msgid "Italic text"
 msgstr "Teks miring"
 
-#: ui/composer-widget.ui:598
+#: ui/composer-widget.ui:650
 msgid "Underline text"
 msgstr "Garisbawahi teks"
 
-#: ui/composer-widget.ui:622
+#: ui/composer-widget.ui:674
 msgid "Strikethrough text"
 msgstr "Coret teks"
 
-#: ui/composer-widget.ui:660
+#: ui/composer-widget.ui:707
 msgid "Insert bulleted list"
 msgstr "Sisipkan daftar bulet"
 
-#: ui/composer-widget.ui:684
+#: ui/composer-widget.ui:731
 msgid "Insert numbered list"
 msgstr "Sisipkan daftar bernomor"
 
-#: ui/composer-widget.ui:722
+#: ui/composer-widget.ui:764
 msgid "Indent or quote text"
 msgstr "Indentasikan atau kutip teks"
 
-#: ui/composer-widget.ui:746
+#: ui/composer-widget.ui:788
 msgid "Un-indent or unquote text"
 msgstr "Batalkan indentasi atau pengutipan teks"
 
-#: ui/composer-widget.ui:784
-msgid "Insert or update text link"
-msgstr "Sisipkan atau mutakhirkan tautan teks"
-
-#: ui/composer-widget.ui:808
-msgid "Insert an image"
-msgstr "Sisipkan sebuah citra"
-
-#: ui/composer-widget.ui:842
+#: ui/composer-widget.ui:817
 msgid "Remove text formatting"
 msgstr "Buang performatan teks"
 
-#: ui/composer-widget.ui:866
+#: ui/composer-widget.ui:836
+msgid "Change font type"
+msgstr "Ubah jenis fonta"
+
+#: ui/composer-widget.ui:851
+msgid "Sans Serif"
+msgstr "Sans Serif"
+
+#: ui/composer-widget.ui:862
+msgid "Serif"
+msgstr "Serif"
+
+#: ui/composer-widget.ui:873
+msgid "Fixed Width"
+msgstr "Lebar Tetap"
+
+#: ui/composer-widget.ui:899
+msgid "Change font color"
+msgstr "Ubah warna fonta"
+
+#: ui/composer-widget.ui:914
+msgid "Change font size"
+msgstr "Ubah ukuran fonta"
+
+#: ui/composer-widget.ui:949
+msgid "Insert or update text link"
+msgstr "Sisipkan atau mutakhirkan tautan teks"
+
+#: ui/composer-widget.ui:973
+msgid "Insert an image"
+msgstr "Sisipkan sebuah citra"
+
+#: ui/composer-widget.ui:1015
+msgid "Undo last edit"
+msgstr "Batalkan suntingan terakhir"
+
+#: ui/composer-widget.ui:1039
+msgid "Redo last edit"
+msgstr "Jadikan lagi penyuntingan terakhir"
+
+#: ui/composer-widget.ui:1068 ui/composer-widget.ui:1093
+msgid "Attach a file"
+msgstr "Lampirkan berkas"
+
+#: ui/composer-widget.ui:1117
+msgid "Add original attachments"
+msgstr "Tambahkan lampiran asli"
+
+#: ui/composer-widget.ui:1162
+msgid "Enable or disable rich text mode"
+msgstr "Aktifkan atau nonaktifkan mode rich text"
+
+#: ui/composer-widget.ui:1182
+msgid "Show formatting toolbar"
+msgstr "Tampilkan bilah alat pemformatan"
+
+#: ui/composer-widget.ui:1200
 msgid "Select spell checking languages"
 msgstr "Pilih bahasa pemeriksaan ejaan"
+
+#: ui/composer-widget.ui:1264
+msgid "S_ans Serif"
+msgstr "S_ans Serif"
+
+#: ui/composer-widget.ui:1269
+msgid "S_erif"
+msgstr "S_erif"
+
+#: ui/composer-widget.ui:1274
+msgid "_Fixed Width"
+msgstr "Lebar _Tetap"
+
+#: ui/composer-widget.ui:1284
+msgid "_Small"
+msgstr "_Kecil"
+
+#: ui/composer-widget.ui:1289
+msgid "_Medium"
+msgstr "_Sedang"
+
+#: ui/composer-widget.ui:1294
+msgid "Lar_ge"
+msgstr "_Besar"
+
+#: ui/composer-widget.ui:1304
+msgid "_Rich Text"
+msgstr "_Rich Text"
+
+#: ui/composer-widget.ui:1309
+msgid "_Plain Text"
+msgstr "Teks _Polos"
 
 #: ui/components-attachment-pane.ui:29 ui/components-attachment-pane.ui:47
 msgid "Select all attachments"
@@ -3411,23 +3462,23 @@ msgstr "Susun Pesan"
 msgid "Toggle search bar"
 msgstr "Jungkitkan bilah pencarian"
 
-#: ui/main-toolbar.ui:114
+#: ui/main-toolbar.ui:113
 msgid "Reply"
 msgstr "Balas"
 
-#: ui/main-toolbar.ui:137
+#: ui/main-toolbar.ui:136
 msgid "Reply All"
 msgstr "Balas Semua"
 
-#: ui/main-toolbar.ui:160
+#: ui/main-toolbar.ui:159
 msgid "Forward"
 msgstr "Teruskan"
 
-#: ui/main-toolbar.ui:265
+#: ui/main-toolbar.ui:264
 msgid "Toggle find bar"
 msgstr "Jungkitkan bilah pencarian"
 
-#: ui/main-toolbar.ui:286
+#: ui/main-toolbar.ui:285
 msgid "_Archive"
 msgstr "_Arsip"
 
@@ -3474,6 +3525,9 @@ msgstr "Otentik_asikan"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Pemutakhiran Geary sedang berlangsung…"
+
+#~ msgid "C_olor"
+#~ msgstr "_Warna"
 
 #~ msgid "Show Extended Fields"
 #~ msgstr "Tampilkan Ruas Yang Diperluas"

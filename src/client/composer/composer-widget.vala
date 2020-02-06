@@ -95,6 +95,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private enum AttachPending { ALL, INLINE_ONLY }
 
+    private enum DraftPolicy { DISCARD, KEEP }
+
+
     private class FromAddressMap {
         public Geary.Account account;
         public Geary.RFC822.MailboxAddresses from;
@@ -252,10 +255,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** Determines if the composer is completely empty. */
     public bool is_blank {
         get {
-            return this.to_entry.empty
-                && this.cc_entry.empty
-                && this.bcc_entry.empty
-                && this.reply_to_entry.empty
+            return this.to_entry.is_empty
+                && this.cc_entry.is_empty
+                && this.bcc_entry.is_empty
+                && this.reply_to_entry.is_empty
                 && this.subject_entry.buffer.length == 0
                 && this.editor.is_empty
                 && this.attached_files.size == 0;
@@ -321,7 +324,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gtk.ComboBoxText from_multiple;
     private Gee.ArrayList<FromAddressMap> from_list = new Gee.ArrayList<FromAddressMap>();
 
-    [GtkChild] Gtk.Box to_row;
     [GtkChild]
     private Gtk.Box to_box;
     [GtkChild]
@@ -895,12 +897,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 this.draft_manager_opening = null;
             }
 
-            if (this.draft_manager != null) {
-                try {
-                    yield close_draft_manager(null);
-                } catch (Error err) {
-                    debug("Error closing draft manager on composer close");
-                }
+            try {
+                yield close_draft_manager(KEEP, null);
+            } catch (GLib.Error error) {
+                this.application.controller.report_problem(
+                    new Geary.AccountProblemReport(
+                        this.account.information, error
+                    )
+                );
             }
 
             destroy();
@@ -1012,29 +1016,28 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         else
             this.compose_type = ComposeType.REPLY_ALL;
 
-        this.to_entry.modified = this.cc_entry.modified = this.bcc_entry.modified = false;
         if (!to_entry.addresses.equal_to(reply_to_addresses))
-            this.to_entry.modified = true;
+            this.to_entry.set_modified();
         if (cc != "" && !cc_entry.addresses.equal_to(reply_cc_addresses))
-            this.cc_entry.modified = true;
+            this.cc_entry.set_modified();
         if (bcc != "")
-            this.bcc_entry.modified = true;
+            this.bcc_entry.set_modified();
 
         // We're in compact inline mode, but there are modified email
         // addresses, so set us to use plain inline mode instead so
         // the modified addresses can be seen. If there are CC
         if (this.current_mode == INLINE_COMPACT && (
-                this.to_entry.modified ||
-                this.cc_entry.modified ||
-                this.bcc_entry.modified ||
-                this.reply_to_entry.modified)) {
+                this.to_entry.is_modified ||
+                this.cc_entry.is_modified ||
+                this.bcc_entry.is_modified ||
+                this.reply_to_entry.is_modified)) {
             set_mode(INLINE);
         }
 
         // If there's a modified header that would normally be hidden,
         // show full fields.
-        if (this.bcc_entry.modified ||
-            this.reply_to_entry.modified) {
+        if (this.bcc_entry.is_modified ||
+            this.reply_to_entry.is_modified) {
             this.editor_actions.change_action_state(
                 ACTION_SHOW_EXTENDED_HEADERS, true
             );
@@ -1397,7 +1400,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (!modify_headers)
             return;
 
-        bool recipients_modified = this.to_entry.modified || this.cc_entry.modified || this.bcc_entry.modified;
+        bool recipients_modified = this.to_entry.is_modified || this.cc_entry.is_modified || this.bcc_entry.is_modified;
         if (!recipients_modified) {
             if (type == ComposeType.REPLY || type == ComposeType.REPLY_ALL)
                 this.to_entry.addresses = Geary.RFC822.Utils.merge_addresses(to_entry.addresses,
@@ -1409,7 +1412,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             else
                 this.cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(this.cc_entry.addresses,
                     this.to_entry.addresses);
-            this.to_entry.modified = this.cc_entry.modified = false;
         }
 
         if (referred.message_id != null) {
@@ -1528,11 +1530,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         try {
             yield this.editor.clean_content();
             yield this.application.controller.send_composed_email(this);
-
-            if (this.draft_manager != null) {
-                yield discard_draft();
-                yield close_draft_manager(null);
-            }
+            yield close_draft_manager(DISCARD, null);
 
             if (this.container != null) {
                 this.container.close();
@@ -1598,30 +1596,38 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      */
     private async void reopen_draft_manager(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        if (this.draft_manager != null) {
-            // Discard the draft, if any, since it may be on a
-            // different account
-            yield discard_draft();
-            yield close_draft_manager(cancellable);
-        }
+        // Discard the draft, if any, since it may be on a different
+        // account
+        yield close_draft_manager(DISCARD, cancellable);
         yield open_draft_manager(null, cancellable);
         yield save_draft();
     }
 
-    private async void close_draft_manager(GLib.Cancellable? cancellable)
+    private async void close_draft_manager(DraftPolicy draft_policy,
+                                           GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.App.DraftManager old_manager = this.draft_manager;
-        this.draft_manager = null;
-        this.draft_status_text = "";
+        var old_manager = this.draft_manager;
+        if (old_manager != null) {
+            this.draft_timer.reset();
 
-        old_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
-            .disconnect(on_draft_state_changed);
-        old_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
-            .disconnect(on_draft_id_changed);
-        old_manager.fatal.disconnect(on_draft_manager_fatal);
+            this.draft_manager = null;
+            this.draft_status_text = "";
+            this.current_draft_id = null;
 
-        yield old_manager.close_async(cancellable);
-        debug("Draft manager closed");
+            old_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+                .disconnect(on_draft_state_changed);
+            old_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+                .disconnect(on_draft_id_changed);
+            old_manager.fatal.disconnect(on_draft_manager_fatal);
+
+            if (draft_policy == DISCARD) {
+                debug("Discarding draft");
+                yield old_manager.discard(null);
+            }
+
+            yield old_manager.close_async(cancellable);
+            debug("Draft manager closed");
+        }
     }
 
     private void update_draft_state() {
@@ -1679,16 +1685,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private async void discard_draft() throws GLib.Error {
-        debug("Discarding draft");
-
-        // cancel timer in favor of this operation
-        this.draft_timer.reset();
-
-        yield this.draft_manager.discard(null);
-        this.current_draft_id = null;
-    }
-
     private async void save_and_close() {
         set_enabled(false);
 
@@ -1715,17 +1711,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private async void discard_and_close() {
         set_enabled(false);
 
-        if (this.draft_manager != null) {
-            try {
-                yield discard_draft();
-                yield close_draft_manager(null);
-            } catch (GLib.Error error) {
-                this.application.controller.report_problem(
-                    new Geary.AccountProblemReport(
-                        this.account.information, error
-                    )
-                );
-            }
+        try {
+            yield close_draft_manager(DISCARD, null);
+        } catch (GLib.Error error) {
+            this.application.controller.report_problem(
+                new Geary.AccountProblemReport(
+                    this.account.information, error
+                )
+            );
         }
 
         // Pass on to the controller so the discarded email can be
@@ -1957,16 +1950,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // To must be valid (and hence non-empty), the other email
         // fields must be either empty or valid.
         get_action(ACTION_SEND).set_enabled(
-            this.to_entry.valid &&
-            (this.cc_entry.empty || this.cc_entry.valid) &&
-            (this.bcc_entry.empty || this.bcc_entry.valid) &&
-            (this.reply_to_entry.empty || this.reply_to_entry.valid)
+            this.to_entry.is_valid &&
+            (this.cc_entry.is_empty || this.cc_entry.is_valid) &&
+            (this.bcc_entry.is_empty || this.bcc_entry.is_valid) &&
+            (this.reply_to_entry.is_empty || this.reply_to_entry.is_valid)
         );
     }
 
     private void set_compact_header_recipients() {
-        bool tocc = !this.to_entry.empty && !this.cc_entry.empty,
-            ccbcc = !(this.to_entry.empty && this.cc_entry.empty) && !this.bcc_entry.empty;
+        bool tocc = !this.to_entry.is_empty && !this.cc_entry.is_empty,
+            ccbcc = !(this.to_entry.is_empty && this.cc_entry.is_empty) && !this.bcc_entry.is_empty;
         string label = this.to_entry.buffer.text + (tocc ? ", " : "")
             + this.cc_entry.buffer.text + (ccbcc ? ", " : "") + this.bcc_entry.buffer.text;
         StringBuilder tooltip = new StringBuilder();
@@ -2149,9 +2142,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void update_extended_headers(bool reorder=true) {
-        bool cc = this.cc_entry.addresses != null;
-        bool bcc = this.bcc_entry.addresses != null;
-        bool reply_to = this.reply_to_entry.addresses != null;
+        bool cc = !this.cc_entry.is_empty;
+        bool bcc = !this.bcc_entry.is_empty;
+        bool reply_to = !this.reply_to_entry.is_empty;
 
         if (reorder) {
             if (cc) {

@@ -287,6 +287,8 @@ public class Application.MainWindow :
     public ConversationViewer conversation_viewer { get; private set; }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
 
+    private Controller controller;
+
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
     private Gee.Set<AccountContext> accounts = new Gee.HashSet<AccountContext>();
@@ -482,6 +484,12 @@ public class Application.MainWindow :
         );
         base_ref();
 
+        // Keep a ref on the current controller so that even if the
+        // application has been shut down, any async tasks that are
+        // running (and presumably being cancelled) can still complete
+        // without a warning.
+        this.controller = application.controller;
+
         load_config(application.config);
         restore_saved_window_state();
 
@@ -519,14 +527,14 @@ public class Application.MainWindow :
         this.update_ui_timeout.repetition = FOREVER;
 
         // Add future and existing accounts to the main window
-        this.application.controller.account_available.connect(
+        this.controller.account_available.connect(
             on_account_available
         );
-        this.application.controller.account_unavailable.connect(
+        this.controller.account_unavailable.connect(
             on_account_unavailable
         );
         foreach (AccountContext context in
-                 this.application.controller.get_account_contexts()) {
+                 this.controller.get_account_contexts()) {
             add_account(context);
         }
 
@@ -540,10 +548,10 @@ public class Application.MainWindow :
     /** {@inheritDoc} */
     public override void destroy() {
         if (this.application != null) {
-            this.application.controller.account_available.disconnect(
+            this.controller.account_available.disconnect(
                 on_account_available
             );
-            this.application.controller.account_unavailable.disconnect(
+            this.controller.account_unavailable.disconnect(
                 on_account_unavailable
             );
         }
@@ -742,11 +750,9 @@ public class Application.MainWindow :
                 );
 
                 yield open_conversation_monitor(this.conversations, cancellable);
-                this.application.controller.clear_new_messages(
-                    GLib.Log.METHOD, null
-                );
+                this.controller.clear_new_messages(GLib.Log.METHOD, null);
 
-                this.application.controller.process_pending_composers();
+                this.controller.process_pending_composers();
             }
         }
 
@@ -848,7 +854,7 @@ public class Application.MainWindow :
         var composer = new Composer.Widget.from_mailbox(
             this.application, this.selected_folder.account, to
         );
-        this.application.controller.add_composer(composer);
+        this.controller.add_composer(composer);
         show_composer(composer, null);
         composer.load.begin(null, false, null, null);
     }
@@ -949,7 +955,7 @@ public class Application.MainWindow :
         }
         this.folder_list.remove_search();
 
-        foreach (var context in this.application.controller.get_account_contexts()) {
+        foreach (var context in this.controller.get_account_contexts()) {
             context.search.clear();
         }
     }
@@ -1075,7 +1081,7 @@ public class Application.MainWindow :
     private AccountContext? get_selected_account_context() {
         AccountContext? context = null;
         if (this.selected_account != null) {
-            context = this.application.controller.get_context_for_account(
+            context = this.controller.get_context_for_account(
                 this.selected_account.information
             );
         }
@@ -1388,7 +1394,7 @@ public class Application.MainWindow :
         Geary.ProblemReport? report = (account != null)
             ? new Geary.AccountProblemReport(account, error)
             : new Geary.ProblemReport(error);
-        this.application.controller.report_problem(report);
+        this.controller.report_problem(report);
     }
 
     private void update_ui() {
@@ -1564,7 +1570,7 @@ public class Application.MainWindow :
         if (account != null && email_view != null) {
             email_view.get_selection_for_quoting.begin((obj, res) => {
                     string? quote = email_view.get_selection_for_quoting.end(res);
-                    this.application.controller.compose_with_context_email(
+                    this.controller.compose_with_context_email(
                         this,
                         account,
                         compose_type,
@@ -1738,7 +1744,7 @@ public class Application.MainWindow :
         Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
         if (this.selected_folder != null) {
             AccountContext? context =
-                this.application.controller.get_context_for_account(
+                this.controller.get_context_for_account(
                     this.selected_folder.account.information
                 );
             if (context != null) {
@@ -1881,7 +1887,7 @@ public class Application.MainWindow :
                                GLib.Error err) {
         Geary.AccountInformation account =
             monitor.base_folder.account.information;
-        this.application.controller.report_problem(
+        this.controller.report_problem(
             new Geary.ServiceProblemReport(account, account.incoming, err)
         );
     }
@@ -2044,11 +2050,15 @@ public class Application.MainWindow :
     private void on_command_redo(Command command) {
         update_command_actions();
         if (command.executed_label != null) {
-            int notification_time =
-                command.executed_notification_brief ?
-                    application.config.brief_notification_duration : 0;
-            Components.InAppNotification ian =
-                new Components.InAppNotification(command.executed_label, notification_time);
+            uint notification_time =
+                Components.InAppNotification.DEFAULT_DURATION;
+            if (command.executed_notification_brief) {
+                notification_time =
+                    application.config.brief_notification_duration;
+            }
+            Components.InAppNotification ian = new Components.InAppNotification(
+                command.executed_label, notification_time
+            );
             ian.set_button(_("Undo"), Action.Edit.prefix(Action.Edit.UNDO));
             add_notification(ian);
         }
@@ -2081,7 +2091,7 @@ public class Application.MainWindow :
     // this signal does not necessarily indicate that the application
     // previously didn't have focus and now it does
     private void on_has_toplevel_focus() {
-        this.application.controller.clear_new_messages(GLib.Log.METHOD, null);
+        this.controller.clear_new_messages(GLib.Log.METHOD, null);
     }
 
     private void on_folder_selected(Geary.Folder? folder) {
@@ -2097,7 +2107,7 @@ public class Application.MainWindow :
     }
 
     private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
-        this.application.controller.clear_new_messages(GLib.Log.METHOD, visible);
+        this.controller.clear_new_messages(GLib.Log.METHOD, visible);
     }
 
     private void on_conversation_activated(Geary.App.Conversation activated) {
@@ -2116,7 +2126,7 @@ public class Application.MainWindow :
                 // open in a detached composer
                 bool already_open = false;
                 foreach (Composer.Widget composer
-                         in this.application.controller.get_composers()) {
+                         in this.controller.get_composers()) {
                     if (composer.current_draft_id != null &&
                         composer.current_draft_id.equal_to(draft.id)) {
                         already_open = true;
@@ -2127,7 +2137,7 @@ public class Application.MainWindow :
                 }
 
                 if (!already_open) {
-                    this.application.controller.compose_with_context_email(
+                    this.controller.compose_with_context_email(
                         this,
                         activated.base_folder.account,
                         NEW_MESSAGE,
@@ -2231,14 +2241,14 @@ public class Application.MainWindow :
                                        Geary.NamedFlag flag) {
         Geary.Folder? location = this.selected_folder;
         if (location != null) {
-            this.application.controller.mark_conversations.begin(
+            this.controller.mark_conversations.begin(
                 location,
                 conversations,
                 flag,
                 true,
                 (obj, res) => {
                     try {
-                        this.application.controller.mark_conversations.end(res);
+                        this.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
                         handle_error(location.account.information, err);
                     }
@@ -2250,14 +2260,14 @@ public class Application.MainWindow :
     private void on_mark_as_read() {
         Geary.Folder? location = this.selected_folder;
         if (location != null) {
-            this.application.controller.mark_conversations.begin(
+            this.controller.mark_conversations.begin(
                 location,
                 this.conversation_list_view.copy_selected(),
                 Geary.EmailFlags.UNREAD,
                 false,
                 (obj, res) => {
                     try {
-                        this.application.controller.mark_conversations.end(res);
+                        this.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
                         handle_error(location.account.information, err);
                     }
@@ -2269,14 +2279,14 @@ public class Application.MainWindow :
     private void on_mark_as_unread() {
         Geary.Folder? location = this.selected_folder;
         if (location != null) {
-            this.application.controller.mark_conversations.begin(
+            this.controller.mark_conversations.begin(
                 location,
                 this.conversation_list_view.copy_selected(),
                 Geary.EmailFlags.UNREAD,
                 true,
                 (obj, res) => {
                     try {
-                        this.application.controller.mark_conversations.end(res);
+                        this.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
                         handle_error(location.account.information, err);
                     }
@@ -2288,14 +2298,14 @@ public class Application.MainWindow :
     private void on_mark_as_starred() {
         Geary.Folder? location = this.selected_folder;
         if (location != null) {
-            this.application.controller.mark_conversations.begin(
+            this.controller.mark_conversations.begin(
                 location,
                 this.conversation_list_view.copy_selected(),
                 Geary.EmailFlags.FLAGGED,
                 true,
                 (obj, res) => {
                     try {
-                        this.application.controller.mark_conversations.end(res);
+                        this.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
                         handle_error(location.account.information, err);
                     }
@@ -2307,14 +2317,14 @@ public class Application.MainWindow :
     private void on_mark_as_unstarred() {
         Geary.Folder? location = this.selected_folder;
         if (location != null) {
-            this.application.controller.mark_conversations.begin(
+            this.controller.mark_conversations.begin(
                 location,
                 this.conversation_list_view.copy_selected(),
                 Geary.EmailFlags.FLAGGED,
                 false,
                 (obj, res) => {
                     try {
-                        this.application.controller.mark_conversations.end(res);
+                        this.controller.mark_conversations.end(res);
                     } catch (GLib.Error err) {
                         handle_error(location.account.information, err);
                     }
@@ -2330,13 +2340,13 @@ public class Application.MainWindow :
                 (source.special_folder_type != SPAM)
                 ? Geary.SpecialFolderType.SPAM
                 : Geary.SpecialFolderType.INBOX;
-            this.application.controller.move_conversations_special.begin(
+            this.controller.move_conversations_special.begin(
                 source,
                 destination,
                 this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
-                        this.application.controller.move_conversations_special.end(res);
+                        this.controller.move_conversations_special.end(res);
                     } catch (GLib.Error err) {
                         handle_error(source.account.information, err);
                     }
@@ -2349,13 +2359,13 @@ public class Application.MainWindow :
         Geary.FolderSupport.Move source =
             this.selected_folder as Geary.FolderSupport.Move;
         if (source != null) {
-            this.application.controller.move_conversations.begin(
+            this.controller.move_conversations.begin(
                 source,
                 destination,
                 this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
-                        this.application.controller.move_conversations.end(res);
+                        this.controller.move_conversations.end(res);
                     } catch (GLib.Error err) {
                         handle_error(source.account.information, err);
                     }
@@ -2369,13 +2379,13 @@ public class Application.MainWindow :
         Geary.FolderSupport.Copy source =
             this.selected_folder as Geary.FolderSupport.Copy;
         if (source != null) {
-            this.application.controller.copy_conversations.begin(
+            this.controller.copy_conversations.begin(
                 source,
                 destination,
                 this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
-                        this.application.controller.copy_conversations.end(res);
+                        this.controller.copy_conversations.end(res);
                     } catch (GLib.Error err) {
                         handle_error(source.account.information, err);
                     }
@@ -2388,13 +2398,13 @@ public class Application.MainWindow :
     private void on_archive_conversation() {
         Geary.Folder source = this.selected_folder;
         if (source != null) {
-            this.application.controller.move_conversations_special.begin(
+            this.controller.move_conversations_special.begin(
                 source,
                 ARCHIVE,
                 this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
-                        this.application.controller.move_conversations_special.end(res);
+                        this.controller.move_conversations_special.end(res);
                     } catch (GLib.Error err) {
                         handle_error(source.account.information, err);
                     }
@@ -2406,13 +2416,13 @@ public class Application.MainWindow :
     private void on_trash_conversation() {
         Geary.Folder source = this.selected_folder;
         if (source != null) {
-            this.application.controller.move_conversations_special.begin(
+            this.controller.move_conversations_special.begin(
                 source,
                 Geary.SpecialFolderType.TRASH,
                 this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
-                        this.application.controller.move_conversations_special.end(res);
+                        this.controller.move_conversations_special.end(res);
                     } catch (GLib.Error err) {
                         handle_error(source.account.information, err);
                     }
@@ -2427,12 +2437,12 @@ public class Application.MainWindow :
         Gee.Collection<Geary.App.Conversation> conversations =
             this.conversation_list_view.copy_selected();
         if (target != null && this.prompt_delete_conversations(conversations.size)) {
-            this.application.controller.delete_conversations.begin(
+            this.controller.delete_conversations.begin(
                 target,
                 conversations,
                 (obj, res) => {
                     try {
-                        this.application.controller.delete_conversations.end(res);
+                        this.controller.delete_conversations.end(res);
                     } catch (GLib.Error err) {
                         handle_error(target.account.information, err);
                     }
@@ -2445,12 +2455,12 @@ public class Application.MainWindow :
         Geary.Account? account = this.selected_account;
         if (account != null &&
             prompt_empty_folder(Geary.SpecialFolderType.SPAM)) {
-            this.application.controller.empty_folder_special.begin(
+            this.controller.empty_folder_special.begin(
                 account,
                 Geary.SpecialFolderType.SPAM,
                 (obj, res) => {
                     try {
-                        this.application.controller.empty_folder_special.end(res);
+                        this.controller.empty_folder_special.end(res);
                 } catch (GLib.Error err) {
                         handle_error(account.information, err);
                     }
@@ -2463,12 +2473,12 @@ public class Application.MainWindow :
         Geary.Account? account = this.selected_account;
         if (account != null &&
             prompt_empty_folder(Geary.SpecialFolderType.TRASH)) {
-            this.application.controller.empty_folder_special.begin(
+            this.controller.empty_folder_special.begin(
                 account,
                 Geary.SpecialFolderType.TRASH,
                 (obj, res) => {
                     try {
-                        this.application.controller.empty_folder_special.end(res);
+                        this.controller.empty_folder_special.end(res);
                     } catch (GLib.Error err) {
                         handle_error(account.information, err);
                     }
@@ -2495,7 +2505,7 @@ public class Application.MainWindow :
                 remove_flags = new Geary.EmailFlags();
                 remove_flags.add(to_remove);
             }
-            this.application.controller.mark_messages.begin(
+            this.controller.mark_messages.begin(
                 location,
                 Geary.Collection.single(view.conversation),
                 messages,
@@ -2503,7 +2513,7 @@ public class Application.MainWindow :
                 remove_flags,
                 (obj, res) => {
                     try {
-                        this.application.controller.mark_messages.end(res);
+                        this.controller.mark_messages.end(res);
                     } catch (GLib.Error err) {
                         handle_error(location.account.information, err);
                     }
@@ -2515,7 +2525,7 @@ public class Application.MainWindow :
     private void on_email_reply_to_sender(Geary.Email target, string? quote) {
         Geary.Account? account = this.selected_account;
         if (account != null) {
-            this.application.controller.compose_with_context_email(
+            this.controller.compose_with_context_email(
                 this, account, REPLY, target, quote, false
             );
         }
@@ -2524,7 +2534,7 @@ public class Application.MainWindow :
     private void on_email_reply_to_all(Geary.Email target, string? quote) {
         Geary.Account? account = this.selected_account;
         if (account != null) {
-            this.application.controller.compose_with_context_email(
+            this.controller.compose_with_context_email(
                 this, account, REPLY_ALL, target, quote, false
             );
         }
@@ -2533,7 +2543,7 @@ public class Application.MainWindow :
     private void on_email_forward(Geary.Email target, string? quote) {
         Geary.Account? account = this.selected_account;
         if (account != null) {
-            this.application.controller.compose_with_context_email(
+            this.controller.compose_with_context_email(
                 this, account, FORWARD, target, quote, false
             );
         }
@@ -2542,7 +2552,7 @@ public class Application.MainWindow :
     private void on_email_edit(Geary.Email target) {
         Geary.Account? account = this.selected_account;
         if (account != null) {
-            this.application.controller.compose_with_context_email(
+            this.controller.compose_with_context_email(
                 this, account, NEW_MESSAGE, target, null, true
             );
         }
@@ -2551,14 +2561,14 @@ public class Application.MainWindow :
     private void on_email_trash(ConversationListBox view, Geary.Email target) {
         Geary.Folder? source = this.selected_folder;
         if (source != null) {
-            this.application.controller.move_messages_special.begin(
+            this.controller.move_messages_special.begin(
                 source,
                 TRASH,
                 Geary.Collection.single(view.conversation),
                 Geary.Collection.single(target.id),
                 (obj, res) => {
                     try {
-                        this.application.controller.move_messages_special.end(res);
+                        this.controller.move_messages_special.end(res);
                     } catch (GLib.Error err) {
                         handle_error(source.account.information, err);
                     }
@@ -2571,13 +2581,13 @@ public class Application.MainWindow :
         Geary.FolderSupport.Remove? source =
             this.selected_folder as Geary.FolderSupport.Remove;
         if (source != null && prompt_delete_messages(1)) {
-            this.application.controller.delete_messages.begin(
+            this.controller.delete_messages.begin(
                 source,
                 Geary.Collection.single(view.conversation),
                 Geary.Collection.single(target.id),
                 (obj, res) => {
                     try {
-                        this.application.controller.delete_messages.end(res);
+                        this.controller.delete_messages.end(res);
                     } catch (GLib.Error err) {
                         handle_error(source.account.information, err);
                     }
