@@ -1,0 +1,165 @@
+# Brazilian Portuguese translation for gnome-tour.
+# Copyright (C) 2020 gnome-tour's COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-tour package.
+# Rafael Fontenelle <rafaelff@gnome.org>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-tour master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
+"POT-Creation-Date: 2020-02-06 15:51+0000\n"
+"PO-Revision-Date: 2020-02-08 00:16-0300\n"
+"Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
+"Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"X-Generator: Gtranslator 3.32.0\n"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:7
+msgid "GNOME Tour"
+msgstr "Tour do GNOME"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:8
+msgid "GNOME Tour and Greeter."
+msgstr "Tour e saudação do GNOME."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:10
+msgid "A guided tour and greeter for GNOME."
+msgstr "Uma visita guiada e saudação para o GNOME."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:15
+msgid "Main Window"
+msgstr "Janela principal"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:34
+msgid "The GNOME Project"
+msgstr "O Projeto GNOME"
+
+#: data/org.gnome.Tour.desktop.in.in:3
+msgid "Tour"
+msgstr "Tour"
+
+#: data/org.gnome.Tour.desktop.in.in:4
+msgid "Greeter & Tour"
+msgstr "Saudação & Tour"
+
+#: data/org.gnome.Tour.desktop.in.in:9
+msgid "Gnome;GTK;"
+msgstr "Gnome;GTK;"
+
+#: src/widgets/pages/welcome.rs:34
+msgid ""
+"Hi there! If you are new to GNOME, you can take the tour to learn some "
+"essential features."
+msgstr ""
+"Olá! Se você é novo no GNOME, pode fazer um tour para aprender alguns "
+"recursos essenciais."
+
+#: src/widgets/pages/welcome.rs:44
+msgid "Take the Tour"
+msgstr "Faça um tour"
+
+#: src/widgets/pages/welcome.rs:51
+msgid "No Thanks"
+msgstr "Não obrigado"
+
+#: src/widgets/headerbar.rs:28
+msgid "Close"
+msgstr "Fechar"
+
+#: src/widgets/headerbar.rs:30 src/widgets/headerbar.rs:62
+msgid "Next"
+msgstr "Próximo"
+
+#: src/widgets/headerbar.rs:52
+msgid "Welcome Tour"
+msgstr "Bem-vindo ao tour"
+
+#: src/widgets/window.rs:94
+msgid "Activities Overview"
+msgstr "Panorama de atividades"
+
+#: src/widgets/window.rs:95
+msgid "Open Activities to start apps"
+msgstr "Abra Atividades para iniciar aplicativos"
+
+#: src/widgets/window.rs:96
+msgid "You can also view open windows, search and use workspaces."
+msgstr ""
+"Você também pode ver janelas abertas, pesquisar e usar espaços de trabalho."
+
+#: src/widgets/window.rs:101
+msgid "Search"
+msgstr "Pesquisa"
+
+#: src/widgets/window.rs:102
+msgid "In the Activities Overview, just start typing to search"
+msgstr "No panorama da atividades, basta começar a digitar para pesquisar"
+
+#: src/widgets/window.rs:103
+msgid ""
+"Search can be used to launch apps, find settings, do calculations and much "
+"more."
+msgstr ""
+"A pesquisa pode ser usada para iniciar aplicativos, encontrar configurações, "
+"fazer cálculos e muito mais."
+
+#: src/widgets/window.rs:108
+msgid "Date & Time"
+msgstr "Data & hora"
+
+#: src/widgets/window.rs:109
+msgid "Click the time to see your now and next"
+msgstr "Clique na hora para ver seu agora e próximo"
+
+#: src/widgets/window.rs:110
+msgid ""
+"This includes notifications, media controls, calendar events, the weather "
+"and world clocks."
+msgstr ""
+"Isso inclui notificações, controles de mídia, eventos de calendário, a "
+"previsão do tempo e relógios mundiais."
+
+#: src/widgets/window.rs:115
+msgid "System Menu"
+msgstr "Menu do sistema"
+
+#: src/widgets/window.rs:116
+msgid "View system information and settings"
+msgstr "Veja informações e configurações do sistema"
+
+#: src/widgets/window.rs:117
+msgid "Get an overview of the system status and quickly change settings."
+msgstr ""
+"Obtenha uma visão geral do status do sistema e altere configurações "
+"rapidamente."
+
+#: src/widgets/window.rs:121
+msgid "Software"
+msgstr "Software"
+
+#: src/widgets/window.rs:122
+msgid "Find and install apps"
+msgstr "Encontre e instale aplicativos"
+
+#: src/widgets/window.rs:123
+msgid ""
+"The Software app makese it easy to find and install all the apps you need."
+msgstr ""
+"O aplicativo Software facilita encontrar e instalar todos os aplicativos que "
+"você precisa."
+
+#: src/widgets/window.rs:128
+msgid "Learn More"
+msgstr "Saiba mais"
+
+#: src/widgets/window.rs:129
+msgid "That's it! To learn more, see the Help"
+msgstr "É isso! Para aprender mais, veja o Ajuda"
+
+#: src/widgets/window.rs:130
+msgid "The help app contains information, tips and tricks."
+msgstr "O aplicativo de ajuda contém informações, dicas e truques."
