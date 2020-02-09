@@ -105,6 +105,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
 
         var page = new Hdy.PreferencesPage();
         page.propagate_natural_height = true;
+        page.propagate_natural_width = true;
         page.add(group);
         page.show_all();
 
