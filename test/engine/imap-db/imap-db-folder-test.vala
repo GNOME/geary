@@ -26,8 +26,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         //add_test("merge_existing_preview", merge_existing_preview);
         add_test("set_flags", set_flags);
         add_test("set_flags_on_deleted", set_flags_on_deleted);
-        // TODO temporarily disabled until fixed
-        //add_test("detach_emails_before_timestamp", detach_emails_before_timestamp);
+        add_test("detach_emails_before_timestamp", detach_emails_before_timestamp);
     }
 
     public override void set_up() throws GLib.Error {
@@ -374,7 +373,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         );
         this.folder.detach_emails_before_timestamp.end(async_result());
 
-        int64[] expected = { 2, 3 };
+        int64[] expected = { 1, 2 };
         Db.Result result = this.account.db.query(
             "SELECT id FROM MessageLocationTable"
         );
