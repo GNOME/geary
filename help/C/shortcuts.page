@@ -10,6 +10,7 @@
   <title>Keyboard shortcuts</title>
 
   <section id="features">
+    <title>Overview</title>
     <p>Geary has keyboard shortcuts for most common operations. Use
     the built-in help to discover the full list. To open the shortcuts
     help, select <gui style="menuitem">Keyboard Shortcuts</gui> from
