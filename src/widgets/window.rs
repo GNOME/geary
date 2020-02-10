@@ -120,7 +120,7 @@ impl Window {
             "/org/gnome/Tour/software.svg",
             gettext("Software"),
             gettext("Find and install apps"),
-            gettext("The Software app makese it easy to find and install all the apps you need."),
+            gettext("The Software app makes it easy to find and install all the apps you need."),
         )));
 
         let last_page = ImagePageWidget::new(
