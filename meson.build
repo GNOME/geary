@@ -1,7 +1,6 @@
 project('gnome-tour',
         'rust',
         version: '0.0.1',
-        license: 'MIT',
 	meson_version : '>= 0.50')
 
 i18n = import('i18n')
@@ -12,7 +11,7 @@ base_id = 'org.gnome.Tour'
 dependency('glib-2.0', version: '>= 2.56')
 dependency('gio-2.0', version: '>= 2.56')
 dependency('gdk-pixbuf-2.0')
-dependency('gtk4', version: '>= 3.96.0')
+dependency('gtk+-3.0', version: '>= 3.16')
 
 
 glib_compile_resources = find_program('glib-compile-resources', required: true)
