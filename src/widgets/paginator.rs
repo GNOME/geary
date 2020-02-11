@@ -28,7 +28,7 @@ impl PaginatorWidget {
     }
 
     pub fn get_current_page_nr(&self) -> i32 {
-        self.current_page.borrow().clone()
+        *self.current_page.borrow()
     }
 
     pub fn get_current_page(&self) -> Option<&Box<dyn Pageable>> {
@@ -37,12 +37,12 @@ impl PaginatorWidget {
     }
 
     pub fn next(&self) {
-        let next_page = self.current_page.borrow().clone() + 1;
+        let next_page = *self.current_page.borrow() + 1;
         self.go_to(next_page);
     }
 
     pub fn previous(&self) {
-        let previous_page = self.current_page.borrow().clone() - 1;
+        let previous_page = *self.current_page.borrow() - 1;
         self.go_to(previous_page);
     }
 

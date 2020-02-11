@@ -22,7 +22,7 @@ impl WelcomePageWidget {
         self.widget.set_margin_top(24);
         self.widget.set_margin_bottom(24);
 
-        let logo = gtk::Image::new_from_icon_name(Some(config::DISTRO_ICON_NAME));
+        let logo = gtk::Image::new_from_icon_name(Some(config::DISTRO_ICON_NAME), gtk::IconSize::Dialog);
         logo.set_pixel_size(196);
         self.widget.add(&logo);
 

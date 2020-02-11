@@ -4,27 +4,27 @@ use crate::widgets::Window;
 use gio::prelude::*;
 use gtk::prelude::*;
 use std::env;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Application {
     app: gtk::Application,
-    window: Rc<Window>,
+    window: RefCell<Rc<Option<Window>>>,
 }
 
 impl Application {
-    pub fn new() -> Self {
+    pub fn new() -> Rc<Self> {
         let app = gtk::Application::new(Some(config::APP_ID), gio::ApplicationFlags::FLAGS_NONE).unwrap();
-        let window = Rc::new(Window::new(&app));
 
-        let application = Self { app, window };
+        let application = Rc::new(Self {
+            app,
+            window: RefCell::new(Rc::new(None)),
+        });
 
-        application.setup_gactions();
-        application.setup_signals();
-        application.setup_css();
+        application.setup_signals(application.clone());
         application
     }
 
-    fn setup_gactions(&self) {
+    fn setup_gactions(&self, application: Rc<Self>) {
         // Quit
         utils::action(
             &self.app,
@@ -37,8 +37,10 @@ impl Application {
         utils::action(
             &self.app,
             "start-tour",
-            clone!(@strong self.window as window => move |_, _| {
-                window.start_tour();
+            clone!(@strong application => move |_, _| {
+                if let Some(window) = &*application.window.borrow().clone() {
+                    window.start_tour();
+                }
             }),
         );
 
@@ -54,32 +56,43 @@ impl Application {
         utils::action(
             &self.app,
             "next-page",
-            clone!(@strong self.window as window => move |_, _| {
-                window.next_page();
+            clone!(@strong application => move |_, _| {
+                if let Some(window) = &*application.window.borrow().clone() {
+                    window.next_page();
+                }
             }),
         );
         utils::action(
             &self.app,
             "previous-page",
-            clone!(@strong self.window as window => move |_, _| {
-                window.previous_page();
+            clone!(@strong application => move |_, _| {
+                if let Some(window) = &*application.window.borrow().clone() {
+                    window.previous_page();
+                }
             }),
         );
         self.app.set_accels_for_action("app.quit", &["<primary>q"]);
     }
 
-    fn setup_signals(&self) {
-        self.app.connect_activate(clone!(@weak self.window.widget as window => move |app| {
-            app.add_window(&window);
-            window.present();
+    fn setup_signals(&self, app: Rc<Self>) {
+        self.app.connect_startup(clone!(@weak app => move |_| {
+            app.setup_css();
+            app.setup_gactions(app.clone());
+        }));
+        self.app.connect_activate(clone!(@weak app => move |gtk_app| {
+           let window = Window::new(&gtk_app);
+            gtk_app.add_window(&window.widget);
+            window.widget.present();
+            window.widget.show_all();
+            app.window.replace(Rc::new(Some(window)));
         }));
     }
 
     fn setup_css(&self) {
         let p = gtk::CssProvider::new();
         gtk::CssProvider::load_from_resource(&p, "/org/gnome/Tour/style.css");
-        if let Some(display) = gdk::Display::get_default() {
-            gtk::StyleContext::add_provider_for_display(&display, &p, 500);
+        if let Some(screen) = gdk::Screen::get_default() {
+            gtk::StyleContext::add_provider_for_screen(&screen, &p, 500);
         }
     }
 
