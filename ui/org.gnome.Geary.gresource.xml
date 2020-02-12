@@ -9,7 +9,8 @@
     <file compressed="true" preprocess="xml-stripblanks">accounts_editor_servers_pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">application-main-window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">certificate_warning_dialog.glade</file>
-    <file compressed="true">components-web-view.js</file>
+    <file compressed="true">client-web-view.js</file>
+    <file compressed="true">client-web-view-allow-remote-images.js</file>
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-view.ui</file>

@@ -6,7 +6,7 @@
  */
 
 /**
- * Application logic for Components.WebView and subclasses.
+ * Application logic for ClientWebView and subclasses.
  */
 
 let PageState = function() {
@@ -14,6 +14,7 @@ let PageState = function() {
 };
 PageState.prototype = {
     init: function() {
+        this.allowRemoteImages = false;
         this.isLoaded = false;
         this.undoEnabled = false;
         this.redoEnabled = false;
@@ -107,7 +108,7 @@ PageState.prototype = {
         window.webkit.messageHandlers.contentLoaded.postMessage(null);
     },
     loadRemoteImages: function() {
-        window._gearyAllowRemoteResourceLoads = true;
+        this.allowRemoteImages = true;
         let images = document.getElementsByTagName("IMG");
         for (let i = 0; i < images.length; i++) {
             let img = images.item(i);

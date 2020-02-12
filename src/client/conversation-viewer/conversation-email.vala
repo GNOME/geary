@@ -479,7 +479,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         if (this.body_selection_message != null) {
             try {
                 selection =
-                   yield this.body_selection_message.get_selection_for_quoting();
+                   yield this.body_selection_message.web_view.get_selection_for_quoting();
             } catch (Error err) {
                 debug("Failed to get selection for quoting: %s", err.message);
             }
@@ -495,7 +495,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         if (this.body_selection_message != null) {
             try {
                 selection =
-                   yield this.body_selection_message.get_selection_for_find();
+                   yield this.body_selection_message.web_view.get_selection_for_find();
             } catch (Error err) {
                 debug("Failed to get selection for find: %s", err.message);
             }
@@ -588,10 +588,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         Json.Generator generator = new Json.Generator();
         generator.set_root(builder.get_root());
         string js = "geary.addPrintHeaders(" + generator.to_data(null) + ");";
-        yield this.primary_message.run_javascript(js, null);
+        yield this.primary_message.web_view.run_javascript(js, null);
 
         Gtk.Window? window = get_toplevel() as Gtk.Window;
-        WebKit.PrintOperation op = this.primary_message.new_print_operation();
+        WebKit.PrintOperation op = new WebKit.PrintOperation(
+            this.primary_message.web_view
+        );
         Gtk.PrintSettings settings = new Gtk.PrintSettings();
 
         if (this.email.subject != null) {
@@ -618,14 +620,14 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     private void connect_message_view_signals(ConversationMessage view) {
-        view.content_loaded.connect(on_content_loaded);
         view.flag_remote_images.connect(on_flag_remote_images);
         view.internal_link_activated.connect((y) => {
                 internal_link_activated(y);
             });
-        view.internal_resource_loaded.connect(on_resource_loaded);
         view.save_image.connect(on_save_image);
-        view.selection_changed.connect((has_selection) => {
+        view.web_view.internal_resource_loaded.connect(on_resource_loaded);
+        view.web_view.content_loaded.connect(on_content_loaded);
+        view.web_view.selection_changed.connect((has_selection) => {
                 this.body_selection_message = has_selection ? view : null;
                 body_selection_changed(has_selection);
             });
@@ -701,7 +703,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         // Load all messages
 
-        this.primary_message.add_internal_resources(cid_resources);
+        this.primary_message.web_view.add_internal_resources(cid_resources);
         yield this.primary_message.load_message_body(
             message, this.load_cancellable
         );
@@ -719,7 +721,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                     this.config
                 );
             connect_message_view_signals(attached_message);
-            attached_message.add_internal_resources(cid_resources);
+            attached_message.web_view.add_internal_resources(cid_resources);
             this.sub_messages.add(attached_message);
             this._attached_messages.add(attached_message);
             attached_message.load_contacts.begin(this.load_cancellable);
@@ -906,8 +908,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                                Geary.Memory.Buffer? content) {
         var main = get_toplevel() as Application.MainWindow;
         if (main != null) {
-            if (uri.has_prefix(Components.WebView.CID_URL_PREFIX)) {
-                string cid = uri.substring(Components.WebView.CID_URL_PREFIX.length);
+            if (uri.has_prefix(ClientWebView.CID_URL_PREFIX)) {
+                string cid = uri.substring(ClientWebView.CID_URL_PREFIX.length);
                 try {
                     Geary.Attachment attachment = this.email.get_attachment_by_content_id(
                         cid
@@ -954,7 +956,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void on_content_loaded() {
         bool all_loaded = true;
         foreach (ConversationMessage message in this) {
-            if (!message.is_content_loaded) {
+            if (!message.web_view.is_content_loaded) {
                 all_loaded = false;
                 break;
             }

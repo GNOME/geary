@@ -24,14 +24,6 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         get; private set; default = null;
     }
 
-    /**
-     * The most recent web view created in this viewer.
-     *
-     * Keep the last created web view around so others can share the
-     * same WebKitGTK WebProcess.
-     */
-    internal ConversationWebView? previous_web_view { get; set; default = null; }
-
     private Application.Configuration config;
 
     private Gee.Set<Geary.App.Conversation>? selection_while_composing = null;
@@ -254,10 +246,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                                         Application.ContactStore contacts,
                                         bool start_mark_timer)
         throws GLib.Error {
-        // Keep the old ScrolledWindow around long enough for its
-        // descendant web views to be kept so their WebProcess can be
-        // re-used.
-        var old_scroller = remove_current_list();
+        remove_current_list();
 
         ConversationListBox new_list = new ConversationListBox(
             conversation,
@@ -303,9 +292,6 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         }
 
         yield new_list.load_conversation(scroll_to, query);
-
-        // Not strictly necessary, but keeps the compiler happy
-        old_scroller.destroy();
     }
 
     // Add a new conversation list to the UI
@@ -325,7 +311,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     }
 
     // Remove any existing conversation list, cancelling its loading
-    private Gtk.ScrolledWindow remove_current_list() {
+    private void remove_current_list() {
         if (this.find_cancellable != null) {
             this.find_cancellable.cancel();
             this.find_cancellable = null;
@@ -337,17 +323,15 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             this.current_list = null;
         }
 
-        var old_scroller = this.conversation_scroller;
         // XXX GTK+ Bug 778190 workaround
-        this.conversation_page.remove(old_scroller);
+        this.conversation_scroller.destroy(); // removes the list
         new_conversation_scroller();
-        return old_scroller;
     }
 
     private void new_conversation_scroller() {
         // XXX Work around for GTK+ Bug 778190: Instead of replacing
         // the Viewport that contains the current list, replace the
-        // complete ScrolledWindow. Need to remove this method and
+        // complete ScrolledWindow. Need to put remove this method and
         // put the settings back into conversation-viewer.ui when we
         // can rely on it being fixed again.
         Gtk.ScrolledWindow scroller = new Gtk.ScrolledWindow(null, null);

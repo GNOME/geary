@@ -6,7 +6,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ConversationWebView : Components.WebView {
+public class ConversationWebView : ClientWebView {
 
 
     private const string DECEPTIVE_LINK_CLICKED = "deceptiveLinkClicked";
@@ -41,10 +41,10 @@ public class ConversationWebView : Components.WebView {
 
     public static new void load_resources()
         throws Error {
-        ConversationWebView.app_script = Components.WebView.load_app_script(
+        ConversationWebView.app_script = ClientWebView.load_app_script(
             "conversation-web-view.js"
         );
-        ConversationWebView.app_stylesheet = Components.WebView.load_app_stylesheet(
+        ConversationWebView.app_stylesheet = ClientWebView.load_app_stylesheet(
             "conversation-web-view.css"
         );
     }
@@ -56,33 +56,16 @@ public class ConversationWebView : Components.WebView {
     );
 
 
-    /**
-     * Constructs a new web view for displaying an email message body.
-     *
-     * A new WebKitGTK WebProcess will be constructed for this view.
-     */
     public ConversationWebView(Application.Configuration config) {
         base(config);
-        init();
-
-        // These only need to be added when creating a new WebProcess,
-        // not when sharing one
         this.user_content_manager.add_script(ConversationWebView.app_script);
         this.user_content_manager.add_style_sheet(ConversationWebView.app_stylesheet);
-    }
 
-    /**
-     * Constructs a new web view for displaying an email message body.
-     *
-     * The WebKitGTK WebProcess will be shared with the related view's
-     * process.
-     */
-    internal ConversationWebView.with_related_view(
-        Application.Configuration config,
-        ConversationWebView related
-    ) {
-        base.with_related_view(config, related);
-        init();
+        register_message_handler(
+            DECEPTIVE_LINK_CLICKED, on_deceptive_link_clicked
+        );
+
+        this.notify["preferred-height"].connect(() => queue_resize());
     }
 
     /**
@@ -210,14 +193,6 @@ public class ConversationWebView : Components.WebView {
     public override void get_preferred_width(out int minimum_height,
                                              out int natural_height) {
         minimum_height = natural_height = 0;
-    }
-
-    private void init() {
-        register_message_handler(
-            DECEPTIVE_LINK_CLICKED, on_deceptive_link_clicked
-        );
-
-        this.notify["preferred-height"].connect(() => queue_resize());
     }
 
     private void on_deceptive_link_clicked(WebKit.JavascriptResult result) {
