@@ -125,7 +125,8 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
             int current_char = 0;
             bool in_quote = false;
             while (text.get_next_char(ref next_idx, out c)) {
-                if (current_char == cursor_pos) {
+                if (current_char != 0 &&
+                    current_char == cursor_pos) {
                     this.current_key = text.slice(start_idx, next_idx).strip();
                     this.cursor_at_address = this.address_parts.size;
                 }
