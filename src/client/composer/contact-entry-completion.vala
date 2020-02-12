@@ -63,6 +63,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
         pack_start(text_renderer, true);
         set_cell_data_func(text_renderer, cell_text_data);
 
+        // cursor-on-match isn't fired unless this is true
+        this.inline_selection = true;
+
         this.match_selected.connect(on_match_selected);
         this.cursor_on_match.connect(on_cursor_on_match);
     }
