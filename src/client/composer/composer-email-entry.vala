@@ -58,7 +58,7 @@ public class Composer.EmailEntry : Gtk.Entry {
     }
 
     private void validate_addresses() {
-        bool is_valid = !this.addresses.is_empty;
+        bool is_valid = !this._addresses.is_empty;
         foreach (Geary.RFC822.MailboxAddress address in this.addresses) {
             if (!address.is_valid()) {
                 is_valid = false;
@@ -77,11 +77,11 @@ public class Composer.EmailEntry : Gtk.Entry {
             completion.update_model();
         }
 
-        if (Geary.String.is_empty(text.strip())) {
-            this.addresses = new Geary.RFC822.MailboxAddresses();
+        if (Geary.String.is_empty_or_whitespace(text)) {
+            this._addresses = new Geary.RFC822.MailboxAddresses();
             this.is_valid = false;
         } else {
-            this.addresses =
+            this._addresses =
                 new Geary.RFC822.MailboxAddresses.from_rfc822_string(text);
             this.is_valid = true;
         }
