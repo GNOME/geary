@@ -2079,7 +2079,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                         this.editor.insert_image(
                             ClientWebView.INTERNAL_URL_PREFIX + unique_filename
                         );
-                        throw new Geary.EngineError.UNSUPPORTED("Mock method");
                     } catch (Error error) {
                         this.application.controller.report_problem(
                             new Geary.ProblemReport(error)
