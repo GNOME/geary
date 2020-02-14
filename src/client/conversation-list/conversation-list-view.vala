@@ -337,7 +337,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
                             this.selected.size
                         ),
                         Action.Window.prefix(
-                            Application.MainWindow.ACTION_ARCHIVE_CONVERSATION
+                            Application.MainWindow.ACTION_TRASH_CONVERSATION
                         )
                     );
                 } else {
