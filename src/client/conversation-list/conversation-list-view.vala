@@ -328,7 +328,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             GLib.Menu context_menu_model = new GLib.Menu();
             var main = get_toplevel() as Application.MainWindow;
             if (main != null) {
-                if (main.is_shift_down) {
+                if (!main.is_shift_down) {
                     context_menu_model.append(
                         /// Translators: Context menu item
                         ngettext(
