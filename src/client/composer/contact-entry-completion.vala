@@ -37,7 +37,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
     private Gee.ArrayList<string> address_parts = new Gee.ArrayList<string>();
 
     // Index of the email address the cursor is currently at
-    private int cursor_at_address = -1;
+    private int cursor_at_address = 0;
 
     private GLib.Cancellable? search_cancellable = null;
     private Gtk.TreeIter? last_iter = null;
@@ -62,6 +62,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
         icon_renderer.ypad = 2;
         pack_start(text_renderer, true);
         set_cell_data_func(text_renderer, cell_text_data);
+
+        // cursor-on-match isn't fired unless this is true
+        this.inline_selection = true;
 
         this.match_selected.connect(on_match_selected);
         this.cursor_on_match.connect(on_cursor_on_match);
@@ -110,20 +113,35 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
         Gtk.Entry? entry = get_entry() as Gtk.Entry;
         if (entry != null) {
             this.current_key = "";
-            this.cursor_at_address = -1;
+            this.cursor_at_address = 0;
             this.address_parts.clear();
+
+            // NB: Do not strip any white space from the addresses,
+            // otherwise we won't be able to accurately insert
+            // addresses in the middle of the list in
+            // ::insert_address_at_cursor.
 
             string text = entry.get_text();
             int cursor_pos = entry.get_position();
 
+            int current_char = 0;
+            unichar c = 0;
             int start_idx = 0;
             int next_idx = 0;
-            unichar c = 0;
-            int current_char = 0;
             bool in_quote = false;
             while (text.get_next_char(ref next_idx, out c)) {
-                if (current_char == cursor_pos) {
-                    this.current_key = text.slice(start_idx, next_idx).strip();
+                if (current_char == cursor_pos &&
+                    current_char != 0) {
+                    if (c != ',' ) {
+                        // Strip whitespace here though so it does not
+                        // interfere with search and highlighting.
+                        this.current_key = text.slice(
+                            start_idx, next_idx
+                        ).strip();
+                    }
+                    // We're in the middle of the address, so it
+                    // hasn't yet been added to the list and hence we
+                    // don't need to subtract 1 from its size here
                     this.cursor_at_address = this.address_parts.size;
                 }
 
@@ -131,7 +149,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
                 case ',':
                     if (!in_quote) {
                         // Don't include the comma in the address
-                        string address = text.slice(start_idx, next_idx -1);
+                        string address = text.slice(start_idx, next_idx - 1);
                         this.address_parts.add(address);
                         // Don't include it in the next one, either
                         start_idx = next_idx;
@@ -155,20 +173,24 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
     private void insert_address_at_cursor(Gtk.TreeIter iter) {
         Gtk.Entry? entry = get_entry() as Gtk.Entry;
         if (entry != null) {
+
             // Take care to do a delete then an insert here so that
             // Component.EntryUndo can combine the two into a single
-            // undoable command
-            int start_char = this.address_parts.slice(
-                0, this.cursor_at_address
-            ).fold<int>(
-                // address parts don't contain commas, so need to add
-                // an char width for it
-                (a, chars) => a.char_count() + chars + 1, 0
-            );
-            int end_char = (
-                start_char +
-                this.address_parts[this.cursor_at_address].char_count()
-            );
+            // undoable command.
+
+            int start_char = 0;
+            if (this.cursor_at_address > 0) {
+                start_char = this.address_parts.slice(
+                    0, this.cursor_at_address
+                ).fold<int>(
+                    // Address parts don't contain commas, so need to add
+                    // an char width for it. Don't need to worry about
+                    // spaces because they are preserved by
+                    // ::update_addresses.
+                    (a, chars) => a.char_count() + chars + 1, 0
+                );
+            }
+            int end_char = entry.get_position();
 
             // Format and use the selected address
             GLib.Value value;
@@ -177,30 +199,34 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
                 (Geary.RFC822.MailboxAddress) value.get_object();
             string formatted = mailbox.to_full_display();
             if (this.cursor_at_address != 0) {
-                // This isn't the first address, so add some
-                // whitespace to pad it out
+                // Isn't the first address, so add some whitespace to
+                // pad it out
                 formatted = " " + formatted;
             }
-            this.address_parts[this.cursor_at_address] = formatted;
+            if (entry.get_position() < entry.buffer.get_length() &&
+                this.address_parts[this.cursor_at_address].strip() !=
+                this.current_key.strip()) {
+                // Isn't at the end of the entry, and the address
+                // under the cursor does not simply consist of the
+                // lookup key (i.e. is effectively already empty
+                // otherwise), so add a comma to separate this address
+                // from the next one
+                formatted = formatted + ", ";
+            }
+            this.address_parts.insert(this.cursor_at_address, formatted);
 
             // Update the entry text
-            entry.delete_text(start_char, end_char);
-            entry.insert_text(
-                formatted, formatted.char_count(), ref start_char
-            );
+            if (start_char < end_char) {
+                entry.delete_text(start_char, end_char);
+            }
+            entry.insert_text(formatted, -1, ref start_char);
 
             // Update the entry cursor position. The previous call
             // updates the start so just use that, but add extra space
             // for the comma and any white space at the start of the
             // next address.
-            ++start_char;
-            string? next_address = (
-                this.cursor_at_address + 1 < this.address_parts.size
-                ? this.address_parts[this.cursor_at_address + 1]
-                : ""
-            );
-            for (int i = 0; i < next_address.length && next_address[i] == ' '; i++) {
-                ++start_char;
+            if (start_char < entry.buffer.get_length()) {
+                start_char += 2;
             }
             entry.set_position(start_char);
         }
