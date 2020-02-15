@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016-2019 Michael Gratton <mike@vee.net>
+ * Copyright 2016 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -14,7 +14,7 @@
  * integration, Inspector support, and remote and inline image
  * handling.
  */
-public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
+public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
 
     /** URI Scheme and delimiter for internal resource loads. */
@@ -65,6 +65,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     private static WebKit.UserStyleSheet? user_stylesheet = null;
 
     private static WebKit.UserScript? script = null;
+    private static WebKit.UserScript? allow_remote_images = null;
 
 
     /**
@@ -75,18 +76,23 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
                                         File cache_dir) {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
+#if HAS_WEBKIT_SHARED_PROC
+        // Use a shared process so we don't spawn N WebProcess instances
+        // when showing N messages in a conversation.
+        context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
+#endif
         // Use the doc viewer model since each web view instance only
         // ever shows a single HTML document.
         context.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
 
         context.register_uri_scheme("cid", (req) => {
-                WebView? view = req.get_web_view() as WebView;
+                ClientWebView? view = req.get_web_view() as ClientWebView;
                 if (view != null) {
                     view.handle_cid_request(req);
                 }
             });
         context.register_uri_scheme("geary", (req) => {
-                WebView? view = req.get_web_view() as WebView;
+                ClientWebView? view = req.get_web_view() as ClientWebView;
                 if (view != null) {
                     view.handle_internal_request(req);
                 }
@@ -107,22 +113,25 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
                 update_spellcheck(context, config);
             });
 
-        WebView.default_context = context;
+        ClientWebView.default_context = context;
     }
 
     /**
-     * Loads static resources used by WebView.
+     * Loads static resources used by ClientWebView.
      */
     public static void load_resources(GLib.File user_dir)
         throws GLib.Error {
-        WebView.script = load_app_script(
-            "components-web-view.js"
+        ClientWebView.script = load_app_script(
+            "client-web-view.js"
+        );
+        ClientWebView.allow_remote_images = load_app_script(
+            "client-web-view-allow-remote-images.js"
         );
 
         foreach (string name in new string[] { USER_CSS, USER_CSS_LEGACY }) {
             GLib.File stylesheet = user_dir.get_child(name);
             try {
-                WebView.user_stylesheet = load_user_stylesheet(stylesheet);
+                ClientWebView.user_stylesheet = load_user_stylesheet(stylesheet);
                 break;
             } catch (GLib.IOError.NOT_FOUND err) {
                 // All good, try the next one or just exit
@@ -290,9 +299,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     public signal void remote_image_load_blocked();
 
 
-    protected WebView(Application.Configuration config,
-                      WebKit.UserContentManager? custom_manager = null,
-                      WebView? related = null) {
+    protected ClientWebView(Application.Configuration config,
+                            WebKit.UserContentManager? custom_manager = null) {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
         setts.default_charset = "UTF-8";
@@ -313,40 +321,62 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
         WebKit.UserContentManager content_manager =
              custom_manager ?? new WebKit.UserContentManager();
-        content_manager.add_script(WebView.script);
-        if (WebView.user_stylesheet != null) {
-            content_manager.add_style_sheet(WebView.user_stylesheet);
+        content_manager.add_script(ClientWebView.script);
+        if (ClientWebView.user_stylesheet != null) {
+            content_manager.add_style_sheet(ClientWebView.user_stylesheet);
         }
 
         Object(
-            settings: setts,
+            web_context: ClientWebView.default_context,
             user_content_manager: content_manager,
-            web_context: WebView.default_context
+            settings: setts
         );
         base_ref();
-        init(config);
-    }
 
-    /**
-     * Constructs a new web view with a new shared WebProcess.
-     *
-     * The new view will use the same WebProcess, settings and content
-     * manager as the given related view's.
-     *
-     * @see WebKit.WebView.with_related_view
-     */
-    protected WebView.with_related_view(Application.Configuration config,
-                                        WebView related) {
-        Object(
-            related_view: related,
-            settings: related.get_settings(),
-            user_content_manager: related.user_content_manager
+        // XXX get the allow prefix from the extension somehow
+
+        this.decide_policy.connect(on_decide_policy);
+        this.web_process_terminated.connect((reason) => {
+                warning("Web process crashed: %s", reason.to_string());
+            });
+
+        register_message_handler(
+            COMMAND_STACK_CHANGED, on_command_stack_changed
         );
-        base_ref();
-        init(config);
+        register_message_handler(
+            CONTENT_LOADED, on_content_loaded
+        );
+        register_message_handler(
+            DOCUMENT_MODIFIED, on_document_modified
+        );
+        register_message_handler(
+            PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
+        );
+        register_message_handler(
+            REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
+        );
+        register_message_handler(
+            SELECTION_CHANGED, on_selection_changed
+        );
+
+        // Manage zoom level, ensure it's sane
+        config.bind(Application.Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
+        if (this.zoom_level < ZOOM_MIN) {
+            this.zoom_level = ZOOM_MIN;
+        } else if (this.zoom_level > ZOOM_MAX) {
+            this.zoom_level = ZOOM_MAX;
+        }
+        this.scroll_event.connect(on_scroll_event);
+
+        // Watch desktop font settings
+        Settings system_settings = config.gnome_interface;
+        system_settings.bind("document-font-name", this,
+                             "document-font", SettingsBindFlags.DEFAULT);
+        system_settings.bind("monospace-font-name", this,
+                             "monospace-font", SettingsBindFlags.DEFAULT);
     }
 
-    ~WebView() {
+    ~ClientWebView() {
         base_unref();
     }
 
@@ -403,7 +433,13 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      * effect.
      */
     public void allow_remote_image_loading() {
-        this.run_javascript.begin("_gearyAllowRemoteResourceLoads = true", null);
+        // Use a separate script here since we need to update the
+        // value of window.geary.allow_remote_image_loading after it
+        // was first created by client-web-view.js (which is loaded at
+        // the start of page load), but before the page load is
+        // started (so that any remote images present are actually
+        // loaded).
+        this.user_content_manager.add_script(ClientWebView.allow_remote_images);
     }
 
     /**
@@ -479,7 +515,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
                                                    JavaScriptMessageHandler handler) {
         // XXX can't use the delegate directly, see b.g.o Bug
         // 604781. However the workaround below creates a circular
-        // reference, causing WebView instances to leak. So to
+        // reference, causing ClientWebView instances to leak. So to
         // work around that we need to record handler ids and
         // disconnect them when being destroyed.
         ulong id = this.user_content_manager.script_message_received[name].connect(
@@ -489,50 +525,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         if (!this.user_content_manager.register_script_message_handler(name)) {
             debug("Failed to register script message handler: %s", name);
         }
-    }
-
-    private void init(Application.Configuration config) {
-        // XXX get the allow prefix from the extension somehow
-
-        this.decide_policy.connect(on_decide_policy);
-        this.web_process_terminated.connect((reason) => {
-                warning("Web process crashed: %s", reason.to_string());
-            });
-
-        register_message_handler(
-            COMMAND_STACK_CHANGED, on_command_stack_changed
-        );
-        register_message_handler(
-            CONTENT_LOADED, on_content_loaded
-        );
-        register_message_handler(
-            DOCUMENT_MODIFIED, on_document_modified
-        );
-        register_message_handler(
-            PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
-        );
-        register_message_handler(
-            REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
-        );
-        register_message_handler(
-            SELECTION_CHANGED, on_selection_changed
-        );
-
-        // Manage zoom level, ensure it's sane
-        config.bind(Application.Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
-        if (this.zoom_level < ZOOM_MIN) {
-            this.zoom_level = ZOOM_MIN;
-        } else if (this.zoom_level > ZOOM_MAX) {
-            this.zoom_level = ZOOM_MAX;
-        }
-        this.scroll_event.connect(on_scroll_event);
-
-        // Watch desktop font settings
-        Settings system_settings = config.gnome_interface;
-        system_settings.bind("document-font-name", this,
-                             "document-font", SettingsBindFlags.DEFAULT);
-        system_settings.bind("monospace-font-name", this,
-                             "monospace-font", SettingsBindFlags.DEFAULT);
     }
 
     private void handle_cid_request(WebKit.URISchemeRequest request) {

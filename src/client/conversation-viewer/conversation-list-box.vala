@@ -898,7 +898,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      */
     public void zoom_in() {
         message_view_iterator().foreach((msg_view) => {
-                msg_view.zoom_in();
+                msg_view.web_view.zoom_in();
                 return true;
             });
     }
@@ -908,7 +908,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      */
     public void zoom_out() {
         message_view_iterator().foreach((msg_view) => {
-                msg_view.zoom_out();
+                msg_view.web_view.zoom_out();
                 return true;
             });
     }
@@ -918,7 +918,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      */
     public void zoom_reset() {
         message_view_iterator().foreach((msg_view) => {
-                msg_view.zoom_reset();
+                msg_view.web_view.zoom_reset();
                 return true;
             });
     }
@@ -1122,7 +1122,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         row.get_allocation(out alloc);
 
         int x = 0, y = 0;
-        row.view.primary_message.web_view_translate_coordinates(row, x, anchor_y, out x, out y);
+        ConversationWebView web_view = row.view.primary_message.web_view;
+        web_view.translate_coordinates(row, x, anchor_y, out x, out y);
 
         Gtk.Adjustment adj = get_adjustment();
         y = alloc.y + y;
@@ -1155,13 +1156,14 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 ConversationMessage conversation_message = view.primary_message;
                  int body_top = 0;
                  int body_left = 0;
-                 conversation_message.web_view_translate_coordinates(
+                 ConversationWebView web_view = conversation_message.web_view;
+                 web_view.translate_coordinates(
                      this,
                      0, 0,
                      out body_left, out body_top
                  );
 
-                 int body_height = conversation_message.web_view_get_allocated_height();
+                 int body_height = web_view.get_allocated_height();
                  int body_bottom = body_top + body_height;
 
                  // Only mark the email as read if it's actually visible

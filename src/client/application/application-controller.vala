@@ -135,12 +135,13 @@ internal class Application.Controller : Geary.BaseObject {
         this.upgrade_dialog = new UpgradeDialog(application);
 
         // Initialise WebKit and WebViews
-        Components.WebView.init_web_context(
+        ClientWebView.init_web_context(
             this.application.config,
             this.application.get_web_extensions_dir(),
             this.application.get_user_cache_directory().get_child("web-resources")
         );
-        Components.WebView.load_resources(
+
+        ClientWebView.load_resources(
             this.application.get_user_config_directory()
         );
         Composer.WebView.load_resources();
