@@ -158,6 +158,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.displayed = new Geary.RFC822.MailboxAddress(
                     this.contact.display_name, this.source.address
                 );
+                this.tooltip_text = this.source.address;
             } else {
                 // Display both the display name and the email address
                 // so that the user has the full information at hand
