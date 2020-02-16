@@ -50,10 +50,7 @@ public class Composer.LinkPopover : Gtk.Popover {
     private Gtk.Button update;
 
     [GtkChild]
-    private Gtk.Button delete;
-
-    [GtkChild]
-    private Gtk.Button open;
+    private Gtk.Button remove;
 
     private Geary.TimeoutManager validation_timeout;
 
@@ -63,9 +60,6 @@ public class Composer.LinkPopover : Gtk.Popover {
 
     /** Emitted when the link URL was activated. */
     public signal void link_activate();
-
-    /** Emitted when the open button was activated. */
-    public signal void link_open();
 
     /** Emitted when the delete button was activated. */
     public signal void link_delete();
@@ -77,7 +71,7 @@ public class Composer.LinkPopover : Gtk.Popover {
         switch (type) {
         case Type.NEW_LINK:
             this.update.hide();
-            this.delete.hide();
+            this.remove.hide();
             break;
         case Type.EXISTING_LINK:
             this.insert.hide();
@@ -135,10 +129,6 @@ public class Composer.LinkPopover : Gtk.Popover {
             }
         }
 
-        // Don't let the user open invalid and mailto links, it's not
-        // terribly useful
-        this.open.set_sensitive(is_nominal && !is_mailto);
-
         Gtk.StyleContext style = this.url.get_style_context();
         Gtk.EntryIconPosition pos = Gtk.EntryIconPosition.SECONDARY;
         if (!is_valid) {
@@ -177,14 +167,8 @@ public class Composer.LinkPopover : Gtk.Popover {
     }
 
     [GtkCallback]
-    private void on_delete_clicked() {
+    private void on_remove_clicked() {
         link_delete();
         popdown();
     }
-
-    [GtkCallback]
-    private void on_open_clicked() {
-        link_open();
-    }
-
 }

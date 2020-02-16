@@ -392,12 +392,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild] private Gtk.Stack font_button_stack;
     [GtkChild] private Gtk.MenuButton font_size_button;
     [GtkChild] private Gtk.Image font_color_icon;
-    [GtkChild] private Gtk.MenuButton text_format_button;
+    [GtkChild] private Gtk.MenuButton more_options_button;
 
     [GtkChild]
     private Gtk.Button insert_link_button;
     [GtkChild]
-    private Gtk.Button select_dictionary_button;
+    private Gtk.MenuButton select_dictionary_button;
     [GtkChild]
     private Gtk.Label info_label;
 
@@ -432,7 +432,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private string body_html = "";
 
-    private SpellCheckPopover? spell_check_popover = null;
     private string? pointer_url = null;
     private string? cursor_url = null;
     private bool is_attachment_overlay_visible = false;
@@ -626,6 +625,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // from the .ui file.
         var cells = this.from_multiple.get_cells();
         ((Gtk.CellRendererText) cells.data).ellipsize = END;
+
+        // Create spellcheck popover
+        Application.Configuration config = this.application.config;
+        var spell_check_popover = new SpellCheckPopover(
+            this.select_dictionary_button, config
+        );
+        spell_check_popover.selection_changed.connect((active_langs) => {
+            config.set_spell_check_languages(active_langs);
+            update_subject_spell_checker();
+        });
 
         load_entry_completions();
 
@@ -1812,8 +1821,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 );
         }
 
+        Gtk.Box wrapper_box = new Gtk.Box(VERTICAL, 0);
+        this.attachments_box.pack_start(wrapper_box);
+        wrapper_box.pack_start(new Gtk.Separator(HORIZONTAL));
+
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-        this.attachments_box.pack_start(box);
+        box.margin_top = 6;
+        box.margin_bottom = 6;
+        wrapper_box.pack_start(box);
 
         /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
         string label_text = _("%s (%s)").printf(target.get_basename(),
@@ -1824,9 +1839,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         label.margin_start = 4;
         label.margin_end = 4;
 
-        Gtk.Button remove_button = new Gtk.Button.with_mnemonic(Stock._REMOVE);
+        Gtk.Button remove_button = new Gtk.Button.from_icon_name("user-trash-symbolic", BUTTON);
         box.pack_start(remove_button, false, false);
-        remove_button.clicked.connect(() => remove_attachment(target, box));
+        remove_button.clicked.connect(() => remove_attachment(target, wrapper_box));
 
         update_attachments_view();
     }
@@ -2132,7 +2147,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.set_rich_text(compose_as_html);
 
         this.application.config.compose_as_html = compose_as_html;
-        this.text_format_button.popover.popdown();
+        this.more_options_button.popover.popdown();
     }
 
     private void reparent_widget(Gtk.Widget child, Gtk.Container new_parent) {
@@ -2371,17 +2386,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_select_dictionary(SimpleAction action, Variant? param) {
-        if (this.spell_check_popover == null) {
-            Application.Configuration config = this.application.config;
-            this.spell_check_popover = new SpellCheckPopover(
-                this.select_dictionary_button, config
-            );
-            this.spell_check_popover.selection_changed.connect((active_langs) => {
-                    config.set_spell_check_languages(active_langs);
-                    update_subject_spell_checker();
-                });
-        }
-        this.spell_check_popover.toggle();
+        this.select_dictionary_button.toggled();
     }
 
     private bool on_editor_key_press_event(Gdk.EventKey event) {
@@ -2635,6 +2640,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         popover.set_link_url(url);
         popover.closed.connect(() => {
                 this.editor.free_selection(selection_id);
+            });
+        popover.hide.connect(() => {
                 Idle.add(() => { popover.destroy(); return Source.REMOVE; });
             });
         popover.link_activate.connect((link_uri) => {
@@ -2642,9 +2649,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             });
         popover.link_delete.connect(() => {
                 this.editor.delete_link(selection_id);
-            });
-        popover.link_open.connect(() => {
-                this.application.show_uri.begin(popover.link_uri);
             });
         return popover;
     }
@@ -2716,7 +2720,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     LinkPopover popover = this.new_link_popover.end(res);
                     popover.set_relative_to(this.editor);
                     popover.set_pointing_to(location);
-                    popover.show();
+                    popover.popup();
                 });
         }
         return Gdk.EVENT_PROPAGATE;
@@ -2828,6 +2832,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.new_link_popover.begin(type, url, (obj, res) => {
                 LinkPopover popover = this.new_link_popover.end(res);
 
+                var style = this.insert_link_button.get_style_context();
+
                 // We have to disconnect then reconnect the selection
                 // changed signal for the duration of the popover
                 // being active since if the user selects the text in
@@ -2837,10 +2843,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 this.editor.selection_changed.disconnect(on_selection_changed);
                 popover.closed.connect(() => {
                         this.editor.selection_changed.connect(on_selection_changed);
+                        style.set_state(NORMAL);
                     });
 
                 popover.set_relative_to(this.insert_link_button);
-                popover.show();
+                popover.popup();
+                style.set_state(ACTIVE);
             });
     }
 
