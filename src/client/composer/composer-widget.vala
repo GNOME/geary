@@ -2307,6 +2307,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         const WebKit.ContextMenuAction[] TEXT_INPUT_ACTIONS = {
             WebKit.ContextMenuAction.INPUT_METHODS,
             WebKit.ContextMenuAction.UNICODE,
+            WebKit.ContextMenuAction.INSERT_EMOJI,
         };
 
         Gee.List<WebKit.ContextMenuItem> existing_spelling =

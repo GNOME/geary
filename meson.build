@@ -53,7 +53,7 @@ valac = meson.get_compiler('vala')
 
 target_glib = '2.60.4'
 target_gtk = '3.24.7'
-target_webkit = '2.24'
+target_webkit = '2.26'
 
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
