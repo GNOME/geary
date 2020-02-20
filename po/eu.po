@@ -5,13 +5,13 @@
 #
 # Translators:
 # Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014.
-# Asier Sarasua Garmendia <asier.sarasua@gmail.com>, 2019.
+# Asier Sarasua Garmendia <asier.sarasua@gmail.com>, 2019, 2020.
 #
 msgid ""
 msgstr "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2019-10-07 00:01+0000\n"
-"PO-Revision-Date: 2019-10-20 10:00+0100\n"
+"POT-Creation-Date: 2020-02-13 09:33+0000\n"
+"PO-Revision-Date: 2020-02-20 10:00+0100\n"
 "Last-Translator: Asier Sarasua Garmendia <asier.sarasua@gmail.com>\n"
 "Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
@@ -150,7 +150,7 @@ msgstr "Karpeta-zerrendaren panelaren posizioa"
 
 #: desktop/org.gnome.Geary.gschema.xml:27
 msgid "Position of the folder list Paned grabber."
-msgstr ""
+msgstr "Karpeta-zerrendaren panelaren heldulekuaren posizioa."
 
 #: desktop/org.gnome.Geary.gschema.xml:32
 msgid "Position of folder list pane when horizontal"
@@ -159,7 +159,7 @@ msgstr "Karpeta-zerrendaren panelaren posizioa horizontalean"
 #: desktop/org.gnome.Geary.gschema.xml:33
 msgid ""
 "Position of the folder list Paned grabber in the horizontal orientation."
-msgstr ""
+msgstr "Karpeta-zerrendaren panelaren heldulekuaren posizioa orientazio horizontalean."
 
 #: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Position of folder list pane when vertical"
@@ -167,7 +167,7 @@ msgstr "Karpeta-zerrendaren panelaren posizioa bertikalean"
 
 #: desktop/org.gnome.Geary.gschema.xml:39
 msgid "Position of the folder list Paned grabber in the vertical orientation."
-msgstr ""
+msgstr "Karpeta-zerrendaren panelaren heldulekuaren posizioa orientazio bertikalean."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
 msgid "Orientation of the folder list pane"
@@ -183,7 +183,7 @@ msgstr "Mezu-zerrendaren panelaren posizioa"
 
 #: desktop/org.gnome.Geary.gschema.xml:51
 msgid "Position of the message list Paned grabber."
-msgstr ""
+msgstr "Mezu-zerrendaren panelaren heldulekuaren posizioa."
 
 #: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Autoselect next message"
@@ -209,7 +209,7 @@ msgstr "Ortografia-egiaztatzailean erabiliko diren hizkuntzak"
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
-msgstr ""
+msgstr "POSIX hizkuntzen zerrenda bat, zerrenda hutsak ortografia egiaztatzea desgaitzen du eta zerrenda nuluak mahaigainaren hizkuntza lehenetsia erabiltzen du."
 
 #: desktop/org.gnome.Geary.gschema.xml:76
 msgid "Languages that are displayed in the spell checker popover"
@@ -263,12 +263,12 @@ msgstr "Egia posta-mezuak HTML formatuan konposatzeko; faltsua testu soilerako."
 
 #: desktop/org.gnome.Geary.gschema.xml:112
 msgid "Advisory strategy for full-text searching"
-msgstr ""
+msgstr "Testu osoak bilatzeko gomendatzen den estrategia"
 
 #: desktop/org.gnome.Geary.gschema.xml:113
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
-msgstr ""
+msgstr "Balio onartuak: “exact” (zehatza), “conservative” (kontserbadorea), “aggressive” (erasokorra) eta “horizon” (zeruertza)."
 
 #: desktop/org.gnome.Geary.gschema.xml:118
 msgid "Zoom of conversation viewer"
@@ -732,7 +732,7 @@ msgstr "%s OAuth2 erabilita"
 
 #: src/client/accounts/accounts-editor-servers-pane.vala:960
 msgid "Use receiving server login"
-msgstr ""
+msgstr "Erabili jasotako zerbitzariaren saio-hasiera"
 
 #. Translators: File name used in save chooser when saving
 #. attachments that do not otherwise have a name.
@@ -981,12 +981,12 @@ msgstr "Erregistratu datu-basearen kontsultak (mezu ugari sortzen ditu)"
 #. / Command line option
 #: src/client/application/geary-application.vala:147
 msgid "Perform a graceful quit"
-msgstr ""
+msgstr "Irten egokiro"
 
 #. / Command line option
 #: src/client/application/geary-application.vala:150
 msgid "Revoke all pinned TLS server certificates"
-msgstr ""
+msgstr "Errebokatu sastatutako TLS zerbitzari-ziurtagiri guztiak"
 
 #. / Command line option
 #: src/client/application/geary-application.vala:153
@@ -1055,13 +1055,13 @@ msgstr "%s aplikazioari buruz"
 #. <yamada.taro@example.com>
 #: src/client/application/geary-application.vala:514
 msgid "translator-credits"
-msgstr "Asier Sarasua Garmendia <asier.sarasua@gmail.com>"
+msgstr "translator-credits"
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
 #: src/client/application/geary-application.vala:798
 msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr ""
+msgstr "`--hidden` aukera zaharkituta dago eta kendu egingo da etorkizunean."
 
 #. / Command line warning, string substitution
 #. / is the given argument
@@ -1128,7 +1128,7 @@ msgstr "Zerbitzari-izena behar da"
 #. looked-up in the DNS.
 #: src/client/components/components-validator.vala:433
 msgid "Could not look up server name"
-msgstr ""
+msgstr "Ezin izan da zerbitzari-izena kontsultatu"
 
 #: src/client/components/main-toolbar.vala:139
 msgid "Mark conversation"
@@ -1365,111 +1365,112 @@ msgstr "Sakatu atzerako tekla aipamena ezabatzeko"
 
 #. Translators: This is list of keywords, separated by pipe ("|")
 #. characters, that suggest an attachment; since this is full-word
-#. checking, include all variants of each word.  No spaces are
-#. allowed.
-#: src/client/composer/composer-widget.vala:168
+#. checking, include all variants of each word. No spaces are
+#. allowed. The words will be converted to lower case based on
+#. locale and English versions included automatically.
+#: src/client/composer/composer-widget.vala:173
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
-msgstr ""
+msgstr "erantsi|eransten|erantsita|eranskina|eranskinak|atxiki|atxikita|atxikipena|atxikitzea|atxikimendua"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1181
+#: src/client/composer/composer-widget.vala:1189
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Zirriborro-mezua mantendu ala baztertu nahi duzu?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1211
+#: src/client/composer/composer-widget.vala:1219
 msgid "Do you want to discard this draft message?"
 msgstr "Zirriborro-mezua baztertu nahi duzu?"
 
-#: src/client/composer/composer-widget.vala:1330
+#: src/client/composer/composer-widget.vala:1338
 msgid "Send message with an empty subject and body?"
 msgstr "Bidali gairik eta gorputzik gabeko mezua?"
 
-#: src/client/composer/composer-widget.vala:1332
+#: src/client/composer/composer-widget.vala:1340
 msgid "Send message with an empty subject?"
 msgstr "Bidali gairik gabeko mezua?"
 
-#: src/client/composer/composer-widget.vala:1334
+#: src/client/composer/composer-widget.vala:1342
 msgid "Send message with an empty body?"
 msgstr "Bidali gorputzik gabeko mezua?"
 
-#: src/client/composer/composer-widget.vala:1338
+#: src/client/composer/composer-widget.vala:1351
 msgid "Send message without an attachment?"
 msgstr "Bidali eranskinik gabeko mezua?"
 
-#: src/client/composer/composer-widget.vala:1652
+#: src/client/composer/composer-widget.vala:1665
 #, c-format
 msgid "“%s” already attached for delivery."
-msgstr ""
+msgstr "“%s” dagoeneko erantsita dago bidalia izateko."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #. Translators: The first argument will be a
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1660
+#: src/client/composer/composer-widget.vala:1673
 #: src/client/conversation-viewer/conversation-email.vala:173
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1697
+#: src/client/composer/composer-widget.vala:1710
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s” ez da aurkitu."
 
-#: src/client/composer/composer-widget.vala:1703
+#: src/client/composer/composer-widget.vala:1716
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s” karpeta bat da."
 
-#: src/client/composer/composer-widget.vala:1709
+#: src/client/composer/composer-widget.vala:1722
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s” fitxategi hutsa da."
 
-#: src/client/composer/composer-widget.vala:1722
+#: src/client/composer/composer-widget.vala:1735
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s” ezin izan da ireki irakurtzeko."
 
-#: src/client/composer/composer-widget.vala:1730
+#: src/client/composer/composer-widget.vala:1743
 msgid "Cannot add attachment"
 msgstr "Ezin da eranskina gehitu"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1787
+#: src/client/composer/composer-widget.vala:1800
 #: src/client/conversation-viewer/conversation-email.vala:976
 #: src/client/util/util-email.vala:216 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Hona:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1793
+#: src/client/composer/composer-widget.vala:1806
 #: src/client/conversation-viewer/conversation-email.vala:981
 #: src/client/util/util-email.vala:221 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1799
+#: src/client/composer/composer-widget.vala:1812
 #: src/client/conversation-viewer/conversation-email.vala:986
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:1805
+#: src/client/composer/composer-widget.vala:1818
 msgid "Reply-To: "
 msgstr "Erantzun honi: "
 
-#: src/client/composer/composer-widget.vala:1945
+#: src/client/composer/composer-widget.vala:1958
 msgid "Select Color"
 msgstr "Hautatu kolorea"
 
@@ -1478,20 +1479,20 @@ msgstr "Hautatu kolorea"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2137
+#: src/client/composer/composer-widget.vala:2150
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s %2$s bidez"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2192
+#: src/client/composer/composer-widget.vala:2205
 msgid "_From:"
 msgstr "H_emendik:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2472
+#: src/client/composer/composer-widget.vala:2485
 msgid "Images"
 msgstr "Irudiak"
 
@@ -1669,35 +1670,35 @@ msgstr "Konexio ez-fidagarria: %s"
 #: src/client/dialogs/certificate-warning-dialog.vala:38
 #, c-format
 msgid "The identity of the %s mail server at %s:%u could not be verified."
-msgstr ""
+msgstr "%s posta-zerbitzariak %s:%u(e)n duen nortasuna ezin izan da egiaztatu."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:48
 msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
-msgstr ""
+msgstr "“Fidatu zerbitzari honetaz” edo “Fidatu beti zerbitzari honetaz” hautatzen bada, zure erabiltzaile-izena eta pasahitza segurua ez den moduan transmititzeko arriskua dago."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:56
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
-msgstr ""
+msgstr "“Ez fidatu zerbitzari honetaz” hautatzen bada, beharbada Geary-k ezin izango du zerbitzaria atzitu."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
-msgstr ""
+msgstr "Geary-k ez du posta-kontu hau gehituko edo eguneratuko."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:63
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
-msgstr ""
+msgstr "“Ez fidatu zerbitzari honetaz” hautatzen bada, Geary-k kontu hau atzitzeari utziko dio."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:69
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
-msgstr ""
+msgstr "Jarri harremanetan zure sistema-administratzailearekin edo zerbitzu-hornitzailearekin auzi horiei buruzko galderarik baduzu."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s certificate is not signed by a known authority"
@@ -2431,7 +2432,7 @@ msgstr "_Berregin"
 
 #: ui/composer-menus.ui:88 ui/composer-menus.ui:106
 msgid "Cu_t"
-msgstr "_Ebaki"
+msgstr "_Moztu"
 
 #: ui/composer-menus.ui:92 ui/composer-menus.ui:110
 #: ui/conversation-message-menus.ui:37
@@ -2551,7 +2552,7 @@ msgid ""
 "the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">mailing list</a> "
 "or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
 "\">new bug report</a>."
-msgstr ""
+msgstr "Arazoa larria edo iraunkorra bada, gorde xehetasun hauek eta bidali <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">posta-zerrendara</a> edo erantsi <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">akatsen jakinarazpen berri bati</a>."
 
 #: ui/components-inspector-error-view.ui:49
 msgid "Details:"
@@ -2741,7 +2742,7 @@ msgstr "_Hautatu denak"
 
 #: ui/conversation-message.ui:63
 msgid "From <email>"
-msgstr ""
+msgstr "Bidaltzailea: <email>"
 
 #: ui/conversation-message.ui:79 ui/conversation-message.ui:178
 msgid "1/1/1970\t"
@@ -2863,12 +2864,12 @@ msgstr "Aurrera"
 #: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:296
 msgctxt "shortcut window"
 msgid "Un-mark/mark read"
-msgstr ""
+msgstr "Markatu irakurritako gisa/kendu marka"
 
 #: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:303
 msgctxt "shortcut window"
 msgid "Mark/un-mark starred"
-msgstr ""
+msgstr "Markatu izarrarekin/kendu marka"
 
 #: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:310
 msgctxt "shortcut window"
@@ -3142,7 +3143,7 @@ msgstr "Aurrera"
 
 #: ui/main-toolbar.ui:265
 msgid "Toggle find bar"
-msgstr ""
+msgstr "Aktibatu/desaktibatu bilaketa-barra"
 
 #: ui/main-toolbar.ui:286
 msgid "_Archive"
@@ -3158,7 +3159,7 @@ msgstr "Markatu e_z-baztergarri gisa"
 
 #: ui/main-toolbar-menus.ui:32
 msgid "Empty _Spam…"
-msgstr ""
+msgstr "Hustu _spama…"
 
 #: ui/main-toolbar-menus.ui:36
 msgid "Empty _Trash…"
@@ -3186,12 +3187,13 @@ msgstr "Lineaz kanpo lanean"
 msgid ""
 "Your computer does not appear to be connected to the Internet.\n"
 "You will not be able to send or receive email until it is re-connected."
-msgstr ""
+msgstr "Badirudi zure ordenagailua ez dagoela konektatuta internetekin.\n"
+"Ezin izango duzu postarik bidali edo jaso berriro konektatu arte."
 
 #. Label and tooltip for offline infobar
 #: ui/main-window.ui:202
 msgid "You will not be able to send or receive email until re-connected."
-msgstr ""
+msgstr "Ezin izango duzu postarik bidali edo jaso berriro konektatu arte."
 
 #. Button label for retrying TLS cert validation
 #: ui/main-window.ui:249
@@ -3201,7 +3203,7 @@ msgstr "Egiaztatu"
 #. Button tooltip for retrying TLS cert validation
 #: ui/main-window.ui:253
 msgid "Check the security details for the connection"
-msgstr ""
+msgstr "Egiaztatu konexioaren segurtasun-xehetasunak"
 
 #. Infobar title when one or more accounts have a TLS cert validation error
 #: ui/main-window.ui:282
@@ -3213,7 +3215,8 @@ msgstr "Segurtasun-arazoa"
 msgid ""
 "An account has reported an untrusted server.\n"
 "Please check the server configuration and try again."
-msgstr ""
+msgstr "Kontu batek fidagarria ez den zerbitzari baten berri eman du.\n"
+"Egiaztatu zerbitzari-konfigurazioa eta saiatu berriro."
 
 #. Label and tooltip for TLS cert validation error infobar
 #: ui/main-window.ui:299
@@ -3235,7 +3238,8 @@ msgstr "Arazoa saioa hastean"
 msgid ""
 "An account has reported an incorrect login or password.\n"
 "Please check your login name and try again."
-msgstr ""
+msgstr "Kontu batek saio-hasiera edo pasahitz oker baten berri eman du.\n"
+"Egiaztatu erabiltzaile-izena eta saiatu berriro."
 
 #. Label and tooltip for authentication problem infobar
 #: ui/main-window.ui:396
@@ -3288,7 +3292,7 @@ msgstr "Erakutsi mezu berrien _jakinarazpenak"
 
 #: ui/preferences-dialog.ui:164
 msgid "_Watch for new mail when closed"
-msgstr ""
+msgstr "_Zaindu posta berririk iritsi den aplikazioa itxitakoan"
 
 #: ui/preferences-dialog.ui:168
 msgid "Geary will keep running after all windows are closed"
@@ -3301,4 +3305,3 @@ msgstr "Hobespenak"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary-ren eguneratzea abian…"
-
