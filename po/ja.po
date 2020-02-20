@@ -1,19 +1,19 @@
 # po/geary.pot
 # PO message string template file for Geary email client
-# Copyright 2016-2019 Software Freedom Conservancy Inc.
+# Copyright 2016-2020 Software Freedom Conservancy Inc.
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
 # masami chikahiro <cmasa.z321@gmail.com>, 2013.
 # pikatenor <pikatenor@gmail.com>, 2013.
 # UTUMI Hirosi <utuhiro78@yahoo.co.jp>, 2018.
-# sicklylife <translation@sicklylife.jp>, 2019.
+# sicklylife <translation@sicklylife.jp>, 2019-2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2020-02-16 20:26+0000\n"
-"PO-Revision-Date: 2019-09-20 23:30+0900\n"
+"PO-Revision-Date: 2020-02-20 23:30+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -225,11 +225,8 @@ msgid "True if we should display a short preview of each message."
 msgstr "各メッセージの短いプレビューを表示する場合は true にしてください。"
 
 #: desktop/org.gnome.Geary.gschema.xml:74
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Single-key shortcuts"
 msgid "Use single key shortcuts"
-msgstr "シングルキーショートカット"
+msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:75
 msgid ""
@@ -307,10 +304,8 @@ msgid "The last recorded size of the detached composer window."
 msgstr "最後に記録した、分離した作成ウィンドウのサイズです。"
 
 #: desktop/org.gnome.Geary.gschema.xml:132
-#, fuzzy
-#| msgid "Error sending email"
 msgid "Undo sending email delay"
-msgstr "メール送信時にエラーが発生しました"
+msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:133
 msgid ""
@@ -882,17 +877,13 @@ msgid "Perform a graceful quit"
 msgstr "正常に終了する"
 
 #: src/client/application/application-client.vala:134
-#, fuzzy
-#| msgid "Use %s to open a new composer window"
 msgid "Open a new window"
-msgstr "%s を使って新規作成ウィンドウを開くことができます"
+msgstr "新しいウィンドウを開く"
 
 #. / Command line option
 #: src/client/application/application-client.vala:137
-#, fuzzy
-#| msgid "Revoke all server certificates with TLS warnings"
 msgid "Revoke all pinned TLS server certificates"
-msgstr "TLS 警告のあるサーバー証明書をすべて失効させる"
+msgstr "ピン留めされた TLS サーバー証明書をすべて失効させる"
 
 #. / Command line option
 #: src/client/application/application-client.vala:140
@@ -994,30 +985,25 @@ msgstr "再接続するまでメールを送信しません"
 
 #. / Translators: Label for in-app notification
 #: src/client/application/application-controller.vala:568
-#, fuzzy
-#| msgid "Conversation Shortcuts"
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
-msgstr[0] "スレッドのショートカット"
+msgstr[0] "スレッドをマークしました"
 
 #. / Translators: Label for in-app notification
 #: src/client/application/application-controller.vala:574
-#, fuzzy
-#| msgid "No conversations found"
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
-msgstr[0] "スレッドが見つかりません"
+msgstr[0] "スレッドのマークを外しました"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
 #: src/client/application/application-controller.vala:600
 #: src/client/application/application-controller.vala:684
-#, fuzzy, c-format
-#| msgid "Conversation Shortcuts"
+#, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
-msgstr[0] "スレッドのショートカット"
+msgstr[0] "スレッドを %s へ移動しました"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
@@ -1026,56 +1012,48 @@ msgstr[0] "スレッドのショートカット"
 #. / substitution is the name of the destination folder.
 #: src/client/application/application-controller.vala:608
 #: src/client/application/application-controller.vala:630
-#, fuzzy, c-format
-#| msgid "Conversation Shortcuts"
+#, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
-msgstr[0] "スレッドのショートカット"
+msgstr[0] "スレッドを %s へ復元しました"
 
 #. / Translators: Label for in-app notification.
 #: src/client/application/application-controller.vala:651
-#, fuzzy
-#| msgid "Conversation Shortcuts"
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
-msgstr[0] "スレッドのショートカット"
+msgstr[0] "スレッドをアーカイブへ移動しました"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
 #: src/client/application/application-controller.vala:707
-#, fuzzy, c-format
-#| msgid "Message not saved"
+#, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
-msgstr[0] "メッセージが保存されませんでした"
+msgstr[0] "メッセージを %s へ復元しました"
 
 #. / Translators: Label for in-app notification.
 #: src/client/application/application-controller.vala:728
-#, fuzzy
-#| msgid "Message not saved"
 msgid "Message archived"
 msgid_plural "Messages archived"
-msgstr[0] "メッセージが保存されませんでした"
+msgstr[0] "メッセージをアーカイブへ移動しました"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
 #: src/client/application/application-controller.vala:763
-#, fuzzy, c-format
-#| msgid "Message not saved"
+#, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
-msgstr[0] "メッセージが保存されませんでした"
+msgstr[0] "メッセージを %s へ移動しました"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
 #: src/client/application/application-controller.vala:791
-#, fuzzy, c-format
-#| msgid "No conversations selected"
+#, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
-msgstr[0] "スレッドを選択していません"
+msgstr[0] "スレッドを %s としてラベル付けしました"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
@@ -1084,7 +1062,7 @@ msgstr[0] "スレッドを選択していません"
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
-msgstr[0] ""
+msgstr[0] "スレッドのラベル %s を外しました"
 
 #: src/client/application/application-controller.vala:1222
 #, c-format
@@ -1144,21 +1122,21 @@ msgstr ""
 #: src/client/application/application-controller.vala:1559
 #, c-format
 msgid "Email sent to %s"
-msgstr ""
+msgstr "%s へメールを送信しました"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
 #: src/client/application/application-controller.vala:2642
 #, c-format
 msgid "Email to %s queued for delivery"
-msgstr ""
+msgstr "%s へのメールが送信待機中です"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
 #: src/client/application/application-controller.vala:2706
 #, c-format
 msgid "Email to %s saved"
-msgstr ""
+msgstr "%s へのメールを保存しました"
 
 #. / Translators: A label for an in-app notification.
 #: src/client/application/application-controller.vala:2721
@@ -1171,7 +1149,7 @@ msgstr ""
 #: src/client/application/application-controller.vala:2764
 #, c-format
 msgid "Email to %s discarded"
-msgstr ""
+msgstr "%s へのメールを破棄しました"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
@@ -1179,7 +1157,7 @@ msgstr ""
 #: src/client/application/application-main-window.vala:560
 #, c-format
 msgid "%s — %s"
-msgstr ""
+msgstr "%s — %s"
 
 #: src/client/application/application-main-window.vala:967
 msgid "Labels"
@@ -1187,12 +1165,9 @@ msgstr "ラベル"
 
 #. / Translators: Primary text for a confirmation dialog
 #: src/client/application/application-main-window.vala:1306
-#, fuzzy
-#| msgid "Do you want to permanently delete this message?"
-#| msgid_plural "Do you want to permanently delete these messages?"
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
-msgstr[0] "このメッセージを完全に削除しますか?"
+msgstr[0] "このスレッドを完全に削除しますか?"
 
 #: src/client/application/application-main-window.vala:1311
 #: src/client/application/application-main-window.vala:1326
@@ -1306,17 +1281,15 @@ msgstr "3ペインビューを使う(_T)"
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:73
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Single-key shortcuts"
 msgid "Use _single key email shortcuts"
-msgstr "シングルキーショートカット"
+msgstr "シングルキーメールショートカットを使用する(_S)"
 
 #: src/client/components/components-preferences-window.vala:75
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
 msgstr ""
+"<Ctrl> を押すことなくメールを操作できるキーボードショートカットを有効にします"
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:86
@@ -1337,10 +1310,8 @@ msgstr "検索"
 
 #. / Translators: Search entry tooltip
 #: src/client/components/components-search-bar.vala:32
-#, fuzzy
-#| msgid "Search all mail in account for keywords (Ctrl+S)"
 msgid "Search all mail in account for keywords"
-msgstr "アカウント内のすべてのメールをキーワードで検索(Ctrl+S)"
+msgstr "アカウント内のすべてのメールをキーワードで検索"
 
 #. / Translators: Search entry placeholder, string
 #. / replacement is the name of an account
@@ -1394,12 +1365,12 @@ msgstr[0] "スレッドを移動"
 #: src/client/components/main-toolbar.vala:131
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
-msgstr[0] "スレッドをアーカイブに移動"
+msgstr[0] "スレッドをアーカイブへ移動"
 
 #: src/client/components/main-toolbar.vala:142
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
-msgstr[0] "スレッドをごみ箱に移動"
+msgstr[0] "スレッドをゴミ箱へ移動"
 
 #: src/client/components/main-toolbar.vala:152
 msgid "Delete conversation"
@@ -1721,7 +1692,7 @@ msgstr "言語を検索"
 #: src/client/conversation-list/conversation-list-view.vala:335
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
-msgstr[0] "スレッドをごみ箱に移動(_T)"
+msgstr[0] "スレッドをゴミ箱へ移動(_T)"
 
 #. / Translators: Context menu item
 #: src/client/conversation-list/conversation-list-view.vala:347
@@ -2207,7 +2178,7 @@ msgstr "迷惑メール"
 
 #: src/engine/api/geary-special-folder-type.vala:45
 msgid "Trash"
-msgstr "ごみ箱"
+msgstr "ゴミ箱"
 
 #: src/engine/api/geary-special-folder-type.vala:48
 msgid "Outbox"
@@ -2424,7 +2395,7 @@ msgstr "迷惑メール | スパム | スパムメール | ごみ | ゴミ"
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:916
 msgid "Trash | Rubbish | Rubbish Bin"
-msgstr "ごみ箱 | ゴミ箱"
+msgstr "ゴミ箱 | ゴミ箱"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
@@ -2444,12 +2415,13 @@ msgstr "アーカイブ"
 #: src/engine/rfc822/rfc822-message.vala:458
 #, c-format
 msgid "Could not determine mime type for “%s”."
-msgstr ""
+msgstr "“%s”の MIME タイプを確認できませんでした。"
 
 #: src/engine/rfc822/rfc822-message.vala:469
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
+"“%1$s”の MIME タイプ“%2$s”のコンテンツタイプを確認できませんでした。"
 
 #: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:126
 msgid "Add an account"
@@ -2624,11 +2596,8 @@ msgid "_Don’t Trust This Server"
 msgstr "このサーバーを信頼しない(_D)"
 
 #: ui/composer-headerbar.ui:23 ui/composer-headerbar.ui:107
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Detach composer window"
 msgid "Detach the composer from the window"
-msgstr "作成ウィンドウを分離する"
+msgstr "このウィンドウから作成ウィンドウを分離する"
 
 #: ui/composer-headerbar.ui:135
 msgid "_Send"
@@ -2648,10 +2617,8 @@ msgid "Insert the new link with this URL"
 msgstr "この URL の新規リンクを挿入"
 
 #: ui/composer-link-popover.ui:43
-#, fuzzy
-#| msgid "_Add"
 msgid "Add"
-msgstr "追加(_A)"
+msgstr "追加"
 
 #: ui/composer-link-popover.ui:47
 msgid "Link URL"
@@ -2663,10 +2630,8 @@ msgid "Update this link’s URL"
 msgstr "このリンクの URL を更新"
 
 #: ui/composer-link-popover.ui:62
-#, fuzzy
-#| msgid "_Update"
 msgid "Update"
-msgstr "更新(_U)"
+msgstr "更新"
 
 #: ui/composer-link-popover.ui:75
 msgid "Delete this link"
@@ -2718,7 +2683,7 @@ msgstr "宛先(_T)"
 
 #: ui/composer-widget.ui:158
 msgid "Show Cc, Bcc, and Reply-To fields"
-msgstr ""
+msgstr "Cc、Bcc、Reply-To フィールドを表示"
 
 #: ui/composer-widget.ui:219
 msgid "_Cc"
@@ -2745,69 +2710,44 @@ msgid "To add them as attachments"
 msgstr "添付ファイルとして追加します"
 
 #: ui/composer-widget.ui:602
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Bold text"
 msgid "Bold text"
 msgstr "テキストを太字にする"
 
 #: ui/composer-widget.ui:626
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Italicize text"
 msgid "Italic text"
 msgstr "テキストを斜体にする"
 
 #: ui/composer-widget.ui:650
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Underline text"
 msgid "Underline text"
 msgstr "テキストに下線を引く"
 
 #: ui/composer-widget.ui:674
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Strike text"
 msgid "Strikethrough text"
 msgstr "テキストに取り消し線を引く"
 
 #: ui/composer-widget.ui:707
-#, fuzzy
-#| msgid "Insert unordered list"
 msgid "Insert bulleted list"
-msgstr "番号無しリストを挿入"
+msgstr "箇条書きリストを挿入"
 
 #: ui/composer-widget.ui:731
-#, fuzzy
-#| msgid "Insert unordered list"
 msgid "Insert numbered list"
-msgstr "番号無しリストを挿入"
+msgstr "番号付き箇条書きリストを挿入"
 
 #: ui/composer-widget.ui:764
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Unquote text"
 msgid "Indent or quote text"
-msgstr "テキストの引用を解除する"
+msgstr "テキストのインデント/引用"
 
 #: ui/composer-widget.ui:788
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Unquote text"
 msgid "Un-indent or unquote text"
-msgstr "テキストの引用を解除する"
+msgstr "テキストのインデント/引用の解除"
 
 #: ui/composer-widget.ui:817
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Remove formatting"
 msgid "Remove text formatting"
-msgstr "書式を削除する"
+msgstr "テキストの書式を削除"
 
 #: ui/composer-widget.ui:836
 msgid "Change font type"
-msgstr ""
+msgstr "フォントの種類を変更"
 
 #: ui/composer-widget.ui:851
 msgid "Sans Serif"
@@ -2818,66 +2758,48 @@ msgid "Serif"
 msgstr "明朝体"
 
 #: ui/composer-widget.ui:873
-#, fuzzy
-#| msgid "_Fixed Width"
 msgid "Fixed Width"
-msgstr "等幅(_F)"
+msgstr "等幅"
 
 #: ui/composer-widget.ui:899
 msgid "Change font color"
-msgstr ""
+msgstr "フォントの色を変更"
 
 #: ui/composer-widget.ui:914
 msgid "Change font size"
-msgstr ""
+msgstr "フォントサイズを変更"
 
 #: ui/composer-widget.ui:949
-#, fuzzy
-#| msgid "Insert or update selection link (Ctrl+L)"
 msgid "Insert or update text link"
-msgstr "選択部分にリンクを挿入/更新(Ctrl+L)"
+msgstr "リンクを挿入/更新"
 
 #: ui/composer-widget.ui:973
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Insert an image"
 msgid "Insert an image"
-msgstr "画像を挿入する"
+msgstr "画像を挿入"
 
 #: ui/composer-widget.ui:1015
-#, fuzzy
-#| msgid "Undo last edit (Ctrl+Z)"
 msgid "Undo last edit"
-msgstr "元に戻す(Ctrl+Z)"
+msgstr "元に戻す"
 
 #: ui/composer-widget.ui:1039
-#, fuzzy
-#| msgid "Undo last edit (Ctrl+Z)"
 msgid "Redo last edit"
-msgstr "元に戻す(Ctrl+Z)"
+msgstr "やり直す"
 
 #: ui/composer-widget.ui:1068 ui/composer-widget.ui:1093
-#, fuzzy
-#| msgid "Choose a file"
 msgid "Attach a file"
-msgstr "ファイルを選択"
+msgstr "ファイルを添付"
 
 #: ui/composer-widget.ui:1117
-#, fuzzy
-#| msgid "Include Original Attachments"
 msgid "Add original attachments"
-msgstr "元の添付ファイルを含める"
+msgstr "元の添付ファイルを追加"
 
 #: ui/composer-widget.ui:1162
-#, fuzzy
-#| msgid "Move conversation"
-#| msgid_plural "Move conversations"
 msgid "More options"
-msgstr "スレッドを移動"
+msgstr "他のオプション"
 
 #: ui/composer-widget.ui:1182
 msgid "Show formatting toolbar"
-msgstr ""
+msgstr "書式ツールバーを表示"
 
 #: ui/composer-widget.ui:1200
 msgid "Select spell checking languages"
@@ -2912,10 +2834,8 @@ msgid "_Rich Text"
 msgstr "リッチテキスト(_R)"
 
 #: ui/composer-widget.ui:1308
-#, fuzzy
-#| msgid "_Rich Text"
 msgid "_Plain Text"
-msgstr "リッチテキスト(_R)"
+msgstr "プレーンテキスト(_P)"
 
 #: ui/components-attachment-pane.ui:29 ui/components-attachment-pane.ui:47
 msgid "Select all attachments"
@@ -2930,10 +2850,8 @@ msgid "Open selected attachments"
 msgstr "選択した添付ファイルを開く"
 
 #: ui/components-attachment-pane-menus.ui:17
-#, fuzzy
-#| msgid "_Save All"
 msgid "Save _All"
-msgstr "すべて保存(_S)"
+msgstr "すべて保存(_A)"
 
 #: ui/components-inspector-error-view.ui:33
 msgid ""
@@ -2960,19 +2878,19 @@ msgstr ""
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:37 ui/problem-details-dialog.ui:19
 msgid "Search for matching log entries"
-msgstr ""
+msgstr "一致するログエントリーを検索"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:63 ui/problem-details-dialog.ui:46
 msgid "Save logs entries and details"
-msgstr ""
+msgstr "ログエントリーと詳細を保存"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:84 ui/problem-details-dialog.ui:62
 msgid "Copy to clipboard"
-msgstr ""
+msgstr "クリップボードにコピー"
 
 #: ui/conversation-contact-popover.ui:146
 msgid "New Conversation…"
@@ -3078,7 +2996,7 @@ msgstr "ここから未読としてマーク(_H)"
 #. to the trash folder
 #: ui/conversation-email-menus.ui:50
 msgid "Move message to _Trash"
-msgstr "メッセージをごみ箱に移動(_T)"
+msgstr "メッセージをゴミ箱へ移動(_T)"
 
 #. Translators: Menu item to delete a single, specific message
 #: ui/conversation-email-menus.ui:57
@@ -3247,52 +3165,34 @@ msgid "Mark/un-mark starred"
 msgstr "星を付ける/外す"
 
 #: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:297
-#, fuzzy
-#| msgid "Archive conversation"
-#| msgid_plural "Archive conversations"
 msgctxt "shortcut window"
 msgid "Archive conversations"
-msgstr "スレッドをアーカイブに移動"
+msgstr "スレッドをアーカイブへ移動する"
 
 #: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:304
-#, fuzzy
-#| msgid "Move conversation"
-#| msgid_plural "Move conversations"
 msgctxt "shortcut window"
 msgid "Move conversations"
-msgstr "スレッドを移動"
+msgstr "スレッドを移動する"
 
 #: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:311
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Label conversation"
 msgctxt "shortcut window"
 msgid "Label conversations"
 msgstr "スレッドにラベルを付ける"
 
 #: ui/gtk/help-overlay.ui:80
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Trash conversation"
 msgctxt "shortcut window"
 msgid "Trash conversations"
-msgstr "スレッドをごみ箱に移動する"
+msgstr "スレッドをゴミ箱へ移動する"
 
 #: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:318
-#, fuzzy
-#| msgid "Mark conversation"
-#| msgid_plural "Mark conversations"
 msgctxt "shortcut window"
 msgid "Junk conversations"
-msgstr "スレッドをマーク"
+msgstr "スレッドを迷惑メールへ移動する"
 
 #: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:325
-#, fuzzy
-#| msgid "Delete conversation"
-#| msgid_plural "Delete conversations"
 msgctxt "shortcut window"
 msgid "Delete conversations"
-msgstr "スレッドを削除"
+msgstr "スレッドを削除する"
 
 #: ui/gtk/help-overlay.ui:104
 msgctxt "shortcut window"
@@ -3360,16 +3260,11 @@ msgid "Show keyboard shortcuts"
 msgstr "キーボードショートカットを表示する"
 
 #: ui/gtk/help-overlay.ui:206
-#, fuzzy
-#| msgid "Use %s to open a new composer window"
 msgctxt "shortcut window"
 msgid "Open a new window"
-msgstr "%s を使って新規作成ウィンドウを開くことができます"
+msgstr "新しいウィンドウを開く"
 
 #: ui/gtk/help-overlay.ui:213
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Close current window"
 msgctxt "shortcut window"
 msgid "Close the current window"
 msgstr "現在のウィンドウを閉じる"
@@ -3385,20 +3280,14 @@ msgid "Keyboard navigation"
 msgstr "キーボードナビゲーション"
 
 #: ui/gtk/help-overlay.ui:233
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Focus the previous pane"
 msgctxt "shortcut window"
 msgid "Go to next/previous pane"
-msgstr "フォーカスを前のペインに移動する"
+msgstr "次/前のペインに移動する"
 
 #: ui/gtk/help-overlay.ui:241
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Select the conversation up"
 msgctxt "shortcut window"
 msgid "Select next/previous conversation"
-msgstr "上のスレッドを選択する"
+msgstr "次/前のスレッドを選択する"
 
 #: ui/gtk/help-overlay.ui:248
 msgctxt "shortcut window"
@@ -3416,20 +3305,14 @@ msgid "Reply to sender "
 msgstr "送信者に返信する "
 
 #: ui/gtk/help-overlay.ui:332
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Find in current conversation"
 msgctxt "shortcut window"
 msgid "Find in current conversations"
 msgstr "現在のスレッド内を検索する"
 
 #: ui/gtk/help-overlay.ui:339
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Select the conversation up"
 msgctxt "shortcut window"
 msgid "Select next/previous conversations"
-msgstr "上のスレッドを選択する"
+msgstr "次/前のスレッドを選択する"
 
 #: ui/gtk/help-overlay.ui:351
 msgid "Composer Shortcuts"
@@ -3463,7 +3346,7 @@ msgstr "編集"
 #: ui/gtk/help-overlay.ui:398
 msgctxt "shortcut window"
 msgid "Move selection to the clipboard"
-msgstr "選択範囲をクリップボードに移動する"
+msgstr "選択範囲をクリップボードへ移動する"
 
 #: ui/gtk/help-overlay.ui:405
 msgctxt "shortcut window"
@@ -3560,9 +3443,6 @@ msgid "_Archive"
 msgstr "アーカイブ(_A)"
 
 #: ui/main-toolbar-menus.ui:21
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Toggle spam"
 msgid "Toggle as S_pam"
 msgstr "迷惑メールに指定/解除する"
 
@@ -3572,7 +3452,7 @@ msgstr "迷惑メールを空にする(_S)…"
 
 #: ui/main-toolbar-menus.ui:32
 msgid "Empty _Trash…"
-msgstr "ごみ箱を空にする(_T)…"
+msgstr "ゴミ箱を空にする(_T)…"
 
 #: ui/main-toolbar-menus.ui:38
 msgid "_Accounts"
@@ -3620,18 +3500,18 @@ msgstr "Geary を更新しています…"
 
 #~ msgid "Moved %d message to %s"
 #~ msgid_plural "Moved %d messages to %s"
-#~ msgstr[0] "%d 件のメッセージを %s に移動しました"
+#~ msgstr[0] "%d 件のメッセージを %s へ移動しました"
 
 #~ msgid "Error emptying %s"
 #~ msgstr "%s を空にするときにエラーが発生しました"
 
 #~ msgid "Trashed %d message"
 #~ msgid_plural "Trashed %d messages"
-#~ msgstr[0] "%d 件のメッセージをごみ箱に移動しました"
+#~ msgstr[0] "%d 件のメッセージをゴミ箱へ移動しました"
 
 #~ msgid "Archived %d message"
 #~ msgid_plural "Archived %d messages"
-#~ msgstr[0] "%d 件のメッセージをアーカイブに移動しました"
+#~ msgstr[0] "%d 件のメッセージをアーカイブへ移動しました"
 
 #~ msgid "Successfully sent mail to %s."
 #~ msgstr "%s にメールを送信しました。"
@@ -3692,7 +3572,7 @@ msgstr "Geary を更新しています…"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Archive conversation"
-#~ msgstr "スレッドをアーカイブに移動する"
+#~ msgstr "スレッドをアーカイブへ移動する"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Move conversation"
@@ -3700,7 +3580,7 @@ msgstr "Geary を更新しています…"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Move to Spam"
-#~ msgstr "迷惑メールに移動する"
+#~ msgstr "迷惑メールへ移動する"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Delete conversation"
@@ -3781,7 +3661,7 @@ msgstr "Geary を更新しています…"
 #~ msgstr[0] "下書きメッセージを閉じますか?"
 
 #~ msgid "Undo trash (Ctrl+Z)"
-#~ msgstr "ごみ箱から戻す(Ctrl+Z)"
+#~ msgstr "ゴミ箱から戻す(Ctrl+Z)"
 
 #~ msgid "Undo archive (Ctrl+Z)"
 #~ msgstr "アーカイブから戻す(Ctrl+Z)"
@@ -3791,7 +3671,7 @@ msgstr "Geary を更新しています…"
 
 #~ msgid "Move conversation to Trash (Delete, Backspace)"
 #~ msgid_plural "Move conversations to Trash (Delete, Backspace)"
-#~ msgstr[0] "スレッドをごみ箱に移動(Delete, Backspace)"
+#~ msgstr[0] "スレッドをゴミ箱へ移動(Delete, Backspace)"
 
 #~ msgid "Delete conversation (Shift+Delete)"
 #~ msgid_plural "Delete conversations (Shift+Delete)"
@@ -3895,7 +3775,7 @@ msgstr "Geary を更新しています…"
 #~ msgstr "%x"
 
 #~ msgid "_Trash"
-#~ msgstr "ごみ箱(_T)"
+#~ msgstr "ゴミ箱(_T)"
 
 #~ msgid "Send New _Message…"
 #~ msgstr "新規メッセージを送信(_M)…"
@@ -3917,7 +3797,7 @@ msgstr "Geary を更新しています…"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Archive"
-#~ msgstr "アーカイブに移動する"
+#~ msgstr "アーカイブへ移動する"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Move the conversation"
@@ -3971,16 +3851,16 @@ msgstr "Geary を更新しています…"
 #~ msgstr "アカウント(_C)"
 
 #~ msgid "Empty Spam or Trash folders"
-#~ msgstr "迷惑メールかごみ箱を空にする"
+#~ msgstr "迷惑メールかゴミ箱を空にする"
 
 #~ msgid "Delete conversations (Shift+Delete)"
 #~ msgstr "スレッドを削除(Shift+Delete)"
 
 #~ msgid "Move conversations to Trash (Delete, Backspace)"
-#~ msgstr "スレッドをごみ箱に移動(Delete, Backspace)"
+#~ msgstr "スレッドをゴミ箱へ移動(Delete, Backspace)"
 
 #~ msgid "Archive conversations (A)"
-#~ msgstr "スレッドをアーカイブに移動(A)"
+#~ msgstr "スレッドをアーカイブへ移動(A)"
 
 #~ msgid "Add label to conversations"
 #~ msgstr "スレッドにラベル付け"
@@ -4071,11 +3951,6 @@ msgstr "Geary を更新しています…"
 
 #~ msgid "        • Username or password incorrect.\n"
 #~ msgstr "        • ユーザー名またはパスワードが不正です。\n"
-
-#, fuzzy
-#~| msgid "_Mark as..."
-#~ msgid "_Mark as…"
-#~ msgstr "名前を付けてマーク(_M)"
 
 #~ msgid "_Label"
 #~ msgstr "ラベル(_L)"
