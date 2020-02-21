@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-02-16 20:26+0000\n"
-"PO-Revision-Date: 2020-02-20 23:30+0900\n"
+"POT-Creation-Date: 2020-02-20 18:05+0000\n"
+"PO-Revision-Date: 2020-02-22 00:00+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -1659,20 +1659,20 @@ msgstr "色を選択"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2439
+#: src/client/composer/composer-widget.vala:2440
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s (%2$s を通して使用)"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2495
+#: src/client/composer/composer-widget.vala:2496
 msgid "_From:"
 msgstr "差出人(_F):"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2800
+#: src/client/composer/composer-widget.vala:2801
 msgid "Images"
 msgstr "画像"
 
@@ -1766,20 +1766,20 @@ msgstr "これは偽装メールアドレスである可能性があります"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:438
+#: src/client/conversation-viewer/conversation-message.vala:439
 msgid "No sender"
 msgstr "送信者なし"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:830
+#: src/client/conversation-viewer/conversation-message.vala:831
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:950
+#: src/client/conversation-viewer/conversation-message.vala:951
 msgid "Image"
 msgstr "画像"
 
@@ -2395,7 +2395,7 @@ msgstr "迷惑メール | スパム | スパムメール | ごみ | ゴミ"
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:916
 msgid "Trash | Rubbish | Rubbish Bin"
-msgstr "ゴミ箱 | ゴミ箱"
+msgstr "ごみ箱 | ゴミ箱"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
@@ -2420,8 +2420,7 @@ msgstr "“%s”の MIME タイプを確認できませんでした。"
 #: src/engine/rfc822/rfc822-message.vala:469
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
-msgstr ""
-"“%1$s”の MIME タイプ“%2$s”のコンテンツタイプを確認できませんでした。"
+msgstr "“%1$s”の MIME タイプ“%2$s”のコンテンツタイプを確認できませんでした。"
 
 #: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:126
 msgid "Add an account"
@@ -2597,7 +2596,7 @@ msgstr "このサーバーを信頼しない(_D)"
 
 #: ui/composer-headerbar.ui:23 ui/composer-headerbar.ui:107
 msgid "Detach the composer from the window"
-msgstr "このウィンドウから作成ウィンドウを分離する"
+msgstr "ウィンドウから作成ウィンドウを分離する"
 
 #: ui/composer-headerbar.ui:135
 msgid "_Send"
@@ -2739,7 +2738,7 @@ msgstr "テキストのインデント/引用"
 
 #: ui/composer-widget.ui:788
 msgid "Un-indent or unquote text"
-msgstr "テキストのインデント/引用の解除"
+msgstr "テキストのインデント/引用を解除"
 
 #: ui/composer-widget.ui:817
 msgid "Remove text formatting"
@@ -3444,7 +3443,7 @@ msgstr "アーカイブ(_A)"
 
 #: ui/main-toolbar-menus.ui:21
 msgid "Toggle as S_pam"
-msgstr "迷惑メールに指定/解除する"
+msgstr "迷惑メールに指定/解除(_P)"
 
 #: ui/main-toolbar-menus.ui:28
 msgid "Empty _Spam…"
