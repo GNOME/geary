@@ -1,0 +1,168 @@
+# Turkish translation for gnome-tour.
+# Copyright (C) 2020 gnome-tour's COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-tour package.
+#
+# Sabri Ünal <libreajans@gmail.com>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-tour master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
+"POT-Creation-Date: 2020-02-16 12:21+0000\n"
+"PO-Revision-Date: 2020-02-19 17:41+0300\n"
+"Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
+"Language-Team: Türkçe <gnome-turk@gnome.org>\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 2.2.4\n"
+"X-POOTLE-MTIME: 1429307949.000000\n"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:7
+msgid "GNOME Tour"
+msgstr "GNOME Tur"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:8
+msgid "GNOME Tour and Greeter."
+msgstr "GNOME Tur ve Karşılayıcı."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:10
+msgid "A guided tour and greeter for GNOME."
+msgstr "GNOME için tur kılavuzu ve karşılayıcı."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:15
+msgid "Main Window"
+msgstr "Ana Pencere"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:34
+msgid "The GNOME Project"
+msgstr "GNOME Projesi"
+
+#: data/org.gnome.Tour.desktop.in.in:3
+msgid "Tour"
+msgstr "Tur"
+
+#: data/org.gnome.Tour.desktop.in.in:4
+msgid "Greeter & Tour"
+msgstr "Karşılayıcı ve Tur"
+
+#: data/org.gnome.Tour.desktop.in.in:9
+msgid "Gnome;GTK;"
+msgstr "Gnome;GTK;"
+
+#: src/widgets/pages/welcome.rs:34
+msgid ""
+"Hi there! If you are new to GNOME, you can take the tour to learn some "
+"essential features."
+msgstr ""
+"Merhaba! GNOME’da yeniyseniz, bazı önemli özellikleri öğrenmek için tura "
+"katılabilirsiniz."
+
+#: src/widgets/pages/welcome.rs:44
+msgid "Take the Tour"
+msgstr "Tura Katıl"
+
+#: src/widgets/pages/welcome.rs:51
+msgid "No Thanks"
+msgstr "Hayır, Teşekkürler"
+
+#: src/widgets/headerbar.rs:30
+msgid "Close"
+msgstr "Kapat"
+
+#: src/widgets/headerbar.rs:32 src/widgets/headerbar.rs:67
+msgid "Next"
+msgstr "İleri"
+
+#: src/widgets/headerbar.rs:57
+msgid "Welcome Tour"
+msgstr "Tura Hoş Geldiniz"
+
+#: src/widgets/window.rs:94
+msgid "Activities Overview"
+msgstr "Etkinlikler Genel Görünümü"
+
+#: src/widgets/window.rs:95
+msgid "Open Activities to start apps"
+msgstr "Uygulamaları başlatmak için Etkinlikler’i açın"
+
+#: src/widgets/window.rs:96
+msgid "You can also view open windows, search and use workspaces."
+msgstr ""
+"Ayrıca açık pencereleri görüntüleyebilir, çalışma alanlarını arayabilir ve "
+"kullanabilirsiniz."
+
+#: src/widgets/window.rs:101
+msgid "Search"
+msgstr "Arama"
+
+#: src/widgets/window.rs:102
+msgid "In the Activities Overview, just start typing to search"
+msgstr "Etkinlikler Genel Görünümünde aramak için yazmaya başlayın"
+
+#: src/widgets/window.rs:103
+msgid ""
+"Search can be used to launch apps, find settings, do calculations and much "
+"more."
+msgstr ""
+"Arama, uygulamaları başlatmak, ayarları bulmak, hesaplamalar yapmak ve daha "
+"çoğu için kullanılabilir."
+
+#: src/widgets/window.rs:108
+msgid "Date & Time"
+msgstr "Tarih ve Zaman"
+
+# Bu çeviriden emin değilim
+#: src/widgets/window.rs:109
+msgid "Click the time to see your now and next"
+msgstr "Şimdiyi ve geleceği görmek için saate tıklayın"
+
+#: src/widgets/window.rs:110
+msgid ""
+"This includes notifications, media controls, calendar events, the weather "
+"and world clocks."
+msgstr ""
+"Bu; bildirimleri, ortam denetimlerini, takvim etkinliklerini, hava durumunu "
+"ve dünya saatlerini içerir."
+
+#: src/widgets/window.rs:115
+msgid "System Menu"
+msgstr "Sistem Menüsü"
+
+#: src/widgets/window.rs:116
+msgid "View system information and settings"
+msgstr "Sistem bilgisini ve ayarları görüntüle"
+
+#: src/widgets/window.rs:117
+msgid "Get an overview of the system status and quickly change settings."
+msgstr ""
+"Sistem durumuyla ilgili genel bilgi alın ve ayarları hızlıca değiştirin."
+
+#: src/widgets/window.rs:121
+msgid "Software"
+msgstr "Yazılım"
+
+#: src/widgets/window.rs:122
+msgid "Find and install apps"
+msgstr "Uygulamaları bul ve kur"
+
+#: src/widgets/window.rs:123
+msgid ""
+"The Software app makes it easy to find and install all the apps you need."
+msgstr ""
+"Yazılım uygulaması, gereksindiğiniz tüm uygulamaları bulmayı ve yüklemeyi "
+"kolaylaştırır."
+
+#: src/widgets/window.rs:128
+msgid "Learn More"
+msgstr "Daha Çoğunu Öğren"
+
+#: src/widgets/window.rs:129
+msgid "That's it! To learn more, see the Help"
+msgstr "Bu kadar! Daha çok bilgi edinmek için Yardım’a bakın"
+
+#: src/widgets/window.rs:130
+msgid "The help app contains information, tips and tricks."
+msgstr "Yardım uygulaması bilgi, ipuçları ve püf noktaları içerir."
