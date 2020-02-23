@@ -88,26 +88,33 @@ public class Composer.EmailEntry : Gtk.Entry {
     }
 
     private bool on_key_press(Gtk.Widget widget, Gdk.EventKey event) {
-        bool ret = Gdk.EVENT_PROPAGATE;
+        bool propagate = Gdk.EVENT_PROPAGATE;
         if (event.keyval == Gdk.Key.Tab) {
+            // If there is a completion entry selected, then use that
             ContactEntryCompletion? completion = (
                 get_completion() as ContactEntryCompletion
             );
             if (completion != null) {
                 completion.trigger_selection();
                 composer.child_focus(Gtk.DirectionType.TAB_FORWARD);
-                ret = Gdk.EVENT_STOP;
-            }
-        } else {
-            // Keyboard shortcuts for undo/redo won't work when the
-            // completion UI is visible unless we explicitly check for
-            // them there. This may be related to the
-            // single-key-shortcut handling hack in the MainWindow.
-            Gtk.Window? window = get_toplevel() as Gtk.Window;
-            if (window != null) {
-                ret = window.activate_key(event);
+                propagate = Gdk.EVENT_STOP;
             }
         }
-        return ret;
+
+        if (propagate == Gdk.EVENT_PROPAGATE &&
+            event.keyval != Gdk.Key.Escape) {
+            // Keyboard shortcuts for undo/redo won't work when the
+            // completion UI is visible unless we explicitly check for
+            // them there.
+            //
+            // However, don't forward it on if the button pressed is
+            // Escape, so that the completion is hidden if present
+            // before the composer is closed.
+            Gtk.Window? window = get_toplevel() as Gtk.Window;
+            if (window != null) {
+                propagate = window.activate_key(event);
+            }
+        }
+        return propagate;
     }
 }

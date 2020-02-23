@@ -50,7 +50,7 @@ public class Composer.LinkPopover : Gtk.Popover {
     private Gtk.Button update;
 
     [GtkChild]
-    private Gtk.Button remove;
+    private new Gtk.Button remove;
 
     private Geary.TimeoutManager validation_timeout;
 
