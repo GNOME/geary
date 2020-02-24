@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-01-23 16:42+0000\n"
-"PO-Revision-Date: 2020-02-04 15:02+0700\n"
+"POT-Creation-Date: 2020-02-20 18:01+0000\n"
+"PO-Revision-Date: 2020-02-23 20:59+0700\n"
 "Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: Indonesian\n"
 "Language: id\n"
@@ -35,7 +35,7 @@ msgstr "Kirim berkas memakai Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:12
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:555
-#: src/client/application/application-main-window.vala:547
+#: src/client/application/application-main-window.vala:555
 msgid "Geary"
 msgstr "Geary"
 
@@ -608,56 +608,56 @@ msgid_plural "%d days back"
 msgstr[0] "%d hari ke belakang"
 msgstr[1] "%d hari ke belakang"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:252
-#: src/client/application/application-main-window.vala:2043
+#: src/client/accounts/accounts-editor-list-pane.vala:255
+#: src/client/application/application-main-window.vala:2053
 msgid "Undo"
 msgstr "Tak Jadi"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:261
-#: src/client/application/application-main-window.vala:2030
+#: src/client/accounts/accounts-editor-list-pane.vala:264
+#: src/client/application/application-main-window.vala:2036
 msgid "Redo"
 msgstr "Jadi Lagi"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:355
-#: src/client/accounts/accounts-editor-list-pane.vala:443
+#: src/client/accounts/accounts-editor-list-pane.vala:358
+#: src/client/accounts/accounts-editor-list-pane.vala:446
 #: src/client/accounts/accounts-editor-row.vala:279
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:359
-#: src/client/accounts/accounts-editor-list-pane.vala:447
+#: src/client/accounts/accounts-editor-list-pane.vala:362
+#: src/client/accounts/accounts-editor-list-pane.vala:450
 #: src/client/accounts/accounts-editor-row.vala:283
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:363
-#: src/client/accounts/accounts-editor-list-pane.vala:451
+#: src/client/accounts/accounts-editor-list-pane.vala:366
+#: src/client/accounts/accounts-editor-list-pane.vala:454
 #: src/client/accounts/accounts-editor-row.vala:287
 msgid "Yahoo"
 msgstr "Yahoo"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:381
+#: src/client/accounts/accounts-editor-list-pane.vala:384
 msgid "This account has been disabled"
 msgstr "Akun ini telah dinonaktifkan"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:390
+#: src/client/accounts/accounts-editor-list-pane.vala:393
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Akun ini mengalami masalah dan tidak tersedia"
 
 #. Translators: Label for adding a generic email account
-#: src/client/accounts/accounts-editor-list-pane.vala:440
+#: src/client/accounts/accounts-editor-list-pane.vala:443
 msgid "Other email providers"
 msgstr "Penyedia surel lain"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:557
+#: src/client/accounts/accounts-editor-list-pane.vala:560
 #, c-format
 msgid "Account “%s” removed"
 msgstr "Akun \"%s\" dihapus"
@@ -665,7 +665,7 @@ msgstr "Akun \"%s\" dihapus"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:564
+#: src/client/accounts/accounts-editor-list-pane.vala:567
 #, c-format
 msgid "Account “%s” restored"
 msgstr "Akun \"%s\" dipulihkan"
@@ -950,7 +950,7 @@ msgstr "Rilis distribusi"
 msgid "Installation prefix"
 msgstr "Prefiks instalasi"
 
-#: src/client/application/application-client.vala:566
+#: src/client/application/application-client.vala:587
 #, c-format
 msgid "About %s"
 msgstr "Tentang %s"
@@ -958,7 +958,7 @@ msgstr "Tentang %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:570
+#: src/client/application/application-client.vala:591
 msgid "translator-credits"
 msgstr ""
 "Andika Triwidada <andika@gmail.com>, 2012, 2013, 2016, 2017, 2019\n"
@@ -967,37 +967,37 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:938
+#: src/client/application/application-client.vala:937
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "Opsi '--hidden' usang dan akan dihapus di masa mendatang."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:971
+#: src/client/application/application-client.vala:970
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Argumen program tidak dikenal: \"%s\""
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:457
+#: src/client/application/application-controller.vala:458
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "Terjadi masalah saat mengirim surel untuk %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:461
+#: src/client/application/application-controller.vala:462
 msgid "Email will not be sent until re-connected"
 msgstr "Surel tidak akan dikirim sampai menyambung ulang"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:567
+#: src/client/application/application-controller.vala:568
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "Percakapan ditandai"
 msgstr[1] "Percakapan ditandai"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:573
+#: src/client/application/application-controller.vala:574
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "Tanda percakapan dihapus"
@@ -1006,8 +1006,8 @@ msgstr[1] "Tanda percakapan dihapus"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:599
-#: src/client/application/application-controller.vala:683
+#: src/client/application/application-controller.vala:600
+#: src/client/application/application-controller.vala:684
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -1019,8 +1019,8 @@ msgstr[1] "Percakapan dipindah ke %s"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:607
-#: src/client/application/application-controller.vala:629
+#: src/client/application/application-controller.vala:608
+#: src/client/application/application-controller.vala:630
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
@@ -1028,7 +1028,7 @@ msgstr[0] "Percakapan dipulihkan ke %s"
 msgstr[1] "Percakapan dipulihkan ke %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:650
+#: src/client/application/application-controller.vala:651
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "Percakapan diarsipkan"
@@ -1036,7 +1036,7 @@ msgstr[1] "Percakapan diarsipkan"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:706
+#: src/client/application/application-controller.vala:707
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
@@ -1044,7 +1044,7 @@ msgstr[0] "Pesan dipulihkan ke %s"
 msgstr[1] "Pesan dipulihkan ke %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:727
+#: src/client/application/application-controller.vala:728
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "Pesan diarsipkan"
@@ -1053,7 +1053,7 @@ msgstr[1] "Pesan diarsipkan"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:762
+#: src/client/application/application-controller.vala:763
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1063,7 +1063,7 @@ msgstr[1] "Pesan dipindah ke %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:790
+#: src/client/application/application-controller.vala:791
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1073,19 +1073,19 @@ msgstr[1] "Percakapan dilabeli sebagai %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:798
+#: src/client/application/application-controller.vala:799
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
 msgstr[0] "Label %s dihapus dari percakapan"
 msgstr[1] "Label %s dihapus dari percakapan"
 
-#: src/client/application/application-controller.vala:1221
+#: src/client/application/application-controller.vala:1222
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Tak bisa membuka basis data bagi %s"
 
-#: src/client/application/application-controller.vala:1222
+#: src/client/application/application-controller.vala:1223
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1109,20 +1109,20 @@ msgstr ""
 "Membangun ulang basis data akan menghancurkan semua surel lokal dan "
 "lampirannya. <b>Surat pada server Anda tak akan terpengaruh.</b>"
 
-#: src/client/application/application-controller.vala:1224
+#: src/client/application/application-controller.vala:1225
 msgid "_Rebuild"
 msgstr "_Bangun Ulang"
 
-#: src/client/application/application-controller.vala:1224
+#: src/client/application/application-controller.vala:1225
 msgid "E_xit"
 msgstr "_Keluar"
 
-#: src/client/application/application-controller.vala:1234
+#: src/client/application/application-controller.vala:1235
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Tak bisa membangun ulang basis data bagi \"%s\""
 
-#: src/client/application/application-controller.vala:1235
+#: src/client/application/application-controller.vala:1236
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1135,34 +1135,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1558
+#: src/client/application/application-controller.vala:1559
 #, c-format
 msgid "Email sent to %s"
 msgstr "Surel dikirim ke %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2641
+#: src/client/application/application-controller.vala:2642
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Surel ke %s diantrikan untuk pengiriman"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2705
+#: src/client/application/application-controller.vala:2706
 #, c-format
 msgid "Email to %s saved"
 msgstr "Surel ke %s disimpan"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2720
-#: src/client/application/application-controller.vala:2778
+#: src/client/application/application-controller.vala:2721
+#: src/client/application/application-controller.vala:2779
 msgid "Composer could not be restored"
 msgstr "Penyusun tidak dapat dipulihkan"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2763
+#: src/client/application/application-controller.vala:2764
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Surel ke %s dibuang"
@@ -1170,53 +1170,53 @@ msgstr "Surel ke %s dibuang"
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:552
+#: src/client/application/application-main-window.vala:560
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:961
+#: src/client/application/application-main-window.vala:967
 msgid "Labels"
 msgstr "Label"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1300
+#: src/client/application/application-main-window.vala:1306
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Anda hendak membuang percakapan ini secara permanen?"
 msgstr[1] "Anda hendak membuang percakapan-percakapan ini secara permanen?"
 
-#: src/client/application/application-main-window.vala:1305
-#: src/client/application/application-main-window.vala:1320
+#: src/client/application/application-main-window.vala:1311
+#: src/client/application/application-main-window.vala:1326
 msgid "Delete"
 msgstr "Hapus"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1315
+#: src/client/application/application-main-window.vala:1321
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Anda mau membuang pesan ini secara permanen?"
 msgstr[1] "Anda mau membuang pesan ini secara permanen?"
 
-#: src/client/application/application-main-window.vala:1328
+#: src/client/application/application-main-window.vala:1334
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Kosongkan semua surel dari folder %s Anda?"
 
-#: src/client/application/application-main-window.vala:1331
+#: src/client/application/application-main-window.vala:1337
 msgid "This removes the email from Geary and your email server."
 msgstr "Ini menghapus surel dari Geary dan server surel Anda."
 
-#: src/client/application/application-main-window.vala:1332
+#: src/client/application/application-main-window.vala:1338
 msgid "This cannot be undone."
 msgstr "Ini tidak bisa dibatalkan."
 
-#: src/client/application/application-main-window.vala:1333
+#: src/client/application/application-main-window.vala:1339
 #, c-format
 msgid "Empty %s"
 msgstr "Kosongkan %s"
 
-#: src/client/application/application-main-window.vala:1663
+#: src/client/application/application-main-window.vala:1669
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1227,7 +1227,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1826
+#: src/client/composer/composer-widget.vala:1834
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1366,37 +1366,37 @@ msgstr "Suatu nama server diperlukan"
 msgid "Could not look up server name"
 msgstr "Tidak bisa mencari nama server"
 
-#: src/client/components/main-toolbar.vala:138
+#: src/client/components/main-toolbar.vala:116
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Tandai percakapan"
 msgstr[1] "Tandai percakapan"
 
-#: src/client/components/main-toolbar.vala:143
+#: src/client/components/main-toolbar.vala:121
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Tambahkan label ke percakapan"
 msgstr[1] "Tambahkan label ke percakapan"
 
-#: src/client/components/main-toolbar.vala:148
+#: src/client/components/main-toolbar.vala:126
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Pindahkan percakapan"
 msgstr[1] "Pindahkan percakapan"
 
-#: src/client/components/main-toolbar.vala:153
+#: src/client/components/main-toolbar.vala:131
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Arsipkan percakapan"
 msgstr[1] "Arsipkan percakapan"
 
-#: src/client/components/main-toolbar.vala:164
+#: src/client/components/main-toolbar.vala:142
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Pindahkan percakapan ke Tong Sampah"
 msgstr[1] "Pindahkan percakapan ke Tong Sampah"
 
-#: src/client/components/main-toolbar.vala:174
+#: src/client/components/main-toolbar.vala:152
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Hapus percakapan"
@@ -1545,15 +1545,15 @@ msgstr "_Simpan"
 msgid "_Keep"
 msgstr "_Pertahankan"
 
-#: src/client/composer/composer-link-popover.vala:149
+#: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr "URL tautan tidak diformat secara benar, mis. http://contoh.com"
 
-#: src/client/composer/composer-link-popover.vala:156
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid link URL"
 msgstr "URL tautan tidak valid"
 
-#: src/client/composer/composer-link-popover.vala:156
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid email address"
 msgstr "Alamat surel tidak valid"
 
@@ -1562,19 +1562,19 @@ msgstr "Alamat surel tidak valid"
 msgid "New Message"
 msgstr "Pesan Baru"
 
-#: src/client/composer/composer-widget.vala:214
+#: src/client/composer/composer-widget.vala:217
 msgid "Saved"
 msgstr "Disimpan"
 
-#: src/client/composer/composer-widget.vala:215
+#: src/client/composer/composer-widget.vala:218
 msgid "Saving"
 msgstr "Menyimpan"
 
-#: src/client/composer/composer-widget.vala:216
+#: src/client/composer/composer-widget.vala:219
 msgid "Error saving"
 msgstr "Galat saat menyimpan"
 
-#: src/client/composer/composer-widget.vala:217
+#: src/client/composer/composer-widget.vala:220
 msgid "Press Backspace to delete quote"
 msgstr "Tekan Backspace untuk menghapus kutip"
 
@@ -1583,7 +1583,7 @@ msgstr "Tekan Backspace untuk menghapus kutip"
 #. checking, include all variants of each word. No spaces are
 #. allowed. The words will be converted to lower case based on
 #. locale and English versions included automatically.
-#: src/client/composer/composer-widget.vala:233
+#: src/client/composer/composer-widget.vala:236
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1595,90 +1595,90 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:832
+#: src/client/composer/composer-widget.vala:843
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Anda mau menyimpan atau membuang draf pesan ini?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:858
+#: src/client/composer/composer-widget.vala:869
 msgid "Do you want to discard this draft message?"
 msgstr "Anda mau membuang draf pesan ini?"
 
-#: src/client/composer/composer-widget.vala:1492
+#: src/client/composer/composer-widget.vala:1503
 msgid "Send message with an empty subject and body?"
 msgstr "Kirim pesan dengan subjek dan isi kosong?"
 
-#: src/client/composer/composer-widget.vala:1494
+#: src/client/composer/composer-widget.vala:1505
 msgid "Send message with an empty subject?"
 msgstr "Kirim pesan dengan subjek kosong?"
 
-#: src/client/composer/composer-widget.vala:1496
+#: src/client/composer/composer-widget.vala:1507
 msgid "Send message with an empty body?"
 msgstr "Kirim pesan tanpa isi?"
 
-#: src/client/composer/composer-widget.vala:1505
+#: src/client/composer/composer-widget.vala:1516
 msgid "Send message without an attachment?"
 msgstr "Kirim pesan tanpa lampiran?"
 
-#: src/client/composer/composer-widget.vala:1818
+#: src/client/composer/composer-widget.vala:1820
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "\"%s\" sudah dilampirkan untuk pengiriman."
 
-#: src/client/composer/composer-widget.vala:1848
-#: src/client/composer/composer-widget.vala:1898
+#: src/client/composer/composer-widget.vala:1856
+#: src/client/composer/composer-widget.vala:1906
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "\"%s\" adalah berkas kosong."
 
-#: src/client/composer/composer-widget.vala:1886
+#: src/client/composer/composer-widget.vala:1894
 #, c-format
 msgid "“%s” could not be found."
 msgstr "\"%s\" tidak ditemukan."
 
-#: src/client/composer/composer-widget.vala:1892
+#: src/client/composer/composer-widget.vala:1900
 #, c-format
 msgid "“%s” is a folder."
 msgstr "\"%s\" adalah sebuah folder."
 
-#: src/client/composer/composer-widget.vala:1911
+#: src/client/composer/composer-widget.vala:1919
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "\"%s\" tak bisa dibuka untuk dibaca."
 
-#: src/client/composer/composer-widget.vala:1919
+#: src/client/composer/composer-widget.vala:1927
 msgid "Cannot add attachment"
 msgstr "Tak bisa menambah lampiran"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1976
+#: src/client/composer/composer-widget.vala:1984
 #: src/client/conversation-viewer/conversation-email.vala:559
 #: src/client/util/util-email.vala:235 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Ke:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1982
+#: src/client/composer/composer-widget.vala:1990
 #: src/client/conversation-viewer/conversation-email.vala:564
 #: src/client/util/util-email.vala:240 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1988
+#: src/client/composer/composer-widget.vala:1996
 #: src/client/conversation-viewer/conversation-email.vala:569
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:1994
+#: src/client/composer/composer-widget.vala:2002
 msgid "Reply-To: "
 msgstr "Balas-Ke: "
 
-#: src/client/composer/composer-widget.vala:2247
+#: src/client/composer/composer-widget.vala:2254
 msgid "Select Color"
 msgstr "Pilih Warna"
 
@@ -1687,32 +1687,32 @@ msgstr "Pilih Warna"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2442
+#: src/client/composer/composer-widget.vala:2440
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2498
+#: src/client/composer/composer-widget.vala:2496
 msgid "_From:"
 msgstr "_Dari:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2804
+#: src/client/composer/composer-widget.vala:2801
 msgid "Images"
 msgstr "Citra"
 
-#: src/client/composer/spell-check-popover.vala:109
+#: src/client/composer/spell-check-popover.vala:125
 msgid "Remove this language from the preferred list"
 msgstr "Hapus bahasa ini dari daftar yang disukai"
 
-#: src/client/composer/spell-check-popover.vala:113
+#: src/client/composer/spell-check-popover.vala:129
 msgid "Add this language to the preferred list"
 msgstr "Tambahkan bahasa ini ke daftar yang disukai"
 
-#: src/client/composer/spell-check-popover.vala:200
+#: src/client/composer/spell-check-popover.vala:225
 msgid "Search for more languages"
 msgstr "Cari lebih banyak bahasa lagi"
 
@@ -1796,44 +1796,44 @@ msgstr "Alamat surel ini mungkin telah dipalsukan"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:465
+#: src/client/conversation-viewer/conversation-message.vala:439
 msgid "No sender"
 msgstr "Tidak ada pengirim"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:959
+#: src/client/conversation-viewer/conversation-message.vala:831
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1081
+#: src/client/conversation-viewer/conversation-message.vala:951
 msgid "Image"
 msgstr "Citra"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:91
+#: src/client/conversation-viewer/conversation-viewer.vala:83
 msgid "No conversations selected"
 msgstr "Tidak ada percakapan yang dipilih"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:95
+#: src/client/conversation-viewer/conversation-viewer.vala:87
 msgid "Selecting a conversation from the list will display it here"
 msgstr "Memilih suatu percakapan dari daftar akan menampilkannya di sini"
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:104
+#: src/client/conversation-viewer/conversation-viewer.vala:96
 msgid "Multiple conversations selected"
 msgstr "Beberapa percakapan dipilih"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:108
+#: src/client/conversation-viewer/conversation-viewer.vala:100
 msgid "Choosing an action will apply to all selected conversations"
 msgstr "Memilih suatu aksi akan berlaku ke semua percakapan yang dipilih"
 
@@ -1841,20 +1841,20 @@ msgstr "Memilih suatu aksi akan berlaku ke semua percakapan yang dipilih"
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:117
-#: src/client/conversation-viewer/conversation-viewer.vala:130
+#: src/client/conversation-viewer/conversation-viewer.vala:109
+#: src/client/conversation-viewer/conversation-viewer.vala:122
 msgid "No conversations found"
 msgstr "Tidak ditemukan percakapan"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:121
+#: src/client/conversation-viewer/conversation-viewer.vala:113
 msgid "This folder does not contain any conversations"
 msgstr "Folder ini tak memuat percakapan apapun"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:134
+#: src/client/conversation-viewer/conversation-viewer.vala:126
 msgid "Your search returned no results, try refining your search terms"
 msgstr ""
 "Pencarian Anda tidak mengembalikan hasil, cobalah memperbaiki istilah yang "
@@ -2658,26 +2658,30 @@ msgid "Save and Close"
 msgstr "Simpan dan Tutup"
 
 #. Note that this button and the Update button will never be shown at the same time to the user.
-#: ui/composer-link-popover.ui:41
+#: ui/composer-link-popover.ui:42
 msgid "Insert the new link with this URL"
 msgstr "Sisipkan tautan baru dengan URL ini"
 
-#: ui/composer-link-popover.ui:52
+#: ui/composer-link-popover.ui:43
+msgid "Add"
+msgstr "Tambah"
+
+#: ui/composer-link-popover.ui:47
 msgid "Link URL"
 msgstr "URL Tautan"
 
 #. Note that this button and the Insert button will never be shown at the same time to the user.
-#: ui/composer-link-popover.ui:66
+#: ui/composer-link-popover.ui:61
 msgid "Update this link’s URL"
 msgstr "Mutakhirkan URL tautan ini"
 
-#: ui/composer-link-popover.ui:86
+#: ui/composer-link-popover.ui:62
+msgid "Update"
+msgstr "Mutakhiran"
+
+#: ui/composer-link-popover.ui:75
 msgid "Delete this link"
 msgstr "Hapus tautan ini"
-
-#: ui/composer-link-popover.ui:106
-msgid "Open this link"
-msgstr "Buka tautan ini"
 
 #: ui/composer-menus.ui:8
 msgid "_Undo"
@@ -2836,8 +2840,8 @@ msgid "Add original attachments"
 msgstr "Tambahkan lampiran asli"
 
 #: ui/composer-widget.ui:1162
-msgid "Enable or disable rich text mode"
-msgstr "Aktifkan atau nonaktifkan mode rich text"
+msgid "More options"
+msgstr "Opsi lanjutan"
 
 #: ui/composer-widget.ui:1182
 msgid "Show formatting toolbar"
@@ -2847,35 +2851,35 @@ msgstr "Tampilkan bilah alat pemformatan"
 msgid "Select spell checking languages"
 msgstr "Pilih bahasa pemeriksaan ejaan"
 
-#: ui/composer-widget.ui:1264
+#: ui/composer-widget.ui:1263
 msgid "S_ans Serif"
 msgstr "S_ans Serif"
 
-#: ui/composer-widget.ui:1269
+#: ui/composer-widget.ui:1268
 msgid "S_erif"
 msgstr "S_erif"
 
-#: ui/composer-widget.ui:1274
+#: ui/composer-widget.ui:1273
 msgid "_Fixed Width"
 msgstr "Lebar _Tetap"
 
-#: ui/composer-widget.ui:1284
+#: ui/composer-widget.ui:1283
 msgid "_Small"
 msgstr "_Kecil"
 
-#: ui/composer-widget.ui:1289
+#: ui/composer-widget.ui:1288
 msgid "_Medium"
 msgstr "_Sedang"
 
-#: ui/composer-widget.ui:1294
+#: ui/composer-widget.ui:1293
 msgid "Lar_ge"
 msgstr "_Besar"
 
-#: ui/composer-widget.ui:1304
+#: ui/composer-widget.ui:1303
 msgid "_Rich Text"
 msgstr "_Rich Text"
 
-#: ui/composer-widget.ui:1309
+#: ui/composer-widget.ui:1308
 msgid "_Plain Text"
 msgstr "Teks _Polos"
 
@@ -3117,19 +3121,19 @@ msgstr "Balas ke:"
 msgid "Subject"
 msgstr "Perihal"
 
-#: ui/conversation-message.ui:502
+#: ui/conversation-message.ui:501
 msgid "Show Images"
 msgstr "Tampilkan Gambar"
 
-#: ui/conversation-message.ui:515
+#: ui/conversation-message.ui:514
 msgid "Always Show From Sender"
 msgstr "Selalu Tampilkan Dari Pengirim"
 
-#: ui/conversation-message.ui:543
+#: ui/conversation-message.ui:542
 msgid "Remote images not shown"
 msgstr "Citra remote tidak ditampilkan"
 
-#: ui/conversation-message.ui:560
+#: ui/conversation-message.ui:559
 msgid "Only show remote images from senders you trust."
 msgstr "Hanya tampilkan citra remote dari pengirim yang Anda percayai."
 
@@ -3453,32 +3457,32 @@ msgctxt "shortcut window"
 msgid "Insert a link"
 msgstr "Sisipkan tautan"
 
-#: ui/main-toolbar.ui:23
+#: ui/main-toolbar.ui:24
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Susun Pesan"
 
-#: ui/main-toolbar.ui:61
+#: ui/main-toolbar.ui:62
 msgid "Toggle search bar"
 msgstr "Jungkitkan bilah pencarian"
 
-#: ui/main-toolbar.ui:113
+#: ui/main-toolbar.ui:114
 msgid "Reply"
 msgstr "Balas"
 
-#: ui/main-toolbar.ui:136
+#: ui/main-toolbar.ui:137
 msgid "Reply All"
 msgstr "Balas Semua"
 
-#: ui/main-toolbar.ui:159
+#: ui/main-toolbar.ui:160
 msgid "Forward"
 msgstr "Teruskan"
 
-#: ui/main-toolbar.ui:264
+#: ui/main-toolbar.ui:265
 msgid "Toggle find bar"
 msgstr "Jungkitkan bilah pencarian"
 
-#: ui/main-toolbar.ui:285
+#: ui/main-toolbar.ui:286
 msgid "_Archive"
 msgstr "_Arsip"
 
@@ -3525,6 +3529,12 @@ msgstr "Otentik_asikan"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Pemutakhiran Geary sedang berlangsung…"
+
+#~ msgid "Open this link"
+#~ msgstr "Buka tautan ini"
+
+#~ msgid "Enable or disable rich text mode"
+#~ msgstr "Aktifkan atau nonaktifkan mode rich text"
 
 #~ msgid "C_olor"
 #~ msgstr "_Warna"
