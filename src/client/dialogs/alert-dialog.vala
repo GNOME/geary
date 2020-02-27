@@ -108,7 +108,6 @@ class QuestionDialog : AlertDialog {
 
         checkbutton = new Gtk.CheckButton.with_mnemonic(checkbox_label);
         checkbutton.active = checkbox_default;
-        checkbutton.halign = Gtk.Align.END;
         checkbutton.toggled.connect(on_checkbox_toggled);
 
         get_message_area().pack_start(checkbutton);
