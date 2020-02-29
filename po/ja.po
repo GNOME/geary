@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-02-20 18:05+0000\n"
-"PO-Revision-Date: 2020-02-22 00:00+0900\n"
+"POT-Creation-Date: 2020-02-25 11:10+0000\n"
+"PO-Revision-Date: 2020-02-29 20:30+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -131,7 +131,7 @@ msgstr "メッセージを作成"
 
 #: desktop/org.gnome.Geary.desktop.in.in:26
 msgid "New Window"
-msgstr ""
+msgstr "新しいウィンドウ"
 
 #: desktop/org.gnome.Geary.gschema.xml:8
 msgid "Maximize window"
