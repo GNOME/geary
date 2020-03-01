@@ -209,6 +209,36 @@ public class Record {
     }
 
     /**
+     * Copy constructor.
+     *
+     * Copies all properties of the given record except its next
+     * record.
+     */
+    public Record.copy(Record other) {
+        this.domain = other.domain;
+        this.account = other.account;
+        this.service = other.service;
+        this.folder = other.folder;
+        this.flags = other.flags;
+        this.message = other.message;
+        this.source_filename = other.source_filename;
+        this.source_line_number = other.source_line_number;
+        this.source_function = other.source_function;
+        this.levels = other.levels;
+        this.timestamp = other.timestamp;
+
+        // Kept null deliberately so that we don't get a stack blowout
+        // copying large record chains and code that does copy records
+        // can copy only a fixed number.
+        // this.next
+
+        this.states = other.states;
+        this.filled = other.filled;
+        this.old_log_api = other.old_log_api;
+    }
+
+
+    /**
      * Sets the well-known logging source properties.
      *
      * Call this before trying to access {@link account}, {@link
