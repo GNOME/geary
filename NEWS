@@ -1,3 +1,50 @@
+Version 3.35.90
+~~~~~~~~~~~~~~~
+Released: 2020-03-01
+
+Changes:
+
+ * Support drag and drop and copy and paste images in composer
+ * Updated composer UI to new responsive design
+ * Updated preferences UI to use Handy widgets
+ * Add hidden prefs for minimising in-app notifications
+ * Ported engine to to GMime 3.x
+ * Update WebKitGTK minimum version to 2.26
+ * Drop libunity dependency in favour of internal implementation
+ * Several bug fixes and code cleanups
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Adam Dingle
+ * Adrien Plazas
+ * Chris Heywood
+ * James Westman
+ * Konstantin Kharlamov
+ * Mart Raudsepp
+ * Niels De Graef
+ * Tobias Sette
+ * Алексей Шилин
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Alexandre Franke (fr)
+ * Anders Jonsson (sv)
+ * Andika Triwidada (id)
+ * Daniel Mustieles (es)
+ * Emin Tufan Çetin (tr)
+ * Enrico Nicoletto (pt_BR)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Kukuh Syafaat (id)
+ * Nathan Follens (nl)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * sicklylife (ja)
+
+And for the user manual:
+ * Daniel Mustieles (es)
+ * Piotr Drąg (pl)
+
 Version 3.35.2
 ~~~~~~~~~~~~~~~
 Released: 2019-10-11
