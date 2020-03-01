@@ -62,6 +62,9 @@ internal class Application.Controller : Geary.BaseObject {
     /** Account management for the application. */
     public Accounts.Manager account_manager { get; private set; }
 
+    /** Plugin manager for the application. */
+    public PluginManager plugins { get; private set; }
+
     /** Certificate management for the application. */
     public Application.CertificateManager certificate_manager {
         get; private set;
@@ -81,8 +84,6 @@ internal class Application.Controller : Geary.BaseObject {
 
     private UpgradeDialog upgrade_dialog;
     private Folks.IndividualAggregator folks;
-
-    private PluginManager plugin_manager;
 
     // List composers that have not yet been closed
     private Gee.Collection<Composer.Widget> composer_widgets =
@@ -162,13 +163,13 @@ internal class Application.Controller : Geary.BaseObject {
 
         }
 
-        this.plugin_manager = new PluginManager(application);
-        this.plugin_manager.notifications = new NotificationContext(
+        this.plugins = new PluginManager(application);
+        this.plugins.notifications = new NotificationContext(
             this.avatars,
             this.get_contact_store_for_account,
             this.should_notify_new_messages
         );
-        this.plugin_manager.load();
+        this.plugins.load();
 
         // Migrate configuration if necessary.
         Migrate.xdg_config_dir(this.application.get_user_data_directory(),
@@ -299,7 +300,7 @@ internal class Application.Controller : Geary.BaseObject {
         }
 
         // Release general resources now there's no more UI
-        this.plugin_manager.notifications.clear_folders();
+        this.plugins.notifications.clear_folders();
         this.avatars.close();
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
@@ -860,7 +861,7 @@ internal class Application.Controller : Geary.BaseObject {
     internal void register_window(MainWindow window) {
         window.retry_service_problem.connect(on_retry_service_problem);
         window.folder_list.set_new_messages_monitor(
-            this.plugin_manager.notifications
+            this.plugins.notifications
         );
     }
 
@@ -1265,12 +1266,12 @@ internal class Application.Controller : Geary.BaseObject {
                                                 Geary.SpecialFolderType old_type,
                                                 Geary.SpecialFolderType new_type) {
         // Update notifications
-        this.plugin_manager.notifications.remove_folder(folder);
+        this.plugins.notifications.remove_folder(folder);
         if (folder.special_folder_type == Geary.SpecialFolderType.INBOX ||
             (folder.special_folder_type == Geary.SpecialFolderType.NONE &&
              is_inbox_descendant(folder))) {
             Geary.AccountInformation info = folder.account.information;
-            this.plugin_manager.notifications.add_folder(
+            this.plugins.notifications.add_folder(
                 folder, this.accounts.get(info).cancellable
             );
         }
@@ -1300,7 +1301,7 @@ internal class Application.Controller : Geary.BaseObject {
                     folder.open_async.begin(NO_DELAY, cancellable);
 
                     // Always notify for new messages in the Inbox
-                    this.plugin_manager.notifications.add_folder(
+                    this.plugins.notifications.add_folder(
                         folder, cancellable
                     );
                     break;
@@ -1309,7 +1310,7 @@ internal class Application.Controller : Geary.BaseObject {
                     // Only notify for new messages in non-special
                     // descendants of the Inbox
                     if (is_inbox_descendant(folder)) {
-                        this.plugin_manager.notifications.add_folder(
+                        this.plugins.notifications.add_folder(
                             folder, cancellable
                         );
                     }
@@ -1331,14 +1332,14 @@ internal class Application.Controller : Geary.BaseObject {
                 switch (folder.special_folder_type) {
                 case Geary.SpecialFolderType.INBOX:
                     context.inbox = null;
-                    this.plugin_manager.notifications.remove_folder(folder);
+                    this.plugins.notifications.remove_folder(folder);
                     break;
 
                 case Geary.SpecialFolderType.NONE:
                     // Only notify for new messages in non-special
                     // descendants of the Inbox
                     if (is_inbox_descendant(folder)) {
-                        this.plugin_manager.notifications.remove_folder(folder);
+                        this.plugins.notifications.remove_folder(folder);
                     }
                     break;
                 }
@@ -1373,7 +1374,7 @@ internal class Application.Controller : Geary.BaseObject {
         Geary.Folder? selected = (
             (window != null) ? window.selected_folder : null
         );
-        NotificationContext notifications = this.plugin_manager.notifications;
+        NotificationContext notifications = this.plugins.notifications;
         if (selected != null && (
                 !notifications.get_folders().contains(selected) ||
                 should_notify_new_messages(selected))) {
@@ -1570,7 +1571,7 @@ internal class Application.Controller : Geary.BaseObject {
 
         AccountContext? context = this.accounts.get(service.account);
         if (context != null) {
-            this.plugin_manager.notifications.email_sent(context.account, sent);
+            this.plugins.notifications.email_sent(context.account, sent);
         }
     }
 
