@@ -23,7 +23,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
 
 
     /** Returns the window's associated client application instance. */
-    public new Application.Client application {
+    public new Application.Client? application {
         get { return (Application.Client) base.get_application(); }
         set { base.set_application(value); }
     }
@@ -115,32 +115,35 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         window_actions.add_action_entries(WINDOW_ACTIONS, this);
         insert_action_group(Action.Window.GROUP_NAME, window_actions);
 
-        Application.Configuration config = this.application.config;
-        config.bind(
-            Application.Configuration.AUTOSELECT_KEY,
-            autoselect,
-            "state"
-        );
-        config.bind(
-            Application.Configuration.DISPLAY_PREVIEW_KEY,
-            display_preview,
-            "state"
-        );
-        config.bind(
-            Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY,
-            three_pane_view,
-            "state"
-        );
-        config.bind(
-            Application.Configuration.SINGLE_KEY_SHORTCUTS,
-            single_key_shortucts,
-            "state"
-        );
-        config.bind(
-            Application.Configuration.STARTUP_NOTIFICATIONS_KEY,
-            startup_notifications,
-            "state"
-        );
+        Application.Client? application = this.application;
+        if (application != null) {
+            Application.Configuration config = application.config;
+            config.bind(
+                Application.Configuration.AUTOSELECT_KEY,
+                autoselect,
+                "state"
+            );
+            config.bind(
+                Application.Configuration.DISPLAY_PREVIEW_KEY,
+                display_preview,
+                "state"
+            );
+            config.bind(
+                Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY,
+                three_pane_view,
+                "state"
+            );
+            config.bind(
+                Application.Configuration.SINGLE_KEY_SHORTCUTS,
+                single_key_shortucts,
+                "state"
+            );
+            config.bind(
+                Application.Configuration.STARTUP_NOTIFICATIONS_KEY,
+                startup_notifications,
+                "state"
+            );
+        }
 
         this.delete_event.connect(on_delete);
     }
@@ -151,7 +154,10 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
 
     private bool on_delete() {
         // Sync startup notification option with file state
-        this.application.autostart.sync_with_config();
+        Application.Client? application = this.application;
+        if (application != null) {
+            application.autostart.sync_with_config();
+        }
         return Gdk.EVENT_PROPAGATE;
     }
 
