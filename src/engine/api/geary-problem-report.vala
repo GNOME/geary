@@ -26,8 +26,37 @@ public class Geary.ProblemReport : Object {
         if (error != null) {
             this.error = new ErrorContext(error);
         }
-        this.earliest_log = Logging.get_earliest_record();
-        this.latest_log = Logging.get_latest_record();
+        Logging.Record next_original = Logging.get_earliest_record();
+        Logging.Record last_original = Logging.get_latest_record();
+        if (next_original != null) {
+            Logging.Record copy = this.earliest_log = new Logging.Record.copy(
+                next_original
+            );
+            next_original = next_original.next;
+            while (next_original != null &&
+                   next_original != last_original) {
+                copy.next = new Logging.Record.copy(next_original);
+                copy = copy.next;
+                next_original = next_original.next;
+            }
+            this.latest_log = copy;
+        }
+    }
+
+    ~ProblemReport() {
+        // Manually clear each log record in a loop if we have the
+        // only reference to it so that finalisation of each is an
+        // iterative process. If we just nulled out the record,
+        // finalising the first would cause second to be finalised,
+        // which would finalise the third, etc., and the recursion
+        // could cause the stack to blow right out for large log
+        // buffers.
+        Logging.Record? earliest = this.earliest_log;
+        this.earliest_log = null;
+        this.latest_log = null;
+        while (earliest != null) {
+            earliest = earliest.next;
+        }
     }
 
     /** Returns a string representation of the report, for debugging only. */
