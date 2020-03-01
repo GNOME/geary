@@ -11,23 +11,23 @@
 public class Application.PluginManager : GLib.Object {
 
 
-    public NotificationContext notifications { get; set; }
-
     private Client application;
     private Peas.Engine engine;
-    private Peas.ExtensionSet? notification_extensions = null;
     private bool is_shutdown = false;
 
+    private Peas.ExtensionSet notification_extensions;
+    private NotificationContext notifications;
 
-    public PluginManager(Client application) {
+
+    public PluginManager(Client application,
+                         NotificationContext notifications) {
         this.application = application;
         this.engine = Peas.Engine.get_default();
         this.engine.add_search_path(
             application.get_app_plugins_dir().get_path(), null
         );
-    }
 
-    public void load() {
+        this.notifications = notifications;
         this.notification_extensions = new Peas.ExtensionSet(
             this.engine,
             typeof(Plugin.Notification),
