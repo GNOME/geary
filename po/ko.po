@@ -1,0 +1,160 @@
+# Korean translation for gnome-tour.
+# Copyright (C) 2020 gnome-tour's COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-tour package.
+# DaeHyun Sung <sungdh86@gmail.com>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-tour master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
+"POT-Creation-Date: 2020-02-23 14:23+0000\n"
+"PO-Revision-Date: 2020-02-24 21:33+0900\n"
+"Language-Team: Korean <gnome-kr@googlegroups.com>\n"
+"Language: ko\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Last-Translator: DaeHyun Sung <sungdh86+git@gmail.com>\n"
+"X-Generator: Poedit 2.3\n"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:7
+msgid "GNOME Tour"
+msgstr "그놈 투어"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:8
+msgid "GNOME Tour and Greeter."
+msgstr "그놈 투어와 안내자."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:10
+msgid "A guided tour and greeter for GNOME."
+msgstr "그놈을 위한 안내 투어와 안내자."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:15
+msgid "Main Window"
+msgstr "메인 창"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:34
+msgid "The GNOME Project"
+msgstr "그놈 프로젝트"
+
+#: data/org.gnome.Tour.desktop.in.in:3
+msgid "Tour"
+msgstr "투어"
+
+#: data/org.gnome.Tour.desktop.in.in:4
+msgid "Greeter & Tour"
+msgstr "안내자 & 투어"
+
+#: data/org.gnome.Tour.desktop.in.in:9
+msgid "Gnome;GTK;"
+msgstr "Gnome;GTK;그놈;"
+
+#: src/widgets/pages/welcome.rs:34
+msgid ""
+"Hi there! If you are new to GNOME, you can take the tour to learn some "
+"essential features."
+msgstr ""
+"여어, 안녕! 그놈을 새로 접하는 경우, 둘러보기를 통해 몇가지 필수 기능을 배"
+"울 수 있습니다."
+
+#: src/widgets/pages/welcome.rs:44
+msgid "Take the Tour"
+msgstr "둘러보기"
+
+#: src/widgets/pages/welcome.rs:51
+msgid "No Thanks"
+msgstr "괜찮습니다"
+
+#: src/widgets/headerbar.rs:30
+msgid "Close"
+msgstr "닫기"
+
+#: src/widgets/headerbar.rs:32 src/widgets/headerbar.rs:67
+msgid "Next"
+msgstr "다음"
+
+#: src/widgets/headerbar.rs:57
+msgid "Welcome Tour"
+msgstr "투어를 환영합니다"
+
+#: src/widgets/window.rs:94
+msgid "Activities Overview"
+msgstr "활동 개요"
+
+#: src/widgets/window.rs:95
+msgid "Open Activities to start apps"
+msgstr "앱 시작을 위한 활동 열기"
+
+#: src/widgets/window.rs:96
+msgid "You can also view open windows, search and use workspaces."
+msgstr "창 열기, 검색, 워크스페이스 사용을 볼 수 있습니다."
+
+#: src/widgets/window.rs:101
+msgid "Search"
+msgstr "검색"
+
+#: src/widgets/window.rs:102
+msgid "In the Activities Overview, just start typing to search"
+msgstr "활동 개요에서, 검색을 위해 검색어를 입력 시작합니다"
+
+#: src/widgets/window.rs:103
+msgid ""
+"Search can be used to launch apps, find settings, do calculations and much "
+"more."
+msgstr ""
+"검색은 앱을 실행하고, 설정을 찾기, 계산을 수행하는 등 더 많은 것을 사용 될 "
+"수 있습니다."
+
+#: src/widgets/window.rs:108
+msgid "Date & Time"
+msgstr "날짜 & 시간"
+
+#: src/widgets/window.rs:109
+msgid "Click the time to see your now and next"
+msgstr "지금과 다음을 보려면 시간을 클릭하십시오"
+
+#: src/widgets/window.rs:110
+msgid ""
+"This includes notifications, media controls, calendar events, the weather "
+"and world clocks."
+msgstr ""
+"여기에는 알림, 미디어 제어, 캘린더 이벤트, 날씨와 세계 시계등이 들어 있"
+"습니다."
+
+#: src/widgets/window.rs:115
+msgid "System Menu"
+msgstr "시스템 메뉴"
+
+#: src/widgets/window.rs:116
+msgid "View system information and settings"
+msgstr "시스템 정보와 설정 보기"
+
+#: src/widgets/window.rs:117
+msgid "Get an overview of the system status and quickly change settings."
+msgstr "시스템 상태의 개요를 얻고, 빠르게 설정을 바꿉니다."
+
+#: src/widgets/window.rs:121
+msgid "Software"
+msgstr "소프트웨어"
+
+#: src/widgets/window.rs:122
+msgid "Find and install apps"
+msgstr "앱 찾기 및 설치"
+
+#: src/widgets/window.rs:123
+msgid ""
+"The Software app makes it easy to find and install all the apps you need."
+msgstr "소프트웨어 앱은 필요한 모든 앱을 찾거나 설치하는 것을 쉽게 해줍니다."
+
+#: src/widgets/window.rs:128
+msgid "Learn More"
+msgstr "더 알아보기"
+
+#: src/widgets/window.rs:129
+msgid "That's it! To learn more, see the Help"
+msgstr "이것입니다! 더 알아보려면, 도움말을 보십시오"
+
+#: src/widgets/window.rs:130
+msgid "The help app contains information, tips and tricks."
+msgstr "도움말 앱은 정보, 팁과 비법이 들어있습니다."
