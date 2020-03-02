@@ -47,19 +47,17 @@ public class Application.PluginManager : GLib.Object {
                 }
             });
 
-        // Load built-in plugins by default
         foreach (Peas.PluginInfo info in this.engine.get_plugin_list()) {
+            string name = info.get_module_name();
             try {
-                info.is_available();
-                if (info.is_builtin()) {
-                    debug("Loading built-in plugin: %s", info.get_name());
-                    this.engine.load_plugin(info);
-                } else {
-                    debug("Not loading plugin: %s", info.get_name());
+                if (info.is_available()) {
+                    if (info.is_builtin()) {
+                        debug("Loading built-in plugin: %s", name);
+                        this.engine.load_plugin(info);
+                    }
                 }
             } catch (GLib.Error err) {
-                warning("Plugin %s not available: %s",
-                        info.get_name(), err.message);
+                warning("Plugin %s not available: %s", name, err.message);
             }
         }
     }

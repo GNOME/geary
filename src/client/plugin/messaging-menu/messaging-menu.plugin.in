@@ -1,5 +1,5 @@
 [Plugin]
-Module=libmessaging-menu-geary.so
+Module=messaging-menu-geary
 Name=Messaging Menu
 Description=Displays Unity Messaging Menu notifications for new email
 Builtin=true
