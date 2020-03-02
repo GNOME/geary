@@ -632,7 +632,8 @@ public class Application.Client : Gtk.Application {
         yield this.present();
 
         Components.PreferencesWindow prefs = new Components.PreferencesWindow(
-            get_active_main_window()
+            get_active_main_window(),
+            this.controller.plugins
         );
         prefs.show();
     }

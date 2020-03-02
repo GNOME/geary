@@ -133,6 +133,7 @@ geary_client_dependencies = [
   libhandy,
   libmath,
   libpeas,
+  libpeas_gtk,
   libsecret,
   libsoup,
   libxml,
