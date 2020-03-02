@@ -10,13 +10,15 @@
  * Provides a context for notification plugins.
  *
  * The context provides an interface for notification plugins to
- * interface with the Geary client application. Notification plugins
- * will be passed an instance of this class as the `context`
- * parameter.
+ * interface with the Geary client application. Plugins that implement
+ * the plugins will be passed an instance of this class as the
+ * `context` property.
  *
  * Plugins can connect to the "notify::count", the {@link
  * new_messages_arrived} or the {@link new_messages_retired} signals
  * and update their state as these change.
+ *
+ * @see Plugin.NotificationPlugin
  */
 public class Application.NotificationContext : Geary.BaseObject {
 
