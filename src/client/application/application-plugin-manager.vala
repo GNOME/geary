@@ -23,9 +23,9 @@ public class Application.PluginManager : GLib.Object {
                          NotificationContext notifications) {
         this.application = application;
         this.engine = Peas.Engine.get_default();
-        this.engine.add_search_path(
-            application.get_app_plugins_dir().get_path(), null
-        );
+
+        string builtin_path = application.get_app_plugins_dir().get_path();
+        this.engine.add_search_path(builtin_path, null);
 
         this.notifications = notifications;
         this.notification_extensions = new Peas.ExtensionSet(
@@ -51,7 +51,8 @@ public class Application.PluginManager : GLib.Object {
             string name = info.get_module_name();
             try {
                 if (info.is_available()) {
-                    if (info.is_builtin()) {
+                    if (info.is_builtin() &&
+                        info.get_module_dir().has_prefix(builtin_path)) {
                         debug("Loading built-in plugin: %s", name);
                         this.engine.load_plugin(info);
                     }
