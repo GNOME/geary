@@ -25,6 +25,7 @@ public class Application.Configuration : Geary.BaseObject {
     public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
     public const string FORMATTING_TOOLBAR_VISIBLE = "formatting-toolbar-visible";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
+    public const string OPTIONAL_PLUGINS = "optional-plugins";
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string SINGLE_KEY_SHORTCUTS = "single-key-shortcuts";
     public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
@@ -202,6 +203,20 @@ public class Application.Configuration : Geary.BaseObject {
     /** Sets the saved size of the composer window. */
     public void set_composer_window_size(int[] value) {
         this.settings.set_value(COMPOSER_WINDOW_SIZE_KEY, value);
+    }
+
+    /**
+     * Returns list of optional plugins to load by default
+     */
+    public string[] get_optional_plugins() {
+        return this.settings.get_strv(OPTIONAL_PLUGINS);
+    }
+
+    /**
+     * Sets the list of optional plugins to load by default
+     */
+    public void set_optional_plugins(string[] value) {
+        this.settings.set_strv(OPTIONAL_PLUGINS, value);
     }
 
     /**
