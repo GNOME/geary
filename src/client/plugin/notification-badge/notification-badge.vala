@@ -16,14 +16,14 @@ public void peas_register_types(TypeModule module) {
 }
 
 /** Updates Unity application badge with total new message count. */
-public class Plugin.NotificationBadge : Notification {
+public class Plugin.NotificationBadge : Geary.BaseObject, Notification {
 
 
-    public override Application.Client application {
+    public Application.Client application {
         get; construct set;
     }
 
-    public override Application.NotificationContext context {
+    public Application.NotificationContext context {
         get; construct set;
     }
 

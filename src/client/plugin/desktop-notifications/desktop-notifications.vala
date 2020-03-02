@@ -18,17 +18,17 @@ public void peas_register_types(TypeModule module) {
 /**
  * Manages standard desktop application notifications.
  */
-public class Plugin.DesktopNotifications : Notification {
+public class Plugin.DesktopNotifications : Geary.BaseObject, Notification {
 
 
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.SUBJECT;
 
-    public override Application.Client application {
+    public Application.Client application {
         get; construct set;
     }
 
-    public override Application.NotificationContext context {
+    public Application.NotificationContext context {
         get; construct set;
     }
 
