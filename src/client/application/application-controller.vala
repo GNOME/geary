@@ -1351,15 +1351,16 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     private bool should_notify_new_messages(Geary.Folder folder) {
-        // A monitored folder must be selected to squelch notifications;
-        // if conversation list is at top of display, don't display
-        // and don't display if main window has top-level focus
+        // Don't show notifications if the top of the folder's
+        // conversations is visible. That is, if there is a main
+        // window, it's focused, the folder is selected, and the
+        // conversation list is at the top.
         MainWindow? window = this.application.last_active_main_window;
         return (
-            window != null &&
-            (folder != window.selected_folder ||
-             window.conversation_list_view.vadjustment.value != 0.0 ||
-             !window.has_toplevel_focus)
+            window == null ||
+            !window.has_toplevel_focus ||
+            window.selected_folder != folder ||
+            window.conversation_list_view.vadjustment.value > 0.0
         );
     }
 
