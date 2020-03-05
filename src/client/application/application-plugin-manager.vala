@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2019-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -11,9 +11,18 @@
 public class Application.PluginManager : GLib.Object {
 
 
+    // Plugins that will be loaded automatically and trusted with
+    // access to the application if they have been installed
+    private const string[] TRUSTED_MODULES = {
+        "desktop-notifications",
+        "messaging-menu",
+        "notification-badge"
+    };
+
     private Client application;
     private Peas.Engine engine;
     private bool is_shutdown = false;
+    private string trusted_path;
 
     private Peas.ExtensionSet notification_extensions;
     private NotificationContext notifications;
@@ -24,8 +33,8 @@ public class Application.PluginManager : GLib.Object {
         this.application = application;
         this.engine = Peas.Engine.get_default();
 
-        string builtin_path = application.get_app_plugins_dir().get_path();
-        this.engine.add_search_path(builtin_path, null);
+        this.trusted_path = application.get_app_plugins_dir().get_path();
+        this.plugins.add_search_path(trusted_path, null);
 
         this.notifications = notifications;
         this.notification_extensions = new Peas.ExtensionSet(
@@ -52,9 +61,8 @@ public class Application.PluginManager : GLib.Object {
             string name = info.get_module_name();
             try {
                 if (info.is_available()) {
-                    if (info.is_builtin() &&
-                        info.get_module_dir().has_prefix(builtin_path)) {
-                        debug("Loading built-in plugin: %s", name);
+                    if (is_trusted(info)) {
+                        debug("Loading trusted plugin: %s", name);
                         this.engine.load_plugin(info);
                     } else if (name in optional_names) {
                         debug("Loading optional plugin: %s", name);
@@ -67,12 +75,19 @@ public class Application.PluginManager : GLib.Object {
         }
     }
 
-    public Gee.List<Peas.PluginInfo> get_optional_plugins() {
+    public inline bool is_trusted(Peas.PluginInfo plugin) {
+        return (
+            plugin.get_module_name() in TRUSTED_MODULES &&
+            plugin.get_module_dir().has_prefix(trusted_path)
+        );
+    }
+
+    public Gee.Collection<Peas.PluginInfo> get_optional_plugins() {
         var plugins = new Gee.LinkedList<Peas.PluginInfo>();
         foreach (Peas.PluginInfo plugin in this.engine.get_plugin_list()) {
             try {
                 plugin.is_available();
-                if (!plugin.is_builtin()) {
+                if (!is_trusted(plugin)) {
                     plugins.add(plugin);
                 }
             } catch (GLib.Error err) {
@@ -89,8 +104,8 @@ public class Application.PluginManager : GLib.Object {
         bool loaded = false;
         if (plugin.is_available() &&
             !plugin.is_loaded() &&
-            !plugin.is_builtin()) {
-            this.engine.load_plugin(plugin);
+            !is_trusted(plugin)) {
+            this.plugins.load_plugin(plugin);
             loaded = true;
             string name = plugin.get_module_name();
             string[] optional_names =
@@ -107,8 +122,8 @@ public class Application.PluginManager : GLib.Object {
         bool unloaded = false;
         if (plugin.is_available() &&
             plugin.is_loaded() &&
-            !plugin.is_builtin()) {
-            this.engine.unload_plugin(plugin);
+            !is_trusted(plugin)) {
+            this.plugins.unload_plugin(plugin);
             unloaded = true;
             string name = plugin.get_module_name();
             string[] old_names =

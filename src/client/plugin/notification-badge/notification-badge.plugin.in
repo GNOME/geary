@@ -2,4 +2,3 @@
 Module=notification-badge
 Name=Notification Badge
 Description=Displays an application badge showing the number of unread messages
-Builtin=true
