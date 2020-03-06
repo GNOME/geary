@@ -41,6 +41,10 @@ public class Geary.Engine : BaseObject {
 
     private static bool is_initialized = false;
 
+    static construct {
+        // Work around GNOME/glib#541
+        typeof(Imap.MailboxAttributes).name();
+    }
 
     // This can't be called from within the ctor, as initialization
     // code may want to access the Engine instance to make their own
