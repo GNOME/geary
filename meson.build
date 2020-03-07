@@ -51,9 +51,14 @@ valac = meson.get_compiler('vala')
 # Required libraries and other dependencies
 #
 
+target_vala = '0.42'
 target_glib = '2.60.4'
 target_gtk = '3.24.7'
 target_webkit = '2.26'
+
+if not valac.version().version_compare('>=' + target_vala)
+  error('Vala does not meet minimum required version: ' + target_vala)
+endif
 
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
