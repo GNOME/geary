@@ -1,0 +1,167 @@
+# Dutch translation for gnome-tour.
+# Copyright (C) 2020 gnome-tour's COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-tour package.
+# Nathan Follens <nthn@unseen.is>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-tour master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
+"POT-Creation-Date: 2020-03-02 03:48+0000\n"
+"PO-Revision-Date: 2020-03-07 23:54+0100\n"
+"Language-Team: Dutch <gnome-nl-list@gnome.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: Nathan Follens <nthn@unseen.is>\n"
+"X-Generator: Poedit 2.3\n"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:7
+msgid "GNOME Tour"
+msgstr "Gnome Tour"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:8
+msgid "GNOME Tour and Greeter."
+msgstr "Rondleiding door en ontmoeting met Gnome."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:10
+msgid "A guided tour and greeter for GNOME."
+msgstr "Een gegidste rondleiding door en ontmoeting met Gnome."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:15
+msgid "Main Window"
+msgstr "Hoofdvenster"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:34
+msgid "The GNOME Project"
+msgstr "Het Gnome-project"
+
+#: data/org.gnome.Tour.desktop.in.in:3
+msgid "Tour"
+msgstr "Rondleiding"
+
+#: data/org.gnome.Tour.desktop.in.in:4
+msgid "Greeter & Tour"
+msgstr "Ontmoeting & rondleiding"
+
+#: data/org.gnome.Tour.desktop.in.in:9
+msgid "Gnome;GTK;"
+msgstr "Gnome;GTK;"
+
+#: src/widgets/pages/welcome.rs:34
+msgid ""
+"Hi there! If you are new to GNOME, you can take the tour to learn some "
+"essential features."
+msgstr ""
+"Hallo! Als dit de eerste keer is dat u Gnome gebruikt, kunt u de "
+"rondleiding volgen om kennis te maken met enkele essentiële functies."
+
+#: src/widgets/pages/welcome.rs:44
+msgid "Take the Tour"
+msgstr "Ik wil de rondleiding volgen"
+
+#: src/widgets/pages/welcome.rs:51
+msgid "No Thanks"
+msgstr "Nee bedankt"
+
+#: src/widgets/headerbar.rs:30
+msgid "Close"
+msgstr "Sluiten"
+
+#: src/widgets/headerbar.rs:32 src/widgets/headerbar.rs:67
+msgid "Next"
+msgstr "Volgende"
+
+#: src/widgets/headerbar.rs:57
+msgid "Welcome Tour"
+msgstr "Welkomstrondleiding"
+
+#: src/widgets/window.rs:94
+msgid "Activities Overview"
+msgstr "Activiteitenoverzicht"
+
+#: src/widgets/window.rs:95
+msgid "Open Activities to start apps"
+msgstr "Open Activiteiten om toepassingen te starten"
+
+#: src/widgets/window.rs:96
+msgid "You can also view open windows, search and use workspaces."
+msgstr ""
+"U kunt er ook uw open vensters bekijken, en uw werkruimten doorzoeken en "
+"gebruiken."
+
+#: src/widgets/window.rs:101
+msgid "Search"
+msgstr "Zoeken"
+
+#: src/widgets/window.rs:102
+msgid "In the Activities Overview, just start typing to search"
+msgstr ""
+"In het activiteitenoverzicht kunt u heel eenvoudig beginnen met typen om "
+"te zoeken"
+
+#: src/widgets/window.rs:103
+msgid ""
+"Search can be used to launch apps, find settings, do calculations and much "
+"more."
+msgstr ""
+"U kunt de zoekfunctie gebruiken om toepassingen te starten, instellingen "
+"te vinden, berekeningen uit te voeren, en nog veel meer."
+
+#: src/widgets/window.rs:108
+msgid "Date & Time"
+msgstr "Datum en tijd"
+
+#: src/widgets/window.rs:109
+msgid "Click the time to see your now and next"
+msgstr "Klik op de tijd om te zien wat er nu en daarna te doen is"
+
+#: src/widgets/window.rs:110
+msgid ""
+"This includes notifications, media controls, calendar events, the weather "
+"and world clocks."
+msgstr ""
+"Dit omvat meldingen, mediabesturingsknoppen, agenda-afspraken, het weer en "
+"wereldklokken."
+
+#: src/widgets/window.rs:115
+msgid "System Menu"
+msgstr "Systeemmenu"
+
+#: src/widgets/window.rs:116
+msgid "View system information and settings"
+msgstr "Bekijk systeeminformatie en instellingen"
+
+#: src/widgets/window.rs:117
+msgid "Get an overview of the system status and quickly change settings."
+msgstr ""
+"Verkrijg een overzicht van de systeemstatus en pas snel instellingen aan."
+
+#: src/widgets/window.rs:121
+msgid "Software"
+msgstr "Software"
+
+#: src/widgets/window.rs:122
+msgid "Find and install apps"
+msgstr "Zoek en installeer toepassingen"
+
+#: src/widgets/window.rs:123
+msgid ""
+"The Software app makes it easy to find and install all the apps you need."
+msgstr ""
+"De Software-toepassing laat u eenvoudig alle toepassingen die u maar nodig "
+"kunt hebben zoeken en installeren."
+
+#: src/widgets/window.rs:128
+msgid "Learn More"
+msgstr "Kom meer te weten"
+
+#: src/widgets/window.rs:129
+msgid "That's it! To learn more, see the Help"
+msgstr "Dat was het! Bekijk de Hulp-toepassing voor meer informatie"
+
+#: src/widgets/window.rs:130
+msgid "The help app contains information, tips and tricks."
+msgstr "De Hulp-toepassing bevat informatie en tips en trucs."
