@@ -16,7 +16,6 @@ public class Application.PluginManager : GLib.Object {
     private const string[] TRUSTED_MODULES = {
         "desktop-notifications",
         "notification-badge",
-        "unity-messaging-menu"
     };
 
     /** Flags assigned to a plugin by the manager. */
