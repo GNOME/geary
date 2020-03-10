@@ -89,6 +89,13 @@ src/client/plugin/messaging-menu/messaging-menu.plugin.in
 src/client/plugin/messaging-menu/messaging-menu.vala
 src/client/plugin/notification-badge/notification-badge.plugin.in
 src/client/plugin/notification-badge/notification-badge.vala
+src/client/plugin/plugin-account.vala
+src/client/plugin/plugin-application.vala
+src/client/plugin/plugin-contact-store.vala
+src/client/plugin/plugin-email-store.vala
+src/client/plugin/plugin-email.vala
+src/client/plugin/plugin-folder-store.vala
+src/client/plugin/plugin-folder.vala
 src/client/plugin/plugin-notification.vala
 src/client/sidebar/sidebar-branch.vala
 src/client/sidebar/sidebar-common.vala

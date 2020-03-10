@@ -91,6 +91,13 @@ geary_client_vala_sources = files(
   'folder-list/folder-list-search-branch.vala',
   'folder-list/folder-list-special-grouping.vala',
 
+  'plugin/plugin-account.vala',
+  'plugin/plugin-application.vala',
+  'plugin/plugin-contact-store.vala',
+  'plugin/plugin-email-store.vala',
+  'plugin/plugin-email.vala',
+  'plugin/plugin-folder-store.vala',
+  'plugin/plugin-folder.vala',
   'plugin/plugin-notification.vala',
 
   'sidebar/sidebar-branch.vala',
