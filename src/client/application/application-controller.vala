@@ -862,9 +862,6 @@ internal class Application.Controller : Geary.BaseObject {
 
     internal void register_window(MainWindow window) {
         window.retry_service_problem.connect(on_retry_service_problem);
-        window.folder_list.set_new_messages_monitor(
-            this.notifications
-        );
     }
 
     internal void unregister_window(MainWindow window) {
