@@ -75,13 +75,6 @@ public class Application.ContactStore : Geary.BaseObject {
         );
     }
 
-    /** Closes the store, flushing all caches. */
-    public void close() {
-        this.folks_address_cache.clear();
-        this.contact_id_cache.clear();
-        this.engine_address_cache.clear();
-    }
-
     /**
      * Returns a contact for a specific mailbox.
      *
@@ -181,6 +174,13 @@ public class Application.ContactStore : Geary.BaseObject {
             }
         }
         return results;
+    }
+
+    /** Closes the store, flushing all caches. */
+    internal void close() {
+        this.folks_address_cache.clear();
+        this.contact_id_cache.clear();
+        this.engine_address_cache.clear();
     }
 
     internal async Geary.Contact
