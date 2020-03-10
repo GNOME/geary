@@ -82,8 +82,8 @@ public class Application.Client : Gtk.Application {
         { Action.Application.NEW_WINDOW, on_activate_new_window },
         { Action.Application.PREFERENCES, on_activate_preferences},
         { Action.Application.QUIT, on_activate_quit},
-        { Action.Application.SHOW_EMAIL, on_activate_show_email, "(svv)"},
-        { Action.Application.SHOW_FOLDER, on_activate_show_folder, "(sv)"}
+        { Action.Application.SHOW_EMAIL, on_activate_show_email, "(vv)"},
+        { Action.Application.SHOW_FOLDER, on_activate_show_folder, "(v)"}
     };
 
     // This is also the order in which they are presented to the user,
@@ -603,13 +603,13 @@ public class Application.Client : Gtk.Application {
         this.controller.expunge_accounts.begin();
     }
 
-    public async void show_email(Geary.Folder? folder,
+    public async void show_email(Geary.Folder folder,
                                  Geary.EmailIdentifier id) {
         MainWindow main = yield this.present();
         main.show_email.begin(folder, Geary.Collection.single(id), true);
     }
 
-    public async void show_folder(Geary.Folder? folder) {
+    public async void show_folder(Geary.Folder folder) {
         MainWindow main = yield this.present();
         yield main.select_folder(folder, true);
     }
@@ -1022,12 +1022,13 @@ public class Application.Client : Gtk.Application {
 
     private Geary.Folder? get_folder_from_action_target(GLib.Variant target) {
         Geary.Folder? folder = null;
-        string id = (string) target.get_child_value(0);
+        GLib.Variant param = target.get_child_value(0).get_variant();
+        string id = (string) param.get_child_value(0);
         try {
             Geary.Account account = this.engine.get_account_for_id(id);
             Geary.FolderPath? path =
                 account.to_folder_path(
-                    target.get_child_value(1).get_variant()
+                    param.get_child_value(1).get_variant()
                 );
             folder = account.get_folder(path);
         } catch (GLib.Error err) {
@@ -1089,13 +1090,12 @@ public class Application.Client : Gtk.Application {
     private void on_activate_show_email(GLib.SimpleAction action,
                                         GLib.Variant? target) {
         if (target != null) {
-            // Target is a (account_id,folder_path,email_id) tuple
             Geary.Folder? folder = get_folder_from_action_target(target);
             Geary.EmailIdentifier? email_id = null;
             if (folder != null) {
                 try {
                     email_id = folder.account.to_email_identifier(
-                        target.get_child_value(2).get_variant()
+                        target.get_child_value(1).get_variant()
                     );
                 } catch (GLib.Error err) {
                     debug("Could not find email id: %s", err.message);
@@ -1111,7 +1111,6 @@ public class Application.Client : Gtk.Application {
     private void on_activate_show_folder(GLib.SimpleAction action,
                                         GLib.Variant? target) {
         if (target != null) {
-            // Target is a (account_id,folder_path) tuple
             Geary.Folder? folder = get_folder_from_action_target(target);
             if (folder != null) {
                 this.show_folder.begin(folder);
