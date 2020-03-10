@@ -25,7 +25,7 @@ if libmessagingmenu_dep.found()
   shared_module(
     # Use a non-standard name for the lib since the standard one
     # conflicts with libmessagingmenu and causes linking to fail
-    plugin_name + '-geary',
+    'unity-' + plugin_name,
     sources: plugin_src,
     dependencies: messaging_menu_dependencies,
     include_directories: config_h_dir,

@@ -15,8 +15,8 @@ public class Application.PluginManager : GLib.Object {
     // access to the application if they have been installed
     private const string[] TRUSTED_MODULES = {
         "desktop-notifications",
-        "messaging-menu",
-        "notification-badge"
+        "notification-badge",
+        "unity-messaging-menu"
     };
 
     /** Flags assigned to a plugin by the manager. */

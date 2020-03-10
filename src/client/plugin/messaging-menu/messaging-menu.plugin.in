@@ -1,4 +1,4 @@
 [Plugin]
-Module=messaging-menu-geary
+Module=unity-messaging-menu
 Name=Messaging Menu
 Description=Displays Unity Messaging Menu notifications for new email
