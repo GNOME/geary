@@ -741,8 +741,6 @@ public class Application.MainWindow :
                 );
 
                 yield open_conversation_monitor(this.conversations, cancellable);
-                this.controller.clear_new_messages(GLib.Log.METHOD, null);
-
                 this.controller.process_pending_composers();
             }
         }
@@ -2082,7 +2080,12 @@ public class Application.MainWindow :
     // this signal does not necessarily indicate that the application
     // previously didn't have focus and now it does
     private void on_has_toplevel_focus() {
-        this.controller.clear_new_messages(GLib.Log.METHOD, null);
+        if (this.selected_folder != null) {
+            this.controller.clear_new_messages(
+                this.selected_folder,
+                this.conversation_list_view.get_visible_conversations()
+            );
+        }
     }
 
     private void on_folder_selected(Geary.Folder? folder) {
@@ -2098,7 +2101,9 @@ public class Application.MainWindow :
     }
 
     private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
-        this.controller.clear_new_messages(GLib.Log.METHOD, visible);
+        if (this.selected_folder != null) {
+            this.controller.clear_new_messages(this.selected_folder, visible);
+        }
     }
 
     private void on_conversation_activated(Geary.App.Conversation activated) {

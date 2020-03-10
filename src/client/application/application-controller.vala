@@ -79,8 +79,6 @@ internal class Application.Controller : Geary.BaseObject {
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
 
-    private NotificationContext notifications;
-
     // Cancelled if the controller is closed
     private GLib.Cancellable controller_open;
 
@@ -165,13 +163,7 @@ internal class Application.Controller : Geary.BaseObject {
 
         }
 
-        this.notifications = new NotificationContext(
-            this.avatars,
-            this.get_contact_store_for_account,
-            this.should_notify_new_messages
-        );
-
-        this.plugins = new PluginManager(this.application, this.notifications);
+        this.plugins = new PluginManager(this.application);
 
         // Migrate configuration if necessary.
         Migrate.xdg_config_dir(this.application.get_user_data_directory(),
@@ -270,7 +262,7 @@ internal class Application.Controller : Geary.BaseObject {
         try {
             yield composer_barrier.wait_async();
         } catch (GLib.Error err) {
-            debug("Error waiting at composer barrier: %s", err.message);
+            warning("Error waiting at composer barrier: %s", err.message);
         }
 
         // Now that all composers are closed, we can shut down the
@@ -298,11 +290,10 @@ internal class Application.Controller : Geary.BaseObject {
         try {
             yield window_barrier.wait_async();
         } catch (GLib.Error err) {
-            debug("Error waiting at window barrier: %s", err.message);
+            warning("Error waiting at window barrier: %s", err.message);
         }
 
         // Release general resources now there's no more UI
-        this.notifications.clear_folders();
         try {
             this.plugins.close();
         } catch (GLib.Error err) {
@@ -331,10 +322,10 @@ internal class Application.Controller : Geary.BaseObject {
         try {
             yield account_barrier.wait_async();
         } catch (GLib.Error err) {
-            debug("Error waiting at account barrier: %s", err.message);
+            warning("Error waiting at account barrier: %s", err.message);
         }
 
-        debug("Closed Application.Controller");
+        info("Closed Application.Controller");
     }
 
     /**
@@ -1254,33 +1245,6 @@ internal class Application.Controller : Geary.BaseObject {
         return retry;
     }
 
-    private bool is_inbox_descendant(Geary.Folder target) {
-        bool is_descendent = false;
-
-        Geary.Account account = target.account;
-        Geary.Folder? inbox = account.get_special_folder(Geary.SpecialFolderType.INBOX);
-
-        if (inbox != null) {
-            is_descendent = inbox.path.is_descendant(target.path);
-        }
-        return is_descendent;
-    }
-
-    private void on_special_folder_type_changed(Geary.Folder folder,
-                                                Geary.SpecialFolderType old_type,
-                                                Geary.SpecialFolderType new_type) {
-        // Update notifications
-        this.notifications.remove_folder(folder);
-        if (folder.special_folder_type == Geary.SpecialFolderType.INBOX ||
-            (folder.special_folder_type == Geary.SpecialFolderType.NONE &&
-             is_inbox_descendant(folder))) {
-            Geary.AccountInformation info = folder.account.information;
-            this.notifications.add_folder(
-                folder, this.accounts.get(info).cancellable
-            );
-        }
-    }
-
     private void on_folders_available_unavailable(
         Geary.Account account,
         Gee.BidirSortedSet<Geary.Folder>? available,
@@ -1292,33 +1256,13 @@ internal class Application.Controller : Geary.BaseObject {
                 if (!Controller.should_add_folder(available, folder)) {
                     continue;
                 }
-                folder.special_folder_type_changed.connect(
-                    on_special_folder_type_changed
-                );
 
                 GLib.Cancellable cancellable = context.cancellable;
-                switch (folder.special_folder_type) {
-                case Geary.SpecialFolderType.INBOX:
+                if (folder.special_folder_type == INBOX) {
                     if (context.inbox == null) {
                         context.inbox = folder;
                     }
                     folder.open_async.begin(NO_DELAY, cancellable);
-
-                    // Always notify for new messages in the Inbox
-                    this.notifications.add_folder(
-                        folder, cancellable
-                    );
-                    break;
-
-                case Geary.SpecialFolderType.NONE:
-                    // Only notify for new messages in non-special
-                    // descendants of the Inbox
-                    if (is_inbox_descendant(folder)) {
-                        this.notifications.add_folder(
-                            folder, cancellable
-                        );
-                    }
-                    break;
                 }
             }
         }
@@ -1329,23 +1273,9 @@ internal class Application.Controller : Geary.BaseObject {
             bool has_prev = unavailable_iterator.last();
             while (has_prev) {
                 Geary.Folder folder = unavailable_iterator.get();
-                folder.special_folder_type_changed.disconnect(
-                    on_special_folder_type_changed
-                );
 
-                switch (folder.special_folder_type) {
-                case Geary.SpecialFolderType.INBOX:
+                if (folder.special_folder_type == INBOX) {
                     context.inbox = null;
-                    this.notifications.remove_folder(folder);
-                    break;
-
-                case Geary.SpecialFolderType.NONE:
-                    // Only notify for new messages in non-special
-                    // descendants of the Inbox
-                    if (is_inbox_descendant(folder)) {
-                        this.notifications.remove_folder(folder);
-                    }
-                    break;
                 }
 
                 has_prev = unavailable_iterator.previous();
@@ -1356,48 +1286,15 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private bool should_notify_new_messages(Geary.Folder folder) {
-        // Don't show notifications if the top of the folder's
-        // conversations is visible. That is, if there is a main
-        // window, it's focused, the folder is selected, and the
-        // conversation list is at the top.
-        MainWindow? window = this.application.last_active_main_window;
-        return (
-            window == null ||
-            !window.has_toplevel_focus ||
-            window.selected_folder != folder ||
-            window.conversation_list_view.vadjustment.value > 0.0
-        );
-    }
-
-    // Clears messages if conditions are true: anything in should_notify_new_messages() is
-    // false and the supplied visible messages are visible in the conversation list view
-    public void clear_new_messages(string caller,
-                                   Gee.Set<Geary.App.Conversation>? supplied) {
-        MainWindow? window = this.application.last_active_main_window;
-        Geary.Folder? selected = (
-            (window != null) ? window.selected_folder : null
-        );
-        NotificationContext notifications = this.notifications;
-        if (selected != null && (
-                !notifications.get_folders().contains(selected) ||
-                should_notify_new_messages(selected))) {
-
-            Gee.Set<Geary.App.Conversation> visible =
-                supplied ?? window.conversation_list_view.get_visible_conversations();
-
-            foreach (Geary.App.Conversation conversation in visible) {
-                try {
-                    if (notifications.are_any_new_messages(selected,
-                                                           conversation.get_email_ids())) {
-                        debug("Clearing new messages: %s", caller);
-                        notifications.clear_new_messages(selected);
-                        break;
-                    }
-                } catch (Geary.EngineError.NOT_FOUND err) {
-                    // all good
-                }
-            }
+    /** Clears new message counts in notification plugin contexts. */
+    public void clear_new_messages(Geary.Folder source,
+                                   Gee.Set<Geary.App.Conversation> visible) {
+        foreach (MainWindow window in this.application.get_main_windows()) {
+            window.folder_list.set_has_new(source, false);
+        }
+        foreach (NotificationContext context in
+                 this.plugins.get_notification_contexts()) {
+            context.clear_new_messages(source, visible);
         }
     }
 
@@ -1575,7 +1472,7 @@ internal class Application.Controller : Geary.BaseObject {
 
         AccountContext? context = this.accounts.get(service.account);
         if (context != null) {
-            this.notifications.email_sent(context.account, sent);
+            //this.notifications.email_sent(context.account, sent);
         }
     }
 

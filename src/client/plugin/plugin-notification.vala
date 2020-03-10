@@ -10,14 +10,9 @@
  */
 public interface Plugin.Notification : Geary.BaseObject {
 
-    /** The application instance containing the plugin. */
-    public abstract Application.Client application {
-        get; construct set;
-    }
-
     /** Context object for notifications. */
-    public abstract Application.NotificationContext context {
-        get; construct set;
+    public abstract global::Application.NotificationContext notifications {
+        get; set;
     }
 
     /* Invoked to activate the plugin, after loading. */
