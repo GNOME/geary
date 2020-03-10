@@ -139,4 +139,10 @@ public class Application.PluginManager : GLib.Object {
         return unloaded;
     }
 
+    internal void close() throws GLib.Error {
+        this.is_shutdown = true;
+        this.plugins.set_loaded_plugins(null);
+        this.folders_factory.destroy();
+    }
+
 }

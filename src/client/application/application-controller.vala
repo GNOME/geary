@@ -303,6 +303,11 @@ internal class Application.Controller : Geary.BaseObject {
 
         // Release general resources now there's no more UI
         this.notifications.clear_folders();
+        try {
+            this.plugins.close();
+        } catch (GLib.Error err) {
+            warning("Error closing plugin manager: %s", err.message);
+        }
         this.avatars.close();
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
