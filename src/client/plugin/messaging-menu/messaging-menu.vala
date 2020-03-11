@@ -10,17 +10,17 @@
 public void peas_register_types(TypeModule module) {
     Peas.ObjectModule obj = module as Peas.ObjectModule;
     obj.register_extension_type(
-        typeof(Plugin.Notification),
+        typeof(Plugin.PluginBase),
         typeof(Plugin.MessagingMenu)
     );
 }
 
 /** Updates the Unity messaging menu when new mail arrives. */
-public class Plugin.MessagingMenu : Geary.BaseObject, Notification {
+public class Plugin.MessagingMenu : PluginBase, NotificationExtension {
 
 
-    public global::Application.NotificationContext notifications {
-        get; set;
+    public NotificationContext notifications {
+        get; set construct;
     }
 
 
@@ -101,7 +101,7 @@ public class Plugin.MessagingMenu : Geary.BaseObject, Notification {
         if (this.folders != null) {
             foreach (Folder folder in this.folders.get_folders()) {
                 if (source_id == get_source_id(folder)) {
-                    this.notifications.plugin_application.show_folder(folder);
+                    this.plugin_application.show_folder(folder);
                     break;
                 }
             }

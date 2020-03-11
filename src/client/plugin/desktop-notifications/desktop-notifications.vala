@@ -10,7 +10,7 @@
 public void peas_register_types(TypeModule module) {
     Peas.ObjectModule obj = module as Peas.ObjectModule;
     obj.register_extension_type(
-        typeof(Plugin.Notification),
+        typeof(Plugin.PluginBase),
         typeof(Plugin.DesktopNotifications)
     );
 }
@@ -18,35 +18,34 @@ public void peas_register_types(TypeModule module) {
 /**
  * Manages standard desktop application notifications.
  */
-public class Plugin.DesktopNotifications : Geary.BaseObject, Notification {
+public class Plugin.DesktopNotifications :
+    PluginBase, NotificationExtension, TrustedExtension {
 
 
     private const Geary.SpecialFolderType[] MONITORED_TYPES = {
         INBOX, NONE
     };
 
-    public global::Application.NotificationContext notifications {
-        get; set;
+    public NotificationContext notifications {
+        get; set construct;
+    }
+
+    public global::Application.Client client_application {
+        get; set construct;
+    }
+
+    public global::Application.PluginManager client_plugins {
+        get; set construct;
     }
 
     private const string ARRIVED_ID = "email-arrived";
 
-    private global::Application.Client? application = null;
     private EmailStore? email = null;
     private GLib.Notification? arrived_notification = null;
     private GLib.Cancellable? cancellable = null;
 
 
     public override void activate() {
-        try {
-            this.application = this.notifications.get_client_application();
-        } catch (GLib.Error error) {
-            warning(
-                "Failed obtain application instance: %s",
-                error.message
-            );
-        }
-
         this.notifications.new_messages_arrived.connect(on_new_messages_arrived);
         this.cancellable = new GLib.Cancellable();
 
@@ -94,7 +93,7 @@ public class Plugin.DesktopNotifications : Geary.BaseObject, Notification {
     }
 
     private void clear_arrived_notification() {
-        this.application.withdraw_notification(ARRIVED_ID);
+        this.client_application.withdraw_notification(ARRIVED_ID);
         this.arrived_notification = null;
     }
 
@@ -206,8 +205,8 @@ public class Plugin.DesktopNotifications : Geary.BaseObject, Notification {
 
         // Do not show notification actions under Unity, it's
         // notifications daemon doesn't support them.
-        if (this.application.config.desktop_environment == UNITY) {
-            this.application.send_notification(id, notification);
+        if (this.client_application.config.desktop_environment == UNITY) {
+            this.client_application.send_notification(id, notification);
             return notification;
         } else {
             if (action != null) {
@@ -216,7 +215,7 @@ public class Plugin.DesktopNotifications : Geary.BaseObject, Notification {
                 );
             }
 
-            this.application.send_notification(id, notification);
+            this.client_application.send_notification(id, notification);
             return notification;
         }
     }

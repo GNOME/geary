@@ -11,18 +11,34 @@
 public class Application.PluginManager : GLib.Object {
 
 
-    // Plugins that will be loaded automatically and trusted with
-    // access to the application if they have been installed
-    private const string[] TRUSTED_MODULES = {
+    // Plugins that will be loaded automatically when the client
+    // application stats up
+    private const string[] AUTOLOAD_MODULES = {
         "desktop-notifications",
         "notification-badge",
     };
 
-    /** Flags assigned to a plugin by the manager. */
-    [Flags]
-    public enum PluginFlags {
-        /** If set, the plugin is in the set of trusted plugins. */
-        TRUSTED;
+
+    private class ApplicationImpl : Geary.BaseObject, Plugin.Application {
+
+
+        private Client backing;
+        private FolderStoreFactory folders;
+
+
+        public ApplicationImpl(Client backing,
+                               FolderStoreFactory folders) {
+            this.backing = backing;
+            this.folders = folders;
+        }
+
+        public override void show_folder(Plugin.Folder folder) {
+            Geary.Folder? target = this.folders.get_engine_folder(folder);
+            if (target != null) {
+                this.backing.show_folder.begin(target);
+            }
+        }
+
     }
 
 
@@ -33,9 +49,10 @@ public class Application.PluginManager : GLib.Object {
 
     private FolderStoreFactory folders_factory;
 
-    private Peas.ExtensionSet notification_extensions;
-    private Gee.Set<NotificationContext> notification_contexts =
-        new Gee.HashSet<NotificationContext>();
+    private Gee.Map<Peas.PluginInfo,Plugin.PluginBase> plugin_set =
+        new Gee.HashMap<Peas.PluginInfo,Plugin.PluginBase>();
+    private Gee.Map<Peas.PluginInfo,NotificationContext> notification_contexts =
+        new Gee.HashMap<Peas.PluginInfo,NotificationContext>();
 
 
     public PluginManager(Client application) throws GLib.Error {
@@ -46,40 +63,16 @@ public class Application.PluginManager : GLib.Object {
         this.trusted_path = application.get_app_plugins_dir().get_path();
         this.plugins.add_search_path(trusted_path, null);
 
-        this.notification_extensions = new Peas.ExtensionSet(
-            this.plugins,
-            typeof(Plugin.Notification)
-        );
-        this.notification_extensions.extension_added.connect((info, extension) => {
-                Plugin.Notification? plugin = extension as Plugin.Notification;
-                if (plugin != null) {
-                    var context = new NotificationContext(
-                        this.application,
-                        this.folders_factory,
-                        to_plugin_flags(info)
-                    );
-                    this.notification_contexts.add(context);
-                    plugin.notifications = context;
-                    plugin.activate();
-                }
-            });
-        this.notification_extensions.extension_removed.connect((info, extension) => {
-                Plugin.Notification? plugin = extension as Plugin.Notification;
-                if (plugin != null) {
-                    plugin.deactivate(this.is_shutdown);
-                }
-                var context = plugin.notifications;
-                context.destroy();
-                this.notification_contexts.remove(context);
-            });
+        this.plugins.load_plugin.connect_after(on_load_plugin);
+        this.plugins.unload_plugin.connect(on_unload_plugin);
 
         string[] optional_names = application.config.get_optional_plugins();
         foreach (Peas.PluginInfo info in this.plugins.get_plugin_list()) {
             string name = info.get_module_name();
             try {
                 if (info.is_available()) {
-                    if (is_trusted(info)) {
-                        debug("Loading trusted plugin: %s", name);
+                    if (is_autoload(info)) {
+                        debug("Loading autoload plugin: %s", name);
                         this.plugins.load_plugin(info);
                     } else if (name in optional_names) {
                         debug("Loading optional plugin: %s", name);
@@ -92,15 +85,9 @@ public class Application.PluginManager : GLib.Object {
         }
     }
 
-    public inline bool is_trusted(Peas.PluginInfo plugin) {
-        return (
-            plugin.get_module_name() in TRUSTED_MODULES &&
-            plugin.get_module_dir().has_prefix(trusted_path)
-        );
-    }
-
-    public inline PluginFlags to_plugin_flags(Peas.PluginInfo plugin) {
-        return is_trusted(plugin) ? PluginFlags.TRUSTED : 0;
+    /** Returns the engine folder for the given plugin folder, if any. */
+    public Geary.Folder? get_engine_folder(Plugin.Folder plugin) {
+        return this.folders_factory.get_engine_folder(plugin);
     }
 
     public Gee.Collection<Peas.PluginInfo> get_optional_plugins() {
@@ -108,7 +95,7 @@ public class Application.PluginManager : GLib.Object {
         foreach (Peas.PluginInfo plugin in this.plugins.get_plugin_list()) {
             try {
                 plugin.is_available();
-                if (!is_trusted(plugin)) {
+                if (!is_autoload(plugin)) {
                     plugins.add(plugin);
                 }
             } catch (GLib.Error err) {
@@ -125,7 +112,7 @@ public class Application.PluginManager : GLib.Object {
         bool loaded = false;
         if (plugin.is_available() &&
             !plugin.is_loaded() &&
-            !is_trusted(plugin)) {
+            !is_autoload(plugin)) {
             this.plugins.load_plugin(plugin);
             loaded = true;
             string name = plugin.get_module_name();
@@ -143,7 +130,7 @@ public class Application.PluginManager : GLib.Object {
         bool unloaded = false;
         if (plugin.is_available() &&
             plugin.is_loaded() &&
-            !is_trusted(plugin)) {
+            !is_autoload(plugin)) {
             this.plugins.unload_plugin(plugin);
             unloaded = true;
             string name = plugin.get_module_name();
@@ -163,11 +150,75 @@ public class Application.PluginManager : GLib.Object {
     internal void close() throws GLib.Error {
         this.is_shutdown = true;
         this.plugins.set_loaded_plugins(null);
+        this.plugins.garbage_collect();
         this.folders_factory.destroy();
     }
 
+    internal inline bool is_autoload(Peas.PluginInfo info) {
+        return info.get_module_name() in AUTOLOAD_MODULES;
+    }
+
     internal Gee.Collection<NotificationContext> get_notification_contexts() {
-        return this.notification_contexts.read_only_view;
+        return this.notification_contexts.values.read_only_view;
+    }
+
+    private void on_load_plugin(Peas.PluginInfo info) {
+        var plugin = this.plugins.create_extension(
+            info,
+            typeof(Plugin.PluginBase),
+            "plugin_application",
+            new ApplicationImpl(this.application, this.folders_factory)
+        ) as Plugin.PluginBase;
+        if (plugin != null) {
+            bool do_activate = true;
+            var trusted = plugin as Plugin.TrustedExtension;
+            if (trusted != null) {
+                if (info.get_module_dir().has_prefix(this.trusted_path)) {
+                    trusted.client_application = this.application;
+                    trusted.client_plugins = this;
+                } else {
+                    do_activate = false;
+                    this.plugins.unload_plugin(info);
+                }
+            }
+
+            var notification = plugin as Plugin.NotificationExtension;
+            if (notification != null) {
+                var context = new NotificationContext(
+                    this.application,
+                    this.folders_factory
+                );
+                this.notification_contexts.set(info, context);
+                notification.notifications = context;
+            }
+
+            if (do_activate) {
+                this.plugin_set.set(info, plugin);
+                plugin.activate();
+            }
+        } else {
+            warning(
+                "Could not construct BasePlugin from %s", info.get_module_name()
+            );
+        }
+    }
+
+    private void on_unload_plugin(Peas.PluginInfo info) {
+        var plugin = this.plugin_set.get(info);
+        if (plugin != null) {
+            plugin.deactivate(this.is_shutdown);
+
+            var notification = plugin as Plugin.NotificationExtension;
+            if (notification != null) {
+                var context = this.notification_contexts.get(info);
+                if (context != null) {
+                    this.notification_contexts.unset(info);
+                    context.destroy();
+                }
+            }
+
+            this.plugin_set.unset(info);
+        }
     }
 
 }

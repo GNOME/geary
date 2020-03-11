@@ -7,49 +7,13 @@
  */
 
 /**
- * Provides a context for notification plugins.
- *
- * The context provides an interface for notification plugins to
- * interface with the Geary client application. Plugins that implement
- * the plugins will be passed an instance of this class as the
- * `context` property.
- *
- * Plugins should register folders they wish to monitor by calling
- * {@link start_monitoring_folder}. The context will then start
- * keeping track of email being delivered to the folder and being seen
- * in a main window updating {@link total_new_messages} and emitting
- * the {@link new_messages_arrived} and {@link new_messages_retired}
- * signals as appropriate.
- *
- * @see Plugin.NotificationPlugin
+ * Implementation of the notification extension context.
  */
-public class Application.NotificationContext : Geary.BaseObject {
+internal class Application.NotificationContext :
+    Geary.BaseObject, Plugin.NotificationContext {
 
 
     private const Geary.Email.Field REQUIRED_FIELDS  = FLAGS;
-
-
-    private class ApplicationImpl : Geary.BaseObject, Plugin.Application {
-
-
-        private Client backing;
-        private FolderStoreFactory folders;
-
-
-        public ApplicationImpl(Client backing,
-                               FolderStoreFactory folders) {
-            this.backing = backing;
-            this.folders = folders;
-        }
-
-        public override void show_folder(Plugin.Folder folder) {
-            Geary.Folder? target = this.folders.get_engine_folder(folder);
-            if (target != null) {
-                this.backing.show_folder.begin(target);
-            }
-        }
-
-    }
 
 
     private class EmailStoreImpl : Geary.BaseObject, Plugin.EmailStore {
@@ -248,23 +212,8 @@ public class Application.NotificationContext : Geary.BaseObject {
         }
     }
 
-    /**
-     * Returns the plugin application object.
-     *
-     * No special permissions are required to use access this.
-     */
-    public Plugin.Application plugin_application {
-        get; private set;
-    }
-
-    /**
-     * Current total new message count for all monitored folders.
-     *
-     * This is the sum of the the counts returned by {@link
-     * get_new_message_count} for all folders that are being monitored
-     * after a call to {@link start_monitoring_folder}.
-     */
-    public int total_new_messages { get; private set; default = 0; }
+    public int total_new_messages { get { return this._total_new_messages; } }
+    public int _total_new_messages = 0;
 
     private Gee.Map<Geary.Folder,MonitorInformation> folder_information =
         new Gee.HashMap<Geary.Folder,MonitorInformation>();
@@ -273,84 +222,28 @@ public class Application.NotificationContext : Geary.BaseObject {
     private FolderStoreFactory folders_factory;
     private Plugin.FolderStore folders;
     private EmailStoreImpl email;
-    private PluginManager.PluginFlags flags;
 
 
-    /**
-     * Emitted when new messages have been downloaded.
-     *
-     * This will only be emitted for folders that are being monitored
-     * by calling {@link start_monitoring_folder}.
-     */
-    public signal void new_messages_arrived(
-        Plugin.Folder parent,
-        int total,
-        Gee.Collection<Plugin.EmailIdentifier> added
-    );
-
-    /**
-     * Emitted when a folder has been cleared of new messages.
-     *
-     * This will only be emitted for folders that are being monitored
-     * after a call to {@link start_monitoring_folder}.
-     */
-    public signal void new_messages_retired(Plugin.Folder parent, int total);
-
-
-    /** Constructs a new context instance. */
     internal NotificationContext(Client application,
-                                 FolderStoreFactory folders_factory,
-                                 PluginManager.PluginFlags flags) {
+                                 FolderStoreFactory folders_factory) {
         this.application = application;
         this.folders_factory = folders_factory;
         this.folders = folders_factory.new_folder_store();
         this.email = new EmailStoreImpl(application);
-        this.flags = flags;
-
-        this.plugin_application = new ApplicationImpl(
-            application, folders_factory
-        );
     }
 
-    /**
-     * Returns a store to lookup folders for notifications.
-     *
-     * This method may prompt for permission before returning.
-     *
-     * @throws Geary.EngineError.PERMISSIONS if permission to access
-     * this resource was not given
-     */
-    public async Plugin.FolderStore get_folders()
-        throws Geary.EngineError.PERMISSIONS {
-        return this.folders;
-    }
-
-    /**
-     * Returns a store to lookup email for notifications.
-     *
-     * This method may prompt for permission before returning.
-     *
-     * @throws Geary.EngineError.PERMISSIONS if permission to access
-     * this resource was not given
-     */
     public async Plugin.EmailStore get_email()
-        throws Geary.EngineError.PERMISSIONS {
+        throws Plugin.Error.PERMISSION_DENIED {
         return this.email;
     }
 
-    /**
-     * Returns a store to lookup contacts for notifications.
-     *
-     * This method may prompt for permission before returning.
-     *
-     * @throws Geary.EngineError.NOT_FOUND if the given account does
-     * not exist
-     * @throws Geary.EngineError.PERMISSIONS if permission to access
-     * this resource was not given
-     */
+    public async Plugin.FolderStore get_folders()
+        throws Plugin.Error.PERMISSION_DENIED {
+        return this.folders;
+    }
+
     public async Plugin.ContactStore get_contacts_for_folder(Plugin.Folder source)
-        throws Geary.EngineError.NOT_FOUND,
-            Geary.EngineError.PERMISSIONS {
+        throws Plugin.Error.NOT_FOUND, Plugin.Error.PERMISSION_DENIED {
         Geary.Folder? folder = this.folders_factory.get_engine_folder(source);
         AccountContext? context = null;
         if (folder != null) {
@@ -359,28 +252,11 @@ public class Application.NotificationContext : Geary.BaseObject {
             );
         }
         if (context == null) {
-            throw new Geary.EngineError.NOT_FOUND(
+            throw new Plugin.Error.NOT_FOUND(
                 "No account for folder: %s", source.display_name
             );
         }
         return new ContactStoreImpl(context.contacts);
-    }
-
-    /**
-     * Returns the client's application object.
-     *
-     * Only plugins that are trusted by the client will be provided
-     * access to the application instance.
-     *
-     * @throws Geary.EngineError.PERMISSIONS if permission to access
-     * this resource was not given
-     */
-    public Client get_client_application()
-        throws Geary.EngineError.PERMISSIONS {
-        if (!(PluginManager.PluginFlags.TRUSTED in this.flags)) {
-            throw new Geary.EngineError.PERMISSIONS("Plugin is not trusted");
-        }
-        return this.application;
     }
 
     /**
@@ -417,14 +293,14 @@ public class Application.NotificationContext : Geary.BaseObject {
      * folder by a call to {@link start_monitoring_folder}.
      */
     public int get_new_message_count(Plugin.Folder target)
-        throws Geary.EngineError.NOT_FOUND {
+        throws Plugin.Error.NOT_FOUND {
         Geary.Folder? folder = this.folders_factory.get_engine_folder(target);
         MonitorInformation? info = null;
         if (folder != null) {
             info = folder_information.get(folder);
         }
         if (info == null) {
-            throw new Geary.EngineError.NOT_FOUND(
+            throw new Plugin.Error.NOT_FOUND(
                 "No such folder: %s", folder.path.to_string()
             );
         }
@@ -534,18 +410,19 @@ public class Application.NotificationContext : Geary.BaseObject {
         Plugin.Folder folder =
             this.folders_factory.get_plugin_folder(info.folder);
         if (arrived) {
-            this.total_new_messages += delta.size;
+            this._total_new_messages += delta.size;
             new_messages_arrived(
                 folder,
                 info.recent_ids.size,
                 this.email.get_plugin_ids(delta, info.folder.account.information)
             );
         } else {
-            this.total_new_messages -= delta.size;
+            this._total_new_messages -= delta.size;
             new_messages_retired(
                 folder, info.recent_ids.size
             );
         }
+        notify_property("total-new-messages");
     }
 
     private void remove_folder(Geary.Folder target) {
@@ -555,7 +432,10 @@ public class Application.NotificationContext : Geary.BaseObject {
             target.email_flags_changed.disconnect(on_email_flags_changed);
             target.email_removed.disconnect(on_email_removed);
 
-            this.total_new_messages -= info.recent_ids.size;
+            if (!info.recent_ids.is_empty) {
+                this._total_new_messages -= info.recent_ids.size;
+                notify_property("total-new-messages");
+            }
 
             this.folder_information.unset(target);
         }

@@ -1,4 +1,5 @@
 # Geary client
+
 geary_client_vala_sources = files(
   'application/application-attachment-manager.vala',
   'application/application-avatar-store.vala',
@@ -97,9 +98,12 @@ geary_client_vala_sources = files(
   'plugin/plugin-contact-store.vala',
   'plugin/plugin-email-store.vala',
   'plugin/plugin-email.vala',
+  'plugin/plugin-error.vala',
   'plugin/plugin-folder-store.vala',
   'plugin/plugin-folder.vala',
-  'plugin/plugin-notification.vala',
+  'plugin/plugin-notification-extension.vala',
+  'plugin/plugin-plugin-base.vala',
+  'plugin/plugin-trusted-extension.vala',
 
   'sidebar/sidebar-branch.vala',
   'sidebar/sidebar-common.vala',

@@ -10,21 +10,30 @@
 public void peas_register_types(TypeModule module) {
     Peas.ObjectModule obj = module as Peas.ObjectModule;
     obj.register_extension_type(
-        typeof(Plugin.Notification),
+        typeof(Plugin.PluginBase),
         typeof(Plugin.NotificationBadge)
     );
 }
 
 /** Updates Unity application badge with total new message count. */
-public class Plugin.NotificationBadge : Geary.BaseObject, Notification {
+public class Plugin.NotificationBadge :
+    PluginBase, NotificationExtension, TrustedExtension {
 
 
     private const Geary.SpecialFolderType[] MONITORED_TYPES = {
         INBOX, NONE
     };
 
-    public global::Application.NotificationContext notifications {
-        get; set;
+    public NotificationContext notifications {
+        get; set construct;
+    }
+
+    public global::Application.Client client_application {
+        get; set construct;
+    }
+
+    public global::Application.PluginManager client_plugins {
+        get; set construct;
     }
 
     private UnityLauncherEntry? entry = null;
@@ -32,9 +41,8 @@ public class Plugin.NotificationBadge : Geary.BaseObject, Notification {
 
     public override void activate() {
         try {
-            var application = this.notifications.get_client_application();
-            var connection = application.get_dbus_connection();
-            var path = application.get_dbus_object_path();
+            var connection = this.client_application.get_dbus_connection();
+            var path = this.client_application.get_dbus_object_path();
             if (connection == null || path == null) {
                 throw new GLib.IOError.NOT_CONNECTED(
                     "Application does not have a DBus connection or path"
