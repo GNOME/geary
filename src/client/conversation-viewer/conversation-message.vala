@@ -728,11 +728,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     this.primary_originator, cancellable
                 );
 
-                Application.AvatarStore loader = main.application.controller.avatars;
                 int window_scale = get_scale_factor();
-                int pixel_size = Application.AvatarStore.PIXEL_SIZE * window_scale;
-                Gdk.Pixbuf? avatar_buf = yield loader.load(
-                    this.primary_contact,
+                int pixel_size =
+                    Application.Client.AVATAR_SIZE_PIXELS * window_scale;
+                Gdk.Pixbuf? avatar_buf = yield this.primary_contact.load_avatar(
                     this.primary_originator,
                     pixel_size,
                     cancellable
@@ -748,7 +747,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.avatar.set_from_icon_name(
                     "avatar-default-symbolic", Gtk.IconSize.DIALOG
                 );
-                this.avatar.set_pixel_size(Application.AvatarStore.PIXEL_SIZE);
+                this.avatar.set_pixel_size(
+                    Application.Client.AVATAR_SIZE_PIXELS
+                );
             }
 
 

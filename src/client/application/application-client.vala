@@ -53,6 +53,9 @@ public class Application.Client : Gtk.Application {
         null
     };
 
+    /** Default size of avatar images, in virtual pixels */
+    public const int AVATAR_SIZE_PIXELS = 48;
+
     // Local-only command line options
     private const string OPTION_VERSION = "version";
 
