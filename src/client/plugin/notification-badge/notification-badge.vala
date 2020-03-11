@@ -39,59 +39,41 @@ public class Plugin.NotificationBadge :
     private UnityLauncherEntry? entry = null;
 
 
-    public override void activate() {
-        try {
-            var connection = this.client_application.get_dbus_connection();
-            var path = this.client_application.get_dbus_object_path();
-            if (connection == null || path == null) {
-                throw new GLib.IOError.NOT_CONNECTED(
-                    "Application does not have a DBus connection or path"
-                );
-            }
-            this.entry = new UnityLauncherEntry(
-                connection,
-                path + "/plugin/notificationbadge",
-                global::Application.Client.APP_ID + ".desktop"
-            );
-        } catch (GLib.Error error) {
-            warning(
-                "Failed to register Unity Launcher Entry: %s",
-                error.message
+    public override async void activate() throws GLib.Error {
+        var connection = this.client_application.get_dbus_connection();
+        var path = this.client_application.get_dbus_object_path();
+        if (connection == null || path == null) {
+            throw new GLib.IOError.NOT_CONNECTED(
+                "Application does not have a DBus connection or path"
             );
         }
+        this.entry = new UnityLauncherEntry(
+            connection,
+            path + "/plugin/notificationbadge",
+            global::Application.Client.APP_ID + ".desktop"
+        );
 
-        connect_folders.begin();
+        FolderStore folders = yield this.notifications.get_folders();
+        folders.folders_available.connect(
+            (folders) => check_folders(folders)
+        );
+        folders.folders_unavailable.connect(
+            (folders) => check_folders(folders)
+        );
+        folders.folders_type_changed.connect(
+            (folders) => check_folders(folders)
+        );
+        check_folders(folders.get_folders());
+
+        this.notifications.notify["total-new-messages"].connect(on_total_changed);
+        update_count();
     }
 
-    public override void deactivate(bool is_shutdown) {
+    public override async void deactivate(bool is_shutdown) throws GLib.Error {
         this.notifications.notify["total-new-messages"].disconnect(
             on_total_changed
         );
         this.entry = null;
-    }
-
-    public async void connect_folders() {
-        try {
-            FolderStore folders = yield this.notifications.get_folders();
-            folders.folders_available.connect(
-                (folders) => check_folders(folders)
-            );
-            folders.folders_unavailable.connect(
-                (folders) => check_folders(folders)
-            );
-            folders.folders_type_changed.connect(
-                (folders) => check_folders(folders)
-            );
-            check_folders(folders.get_folders());
-        } catch (GLib.Error error) {
-            warning(
-                "Unable to get folders for plugin: %s",
-                error.message
-            );
-        }
-
-        this.notifications.notify["total-new-messages"].connect(on_total_changed);
-        update_count();
     }
 
     private void check_folders(Gee.Collection<Folder> folders) {

@@ -27,10 +27,21 @@ public abstract class Plugin.PluginBase : Geary.BaseObject {
         get; construct;
     }
 
-    /** Invoked to activate the plugin, after loading. */
-    public abstract void activate();
+    /**
+     * Invoked to activate the plugin, after loading.
+     *
+     * If this method raises an error, it will be unloaded without
+     * deactivating.
+     */
+    public abstract async void activate() throws GLib.Error;
 
-    /** Invoked to deactivate the plugin, prior to unloading */
-    public abstract void deactivate(bool is_shutdown);
+    /**
+     * Invoked to deactivate the plugin, prior to unloading.
+     *
+     * If `is_shutdown` is true, the plugin is being unloaded because
+     * the client application is quitting. Otherwise, the plugin is
+     * being unloaded at end-user request.
+     */
+    public abstract async void deactivate(bool is_shutdown) throws GLib.Error;
 
 }

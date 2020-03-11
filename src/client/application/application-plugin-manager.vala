@@ -19,6 +19,29 @@ public class Application.PluginManager : GLib.Object {
     };
 
 
+    private class PluginContext {
+
+
+        public Peas.PluginInfo info { get; private set; }
+        public Plugin.PluginBase plugin { get; private set; }
+
+
+        public PluginContext(Peas.PluginInfo info, Plugin.PluginBase plugin) {
+            this.info = info;
+            this.plugin = plugin;
+        }
+
+        public async void activate() throws GLib.Error {
+            yield this.plugin.activate();
+        }
+
+        public async void deactivate(bool is_shutdown) throws GLib.Error {
+            yield this.plugin.deactivate(is_shutdown);
+        }
+
+    }
+
+
     private class ApplicationImpl : Geary.BaseObject, Plugin.Application {
 
 
@@ -42,6 +65,21 @@ public class Application.PluginManager : GLib.Object {
     }
 
 
+    /** Emitted when a plugin is successfully loaded and activated. */
+    public signal void plugin_activated(Peas.PluginInfo info);
+
+    /** Emitted when a plugin raised an error loading or activating. */
+    public signal void plugin_error(Peas.PluginInfo info, GLib.Error error);
+
+    /**
+     * Emitted when a plugin was unloaded.
+     *
+     * If the given error is not null, it was raised on deactivate.
+     */
+    public signal void plugin_deactivated(Peas.PluginInfo info,
+                                          GLib.Error? error);
+
+
     private Client application;
     private Peas.Engine plugins;
     private bool is_shutdown = false;
@@ -49,8 +87,8 @@ public class Application.PluginManager : GLib.Object {
 
     private FolderStoreFactory folders_factory;
 
-    private Gee.Map<Peas.PluginInfo,Plugin.PluginBase> plugin_set =
-        new Gee.HashMap<Peas.PluginInfo,Plugin.PluginBase>();
+    private Gee.Map<Peas.PluginInfo,PluginContext> plugin_set =
+        new Gee.HashMap<Peas.PluginInfo,PluginContext>();
     private Gee.Map<Peas.PluginInfo,NotificationContext> notification_contexts =
         new Gee.HashMap<Peas.PluginInfo,NotificationContext>();
 
@@ -193,8 +231,10 @@ public class Application.PluginManager : GLib.Object {
             }
 
             if (do_activate) {
-                this.plugin_set.set(info, plugin);
-                plugin.activate();
+                var plugin_context = new PluginContext(info, plugin);
+                plugin_context.activate.begin((obj, res) => {
+                        on_plugin_activated(plugin_context, res);
+                    });
             }
         } else {
             warning(
@@ -204,21 +244,59 @@ public class Application.PluginManager : GLib.Object {
     }
 
     private void on_unload_plugin(Peas.PluginInfo info) {
-        var plugin = this.plugin_set.get(info);
-        if (plugin != null) {
-            plugin.deactivate(this.is_shutdown);
-
-            var notification = plugin as Plugin.NotificationExtension;
-            if (notification != null) {
-                var context = this.notification_contexts.get(info);
-                if (context != null) {
-                    this.notification_contexts.unset(info);
-                    context.destroy();
+        var plugin_context = this.plugin_set.get(info);
+        if (plugin_context != null) {
+            plugin_context.deactivate.begin(
+                this.is_shutdown,
+                (obj, res) => {
+                    on_plugin_deactivated(plugin_context, res);
                 }
-            }
-
-            this.plugin_set.unset(info);
+            );
         }
+    }
+
+    private void on_plugin_activated(PluginContext context,
+                                     GLib.AsyncResult result) {
+        try {
+            context.activate.end(result);
+            this.plugin_set.set(context.info, context);
+            plugin_activated(context.info);
+        } catch (GLib.Error err) {
+            plugin_error(context.info, err);
+            warning(
+                "Activating plugin %s threw error, unloading: %s",
+                context.info.get_module_name(),
+                err.message
+            );
+            this.plugins.unload_plugin(context.info);
+        }
+    }
+
+    private void on_plugin_deactivated(PluginContext context,
+                                       GLib.AsyncResult result) {
+        GLib.Error? error = null;
+        try {
+            context.deactivate.end(result);
+        } catch (GLib.Error err) {
+            warning(
+                "Deactivating plugin %s threw error: %s",
+                context.info.get_module_name(),
+                err.message
+            );
+            error = err;
+        }
+
+        var notification = context.plugin as Plugin.NotificationExtension;
+        if (notification != null) {
+            var notifications = this.notification_contexts.get(context.info);
+            if (notifications != null) {
+                this.notification_contexts.unset(context.info);
+                notifications.destroy();
+            }
+        }
+
+        plugin_deactivated(context.info, error);
+        this.plugin_set.unset(context.info);
     }
 
 }

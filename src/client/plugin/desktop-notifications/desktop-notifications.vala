@@ -45,50 +45,32 @@ public class Plugin.DesktopNotifications :
     private GLib.Cancellable? cancellable = null;
 
 
-    public override void activate() {
-        this.notifications.new_messages_arrived.connect(on_new_messages_arrived);
+    public override async void activate() throws GLib.Error {
         this.cancellable = new GLib.Cancellable();
+        this.email = yield this.notifications.get_email();
 
-        this.connect_signals.begin();
+        this.notifications.new_messages_arrived.connect(on_new_messages_arrived);
+
+        FolderStore folders = yield this.notifications.get_folders();
+        folders.folders_available.connect(
+            (folders) => check_folders(folders)
+        );
+        folders.folders_unavailable.connect(
+                (folders) => check_folders(folders)
+        );
+        folders.folders_type_changed.connect(
+            (folders) => check_folders(folders)
+        );
+        check_folders(folders.get_folders());
     }
 
-    public override void deactivate(bool is_shutdown) {
+    public override async void deactivate(bool is_shutdown) throws GLib.Error {
         this.cancellable.cancel();
 
         // Keep existing notifications if shutting down since they are
         // persistent, but revoke if the plugin is being disabled.
         if (!is_shutdown) {
             clear_arrived_notification();
-        }
-    }
-
-    private async void connect_signals() {
-        try {
-            this.email = yield this.notifications.get_email();
-        } catch (GLib.Error error) {
-            warning(
-                "Unable to get folders for plugin: %s",
-                error.message
-            );
-        }
-
-        try {
-            FolderStore folders = yield this.notifications.get_folders();
-            folders.folders_available.connect(
-                (folders) => check_folders(folders)
-            );
-            folders.folders_unavailable.connect(
-                (folders) => check_folders(folders)
-            );
-            folders.folders_type_changed.connect(
-                (folders) => check_folders(folders)
-            );
-            check_folders(folders.get_folders());
-        } catch (GLib.Error error) {
-            warning(
-                "Unable to get folders for plugin: %s",
-                error.message
-            );
         }
     }
 

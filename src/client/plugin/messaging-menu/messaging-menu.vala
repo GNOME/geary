@@ -28,7 +28,7 @@ public class Plugin.MessagingMenu : PluginBase, NotificationExtension {
     private FolderStore? folders = null;
 
 
-    public override void activate() {
+    public override async void activate() throws GLib.Error {
         this.app = new global::MessagingMenu.App(
             "%s.desktop".printf(global::Application.Client.APP_ID)
         );
@@ -37,34 +37,24 @@ public class Plugin.MessagingMenu : PluginBase, NotificationExtension {
 
         this.notifications.new_messages_arrived.connect(on_new_messages_changed);
         this.notifications.new_messages_retired.connect(on_new_messages_changed);
-        this.connect_folders.begin();
+
+        this.folders = yield this.notifications.get_folders();
+        folders.folders_available.connect(
+            (folders) => check_folders(folders)
+        );
+        folders.folders_unavailable.connect(
+            (folders) => check_folders(folders)
+        );
+        folders.folders_type_changed.connect(
+            (folders) => check_folders(folders)
+        );
+        check_folders(folders.get_folders());
     }
 
-    public override void deactivate(bool is_shutdown) {
+    public override async void deactivate(bool is_shutdown) throws GLib.Error {
         this.app.activate_source.disconnect(on_activate_source);
         this.app.unregister();
         this.app = null;
-    }
-
-    private async void connect_folders() {
-        try {
-            this.folders = yield this.notifications.get_folders();
-            folders.folders_available.connect(
-                (folders) => check_folders(folders)
-            );
-            folders.folders_unavailable.connect(
-                (folders) => check_folders(folders)
-            );
-            folders.folders_type_changed.connect(
-                (folders) => check_folders(folders)
-            );
-            check_folders(folders.get_folders());
-        } catch (GLib.Error error) {
-            warning(
-                "Unable to get folders for plugin: %s",
-                error.message
-            );
-        }
     }
 
     private void show_new_messages_count(Folder folder, int count) {
