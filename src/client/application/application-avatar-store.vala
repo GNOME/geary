@@ -21,7 +21,7 @@
  * Unlike {@link ContactStore}, once store instance is useful for
  * loading and caching avatars across accounts.
  */
-public class Application.AvatarStore : Geary.BaseObject {
+internal class Application.AvatarStore : Geary.BaseObject {
 
 
     // Max size is low since most conversations don't get above the

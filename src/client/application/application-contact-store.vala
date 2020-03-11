@@ -61,9 +61,9 @@ public class Application.ContactStore : Geary.BaseObject {
 
 
     /** Constructs a new contact store for an account. */
-    public ContactStore(Geary.Account account,
-                        Folks.IndividualAggregator individuals,
-                        AvatarStore avatars) {
+    internal ContactStore(Geary.Account account,
+                          Folks.IndividualAggregator individuals,
+                          AvatarStore avatars) {
         this.account = account;
         this.individuals = individuals;
         this.individuals.individuals_changed_detailed.connect(
