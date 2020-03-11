@@ -97,6 +97,8 @@ src/client/plugin/plugin-plugin-base.vala
 src/client/plugin/plugin-trusted-etension.vala
 src/client/plugin/desktop-notifications/desktop-notifications.plugin.in
 src/client/plugin/desktop-notifications/desktop-notifications.vala
+src/client/plugin/folder-highlight/folder-highlight.plugin.in
+src/client/plugin/folder-highlight/folder-highlight.vala
 src/client/plugin/messaging-menu/messaging-menu.plugin.in
 src/client/plugin/messaging-menu/messaging-menu.vala
 src/client/plugin/notification-badge/notification-badge.plugin.in

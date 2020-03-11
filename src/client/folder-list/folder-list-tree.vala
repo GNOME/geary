@@ -14,11 +14,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     private const int INBOX_ORDINAL = -2; // First account branch is zero
     private const int SEARCH_ORDINAL = -1;
 
-    private const Geary.SpecialFolderType[] INTERESTING_FOLDERS = {
-        INBOX,
-        NONE
-    };
-
 
     public signal void folder_selected(Geary.Folder? folder);
     public signal void copy_conversation(Geary.Folder folder);
@@ -113,7 +108,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         if (folder.special_folder_type == Geary.SpecialFolderType.INBOX)
             inboxes_branch.add_inbox(folder);
 
-        folder.email_locally_appended.connect(on_email_appended);
         account_branch.add_folder(folder);
     }
 
@@ -141,7 +135,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         if (folder.special_folder_type == Geary.SpecialFolderType.INBOX)
             inboxes_branch.remove_inbox(folder.account);
 
-        folder.email_locally_appended.disconnect(on_email_appended);
         account_branch.remove_folder(folder);
     }
 
@@ -267,13 +260,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         // Re-add branches with new positions.
         foreach (AccountBranch branch in branches_to_reorder)
             graft(branch, branch.account.information.ordinal);
-    }
-
-    private void on_email_appended(Geary.Folder folder,
-                                   Gee.Collection<Geary.EmailIdentifier> ids) {
-        if (folder.special_folder_type in INTERESTING_FOLDERS) {
-            set_has_new(folder, true);
-        }
     }
 
 }
