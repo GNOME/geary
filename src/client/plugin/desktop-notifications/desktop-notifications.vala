@@ -50,6 +50,7 @@ public class Plugin.DesktopNotifications :
         this.email = yield this.notifications.get_email();
 
         this.notifications.new_messages_arrived.connect(on_new_messages_arrived);
+        this.notifications.new_messages_retired.connect(on_new_messages_retired);
 
         FolderStore folders = yield this.notifications.get_folders();
         folders.folders_available.connect(
@@ -104,15 +105,14 @@ public class Plugin.DesktopNotifications :
                 /// Notification body when a message as been received
                 /// and other unread messages have not been
                 /// seen. First string substitution is the message
-                /// subject, second is the number of unseen messages,
-                /// third is the name of the email account.
-                "%s\n(%d other new message for %s)",
-                "%s\n(%d other new messages for %s)",
+                /// subject and the second is the number of unseen
+                /// messages
+                "%s\n(%d other new message)",
+                "%s\n(%d other new messages)",
                 total - 1
             ).printf(
                 body,
-                total - 1,
-                folder.account.display_name
+                total - 1
             );
         }
 
@@ -136,7 +136,8 @@ public class Plugin.DesktopNotifications :
                 /// above with the number of new messages that have
                 /// arrived, number substitution is the total number
                 /// of unseen messages.
-                "%s, %d new message total", "%s, %d new messages total",
+                "%s, %d new message total",
+                "%s, %d new messages total",
                 total
             ).printf(body, total);
         }
@@ -246,16 +247,19 @@ public class Plugin.DesktopNotifications :
     private inline string to_notitication_title(Account account, int count) {
         return ngettext(
             /// Notification title when new messages have been
-            /// received. String substitution is the name of the email
-            /// account.
-            "New message for %s", "New messages for %s", count
-        ).printf(account.display_name);
+            /// received
+            "New message", "New messages", count
+        );
     }
 
     private void on_new_messages_arrived(Folder folder,
                                          int total,
                                          Gee.Collection<EmailIdentifier> added) {
         this.handle_new_messages.begin(folder, total, added);
+    }
+
+    private void on_new_messages_retired(Folder folder, int total) {
+        clear_arrived_notification();
     }
 
 }
