@@ -878,7 +878,7 @@ internal class Application.Controller : Geary.BaseObject {
             account,
             new Geary.App.SearchFolder(account, account.local_folder_root),
             new Geary.App.EmailStore(account),
-            new Application.ContactStore(account, this.folks)
+            new Application.ContactStore(account, this.folks, this.avatars)
         );
         this.accounts.set(account.information, context);
 
