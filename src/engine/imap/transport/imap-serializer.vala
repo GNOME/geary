@@ -87,7 +87,7 @@ public class Geary.Imap.Serializer : BaseObject {
     }
 
     /**
-     * Writes a single ASCII space character.
+     * Writes a ASCII space character.
      */
     public void push_space(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
