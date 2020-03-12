@@ -72,7 +72,6 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
     private SocketConnection? cx = null;
     private IOStream? ios = null;
     private Serializer? ser = null;
-    private BufferedOutputStream? ser_buffer = null;
     private Deserializer? des = null;
 
     private int tag_counter = 0;
@@ -359,8 +358,7 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
         this.open_cancellable = new GLib.Cancellable();
 
-        // Not buffering the Deserializer because it uses a DataInputStream, which is buffered
-        ser_buffer = new BufferedOutputStream(ios.output_stream);
+        var ser_buffer = new BufferedOutputStream(ios.output_stream);
         ser_buffer.set_close_base_stream(false);
 
         // Use ClientConnection cx_id for debugging aid with Serializer/Deserializer
@@ -404,15 +402,6 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         }
         des = null;
         ser = null;
-        // Close the Serializer's buffered stream after it as been
-        // deallocated so it can't possibly write to the stream again,
-        // and so the stream's async thread doesn't attempt to flush
-        // its buffers from its finaliser at some later unspecified
-        // point, possibly writing to an invalid underlying stream.
-        if (ser_buffer != null) {
-            yield ser_buffer.close_async(GLib.Priority.DEFAULT, cancellable);
-            ser_buffer = null;
-        }
     }
 
     private inline void cancel_idle() {
