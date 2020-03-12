@@ -232,21 +232,21 @@ public class Plugin.DesktopNotifications :
             // present and it can be loaded, otherwise notify
             // generally
             bool notified = false;
-            if (this.email != null &&
-                added.size == 1) {
-                try {
-                    Email? message = Geary.Collection.first(
-                        yield this.email.get_email(added, this.cancellable)
-                    );
-                    if (message != null) {
-                        yield notify_specific_message(folder, total, message);
-                        notified = true;
-                    } else {
-                        warning("Could not load email for notification");
-                    }
-                } catch (GLib.Error error) {
-                    warning("Error loading email for notification: %s", error.message);
+            try {
+                Email? message = Geary.Collection.first(
+                    yield this.email.get_email(
+                        Geary.Collection.single(Geary.Collection.first(added)),
+                        this.cancellable
+                    )
+                );
+                if (message != null) {
+                    yield notify_specific_message(folder, total, message);
+                    notified = true;
+                } else {
+                    warning("Could not load email for notification");
                 }
+            } catch (GLib.Error error) {
+                warning("Error loading email for notification: %s", error.message);
             }
 
             if (!notified) {
