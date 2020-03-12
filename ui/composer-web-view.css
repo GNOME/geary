@@ -17,6 +17,7 @@ body.plain, body.plain * {
   font-weight: normal;
   font-style: normal;
   font-size: medium !important;
+  color: black !important;
   text-decoration: none;
 }
 
