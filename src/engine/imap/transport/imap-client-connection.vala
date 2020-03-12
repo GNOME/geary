@@ -67,7 +67,6 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
     private IOStream? cx = null;
     private Deserializer? deserializer = null;
     private Serializer? serializer = null;
-    private GLib.BufferedOutputStream? serializer_buffer = null;
 
     private int tag_counter = 0;
     private char tag_prefix = 'a';
@@ -315,11 +314,11 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
         string id = "%04d".printf(cx_id);
 
-        this.serializer_buffer = new GLib.BufferedOutputStream(
+        var serializer_buffer = new GLib.BufferedOutputStream(
             this.cx.output_stream
         );
-        this.serializer_buffer.set_close_base_stream(false);
-        this.serializer = new Serializer(id, this.serializer_buffer);
+        serializer_buffer.set_close_base_stream(false);
+        this.serializer = new Serializer(id, serializer_buffer);
 
         // Not buffering the Deserializer because it uses a
         // DataInputStream, which is already buffered
@@ -350,13 +349,6 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         if (this.serializer != null) {
             yield this.serializer.close_stream(cancellable);
             this.serializer = null;
-        }
-
-        if (this.serializer_buffer != null) {
-            yield this.serializer_buffer.close_async(
-                GLib.Priority.DEFAULT, cancellable
-            );
-            this.serializer_buffer = null;
         }
 
         var deserializer = this.deserializer;
