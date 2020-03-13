@@ -51,9 +51,14 @@ valac = meson.get_compiler('vala')
 # Required libraries and other dependencies
 #
 
+target_vala = '0.42'
 target_glib = '2.60.4'
 target_gtk = '3.24.7'
 target_webkit = '2.26'
+
+if not valac.version().version_compare('>=' + target_vala)
+  error('Vala does not meet minimum required version: ' + target_vala)
+endif
 
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
@@ -66,7 +71,7 @@ webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 # We need appdata.its from appstream-glib:
 # https://gitlab.gnome.org/GNOME/geary/issues/439
 appstream_glib = dependency('appstream-glib', version: '>=0.7.10')
-enchant = dependency('enchant-2', version: '>=2.1', required: false) # see below
+enchant = dependency('enchant-2', version: '>=2.1')
 folks = dependency('folks', version: '>=0.11')
 gck = dependency('gck-1')
 gcr = dependency('gcr-3', version: '>= 3.10.1')
@@ -94,11 +99,6 @@ libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tnef-support'))
 posix = valac.find_library('posix')
 webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
-
-# Can currently use either Enchant 1 or 2
-if not enchant.found()
-  enchant = dependency('enchant', version: '>=1.6')
-endif
 
 # Libunwind system dependencies above ensures appropriate versions,
 # but this declared depencency is what we actually build against so we

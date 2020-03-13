@@ -22,6 +22,7 @@ configure_file(output: 'config.h', configuration: conf)
 
 # Common valac options
 geary_vala_args = [
+  '--abi-stability',
   '--enable-checking',
 ]
 
