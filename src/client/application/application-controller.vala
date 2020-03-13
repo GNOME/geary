@@ -809,9 +809,10 @@ internal class Application.Controller : Geary.BaseObject {
     public async void delete_conversations(Geary.FolderSupport.Remove target,
                                            Gee.Collection<Geary.App.Conversation> conversations)
         throws GLib.Error {
-        yield delete_messages(
-            target, conversations, to_in_folder_email_ids(conversations)
-        );
+        var messages = target.properties.is_virtual
+            ? to_all_email_ids(conversations)
+            : to_in_folder_email_ids(conversations);
+        yield delete_messages(target, conversations, messages);
     }
 
     public async void delete_messages(Geary.FolderSupport.Remove target,
@@ -1580,6 +1581,18 @@ internal class Application.Controller : Geary.BaseObject {
         foreach (Geary.App.Conversation conversation in conversations) {
             foreach (Geary.Email email in
                      conversation.get_emails(RECV_DATE_ASCENDING, IN_FOLDER)) {
+                messages.add(email.id);
+            }
+        }
+        return messages;
+    }
+
+    private Gee.Collection<Geary.EmailIdentifier>
+        to_all_email_ids(Gee.Collection<Geary.App.Conversation> conversations) {
+        Gee.Collection<Geary.EmailIdentifier> messages =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        foreach (Geary.App.Conversation conversation in conversations) {
+            foreach (Geary.Email email in conversation.get_emails(NONE)) {
                 messages.add(email.id);
             }
         }
