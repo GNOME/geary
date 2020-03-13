@@ -171,7 +171,7 @@ custom_target(
   'org.gnome.Geary.json',
   build_by_default: true,
   command: [yaml_to_json, '@INPUT@', meson.source_root(), '@OUTPUT@'],
-  input: files('org.gnome.Geary.yml'),
+  input: files('org.gnome.Geary.yaml'),
   output: 'org.gnome.Geary.json'
 )
 
