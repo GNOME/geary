@@ -41,7 +41,7 @@
   <url type="bugtracker">https://wiki.gnome.org/Apps/Geary/ReportingABug</url>
   <url type="translate">https://wiki.gnome.org/Apps/Geary/Translating</url>
   <url type="donation">https://www.gnome.org/friends/</url>
-  
+
   <screenshots>
     <screenshot>
       <!-- Translators: A screenshot description. -->
@@ -89,7 +89,7 @@
   <translation type="gettext">geary</translation>
 
   <releases>
-    <release version="3.36" date="">
+    <release version="3.36" date="2020-03-13">
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
@@ -106,7 +106,6 @@
           <li>Using single key shortcuts for email actions is now optional</li>
           <li>Single key shortcuts have been brought up to date with Gmail</li>
           <li>App-wide notification preferences now handled by desktop</li>
-          <li>Initial plugin system</li>
           <li>Numerous bug fixes and user interface improvements</li>
           <li>Numerous user interface translation updates</li>
         </ul>
