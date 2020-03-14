@@ -200,6 +200,88 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     }
 
+    /**
+     * A FlowBox that limits its contents to 12 items until a link is
+     * clicked to expand it. Used for to, cc, and bcc fields.
+     */
+    public class ContactList : Gtk.FlowBox, Geary.BaseInterface {
+        /**
+         * The number of results that will be displayed when not expanded.
+         * Note this is actually one less than the cutoff, which is 12; we
+         * don't want the show more label to be visible when we could just
+         * put the last item.
+         */
+        private const int SHORT_RESULTS = 11;
+
+
+        private Gtk.Label show_more;
+        private Gtk.Label show_less;
+        private bool expanded = false;
+        private int children = 0;
+
+
+        construct {
+            this.show_more = this.create_label();
+            this.show_more.activate_link.connect(() => {
+                this.set_expanded(true);
+            });
+            base.add(this.show_more);
+
+            this.show_less = this.create_label();
+            this.show_less.label = _("<a href=''>Show less</a>");
+            this.show_less.activate_link.connect(() => {
+                this.set_expanded(false);
+            });
+            base.add(this.show_less);
+
+            this.set_filter_func(this.filter_func);
+        }
+
+
+        public override void add(Gtk.Widget child) {
+            // insert before the show_more and show_less labels
+            int length = (int) this.get_children().length();
+            base.insert(child, length - 2);
+
+            this.children ++;
+
+            if (this.children >= SHORT_RESULTS && this.children <= SHORT_RESULTS + 2) {
+                this.invalidate_filter();
+            }
+
+            this.show_more.label = _("<a href=''>%d more…</a>").printf(this.children - SHORT_RESULTS);
+        }
+
+
+        private Gtk.Label create_label() {
+            var label = new Gtk.Label("");
+            label.visible = true;
+            label.use_markup = true;
+            label.track_visited_links = false;
+            label.halign = START;
+            return label;
+        }
+
+        private void set_expanded(bool expanded) {
+            this.expanded = expanded;
+            this.invalidate_filter();
+        }
+
+        private bool filter_func(Gtk.FlowBoxChild child) {
+            bool is_expandable = this.children > SHORT_RESULTS + 1;
+
+            if (child.get_child() == this.show_more) {
+                return !this.expanded && is_expandable;
+            } else if (child.get_child() == this.show_less) {
+                return this.expanded;
+            } else if (!this.expanded && is_expandable) {
+                return child.get_index() < SHORT_RESULTS;
+            } else {
+                return true;
+            }
+        }
+    }
+
 
     /** Contact for the primary originator, if any. */
     internal Application.Contact? primary_contact {
@@ -899,7 +981,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                              GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (addresses != null && addresses.size > 0) {
-            Gtk.FlowBox box = header.get_children().nth(0).data as Gtk.FlowBox;
+            ContactList box = header.get_children().nth(0).data as ContactList;
             if (box != null) {
                 foreach (Geary.RFC822.MailboxAddress address in addresses) {
                     ContactFlowBoxChild child = new ContactFlowBoxChild(
