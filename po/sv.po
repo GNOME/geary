@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-02-25 11:10+0000\n"
-"PO-Revision-Date: 2020-03-13 10:11+0100\n"
+"POT-Creation-Date: 2020-03-16 11:21+0000\n"
+"PO-Revision-Date: 2020-03-16 19:35+0100\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -1094,12 +1094,12 @@ msgid_plural "Conversations un-labelled as %s"
 msgstr[0] "Konversation inte längre etiketterad som %s"
 msgstr[1] "Konversationer inte längre etiketterade som %s"
 
-#: src/client/application/application-controller.vala:1222
+#: src/client/application/application-controller.vala:1223
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Kunde inte öppna databasen för %s"
 
-#: src/client/application/application-controller.vala:1223
+#: src/client/application/application-controller.vala:1224
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1122,20 +1122,20 @@ msgstr ""
 "Att bygga om databasen medför att alla lokala e-postmeddelanden och bifogade "
 "filer förstörs. <b>E-post på din server är inte berörda av felet.</b>"
 
-#: src/client/application/application-controller.vala:1225
+#: src/client/application/application-controller.vala:1226
 msgid "_Rebuild"
 msgstr "_Bygg om"
 
-#: src/client/application/application-controller.vala:1225
+#: src/client/application/application-controller.vala:1226
 msgid "E_xit"
 msgstr "_Avsluta"
 
-#: src/client/application/application-controller.vala:1235
+#: src/client/application/application-controller.vala:1236
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Kunde inte bygga om databasen för ”%s”"
 
-#: src/client/application/application-controller.vala:1236
+#: src/client/application/application-controller.vala:1237
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1148,34 +1148,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1559
+#: src/client/application/application-controller.vala:1561
 #, c-format
 msgid "Email sent to %s"
 msgstr "E-post skickad till %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2642
+#: src/client/application/application-controller.vala:2656
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "E-post till %s köad för leverans"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2706
+#: src/client/application/application-controller.vala:2720
 #, c-format
 msgid "Email to %s saved"
 msgstr "E-post till %s sparad"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2721
-#: src/client/application/application-controller.vala:2779
+#: src/client/application/application-controller.vala:2735
+#: src/client/application/application-controller.vala:2793
 msgid "Composer could not be restored"
 msgstr "Redigeraren kunde inte återställas"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2764
+#: src/client/application/application-controller.vala:2778
 #, c-format
 msgid "Email to %s discarded"
 msgstr "E-post till %s förkastad"
@@ -1805,24 +1805,33 @@ msgstr "Ämne:"
 msgid "This email address may have been forged"
 msgstr "E-postadressen kan ha förfalskats"
 
+#: src/client/conversation-viewer/conversation-message.vala:231
+msgid "<a href=''>Show less</a>"
+msgstr "<a href=''>Visa mindre</a>"
+
+#: src/client/conversation-viewer/conversation-message.vala:252
+#, c-format
+msgid "<a href=''>%d more…</a>"
+msgstr "<a href=''>%d till…</a>"
+
 #. Compact headers. These are partially done here and partially
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:439
+#: src/client/conversation-viewer/conversation-message.vala:521
 msgid "No sender"
 msgstr "Ingen avsändare"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:831
+#: src/client/conversation-viewer/conversation-message.vala:913
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:951
+#: src/client/conversation-viewer/conversation-message.vala:1033
 msgid "Image"
 msgstr "Bild"
 
