@@ -36,6 +36,7 @@ src/client/components/client-web-view.vala
 src/client/components/components-attachment-pane.vala
 src/client/components/components-entry-undo.vala
 src/client/components/components-in-app-notification.vala
+src/client/components/components-info-bar-stack.vala
 src/client/components/components-inspector.vala
 src/client/components/components-placeholder-pane.vala
 src/client/components/components-preferences-window.vala
