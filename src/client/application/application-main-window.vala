@@ -348,7 +348,7 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.InfoBar auth_problem_infobar;
 
-    private MainWindowInfoBar? service_problem_infobar = null;
+    private Components.ProblemReportInfoBar? service_problem_infobar = null;
 
     /** Fired when the user requests an account status be retried. */
     public signal void retry_service_problem(Geary.ClientService.Status problem);
@@ -607,7 +607,7 @@ public class Application.MainWindow :
                 ? problem_source.incoming
                 : problem_source.outgoing
             );
-            this.service_problem_infobar = new MainWindowInfoBar.for_problem(
+            this.service_problem_infobar = new Components.ProblemReportInfoBar(
                 new Geary.ServiceProblemReport(
                     problem_source.information,
                     service.configuration,
@@ -616,7 +616,7 @@ public class Application.MainWindow :
             );
             this.service_problem_infobar.retry.connect(on_service_problem_retry);
 
-            show_infobar(this.service_problem_infobar);
+            show_info_bar(this.service_problem_infobar);
         }
 
         this.offline_infobar.set_visible(show_offline);
@@ -833,7 +833,7 @@ public class Application.MainWindow :
     }
 
     /** Displays an infobar in the window. */
-    public void show_infobar(MainWindowInfoBar info_bar) {
+    public void show_info_bar(Gtk.InfoBar info_bar) {
         this.info_bar_container.add(info_bar);
         this.info_bar_frame.show();
     }

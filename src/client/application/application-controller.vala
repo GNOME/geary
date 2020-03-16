@@ -444,9 +444,9 @@ internal class Application.Controller : Geary.BaseObject {
 
         if (report.error == null ||
             !(report.error.thrown is IOError.CANCELLED)) {
-            MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
+            var info_bar = new Components.ProblemReportInfoBar(report);
             info_bar.retry.connect(on_retry_problem);
-            this.application.get_active_main_window().show_infobar(info_bar);
+            this.application.get_active_main_window().show_info_bar(info_bar);
         }
 
         Geary.ServiceProblemReport? service_report =
@@ -1589,7 +1589,7 @@ internal class Application.Controller : Geary.BaseObject {
         report_problem(problem);
     }
 
-    private void on_retry_problem(MainWindowInfoBar info_bar) {
+    private void on_retry_problem(Components.ProblemReportInfoBar info_bar) {
         Geary.ServiceProblemReport? service_report =
             info_bar.report as Geary.ServiceProblemReport;
         if (service_report != null) {
