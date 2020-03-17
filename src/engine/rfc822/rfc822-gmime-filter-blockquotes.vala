@@ -49,7 +49,7 @@ private class Geary.RFC822.FilterBlockquotes : GMime.Filter {
         return new_filter;
     }
 
-    private void do_filter(uint8[] inbuf, size_t prespace, out unowned uint8[] processed_buffer,
+    private void do_filter([CCode (array_length_type = "gsize")] uint8[] inbuf, size_t prespace, [CCode (array_length_type = "gsize")] out unowned uint8[] processed_buffer,
         out size_t outprespace, bool flush) {
 
         // This may not be strictly necessary.
@@ -122,12 +122,12 @@ private class Geary.RFC822.FilterBlockquotes : GMime.Filter {
         outprespace = this.outpre;
     }
 
-    public override void filter(uint8[] inbuf, size_t prespace, out unowned uint8[] processed_buffer,
+    public override void filter([CCode (array_length_type = "gsize")] uint8[] inbuf, size_t prespace, [CCode (array_length_type = "gsize")] out unowned uint8[] processed_buffer,
         out size_t outprespace) {
         do_filter(inbuf, prespace, out processed_buffer, out outprespace, false);
     }
 
-    public override void complete(uint8[] inbuf, size_t prespace, out unowned uint8[] processed_buffer,
+    public override void complete([CCode (array_length_type = "gsize")] uint8[] inbuf, size_t prespace, [CCode (array_length_type = "gsize")] out unowned uint8[] processed_buffer,
         out size_t outprespace) {
         do_filter(inbuf, prespace, out processed_buffer, out outprespace, true);
     }
