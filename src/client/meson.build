@@ -1,4 +1,5 @@
 # Geary client
+
 geary_client_vala_sources = files(
   'application/application-attachment-manager.vala',
   'application/application-avatar-store.vala',
@@ -9,6 +10,7 @@ geary_client_vala_sources = files(
   'application/application-contact-store.vala',
   'application/application-contact.vala',
   'application/application-controller.vala',
+  'application/application-folder-store-factory.vala',
   'application/application-main-window.vala',
   'application/application-notification-context.vala',
   'application/application-plugin-manager.vala',
@@ -91,7 +93,17 @@ geary_client_vala_sources = files(
   'folder-list/folder-list-search-branch.vala',
   'folder-list/folder-list-special-grouping.vala',
 
-  'plugin/plugin-notification.vala',
+  'plugin/plugin-account.vala',
+  'plugin/plugin-application.vala',
+  'plugin/plugin-contact-store.vala',
+  'plugin/plugin-email-store.vala',
+  'plugin/plugin-email.vala',
+  'plugin/plugin-error.vala',
+  'plugin/plugin-folder-store.vala',
+  'plugin/plugin-folder.vala',
+  'plugin/plugin-notification-extension.vala',
+  'plugin/plugin-plugin-base.vala',
+  'plugin/plugin-trusted-extension.vala',
 
   'sidebar/sidebar-branch.vala',
   'sidebar/sidebar-common.vala',
@@ -133,6 +145,7 @@ geary_client_dependencies = [
   libhandy,
   libmath,
   libpeas,
+  libpeas_gtk,
   libsecret,
   libsoup,
   libxml,

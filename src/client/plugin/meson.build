@@ -23,5 +23,6 @@ plugin_dependencies = [
 plugin_c_args = geary_c_args
 
 subdir('desktop-notifications')
+subdir('folder-highlight')
 subdir('messaging-menu')
 subdir('notification-badge')

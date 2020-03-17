@@ -11,12 +11,14 @@ public void peas_register_types(TypeModule module) {
     Peas.ObjectModule obj = module as Peas.ObjectModule;
     obj.register_extension_type(
         typeof(Plugin.PluginBase),
-        typeof(Plugin.NotificationBadge)
+        typeof(Plugin.FolderHighlight)
     );
 }
 
-/** Updates Unity application badge with total new message count. */
-public class Plugin.NotificationBadge :
+/**
+ * Manages highlighting folders that have newly delivered mail
+ */
+public class Plugin.FolderHighlight :
     PluginBase, NotificationExtension, TrustedExtension {
 
 
@@ -24,34 +26,22 @@ public class Plugin.NotificationBadge :
         INBOX, NONE
     };
 
+
     public NotificationContext notifications {
-        get; set construct;
+        get; construct set;
     }
 
     public global::Application.Client client_application {
-        get; set construct;
+        get; construct set;
     }
 
     public global::Application.PluginManager client_plugins {
-        get; set construct;
+        get; construct set;
     }
 
-    private UnityLauncherEntry? entry = null;
-
-
     public override async void activate() throws GLib.Error {
-        var connection = this.client_application.get_dbus_connection();
-        var path = this.client_application.get_dbus_object_path();
-        if (connection == null || path == null) {
-            throw new GLib.IOError.NOT_CONNECTED(
-                "Application does not have a DBus connection or path"
-            );
-        }
-        this.entry = new UnityLauncherEntry(
-            connection,
-            path + "/plugin/notificationbadge",
-            global::Application.Client.APP_ID + ".desktop"
-        );
+        this.notifications.new_messages_arrived.connect(on_new_messages_arrived);
+        this.notifications.new_messages_retired.connect(on_new_messages_retired);
 
         FolderStore folders = yield this.notifications.get_folders();
         folders.folders_available.connect(
@@ -64,16 +54,10 @@ public class Plugin.NotificationBadge :
             (folders) => check_folders(folders)
         );
         check_folders(folders.get_folders());
-
-        this.notifications.notify["total-new-messages"].connect(on_total_changed);
-        update_count();
     }
 
     public override async void deactivate(bool is_shutdown) throws GLib.Error {
-        this.notifications.notify["total-new-messages"].disconnect(
-            on_total_changed
-        );
-        this.entry = null;
+        // no-op
     }
 
     private void check_folders(Gee.Collection<Folder> folders) {
@@ -86,19 +70,26 @@ public class Plugin.NotificationBadge :
         }
     }
 
-    private void update_count() {
-        if (this.entry != null) {
-            int count = this.notifications.total_new_messages;
-            if (count > 0) {
-                this.entry.set_count(count);
-            } else {
-                this.entry.clear_count();
+    private void on_new_messages_arrived(Folder folder,
+                                         int total,
+                                         Gee.Collection<EmailIdentifier> added) {
+        Geary.Folder? engine = this.client_plugins.get_engine_folder(folder);
+        if (engine != null) {
+            foreach (global::Application.MainWindow window
+                     in this.client_application.get_main_windows()) {
+                window.folder_list.set_has_new(engine, true);
             }
         }
     }
 
-    private void on_total_changed() {
-        update_count();
+    private void on_new_messages_retired(Folder folder, int total) {
+        Geary.Folder? engine = this.client_plugins.get_engine_folder(folder);
+        if (engine != null) {
+            foreach (global::Application.MainWindow window
+                     in this.client_application.get_main_windows()) {
+                window.folder_list.set_has_new(engine, false);
+            }
+        }
     }
 
 }

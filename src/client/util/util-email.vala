@@ -35,7 +35,7 @@ namespace Util.Email {
     /** Returns the stripped subject line, or a placeholder if none. */
     public string strip_subject_prefixes(Geary.Email email) {
         string? cleaned = (email.subject != null) ? email.subject.strip_prefixes() : null;
-        return !Geary.String.is_empty(cleaned) ? cleaned : _("(no subject)");
+        return !Geary.String.is_empty(cleaned) ? cleaned : _("(No subject)");
     }
 
     /**

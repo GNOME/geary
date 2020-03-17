@@ -56,7 +56,7 @@ public abstract class Geary.BaseObject : Geary.BaseInterface, Object {
      * by calling {@link BaseInterface.base_ref} if reference tracking
      * is enabled at compile-time, otherwise this is a no-op.
      */
-    protected BaseObject() {
+    construct {
 #if REF_TRACKING
         base_ref();
 #endif

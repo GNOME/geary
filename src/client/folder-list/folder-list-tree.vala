@@ -5,12 +5,15 @@
  */
 
 public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
+
+
     public const Gtk.TargetEntry[] TARGET_ENTRY_LIST = {
         { "application/x-geary-mail", Gtk.TargetFlags.SAME_APP, 0 }
     };
 
     private const int INBOX_ORDINAL = -2; // First account branch is zero
     private const int SEARCH_ORDINAL = -1;
+
 
     public signal void folder_selected(Geary.Folder? folder);
     public signal void copy_conversation(Geary.Folder folder);
@@ -22,7 +25,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         = new Gee.HashMap<Geary.Account, AccountBranch>();
     private InboxesBranch inboxes_branch = new InboxesBranch();
     private SearchBranch? search_branch = null;
-    private Application.NotificationContext? monitor = null;
+
 
     public Tree() {
         base(TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE, drop_handler);
@@ -39,8 +42,22 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     }
 
     ~Tree() {
-        set_new_messages_monitor(null);
         base_unref();
+    }
+
+    public void set_has_new(Geary.Folder folder, bool has_new) {
+        FolderEntry? entry = get_folder_entry(folder);
+        if (entry != null) {
+            entry.set_has_new(has_new);
+        }
+
+        if (folder.special_folder_type == INBOX &&
+            has_branch(inboxes_branch)) {
+            entry = inboxes_branch.get_entry_for_account(folder.account);
+            if (entry != null) {
+                entry.set_has_new(has_new);
+            }
+        }
     }
 
     private void drop_handler(Gdk.DragContext context, Sidebar.Entry? entry,
@@ -63,35 +80,10 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     }
 
     private void on_entry_selected(Sidebar.SelectableEntry selectable) {
-        AbstractFolderEntry? abstract_folder_entry = selectable as AbstractFolderEntry;
-        if (abstract_folder_entry != null) {
-            this.selected = abstract_folder_entry.folder;
-            folder_selected(abstract_folder_entry.folder);
-        }
-    }
-
-    private void on_new_messages_changed(Geary.Folder folder, int count) {
-        FolderEntry? entry = get_folder_entry(folder);
-        if (entry != null)
-            entry.set_has_new(count > 0);
-
-        if (has_branch(inboxes_branch)) {
-            InboxFolderEntry? inbox_entry = inboxes_branch.get_entry_for_account(folder.account);
-            if (inbox_entry != null)
-                inbox_entry.set_has_new(count > 0);
-        }
-    }
-
-    public void set_new_messages_monitor(Application.NotificationContext? monitor) {
-        if (this.monitor != null) {
-            this.monitor.new_messages_arrived.disconnect(on_new_messages_changed);
-            this.monitor.new_messages_retired.disconnect(on_new_messages_changed);
-        }
-
-        this.monitor = monitor;
-        if (this.monitor != null) {
-            this.monitor.new_messages_arrived.connect(on_new_messages_changed);
-            this.monitor.new_messages_retired.connect(on_new_messages_changed);
+        FolderEntry? entry = selectable as FolderEntry;
+        if (entry != null) {
+            this.selected = entry.folder;
+            folder_selected(entry.folder);
         }
     }
 
@@ -101,8 +93,11 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     }
 
     public void add_folder(Geary.Folder folder) {
-        if (!account_branches.has_key(folder.account))
-            account_branches.set(folder.account, new AccountBranch(folder.account));
+        Geary.Account account = folder.account;
+        if (!account_branches.has_key(account)) {
+            this.account_branches.set(account, new AccountBranch(account));
+            account.information.notify["ordinal"].connect(on_ordinal_changed);
+        }
 
         AccountBranch account_branch = account_branches.get(folder.account);
         if (!has_branch(account_branch))
@@ -113,7 +108,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         if (folder.special_folder_type == Geary.SpecialFolderType.INBOX)
             inboxes_branch.add_inbox(folder);
 
-        folder.account.information.notify["ordinal"].connect(on_ordinal_changed);
         account_branch.add_folder(folder);
     }
 
@@ -225,24 +219,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         return ret;
     }
 
-    private void on_ordinal_changed() {
-        if (account_branches.size <= 1)
-            return;
-
-        // Remove branches where the ordinal doesn't match the graft position.
-        Gee.ArrayList<AccountBranch> branches_to_reorder = new Gee.ArrayList<AccountBranch>();
-        foreach (AccountBranch branch in account_branches.values) {
-            if (get_position_for_branch(branch) != branch.account.information.ordinal) {
-                prune(branch);
-                branches_to_reorder.add(branch);
-            }
-        }
-
-        // Re-add branches with new positions.
-        foreach (AccountBranch branch in branches_to_reorder)
-            graft(branch, branch.account.information.ordinal);
-    }
-
     public void set_search(Geary.Engine engine,
                            Geary.App.SearchFolder search_folder) {
         if (search_branch != null && has_branch(search_branch)) {
@@ -268,5 +244,22 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
             search_branch = null;
         }
     }
-}
+    private void on_ordinal_changed() {
+        if (account_branches.size <= 1)
+            return;
 
+        // Remove branches where the ordinal doesn't match the graft position.
+        Gee.ArrayList<AccountBranch> branches_to_reorder = new Gee.ArrayList<AccountBranch>();
+        foreach (AccountBranch branch in account_branches.values) {
+            if (get_position_for_branch(branch) != branch.account.information.ordinal) {
+                prune(branch);
+                branches_to_reorder.add(branch);
+            }
+        }
+
+        // Re-add branches with new positions.
+        foreach (AccountBranch branch in branches_to_reorder)
+            graft(branch, branch.account.information.ordinal);
+    }
+
+}

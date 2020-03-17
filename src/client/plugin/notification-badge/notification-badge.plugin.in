@@ -1,5 +1,4 @@
 [Plugin]
-Module=libnotification-badge.so
+Module=notification-badge
 Name=Notification Badge
-Description=Displays an application badge showing the number of unread messages
-Builtin=true
+Description=Displays a dock badge showing the number of new messages

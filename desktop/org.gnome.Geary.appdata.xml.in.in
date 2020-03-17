@@ -89,6 +89,14 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="3.38" date="">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>New preferences pane for managing plugins</li>
+        </ul>
+      </description>
+    </release>
     <release version="3.36" date="2020-03-13">
       <description>
         <p>Enhancements included in this release:</p>
