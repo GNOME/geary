@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-02-16 20:26+0000\n"
-"PO-Revision-Date: 2020-02-23 14:43+0200\n"
+"POT-Creation-Date: 2020-03-17 08:39+0000\n"
+"PO-Revision-Date: 2020-03-17 16:18+0200\n"
 "Last-Translator: Jiri Grönroos <jiri.gronroos+l10n@iki.fi>\n"
 "Language-Team: suomi <lokalisointi-lista@googlegroups.com>\n"
 "Language: fi\n"
@@ -893,7 +893,6 @@ msgstr "Avaa uusi ikkuna"
 
 #. / Command line option
 #: src/client/application/application-client.vala:137
-#| msgid "Revoke all server certificates with TLS warnings"
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Kumoa kaikki kiinnitetyt TLS-palvelinvarmenteet"
 
@@ -977,7 +976,6 @@ msgstr ""
 #. / is the given argument
 #: src/client/application/application-client.vala:970
 #, c-format
-#| msgid "Unrecognized command line option “%s”\n"
 msgid "Unrecognised program argument: “%s”"
 msgstr "Tunnistamaton ohjelma-argumentti: “%s”"
 
@@ -1041,7 +1039,6 @@ msgstr[1] "Keskustelut arkistoitu"
 #. / substitution is the name of the destination folder.
 #: src/client/application/application-controller.vala:707
 #, c-format
-#| msgid "Message not saved"
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
 msgstr[0] "Viesti palautettu kansioon %s"
@@ -1059,7 +1056,6 @@ msgstr[1] "Viestit arkistoitu"
 #. / of the destination folder.
 #: src/client/application/application-controller.vala:763
 #, c-format
-#| msgid "Message not saved"
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
 msgstr[0] "Viesti siirretty kansioon %s"
@@ -1070,7 +1066,6 @@ msgstr[1] "Viestit siirretty kansioon %s"
 #. / of the destination folder.
 #: src/client/application/application-controller.vala:791
 #, c-format
-#| msgid "No conversations selected"
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
 msgstr[0] "Keskustelu merkitty tunnisteella %s"
@@ -1086,12 +1081,12 @@ msgid_plural "Conversations un-labelled as %s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/client/application/application-controller.vala:1222
+#: src/client/application/application-controller.vala:1223
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Kohteen %s tietokannan avaaminen epäonnistui"
 
-#: src/client/application/application-controller.vala:1223
+#: src/client/application/application-controller.vala:1224
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1117,20 +1112,20 @@ msgstr ""
 "niiden liitteet. <b>Toimenpiteellä ei ole vaikutusta palvelimella oleviin "
 "viesteihin ja liitteisiin.</b>"
 
-#: src/client/application/application-controller.vala:1225
+#: src/client/application/application-controller.vala:1226
 msgid "_Rebuild"
 msgstr "Ra_kenna uudelleen"
 
-#: src/client/application/application-controller.vala:1225
+#: src/client/application/application-controller.vala:1226
 msgid "E_xit"
 msgstr "_Poistu"
 
-#: src/client/application/application-controller.vala:1235
+#: src/client/application/application-controller.vala:1236
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Tietokannan jälleenrakennus tilille “%s” epäonnistui"
 
-#: src/client/application/application-controller.vala:1236
+#: src/client/application/application-controller.vala:1237
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1143,34 +1138,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1559
+#: src/client/application/application-controller.vala:1561
 #, c-format
 msgid "Email sent to %s"
 msgstr "Viesti vastaanottajalle %s lähetetty"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2642
+#: src/client/application/application-controller.vala:2656
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Viesti vastaanottajalle %s asetettu jonoon toimitusta varten"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2706
+#: src/client/application/application-controller.vala:2720
 #, c-format
 msgid "Email to %s saved"
 msgstr "Viesti vastaanottajalle %s tallennettu"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2721
-#: src/client/application/application-controller.vala:2779
+#: src/client/application/application-controller.vala:2735
+#: src/client/application/application-controller.vala:2793
 msgid "Composer could not be restored"
 msgstr "Lähetintä ei voitu palauttaa"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2764
+#: src/client/application/application-controller.vala:2778
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Viesti vastaanottajalle %s hylätty"
@@ -1308,7 +1303,7 @@ msgstr "Kä_ytä kolmen paneelin näkymää"
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:73
 msgid "Use _single key email shortcuts"
-msgstr "Näytä _yhden näppäimen pikanäppäimiä"
+msgstr "Käytä _yhden näppäimen pikanäppäimiä"
 
 #: src/client/components/components-preferences-window.vala:75
 msgid ""
@@ -1695,20 +1690,20 @@ msgstr "Valitse väri"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2439
+#: src/client/composer/composer-widget.vala:2440
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s välityksellä %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2495
+#: src/client/composer/composer-widget.vala:2496
 msgid "_From:"
 msgstr "_Lähettäjä:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2800
+#: src/client/composer/composer-widget.vala:2801
 msgid "Images"
 msgstr "Kuvat"
 
@@ -1800,24 +1795,40 @@ msgstr "Aihe:"
 msgid "This email address may have been forged"
 msgstr "Tämä sähköpostiosoite saattaa olla väärennetty"
 
+#. Translators: Label text displayed when there are too
+#. many email addresses to be shown by default in an
+#. email's header, but they are all being shown anyway.
+#: src/client/conversation-viewer/conversation-message.vala:234
+msgid "Show less"
+msgstr "Näytä vähemmän"
+
+#. Translators: Label text displayed when there are
+#. too many email addresses to be shown by default in
+#. an email's header. The string substitution is the
+#. number of extra email to be shown.
+#: src/client/conversation-viewer/conversation-message.vala:260
+#, c-format
+msgid "%d more…"
+msgstr "%d lisää…"
+
 #. Compact headers. These are partially done here and partially
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:438
+#: src/client/conversation-viewer/conversation-message.vala:530
 msgid "No sender"
 msgstr "Ei lähettäjää"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:830
+#: src/client/conversation-viewer/conversation-message.vala:922
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:950
+#: src/client/conversation-viewer/conversation-message.vala:1042
 msgid "Image"
 msgstr "Kuva"
 
@@ -2109,7 +2120,6 @@ msgstr "%A"
 #. / 12 hours format for datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:216
-#| msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgid "%a, %b %-e, %Y at %l:%M %P"
 msgstr "%a, %b %-e, %Y klo %l:%M %P"
 
