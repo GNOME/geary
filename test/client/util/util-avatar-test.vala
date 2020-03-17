@@ -22,6 +22,8 @@ public class Util.Avatar.Test : TestCase {
         assert_string("AB", extract_initials_from_name("aardvark !baardvark"));
         assert_string("AC", extract_initials_from_name("aardvark baardvark !caardvark"));
 
+        assert_string("Ó", extract_initials_from_name("óvári"));
+
         assert_true(extract_initials_from_name("") == null);
         assert_true(extract_initials_from_name(" ") == null);
         assert_true(extract_initials_from_name("  ") == null);
