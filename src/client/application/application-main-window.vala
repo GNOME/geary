@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016, 2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2016, 2019-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -339,13 +339,10 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.Grid info_bar_container;
 
-    [GtkChild]
     private Gtk.InfoBar offline_infobar;
 
-    [GtkChild]
     private Gtk.InfoBar cert_problem_infobar;
 
-    [GtkChild]
     private Gtk.InfoBar auth_problem_infobar;
 
     private Components.ProblemReportInfoBar? service_problem_infobar = null;
@@ -528,6 +525,45 @@ public class Application.MainWindow :
                  this.controller.get_account_contexts()) {
             add_account(context);
         }
+
+        this.offline_infobar = new Components.InfoBar(
+            // Translators: An info bar status label
+            _("Working offline"),
+            // Translators: An info bar description label
+            _("You will not be able to send or receive email until re-connected.")
+        );
+        this.offline_infobar.show_close_button = true;
+        this.offline_infobar.response.connect(on_offline_infobar_response);
+
+        this.auth_problem_infobar = new Components.InfoBar(
+            // Translators: An info bar status label
+            _("Login problem"),
+            // Translators: An info bar description label
+            _("An account has reported an incorrect login or password.")
+        );
+        // Translators: An info bar button label
+        var auth_retry = new Gtk.Button.with_label(_("Login"));
+        // Translators: An info bar button tool-tip
+        auth_retry.tooltip_text = _(
+            "Retry login, you will be prompted for your password"
+        );
+        auth_retry.clicked.connect(on_auth_problem_retry);
+        this.auth_problem_infobar.get_action_area().add(auth_retry);
+
+        this.cert_problem_infobar = new Components.InfoBar(
+            // Translators: An info bar status label
+            _("Security problem"),
+            // Translators: An info bar description label
+            _("An account has reported an untrusted server..")
+        );
+        // Translators: An info bar button label
+        var cert_retry = new Gtk.Button.with_label(_("Check"));
+        // Translators: An info bar button tool-tip
+        cert_retry.tooltip_text = _(
+            "Check the security details for the connection"
+        );
+        cert_retry.clicked.connect(on_cert_problem_retry);
+        this.cert_problem_infobar.get_action_area().add(cert_retry);
 
         this.conversation_list_view.grab_focus();
     }
@@ -1919,7 +1955,6 @@ public class Application.MainWindow :
         return Gdk.EVENT_STOP;
     }
 
-    [GtkCallback]
     private void on_offline_infobar_response() {
         this.offline_infobar.hide();
         update_infobar_frame();
@@ -1930,14 +1965,12 @@ public class Application.MainWindow :
         retry_service_problem(Geary.ClientService.Status.CONNECTION_FAILED);
     }
 
-    [GtkCallback]
     private void on_cert_problem_retry() {
         this.cert_problem_infobar.hide();
         update_infobar_frame();
         retry_service_problem(Geary.ClientService.Status.TLS_VALIDATION_FAILED);
     }
 
-    [GtkCallback]
     private void on_auth_problem_retry() {
         this.auth_problem_infobar.hide();
         update_infobar_frame();
