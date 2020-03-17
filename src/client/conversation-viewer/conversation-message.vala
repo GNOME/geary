@@ -228,7 +228,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             base.add(this.show_more);
 
             this.show_less = this.create_label();
-            this.show_less.label = _("<a href=''>Show less</a>");
+            // Translators: Label text displayed when there are too
+            // many email addresses to be shown by default in an
+            // email's header, but they are all being shown anyway.
+            this.show_less.label = "<a href=''>%s</a>".printf(_("Show less"));
             this.show_less.activate_link.connect(() => {
                 this.set_expanded(false);
             });
@@ -249,7 +252,13 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.invalidate_filter();
             }
 
-            this.show_more.label = _("<a href=''>%d more…</a>").printf(this.children - SHORT_RESULTS);
+            this.show_more.label = "<a href=''>%s</a>".printf(
+                // Translators: Label text displayed when there are
+                // too many email addresses to be shown by default in
+                // an email's header. The string substitution is the
+                // number of extra email to be shown.
+                _("%d more…").printf(this.children - SHORT_RESULTS)
+            );
         }
 
 
