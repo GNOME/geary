@@ -92,9 +92,9 @@ src/client/plugin/plugin-email.vala
 src/client/plugin/plugin-error.vala
 src/client/plugin/plugin-folder-store.vala
 src/client/plugin/plugin-folder.vala
-src/client/plugin/plugin-notification-etension.vala
+src/client/plugin/plugin-notification-extension.vala
 src/client/plugin/plugin-plugin-base.vala
-src/client/plugin/plugin-trusted-etension.vala
+src/client/plugin/plugin-trusted-extension.vala
 src/client/plugin/desktop-notifications/desktop-notifications.plugin.in
 src/client/plugin/desktop-notifications/desktop-notifications.vala
 src/client/plugin/folder-highlight/folder-highlight.plugin.in
