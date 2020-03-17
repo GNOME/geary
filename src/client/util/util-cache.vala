@@ -13,8 +13,15 @@ public class Util.Cache.Lru<T> : Geary.BaseObject {
 
 
         public static int lru_compare(CacheEntry<T> a, CacheEntry<T> b) {
-            return (a.key == b.key)
-                ? 0 : (int) (a.last_used - b.last_used);
+            if (a.key == b.key) {
+                return 0;
+            }
+            if (a.last_used != b.last_used) {
+                return (int) (a.last_used - b.last_used);
+            }
+            // If all else is equal, use the keys themselves to
+            // stabilise the sorting order
+            return GLib.strcmp(a.key, b.key);
         }
 
 
