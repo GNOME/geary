@@ -72,7 +72,7 @@ namespace Util.Avatar {
     }
 
     public string? extract_initials_from_name(string name) {
-        string normalized = name.strip().up().normalize();
+        string normalized = name.strip().up().normalize(-1, DEFAULT_COMPOSE);
         string? initials = null;
         if (normalized != "") {
             GLib.StringBuilder buf = new GLib.StringBuilder();
