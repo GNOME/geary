@@ -1760,16 +1760,14 @@ internal class Application.AccountContext : Geary.BaseObject {
             effective |= ONLINE;
         }
         if (current.has_service_problem()) {
-            // Only retain this flag if the problem isn't auth or
-            // cert related, that is handled elsewhere.
-            Geary.ClientService.Status incoming =
-            account.incoming.current_status;
-            Geary.ClientService.Status outgoing =
-            account.outgoing.current_status;
-            if (incoming != AUTHENTICATION_FAILED &&
-                incoming != TLS_VALIDATION_FAILED &&
-                outgoing != AUTHENTICATION_FAILED &&
-                outgoing != TLS_VALIDATION_FAILED) {
+            // Only retain service problem if the problem isn't auth
+            // or cert related, that is handled elsewhere.
+            const Geary.ClientService.Status SPECIALS[] = {
+                AUTHENTICATION_FAILED,
+                TLS_VALIDATION_FAILED
+            };
+            if (!(account.incoming.current_status in SPECIALS) &&
+                !(account.outgoing.current_status in SPECIALS)) {
                 effective |= SERVICE_PROBLEM;
             }
         }
