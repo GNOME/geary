@@ -90,6 +90,9 @@ internal class Application.Controller : Geary.BaseObject {
     // Requested mailto composers not yet fullfulled
     private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
 
+    // Timeout controller for displaying the offline status bar
+    private Geary.TimeoutManager offline_timeout;
+
 
     /**
      * Emitted when an account is added or is enabled.
@@ -177,6 +180,10 @@ internal class Application.Controller : Geary.BaseObject {
         SecretMediator? libsecret = yield new SecretMediator(cancellable);
 
         application.engine.account_available.connect(on_account_available);
+
+        this.offline_timeout = new Geary.TimeoutManager.seconds(
+            10, () => update_account_status(false)
+        );
 
         this.account_manager = new Accounts.Manager(
             libsecret,
@@ -999,7 +1006,7 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
-    private void update_account_status() {
+    private void update_account_status(bool delay_offline = true) {
         // Start off assuming all accounts are online and error free
         // (i.e. no status issues to indicate) and proceed until
         // proven incorrect.
@@ -1022,13 +1029,21 @@ internal class Application.Controller : Geary.BaseObject {
             has_cert_error |= context.tls_validation_failed;
         }
 
-        foreach (MainWindow window in this.application.get_main_windows()) {
-            window.update_account_status(
-                effective_status,
-                has_auth_error,
-                has_cert_error,
-                service_problem_source
-            );
+        // Don't show the offline bar right away, wait a few seconds
+        // in case the host is currently resuming and the network is
+        // already coming back up
+        if (!effective_status.is_online() && delay_offline) {
+            this.offline_timeout.start();
+        } else {
+            this.offline_timeout.reset();
+            foreach (MainWindow window in this.application.get_main_windows()) {
+                window.update_account_status(
+                    effective_status,
+                    has_auth_error,
+                    has_cert_error,
+                    service_problem_source
+                );
+            }
         }
     }
 
