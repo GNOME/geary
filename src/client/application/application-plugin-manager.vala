@@ -97,7 +97,7 @@ public class Application.PluginManager : GLib.Object {
     public PluginManager(Client application) throws GLib.Error {
         this.application = application;
         this.plugins = Peas.Engine.get_default();
-        this.folders_factory = new FolderStoreFactory(application.engine);
+        this.folders_factory = new FolderStoreFactory(application);
 
         this.trusted_path = application.get_app_plugins_dir().get_path();
         this.plugins.add_search_path(trusted_path, null);

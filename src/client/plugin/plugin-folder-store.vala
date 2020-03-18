@@ -24,6 +24,9 @@ public interface Plugin.FolderStore : Geary.BaseObject {
     /** Emitted when existing folders have become unavailable. */
     public signal void folders_type_changed(Gee.Collection<Folder> changed);
 
+    /** Emitted when a folder has been selected in any main window. */
+    public signal void folder_selected(Folder selected);
+
 
     /** Returns a read-only set of all known folders. */
     public abstract Gee.Collection<Folder> get_folders();

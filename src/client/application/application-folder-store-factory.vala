@@ -112,6 +112,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     }
 
 
+    private Client application;
     private Geary.Engine engine;
 
     private Gee.Map<Geary.AccountInformation,AccountImpl> accounts =
@@ -125,17 +126,23 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     /**
      * Constructs a new factory instance.
      */
-    public FolderStoreFactory(Geary.Engine engine) throws GLib.Error {
-        this.engine = engine;
+    public FolderStoreFactory(Client application) throws GLib.Error {
+        this.application = application;
+        this.engine = application.engine;
         this.engine.account_available.connect(on_account_available);
         this.engine.account_unavailable.connect(on_account_unavailable);
         foreach (Geary.Account account in this.engine.get_accounts()) {
             add_account(account.information);
         }
+        application.window_added.connect(on_window_added);
+        foreach (MainWindow main in this.application.get_main_windows()) {
+            main.notify["selected-folder"].connect(on_folder_selected);
+        }
     }
 
     /** Clearing all state of the store. */
     public void destroy() throws GLib.Error {
+        this.application.window_added.disconnect(on_window_added);
         foreach (FolderStoreImpl store in this.stores) {
             store.destroy();
         }
@@ -276,6 +283,29 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
         foreach (FolderStoreImpl store in this.stores) {
             store.folders_type_changed(folders);
+        }
+    }
+
+
+    private void on_window_added(Gtk.Window window) {
+        var main = window as MainWindow;
+        if (main != null) {
+            main.notify["selected-folder"].connect(on_folder_selected);
+        }
+    }
+
+    private void on_folder_selected(GLib.Object object, GLib.ParamSpec param) {
+        var main = object as MainWindow;
+        if (main != null) {
+            Geary.Folder? selected = main.selected_folder;
+            if (selected != null) {
+                var plugin = get_plugin_folder(selected);
+                if (plugin != null) {
+                    foreach (FolderStoreImpl store in this.stores) {
+                        store.folder_selected(plugin);
+                    }
+                }
+            }
         }
     }
 
