@@ -101,7 +101,20 @@ public class Geary.Imap.StatusData : Object {
                     break;
 
                     case StatusDataType.UIDNEXT:
-                        uid_next = new UID.checked(valuep.as_int64());
+                        try {
+                            uid_next = new UID.checked(valuep.as_int64());
+                        } catch (ImapError.INVALID err) {
+                            // Some mail servers e.g hMailServer and
+                            // whatever is used by home.pl (dovecot?)
+                            // sends UIDNEXT 0. Just ignore these
+                            // since there nothing else that can be
+                            // done. See GNOME/geary#711
+                            if (valuep.as_int64() == 0) {
+                                warning("Ignoring bad UIDNEXT 0 from server");
+                            } else {
+                                throw err;
+                            }
+                        }
                     break;
 
                     case StatusDataType.UIDVALIDITY:
@@ -118,8 +131,10 @@ public class Geary.Imap.StatusData : Object {
                     break;
                 }
             } catch (ImapError ierr) {
-                message("Bad value at %d/%d in STATUS response \"%s\": %s", ctr, ctr + 1,
-                    server_data.to_string(), ierr.message);
+                warning(
+                    "Bad value at %d/%d in STATUS response \"%s\": %s",
+                    ctr, ctr + 1, server_data.to_string(), ierr.message
+                );
             }
         }
 

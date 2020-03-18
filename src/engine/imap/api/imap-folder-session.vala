@@ -248,7 +248,20 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 break;
 
                 case ResponseCodeType.UIDNEXT:
-                    this.folder.properties.uid_next = response_code.get_uid_next();
+                    try {
+                        this.folder.properties.uid_next = response_code.get_uid_next();
+                    } catch (ImapError.INVALID err) {
+                        // Some mail servers e.g hMailServer and
+                        // whatever is used by home.pl (dovecot?)
+                        // sends UIDNEXT 0. Just ignore these since
+                        // there nothing else that can be done. See
+                        // GNOME/geary#711
+                        if (response_code.get_as_string(1).as_int64() == 0) {
+                            warning("Ignoring bad UIDNEXT 0 from server");
+                        } else {
+                            throw err;
+                        }
+                    }
                 break;
 
                 case ResponseCodeType.UIDVALIDITY:
