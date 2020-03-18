@@ -50,4 +50,29 @@ public interface Plugin.FolderContext : Geary.BaseObject {
     public abstract async FolderStore get_folders()
         throws Error.PERMISSION_DENIED;
 
+    /**
+     * Adds an info bar to a folder, if selected.
+     *
+     * The info bar will be shown for the given folder if it is
+     * currently selected in any main window, which can be determined
+     * by connecting to the {@link folder_selected} signal. Further,
+     * if multiple info bars are added for the same folder, only the
+     * one with a higher priority will be shown. If that is closed or
+     * removed, the second highest will be shown, and so on. Once the
+     * selected folder changes, the info bars will be automatically
+     * removed.
+     */
+    public abstract void add_folder_info_bar(Folder selected,
+                                             InfoBar infobar,
+                                             uint priority);
+
+    /**
+     * Removes an info bar from a folder, if selected.
+     *
+     * Removes the info bar from the given folder if it is currently
+     * selected in any main window.
+     */
+    public abstract void remove_folder_info_bar(Folder selected,
+                                                InfoBar infobar);
+
 }

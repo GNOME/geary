@@ -12,6 +12,21 @@ internal class Application.FolderContext :
     Geary.BaseObject, Plugin.FolderContext {
 
 
+    private class PluginInfoBar : Components.InfoBar {
+
+
+        private Plugin.InfoBar plugin;
+
+
+        public PluginInfoBar(Plugin.InfoBar plugin) {
+            base(plugin.status, plugin.description);
+            this.show_close_button = plugin.show_close_button;
+            this.plugin = plugin;
+        }
+
+    }
+
+
     private unowned Client application;
     private FolderStoreFactory folders_factory;
     private Plugin.FolderStore folders;
@@ -27,6 +42,35 @@ internal class Application.FolderContext :
     public async Plugin.FolderStore get_folders()
         throws Plugin.Error.PERMISSION_DENIED {
         return this.folders;
+    }
+
+    public void add_folder_info_bar(Plugin.Folder selected,
+                                    Plugin.InfoBar infobar,
+                                    uint priority) {
+        Geary.Folder? folder = this.folders_factory.get_engine_folder(selected);
+        if (folder != null) {
+            foreach (MainWindow main in this.application.get_main_windows()) {
+                if (main.selected_folder == folder) {
+                    main.conversation_list_info_bars.add(
+                        new PluginInfoBar(infobar)
+                    );
+                }
+            }
+        }
+    }
+
+    public void remove_folder_info_bar(Plugin.Folder selected,
+                                       Plugin.InfoBar infobar) {
+        Geary.Folder? folder = this.folders_factory.get_engine_folder(selected);
+        if (folder != null) {
+            foreach (MainWindow main in this.application.get_main_windows()) {
+                if (main.selected_folder == folder) {
+                    main.conversation_list_info_bars.remove(
+                        new PluginInfoBar(infobar)
+                    );
+                }
+            }
+        }
     }
 
     internal void destroy() {

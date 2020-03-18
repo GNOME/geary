@@ -105,6 +105,7 @@ geary_client_vala_sources = files(
   'plugin/plugin-folder-extension.vala',
   'plugin/plugin-folder-store.vala',
   'plugin/plugin-folder.vala',
+  'plugin/plugin-info-bar.vala',
   'plugin/plugin-notification-extension.vala',
   'plugin/plugin-plugin-base.vala',
   'plugin/plugin-trusted-extension.vala',

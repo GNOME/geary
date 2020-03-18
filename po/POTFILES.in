@@ -96,6 +96,7 @@ src/client/plugin/plugin-error.vala
 src/client/plugin/plugin-folder-extension.vala
 src/client/plugin/plugin-folder-store.vala
 src/client/plugin/plugin-folder.vala
+src/client/plugin/plugin-info-bar.vala
 src/client/plugin/plugin-notification-extension.vala
 src/client/plugin/plugin-plugin-base.vala
 src/client/plugin/plugin-trusted-extension.vala
