@@ -231,6 +231,14 @@ public class Application.PluginManager : GLib.Object {
                 notification.notifications = context;
             }
 
+            var folder = plugin as Plugin.FolderExtension;
+            if (folder != null) {
+                folder.folders = new FolderContext(
+                    this.application,
+                    this.folders_factory
+                );
+            }
+
             if (do_activate) {
                 var plugin_context = new PluginContext(info, plugin);
                 plugin_context.activate.begin((obj, res) => {
@@ -293,6 +301,14 @@ public class Application.PluginManager : GLib.Object {
             if (notifications != null) {
                 this.notification_contexts.unset(context.info);
                 notifications.destroy();
+            }
+        }
+
+        var folder = context.plugin as Plugin.FolderExtension;
+        if (folder != null) {
+            var folders = folder.folders as FolderContext;
+            if (folders != null) {
+                folders.destroy();
             }
         }
 
