@@ -33,6 +33,17 @@ public class Plugin.InfoBar : Geary.BaseObject {
     /** Determines if a close button is displayed by the info bar. */
     public bool show_close_button { get; set; default = false; }
 
+    /**
+     * An optional primary button for the info bar.
+     *
+     * The info bar is not automatically dismissed when the button is
+     * clicked. If it should be hidden then the action's handler
+     * should explicitly do so by calling the appropriate context
+     * object's method, such as {@link
+     * FolderContext.remove_folder_info_bar}.
+     */
+    public Button? primary_button { get; set; default = null; }
+
 
     /** Constructs a new info bar with the given status. */
     public InfoBar(string status,

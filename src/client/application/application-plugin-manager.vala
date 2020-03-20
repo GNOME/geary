@@ -276,7 +276,8 @@ public class Application.PluginManager : GLib.Object {
             if (folder != null) {
                 folder.folders = new FolderContext(
                     this.application,
-                    this.folders_factory
+                    this.folders_factory,
+                    plugin_application.action_group_name
                 );
             }
 
