@@ -289,7 +289,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             add_folders(available);
         }
         if (unavailable != null && !unavailable.is_empty) {
-            remove_folders(available);
+            remove_folders(unavailable);
         }
     }
 
