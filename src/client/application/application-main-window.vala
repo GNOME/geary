@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016, 2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2016, 2019-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -332,23 +332,16 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.Overlay overlay;
 
-    // This is a frame so users can use F6/Shift-F6 to get to it
-    [GtkChild]
-    private Gtk.Frame info_bar_frame;
+    private Components.InfoBarStack info_bars =
+        new Components.InfoBarStack.exclusive();
 
-    [GtkChild]
-    private Gtk.Grid info_bar_container;
-
-    [GtkChild]
     private Gtk.InfoBar offline_infobar;
 
-    [GtkChild]
     private Gtk.InfoBar cert_problem_infobar;
 
-    [GtkChild]
     private Gtk.InfoBar auth_problem_infobar;
 
-    private MainWindowInfoBar? service_problem_infobar = null;
+    private Components.ProblemReportInfoBar? service_problem_infobar = null;
 
     /** Fired when the user requests an account status be retried. */
     public signal void retry_service_problem(Geary.ClientService.Status problem);
@@ -529,6 +522,45 @@ public class Application.MainWindow :
             add_account(context);
         }
 
+        this.offline_infobar = new Components.InfoBar(
+            // Translators: An info bar status label
+            _("Working offline"),
+            // Translators: An info bar description label
+            _("You will not be able to send or receive email until re-connected.")
+        );
+        this.offline_infobar.show_close_button = true;
+        this.offline_infobar.response.connect(on_offline_infobar_response);
+
+        this.auth_problem_infobar = new Components.InfoBar(
+            // Translators: An info bar status label
+            _("Login problem"),
+            // Translators: An info bar description label
+            _("An account has reported an incorrect login or password.")
+        );
+        // Translators: An info bar button label
+        var auth_retry = new Gtk.Button.with_label(_("Login"));
+        // Translators: An info bar button tool-tip
+        auth_retry.tooltip_text = _(
+            "Retry login, you will be prompted for your password"
+        );
+        auth_retry.clicked.connect(on_auth_problem_retry);
+        this.auth_problem_infobar.get_action_area().add(auth_retry);
+
+        this.cert_problem_infobar = new Components.InfoBar(
+            // Translators: An info bar status label
+            _("Security problem"),
+            // Translators: An info bar description label
+            _("An account has reported an untrusted server..")
+        );
+        // Translators: An info bar button label
+        var cert_retry = new Gtk.Button.with_label(_("Check"));
+        // Translators: An info bar button tool-tip
+        cert_retry.tooltip_text = _(
+            "Check the security details for the connection"
+        );
+        cert_retry.clicked.connect(on_cert_problem_retry);
+        this.cert_problem_infobar.get_action_area().add(cert_retry);
+
         this.conversation_list_view.grab_focus();
     }
 
@@ -581,33 +613,21 @@ public class Application.MainWindow :
                                       bool has_auth_error,
                                       bool has_cert_error,
                                       Geary.Account? problem_source) {
-        // Only ever show one at a time. Offline is primary since
-        // nothing else can happen when offline. Service problems are
-        // secondary since auth and cert problems can't be resolved
-        // when the service isn't talking to the server. Cert problems
-        // are tertiary since you can't auth if you can't connect.
-        bool show_offline = false;
-        bool show_service = false;
-        bool show_cert = false;
-        bool show_auth = false;
-
+        // Only ever show one info bar at a time. Offline is primary
+        // since nothing else can happen when offline. Service
+        // problems are secondary since auth and cert problems can't
+        // be resolved when the service isn't talking to the
+        // server. Cert problems are tertiary since you can't auth if
+        // you can't connect.
         if (!status.is_online()) {
-            show_offline = true;
+            this.info_bars.add(this.offline_infobar);
         } else if (status.has_service_problem()) {
-            show_service = true;
-        } else if (has_cert_error) {
-            show_cert = true;
-        } else if (has_auth_error) {
-            show_auth = true;
-        }
-
-        if (show_service && this.service_problem_infobar == null) {
             Geary.ClientService? service = (
                 problem_source.incoming.last_error != null
                 ? problem_source.incoming
                 : problem_source.outgoing
             );
-            this.service_problem_infobar = new MainWindowInfoBar.for_problem(
+            this.service_problem_infobar = new Components.ProblemReportInfoBar(
                 new Geary.ServiceProblemReport(
                     problem_source.information,
                     service.configuration,
@@ -615,14 +635,14 @@ public class Application.MainWindow :
                 )
             );
             this.service_problem_infobar.retry.connect(on_service_problem_retry);
-
-            show_infobar(this.service_problem_infobar);
+            this.info_bars.add(this.service_problem_infobar);
+        } else if (has_cert_error) {
+            this.info_bars.add(this.cert_problem_infobar);
+        } else if (has_auth_error) {
+            this.info_bars.add(this.auth_problem_infobar);
+        } else {
+            this.info_bars.remove_all();
         }
-
-        this.offline_infobar.set_visible(show_offline);
-        this.cert_problem_infobar.set_visible(show_cert);
-        this.auth_problem_infobar.set_visible(show_auth);
-        update_infobar_frame();
     }
 
     /**
@@ -833,9 +853,10 @@ public class Application.MainWindow :
     }
 
     /** Displays an infobar in the window. */
-    public void show_infobar(MainWindowInfoBar info_bar) {
-        this.info_bar_container.add(info_bar);
-        this.info_bar_frame.show();
+    public void show_info_bar(Gtk.InfoBar info_bar) {
+        if (!this.info_bars.has_current) {
+            this.info_bars.add(info_bar);
+        }
     }
 
     /** Displays a composer addressed to a specific email address. */
@@ -1230,6 +1251,8 @@ public class Application.MainWindow :
             titlebar.add(this.main_toolbar);
             set_titlebar(titlebar);
         }
+
+        this.main_layout.pack_start(this.info_bars, false, true, 0);
 
         // Status bar
         this.status_bar.set_size_request(-1, STATUS_BAR_HEIGHT);
@@ -1669,18 +1692,6 @@ public class Application.MainWindow :
             this.main_toolbar.folder = this.selected_folder.get_display_name();
     }
 
-    private void update_infobar_frame() {
-        // Ensure the info bar frame is shown only when it has visible
-        // children
-        bool show_frame = false;
-        this.info_bar_container.foreach((child) => {
-                if (child.visible) {
-                    show_frame = true;
-                }
-            });
-        this.info_bar_frame.set_visible(show_frame);
-    }
-
     private void update_conversation_actions(ConversationCount count) {
         bool sensitive = (count != NONE);
         bool multiple = (count == MULTIPLE);
@@ -1919,34 +1930,24 @@ public class Application.MainWindow :
         return Gdk.EVENT_STOP;
     }
 
-    [GtkCallback]
     private void on_offline_infobar_response() {
-        this.offline_infobar.hide();
-        update_infobar_frame();
+        this.info_bars.remove(this.offline_infobar);
     }
 
     private void on_service_problem_retry() {
+        this.info_bars.remove(this.service_problem_infobar);
         this.service_problem_infobar = null;
         retry_service_problem(Geary.ClientService.Status.CONNECTION_FAILED);
     }
 
-    [GtkCallback]
     private void on_cert_problem_retry() {
-        this.cert_problem_infobar.hide();
-        update_infobar_frame();
+        this.info_bars.remove(this.cert_problem_infobar);
         retry_service_problem(Geary.ClientService.Status.TLS_VALIDATION_FAILED);
     }
 
-    [GtkCallback]
     private void on_auth_problem_retry() {
-        this.auth_problem_infobar.hide();
-        update_infobar_frame();
+        this.info_bars.remove(this.auth_problem_infobar);
         retry_service_problem(Geary.ClientService.Status.AUTHENTICATION_FAILED);
-    }
-
-    [GtkCallback]
-    private void on_info_bar_container_remove() {
-        update_infobar_frame();
     }
 
     private void on_update_ui_timeout() {
