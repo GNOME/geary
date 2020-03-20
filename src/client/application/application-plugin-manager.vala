@@ -313,6 +313,14 @@ public class Application.PluginManager : GLib.Object {
                 notification.notifications = context;
             }
 
+            var email = plugin as Plugin.EmailExtension;
+            if (email != null) {
+                email.email = new EmailContext(
+                    this.application,
+                    this.email_factory
+                );
+            }
+
             var folder = plugin as Plugin.FolderExtension;
             if (folder != null) {
                 folder.folders = new FolderContext(
@@ -389,9 +397,17 @@ public class Application.PluginManager : GLib.Object {
 
         var folder = context.plugin as Plugin.FolderExtension;
         if (folder != null) {
-            var folders = folder.folders as FolderContext;
-            if (folders != null) {
-                folders.destroy();
+            var folder_context = folder.folders as FolderContext;
+            if (folder_context != null) {
+                folder_context.destroy();
+            }
+        }
+
+        var email = context.plugin as Plugin.EmailExtension;
+        if (email != null) {
+            var email_context = email.email as Application.EmailContext;
+            if (email_context != null) {
+                email_context.destroy();
             }
         }
 
