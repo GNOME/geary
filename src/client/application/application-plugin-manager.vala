@@ -16,7 +16,8 @@ public class Application.PluginManager : GLib.Object {
     private const string[] AUTOLOAD_MODULES = {
         "desktop-notifications",
         "folder-highlight",
-        "notification-badge"
+        "notification-badge",
+        "special-folders",
     };
 
 
