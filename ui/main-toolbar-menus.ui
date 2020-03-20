@@ -25,16 +25,6 @@
   <menu id="main_menu">
     <section>
       <item>
-        <attribute name="label" translatable="yes">Empty _Spam…</attribute>
-        <attribute name="action">win.empty-spam</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Empty _Trash…</attribute>
-        <attribute name="action">win.empty-trash</attribute>
-      </item>
-    </section>
-    <section>
-      <item>
         <attribute name="label" translatable="yes">_Accounts</attribute>
         <attribute name="action">app.accounts</attribute>
       </item>
