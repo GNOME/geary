@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of the notification extension context.
+ * Implementation of the notification plugin extension context.
  */
 internal class Application.NotificationContext :
     Geary.BaseObject, Plugin.NotificationContext {
