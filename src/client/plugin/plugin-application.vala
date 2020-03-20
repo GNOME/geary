@@ -37,4 +37,20 @@ public interface Plugin.Application : Geary.BaseObject {
     /** Displays a folder in the most recently used main window. */
     public abstract void show_folder(Folder folder);
 
+    /**
+     * Reversibly deletes all email from a folder.
+     *
+     * A prompt will be displayed for confirmation before the folder
+     * is actually emptied, if declined an exception will be thrown.
+     *
+     * This method will return once the engine has completed emptying
+     * the folder, however it may take additional time for the changes
+     * to be fully committed and reflected on the remote server.
+     *
+     * @throws Error.PERMISSIONS if permission was not granted to
+     * empty the folder
+     */
+    public abstract async void empty_folder(Folder folder)
+        throws Error.PERMISSION_DENIED;
+
 }

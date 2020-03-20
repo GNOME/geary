@@ -1285,6 +1285,22 @@ public class Application.MainWindow :
         return base.key_release_event(event);
     }
 
+    internal bool prompt_empty_folder(Geary.SpecialFolderType type) {
+        ConfirmationDialog dialog = new ConfirmationDialog(
+            this,
+            _("Empty all email from your %s folder?").printf(
+                type.get_display_name()
+            ),
+            _("This removes the email from Geary and your email server.") +
+            "  <b>" + _("This cannot be undone.") + "</b>",
+            _("Empty %s").printf(type.get_display_name()),
+            "destructive-action"
+        );
+        dialog.use_secondary_markup(true);
+        dialog.set_focus_response(Gtk.ResponseType.CANCEL);
+        return (dialog.run() == Gtk.ResponseType.OK);
+    }
+
     /** Un-does the last executed application command, if any. */
     private async void undo() {
         AccountContext? selected = get_selected_account_context();
@@ -1358,23 +1374,6 @@ public class Application.MainWindow :
         );
         return (dialog.run() == Gtk.ResponseType.OK);
     }
-
-    private bool prompt_empty_folder(Geary.SpecialFolderType type) {
-        ConfirmationDialog dialog = new ConfirmationDialog(
-            this,
-            _("Empty all email from your %s folder?").printf(
-                type.get_display_name()
-            ),
-            _("This removes the email from Geary and your email server.") +
-            "  <b>" + _("This cannot be undone.") + "</b>",
-            _("Empty %s").printf(type.get_display_name()),
-            "destructive-action"
-        );
-        dialog.use_secondary_markup(true);
-        dialog.set_focus_response(Gtk.ResponseType.CANCEL);
-        return (dialog.run() == Gtk.ResponseType.OK);
-    }
-
 
     private async Gee.Collection<Geary.App.Conversation>
         load_conversations_for_email(

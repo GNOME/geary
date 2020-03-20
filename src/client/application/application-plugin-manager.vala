@@ -16,7 +16,7 @@ public class Application.PluginManager : GLib.Object {
     private const string[] AUTOLOAD_MODULES = {
         "desktop-notifications",
         "folder-highlight",
-        "notification-badge",
+        "notification-badge"
     };
 
 
@@ -87,6 +87,42 @@ public class Application.PluginManager : GLib.Object {
             if (target != null) {
                 this.backing.show_folder.begin(target);
             }
+        }
+
+        public override async void empty_folder(Plugin.Folder folder)
+           throws Plugin.Error.PERMISSION_DENIED {
+           MainWindow main = this.backing.last_active_main_window;
+           if (main == null) {
+               throw new Plugin.Error.PERMISSION_DENIED(
+                   "Cannot prompt for permission"
+               );
+           }
+
+           Geary.Folder? target = this.folders.get_engine_folder(folder);
+           if (target != null) {
+               if (!main.prompt_empty_folder(target.special_folder_type)) {
+                   throw new Plugin.Error.PERMISSION_DENIED(
+                       "Permission not granted"
+                   );
+               }
+
+               Application.Controller controller = this.backing.controller;
+               controller.empty_folder.begin(
+                   target,
+                   (obj, res) => {
+                       try {
+                           controller.empty_folder.end(res);
+                       } catch (GLib.Error error) {
+                           controller.report_problem(
+                               new Geary.AccountProblemReport(
+                                   target.account.information,
+                                   error
+                               )
+                           );
+                       }
+                   }
+               );
+           }
         }
 
         private void on_window_added(Gtk.Window window) {

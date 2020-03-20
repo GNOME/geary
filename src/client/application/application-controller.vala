@@ -828,6 +828,30 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
+    public async void empty_folder(Geary.Folder target)
+        throws GLib.Error {
+        AccountContext? context = this.accounts.get(target.account.information);
+        if (context != null) {
+            Geary.FolderSupport.Empty? emptyable = (
+                target as Geary.FolderSupport.Empty
+            );
+            if (emptyable == null) {
+                throw new Geary.EngineError.UNSUPPORTED(
+                    "Emptying folder not supported %s", target.path.to_string()
+                );
+            }
+
+            Command command = new EmptyFolderCommand(emptyable);
+            command.executed.connect(
+                // Not quite accurate, but close enough
+                () => context.controller_stack.folders_removed(
+                    Geary.Collection.single(emptyable)
+                )
+            );
+            yield context.commands.execute(command, context.cancellable);
+        }
+    }
+
     public async void empty_folder_special(Geary.Account source,
                                            Geary.SpecialFolderType type)
         throws GLib.Error {
