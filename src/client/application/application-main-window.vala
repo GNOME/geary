@@ -285,6 +285,11 @@ public class Application.MainWindow :
     public SearchBar search_bar { get; private set; }
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
+
+    public Components.InfoBarStack conversation_list_info_bars {
+        get; private set; default = new Components.InfoBarStack.exclusive();
+    }
+
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
 
     private Controller controller;
@@ -685,6 +690,8 @@ public class Application.MainWindow :
                 this.progress_monitor.remove(conversations_model.preview_monitor);
                 this.conversation_list_view.set_model(null);
             }
+
+            this.conversation_list_info_bars.remove_all();
 
             // With everything disposed of, update existing window
             // state
@@ -1214,6 +1221,9 @@ public class Application.MainWindow :
         this.folder_list_scrolled.add(this.folder_list);
 
         // Conversation list
+        this.conversation_box.pack_start(
+            this.conversation_list_info_bars, false, false, 0
+        );
         this.conversation_list_view = new ConversationListView(
             this.application.config
         );

@@ -46,20 +46,58 @@ public class Application.PluginManager : GLib.Object {
     private class ApplicationImpl : Geary.BaseObject, Plugin.Application {
 
 
+        internal string action_group_name { get; private set; }
+
+        private Peas.PluginInfo plugin;
         private Client backing;
         private FolderStoreFactory folders;
+        private GLib.SimpleActionGroup? action_group = null;
 
 
-        public ApplicationImpl(Client backing,
+        public ApplicationImpl(Peas.PluginInfo plugin,
+                               Client backing,
                                FolderStoreFactory folders) {
+            this.plugin = plugin;
             this.backing = backing;
             this.folders = folders;
+            this.action_group_name = plugin.get_module_name().replace(".", "_");
+        }
+
+        public override void register_action(GLib.Action action) {
+            if (this.action_group == null) {
+                this.action_group = new GLib.SimpleActionGroup();
+                this.backing.window_added.connect(on_window_added);
+                foreach (MainWindow main in this.backing.get_main_windows()) {
+                    main.insert_action_group(
+                        this.action_group_name,
+                        this.action_group
+                    );
+                }
+            }
+
+            this.action_group.add_action(action);
+        }
+
+        public override void deregister_action(GLib.Action action) {
+            this.action_group.remove_action(action.get_name());
         }
 
         public override void show_folder(Plugin.Folder folder) {
             Geary.Folder? target = this.folders.get_engine_folder(folder);
             if (target != null) {
                 this.backing.show_folder.begin(target);
+            }
+        }
+
+        private void on_window_added(Gtk.Window window) {
+            if (this.action_group != null) {
+                var main = window as MainWindow;
+                if (main != null) {
+                    main.insert_action_group(
+                        this.action_group_name,
+                        this.action_group
+                    );
+                }
             }
         }
 
@@ -97,7 +135,7 @@ public class Application.PluginManager : GLib.Object {
     public PluginManager(Client application) throws GLib.Error {
         this.application = application;
         this.plugins = Peas.Engine.get_default();
-        this.folders_factory = new FolderStoreFactory(application.engine);
+        this.folders_factory = new FolderStoreFactory(application);
 
         this.trusted_path = application.get_app_plugins_dir().get_path();
         this.plugins.add_search_path(trusted_path, null);
@@ -202,11 +240,14 @@ public class Application.PluginManager : GLib.Object {
     }
 
     private void on_load_plugin(Peas.PluginInfo info) {
+        var plugin_application = new ApplicationImpl(
+            info, this.application, this.folders_factory
+        );
         var plugin = this.plugins.create_extension(
             info,
             typeof(Plugin.PluginBase),
             "plugin_application",
-            new ApplicationImpl(this.application, this.folders_factory)
+            plugin_application
         ) as Plugin.PluginBase;
         if (plugin != null) {
             bool do_activate = true;
@@ -229,6 +270,15 @@ public class Application.PluginManager : GLib.Object {
                 );
                 this.notification_contexts.set(info, context);
                 notification.notifications = context;
+            }
+
+            var folder = plugin as Plugin.FolderExtension;
+            if (folder != null) {
+                folder.folders = new FolderContext(
+                    this.application,
+                    this.folders_factory,
+                    plugin_application.action_group_name
+                );
             }
 
             if (do_activate) {
@@ -293,6 +343,14 @@ public class Application.PluginManager : GLib.Object {
             if (notifications != null) {
                 this.notification_contexts.unset(context.info);
                 notifications.destroy();
+            }
+        }
+
+        var folder = context.plugin as Plugin.FolderExtension;
+        if (folder != null) {
+            var folders = folder.folders as FolderContext;
+            if (folders != null) {
+                folders.destroy();
             }
         }
 
