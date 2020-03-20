@@ -17,6 +17,13 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     private class FolderStoreImpl : Geary.BaseObject, Plugin.FolderStore {
 
 
+        public override GLib.VariantType folder_variant_type {
+            get { return this._folder_variant_type; }
+        }
+        private GLib.VariantType _folder_variant_type = new GLib.VariantType(
+            "(sv)"
+        );
+
         private Gee.Map<Geary.Folder,FolderImpl> folders;
 
 
@@ -24,9 +31,20 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             this.folders = folders;
         }
 
-        /** Returns a read-only set of all known folders. */
         public Gee.Collection<Plugin.Folder> get_folders() {
             return this.folders.values.read_only_view;
+        }
+
+        public Plugin.Folder? get_folder_from_variant(GLib.Variant variant) {
+            Plugin.Folder? found = null;
+            // XXX this is pretty inefficient
+            foreach (var folder in this.folders.values) {
+                if (folder.to_variant().equal(variant)) {
+                    found = folder;
+                    break;
+                }
+            }
+            return found;
         }
 
         internal void destroy() {

@@ -32,8 +32,12 @@ public interface Plugin.Folder : Geary.BaseObject {
     /**
      * Returns a variant identifying this account and folder.
      *
-     * This value is suitable to be used as the `show-folder`
+     * This value can be used to obtain folders from {@link
+     * FolderStore}, and is suitable to be used as the `show-folder`
      * application action parameter.
+     *
+     * @see FolderStore.get_folder_from_variant
+     * @see folder_variant_type
      */
     public abstract GLib.Variant to_variant();
 
