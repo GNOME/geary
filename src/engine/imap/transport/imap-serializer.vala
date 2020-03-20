@@ -106,12 +106,14 @@ public class Geary.Imap.Serializer : BaseObject {
     public async void push_literal_data(uint8[] buffer,
                                         GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        yield this.output.write_all_async(
-            buffer,
-            Priority.DEFAULT,
-            cancellable,
-            null
-        );
+        if (buffer.length > 0) {
+            yield this.output.write_all_async(
+                buffer,
+                Priority.DEFAULT,
+                cancellable,
+                null
+            );
+        }
     }
 
     /**
