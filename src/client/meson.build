@@ -98,6 +98,7 @@ geary_client_vala_sources = files(
 
   'plugin/plugin-account.vala',
   'plugin/plugin-application.vala',
+  'plugin/plugin-button.vala',
   'plugin/plugin-contact-store.vala',
   'plugin/plugin-email-store.vala',
   'plugin/plugin-email.vala',
