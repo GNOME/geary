@@ -423,11 +423,22 @@ class ImapConsole : Gtk.Window {
     }
 
     private void list(string cmd, string[] args) throws Error {
-        check_connected(cmd, args, 2, "<reference> <mailbox>");
+        check_min_connected(cmd, args, 2, "<reference> <mailbox> [special-use]");
 
         status("Listing...");
-        this.cx.send_command(new Geary.Imap.ListCommand.wildcarded(args[0],
-            new Geary.Imap.MailboxSpecifier(args[1]), (cmd.down() == "xlist"), null));
+        Geary.Imap.ListReturnParameter? return_param = null;
+        if (args.length >= 3 && args[2] == "special-use") {
+            return_param = new Geary.Imap.ListReturnParameter();
+            return_param.add_special_use();
+        }
+        this.cx.send_command(
+            new Geary.Imap.ListCommand.wildcarded(
+                args[0],
+                new Geary.Imap.MailboxSpecifier(args[1]),
+                (cmd.down() == "xlist"),
+                return_param
+            )
+        );
     }
 
     private void examine(string cmd, string[] args) throws Error {

@@ -308,20 +308,21 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                                                                bool list_children,
                                                                Cancellable? cancellable)
         throws Error {
-        bool can_xlist = session.capabilities.has_capability(Capabilities.XLIST);
-
-        // Request SPECIAL-USE if available and not using XLIST
+        // Request SPECIAL-USE or else XLIST if available
         ListReturnParameter? return_param = null;
-        if (session.capabilities.supports_special_use() && !can_xlist) {
+        bool use_xlist = false;
+        if (session.capabilities.supports_special_use()) {
             return_param = new ListReturnParameter();
             return_param.add_special_use();
+        } else {
+            use_xlist = session.capabilities.has_capability(Capabilities.XLIST);
         }
 
         ListCommand cmd;
         if (folder.is_root) {
             // List the server root
             cmd = new ListCommand.wildcarded(
-                "", new MailboxSpecifier("%"), can_xlist, return_param
+                "", new MailboxSpecifier("%"), use_xlist, return_param
             );
         } else {
             // List either the given folder or its children
@@ -333,7 +334,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                 }
                 specifier = specifier + delim + "%";
             }
-            cmd = new ListCommand(new MailboxSpecifier(specifier), can_xlist, return_param);
+            cmd = new ListCommand(new MailboxSpecifier(specifier), use_xlist, return_param);
         }
 
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
