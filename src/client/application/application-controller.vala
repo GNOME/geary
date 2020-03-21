@@ -1456,7 +1456,7 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     private void on_sent(Geary.Smtp.ClientService service,
-                         Geary.RFC822.Message sent) {
+                         Geary.Email sent) {
         /// Translators: The label for an in-app notification. The
         /// string substitution is a list of recipients of the email.
         string message = _(

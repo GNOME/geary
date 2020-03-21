@@ -42,7 +42,7 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
     private Cancellable? queue_cancellable = null;
 
     /** Emitted when the manager has sent an email. */
-    public signal void email_sent(Geary.RFC822.Message rfc822);
+    public signal void email_sent(Geary.Email email);
 
     /** Emitted when an error occurred sending an email. */
     public signal void report_problem(Geary.ProblemReport problem);
@@ -252,6 +252,7 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
             debug("Outbox postie: Sending \"%s\" (ID:%s)...",
                   email_subject(message), email.id.to_string());
             yield send_email_internal(message, cancellable);
+            email_sent(email);
 
             // Mark as sent, so if there's a problem pushing up to
             // Sent, we don't retry sending. Don't pass the
@@ -353,8 +354,6 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
 
         if (smtp_err != null)
             throw smtp_err;
-
-        email_sent(rfc822);
     }
 
     private async void save_sent_mail(Geary.Email message,
