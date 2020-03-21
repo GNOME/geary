@@ -80,7 +80,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     }
 
     private void on_entry_selected(Sidebar.SelectableEntry selectable) {
-        FolderEntry? entry = selectable as FolderEntry;
+        AbstractFolderEntry? entry = selectable as AbstractFolderEntry;
         if (entry != null) {
             this.selected = entry.folder;
             folder_selected(entry.folder);
