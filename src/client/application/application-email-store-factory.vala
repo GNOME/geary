@@ -207,4 +207,9 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         return plugin_ids;
     }
 
+    public Plugin.Email to_plugin_email(Geary.Email engine,
+                                        Geary.AccountInformation account) {
+        return new EmailImpl(engine, account);
+    }
+
 }

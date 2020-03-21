@@ -206,6 +206,11 @@ internal class Application.NotificationContext :
         this.email_factory.destroy_email_store(this.email);
     }
 
+    internal void email_sent(Geary.AccountInformation account,
+                             Geary.Email email) {
+        this.email.email_sent(email_factory.to_plugin_email(email, account));
+    }
+
     internal void clear_new_messages(Geary.Folder location,
                                      Gee.Set<Geary.App.Conversation>? visible) {
         MonitorInformation? info = this.folder_information.get(location);

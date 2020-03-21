@@ -1472,7 +1472,10 @@ internal class Application.Controller : Geary.BaseObject {
 
         AccountContext? context = this.accounts.get(service.account);
         if (context != null) {
-            //this.notifications.email_sent(context.account, sent);
+            foreach (NotificationContext plugin in
+                     this.plugins.get_notification_contexts()) {
+                plugin.email_sent(context.account.information, sent);
+            }
         }
     }
 
