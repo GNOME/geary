@@ -93,6 +93,7 @@
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
+          <li>New mail notifications now show contact photos</li>
           <li>New preferences pane for managing plugins</li>
         </ul>
       </description>
