@@ -178,6 +178,12 @@ modules:
         url: https://github.com/jstedfast/gmime.git
 
   # Geary dependency
+  - name: gsound
+    sources:
+      - type: git
+        url: https://github.com/GNOME/gsound.git
+
+  # Geary dependency
   - name: libhandy
     buildsystem: meson
     config-opts:

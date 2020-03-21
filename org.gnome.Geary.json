@@ -173,6 +173,15 @@
             ]
         },
         {
+            "name": "gsound",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/GNOME/gsound.git"
+                }
+            ]
+        },
+        {
             "name": "libhandy",
             "buildsystem": "meson",
             "config-opts": [
