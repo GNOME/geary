@@ -31,8 +31,8 @@ public interface Plugin.NotificationExtension : PluginBase {
  *
  * The context provides an interface for notification plugins to
  * interface with the Geary client application. Plugins that implement
- * the plugins will be passed an instance of this class as the
- * `context` property.
+ * the {@link NotificationExtension} interface will be given an
+ * instance of this class.
  *
  * Plugins should register folders they wish to monitor by calling
  * {@link start_monitoring_folder}. The context will then start

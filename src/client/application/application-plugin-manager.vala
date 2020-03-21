@@ -125,6 +125,7 @@ public class Application.PluginManager : GLib.Object {
     private string trusted_path;
 
     private FolderStoreFactory folders_factory;
+    private EmailStoreFactory email_factory;
 
     private Gee.Map<Peas.PluginInfo,PluginContext> plugin_set =
         new Gee.HashMap<Peas.PluginInfo,PluginContext>();
@@ -136,6 +137,7 @@ public class Application.PluginManager : GLib.Object {
         this.application = application;
         this.plugins = Peas.Engine.get_default();
         this.folders_factory = new FolderStoreFactory(application);
+        this.email_factory = new EmailStoreFactory(application);
 
         this.trusted_path = application.get_app_plugins_dir().get_path();
         this.plugins.add_search_path(trusted_path, null);
@@ -229,6 +231,7 @@ public class Application.PluginManager : GLib.Object {
         this.plugins.set_loaded_plugins(null);
         this.plugins.garbage_collect();
         this.folders_factory.destroy();
+        this.email_factory.destroy();
     }
 
     internal inline bool is_autoload(Peas.PluginInfo info) {
@@ -266,7 +269,8 @@ public class Application.PluginManager : GLib.Object {
             if (notification != null) {
                 var context = new NotificationContext(
                     this.application,
-                    this.folders_factory
+                    this.folders_factory,
+                    this.email_factory
                 );
                 this.notification_contexts.set(info, context);
                 notification.notifications = context;

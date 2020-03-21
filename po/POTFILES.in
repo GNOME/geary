@@ -23,6 +23,7 @@ src/client/application/application-configuration.vala
 src/client/application/application-contact-store.vala
 src/client/application/application-contact.vala
 src/client/application/application-controller.vala
+src/client/application/application-email-store-factory.vala
 src/client/application/application-folder-context.vala
 src/client/application/application-folder-store-factory.vala
 src/client/application/application-main-window.vala
