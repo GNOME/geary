@@ -265,6 +265,21 @@ public class Application.Contact : Geary.BaseObject {
         );
     }
 
+    /** Returns the avatar for this contact. */
+    public async Gdk.Pixbuf? load_avatar(Geary.RFC822.MailboxAddress source,
+                                         int pixel_size,
+                                         GLib.Cancellable cancellable)
+        throws GLib.Error {
+        Gdk.Pixbuf? avatar = null;
+        ContactStore? store = this.store;
+        if (store != null) {
+            avatar = yield store.avatars.load(
+                this, source, pixel_size, cancellable
+            );
+        }
+        return avatar;
+    }
+
     /** Sets remote resource loading for this contact. */
     public async void set_remote_resource_loading(bool enabled,
                                                   GLib.Cancellable? cancellable)

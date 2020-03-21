@@ -85,6 +85,7 @@ public class Plugin.DesktopNotifications :
                                                Email email
     ) throws GLib.Error {
         string title = to_notitication_title(folder.account, total);
+        Gdk.Pixbuf? icon = null;
         Geary.RFC822.MailboxAddress? originator = email.get_primary_originator();
         if (originator != null) {
             ContactStore contacts =
@@ -92,10 +93,25 @@ public class Plugin.DesktopNotifications :
             global::Application.Contact? contact = yield contacts.load(
                 originator, this.cancellable
             );
+
             title = (
                 contact.is_trusted
                 ? contact.display_name
                 : originator.to_short_display()
+            );
+
+            int window_scale = 1;
+            Gdk.Display? display = Gdk.Display.get_default();
+            if (display != null) {
+                Gdk.Monitor? monitor = display.get_primary_monitor();
+                if (monitor != null) {
+                    window_scale = monitor.scale_factor;
+                }
+            }
+            icon = yield contact.load_avatar(
+                originator,
+                global::Application.Client.AVATAR_SIZE_PIXELS * window_scale,
+                this.cancellable
             );
         }
 
@@ -116,7 +132,7 @@ public class Plugin.DesktopNotifications :
             );
         }
 
-        issue_arrived_notification(title, body, folder, email.identifier);
+        issue_arrived_notification(title, body, icon, folder, email.identifier);
     }
 
     private void notify_general(Folder folder, int total, int added) {
@@ -142,11 +158,12 @@ public class Plugin.DesktopNotifications :
             ).printf(body, total);
         }
 
-        issue_arrived_notification(title, body, folder, null);
+        issue_arrived_notification(title, body, null, folder, null);
     }
 
     private void issue_arrived_notification(string summary,
                                             string body,
+                                            Gdk.Pixbuf? icon,
                                             Folder folder,
                                             EmailIdentifier? id) {
         // only one outstanding notification at a time
@@ -168,6 +185,7 @@ public class Plugin.DesktopNotifications :
             ARRIVED_ID,
             summary,
             body,
+            icon,
             Action.Application.prefix(action),
             new GLib.Variant.tuple(target_param)
         );
@@ -176,15 +194,18 @@ public class Plugin.DesktopNotifications :
     private GLib.Notification issue_notification(string id,
                                                  string summary,
                                                  string body,
+                                                 Gdk.Pixbuf? avatar,
                                                  string? action,
                                                  GLib.Variant? action_target) {
+        GLib.Icon icon = avatar;
+        if (avatar == null) {
+            icon = new GLib.ThemedIcon(
+                "%s-symbolic".printf(global::Application.Client.APP_ID)
+            );
+        }
         GLib.Notification notification = new GLib.Notification(summary);
         notification.set_body(body);
-        notification.set_icon(
-            new GLib.ThemedIcon(
-                "%s-symbolic".printf(global::Application.Client.APP_ID)
-            )
-        );
+        notification.set_icon(icon);
 
         // Do not show notification actions under Unity, it's
         // notifications daemon doesn't support them.
@@ -211,21 +232,21 @@ public class Plugin.DesktopNotifications :
             // present and it can be loaded, otherwise notify
             // generally
             bool notified = false;
-            if (this.email != null &&
-                added.size == 1) {
-                try {
-                    Email? message = Geary.Collection.first(
-                        yield this.email.get_email(added, this.cancellable)
-                    );
-                    if (message != null) {
-                        yield notify_specific_message(folder, total, message);
-                        notified = true;
-                    } else {
-                        warning("Could not load email for notification");
-                    }
-                } catch (GLib.Error error) {
-                    warning("Error loading email for notification: %s", error.message);
+            try {
+                Email? message = Geary.Collection.first(
+                    yield this.email.get_email(
+                        Geary.Collection.single(Geary.Collection.first(added)),
+                        this.cancellable
+                    )
+                );
+                if (message != null) {
+                    yield notify_specific_message(folder, total, message);
+                    notified = true;
+                } else {
+                    warning("Could not load email for notification");
                 }
+            } catch (GLib.Error error) {
+                warning("Error loading email for notification: %s", error.message);
             }
 
             if (!notified) {

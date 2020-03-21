@@ -44,6 +44,7 @@ public class Application.ContactStore : Geary.BaseObject {
     public Geary.Account account { get; private set; }
 
     internal Folks.IndividualAggregator individuals;
+    internal AvatarStore avatars;
 
     // Cache for storing Folks individuals by email address. Store
     // nulls so that negative lookups are cached as well.
@@ -60,13 +61,15 @@ public class Application.ContactStore : Geary.BaseObject {
 
 
     /** Constructs a new contact store for an account. */
-    public ContactStore(Geary.Account account,
-                        Folks.IndividualAggregator individuals) {
+    internal ContactStore(Geary.Account account,
+                          Folks.IndividualAggregator individuals,
+                          AvatarStore avatars) {
         this.account = account;
         this.individuals = individuals;
         this.individuals.individuals_changed_detailed.connect(
             on_individuals_changed
         );
+        this.avatars = avatars;
     }
 
     ~ContactStore() {

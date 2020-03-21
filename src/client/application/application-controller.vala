@@ -70,11 +70,9 @@ internal class Application.Controller : Geary.BaseObject {
         get; private set;
     }
 
-    /** Avatar store for the application. */
-    public Application.AvatarStore avatars {
-        get; private set; default = new Application.AvatarStore();
-    }
-
+    // Avatar store for the application.
+    private Application.AvatarStore avatars = new Application.AvatarStore();
+    
     // Primary collection of the application's open accounts
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
@@ -878,7 +876,7 @@ internal class Application.Controller : Geary.BaseObject {
             account,
             new Geary.App.SearchFolder(account, account.local_folder_root),
             new Geary.App.EmailStore(account),
-            new Application.ContactStore(account, this.folks)
+            new Application.ContactStore(account, this.folks, this.avatars)
         );
         this.accounts.set(account.information, context);
 
