@@ -16,6 +16,9 @@ public interface Plugin.Email : Geary.BaseObject {
     /** Returns a unique identifier for this email. */
     public abstract EmailIdentifier identifier { get; }
 
+    /** Returns the set of mutable flags for the email. */
+    public abstract Geary.EmailFlags flags { get; }
+
     /** Returns the subject header value for the this email. */
     public abstract string subject { get; }
 

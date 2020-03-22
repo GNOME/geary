@@ -14,6 +14,12 @@
 internal class Application.EmailStoreFactory : Geary.BaseObject {
 
 
+    private const Geary.Email.Field REQUIRED_FIELDS = (
+        ENVELOPE |
+        FLAGS
+    );
+
+
     private class EmailStoreImpl : Geary.BaseObject, Plugin.EmailStore {
 
 
@@ -61,7 +67,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
                 Gee.Collection<Geary.Email> batch =
                     yield context.emails.list_email_by_sparse_id_async(
                         accounts.get(account),
-                        ENVELOPE,
+                        REQUIRED_FIELDS,
                         NONE,
                         context.cancellable
                     );
@@ -94,6 +100,10 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             }
         }
         private IdImpl? _id = null;
+
+        public Geary.EmailFlags flags {
+            get { return this.backing.email_flags; }
+        }
 
         public string subject {
             get { return this._subject; }
