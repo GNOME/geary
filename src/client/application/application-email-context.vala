@@ -29,6 +29,11 @@ internal class Application.EmailContext :
         return this.email;
     }
 
+    internal void email_sent(Geary.AccountInformation account,
+                             Geary.Email email) {
+        this.email.email_sent(email_factory.to_plugin_email(email, account));
+    }
+
     internal void destroy() {
         this.email_factory.destroy_email_store(this.email);
     }
