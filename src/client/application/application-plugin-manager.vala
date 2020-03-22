@@ -323,7 +323,8 @@ public class Application.PluginManager : GLib.Object {
             if (email != null) {
                 var context = new EmailContext(
                     this.application,
-                    this.email_factory
+                    this.email_factory,
+                    plugin_application.action_group_name
                 );
                 this.email_contexts.set(info, context);
                 email.email = context;

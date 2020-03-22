@@ -50,4 +50,29 @@ public interface Plugin.EmailContext : Geary.BaseObject {
     public abstract async EmailStore get_email()
         throws Error.PERMISSION_DENIED;
 
+    /**
+     * Adds an info bar to an email, if displayed.
+     *
+     * The info bar will be shown for the given email if it is
+     * currently displayed in any main window, which can be determined
+     * by connecting to the {@link email_displayed} signal. Further,
+     * if multiple info bars are added for the same email, only the
+     * one with a higher priority will be shown. If that is closed or
+     * removed, the second highest will be shown, and so on. Once the
+     * email is no longer shown, the info bars will be automatically
+     * removed.
+     */
+    public abstract void add_email_info_bar(EmailIdentifier displayed,
+                                            InfoBar info_bar,
+                                            uint priority);
+
+    /**
+     * Removes an info bar from a email, if displayed.
+     *
+     * Removes the info bar from the given email if it is currently
+     * displayed in any main window.
+     */
+    public abstract void remove_email_info_bar(EmailIdentifier displayed,
+                                               InfoBar info_bar);
+
 }
