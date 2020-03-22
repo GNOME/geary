@@ -253,12 +253,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private Gtk.MenuButton email_menubutton;
 
     [GtkChild]
-    private Gtk.InfoBar draft_infobar;
-
-    [GtkChild]
-    private Gtk.InfoBar not_saved_infobar;
-
-    [GtkChild]
     private Gtk.Grid sub_messages;
 
 
@@ -307,19 +301,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             this.contacts,
             this.config
         );
-        connect_message_view_signals(this.primary_message);
-
         this.primary_message.summary.add(this.actions);
-        this.primary_message.infobars.add(this.draft_infobar);
-        if (is_draft) {
-            this.draft_infobar.show();
-            this.draft_infobar.response.connect((infobar, response_id) => {
-                    if (response_id == 1) {
-                        activate_email_action(ConversationListBox.ACTION_EDIT);
-                    }
-                });
-        }
-        this.primary_message.infobars.add(this.not_saved_infobar);
+        connect_message_view_signals(this.primary_message);
 
         // Wire up the rest of the UI
 
@@ -751,11 +734,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             style.remove_class(STARRED_CLASS);
             this.star_button.show();
             this.unstar_button.hide();
-        }
-
-        if (this.email.email_flags != null &&
-            this.email.email_flags.is_outbox_sent()) {
-            this.not_saved_infobar.show();
         }
 
         update_email_menu();

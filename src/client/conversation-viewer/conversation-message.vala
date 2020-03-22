@@ -308,7 +308,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     /** Box that InfoBar widgets should be added to. */
     [GtkChild]
-    internal Gtk.Grid infobars;
+    internal Components.InfoBarStack info_bars;
 
     /** HTML view that displays the message body. */
     internal ConversationWebView web_view { get; private set; }
@@ -369,8 +369,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     [GtkChild]
     private Gtk.ProgressBar body_progress;
 
-    [GtkChild]
-    private Gtk.InfoBar remote_images_infobar;
+    private Gtk.InfoBar? remote_images_info_bar = null;
 
     private Gtk.Widget? body_placeholder = null;
 
@@ -564,9 +563,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
         this.web_view.notify["is-loading"].connect(on_is_loading_notify);
         this.web_view.resource_load_started.connect(on_resource_load_started);
-        this.web_view.remote_image_load_blocked.connect(() => {
-                this.remote_images_infobar.show();
-            });
+        this.web_view.remote_image_load_blocked.connect(on_remote_images_blocked);
         this.web_view.selection_changed.connect(on_selection_changed);
         this.web_view.set_hexpand(true);
         this.web_view.set_vexpand(true);
@@ -1055,7 +1052,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private void show_images(bool update_email_flag) {
         start_progress_loading();
-        this.remote_images_infobar.hide();
+        if (this.remote_images_info_bar != null) {
+            this.info_bars.remove(this.remote_images_info_bar);
+            this.remote_images_info_bar = null;
+        }
         this.load_remote_resources = true;
         this.remote_resources_requested = 0;
         this.remote_resources_loaded = 0;
@@ -1298,7 +1298,29 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         set_action_enabled(ACTION_COPY_SELECTION, has_selection);
     }
 
-    [GtkCallback]
+    private void on_remote_images_blocked() {
+        this.remote_images_info_bar = new Components.InfoBar(
+            // Translators: Info bar status message
+            _("Remote images not shown"),
+            // Translators: Info bar description
+            _("Only show remote images from senders you trust.")
+        );
+        var show = this.remote_images_info_bar.add_button(
+            // Translators: Info bar button label
+            _("Show"), 1
+        );
+        this.remote_images_info_bar.add_button(
+            // Translators: Info bar button label
+            _("Always show from sender"), 2
+        );
+        this.remote_images_info_bar.response.connect(on_remote_images_response);
+        var buttons = this.remote_images_info_bar.get_action_area() as Gtk.ButtonBox;
+        if (buttons != null) {
+            buttons.set_child_non_homogeneous(show, true);
+        }
+        this.info_bars.add(this.remote_images_info_bar);
+    }
+
     private void on_remote_images_response(Gtk.InfoBar info_bar, int response_id) {
         switch (response_id) {
         case 1:
@@ -1315,7 +1337,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
             break;
         default:
-            this.remote_images_infobar.hide();
+            this.info_bars.remove(this.remote_images_info_bar);
+            this.remote_images_info_bar = null;
             break;
         }
     }

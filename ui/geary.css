@@ -45,10 +45,8 @@
   border-right: 0;
 }
 
-/* MainWindowInfoBarSet */
-
-.geary-info-bar-frame > border {
-  border-top-width: 0;
+.geary-info-bar-stack > border {
+  border-width: 0;
   border-left-width: 0;
   border-right-width: 0;
 }
@@ -111,6 +109,10 @@ row.geary-folder-popover-list-row > label {
 }
 
 /* ConversationMessage */
+
+.geary-message infobar box {
+  border-width: 0;
+}
 
 grid.geary-message-summary {
   border-top: 4px solid transparent;
