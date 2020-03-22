@@ -283,7 +283,7 @@ public class Application.MainWindow :
     public ConversationViewer conversation_viewer { get; private set; }
 
     public Components.InfoBarStack conversation_list_info_bars {
-        get; private set; default = new Components.InfoBarStack.exclusive();
+        get; private set; default = new Components.InfoBarStack();
     }
 
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
@@ -333,8 +333,7 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.Overlay overlay;
 
-    private Components.InfoBarStack info_bars =
-        new Components.InfoBarStack.exclusive();
+    private Components.InfoBarStack info_bars = new Components.InfoBarStack();
 
     private Gtk.InfoBar offline_infobar;
 
@@ -490,6 +489,9 @@ public class Application.MainWindow :
         if (_PROFILE != "") {
             this.get_style_context().add_class("devel");
         }
+
+        this.info_bars.shadow_type = IN;
+        this.conversation_list_info_bars.shadow_type = IN;
 
         // Edit actions
         this.edit_actions.add_action_entries(EDIT_ACTIONS, this);
