@@ -67,7 +67,6 @@ internal class Application.NotificationContext :
 
     private unowned Client application;
     private FolderStoreFactory folders_factory;
-    private Plugin.FolderStore folders;
     private EmailStoreFactory email_factory;
 
 
@@ -76,13 +75,7 @@ internal class Application.NotificationContext :
                                  EmailStoreFactory email_factory) {
         this.application = application;
         this.folders_factory = folders_factory;
-        this.folders = folders_factory.new_folder_store();
         this.email_factory = email_factory;
-    }
-
-    public async Plugin.FolderStore get_folders()
-        throws Plugin.Error.PERMISSION_DENIED {
-        return this.folders;
     }
 
     public async Plugin.ContactStore get_contacts_for_folder(Plugin.Folder source)
@@ -191,7 +184,6 @@ internal class Application.NotificationContext :
     }
 
     internal void destroy() {
-        this.folders_factory.destroy_folder_store(this.folders);
         // Get an array so the loop does not blow up when removing values.
         foreach (Geary.Folder monitored in this.folder_information.keys.to_array()) {
             remove_folder(monitored);

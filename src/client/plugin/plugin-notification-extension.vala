@@ -77,17 +77,6 @@ public interface Plugin.NotificationContext : Geary.BaseObject {
 
 
     /**
-     * Returns a store to lookup folders for notifications.
-     *
-     * This method may prompt for permission before returning.
-     *
-     * @throws Error.PERMISSIONS if permission to access
-     * this resource was not given
-     */
-    public abstract async Plugin.FolderStore get_folders()
-        throws Error.PERMISSION_DENIED;
-
-    /**
      * Returns a store to lookup contacts for notifications.
      *
      * This method may prompt for permission before returning.

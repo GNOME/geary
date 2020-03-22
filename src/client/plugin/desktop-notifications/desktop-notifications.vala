@@ -19,7 +19,11 @@ public void peas_register_types(TypeModule module) {
  * Manages standard desktop application notifications.
  */
 public class Plugin.DesktopNotifications :
-    PluginBase, NotificationExtension, EmailExtension, TrustedExtension {
+    PluginBase,
+    NotificationExtension,
+    FolderExtension,
+    EmailExtension,
+    TrustedExtension {
 
 
     private const Geary.SpecialFolderType[] MONITORED_TYPES = {
@@ -27,6 +31,10 @@ public class Plugin.DesktopNotifications :
     };
 
     public NotificationContext notifications {
+        get; set construct;
+    }
+
+    public FolderContext folders {
         get; set construct;
     }
 
@@ -56,17 +64,17 @@ public class Plugin.DesktopNotifications :
         this.notifications.new_messages_arrived.connect(on_new_messages_arrived);
         this.notifications.new_messages_retired.connect(on_new_messages_retired);
 
-        FolderStore folders = yield this.notifications.get_folders();
-        folders.folders_available.connect(
+        FolderStore folder_store = yield this.folders.get_folders();
+        folder_store.folders_available.connect(
             (folders) => check_folders(folders)
         );
-        folders.folders_unavailable.connect(
+        folder_store.folders_unavailable.connect(
                 (folders) => check_folders(folders)
         );
-        folders.folders_type_changed.connect(
+        folder_store.folders_type_changed.connect(
             (folders) => check_folders(folders)
         );
-        check_folders(folders.get_folders());
+        check_folders(folder_store.get_folders());
     }
 
     public override async void deactivate(bool is_shutdown) throws GLib.Error {

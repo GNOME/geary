@@ -16,16 +16,21 @@ public void peas_register_types(TypeModule module) {
 }
 
 /** Updates the Unity messaging menu when new mail arrives. */
-public class Plugin.MessagingMenu : PluginBase, NotificationExtension {
+public class Plugin.MessagingMenu :
+    PluginBase, NotificationExtension, FolderExtension {
 
 
     public NotificationContext notifications {
         get; set construct;
     }
 
+    public FolderContext folders {
+        get; set construct;
+    }
+
 
     private global::MessagingMenu.App? app = null;
-    private FolderStore? folders = null;
+    private FolderStore? folder_store = null;
 
 
     public override async void activate() throws GLib.Error {
@@ -38,17 +43,17 @@ public class Plugin.MessagingMenu : PluginBase, NotificationExtension {
         this.notifications.new_messages_arrived.connect(on_new_messages_changed);
         this.notifications.new_messages_retired.connect(on_new_messages_changed);
 
-        this.folders = yield this.notifications.get_folders();
-        folders.folders_available.connect(
+        this.folder_store = yield this.folders.get_folders();
+        this.folder_store.folders_available.connect(
             (folders) => check_folders(folders)
         );
-        folders.folders_unavailable.connect(
+        this.folder_store.folders_unavailable.connect(
             (folders) => check_folders(folders)
         );
-        folders.folders_type_changed.connect(
+        this.folder_store.folders_type_changed.connect(
             (folders) => check_folders(folders)
         );
-        check_folders(folders.get_folders());
+        check_folders(this.folder_store.get_folders());
     }
 
     public override async void deactivate(bool is_shutdown) throws GLib.Error {
@@ -89,7 +94,7 @@ public class Plugin.MessagingMenu : PluginBase, NotificationExtension {
 
     private void on_activate_source(string source_id) {
         if (this.folders != null) {
-            foreach (Folder folder in this.folders.get_folders()) {
+            foreach (Folder folder in this.folder_store.get_folders()) {
                 if (source_id == get_source_id(folder)) {
                     this.plugin_application.show_folder(folder);
                     break;

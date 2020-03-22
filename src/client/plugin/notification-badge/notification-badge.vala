@@ -17,7 +17,7 @@ public void peas_register_types(TypeModule module) {
 
 /** Updates Unity application badge with total new message count. */
 public class Plugin.NotificationBadge :
-    PluginBase, NotificationExtension, TrustedExtension {
+    PluginBase, NotificationExtension, FolderExtension, TrustedExtension {
 
 
     private const Geary.SpecialFolderType[] MONITORED_TYPES = {
@@ -25,6 +25,10 @@ public class Plugin.NotificationBadge :
     };
 
     public NotificationContext notifications {
+        get; set construct;
+    }
+
+    public FolderContext folders {
         get; set construct;
     }
 
@@ -53,17 +57,17 @@ public class Plugin.NotificationBadge :
             global::Application.Client.APP_ID + ".desktop"
         );
 
-        FolderStore folders = yield this.notifications.get_folders();
-        folders.folders_available.connect(
+        FolderStore folder_store = yield this.folders.get_folders();
+        folder_store.folders_available.connect(
             (folders) => check_folders(folders)
         );
-        folders.folders_unavailable.connect(
+        folder_store.folders_unavailable.connect(
             (folders) => check_folders(folders)
         );
-        folders.folders_type_changed.connect(
+        folder_store.folders_type_changed.connect(
             (folders) => check_folders(folders)
         );
-        check_folders(folders.get_folders());
+        check_folders(folder_store.get_folders());
 
         this.notifications.notify["total-new-messages"].connect(on_total_changed);
         update_count();
