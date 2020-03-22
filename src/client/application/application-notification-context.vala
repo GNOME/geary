@@ -206,9 +206,18 @@ internal class Application.NotificationContext :
         this.email_factory.destroy_email_store(this.email);
     }
 
+    internal void email_displayed(Geary.AccountInformation account,
+                                  Geary.Email email) {
+        this.email.email_displayed(
+            this.email_factory.to_plugin_email(email, account)
+        );
+    }
+
     internal void email_sent(Geary.AccountInformation account,
                              Geary.Email email) {
-        this.email.email_sent(email_factory.to_plugin_email(email, account));
+        this.email.email_sent(
+            this.email_factory.to_plugin_email(email, account)
+        );
     }
 
     internal void clear_new_messages(Geary.Folder location,

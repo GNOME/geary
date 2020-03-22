@@ -2062,6 +2062,7 @@ public class Application.MainWindow :
     }
 
     private void on_conversation_view_added(ConversationListBox list) {
+        list.email_loaded.connect(on_email_loaded);
         list.mark_email.connect(on_email_mark);
         list.reply_to_all_email.connect(on_email_reply_to_all);
         list.reply_to_sender_email.connect(on_email_reply_to_sender);
@@ -2456,6 +2457,14 @@ public class Application.MainWindow :
     }
 
     // Individual conversation email view action callbacks
+
+    private void on_email_loaded(ConversationListBox view,
+                                 Geary.Email loaded) {
+        this.controller.email_loaded(
+            view.conversation.base_folder.account.information,
+            loaded
+        );
+    }
 
     private void on_email_mark(ConversationListBox view,
                                Gee.Collection<Geary.EmailIdentifier> messages,

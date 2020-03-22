@@ -1283,7 +1283,7 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     /** Clears new message counts in notification plugin contexts. */
-    public void clear_new_messages(Geary.Folder source,
+    internal void clear_new_messages(Geary.Folder source,
                                    Gee.Set<Geary.App.Conversation> visible) {
         foreach (MainWindow window in this.application.get_main_windows()) {
             window.folder_list.set_has_new(source, false);
@@ -1291,6 +1291,19 @@ internal class Application.Controller : Geary.BaseObject {
         foreach (NotificationContext context in
                  this.plugins.get_notification_contexts()) {
             context.clear_new_messages(source, visible);
+        }
+    }
+
+    /** Notifies plugins of new email being displayed. */
+    internal void email_loaded(Geary.AccountInformation account,
+                               Geary.Email loaded) {
+        foreach (NotificationContext plugin in
+                 this.plugins.get_notification_contexts()) {
+            plugin.email_displayed(account, loaded);
+        }
+        foreach (EmailContext plugin in
+                 this.plugins.get_email_contexts()) {
+            plugin.email_displayed(account, loaded);
         }
     }
 

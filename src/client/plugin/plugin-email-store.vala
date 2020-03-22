@@ -15,6 +15,9 @@
 public interface Plugin.EmailStore : Geary.BaseObject {
 
 
+    /** Emitted when an email has been displayed in the UI. */
+    public signal void email_displayed(Email sent);
+
     /** Emitted when an email has been sent. */
     public signal void email_sent(Email sent);
 
