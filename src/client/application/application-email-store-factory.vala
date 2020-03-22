@@ -88,7 +88,8 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
 
-    private class EmailImpl : Geary.BaseObject, Plugin.Email {
+    /** Implementation of the plugin email interface. */
+    internal class EmailImpl : Geary.BaseObject, Plugin.Email {
 
 
         public Plugin.EmailIdentifier identifier {
@@ -116,7 +117,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         internal Geary.AccountInformation account { get; private set; }
 
 
-        public EmailImpl(Geary.Email backing,
+        internal EmailImpl(Geary.Email backing,
                          Geary.AccountInformation account) {
             this.backing = backing;
             this.account = account;
@@ -131,7 +132,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
 
-    private class IdImpl : Geary.BaseObject,
+    internal class IdImpl : Geary.BaseObject,
         Gee.Hashable<Plugin.EmailIdentifier>, Plugin.EmailIdentifier {
 
 
@@ -141,8 +142,8 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         internal Geary.AccountInformation account { get; private set; }
 
 
-        public IdImpl(Geary.EmailIdentifier backing,
-                      Geary.AccountInformation account) {
+        internal IdImpl(Geary.EmailIdentifier backing,
+                        Geary.AccountInformation account) {
             this.backing = backing;
             this.account = account;
         }
