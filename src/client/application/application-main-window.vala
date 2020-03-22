@@ -327,7 +327,7 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.ScrolledWindow folder_list_scrolled;
     [GtkChild]
-    private Gtk.Box conversation_box;
+    private Gtk.Box conversation_list_box;
     [GtkChild]
     private Gtk.ScrolledWindow conversation_list_scrolled;
     [GtkChild]
@@ -1217,7 +1217,7 @@ public class Application.MainWindow :
         this.folder_list_scrolled.add(this.folder_list);
 
         // Conversation list
-        this.conversation_box.pack_start(
+        this.conversation_list_box.pack_start(
             this.conversation_list_info_bars, false, false, 0
         );
         this.conversation_list_view = new ConversationListView(
@@ -1656,7 +1656,7 @@ public class Application.MainWindow :
         } else {
             if (!initial)
                 this.conversations_paned.position -= folder_list_width;
-            this.conversation_box.pack_start(status_bar, false, false);
+            this.conversation_list_box.pack_start(status_bar, false, false);
         }
 
         this.application.config.bind(
