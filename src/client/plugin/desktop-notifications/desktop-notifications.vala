@@ -19,7 +19,7 @@ public void peas_register_types(TypeModule module) {
  * Manages standard desktop application notifications.
  */
 public class Plugin.DesktopNotifications :
-    PluginBase, NotificationExtension, TrustedExtension {
+    PluginBase, NotificationExtension, EmailExtension, TrustedExtension {
 
 
     private const Geary.SpecialFolderType[] MONITORED_TYPES = {
@@ -27,6 +27,10 @@ public class Plugin.DesktopNotifications :
     };
 
     public NotificationContext notifications {
+        get; set construct;
+    }
+
+    public EmailContext email {
         get; set construct;
     }
 
@@ -40,14 +44,14 @@ public class Plugin.DesktopNotifications :
 
     private const string ARRIVED_ID = "email-arrived";
 
-    private EmailStore? email = null;
+    private EmailStore? email_store = null;
     private GLib.Notification? arrived_notification = null;
     private GLib.Cancellable? cancellable = null;
 
 
     public override async void activate() throws GLib.Error {
         this.cancellable = new GLib.Cancellable();
-        this.email = yield this.notifications.get_email();
+        this.email_store = yield this.email.get_email();
 
         this.notifications.new_messages_arrived.connect(on_new_messages_arrived);
         this.notifications.new_messages_retired.connect(on_new_messages_retired);
@@ -234,7 +238,7 @@ public class Plugin.DesktopNotifications :
             bool notified = false;
             try {
                 Email? message = Geary.Collection.first(
-                    yield this.email.get_email(
+                    yield this.email_store.get_email(
                         Geary.Collection.single(Geary.Collection.first(added)),
                         this.cancellable
                     )

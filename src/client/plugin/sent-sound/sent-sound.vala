@@ -15,10 +15,10 @@ public void peas_register_types(TypeModule module) {
 }
 
 /** Plays the desktop sent-mail sound when an email is sent. */
-public class Plugin.SentSound : PluginBase, NotificationExtension {
+public class Plugin.SentSound : PluginBase, EmailExtension {
 
 
-    public NotificationContext notifications {
+    public EmailContext email {
         get; set construct;
     }
 
@@ -31,7 +31,7 @@ public class Plugin.SentSound : PluginBase, NotificationExtension {
         this.context = new GSound.Context();
         this.context.init();
 
-        this.store = yield this.notifications.get_email();
+        this.store = yield this.email.get_email();
         this.store.email_sent.connect(on_sent);
     }
 

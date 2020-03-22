@@ -69,7 +69,6 @@ internal class Application.NotificationContext :
     private FolderStoreFactory folders_factory;
     private Plugin.FolderStore folders;
     private EmailStoreFactory email_factory;
-    private Plugin.EmailStore email;
 
 
     internal NotificationContext(Client application,
@@ -79,12 +78,6 @@ internal class Application.NotificationContext :
         this.folders_factory = folders_factory;
         this.folders = folders_factory.new_folder_store();
         this.email_factory = email_factory;
-        this.email = email_factory.new_email_store();
-    }
-
-    public async Plugin.EmailStore get_email()
-        throws Plugin.Error.PERMISSION_DENIED {
-        return this.email;
     }
 
     public async Plugin.FolderStore get_folders()
@@ -203,21 +196,6 @@ internal class Application.NotificationContext :
         foreach (Geary.Folder monitored in this.folder_information.keys.to_array()) {
             remove_folder(monitored);
         }
-        this.email_factory.destroy_email_store(this.email);
-    }
-
-    internal void email_displayed(Geary.AccountInformation account,
-                                  Geary.Email email) {
-        this.email.email_displayed(
-            this.email_factory.to_plugin_email(email, account)
-        );
-    }
-
-    internal void email_sent(Geary.AccountInformation account,
-                             Geary.Email email) {
-        this.email.email_sent(
-            this.email_factory.to_plugin_email(email, account)
-        );
     }
 
     internal void clear_new_messages(Geary.Folder location,
