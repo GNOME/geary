@@ -47,7 +47,7 @@ public class Plugin.FolderHighlight :
         this.notifications.new_messages_arrived.connect(on_new_messages_arrived);
         this.notifications.new_messages_retired.connect(on_new_messages_retired);
 
-        FolderStore folder_store = yield this.folders.get_folders();
+        FolderStore folder_store = yield this.folders.get_folder_store();
         folder_store.folders_available.connect(
             (folders) => check_folders(folders)
         );

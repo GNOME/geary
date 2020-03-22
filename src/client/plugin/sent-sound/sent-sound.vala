@@ -31,7 +31,7 @@ public class Plugin.SentSound : PluginBase, EmailExtension {
         this.context = new GSound.Context();
         this.context.init();
 
-        this.store = yield this.email.get_email();
+        this.store = yield this.email.get_email_store();
         this.store.email_sent.connect(on_sent);
     }
 

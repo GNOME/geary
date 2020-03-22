@@ -59,12 +59,12 @@ public class Plugin.DesktopNotifications :
 
     public override async void activate() throws GLib.Error {
         this.cancellable = new GLib.Cancellable();
-        this.email_store = yield this.email.get_email();
+        this.email_store = yield this.email.get_email_store();
 
         this.notifications.new_messages_arrived.connect(on_new_messages_arrived);
         this.notifications.new_messages_retired.connect(on_new_messages_retired);
 
-        FolderStore folder_store = yield this.folders.get_folders();
+        FolderStore folder_store = yield this.folders.get_folder_store();
         folder_store.folders_available.connect(
             (folders) => check_folders(folders)
         );

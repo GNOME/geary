@@ -57,7 +57,7 @@ public class Plugin.NotificationBadge :
             global::Application.Client.APP_ID + ".desktop"
         );
 
-        FolderStore folder_store = yield this.folders.get_folders();
+        FolderStore folder_store = yield this.folders.get_folder_store();
         folder_store.folders_available.connect(
             (folders) => check_folders(folders)
         );

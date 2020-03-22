@@ -27,7 +27,7 @@ internal class Application.EmailContext :
         this.action_group_name = action_group_name;
     }
 
-    public async Plugin.EmailStore get_email()
+    public async Plugin.EmailStore get_email_store()
         throws Plugin.Error.PERMISSION_DENIED {
         return this.email;
     }

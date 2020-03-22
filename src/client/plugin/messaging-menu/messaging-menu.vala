@@ -43,7 +43,7 @@ public class Plugin.MessagingMenu :
         this.notifications.new_messages_arrived.connect(on_new_messages_changed);
         this.notifications.new_messages_retired.connect(on_new_messages_changed);
 
-        this.folder_store = yield this.folders.get_folders();
+        this.folder_store = yield this.folders.get_folder_store();
         this.folder_store.folders_available.connect(
             (folders) => check_folders(folders)
         );
