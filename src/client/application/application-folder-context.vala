@@ -12,39 +12,6 @@ internal class Application.FolderContext :
     Geary.BaseObject, Plugin.FolderContext {
 
 
-    private class PluginInfoBar : Components.InfoBar {
-
-
-        private Plugin.InfoBar plugin;
-
-
-        public PluginInfoBar(Plugin.InfoBar plugin,
-                             string action_group_name) {
-            base(plugin.status, plugin.description);
-            this.show_close_button = plugin.show_close_button;
-            this.plugin = plugin;
-
-            var plugin_primary = plugin.primary_button;
-            if (plugin_primary != null) {
-                var gtk_primary = new Gtk.Button.with_label(plugin_primary.label);
-                gtk_primary.set_action_name(
-                    action_group_name + "." + plugin_primary.action.name
-                );
-                if (plugin_primary.action_target != null) {
-                    gtk_primary.set_action_target_value(
-                        plugin_primary.action_target
-                    );
-                }
-
-                get_action_area().add(gtk_primary);
-            }
-
-            show_all();
-        }
-
-    }
-
-
     private unowned Client application;
     private FolderStoreFactory folders_factory;
     private Plugin.FolderStore folders;
@@ -66,14 +33,16 @@ internal class Application.FolderContext :
     }
 
     public void add_folder_info_bar(Plugin.Folder selected,
-                                    Plugin.InfoBar infobar,
+                                    Plugin.InfoBar info_bar,
                                     uint priority) {
         Geary.Folder? folder = this.folders_factory.get_engine_folder(selected);
         if (folder != null) {
             foreach (MainWindow main in this.application.get_main_windows()) {
                 if (main.selected_folder == folder) {
                     main.conversation_list_info_bars.add(
-                        new PluginInfoBar(infobar, this.action_group_name)
+                        new Components.InfoBar.for_plugin(
+                            info_bar, this.action_group_name
+                        )
                     );
                 }
             }
@@ -81,7 +50,7 @@ internal class Application.FolderContext :
     }
 
     public void remove_folder_info_bar(Plugin.Folder selected,
-                                       Plugin.InfoBar infobar) {
+                                       Plugin.InfoBar info_bar) {
         Geary.Folder? folder = this.folders_factory.get_engine_folder(selected);
         if (folder != null) {
             foreach (MainWindow main in this.application.get_main_windows()) {
