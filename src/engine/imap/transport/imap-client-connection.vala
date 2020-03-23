@@ -318,7 +318,7 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
             this.cx.output_stream
         );
         serializer_buffer.set_close_base_stream(false);
-        this.serializer = new Serializer(id, serializer_buffer);
+        this.serializer = new Serializer(serializer_buffer);
 
         // Not buffering the Deserializer because it uses a
         // DataInputStream, which is already buffered

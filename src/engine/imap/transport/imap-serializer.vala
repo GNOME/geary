@@ -25,13 +25,10 @@ public class Geary.Imap.Serializer : BaseObject {
     private const string EOL = "\r\n";
     private const string SPACE = " ";
 
-    private string identifier;
     private GLib.OutputStream output;
 
 
-
-    public Serializer(string identifier, GLib.OutputStream output) {
-        this.identifier = identifier;
+    public Serializer(GLib.OutputStream output) {
         this.output = output;
     }
 
@@ -140,13 +137,6 @@ public class Geary.Imap.Serializer : BaseObject {
     public async void close_stream(GLib.Cancellable? cancellable)
         throws GLib.IOError {
         yield this.output.close_async(GLib.Priority.DEFAULT, cancellable);
-    }
-
-    /**
-     * Returns a string representation for debugging.
-     */
-    public string to_string() {
-        return "ser:%s".printf(identifier);
     }
 
 }
