@@ -130,19 +130,22 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         this.message = new GMime.Message(true);
 
         // Required headers
-        assert(email.from.size > 0);
-        this.sender = email.sender;
-        this.from = email.from;
-        this.date = email.date;
 
-        this.message.set_date(this.date.value);
-        
-        if (email.from != null) {
-            foreach (RFC822.MailboxAddress mailbox in email.from)
-                this.message.add_mailbox(FROM, mailbox.name, mailbox.address);
+        this.from = email.from;
+        foreach (RFC822.MailboxAddress mailbox in email.from) {
+            this.message.add_mailbox(FROM, mailbox.name, mailbox.address);
         }
 
+        this.date = email.date;
+        this.message.set_date(this.date.value);
+
+        // Not actually required, but effectively required since
+        // otherwise mail servers will treat email as spam
+        this.message_id = new MessageID(message_id);
+        this.message.set_message_id(message_id);
+
         // Optional headers
+
         if (email.to != null) {
             this.to = email.to;
             foreach (RFC822.MailboxAddress mailbox in email.to)
@@ -162,6 +165,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
 
         if (email.sender != null) {
+            this.sender = email.sender;
             this.message.add_mailbox(SENDER, this.sender.name, this.sender.address);
         }
 
