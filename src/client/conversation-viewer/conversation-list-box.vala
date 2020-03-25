@@ -544,30 +544,59 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /** Keyboard action to scroll the conversation. */
     [Signal (action=true)]
     public virtual signal void scroll(Gtk.ScrollType type) {
-        Gtk.Adjustment adj = get_adjustment();
-        double value = adj.get_value();
-        switch (type) {
-        case Gtk.ScrollType.STEP_UP:
-            value -= adj.get_step_increment();
-            break;
-        case Gtk.ScrollType.STEP_DOWN:
-            value += adj.get_step_increment();
-            break;
-        case Gtk.ScrollType.PAGE_UP:
-            value -= adj.get_page_increment();
-            break;
-        case Gtk.ScrollType.PAGE_DOWN:
-            value += adj.get_page_increment();
-            break;
-        case Gtk.ScrollType.START:
-            value = 0.0;
-            break;
-        case Gtk.ScrollType.END:
-            value = adj.get_upper();
-            break;
+
+        // If there is an embedded composer, check to see if one of
+        // its non-web view widgets is focused and give the key press
+        // to that instead. If not, then standard nav
+        var handled = false;
+        var composer = this.current_composer;
+        if (composer != null) {
+            var window = get_toplevel() as Gtk.Window;
+            if (window != null) {
+                var focused = window.get_focus();
+                if (focused != null &&
+                    focused.is_ancestor(composer) &&
+                    !(focused is Composer.WebView)) {
+                    switch (type) {
+                    case Gtk.ScrollType.STEP_UP:
+                        composer.focus(UP);
+                        handled = true;
+                        break;
+                    case Gtk.ScrollType.STEP_DOWN:
+                        composer.focus(DOWN);
+                        handled = true;
+                        break;
+                    }
+                }
+            }
         }
-        adj.set_value(value);
-        this.mark_read_timer.start();
+
+        if (!handled) {
+            Gtk.Adjustment adj = get_adjustment();
+            double value = adj.get_value();
+            switch (type) {
+            case Gtk.ScrollType.STEP_UP:
+                value -= adj.get_step_increment();
+                break;
+            case Gtk.ScrollType.STEP_DOWN:
+                value += adj.get_step_increment();
+                break;
+            case Gtk.ScrollType.PAGE_UP:
+                value -= adj.get_page_increment();
+                break;
+            case Gtk.ScrollType.PAGE_DOWN:
+                value += adj.get_page_increment();
+                break;
+            case Gtk.ScrollType.START:
+                value = 0.0;
+                break;
+            case Gtk.ScrollType.END:
+                value = adj.get_upper();
+                break;
+            }
+            adj.set_value(value);
+            this.mark_read_timer.start();
+        }
     }
 
     /** Keyboard action to shift focus to the next message, if any. */
