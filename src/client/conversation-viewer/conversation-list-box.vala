@@ -506,7 +506,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     public SearchManager search { get; private set; }
 
     /** Specifies if this list box currently has an embedded composer. */
-    public bool has_composer { get; private set; default = false; }
+    public bool has_composer {
+        get { return this.current_composer != null; }
+    }
 
     // Used to load messages in conversation.
     private Geary.App.EmailStore email_store;
@@ -527,6 +529,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     private Gee.Map<Geary.EmailIdentifier,EmailRow> email_rows =
         new Gee.HashMap<Geary.EmailIdentifier,EmailRow>();
 
+    // The current composer, if any
+    private ComposerRow? current_composer = null;
+
     // The id of the draft referred to by the current composer.
     private Geary.EmailIdentifier? draft_id = null;
 
@@ -539,30 +544,59 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /** Keyboard action to scroll the conversation. */
     [Signal (action=true)]
     public virtual signal void scroll(Gtk.ScrollType type) {
-        Gtk.Adjustment adj = get_adjustment();
-        double value = adj.get_value();
-        switch (type) {
-        case Gtk.ScrollType.STEP_UP:
-            value -= adj.get_step_increment();
-            break;
-        case Gtk.ScrollType.STEP_DOWN:
-            value += adj.get_step_increment();
-            break;
-        case Gtk.ScrollType.PAGE_UP:
-            value -= adj.get_page_increment();
-            break;
-        case Gtk.ScrollType.PAGE_DOWN:
-            value += adj.get_page_increment();
-            break;
-        case Gtk.ScrollType.START:
-            value = 0.0;
-            break;
-        case Gtk.ScrollType.END:
-            value = adj.get_upper();
-            break;
+
+        // If there is an embedded composer, check to see if one of
+        // its non-web view widgets is focused and give the key press
+        // to that instead. If not, then standard nav
+        var handled = false;
+        var composer = this.current_composer;
+        if (composer != null) {
+            var window = get_toplevel() as Gtk.Window;
+            if (window != null) {
+                var focused = window.get_focus();
+                if (focused != null &&
+                    focused.is_ancestor(composer) &&
+                    !(focused is Composer.WebView)) {
+                    switch (type) {
+                    case Gtk.ScrollType.STEP_UP:
+                        composer.focus(UP);
+                        handled = true;
+                        break;
+                    case Gtk.ScrollType.STEP_DOWN:
+                        composer.focus(DOWN);
+                        handled = true;
+                        break;
+                    }
+                }
+            }
         }
-        adj.set_value(value);
-        this.mark_read_timer.start();
+
+        if (!handled) {
+            Gtk.Adjustment adj = get_adjustment();
+            double value = adj.get_value();
+            switch (type) {
+            case Gtk.ScrollType.STEP_UP:
+                value -= adj.get_step_increment();
+                break;
+            case Gtk.ScrollType.STEP_DOWN:
+                value += adj.get_step_increment();
+                break;
+            case Gtk.ScrollType.PAGE_UP:
+                value -= adj.get_page_increment();
+                break;
+            case Gtk.ScrollType.PAGE_DOWN:
+                value += adj.get_page_increment();
+                break;
+            case Gtk.ScrollType.START:
+                value = 0.0;
+                break;
+            case Gtk.ScrollType.END:
+                value = adj.get_upper();
+                break;
+            }
+            adj.set_value(value);
+            this.mark_read_timer.start();
+        }
     }
 
     /** Keyboard action to shift focus to the next message, if any. */
@@ -773,7 +807,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                          Geary.Email.compare_sent_date_ascending(
                              target.email, best.email
                          ) < 0)) {
-                        debug("XXX have new best row....");
                         closest_distance = distance;
                         best = target;
                     }
@@ -849,13 +882,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // circular ref.
         row.should_scroll.connect((row) => { scroll_to_row(row); });
         add(row);
-        this.has_composer = true;
+        this.current_composer = row;
 
         embed.composer.notify["current-draft-id"].connect(
             (id) => { this.draft_id = embed.composer.current_draft_id; }
         );
         embed.vanished.connect(() => {
-                this.has_composer = false;
+                this.current_composer = null;
                 this.draft_id = null;
                 remove(row);
                 if (is_draft &&
@@ -1236,9 +1269,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         } catch (Geary.EngineError err) {
             debug("Failed to get email id for action target: %s", err.message);
         }
-        debug("XXX have id? %s", (id != null).to_string());
         EmailRow? row = (id != null) ? this.email_rows[id] : null;
-        debug("XXX have row? %s", (row != null).to_string());
         return (row != null) ? row.view : null;
     }
 
@@ -1453,10 +1484,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     private void on_email_save_all_attachments(GLib.SimpleAction action,
                                                GLib.Variant? param) {
-        debug("XXX save all: %s", param.print(true));
         ConversationEmail? view = action_target_to_view(param);
         if (view != null && view.attachments_pane != null) {
-            debug("XXX really save all");
             view.attachments_pane.save_all();
         }
     }
