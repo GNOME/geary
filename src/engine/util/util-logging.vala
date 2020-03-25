@@ -219,7 +219,10 @@ public interface Geary.Logging.Source : GLib.Object {
                                        va_list args) {
         if (flags == ALL || Logging.get_flags().is_any_set(flags)) {
             Context context = Context(Logging.DOMAIN, flags, levels, fmt, args);
-            Source? decorated = this;
+            // Don't attempt to this object if it is in the middle of
+            // being destructed, which can happen when logging from
+            // the destructor.
+            Source? decorated = (this.ref_count > 0) ? this : this.logging_parent;
             while (decorated != null) {
                 context.append_source(decorated);
                 decorated = decorated.logging_parent;
