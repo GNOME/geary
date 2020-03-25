@@ -807,7 +807,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                          Geary.Email.compare_sent_date_ascending(
                              target.email, best.email
                          ) < 0)) {
-                        debug("XXX have new best row....");
                         closest_distance = distance;
                         best = target;
                     }
@@ -1270,9 +1269,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         } catch (Geary.EngineError err) {
             debug("Failed to get email id for action target: %s", err.message);
         }
-        debug("XXX have id? %s", (id != null).to_string());
         EmailRow? row = (id != null) ? this.email_rows[id] : null;
-        debug("XXX have row? %s", (row != null).to_string());
         return (row != null) ? row.view : null;
     }
 
@@ -1487,10 +1484,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     private void on_email_save_all_attachments(GLib.SimpleAction action,
                                                GLib.Variant? param) {
-        debug("XXX save all: %s", param.print(true));
         ConversationEmail? view = action_target_to_view(param);
         if (view != null && view.attachments_pane != null) {
-            debug("XXX really save all");
             view.attachments_pane.save_all();
         }
     }
