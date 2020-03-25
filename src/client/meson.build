@@ -173,12 +173,13 @@ if webkit_version[0].to_int() <= 2 and webkit_version[1].to_int() <= 24
 endif
 
 # Main client application library
-geary_client_lib = static_library('geary-client',
+geary_client_lib = shared_library('geary-client',
   geary_client_sources,
   dependencies: geary_client_dependencies,
   include_directories: config_h_dir,
   vala_args: geary_client_vala_args,
   c_args: geary_c_args,
+  install: true
 )
 
 geary_client_dep = declare_dependency(
