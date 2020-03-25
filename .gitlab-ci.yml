@@ -67,6 +67,7 @@ ubuntu:
   stage: build
   image: ubuntu:devel
   before_script:
+    - ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
     - apt-get update
     - apt-get install -q -y --no-install-recommends $UBUNTU_DEPS $UBUNTU_TEST_DEPS
     - locale-gen $TEST_LOCALE
