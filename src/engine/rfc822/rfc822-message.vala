@@ -139,11 +139,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         this.date = email.date;
         this.message.set_date(this.date.value);
 
-        // Not actually required, but effectively required since
-        // otherwise mail servers will treat email as spam
-        this.message_id = new MessageID(message_id);
-        this.message.set_message_id(message_id);
-
         // Optional headers
 
         if (email.to != null) {
@@ -173,6 +168,11 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             this.reply_to = email.reply_to;
             foreach (RFC822.MailboxAddress mailbox in email.reply_to)
                 this.message.add_mailbox(REPLY_TO, mailbox.name, mailbox.address);
+        }
+
+        if (message_id != null) {
+            this.message_id = new MessageID(message_id);
+            this.message.set_message_id(message_id);
         }
 
         if (email.in_reply_to != null) {
