@@ -1126,18 +1126,23 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     public void set_focus() {
-        bool not_compact = this.current_mode != INLINE_COMPACT;
-        if (not_compact && Geary.String.is_empty(to))
+        bool not_inline = (
+            this.current_mode != INLINE &&
+            this.current_mode != INLINE_COMPACT
+        );
+        if (not_inline && Geary.String.is_empty(to)) {
             this.to_entry.grab_focus();
-        else if (not_compact && Geary.String.is_empty(subject))
+        } else if (not_inline && Geary.String.is_empty(subject)) {
             this.subject_entry.grab_focus();
-        else {
+        } else {
             // Need to grab the focus after the content has finished
             // loading otherwise the text caret will not be visible.
             if (this.editor.is_content_loaded) {
                 this.editor.grab_focus();
             } else {
-                this.editor.content_loaded.connect(() => { this.editor.grab_focus(); });
+                this.editor.content_loaded.connect(() => {
+                        this.editor.grab_focus();
+                    });
             }
         }
     }
