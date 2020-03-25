@@ -506,7 +506,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     public SearchManager search { get; private set; }
 
     /** Specifies if this list box currently has an embedded composer. */
-    public bool has_composer { get; private set; default = false; }
+    public bool has_composer {
+        get { return this.current_composer != null; }
+    }
 
     // Used to load messages in conversation.
     private Geary.App.EmailStore email_store;
@@ -526,6 +528,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // Maps displayed emails to their corresponding rows.
     private Gee.Map<Geary.EmailIdentifier,EmailRow> email_rows =
         new Gee.HashMap<Geary.EmailIdentifier,EmailRow>();
+
+    // The current composer, if any
+    private ComposerRow? current_composer = null;
 
     // The id of the draft referred to by the current composer.
     private Geary.EmailIdentifier? draft_id = null;
@@ -849,13 +854,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // circular ref.
         row.should_scroll.connect((row) => { scroll_to_row(row); });
         add(row);
-        this.has_composer = true;
+        this.current_composer = row;
 
         embed.composer.notify["current-draft-id"].connect(
             (id) => { this.draft_id = embed.composer.current_draft_id; }
         );
         embed.vanished.connect(() => {
-                this.has_composer = false;
+                this.current_composer = null;
                 this.draft_id = null;
                 remove(row);
                 if (is_draft &&
