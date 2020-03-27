@@ -29,26 +29,26 @@ public class Geary.Imap.CreateCommand : Command {
 
     private static MailboxAttribute? get_special_folder_type(Geary.SpecialFolderType type) {
         switch (type) {
-        case Geary.SpecialFolderType.TRASH:
-            return MailboxAttribute.SPECIAL_FOLDER_TRASH;
-
-        case Geary.SpecialFolderType.DRAFTS:
-            return MailboxAttribute.SPECIAL_FOLDER_DRAFTS;
-
-        case Geary.SpecialFolderType.SENT:
-            return MailboxAttribute.SPECIAL_FOLDER_SENT;
+        case Geary.SpecialFolderType.ALL_MAIL:
+            return MailboxAttribute.SPECIAL_FOLDER_ALL;
 
         case Geary.SpecialFolderType.ARCHIVE:
             return MailboxAttribute.SPECIAL_FOLDER_ARCHIVE;
 
+        case Geary.SpecialFolderType.DRAFTS:
+            return MailboxAttribute.SPECIAL_FOLDER_DRAFTS;
+
+        case Geary.SpecialFolderType.FLAGGED:
+            return MailboxAttribute.SPECIAL_FOLDER_FLAGGED;
+
         case Geary.SpecialFolderType.JUNK:
             return MailboxAttribute.SPECIAL_FOLDER_JUNK;
 
-        case Geary.SpecialFolderType.FLAGGED:
-            return MailboxAttribute.SPECIAL_FOLDER_STARRED;
+        case Geary.SpecialFolderType.SENT:
+            return MailboxAttribute.SPECIAL_FOLDER_SENT;
 
-        case Geary.SpecialFolderType.ALL_MAIL:
-            return MailboxAttribute.SPECIAL_FOLDER_ALL;
+        case Geary.SpecialFolderType.TRASH:
+            return MailboxAttribute.SPECIAL_FOLDER_TRASH;
 
         default:
             return null;

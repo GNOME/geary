@@ -59,10 +59,10 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
      * {@link Geary.SpecialFolderType}.
      */
     public Geary.SpecialFolderType get_special_folder_type() {
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_INBOX))
+        if (contains(MailboxAttribute.XLIST_INBOX))
             return Geary.SpecialFolderType.INBOX;
 
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_ALL_MAIL))
+        if (contains(MailboxAttribute.XLIST_ALL_MAIL))
             return Geary.SpecialFolderType.ALL_MAIL;
 
         if (contains(MailboxAttribute.SPECIAL_FOLDER_TRASH))
@@ -77,10 +77,10 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
         if (contains(MailboxAttribute.SPECIAL_FOLDER_JUNK))
             return Geary.SpecialFolderType.JUNK;
 
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_SPAM))
+        if (contains(MailboxAttribute.XLIST_SPAM))
             return Geary.SpecialFolderType.JUNK;
 
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_STARRED))
+        if (contains(MailboxAttribute.XLIST_STARRED))
             return Geary.SpecialFolderType.FLAGGED;
 
         if (contains(MailboxAttribute.SPECIAL_FOLDER_IMPORTANT))
