@@ -593,7 +593,7 @@ public class Application.MainWindow :
             /// substitution being the currently selected folder name,
             /// the second being the selected account name.
             title = _("%s — %s").printf(
-                this.selected_folder.get_display_name(),
+                Util.I18n.to_folder_display_name(this.selected_folder),
                 this.selected_folder.account.information.display_name
             );
         }
@@ -606,7 +606,7 @@ public class Application.MainWindow :
         );
         this.main_toolbar.folder = (
             this.selected_folder != null
-            ? this.selected_folder.get_display_name()
+            ? Util.I18n.to_folder_display_name(this.selected_folder)
             : ""
         );
     }
@@ -1284,14 +1284,13 @@ public class Application.MainWindow :
     }
 
     internal bool prompt_empty_folder(Geary.SpecialFolderType type) {
+        var folder_name = Util.I18n.to_folder_type_display_name(type);
         ConfirmationDialog dialog = new ConfirmationDialog(
             this,
-            _("Empty all email from your %s folder?").printf(
-                type.get_display_name()
-            ),
+            _("Empty all email from your %s folder?").printf(folder_name),
             _("This removes the email from Geary and your email server.") +
             "  <b>" + _("This cannot be undone.") + "</b>",
-            _("Empty %s").printf(type.get_display_name()),
+            _("Empty %s").printf(folder_name),
             "destructive-action"
         );
         dialog.use_secondary_markup(true);
@@ -1693,10 +1692,12 @@ public class Application.MainWindow :
             break;
         }
 
-        if (count > 0)
-            this.main_toolbar.folder = _("%s (%d)").printf(this.selected_folder.get_display_name(), count);
-        else
-            this.main_toolbar.folder = this.selected_folder.get_display_name();
+        var folder_name = Util.I18n.to_folder_display_name(this.selected_folder);
+        this.main_toolbar.folder = (
+            count > 0
+            ? _("%s (%d)").printf(folder_name, count)
+            : folder_name
+        );
     }
 
     private void update_conversation_actions(ConversationCount count) {

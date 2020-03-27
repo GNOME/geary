@@ -247,4 +247,63 @@ namespace Util.I18n {
         return country_name;
     }
 
+    /**
+     * Returns the localised display name name for specific folder.
+     *
+     * If the folder has a special type, the result of {@link
+     * to_folder_type_display_name} is returned, otherwise the last
+     * folder path step is returned.
+     */
+    public string? to_folder_display_name(Geary.Folder folder) {
+        var name = to_folder_type_display_name(folder.special_folder_type);
+        if (Geary.String.is_empty_or_whitespace(name)) {
+            name = folder.path.name;
+        }
+        return name;
+    }
+
+    /**
+     * Returns the localised name for a specific folder type, if any.
+     */
+    public unowned string? to_folder_type_display_name(Geary.SpecialFolderType type) {
+        switch (type) {
+            case INBOX:
+                return _("Inbox");
+
+            case DRAFTS:
+                return _("Drafts");
+
+            case SENT:
+                return _("Sent");
+
+            case FLAGGED:
+                return _("Starred");
+
+            case IMPORTANT:
+                return _("Important");
+
+            case ALL_MAIL:
+                return _("All Mail");
+
+            case SPAM:
+                return _("Spam");
+
+            case TRASH:
+                return _("Trash");
+
+            case OUTBOX:
+                return _("Outbox");
+
+            case SEARCH:
+                return _("Search");
+
+            case ARCHIVE:
+                return _("Archive");
+
+            case NONE:
+            default:
+                return null;
+        }
+    }
+
 }

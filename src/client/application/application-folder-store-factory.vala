@@ -150,7 +150,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
 
         internal void folder_type_changed() {
             notify_property("folder-type");
-            this._display_name = this.backing.get_display_name();
+            this._display_name = Util.I18n.to_folder_display_name(this.backing);
             notify_property("display-name");
         }
 

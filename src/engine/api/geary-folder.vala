@@ -393,15 +393,6 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     public signal void special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type);
 
-    /**
-     * Fired when the Folder's display name has changed.
-     *
-     * @see get_display_name
-     */
-    public signal void display_name_changed();
-
-    protected Folder() {
-    }
 
     protected virtual void notify_opened(Geary.Folder.OpenState state, int count) {
         opened(state, count);
@@ -448,32 +439,9 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
         email_locally_complete(ids);
     }
 
-    /**
-     * In its default implementation, this will also call {@link notify_display_name_changed} since
-     * that's often the case; if not, subclasses should override.
-     */
-    protected virtual void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
-        Geary.SpecialFolderType new_type) {
+    protected virtual void notify_special_folder_type_changed(SpecialFolderType old_type,
+                                                              SpecialFolderType new_type) {
         special_folder_type_changed(old_type, new_type);
-
-        // in default implementation, this may also mean the display name changed; subclasses may
-        // override this behavior, but no way to detect this, so notify
-        notify_display_name_changed();
-    }
-
-    protected virtual void notify_display_name_changed() {
-        display_name_changed();
-    }
-
-    /**
-     * Returns a name suitable for displaying to the user.
-     *
-     * Default is to display the name of the Folder's path, unless it's a special folder,
-     * in which case {@link SpecialFolderType.get_display_name} is returned.
-     */
-    public virtual string get_display_name() {
-        return (special_folder_type == Geary.SpecialFolderType.NONE)
-            ? path.name : special_folder_type.get_display_name();
     }
 
     /** Determines if a folder has been opened, and if so in which way. */

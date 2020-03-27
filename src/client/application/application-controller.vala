@@ -597,7 +597,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation moved to %s",
                         "Conversations moved to %s",
                         conversations.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(destination)),
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the source folder.
@@ -605,7 +605,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation restored to %s",
                         "Conversations restored to %s",
                         conversations.size
-                    ).printf(source.get_display_name())
+                    ).printf(Util.I18n.to_folder_display_name(source))
                 ),
                 context.cancellable
             );
@@ -627,7 +627,7 @@ internal class Application.Controller : Geary.BaseObject {
                 "Conversation restored to %s",
                 "Conversations restored to %s",
                 messages.size
-            ).printf(source.get_display_name());
+            ).printf(Util.I18n.to_folder_display_name(source));
 
             if (destination == ARCHIVE) {
                 Geary.FolderSupport.Archive? archive_source = (
@@ -681,7 +681,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation moved to %s",
                         "Conversations moved to %s",
                         messages.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(dest)),
                     undone_tooltip
                 );
             }
@@ -704,7 +704,7 @@ internal class Application.Controller : Geary.BaseObject {
                 "Message restored to %s",
                 "Messages restored to %s",
                 messages.size
-            ).printf(source.get_display_name());
+            ).printf(Util.I18n.to_folder_display_name(source));
 
             if (destination == ARCHIVE) {
                 Geary.FolderSupport.Archive? archive_source = (
@@ -760,7 +760,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Message moved to %s",
                         "Messages moved to %s",
                         messages.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(dest)),
                     undone_tooltip
                 );
             }
@@ -788,7 +788,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation labelled as %s",
                         "Conversations labelled as %s",
                         conversations.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(destination)),
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the destination folder.
@@ -796,7 +796,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation un-labelled as %s",
                         "Conversations un-labelled as %s",
                         conversations.size
-                    ).printf(destination.get_display_name())
+                    ).printf(Util.I18n.to_folder_display_name(destination))
                 ),
                 context.cancellable
             );
