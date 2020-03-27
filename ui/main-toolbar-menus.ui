@@ -18,8 +18,8 @@
       <attribute name="action">win.mark-conversation-unstarred</attribute>
     </item>
     <item>
-      <attribute name="label" translatable="yes">Toggle as S_pam</attribute>
-      <attribute name="action">win.toggle-conversation-spam</attribute>
+      <attribute name="label" translatable="yes">Toggle as _Junk</attribute>
+      <attribute name="action">win.toggle-conversation-junk</attribute>
     </item>
   </menu>
   <menu id="main_menu">
@@ -48,7 +48,5 @@
         <attribute name="action">app.about</attribute>
       </item>
     </section>
-
   </menu>
 </interface>
-

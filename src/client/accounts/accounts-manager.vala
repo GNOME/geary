@@ -1022,6 +1022,7 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
 
     private const string FOLDER_ARCHIVE = "archive_folder";
     private const string FOLDER_DRAFTS = "drafts_folder";
+    private const string FOLDER_JUNK = "junk_folder";
     private const string FOLDER_SENT = "sent_folder";
     private const string FOLDER_SPAM = "spam_folder";
     private const string FOLDER_TRASH = "trash_folder";
@@ -1110,7 +1111,13 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
         account.archive_folder_path = load_folder(folder_config, FOLDER_ARCHIVE);
         account.drafts_folder_path = load_folder(folder_config, FOLDER_DRAFTS);
         account.sent_folder_path = load_folder(folder_config, FOLDER_SENT);
-        account.spam_folder_path = load_folder(folder_config, FOLDER_SPAM);
+        // v3.32-3.36 used spam instead of junk
+        if (folder_config.has_key(FOLDER_SPAM)) {
+            account.junk_folder_path = load_folder(folder_config, FOLDER_SPAM);
+        }
+        if (folder_config.has_key(FOLDER_JUNK)) {
+            account.junk_folder_path = load_folder(folder_config, FOLDER_JUNK);
+        }
         account.trash_folder_path = load_folder(folder_config, FOLDER_TRASH);
 
         return account;
@@ -1146,7 +1153,7 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
         save_folder(folder_config, FOLDER_ARCHIVE, account.archive_folder_path);
         save_folder(folder_config, FOLDER_DRAFTS, account.drafts_folder_path);
         save_folder(folder_config, FOLDER_SENT, account.sent_folder_path);
-        save_folder(folder_config, FOLDER_SPAM, account.spam_folder_path);
+        save_folder(folder_config, FOLDER_JUNK, account.junk_folder_path);
         save_folder(folder_config, FOLDER_TRASH, account.trash_folder_path);
     }
 
@@ -1273,7 +1280,7 @@ public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
         info.sent_folder_path = Geary.AccountInformation.build_folder_path(
             config.get_string_list(SENT_MAIL_FOLDER_KEY)
         );
-        info.spam_folder_path = Geary.AccountInformation.build_folder_path(
+        info.junk_folder_path = Geary.AccountInformation.build_folder_path(
             config.get_string_list(SPAM_FOLDER_KEY)
         );
         info.trash_folder_path = Geary.AccountInformation.build_folder_path(
@@ -1330,8 +1337,8 @@ public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
         );
         config.set_string_list(
             SPAM_FOLDER_KEY,
-            (info.spam_folder_path != null
-             ? new Gee.ArrayList<string>.wrap(info.spam_folder_path.as_array())
+            (info.junk_folder_path != null
+             ? new Gee.ArrayList<string>.wrap(info.junk_folder_path.as_array())
              : empty)
         );
         config.set_string_list(

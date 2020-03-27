@@ -28,7 +28,7 @@ public class Application.MainWindow :
     public const string ACTION_SHOW_COPY_MENU = "show-copy-menu";
     public const string ACTION_SHOW_MARK_MENU = "show-mark-menu";
     public const string ACTION_SHOW_MOVE_MENU = "show-move-menu";
-    public const string ACTION_TOGGLE_SPAM = "toggle-conversation-spam";
+    public const string ACTION_TOGGLE_JUNK = "toggle-conversation-junk";
     public const string ACTION_TRASH_CONVERSATION = "trash-conversation";
     public const string ACTION_ZOOM = "zoom";
 
@@ -59,7 +59,7 @@ public class Application.MainWindow :
         { ACTION_MARK_AS_UNREAD, on_mark_as_unread },
         { ACTION_MARK_AS_STARRED, on_mark_as_starred },
         { ACTION_MARK_AS_UNSTARRED, on_mark_as_unstarred },
-        { ACTION_TOGGLE_SPAM, on_mark_as_spam_toggle },
+        { ACTION_TOGGLE_JUNK, on_mark_as_junk_toggle },
         // Message viewer
         { ACTION_ZOOM, on_zoom, "s" },
     };
@@ -406,7 +406,7 @@ public class Application.MainWindow :
     /** Keybinding signal for junking the current selection. */
     [Signal (action=true)]
     public virtual signal void junk_conversations() {
-        activate_action(get_window_action(ACTION_TOGGLE_SPAM));
+        activate_action(get_window_action(ACTION_TOGGLE_JUNK));
     }
 
     /** Keybinding signal for trashing the current selection. */
@@ -2237,8 +2237,8 @@ public class Application.MainWindow :
         get_window_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
 
         // If we're in Drafts/Outbox, we also shouldn't set a message as junk
-        bool in_spam_folder = (selected_folder.special_folder_type == JUNK);
-        get_window_action(ACTION_TOGGLE_SPAM).set_enabled(!in_spam_folder &&
+        bool in_junk_folder = (selected_folder.special_folder_type == JUNK);
+        get_window_action(ACTION_TOGGLE_JUNK).set_enabled(!in_junk_folder &&
             selected_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
             selected_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
     }
@@ -2339,7 +2339,7 @@ public class Application.MainWindow :
         }
     }
 
-    private void on_mark_as_spam_toggle() {
+    private void on_mark_as_junk_toggle() {
         Geary.Folder? source = this.selected_folder;
         if (source != null) {
             Geary.SpecialFolderType destination =

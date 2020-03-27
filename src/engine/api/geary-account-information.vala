@@ -180,8 +180,8 @@ public class Geary.AccountInformation : BaseObject {
     /** Sent special folder path. */
     public Geary.FolderPath? sent_folder_path { get; set; default = null; }
 
-    /** Spam special folder path. */
-    public Geary.FolderPath? spam_folder_path { get; set; default = null; }
+    /** Junk special folder path. */
+    public Geary.FolderPath? junk_folder_path { get; set; default = null; }
 
     /** Trash special folder path. */
     public Geary.FolderPath? trash_folder_path { get; set; default = null; }
@@ -289,7 +289,7 @@ public class Geary.AccountInformation : BaseObject {
 
         this.drafts_folder_path = other.drafts_folder_path;
         this.sent_folder_path = other.sent_folder_path;
-        this.spam_folder_path = other.spam_folder_path;
+        this.junk_folder_path = other.junk_folder_path;
         this.trash_folder_path = other.trash_folder_path;
         this.archive_folder_path = other.archive_folder_path;
 
@@ -387,7 +387,7 @@ public class Geary.AccountInformation : BaseObject {
                 return this.sent_folder_path;
 
             case Geary.SpecialFolderType.JUNK:
-                return this.spam_folder_path;
+                return this.junk_folder_path;
 
             case Geary.SpecialFolderType.TRASH:
                 return this.trash_folder_path;
@@ -422,8 +422,8 @@ public class Geary.AccountInformation : BaseObject {
             break;
 
             case Geary.SpecialFolderType.JUNK:
-                old_path = this.spam_folder_path;
-                this.spam_folder_path = new_path;
+                old_path = this.junk_folder_path;
+                this.junk_folder_path = new_path;
             break;
 
             case Geary.SpecialFolderType.TRASH:
@@ -541,7 +541,7 @@ public class Geary.AccountInformation : BaseObject {
                 this.outgoing.equal_to(other.outgoing) &&
                 this.drafts_folder_path == other.drafts_folder_path &&
                 this.sent_folder_path == other.sent_folder_path &&
-                this.spam_folder_path == other.spam_folder_path &&
+                this.junk_folder_path == other.junk_folder_path &&
                 this.trash_folder_path == other.trash_folder_path &&
                 this.archive_folder_path == other.archive_folder_path &&
                 this.config_dir == other.config_dir &&
