@@ -234,7 +234,7 @@ public class Application.Configuration : Geary.BaseObject {
         ).get_maybe();
         string[] langs = (value != null)
             ? value.get_strv()
-            : Util.International.get_user_preferred_languages();
+            : Util.I18n.get_user_preferred_languages();
         return langs;
     }
 
@@ -245,7 +245,7 @@ public class Application.Configuration : Geary.BaseObject {
      * client. By default, the set will contain languages based on
      * environment variables.
      *
-     * @see Util.International.get_user_preferred_languages
+     * @see Util.I18n.get_user_preferred_languages
      */
     public void set_spell_check_languages(string[] value) {
         this.settings.set_value(

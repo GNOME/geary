@@ -384,7 +384,7 @@ public class Application.Client : Gtk.Application {
 
     public override void startup() {
         Environment.set_application_name(NAME);
-        Util.International.init(GETTEXT_PACKAGE, this.binary);
+        Util.I18n.init(GETTEXT_PACKAGE, this.binary);
         Util.Date.init();
 
         Configuration.init(this.is_installed, GSETTINGS_DIR);

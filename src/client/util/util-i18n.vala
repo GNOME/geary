@@ -1,14 +1,19 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 extern const string _LANGUAGE_SUPPORT_DIRECTORY;
 extern const string _ISO_CODE_639_XML;
 extern const string _ISO_CODE_3166_XML;
 
-namespace Util.International {
+/**
+ * Internationalisation support functions.
+ */
+namespace Util.I18n {
 
     private GLib.HashTable<string, string> language_names = null;
     private GLib.HashTable<string, string> country_names = null;

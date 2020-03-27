@@ -128,7 +128,7 @@ src/client/util/util-email.vala
 src/client/util/util-files.vala
 src/client/util/util-gio.vala
 src/client/util/util-gtk.vala
-src/client/util/util-international.vala
+src/client/util/util-i18n.vala
 src/client/util/util-js.vala
 src/client/util/util-migrate.vala
 src/client/web-process/web-process-extension.vala

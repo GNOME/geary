@@ -2596,8 +2596,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             // <https://gitlab.gnome.org/GNOME/gspell/issues/5>) and
             // we don't support spell checker language priority, use
             // the first matching most preferred language, if any.
-            foreach (string pref in
-                     Util.International.get_user_preferred_languages()) {
+            foreach (string pref in Util.I18n.get_user_preferred_languages()) {
                 if (pref in langs) {
                     lang = Gspell.Language.lookup(pref);
                     if (lang != null) {
