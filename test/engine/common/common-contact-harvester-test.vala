@@ -84,7 +84,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void blacklisted_folder_type() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.SPAM,
+            SpecialFolderType.JUNK,
             this.senders
         );
         this.email.set_receivers(

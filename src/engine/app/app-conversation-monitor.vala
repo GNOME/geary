@@ -424,7 +424,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
      */
     internal Gee.Collection<Geary.FolderPath> get_search_folder_blacklist() {
         Geary.SpecialFolderType[] blacklisted_folder_types = {
-            Geary.SpecialFolderType.SPAM,
+            Geary.SpecialFolderType.JUNK,
             Geary.SpecialFolderType.TRASH,
             Geary.SpecialFolderType.DRAFTS,
         };

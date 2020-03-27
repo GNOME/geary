@@ -285,8 +285,8 @@ namespace Util.I18n {
             case ALL_MAIL:
                 return _("All Mail");
 
-            case SPAM:
-                return _("Spam");
+            case JUNK:
+                return _("Junk");
 
             case TRASH:
                 return _("Trash");

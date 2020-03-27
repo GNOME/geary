@@ -41,7 +41,7 @@ public class Geary.Imap.CreateCommand : Command {
         case Geary.SpecialFolderType.ARCHIVE:
             return MailboxAttribute.SPECIAL_FOLDER_ARCHIVE;
 
-        case Geary.SpecialFolderType.SPAM:
+        case Geary.SpecialFolderType.JUNK:
             return MailboxAttribute.SPECIAL_FOLDER_JUNK;
 
         case Geary.SpecialFolderType.FLAGGED:

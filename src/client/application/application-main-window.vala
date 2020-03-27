@@ -2236,8 +2236,8 @@ public class Application.MainWindow :
         get_window_action(ACTION_MARK_AS_STARRED).set_enabled(unstarred_selected);
         get_window_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
 
-        // If we're in Drafts/Outbox, we also shouldn't set a message as SPAM.
-        bool in_spam_folder = selected_folder.special_folder_type == Geary.SpecialFolderType.SPAM;
+        // If we're in Drafts/Outbox, we also shouldn't set a message as junk
+        bool in_spam_folder = (selected_folder.special_folder_type == JUNK);
         get_window_action(ACTION_TOGGLE_SPAM).set_enabled(!in_spam_folder &&
             selected_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
             selected_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
@@ -2343,8 +2343,8 @@ public class Application.MainWindow :
         Geary.Folder? source = this.selected_folder;
         if (source != null) {
             Geary.SpecialFolderType destination =
-                (source.special_folder_type != SPAM)
-                ? Geary.SpecialFolderType.SPAM
+                (source.special_folder_type != JUNK)
+                ? Geary.SpecialFolderType.JUNK
                 : Geary.SpecialFolderType.INBOX;
             this.controller.move_conversations_special.begin(
                 source,
@@ -2456,8 +2456,6 @@ public class Application.MainWindow :
             );
         }
     }
-
-    // Individual conversation email view action callbacks
 
     private void on_email_loaded(ConversationListBox view,
                                  Geary.Email loaded) {

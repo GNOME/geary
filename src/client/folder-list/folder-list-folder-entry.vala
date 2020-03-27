@@ -67,7 +67,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
             case Geary.SpecialFolderType.ARCHIVE:
                 return "mail-archive-symbolic";
 
-            case Geary.SpecialFolderType.SPAM:
+            case Geary.SpecialFolderType.JUNK:
                 return "dialog-warning-symbolic";
 
             case Geary.SpecialFolderType.TRASH:
@@ -125,9 +125,9 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
             case Geary.SpecialFolderType.OUTBOX:
                 return folder.properties.email_total;
 
-            // only show counts for Inbox, Spam, and user folders
+            // only show counts for Inbox, Junk, and user folders
             case Geary.SpecialFolderType.INBOX:
-            case Geary.SpecialFolderType.SPAM:
+            case Geary.SpecialFolderType.JUNK:
             case Geary.SpecialFolderType.NONE:
                 return folder.properties.email_unread;
 

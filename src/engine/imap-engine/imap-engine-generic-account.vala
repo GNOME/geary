@@ -20,7 +20,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private const Geary.SpecialFolderType[] SUPPORTED_SPECIAL_FOLDERS = {
         Geary.SpecialFolderType.DRAFTS,
         Geary.SpecialFolderType.SENT,
-        Geary.SpecialFolderType.SPAM,
+        Geary.SpecialFolderType.JUNK,
         Geary.SpecialFolderType.TRASH,
         Geary.SpecialFolderType.ARCHIVE,
     };
@@ -898,11 +898,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
             break;
 
-        case Geary.SpecialFolderType.SPAM:
+        case Geary.SpecialFolderType.JUNK:
             // List of general possible folder names to match for the
-            // Spam mailbox. Separate names using a vertical bar and
-            // put the most common localized name to the front for the
-            // default. English names do not need to be included.
+            // Junk/Spam mailbox. Separate names using a vertical bar
+            // and put the most common localized name to the front for
+            // the default. English names do not need to be included.
             loc_names.add(_("Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"));
             unloc_names.add("Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail");
 

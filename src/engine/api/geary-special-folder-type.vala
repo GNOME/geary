@@ -14,7 +14,7 @@ public enum Geary.SpecialFolderType {
     FLAGGED,
     IMPORTANT,
     ALL_MAIL,
-    SPAM,
+    JUNK,
     TRASH,
     OUTBOX,
     ARCHIVE;

@@ -85,7 +85,7 @@ public class Plugin.SpecialFolders :
             );
             break;
 
-        case SPAM:
+        case JUNK:
             this.folders.add_folder_info_bar(
                 target, get_folder_info_bar(target), PRIORITY
             );
@@ -133,7 +133,7 @@ public class Plugin.SpecialFolders :
     private InfoBar get_folder_info_bar(Folder target) {
         var bar = this.info_bars.get(target);
         if (bar == null) {
-            bar = new InfoBar(target.folder_type.get_display_name());
+            bar = new InfoBar(target.display_name);
             bar.primary_button = new Button(
                 // Translators: Info bar button label for emptying
                 // trash/spam folders

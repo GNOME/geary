@@ -12,7 +12,7 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
     private const Geary.SpecialFolderType[] SUPPORTED_SPECIAL_FOLDERS = {
         Geary.SpecialFolderType.DRAFTS,
         Geary.SpecialFolderType.SENT,
-        Geary.SpecialFolderType.SPAM,
+        Geary.SpecialFolderType.JUNK,
         Geary.SpecialFolderType.TRASH,
     };
 
@@ -69,7 +69,7 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
             case SpecialFolderType.DRAFTS:
                 return new GmailDraftsFolder(this, local_folder, type);
 
-            case SpecialFolderType.SPAM:
+            case SpecialFolderType.JUNK:
             case SpecialFolderType.TRASH:
                 return new GmailSpamTrashFolder(this, local_folder, type);
 

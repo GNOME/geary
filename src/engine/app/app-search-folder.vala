@@ -24,7 +24,7 @@ public class Geary.App.SearchFolder :
     public const string MAGIC_BASENAME = "$GearyAccountSearchFolder$";
 
     private const SpecialFolderType[] EXCLUDE_TYPES = {
-        SpecialFolderType.SPAM,
+        SpecialFolderType.JUNK,
         SpecialFolderType.TRASH,
         SpecialFolderType.DRAFTS,
         // Orphan emails (without a folder) are also excluded; see ct or.

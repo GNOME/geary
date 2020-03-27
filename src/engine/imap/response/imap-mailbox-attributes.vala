@@ -75,10 +75,10 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
             return Geary.SpecialFolderType.SENT;
 
         if (contains(MailboxAttribute.SPECIAL_FOLDER_JUNK))
-            return Geary.SpecialFolderType.SPAM;
+            return Geary.SpecialFolderType.JUNK;
 
         if (contains(MailboxAttribute.SPECIAL_FOLDER_SPAM))
-            return Geary.SpecialFolderType.SPAM;
+            return Geary.SpecialFolderType.JUNK;
 
         if (contains(MailboxAttribute.SPECIAL_FOLDER_STARRED))
             return Geary.SpecialFolderType.FLAGGED;
