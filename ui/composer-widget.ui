@@ -57,7 +57,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="halign">end</property>
-                            <property name="label" translatable="yes" comments="Geary account mail will be sent from">From</property>
+                            <property name="label" translatable="yes" comments="Geary account mail will be sent from">_From</property>
                             <property name="use_underline">True</property>
                             <property name="justify">right</property>
                             <property name="mnemonic_widget">to_box</property>

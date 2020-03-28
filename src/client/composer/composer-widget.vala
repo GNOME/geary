@@ -2496,9 +2496,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         this.from_row.visible = true;
         this.from_label.set_mnemonic_widget(this.from_multiple);
-        // Composer label (with mnemonic underscore) for the account selector
-        // when choosing what address to send a message from.
-        this.from_label.set_text_with_mnemonic(_("_From:"));
 
         this.from_multiple.visible = true;
         this.from_multiple.remove_all();
