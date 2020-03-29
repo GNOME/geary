@@ -263,9 +263,7 @@ public string to_preview_text(string? text, TextFormat format) {
 public async string get_best_charset(GMime.Stream in_stream,
                                      GLib.Cancellable? cancellable)
     throws GLib.Error {
-    GMime.FilterBest filter = new GMime.FilterBest(
-        GMime.FilterBestFlags.CHARSET
-    );
+    GMime.FilterBest filter = new GMime.FilterBest(CHARSET);
     GMime.StreamFilter out_stream = new GMime.StreamFilter(
         new GMime.StreamNull()
     );
@@ -274,6 +272,7 @@ public async string get_best_charset(GMime.Stream in_stream,
     yield Nonblocking.Concurrent.global.schedule_async(() => {
             in_stream.write_to_stream(out_stream);
             in_stream.reset();
+            out_stream.close();
         },
         cancellable
     );
@@ -290,9 +289,7 @@ public async GMime.ContentEncoding get_best_encoding(GMime.Stream in_stream,
                                                      GMime.EncodingConstraint constraint,
                                                      GLib.Cancellable? cancellable)
     throws GLib.Error {
-    GMime.FilterBest filter = new GMime.FilterBest(
-        GMime.FilterBestFlags.ENCODING
-    );
+    GMime.FilterBest filter = new GMime.FilterBest(ENCODING);
     GMime.StreamFilter out_stream = new GMime.StreamFilter(
         new GMime.StreamNull()
     );
@@ -301,6 +298,7 @@ public async GMime.ContentEncoding get_best_encoding(GMime.Stream in_stream,
     yield Nonblocking.Concurrent.global.schedule_async(() => {
             in_stream.write_to_stream(out_stream);
             in_stream.reset();
+            out_stream.close();
         },
         cancellable
     );
