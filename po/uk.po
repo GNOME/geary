@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-03-21 18:57+0000\n"
-"PO-Revision-Date: 2020-03-28 18:06+0200\n"
+"POT-Creation-Date: 2020-03-29 05:39+0000\n"
+"PO-Revision-Date: 2020-03-29 09:09+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -44,7 +44,6 @@ msgstr "Geary"
 
 #: desktop/geary-autostart.desktop.in.in:4
 #: desktop/org.gnome.Geary.desktop.in.in:4
-#| msgid "Gmail"
 msgid "Email"
 msgstr "Електронна пошта"
 
@@ -72,18 +71,18 @@ msgid ""
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Geary — програма для роботи з електронною поштою, базовою концепцією якої є"
-" «спілкування». Програму призначено для стільничного середовища GNOME 3. Вона"
-" надає вам змогу читати, шукати та надсилати електронну пошту. Інтерфейс"
-" програми є простим і сучасним."
+"Geary — програма для роботи з електронною поштою, базовою концепцією якої є "
+"«спілкування». Програму призначено для стільничного середовища GNOME 3. Вона "
+"надає вам змогу читати, шукати та надсилати електронну пошту. Інтерфейс "
+"програми є простим і сучасним."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:23
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
 msgstr ""
-"За допомогою можливості «спілкування» ви можете читати усе обговорення"
-" певного питання без потреби у пересуванні між його окремими повідомленнями."
+"За допомогою можливості «спілкування» ви можете читати усе обговорення "
+"певного питання без потреби у пересуванні між його окремими повідомленнями."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:27
 msgid "Geary’s features include:"
@@ -104,11 +103,10 @@ msgstr "Швидкий повнотекстовий пошук за ключов
 #: desktop/org.gnome.Geary.appdata.xml.in.in:32
 msgid "Full-featured HTML and plain text message composer"
 msgstr ""
-"Редактор повідомлень із повноцінною підтримкою створення повідомлень у"
-" форматі HTML та звичайному текстовому форматі"
+"Редактор повідомлень із повноцінною підтримкою створення повідомлень у "
+"форматі HTML та звичайному текстовому форматі"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:33
-#| msgid "Show _notifications for new mail"
 msgid "Desktop notification of new mail"
 msgstr "Сповіщення про нову пошту на стільниці"
 
@@ -118,7 +116,6 @@ msgstr "Сумісність із GMail, Yahoo! Mail, Outlook.com та інши�
 
 #. Translators: A screenshot description.
 #: desktop/org.gnome.Geary.appdata.xml.in.in:48
-#| msgid "_Display conversation preview"
 msgid "Geary displaying a conversation"
 msgstr "Спілкування у вікні Geary"
 
@@ -131,8 +128,8 @@ msgstr "Редактор форматованого тексту у Geary"
 #: desktop/org.gnome.Geary.desktop.in.in:7
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr ""
-"Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;пошта;електронна;електронка;імап;"
-"аймап;повідомлення;жмейл;яху;ягу;хотмейл;готмейл;аутлук;"
+"Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;пошта;електронна;електронка;"
+"імап;аймап;повідомлення;жмейл;яху;ягу;хотмейл;готмейл;аутлук;"
 
 #: desktop/org.gnome.Geary.desktop.in.in:22
 msgid "Compose Message"
@@ -149,7 +146,8 @@ msgstr "Розгорнути вікно"
 #: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
 msgstr ""
-"Значення «true», якщо вікно програми максимізовано; значення «false», якщо ні."
+"Значення «true», якщо вікно програми максимізовано; значення «false», якщо "
+"ні."
 
 #: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
@@ -199,8 +197,8 @@ msgstr "Орієнтація панелі списку тек"
 #: desktop/org.gnome.Geary.gschema.xml:45
 msgid "True if the folder list Paned is in the horizontal orientation."
 msgstr ""
-"Значення «true», якщо прив'язка панелі списку тек перебуває у горизонтальному"
-" режимі."
+"Значення «true», якщо прив'язка панелі списку тек перебуває у "
+"горизонтальному режимі."
 
 #: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Show/hide formatting toolbar"
@@ -209,7 +207,8 @@ msgstr "Показати або приховати панель форматув
 #: desktop/org.gnome.Geary.gschema.xml:51
 msgid "True if the formatting toolbar in the composer is shown."
 msgstr ""
-"Якщо має значення «true», панель форматування у вікні редактора буде показано."
+"Якщо має значення «true», панель форматування у вікні редактора буде "
+"показано."
 
 #: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Position of message list pane"
@@ -220,7 +219,6 @@ msgid "Position of the message list Paned grabber."
 msgstr "Розташування прив'язки панелі списку повідомлень."
 
 #: desktop/org.gnome.Geary.gschema.xml:62
-#| msgid "_Automatically select next message"
 msgid "Autoselect next message"
 msgstr "Автоматично вибирати наступний лист"
 
@@ -230,15 +228,14 @@ msgstr ""
 "Значення «true» означає «автоматично вибирати наступне доступне спілкування."
 
 #: desktop/org.gnome.Geary.gschema.xml:68
-#| msgid "_Display conversation preview"
 msgid "Display message previews"
 msgstr "Попередній перегляд повідомлень"
 
 #: desktop/org.gnome.Geary.gschema.xml:69
 msgid "True if we should display a short preview of each message."
 msgstr ""
-"Якщо має значення «true», програма має показувати короткий попередній"
-" перегляд кожного повідомлення."
+"Якщо має значення «true», програма має показувати короткий попередній "
+"перегляд кожного повідомлення."
 
 #: desktop/org.gnome.Geary.gschema.xml:74
 msgid "Use single key shortcuts"
@@ -249,8 +246,8 @@ msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
 msgstr ""
-"Вмикає клавіатурні скорочення, які не потребують натискання <Ctrl>, для дій з"
-" повідомленнями — імітації скорочень, які використовуються у Gmail."
+"Вмикає клавіатурні скорочення, які не потребують натискання <Ctrl>, для дій "
+"з повідомленнями — імітації скорочень, які використовуються у Gmail."
 
 #: desktop/org.gnome.Geary.gschema.xml:82
 msgid "Languages that shall be used in the spell checker"
@@ -261,8 +258,8 @@ msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
 msgstr ""
-"Список локалей POSIX. Порожній список вимикає перевірку правопису, а"
-" null-список означає «використовувати типові мови стільничного середовища»."
+"Список локалей POSIX. Порожній список вимикає перевірку правопису, а null-"
+"список означає «використовувати типові мови стільничного середовища»."
 
 #: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Languages that are displayed in the spell checker popover"
@@ -273,16 +270,14 @@ msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr ""
-"Список мов, які буде завжди показано у накладному меню засобу перевірки"
-" правопису."
+"Список мов, які буде завжди показано у накладному меню засобу перевірки "
+"правопису."
 
 #: desktop/org.gnome.Geary.gschema.xml:96
-#| msgid "Notify of new mail at start_up"
 msgid "Notify of new mail at startup"
 msgstr "Сповіщати про нову пошту під час запуску"
 
 #: desktop/org.gnome.Geary.gschema.xml:97
-#| msgid "Notify of new mail at start_up"
 msgid "True to notify of new mail at startup."
 msgstr "Значення «true» означає «сповіщати про нову пошту під час запуску»."
 
@@ -291,7 +286,6 @@ msgid "Ask when opening an attachment"
 msgstr "Питати при відкритті долучення"
 
 #: desktop/org.gnome.Geary.gschema.xml:103
-#| msgid "To add them as attachments"
 msgid "True to ask when opening an attachment."
 msgstr "Значення «true» означає «питати при відкритті долучення»."
 
@@ -302,8 +296,8 @@ msgstr "Чи слід редагувати повідомлення у форм�
 #: desktop/org.gnome.Geary.gschema.xml:109
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
-"Значення «true» — редагувати повідомлення у HTML; «false» — редагувати у"
-" форматі звичайного тексту."
+"Значення «true» — редагувати повідомлення у HTML; «false» — редагувати у "
+"форматі звичайного тексту."
 
 #: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Advisory strategy for full-text searching"
@@ -313,11 +307,10 @@ msgstr "Рекомендована стратегія для повнотекс�
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
-"Доступні значення: «exact» («точний»), «conservative» («консервативний»),"
-" «aggressive» («агресивний») і «horizon» («горизонтний»)."
+"Доступні значення: «exact» («точний»), «conservative» («консервативний»), "
+"«aggressive» («агресивний») і «horizon» («горизонтний»)."
 
 #: desktop/org.gnome.Geary.gschema.xml:120
-#| msgid "No conversations in folder."
 msgid "Zoom of conversation viewer"
 msgstr "Масштаб панелі перегляду спілкувань"
 
@@ -326,7 +319,6 @@ msgid "The zoom to apply on the conservation view."
 msgstr "Масштаб для панелі перегляду спілкувань."
 
 #: desktop/org.gnome.Geary.gschema.xml:126
-#| msgid "Use %s to open a new composer window"
 msgid "Size of detached composer window"
 msgstr "Розмір від'єднаного вікна редактора"
 
@@ -335,7 +327,6 @@ msgid "The last recorded size of the detached composer window."
 msgstr "Останній записаний розмір від'єднаного вікна редактора."
 
 #: desktop/org.gnome.Geary.gschema.xml:132
-#| msgid "Error sending email"
 msgid "Undo sending email delay"
 msgstr "Скасувати затримку надсилання повідомлення"
 
@@ -344,8 +335,8 @@ msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
 msgstr ""
-"Тривалість очікування у секундах перед надсиланням повідомлення. Встановіть"
-" нульове або від'ємне значення, щоб вимкнути очікування."
+"Тривалість очікування у секундах перед надсиланням повідомлення. Встановіть "
+"нульове або від'ємне значення, щоб вимкнути очікування."
 
 #: desktop/org.gnome.Geary.gschema.xml:139
 msgid "Brief notification display time"
@@ -373,8 +364,8 @@ msgstr "Чи перенесено на нову версію старі пара
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
-"Встановіть значення «false», щоб програма виконала пошук старої схеми"
-" «org.yorba.geary» і скопіювала її значення до нової схеми."
+"Встановіть значення «false», щоб програма виконала пошук старої схеми «org."
+"yorba.geary» і скопіювала її значення до нової схеми."
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -451,7 +442,6 @@ msgstr "Ваше ім’я"
 #. preferences for an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:575
 #: src/client/accounts/accounts-editor-edit-pane.vala:513
-#| msgid "Email address:"
 msgid "Email address"
 msgstr "Поштова адреса"
 
@@ -488,7 +478,6 @@ msgstr "Пароль"
 #. address and port used by an account's IMAP service.
 #: src/client/accounts/accounts-editor-add-pane.vala:629
 #: src/client/accounts/accounts-editor-servers-pane.vala:728
-#| msgid "IMAP username"
 msgid "IMAP server"
 msgstr "Сервер IMAP"
 
@@ -504,7 +493,6 @@ msgstr "imap.ukrmail.com"
 #. address and port used by an account's SMTP service.
 #: src/client/accounts/accounts-editor-add-pane.vala:638
 #: src/client/accounts/accounts-editor-servers-pane.vala:734
-#| msgid "SMTP username"
 msgid "SMTP server"
 msgstr "Сервер SMTP"
 
@@ -518,7 +506,6 @@ msgstr "smtp.ukrmail.com"
 #. custom name for an account.
 #: src/client/accounts/accounts-editor-edit-pane.vala:277
 #: ui/accounts_editor_remove_pane.ui:123
-#| msgid "Accounts"
 msgid "Account name"
 msgstr "Назва облікового запису"
 
@@ -534,7 +521,6 @@ msgstr "Повернути обліковому запису назву «%s»"
 #. Translators: Tooltip for adding a new email sender/from
 #. address's address to an account
 #: src/client/accounts/accounts-editor-edit-pane.vala:342
-#| msgid "Remove email address"
 msgid "Add a new sender email address"
 msgstr "Додати нову адресу електронної пошти відправника"
 
@@ -553,7 +539,6 @@ msgid "Sender Name"
 msgstr "Ім'я відправника"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:491
-#| msgid "_Remove"
 msgid "Remove"
 msgstr "Вилучити"
 
@@ -561,7 +546,6 @@ msgstr "Вилучити"
 #. email address when editing a user's sender address
 #. preferences for an account.
 #: src/client/accounts/accounts-editor-edit-pane.vala:506
-#| msgid "Username"
 msgid "Sender name"
 msgstr "Ім'я відправника"
 
@@ -600,7 +584,6 @@ msgstr "Скасувати зміни у підписі"
 #. preference for the length of time (weeks, months or
 #. years) that past email should be downloaded.
 #: src/client/accounts/accounts-editor-edit-pane.vala:790
-#| msgid "_Download mail"
 msgid "Download mail"
 msgstr "Отримання пошти"
 
@@ -648,7 +631,6 @@ msgstr "4 роки тому"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:877
 #, c-format
-#| msgid "1 year back"
 msgid "%d day back"
 msgid_plural "%d days back"
 msgstr[0] "%d день тому"
@@ -658,13 +640,11 @@ msgstr[3] "день тому"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
 #: src/client/application/application-main-window.vala:2062
-#| msgid "_Undo"
 msgid "Undo"
 msgstr "Скасувати"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
 #: src/client/application/application-main-window.vala:2045
-#| msgid "_Redo"
 msgid "Redo"
 msgstr "Повторити"
 
@@ -683,7 +663,6 @@ msgstr "Outlook.com"
 #: src/client/accounts/accounts-editor-list-pane.vala:366
 #: src/client/accounts/accounts-editor-list-pane.vala:454
 #: src/client/accounts/accounts-editor-row.vala:287
-#| msgid "Yahoo! Mail"
 msgid "Yahoo"
 msgstr "Yahoo"
 
@@ -750,12 +729,10 @@ msgid "None"
 msgstr "Немає"
 
 #: src/client/accounts/accounts-editor-row.vala:486
-#| msgid "_Star"
 msgid "StartTLS"
 msgstr "StartTLS"
 
 #: src/client/accounts/accounts-editor-row.vala:493
-#| msgid "SSL/TLS"
 msgid "TLS"
 msgstr "TLS"
 
@@ -800,7 +777,6 @@ msgstr "Обліковий запис не оновлено: %s"
 #. created the account, e.g. an SSO service like GOA, or
 #. locally by Geary.
 #: src/client/accounts/accounts-editor-servers-pane.vala:540
-#| msgid "Accounts"
 msgid "Account source"
 msgstr "Джерело облікового запису"
 
@@ -811,14 +787,12 @@ msgstr "Мережеві облікові записи GNOME"
 #. Translators: This label describes an account
 #. preference.
 #: src/client/accounts/accounts-editor-servers-pane.vala:611
-#| msgid "Save dra_fts on server"
 msgid "Save draft email on server"
 msgstr "Зберігати чернетки пошти на сервері"
 
 #. Translators: This label describes an account
 #. preference.
 #: src/client/accounts/accounts-editor-servers-pane.vala:666
-#| msgid "_Save sent mail"
 msgid "Save sent email on server"
 msgstr "Зберігати надіслано пошту на сервері"
 
@@ -847,7 +821,6 @@ msgstr "Без назви"
 #. / name.
 #: src/client/application/application-attachment-manager.vala:222
 #, c-format
-#| msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Файл з назвою «%s» вже існує. Замінити його?"
 
@@ -856,9 +829,6 @@ msgstr "Файл з назвою «%s» вже існує. Замінити йо
 #. / folder's name.
 #: src/client/application/application-attachment-manager.vala:229
 #, c-format
-#| msgid ""
-#| "The file already exists in \"%s\".  Replacing it will overwrite its "
-#| "contents."
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Файл вже існує у «%s». Перезаписування призведе до втрати вмісту."
@@ -880,145 +850,140 @@ msgid "Visit the Geary web site"
 msgstr "Відвідати сайт Geary"
 
 #. / Command line option
-#: src/client/application/application-client.vala:94
+#: src/client/application/application-client.vala:97
 msgid "Print debug logging"
 msgstr "Виводити діагностичні повідомлення"
 
 #. / Command line option
-#: src/client/application/application-client.vala:97
-#| msgid "Start Geary with hidden main window"
+#: src/client/application/application-client.vala:100
 msgid "Start with the main window hidden (deprecated)"
 msgstr "Запустити із прихованим головним вікном (застаріле)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:100
+#: src/client/application/application-client.vala:103
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Увімкнути ревізор WebKitGTK на панелях вебперегляду"
 
 #. / Command line option
-#: src/client/application/application-client.vala:103
+#: src/client/application/application-client.vala:106
 msgid "Log conversation monitoring"
 msgstr "Журнал спостереження за спілкуванням"
 
 #. / Command line option
-#: src/client/application/application-client.vala:106
-#| msgid "Log network deserialization"
+#: src/client/application/application-client.vala:109
 msgid "Log IMAP network deserialization"
 msgstr ""
 "Записувати до журналу розкладення роботи з мережею IMAP у послідовну форму"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:110
+#: src/client/application/application-client.vala:113
 msgid "Log folder normalization"
 msgstr "Журнал нормування тек"
 
 #. / Command line option
-#: src/client/application/application-client.vala:113
+#: src/client/application/application-client.vala:116
 msgid "Log network activity"
 msgstr "Журнал мережевої діяльності"
 
 #. / Command line option
-#: src/client/application/application-client.vala:116
+#: src/client/application/application-client.vala:119
 msgid "Log periodic activity"
 msgstr "Журнал періодичної діяльності"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:121
+#: src/client/application/application-client.vala:124
 msgid "Log IMAP replay queue"
 msgstr "Журнал черги відповідей IMAP"
 
 #. / Command line option. Serialization is how commands and
 #. / responses are converted into a stream of bytes for
 #. / network transmission
-#: src/client/application/application-client.vala:126
-#| msgid "Log network serialization"
+#: src/client/application/application-client.vala:129
 msgid "Log IMAP network serialization"
 msgstr ""
-"Записувати до журналу збирання команд роботи з мережею IMAP у послідовну форму"
+"Записувати до журналу збирання команд роботи з мережею IMAP у послідовну "
+"форму"
 
 #. / Command line option
-#: src/client/application/application-client.vala:129
+#: src/client/application/application-client.vala:132
 msgid "Log database queries (generates lots of messages)"
 msgstr "Журнал запитів баз даних (породжує багато повідомлень)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:132
+#: src/client/application/application-client.vala:135
 msgid "Perform a graceful quit"
 msgstr "Виконати штатне завершення роботи"
 
-#: src/client/application/application-client.vala:134
-#| msgid "Use %s to open a new composer window"
+#: src/client/application/application-client.vala:137
 msgid "Open a new window"
 msgstr "Відкрити нове вікно"
 
 #. / Command line option
-#: src/client/application/application-client.vala:137
-#| msgid "Revoke all server certificates with TLS warnings"
+#: src/client/application/application-client.vala:140
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Відкликати усі пришпилені сертифікати TLS сервера"
 
 #. / Command line option
-#: src/client/application/application-client.vala:140
+#: src/client/application/application-client.vala:143
 msgid "Display program version"
 msgstr "Показати версію програми"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:264
-#| msgid "Mark conversation"
+#: src/client/application/application-client.vala:267
 msgid "Geary version"
 msgstr "Версія Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:266
+#: src/client/application/application-client.vala:269
 msgid "Geary revision"
 msgstr "Модифікація Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:268
+#: src/client/application/application-client.vala:271
 msgid "GTK version"
 msgstr "Версія GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:275
+#: src/client/application/application-client.vala:278
 msgid "GLib version"
 msgstr "Версія GLib"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:282
+#: src/client/application/application-client.vala:285
 msgid "WebKitGTK version"
 msgstr "Версія WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:289
+#: src/client/application/application-client.vala:292
 msgid "Desktop environment"
 msgstr "Стільничне середовище"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:291
+#: src/client/application/application-client.vala:294
 #: src/client/components/components-attachment-pane.vala:91
 msgid "Unknown"
 msgstr "Невідомий"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:321
+#: src/client/application/application-client.vala:324
 msgid "Distribution name"
 msgstr "Назва дистрибутива"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:326
+#: src/client/application/application-client.vala:329
 msgid "Distribution release"
 msgstr "Поширений випуск"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:334
+#: src/client/application/application-client.vala:337
 msgid "Installation prefix"
 msgstr "Префікс встановлення"
 
-#: src/client/application/application-client.vala:587
+#: src/client/application/application-client.vala:590
 #, c-format
 msgid "About %s"
 msgstr "Інформація про %s"
@@ -1026,40 +991,38 @@ msgstr "Інформація про %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:591
+#: src/client/application/application-client.vala:594
 msgid "translator-credits"
 msgstr "Daniel Korostil <ted.korostiled@gmail.com>"
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:938
+#: src/client/application/application-client.vala:941
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr ""
-"Параметр «--hidden» вважається застарілим. Його буде вилучено у майбутніх"
-" версіях програми."
+"Параметр «--hidden» вважається застарілим. Його буде вилучено у майбутніх "
+"версіях програми."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:971
+#: src/client/application/application-client.vala:974
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Нерозпізнаний аргумент команди: «%s»"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:457
+#: src/client/application/application-controller.vala:455
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "Під час спроби надіслати повідомлення для %s виникла проблема"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:461
+#: src/client/application/application-controller.vala:459
 msgid "Email will not be sent until re-connected"
 msgstr "Повідомлення не буде надіслано до відновлення з'єднання"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:567
-#| msgid "%u conversation selected."
-#| msgid_plural "%u conversations selected."
+#: src/client/application/application-controller.vala:565
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "Спілкування позначено"
@@ -1068,8 +1031,7 @@ msgstr[2] "Спілкування позначено"
 msgstr[3] "Спілкування позначено"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:573
-#| msgid "%s - Conversation Inspector"
+#: src/client/application/application-controller.vala:571
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "Позначення спілкувань скасовано"
@@ -1080,10 +1042,9 @@ msgstr[3] "Позначення спілкування скасовано"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:599
-#: src/client/application/application-controller.vala:683
+#: src/client/application/application-controller.vala:597
+#: src/client/application/application-controller.vala:681
 #, c-format
-#| msgid "Log conversation monitoring"
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
 msgstr[0] "Спілкування пересунуто до %s"
@@ -1096,10 +1057,9 @@ msgstr[3] "Спілкування пересунуто до %s"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:607
-#: src/client/application/application-controller.vala:629
+#: src/client/application/application-controller.vala:605
+#: src/client/application/application-controller.vala:627
 #, c-format
-#| msgid "%s - Conversation Inspector"
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
 msgstr[0] "Спілкування відновлено у %s"
@@ -1108,9 +1068,7 @@ msgstr[2] "Спілкування відновлено у %s"
 msgstr[3] "Спілкування відновлено у %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:650
-#| msgid "%u conversation selected."
-#| msgid_plural "%u conversations selected."
+#: src/client/application/application-controller.vala:648
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "Спілкування архівовано"
@@ -1120,7 +1078,7 @@ msgstr[3] "Спілкування архівовано"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:706
+#: src/client/application/application-controller.vala:704
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
@@ -1130,7 +1088,7 @@ msgstr[2] "Повідомлення відновлено у %s"
 msgstr[3] "Повідомлення відновлено у %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:727
+#: src/client/application/application-controller.vala:725
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "Повідомлення архівовано"
@@ -1141,7 +1099,7 @@ msgstr[3] "Повідомлення архівовано"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:762
+#: src/client/application/application-controller.vala:760
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1153,10 +1111,8 @@ msgstr[3] "Повідомлення пересунуто до %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:790
+#: src/client/application/application-controller.vala:788
 #, c-format
-#| msgid "%u conversation selected."
-#| msgid_plural "%u conversations selected."
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
 msgstr[0] "Спілкування позначено як %s"
@@ -1167,7 +1123,7 @@ msgstr[3] "Спілкування позначено як %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:798
+#: src/client/application/application-controller.vala:796
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
@@ -1176,12 +1132,12 @@ msgstr[1] "Скасовано позначення спілкувань як %s"
 msgstr[2] "Скасовано позначення спілкувань як %s"
 msgstr[3] "Скасовано позначення спілкування як %s"
 
-#: src/client/application/application-controller.vala:1219
+#: src/client/application/application-controller.vala:1217
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Неможливо відкрити базу даних для %s"
 
-#: src/client/application/application-controller.vala:1220
+#: src/client/application/application-controller.vala:1218
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1206,21 +1162,20 @@ msgstr ""
 "Перезбирання бази даних знищить всю локальну пошту та її долучень. <b>На "
 "пошту на вашому сервері це не поширюється.</b>"
 
-#: src/client/application/application-controller.vala:1222
+#: src/client/application/application-controller.vala:1220
 msgid "_Rebuild"
 msgstr "_Перебудувати"
 
-#: src/client/application/application-controller.vala:1222
+#: src/client/application/application-controller.vala:1220
 msgid "E_xit"
 msgstr "В_ийти"
 
-#: src/client/application/application-controller.vala:1232
+#: src/client/application/application-controller.vala:1230
 #, c-format
-#| msgid "Unable to rebuild database for \"%s\""
 msgid "Unable to rebuild database for “%s”"
 msgstr "Не вдалося перебудувати базу даних для «%s»"
 
-#: src/client/application/application-controller.vala:1233
+#: src/client/application/application-controller.vala:1231
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1233,35 +1188,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1463
+#: src/client/application/application-controller.vala:1461
 #, c-format
 msgid "Email sent to %s"
 msgstr "Повідомлення надіслано %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2559
+#: src/client/application/application-controller.vala:2557
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Повідомлення до %s заплановано до надсилання"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2623
+#: src/client/application/application-controller.vala:2621
 #, c-format
 msgid "Email to %s saved"
 msgstr "Повідомлення до %s збережено"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2638
-#: src/client/application/application-controller.vala:2696
-#| msgid "\"%s\" could not be found."
+#: src/client/application/application-controller.vala:2636
+#: src/client/application/application-controller.vala:2694
 msgid "Composer could not be restored"
 msgstr "Не вдалося відновити вміст редактора"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2681
+#: src/client/application/application-controller.vala:2679
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Повідомлення до %s відкинуто"
@@ -1275,8 +1229,8 @@ msgstr "Працюємо у автономному режимі"
 #: src/client/application/application-main-window.vala:534
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
-"Ви не зможете надсилати або отримувати електронну пошту до відновлення"
-" з'єднання із інтернетом."
+"Ви не зможете надсилати або отримувати електронну пошту до відновлення "
+"з'єднання із інтернетом."
 
 #. Translators: An info bar status label
 #: src/client/application/application-main-window.vala:541
@@ -1287,8 +1241,8 @@ msgstr "Проблеми із входом"
 #: src/client/application/application-main-window.vala:543
 msgid "An account has reported an incorrect login or password."
 msgstr ""
-"Сервером облікового запису повідомлено про помилкове ім'я користувача або"
-" пароль."
+"Сервером облікового запису повідомлено про помилкове ім'я користувача або "
+"пароль."
 
 #. Translators: An info bar button tool-tip
 #: src/client/application/application-main-window.vala:549
@@ -1305,8 +1259,8 @@ msgstr "Проблема із захистом"
 #: src/client/application/application-main-window.vala:558
 msgid "An account has reported an untrusted server.."
 msgstr ""
-"Механізмами роботи із обліковими записами повідомлено про ненадійність"
-" сервера…"
+"Механізмами роботи із обліковими записами повідомлено про ненадійність "
+"сервера…"
 
 #. Translators: An info bar button label
 #: src/client/application/application-main-window.vala:561
@@ -1332,8 +1286,6 @@ msgstr "Мітки"
 
 #. / Translators: Primary text for a confirmation dialog
 #: src/client/application/application-main-window.vala:1337
-#| msgid "Do you want to permanently delete this message?"
-#| msgid_plural "Do you want to permanently delete these messages?"
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Ви справді хочете остаточно вилучити ці спілкування?"
@@ -1384,13 +1336,12 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1834
+#: src/client/composer/composer-widget.vala:1839
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
 #: src/client/components/components-attachment-pane.vala:379
-#| msgid "Are you sure you want to open \"%s\"?"
 msgid "Are you sure you want to open these attachments?"
 msgstr "Ви справді хочете відкрити ці долучення?"
 
@@ -1403,12 +1354,10 @@ msgstr ""
 "джерел."
 
 #: src/client/components/components-attachment-pane.vala:381
-#| msgid "Don't _ask me again"
 msgid "Don’t _ask me again"
 msgstr "Більше не _запитувати"
 
 #: src/client/components/components-inspector.vala:72
-#| msgid "_Inspect"
 msgid "Inspector"
 msgstr "Ревізор"
 
@@ -1433,14 +1382,12 @@ msgstr "Система"
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:221
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:224
 #: ui/problem-details-dialog.ui:42
-#| msgid "_Save As..."
 msgid "Save As"
 msgstr "Зберегти як"
 
 #: src/client/components/components-inspector.vala:212
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:225
 #: ui/accounts_editor_servers_pane.ui:17
-#| msgid "_Cancel"
 msgid "Cancel"
 msgstr "Скасувати"
 
@@ -1469,12 +1416,11 @@ msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
 msgstr ""
-"Увімкнути клавіатурні скорочення, які не потребують натискання <Ctrl>, для"
-" дій з повідомленнями"
+"Увімкнути клавіатурні скорочення, які не потребують натискання <Ctrl>, для "
+"дій з повідомленнями"
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:95
-#| msgid "Always _watch for new mail"
 msgid "_Watch for new mail when closed"
 msgstr "_Шукати нові повідомлення під час закриття"
 
@@ -1496,7 +1442,6 @@ msgstr "Додатки"
 #. Translators: Info bar title for a generic account
 #. problem.
 #: src/client/components/components-problem-report-info-bar.vala:36
-#| msgid "Accounts"
 msgid "Account problem"
 msgstr "Проблема з обліковим записом"
 
@@ -1544,7 +1489,8 @@ msgstr "У Geary виникли проблеми"
 #: src/client/components/components-problem-report-info-bar.vala:80
 msgid "Please report the details if it persists."
 msgstr ""
-"Будь ласка, повідомте розробникам про цю помилку, якщо її не вдається усунути."
+"Будь ласка, повідомте розробникам про цю помилку, якщо її не вдається "
+"усунути."
 
 #. Translators: Button label for viewing technical details
 #. for a problem report.
@@ -1573,7 +1519,6 @@ msgstr "Пошук"
 
 #. / Translators: Search entry tooltip
 #: src/client/components/components-search-bar.vala:32
-#| msgid "Search all mail in account for keywords (Ctrl+S)"
 msgid "Search all mail in account for keywords"
 msgstr "Шукати у всій пошті облікового запису за ключовими словами"
 
@@ -1594,7 +1539,6 @@ msgstr "Слід вказати адресу електронної пошти"
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but the address is invalid.
 #: src/client/components/components-validator.vala:394
-#| msgid "Remove email address"
 msgid "Not a valid email address"
 msgstr "Немає коректної поштової адреси"
 
@@ -1613,7 +1557,6 @@ msgid "Could not look up server name"
 msgstr "Не вдалося виконати пошук за назвою сервера"
 
 #: src/client/components/main-toolbar.vala:116
-#| msgid "Mark conversation"
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Позначити спілкування"
@@ -1622,7 +1565,6 @@ msgstr[2] "Позначити спілкування"
 msgstr[3] "Позначити спілкування"
 
 #: src/client/components/main-toolbar.vala:121
-#| msgid "Add label to conversation"
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Додати мітку до спілкувань"
@@ -1631,7 +1573,6 @@ msgstr[2] "Додати мітку до спілкувань"
 msgstr[3] "Додати мітку до спілкування"
 
 #: src/client/components/main-toolbar.vala:126
-#| msgid "Move conversation"
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Пересунути спілкування"
@@ -1640,7 +1581,6 @@ msgstr[2] "Пересунути спілкування"
 msgstr[3] "Пересунути спілкування"
 
 #: src/client/components/main-toolbar.vala:131
-#| msgid "Archive conversation (A)"
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Архівувати спілкування"
@@ -1649,7 +1589,6 @@ msgstr[2] "Архівувати спілкування"
 msgstr[3] "Архівувати спілкування"
 
 #: src/client/components/main-toolbar.vala:142
-#| msgid "Move conversations"
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Пересунути спілкування до смітника"
@@ -1658,7 +1597,6 @@ msgstr[2] "Пересунути спілкування до смітника"
 msgstr[3] "Пересунути спілкування до смітника"
 
 #: src/client/components/main-toolbar.vala:152
-#| msgid "Delete conversation"
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Вилучити спілкування"
@@ -1668,7 +1606,6 @@ msgstr[3] "Вилучити спілкування"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: src/client/components/status-bar.vala:26
-#| msgid "Sending..."
 msgid "Sending…"
 msgstr "Надсилання…"
 
@@ -1721,7 +1658,6 @@ msgstr "П_араметри"
 
 #. Translators: Menu item to print a single, specific message
 #: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:64
-#| msgid "_Print..."
 msgid "_Print…"
 msgstr "Над_рукувати…"
 
@@ -1751,7 +1687,6 @@ msgid "Invalid link URL"
 msgstr "Некоректна адреса посилання"
 
 #: src/client/composer/composer-link-popover.vala:146
-#| msgid "Remove email address"
 msgid "Invalid email address"
 msgstr "Некоректна адреса електронної пошти"
 
@@ -1793,7 +1728,6 @@ msgstr ""
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
 #: src/client/composer/composer-widget.vala:843
-#| msgid "Do you want to discard this message?"
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Хочете зберегти чи відкинути цю чернетку повідомлення?"
 
@@ -1801,88 +1735,82 @@ msgstr "Хочете зберегти чи відкинути цю чернет�
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
 #: src/client/composer/composer-widget.vala:869
-#| msgid "Do you want to discard this message?"
 msgid "Do you want to discard this draft message?"
 msgstr "Хочете відкинути цю чернетку повідомлення?"
 
-#: src/client/composer/composer-widget.vala:1503
+#: src/client/composer/composer-widget.vala:1508
 msgid "Send message with an empty subject and body?"
 msgstr "Надіслати лист без теми і текстом листа?"
 
-#: src/client/composer/composer-widget.vala:1505
+#: src/client/composer/composer-widget.vala:1510
 msgid "Send message with an empty subject?"
 msgstr "Надіслати лист без теми?"
 
-#: src/client/composer/composer-widget.vala:1507
+#: src/client/composer/composer-widget.vala:1512
 msgid "Send message with an empty body?"
 msgstr "Надіслати лист без тексту?"
 
-#: src/client/composer/composer-widget.vala:1516
+#: src/client/composer/composer-widget.vala:1521
 msgid "Send message without an attachment?"
 msgstr "Надіслати лист без долучень?"
 
-#: src/client/composer/composer-widget.vala:1820
+#: src/client/composer/composer-widget.vala:1825
 #, c-format
-#| msgid "\"%s\" already attached for delivery."
 msgid "“%s” already attached for delivery."
 msgstr "«%s» уже долучено для доставлення."
 
-#: src/client/composer/composer-widget.vala:1856
-#: src/client/composer/composer-widget.vala:1906
+#: src/client/composer/composer-widget.vala:1861
+#: src/client/composer/composer-widget.vala:1911
 #, c-format
-#| msgid "\"%s\" is an empty file."
 msgid "“%s” is an empty file."
 msgstr "«%s» — порожній файл."
 
-#: src/client/composer/composer-widget.vala:1894
+#: src/client/composer/composer-widget.vala:1899
 #, c-format
-#| msgid "\"%s\" could not be found."
 msgid "“%s” could not be found."
 msgstr "Не вдалося знайти «%s»."
 
-#: src/client/composer/composer-widget.vala:1900
+#: src/client/composer/composer-widget.vala:1905
 #, c-format
-#| msgid "\"%s\" is a folder."
 msgid "“%s” is a folder."
 msgstr "«%s» — тека."
 
-#: src/client/composer/composer-widget.vala:1919
+#: src/client/composer/composer-widget.vala:1924
 #, c-format
-#| msgid "\"%s\" could not be opened for reading."
 msgid "“%s” could not be opened for reading."
 msgstr "Не вдалося відкрити «%s» для читання."
 
-#: src/client/composer/composer-widget.vala:1927
+#: src/client/composer/composer-widget.vala:1932
 msgid "Cannot add attachment"
 msgstr "Неможливо додати долучення"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1984
+#: src/client/composer/composer-widget.vala:1989
 #: src/client/conversation-viewer/conversation-email.vala:559
 #: src/client/util/util-email.vala:235 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Кому:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1990
+#: src/client/composer/composer-widget.vala:1995
 #: src/client/conversation-viewer/conversation-email.vala:564
 #: src/client/util/util-email.vala:240 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Копія:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1996
+#: src/client/composer/composer-widget.vala:2001
 #: src/client/conversation-viewer/conversation-email.vala:569
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Потайна копія:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2002
+#: src/client/composer/composer-widget.vala:2007
 msgid "Reply-To: "
 msgstr "Відповісти:"
 
-#: src/client/composer/composer-widget.vala:2254
+#: src/client/composer/composer-widget.vala:2259
 msgid "Select Color"
 msgstr "Вибрати колір"
 
@@ -1891,21 +1819,14 @@ msgstr "Вибрати колір"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2440
+#: src/client/composer/composer-widget.vala:2445
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s через %2$s"
 
-#. Composer label (with mnemonic underscore) for the account selector
-#. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2496
-msgid "_From:"
-msgstr "_Від:"
-
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2801
-#| msgid "Show Images"
+#: src/client/composer/composer-widget.vala:2803
 msgid "Images"
 msgstr "Зображення"
 
@@ -1923,7 +1844,6 @@ msgstr "Шукати інші мови"
 
 #. / Translators: Context menu item
 #: src/client/conversation-list/conversation-list-view.vala:335
-#| msgid "Move conversations"
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "Пересунути спілкування до с_мітника"
@@ -1933,7 +1853,6 @@ msgstr[3] "Пересунути спілкування до с_мітника"
 
 #. / Translators: Context menu item
 #: src/client/conversation-list/conversation-list-view.vala:347
-#| msgid "Delete conversation"
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "Ви_лучити спілкування"
@@ -2007,7 +1926,6 @@ msgstr "Цю адресу електронної пошти підроблено
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
 #: src/client/conversation-viewer/conversation-message.vala:234
-#| msgid "Show Images"
 msgid "Show less"
 msgstr "Показати менше"
 
@@ -2030,22 +1948,20 @@ msgstr "Немає відправника"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:922
+#: src/client/conversation-viewer/conversation-message.vala:923
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1042
-#| msgid "Show Images"
+#: src/client/conversation-viewer/conversation-message.vala:1043
 msgid "Image"
 msgstr "Зображення"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:83
-#| msgid "No conversations selected."
 msgid "No conversations selected"
 msgstr "Не позначено жодного спілкування."
 
@@ -2058,8 +1974,6 @@ msgstr "Після вибору спілкування зі списку йог�
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:96
-#| msgid "%u conversation selected."
-#| msgid_plural "%u conversations selected."
 msgid "Multiple conversations selected"
 msgstr "Позначено декілька спілкувань"
 
@@ -2075,7 +1989,6 @@ msgstr "Вибір дії призведе до її застосування д
 #. conversations have been found in a search.
 #: src/client/conversation-viewer/conversation-viewer.vala:109
 #: src/client/conversation-viewer/conversation-viewer.vala:122
-#| msgid "No conversations in folder."
 msgid "No conversations found"
 msgstr "Спілкувань не знайдено"
 
@@ -2111,43 +2024,33 @@ msgid "The identity of the %s mail server at %s:%u could not be verified."
 msgstr "Ототожнення поштового сервера %s у %s:%u неможливо завірити."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:48
-#| msgid ""
-#| "Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
-#| "your username and password to be transmitted insecurely."
 msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
-"Вибір варіанта «Довіритись цьому серверу» або «Завжди довіряти цьому серверу»"
-" може "
-"спричинити проблеми із захистом передавання вашого імені користувача і пароля."
+"Вибір варіанта «Довіритись цьому серверу» або «Завжди довіряти цьому "
+"серверу» може спричинити проблеми із захистом передавання вашого імені "
+"користувача і пароля."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:56
-#| msgid ""
-#| "Selecting \"Don't Trust This Server\" will cause Geary not to access this "
-#| "server."
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
 msgstr ""
-"Вибір варіанта «Не довіряти цьому серверу» призведе до того, що Geary"
-" втратить доступ до цього "
-"сервера."
+"Вибір варіанта «Не довіряти цьому серверу» призведе до того, що Geary "
+"втратить доступ до цього сервера."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
 msgstr "Geary не додаватиме і не оновлюватиме цей поштовий обліковий запис."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:63
-#| msgid ""
-#| "Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
-#| "this account."
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
 msgstr ""
-"Вибір варіанта «Не довіряти цьому серверу» призведе до того, що Geary"
-" припинить намагатися отримати доступ до цього облікового запису."
+"Вибір варіанта «Не довіряти цьому серверу» призведе до того, що Geary "
+"припинить намагатися отримати доступ до цього облікового запису."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:69
 msgid ""
@@ -2158,37 +2061,30 @@ msgstr ""
 "послуг, якщо виникли запитання щодо цих проблем."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:76
-#| msgid "The server's certificate is not signed by a known authority"
 msgid "The server’s certificate is not signed by a known authority"
 msgstr "Сертифікат сервера не підписано відомою службою сертифікації"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:79
-#| msgid "The server's identity does not match the identity in the certificate"
 msgid "The server’s identity does not match the identity in the certificate"
 msgstr "Профіль сервера не відповідає профілю, який вказано у сертифікаті"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:82
-#| msgid "The server's certificate has expired"
 msgid "The server’s certificate has expired"
 msgstr "Строк дії сертифіката сервера вичерпано"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:85
-#| msgid "The server's certificate has not been activated"
 msgid "The server’s certificate has not been activated"
 msgstr "Сертифікат сервера не було активовано"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:88
-#| msgid "The server's certificate has been revoked and is now invalid"
 msgid "The server’s certificate has been revoked and is now invalid"
 msgstr "Сертифікат сервера було відкликано. Зараз він є недійсним."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:91
-#| msgid "The server's certificate is considered insecure"
 msgid "The server’s certificate is considered insecure"
 msgstr "Сертифікат сервера можна вважати нічим не захищеним"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:94
-#| msgid "An error has occurred processing the server's certificate"
 msgid "An error has occurred processing the server’s certificate"
 msgstr "Під час спроби обробити сертифікат сервера сталася помилка"
 
@@ -2197,7 +2093,6 @@ msgstr "Під час спроби обробити сертифікат сер�
 #. Dialog title for displaying technical details of a problem. Same as the button that invokes it.
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:100
 #: ui/problem-details-dialog.ui:12
-#| msgid "_Details"
 msgid "Details"
 msgstr "Подробиці"
 
@@ -2254,14 +2149,8 @@ msgstr[3] "%d результат"
 #. / seen. First string substitution is the message
 #. / subject and the second is the number of unseen
 #. / messages
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:110
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:126
 #, c-format
-#| msgid ""
-#| "%s\n"
-#| "(%d other new message for %s)"
-#| msgid_plural ""
-#| "%s\n"
-#| "(%d other new messages for %s)"
 msgid ""
 "%s\n"
 "(%d other new message)"
@@ -2285,7 +2174,7 @@ msgstr[3] ""
 #. / received at the same time and other unseen messages
 #. / exist. String substitution is the number of new
 #. / messages that have arrived.
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:129
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:145
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
@@ -2300,7 +2189,7 @@ msgstr[3] "%d новий лист"
 #. / above with the number of new messages that have
 #. / arrived, number substitution is the total number
 #. / of unseen messages.
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:139
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:155
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
@@ -2311,8 +2200,7 @@ msgstr[3] "%s, %d новий лист загалом"
 
 #. / Notification title when new messages have been
 #. / received
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:251
-#| msgid "New Message"
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:272
 msgid "New message"
 msgid_plural "New messages"
 msgstr[0] "Нові повідомлення"
@@ -2322,7 +2210,6 @@ msgstr[3] "Нове повідомлення"
 
 #: src/client/plugin/messaging-menu/messaging-menu.vala:70
 #, c-format
-#| msgid "%s - New Messages"
 msgid "%s — New Messages"
 msgstr "%s — нові повідомлення"
 
@@ -2401,26 +2288,22 @@ msgstr "%A"
 #. / 12 hours format for datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:216
-#| msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgid "%a, %b %-e, %Y at %l:%M %P"
 msgstr "%a, %d.%b.%Y о %-k:%M"
 
 #. / 24 hours format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:220
-#| msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgid "%a, %b %-e, %Y at %H:%M"
 msgstr "%a, %d.%b.%Y о %-k:%M"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:224
-#| msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgid "%a, %b %-e, %Y at %X"
 msgstr "%a, %d.%b.%Y о %X"
 
 #: src/client/util/util-email.vala:38
-#| msgid "(no subject)"
 msgid "(No subject)"
 msgstr "(Без теми)"
 
@@ -2549,7 +2432,6 @@ msgstr "Архів"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:130
-#| msgid "attachment"
 msgctxt "Search operator"
 msgid "attachment"
 msgstr "долучення"
@@ -2563,7 +2445,6 @@ msgstr "долучення"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:139
-#| msgid "bcc"
 msgctxt "Search operator"
 msgid "bcc"
 msgstr "bcc"
@@ -2576,7 +2457,6 @@ msgstr "bcc"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:147
-#| msgid "body"
 msgctxt "Search operator"
 msgid "body"
 msgstr "вміст"
@@ -2590,7 +2470,6 @@ msgstr "вміст"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:156
-#| msgid "cc"
 msgctxt "Search operator"
 msgid "cc"
 msgstr "копія"
@@ -2604,7 +2483,6 @@ msgstr "копія"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:165
-#| msgid "from"
 msgctxt "Search operator"
 msgid "from"
 msgstr "від"
@@ -2617,7 +2495,6 @@ msgstr "від"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:173
-#| msgid "is"
 msgctxt "Search operator"
 msgid "is"
 msgstr "є"
@@ -2630,7 +2507,6 @@ msgstr "є"
 #. also match the translation in "search.page" of the Geary
 #. User Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:181
-#| msgid "subject"
 msgctxt "Search operator"
 msgid "subject"
 msgstr "тема"
@@ -2644,7 +2520,6 @@ msgstr "тема"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:190
-#| msgid "to"
 msgctxt "Search operator"
 msgid "to"
 msgstr "до"
@@ -2658,7 +2533,6 @@ msgstr "до"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:211
-#| msgid "me"
 msgctxt "Search operator value - mail addressed to the user"
 msgid "me"
 msgstr "ви"
@@ -2671,7 +2545,6 @@ msgstr "ви"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:223
-#| msgid "me"
 msgctxt "Search operator value - mail sent by the user"
 msgid "me"
 msgstr "я"
@@ -2684,7 +2557,6 @@ msgstr "я"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:235
-#| msgid "read"
 msgctxt "'is:' search operator value"
 msgid "read"
 msgstr "прочитане"
@@ -2698,7 +2570,6 @@ msgstr "прочитане"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:246
-#| msgid "starred"
 msgctxt "'is:' search operator value"
 msgid "starred"
 msgstr "позначене"
@@ -2711,7 +2582,6 @@ msgstr "позначене"
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
 #: src/engine/imap-db/imap-db-search-query.vala:256
-#| msgid "unread"
 msgctxt "'is:' search operator value"
 msgid "unread"
 msgstr "непрочитане"
@@ -2764,7 +2634,6 @@ msgstr "Сміття | Смітник | Кошик | TTrash | Rubbish | Rubbish 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:921
-#| msgid "Delete"
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Вилучені записи"
@@ -2777,22 +2646,21 @@ msgstr "Вилучені записи"
 msgid "Archive | Archives"
 msgstr "Архів | Архіви | Archive | Archives"
 
-#: src/engine/rfc822/rfc822-message.vala:458
+#: src/engine/rfc822/rfc822-message.vala:462
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Не вдалося визначити тип MIME для «%s»."
 
-#: src/engine/rfc822/rfc822-message.vala:469
+#: src/engine/rfc822/rfc822-message.vala:473
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Не вдалося визначити тип даних для типу MIME «%s» у «%s»."
 
-#: src/engine/rfc822/rfc822-message.vala:1000
+#: src/engine/rfc822/rfc822-message.vala:1004
 msgid "(no subject)"
 msgstr "(без теми)"
 
 #: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:126
-#| msgid "Add account"
 msgid "Add an account"
 msgstr "Додати обліковий запис"
 
@@ -2805,22 +2673,18 @@ msgid "Receiving"
 msgstr "Отримання"
 
 #: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
-#| msgid "Sending..."
 msgid "Sending"
 msgstr "Надсилання"
 
 #: ui/accounts_editor_edit_pane.ui:8
-#| msgid "Edit account"
 msgid "Edit Account"
 msgstr "Змінити обліковий запис"
 
 #: ui/accounts_editor_edit_pane.ui:9 ui/accounts_editor_servers_pane.ui:9
-#| msgid "Accounts"
 msgid "Account Name"
 msgstr "Назва облікового запису"
 
 #: ui/accounts_editor_edit_pane.ui:124
-#| msgid "Email address:"
 msgid "Email addresses"
 msgstr "Адреси ел. пошти"
 
@@ -2829,24 +2693,20 @@ msgid "Signature"
 msgstr "Підпис"
 
 #: ui/accounts_editor_edit_pane.ui:201
-#| msgid "SMTP settings"
 msgid "Settings"
 msgstr "Параметри"
 
 #. This is a button in the account settings to show server settings.
 #: ui/accounts_editor_edit_pane.ui:243 ui/accounts_editor_servers_pane.ui:8
-#| msgid "SMTP settings"
 msgid "Server Settings"
 msgstr "Параметри сервера"
 
 #. This is the remove account button in the account settings.
 #: ui/accounts_editor_edit_pane.ui:258 ui/accounts_editor_remove_pane.ui:23
-#| msgid "Remove account"
 msgid "Remove Account"
 msgstr "Вилучити обліковий запис"
 
 #: ui/accounts_editor_edit_pane.ui:262 ui/accounts_editor_remove_pane.ui:27
-#| msgid "Remove account"
 msgid "Remove this account from Geary"
 msgstr "Вилучити цей обліковий запис з Geary"
 
@@ -2857,11 +2717,10 @@ msgstr "Облікові записи"
 #: ui/accounts_editor_list_pane.ui:62
 msgid "To get started, select an email provider below."
 msgstr ""
-"Для початку, виберіть надавача послуг електронної пошти із наведеного нижче"
-" списку."
+"Для початку, виберіть надавача послуг електронної пошти із наведеного нижче "
+"списку."
 
 #: ui/accounts_editor_list_pane.ui:75
-#| msgid "Welcome to Geary."
 msgid "Welcome to Geary"
 msgstr "Ласкаво просимо до Geary"
 
@@ -2876,9 +2735,9 @@ msgid ""
 "Removing an account will remove it from Geary and delete locally cached "
 "email data from your computer, but not from your service provider."
 msgstr ""
-"Вилучення облікового запису призведе до вилучення даних цього запису з Geary"
-" і вилучення локального кешу даних з вашого комп'ютера. Втім, усі дані"
-" лишаться на сервері вашого надавача послуг електронної пошти."
+"Вилучення облікового запису призведе до вилучення даних цього запису з Geary "
+"і вилучення локального кешу даних з вашого комп'ютера. Втім, усі дані "
+"лишаться на сервері вашого надавача послуг електронної пошти."
 
 #: ui/accounts_editor_remove_pane.ui:122
 msgid "Remove account"
@@ -2901,7 +2760,6 @@ msgid "_Trust This Server"
 msgstr "_Довіритись цьому серверу"
 
 #: ui/certificate_warning_dialog.glade:57
-#| msgid "_Don't Trust This Server"
 msgid "_Don’t Trust This Server"
 msgstr "_Не довіряти цьому серверу"
 
@@ -2927,7 +2785,6 @@ msgid "Insert the new link with this URL"
 msgstr "Вставити нове посилання із цією адресою"
 
 #: ui/composer-link-popover.ui:43
-#| msgid "_Add"
 msgid "Add"
 msgstr "Додати"
 
@@ -2941,7 +2798,6 @@ msgid "Update this link’s URL"
 msgstr "Оновити цю адресу посилання"
 
 #: ui/composer-link-popover.ui:62
-#| msgid "_Update"
 msgid "Update"
 msgstr "Оновити"
 
@@ -2971,8 +2827,6 @@ msgid "_Paste"
 msgstr "Вст_авити"
 
 #: ui/composer-menus.ui:30
-#| msgctxt "Clipboard paste with rich text"
-#| msgid "Paste _With Formatting"
 msgctxt "Clipboard paste as plain text"
 msgid "Paste _Without Formatting"
 msgstr "Вставити _без форматування"
@@ -2982,14 +2836,14 @@ msgid "Select _All"
 msgstr "Вибрати _все"
 
 #: ui/composer-menus.ui:57 ui/conversation-message-menus.ui:43
-#| msgid "_Inspect"
 msgid "_Inspect…"
 msgstr "Дос_лідити…"
 
 #. Geary account mail will be sent from
 #: ui/composer-widget.ui:60
-msgid "From"
-msgstr "Від"
+#| msgid "_From:"
+msgid "_From"
+msgstr "_Від"
 
 #. Address(es) e-mail is to be sent to
 #: ui/composer-widget.ui:130
@@ -3029,17 +2883,14 @@ msgid "Bold text"
 msgstr "Текст напівжирним"
 
 #: ui/composer-widget.ui:626
-#| msgid "Italic (Ctrl+I)"
 msgid "Italic text"
 msgstr "Текст курсивом"
 
 #: ui/composer-widget.ui:650
-#| msgid "Underline (Ctrl+U)"
 msgid "Underline text"
 msgstr "Підкреслити текст"
 
 #: ui/composer-widget.ui:674
-#| msgid "Strikethrough (Ctrl+K)"
 msgid "Strikethrough text"
 msgstr "Перекреслений текст"
 
@@ -3060,7 +2911,6 @@ msgid "Un-indent or unquote text"
 msgstr "Скасувати відступи або цитування тексту"
 
 #: ui/composer-widget.ui:817
-#| msgid "Remove formatting (Ctrl+Space)"
 msgid "Remove text formatting"
 msgstr "Вилучити форматування тексту"
 
@@ -3105,12 +2955,10 @@ msgid "Redo last edit"
 msgstr "Повторити останнє скасоване редагування"
 
 #: ui/composer-widget.ui:1068 ui/composer-widget.ui:1093
-#| msgid "Attach File"
 msgid "Attach a file"
 msgstr "Вкласти файл"
 
 #: ui/composer-widget.ui:1117
-#| msgid "Include Original Attachments"
 msgid "Add original attachments"
 msgstr "Додати початкові долучення"
 
@@ -3119,12 +2967,10 @@ msgid "More options"
 msgstr "Ще параметри"
 
 #: ui/composer-widget.ui:1182
-#| msgid "Remove formatting (Ctrl+Space)"
 msgid "Show formatting toolbar"
 msgstr "Показувати панель форматування"
 
 #: ui/composer-widget.ui:1200
-#| msgid "Enable _spell checking"
 msgid "Select spell checking languages"
 msgstr "Виберіть мови для перевірки правопису"
 
@@ -3157,27 +3003,22 @@ msgid "_Rich Text"
 msgstr "_Форматований текст"
 
 #: ui/composer-widget.ui:1308
-#| msgid "_Rich Text"
 msgid "_Plain Text"
 msgstr "_Звичайний текст"
 
 #: ui/components-attachment-pane.ui:29 ui/components-attachment-pane.ui:47
-#| msgid "Save All A_ttachments..."
 msgid "Select all attachments"
 msgstr "Вибрати усі долучення"
 
 #: ui/components-attachment-pane.ui:66
-#| msgid "Save All A_ttachments..."
 msgid "Save selected attachments"
 msgstr "Зберегти вибрані долучення"
 
 #: ui/components-attachment-pane.ui:85
-#| msgid "Cannot add attachment"
 msgid "Open selected attachments"
 msgstr "Відкрити вибрані долучення"
 
 #: ui/components-attachment-pane-menus.ui:17
-#| msgid "Select _All"
 msgid "Save _All"
 msgstr "Зберегти _все"
 
@@ -3188,14 +3029,13 @@ msgid ""
 "or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
 "\">new bug report</a>."
 msgstr ""
-"Якщо проблема є серйозною або проблема весь час повторюється, будь ласка,"
-" збережіть ці подробиці і надішліть їх до <a"
-" href=\"https://wiki.gnome.org/Apps/Geary/Contact\">списку листування"
-" розробників</a> або долучіть до <a href=\"https://wiki.gnome.org/Apps/Geary/R"
-"eportingABug\">нового звіту щодо вади</a>."
+"Якщо проблема є серйозною або проблема весь час повторюється, будь ласка, "
+"збережіть ці подробиці і надішліть їх до <a href=\"https://wiki.gnome.org/"
+"Apps/Geary/Contact\">списку листування розробників</a> або долучіть до <a "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">нового звіту щодо "
+"вади</a>."
 
 #: ui/components-inspector-error-view.ui:49
-#| msgid "_Details"
 msgid "Details:"
 msgstr "Подробиці:"
 
@@ -3223,12 +3063,10 @@ msgid "Copy to clipboard"
 msgstr "Скопіювати до буфера"
 
 #: ui/conversation-contact-popover.ui:146
-#| msgid "Move conversation"
 msgid "New Conversation…"
 msgstr "Нове спілкування…"
 
 #: ui/conversation-contact-popover.ui:159
-#| msgid "Copy _Email Address"
 msgid "Copy Email Address"
 msgstr "Скопіювати адресу ел. пошти"
 
@@ -3237,7 +3075,6 @@ msgid "Save in Contacts…"
 msgstr "Зберегти у «Контактах»…"
 
 #: ui/conversation-contact-popover.ui:195
-#| msgid "Move conversations"
 msgid "Show Conversations"
 msgstr "Показати спілкування"
 
@@ -3251,13 +3088,11 @@ msgstr "Завжди завантажувати сторонні зображе�
 
 #. Title label on contact popover
 #: ui/conversation-contact-popover.ui:264
-#| msgid "Remove email address"
 msgid "Deceptive email address"
 msgstr "Оманлива адреса електронної пошти"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:294
-#| msgid "Email address:"
 msgid "This email address is:"
 msgstr "Адреса цієї електронної пошти:"
 
@@ -3272,7 +3107,6 @@ msgid "The sender may not be trustworthy"
 msgstr "Ймовірно, відправнику не варто довіряти"
 
 #: ui/conversation-email.ui:27
-#| msgid "Save All A_ttachments..."
 msgid "Save all attachments"
 msgstr "Зберегти всі долучення"
 
@@ -3291,13 +3125,10 @@ msgid "Edit Draft"
 msgstr "Редагувати чернетку"
 
 #: ui/conversation-email.ui:151
-#| msgid "%u read message"
-#| msgid_plural "%u read messages"
 msgid "Draft message"
 msgstr "Чернетка повідомлення"
 
 #: ui/conversation-email.ui:167
-#| msgid "This message contains remote images."
 msgid "This message has not yet been sent."
 msgstr "Це повідомлення ще не надіслано."
 
@@ -3306,11 +3137,10 @@ msgid "Message not saved"
 msgstr "Повідомлення не збережено"
 
 #: ui/conversation-email.ui:229
-#| msgid "This message was sent successfully, but could not be saved to %s."
 msgid "This message was sent, but has not been saved to your account."
 msgstr ""
-"Це повідомлення надіслано, але його не було збережено на вашому обліковому"
-" записі."
+"Це повідомлення надіслано, але його не було збережено на вашому обліковому "
+"записі."
 
 #. Translators: Menu item to reply to a specific message.
 #: ui/conversation-email-menus.ui:15
@@ -3320,12 +3150,10 @@ msgstr "Відповісти в_сім"
 #. Translators: Menu item to mark a specific message as
 #. read.
 #: ui/conversation-email-menus.ui:30
-#| msgid "_Mark as Read"
 msgid "_Mark Read"
 msgstr "По_значити як прочитане"
 
 #: ui/conversation-email-menus.ui:36
-#| msgid "_Mark as Unread"
 msgid "_Mark Unread"
 msgstr "По_значити як непрочитане"
 
@@ -3343,7 +3171,6 @@ msgstr "Пересунути повідомлення до с_мітника"
 
 #. Translators: Menu item to delete a single, specific message
 #: ui/conversation-email-menus.ui:57
-#| msgid "Select _Message"
 msgid "_Delete message…"
 msgstr "В_илучити повідомлення…"
 
@@ -3353,12 +3180,10 @@ msgid "_View Source"
 msgstr "_Глянути код"
 
 #: ui/conversation-message-link-popover.ui:54
-#| msgid "but actually goes to"
 msgid "But actually goes to:"
 msgstr "але насправді веде сюди:"
 
 #: ui/conversation-message-link-popover.ui:84
-#| msgid "This link appears to go to"
 msgid "The link appears to go to:"
 msgstr "Це посилання начебто веде сюди:"
 
@@ -3369,42 +3194,36 @@ msgstr "Виявлено оманливе посилання"
 #: ui/conversation-message-link-popover.ui:111
 msgid "The email sender may be leading you to the wrong web site."
 msgstr ""
-"Ймовірно, відправник повідомлення хоче спрямувати вас не на той сайт, на який"
-" ви сподіваєтеся."
+"Ймовірно, відправник повідомлення хоче спрямувати вас не на той сайт, на "
+"який ви сподіваєтеся."
 
 #: ui/conversation-message-link-popover.ui:124
 msgid "If unsure, contact the sender and ask before continuing."
 msgstr ""
-"Якщо не певні, зв'яжіться із відправником для підтвердження, перш ніж"
-" продовжувати."
+"Якщо не певні, зв'яжіться із відправником для підтвердження, перш ніж "
+"продовжувати."
 
 #: ui/conversation-message-menus.ui:7
-#| msgid "_Open"
 msgid "_Open Link"
 msgstr "_Відкрити посилання"
 
 #: ui/conversation-message-menus.ui:11
-#| msgid "Copy _Email Address"
 msgid "Copy Link _Address"
 msgstr "Копіювати _адресу посилання"
 
 #: ui/conversation-message-menus.ui:17
-#| msgid "Move conversation"
 msgid "_New Conversation…"
 msgstr "С_творити спілкування…"
 
 #: ui/conversation-message-menus.ui:21
-#| msgid "Copy _Email Address"
 msgid "Copy Email _Address"
 msgstr "Копіювати _поштову адресу"
 
 #: ui/conversation-message-menus.ui:27
-#| msgid "_Save Image As..."
 msgid "Save _Image As…"
 msgstr "Зберегти з_ображення як…"
 
 #: ui/conversation-message-menus.ui:33
-#| msgid "Select _All"
 msgid "_Select All"
 msgstr "Ви_брати все"
 
@@ -3425,12 +3244,10 @@ msgid "Sent by:"
 msgstr "Відправник:"
 
 #: ui/conversation-message.ui:247
-#| msgid "Reply-To: "
 msgid "Reply to:"
 msgstr "Відповідати до:"
 
 #: ui/conversation-message.ui:291
-#| msgid "Subject:"
 msgid "Subject"
 msgstr "Тема"
 
@@ -3452,7 +3269,6 @@ msgstr ""
 "Зовнішні зображення буде показано лише для відправників, яким ви довіряєте."
 
 #: ui/conversation-viewer.ui:60
-#| msgid "Mark conversation"
 msgid "Find in conversation"
 msgstr "Знайти у спілкуванні"
 
@@ -3485,36 +3301,30 @@ msgid "label"
 msgstr "мітка"
 
 #: ui/gtk/help-overlay.ui:9
-#| msgid "%s - Conversation Inspector"
 msgid "Conversation Shortcuts"
 msgstr "Скорочення панелі спілкування"
 
 #: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:355
-#| msgid "Notifications"
 msgctxt "shortcut window"
 msgid "Actions"
 msgstr "Дії"
 
 #: ui/gtk/help-overlay.ui:17
-#| msgid "Move conversation"
 msgctxt "shortcut window"
 msgid "New conversation"
 msgstr "Створити спілкування"
 
 #: ui/gtk/help-overlay.ui:24
-#| msgid "Reply to _All"
 msgctxt "shortcut window"
 msgid "Reply to sender"
 msgstr "Відповісти відправнику"
 
 #: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:269
-#| msgid "Reply to _All"
 msgctxt "shortcut window"
 msgid "Reply to all"
 msgstr "Відповісти всім"
 
 #: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:276
-#| msgid "_Forward"
 msgctxt "shortcut window"
 msgid "Forward"
 msgstr "Переслати"
@@ -3530,61 +3340,51 @@ msgid "Mark/un-mark starred"
 msgstr "Позначити або зняти позначення зірками"
 
 #: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:297
-#| msgid "Archive conversations (A)"
 msgctxt "shortcut window"
 msgid "Archive conversations"
 msgstr "Архівувати спілкування"
 
 #: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:304
-#| msgid "Move conversations"
 msgctxt "shortcut window"
 msgid "Move conversations"
 msgstr "Пересунути спілкування"
 
 #: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:311
-#| msgid "Mark conversations"
 msgctxt "shortcut window"
 msgid "Label conversations"
 msgstr "Позначити спілкування"
 
 #: ui/gtk/help-overlay.ui:80
-#| msgid "Mark conversations"
 msgctxt "shortcut window"
 msgid "Trash conversations"
 msgstr "Пересунути спілкування до смітника"
 
 #: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:318
-#| msgid "Mark conversations"
 msgctxt "shortcut window"
 msgid "Junk conversations"
 msgstr "Пересунути спілкування до спаму"
 
 #: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:325
-#| msgid "Delete conversation"
 msgctxt "shortcut window"
 msgid "Delete conversations"
 msgstr "Вилучити спілкування"
 
 #: ui/gtk/help-overlay.ui:104
-#| msgid "Search"
 msgctxt "shortcut window"
 msgid "Search"
 msgstr "Шукати"
 
 #: ui/gtk/help-overlay.ui:108
-#| msgid "Mark conversations"
 msgctxt "shortcut window"
 msgid "Search for conversations"
 msgstr "Шукати спілкування"
 
 #: ui/gtk/help-overlay.ui:115
-#| msgid "Add label to conversation"
 msgctxt "shortcut window"
 msgid "Find in current conversation"
 msgstr "Знайти у поточному спілкуванні"
 
 #: ui/gtk/help-overlay.ui:141
-#| msgid "_Undo"
 msgctxt "shortcut window"
 msgid "Undo"
 msgstr "Скасувати"
@@ -3625,7 +3425,6 @@ msgid "General"
 msgstr "Загальні"
 
 #: ui/gtk/help-overlay.ui:192
-#| msgid "Show Images"
 msgctxt "shortcut window"
 msgid "Show help"
 msgstr "Показати довідку"
@@ -3636,7 +3435,6 @@ msgid "Show keyboard shortcuts"
 msgstr "Показати клавіатурні скорочення"
 
 #: ui/gtk/help-overlay.ui:206
-#| msgid "Use %s to open a new composer window"
 msgctxt "shortcut window"
 msgid "Open a new window"
 msgstr "Відкрити нове вікно"
@@ -3662,7 +3460,6 @@ msgid "Go to next/previous pane"
 msgstr "Перейти до наступної або попередньої панелі"
 
 #: ui/gtk/help-overlay.ui:241
-#| msgid "Delete conversation"
 msgctxt "shortcut window"
 msgid "Select next/previous conversation"
 msgstr "Вибрати наступне або попереднє спілкування"
@@ -3678,54 +3475,45 @@ msgid "Single-key shortcuts"
 msgstr "Одноклавішні скорочення"
 
 #: ui/gtk/help-overlay.ui:262
-#| msgid "Reply to _All"
 msgctxt "shortcut window"
 msgid "Reply to sender "
 msgstr "Відповісти відправнику"
 
 #: ui/gtk/help-overlay.ui:332
-#| msgid "Add label to conversations"
 msgctxt "shortcut window"
 msgid "Find in current conversations"
 msgstr "Знайти у поточних спілкуваннях"
 
 #: ui/gtk/help-overlay.ui:339
-#| msgid "Delete conversation"
 msgctxt "shortcut window"
 msgid "Select next/previous conversations"
 msgstr "Вибрати наступні або попередні спілкування"
 
 #: ui/gtk/help-overlay.ui:351
-#| msgid "Composer"
 msgid "Composer Shortcuts"
 msgstr "Скорочення вікна редактора"
 
 #: ui/gtk/help-overlay.ui:359
-#| msgid "Send"
 msgctxt "shortcut window"
 msgid "Send"
 msgstr "Надіслати"
 
 #: ui/gtk/help-overlay.ui:366
-#| msgid "attachment"
 msgctxt "shortcut window"
 msgid "Add attachment"
 msgstr "Додати долучення"
 
 #: ui/gtk/help-overlay.ui:379
-#| msgid "Use %s to open a new composer window"
 msgctxt "shortcut window"
 msgid "Close composer window"
 msgstr "Закрити вікно редактора"
 
 #: ui/gtk/help-overlay.ui:386
-#| msgid "Use %s to open a new composer window"
 msgctxt "shortcut window"
 msgid "Detach composer window"
 msgstr "Від'єднати вікно редактора"
 
 #: ui/gtk/help-overlay.ui:393
-#| msgid "Edit"
 msgctxt "shortcut window"
 msgid "Editing"
 msgstr "Редагування"
@@ -3746,13 +3534,11 @@ msgid "Paste from the clipboard"
 msgstr "Вставити з буфера обміну даними"
 
 #: ui/gtk/help-overlay.ui:419
-#| msgid "Quote text  (Ctrl+])"
 msgctxt "shortcut window"
 msgid "Quote text"
 msgstr "Цитувати текст"
 
 #: ui/gtk/help-overlay.ui:426
-#| msgid "Unquote text (Ctrl+[)"
 msgctxt "shortcut window"
 msgid "Unquote text"
 msgstr "Скасувати цитування тексту"
@@ -3763,8 +3549,6 @@ msgid "Rich text editing"
 msgstr "Редагування з форматуванням"
 
 #: ui/gtk/help-overlay.ui:439
-#| msgctxt "Clipboard paste with rich text"
-#| msgid "Paste _With Formatting"
 msgctxt "shortcut window"
 msgid "Paste without formatting"
 msgstr "Вставити без форматування"
@@ -3780,7 +3564,6 @@ msgid "Italicize text"
 msgstr "Зробити текст курсивним"
 
 #: ui/gtk/help-overlay.ui:460
-#| msgid "Underline (Ctrl+U)"
 msgctxt "shortcut window"
 msgid "Underline text"
 msgstr "Підкреслити текст"
@@ -3791,7 +3574,6 @@ msgid "Strike text"
 msgstr "Закреслити текст"
 
 #: ui/gtk/help-overlay.ui:474
-#| msgid "Remove formatting (Ctrl+Space)"
 msgctxt "shortcut window"
 msgid "Remove formatting"
 msgstr "Вилучити форматування"
@@ -3807,7 +3589,6 @@ msgid "Insert a link"
 msgstr "Вставити посилання"
 
 #: ui/main-toolbar.ui:24
-#| msgid "Compose Message"
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Нове повідомлення"
@@ -3817,22 +3598,18 @@ msgid "Toggle search bar"
 msgstr "Перемкнути панель пошуку"
 
 #: ui/main-toolbar.ui:114
-#| msgid "_Reply"
 msgid "Reply"
 msgstr "Відповісти"
 
 #: ui/main-toolbar.ui:137
-#| msgid "R_eply All"
 msgid "Reply All"
 msgstr "Відповісти всім"
 
 #: ui/main-toolbar.ui:160
-#| msgid "_Forward"
 msgid "Forward"
 msgstr "Переслати"
 
 #: ui/main-toolbar.ui:265
-#| msgid "Toggle search bar"
 msgid "Toggle find bar"
 msgstr "Увімкнути або вимкнути смужку пошуку"
 
@@ -3841,7 +3618,6 @@ msgid "_Archive"
 msgstr "_Архівувати"
 
 #: ui/main-toolbar-menus.ui:21
-#| msgid "Mark as S_pam"
 msgid "Toggle as S_pam"
 msgstr "Перемкнути позначення як _спам"
 
@@ -3854,7 +3630,6 @@ msgid "Empty _Trash…"
 msgstr "Спорожнити _смітник…"
 
 #: ui/main-toolbar-menus.ui:38
-#| msgid "Accounts"
 msgid "_Accounts"
 msgstr "_Облікові записи"
 
@@ -3863,7 +3638,6 @@ msgid "_Keyboard Shortcuts"
 msgstr "_Клавіатурні скорочення"
 
 #: ui/main-toolbar-menus.ui:57
-#| msgid "_About"
 msgid "_About Geary"
 msgstr "_Про Geary"
 
@@ -3886,3 +3660,6 @@ msgstr "_Засвідчення"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Виконується оновлення…"
+
+#~ msgid "From"
+#~ msgstr "Від"
