@@ -236,7 +236,6 @@ This is the second line.
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 
         string message_data = message.get_network_buffer(true).to_string();
-        print("\n'%s'\n", message_data);
         assert_true(message_data.has_suffix("..newline\r\n..\r\n"));
     }
 
@@ -251,10 +250,14 @@ This is the second line.
             new GLib.DateTime.now_local(),
             new Geary.RFC822.MailboxAddresses.single(from)
         ).set_to(new Geary.RFC822.MailboxAddresses.single(to));
-        composed.body_text = """
-long long long long long long long long long long long long long long long long long
-""";
-        composed.body_html = "<p>%s<p>".printf(composed.body_text);
+
+        GLib.StringBuilder buf = new GLib.StringBuilder();
+        for (int i = 0; i < 2000; i++) {
+            buf.append("long ");
+        }
+
+        //composed.body_text = buf.str;
+        composed.body_html = "<p>%s<p>".printf(buf.str);
 
         this.message_from_composed_email.begin(
             composed,
@@ -264,7 +267,7 @@ long long long long long long long long long long long long long long long long 
 
         string message_data = message.get_network_buffer(true).to_string();
         foreach (var line in message_data.split("\n")) {
-            assert_true(line.length < 80, line);
+            assert_true(line.length < 1000, line);
         }
     }
 
