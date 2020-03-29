@@ -1,3 +1,25 @@
+Version 3.36.1
+~~~~~~~~~~~~~~
+Released: 2020-03-29
+
+Enhancements included in this release:
+ * Numerous bug fixes and user interface improvements
+ * Numerous user interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Daniel Kahn Gillmor
+ * James Westman
+ * Jonatan Pålsson
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Anders Jonsson (sv)
+ * Jordi Mas (ca)
+
+And for the user manual:
+ * Jordi Mas (ca)
+
 Version 3.36
 ~~~~~~~~~~~~
 Released: 2020-03-13

@@ -89,6 +89,15 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="3.36.1" date="2020-03-29">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Numerous bug fixes and user interface improvements</li>
+          <li>Numerous user interface translation updates</li>
+        </ul>
+      </description>
+    </release>
     <release version="3.36" date="2020-03-13">
       <description>
         <p>Enhancements included in this release:</p>
