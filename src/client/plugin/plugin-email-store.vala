@@ -15,10 +15,13 @@
 public interface Plugin.EmailStore : Geary.BaseObject {
 
 
-    /** Emitted when an email message has been sent. */
-    public signal void email_sent(Email message);
+    /** Emitted when an email has been displayed in the UI. */
+    public signal void email_displayed(Email sent);
 
-    /** Returns a read-only set of all known folders. */
+    /** Emitted when an email has been sent. */
+    public signal void email_sent(Email sent);
+
+    /** Returns the email with the given identifiers. */
     public async abstract Gee.Collection<Email> get_email(
         Gee.Collection<EmailIdentifier> ids,
         GLib.Cancellable? cancellable

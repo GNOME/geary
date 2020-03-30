@@ -72,4 +72,26 @@ public class Components.InfoBar : Gtk.InfoBar {
         show_all();
     }
 
+    public InfoBar.for_plugin(Plugin.InfoBar plugin,
+                              string action_group_name) {
+        this(plugin.status, plugin.description);
+        this.show_close_button = plugin.show_close_button;
+
+        var plugin_primary = plugin.primary_button;
+        if (plugin_primary != null) {
+            var gtk_primary = new Gtk.Button.with_label(plugin_primary.label);
+            gtk_primary.set_action_name(
+                action_group_name + "." + plugin_primary.action.name
+            );
+            if (plugin_primary.action_target != null) {
+                gtk_primary.set_action_target_value(
+                    plugin_primary.action_target
+                );
+            }
+            get_action_area().add(gtk_primary);
+        }
+
+        show_all();
+    }
+
 }

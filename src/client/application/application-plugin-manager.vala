@@ -168,6 +168,8 @@ public class Application.PluginManager : GLib.Object {
         new Gee.HashMap<Peas.PluginInfo,PluginContext>();
     private Gee.Map<Peas.PluginInfo,NotificationContext> notification_contexts =
         new Gee.HashMap<Peas.PluginInfo,NotificationContext>();
+    private Gee.Map<Peas.PluginInfo,EmailContext> email_contexts =
+        new Gee.HashMap<Peas.PluginInfo,EmailContext>();
 
 
     public PluginManager(Client application) throws GLib.Error {
@@ -279,6 +281,10 @@ public class Application.PluginManager : GLib.Object {
         return this.notification_contexts.values.read_only_view;
     }
 
+    internal Gee.Collection<EmailContext> get_email_contexts() {
+        return this.email_contexts.values.read_only_view;
+    }
+
     private void on_load_plugin(Peas.PluginInfo info) {
         var plugin_application = new ApplicationImpl(
             info, this.application, this.folders_factory
@@ -311,6 +317,17 @@ public class Application.PluginManager : GLib.Object {
                 );
                 this.notification_contexts.set(info, context);
                 notification.notifications = context;
+            }
+
+            var email = plugin as Plugin.EmailExtension;
+            if (email != null) {
+                var context = new EmailContext(
+                    this.application,
+                    this.email_factory,
+                    plugin_application.action_group_name
+                );
+                this.email_contexts.set(info, context);
+                email.email = context;
             }
 
             var folder = plugin as Plugin.FolderExtension;
@@ -389,9 +406,18 @@ public class Application.PluginManager : GLib.Object {
 
         var folder = context.plugin as Plugin.FolderExtension;
         if (folder != null) {
-            var folders = folder.folders as FolderContext;
-            if (folders != null) {
-                folders.destroy();
+            var folder_context = folder.folders as FolderContext;
+            if (folder_context != null) {
+                folder_context.destroy();
+            }
+        }
+
+        var email = context.plugin as Plugin.EmailExtension;
+        if (email != null) {
+            var email_context = email.email as Application.EmailContext;
+            if (email_context != null) {
+                this.email_contexts.unset(context.info);
+                email_context.destroy();
             }
         }
 

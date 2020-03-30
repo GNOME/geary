@@ -98,18 +98,11 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
         get { return get_child() as Gtk.InfoBar; }
     }
 
-    private Gee.Queue<Gtk.InfoBar> available;
+    private Gee.Queue<Gtk.InfoBar> available = new SingletonQueue();
 
 
-    /**
-     * Constructs a stack that shows the most recently added info bar.
-     */
-    public InfoBarStack.exclusive() {
-        this.shadow_type = IN;
-        this.visible = false;
-        get_style_context().add_class("geary-info-bar-frame");
-
-        this.available = new SingletonQueue();
+    construct {
+        get_style_context().add_class("geary-info-bar-stack");
     }
 
     /**

@@ -14,6 +14,12 @@
 internal class Application.EmailStoreFactory : Geary.BaseObject {
 
 
+    private const Geary.Email.Field REQUIRED_FIELDS = (
+        ENVELOPE |
+        FLAGS
+    );
+
+
     private class EmailStoreImpl : Geary.BaseObject, Plugin.EmailStore {
 
 
@@ -61,7 +67,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
                 Gee.Collection<Geary.Email> batch =
                     yield context.emails.list_email_by_sparse_id_async(
                         accounts.get(account),
-                        ENVELOPE,
+                        REQUIRED_FIELDS,
                         NONE,
                         context.cancellable
                     );
@@ -82,7 +88,8 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
 
-    private class EmailImpl : Geary.BaseObject, Plugin.Email {
+    /** Implementation of the plugin email interface. */
+    internal class EmailImpl : Geary.BaseObject, Plugin.Email {
 
 
         public Plugin.EmailIdentifier identifier {
@@ -95,6 +102,10 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         }
         private IdImpl? _id = null;
 
+        public Geary.EmailFlags flags {
+            get { return this.backing.email_flags; }
+        }
+
         public string subject {
             get { return this._subject; }
         }
@@ -106,7 +117,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         internal Geary.AccountInformation account { get; private set; }
 
 
-        public EmailImpl(Geary.Email backing,
+        internal EmailImpl(Geary.Email backing,
                          Geary.AccountInformation account) {
             this.backing = backing;
             this.account = account;
@@ -121,7 +132,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
 
-    private class IdImpl : Geary.BaseObject,
+    internal class IdImpl : Geary.BaseObject,
         Gee.Hashable<Plugin.EmailIdentifier>, Plugin.EmailIdentifier {
 
 
@@ -131,8 +142,8 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         internal Geary.AccountInformation account { get; private set; }
 
 
-        public IdImpl(Geary.EmailIdentifier backing,
-                      Geary.AccountInformation account) {
+        internal IdImpl(Geary.EmailIdentifier backing,
+                        Geary.AccountInformation account) {
             this.backing = backing;
             this.account = account;
         }
@@ -205,6 +216,11 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             plugin_ids.add(new IdImpl(id, account));
         }
         return plugin_ids;
+    }
+
+    public Geary.EmailIdentifier? to_engine_id(Plugin.EmailIdentifier plugin) {
+        var impl = plugin as IdImpl;
+        return (impl != null) ? impl.backing : null;
     }
 
     public Plugin.Email to_plugin_email(Geary.Email engine,

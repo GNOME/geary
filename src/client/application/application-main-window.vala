@@ -283,7 +283,7 @@ public class Application.MainWindow :
     public ConversationViewer conversation_viewer { get; private set; }
 
     public Components.InfoBarStack conversation_list_info_bars {
-        get; private set; default = new Components.InfoBarStack.exclusive();
+        get; private set; default = new Components.InfoBarStack();
     }
 
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
@@ -327,14 +327,13 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.ScrolledWindow folder_list_scrolled;
     [GtkChild]
-    private Gtk.Box conversation_box;
+    private Gtk.Box conversation_list_box;
     [GtkChild]
     private Gtk.ScrolledWindow conversation_list_scrolled;
     [GtkChild]
     private Gtk.Overlay overlay;
 
-    private Components.InfoBarStack info_bars =
-        new Components.InfoBarStack.exclusive();
+    private Components.InfoBarStack info_bars = new Components.InfoBarStack();
 
     private Gtk.InfoBar offline_infobar;
 
@@ -490,6 +489,9 @@ public class Application.MainWindow :
         if (_PROFILE != "") {
             this.get_style_context().add_class("devel");
         }
+
+        this.info_bars.shadow_type = IN;
+        this.conversation_list_info_bars.shadow_type = IN;
 
         // Edit actions
         this.edit_actions.add_action_entries(EDIT_ACTIONS, this);
@@ -1217,7 +1219,7 @@ public class Application.MainWindow :
         this.folder_list_scrolled.add(this.folder_list);
 
         // Conversation list
-        this.conversation_box.pack_start(
+        this.conversation_list_box.pack_start(
             this.conversation_list_info_bars, false, false, 0
         );
         this.conversation_list_view = new ConversationListView(
@@ -1656,7 +1658,7 @@ public class Application.MainWindow :
         } else {
             if (!initial)
                 this.conversations_paned.position -= folder_list_width;
-            this.conversation_box.pack_start(status_bar, false, false);
+            this.conversation_list_box.pack_start(status_bar, false, false);
         }
 
         this.application.config.bind(
@@ -2060,6 +2062,7 @@ public class Application.MainWindow :
     }
 
     private void on_conversation_view_added(ConversationListBox list) {
+        list.email_loaded.connect(on_email_loaded);
         list.mark_email.connect(on_email_mark);
         list.reply_to_all_email.connect(on_email_reply_to_all);
         list.reply_to_sender_email.connect(on_email_reply_to_sender);
@@ -2454,6 +2457,14 @@ public class Application.MainWindow :
     }
 
     // Individual conversation email view action callbacks
+
+    private void on_email_loaded(ConversationListBox view,
+                                 Geary.Email loaded) {
+        this.controller.email_loaded(
+            view.conversation.base_folder.account.information,
+            loaded
+        );
+    }
 
     private void on_email_mark(ConversationListBox view,
                                Gee.Collection<Geary.EmailIdentifier> messages,

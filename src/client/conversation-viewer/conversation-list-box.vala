@@ -296,6 +296,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // to appropriate times to try to do that scroll.
         public signal void should_scroll();
 
+        // Emitted when an email is loaded for the first time
+        public signal void email_loaded(Geary.Email email);
+
 
         protected ConversationRow(Geary.Email? email) {
             base_ref();
@@ -379,6 +382,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             update_row_expansion();
             if (this.view.message_body_state == NOT_STARTED) {
                 yield this.view.load_body();
+                email_loaded(this.view.email);
             }
         }
 
@@ -612,6 +616,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, -1);
         this.mark_read_timer.start();
     }
+
+    /** Fired when an email is fully loaded in the list box. */
+    public signal void email_loaded(Geary.Email email);
 
     /** Fired when the user clicks "reply" in the message menu. */
     public signal void reply_to_sender_email(Geary.Email email, string? quote);
@@ -926,6 +933,24 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
     }
 
+    /** Adds an info bar to the given email, if any. */
+    public void add_email_info_bar(Geary.EmailIdentifier id,
+                                   Gtk.InfoBar info_bar) {
+        var row = this.email_rows.get(id);
+        if (row != null) {
+            row.view.primary_message.info_bars.add(info_bar);
+        }
+    }
+
+    /** Adds an info bar to the given email, if any. */
+    public void remove_email_info_bar(Geary.EmailIdentifier id,
+                                      Gtk.InfoBar info_bar) {
+        var row = this.email_rows.get(id);
+        if (row != null) {
+            row.view.primary_message.info_bars.remove(info_bar);
+        }
+    }
+
     /**
      * Increases the magnification level used for displaying messages.
      */
@@ -1118,6 +1143,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             });
 
         EmailRow row = new EmailRow(view);
+        row.email_loaded.connect((e) => { email_loaded(e); });
         this.email_rows.set(email.id, row);
 
         if (append_row) {

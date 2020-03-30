@@ -24,15 +24,42 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             "(sv)"
         );
 
+        private Client application;
         private Gee.Map<Geary.Folder,FolderImpl> folders;
 
 
-        public FolderStoreImpl(Gee.Map<Geary.Folder,FolderImpl> folders) {
+        public FolderStoreImpl(Client application,
+                               Gee.Map<Geary.Folder,FolderImpl> folders) {
+            this.application = application;
             this.folders = folders;
         }
 
         public Gee.Collection<Plugin.Folder> get_folders() {
             return this.folders.values.read_only_view;
+        }
+
+        public async Gee.Collection<Plugin.Folder> list_containing_folders(
+            Plugin.EmailIdentifier target,
+            GLib.Cancellable? cancellable
+        ) throws GLib.Error {
+            var id = target as EmailStoreFactory.IdImpl;
+            var folders = new Gee.LinkedList<Plugin.Folder>();
+            AccountContext context =
+                this.application.controller.get_context_for_account(id.account);
+            if (id != null && context != null) {
+                Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? multi_folders =
+                    yield context.account.get_containing_folders_async(
+                        Geary.Collection.single(id.backing),
+                        cancellable
+                    );
+                if (multi_folders != null) {
+                    foreach (var path in multi_folders.get(id.backing)) {
+                        var folder = context.account.get_folder(path);
+                        folders.add(this.folders.get(folder));
+                    }
+                }
+            }
+            return folders;
         }
 
         public Plugin.Folder? get_folder_from_variant(GLib.Variant variant) {
@@ -176,7 +203,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
 
     /** Constructs a new folder store for use by plugin contexts. */
     public Plugin.FolderStore new_folder_store() {
-        var store = new FolderStoreImpl(this.folders);
+        var store = new FolderStoreImpl(this.application, this.folders);
         this.stores.add(store);
         return store;
     }

@@ -39,6 +39,12 @@ public interface Plugin.FolderStore : Geary.BaseObject {
     /** Returns a read-only set of all known folders. */
     public abstract Gee.Collection<Folder> get_folders();
 
+    /** Returns the set of folders that contains the given email. */
+    public abstract async Gee.Collection<Folder> list_containing_folders(
+        EmailIdentifier target,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error;
+
     /**
      * Returns the folder specified by the given identifier, if any.
      *
