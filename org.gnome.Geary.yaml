@@ -33,6 +33,9 @@ finish-args:
   # OpenGL access for WK2
   - "--device=dri"
 
+  # Sent mail sound plugin
+  - "--socket=pulseaudio"
+
   # Needs to talk to the network
   - "--share=network"
 
@@ -120,7 +123,7 @@ modules:
     cleanup:
       - /lib/cmake
 
-  # EDS dependency
+  # EDS and sound-theme-freedesktop dependency
   - name: "intltool"
     sources:
       - type: archive
@@ -206,6 +209,13 @@ modules:
       - type: git
         url: https://github.com/Yeraze/ytnef.git
         branch: master
+
+  # Geary dependency
+  - name: sound-theme-freedesktop
+    sources:
+      - type: archive
+        url: http://people.freedesktop.org/~mccann/dist/sound-theme-freedesktop-0.8.tar.bz2
+        sha256: cb518b20eef05ec2e82dda1fa89a292c1760dc023aba91b8aa69bafac85e8a14
 
   - name: geary
     buildsystem: meson
