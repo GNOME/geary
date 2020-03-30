@@ -127,7 +127,10 @@ libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', require
 # Build variables
 geary_id = 'org.gnome.Geary@0@'.format(profile)
 geary_version = meson.project_version()
-revno = run_command('build-aux/git_version.py').stdout().strip()
+revno = get_option('revno')
+if revno == ''
+  revno = run_command('build-aux/git_version.py').stdout().strip()
+endif
 
 gnome = import('gnome')
 i18n = import('i18n')
