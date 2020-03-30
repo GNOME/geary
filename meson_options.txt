@@ -58,3 +58,8 @@ option(
   value: false,
   description: 'Whether to use explicit reference tracking.'
 )
+option(
+  'revno',
+  type: 'string',
+  description: 'Custom revision string (default extracted from "git describe")'
+)
