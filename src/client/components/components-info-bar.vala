@@ -94,4 +94,10 @@ public class Components.InfoBar : Gtk.InfoBar {
         show_all();
     }
 
+    // GTK 3.24.16 fixed the binding for this, but that and the VAPI
+    // change has yet to trickle down to common distros like F31
+    public new Gtk.Box get_action_area() {
+        return (Gtk.Box) base.get_action_area();
+    }
+
 }

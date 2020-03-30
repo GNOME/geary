@@ -335,11 +335,11 @@ public class Application.MainWindow :
 
     private Components.InfoBarStack info_bars = new Components.InfoBarStack();
 
-    private Gtk.InfoBar offline_infobar;
+    private Components.InfoBar offline_infobar;
 
-    private Gtk.InfoBar cert_problem_infobar;
+    private Components.InfoBar cert_problem_infobar;
 
-    private Gtk.InfoBar auth_problem_infobar;
+    private Components.InfoBar auth_problem_infobar;
 
     private Components.ProblemReportInfoBar? service_problem_infobar = null;
 
