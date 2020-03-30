@@ -16,8 +16,6 @@ public class Application.MainWindow :
     public const string ACTION_CONVERSATION_DOWN = "down-conversation";
     public const string ACTION_CONVERSATION_UP = "up-conversation";
     public const string ACTION_DELETE_CONVERSATION = "delete-conversation";
-    public const string ACTION_EMPTY_SPAM = "empty-spam";
-    public const string ACTION_EMPTY_TRASH = "empty-trash";
     public const string ACTION_FIND_IN_CONVERSATION = "find-in-conversation";
     public const string ACTION_FORWARD_CONVERSATION = "forward-conversation";
     public const string ACTION_MARK_AS_READ = "mark-conversation-read";
@@ -44,8 +42,6 @@ public class Application.MainWindow :
 
         { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
         { ACTION_SEARCH, on_search_activated },
-        { ACTION_EMPTY_SPAM, on_empty_spam },
-        { ACTION_EMPTY_TRASH, on_empty_trash },
         // Message actions
         { ACTION_REPLY_CONVERSATION, on_reply_conversation },
         { ACTION_REPLY_ALL_CONVERSATION, on_reply_all_conversation },
@@ -1285,6 +1281,22 @@ public class Application.MainWindow :
         return base.key_release_event(event);
     }
 
+    internal bool prompt_empty_folder(Geary.SpecialFolderType type) {
+        ConfirmationDialog dialog = new ConfirmationDialog(
+            this,
+            _("Empty all email from your %s folder?").printf(
+                type.get_display_name()
+            ),
+            _("This removes the email from Geary and your email server.") +
+            "  <b>" + _("This cannot be undone.") + "</b>",
+            _("Empty %s").printf(type.get_display_name()),
+            "destructive-action"
+        );
+        dialog.use_secondary_markup(true);
+        dialog.set_focus_response(Gtk.ResponseType.CANCEL);
+        return (dialog.run() == Gtk.ResponseType.OK);
+    }
+
     /** Un-does the last executed application command, if any. */
     private async void undo() {
         AccountContext? selected = get_selected_account_context();
@@ -1358,23 +1370,6 @@ public class Application.MainWindow :
         );
         return (dialog.run() == Gtk.ResponseType.OK);
     }
-
-    private bool prompt_empty_folder(Geary.SpecialFolderType type) {
-        ConfirmationDialog dialog = new ConfirmationDialog(
-            this,
-            _("Empty all email from your %s folder?").printf(
-                type.get_display_name()
-            ),
-            _("This removes the email from Geary and your email server.") +
-            "  <b>" + _("This cannot be undone.") + "</b>",
-            _("Empty %s").printf(type.get_display_name()),
-            "destructive-action"
-        );
-        dialog.use_secondary_markup(true);
-        dialog.set_focus_response(Gtk.ResponseType.CANCEL);
-        return (dialog.run() == Gtk.ResponseType.OK);
-    }
-
 
     private async Gee.Collection<Geary.App.Conversation>
         load_conversations_for_email(
@@ -2452,42 +2447,6 @@ public class Application.MainWindow :
                         this.controller.delete_conversations.end(res);
                     } catch (GLib.Error err) {
                         handle_error(target.account.information, err);
-                    }
-                }
-            );
-        }
-    }
-
-    private void on_empty_spam() {
-        Geary.Account? account = this.selected_account;
-        if (account != null &&
-            prompt_empty_folder(Geary.SpecialFolderType.SPAM)) {
-            this.controller.empty_folder_special.begin(
-                account,
-                Geary.SpecialFolderType.SPAM,
-                (obj, res) => {
-                    try {
-                        this.controller.empty_folder_special.end(res);
-                } catch (GLib.Error err) {
-                        handle_error(account.information, err);
-                    }
-                }
-            );
-        }
-    }
-
-    private void on_empty_trash() {
-        Geary.Account? account = this.selected_account;
-        if (account != null &&
-            prompt_empty_folder(Geary.SpecialFolderType.TRASH)) {
-            this.controller.empty_folder_special.begin(
-                account,
-                Geary.SpecialFolderType.TRASH,
-                (obj, res) => {
-                    try {
-                        this.controller.empty_folder_special.end(res);
-                    } catch (GLib.Error err) {
-                        handle_error(account.information, err);
                     }
                 }
             );

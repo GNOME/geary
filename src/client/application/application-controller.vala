@@ -828,18 +828,16 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
-    public async void empty_folder_special(Geary.Account source,
-                                           Geary.SpecialFolderType type)
+    public async void empty_folder(Geary.Folder target)
         throws GLib.Error {
-        AccountContext? context = this.accounts.get(source.information);
+        AccountContext? context = this.accounts.get(target.account.information);
         if (context != null) {
             Geary.FolderSupport.Empty? emptyable = (
-                source.get_special_folder(type)
-                as Geary.FolderSupport.Empty
+                target as Geary.FolderSupport.Empty
             );
             if (emptyable == null) {
                 throw new Geary.EngineError.UNSUPPORTED(
-                    "Special folder type not supported %s", type.to_string()
+                    "Emptying folder not supported %s", target.path.to_string()
                 );
             }
 
