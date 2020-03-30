@@ -19,7 +19,7 @@ if libmessagingmenu_dep.found()
   )
 
   plugin_src = files(plugin_name + '.vala')
-  plugin_data = plugin_name + '.plugin'
+  plugin_data = plugin_name + plugin_data_suffix
   plugin_dest = plugins_dir / plugin_name
 
   shared_module(
@@ -36,7 +36,7 @@ if libmessagingmenu_dep.found()
   )
 
   i18n.merge_file(
-    input: files(plugin_data + '.in'),
+    input: files(plugin_data + plugin_data_src_suffix),
     output: plugin_data,
     type: 'desktop',
     po_dir: po_dir,

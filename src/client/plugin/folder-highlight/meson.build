@@ -17,7 +17,7 @@ shared_module(
 )
 
 i18n.merge_file(
-  input: files(plugin_data + '.in'),
+  input: files(plugin_data + '.desktop.in'),
   output: plugin_data,
   type: 'desktop',
   po_dir: po_dir,
