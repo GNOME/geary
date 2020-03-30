@@ -139,8 +139,9 @@ i18n = import('i18n')
 
 # Static install dirs
 dbus_services_dir = join_paths(data_dir, 'dbus-1', 'services')
-plugins_dir = join_paths(lib_dir, 'geary', 'plugins')
-web_extensions_dir = join_paths(lib_dir, 'geary', 'web-extensions')
+client_lib_dir = join_paths(lib_dir, 'geary')
+plugins_dir = join_paths(client_lib_dir, 'plugins')
+web_extensions_dir = join_paths(client_lib_dir, 'web-extensions')
 
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
