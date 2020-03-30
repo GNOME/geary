@@ -108,6 +108,7 @@ geary_bin = executable('geary',
   vala_args: geary_vala_args,
   c_args: geary_c_args,
   install: true,
+  install_rpath: client_lib_dir,
 )
 
 if enable_valadoc
