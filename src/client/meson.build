@@ -1,5 +1,15 @@
 # Geary client
 
+geary_client_package_name = 'geary-client'
+geary_client_api_version = '.'.join([
+  geary_version.split('.')[0],
+  geary_version.split('.')[1]
+])
+geary_client_package = '@0@-@1@'.format(
+  geary_client_package_name,
+  geary_client_api_version
+)
+
 geary_client_vala_sources = files(
   'application/application-attachment-manager.vala',
   'application/application-avatar-store.vala',
@@ -173,13 +183,15 @@ if webkit_version[0].to_int() <= 2 and webkit_version[1].to_int() <= 24
 endif
 
 # Main client application library
-geary_client_lib = shared_library('geary-client',
+geary_client_lib = shared_library(
+  geary_client_package,
   geary_client_sources,
   dependencies: geary_client_dependencies,
   include_directories: config_h_dir,
   vala_args: geary_client_vala_args,
   c_args: geary_c_args,
-  install: true
+  install: true,
+  install_dir: client_lib_dir,
 )
 
 geary_client_dep = declare_dependency(
