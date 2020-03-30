@@ -27,7 +27,7 @@ public class Geary.Db.Statement : Geary.Db.Context {
     /**
      * Fired when the Statement is reset.
      */
-    public signal void resetted();
+    public signal void was_reset();
 
     /**
      * Fired when the Statement's bindings are cleared.
@@ -69,7 +69,7 @@ public class Geary.Db.Statement : Geary.Db.Context {
         if (reset_scope == ResetScope.CLEAR_BINDINGS)
             bindings_cleared();
 
-        resetted();
+        was_reset();
 
         return this;
     }

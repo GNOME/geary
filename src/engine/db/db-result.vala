@@ -13,14 +13,14 @@ public class Geary.Db.Result : Geary.Db.Context {
     internal Result(Statement statement, Cancellable? cancellable) throws Error {
         this.statement = statement;
 
-        statement.resetted.connect(on_query_finished);
+        statement.was_reset.connect(on_query_finished);
         statement.bindings_cleared.connect(on_query_finished);
 
         next(cancellable);
     }
 
     ~Result() {
-        statement.resetted.disconnect(on_query_finished);
+        statement.was_reset.disconnect(on_query_finished);
         statement.bindings_cleared.disconnect(on_query_finished);
     }
 
