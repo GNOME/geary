@@ -214,6 +214,7 @@ src/engine/db/db-versioned-database.vala
 src/engine/imap/imap.vala
 src/engine/imap/imap-error.vala
 src/engine/imap/api/imap-account-session.vala
+src/engine/imap/api/imap-capabilities.vala
 src/engine/imap/api/imap-client-service.vala
 src/engine/imap/api/imap-email-flags.vala
 src/engine/imap/api/imap-email-properties.vala
@@ -325,7 +326,6 @@ src/engine/imap/parameter/imap-quoted-string-parameter.vala
 src/engine/imap/parameter/imap-root-parameters.vala
 src/engine/imap/parameter/imap-string-parameter.vala
 src/engine/imap/parameter/imap-unquoted-string-parameter.vala
-src/engine/imap/response/imap-capabilities.vala
 src/engine/imap/response/imap-continuation-response.vala
 src/engine/imap/response/imap-fetch-data-decoder.vala
 src/engine/imap/response/imap-fetched-data.vala

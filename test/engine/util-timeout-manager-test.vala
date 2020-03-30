@@ -87,7 +87,7 @@ class Geary.TimeoutManagerTest : TestCase {
             this.main_loop.iteration(true);
         }
 
-        assert_epsilon(timer.elapsed(), 1.0, SECONDS_EPSILON);
+        assert_double(timer.elapsed(), 1.0, SECONDS_EPSILON);
     }
 
     public void milliseconds() throws Error {
@@ -101,7 +101,7 @@ class Geary.TimeoutManagerTest : TestCase {
             this.main_loop.iteration(true);
         }
 
-        assert_epsilon(timer.elapsed(), 0.1, MILLISECONDS_EPSILON);
+        assert_double(timer.elapsed(), 0.1, MILLISECONDS_EPSILON);
     }
 
     public void repeat_forever() throws Error {
@@ -118,11 +118,7 @@ class Geary.TimeoutManagerTest : TestCase {
         }
         timer.stop();
 
-        assert_epsilon(timer.elapsed(), 2.0, SECONDS_EPSILON * 2);
-    }
-
-    private inline void assert_epsilon(double actual, double expected, double epsilon) {
-        assert(actual + epsilon >= expected && actual - epsilon <= expected);
+        assert_double(timer.elapsed(), 2.0, SECONDS_EPSILON * 2);
     }
 
 }

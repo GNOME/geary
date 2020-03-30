@@ -103,7 +103,7 @@ public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
     }
 
     private void on_disconnected(ClientSession.DisconnectReason reason) {
-        debug("DISCONNECTED %s", reason.to_string());
+        debug("Disconnected %s", reason.to_string());
 
         close();
         disconnected(reason);

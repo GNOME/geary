@@ -84,7 +84,7 @@ class Geary.ImapDB.AccountTest : TestCase {
                     new Imap.UIDValidity(7),
                     6 //unseen
                 ),
-                new Imap.Capabilities(1)
+                new Imap.Capabilities.empty(0)
             )
         );
 
@@ -123,7 +123,7 @@ class Geary.ImapDB.AccountTest : TestCase {
                     new Imap.UIDValidity(7),
                     6 //unseen
                 ),
-                new Imap.Capabilities(1)
+                new Imap.Capabilities.empty(0)
             )
         );
 
