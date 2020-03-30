@@ -17,7 +17,7 @@
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-6]]
  */
-public class Geary.Imap.Command : BaseObject {
+public abstract class Geary.Imap.Command : BaseObject {
 
     /**
      * Default timeout to wait for a server response for a command.
@@ -97,7 +97,7 @@ public class Geary.Imap.Command : BaseObject {
      *
      * @see Tag
      */
-    public Command(string name, string[]? args = null) {
+    protected Command(string name, string[]? args = null) {
         this.tag = Tag.get_unassigned();
         this.name = name;
         if (args != null) {
@@ -250,7 +250,7 @@ public class Geary.Imap.Command : BaseObject {
      * cancelled, if the command timed out, or if the command's
      * response was bad.
      */
-    public async void wait_until_complete(GLib.Cancellable cancellable)
+    public async void wait_until_complete(GLib.Cancellable? cancellable)
         throws GLib.Error {
         yield this.complete_lock.wait_async(cancellable);
 
