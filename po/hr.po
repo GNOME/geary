@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2020-03-21 18:58+0000\n"
-"PO-Revision-Date: 2020-03-31 01:12+0200\n"
+"PO-Revision-Date: 2020-03-31 01:27+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian (http://www.transifex.com/projects/p/geary/language/"
 "hr/)\n"
@@ -2628,13 +2628,13 @@ msgid ""
 "An account has reported an untrusted server.\n"
 "Please check the server configuration and try again."
 msgstr ""
-"Račun je prijavio nepouzdani poslužitelj.\n"
+"Račun je prijavio nepouzdanog poslužitelja.\n"
 "Provjerite postavke poslužitelja i pokušajte ponovno."
 
 #. Label and tooltip for TLS cert validation error infobar
 #: ui/application-main-window.ui:299
 msgid "An account has reported an untrusted server."
-msgstr "Račun je prijavio nepouzdani poslužitelj."
+msgstr "Račun je prijavio nepouzdanog poslužitelja."
 
 #. Button tooltip for retrying when a login error has occurred
 #: ui/application-main-window.ui:350
