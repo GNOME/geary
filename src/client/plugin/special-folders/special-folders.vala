@@ -49,7 +49,7 @@ public class Plugin.SpecialFolders :
 
 
     public override async void activate() throws GLib.Error {
-        this.folder_store = yield this.folders.get_folders();
+        this.folder_store = yield this.folders.get_folder_store();
         this.folder_store.folder_selected.connect(on_folder_selected);
         this.folder_store.folders_type_changed.connect(on_folders_type_changed);
 
@@ -59,7 +59,7 @@ public class Plugin.SpecialFolders :
         this.empty_action.activate.connect(on_empty_activated);
         this.plugin_application.register_action(this.empty_action);
 
-        this.email_store = yield this.email.get_email();
+        this.email_store = yield this.email.get_email_store();
         this.email_store.email_displayed.connect(on_email_displayed);
     }
 

@@ -1297,10 +1297,6 @@ internal class Application.Controller : Geary.BaseObject {
     /** Notifies plugins of new email being displayed. */
     internal void email_loaded(Geary.AccountInformation account,
                                Geary.Email loaded) {
-        foreach (NotificationContext plugin in
-                 this.plugins.get_notification_contexts()) {
-            plugin.email_displayed(account, loaded);
-        }
         foreach (EmailContext plugin in
                  this.plugins.get_email_contexts()) {
             plugin.email_displayed(account, loaded);
@@ -1481,10 +1477,6 @@ internal class Application.Controller : Geary.BaseObject {
 
         AccountContext? context = this.accounts.get(service.account);
         if (context != null) {
-            foreach (NotificationContext plugin in
-                     this.plugins.get_notification_contexts()) {
-                plugin.email_sent(context.account.information, sent);
-            }
             foreach (EmailContext plugin in
                      this.plugins.get_email_contexts()) {
                 plugin.email_sent(context.account.information, sent);

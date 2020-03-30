@@ -47,7 +47,7 @@ public interface Plugin.FolderContext : Geary.BaseObject {
      * @throws Error.PERMISSIONS if permission to access
      * this resource was not given
      */
-    public abstract async FolderStore get_folders()
+    public abstract async FolderStore get_folder_store()
         throws Error.PERMISSION_DENIED;
 
     /**

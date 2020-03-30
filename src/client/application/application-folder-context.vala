@@ -27,7 +27,7 @@ internal class Application.FolderContext :
         this.action_group_name = action_group_name;
     }
 
-    public async Plugin.FolderStore get_folders()
+    public async Plugin.FolderStore get_folder_store()
         throws Plugin.Error.PERMISSION_DENIED {
         return this.folders;
     }

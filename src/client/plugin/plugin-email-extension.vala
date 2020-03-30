@@ -47,7 +47,7 @@ public interface Plugin.EmailContext : Geary.BaseObject {
      * @throws Error.PERMISSIONS if permission to access
      * this resource was not given
      */
-    public abstract async EmailStore get_email()
+    public abstract async EmailStore get_email_store()
         throws Error.PERMISSION_DENIED;
 
     /**
