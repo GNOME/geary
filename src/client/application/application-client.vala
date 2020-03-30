@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2019-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -31,7 +31,7 @@ public class Application.Client : Gtk.Application {
     public const string SCHEMA_ID = "org.gnome.Geary";
     public const string DESCRIPTION = _("Send and receive email");
     public const string COPYRIGHT_1 = _("Copyright 2016 Software Freedom Conservancy Inc.");
-    public const string COPYRIGHT_2 = _("Copyright 2016-2019 Geary Development Team.");
+    public const string COPYRIGHT_2 = _("Copyright 2016-2020 Geary Development Team.");
     public const string WEBSITE = "https://wiki.gnome.org/Apps/Geary";
     public const string WEBSITE_LABEL = _("Visit the Geary web site");
     public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
