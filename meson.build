@@ -25,15 +25,15 @@ endif
 
 # Configurable install dirs
 geary_prefix = get_option('prefix')
-bin_dir = join_paths(geary_prefix, get_option('bindir'))
-data_dir = join_paths(geary_prefix, get_option('datadir'))
-lib_dir = join_paths(geary_prefix, get_option('libdir'))
-locale_dir = join_paths(geary_prefix, get_option('localedir'))
+bin_dir = geary_prefix / get_option('bindir')
+data_dir = geary_prefix / get_option('datadir')
+lib_dir = geary_prefix / get_option('libdir')
+locale_dir = geary_prefix / get_option('localedir')
 
 # Source dirs
-metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
-po_dir = join_paths(meson.source_root(), 'po')
-vapi_dir = join_paths(meson.source_root(), 'bindings', 'vapi')
+metadata_dir = meson.source_root() / 'bindings'/ 'metadata'
+po_dir = meson.source_root() / 'po'
+vapi_dir = meson.source_root() / 'bindings' / 'vapi'
 
 # Compiler configuration
 add_project_arguments([
@@ -137,10 +137,10 @@ gnome = import('gnome')
 i18n = import('i18n')
 
 # Static install dirs
-dbus_services_dir = join_paths(data_dir, 'dbus-1', 'services')
-client_lib_dir = join_paths(lib_dir, 'geary')
-plugins_dir = join_paths(client_lib_dir, 'plugins')
-web_extensions_dir = join_paths(client_lib_dir, 'web-extensions')
+dbus_services_dir = data_dir / 'dbus-1' / 'services'
+client_lib_dir = lib_dir / 'geary'
+plugins_dir = client_lib_dir / 'plugins'
+web_extensions_dir = client_lib_dir / 'web-extensions'
 
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
@@ -157,17 +157,17 @@ if enable_valadoc
 endif
 
 # Language detection
-iso_codes_dir = join_paths(iso_codes.get_pkgconfig_variable('prefix'), 'share', 'xml', 'iso-codes')
+iso_codes_dir = iso_codes.get_pkgconfig_variable('prefix')/'share'/'xml'/'iso-codes'
 if iso_639_xml == ''
-  iso_639_xml = join_paths(iso_codes_dir, 'iso_639.xml')
+  iso_639_xml = iso_codes_dir / 'iso_639.xml'
 endif
 if iso_3166_xml == ''
-  iso_3166_xml = join_paths(iso_codes_dir, 'iso_3166.xml')
+  iso_3166_xml = iso_codes_dir / 'iso_3166.xml'
 endif
 files(iso_639_xml, iso_3166_xml) # Check to make sure these exist
 
 # Post-install scripts
-meson.add_install_script(join_paths('build-aux', 'post_install.py'))
+meson.add_install_script('build-aux' / 'post_install.py')
 
 # GNOME Builder doesn't support YAML manifests, so generate a JSON
 # version from the YAML and commit it. :( GNOME/gnome-builder#520
