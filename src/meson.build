@@ -31,9 +31,6 @@ geary_vala_args = [
 if reference_tracking
   geary_vala_args += [ '--define=REF_TRACKING' ]
 endif
-if not poodle
-  geary_vala_args += [ '--define=DISABLE_POODLE' ]
-endif
 
 # Common cc options
 geary_c_args = [

@@ -26,12 +26,6 @@ option(
   description: 'Determines if libunwind is required.'
 )
 option(
-  'poodle',
-  type: 'boolean',
-  value: true,
-  description: 'Whether to apply the POODLE SSLv3 fix.'
-)
-option(
   'tnef-support',
   type: 'boolean',
   value: true,
