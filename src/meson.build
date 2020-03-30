@@ -6,7 +6,7 @@ conf.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 conf.set_quoted('G_LOG_DOMAIN', meson.project_name())
 conf.set_quoted('_APP_ID', geary_id)
 conf.set_quoted('_BUILD_ROOT_DIR', meson.build_root())
-conf.set_quoted('_GSETTINGS_DIR', join_paths(meson.build_root(), 'desktop'))
+conf.set_quoted('_GSETTINGS_DIR', meson.build_root() / 'desktop')
 conf.set_quoted('_INSTALL_PREFIX', geary_prefix)
 conf.set_quoted('_ISO_CODE_3166_XML', iso_3166_xml)
 conf.set_quoted('_ISO_CODE_639_XML', iso_639_xml)
@@ -30,9 +30,6 @@ geary_vala_args = [
 # not in the code or in config.h
 if reference_tracking
   geary_vala_args += [ '--define=REF_TRACKING' ]
-endif
-if not poodle
-  geary_vala_args += [ '--define=DISABLE_POODLE' ]
 endif
 
 # Common cc options
@@ -79,7 +76,7 @@ geary_web_process = library('geary-web-process',
 
 # Now finally, make the geary executable
 geary_bin_sources = files(
-  join_paths('client', 'application', 'main.vala'),
+  'client' / 'application' / 'main.vala',
 )
 
 geary_bin_sources += [
