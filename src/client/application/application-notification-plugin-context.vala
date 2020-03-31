@@ -9,7 +9,7 @@
 /**
  * Implementation of the notification plugin extension context.
  */
-internal class Application.NotificationContext :
+internal class Application.NotificationPluginContext :
     Geary.BaseObject, Plugin.NotificationContext {
 
 
@@ -70,9 +70,9 @@ internal class Application.NotificationContext :
     private EmailStoreFactory email_factory;
 
 
-    internal NotificationContext(Client application,
-                                 FolderStoreFactory folders_factory,
-                                 EmailStoreFactory email_factory) {
+    internal NotificationPluginContext(Client application,
+                                       FolderStoreFactory folders_factory,
+                                       EmailStoreFactory email_factory) {
         this.application = application;
         this.folders_factory = folders_factory;
         this.email_factory = email_factory;

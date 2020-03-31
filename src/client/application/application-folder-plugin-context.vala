@@ -6,9 +6,9 @@
  */
 
 /**
- * Implementation of the folder extension context.
+ * Implementation of the folder plugin extension context.
  */
-internal class Application.FolderContext :
+internal class Application.FolderPluginContext :
     Geary.BaseObject, Plugin.FolderContext {
 
 
@@ -18,9 +18,9 @@ internal class Application.FolderContext :
     private string action_group_name;
 
 
-    internal FolderContext(Client application,
-                           FolderStoreFactory folders_factory,
-                           string action_group_name) {
+    internal FolderPluginContext(Client application,
+                                 FolderStoreFactory folders_factory,
+                                 string action_group_name) {
         this.application = application;
         this.folders_factory = folders_factory;
         this.folders = folders_factory.new_folder_store();

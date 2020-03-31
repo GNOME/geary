@@ -1288,7 +1288,7 @@ internal class Application.Controller : Geary.BaseObject {
         foreach (MainWindow window in this.application.get_main_windows()) {
             window.folder_list.set_has_new(source, false);
         }
-        foreach (NotificationContext context in
+        foreach (NotificationPluginContext context in
                  this.plugins.get_notification_contexts()) {
             context.clear_new_messages(source, visible);
         }
@@ -1297,7 +1297,7 @@ internal class Application.Controller : Geary.BaseObject {
     /** Notifies plugins of new email being displayed. */
     internal void email_loaded(Geary.AccountInformation account,
                                Geary.Email loaded) {
-        foreach (EmailContext plugin in
+        foreach (EmailPluginContext plugin in
                  this.plugins.get_email_contexts()) {
             plugin.email_displayed(account, loaded);
         }
@@ -1477,7 +1477,7 @@ internal class Application.Controller : Geary.BaseObject {
 
         AccountContext? context = this.accounts.get(service.account);
         if (context != null) {
-            foreach (EmailContext plugin in
+            foreach (EmailPluginContext plugin in
                      this.plugins.get_email_contexts()) {
                 plugin.email_sent(context.account.information, sent);
             }

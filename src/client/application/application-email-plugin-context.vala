@@ -8,7 +8,7 @@
 /**
  * Implementation of the email plugin extension context.
  */
-internal class Application.EmailContext :
+internal class Application.EmailPluginContext :
     Geary.BaseObject, Plugin.EmailContext {
 
 
@@ -18,9 +18,9 @@ internal class Application.EmailContext :
     private string action_group_name;
 
 
-    internal EmailContext(Client application,
-                          EmailStoreFactory email_factory,
-                          string action_group_name) {
+    internal EmailPluginContext(Client application,
+                                EmailStoreFactory email_factory,
+                                string action_group_name) {
         this.application = application;
         this.email_factory = email_factory;
         this.email = email_factory.new_email_store();

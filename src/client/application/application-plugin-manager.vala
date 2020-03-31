@@ -166,10 +166,10 @@ public class Application.PluginManager : GLib.Object {
 
     private Gee.Map<Peas.PluginInfo,PluginContext> plugin_set =
         new Gee.HashMap<Peas.PluginInfo,PluginContext>();
-    private Gee.Map<Peas.PluginInfo,NotificationContext> notification_contexts =
-        new Gee.HashMap<Peas.PluginInfo,NotificationContext>();
-    private Gee.Map<Peas.PluginInfo,EmailContext> email_contexts =
-        new Gee.HashMap<Peas.PluginInfo,EmailContext>();
+    private Gee.Map<Peas.PluginInfo,NotificationPluginContext> notification_contexts =
+        new Gee.HashMap<Peas.PluginInfo,NotificationPluginContext>();
+    private Gee.Map<Peas.PluginInfo,EmailPluginContext> email_contexts =
+        new Gee.HashMap<Peas.PluginInfo,EmailPluginContext>();
 
 
     public PluginManager(Client application) throws GLib.Error {
@@ -277,11 +277,11 @@ public class Application.PluginManager : GLib.Object {
         return info.get_module_name() in AUTOLOAD_MODULES;
     }
 
-    internal Gee.Collection<NotificationContext> get_notification_contexts() {
+    internal Gee.Collection<NotificationPluginContext> get_notification_contexts() {
         return this.notification_contexts.values.read_only_view;
     }
 
-    internal Gee.Collection<EmailContext> get_email_contexts() {
+    internal Gee.Collection<EmailPluginContext> get_email_contexts() {
         return this.email_contexts.values.read_only_view;
     }
 
@@ -310,7 +310,7 @@ public class Application.PluginManager : GLib.Object {
 
             var notification = plugin as Plugin.NotificationExtension;
             if (notification != null) {
-                var context = new NotificationContext(
+                var context = new NotificationPluginContext(
                     this.application,
                     this.folders_factory,
                     this.email_factory
@@ -321,7 +321,7 @@ public class Application.PluginManager : GLib.Object {
 
             var email = plugin as Plugin.EmailExtension;
             if (email != null) {
-                var context = new EmailContext(
+                var context = new EmailPluginContext(
                     this.application,
                     this.email_factory,
                     plugin_application.action_group_name
@@ -332,7 +332,7 @@ public class Application.PluginManager : GLib.Object {
 
             var folder = plugin as Plugin.FolderExtension;
             if (folder != null) {
-                folder.folders = new FolderContext(
+                folder.folders = new FolderPluginContext(
                     this.application,
                     this.folders_factory,
                     plugin_application.action_group_name
@@ -406,7 +406,7 @@ public class Application.PluginManager : GLib.Object {
 
         var folder = context.plugin as Plugin.FolderExtension;
         if (folder != null) {
-            var folder_context = folder.folders as FolderContext;
+            var folder_context = folder.folders as FolderPluginContext;
             if (folder_context != null) {
                 folder_context.destroy();
             }
@@ -414,7 +414,7 @@ public class Application.PluginManager : GLib.Object {
 
         var email = context.plugin as Plugin.EmailExtension;
         if (email != null) {
-            var email_context = email.email as Application.EmailContext;
+            var email_context = email.email as EmailPluginContext;
             if (email_context != null) {
                 this.email_contexts.unset(context.info);
                 email_context.destroy();
