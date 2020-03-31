@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-03-30 10:44+0000\n"
-"PO-Revision-Date: 2020-03-30 22:24+0300\n"
+"POT-Creation-Date: 2020-03-31 07:45+0000\n"
+"PO-Revision-Date: 2020-03-31 14:00+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -639,12 +639,12 @@ msgstr[2] "%d днів тому"
 msgstr[3] "день тому"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2059
+#: src/client/application/application-main-window.vala:2060
 msgid "Undo"
 msgstr "Скасувати"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
-#: src/client/application/application-main-window.vala:2042
+#: src/client/application/application-main-window.vala:2043
 msgid "Redo"
 msgstr "Повторити"
 
@@ -724,7 +724,6 @@ msgstr "Захист з'єднання"
 #: src/client/accounts/accounts-editor-row.vala:479
 #: src/client/accounts/accounts-editor-servers-pane.vala:755
 #: src/client/accounts/accounts-editor-servers-pane.vala:970
-#: src/engine/api/geary-special-folder-type.vala:58
 msgid "None"
 msgstr "Немає"
 
@@ -842,7 +841,6 @@ msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "© 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/application-client.vala:34
-#| msgid "Copyright 2016-2019 Geary Development Team."
 msgid "Copyright 2016-2020 Geary Development Team."
 msgstr "© Команда розробників Geary, 2016–2020"
 
@@ -1189,34 +1187,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1472
+#: src/client/application/application-controller.vala:1468
 #, c-format
 msgid "Email sent to %s"
 msgstr "Повідомлення надіслано %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2572
+#: src/client/application/application-controller.vala:2564
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Повідомлення до %s заплановано до надсилання"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2636
+#: src/client/application/application-controller.vala:2628
 #, c-format
 msgid "Email to %s saved"
 msgstr "Повідомлення до %s збережено"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2651
-#: src/client/application/application-controller.vala:2709
+#: src/client/application/application-controller.vala:2643
+#: src/client/application/application-controller.vala:2701
 msgid "Composer could not be restored"
 msgstr "Не вдалося відновити вміст редактора"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2694
+#: src/client/application/application-controller.vala:2686
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Повідомлення до %s відкинуто"
@@ -1285,26 +1283,26 @@ msgstr "%s — %s"
 msgid "Labels"
 msgstr "Мітки"
 
-#: src/client/application/application-main-window.vala:1289
+#: src/client/application/application-main-window.vala:1290
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Спорожнити всі листи з теки %s?"
 
-#: src/client/application/application-main-window.vala:1292
+#: src/client/application/application-main-window.vala:1291
 msgid "This removes the email from Geary and your email server."
 msgstr "Це вилучить всі листи з Geary і з вашого сервера."
 
-#: src/client/application/application-main-window.vala:1293
+#: src/client/application/application-main-window.vala:1292
 msgid "This cannot be undone."
 msgstr "Це неможливо повернути."
 
-#: src/client/application/application-main-window.vala:1294
+#: src/client/application/application-main-window.vala:1293
 #, c-format
 msgid "Empty %s"
 msgstr "Спорожнити %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1351
+#: src/client/application/application-main-window.vala:1350
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Ви справді хочете остаточно вилучити ці спілкування?"
@@ -1312,13 +1310,13 @@ msgstr[1] "Ви справді хочете остаточно вилучити 
 msgstr[2] "Ви справді хочете остаточно вилучити ці спілкування?"
 msgstr[3] "Ви справді хочете остаточно вилучити це спілкування?"
 
-#: src/client/application/application-main-window.vala:1356
-#: src/client/application/application-main-window.vala:1371
+#: src/client/application/application-main-window.vala:1355
+#: src/client/application/application-main-window.vala:1370
 msgid "Delete"
 msgstr "Вилучити"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1366
+#: src/client/application/application-main-window.vala:1365
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Остаточно вилучити цей лист?"
@@ -1326,7 +1324,7 @@ msgstr[1] "Остаточно вилучити ці листи?"
 msgstr[2] "Остаточно вилучити ці листи?"
 msgstr[3] "Остаточно вилучити цей лист?"
 
-#: src/client/application/application-main-window.vala:1697
+#: src/client/application/application-main-window.vala:1698
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1514,7 +1512,7 @@ msgstr "_Повторити"
 #. / Translators: Search entry placeholder text
 #: src/client/components/components-search-bar.vala:12
 #: src/client/folder-list/folder-list-search-branch.vala:53
-#: src/engine/api/geary-special-folder-type.vala:51
+#: src/client/util/util-i18n.vala:298
 msgid "Search"
 msgstr "Пошук"
 
@@ -1827,7 +1825,7 @@ msgstr "%1$s через %2$s"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2803
+#: src/client/composer/composer-widget.vala:2802
 msgid "Images"
 msgstr "Зображення"
 
@@ -1973,13 +1971,11 @@ msgstr ""
 
 #. Translators: Info bar button label
 #: src/client/conversation-viewer/conversation-message.vala:1310
-#| msgid "Show less"
 msgid "Show"
 msgstr "Показати"
 
 #. Translators: Info bar button label
 #: src/client/conversation-viewer/conversation-message.vala:1314
-#| msgid "Always Show From Sender"
 msgid "Always show from sender"
 msgstr "Завжди показувати від відправника"
 
@@ -2128,7 +2124,7 @@ msgid "Geary requires your email password to continue"
 msgstr "Вкажіть ваш пароль для продовження"
 
 #. Label displaying total number of email messages in a folder
-#: src/client/folder-list/folder-list-folder-entry.vala:32
+#: src/client/folder-list/folder-list-folder-entry.vala:30
 #, c-format
 msgid "%d message"
 msgid_plural "%d messages"
@@ -2138,7 +2134,7 @@ msgstr[2] "%d листів"
 msgstr[3] "%d лист"
 
 #. / Label displaying number of unread email messages in a folder
-#: src/client/folder-list/folder-list-folder-entry.vala:39
+#: src/client/folder-list/folder-list-folder-entry.vala:37
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
@@ -2150,7 +2146,7 @@ msgstr[3] "%d непрочитаний"
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
 #. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
-#: src/client/folder-list/folder-list-folder-entry.vala:45
+#: src/client/folder-list/folder-list-folder-entry.vala:43
 #, c-format
 msgid "%s, %s"
 msgstr "%s, %s"
@@ -2169,12 +2165,10 @@ msgstr[2] "%d результатів"
 msgstr[3] "%d результат"
 
 #: src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in:4
-#| msgid "Desktop notification of new mail"
 msgid "Desktop Notifications"
 msgstr "Сповіщення на стільниці"
 
 #: src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in:5
-#| msgid "Desktop notification of new mail"
 msgid "Displays desktop notifications when new email is delivered"
 msgstr "Показувати сповіщення на стільниці, коли надходять нові повідомлення"
 
@@ -2183,7 +2177,7 @@ msgstr "Показувати сповіщення на стільниці, ко�
 #. / seen. First string substitution is the message
 #. / subject and the second is the number of unseen
 #. / messages
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:126
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:138
 #, c-format
 msgid ""
 "%s\n"
@@ -2208,7 +2202,7 @@ msgstr[3] ""
 #. / received at the same time and other unseen messages
 #. / exist. String substitution is the number of new
 #. / messages that have arrived.
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:145
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:157
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
@@ -2223,7 +2217,7 @@ msgstr[3] "%d новий лист"
 #. / above with the number of new messages that have
 #. / arrived, number substitution is the total number
 #. / of unseen messages.
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:155
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:167
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
@@ -2234,7 +2228,7 @@ msgstr[3] "%s, %d новий лист загалом"
 
 #. / Notification title when new messages have been
 #. / received
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:272
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:284
 msgid "New message"
 msgid_plural "New messages"
 msgstr[0] "Нові повідомлення"
@@ -2255,12 +2249,12 @@ msgid "Messaging Menu"
 msgstr "Меню обміну повідомленнями"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
-#| msgid "Desktop notification of new mail"
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr ""
-"Показує сповіщення меню обміну повідомленнями Unity, коли надходить нова пошта"
+"Показує сповіщення меню обміну повідомленнями Unity, коли надходить нова "
+"пошта"
 
-#: src/client/plugin/messaging-menu/messaging-menu.vala:70
+#: src/client/plugin/messaging-menu/messaging-menu.vala:75
 #, c-format
 msgid "%s — New Messages"
 msgstr "%s — нові повідомлення"
@@ -2288,7 +2282,6 @@ msgstr "Особливі теки"
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
 #: src/client/plugin/special-folders/special-folders.vala:140
-#| msgid "Empty %s"
 msgid "Empty"
 msgstr "Спорожнити"
 
@@ -2306,8 +2299,6 @@ msgstr "Це повідомлення ще не надіслано."
 #. Translators: Info bar button label for editing a draft
 #. email
 #: src/client/plugin/special-folders/special-folders.vala:160
-#| msgctxt "shortcut window"
-#| msgid "Editing"
 msgid "Edit"
 msgstr "Редагувати"
 
@@ -2490,43 +2481,44 @@ msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "КБ"
 
-#: src/engine/api/geary-special-folder-type.vala:24
+#: src/client/util/util-i18n.vala:271
 msgid "Inbox"
 msgstr "Вхідні"
 
-#: src/engine/api/geary-special-folder-type.vala:27
+#: src/client/util/util-i18n.vala:274
 msgid "Drafts"
 msgstr "Чернетки"
 
-#: src/engine/api/geary-special-folder-type.vala:30
-msgid "Sent Mail"
-msgstr "Надіслана пошта"
+#: src/client/util/util-i18n.vala:277
+#| msgid "Sent by:"
+msgid "Sent"
+msgstr "Надіслані"
 
-#: src/engine/api/geary-special-folder-type.vala:33
+#: src/client/util/util-i18n.vala:280
 msgid "Starred"
 msgstr "Із зіркою"
 
-#: src/engine/api/geary-special-folder-type.vala:36
+#: src/client/util/util-i18n.vala:283
 msgid "Important"
 msgstr "Важливо"
 
-#: src/engine/api/geary-special-folder-type.vala:39
+#: src/client/util/util-i18n.vala:286
 msgid "All Mail"
 msgstr "Уся пошта"
 
-#: src/engine/api/geary-special-folder-type.vala:42
-msgid "Spam"
+#: src/client/util/util-i18n.vala:289
+msgid "Junk"
 msgstr "Спам"
 
-#: src/engine/api/geary-special-folder-type.vala:45
+#: src/client/util/util-i18n.vala:292
 msgid "Trash"
 msgstr "Кошик"
 
-#: src/engine/api/geary-special-folder-type.vala:48
+#: src/client/util/util-i18n.vala:295
 msgid "Outbox"
 msgstr "Вихідні"
 
-#: src/engine/api/geary-special-folder-type.vala:54
+#: src/client/util/util-i18n.vala:301
 msgid "Archive"
 msgstr "Архів"
 
@@ -2702,7 +2694,7 @@ msgstr "непрочитане"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:882
+#: src/engine/imap-engine/imap-engine-generic-account.vala:884
 msgid "Drafts | Draft"
 msgstr "Чернетки | Чернетка | Draft | Drafts"
 
@@ -2710,7 +2702,7 @@ msgstr "Чернетки | Чернетка | Draft | Drafts"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:891
+#: src/engine/imap-engine/imap-engine-generic-account.vala:893
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Надіслано | Надіслане | Надіслана пошта | Надісланий лист | Sent | Sent Mail "
@@ -2718,16 +2710,16 @@ msgstr ""
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:896
+#: src/engine/imap-engine/imap-engine-generic-account.vala:898
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Надіслані"
 
 #. List of general possible folder names to match for the
-#. Spam mailbox. Separate names using a vertical bar and
-#. put the most common localized name to the front for the
-#. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:906
+#. Junk/Spam mailbox. Separate names using a vertical bar
+#. and put the most common localized name to the front for
+#. the default. English names do not need to be included.
+#: src/engine/imap-engine/imap-engine-generic-account.vala:908
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2739,13 +2731,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:916
+#: src/engine/imap-engine/imap-engine-generic-account.vala:918
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Сміття | Смітник | Кошик | TTrash | Rubbish | Rubbish Bin"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:921
+#: src/engine/imap-engine/imap-engine-generic-account.vala:923
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Вилучені записи"
@@ -2754,7 +2746,7 @@ msgstr "Вилучені записи"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:931
+#: src/engine/imap-engine/imap-engine-generic-account.vala:933
 msgid "Archive | Archives"
 msgstr "Архів | Архіви | Archive | Archives"
 
@@ -3690,8 +3682,9 @@ msgid "_Archive"
 msgstr "_Архівувати"
 
 #: ui/main-toolbar-menus.ui:21
-msgid "Toggle as S_pam"
-msgstr "Перемкнути позначення як _спам"
+#| msgid "Toggle as S_pam"
+msgid "Toggle as _Junk"
+msgstr "Перемкнути позначення як сп_ам"
 
 #: ui/main-toolbar-menus.ui:28
 msgid "_Accounts"
@@ -3724,6 +3717,12 @@ msgstr "_Засвідчення"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Виконується оновлення…"
+
+#~ msgid "Sent Mail"
+#~ msgstr "Надіслана пошта"
+
+#~ msgid "Spam"
+#~ msgstr "Спам"
 
 #~ msgid "Edit Draft"
 #~ msgstr "Редагувати чернетку"
