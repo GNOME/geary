@@ -78,7 +78,7 @@ public class Plugin.SpecialFolders :
     }
 
     private void update_folder(Folder target) {
-        switch (target.folder_type) {
+        switch (target.used_as) {
         case TRASH:
             this.folders.add_folder_info_bar(
                 target, get_folder_info_bar(target), PRIORITY
@@ -104,7 +104,7 @@ public class Plugin.SpecialFolders :
                     target.identifier, this.cancellable
                 );
                 foreach (var folder in folders) {
-                    if (folder.folder_type == DRAFTS) {
+                    if (folder.used_as == DRAFTS) {
                         is_draft = true;
                         break;
                     }

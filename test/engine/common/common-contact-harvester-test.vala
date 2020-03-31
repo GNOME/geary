@@ -54,7 +54,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void whitelisted_folder_type() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.INBOX,
+            INBOX,
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
@@ -84,7 +84,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void blacklisted_folder_type() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.JUNK,
+            JUNK,
             this.senders
         );
         this.email.set_receivers(
@@ -103,7 +103,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void seen_priority() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.INBOX,
+            INBOX,
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
@@ -132,7 +132,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void sent_priority() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.SENT,
+            SENT,
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
@@ -161,7 +161,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void received_priority() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.SENT,
+            SENT,
             this.senders
         );
         this.store.expect_call("get_by_rfc822");

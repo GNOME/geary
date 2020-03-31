@@ -22,32 +22,32 @@ public class Geary.Imap.CreateCommand : Command {
 
     public MailboxSpecifier mailbox { get; private set; }
 
-    public Geary.SpecialFolderType use {
-        get; private set; default = Geary.SpecialFolderType.NONE;
+    public Geary.Folder.SpecialUse use {
+        get; private set; default = NONE;
     }
 
 
-    private static MailboxAttribute? get_special_folder_type(Geary.SpecialFolderType type) {
-        switch (type) {
-        case Geary.SpecialFolderType.ALL_MAIL:
+    private static MailboxAttribute? get_special_folder_type(Geary.Folder.SpecialUse use) {
+        switch (use) {
+        case ALL_MAIL:
             return MailboxAttribute.SPECIAL_FOLDER_ALL;
 
-        case Geary.SpecialFolderType.ARCHIVE:
+        case ARCHIVE:
             return MailboxAttribute.SPECIAL_FOLDER_ARCHIVE;
 
-        case Geary.SpecialFolderType.DRAFTS:
+        case DRAFTS:
             return MailboxAttribute.SPECIAL_FOLDER_DRAFTS;
 
-        case Geary.SpecialFolderType.FLAGGED:
+        case FLAGGED:
             return MailboxAttribute.SPECIAL_FOLDER_FLAGGED;
 
-        case Geary.SpecialFolderType.JUNK:
+        case JUNK:
             return MailboxAttribute.SPECIAL_FOLDER_JUNK;
 
-        case Geary.SpecialFolderType.SENT:
+        case SENT:
             return MailboxAttribute.SPECIAL_FOLDER_SENT;
 
-        case Geary.SpecialFolderType.TRASH:
+        case TRASH:
             return MailboxAttribute.SPECIAL_FOLDER_TRASH;
 
         default:
@@ -62,7 +62,7 @@ public class Geary.Imap.CreateCommand : Command {
     }
 
     public CreateCommand.special_use(MailboxSpecifier mailbox,
-                                     Geary.SpecialFolderType use) {
+                                     Geary.Folder.SpecialUse use) {
         this(mailbox);
         this.use = use;
 

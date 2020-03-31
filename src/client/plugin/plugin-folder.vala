@@ -24,7 +24,7 @@ public interface Plugin.Folder : Geary.BaseObject {
     public abstract string display_name { get; }
 
     /** Returns the type of this folder. */
-    public abstract Geary.SpecialFolderType folder_type { get; }
+    public abstract Geary.Folder.SpecialUse used_as { get; }
 
     /** Returns the account the folder belongs to, if any. */
     public abstract Account? account { get; }

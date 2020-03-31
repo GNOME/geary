@@ -173,7 +173,6 @@ src/engine/api/geary-revokable.vala
 src/engine/api/geary-search-query.vala
 src/engine/api/geary-service-information.vala
 src/engine/api/geary-service-provider.vala
-src/engine/api/geary-special-folder-type.vala
 src/engine/app/app-conversation-monitor.vala
 src/engine/app/app-conversation.vala
 src/engine/app/app-draft-manager.vala

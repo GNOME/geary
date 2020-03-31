@@ -46,12 +46,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
     }
 
-    private SpecialFolderType _special_folder_type;
-    public override SpecialFolderType special_folder_type {
+    public override Folder.SpecialUse used_as {
         get {
-            return _special_folder_type;
+            return this._used_as;
         }
     }
+    private Folder.SpecialUse _used_as;
 
     private ProgressMonitor _opening_monitor =
         new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
@@ -117,12 +117,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
     public MinimalFolder(GenericAccount account,
                          ImapDB.Folder local_folder,
-                         SpecialFolderType special_folder_type) {
+                         Folder.SpecialUse use) {
         this._account = account;
         this.local_folder = local_folder;
         this.local_folder.email_complete.connect(on_email_complete);
 
-        this._special_folder_type = special_folder_type;
+        this._used_as = use;
         this._properties.add(local_folder.get_properties());
         this.email_prefetcher = new EmailPrefetcher(this);
         update_harvester();
@@ -178,11 +178,11 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         notify_email_flags_changed(flag_map);
     }
 
-    public void set_special_folder_type(SpecialFolderType new_type) {
-        SpecialFolderType old_type = _special_folder_type;
-        _special_folder_type = new_type;
-        if (old_type != new_type)
-            notify_special_folder_type_changed(old_type, new_type);
+    public void set_use(Folder.SpecialUse new_use) {
+        var old_use = this._used_as;
+        this._used_as = new_use;
+        if (old_use != new_use)
+            notify_use_changed(old_use, new_use);
         update_harvester();
     }
 
@@ -1579,7 +1579,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private void update_harvester() {
         this.harvester = new ContactHarvesterImpl(
             this.account.contact_store,
-            this.special_folder_type,
+            this._used_as,
             this.account.information.sender_mailboxes
         );
     }

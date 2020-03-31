@@ -705,12 +705,12 @@ public class Application.MainWindow :
                 // Prefer the inboxes branch if it is a thing, but
                 // only for non-interactive calls
                 if (is_interactive ||
-                    (to_select.special_folder_type != INBOX ||
+                    (to_select.used_as != INBOX ||
                      !this.folder_list.select_inbox(to_select.account))) {
                     this.folder_list.select_folder(to_select);
                 }
 
-                if (to_select.special_folder_type == SEARCH) {
+                if (to_select.used_as == SEARCH) {
                     this.previous_non_search_folder = to_select;
                 }
             } else {
@@ -963,7 +963,7 @@ public class Application.MainWindow :
         this.search_open = new GLib.Cancellable();
 
         if (this.previous_non_search_folder != null &&
-            this.selected_folder.special_folder_type == SEARCH) {
+            this.selected_folder.used_as == SEARCH) {
             this.select_folder.begin(
                 this.previous_non_search_folder, is_interactive
             );
@@ -1036,7 +1036,7 @@ public class Application.MainWindow :
             if (this.selected_folder != null &&
                 this.selected_folder.account == to_remove.account) {
                 bool is_account_search_active = (
-                    this.selected_folder.special_folder_type == SEARCH
+                    this.selected_folder.used_as == SEARCH
                 );
 
                 yield select_folder(to_select, false);
@@ -1076,15 +1076,15 @@ public class Application.MainWindow :
             this.main_toolbar.copy_folder_menu.add_folder(to_add);
             this.main_toolbar.move_folder_menu.add_folder(to_add);
         }
-        to_add.special_folder_type_changed.connect(
-            on_special_folder_type_changed
+        to_add.use_changed.connect(
+            on_use_changed
         );
     }
 
     /** Removes a folder from the window. */
     private void remove_folder(Geary.Folder to_remove) {
-        to_remove.special_folder_type_changed.disconnect(
-            on_special_folder_type_changed
+        to_remove.use_changed.disconnect(
+            on_use_changed
         );
         if (to_remove.account == this.selected_account) {
             this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
@@ -1283,7 +1283,7 @@ public class Application.MainWindow :
         return base.key_release_event(event);
     }
 
-    internal bool prompt_empty_folder(Geary.SpecialFolderType type) {
+    internal bool prompt_empty_folder(Geary.Folder.SpecialUse type) {
         var folder_name = Util.I18n.to_folder_type_display_name(type);
         ConfirmationDialog dialog = new ConfirmationDialog(
             this,
@@ -1616,7 +1616,7 @@ public class Application.MainWindow :
         if (!this.has_composer) {
             if (this.conversations.size == 0) {
                 // Let the user know if there's no available conversations
-                if (this.selected_folder.special_folder_type == SEARCH) {
+                if (this.selected_folder.used_as == SEARCH) {
                     this.conversation_viewer.show_empty_search();
                 } else {
                     this.conversation_viewer.show_empty_folder();
@@ -1681,9 +1681,9 @@ public class Application.MainWindow :
         /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
         // except for Drafts and Outbox, where we show total count
         int count;
-        switch (this.selected_folder.special_folder_type) {
-            case Geary.SpecialFolderType.DRAFTS:
-            case Geary.SpecialFolderType.OUTBOX:
+        switch (this.selected_folder.used_as) {
+            case DRAFTS:
+            case OUTBOX:
                 count = this.selected_folder.properties.email_total;
             break;
 
@@ -1712,7 +1712,7 @@ public class Application.MainWindow :
             sensitive &&
             !multiple &&
             this.selected_folder != null &&
-            this.selected_folder.special_folder_type != DRAFTS
+            this.selected_folder.used_as != DRAFTS
         );
         get_window_action(ACTION_REPLY_CONVERSATION).set_enabled(reply_sensitive);
         get_window_action(ACTION_REPLY_ALL_CONVERSATION).set_enabled(reply_sensitive);
@@ -1991,9 +1991,9 @@ public class Application.MainWindow :
         }
     }
 
-    private void on_special_folder_type_changed(Geary.Folder folder,
-                                                Geary.SpecialFolderType old_type,
-                                                Geary.SpecialFolderType new_type) {
+    private void on_use_changed(Geary.Folder folder,
+                                Geary.Folder.SpecialUse old_type,
+                                Geary.Folder.SpecialUse new_type) {
         // Update the main window
         this.folder_list.remove_folder(folder);
         this.folder_list.add_folder(folder);
@@ -2118,7 +2118,7 @@ public class Application.MainWindow :
 
     private void on_conversation_activated(Geary.App.Conversation activated) {
         if (this.selected_folder != null) {
-            if (this.selected_folder.special_folder_type != DRAFTS) {
+            if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
                     this.selected_folder,
                     this.conversation_list_view.copy_selected()
@@ -2237,10 +2237,12 @@ public class Application.MainWindow :
         get_window_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
 
         // If we're in Drafts/Outbox, we also shouldn't set a message as junk
-        bool in_junk_folder = (selected_folder.special_folder_type == JUNK);
-        get_window_action(ACTION_TOGGLE_JUNK).set_enabled(!in_junk_folder &&
-            selected_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
-            selected_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
+        bool in_junk_folder = (selected_folder.used_as == JUNK);
+        get_window_action(ACTION_TOGGLE_JUNK).set_enabled(
+            !in_junk_folder &&
+            selected_folder.used_as != DRAFTS &&
+            selected_folder.used_as != OUTBOX
+        );
     }
 
     private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
@@ -2342,10 +2344,10 @@ public class Application.MainWindow :
     private void on_mark_as_junk_toggle() {
         Geary.Folder? source = this.selected_folder;
         if (source != null) {
-            Geary.SpecialFolderType destination =
-                (source.special_folder_type != JUNK)
-                ? Geary.SpecialFolderType.JUNK
-                : Geary.SpecialFolderType.INBOX;
+            Geary.Folder.SpecialUse destination =
+                (source.used_as != JUNK)
+                ? Geary.Folder.SpecialUse.JUNK
+                : Geary.Folder.SpecialUse.INBOX;
             this.controller.move_conversations_special.begin(
                 source,
                 destination,
@@ -2424,7 +2426,7 @@ public class Application.MainWindow :
         if (source != null) {
             this.controller.move_conversations_special.begin(
                 source,
-                Geary.SpecialFolderType.TRASH,
+                TRASH,
                 this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {

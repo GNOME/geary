@@ -13,8 +13,8 @@ private class Geary.ImapEngine.GenericFolder : MinimalFolder,
 
     public GenericFolder(GenericAccount account,
                          ImapDB.Folder local_folder,
-                         SpecialFolderType special_folder_type) {
-        base (account, local_folder, special_folder_type);
+                         Folder.SpecialUse use) {
+        base (account, local_folder, use);
     }
 
     public async Geary.Revokable?
@@ -23,7 +23,9 @@ private class Geary.ImapEngine.GenericFolder : MinimalFolder,
         throws GLib.Error {
         Geary.Folder? archive_folder = null;
         try {
-            archive_folder = yield account.get_required_special_folder_async(Geary.SpecialFolderType.ARCHIVE, cancellable);
+            archive_folder = yield account.get_required_special_folder_async(
+                Folder.SpecialUse.ARCHIVE, cancellable
+            );
         } catch (Error e) {
             debug("Error looking up archive folder in %s: %s", account.to_string(), e.message);
         }

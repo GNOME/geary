@@ -44,36 +44,36 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
 
     public override string? get_sidebar_icon() {
-        switch (folder.special_folder_type) {
-            case Geary.SpecialFolderType.NONE:
+        switch (folder.used_as) {
+            case NONE:
                 return "tag-symbolic";
 
-            case Geary.SpecialFolderType.INBOX:
+            case INBOX:
                 return "mail-inbox-symbolic";
 
-            case Geary.SpecialFolderType.DRAFTS:
+            case DRAFTS:
                 return "mail-drafts-symbolic";
 
-            case Geary.SpecialFolderType.SENT:
+            case SENT:
                 return "mail-sent-symbolic";
 
-            case Geary.SpecialFolderType.FLAGGED:
+            case FLAGGED:
                 return "starred-symbolic";
 
-            case Geary.SpecialFolderType.IMPORTANT:
+            case IMPORTANT:
                 return "task-due-symbolic";
 
-            case Geary.SpecialFolderType.ALL_MAIL:
-            case Geary.SpecialFolderType.ARCHIVE:
+            case ALL_MAIL:
+            case ARCHIVE:
                 return "mail-archive-symbolic";
 
-            case Geary.SpecialFolderType.JUNK:
+            case JUNK:
                 return "dialog-warning-symbolic";
 
-            case Geary.SpecialFolderType.TRASH:
+            case TRASH:
                 return "user-trash-symbolic";
 
-            case Geary.SpecialFolderType.OUTBOX:
+            case OUTBOX:
                 return "mail-outbox-symbolic";
 
             default:
@@ -119,16 +119,16 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
 
     public override int get_count() {
-        switch (folder.special_folder_type) {
+        switch (folder.used_as) {
             // for Drafts and Outbox, interested in showing total count, not unread count
-            case Geary.SpecialFolderType.DRAFTS:
-            case Geary.SpecialFolderType.OUTBOX:
+            case DRAFTS:
+            case OUTBOX:
                 return folder.properties.email_total;
 
             // only show counts for Inbox, Junk, and user folders
-            case Geary.SpecialFolderType.INBOX:
-            case Geary.SpecialFolderType.JUNK:
-            case Geary.SpecialFolderType.NONE:
+            case INBOX:
+            case JUNK:
+            case NONE:
                 return folder.properties.email_unread;
 
             // otherwise, to avoid clutter, no counts displayed (but are available in tooltip)

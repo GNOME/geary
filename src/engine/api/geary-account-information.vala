@@ -369,7 +369,7 @@ public class Geary.AccountInformation : BaseObject {
     }
 
      /**
-     * Returns the configured path for a special folder type.
+     * Returns the configured path for a special folder use.
      *
      * This is used when Geary has found or created a special folder
      * for this account. The path will be null if Geary has always
@@ -378,22 +378,22 @@ public class Geary.AccountInformation : BaseObject {
      * JUNK, and TRASH special folder types are valid to pass to this
      * function.
      */
-    public Geary.FolderPath? get_special_folder_path(Geary.SpecialFolderType special) {
+    public Geary.FolderPath? get_special_folder_path(Folder.SpecialUse special) {
         switch (special) {
-            case Geary.SpecialFolderType.DRAFTS:
-                return this.drafts_folder_path;
+        case DRAFTS:
+            return this.drafts_folder_path;
 
-            case Geary.SpecialFolderType.SENT:
-                return this.sent_folder_path;
+        case SENT:
+            return this.sent_folder_path;
 
-            case Geary.SpecialFolderType.JUNK:
-                return this.junk_folder_path;
+        case JUNK:
+            return this.junk_folder_path;
 
-            case Geary.SpecialFolderType.TRASH:
-                return this.trash_folder_path;
+        case TRASH:
+            return this.trash_folder_path;
 
-            case Geary.SpecialFolderType.ARCHIVE:
-                return this.archive_folder_path;
+        case ARCHIVE:
+            return this.archive_folder_path;
         }
 
         return null;
@@ -407,33 +407,33 @@ public class Geary.AccountInformation : BaseObject {
      * ARCHIVE special folder types are valid to pass to this
      * function.
      */
-    public void set_special_folder_path(Geary.SpecialFolderType special,
-                                        Geary.FolderPath? new_path) {
+    public void set_special_folder_path(Folder.SpecialUse special,
+                                        FolderPath? new_path) {
         Geary.FolderPath? old_path = null;
         switch (special) {
-            case Geary.SpecialFolderType.DRAFTS:
-                old_path = this.drafts_folder_path;
-                this.drafts_folder_path = new_path;
+        case DRAFTS:
+            old_path = this.drafts_folder_path;
+            this.drafts_folder_path = new_path;
             break;
 
-            case Geary.SpecialFolderType.SENT:
-                old_path = this.sent_folder_path;
-                this.sent_folder_path = new_path;
+        case SENT:
+            old_path = this.sent_folder_path;
+            this.sent_folder_path = new_path;
             break;
 
-            case Geary.SpecialFolderType.JUNK:
-                old_path = this.junk_folder_path;
-                this.junk_folder_path = new_path;
+        case JUNK:
+            old_path = this.junk_folder_path;
+            this.junk_folder_path = new_path;
             break;
 
-            case Geary.SpecialFolderType.TRASH:
-                old_path = this.trash_folder_path;
-                this.trash_folder_path = new_path;
+        case TRASH:
+            old_path = this.trash_folder_path;
+            this.trash_folder_path = new_path;
             break;
 
-            case Geary.SpecialFolderType.ARCHIVE:
-                old_path = this.archive_folder_path;
-                this.archive_folder_path = new_path;
+        case ARCHIVE:
+            old_path = this.archive_folder_path;
+            this.archive_folder_path = new_path;
             break;
         }
 

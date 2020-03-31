@@ -42,14 +42,14 @@ class Geary.App.ConversationMonitorTest : TestCase {
             this.account,
             null,
             this.folder_root.get_child("base"),
-            SpecialFolderType.NONE,
+            NONE,
             null
         );
         this.other_folder = new MockFolder(
             this.account,
             null,
             this.folder_root.get_child("other"),
-            SpecialFolderType.NONE,
+            NONE,
             null
         );
     }

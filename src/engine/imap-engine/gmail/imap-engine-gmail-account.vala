@@ -9,11 +9,11 @@
 private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
 
     // Archive is handled specially, so don't require it
-    private const Geary.SpecialFolderType[] SUPPORTED_SPECIAL_FOLDERS = {
-        Geary.SpecialFolderType.DRAFTS,
-        Geary.SpecialFolderType.SENT,
-        Geary.SpecialFolderType.JUNK,
-        Geary.SpecialFolderType.TRASH,
+    private const Folder.SpecialUse[] SUPPORTED_SPECIAL_FOLDERS = {
+        DRAFTS,
+        SENT,
+        JUNK,
+        TRASH,
     };
 
 
@@ -45,36 +45,36 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         base(config, local, incoming_remote, outgoing_remote);
     }
 
-    protected override Geary.SpecialFolderType[] get_supported_special_folders() {
+    protected override Folder.SpecialUse[] get_supported_special_folders() {
         return SUPPORTED_SPECIAL_FOLDERS;
     }
 
     protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {
         FolderPath path = local_folder.get_path();
-        SpecialFolderType type;
+        Folder.SpecialUse use = NONE;
         if (Imap.MailboxSpecifier.folder_path_is_inbox(path)) {
-            type = SpecialFolderType.INBOX;
+            use = INBOX;
         } else {
-            type = local_folder.get_properties().attrs.get_special_folder_type();
+            use = local_folder.get_properties().attrs.get_special_use();
             // There can be only one Inbox
-            if (type == SpecialFolderType.INBOX) {
-                type = SpecialFolderType.NONE;
+            if (use == INBOX) {
+                use = NONE;
             }
         }
 
-        switch (type) {
-            case SpecialFolderType.ALL_MAIL:
-                return new GmailAllMailFolder(this, local_folder, type);
+        switch (use) {
+            case ALL_MAIL:
+                return new GmailAllMailFolder(this, local_folder);
 
-            case SpecialFolderType.DRAFTS:
-                return new GmailDraftsFolder(this, local_folder, type);
+            case DRAFTS:
+                return new GmailDraftsFolder(this, local_folder);
 
-            case SpecialFolderType.JUNK:
-            case SpecialFolderType.TRASH:
-                return new GmailSpamTrashFolder(this, local_folder, type);
+            case JUNK:
+            case TRASH:
+                return new GmailSpamTrashFolder(this, local_folder, use);
 
             default:
-                return new GmailFolder(this, local_folder, type);
+                return new GmailFolder(this, local_folder, use);
         }
     }
 

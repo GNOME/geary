@@ -40,7 +40,6 @@ geary_engine_vala_sources = files(
   'api/geary-search-query.vala',
   'api/geary-service-information.vala',
   'api/geary-service-provider.vala',
-  'api/geary-special-folder-type.vala',
 
   'app/app-conversation.vala',
   'app/app-conversation-monitor.vala',

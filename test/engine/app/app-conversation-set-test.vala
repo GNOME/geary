@@ -33,7 +33,7 @@ class Geary.App.ConversationSetTest : TestCase {
             null,
             null,
             this.folder_root.get_child("test"),
-            SpecialFolderType.NONE,
+            NONE,
             null
         );
         this.test = new ConversationSet(this.base_folder);

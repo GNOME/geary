@@ -423,14 +423,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * Returns the list of folders that disqualify emails from conversations.
      */
     internal Gee.Collection<Geary.FolderPath> get_search_folder_blacklist() {
-        Geary.SpecialFolderType[] blacklisted_folder_types = {
-            Geary.SpecialFolderType.JUNK,
-            Geary.SpecialFolderType.TRASH,
-            Geary.SpecialFolderType.DRAFTS,
+        Folder.SpecialUse[] blacklisted_folder_types = {
+            JUNK,
+            TRASH,
+            DRAFTS,
         };
 
-        Gee.ArrayList<Geary.FolderPath?> blacklist = new Gee.ArrayList<Geary.FolderPath?>();
-        foreach (Geary.SpecialFolderType type in blacklisted_folder_types) {
+        var blacklist = new Gee.ArrayList<Geary.FolderPath?>();
+        foreach (var type in blacklisted_folder_types) {
             Geary.Folder? blacklist_folder = this.base_folder.account.get_special_folder(type);
             if (blacklist_folder != null) {
                 blacklist.add(blacklist_folder.path);

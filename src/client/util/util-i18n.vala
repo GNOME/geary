@@ -255,7 +255,7 @@ namespace Util.I18n {
      * folder path step is returned.
      */
     public string? to_folder_display_name(Geary.Folder folder) {
-        var name = to_folder_type_display_name(folder.special_folder_type);
+        var name = to_folder_type_display_name(folder.used_as);
         if (Geary.String.is_empty_or_whitespace(name)) {
             name = folder.path.name;
         }
@@ -265,8 +265,8 @@ namespace Util.I18n {
     /**
      * Returns the localised name for a specific folder type, if any.
      */
-    public unowned string? to_folder_type_display_name(Geary.SpecialFolderType type) {
-        switch (type) {
+    public unowned string? to_folder_type_display_name(Geary.Folder.SpecialUse use) {
+        switch (use) {
             case INBOX:
                 return _("Inbox");
 

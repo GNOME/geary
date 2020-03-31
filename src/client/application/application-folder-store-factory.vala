@@ -118,8 +118,8 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
         private string _display_name;
 
-        public Geary.SpecialFolderType folder_type {
-            get { return this.backing.special_folder_type; }
+        public Geary.Folder.SpecialUse used_as {
+            get { return this.backing.used_as; }
         }
 
         public Plugin.Account? account {
@@ -149,7 +149,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
 
         internal void folder_type_changed() {
-            notify_property("folder-type");
+            notify_property("used-as");
             this._display_name = Util.I18n.to_folder_display_name(this.backing);
             notify_property("display-name");
         }
@@ -235,8 +235,8 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             account.folders_available_unavailable.connect(
                 on_folders_available_unavailable
             );
-            account.folders_special_type.connect(
-                on_folders_type_changed
+            account.folders_use_changed.connect(
+                on_folders_use_changed
             );
             add_folders(account.list_folders());
         } catch (GLib.Error err) {
@@ -253,8 +253,8 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             account.folders_available_unavailable.disconnect(
                 on_folders_available_unavailable
             );
-            account.folders_special_type.disconnect(
-                on_folders_type_changed
+            account.folders_use_changed.disconnect(
+                on_folders_use_changed
             );
             remove_folders(account.list_folders());
             this.accounts.unset(removed);
@@ -320,8 +320,8 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
     }
 
-    private void on_folders_type_changed(Geary.Account account,
-                                         Gee.Collection<Geary.Folder> changed) {
+    private void on_folders_use_changed(Geary.Account account,
+                                        Gee.Collection<Geary.Folder> changed) {
         var folders = to_plugin_folders(changed);
         foreach (FolderImpl folder in folders) {
             folder.folder_type_changed();

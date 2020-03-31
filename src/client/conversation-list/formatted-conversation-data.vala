@@ -121,7 +121,7 @@ public class FormattedConversationData : Geary.BaseObject {
         this.config = config;
         this.conversation = conversation;
         this.account_owner_emails = account_owner_emails;
-        use_to = (folder != null) && folder.special_folder_type.is_outgoing();
+        use_to = (folder != null) && folder.used_as.is_outgoing();
 
         // Load preview-related data.
         update_date_string();

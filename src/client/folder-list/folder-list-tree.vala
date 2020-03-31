@@ -51,7 +51,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
             entry.set_has_new(has_new);
         }
 
-        if (folder.special_folder_type == INBOX &&
+        if (folder.used_as == INBOX &&
             has_branch(inboxes_branch)) {
             entry = inboxes_branch.get_entry_for_account(folder.account);
             if (entry != null) {
@@ -105,7 +105,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
         if (account_branches.size > 1 && !has_branch(inboxes_branch))
             graft(inboxes_branch, INBOX_ORDINAL); // The Inboxes branch comes first.
-        if (folder.special_folder_type == Geary.SpecialFolderType.INBOX)
+        if (folder.used_as == INBOX)
             inboxes_branch.add_inbox(folder);
 
         account_branch.add_folder(folder);
@@ -132,7 +132,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         }
 
         // if Inbox, remove from inboxes branch, selected or not
-        if (folder.special_folder_type == Geary.SpecialFolderType.INBOX)
+        if (folder.used_as == INBOX)
             inboxes_branch.remove_inbox(folder.account);
 
         account_branch.remove_folder(folder);
@@ -163,7 +163,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     public void select_folder(Geary.Folder to_select) {
         if (this.selected != to_select) {
             bool selected = false;
-            if (to_select.special_folder_type == INBOX) {
+            if (to_select.used_as == INBOX) {
                 selected = select_inbox(to_select.account);
             }
 

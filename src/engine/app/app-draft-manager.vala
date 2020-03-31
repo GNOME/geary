@@ -205,7 +205,7 @@ public class Geary.App.DraftManager : BaseObject {
         if (current_draft_id != null)
             draft_state = DraftState.STORED;
 
-        drafts_folder = account.get_special_folder(SpecialFolderType.DRAFTS);
+        drafts_folder = account.get_special_folder(DRAFTS);
         if (drafts_folder == null)
             throw new EngineError.NOT_FOUND("%s: No drafts folder found", to_string());
 

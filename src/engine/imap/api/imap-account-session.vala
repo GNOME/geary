@@ -91,14 +91,14 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
      * used to specify the type of the new folder.
      */
     public async void create_folder_async(FolderPath path,
-                                          Geary.SpecialFolderType? type,
+                                          Geary.Folder.SpecialUse? use,
                                           Cancellable? cancellable)
     throws Error {
         ClientSession session = claim_session();
         MailboxSpecifier mailbox = session.get_mailbox_for_path(path);
         bool can_create_special = session.capabilities.has_capability(Capabilities.CREATE_SPECIAL_USE);
-        CreateCommand cmd = (type != null && can_create_special)
-            ? new CreateCommand.special_use(mailbox, type)
+        CreateCommand cmd = (use != null && can_create_special)
+            ? new CreateCommand.special_use(mailbox, use)
             : new CreateCommand(mailbox);
 
         StatusResponse response = yield send_command_async(
