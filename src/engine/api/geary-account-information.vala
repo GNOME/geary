@@ -180,8 +180,8 @@ public class Geary.AccountInformation : BaseObject {
     /** Sent special folder path. */
     public Geary.FolderPath? sent_folder_path { get; set; default = null; }
 
-    /** Spam special folder path. */
-    public Geary.FolderPath? spam_folder_path { get; set; default = null; }
+    /** Junk special folder path. */
+    public Geary.FolderPath? junk_folder_path { get; set; default = null; }
 
     /** Trash special folder path. */
     public Geary.FolderPath? trash_folder_path { get; set; default = null; }
@@ -289,7 +289,7 @@ public class Geary.AccountInformation : BaseObject {
 
         this.drafts_folder_path = other.drafts_folder_path;
         this.sent_folder_path = other.sent_folder_path;
-        this.spam_folder_path = other.spam_folder_path;
+        this.junk_folder_path = other.junk_folder_path;
         this.trash_folder_path = other.trash_folder_path;
         this.archive_folder_path = other.archive_folder_path;
 
@@ -369,31 +369,31 @@ public class Geary.AccountInformation : BaseObject {
     }
 
      /**
-     * Returns the configured path for a special folder type.
+     * Returns the configured path for a special folder use.
      *
      * This is used when Geary has found or created a special folder
      * for this account. The path will be null if Geary has always
      * been told about the special folders by the server, and hasn't
      * had to go looking for them.  Only the ARCHIVE, DRAFTS, SENT,
-     * SPAM, and TRASH special folder types are valid to pass to this
+     * JUNK, and TRASH special folder types are valid to pass to this
      * function.
      */
-    public Geary.FolderPath? get_special_folder_path(Geary.SpecialFolderType special) {
+    public Geary.FolderPath? get_special_folder_path(Folder.SpecialUse special) {
         switch (special) {
-            case Geary.SpecialFolderType.DRAFTS:
-                return this.drafts_folder_path;
+        case DRAFTS:
+            return this.drafts_folder_path;
 
-            case Geary.SpecialFolderType.SENT:
-                return this.sent_folder_path;
+        case SENT:
+            return this.sent_folder_path;
 
-            case Geary.SpecialFolderType.SPAM:
-                return this.spam_folder_path;
+        case JUNK:
+            return this.junk_folder_path;
 
-            case Geary.SpecialFolderType.TRASH:
-                return this.trash_folder_path;
+        case TRASH:
+            return this.trash_folder_path;
 
-            case Geary.SpecialFolderType.ARCHIVE:
-                return this.archive_folder_path;
+        case ARCHIVE:
+            return this.archive_folder_path;
         }
 
         return null;
@@ -403,37 +403,37 @@ public class Geary.AccountInformation : BaseObject {
      * Sets the configured path for a special folder type.
      *
      * This is only obeyed if the server doesn't tell Geary which
-     * folders are special. Only the DRAFTS, SENT, SPAM, TRASH and
+     * folders are special. Only the DRAFTS, SENT, JUNK, TRASH and
      * ARCHIVE special folder types are valid to pass to this
      * function.
      */
-    public void set_special_folder_path(Geary.SpecialFolderType special,
-                                        Geary.FolderPath? new_path) {
+    public void set_special_folder_path(Folder.SpecialUse special,
+                                        FolderPath? new_path) {
         Geary.FolderPath? old_path = null;
         switch (special) {
-            case Geary.SpecialFolderType.DRAFTS:
-                old_path = this.drafts_folder_path;
-                this.drafts_folder_path = new_path;
+        case DRAFTS:
+            old_path = this.drafts_folder_path;
+            this.drafts_folder_path = new_path;
             break;
 
-            case Geary.SpecialFolderType.SENT:
-                old_path = this.sent_folder_path;
-                this.sent_folder_path = new_path;
+        case SENT:
+            old_path = this.sent_folder_path;
+            this.sent_folder_path = new_path;
             break;
 
-            case Geary.SpecialFolderType.SPAM:
-                old_path = this.spam_folder_path;
-                this.spam_folder_path = new_path;
+        case JUNK:
+            old_path = this.junk_folder_path;
+            this.junk_folder_path = new_path;
             break;
 
-            case Geary.SpecialFolderType.TRASH:
-                old_path = this.trash_folder_path;
-                this.trash_folder_path = new_path;
+        case TRASH:
+            old_path = this.trash_folder_path;
+            this.trash_folder_path = new_path;
             break;
 
-            case Geary.SpecialFolderType.ARCHIVE:
-                old_path = this.archive_folder_path;
-                this.archive_folder_path = new_path;
+        case ARCHIVE:
+            old_path = this.archive_folder_path;
+            this.archive_folder_path = new_path;
             break;
         }
 
@@ -541,7 +541,7 @@ public class Geary.AccountInformation : BaseObject {
                 this.outgoing.equal_to(other.outgoing) &&
                 this.drafts_folder_path == other.drafts_folder_path &&
                 this.sent_folder_path == other.sent_folder_path &&
-                this.spam_folder_path == other.spam_folder_path &&
+                this.junk_folder_path == other.junk_folder_path &&
                 this.trash_folder_path == other.trash_folder_path &&
                 this.archive_folder_path == other.archive_folder_path &&
                 this.config_dir == other.config_dir &&

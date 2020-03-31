@@ -101,7 +101,7 @@ public class Application.PluginManager : GLib.Object {
 
            Geary.Folder? target = this.folders.get_engine_folder(folder);
            if (target != null) {
-               if (!main.prompt_empty_folder(target.special_folder_type)) {
+               if (!main.prompt_empty_folder(target.used_as)) {
                    throw new Plugin.Error.PERMISSION_DENIED(
                        "Permission not granted"
                    );

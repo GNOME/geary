@@ -10,9 +10,8 @@
 
 private class Geary.ImapEngine.GmailAllMailFolder : MinimalFolder, FolderSupport.Remove {
     public GmailAllMailFolder(GmailAccount account,
-                              ImapDB.Folder local_folder,
-                              SpecialFolderType special_folder_type) {
-        base(account, local_folder, special_folder_type);
+                              ImapDB.Folder local_folder) {
+        base(account, local_folder, ALL_MAIL);
     }
 
     public async void

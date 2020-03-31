@@ -9,8 +9,8 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
     FolderSupport.Create, FolderSupport.Remove {
     public GmailFolder(GmailAccount account,
                        ImapDB.Folder local_folder,
-                       SpecialFolderType special_folder_type) {
-        base (account, local_folder, special_folder_type);
+                       Folder.SpecialUse use) {
+        base (account, local_folder, use);
     }
 
     public new async EmailIdentifier?
@@ -31,7 +31,7 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
         // Use move_email_async("All Mail") here; Gmail will do the right thing and report
         // it was copied with the pre-existing All Mail UID (in other words, no actual copy is
         // performed).  This allows for undoing an archive with the same code path as a move.
-        Geary.Folder? all_mail = account.get_special_folder(Geary.SpecialFolderType.ALL_MAIL);
+        Geary.Folder? all_mail = account.get_special_folder(ALL_MAIL);
         if (all_mail != null)
             return yield move_email_async(email_ids, all_mail.path, cancellable);
 
@@ -65,7 +65,7 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
                                 GLib.Cancellable? cancellable)
         throws GLib.Error {
         // Get path to Trash folder
-        Geary.Folder? trash = folder.account.get_special_folder(SpecialFolderType.TRASH);
+        Geary.Folder? trash = folder.account.get_special_folder(TRASH);
         if (trash == null)
             throw new EngineError.NOT_FOUND("%s: Trash folder not found for removal", folder.to_string());
 

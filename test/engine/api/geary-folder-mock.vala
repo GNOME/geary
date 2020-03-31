@@ -20,8 +20,8 @@ public class Geary.MockFolder : Folder, MockObject {
         get { return this._path; }
     }
 
-    public override SpecialFolderType special_folder_type {
-        get { return this._type; }
+    public override Folder.SpecialUse used_as {
+        get { return this._used_as; }
     }
 
     public override ProgressMonitor opening_monitor {
@@ -36,19 +36,19 @@ public class Geary.MockFolder : Folder, MockObject {
     private Account _account;
     private FolderProperties _properties;
     private FolderPath _path;
-    private SpecialFolderType _type;
+    private Folder.SpecialUse _used_as;
     private ProgressMonitor _opening_monitor;
 
 
     public MockFolder(Account? account,
                       FolderProperties? properties,
                       FolderPath? path,
-                      SpecialFolderType type,
+                      Folder.SpecialUse used_as,
                       ProgressMonitor? monitor) {
         this._account = account;
         this._properties = properties ?? new MockFolderPoperties();
         this._path = path;
-        this._type = type;
+        this._used_as = used_as;
         this._opening_monitor = monitor;
     }
 

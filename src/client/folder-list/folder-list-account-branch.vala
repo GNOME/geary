@@ -56,16 +56,10 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         if (a is Sidebar.Grouping || b is Sidebar.Grouping)
             return special_grouping_comparator(a, b);
 
-        assert(a is FolderEntry);
-        assert(b is FolderEntry);
-
         FolderEntry entry_a = (FolderEntry) a;
         FolderEntry entry_b = (FolderEntry) b;
-        Geary.SpecialFolderType type_a = entry_a.folder.special_folder_type;
-        Geary.SpecialFolderType type_b = entry_b.folder.special_folder_type;
-
-        assert(type_a != Geary.SpecialFolderType.NONE);
-        assert(type_b != Geary.SpecialFolderType.NONE);
+        Geary.Folder.SpecialUse type_a = entry_a.folder.used_as;
+        Geary.Folder.SpecialUse type_b = entry_b.folder.used_as;
 
         // Special folders are ordered by their enum value.
         return (int) type_a - (int) type_b;
@@ -83,9 +77,9 @@ public class FolderList.AccountBranch : Sidebar.Branch {
     public void add_folder(Geary.Folder folder) {
         Sidebar.Entry? graft_point = null;
         FolderEntry folder_entry = new FolderEntry(folder);
-        Geary.SpecialFolderType special_folder_type = folder.special_folder_type;
-        if (special_folder_type != Geary.SpecialFolderType.NONE) {
-            if (special_folder_type == Geary.SpecialFolderType.SEARCH)
+        Geary.Folder.SpecialUse used_as = folder.used_as;
+        if (used_as != NONE) {
+            if (used_as == SEARCH)
                 return; // Don't show search folder under the account.
 
             // Special folders go in the root of the account.
@@ -120,7 +114,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
             folder_entries.set(folder.path, folder_entry);
         } else {
             debug("Could not add folder %s of type %s to folder list", folder.to_string(),
-                special_folder_type.to_string());
+                  used_as.to_string());
         }
     }
 

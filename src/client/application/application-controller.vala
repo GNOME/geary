@@ -23,7 +23,7 @@ internal class Application.Controller : Geary.BaseObject {
     public static bool does_folder_support_trash(Geary.Folder? target) {
         return (
             target != null &&
-            target.special_folder_type != TRASH &&
+            target.used_as != TRASH &&
             !target.properties.is_local_only &&
             (target as Geary.FolderSupport.Move) != null
         );
@@ -39,9 +39,9 @@ internal class Application.Controller : Geary.BaseObject {
             return false;
 
         // if folder contains children, we must ensure that there is at least one of the same type
-        Geary.SpecialFolderType type = folder.special_folder_type;
+        Geary.Folder.SpecialUse type = folder.used_as;
         foreach (Geary.Folder other in all) {
-            if (other.special_folder_type == type && other.path.parent == folder.path)
+            if (other.used_as == type && other.path.parent == folder.path)
                 return true;
         }
 
@@ -597,7 +597,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation moved to %s",
                         "Conversations moved to %s",
                         conversations.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(destination)),
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the source folder.
@@ -605,7 +605,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation restored to %s",
                         "Conversations restored to %s",
                         conversations.size
-                    ).printf(source.get_display_name())
+                    ).printf(Util.I18n.to_folder_display_name(source))
                 ),
                 context.cancellable
             );
@@ -613,7 +613,7 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     public async void move_conversations_special(Geary.Folder source,
-                                                 Geary.SpecialFolderType destination,
+                                                 Geary.Folder.SpecialUse destination,
                                                  Gee.Collection<Geary.App.Conversation> conversations)
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
@@ -627,7 +627,7 @@ internal class Application.Controller : Geary.BaseObject {
                 "Conversation restored to %s",
                 "Conversations restored to %s",
                 messages.size
-            ).printf(source.get_display_name());
+            ).printf(Util.I18n.to_folder_display_name(source));
 
             if (destination == ARCHIVE) {
                 Geary.FolderSupport.Archive? archive_source = (
@@ -681,7 +681,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation moved to %s",
                         "Conversations moved to %s",
                         messages.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(dest)),
                     undone_tooltip
                 );
             }
@@ -691,7 +691,7 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     public async void move_messages_special(Geary.Folder source,
-                                            Geary.SpecialFolderType destination,
+                                            Geary.Folder.SpecialUse destination,
                                             Gee.Collection<Geary.App.Conversation> conversations,
                                             Gee.Collection<Geary.EmailIdentifier> messages)
         throws GLib.Error {
@@ -704,7 +704,7 @@ internal class Application.Controller : Geary.BaseObject {
                 "Message restored to %s",
                 "Messages restored to %s",
                 messages.size
-            ).printf(source.get_display_name());
+            ).printf(Util.I18n.to_folder_display_name(source));
 
             if (destination == ARCHIVE) {
                 Geary.FolderSupport.Archive? archive_source = (
@@ -760,7 +760,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Message moved to %s",
                         "Messages moved to %s",
                         messages.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(dest)),
                     undone_tooltip
                 );
             }
@@ -788,7 +788,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation labelled as %s",
                         "Conversations labelled as %s",
                         conversations.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(destination)),
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the destination folder.
@@ -796,7 +796,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation un-labelled as %s",
                         "Conversations un-labelled as %s",
                         conversations.size
-                    ).printf(destination.get_display_name())
+                    ).printf(Util.I18n.to_folder_display_name(destination))
                 ),
                 context.cancellable
             );
@@ -1183,7 +1183,7 @@ internal class Application.Controller : Geary.BaseObject {
 
     private void on_account_email_removed(Geary.Folder folder,
                                           Gee.Collection<Geary.EmailIdentifier> ids) {
-        if (folder.special_folder_type == OUTBOX) {
+        if (folder.used_as == OUTBOX) {
             foreach (MainWindow window in this.application.get_main_windows()) {
                 window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
                 window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
@@ -1254,7 +1254,7 @@ internal class Application.Controller : Geary.BaseObject {
                 }
 
                 GLib.Cancellable cancellable = context.cancellable;
-                if (folder.special_folder_type == INBOX) {
+                if (folder.used_as == INBOX) {
                     if (context.inbox == null) {
                         context.inbox = folder;
                     }
@@ -1270,7 +1270,7 @@ internal class Application.Controller : Geary.BaseObject {
             while (has_prev) {
                 Geary.Folder folder = unavailable_iterator.get();
 
-                if (folder.special_folder_type == INBOX) {
+                if (folder.used_as == INBOX) {
                     context.inbox = null;
                 }
 
@@ -2263,7 +2263,7 @@ private class Application.ArchiveEmailCommand : RevokableCommand {
             // affected, so if the dest is the location, just assume
             // they are for now.
             foreach (var folder in removed) {
-                if (folder.special_folder_type == ARCHIVE) {
+                if (folder.used_as == ARCHIVE) {
                     ret = REMOVE;
                     break;
                 }
@@ -2281,7 +2281,7 @@ private class Application.ArchiveEmailCommand : RevokableCommand {
         // affected, so if the dest is the location, just assume they
         // are for now.
         return (
-            location.special_folder_type == ARCHIVE
+            location.used_as == ARCHIVE
             ? EmailCommand.StateChangePolicy.REMOVE
             : base.email_removed(location, targets)
         );

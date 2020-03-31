@@ -20,7 +20,7 @@ internal class Geary.ContactHarvesterImpl : BaseObject, ContactHarvester {
 
     private const Email.Field REQUIRED_FIELDS = ORIGINATORS | RECEIVERS;
 
-    private const SpecialFolderType[] FOLDER_WHITELIST = {
+    private const Folder.SpecialUse[] FOLDER_WHITELIST = {
         INBOX,
         ARCHIVE,
         SENT,
@@ -30,11 +30,12 @@ internal class Geary.ContactHarvesterImpl : BaseObject, ContactHarvester {
 
     private ContactStore store;
     private Gee.Collection<RFC822.MailboxAddress> owner_mailboxes;
-    private SpecialFolderType location;
+    private Folder.SpecialUse location;
     private bool is_whitelisted;
 
+
     public ContactHarvesterImpl(ContactStore store,
-                                SpecialFolderType location,
+                                Folder.SpecialUse location,
                                 Gee.Collection<RFC822.MailboxAddress> owners) {
         this.store = store;
         this.owner_mailboxes = owners;

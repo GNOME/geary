@@ -63,8 +63,8 @@ public class SpellCheckPopover {
             box.margin = 6;
             box.margin_start = 12;
 
-            lang_name = Util.International.language_name_from_locale(lang_code);
-            country_name = Util.International.country_name_from_locale(lang_code);
+            lang_name = Util.I18n.language_name_from_locale(lang_code);
+            country_name = Util.I18n.country_name_from_locale(lang_code);
 
             string label_text = lang_name;
             Gtk.Label label = new Gtk.Label(label_text);
@@ -216,7 +216,7 @@ public class SpellCheckPopover {
 
     private void setup_popover() {
         // We populate the popover with the list of languages that the user wants to see
-        string[] languages = Util.International.get_available_dictionaries();
+        string[] languages = Util.I18n.get_available_dictionaries();
         string[] enabled_langs = this.config.get_spell_check_languages();
         string[] visible_langs = this.config.get_spell_check_visible_languages();
 

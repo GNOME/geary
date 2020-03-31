@@ -1278,12 +1278,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // XXX should be able to edit draft emails from any
         // conversation. This test should be more like "is in drafts
         // folder"
-        Geary.SpecialFolderType type =
-            this.conversation.base_folder.special_folder_type;
+        Geary.Folder.SpecialUse use = this.conversation.base_folder.used_as;
         bool is_in_folder = this.conversation.is_in_base_folder(email.id);
 
         return (
-            is_in_folder && type == Geary.SpecialFolderType.DRAFTS // ||
+            is_in_folder && use == DRAFTS // ||
             //email.flags.is_draft()
         );
     }

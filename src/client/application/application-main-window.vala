@@ -28,7 +28,7 @@ public class Application.MainWindow :
     public const string ACTION_SHOW_COPY_MENU = "show-copy-menu";
     public const string ACTION_SHOW_MARK_MENU = "show-mark-menu";
     public const string ACTION_SHOW_MOVE_MENU = "show-move-menu";
-    public const string ACTION_TOGGLE_SPAM = "toggle-conversation-spam";
+    public const string ACTION_TOGGLE_JUNK = "toggle-conversation-junk";
     public const string ACTION_TRASH_CONVERSATION = "trash-conversation";
     public const string ACTION_ZOOM = "zoom";
 
@@ -59,7 +59,7 @@ public class Application.MainWindow :
         { ACTION_MARK_AS_UNREAD, on_mark_as_unread },
         { ACTION_MARK_AS_STARRED, on_mark_as_starred },
         { ACTION_MARK_AS_UNSTARRED, on_mark_as_unstarred },
-        { ACTION_TOGGLE_SPAM, on_mark_as_spam_toggle },
+        { ACTION_TOGGLE_JUNK, on_mark_as_junk_toggle },
         // Message viewer
         { ACTION_ZOOM, on_zoom, "s" },
     };
@@ -406,7 +406,7 @@ public class Application.MainWindow :
     /** Keybinding signal for junking the current selection. */
     [Signal (action=true)]
     public virtual signal void junk_conversations() {
-        activate_action(get_window_action(ACTION_TOGGLE_SPAM));
+        activate_action(get_window_action(ACTION_TOGGLE_JUNK));
     }
 
     /** Keybinding signal for trashing the current selection. */
@@ -593,7 +593,7 @@ public class Application.MainWindow :
             /// substitution being the currently selected folder name,
             /// the second being the selected account name.
             title = _("%s — %s").printf(
-                this.selected_folder.get_display_name(),
+                Util.I18n.to_folder_display_name(this.selected_folder),
                 this.selected_folder.account.information.display_name
             );
         }
@@ -606,7 +606,7 @@ public class Application.MainWindow :
         );
         this.main_toolbar.folder = (
             this.selected_folder != null
-            ? this.selected_folder.get_display_name()
+            ? Util.I18n.to_folder_display_name(this.selected_folder)
             : ""
         );
     }
@@ -705,12 +705,12 @@ public class Application.MainWindow :
                 // Prefer the inboxes branch if it is a thing, but
                 // only for non-interactive calls
                 if (is_interactive ||
-                    (to_select.special_folder_type != INBOX ||
+                    (to_select.used_as != INBOX ||
                      !this.folder_list.select_inbox(to_select.account))) {
                     this.folder_list.select_folder(to_select);
                 }
 
-                if (to_select.special_folder_type == SEARCH) {
+                if (to_select.used_as == SEARCH) {
                     this.previous_non_search_folder = to_select;
                 }
             } else {
@@ -963,7 +963,7 @@ public class Application.MainWindow :
         this.search_open = new GLib.Cancellable();
 
         if (this.previous_non_search_folder != null &&
-            this.selected_folder.special_folder_type == SEARCH) {
+            this.selected_folder.used_as == SEARCH) {
             this.select_folder.begin(
                 this.previous_non_search_folder, is_interactive
             );
@@ -1036,7 +1036,7 @@ public class Application.MainWindow :
             if (this.selected_folder != null &&
                 this.selected_folder.account == to_remove.account) {
                 bool is_account_search_active = (
-                    this.selected_folder.special_folder_type == SEARCH
+                    this.selected_folder.used_as == SEARCH
                 );
 
                 yield select_folder(to_select, false);
@@ -1076,15 +1076,15 @@ public class Application.MainWindow :
             this.main_toolbar.copy_folder_menu.add_folder(to_add);
             this.main_toolbar.move_folder_menu.add_folder(to_add);
         }
-        to_add.special_folder_type_changed.connect(
-            on_special_folder_type_changed
+        to_add.use_changed.connect(
+            on_use_changed
         );
     }
 
     /** Removes a folder from the window. */
     private void remove_folder(Geary.Folder to_remove) {
-        to_remove.special_folder_type_changed.disconnect(
-            on_special_folder_type_changed
+        to_remove.use_changed.disconnect(
+            on_use_changed
         );
         if (to_remove.account == this.selected_account) {
             this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
@@ -1283,15 +1283,14 @@ public class Application.MainWindow :
         return base.key_release_event(event);
     }
 
-    internal bool prompt_empty_folder(Geary.SpecialFolderType type) {
+    internal bool prompt_empty_folder(Geary.Folder.SpecialUse type) {
+        var folder_name = Util.I18n.to_folder_type_display_name(type);
         ConfirmationDialog dialog = new ConfirmationDialog(
             this,
-            _("Empty all email from your %s folder?").printf(
-                type.get_display_name()
-            ),
+            _("Empty all email from your %s folder?").printf(folder_name),
             _("This removes the email from Geary and your email server.") +
             "  <b>" + _("This cannot be undone.") + "</b>",
-            _("Empty %s").printf(type.get_display_name()),
+            _("Empty %s").printf(folder_name),
             "destructive-action"
         );
         dialog.use_secondary_markup(true);
@@ -1617,7 +1616,7 @@ public class Application.MainWindow :
         if (!this.has_composer) {
             if (this.conversations.size == 0) {
                 // Let the user know if there's no available conversations
-                if (this.selected_folder.special_folder_type == SEARCH) {
+                if (this.selected_folder.used_as == SEARCH) {
                     this.conversation_viewer.show_empty_search();
                 } else {
                     this.conversation_viewer.show_empty_folder();
@@ -1682,9 +1681,9 @@ public class Application.MainWindow :
         /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
         // except for Drafts and Outbox, where we show total count
         int count;
-        switch (this.selected_folder.special_folder_type) {
-            case Geary.SpecialFolderType.DRAFTS:
-            case Geary.SpecialFolderType.OUTBOX:
+        switch (this.selected_folder.used_as) {
+            case DRAFTS:
+            case OUTBOX:
                 count = this.selected_folder.properties.email_total;
             break;
 
@@ -1693,10 +1692,12 @@ public class Application.MainWindow :
             break;
         }
 
-        if (count > 0)
-            this.main_toolbar.folder = _("%s (%d)").printf(this.selected_folder.get_display_name(), count);
-        else
-            this.main_toolbar.folder = this.selected_folder.get_display_name();
+        var folder_name = Util.I18n.to_folder_display_name(this.selected_folder);
+        this.main_toolbar.folder = (
+            count > 0
+            ? _("%s (%d)").printf(folder_name, count)
+            : folder_name
+        );
     }
 
     private void update_conversation_actions(ConversationCount count) {
@@ -1711,7 +1712,7 @@ public class Application.MainWindow :
             sensitive &&
             !multiple &&
             this.selected_folder != null &&
-            this.selected_folder.special_folder_type != DRAFTS
+            this.selected_folder.used_as != DRAFTS
         );
         get_window_action(ACTION_REPLY_CONVERSATION).set_enabled(reply_sensitive);
         get_window_action(ACTION_REPLY_ALL_CONVERSATION).set_enabled(reply_sensitive);
@@ -1990,9 +1991,9 @@ public class Application.MainWindow :
         }
     }
 
-    private void on_special_folder_type_changed(Geary.Folder folder,
-                                                Geary.SpecialFolderType old_type,
-                                                Geary.SpecialFolderType new_type) {
+    private void on_use_changed(Geary.Folder folder,
+                                Geary.Folder.SpecialUse old_type,
+                                Geary.Folder.SpecialUse new_type) {
         // Update the main window
         this.folder_list.remove_folder(folder);
         this.folder_list.add_folder(folder);
@@ -2117,7 +2118,7 @@ public class Application.MainWindow :
 
     private void on_conversation_activated(Geary.App.Conversation activated) {
         if (this.selected_folder != null) {
-            if (this.selected_folder.special_folder_type != DRAFTS) {
+            if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
                     this.selected_folder,
                     this.conversation_list_view.copy_selected()
@@ -2235,11 +2236,13 @@ public class Application.MainWindow :
         get_window_action(ACTION_MARK_AS_STARRED).set_enabled(unstarred_selected);
         get_window_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
 
-        // If we're in Drafts/Outbox, we also shouldn't set a message as SPAM.
-        bool in_spam_folder = selected_folder.special_folder_type == Geary.SpecialFolderType.SPAM;
-        get_window_action(ACTION_TOGGLE_SPAM).set_enabled(!in_spam_folder &&
-            selected_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
-            selected_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
+        // If we're in Drafts/Outbox, we also shouldn't set a message as junk
+        bool in_junk_folder = (selected_folder.used_as == JUNK);
+        get_window_action(ACTION_TOGGLE_JUNK).set_enabled(
+            !in_junk_folder &&
+            selected_folder.used_as != DRAFTS &&
+            selected_folder.used_as != OUTBOX
+        );
     }
 
     private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
@@ -2338,13 +2341,13 @@ public class Application.MainWindow :
         }
     }
 
-    private void on_mark_as_spam_toggle() {
+    private void on_mark_as_junk_toggle() {
         Geary.Folder? source = this.selected_folder;
         if (source != null) {
-            Geary.SpecialFolderType destination =
-                (source.special_folder_type != SPAM)
-                ? Geary.SpecialFolderType.SPAM
-                : Geary.SpecialFolderType.INBOX;
+            Geary.Folder.SpecialUse destination =
+                (source.used_as != JUNK)
+                ? Geary.Folder.SpecialUse.JUNK
+                : Geary.Folder.SpecialUse.INBOX;
             this.controller.move_conversations_special.begin(
                 source,
                 destination,
@@ -2423,7 +2426,7 @@ public class Application.MainWindow :
         if (source != null) {
             this.controller.move_conversations_special.begin(
                 source,
-                Geary.SpecialFolderType.TRASH,
+                TRASH,
                 this.conversation_list_view.copy_selected(),
                 (obj, res) => {
                     try {
@@ -2455,8 +2458,6 @@ public class Application.MainWindow :
             );
         }
     }
-
-    // Individual conversation email view action callbacks
 
     private void on_email_loaded(ConversationListBox view,
                                  Geary.Email loaded) {

@@ -78,14 +78,14 @@ public class Plugin.SpecialFolders :
     }
 
     private void update_folder(Folder target) {
-        switch (target.folder_type) {
+        switch (target.used_as) {
         case TRASH:
             this.folders.add_folder_info_bar(
                 target, get_folder_info_bar(target), PRIORITY
             );
             break;
 
-        case SPAM:
+        case JUNK:
             this.folders.add_folder_info_bar(
                 target, get_folder_info_bar(target), PRIORITY
             );
@@ -104,7 +104,7 @@ public class Plugin.SpecialFolders :
                     target.identifier, this.cancellable
                 );
                 foreach (var folder in folders) {
-                    if (folder.folder_type == DRAFTS) {
+                    if (folder.used_as == DRAFTS) {
                         is_draft = true;
                         break;
                     }
@@ -133,7 +133,7 @@ public class Plugin.SpecialFolders :
     private InfoBar get_folder_info_bar(Folder target) {
         var bar = this.info_bars.get(target);
         if (bar == null) {
-            bar = new InfoBar(target.folder_type.get_display_name());
+            bar = new InfoBar(target.display_name);
             bar.primary_button = new Button(
                 // Translators: Info bar button label for emptying
                 // trash/spam folders

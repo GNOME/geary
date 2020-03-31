@@ -128,7 +128,7 @@ src/client/util/util-email.vala
 src/client/util/util-files.vala
 src/client/util/util-gio.vala
 src/client/util/util-gtk.vala
-src/client/util/util-international.vala
+src/client/util/util-i18n.vala
 src/client/util/util-js.vala
 src/client/util/util-migrate.vala
 src/client/web-process/web-process-extension.vala
@@ -173,7 +173,6 @@ src/engine/api/geary-revokable.vala
 src/engine/api/geary-search-query.vala
 src/engine/api/geary-service-information.vala
 src/engine/api/geary-service-provider.vala
-src/engine/api/geary-special-folder-type.vala
 src/engine/app/app-conversation-monitor.vala
 src/engine/app/app-conversation.vala
 src/engine/app/app-draft-manager.vala

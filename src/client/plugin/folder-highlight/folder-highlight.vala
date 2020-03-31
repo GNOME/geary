@@ -22,7 +22,7 @@ public class Plugin.FolderHighlight :
     PluginBase, NotificationExtension, FolderExtension, TrustedExtension {
 
 
-    private const Geary.SpecialFolderType[] MONITORED_TYPES = {
+    private const Geary.Folder.SpecialUse[] MONITORED_TYPES = {
         INBOX, NONE
     };
 
@@ -66,7 +66,7 @@ public class Plugin.FolderHighlight :
 
     private void check_folders(Gee.Collection<Folder> folders) {
         foreach (Folder folder in folders) {
-            if (folder.folder_type in MONITORED_TYPES) {
+            if (folder.used_as in MONITORED_TYPES) {
                 this.notifications.start_monitoring_folder(folder);
             } else {
                 this.notifications.stop_monitoring_folder(folder);

@@ -113,7 +113,7 @@ public class Plugin.MessagingMenu :
 
     private void check_folders(Gee.Collection<Folder> folders) {
         foreach (Folder folder in folders) {
-            if (folder.folder_type == INBOX) {
+            if (folder.used_as == INBOX) {
                 this.notifications.start_monitoring_folder(folder);
             } else if (this.notifications.is_monitoring_folder(folder)) {
                 this.notifications.stop_monitoring_folder(folder);

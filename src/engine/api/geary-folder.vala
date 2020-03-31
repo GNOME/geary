@@ -63,6 +63,62 @@
  */
 public abstract class Geary.Folder : BaseObject, Logging.Source {
 
+
+    /**
+     * Specifies the use of a specific folder.
+     *
+     * These are populated from a number of sources, including mailbox
+     * names, protocol hints, and special folder implementations.
+     */
+    public enum SpecialUse {
+
+        /** No special type, likely user-created. */
+        NONE,
+
+        // Well-known concrete folders
+
+        /** Denotes the inbox for the account. */
+        INBOX,
+
+        /** Stores email to be kept. */
+        ARCHIVE,
+
+        /** Stores email that has not yet been sent. */
+        DRAFTS,
+
+        /** Stores spam, malware and other kinds of unwanted email. */
+        JUNK,
+
+        /** Stores email that is waiting to be sent. */
+        OUTBOX,
+
+        /** Stores email that has been sent. */
+        SENT,
+
+        /** Stores email that is to be deleted. */
+        TRASH,
+
+        // Virtual folders
+
+        /** A view of all email in an account. */
+        ALL_MAIL,
+
+        /** A view of all flagged/starred email in an account. */
+        FLAGGED,
+
+        /** A view of email the server thinks is important. */
+        IMPORTANT,
+
+        /** A view of email matching some kind of search criteria. */
+        SEARCH;
+
+        public bool is_outgoing() {
+            return this == SENT || this == OUTBOX;
+        }
+
+    }
+
+
     /**
      * Indicates if a folder has been opened, and if so in which way.
      */
@@ -232,8 +288,8 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     /** The folder path represented by this object. */
     public abstract Geary.FolderPath path { get; }
 
-    /** Determines the type of this folder. */
-    public abstract Geary.SpecialFolderType special_folder_type { get; }
+    /** Determines the special use of this folder. */
+    public abstract SpecialUse used_as { get; }
 
     /** Monitor for notifying of progress when opening the folder. */
     public abstract Geary.ProgressMonitor opening_monitor { get; }
@@ -385,23 +441,13 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     public signal void email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
 
     /**
-    * Fired when the {@link SpecialFolderType} has changed.
+    * Fired when the folder's special use has changed.
     *
-    * This will usually happen when the local object has been updated with data discovered from the
-    * remote account.
+    * This will usually happen when the local object has been updated
+    * with data discovered from the remote account.
     */
-    public signal void special_folder_type_changed(Geary.SpecialFolderType old_type,
-        Geary.SpecialFolderType new_type);
+    public signal void use_changed(SpecialUse old_use, SpecialUse new_use);
 
-    /**
-     * Fired when the Folder's display name has changed.
-     *
-     * @see get_display_name
-     */
-    public signal void display_name_changed();
-
-    protected Folder() {
-    }
 
     protected virtual void notify_opened(Geary.Folder.OpenState state, int count) {
         opened(state, count);
@@ -448,32 +494,9 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
         email_locally_complete(ids);
     }
 
-    /**
-     * In its default implementation, this will also call {@link notify_display_name_changed} since
-     * that's often the case; if not, subclasses should override.
-     */
-    protected virtual void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
-        Geary.SpecialFolderType new_type) {
-        special_folder_type_changed(old_type, new_type);
-
-        // in default implementation, this may also mean the display name changed; subclasses may
-        // override this behavior, but no way to detect this, so notify
-        notify_display_name_changed();
-    }
-
-    protected virtual void notify_display_name_changed() {
-        display_name_changed();
-    }
-
-    /**
-     * Returns a name suitable for displaying to the user.
-     *
-     * Default is to display the name of the Folder's path, unless it's a special folder,
-     * in which case {@link SpecialFolderType.get_display_name} is returned.
-     */
-    public virtual string get_display_name() {
-        return (special_folder_type == Geary.SpecialFolderType.NONE)
-            ? path.name : special_folder_type.get_display_name();
+    protected virtual void notify_use_changed(SpecialUse old_use,
+                                              SpecialUse new_use) {
+        use_changed(old_use, new_use);
     }
 
     /** Determines if a folder has been opened, and if so in which way. */

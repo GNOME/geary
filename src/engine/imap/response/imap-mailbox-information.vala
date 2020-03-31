@@ -77,7 +77,7 @@ public class Geary.Imap.MailboxInformation : BaseObject {
         // Inbox name, otherwise decode it
         MailboxSpecifier? specifier =
             (canonical_inbox &&
-             Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes)
+             Geary.Imap.MailboxAttribute.XLIST_INBOX in attributes)
             ? MailboxSpecifier.inbox
             : new MailboxSpecifier.from_parameter(mailbox);
 
