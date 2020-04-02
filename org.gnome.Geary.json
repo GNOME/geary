@@ -117,6 +117,7 @@
             "buildsystem": "cmake-ninja",
             "config-opts": [
                 "-DCMAKE_BUILD_TYPE=Release",
+                "-DENABLE_CANBERRA=OFF",
                 "-DENABLE_EXAMPLES=OFF",
                 "-DENABLE_GOA=ON",
                 "-DENABLE_GOOGLE=OFF",
