@@ -1212,7 +1212,7 @@ msgstr "Buida tot el correu electrònic de la carpeta %s?"
 #: src/client/application/application-main-window.vala:1337
 msgid "This removes the email from Geary and your email server."
 msgstr ""
-"Això elimina el correu electrònic del Geary i el seu servidor de correu "
+"Això elimina el correu electrònic del Geary i del servidor de correu "
 "electrònic."
 
 #: src/client/application/application-main-window.vala:1338
@@ -1221,8 +1221,9 @@ msgstr "Això no es pot desfer."
 
 #: src/client/application/application-main-window.vala:1339
 #, c-format
+#. N.T.: Buida com a verb. Buida "paperera"
 msgid "Empty %s"
-msgstr "Buit %s"
+msgstr "Buida %s"
 
 #: src/client/application/application-main-window.vala:1669
 #, c-format
@@ -2244,7 +2245,7 @@ msgstr "Safata de sortida"
 
 #: src/engine/api/geary-special-folder-type.vala:54
 msgid "Archive"
-msgstr "Arxiva"
+msgstr "Arxivat"
 
 #. Map of possibly translated search operator names and values
 #. to English/internal names and values. We include the
@@ -2790,11 +2791,11 @@ msgstr "Text ratllat"
 
 #: ui/composer-widget.ui:707
 msgid "Insert bulleted list"
-msgstr "Insereix la llista de pics"
+msgstr "Insereix una llista de pics"
 
 #: ui/composer-widget.ui:731
 msgid "Insert numbered list"
-msgstr "Insereix la llista numerada"
+msgstr "Insereix una llista numerada"
 
 #: ui/composer-widget.ui:764
 msgid "Indent or quote text"
@@ -3508,11 +3509,11 @@ msgstr "_Arxiva"
 
 #: ui/main-toolbar-menus.ui:21
 msgid "Toggle as S_pam"
-msgstr "_Commuta com a correu brossa"
+msgstr "_Marca o desmarca com a correu brossa"
 
 #: ui/main-toolbar-menus.ui:28
 msgid "Empty _Spam…"
-msgstr "Buida _correu brossa…"
+msgstr "Buida el _correu brossa…"
 
 #: ui/main-toolbar-menus.ui:32
 msgid "Empty _Trash…"

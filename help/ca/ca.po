@@ -73,7 +73,7 @@ msgid ""
 " to add an account the first time you run Geary."
 msgstr ""
 "Geary automàticament utilitzarà qualsevol compte de correu electrònic que "
-"hagueu afegit des del panell <app>Comptes en línia</app> de la "
+"hàgeu afegit des del panell <app>Comptes en línia</app> de la "
 "<app>Configuració de GNOME</app>. Si no teniu comptes a <app>Comptes en "
 "línia</app>, se us demanarà que afegiu un compte la primera vegada que "
 "executeu Geary."
@@ -213,7 +213,7 @@ msgstr ""
 #. (itstool) path: page/title
 #: C/archive.page:8
 msgid "Archive, trash and delete messages"
-msgstr "Arxiva, esborra i elimina missatges"
+msgstr "Arxivar, esborrar i eliminar missatges"
 
 #. (itstool) path: page/p
 #: C/archive.page:10
@@ -226,7 +226,7 @@ msgid ""
 msgstr ""
 "Geary us permet arxivar missatges si el vostre servidor ho permet. Fent clic"
 " al botó de la barra d'eines <gui style=\"button\">Arxiva</gui> es mouen les "
-"converses des de la carpeta actual a la carpeta <gui>Arxiu</gui> en la "
+"converses des de la carpeta actual a la carpeta <gui>Arxivats</gui> en la "
 "majoria de serveis de correu, o a <gui>Tot el correu electrònic</gui> a "
 "GMail. Arxivar ajuda a mantenir el vostre correu electrònic organitzat, "
 "movent fora de la vostra vista les respostes i els missatges antics."
@@ -242,7 +242,7 @@ msgid ""
 "folder and click <gui style=\"button\">Delete</gui> there."
 msgstr ""
 "Per a moure converses a la carpeta <gui>Paperera</gui>, seleccioneu-les i feu "
-"clic al botó de la barra d'eines <gui style=\"button\">Paperera</gui>. Per "
+"clic al botó de la barra d'eines <gui style=\"button\">Paperera</gui>. Per a "
 "esborrar les converses definitivament, mantingueu premuda la tecla "
 "<key>Majúscules</key> i feu clic al botó <gui "
 "style=\"button\">Suprimeix</gui> que apareix en el lloc del botó "
@@ -283,7 +283,7 @@ msgstr ""
 "style=\"button\">Paperera</gui> eliminen les converses de la "
 "<gui>Safata d'entrada</gui>, hi ha una diferència important. Fent clic a <gui "
 "style=\"button\">Arxiva</gui> es garanteix que les converses es mantindran "
-"per poder-les recuperar més endavant. Fent clic a <gui "
+"per a poder-les recuperar més endavant. Fent clic a <gui "
 "style=\"button\">Paperera</gui> es provoca que les converses s'ocultin de "
 "<link xref=\"search\"/>, i probablement s'eliminaran en el futur."
 
@@ -300,7 +300,7 @@ msgid ""
 " it so it can be fixed."
 msgstr ""
 "Si sospiteu haver trobat un error a Geary, si us plau <link "
-"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">poseu-nos en "
+"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">poseu-vos en "
 "contacte</link> de forma que es pugui resoldre."
 
 #. (itstool) path: page/p
@@ -464,12 +464,12 @@ msgstr "Contribuir i reportar errors"
 #. (itstool) path: page/title
 #: C/label.page:10
 msgid "Label or move a conversation"
-msgstr "Etiqueta o mou una conversa"
+msgstr "Etiquetar o moure una conversa"
 
 #. (itstool) path: section/title
 #: C/label.page:12
 msgid "Label a conversation"
-msgstr "Etiqueta una conversa"
+msgstr "Etiquetar una conversa"
 
 #. (itstool) path: section/p
 #: C/label.page:13
@@ -621,7 +621,7 @@ msgid ""
 msgstr ""
 "La <em>llista de carpetes</em> mostra totes les <em>carpetes</em> i "
 "<em>etiquetes</em> dels vostres comptes de correu electrònic. Geary utilitza"
-" el terme <em>etiqueta</em> per qualsevol carpeta que hàgiu creat per "
+" el terme <em>etiqueta</em> per qualsevol carpeta que hàgiu creat per a "
 "organitzar els vostres missatges de correu."
 
 #. (itstool) path: section/p
@@ -682,7 +682,7 @@ msgid ""
 "first conversation in a range, then hold down <key>Shift</key> and click the"
 " last conversation."
 msgstr ""
-"Algunes ordres de Geary poden actuar sobre un grup de converses. Per "
+"Algunes ordres de Geary poden actuar sobre un grup de converses. Per a "
 "seleccionar diverses converses, mantingueu premuda la tecla <key>Ctrl</key> "
 "i feu clic a cada conversa de la llista de converses que vulgueu "
 "seleccionar. Alternativament, podeu fer clic al primer element de la "
@@ -922,7 +922,7 @@ msgstr "Cerca operadors"
 #: C/search.page:24
 msgid "Geary supports the following operators to limit the scope of searches:"
 msgstr ""
-"Geary admet els operadors següents per limitar l'abast de les cerques:"
+"Geary admet els operadors següents per a limitar l'abast de les cerques:"
 
 #. (itstool) path: td/p
 #: C/search.page:27
@@ -1168,7 +1168,7 @@ msgid ""
 "toggle a conversation as read or unread, click the circle icon in the "
 "conversation list."
 msgstr ""
-"Geary marca els missatges de forma automàtica mentre els llegiu. Per "
+"Geary marca els missatges de forma automàtica mentre els llegiu. Per a "
 "commutar manualment una conversa entre llegida i no llegida, feu clic a la "
 "icona amb un cercle a la llista de converses."
 
@@ -1180,7 +1180,7 @@ msgid ""
 "conversation(s)."
 msgstr ""
 "Alternativament la <gui>Marca de no llegit</gui> al menú <gui>Marca</gui> a "
-"la barra d'eines es pot fer servir per commutar l'estat de lectura de les "
+"la barra d'eines es pot fer servir per a commutar l'estat de lectura de les "
 "converses seleccionades."
 
 #. (itstool) path: section/p
@@ -1213,7 +1213,7 @@ msgid ""
 " message is read to send, click <gui style=\"button\">Send</gui> or type "
 "<keyseq><key>Ctrl</key><key>Enter</key></keyseq> to send the message."
 msgstr ""
-"Per iniciar una nova conversa per correu electrònic, feu clic al botó <gui "
+"Per a iniciar una nova conversa per correu electrònic, feu clic al botó <gui "
 "style=\"button\">Edita</gui> a la barra d'eines. Escriviu l'adreça de la "
 "gent que ha de rebre el correu al camp text <gui style=\"input\">Per "
 "a</gui>, i l'assumpte  al camp <gui style=\"input\">Assumpte</gui>. A "
@@ -1388,13 +1388,13 @@ msgid ""
 "You may specify a signature to be inserted into the footer of email in the "
 "composer via the <link xref=\"accounts\"/> dialog."
 msgstr ""
-"A l'editor, podeu especificar una signatura per inserir-la com a peu del "
+"A l'editor, podeu especificar una signatura per a inserir-la com a peu del "
 "correu electrònic utilitzant el <link xref=\"accounts\"/> diàleg."
 
 #. (itstool) path: section/title
 #: C/write.page:98
 msgid "Checking spelling"
-msgstr "Comprova l'ortografia"
+msgstr "Comprovar l'ortografia"
 
 #. (itstool) path: section/p
 #: C/write.page:100
@@ -1408,7 +1408,7 @@ msgstr ""
 "diversos idiomes, mentre escriviu. Per a habilitar la correcció ortogràfica, "
 "primer assegureu-vos que l'ordinador tingui instal·lats els diccionaris de "
 "correcció ortogràfica dels idiomes desitjats. Consulteu l'ajuda de "
-"l'ordinador per determinar com instal·lar diccionaris si no hi són presents."
+"l'ordinador per a determinar com instal·lar diccionaris si no hi són presents."
 
 #. (itstool) path: section/p
 #: C/write.page:106
@@ -1424,15 +1424,15 @@ msgstr ""
 "Per a seleccionar idiomes per a les correccions ortogràfiques, feu clic al "
 "botó <gui style=\"button\">Corrector ortogràfic</gui> a la barra d'eines de "
 "format i apareixerà el menú emergent de selecció d'idioma. Feu clic a un "
-"idioma de la llista per activar-lo o desactivar-lo, i feu clic al botó <gui "
-"style=\"button\">-</gui> per eliminar-lo de la llista. Si no apareix un "
+"idioma de la llista per a activar-lo o desactivar-lo, i feu clic al botó <gui "
+"style=\"button\">-</gui> per a eliminar-lo de la llista. Si no apareix un "
 "idioma a la llista, busqueu-lo escrivint-ne el nom al quadre de cerca, "
 "aleshores feu clic al botó <gui style=\"button\">+</gui> per a afegir-lo."
 
 #. (itstool) path: section/title
 #: C/write.page:117
 msgid "Saving drafts and restoring discarded messages"
-msgstr "Desa esborranys i recupera missatges descartats"
+msgstr "Desar esborranys i recuperar missatges descartats"
 
 #. (itstool) path: section/p
 #: C/write.page:119
@@ -1493,7 +1493,7 @@ msgid ""
 msgstr ""
 "Geary també pot enviar missatges de text pla. Al menú desplegable, marqueu o"
 " desmarqueu <gui style=\"menu\">Text enriquit</gui> per a canviar entre el "
-"text de text pla i el mode de text enriquit. El mode text pla és útil per "
+"text de text pla i el mode de text enriquit. El mode text pla és útil per a "
 "enviar missatges de correu electrònic a llistes de distribució que "
 "prohibeixen els missatges de text enriquit (HTML) o per a enviar a correu "
 "electrònic a persones que no utilitzen clients moderns com Geary."
