@@ -1299,26 +1299,28 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void on_remote_images_blocked() {
-        this.remote_images_info_bar = new Components.InfoBar(
-            // Translators: Info bar status message
-            _("Remote images not shown"),
-            // Translators: Info bar description
-            _("Only show remote images from senders you trust.")
-        );
-        var show = this.remote_images_info_bar.add_button(
-            // Translators: Info bar button label
-            _("Show"), 1
-        );
-        this.remote_images_info_bar.add_button(
-            // Translators: Info bar button label
-            _("Always show from sender"), 2
-        );
-        this.remote_images_info_bar.response.connect(on_remote_images_response);
-        var buttons = this.remote_images_info_bar.get_action_area() as Gtk.ButtonBox;
-        if (buttons != null) {
-            buttons.set_child_non_homogeneous(show, true);
+        if (this.remote_images_info_bar == null) {
+            this.remote_images_info_bar = new Components.InfoBar(
+                // Translators: Info bar status message
+                _("Remote images not shown"),
+                // Translators: Info bar description
+                _("Only show remote images from senders you trust.")
+            );
+            var show = this.remote_images_info_bar.add_button(
+                // Translators: Info bar button label
+                _("Show"), 1
+            );
+            this.remote_images_info_bar.add_button(
+                // Translators: Info bar button label
+                _("Always show from sender"), 2
+            );
+            this.remote_images_info_bar.response.connect(on_remote_images_response);
+            var buttons = this.remote_images_info_bar.get_action_area() as Gtk.ButtonBox;
+            if (buttons != null) {
+                buttons.set_child_non_homogeneous(show, true);
+            }
+            this.info_bars.add(this.remote_images_info_bar);
         }
-        this.info_bars.add(this.remote_images_info_bar);
     }
 
     private void on_remote_images_response(Gtk.InfoBar info_bar, int response_id) {
