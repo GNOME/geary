@@ -73,7 +73,7 @@ internal class Application.Controller : Geary.BaseObject {
 
     // Avatar store for the application.
     private Application.AvatarStore avatars = new Application.AvatarStore();
-    
+
     // Primary collection of the application's open accounts
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
@@ -901,6 +901,11 @@ internal class Application.Controller : Geary.BaseObject {
             smtp.sending_monitor.finish.connect(on_sending_finished);
         }
 
+        // Notify before opening so that listeners have a chance to
+        // hook into it before signals start getting fired by folders
+        // becoming available, etc.
+        account_available(context);
+
         bool retry = false;
         do {
             try {
@@ -927,7 +932,6 @@ internal class Application.Controller : Geary.BaseObject {
             }
         } while (retry);
 
-        account_available(context);
         update_account_status();
     }
 
@@ -937,6 +941,8 @@ internal class Application.Controller : Geary.BaseObject {
         if (context != null) {
             debug("Closing account: %s", context.account.information.id);
             Geary.Account account = context.account;
+
+            account_unavailable(context, is_shutdown);
 
             // Guard against trying to close the account twice
             this.accounts.unset(account.information);
@@ -969,8 +975,6 @@ internal class Application.Controller : Geary.BaseObject {
             // Now the account is not in the accounts map, reset any
             // status notifications for it
             update_account_status();
-
-            account_unavailable(context, is_shutdown);
 
             // Stop any background processes
             context.search.clear();
@@ -1246,28 +1250,27 @@ internal class Application.Controller : Geary.BaseObject {
         Geary.Account account,
         Gee.BidirSortedSet<Geary.Folder>? available,
         Gee.BidirSortedSet<Geary.Folder>? unavailable) {
-        AccountContext context = this.accounts.get(account.information);
+        var account_context = this.accounts.get(account.information);
 
         if (available != null && available.size > 0) {
+            var added_contexts = new Gee.LinkedList<FolderContext>();
             foreach (var folder in available) {
                 if (Controller.should_add_folder(available, folder)) {
                     if (folder.used_as == INBOX) {
-                        if (context.inbox == null) {
-                            context.inbox = folder;
+                        if (account_context.inbox == null) {
+                            account_context.inbox = folder;
                         }
                         folder.open_async.begin(
-                            NO_DELAY, context.cancellable
+                            NO_DELAY, account_context.cancellable
                         );
                     }
 
                     var folder_context = new FolderContext(folder);
-                    context.add_folder(folder_context);
-
-                    foreach (MainWindow main in
-                             this.application.get_main_windows()) {
-                        main.add_folder(folder_context);
-                    }
+                    added_contexts.add(folder_context);
                 }
+            }
+            if (!added_contexts.is_empty) {
+                account_context.add_folders(added_contexts);
             }
         }
 
@@ -1275,27 +1278,27 @@ internal class Application.Controller : Geary.BaseObject {
             Gee.BidirIterator<Geary.Folder> unavailable_iterator =
                 unavailable.bidir_iterator();
             bool has_prev = unavailable_iterator.last();
+            var removed_contexts = new Gee.LinkedList<FolderContext>();
             while (has_prev) {
                 Geary.Folder folder = unavailable_iterator.get();
 
                 if (folder.used_as == INBOX) {
-                    context.inbox = null;
+                    account_context.inbox = null;
                 }
 
-                var folder_context = context.get_folder(folder);
+                var folder_context = account_context.get_folder(folder);
                 if (folder_context != null) {
-                    context.remove_folder(folder_context);
-                    foreach (MainWindow main in
-                             this.application.get_main_windows()) {
-                        main.remove_folder(folder_context);
-                    }
+                    removed_contexts.add(folder_context);
                 }
 
                 has_prev = unavailable_iterator.previous();
             }
+            if (!removed_contexts.is_empty) {
+                account_context.remove_folders(removed_contexts);
+            }
 
             // Notify the command stack that folders have gone away
-            context.controller_stack.folders_removed(unavailable);
+            account_context.controller_stack.folders_removed(unavailable);
         }
     }
 

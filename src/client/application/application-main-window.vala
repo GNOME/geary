@@ -985,31 +985,6 @@ public class Application.MainWindow :
         return success;
     }
 
-    /** Adds a folder to the window. */
-    internal void add_folder(FolderContext to_add) {
-        this.folder_list.add_folder(to_add);
-        if (to_add.folder.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.add_folder(to_add.folder);
-            this.main_toolbar.move_folder_menu.add_folder(to_add.folder);
-        }
-        to_add.folder.use_changed.connect(
-            on_use_changed
-        );
-    }
-
-    /** Removes a folder from the window. */
-    internal void remove_folder(FolderContext to_remove) {
-        Geary.Folder folder = to_remove.folder;
-        folder.use_changed.disconnect(
-            on_use_changed
-        );
-        if (folder.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.remove_folder(folder);
-            this.main_toolbar.move_folder_menu.remove_folder(folder);
-        }
-        this.folder_list.remove_folder(to_remove);
-    }
-
     private void add_account(AccountContext to_add) {
         if (!this.accounts.contains(to_add)) {
             this.folder_list.set_user_folders_root_name(
@@ -1024,18 +999,13 @@ public class Application.MainWindow :
                 this.progress_monitor.add(smtp.sending_monitor);
             }
 
+            to_add.folders_available.connect(on_folders_available);
+            to_add.folders_unavailable.connect(on_folders_unavailable);
             to_add.commands.executed.connect(on_command_execute);
             to_add.commands.undone.connect(on_command_undo);
             to_add.commands.redone.connect(on_command_redo);
 
-            foreach (Geary.Folder folder in
-                     Geary.Account.sort_by_path(to_add.account.list_folders())) {
-                var folder_context = to_add.get_folder(folder);
-                if (folder_context != null) {
-                    add_folder(folder_context);
-                }
-            }
-
+            add_folders(to_add.get_folders());
             this.accounts.add(to_add);
         }
     }
@@ -1070,6 +1040,8 @@ public class Application.MainWindow :
             to_remove.commands.executed.disconnect(on_command_execute);
             to_remove.commands.undone.disconnect(on_command_undo);
             to_remove.commands.redone.disconnect(on_command_redo);
+            to_remove.folders_available.disconnect(on_folders_available);
+            to_remove.folders_available.disconnect(on_folders_unavailable);
 
             this.progress_monitor.remove(to_remove.account.background_progress);
             Geary.Smtp.ClientService? smtp = (
@@ -1080,8 +1052,34 @@ public class Application.MainWindow :
             }
 
             // Finally, remove the account and its folders
+            remove_folders(to_remove.get_folders());
             this.folder_list.remove_account(to_remove.account);
             this.accounts.remove(to_remove);
+        }
+    }
+
+    /** Adds a folder to the window. */
+    private void add_folders(Gee.Collection<FolderContext> to_add) {
+        foreach (var context in to_add) {
+            this.folder_list.add_folder(context);
+            if (context.folder.account == this.selected_account) {
+                this.main_toolbar.copy_folder_menu.add_folder(context.folder);
+                this.main_toolbar.move_folder_menu.add_folder(context.folder);
+            }
+            context.folder.use_changed.connect(on_use_changed);
+        }
+    }
+
+    /** Removes a folder from the window. */
+    private void remove_folders(Gee.Collection<FolderContext> to_remove) {
+        foreach (var context in to_remove) {
+            Geary.Folder folder = context.folder;
+            folder.use_changed.disconnect(on_use_changed);
+            if (folder.account == this.selected_account) {
+                this.main_toolbar.copy_folder_menu.remove_folder(folder);
+                this.main_toolbar.move_folder_menu.remove_folder(folder);
+            }
+            this.folder_list.remove_folder(context);
         }
     }
 
@@ -1947,6 +1945,14 @@ public class Application.MainWindow :
             to_select = get_first_inbox();
         }
         this.remove_account.begin(account, to_select);
+    }
+
+    private void on_folders_available(Gee.Collection<FolderContext> available) {
+        add_folders(available);
+    }
+
+    private void on_folders_unavailable(Gee.Collection<FolderContext> unavailable) {
+        remove_folders(unavailable);
     }
 
     private void on_use_changed(Geary.Folder folder,

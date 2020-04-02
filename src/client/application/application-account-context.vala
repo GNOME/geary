@@ -70,6 +70,13 @@ internal class Application.AccountContext : Geary.BaseObject {
         new Gee.HashMap<Geary.FolderPath,FolderContext>();
 
 
+    /** Emitted when folders contexts become available. */
+    public signal void folders_available(Gee.Collection<FolderContext> available);
+
+    /** Emitted when folders contexts become available. */
+    public signal void folders_unavailable(Gee.Collection<FolderContext> unavailable);
+
+
     public AccountContext(Geary.Account account,
                           Geary.App.SearchFolder search,
                           Geary.App.EmailStore emails,
@@ -103,6 +110,13 @@ internal class Application.AccountContext : Geary.BaseObject {
     }
 
     /**
+     * Returns read-only collection of all known folder contexts.
+     */
+    internal Gee.Collection<FolderContext> get_folders() {
+        return this.folders.values.read_only_view;
+    }
+
+    /**
      * Returns context for a folder belonging to this context's account.
      */
     internal FolderContext? get_folder(Geary.Folder target) {
@@ -114,13 +128,19 @@ internal class Application.AccountContext : Geary.BaseObject {
     }
 
     /** Adds a context for a folder belonging to the account. */
-    internal void add_folder(FolderContext to_add) {
-        this.folders.set(to_add.folder.path, to_add);
+    internal void add_folders(Gee.Collection<FolderContext> to_add) {
+        foreach (var context in to_add) {
+            this.folders.set(context.folder.path, context);
+        }
+        folders_available(to_add);
     }
 
     /** Adds a context for a folder belonging to the account. */
-    internal void remove_folder(FolderContext to_remove) {
-        this.folders.unset(to_remove.folder.path);
+    internal void remove_folders(Gee.Collection<FolderContext> to_remove) {
+        foreach (var context in to_remove) {
+            this.folders.unset(context.folder.path);
+        }
+        folders_unavailable(to_remove);
     }
 
 }
