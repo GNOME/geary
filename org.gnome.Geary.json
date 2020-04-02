@@ -117,20 +117,17 @@
             "buildsystem": "cmake-ninja",
             "config-opts": [
                 "-DCMAKE_BUILD_TYPE=Release",
-                "-DENABLE_GTK=ON",
+                "-DENABLE_EXAMPLES=OFF",
                 "-DENABLE_GOA=ON",
-                "-DENABLE_UOA=OFF",
-                "-DENABLE_GOOGLE_AUTH=OFF",
                 "-DENABLE_GOOGLE=OFF",
-                "-DENABLE_WITH_PHONENUMBER=OFF",
+                "-DENABLE_GTK=ON",
+                "-DENABLE_GTK_DOC=OFF",
+                "-DENABLE_INSTALLED_TESTS=OFF",
+                "-DENABLE_INTROSPECTION=ON",
                 "-DENABLE_VALA_BINDINGS=ON",
                 "-DENABLE_WEATHER=OFF",
-                "-DWITH_OPENLDAP=OFF",
                 "-DWITH_LIBDB=OFF",
-                "-DENABLE_INTROSPECTION=ON",
-                "-DENABLE_INSTALLED_TESTS=OFF",
-                "-DENABLE_GTK_DOC=OFF",
-                "-DENABLE_EXAMPLES=OFF"
+                "-DWITH_OPENLDAP=OFF"
             ],
             "sources": [
                 {
