@@ -136,8 +136,10 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
      * Removes all info bars from the stack, hiding the stack.
      */
     public new void remove_all() {
-        this.available.clear();
-        update();
+        if (!this.available.is_empty) {
+            this.available.clear();
+            update();
+        }
     }
 
     private void update() {
