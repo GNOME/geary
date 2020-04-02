@@ -18,12 +18,14 @@ public class FolderList.FolderEntry :
     public FolderEntry(Application.FolderContext context) {
         base(context.folder);
         this.context = context;
+        this.context.notify.connect(on_context_changed);
         this.has_new = false;
         this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].connect(on_counts_changed);
         this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].connect(on_counts_changed);
     }
 
     ~FolderEntry() {
+        this.context.notify.disconnect(on_context_changed);
         this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].disconnect(on_counts_changed);
         this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].disconnect(on_counts_changed);
     }
@@ -108,6 +110,10 @@ public class FolderList.FolderEntry :
     }
 
     private void on_counts_changed() {
+        entry_changed();
+    }
+
+    private void on_context_changed() {
         entry_changed();
     }
 
