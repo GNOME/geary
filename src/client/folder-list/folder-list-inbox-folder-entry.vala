@@ -32,7 +32,7 @@ public class FolderList.InboxFolderEntry : FolderList.FolderEntry {
     private void on_information_changed(Geary.AccountInformation config) {
         if (this.display_name != config.display_name) {
             this.display_name = config.display_name;
-            sidebar_name_changed(this.display_name);
+            entry_changed();
         }
     }
 }

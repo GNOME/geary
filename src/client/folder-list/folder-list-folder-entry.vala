@@ -75,7 +75,7 @@ public class FolderList.FolderEntry :
             return;
 
         this.has_new = has_new;
-        is_emphasized_changed(has_new);
+        entry_changed();
     }
 
     public bool internal_drop_received(Application.MainWindow main_window,
@@ -94,11 +94,6 @@ public class FolderList.FolderEntry :
         return true;
     }
 
-    private void on_counts_changed() {
-        sidebar_count_changed(get_count());
-        sidebar_tooltip_changed(get_sidebar_tooltip());
-    }
-
     public override int get_count() {
         switch (this.context.displayed_count) {
         case TOTAL:
@@ -111,4 +106,9 @@ public class FolderList.FolderEntry :
             return 0;
         }
     }
+
+    private void on_counts_changed() {
+        entry_changed();
+    }
+
 }

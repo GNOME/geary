@@ -481,22 +481,16 @@ public class Sidebar.Tree : Gtk.TreeView {
         assert(!entry_map.has_key(entry));
         entry_map.set(entry, wrapper);
 
-        store.set(assoc_iter, Columns.NAME, get_name_for_entry(entry));
-        store.set(assoc_iter, Columns.TOOLTIP, entry.get_sidebar_tooltip() != null ?
-            Geary.HTML.escape_markup(entry.get_sidebar_tooltip()) : null);
-        store.set(assoc_iter, Columns.WRAPPER, wrapper);
-        store.set(assoc_iter, Columns.COUNTER, entry.get_count());
-        load_entry_icons(assoc_iter);
-
-        entry.sidebar_tooltip_changed.connect(on_sidebar_tooltip_changed);
-
-        entry.sidebar_name_changed.connect(on_sidebar_name_changed);
-        entry.sidebar_count_changed.connect(on_sidebar_count_changed);
-
-        Sidebar.EmphasizableEntry? emphasizable = entry as Sidebar.EmphasizableEntry;
-        if (emphasizable != null)
-            emphasizable.is_emphasized_changed.connect(on_is_emphasized_changed);
-
+        store.set(
+            assoc_iter,
+            Columns.WRAPPER, wrapper,
+            Columns.ICON, entry.get_sidebar_icon(),
+            Columns.NAME, get_name_for_entry(entry),
+            Columns.TOOLTIP, entry.get_sidebar_tooltip() != null ?
+                Geary.HTML.escape_markup(entry.get_sidebar_tooltip()) : null,
+            Columns.COUNTER, entry.get_count()
+        );
+        entry.entry_changed.connect(on_entry_changed);
         entry.grafted(this);
     }
 
@@ -506,15 +500,17 @@ public class Sidebar.Tree : Gtk.TreeView {
         bool removed = entry_map.unset(entry);
         assert(removed);
 
-        EntryWrapper new_wrapper = new EntryWrapper(store, entry, store.get_path(new_iter));
-        entry_map.set(entry, new_wrapper);
-
-        store.set(new_iter, Columns.NAME, get_name_for_entry(entry));
-        store.set(new_iter, Columns.TOOLTIP, Geary.HTML.escape_markup(entry.get_sidebar_tooltip()));
-        store.set(new_iter, Columns.COUNTER, entry.get_count());
-        store.set(new_iter, Columns.WRAPPER, new_wrapper);
-        load_entry_icons(new_iter);
-
+        var new_wrapper = new EntryWrapper(store, entry, store.get_path(new_iter));
+        this.entry_map.set(entry, new_wrapper);
+        this.store.set(
+            new_iter,
+            Columns.WRAPPER, new_wrapper,
+            Columns.ICON, entry.get_sidebar_icon(),
+            Columns.NAME, get_name_for_entry(entry),
+            Columns.TOOLTIP, entry.get_sidebar_tooltip() != null ?
+                Geary.HTML.escape_markup(entry.get_sidebar_tooltip()) : null,
+            Columns.COUNTER, entry.get_count()
+        );
         return new_wrapper;
     }
 
@@ -596,19 +592,10 @@ public class Sidebar.Tree : Gtk.TreeView {
             selected_wrapper = null;
 
         Sidebar.Entry entry = wrapper.entry;
-
         entry.pruned(this);
+        entry.entry_changed.disconnect(on_entry_changed);
 
-        entry.sidebar_tooltip_changed.disconnect(on_sidebar_tooltip_changed);
-        entry.sidebar_name_changed.disconnect(on_sidebar_name_changed);
-        entry.sidebar_count_changed.disconnect(on_sidebar_count_changed);
-
-        Sidebar.EmphasizableEntry? emphasizable = entry as Sidebar.EmphasizableEntry;
-        if (emphasizable != null)
-            emphasizable.is_emphasized_changed.disconnect(on_is_emphasized_changed);
-
-        bool removed = entry_map.unset(entry);
-        assert(removed);
+        this.entry_map.unset(entry);
     }
 
     private void on_branch_entry_added(Sidebar.Branch branch, Sidebar.Entry entry) {
@@ -728,42 +715,21 @@ public class Sidebar.Tree : Gtk.TreeView {
         branch_shown(branch, shown);
     }
 
-    private void on_sidebar_tooltip_changed(Sidebar.Entry entry, string? tooltip) {
-        EntryWrapper? wrapper = get_wrapper(entry);
-        assert(wrapper != null);
-
-        store.set(wrapper.get_iter(), Columns.TOOLTIP, tooltip != null ?
-            Geary.HTML.escape_markup(tooltip) : null);
-    }
-
-    private void rename_entry(Sidebar.Entry entry) {
-        EntryWrapper? wrapper = get_wrapper(entry);
-        assert(wrapper != null);
-
-        store.set(wrapper.get_iter(), Columns.NAME, get_name_for_entry(entry));
-    }
-
-    private void on_sidebar_name_changed(Sidebar.Entry entry, string name) {
-        rename_entry(entry);
-    }
-
-    private void on_is_emphasized_changed(Sidebar.EmphasizableEntry entry, bool is_emphasized) {
-        rename_entry(entry);
-    }
-
-    private void on_sidebar_count_changed(Sidebar.Entry entry, int coun) {
-        EntryWrapper? wrapper = get_wrapper(entry);
-        assert(wrapper != null);
-
-        store.set(wrapper.get_iter(), Columns.COUNTER, entry.get_count());
-    }
-
-    private void load_entry_icons(Gtk.TreeIter iter) {
-        EntryWrapper? wrapper = get_wrapper_at_iter(iter);
-        if (wrapper == null)
-            return;
-        string? icon = wrapper.entry.get_sidebar_icon();
-        store.set(iter, Columns.ICON, icon);
+    private void on_entry_changed(Sidebar.Entry entry) {
+        var wrapper = get_wrapper(entry);
+        if (wrapper != null) {
+            var tooltip = entry.get_sidebar_tooltip();
+            if (tooltip != null) {
+                tooltip = Geary.HTML.escape_markup(tooltip);
+            }
+            store.set(
+                wrapper.get_iter(),
+                Columns.ICON, entry.get_sidebar_icon(),
+                Columns.NAME, get_name_for_entry(entry),
+                Columns.TOOLTIP, tooltip,
+                Columns.COUNTER, entry.get_count()
+            );
+        }
     }
 
     private bool on_selection(Gtk.TreeSelection selection, Gtk.TreeModel model, Gtk.TreePath path,

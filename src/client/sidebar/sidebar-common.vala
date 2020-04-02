@@ -20,7 +20,7 @@ public class Sidebar.Grouping : Geary.BaseObject, Sidebar.Entry, Sidebar.Expanda
 
     public void rename(string name) {
         this.name = name;
-        sidebar_name_changed(name);
+        entry_changed();
     }
 
     public bool is_user_renameable() {
