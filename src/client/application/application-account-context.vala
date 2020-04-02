@@ -66,6 +66,9 @@ internal class Application.AccountContext : Geary.BaseObject {
         get; internal set; default = false;
     }
 
+    private Gee.Map<Geary.FolderPath,FolderContext> folders =
+        new Gee.HashMap<Geary.FolderPath,FolderContext>();
+
 
     public AccountContext(Geary.Account account,
                           Geary.App.SearchFolder search,
@@ -97,6 +100,27 @@ internal class Application.AccountContext : Geary.BaseObject {
             }
         }
         return effective;
+    }
+
+    /**
+     * Returns context for a folder belonging to this context's account.
+     */
+    internal FolderContext? get_folder(Geary.Folder target) {
+        FolderContext? context = null;
+        if (this.account == target.account) {
+            context = this.folders.get(target.path);
+        }
+        return context;
+    }
+
+    /** Adds a context for a folder belonging to the account. */
+    internal void add_folder(FolderContext to_add) {
+        this.folders.set(to_add.folder.path, to_add);
+    }
+
+    /** Adds a context for a folder belonging to the account. */
+    internal void remove_folder(FolderContext to_remove) {
+        this.folders.unset(to_remove.folder.path);
     }
 
 }

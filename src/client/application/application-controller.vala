@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016-2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2016-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -30,15 +30,16 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     /** Determines if folders should be added to main windows. */
-    public static bool should_add_folder(Gee.Collection<Geary.Folder>? all,
-                                         Geary.Folder folder) {
+    private static bool should_add_folder(Gee.Collection<Geary.Folder>? all,
+                                          Geary.Folder folder) {
         // if folder is openable, add it
         if (folder.properties.is_openable != Geary.Trillian.FALSE)
             return true;
         else if (folder.properties.has_children == Geary.Trillian.FALSE)
             return false;
 
-        // if folder contains children, we must ensure that there is at least one of the same type
+        // if folder contains children, we must ensure that there is
+        // at least one of the same type
         Geary.Folder.SpecialUse type = folder.used_as;
         foreach (Geary.Folder other in all) {
             if (other.used_as == type && other.path.parent == folder.path)
@@ -1248,17 +1249,24 @@ internal class Application.Controller : Geary.BaseObject {
         AccountContext context = this.accounts.get(account.information);
 
         if (available != null && available.size > 0) {
-            foreach (Geary.Folder folder in available) {
-                if (!Controller.should_add_folder(available, folder)) {
-                    continue;
-                }
-
-                GLib.Cancellable cancellable = context.cancellable;
-                if (folder.used_as == INBOX) {
-                    if (context.inbox == null) {
-                        context.inbox = folder;
+            foreach (var folder in available) {
+                if (Controller.should_add_folder(available, folder)) {
+                    if (folder.used_as == INBOX) {
+                        if (context.inbox == null) {
+                            context.inbox = folder;
+                        }
+                        folder.open_async.begin(
+                            NO_DELAY, context.cancellable
+                        );
                     }
-                    folder.open_async.begin(NO_DELAY, cancellable);
+
+                    var folder_context = new FolderContext(folder);
+                    context.add_folder(folder_context);
+
+                    foreach (MainWindow main in
+                             this.application.get_main_windows()) {
+                        main.add_folder(folder_context);
+                    }
                 }
             }
         }
@@ -1272,6 +1280,15 @@ internal class Application.Controller : Geary.BaseObject {
 
                 if (folder.used_as == INBOX) {
                     context.inbox = null;
+                }
+
+                var folder_context = context.get_folder(folder);
+                if (folder_context != null) {
+                    context.remove_folder(folder_context);
+                    foreach (MainWindow main in
+                             this.application.get_main_windows()) {
+                        main.remove_folder(folder_context);
+                    }
                 }
 
                 has_prev = unavailable_iterator.previous();

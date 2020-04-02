@@ -11,10 +11,10 @@ public class FolderList.InboxFolderEntry : FolderList.FolderEntry {
     private string display_name = "";
 
 
-    public InboxFolderEntry(Geary.Folder folder) {
-        base(folder);
-        this.display_name = folder.account.information.display_name;
-        folder.account.information.changed.connect(on_information_changed);
+    public InboxFolderEntry(Application.FolderContext context) {
+        base(context);
+        this.display_name = context.folder.account.information.display_name;
+        context.folder.account.information.changed.connect(on_information_changed);
     }
 
     ~InboxFolderEntry() {

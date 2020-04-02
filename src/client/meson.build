@@ -23,6 +23,7 @@ geary_client_vala_sources = files(
   'application/application-controller.vala',
   'application/application-email-plugin-context.vala',
   'application/application-email-store-factory.vala',
+  'application/application-folder-context.vala',
   'application/application-folder-plugin-context.vala',
   'application/application-folder-store-factory.vala',
   'application/application-main-window.vala',

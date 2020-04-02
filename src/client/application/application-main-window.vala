@@ -985,6 +985,31 @@ public class Application.MainWindow :
         return success;
     }
 
+    /** Adds a folder to the window. */
+    internal void add_folder(FolderContext to_add) {
+        this.folder_list.add_folder(to_add);
+        if (to_add.folder.account == this.selected_account) {
+            this.main_toolbar.copy_folder_menu.add_folder(to_add.folder);
+            this.main_toolbar.move_folder_menu.add_folder(to_add.folder);
+        }
+        to_add.folder.use_changed.connect(
+            on_use_changed
+        );
+    }
+
+    /** Removes a folder from the window. */
+    internal void remove_folder(FolderContext to_remove) {
+        Geary.Folder folder = to_remove.folder;
+        folder.use_changed.disconnect(
+            on_use_changed
+        );
+        if (folder.account == this.selected_account) {
+            this.main_toolbar.copy_folder_menu.remove_folder(folder);
+            this.main_toolbar.move_folder_menu.remove_folder(folder);
+        }
+        this.folder_list.remove_folder(to_remove);
+    }
+
     private void add_account(AccountContext to_add) {
         if (!this.accounts.contains(to_add)) {
             this.folder_list.set_user_folders_root_name(
@@ -1003,18 +1028,13 @@ public class Application.MainWindow :
             to_add.commands.undone.connect(on_command_undo);
             to_add.commands.redone.connect(on_command_redo);
 
-            to_add.account.folders_available_unavailable.connect(
-                on_folders_available_unavailable
-            );
-
-            folders_available(
-                to_add.account,
-                Geary.Account.sort_by_path(to_add.account.list_folders())
-            );
-
-            add_folder(
-                ((Geary.Smtp.ClientService) to_add.account.outgoing).outbox
-            );
+            foreach (Geary.Folder folder in
+                     Geary.Account.sort_by_path(to_add.account.list_folders())) {
+                var folder_context = to_add.get_folder(folder);
+                if (folder_context != null) {
+                    add_folder(folder_context);
+                }
+            }
 
             this.accounts.add(to_add);
         }
@@ -1047,10 +1067,6 @@ public class Application.MainWindow :
                 }
             }
 
-            to_remove.account.folders_available_unavailable.disconnect(
-                on_folders_available_unavailable
-            );
-
             to_remove.commands.executed.disconnect(on_command_execute);
             to_remove.commands.undone.disconnect(on_command_undo);
             to_remove.commands.redone.disconnect(on_command_redo);
@@ -1067,30 +1083,6 @@ public class Application.MainWindow :
             this.folder_list.remove_account(to_remove.account);
             this.accounts.remove(to_remove);
         }
-    }
-
-    /** Adds a folder to the window. */
-    private void add_folder(Geary.Folder to_add) {
-        this.folder_list.add_folder(to_add);
-        if (to_add.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.add_folder(to_add);
-            this.main_toolbar.move_folder_menu.add_folder(to_add);
-        }
-        to_add.use_changed.connect(
-            on_use_changed
-        );
-    }
-
-    /** Removes a folder from the window. */
-    private void remove_folder(Geary.Folder to_remove) {
-        to_remove.use_changed.disconnect(
-            on_use_changed
-        );
-        if (to_remove.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
-            this.main_toolbar.move_folder_menu.remove_folder(to_remove);
-        }
-        this.folder_list.remove_folder(to_remove);
     }
 
     private AccountContext? get_selected_account_context() {
@@ -1508,27 +1500,6 @@ public class Application.MainWindow :
                 this.conversation_viewer.show_multiple_selected();
                 break;
             }
-        }
-    }
-
-    private void folders_available(Geary.Account account,
-                                   Gee.BidirSortedSet<Geary.Folder> available) {
-        foreach (Geary.Folder folder in available) {
-            if (Controller.should_add_folder(available, folder)) {
-                add_folder(folder);
-            }
-        }
-    }
-
-    private void folders_unavailable(Geary.Account account,
-                                     Gee.BidirSortedSet<Geary.Folder> unavailable) {
-        var unavailable_iterator = unavailable.bidir_iterator();
-        bool has_prev = unavailable_iterator.last();
-        while (has_prev) {
-            Geary.Folder folder = unavailable_iterator.get();
-            remove_folder(folder);
-
-            has_prev = unavailable_iterator.previous();
         }
     }
 
@@ -1978,36 +1949,34 @@ public class Application.MainWindow :
         this.remove_account.begin(account, to_select);
     }
 
-    private void on_folders_available_unavailable(
-        Geary.Account account,
-        Gee.BidirSortedSet<Geary.Folder>? available,
-        Gee.BidirSortedSet<Geary.Folder>? unavailable
-    ) {
-        if (available != null) {
-            folders_available(account, available);
-        }
-        if (unavailable != null) {
-            folders_unavailable(account, unavailable);
-        }
-    }
-
     private void on_use_changed(Geary.Folder folder,
                                 Geary.Folder.SpecialUse old_type,
                                 Geary.Folder.SpecialUse new_type) {
         // Update the main window
-        this.folder_list.remove_folder(folder);
-        this.folder_list.add_folder(folder);
+        AccountContext? context = this.controller.get_context_for_account(
+            folder.account.information
+        );
+        if (context != null) {
+            FolderContext? folder_context = context.get_folder(folder);
+            if (folder_context != null) {
+                this.folder_list.remove_folder(folder_context);
+                this.folder_list.add_folder(folder_context);
 
-        // Since removing the folder will also remove its children
-        // from the folder list, we need to check for any and re-add
-        // them. See issue #11.
-        try {
-            foreach (Geary.Folder child in
-                     folder.account.list_matching_folders(folder.path)) {
-                this.folder_list.add_folder(child);
+                // Since removing the folder will also remove its children
+                // from the folder list, we need to check for any and re-add
+                // them. See issue #11.
+                try {
+                    foreach (Geary.Folder child in
+                             folder.account.list_matching_folders(folder.path)) {
+                        FolderContext? child_context = context.get_folder(child);
+                        if (child_context != null) {
+                            this.folder_list.add_folder(child_context);
+                        }
+                    }
+                } catch (Error err) {
+                    // Oh well
+                }
             }
-        } catch (Error err) {
-            // Oh well
         }
     }
 
