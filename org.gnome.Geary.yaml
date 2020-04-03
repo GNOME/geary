@@ -137,20 +137,18 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - "-DCMAKE_BUILD_TYPE=Release"
-      - "-DENABLE_GTK=ON"
+      - "-DENABLE_CANBERRA=OFF"
+      - "-DENABLE_EXAMPLES=OFF"
       - "-DENABLE_GOA=ON"
-      - "-DENABLE_UOA=OFF"
-      - "-DENABLE_GOOGLE_AUTH=OFF"
       - "-DENABLE_GOOGLE=OFF"
-      - "-DENABLE_WITH_PHONENUMBER=OFF"
+      - "-DENABLE_GTK=ON"
+      - "-DENABLE_GTK_DOC=OFF"
+      - "-DENABLE_INSTALLED_TESTS=OFF"
+      - "-DENABLE_INTROSPECTION=ON"
       - "-DENABLE_VALA_BINDINGS=ON"
       - "-DENABLE_WEATHER=OFF"
-      - "-DWITH_OPENLDAP=OFF"
       - "-DWITH_LIBDB=OFF"
-      - "-DENABLE_INTROSPECTION=ON"
-      - "-DENABLE_INSTALLED_TESTS=OFF"
-      - "-DENABLE_GTK_DOC=OFF"
-      - "-DENABLE_EXAMPLES=OFF"
+      - "-DWITH_OPENLDAP=OFF"
     sources:
       - type: git
         url: https://gitlab.gnome.org/GNOME/evolution-data-server.git
@@ -174,17 +172,28 @@ modules:
     cleanup:
       - /bin
 
-  # Geary dependency
-  - name: gmime
+  # GSound dependency
+  - name: libcanberra
     sources:
-      - type: git
-        url: https://github.com/jstedfast/gmime.git
+      - type: archive
+        url: http://0pointer.de/lennart/projects/libcanberra/libcanberra-0.30.tar.xz
+        sha256: c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72
+    config-opts:
+      - "--disable-alsa"
+      - "--disable-null"
+      - "--disable-oss"
 
   # Geary dependency
   - name: gsound
     sources:
       - type: git
         url: https://github.com/GNOME/gsound.git
+
+  # Geary dependency
+  - name: gmime
+    sources:
+      - type: git
+        url: https://github.com/jstedfast/gmime.git
 
   # Geary dependency
   - name: libhandy
@@ -225,3 +234,4 @@ modules:
       - type: git
         url: https://gitlab.gnome.org/GNOME/geary.git
         branch: mainline
+
