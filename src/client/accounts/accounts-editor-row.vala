@@ -38,7 +38,7 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
         Gtk.EventBox drag_box = new Gtk.EventBox();
         drag_box.add(
             new Gtk.Image.from_icon_name(
-                "open-menu-symbolic", Gtk.IconSize.BUTTON
+                "list-drag-handle-symbolic", Gtk.IconSize.BUTTON
             )
         );
         this.drag_handle = new Gtk.Grid();
