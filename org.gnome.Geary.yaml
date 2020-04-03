@@ -172,17 +172,28 @@ modules:
     cleanup:
       - /bin
 
-  # Geary dependency
-  - name: gmime
+  # GSound dependency
+  - name: libcanberra
     sources:
-      - type: git
-        url: https://github.com/jstedfast/gmime.git
+      - type: archive
+        url: http://0pointer.de/lennart/projects/libcanberra/libcanberra-0.30.tar.xz
+        sha256: c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72
+    config-opts:
+      - "--disable-alsa"
+      - "--disable-null"
+      - "--disable-oss"
 
   # Geary dependency
   - name: gsound
     sources:
       - type: git
         url: https://github.com/GNOME/gsound.git
+
+  # Geary dependency
+  - name: gmime
+    sources:
+      - type: git
+        url: https://github.com/jstedfast/gmime.git
 
   # Geary dependency
   - name: libhandy
@@ -223,3 +234,4 @@ modules:
       - type: git
         url: https://gitlab.gnome.org/GNOME/geary.git
         branch: mainline
+
