@@ -99,6 +99,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
     }
 
     private Gee.Queue<Gtk.InfoBar> available = new SingletonQueue();
+    private int last_allocated_height = 0;
 
 
     construct {
@@ -136,8 +137,10 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
      * Removes all info bars from the stack, hiding the stack.
      */
     public new void remove_all() {
-        this.available.clear();
-        update();
+        if (!this.available.is_empty) {
+            this.available.clear();
+            update();
+        }
     }
 
     private void update() {
@@ -160,6 +163,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
             // Not currently showing anything and there's nothing to
             // show, so hide the frame
             this.visible = false;
+            this.last_allocated_height = 0;
         }
     }
 
@@ -168,8 +172,11 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
         if (current != null) {
             Gtk.Allocation alloc;
             get_allocation(out alloc);
-            if (alloc.height < 2) {
+            bool shrinking = this.last_allocated_height > alloc.height;
+            this.last_allocated_height = alloc.height;
+            if (shrinking && alloc.height < 2) {
                 this.size_allocate.disconnect(on_allocation_changed);
+                this.available.remove(current);
                 base.remove(current);
                 update();
             }
