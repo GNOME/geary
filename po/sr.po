@@ -1,0 +1,166 @@
+# Serbian translation for gnome-tour.
+# Copyright (C) 2020 gnome-tour's COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-tour package.
+# Марко Костић <marko.m.kostic@gmail.com>, 2020.
+# Марко М. Костић <marko.m.kostic@gmail.com>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-tour master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
+"POT-Creation-Date: 2020-04-01 19:14+0000\n"
+"PO-Revision-Date: 2020-04-04 11:44+0200\n"
+"Last-Translator: Марко М. Костић <marko.m.kostic@gmail.com>\n"
+"Language-Team: Serbian <gnome-sr@googlegroups.org>\n"
+"Language: sr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=n==1? 3 : n%10==1 && n%100!=11 ? 0 : n"
+"%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2\n"
+"X-Generator: Gtranslator 3.36.0\n"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:7
+msgid "GNOME Tour"
+msgstr "Гномов водич"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:8
+msgid "GNOME Tour and Greeter."
+msgstr "Гномова добродошлица и водич."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:10
+msgid "A guided tour and greeter for GNOME."
+msgstr "Водич за Гном."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:15
+msgid "Main Window"
+msgstr "Главни прозор"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:34
+msgid "The GNOME Project"
+msgstr "Гномов пројекат"
+
+#: data/org.gnome.Tour.desktop.in.in:3
+msgid "Tour"
+msgstr "Обилазак"
+
+#: data/org.gnome.Tour.desktop.in.in:4
+msgid "Greeter & Tour"
+msgstr "Водич и обилазак"
+
+#: data/org.gnome.Tour.desktop.in.in:9
+msgid "Gnome;GTK;"
+msgstr "Gnome;GTK;Гном;ГТК;"
+
+#: src/widgets/pages/welcome.rs:34
+msgid ""
+"Hi there! If you are new to GNOME, you can take the tour to learn some "
+"essential features."
+msgstr ""
+"Здраво! Ако нисте користили Гном до сада, можете започети обилазак да бисте "
+"научили основе."
+
+#: src/widgets/pages/welcome.rs:44
+msgid "Take the Tour"
+msgstr "Започни обилазак"
+
+#: src/widgets/pages/welcome.rs:51
+msgid "No Thanks"
+msgstr "Не, хвала"
+
+#: src/widgets/headerbar.rs:30
+msgid "Close"
+msgstr "Затвори"
+
+#: src/widgets/headerbar.rs:32 src/widgets/headerbar.rs:67
+msgid "Next"
+msgstr "Следеће"
+
+#: src/widgets/headerbar.rs:57
+msgid "Welcome Tour"
+msgstr "Обилазак за нове кориснике"
+
+#: src/widgets/window.rs:94
+msgid "Activities Overview"
+msgstr "Преглед активности"
+
+#: src/widgets/window.rs:95
+msgid "Open Activities to start apps"
+msgstr "Отворите Активности за покретање програма"
+
+#: src/widgets/window.rs:96
+msgid "You can also view open windows, search and use workspaces."
+msgstr ""
+"Такође можете погледати отворене прозоре, претраживати и користити радне "
+"просторе."
+
+#: src/widgets/window.rs:101
+msgid "Search"
+msgstr "Претрага"
+
+#: src/widgets/window.rs:102
+msgid "In the Activities Overview, just start typing to search"
+msgstr "У прегледу активности, само започните са куцањем за претраживање"
+
+#: src/widgets/window.rs:103
+msgid ""
+"Search can be used to launch apps, find settings, do calculations and much "
+"more."
+msgstr ""
+"Претрага се може користити за покретање програма, претраживање подешавања, "
+"рачунање и још понешто."
+
+#: src/widgets/window.rs:108
+msgid "Date & Time"
+msgstr "Датум и време"
+
+#: src/widgets/window.rs:109
+msgid "Click the time to see your now and next"
+msgstr "Кликните на време да бисте видели ваше садашње и будуће обавезе"
+
+#: src/widgets/window.rs:110
+msgid ""
+"This includes notifications, media controls, calendar events, the weather "
+"and world clocks."
+msgstr ""
+"У ово су укључена обавештења, управљање пуштањем медија, догађаји из "
+"календара, време и светски сатови."
+
+#: src/widgets/window.rs:115
+msgid "System Menu"
+msgstr "Системски изборник"
+
+#: src/widgets/window.rs:116
+msgid "View system information and settings"
+msgstr "Погледајте податке о систему и подешавања"
+
+#: src/widgets/window.rs:117
+msgid "Get an overview of the system status and quickly change settings."
+msgstr "Погледајте стање система и брзо промените подешавања."
+
+#: src/widgets/window.rs:121
+msgid "Software"
+msgstr "Програми"
+
+#: src/widgets/window.rs:122
+msgid "Find and install apps"
+msgstr "Нађите и инсталирајте програме"
+
+#: src/widgets/window.rs:123
+msgid ""
+"The Software app makes it easy to find and install all the apps you need."
+msgstr ""
+"Програми вам омогућавају да на лак начин нађете и инсталирате потребне "
+"програме."
+
+#: src/widgets/window.rs:128
+msgid "Learn More"
+msgstr "Сазнајте више"
+
+#: src/widgets/window.rs:129
+msgid "That's it! To learn more, see the Help"
+msgstr "То је то! Ако желите да сазнате више, отворите програм Помоћ"
+
+#: src/widgets/window.rs:130
+msgid "The help app contains information, tips and tricks."
+msgstr "Програм за помоћ садржи додатне податке, савете и трикове."
