@@ -84,7 +84,7 @@ ubuntu:
     expire_in: 2 days
 
 flatpak:
-  image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master'
+  image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.36'
   variables:
     APP_ID: org.gnome.Geary.Devel
     FLATPAK_MODULE: geary

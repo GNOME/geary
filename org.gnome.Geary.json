@@ -3,7 +3,7 @@
     "app-id": "org.gnome.Geary.Devel",
     "branch": "master",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "master",
+    "runtime-version": "3.36",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
     "desktop-file-name-suffix": " (Development)",
@@ -53,7 +53,7 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/gnome-online-accounts.git",
-                    "branch": "master"
+                    "branch": "gnome-3-36"
                 }
             ]
         },
@@ -134,7 +134,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git"
+                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git",
+                    "branch": "gnome-3-36"
                 }
             ],
             "cleanup": [
@@ -156,7 +157,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/folks.git"
+                    "url": "https://gitlab.gnome.org/GNOME/folks.git",
+                    "branch": "folks-0-14"
                 }
             ],
             "cleanup": [
@@ -216,7 +218,7 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/geary.git",
-                    "branch": "mainline"
+                    "branch": "gnome-3-36"
                 }
             ]
         }
