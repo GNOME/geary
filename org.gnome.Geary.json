@@ -184,7 +184,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://github.com/GNOME/gsound.git",
+                    "url": "https://gitlab.gnome.org/GNOME/gsound.git",
                     "branch": "master"
                 }
             ]
