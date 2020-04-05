@@ -23,11 +23,11 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     private class EmailStoreImpl : Geary.BaseObject, Plugin.EmailStore {
 
 
-        private Client backing;
+        private Controller controller;
 
 
-        public EmailStoreImpl(Client backing) {
-            this.backing = backing;
+        public EmailStoreImpl(Controller controller) {
+            this.controller = controller;
         }
 
         public async Gee.Collection<Plugin.Email> get_email(
@@ -63,7 +63,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
             foreach (var account in accounts.keys) {
                 AccountContext context =
-                    this.backing.controller.get_context_for_account(account);
+                    this.controller.get_context_for_account(account);
                 Gee.Collection<Geary.Email> batch =
                     yield context.emails.list_email_by_sparse_id_async(
                         accounts.get(account),
@@ -118,7 +118,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
 
         internal EmailImpl(Geary.Email backing,
-                         Geary.AccountInformation account) {
+                           Geary.AccountInformation account) {
             this.backing = backing;
             this.account = account;
             Geary.RFC822.Subject? subject = this.backing.subject;
@@ -171,7 +171,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
 
-    private Client application;
+    private Controller application;
     private Gee.Set<EmailStoreImpl> stores =
         new Gee.HashSet<EmailStoreImpl>();
 
@@ -179,7 +179,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     /**
      * Constructs a new factory instance.
      */
-    public EmailStoreFactory(Client application) throws GLib.Error {
+    public EmailStoreFactory(Controller application) throws GLib.Error {
         this.application = application;
     }
 

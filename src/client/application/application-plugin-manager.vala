@@ -157,6 +157,8 @@ public class Application.PluginManager : GLib.Object {
 
 
     private Client application;
+    private Controller controller;
+    private Configuration config;
     private Peas.Engine plugins;
     private bool is_shutdown = false;
     private string trusted_path;
@@ -172,19 +174,24 @@ public class Application.PluginManager : GLib.Object {
         new Gee.HashMap<Peas.PluginInfo,EmailPluginContext>();
 
 
-    public PluginManager(Client application) throws GLib.Error {
+    internal PluginManager(Client application,
+                           Controller controller,
+                           Configuration config,
+                           GLib.File trusted_plugin_path) throws GLib.Error {
         this.application = application;
+        this.controller = controller;
+        this.config = config;
         this.plugins = Peas.Engine.get_default();
-        this.folders_factory = new FolderStoreFactory(application);
-        this.email_factory = new EmailStoreFactory(application);
+        this.folders_factory = new FolderStoreFactory(controller);
+        this.email_factory = new EmailStoreFactory(controller);
 
-        this.trusted_path = application.get_app_plugins_dir().get_path();
-        this.plugins.add_search_path(trusted_path, null);
+        this.trusted_path = trusted_plugin_path.get_path();
+        this.plugins.add_search_path(this.trusted_path, null);
 
         this.plugins.load_plugin.connect_after(on_load_plugin);
         this.plugins.unload_plugin.connect(on_unload_plugin);
 
-        string[] optional_names = application.config.get_optional_plugins();
+        string[] optional_names = this.config.get_optional_plugins();
         foreach (Peas.PluginInfo info in this.plugins.get_plugin_list()) {
             string name = info.get_module_name();
             try {
@@ -234,11 +241,10 @@ public class Application.PluginManager : GLib.Object {
             this.plugins.load_plugin(plugin);
             loaded = true;
             string name = plugin.get_module_name();
-            string[] optional_names =
-                this.application.config.get_optional_plugins();
+            string[] optional_names = this.config.get_optional_plugins();
             if (!(name in optional_names)) {
                 optional_names += name;
-                this.application.config.set_optional_plugins(optional_names);
+                this.config.set_optional_plugins(optional_names);
             }
         }
         return loaded;
@@ -252,15 +258,14 @@ public class Application.PluginManager : GLib.Object {
             this.plugins.unload_plugin(plugin);
             unloaded = true;
             string name = plugin.get_module_name();
-            string[] old_names =
-                this.application.config.get_optional_plugins();
+            string[] old_names = this.config.get_optional_plugins();
             string[] new_names = new string[0];
             for (int i = 0; i < old_names.length; i++) {
                 if (old_names[i] != name) {
                     new_names += old_names[i];
                 }
             }
-            this.application.config.set_optional_plugins(new_names);
+            this.config.set_optional_plugins(new_names);
         }
         return unloaded;
     }
@@ -333,7 +338,7 @@ public class Application.PluginManager : GLib.Object {
             var folder = plugin as Plugin.FolderExtension;
             if (folder != null) {
                 folder.folders = new FolderPluginContext(
-                    this.application,
+                    this.controller.application,
                     this.folders_factory,
                     plugin_application.action_group_name
                 );

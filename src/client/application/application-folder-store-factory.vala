@@ -24,13 +24,13 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             "(sv)"
         );
 
-        private Client application;
+        private Controller controller;
         private Gee.Map<Geary.Folder,FolderImpl> folders;
 
 
-        public FolderStoreImpl(Client application,
+        public FolderStoreImpl(Controller controller,
                                Gee.Map<Geary.Folder,FolderImpl> folders) {
-            this.application = application;
+            this.controller = controller;
             this.folders = folders;
         }
 
@@ -45,7 +45,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             var id = target as EmailStoreFactory.IdImpl;
             var folders = new Gee.LinkedList<Plugin.Folder>();
             AccountContext context =
-                this.application.controller.get_context_for_account(id.account);
+                this.controller.get_context_for_account(id.account);
             if (id != null && context != null) {
                 Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? multi_folders =
                     yield context.account.get_containing_folders_async(
@@ -157,8 +157,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     }
 
 
-    private Client application;
-    private Geary.Engine engine;
+    private Controller controller;
 
     private Gee.Map<Geary.AccountInformation,AccountImpl> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountImpl>();
@@ -171,39 +170,23 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     /**
      * Constructs a new factory instance.
      */
-    public FolderStoreFactory(Client application) throws GLib.Error {
-        this.application = application;
-        this.engine = application.engine;
-        this.engine.account_available.connect(on_account_available);
-        this.engine.account_unavailable.connect(on_account_unavailable);
-        foreach (Geary.Account account in this.engine.get_accounts()) {
-            add_account(account.information);
-        }
-        application.window_added.connect(on_window_added);
-        foreach (MainWindow main in this.application.get_main_windows()) {
-            main.notify["selected-folder"].connect(on_folder_selected);
-        }
+    public FolderStoreFactory(Controller controller) throws GLib.Error {
+        this.controller = controller;
     }
 
     /** Clearing all state of the store. */
     public void destroy() throws GLib.Error {
-        this.application.window_added.disconnect(on_window_added);
         foreach (FolderStoreImpl store in this.stores) {
             store.destroy();
         }
         this.stores.clear();
 
-        this.engine.account_available.disconnect(on_account_available);
-        this.engine.account_unavailable.disconnect(on_account_unavailable);
-        foreach (Geary.Account account in this.engine.get_accounts()) {
-            remove_account(account.information);
-        }
         this.folders.clear();
     }
 
     /** Constructs a new folder store for use by plugin contexts. */
     public Plugin.FolderStore new_folder_store() {
-        var store = new FolderStoreImpl(this.application, this.folders);
+        var store = new FolderStoreImpl(this.controller, this.folders);
         this.stores.add(store);
         return store;
     }
@@ -229,41 +212,9 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     }
 
     private void add_account(Geary.AccountInformation added) {
-        try {
-            this.accounts.set(added, new AccountImpl(added));
-            Geary.Account account = this.engine.get_account(added);
-            account.folders_available_unavailable.connect(
-                on_folders_available_unavailable
-            );
-            account.folders_use_changed.connect(
-                on_folders_use_changed
-            );
-            add_folders(account.list_folders());
-        } catch (GLib.Error err) {
-            warning(
-                "Failed to add account %s to folder store: %s",
-                added.id, err.message
-            );
-        }
     }
 
     private void remove_account(Geary.AccountInformation removed) {
-        try {
-            Geary.Account account = this.engine.get_account(removed);
-            account.folders_available_unavailable.disconnect(
-                on_folders_available_unavailable
-            );
-            account.folders_use_changed.disconnect(
-                on_folders_use_changed
-            );
-            remove_folders(account.list_folders());
-            this.accounts.unset(removed);
-        } catch (GLib.Error err) {
-            warning(
-                "Error removing account %s from folder store: %s",
-                removed.id, err.message
-            );
-        }
     }
 
     private void add_folders(Gee.Collection<Geary.Folder> to_add) {

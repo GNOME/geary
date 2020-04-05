@@ -162,7 +162,12 @@ internal class Application.Controller : Geary.BaseObject {
 
         }
 
-        this.plugins = new PluginManager(this.application);
+        this.plugins = new PluginManager(
+            this.application,
+            this,
+            this.application.config,
+            this.application.get_app_plugins_dir()
+        );
 
         // Migrate configuration if necessary.
         Migrate.xdg_config_dir(this.application.get_user_data_directory(),
