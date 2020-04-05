@@ -1758,6 +1758,10 @@ internal class Application.AccountContext : Geary.BaseObject {
         this.search = search;
         this.emails = emails;
         this.contacts = contacts;
+
+        this.cancellable.connect(() => {
+                debug("Account cancellable cancelled");
+            });
     }
 
     /** Returns the current effective status for the account. */
