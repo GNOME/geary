@@ -64,7 +64,7 @@ public class Application.PluginManager : GLib.Object {
             this.action_group_name = plugin.get_module_name().replace(".", "_");
         }
 
-        public override void register_action(GLib.Action action) {
+        public void register_action(GLib.Action action) {
             if (this.action_group == null) {
                 this.action_group = new GLib.SimpleActionGroup();
                 this.backing.window_added.connect(on_window_added);
@@ -79,18 +79,18 @@ public class Application.PluginManager : GLib.Object {
             this.action_group.add_action(action);
         }
 
-        public override void deregister_action(GLib.Action action) {
+        public void deregister_action(GLib.Action action) {
             this.action_group.remove_action(action.get_name());
         }
 
-        public override void show_folder(Plugin.Folder folder) {
+        public void show_folder(Plugin.Folder folder) {
             Geary.Folder? target = this.folders.get_engine_folder(folder);
             if (target != null) {
                 this.backing.show_folder.begin(target);
             }
         }
 
-        public override async void empty_folder(Plugin.Folder folder)
+        public async void empty_folder(Plugin.Folder folder)
            throws Plugin.Error.PERMISSION_DENIED {
            MainWindow main = this.backing.last_active_main_window;
            if (main == null) {
