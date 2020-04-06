@@ -85,14 +85,15 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
 
 
         public string display_name {
-            get { return this.backing.display_name; }
+            get { return this.backing.account.information.display_name; }
         }
 
 
-        private Geary.AccountInformation backing;
+        /** The underlying backing account context for this account. */
+        internal AccountContext backing { get; private set; }
 
 
-        public AccountImpl(Geary.AccountInformation backing) {
+        public AccountImpl(AccountContext backing) {
             this.backing = backing;
         }
 
@@ -114,12 +115,11 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         private string _persistent_id;
 
         public string display_name {
-            get { return this._display_name; }
+            get { return this.backing.display_name; }
         }
-        private string _display_name;
 
         public Geary.Folder.SpecialUse used_as {
-            get { return this.backing.used_as; }
+            get { return this.backing.folder.used_as; }
         }
 
         public Plugin.Account? account {
@@ -127,30 +127,30 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
         private AccountImpl? _account;
 
-        // The underlying engine folder being represented.
-        internal Geary.Folder backing { get; private set; }
+        // The underlying folder being represented
+        internal FolderContext backing { get; private set; }
 
 
-        public FolderImpl(Geary.Folder backing, AccountImpl? account) {
+        public FolderImpl(FolderContext backing, AccountImpl? account) {
             this.backing = backing;
             this._account = account;
             this._persistent_id = ID_FORMAT.printf(
-                backing.account.information.id,
-                string.join(ID_PATH_SEP, backing.path.as_array())
+                account.backing.account.information.id,
+                string.join(ID_PATH_SEP, backing.folder.path.as_array())
             );
             folder_type_changed();
         }
 
         public GLib.Variant to_variant() {
+            Geary.Folder folder = this.backing.folder;
             return new GLib.Variant.tuple({
-                    this.backing.account.information.id,
-                        new GLib.Variant.variant(this.backing.path.to_variant())
+                    folder.account.information.id,
+                        new GLib.Variant.variant(folder.path.to_variant())
             });
         }
 
         internal void folder_type_changed() {
             notify_property("used-as");
-            this._display_name = Util.I18n.to_folder_display_name(this.backing);
             notify_property("display-name");
         }
 
@@ -172,15 +172,40 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
      */
     public FolderStoreFactory(Controller controller) throws GLib.Error {
         this.controller = controller;
+        this.controller.account_available.connect(
+            on_account_available
+        );
+        this.controller.account_unavailable.connect(
+            on_account_unavailable
+        );
+        foreach (var context in controller.get_account_contexts()) {
+            add_account(context);
+        }
+        this.controller.application.window_added.connect(on_window_added);
+        foreach (var main in this.controller.application.get_main_windows()) {
+            main.notify["selected-folder"].connect(on_folder_selected);
+        }
     }
 
     /** Clearing all state of the store. */
     public void destroy() throws GLib.Error {
+        this.controller.application.window_added.disconnect(on_window_added);
         foreach (FolderStoreImpl store in this.stores) {
             store.destroy();
         }
         this.stores.clear();
 
+        this.controller.account_available.disconnect(
+            on_account_available
+        );
+        this.controller.account_unavailable.disconnect(
+            on_account_unavailable
+        );
+        // take a copy of the key set so the iterator doesn't asplode
+        // as accounts are removed
+        foreach (var context in this.accounts.values.to_array()) {
+            remove_account(context.backing);
+        }
         this.folders.clear();
     }
 
@@ -200,6 +225,12 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
     }
 
+    /** Returns the folder context for the given plugin folder. */
+    public AccountContext get_account_context(Plugin.Account plugin) {
+        AccountImpl? impl = plugin as AccountImpl;
+        return (impl != null) ? impl.backing : null;
+    }
+
     /** Returns the plugin folder for the given engine folder. */
     public Plugin.Folder? get_plugin_folder(Geary.Folder engine) {
         return this.folders.get(engine);
@@ -208,35 +239,65 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     /** Returns the engine folder for the given plugin folder. */
     public Geary.Folder? get_engine_folder(Plugin.Folder plugin) {
         FolderImpl? impl = plugin as FolderImpl;
+        return (impl != null) ? impl.backing.folder : null;
+    }
+
+    /** Returns the folder context for the given plugin folder. */
+    public FolderContext get_folder_context(Plugin.Folder plugin) {
+        FolderImpl? impl = plugin as FolderImpl;
         return (impl != null) ? impl.backing : null;
     }
 
-    private void add_account(Geary.AccountInformation added) {
+    private void add_account(AccountContext added) {
+        if (!this.accounts.has_key(added.account.information)) {
+            this.accounts.set(added.account.information, new AccountImpl(added));
+            added.folders_available.connect(on_folders_available);
+            added.folders_unavailable.connect(on_folders_unavailable);
+            added.account.folders_use_changed.connect(on_folders_use_changed);
+            add_folders(added.get_folders());
+         }
+     }
+
+    private void remove_account(AccountContext removed) {
+        if (this.accounts.unset(removed.account.information)) {
+            removed.folders_available.disconnect(on_folders_available);
+            removed.folders_unavailable.disconnect(on_folders_unavailable);
+            removed.account.folders_use_changed.disconnect(on_folders_use_changed);
+            remove_folders(removed.get_folders());
+        }
     }
 
-    private void remove_account(Geary.AccountInformation removed) {
-    }
-
-    private void add_folders(Gee.Collection<Geary.Folder> to_add) {
-        foreach (Geary.Folder folder in to_add) {
+    private void add_folders(Gee.Collection<FolderContext> to_add) {
+        foreach (var context in to_add) {
             this.folders.set(
-                folder,
+                context.folder,
                 new FolderImpl(
-                    folder, this.accounts.get(folder.account.information)
+                    context,
+                    this.accounts.get(context.folder.account.information)
                 )
             );
         }
+        var folder_impls = to_plugin_folders(
+            Geary.traverse(to_add)
+            .map<Geary.Folder>((context => context.folder))
+            .to_linked_list()
+        ).read_only_view;
         foreach (FolderStoreImpl store in this.stores) {
-            store.folders_available(to_plugin_folders(to_add));
+            store.folders_available(folder_impls);
         }
     }
 
-    private void remove_folders(Gee.Collection<Geary.Folder> to_remove) {
-        foreach (Geary.Folder folder in to_remove) {
-            this.folders.unset(folder);
+    private void remove_folders(Gee.Collection<FolderContext> to_remove) {
+        foreach (var context in to_remove) {
+            this.folders.unset(context.folder);
         }
+        var folder_impls = to_plugin_folders(
+            Geary.traverse(to_remove)
+            .map<Geary.Folder>((context => context.folder))
+            .to_linked_list()
+        ).read_only_view;
         foreach (FolderStoreImpl store in this.stores) {
-            store.folders_unavailable(to_plugin_folders(to_remove));
+            store.folders_unavailable(folder_impls);
         }
     }
 
@@ -250,25 +311,22 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         ).to_linked_list().read_only_view;
     }
 
-    private void on_account_available(Geary.AccountInformation to_add) {
-        add_account(to_add);
+    private void on_account_available(AccountContext available) {
+        add_account(available);
     }
 
-    private void on_account_unavailable(Geary.AccountInformation to_remove) {
-        remove_account(to_remove);
+    private void on_account_unavailable(AccountContext unavailable) {
+        remove_account(unavailable);
     }
 
-    private void on_folders_available_unavailable(
-        Geary.Account account,
-        Gee.BidirSortedSet<Geary.Folder>? available,
-        Gee.BidirSortedSet<Geary.Folder>? unavailable
-    ) {
-        if (available != null && !available.is_empty) {
-            add_folders(available);
-        }
-        if (unavailable != null && !unavailable.is_empty) {
-            remove_folders(unavailable);
-        }
+    private void on_folders_available(AccountContext account,
+                                      Gee.Collection<FolderContext> available) {
+        add_folders(available);
+    }
+
+    private void on_folders_unavailable(AccountContext account,
+                                        Gee.Collection<FolderContext> unavailable) {
+        remove_folders(unavailable);
     }
 
     private void on_folders_use_changed(Geary.Account account,
