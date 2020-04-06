@@ -119,4 +119,9 @@ public class Geary.MockFolder : Folder, MockObject {
         throw new EngineError.UNSUPPORTED("Mock method");
     }
 
+    public override void set_used_as_custom(bool enabled)
+        throws EngineError.UNSUPPORTED {
+        throw new EngineError.UNSUPPORTED("Mock method");
+    }
+
 }

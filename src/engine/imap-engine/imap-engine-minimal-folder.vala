@@ -178,12 +178,33 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         notify_email_flags_changed(flag_map);
     }
 
+    public override void set_used_as_custom(bool enabled)
+        throws EngineError.UNSUPPORTED {
+        if (enabled) {
+            if (this._used_as != NONE) {
+                throw new EngineError.UNSUPPORTED(
+                    "Folder already has special use"
+                );
+            }
+            set_use(CUSTOM);
+        } else {
+            if (this._used_as != CUSTOM &&
+                this._used_as != NONE) {
+                throw new EngineError.UNSUPPORTED(
+                    "Folder already has special use"
+                );
+            }
+            set_use(NONE);
+        }
+    }
+
     public void set_use(Folder.SpecialUse new_use) {
         var old_use = this._used_as;
         this._used_as = new_use;
-        if (old_use != new_use)
+        if (old_use != new_use) {
             notify_use_changed(old_use, new_use);
-        update_harvester();
+            update_harvester();
+        }
     }
 
     /** {@inheritDoc} */

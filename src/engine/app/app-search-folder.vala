@@ -369,6 +369,11 @@ public class Geary.App.SearchFolder :
         }
     }
 
+    public override void set_used_as_custom(bool enabled)
+        throws EngineError.UNSUPPORTED {
+        throw new EngineError.UNSUPPORTED("Folder special use cannot be changed");
+    }
+
     private void require_id(EmailIdentifier id)
         throws EngineError.NOT_FOUND {
         if (!this.id_map.has_key(id)) {

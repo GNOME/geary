@@ -108,7 +108,11 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
         IMPORTANT,
 
         /** A view of email matching some kind of search criteria. */
-        SEARCH;
+        SEARCH,
+
+        /** A folder with an application-defined use. */
+        CUSTOM;
+
 
         public bool is_outgoing() {
             return this == SENT || this == OUTBOX;
@@ -286,7 +290,15 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     /** The folder path represented by this object. */
     public abstract Geary.FolderPath path { get; }
 
-    /** Determines the special use of this folder. */
+    /**
+     * Determines the special use of this folder.
+     *
+     * This will be set by the engine and updated as information about
+     * a folders use is discovered and changed.
+     *
+     * @see use_changed
+     * @see set_used_as_custom
+     */
     public abstract SpecialUse used_as { get; }
 
     /** Monitor for notifying of progress when opening the folder. */
@@ -697,6 +709,29 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
      */
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null) throws Error;
+
+    /**
+     * Sets whether this folder has a custom special use.
+     *
+     * If `true`, this set a folder's {@link used_as} property so that
+     * it returns {@link SpecialUse.CUSTOM}. If the folder's existing
+     * special use is not currently set to {@link SpecialUse.NONE}
+     * then {@link EngineError.UNSUPPORTED} is thrown.
+     *
+     * If `false` and the folder's use is currently {@link
+     * SpecialUse.CUSTOM} then it is reset to be {@link
+     * SpecialUse.NONE}, otherwise if the folder's use is something
+     * other than {@link SpecialUse.NONE} then {@link
+     * EngineError.UNSUPPORTED} is thrown.
+     *
+     * If some other engine process causes this folder's use to be
+     * something other than {@link SpecialUse.NONE}, this will
+     * override the custom use.
+     *
+     * @see used_as
+     */
+    public abstract void set_used_as_custom(bool enabled)
+        throws EngineError.UNSUPPORTED;
 
     /** {@inheritDoc} */
     public virtual Logging.State to_logging_state() {
