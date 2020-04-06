@@ -66,11 +66,11 @@ public class Application.PluginManager : GLib.Object {
 
         public Plugin.Composer new_composer(Plugin.Account source)
             throws Plugin.Error {
-            AccountContext? account = this.folders.get_account_context(source);
-            if (account == null) {
-                throw new Plugin.Error.NOT_SUPPORTED("No such account");
+            var impl = source as AccountImpl;
+            if (impl == null) {
+                throw new Plugin.Error.NOT_SUPPORTED("Not a valid account");
             }
-            return new ComposerImpl(this.backing, account);
+            return new ComposerImpl(this.backing, impl.backing);
         }
 
         public void register_action(GLib.Action action) {
@@ -150,6 +150,25 @@ public class Application.PluginManager : GLib.Object {
     }
 
 
+    internal class AccountImpl : Geary.BaseObject, Plugin.Account {
+
+
+        public string display_name {
+            get { return this.backing.account.information.display_name; }
+        }
+
+
+        /** The underlying backing account context for this account. */
+        internal AccountContext backing { get; private set; }
+
+
+        public AccountImpl(AccountContext backing) {
+            this.backing = backing;
+        }
+
+    }
+
+
     private class ComposerImpl : Geary.BaseObject, Plugin.Composer {
 
 
@@ -196,6 +215,8 @@ public class Application.PluginManager : GLib.Object {
     private bool is_shutdown = false;
     private string trusted_path;
 
+    private Gee.Map<Geary.AccountInformation,AccountImpl> plugin_accounts =
+        new Gee.HashMap<Geary.AccountInformation,AccountImpl>();
     private FolderStoreFactory folders_factory;
     private EmailStoreFactory email_factory;
 
@@ -215,7 +236,9 @@ public class Application.PluginManager : GLib.Object {
         this.controller = controller;
         this.config = config;
         this.plugins = Peas.Engine.get_default();
-        this.folders_factory = new FolderStoreFactory(controller);
+        this.folders_factory = new FolderStoreFactory(
+            controller, this.plugin_accounts.read_only_view
+        );
         this.email_factory = new EmailStoreFactory(controller);
 
         this.trusted_path = trusted_plugin_path.get_path();
@@ -240,6 +263,16 @@ public class Application.PluginManager : GLib.Object {
             } catch (GLib.Error err) {
                 warning("Plugin %s not available: %s", name, err.message);
             }
+        }
+
+        this.controller.account_available.connect(
+            on_account_available
+        );
+        this.controller.account_unavailable.connect(
+            on_account_unavailable
+        );
+        foreach (var context in this.controller.get_account_contexts()) {
+            add_account(context);
         }
     }
 
@@ -305,6 +338,13 @@ public class Application.PluginManager : GLib.Object {
 
     internal void close() throws GLib.Error {
         this.is_shutdown = true;
+
+        this.controller.account_unavailable.disconnect(on_account_unavailable);
+        this.controller.account_available.disconnect(on_account_available);
+        foreach (var context in this.controller.get_account_contexts()) {
+            remove_account(context);
+        }
+
         this.plugins.set_loaded_plugins(null);
         this.plugins.garbage_collect();
         this.folders_factory.destroy();
@@ -321,6 +361,16 @@ public class Application.PluginManager : GLib.Object {
 
     internal Gee.Collection<EmailPluginContext> get_email_contexts() {
         return this.email_contexts.values.read_only_view;
+    }
+
+    internal void add_account(AccountContext added) {
+        this.plugin_accounts.set(added.account.information, new AccountImpl(added));
+        this.folders_factory.add_account(added);
+    }
+
+    internal void remove_account(AccountContext removed) {
+        this.folders_factory.remove_account(removed);
+        this.plugin_accounts.unset(removed.account.information);
     }
 
     private void on_load_plugin(Peas.PluginInfo info) {
@@ -461,6 +511,14 @@ public class Application.PluginManager : GLib.Object {
 
         plugin_deactivated(context.info, error);
         this.plugin_set.unset(context.info);
+    }
+
+    private void on_account_available(AccountContext available) {
+        add_account(available);
+    }
+
+    private void on_account_unavailable(AccountContext unavailable) {
+        remove_account(unavailable);
     }
 
 }

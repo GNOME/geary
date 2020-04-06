@@ -81,25 +81,6 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     }
 
 
-    private class AccountImpl : Geary.BaseObject, Plugin.Account {
-
-
-        public string display_name {
-            get { return this.backing.account.information.display_name; }
-        }
-
-
-        /** The underlying backing account context for this account. */
-        internal AccountContext backing { get; private set; }
-
-
-        public AccountImpl(AccountContext backing) {
-            this.backing = backing;
-        }
-
-    }
-
-
     private class FolderImpl : Geary.BaseObject, Plugin.Folder {
 
 
@@ -125,13 +106,14 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         public Plugin.Account? account {
             get { return this._account; }
         }
-        private AccountImpl? _account;
+        private PluginManager.AccountImpl? _account;
 
         // The underlying folder being represented
         internal FolderContext backing { get; private set; }
 
 
-        public FolderImpl(FolderContext backing, AccountImpl? account) {
+        public FolderImpl(FolderContext backing,
+                          PluginManager.AccountImpl? account) {
             this.backing = backing;
             this._account = account;
             this._persistent_id = ID_FORMAT.printf(
@@ -159,8 +141,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
 
     private Controller controller;
 
-    private Gee.Map<Geary.AccountInformation,AccountImpl> accounts =
-        new Gee.HashMap<Geary.AccountInformation,AccountImpl>();
+    private Gee.Map<Geary.AccountInformation,PluginManager.AccountImpl> accounts;
     private Gee.Map<Geary.Folder,FolderImpl> folders =
         new Gee.HashMap<Geary.Folder,FolderImpl>();
     private Gee.Set<FolderStoreImpl> stores =
@@ -170,21 +151,14 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     /**
      * Constructs a new factory instance.
      */
-    public FolderStoreFactory(Controller controller) throws GLib.Error {
+    public FolderStoreFactory(Controller controller,
+                              Gee.Map<Geary.AccountInformation,PluginManager.AccountImpl> accounts) {
         this.controller = controller;
-        this.controller.account_available.connect(
-            on_account_available
-        );
-        this.controller.account_unavailable.connect(
-            on_account_unavailable
-        );
-        foreach (var context in controller.get_account_contexts()) {
-            add_account(context);
-        }
         this.controller.application.window_added.connect(on_window_added);
         foreach (var main in this.controller.application.get_main_windows()) {
             main.notify["selected-folder"].connect(on_folder_selected);
         }
+        this.accounts = accounts;
     }
 
     /** Clearing all state of the store. */
@@ -194,18 +168,6 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             store.destroy();
         }
         this.stores.clear();
-
-        this.controller.account_available.disconnect(
-            on_account_available
-        );
-        this.controller.account_unavailable.disconnect(
-            on_account_unavailable
-        );
-        // take a copy of the key set so the iterator doesn't asplode
-        // as accounts are removed
-        foreach (var context in this.accounts.values.to_array()) {
-            remove_account(context.backing);
-        }
         this.folders.clear();
     }
 
@@ -225,12 +187,6 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
     }
 
-    /** Returns the folder context for the given plugin folder. */
-    public AccountContext get_account_context(Plugin.Account plugin) {
-        AccountImpl? impl = plugin as AccountImpl;
-        return (impl != null) ? impl.backing : null;
-    }
-
     /** Returns the plugin folder for the given engine folder. */
     public Plugin.Folder? get_plugin_folder(Geary.Folder engine) {
         return this.folders.get(engine);
@@ -248,23 +204,18 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         return (impl != null) ? impl.backing : null;
     }
 
-    private void add_account(AccountContext added) {
-        if (!this.accounts.has_key(added.account.information)) {
-            this.accounts.set(added.account.information, new AccountImpl(added));
-            added.folders_available.connect(on_folders_available);
-            added.folders_unavailable.connect(on_folders_unavailable);
-            added.account.folders_use_changed.connect(on_folders_use_changed);
-            add_folders(added.get_folders());
-         }
+    internal void add_account(AccountContext added) {
+        added.folders_available.connect(on_folders_available);
+        added.folders_unavailable.connect(on_folders_unavailable);
+        added.account.folders_use_changed.connect(on_folders_use_changed);
+        add_folders(added.get_folders());
      }
 
-    private void remove_account(AccountContext removed) {
-        if (this.accounts.unset(removed.account.information)) {
-            removed.folders_available.disconnect(on_folders_available);
-            removed.folders_unavailable.disconnect(on_folders_unavailable);
-            removed.account.folders_use_changed.disconnect(on_folders_use_changed);
-            remove_folders(removed.get_folders());
-        }
+    internal void remove_account(AccountContext removed) {
+        removed.folders_available.disconnect(on_folders_available);
+        removed.folders_unavailable.disconnect(on_folders_unavailable);
+        removed.account.folders_use_changed.disconnect(on_folders_use_changed);
+        remove_folders(removed.get_folders());
     }
 
     private void add_folders(Gee.Collection<FolderContext> to_add) {
@@ -309,14 +260,6 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         ).map<FolderImpl>(
             (f) => this.folders.get(f)
         ).to_linked_list().read_only_view;
-    }
-
-    private void on_account_available(AccountContext available) {
-        add_account(available);
-    }
-
-    private void on_account_unavailable(AccountContext unavailable) {
-        remove_account(unavailable);
     }
 
     private void on_folders_available(AccountContext account,
