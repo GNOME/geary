@@ -94,6 +94,7 @@ src/client/folder-list/folder-list-tree.vala
 src/client/plugin/plugin-account.vala
 src/client/plugin/plugin-application.vala
 src/client/plugin/plugin-button.vala
+src/client/plugin/plugin-composer.vala
 src/client/plugin/plugin-contact-store.vala
 src/client/plugin/plugin-email-extension.vala
 src/client/plugin/plugin-email-store.vala

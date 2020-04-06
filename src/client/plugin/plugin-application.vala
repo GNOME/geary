@@ -15,6 +15,15 @@ public interface Plugin.Application : Geary.BaseObject {
 
 
     /**
+     * Constructs a new, blank composer for the given account.
+     *
+     * The composer will be initialised to send an email from the
+     * given account. This may be changed by people before they send
+     * the email, however.
+     */
+    public abstract Composer new_composer(Account source) throws Error;
+
+    /**
      * Registers a plugin action with the application.
      *
      * Once registered, the action will be available for use in user

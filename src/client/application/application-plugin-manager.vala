@@ -64,6 +64,15 @@ public class Application.PluginManager : GLib.Object {
             this.action_group_name = plugin.get_module_name().replace(".", "_");
         }
 
+        public Plugin.Composer new_composer(Plugin.Account source)
+            throws Plugin.Error {
+            AccountContext? account = this.folders.get_account_context(source);
+            if (account == null) {
+                throw new Plugin.Error.NOT_SUPPORTED("No such account");
+            }
+            return new ComposerImpl(this.backing, account);
+        }
+
         public void register_action(GLib.Action action) {
             if (this.action_group == null) {
                 this.action_group = new GLib.SimpleActionGroup();
@@ -136,6 +145,30 @@ public class Application.PluginManager : GLib.Object {
                     );
                 }
             }
+        }
+
+    }
+
+
+    private class ComposerImpl : Geary.BaseObject, Plugin.Composer {
+
+
+        private Client application;
+        private AccountContext account;
+
+
+        public ComposerImpl(Client application, AccountContext account) {
+            this.application = application;
+            this.account = account;
+        }
+
+        public void show() {
+            var composer = new Composer.Widget(
+                this.application, this.account.account, NEW_MESSAGE
+            );
+            var main_window = this.application.get_active_main_window();
+            main_window.show_composer(composer, null);
+            composer.load.begin(null, false, null, null);
         }
 
     }
