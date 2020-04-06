@@ -133,7 +133,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git"
+                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git",
+                    "branch": "master"
                 }
             ],
             "cleanup": [
@@ -155,7 +156,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/folks.git"
+                    "url": "https://gitlab.gnome.org/GNOME/folks.git",
+                    "branch": "master"
                 }
             ],
             "cleanup": [
@@ -182,7 +184,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://github.com/GNOME/gsound.git"
+                    "url": "https://gitlab.gnome.org/GNOME/gsound.git",
+                    "branch": "master"
                 }
             ]
         },
@@ -191,7 +194,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://github.com/jstedfast/gmime.git"
+                    "url": "https://github.com/jstedfast/gmime.git",
+                    "branch": "master"
                 }
             ]
         },
@@ -215,7 +219,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libpeas.git"
+                    "url": "https://gitlab.gnome.org/GNOME/libpeas.git",
+                    "branch": "master"
                 }
             ]
         },

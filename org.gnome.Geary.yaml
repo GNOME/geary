@@ -152,6 +152,7 @@ modules:
     sources:
       - type: git
         url: https://gitlab.gnome.org/GNOME/evolution-data-server.git
+        branch: master
     cleanup:
       - /lib/cmake
       - /lib/evolution-data-server/*-backends
@@ -169,6 +170,7 @@ modules:
     sources:
       - type: git
         url: https://gitlab.gnome.org/GNOME/folks.git
+        branch: master
     cleanup:
       - /bin
 
@@ -187,13 +189,15 @@ modules:
   - name: gsound
     sources:
       - type: git
-        url: https://github.com/GNOME/gsound.git
+        url: https://gitlab.gnome.org/GNOME/gsound.git
+        branch: master
 
   # Geary dependency
   - name: gmime
     sources:
       - type: git
         url: https://github.com/jstedfast/gmime.git
+        branch: master
 
   # Geary dependency
   - name: libhandy
@@ -211,6 +215,7 @@ modules:
     sources:
       - type: git
         url: https://gitlab.gnome.org/GNOME/libpeas.git
+        branch: master
 
   # Geary dependency
   - name: "libytnef"
@@ -234,4 +239,3 @@ modules:
       - type: git
         url: https://gitlab.gnome.org/GNOME/geary.git
         branch: mainline
-
