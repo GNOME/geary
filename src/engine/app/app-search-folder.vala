@@ -96,7 +96,7 @@ public class Geary.App.SearchFolder :
     /**
      * {@inheritDoc}
      *
-     * Always returns {@link SpecialFolderType.SEARCH}.
+     * Always returns {@link Folder.SpecialUse.SEARCH}.
      */
     public override Folder.SpecialUse used_as {
         get { return SEARCH; }

@@ -66,7 +66,7 @@ public class Geary.Outbox.Folder :
     /**
      * Returns the type of this folder.
      *
-     * This is always {@link Geary.SpecialFolderType.OUTBOX}
+     * This is always {@link Folder.SpecialUse.OUTBOX}
      */
     public override Geary.Folder.SpecialUse used_as {
         get {

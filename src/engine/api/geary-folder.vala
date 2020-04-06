@@ -58,8 +58,6 @@
  * Email}).  Additional functionality for Folders is indicated by the
  * presence of {@link FolderSupport} interfaces, include {@link
  * FolderSupport.Remove}, {@link FolderSupport.Copy}, and so forth.
- *
- * @see Geary.SpecialFolderType
  */
 public abstract class Geary.Folder : BaseObject, Logging.Source {
 
