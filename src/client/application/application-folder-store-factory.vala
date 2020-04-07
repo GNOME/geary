@@ -24,13 +24,10 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             "(sv)"
         );
 
-        private Controller controller;
         private Gee.Map<Geary.Folder,FolderImpl> folders;
 
 
-        public FolderStoreImpl(Controller controller,
-                               Gee.Map<Geary.Folder,FolderImpl> folders) {
-            this.controller = controller;
+        public FolderStoreImpl(Gee.Map<Geary.Folder,FolderImpl> folders) {
             this.folders = folders;
         }
 
@@ -138,8 +135,6 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     }
 
 
-    private Controller controller;
-
     private Gee.Map<AccountContext,PluginManager.AccountImpl> accounts;
     private Gee.Map<Geary.Folder,FolderImpl> folders =
         new Gee.HashMap<Geary.Folder,FolderImpl>();
@@ -150,19 +145,12 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     /**
      * Constructs a new factory instance.
      */
-    public FolderStoreFactory(Controller controller,
-                              Gee.Map<AccountContext,PluginManager.AccountImpl> accounts) {
-        this.controller = controller;
-        this.controller.application.window_added.connect(on_window_added);
-        foreach (var main in this.controller.application.get_main_windows()) {
-            main.notify["selected-folder"].connect(on_folder_selected);
-        }
+    public FolderStoreFactory(Gee.Map<AccountContext,PluginManager.AccountImpl> accounts) {
         this.accounts = accounts;
     }
 
     /** Clearing all state of the store. */
     public void destroy() throws GLib.Error {
-        this.controller.application.window_added.disconnect(on_window_added);
         foreach (FolderStoreImpl store in this.stores) {
             store.destroy();
         }
@@ -172,7 +160,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
 
     /** Constructs a new folder store for use by plugin contexts. */
     public Plugin.FolderStore new_folder_store() {
-        var store = new FolderStoreImpl(this.controller, this.folders);
+        var store = new FolderStoreImpl(this.folders);
         this.stores.add(store);
         return store;
     }
@@ -215,6 +203,10 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         removed.folders_unavailable.disconnect(on_folders_unavailable);
         removed.account.folders_use_changed.disconnect(on_folders_use_changed);
         remove_folders(removed, removed.get_folders());
+    }
+
+    internal void main_window_added(MainWindow added) {
+        added.notify["selected-folder"].connect(on_folder_selected);
     }
 
     private void add_folders(AccountContext account,
@@ -278,14 +270,6 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
         foreach (FolderStoreImpl store in this.stores) {
             store.folders_type_changed(folders);
-        }
-    }
-
-
-    private void on_window_added(Gtk.Window window) {
-        var main = window as MainWindow;
-        if (main != null) {
-            main.notify["selected-folder"].connect(on_folder_selected);
         }
     }
 

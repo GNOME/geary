@@ -237,10 +237,10 @@ public class Application.PluginManager : GLib.Object {
         this.config = config;
         this.plugins = Peas.Engine.get_default();
         this.folders_factory = new FolderStoreFactory(
-            controller, this.plugin_accounts.read_only_view
+            this.plugin_accounts.read_only_view
         );
         this.email_factory = new EmailStoreFactory(
-            controller, this.plugin_accounts.read_only_view
+            this.plugin_accounts.read_only_view
         );
 
         this.trusted_path = trusted_plugin_path.get_path();
@@ -265,6 +265,11 @@ public class Application.PluginManager : GLib.Object {
             } catch (GLib.Error err) {
                 warning("Plugin %s not available: %s", name, err.message);
             }
+        }
+
+        this.application.window_added.connect(on_window_added);
+        foreach (MainWindow main in this.application.get_main_windows()) {
+            this.folders_factory.main_window_added(main);
         }
 
         this.controller.account_available.connect(
@@ -340,6 +345,8 @@ public class Application.PluginManager : GLib.Object {
 
     internal void close() throws GLib.Error {
         this.is_shutdown = true;
+
+        this.application.window_added.disconnect(on_window_added);
 
         this.controller.account_unavailable.disconnect(on_account_unavailable);
         this.controller.account_available.disconnect(on_account_available);
@@ -513,6 +520,13 @@ public class Application.PluginManager : GLib.Object {
 
         plugin_deactivated(context.info, error);
         this.plugin_set.unset(context.info);
+    }
+
+    private void on_window_added(Gtk.Window window) {
+        var main = window as MainWindow;
+        if (main != null) {
+            this.folders_factory.main_window_added(main);
+        }
     }
 
     private void on_account_available(AccountContext available) {

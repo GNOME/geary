@@ -23,15 +23,12 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     private class EmailStoreImpl : Geary.BaseObject, Plugin.EmailStore {
 
 
-        private Controller controller;
         private Gee.Map<AccountContext,PluginManager.AccountImpl> accounts;
 
 
         public EmailStoreImpl(
-            Controller controller,
             Gee.Map<AccountContext,PluginManager.AccountImpl> accounts
         ) {
-            this.controller = controller;
             this.accounts = accounts;
         }
 
@@ -173,7 +170,6 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
 
-    private Controller controller;
     private Gee.Map<AccountContext,PluginManager.AccountImpl> accounts;
     private Gee.Set<EmailStoreImpl> stores =
         new Gee.HashSet<EmailStoreImpl>();
@@ -183,10 +179,8 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
      * Constructs a new factory instance.
      */
     public EmailStoreFactory(
-        Controller controller,
         Gee.Map<AccountContext,PluginManager.AccountImpl> accounts
     ) {
-        this.controller = controller;
         this.accounts = accounts;
     }
 
@@ -200,7 +194,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
     /** Constructs a new email store for use by plugin contexts. */
     public Plugin.EmailStore new_email_store() {
-        var store = new EmailStoreImpl(this.controller, this.accounts);
+        var store = new EmailStoreImpl(this.accounts);
         this.stores.add(store);
         return store;
     }
