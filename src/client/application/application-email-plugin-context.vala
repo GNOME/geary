@@ -68,16 +68,24 @@ internal class Application.EmailPluginContext :
 
     internal void email_displayed(Geary.AccountInformation account,
                                   Geary.Email email) {
-        this.email.email_displayed(
-            this.email_factory.to_plugin_email(email, account)
-        );
+        AccountContext? context =
+            this.application.controller.get_context_for_account(account);
+        if (context != null) {
+            this.email.email_displayed(
+                this.email_factory.to_plugin_email(email, context)
+            );
+        }
     }
 
     internal void email_sent(Geary.AccountInformation account,
                              Geary.Email email) {
-        this.email.email_sent(
-            this.email_factory.to_plugin_email(email, account)
-        );
+        AccountContext? context =
+            this.application.controller.get_context_for_account(account);
+        if (context != null) {
+            this.email.email_sent(
+                this.email_factory.to_plugin_email(email, context)
+            );
+        }
     }
 
     internal void destroy() {

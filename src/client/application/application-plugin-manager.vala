@@ -215,8 +215,8 @@ public class Application.PluginManager : GLib.Object {
     private bool is_shutdown = false;
     private string trusted_path;
 
-    private Gee.Map<Geary.AccountInformation,AccountImpl> plugin_accounts =
-        new Gee.HashMap<Geary.AccountInformation,AccountImpl>();
+    private Gee.Map<AccountContext,AccountImpl> plugin_accounts =
+        new Gee.HashMap<AccountContext,AccountImpl>();
     private FolderStoreFactory folders_factory;
     private EmailStoreFactory email_factory;
 
@@ -366,13 +366,13 @@ public class Application.PluginManager : GLib.Object {
     }
 
     internal void add_account(AccountContext added) {
-        this.plugin_accounts.set(added.account.information, new AccountImpl(added));
+        this.plugin_accounts.set(added, new AccountImpl(added));
         this.folders_factory.add_account(added);
     }
 
     internal void remove_account(AccountContext removed) {
         this.folders_factory.remove_account(removed);
-        this.plugin_accounts.unset(removed.account.information);
+        this.plugin_accounts.unset(removed);
     }
 
     private void on_load_plugin(Peas.PluginInfo info) {

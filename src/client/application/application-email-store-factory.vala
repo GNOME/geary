@@ -24,12 +24,12 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
 
         private Controller controller;
-        private Gee.Map<Geary.AccountInformation,PluginManager.AccountImpl> accounts;
+        private Gee.Map<AccountContext,PluginManager.AccountImpl> accounts;
 
 
         public EmailStoreImpl(
             Controller controller,
-            Gee.Map<Geary.AccountInformation,PluginManager.AccountImpl> accounts
+            Gee.Map<AccountContext,PluginManager.AccountImpl> accounts
         ) {
             this.controller = controller;
             this.accounts = accounts;
@@ -45,7 +45,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             // group them by account up front. The common case will be
             // only a single account, so optimise for that a bit.
 
-            var accounts = new Gee.HashMap<
+            var found_accounts = new Gee.HashMap<
                 AccountContext, Gee.Set<Geary.EmailIdentifier>
             >();
             AccountContext? current_account = null;
@@ -55,20 +55,20 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
                 if (id_impl != null) {
                     if (id_impl._account.backing != current_account) {
                         current_account = id_impl._account.backing;
-                        engine_ids = accounts.get(current_account);
+                        engine_ids = found_accounts.get(current_account);
                         if (engine_ids == null) {
                             engine_ids = new Gee.HashSet<Geary.EmailIdentifier>();
-                            accounts.set(current_account, engine_ids);
+                            found_accounts.set(current_account, engine_ids);
                         }
                     }
                     engine_ids.add(id_impl.backing);
                 }
             }
 
-            foreach (var context in accounts.keys) {
+            foreach (var context in found_accounts.keys) {
                 Gee.Collection<Geary.Email> batch =
                     yield context.emails.list_email_by_sparse_id_async(
-                        accounts.get(context),
+                        found_accounts.get(context),
                         REQUIRED_FIELDS,
                         NONE,
                         context.cancellable
@@ -76,10 +76,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
                 if (batch != null) {
                     foreach (var email in batch) {
                         emails.add(
-                            new EmailImpl(
-                                email,
-                                this.accounts.get(context.account.information)
-                            )
+                            new EmailImpl(email, this.accounts.get(context))
                         );
                     }
                 }
@@ -177,7 +174,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
 
     private Controller controller;
-    private Gee.Map<Geary.AccountInformation,PluginManager.AccountImpl> accounts;
+    private Gee.Map<AccountContext,PluginManager.AccountImpl> accounts;
     private Gee.Set<EmailStoreImpl> stores =
         new Gee.HashSet<EmailStoreImpl>();
 
@@ -187,7 +184,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
      */
     public EmailStoreFactory(
         Controller controller,
-        Gee.Map<Geary.AccountInformation,PluginManager.AccountImpl> accounts
+        Gee.Map<AccountContext,PluginManager.AccountImpl> accounts
     ) {
         this.controller = controller;
         this.accounts = accounts;
@@ -219,7 +216,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
     public Gee.Collection<Plugin.EmailIdentifier> to_plugin_ids(
         Gee.Collection<Geary.EmailIdentifier> engine_ids,
-        Geary.AccountInformation account
+        AccountContext account
     ) {
         var plugin_ids = new Gee.HashSet<Plugin.EmailIdentifier>();
         foreach (var id in engine_ids) {
@@ -234,7 +231,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
     public Plugin.Email to_plugin_email(Geary.Email engine,
-                                        Geary.AccountInformation account) {
+                                        AccountContext account) {
         return new EmailImpl(engine, this.accounts.get(account));
     }
 

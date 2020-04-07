@@ -140,7 +140,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
 
     private Controller controller;
 
-    private Gee.Map<Geary.AccountInformation,PluginManager.AccountImpl> accounts;
+    private Gee.Map<AccountContext,PluginManager.AccountImpl> accounts;
     private Gee.Map<Geary.Folder,FolderImpl> folders =
         new Gee.HashMap<Geary.Folder,FolderImpl>();
     private Gee.Set<FolderStoreImpl> stores =
@@ -151,7 +151,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
      * Constructs a new factory instance.
      */
     public FolderStoreFactory(Controller controller,
-                              Gee.Map<Geary.AccountInformation,PluginManager.AccountImpl> accounts) {
+                              Gee.Map<AccountContext,PluginManager.AccountImpl> accounts) {
         this.controller = controller;
         this.controller.application.window_added.connect(on_window_added);
         foreach (var main in this.controller.application.get_main_windows()) {
@@ -207,24 +207,22 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         added.folders_available.connect(on_folders_available);
         added.folders_unavailable.connect(on_folders_unavailable);
         added.account.folders_use_changed.connect(on_folders_use_changed);
-        add_folders(added.get_folders());
+        add_folders(added, added.get_folders());
      }
 
     internal void remove_account(AccountContext removed) {
         removed.folders_available.disconnect(on_folders_available);
         removed.folders_unavailable.disconnect(on_folders_unavailable);
         removed.account.folders_use_changed.disconnect(on_folders_use_changed);
-        remove_folders(removed.get_folders());
+        remove_folders(removed, removed.get_folders());
     }
 
-    private void add_folders(Gee.Collection<FolderContext> to_add) {
+    private void add_folders(AccountContext account,
+                             Gee.Collection<FolderContext> to_add) {
         foreach (var context in to_add) {
             this.folders.set(
                 context.folder,
-                new FolderImpl(
-                    context,
-                    this.accounts.get(context.folder.account.information)
-                )
+                new FolderImpl(context, this.accounts.get(account))
             );
         }
         var folder_impls = to_plugin_folders(
@@ -237,7 +235,8 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
     }
 
-    private void remove_folders(Gee.Collection<FolderContext> to_remove) {
+    private void remove_folders(AccountContext account,
+                                Gee.Collection<FolderContext> to_remove) {
         foreach (var context in to_remove) {
             this.folders.unset(context.folder);
         }
@@ -263,12 +262,12 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
 
     private void on_folders_available(AccountContext account,
                                       Gee.Collection<FolderContext> available) {
-        add_folders(available);
+        add_folders(account, available);
     }
 
     private void on_folders_unavailable(AccountContext account,
                                         Gee.Collection<FolderContext> unavailable) {
-        remove_folders(unavailable);
+        remove_folders(account, unavailable);
     }
 
     private void on_folders_use_changed(Geary.Account account,

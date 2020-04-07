@@ -244,14 +244,16 @@ internal class Application.NotificationPluginContext :
                               Gee.Collection<Geary.EmailIdentifier> delta) {
         Plugin.Folder folder =
             this.folders_factory.get_plugin_folder(info.folder);
-        if (arrived) {
+        AccountContext? context =
+            this.application.controller.get_context_for_account(
+                info.folder.account.information
+            );
+        if (arrived && context != null) {
             this._total_new_messages += delta.size;
             new_messages_arrived(
                 folder,
                 info.recent_ids.size,
-                this.email_factory.to_plugin_ids(
-                    delta, info.folder.account.information
-                )
+                this.email_factory.to_plugin_ids(delta, context)
             );
         } else {
             this._total_new_messages -= delta.size;
