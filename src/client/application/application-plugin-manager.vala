@@ -239,7 +239,9 @@ public class Application.PluginManager : GLib.Object {
         this.folders_factory = new FolderStoreFactory(
             controller, this.plugin_accounts.read_only_view
         );
-        this.email_factory = new EmailStoreFactory(controller);
+        this.email_factory = new EmailStoreFactory(
+            controller, this.plugin_accounts.read_only_view
+        );
 
         this.trusted_path = trusted_plugin_path.get_path();
         this.plugins.add_search_path(this.trusted_path, null);

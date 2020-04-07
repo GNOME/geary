@@ -42,11 +42,10 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             Plugin.EmailIdentifier target,
             GLib.Cancellable? cancellable
         ) throws GLib.Error {
-            var id = target as EmailStoreFactory.IdImpl;
             var folders = new Gee.LinkedList<Plugin.Folder>();
-            AccountContext context =
-                this.controller.get_context_for_account(id.account);
-            if (id != null && context != null) {
+            var id = target as EmailStoreFactory.IdImpl;
+            if (id != null) {
+                var context = id._account.backing;
                 Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? multi_folders =
                     yield context.account.get_containing_folders_async(
                         Geary.Collection.single(id.backing),
