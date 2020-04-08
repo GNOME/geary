@@ -8,9 +8,10 @@
 /**
  * Provides plugins with access to email.
  *
- * Plugins may obtain instances of this object from their context
- * objects, for example {@link
- * Application.NotificationContext.get_email}.
+ * Plugins that implement the {@link EmailExtension} interface may
+ * obtain instances of this object by calling {@link
+ * EmailContext.get_email_store} on their {@link EmailExtension.email}
+ * property.
  */
 public interface Plugin.EmailStore : Geary.BaseObject {
 

@@ -10,8 +10,8 @@
 /**
  * Primary controller for an application instance.
  *
- * A single instance of this class is constructed by {@link
- * GearyAplication} when the primary application instance is started.
+ * A single instance of this class is constructed by {@link Client}
+ * when the primary application instance is started.
  */
 internal class Application.Controller : Geary.BaseObject {
 

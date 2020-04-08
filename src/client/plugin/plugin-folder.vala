@@ -37,7 +37,7 @@ public interface Plugin.Folder : Geary.BaseObject {
      * application action parameter.
      *
      * @see FolderStore.get_folder_from_variant
-     * @see folder_variant_type
+     * @see FolderStore.folder_variant_type
      */
     public abstract GLib.Variant to_variant();
 

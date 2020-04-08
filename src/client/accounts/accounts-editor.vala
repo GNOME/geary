@@ -186,8 +186,8 @@ public class Accounts.Editor : Gtk.Dialog {
      * Prompts for pinning a certificate using the certificate manager.
      *
      * This provides a thing wrapper around {@link
-     * CertificateManager.prompt_pin_certificate} that uses the
-     * account editor as the dialog parent.
+     * Application.CertificateManager.prompt_pin_certificate} that
+     * uses the account editor as the dialog parent.
      */
     internal async void prompt_pin_certificate(Geary.AccountInformation account,
                                                Geary.ServiceInformation service,

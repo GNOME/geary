@@ -17,7 +17,8 @@ private extern Type components_reflow_box_get_type();
 /**
  * A widget for editing an email message.
  *
- * Composers must always be placed in an instance of {@link ComposerContainer}.
+ * Composers must always be placed in an instance of {@link
+ * Container}.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
 public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
@@ -806,10 +807,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /**
      * Prompts to close the composer if needed, before closing it.
      *
-     * If the composer is already closed no action is taken.  If the
-     * composer is blank then this method will call {@link exit},
-     * destroying the composer, else the composer will either be saved
-     * or discarded as needed then closed.
+     * If the composer is already closed no action is taken. If the
+     * composer is blank then this method will close the composer,
+     * else the composer will either be saved or discarded as needed
+     * then closed.
      *
      * The return value specifies whether the composer is being closed
      * or if the prompt was cancelled by a human.

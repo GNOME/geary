@@ -104,8 +104,9 @@ namespace Util.Email {
      * is little room for the display.
      *
      * @return a string containing at least the first mailbox
-     * serialised by {@link MailboxAddress.to_short_display}, if the
-     * list contains more mailboxes then an indication of how many
+     * serialised by {@link
+     * Geary.RFC822.MailboxAddress.to_short_display}, if the list
+     * contains more mailboxes then an indication of how many
      * additional are present.
      */
     public string to_short_recipient_display(Geary.EmailHeaderSet headers) {

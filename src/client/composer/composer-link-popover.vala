@@ -12,10 +12,10 @@
  * The exact appearance of the popover will depend on the {@link
  * Type} passed to the constructor:
  *
- * - For {@link Type.NEW_LINK}, the user will be presented with an
- *   insert button and an open button.
- * - For {@link Type.EXISTING_LINK}, the user will be presented with
- *   an update, delete and open buttons.
+ *  * For {@link Type.NEW_LINK}, the user will be presented with an
+ *    insert button and an open button.
+ *  * For {@link Type.EXISTING_LINK}, the user will be presented with
+ *    an update, delete and open buttons.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/composer-link-popover.ui")]
 public class Composer.LinkPopover : Gtk.Popover {

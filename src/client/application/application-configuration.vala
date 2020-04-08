@@ -226,7 +226,7 @@ public class Application.Configuration : Geary.BaseObject {
      * client. By default, the set will contain languages based on
      * environment variables.
      *
-     * @see Util.International.get_user_preferred_languages
+     * @see Util.I18n.get_user_preferred_languages
      */
     public string[] get_spell_check_languages() {
         GLib.Variant? value = this.settings.get_value(

@@ -417,7 +417,8 @@ internal interface Accounts.ValidatingRow : EditorRow {
      *
      * This is only called when the row's value has changed, is
      * valid, and the user has activated or changed to a different
-     * row. */
+     * row.
+     */
     protected virtual void commit() {
         // noop
     }
@@ -590,7 +591,7 @@ internal class Accounts.EditorPopover : Gtk.Popover {
         this.closed.disconnect(on_closed);
     }
 
-    /** {@inheritdoc} */
+    /** {@inheritDoc} */
     public new void popup() {
         // Work-around GTK+ issue #1138
         Gtk.Widget target = get_relative_to();
