@@ -142,11 +142,6 @@ geary_client_vala_sources = files(
   'util/util-migrate.vala',
 )
 
-geary_client_sources = [
-  geary_client_vala_sources,
-  geary_resources # Included here so valac can check them
-]
-
 geary_client_dependencies = [
   enchant,
   folks,
@@ -187,7 +182,7 @@ endif
 # Main client application library
 geary_client_lib = shared_library(
   geary_client_package,
-  geary_client_sources,
+  geary_client_vala_sources + geary_resources,
   dependencies: geary_client_dependencies,
   include_directories: config_h_dir,
   vala_args: geary_client_vala_args,

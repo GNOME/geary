@@ -55,8 +55,7 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
     }
 
     /**
-     * Search the {@link MailboxAttributes} looking for an XLIST-style
-     * {@link Geary.SpecialFolderType}.
+     * Returns the special use specified for the mailbox, if any.
      */
     public Geary.Folder.SpecialUse get_special_use() {
         if (contains(MailboxAttribute.XLIST_INBOX))

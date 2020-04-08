@@ -8,9 +8,10 @@
 /**
  * Provides plugins with access to folders.
  *
- * Plugins may obtain instances of this object from their context
- * objects, for example {@link
- * Application.NotificationContext.get_folder_store}.
+ * Plugins that implement the {@link FolderExtension} interface may
+ * obtain instances of this object by calling {@link
+ * FolderContext.get_folder_store} on their {@link
+ * FolderExtension.folders} property.
  */
 public interface Plugin.FolderStore : Geary.BaseObject {
 

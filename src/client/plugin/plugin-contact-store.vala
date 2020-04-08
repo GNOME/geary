@@ -10,7 +10,7 @@
  *
  * Plugins may obtain instances of this object from their context
  * objects, for example {@link
- * Application.NotificationContext.get_contacts_for_folder}.
+ * NotificationContext.get_contacts_for_folder}.
  */
 public interface Plugin.ContactStore : Geary.BaseObject {
 

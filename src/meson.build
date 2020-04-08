@@ -109,11 +109,43 @@ geary_bin = executable('geary',
   install_rpath: client_lib_dir,
 )
 
+valadoc_dependencies = [
+  cairo,
+  enchant,
+  folks,
+  gcr,
+  gdk,
+  gee,
+  gio,
+  glib,
+  gmime,
+  goa,
+  gspell,
+  gtk,
+  javascriptcoregtk,
+  json_glib,
+  libhandy,
+  libpeas,
+  libsecret,
+  libxml,
+  sqlite,
+  webkit2gtk
+]
+
+# Hopefully Meson will get baked-in valadoc support, so we don't have
+# to do this any more. https://github.com/mesonbuild/meson/issues/894
+valadoc_dep_args = []
+foreach dep : valadoc_dependencies
+  valadoc_dep_args += '--pkg'
+  valadoc_dep_args += dep.name()
+endforeach
+valadoc_dep_args += [ '--pkg', 'posix' ]
+
 if enable_valadoc
   geary_docs = custom_target('valadoc',
     build_by_default: true,
-    depends: geary_engine_lib,
-    input: geary_engine_sources,
+    depends: [geary_client_lib, geary_engine_lib],
+    input: geary_client_vala_sources + geary_engine_sources,
     output: 'valadoc',
     command: [ valadoc,
       '--verbose',
@@ -123,19 +155,10 @@ if enable_valadoc
       '--package-version=@0@'.format(meson.project_version()),
       '-b', meson.current_source_dir(),
       '-o', '@OUTPUT@',
+      '--vapidir=@0@'.format('/usr/share/vala-0.48'),
       '--vapidir=@0@'.format(vapi_dir),
       '--vapidir=@0@'.format(meson.current_build_dir()),
-      # Hopefully, Meson gets baked-in valadoc support, so we don't
-      # have to do this (see https://github.com/mesonbuild/meson/issues/894)
-      '--pkg', 'glib-2.0',
-      '--pkg', 'gio-2.0',
-      '--pkg', 'gee-0.8',
-      '--pkg', 'sqlite3',
-      '--pkg', 'gmime-3.0',
-      '--pkg', 'javascriptcoregtk-4.0',
-      '--pkg', 'libxml-2.0',
-      '--pkg', 'libunwind',
       '@INPUT@',
-    ]
+    ] + valadoc_dep_args
   )
 endif

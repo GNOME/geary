@@ -10,7 +10,7 @@
  * A container detached composers, i.e. in their own separate window.
  *
  * Adding a composer to this container places it in {@link
- * PresentationMode.DETACHED} mode.
+ * Widget.PresentationMode.DETACHED} mode.
  */
 public class Composer.Window : Gtk.ApplicationWindow, Container {
 

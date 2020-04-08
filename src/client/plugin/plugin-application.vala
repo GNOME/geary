@@ -8,9 +8,8 @@
 /**
  * An object representing the client application for use by plugins.
  *
- * Plugins may obtain instances of this object from their context
- * objects, for example {@link
- * Application.NotificationContext.get_application}.
+ * Plugins may obtain instances of this object from the {@link
+ * PluginBase.plugin_application} property.
  */
 public interface Plugin.Application : Geary.BaseObject {
 
@@ -19,9 +18,9 @@ public interface Plugin.Application : Geary.BaseObject {
      * Registers a plugin action with the application.
      *
      * Once registered, the action will be available for use in user
-     * interface elements such as {@see Button}.
+     * interface elements such as {@link Button}.
      *
-     * @see unregister_action
+     * @see deregister_action
      */
     public abstract void register_action(GLib.Action action);
 
@@ -47,8 +46,8 @@ public interface Plugin.Application : Geary.BaseObject {
      * the folder, however it may take additional time for the changes
      * to be fully committed and reflected on the remote server.
      *
-     * @throws Error.PERMISSIONS if permission was not granted to
-     * empty the folder
+     * @throws Error.PERMISSION_DENIED if permission to access the
+     * resource was not given
      */
     public abstract async void empty_folder(Folder folder)
         throws Error.PERMISSION_DENIED;

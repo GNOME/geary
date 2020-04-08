@@ -10,7 +10,7 @@
  * A container for full-height paned composers in the main window.
  *
  * Adding a composer to this container places it in {@link
- * PresentationMode.PANED} mode.
+ * Widget.PresentationMode.PANED} mode.
  */
 public class Composer.Box : Gtk.Frame, Container {
 

@@ -83,8 +83,8 @@ public interface Plugin.NotificationContext : Geary.BaseObject {
      *
      * @throws Error.NOT_FOUND if the given account does
      * not exist
-     * @throws Error.PERMISSIONS if permission to access
-     * this resource was not given
+     * @throws Error.PERMISSION_DENIED if permission to access the
+     * resource was not given
      */
     public abstract async Plugin.ContactStore get_contacts_for_folder(Plugin.Folder source)
         throws Error.NOT_FOUND, Error.PERMISSION_DENIED;
