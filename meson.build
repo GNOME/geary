@@ -70,6 +70,7 @@ webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 # We need appdata.its from appstream-glib:
 # https://gitlab.gnome.org/GNOME/geary/issues/439
 appstream_glib = dependency('appstream-glib', version: '>=0.7.10')
+cairo = dependency('cairo')
 enchant = dependency('enchant-2', version: '>=2.1')
 folks = dependency('folks', version: '>=0.11')
 gck = dependency('gck-1')
