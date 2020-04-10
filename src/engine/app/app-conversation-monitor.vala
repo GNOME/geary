@@ -681,10 +681,16 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         bool closing = false;
         if (folder_was_opened) {
             try {
-                // Always close the folder to prevent open leaks
                 closing = yield this.base_folder.close_async(null);
-            } catch (Error err) {
-                warning("Unable to close monitored folder: %s", err.message);
+            } catch (GLib.Error err) {
+                if (close_err == null) {
+                    close_err = err;
+                } else {
+                    warning(
+                        "Unable to close monitored folder %s: %s",
+                        this.base_folder.to_string(), err.message
+                    );
+                }
             }
         }
 
