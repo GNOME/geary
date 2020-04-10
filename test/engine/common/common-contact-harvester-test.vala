@@ -64,9 +64,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();
@@ -92,9 +90,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();
@@ -113,9 +109,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();
@@ -142,9 +136,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();
@@ -171,9 +163,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();

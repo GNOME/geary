@@ -34,8 +34,7 @@ class Geary.Db.VersionedDatabaseTest : TestCase {
         );
 
         db.open.begin(
-            Geary.Db.DatabaseFlags.CREATE_FILE, null,
-            (obj, ret) => { async_complete(ret); }
+            Geary.Db.DatabaseFlags.CREATE_FILE, null, this.async_completion
         );
         db.open.end(async_result());
 

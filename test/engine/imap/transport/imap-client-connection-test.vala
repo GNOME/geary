@@ -40,13 +40,13 @@ class Geary.Imap.ClientConnectionTest : TestCase {
     public void connect_disconnect() throws GLib.Error {
         var test_article = new ClientConnection(new_endpoint());
 
-        test_article.connect_async.begin(null, this.async_complete_full);
+        test_article.connect_async.begin(null, this.async_completion);
         test_article.connect_async.end(async_result());
 
         assert_non_null(test_article.get_remote_address());
         assert_non_null(test_article.get_local_address());
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
 
         assert_null(test_article.get_remote_address());
@@ -71,7 +71,7 @@ class Geary.Imap.ClientConnectionTest : TestCase {
         var test_article = new ClientConnection(
             new_endpoint(), COMMAND_TIMEOUT, IDLE_TIMEOUT
         );
-        test_article.connect_async.begin(null, this.async_complete_full);
+        test_article.connect_async.begin(null, this.async_completion);
         test_article.connect_async.end(async_result());
 
         assert_false(test_article.is_in_idle(), "Initial idle state");
@@ -98,12 +98,12 @@ class Geary.Imap.ClientConnectionTest : TestCase {
 
         var command = new TestCommand();
         test_article.send_command(command);
-        command.wait_until_complete.begin(null, this.async_complete_full);
+        command.wait_until_complete.begin(null, this.async_completion);
         command.wait_until_complete.end(async_result());
 
         assert_false(test_article.is_in_idle(), "Post test command");
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
@@ -126,7 +126,7 @@ class Geary.Imap.ClientConnectionTest : TestCase {
         var test_article = new ClientConnection(new_endpoint(), TIMEOUT);
         test_article.sent_command.connect(() => { sent = true; });
         test_article.receive_failure.connect(() => { recv_fail = true; });
-        test_article.connect_async.begin(null, this.async_complete_full);
+        test_article.connect_async.begin(null, this.async_completion);
         test_article.connect_async.end(async_result());
 
         var command = new TestCommand();
@@ -140,7 +140,7 @@ class Geary.Imap.ClientConnectionTest : TestCase {
             this.main_loop.iteration(false);
         }
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
 
         assert_true(sent, "connection.sent_command");

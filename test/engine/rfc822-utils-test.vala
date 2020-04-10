@@ -27,7 +27,7 @@ class Geary.RFC822.Utils.Test : TestCase {
     public void best_encoding_default() throws GLib.Error {
         string test = "abc";
         var stream = new GMime.StreamMem.with_buffer(test.data);
-        get_best_encoding.begin(stream, 7BIT, null, async_complete_full);
+        get_best_encoding.begin(stream, 7BIT, null, this.async_completion);
         var encoding = get_best_encoding.end(async_result());
         assert_true(encoding == DEFAULT);
     }
@@ -38,7 +38,7 @@ class Geary.RFC822.Utils.Test : TestCase {
             buf.append("long ");
         }
         var stream = new GMime.StreamMem.with_buffer(buf.str.data);
-        get_best_encoding.begin(stream, 7BIT, null, async_complete_full);
+        get_best_encoding.begin(stream, 7BIT, null, this.async_completion);
         var encoding = get_best_encoding.end(async_result());
         assert_true(encoding == QUOTEDPRINTABLE);
     }
@@ -46,7 +46,7 @@ class Geary.RFC822.Utils.Test : TestCase {
     public void best_encoding_binary() throws GLib.Error {
         uint8 test[] = { 0x20, 0x00, 0x20 };
         var stream = new GMime.StreamMem.with_buffer(test);
-        get_best_encoding.begin(stream, 7BIT, null, async_complete_full);
+        get_best_encoding.begin(stream, 7BIT, null, this.async_completion);
         var encoding = get_best_encoding.end(async_result());
         assert_true(encoding == BASE64);
     }

@@ -42,7 +42,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
 
         db.open.begin(
             Geary.Db.DatabaseFlags.CREATE_FILE, null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         db.open.end(async_result());
 
@@ -102,7 +102,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
 
         db.open.begin(
             Geary.Db.DatabaseFlags.CREATE_FILE, null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         db.open.end(async_result());
 
@@ -136,7 +136,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
 
         db.open.begin(
             Geary.Db.DatabaseFlags.CREATE_FILE, null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         db.open.end(async_result());
 

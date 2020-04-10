@@ -51,7 +51,7 @@ class Geary.Imap.DeserializerTest : TestCase {
     }
 
     public override void tear_down() {
-        this.deser.stop_async.begin((obj, ret) => { async_complete(ret); });
+        this.deser.stop_async.begin(this.async_completion);
         async_result();
         this.stream = null;
     }
@@ -62,7 +62,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(bytes.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert_int(2, message.size);
@@ -76,7 +76,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(bytes.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert_int(2, message.size);
@@ -90,7 +90,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(bytes.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert_int(2, message.size);
@@ -104,7 +104,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(bytes.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert_int(2, message.size);
@@ -118,7 +118,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(bytes.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert_int(2, message.size);
@@ -136,7 +136,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         // deserializer currently silently ignores lines with
         // malformed lists and continues parsing, so we get to the end
         // of the stream.
-        this.process.begin(Expect.EOS, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.EOS, this.async_completion);
         this.process.end(async_result());
     }
 
@@ -150,7 +150,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         // deserializer currently silently ignores lines with
         // malformed lists and continues parsing, so we get to the end
         // of the stream.
-        this.process.begin(Expect.EOS, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.EOS, this.async_completion);
         this.process.end(async_result());
     }
 
@@ -159,7 +159,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(greeting.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert(message.to_string() == greeting);
@@ -170,7 +170,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(greeting.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert(message.to_string() == greeting);
@@ -182,7 +182,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(greeting.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert(message.to_string() == parsed);
@@ -193,7 +193,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.DESER_FAIL, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.DESER_FAIL, this.async_completion);
         this.process.end(async_result());
     }
 
@@ -202,7 +202,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert(message.to_string() == flags);
@@ -213,7 +213,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert(message.to_string() == flags);
@@ -224,7 +224,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert(message.to_string() == flags);
@@ -239,7 +239,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
         assert(message.to_string() == expected);
@@ -250,12 +250,12 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
 
-        this.process.begin(Expect.DESER_FAIL, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.DESER_FAIL, this.async_completion);
         this.process.end(async_result());
     }
 
     public void instant_eos() throws Error {
-        this.process.begin(Expect.EOS, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.EOS, this.async_completion);
         this.process.end(async_result());
         assert(this.deser.is_halted());
     }
@@ -267,10 +267,14 @@ class Geary.Imap.DeserializerTest : TestCase {
         bool eos = false;
         this.deser.end_of_stream.connect(() => { eos = true; });
 
-        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
         assert(message.to_string() == bye);
-        assert(eos);
+        assert_false(eos);
+
+        this.process.begin(Expect.EOS, this.async_completion);
+        assert_true(eos);
+
         assert(this.deser.is_halted());
     }
 

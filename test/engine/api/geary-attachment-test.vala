@@ -83,9 +83,7 @@ class Geary.AttachmentTest : TestCase {
             this.file
         );
 
-        test.get_safe_file_name.begin(null, (obj, ret) => {
-                async_complete(ret);
-            });
+        test.get_safe_file_name.begin(null, this.async_completion);
 
         assert(test.get_safe_file_name.end(async_result()) == TEST_FILENAME);
     }
@@ -102,9 +100,7 @@ class Geary.AttachmentTest : TestCase {
             this.file
         );
 
-        test.get_safe_file_name.begin(null, (obj, ret) => {
-                async_complete(ret);
-            });
+        test.get_safe_file_name.begin(null, this.async_completion);
 
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
@@ -121,9 +117,7 @@ class Geary.AttachmentTest : TestCase {
             this.file
         );
 
-        test.get_safe_file_name.begin(null, (obj, ret) => {
-                async_complete(ret);
-            });
+        test.get_safe_file_name.begin(null, this.async_completion);
 
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
@@ -139,9 +133,7 @@ class Geary.AttachmentTest : TestCase {
             this.file
         );
 
-        test.get_safe_file_name.begin(null, (obj, ret) => {
-                async_complete(ret);
-            });
+        test.get_safe_file_name.begin(null, this.async_completion);
 
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
@@ -157,9 +149,7 @@ class Geary.AttachmentTest : TestCase {
             this.file
         );
 
-        test.get_safe_file_name.begin(null, (obj, ret) => {
-                async_complete(ret);
-            });
+        test.get_safe_file_name.begin(null, this.async_completion);
 
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
@@ -176,9 +166,7 @@ class Geary.AttachmentTest : TestCase {
             this.file
         );
 
-        test.get_safe_file_name.begin(ALT_TEXT, (obj, ret) => {
-                async_complete(ret);
-            });
+        test.get_safe_file_name.begin(ALT_TEXT, this.async_completion);
 
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
@@ -194,9 +182,7 @@ class Geary.AttachmentTest : TestCase {
             this.file
         );
 
-        test.get_safe_file_name.begin(null, (obj, ret) => {
-                async_complete(ret);
-            });
+        test.get_safe_file_name.begin(null, this.async_completion);
 
         assert(test.get_safe_file_name.end(async_result()) == TEST_FILENAME);
     }
@@ -214,9 +200,7 @@ class Geary.AttachmentTest : TestCase {
             this.file
         );
 
-        test.get_safe_file_name.begin(null, (obj, ret) => {
-                async_complete(ret);
-            });
+        test.get_safe_file_name.begin(null, this.async_completion);
 
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
@@ -233,9 +217,7 @@ class Geary.AttachmentTest : TestCase {
             File.new_for_path(TEST_FILENAME)
         );
 
-        test.get_safe_file_name.begin(null, (obj, ret) => {
-                async_complete(ret);
-            });
+        test.get_safe_file_name.begin(null, this.async_completion);
 
         assert_string(TEST_FILENAME, test.get_safe_file_name.end(async_result()));
     }

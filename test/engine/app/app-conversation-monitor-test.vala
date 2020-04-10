@@ -78,7 +78,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         this.base_folder.expect_call("close_async");
 
         monitor.start_monitoring.begin(
-            NONE, test_cancellable, (obj, res) => { async_complete(res); }
+            NONE, test_cancellable, this.async_completion
         );
         monitor.start_monitoring.end(async_result());
 
@@ -88,7 +88,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         }
 
         monitor.stop_monitoring.begin(
-            test_cancellable, (obj, res) => { async_complete(res); }
+            test_cancellable, this.async_completion
         );
         monitor.stop_monitoring.end(async_result());
 
@@ -108,7 +108,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             .throws(new EngineError.SERVER_UNAVAILABLE("Mock error"));
 
         monitor.start_monitoring.begin(
-            NONE, null, (obj, res) => { async_complete(res); }
+            NONE, null, this.async_completion
         );
         try {
             monitor.start_monitoring.end(async_result());
@@ -246,7 +246,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         // error out during later tests
         this.base_folder.expect_call("close_async");
         monitor.stop_monitoring.begin(
-            null, (obj, res) => { async_complete(res); }
+            null, this.async_completion
         );
         monitor.stop_monitoring.end(async_result());
     }
@@ -477,7 +477,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         }
 
         monitor.start_monitoring.begin(
-            NONE, test_cancellable, (obj, res) => { async_complete(res); }
+            NONE, test_cancellable, this.async_completion
         );
         monitor.start_monitoring.end(async_result());
 

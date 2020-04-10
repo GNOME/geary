@@ -43,10 +43,7 @@ public abstract class ClientWebViewTestCase<V> : TestCase {
 
     protected WebKit.JavascriptResult run_javascript(string command) throws Error {
         ClientWebView view = (ClientWebView) this.test_view;
-        view.run_javascript.begin(
-            command, null, (obj, res) => { async_complete(res); }
-        );
-
+        view.run_javascript.begin(command, null, this.async_completion);
         return view.run_javascript.end(async_result());
     }
 
