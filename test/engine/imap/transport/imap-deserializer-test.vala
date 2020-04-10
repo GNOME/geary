@@ -270,7 +270,11 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
         assert(message.to_string() == bye);
-        assert(eos);
+        assert_false(eos);
+
+        this.process.begin(Expect.EOS, this.async_completion);
+        assert_true(eos);
+
         assert(this.deser.is_halted());
     }
 
