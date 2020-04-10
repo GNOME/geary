@@ -67,19 +67,62 @@ private class UintArgument : Object, Argument {
  * expectations, such that the mock method should throw a specific
  * error or return a specific value or object.
  */
-public class ExpectedCall : Object {
+public class ExpectedCall : GLib.Object {
 
 
+    /** Options for handling async calls. */
+    public enum AsyncCallOptions {
+
+        /** Check and return from the expected call immediately. */
+        CONTINUE,
+
+        /**
+         * Check and return from the expected call when idle.
+         *
+         * This will yield when the call is made, being resuming when
+         * idle.
+         */
+        CONTINUE_AT_IDLE,
+
+        /**
+         * Check and return from the expected call when requested.
+         *
+         * This will yield when the call is made, resuming when {@link
+         * ExpectedCall.async_resume} is called.
+         */
+        PAUSE;
+
+    }
+
+
+    /** The name of the expected call. */
     public string name { get; private set; }
-    public Error? throw_error { get; private set; default = null; }
-    public Object? return_object { get; private set; default = null; }
-    public Variant? return_value { get; private set; default = null; }
 
+    /** Determines how async calls are handled. */
+    public AsyncCallOptions async_behaviour {
+        get; private set; default = CONTINUE;
+    }
+
+    /** The error to be thrown by the call, if any. */
+    public GLib.Error? throw_error { get; private set; default = null; }
+
+    /** An object to be returned by the call, if any. */
+    public GLib.Object? return_object { get; private set; default = null; }
+
+    /** A value to be returned by the call, if any. */
+    public GLib.Variant? return_value { get; private set; default = null; }
+
+    /** Determines if the call has been made or not. */
     public bool was_called { get; private set; default = false; }
 
+    /** Determines if an async call has been resumed or not. */
+    public bool async_resumed { get; private set; default = false; }
+
     // XXX Arrays can't be GObject properties :(
-    internal Object[]? expected_args = null;
-    private Object[]? called_args = null;
+    internal GLib.Object[]? expected_args = null;
+    private GLib.Object[]? called_args = null;
+
+    internal unowned GLib.SourceFunc? async_callback = null;
 
 
     internal ExpectedCall(string name, Object[]? args) {
@@ -87,21 +130,50 @@ public class ExpectedCall : Object {
         this.expected_args = args;
     }
 
+    /** Sets the behaviour for an async call. */
+    public ExpectedCall async_call(AsyncCallOptions behaviour) {
+        this.async_behaviour = behaviour;
+        return this;
+    }
+
+    /** Sets an object that the call should return. */
     public ExpectedCall returns_object(Object value) {
         this.return_object = value;
         return this;
     }
 
+    /** Sets a bool value that the call should return. */
     public ExpectedCall returns_boolean(bool value) {
         this.return_value = new GLib.Variant.boolean(value);
         return this;
     }
 
-    public ExpectedCall @throws(Error err) {
+    /** Sets an error that the cal should throw. */
+    public ExpectedCall @throws(GLib.Error err) {
         this.throw_error = err;
         return this;
     }
 
+    /**
+     * Resumes an async call that has been paused.
+     *
+     * Throws an assertion error if the call has not yet been called
+     * or has not been paused.
+     */
+    public void async_resume() throws GLib.Error {
+        assert_true(
+            this.async_callback != null,
+            "Async call not called, could not resume"
+        );
+        assert_false(
+            this.async_resumed,
+            "Async call already resumed"
+        );
+        this.async_resumed = true;
+        this.async_callback();
+    }
+
+    /** Determines if an argument was given in the specific position. */
     public T called_arg<T>(int pos) throws GLib.Error {
         assert_true(
             this.called_args != null && this.called_args.length >= (pos + 1),
