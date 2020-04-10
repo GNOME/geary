@@ -153,6 +153,9 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     /** Determines if the fill operation can load more messages. */
     internal bool fill_complete { get; set; default = false; }
 
+    // Determines if the base folder was actually opened or not
+    private bool base_was_opened = false;
+
     private Geary.Email.Field required_fields;
     private ConversationOperationQueue queue;
     private GLib.Cancellable operation_cancellable = new GLib.Cancellable();
@@ -312,6 +315,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
         // Set early yield to guard against reentrancy
         this.is_monitoring = true;
+        this.base_was_opened = false;
 
         this.base_folder.email_appended.connect(on_folder_email_appended);
         this.base_folder.email_inserted.connect(on_folder_email_inserted);
@@ -338,20 +342,28 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
         try {
             yield this.base_folder.open_async(open_flags, opening);
-        } catch (Error err) {
+            this.base_was_opened = true;
+        } catch (GLib.Error err) {
+            // This check is needed since ::stop_monitoring may have
+            // been called while this call is waiting for the folder
+            // to finish opening. If so, we're already disconnected
+            // and don't need to do it again.
             if (this.is_monitoring) {
                 try {
-                    yield stop_monitoring_internal(false, null);
-                } catch (Error stop_error) {
+                    yield stop_monitoring_internal(null);
+                } catch (GLib.Error stop_error) {
                     warning(
                         "Error cleaning up after folder open error: %s", err.message
                     );
                 }
-                throw err;
             }
+
+            this.is_monitoring = false;
+            throw err;
         }
 
-        // Now the folder is open, start the queue running
+        // Now the folder is open, start the queue running. The here
+        // is needed for the same reason as the one immediately above.
         if (this.is_monitoring) {
             this.queue.run_process_async.begin();
         }
@@ -373,7 +385,9 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         throws GLib.Error {
         bool is_closing = false;
         if (this.is_monitoring) {
-            is_closing = yield stop_monitoring_internal(true, cancellable);
+            // Set now to prevent reentrancy during yield or signal
+            this.is_monitoring = false;
+            is_closing = yield stop_monitoring_internal(cancellable);
         }
         return is_closing;
     }
@@ -649,12 +663,8 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         email_flags_changed(conversation, email);
     }
 
-    private async bool stop_monitoring_internal(bool folder_was_opened,
-                                                Cancellable? cancellable)
+    private async bool stop_monitoring_internal(GLib.Cancellable? cancellable)
         throws Error {
-        // set now to prevent reentrancy during yield or signal
-        is_monitoring = false;
-
         this.base_folder.email_appended.disconnect(on_folder_email_appended);
         this.base_folder.email_inserted.disconnect(on_folder_email_inserted);
         this.base_folder.email_locally_complete.disconnect(on_folder_email_complete);
@@ -679,7 +689,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         }
 
         bool closing = false;
-        if (folder_was_opened) {
+        if (this.base_was_opened) {
             try {
                 closing = yield this.base_folder.close_async(null);
             } catch (GLib.Error err) {
