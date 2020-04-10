@@ -48,7 +48,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         );
         this.account.open_async.begin(
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.account.open_async.end(async_result());
 
@@ -59,7 +59,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.root = null;
         this.account.close_async.begin(
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.account.close_async.end(async_result());
         this.account = null;
@@ -91,7 +91,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.clone_folder_async.begin(
             folder,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.account.clone_folder_async.end(async_result());
 
@@ -130,7 +130,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.clone_folder_async.begin(
             folder,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.account.clone_folder_async.end(async_result());
 
@@ -155,7 +155,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.list_folders_async.begin(
             this.account.imap_folder_root,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Collection<Geary.ImapDB.Folder> result =
             this.account.list_folders_async.end(async_result());
@@ -167,7 +167,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.list_folders_async.begin(
             test1.get_path(),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         result = this.account.list_folders_async.end(async_result());
 
@@ -178,7 +178,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.list_folders_async.begin(
             test2.get_path(),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         result = this.account.list_folders_async.end(async_result());
 
@@ -198,14 +198,14 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.delete_folder_async.begin(
             this.root.get_child("test1").get_child("test2"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.account.delete_folder_async.end(async_result());
 
         this.account.delete_folder_async.begin(
             this.root.get_child("test1"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.account.delete_folder_async.end(async_result());
     }
@@ -221,7 +221,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.delete_folder_async.begin(
             this.root.get_child("test1"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         try {
             this.account.delete_folder_async.end(async_result());
@@ -242,7 +242,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.delete_folder_async.begin(
             this.root.get_child("test3"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         try {
             this.account.delete_folder_async.end(async_result());
@@ -263,7 +263,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.fetch_folder_async.begin(
             this.root.get_child("test1"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
 
         Folder? result = this.account.fetch_folder_async.end(async_result());
@@ -282,7 +282,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.fetch_folder_async.begin(
             this.root.get_child("test1").get_child("test2"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
 
         Folder? result = this.account.fetch_folder_async.end(async_result());
@@ -301,7 +301,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account.fetch_folder_async.begin(
             this.root.get_child("test3"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         try {
             this.account.fetch_folder_async.end(async_result());
@@ -330,7 +330,7 @@ class Geary.ImapDB.AccountTest : TestCase {
                 }).to_linked_list(),
             Email.Field.RECEIVERS,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.List<Email> result = this.account.list_email.end(
             async_result()
@@ -344,7 +344,7 @@ class Geary.ImapDB.AccountTest : TestCase {
             Collection.single(new EmailIdentifier(3, null)),
             Email.Field.RECEIVERS,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         try {
             this.account.list_email.end(async_result());
@@ -357,7 +357,7 @@ class Geary.ImapDB.AccountTest : TestCase {
             Collection.single(new EmailIdentifier(1, null)),
             Email.Field.BODY,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         try {
             this.account.list_email.end(async_result());

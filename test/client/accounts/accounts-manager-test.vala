@@ -82,7 +82,7 @@ class Accounts.ManagerTest : TestCase {
 
         this.test.create_account.begin(
             account, new GLib.Cancellable(),
-             (obj, res) => { async_complete(res); }
+             this.async_completion
         );
         this.test.create_account.end(async_result());
 
@@ -95,7 +95,7 @@ class Accounts.ManagerTest : TestCase {
     public void create_orphan_account() throws GLib.Error {
         this.test.new_orphan_account.begin(
             Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         Geary.AccountInformation account1 =
             this.test.new_orphan_account.end(async_result());
@@ -103,13 +103,13 @@ class Accounts.ManagerTest : TestCase {
 
         this.test.create_account.begin(
             account1, new GLib.Cancellable(),
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         this.test.create_account.end(async_result());
 
         this.test.new_orphan_account.begin(
             Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         Geary.AccountInformation account2 =
             this.test.new_orphan_account.end(async_result());
@@ -119,13 +119,13 @@ class Accounts.ManagerTest : TestCase {
     public void create_orphan_account_with_legacy() throws GLib.Error {
         this.test.create_account.begin(
             account, new GLib.Cancellable(),
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         this.test.create_account.end(async_result());
 
         this.test.new_orphan_account.begin(
             Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         Geary.AccountInformation account1 =
             this.test.new_orphan_account.end(async_result());
@@ -133,13 +133,13 @@ class Accounts.ManagerTest : TestCase {
 
         this.test.create_account.begin(
             account1, new GLib.Cancellable(),
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         this.test.create_account.end(async_result());
 
         this.test.new_orphan_account.begin(
             Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         Geary.AccountInformation account2 =
             this.test.new_orphan_account.end(async_result());
@@ -154,7 +154,7 @@ class Accounts.ManagerTest : TestCase {
 
         this.test.new_orphan_account.begin(
             Geary.ServiceProvider.OTHER, this.primary_mailbox, null,
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         Geary.AccountInformation account =
             this.test.new_orphan_account.end(async_result());

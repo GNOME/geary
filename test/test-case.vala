@@ -360,17 +360,8 @@ public abstract class TestCase : GLib.Object {
      *
      * @see AsyncResultWaiter.async_completion
      */
-    protected void async_complete(AsyncResult result) {
-        this.async_waiter.async_completion(null, result);
-    }
-
-    /**
-     * Calls the same method on the test case's default async waiter.
-     *
-     * @see AsyncResultWaiter.async_completion
-     */
-    protected void async_complete_full(GLib.Object? object,
-                                       AsyncResult result) {
+    protected void async_completion(GLib.Object? object,
+                                    AsyncResult result) {
         this.async_waiter.async_completion(object, result);
     }
 

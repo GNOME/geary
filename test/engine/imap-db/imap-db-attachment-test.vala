@@ -119,7 +119,7 @@ class Geary.ImapDB.AttachmentIoTest : TestCase {
         this.db = new Geary.Db.Database.transient();
         this.db.open.begin(
             Geary.Db.DatabaseFlags.NONE, null,
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         this.db.open.end(async_result());
         this.db.exec("""
@@ -150,7 +150,7 @@ CREATE TABLE MessageAttachmentTable (
 
         Files.recursive_delete_async.begin(
             this.tmp_dir, GLib.Priority.DEFAULT, null,
-            (obj, res) => { async_complete(res); }
+            this.async_completion
         );
         Files.recursive_delete_async.end(async_result());
         this.tmp_dir = null;

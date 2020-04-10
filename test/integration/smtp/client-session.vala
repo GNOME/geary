@@ -37,7 +37,7 @@ class Integration.Smtp.ClientSession : TestCase {
 
     public override void tear_down() throws GLib.Error {
         try {
-            this.session.logout_async.begin(false, null, async_complete_full);
+            this.session.logout_async.begin(false, null, this.async_completion);
             this.session.logout_async.end(async_result());
         } catch (GLib.Error err) {
             // Oh well
@@ -52,7 +52,7 @@ class Integration.Smtp.ClientSession : TestCase {
             "deliberately-invalid-password"
         );
         this.session.login_async.begin(
-            password_creds, null, async_complete_full
+            password_creds, null, this.async_completion
         );
         try {
             this.session.login_async.end(async_result());
@@ -69,7 +69,7 @@ class Integration.Smtp.ClientSession : TestCase {
             "deliberately-invalid-token"
         );
         this.session.login_async.begin(
-            oauth2_creds, null, async_complete_full
+            oauth2_creds, null, this.async_completion
         );
         try {
             this.session.login_async.end(async_result());
@@ -97,7 +97,7 @@ class Integration.Smtp.ClientSession : TestCase {
                 "Geary integration test",
                 this.config.credentials.user
             ),
-            async_complete_full
+            this.async_completion
         );
         Geary.RFC822.Message message = new_message.end(async_result());
 
@@ -105,14 +105,14 @@ class Integration.Smtp.ClientSession : TestCase {
             return_path,
             message,
             null,
-            async_complete_full
+            this.async_completion
         );
         this.session.send_email_async.end(async_result());
     }
 
     private void do_connect() throws GLib.Error {
         this.session.login_async.begin(
-            this.config.credentials, null, async_complete_full
+            this.config.credentials, null, this.async_completion
         );
         this.session.login_async.end(async_result());
     }

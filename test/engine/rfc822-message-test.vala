@@ -231,7 +231,7 @@ This is the second line.
 
         this.message_from_composed_email.begin(
             composed,
-            async_complete_full
+            this.async_completion
         );
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 
@@ -261,7 +261,7 @@ This is the second line.
 
         this.message_from_composed_email.begin(
             composed,
-            async_complete_full
+            this.async_completion
         );
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 
@@ -286,7 +286,7 @@ This is the second line.
 
         this.message_from_composed_email.begin(
             composed,
-            async_complete_full
+            this.async_completion
         );
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 
@@ -343,7 +343,7 @@ This is the second line.
 
         this.message_from_composed_email.begin(
             composed,
-            async_complete_full
+            this.async_completion
         );
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 

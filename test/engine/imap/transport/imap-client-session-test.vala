@@ -47,12 +47,12 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
         assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
@@ -71,13 +71,13 @@ class Geary.Imap.ClientSessionTest : TestCase {
 
         var test_article = new ClientSession(new_endpoint());
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
 
         assert_true(test_article.capabilities.supports_imap4rev1());
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
@@ -92,7 +92,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         GLib.Timer timer = new GLib.Timer();
         timer.start();
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         try {
             test_article.connect_async.end(async_result());
@@ -117,19 +117,19 @@ class Geary.Imap.ClientSessionTest : TestCase {
 
         var test_article = new ClientSession(new_endpoint());
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
         test_article.login_async.begin(
             new Credentials(PASSWORD, "test", "password"),
             null,
-            this.async_complete_full
+            this.async_completion
         );
         test_article.login_async.end(async_result());
 
         assert_true(test_article.capabilities.supports_imap4rev1());
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
@@ -151,7 +151,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
         assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
@@ -159,12 +159,12 @@ class Geary.Imap.ClientSessionTest : TestCase {
         test_article.login_async.begin(
             new Credentials(PASSWORD, "test", "password"),
             null,
-            this.async_complete_full
+            this.async_completion
         );
         test_article.login_async.end(async_result());
         assert_true(test_article.get_protocol_state() == AUTHORIZED);
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
@@ -188,12 +188,12 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
         assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
 
-        test_article.logout_async.begin(null, this.async_complete_full);
+        test_article.logout_async.begin(null, this.async_completion);
         test_article.logout_async.end(async_result());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
@@ -219,7 +219,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
         assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
@@ -227,12 +227,12 @@ class Geary.Imap.ClientSessionTest : TestCase {
         test_article.login_async.begin(
             new Credentials(PASSWORD, "test", "password"),
             null,
-            this.async_complete_full
+            this.async_completion
         );
         test_article.login_async.end(async_result());
         assert_true(test_article.get_protocol_state() == AUTHORIZED);
 
-        test_article.logout_async.begin(null, this.async_complete_full);
+        test_article.logout_async.begin(null, this.async_completion);
         test_article.logout_async.end(async_result());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
@@ -264,7 +264,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
         assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
@@ -272,7 +272,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         test_article.initiate_session_async.begin(
             new Credentials(PASSWORD, "test", "password"),
             null,
-            this.async_complete_full
+            this.async_completion
         );
         test_article.initiate_session_async.end(async_result());
 
@@ -283,7 +283,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_string("Inbox", test_article.inbox.mailbox.name);
         assert_true(test_article.inbox.mailbox.is_inbox);
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
@@ -308,7 +308,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
         assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
@@ -316,7 +316,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         test_article.initiate_session_async.begin(
             new Credentials(PASSWORD, "test", "password"),
             null,
-            this.async_complete_full
+            this.async_completion
         );
         test_article.initiate_session_async.end(async_result());
 
@@ -327,7 +327,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_string("Inbox", test_article.inbox.mailbox.name);
         assert_true(test_article.inbox.mailbox.is_inbox);
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
@@ -371,7 +371,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
-            CONNECT_TIMEOUT, null, this.async_complete_full
+            CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
         assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
@@ -379,7 +379,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         test_article.initiate_session_async.begin(
             new Credentials(PASSWORD, "test", "password"),
             null,
-            this.async_complete_full
+            this.async_completion
         );
         test_article.initiate_session_async.end(async_result());
 
@@ -398,7 +398,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
             "user.", test_article.get_other_users_namespaces()[0].prefix
         );
 
-        test_article.disconnect_async.begin(null, this.async_complete_full);
+        test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
