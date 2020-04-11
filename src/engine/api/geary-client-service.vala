@@ -456,6 +456,9 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
         if (this.is_running) {
             this.became_reachable_timer.reset();
             this.became_unreachable_timer.reset();
+            // Since there was an error determining if the service was
+            // reachable, assume it is no longer reachable.
+            became_unreachable();
             notify_connection_failed(new ErrorContext(error));
         }
     }
@@ -466,6 +469,8 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
             this.current_status = TLS_VALIDATION_FAILED;
             this.became_reachable_timer.reset();
             this.became_unreachable_timer.reset();
+            // Since the host is not trusted, it should not be
+            // considered reachable.
             became_unreachable();
             this.account.untrusted_host(this.configuration, remote, cx);
         }
