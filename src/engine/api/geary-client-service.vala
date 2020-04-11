@@ -17,8 +17,13 @@
 public abstract class Geary.ClientService : BaseObject, Logging.Source {
 
 
-    private const int BECAME_REACHABLE_TIMEOUT_SEC = 1;
-    private const int BECAME_UNREACHABLE_TIMEOUT_SEC = 3;
+    // Keep the unreachable timeout short so that when the connection
+    // actually goes down connections get pulled down ASAP. Keep the
+    // reachable timeout higher to avoid trying to reconnect
+    // immediately on notification of being reachable, which can be a
+    // bit bouncy
+    private const int BECAME_REACHABLE_TIMEOUT_SEC = 3;
+    private const int BECAME_UNREACHABLE_TIMEOUT_SEC = 1;
 
 
     /**
