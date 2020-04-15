@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2019-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -261,6 +261,11 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     /** {@inheritDoc} */
     public Logging.Flag logging_flags {
         get; protected set; default = Logging.Flag.ALL;
+    }
+
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return ClientService.LOGGING_DOMAIN; }
     }
 
     /** {@inheritDoc} */
