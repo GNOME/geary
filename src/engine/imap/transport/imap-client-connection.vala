@@ -55,11 +55,6 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.NETWORK;
-    }
-
-    /** {@inheritDoc} */
     public override string logging_domain {
         get { return ClientService.PROTOCOL_LOGGING_DOMAIN; }
     }

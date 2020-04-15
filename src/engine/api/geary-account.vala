@@ -256,11 +256,6 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
-    }
-
-    /** {@inheritDoc} */
     public Logging.Source? logging_parent { get { return null; } }
 
 

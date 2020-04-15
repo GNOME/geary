@@ -65,10 +65,9 @@ public class Application.Client : Gtk.Application {
     private const string OPTION_LOG_CONVERSATIONS = "log-conversations";
     private const string OPTION_LOG_DESERIALIZER = "log-deserializer";
     private const string OPTION_LOG_FOLDER_NORM = "log-folder-normalization";
-    private const string OPTION_LOG_NETWORK = "log-network";
-    private const string OPTION_LOG_PERIODIC = "log-periodic";
+    private const string OPTION_LOG_IMAP = "log-imap";
     private const string OPTION_LOG_REPLAY_QUEUE = "log-replay-queue";
-    private const string OPTION_LOG_SERIALIZER = "log-serializer";
+    private const string OPTION_LOG_SMTP = "log-smtp";
     private const string OPTION_LOG_SQL = "log-sql";
     private const string OPTION_HIDDEN = "hidden";
     private const string OPTION_NEW_WINDOW = "new-window";
@@ -111,22 +110,17 @@ public class Application.Client : Gtk.Application {
           /// Command line option. "Normalization" can also be called
           /// "synchronization".
           N_("Log folder normalization"), null },
-        { OPTION_LOG_NETWORK, 0, 0, GLib.OptionArg.NONE, null,
+        { OPTION_LOG_IMAP, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
-          N_("Log network activity"), null },
-        { OPTION_LOG_PERIODIC, 0, 0, GLib.OptionArg.NONE, null,
-          /// Command line option
-          N_("Log periodic activity"), null },
+          N_("Log IMAP messages"), null },
         { OPTION_LOG_REPLAY_QUEUE, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option. The IMAP replay queue is how changes
           /// on the server are replicated on the client.  It could
           /// also be called the IMAP events queue.
           N_("Log IMAP replay queue"), null },
-        { OPTION_LOG_SERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
-          /// Command line option. Serialization is how commands and
-          /// responses are converted into a stream of bytes for
-          /// network transmission
-          N_("Log IMAP network serialization"), null },
+        { OPTION_LOG_SMTP, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Log SMTP messages"), null },
         { OPTION_LOG_SQL, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Log database queries (generates lots of messages)"), null },
@@ -917,23 +911,41 @@ public class Application.Client : Gtk.Application {
 
         bool activated = false;
 
-        // Logging flags
-        if (options.contains(OPTION_LOG_NETWORK))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
-        if (options.contains(OPTION_LOG_SERIALIZER))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
-        if (options.contains(OPTION_LOG_REPLAY_QUEUE))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.REPLAY);
-        if (options.contains(OPTION_LOG_CONVERSATIONS))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.CONVERSATIONS);
-        if (options.contains(OPTION_LOG_PERIODIC))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.PERIODIC);
-        if (options.contains(OPTION_LOG_SQL))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.SQL);
-        if (options.contains(OPTION_LOG_FOLDER_NORM))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.FOLDER_NORMALIZATION);
-        if (options.contains(OPTION_LOG_DESERIALIZER))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.DESERIALIZER);
+        // Suppress some noisy domains from third-party libraries
+        Geary.Logging.suppress_domain("GdkPixbuf");
+        Geary.Logging.suppress_domain("GLib-Net");
+
+        // Suppress the engine's sub-domains that are extremely
+        // verbose by default unless requested not to do so
+        if (!options.contains(OPTION_LOG_CONVERSATIONS)) {
+            Geary.Logging.suppress_domain(
+                Geary.App.ConversationMonitor.LOGGING_DOMAIN
+            );
+        }
+        if (!options.contains(OPTION_LOG_DESERIALIZER)) {
+            Geary.Logging.suppress_domain(
+                Geary.Imap.ClientService.DESERIALISATION_LOGGING_DOMAIN
+            );
+        }
+        if (!options.contains(OPTION_LOG_IMAP)) {
+            Geary.Logging.suppress_domain(
+                Geary.Imap.ClientService.PROTOCOL_LOGGING_DOMAIN
+            );
+        }
+        if (!options.contains(OPTION_LOG_REPLAY_QUEUE)) {
+            Geary.Logging.suppress_domain(
+                Geary.Imap.ClientService.REPLAY_QUEUE_LOGGING_DOMAIN
+            );
+        }
+        if (!options.contains(OPTION_LOG_SMTP)) {
+            Geary.Logging.suppress_domain(
+                Geary.Smtp.ClientService.PROTOCOL_LOGGING_DOMAIN
+            );
+        }
+        if (!options.contains(OPTION_LOG_SQL)) {
+            Geary.Logging.suppress_domain(Geary.Db.Context.LOGGING_DOMAIN);
+        }
+
         if (options.contains(OPTION_HIDDEN)) {
             warning(
                 /// Warning printed to the console when a deprecated

@@ -27,11 +27,6 @@ private class Geary.App.ConversationSet : BaseObject, Logging.Source {
     }
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.CONVERSATIONS;
-    }
-
-    /** {@inheritDoc} */
     public override string logging_domain {
         get { return ConversationMonitor.LOGGING_DOMAIN; }
     }

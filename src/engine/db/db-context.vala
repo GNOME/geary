@@ -19,11 +19,6 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
     public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Db";
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.SQL;
-    }
-
-    /** {@inheritDoc} */
     public override string logging_domain {
         get { return LOGGING_DOMAIN; }
     }
@@ -68,9 +63,6 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
 
     [PrintfFormat]
     protected void log(string fmt, ...) {
-        if (!Logging.are_all_flags_set(Logging.Flag.SQL))
-            return;
-
         Statement? stmt = get_statement();
         if (stmt != null) {
             debug("%s\n\t<%s>",

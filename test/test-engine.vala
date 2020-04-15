@@ -23,9 +23,7 @@ int main(string[] args) {
     Geary.HTML.init();
     Geary.Logging.init();
     if (GLib.Test.verbose()) {
-        Geary.Logging.enable_flags(ALL);
         GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
-        Geary.Logging.enable_flags(ALL);
         Geary.Logging.log_to(GLib.stdout);
     }
 

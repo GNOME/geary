@@ -98,11 +98,6 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
     } }
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.CONVERSATIONS;
-    }
-
-    /** {@inheritDoc} */
     public override string logging_domain {
         get { return Imap.ClientService.REPLAY_QUEUE_LOGGING_DOMAIN; }
     }

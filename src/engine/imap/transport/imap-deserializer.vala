@@ -76,11 +76,6 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
         state_to_string, event_to_string);
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.DESERIALIZER;
-    }
-
-    /** {@inheritDoc} */
     public override string logging_domain {
         get { return ClientService.DESERIALISATION_LOGGING_DOMAIN; }
     }

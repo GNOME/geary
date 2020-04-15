@@ -259,11 +259,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     public bool selected_readonly = false;
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
-    }
-
-    /** {@inheritDoc} */
     public override string logging_domain {
         get { return ClientService.LOGGING_DOMAIN; }
     }
@@ -1234,7 +1229,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         keepalive_id = 0;
 
         send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
-        log(PERIODIC, LEVEL_DEBUG, "Sending keepalive...");
+        debug("Sending keepalive...");
 
         // No need to reschedule keepalive, as the notification that the command was sent should
         // do that automatically
@@ -1246,7 +1241,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         try {
             send_command_async.end(result);
         } catch (GLib.Error err) {
-            log(PERIODIC, LEVEL_WARNING, "Keepalive error: %s", err.message);
+            warning("Keepalive error: %s", err.message);
         }
     }
 

@@ -107,7 +107,6 @@ public interface Geary.Logging.Source : GLib.Object {
 
 
         Context(string domain,
-                Logging.Flag flags,
                 GLib.LogLevelFlags level,
                 string message,
                 va_list args) {
@@ -116,7 +115,6 @@ public interface Geary.Logging.Source : GLib.Object {
             this.count = 0;
             append("PRIORITY", log_level_to_priority(level));
             append("GLIB_DOMAIN", domain);
-            append("GEARY_FLAGS", flags);
 
             this.message = message.vprintf(va_list.copy(args));
         }
@@ -157,11 +155,6 @@ public interface Geary.Logging.Source : GLib.Object {
     }
 
     /**
-     * Default flags to use for this source when logging messages.
-     */
-    public abstract Logging.Flag logging_flags { get; protected set; }
-
-    /**
      * The parent of this source.
      *
      * If not null, the parent and its ancestors recursively will be
@@ -197,9 +190,7 @@ public interface Geary.Logging.Source : GLib.Object {
     [PrintfFormat]
     public inline void debug(string fmt, ...) {
         if (!(this.logging_domain in Logging.suppressed_domains)) {
-            log_structured(
-                this.logging_flags, LogLevelFlags.LEVEL_DEBUG, fmt, va_list()
-            );
+            log_structured(LEVEL_DEBUG, fmt, va_list());
         }
     }
 
@@ -208,9 +199,7 @@ public interface Geary.Logging.Source : GLib.Object {
      */
     [PrintfFormat]
     public inline void message(string fmt, ...) {
-        log_structured(
-            this.logging_flags, LogLevelFlags.LEVEL_MESSAGE, fmt, va_list()
-        );
+        log_structured(LEVEL_MESSAGE, fmt, va_list());
     }
 
     /**
@@ -218,9 +207,7 @@ public interface Geary.Logging.Source : GLib.Object {
      */
     [PrintfFormat]
     public inline void warning(string fmt, ...) {
-        log_structured(
-            this.logging_flags, LogLevelFlags.LEVEL_WARNING, fmt, va_list()
-        );
+        log_structured(LEVEL_WARNING, fmt, va_list());
     }
 
     /**
@@ -229,9 +216,7 @@ public interface Geary.Logging.Source : GLib.Object {
     [PrintfFormat]
     [NoReturn]
     public inline void error(string fmt, ...) {
-        log_structured(
-            this.logging_flags, LogLevelFlags.LEVEL_ERROR, fmt, va_list()
-        );
+        log_structured(LEVEL_ERROR, fmt, va_list());
     }
 
     /**
@@ -239,40 +224,24 @@ public interface Geary.Logging.Source : GLib.Object {
      */
     [PrintfFormat]
     public inline void critical(string fmt, ...) {
-        log_structured(
-            this.logging_flags, LogLevelFlags.LEVEL_CRITICAL, fmt, va_list()
-        );
+        log_structured(LEVEL_CRITICAL, fmt, va_list());
     }
 
-    /**
-     * Logs a message with this object as context.
-     */
-    [PrintfFormat]
-    public inline void log(Logging.Flag flags,
-                           GLib.LogLevelFlags levels,
-                           string fmt, ...) {
-        log_structured(flags, levels, fmt, va_list());
-    }
-
-    private inline void log_structured(Logging.Flag flags,
-                                       GLib.LogLevelFlags levels,
+    private inline void log_structured(GLib.LogLevelFlags levels,
                                        string fmt,
                                        va_list args) {
-        if (flags == ALL || Logging.get_flags().is_any_set(flags)) {
-            Context context = Context(
-                this.logging_domain, flags, levels, fmt, args
-            );
-            // Don't attempt to this object if it is in the middle of
-            // being destructed, which can happen when logging from
-            // the destructor.
-            Source? decorated = (this.ref_count > 0) ? this : this.logging_parent;
-            while (decorated != null) {
-                context.append_source(decorated);
-                decorated = decorated.logging_parent;
-            }
+        Context context = Context(this.logging_domain, levels, fmt, args);
 
-            GLib.log_structured_array(levels, context.to_array());
+        // Don't attempt to this object if it is in the middle of
+        // being destructed, which can happen when logging from
+        // the destructor.
+        Source? decorated = (this.ref_count > 0) ? this : this.logging_parent;
+        while (decorated != null) {
+            context.append_source(decorated);
+            decorated = decorated.logging_parent;
         }
+
+        GLib.log_structured_array(levels, context.to_array());
     }
 
 }

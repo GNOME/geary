@@ -21,11 +21,6 @@ internal class Geary.Smtp.ClientConnection : BaseObject, Logging.Source {
     }
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
-    }
-
-    /** {@inheritDoc} */
     public Logging.Source? logging_parent { get { return _logging_parent; } }
     private weak Logging.Source? _logging_parent = null;
 

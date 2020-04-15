@@ -21,92 +21,6 @@ public const string DOMAIN = "Geary";
 public const uint DEFAULT_MAX_LOG_BUFFER_LENGTH = 4096;
 
 /**
- * Denotes a type of log message.
- *
- * Logging for each type of log message may be dynamically enabled or
- * disabled at run time by {@link enable_flags} and {@link
- * disable_flags}.
- */
-[Flags]
-public enum Flag {
-    NONE = 0,
-    NETWORK,
-    SERIALIZER,
-    REPLAY,
-    CONVERSATIONS,
-    PERIODIC,
-    SQL,
-    FOLDER_NORMALIZATION,
-    DESERIALIZER,
-    ALL = int.MAX;
-
-    public inline bool is_all_set(Flag flags) {
-        return (flags & this) == flags;
-    }
-
-    public inline bool is_any_set(Flag flags) {
-        return (flags & this) != 0;
-    }
-
-    public string to_string() {
-        GLib.StringBuilder buf = new GLib.StringBuilder();
-        if (this == ALL) {
-            buf.append("ALL");
-        } else if (this == NONE) {
-            buf.append("NONE");
-        } else {
-            if (this.is_any_set(NETWORK)) {
-                buf.append("NET");
-            }
-            if (this.is_any_set(SERIALIZER)) {
-                if (buf.len > 0) {
-                    buf.append_c('|');
-                }
-                buf.append("SER");
-            }
-            if (this.is_any_set(REPLAY)) {
-                if (buf.len > 0) {
-                    buf.append_c('|');
-                }
-                buf.append("REP");
-            }
-            if (this.is_any_set(CONVERSATIONS)) {
-                if (buf.len > 0) {
-                    buf.append_c('|');
-                }
-                buf.append("CNV");
-            }
-            if (this.is_any_set(PERIODIC)) {
-                if (buf.len > 0) {
-                    buf.append_c('|');
-                }
-                buf.append("PER");
-            }
-            if (this.is_any_set(SQL)) {
-                if (buf.len > 0) {
-                    buf.append_c('|');
-                }
-                buf.append("SQL");
-            }
-            if (this.is_any_set(FOLDER_NORMALIZATION)) {
-                if (buf.len > 0) {
-                    buf.append_c('|');
-                }
-                buf.append("NRM");
-            }
-            if (this.is_any_set(DESERIALIZER)) {
-                if (buf.len > 0) {
-                    buf.append_c('|');
-                }
-                buf.append("DES");
-            }
-        }
-        return buf.str;
-    }
-
-}
-
-/**
  * A record of a single message sent to the logging system.
  *
  * A record is created for each message logged, and stored in a
@@ -128,9 +42,6 @@ public class Record {
 
     /** Folder from which the record originated, if any. */
     public Folder? folder { get; private set; default = null; }
-
-    /** The logged flags, if any. */
-    public Flag? flags = null;
 
     /** The logged message, if any. */
     public string? message = null;
@@ -179,10 +90,6 @@ public class Record {
                     ((Source) field.value).to_logging_state();
                 break;
 
-            case "GEARY_FLAGS":
-                this.flags = (Flag) field.value;
-                break;
-
             case "GLIB_DOMAIN":
                 this.domain = field_to_string(field);
                 break;
@@ -219,7 +126,6 @@ public class Record {
         this.account = other.account;
         this.service = other.service;
         this.folder = other.folder;
-        this.flags = other.flags;
         this.message = other.message;
         this.source_filename = other.source_filename;
         this.source_line_number = other.source_line_number;
@@ -266,7 +172,6 @@ public class Record {
         fill_well_known_sources();
 
         string domain = this.domain ?? "[no domain]";
-        Flag flags = this.flags ?? Flag.NONE;
         string message = this.message ?? "[no message]";
         double float_secs = this.timestamp / 1000.0 / 1000.0;
         double floor_secs = GLib.Math.floor(float_secs);
@@ -276,7 +181,7 @@ public class Record {
         ).to_local();
         GLib.StringBuilder str = new GLib.StringBuilder.sized(128);
         str.printf(
-            "%s %02d:%02d:%02d.%04d %s",
+            "%s %02d:%02d:%02d.%04d %s:",
             to_prefix(levels),
             time.get_hour(),
             time.get_minute(),
@@ -284,12 +189,6 @@ public class Record {
             ms,
             domain
         );
-
-        if (flags != NONE) {
-            str.append_printf("[%s]:", flags.to_string());
-        } else {
-            str.append(":");
-        }
 
         // Append in reverse so inner sources appear first
         for (int i = this.states.length - 1; i >= 0; i--) {
@@ -333,7 +232,6 @@ public class Record {
 public delegate void LogRecord(Record record);
 
 private int init_count = 0;
-private Flag logging_flags = Flag.NONE;
 
 // The two locks below can't be nullable. See
 // https://gitlab.gnome.org/GNOME/vala/issues/812
@@ -398,93 +296,9 @@ public void clear() {
     }
 }
 
-/**
- * Replaces the current logging flags with flags.  Use Geary.Logging.Flag.NONE to clear all
- * logging flags.
- */
-public void set_flags(Flag flags) {
-    logging_flags = flags;
-}
-
-/**
- * Adds the supplied flags to the current logging flags without disturbing the others.
- */
-public void enable_flags(Flag flags) {
-    logging_flags |= flags;
-}
-
-/**
- * Removes the supplied flags from the current logging flags without disturbing the others.
- */
-public void disable_flags(Flag flags) {
-    logging_flags &= ~flags;
-}
-
 /** Sets a function to be called when a new log record is created. */
 public void set_log_listener(LogRecord? new_listener) {
     listener = new_listener;
-}
-
-
-/**
- * Returns the current logging flags.
- */
-public Flag get_flags() {
-    return logging_flags;
-}
-
-/**
- * Returns true if all the flag(s) are set.
- */
-public inline bool are_all_flags_set(Flag flags) {
-    return logging_flags.is_all_set(flags);
-}
-
-[PrintfFormat]
-public inline void error(Flag flags, string fmt, ...) {
-    logv(flags, GLib.LogLevelFlags.LEVEL_ERROR, fmt, va_list());
-}
-
-[PrintfFormat]
-public inline void critical(Flag flags, string fmt, ...) {
-    logv(flags, GLib.LogLevelFlags.LEVEL_CRITICAL, fmt, va_list());
-}
-
-[PrintfFormat]
-public inline void warning(Flag flags, string fmt, ...) {
-    logv(flags, GLib.LogLevelFlags.LEVEL_WARNING, fmt, va_list());
-}
-
-[PrintfFormat]
-public inline void message(Flag flags, string fmt, ...) {
-    logv(flags, GLib.LogLevelFlags.LEVEL_MESSAGE, fmt, va_list());
-}
-
-[PrintfFormat]
-public inline void debug(Flag flags, string fmt, ...) {
-    logv(flags, GLib.LogLevelFlags.LEVEL_DEBUG, fmt, va_list());
-}
-
-public inline void logv(Flag flags,
-                        GLib.LogLevelFlags level,
-                        string fmt,
-                        va_list args) {
-    if (flags == ALL || logging_flags.is_any_set(flags)) {
-        GLib.log_structured_array(
-            level,
-            new GLib.LogField[] {
-                GLib.LogField<string>() {
-                    key = "GLIB_DOMAIN", value = DOMAIN, length = -1
-                },
-                GLib.LogField<Flag>() {
-                    key = "GEARY_FLAGS", value = flags, length = 0
-                },
-                GLib.LogField<string>() {
-                    key = "MESSAGE", value = fmt.vprintf(args), length = -1
-                }
-            }
-        );
-    }
 }
 
 /** Returns the oldest log record in the logging system's buffer. */
