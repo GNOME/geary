@@ -359,6 +359,7 @@ private unowned FileStream? stream = null;
 public void init() {
     if (init_count++ != 0)
         return;
+    Logging.suppressed_domains = new Gee.HashSet<string>();
     record_lock = GLib.Mutex();
     writer_lock = GLib.Mutex();
     max_log_length = DEFAULT_MAX_LOG_BUFFER_LENGTH;
@@ -571,12 +572,13 @@ public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
 }
 
 private bool should_blacklist(Record record) {
+    const string DOMAIN_PREFIX = Logging.DOMAIN + ".";
     return (
-        // GdkPixbuf spams us e.g. when window focus changes,
-        // including between MainWindow and the Inspector, which is
-        // very annoying.
-        (record.levels == GLib.LogLevelFlags.LEVEL_DEBUG &&
-         record.domain == "GdkPixbuf") ||
+        // Don't need to check for the engine's domains, they were
+        // already handled by Source's methods.
+        (record.domain != Logging.DOMAIN &&
+         !record.domain.has_prefix(DOMAIN_PREFIX) &&
+         record.domain in Logging.suppressed_domains) ||
         // GAction does not support disabling parameterised actions
         // with specific values, but GTK complains if the parameter is
         // set to null to achieve the same effect, and they aren't

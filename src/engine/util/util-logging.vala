@@ -7,6 +7,35 @@
  */
 
 
+namespace Geary.Logging {
+
+
+    internal Gee.Set<string> suppressed_domains;
+
+
+    /**
+     * Suppresses debug logging for a given logging domain.
+     *
+     * If a logging domain is suppressed, DEBUG-level logging will not
+     * be sent to the logging system.
+     *
+     * @see unsuppress_domain
+     */
+    public void suppress_domain(string domain) {
+        Logging.suppressed_domains.add(domain);
+    }
+
+    /**
+     * Un-suppresses debug logging for a given logging domain.
+     *
+     * @see suppress_domain
+     */
+    public void unsuppress_domain(string domain) {
+        Logging.suppressed_domains.remove(domain);
+    }
+
+}
+
 /**
  * Mixin interface for objects that support structured logging.
  *
@@ -167,9 +196,11 @@ public interface Geary.Logging.Source : GLib.Object {
      */
     [PrintfFormat]
     public inline void debug(string fmt, ...) {
-        log_structured(
-            this.logging_flags, LogLevelFlags.LEVEL_DEBUG, fmt, va_list()
-        );
+        if (!(this.logging_domain in Logging.suppressed_domains)) {
+            log_structured(
+                this.logging_flags, LogLevelFlags.LEVEL_DEBUG, fmt, va_list()
+            );
+        }
     }
 
     /**
