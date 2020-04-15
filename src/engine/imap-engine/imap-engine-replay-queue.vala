@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -11,7 +13,10 @@
  * locally and from the server for a specific IMAP mailbox so as to
  * ensure the execution of the operations maintains consistent.
  */
-private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
+private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
+
+    /** The GLib logging domain used by this class. */
+    public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Repq";
 
     // Maximum number of times a retry-able operation should be
     // retried before failing. It's set to 1 since we only attempt to
@@ -94,6 +99,21 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         return remote_queue.size;
     } }
 
+    /** {@inheritDoc} */
+    public Logging.Flag logging_flags {
+        get; protected set; default = Logging.Flag.CONVERSATIONS;
+    }
+
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return LOGGING_DOMAIN; }
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent {
+        get { return this.owner; }
+    }
+
     private weak MinimalFolder owner;
     private Nonblocking.Queue<ReplayOperation> local_queue =
         new Nonblocking.Queue<ReplayOperation>.fifo();
@@ -108,65 +128,55 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private Cancellable remote_wait_cancellable = new Cancellable();
 
     public virtual signal void scheduled(ReplayOperation op) {
-        Logging.debug(
-            Logging.Flag.REPLAY,
-            "[%s] ReplayQueue::scheduled: %s",
-            to_string(),
-            op.to_string()
-        );
+        debug("Scheduled: %s", op.to_string());
     }
 
     public virtual signal void locally_executing(ReplayOperation op) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::locally-executing: %s", to_string(),
-            op.to_string());
+        debug("Locally-executing: %s", op.to_string());
     }
 
     public virtual signal void locally_executed(ReplayOperation op, bool continuing) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::locally-executed: %s continuing=%s",
-            to_string(), op.to_string(), continuing.to_string());
+        debug("Locally-executed: %s continuing=%s",
+              op.to_string(), continuing.to_string());
     }
 
     public virtual signal void remotely_executing(ReplayOperation op) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::remotely-executing: %s", to_string(),
-            op.to_string());
+        debug("Remotely-executing: %s", op.to_string());
     }
 
     public virtual signal void remotely_executed(ReplayOperation op) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::remotely-executed: %s", to_string(),
-            op.to_string());
+        debug("Remotely-executed: %s", op.to_string());
     }
 
     public virtual signal void backing_out(ReplayOperation op, Error? err) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::backout-out: %s err=%s",
-            to_string(), op.to_string(), (err != null) ? err.message : "(null)");
+        debug("Backout-out: %s err=%s",
+              op.to_string(), (err != null) ? err.message : "(null)");
     }
 
     public virtual signal void backed_out(ReplayOperation op, Error? err) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::backed-out: %s err=%s",
-            to_string(), op.to_string(), (err != null) ? err.message : "(null)");
+        debug("Backed-out: %s err=%s",
+              op.to_string(), (err != null) ? err.message : "(null)");
     }
 
     public virtual signal void backout_failed(ReplayOperation op, Error? backout_err) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::backout-failed: %s err=%s", to_string(),
-            op.to_string(), (backout_err != null) ? backout_err.message : "(null)");
+        debug("Backout-failed: %s err=%s",
+              op.to_string(), (backout_err != null) ? backout_err.message : "(null)");
     }
 
     public virtual signal void completed(ReplayOperation op) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::completed: %s", to_string(),
-            op.to_string());
+        debug("Completed: %s", op.to_string());
     }
 
     public virtual signal void failed(ReplayOperation op) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::failed: %s", to_string(),
-            op.to_string());
+        debug("Failed: %s", op.to_string());
     }
 
     public virtual signal void closing() {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::closing", to_string());
+        debug("Closing");
     }
 
     public virtual signal void closed() {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::closed", to_string());
+        debug("Closed");
     }
 
     /**
@@ -392,6 +402,19 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
 
         state = State.CLOSED;
         closed();
+    }
+
+    /** {@inheritDoc} */
+    public Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "notification=%d local=%d local_active=%s remote=%d remote_active=%s",
+            this.notification_queue.size,
+            this.local_queue.size,
+            (this.local_op_active != null).to_string(),
+            this.remote_queue.size,
+            (this.remote_op_active != null).to_string()
+        );
     }
 
     private async void clear_pending_async(Cancellable? cancellable) {
@@ -631,10 +654,4 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         debug("ReplayQueue.do_replay_remote_async %s exiting", to_string());
     }
 
-    public string to_string() {
-        return "ReplayQueue:%s (notification=%d local=%d local_active=%s remote=%d remote_active=%s)".printf(
-            owner.to_string(), notification_queue.size, local_queue.size, (local_op_active != null).to_string(),
-            remote_queue.size, (remote_op_active != null).to_string());
-    }
 }
-
