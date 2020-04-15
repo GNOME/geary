@@ -158,7 +158,7 @@ public interface Geary.Logging.Source : GLib.Object {
      * this interface can call that method if they need to override
      * the default behaviour of this method.
      */
-    public string to_string() {
+    public virtual string to_string() {
         return Source.default_to_string(this, "");
     }
 
