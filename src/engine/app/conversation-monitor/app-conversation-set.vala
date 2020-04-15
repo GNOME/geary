@@ -1,15 +1,15 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017-2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2017-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
  * Creates and maintains set of conversations by adding and removing email.
  */
-private class Geary.App.ConversationSet : BaseObject {
+private class Geary.App.ConversationSet : BaseObject, Logging.Source {
 
 
     /** The base folder for this set of conversations. */
@@ -24,6 +24,21 @@ private class Geary.App.ConversationSet : BaseObject {
     /** Returns a read-only view of conversations in the set.  */
     public Gee.Set<Conversation> read_only_view {
         owned get { return _conversations.read_only_view; }
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Flag logging_flags {
+        get; protected set; default = Logging.Flag.CONVERSATIONS;
+    }
+
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return ConversationMonitor.LOGGING_DOMAIN; }
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent {
+        get { return this.base_folder; }
     }
 
 
@@ -201,8 +216,7 @@ private class Geary.App.ConversationSet : BaseObject {
                 }
 
                 if (conversation.get_count() == 0) {
-                    Logging.debug(
-                        Logging.Flag.CONVERSATIONS,
+                    debug(
                         "Conversation %s evaporated: No messages remains",
                         conversation.to_string()
                     );
@@ -226,8 +240,7 @@ private class Geary.App.ConversationSet : BaseObject {
             // two different folders.
             foreach (Conversation conversation in remaining) {
                 if (conversation.get_count_in_folder(source_path) == 0) {
-                    Logging.debug(
-                        Logging.Flag.CONVERSATIONS,
+                    debug(
                         "Conversation %s dropped: No messages in base folder remain",
                         conversation.to_string()
                     );
@@ -255,6 +268,11 @@ private class Geary.App.ConversationSet : BaseObject {
 
         if (!_conversations.remove(conversation))
             error("Conversation %s already removed from set", conversation.to_string());
+    }
+
+    /** {@inheritDoc} */
+    public Logging.State to_logging_state() {
+        return new Logging.State(this, "size=%d", this.size);
     }
 
     // Returns a Collection of zero or more Conversations that have Message-IDs associated with
