@@ -15,8 +15,11 @@
 public class Geary.Smtp.ClientService : Geary.ClientService {
 
 
-    /** The GLib logging domain used by this class. */
+    /** The GLib logging domain used for SMTP sub-system logging. */
     public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Smtp";
+
+    /** The GLib logging domain used for SMTP protocol logging. */
+    public const string PROTOCOL_LOGGING_DOMAIN = Logging.DOMAIN + ".Smtp.Net";
 
 
     // Used solely for debugging, hence "(no subject)" not marked for

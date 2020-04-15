@@ -9,16 +9,15 @@
 /** A network connection to a SMTP service. */
 internal class Geary.Smtp.ClientConnection : BaseObject, Logging.Source {
 
-    /** The GLib logging domain used by this class. */
-    public const string LOGGING_DOMAIN = ClientService.LOGGING_DOMAIN + ".Net";
 
     public const uint DEFAULT_TIMEOUT_SEC = 20;
+
 
     public Geary.Smtp.Capabilities? capabilities { get; private set; default = null; }
 
     /** {@inheritDoc} */
     public override string logging_domain {
-        get { return LOGGING_DOMAIN; }
+        get { return ClientService.PROTOCOL_LOGGING_DOMAIN; }
     }
 
     /** {@inheritDoc} */

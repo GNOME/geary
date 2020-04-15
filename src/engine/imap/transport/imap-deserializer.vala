@@ -27,9 +27,6 @@
 
 public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
 
-    /** The GLib logging domain used by this class. */
-    public const string LOGGING_DOMAIN = ClientService.LOGGING_DOMAIN + ".Des";
-
 
     private const size_t MAX_BLOCK_READ_SIZE = 4096;
 
@@ -85,7 +82,7 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
 
     /** {@inheritDoc} */
     public override string logging_domain {
-        get { return LOGGING_DOMAIN; }
+        get { return ClientService.DESERIALISATION_LOGGING_DOMAIN; }
     }
 
     /** {@inheritDoc} */

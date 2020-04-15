@@ -8,8 +8,6 @@
 
 public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
-    /** The GLib logging domain used by this class. */
-    public const string LOGGING_DOMAIN = ClientService.LOGGING_DOMAIN + ".Net";
 
     /**
      * Default socket timeout duration.
@@ -63,7 +61,7 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
     /** {@inheritDoc} */
     public override string logging_domain {
-        get { return LOGGING_DOMAIN; }
+        get { return ClientService.PROTOCOL_LOGGING_DOMAIN; }
     }
 
     /** {@inheritDoc} */

@@ -15,8 +15,6 @@
  */
 private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
 
-    /** The GLib logging domain used by this class. */
-    public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Repq";
 
     // Maximum number of times a retry-able operation should be
     // retried before failing. It's set to 1 since we only attempt to
@@ -106,7 +104,7 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
 
     /** {@inheritDoc} */
     public override string logging_domain {
-        get { return LOGGING_DOMAIN; }
+        get { return Imap.ClientService.REPLAY_QUEUE_LOGGING_DOMAIN; }
     }
 
     /** {@inheritDoc} */

@@ -19,11 +19,20 @@
  *
  * This class is not thread-safe.
  */
-internal class Geary.Imap.ClientService : Geary.ClientService {
+public class Geary.Imap.ClientService : Geary.ClientService {
 
 
-    /** The GLib logging domain used by this class. */
+    /** The GLib logging domain used for IMAP sub-system logging. */
     public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Imap";
+
+    /** The GLib logging domain used for IMAP protocol logging. */
+    public const string PROTOCOL_LOGGING_DOMAIN = Logging.DOMAIN + ".Imap.Net";
+
+    /** The GLib logging domain used for IMAP de-serialisation logging. */
+    public const string DESERIALISATION_LOGGING_DOMAIN = Logging.DOMAIN + ".Imap.Deser";
+
+    /** The GLib logging domain used for IMAP replay-queue logging. */
+    public const string REPLAY_QUEUE_LOGGING_DOMAIN = Logging.DOMAIN + ".Imap.Replay";
 
     private const int DEFAULT_MIN_POOL_SIZE = 1;
     private const int DEFAULT_MAX_FREE_SIZE = 1;
