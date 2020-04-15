@@ -31,7 +31,6 @@ geary_engine_vala_sources = files(
   'api/geary-folder-supports-mark.vala',
   'api/geary-folder-supports-move.vala',
   'api/geary-folder-supports-remove.vala',
-  'api/geary-logging.vala',
   'api/geary-named-flag.vala',
   'api/geary-named-flags.vala',
   'api/geary-problem-report.vala',
