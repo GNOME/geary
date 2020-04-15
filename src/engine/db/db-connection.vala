@@ -111,7 +111,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
         throw_on_error("Connection.exec", db.exec(sql), sql);
 
         // Don't use Context.log(), which is designed for logging Results and Statements
-        Logging.debug(Logging.Flag.SQL, "exec:\n\t%s", sql);
+        debug("exec:\n\t%s", sql);
     }
 
     /**
