@@ -1,5 +1,6 @@
 /*
- * Copyright 2018-2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2018-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -118,6 +119,15 @@ public interface Geary.Logging.Source : GLib.Object {
 
 
     /**
+     * A value to use as the GLib logging domain for the source.
+     *
+     * This defaults to {@link DOMAIN}.
+     */
+    public virtual string logging_domain {
+        get { return DOMAIN; }
+    }
+
+    /**
      * Default flags to use for this source when logging messages.
      */
     public abstract Logging.Flag logging_flags { get; protected set; }
@@ -218,7 +228,9 @@ public interface Geary.Logging.Source : GLib.Object {
                                        string fmt,
                                        va_list args) {
         if (flags == ALL || Logging.get_flags().is_any_set(flags)) {
-            Context context = Context(Logging.DOMAIN, flags, levels, fmt, args);
+            Context context = Context(
+                this.logging_domain, flags, levels, fmt, args
+            );
             // Don't attempt to this object if it is in the middle of
             // being destructed, which can happen when logging from
             // the destructor.
