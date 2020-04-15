@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2018, 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -13,6 +13,10 @@
  * opens SMTP connections to deliver queued messages as needed.
  */
 public class Geary.Smtp.ClientService : Geary.ClientService {
+
+
+    /** The GLib logging domain used by this class. */
+    public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Smtp";
 
 
     // Used solely for debugging, hence "(no subject)" not marked for
@@ -33,6 +37,11 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
         get;
         private set;
         default = new SimpleProgressMonitor(ProgressType.ACTIVITY);
+    }
+
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return LOGGING_DOMAIN; }
     }
 
     private Account owner { get { return this.outbox.account; } }
@@ -298,6 +307,7 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
         }
 
         Smtp.ClientSession smtp = new Geary.Smtp.ClientSession(this.remote);
+        smtp.set_logging_parent(this);
         sending_monitor.notify_start();
 
         Error? smtp_err = null;
