@@ -154,37 +154,7 @@ public class Components.InspectorLogView : Gtk.Grid {
         }
 
         this.logs_filter = new Gtk.TreeModelFilter(this.logs_store, null);
-        this.logs_filter.set_visible_func((model, iter) => {
-                GLib.Value value;
-                model.get_value(iter, COL_ACCOUNT, out value);
-                var account = (string) value;
-                var show_row = (
-                    account == "" ||
-                    !(account in this.suppressed_accounts)
-                );
-
-                if (show_row) {
-                    model.get_value(iter, COL_DOMAIN, out value);
-                    var domain = (string) value;
-                    show_row = !Geary.Logging.is_suppressed_domain(domain);
-                }
-
-                if (show_row && this.logs_filter_terms.length > 0) {
-                    model.get_value(iter, COL_MESSAGE, out value);
-                    string? message = (string) value;
-                    if (message != null) {
-                        message = message.casefold();
-                        foreach (string term in this.logs_filter_terms) {
-                            if (!message.contains(term)) {
-                                show_row = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                return show_row;
-            });
+        this.logs_filter.set_visible_func(log_filter_func);
 
         this.logs_view.set_model(this.logs_filter);
     }
@@ -382,6 +352,35 @@ public class Components.InspectorLogView : Gtk.Grid {
             header = new Gtk.Separator(HORIZONTAL);
         }
         current_row.set_header(header);
+    }
+
+    private bool log_filter_func(Gtk.TreeModel model, Gtk.TreeIter iter) {
+        GLib.Value value;
+        model.get_value(iter, COL_ACCOUNT, out value);
+        var account = (string) value;
+        var show_row = (
+            account == "" || !(account in this.suppressed_accounts)
+        );
+
+        if (show_row) {
+            model.get_value(iter, COL_DOMAIN, out value);
+            var domain = (string) value;
+            show_row = !Geary.Logging.is_suppressed_domain(domain);
+        }
+
+        model.get_value(iter, COL_MESSAGE, out value);
+        string message = (string) value;
+        if (show_row && this.logs_filter_terms.length > 0) {
+            var folded_message = message.casefold();
+            foreach (string term in this.logs_filter_terms) {
+                if (!folded_message.contains(term)) {
+                    show_row = false;
+                    break;
+                }
+            }
+        }
+
+        return show_row;
     }
 
     [GtkCallback]
