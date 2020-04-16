@@ -380,6 +380,14 @@ public class Components.InspectorLogView : Gtk.Grid {
             }
         }
 
+        // If the message looks like an inspector mark, show
+        // it anyway. There's some whitespace at the end, so
+        // just check the last few chars of the message.
+        if (!show_row &&
+            message.index_of("---- 8< ----", message.length - 15) >= 0) {
+            show_row = true;
+        }
+
         return show_row;
     }
 
