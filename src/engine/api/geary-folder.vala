@@ -293,11 +293,6 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     public abstract Geary.ProgressMonitor opening_monitor { get; }
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
-    }
-
-    /** {@inheritDoc} */
     public Logging.Source? logging_parent {
         get { return this.account; }
     }

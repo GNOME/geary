@@ -30,11 +30,6 @@ private class Geary.ImapEngine.AccountSynchronizer :
     }
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
-    }
-
-    /** {@inheritDoc} */
     public Logging.Source? logging_parent {
         get { return this.account; }
     }

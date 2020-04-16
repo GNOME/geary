@@ -1,14 +1,28 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.Smtp.ClientConnection {
+/** A network connection to a SMTP service. */
+internal class Geary.Smtp.ClientConnection : BaseObject, Logging.Source {
+
 
     public const uint DEFAULT_TIMEOUT_SEC = 20;
 
+
     public Geary.Smtp.Capabilities? capabilities { get; private set; default = null; }
+
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return ClientService.PROTOCOL_LOGGING_DOMAIN; }
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent { get { return _logging_parent; } }
+    private weak Logging.Source? _logging_parent = null;
 
     private Geary.Endpoint endpoint;
     private IOStream? cx = null;
@@ -26,8 +40,7 @@ public class Geary.Smtp.ClientConnection {
 
     public async Greeting? connect_async(Cancellable? cancellable = null) throws Error {
         if (cx != null) {
-            debug("Already connected to %s", to_string());
-
+            debug("Already connected");
             return null;
         }
 
@@ -36,7 +49,7 @@ public class Geary.Smtp.ClientConnection {
 
         // read and deserialize the greeting
         Greeting greeting = new Greeting(yield recv_response_lines_async(cancellable));
-        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Greeting: %s", to_string(), greeting.to_string());
+        debug("SMTP Greeting: %s", greeting.to_string());
 
         return greeting;
     }
@@ -69,8 +82,7 @@ public class Geary.Smtp.ClientConnection {
 
         Response response = yield transaction_async(authenticator.initiate(), cancellable);
 
-        Logging.debug(Logging.Flag.NETWORK, "[%s] Initiated SMTP %s authentication", to_string(),
-            authenticator.to_string());
+        debug("Initiated SMTP %s authentication", authenticator.to_string());
 
         // Possible for initiate() Request to:
         // (a) immediately generate success (due to valid authentication being passed in Request);
@@ -85,7 +97,7 @@ public class Geary.Smtp.ClientConnection {
             if (data == null || data.size == 0)
                 data = new Memory.StringBuffer(DataFormat.CANCEL_AUTHENTICATION);
 
-            Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP AUTH Challenge recvd", to_string());
+            debug("SMTP AUTH Challenge recvd");
 
             yield Stream.write_all_async(douts, data, cancellable);
             douts.put_string(DataFormat.LINE_TERMINATOR);
@@ -116,7 +128,7 @@ public class Geary.Smtp.ClientConnection {
         if (!response.code.is_start_data())
             return response;
 
-        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Data: <%z>", to_string(), data.size);
+        debug("SMTP Data: <%z>", data.size);
 
         if (!already_dotstuffed) {
             // By using DataStreamNewlineType.ANY, we're assured to get each line and convert to
@@ -153,7 +165,7 @@ public class Geary.Smtp.ClientConnection {
     public async void send_request_async(Request request, Cancellable? cancellable = null) throws Error {
         check_connected();
 
-        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Request: %s", to_string(), request.to_string());
+        debug("SMTP Request: %s", request.to_string());
 
         douts.put_string(request.serialize());
         douts.put_string(DataFormat.LINE_TERMINATOR);
@@ -180,9 +192,7 @@ public class Geary.Smtp.ClientConnection {
 
     public async Response recv_response_async(Cancellable? cancellable = null) throws Error {
         Response response = new Response(yield recv_response_lines_async(cancellable));
-
-        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Response: %s", to_string(), response.to_string());
-
+        debug("SMTP Response: %s", response.to_string());
         return response;
     }
 
@@ -203,8 +213,8 @@ public class Geary.Smtp.ClientConnection {
             try {
                 fqdn = yield Resolver.get_default().lookup_by_address_async(local_addr, cancellable);
             } catch (Error err) {
-                debug("[%s] Unable to lookup local address for %s: %s", to_string(),
-                    local_addr.to_string(), err.message);
+                debug("Unable to lookup local address for %s: %s",
+                      local_addr.to_string(), err.message);
             }
         }
 
@@ -296,8 +306,19 @@ public class Geary.Smtp.ClientConnection {
             throw new SmtpError.NOT_CONNECTED("Not connected to %s", to_string());
     }
 
-    public string to_string() {
-        return endpoint.to_string();
+    /** {@inheritDoc} */
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "%s/%s",
+            endpoint.to_string(),
+            is_connected() ? "connected" : "disconnected"
+        );
+    }
+
+    /** Sets the service's logging parent. */
+    internal void set_logging_parent(Logging.Source parent) {
+        this._logging_parent = parent;
     }
 
     private void set_data_streams(IOStream stream) {
@@ -308,4 +329,3 @@ public class Geary.Smtp.ClientConnection {
         douts.set_close_base_stream(false);
     }
 }
-

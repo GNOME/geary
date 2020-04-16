@@ -1,12 +1,13 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018-2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2018-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
+
 
     /**
      * Default socket timeout duration.
@@ -54,8 +55,8 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.NETWORK;
+    public override string logging_domain {
+        get { return ClientService.PROTOCOL_LOGGING_DOMAIN; }
     }
 
     /** {@inheritDoc} */
@@ -328,6 +329,7 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         this.deserializer.end_of_stream.connect(on_eos);
         this.deserializer.parameters_ready.connect(on_parameters_ready);
         this.deserializer.receive_failure.connect(on_receive_failure);
+        this.deserializer.set_logging_parent(this);
         yield this.deserializer.start_async();
 
         // Start this running in the "background", it will stop when

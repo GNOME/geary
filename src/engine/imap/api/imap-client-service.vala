@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017-2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2017-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -19,12 +19,25 @@
  *
  * This class is not thread-safe.
  */
-internal class Geary.Imap.ClientService : Geary.ClientService {
+public class Geary.Imap.ClientService : Geary.ClientService {
 
+
+    /** The GLib logging domain used for IMAP sub-system logging. */
+    public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Imap";
+
+    /** The GLib logging domain used for IMAP protocol logging. */
+    public const string PROTOCOL_LOGGING_DOMAIN = Logging.DOMAIN + ".Imap.Net";
+
+    /** The GLib logging domain used for IMAP de-serialisation logging. */
+    public const string DESERIALISATION_LOGGING_DOMAIN = Logging.DOMAIN + ".Imap.Deser";
+
+    /** The GLib logging domain used for IMAP replay-queue logging. */
+    public const string REPLAY_QUEUE_LOGGING_DOMAIN = Logging.DOMAIN + ".Imap.Replay";
 
     private const int DEFAULT_MIN_POOL_SIZE = 1;
     private const int DEFAULT_MAX_FREE_SIZE = 1;
     private const int CHECK_NOOP_THRESHOLD_SEC = 5;
+
 
     /**
      * Set to zero or negative value if keepalives should be disabled when a connection has not
@@ -82,6 +95,11 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
      * Determines if returned sessions should be kept or discarded.
      */
     public bool discard_returned_sessions = false;
+
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return LOGGING_DOMAIN; }
+    }
 
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.Set<ClientSession> all_sessions =

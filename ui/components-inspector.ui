@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <requires lib="libhandy" version="0.0"/>
   <template class="ComponentsInspector" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
     <property name="default_width">750</property>
@@ -12,6 +11,22 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="show_close_button">True</property>
+        <child>
+          <object class="GtkToggleButton" id="search_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Search for matching log entries</property>
+            <property name="action_name">win.toggle-search</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">edit-find-symbolic</property>
+              </object>
+            </child>
+          </object>
+        </child>
         <child>
           <object class="GtkToggleButton" id="play_button">
             <property name="visible">True</property>
@@ -28,24 +43,27 @@
               </object>
             </child>
           </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
         </child>
         <child>
-          <object class="GtkToggleButton" id="search_button">
+          <object class="GtkButton" id="mark_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Search for matching log entries</property>
-            <property name="action_name">win.toggle-search</property>
+            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Add a marker entry to the log</property>
+            <signal name="clicked" handler="on_mark_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">edit-find-symbolic</property>
+                <property name="icon_name">marker-symbolic</property>
               </object>
             </child>
           </object>
           <packing>
-            <property name="position">1</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child type="title">
@@ -80,8 +98,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes"
-                      comments="Tooltip for inspector button">Copy to clipboard</property>
+            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Copy to clipboard</property>
             <property name="action_name">edt.copy</property>
             <child>
               <object class="GtkImage">
@@ -96,6 +113,26 @@
             <property name="position">2</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkButton" id="clear_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Clears all log entries</property>
+            <signal name="clicked" handler="on_clear_clicked" swapped="no"/>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">edit-clear-all-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">5</property>
+          </packing>
+        </child>
       </object>
     </child>
     <child>
@@ -103,6 +140,9 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <signal name="notify::visible-child" handler="on_visible_child_changed" swapped="no"/>
+        <child>
+          <placeholder/>
+        </child>
       </object>
     </child>
   </template>

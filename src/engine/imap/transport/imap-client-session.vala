@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2019-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -259,8 +259,8 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     public bool selected_readonly = false;
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
+    public override string logging_domain {
+        get { return ClientService.LOGGING_DOMAIN; }
     }
 
     /** {@inheritDoc} */
@@ -1229,7 +1229,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         keepalive_id = 0;
 
         send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
-        log(PERIODIC, LEVEL_DEBUG, "Sending keepalive...");
+        debug("Sending keepalive...");
 
         // No need to reschedule keepalive, as the notification that the command was sent should
         // do that automatically
@@ -1241,7 +1241,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         try {
             send_command_async.end(result);
         } catch (GLib.Error err) {
-            log(PERIODIC, LEVEL_WARNING, "Keepalive error: %s", err.message);
+            warning("Keepalive error: %s", err.message);
         }
     }
 

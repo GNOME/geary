@@ -198,8 +198,9 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
     public ErrorContext? last_error { get; private set; default = null; }
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
+    // XXX see GNOME/vala#119 for why this is necessary
+    public virtual string logging_domain {
+        get { return Logging.DOMAIN; }
     }
 
     /** {@inheritDoc} */
