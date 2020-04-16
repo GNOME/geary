@@ -13,17 +13,26 @@ public class Components.InspectorLogView : Gtk.Grid {
 
 
     private const int COL_MESSAGE = 0;
+    private const int COL_ACCOUNT = 1;
+    private const int COL_DOMAIN = 2;
 
 
     private class SidebarRow : Gtk.ListBoxRow {
+
 
         public enum RowType { ACCOUNT, INTERNAL_DOMAIN, EXTERNAL_DOMAIN }
 
 
         public RowType row_type { get; private set; }
+
         public string id  { get; private set; }
 
-        internal Gtk.CheckButton enabled = new Gtk.CheckButton();
+        public bool enabled {
+            get { return this.enabled_toggle.active; }
+            set { this.enabled_toggle.active = value; }
+        }
+
+        private Gtk.CheckButton enabled_toggle = new Gtk.CheckButton();
 
 
         public SidebarRow(RowType type, string label, string id) {
@@ -34,10 +43,14 @@ public class Components.InspectorLogView : Gtk.Grid {
             label_widget.hexpand = true;
             label_widget.xalign = 0.0f;
 
+            this.enabled_toggle.toggled.connect(
+                () => { notify_property("enabled"); }
+            );
+
             var grid = new Gtk.Grid();
             grid.orientation = HORIZONTAL;
             grid.add(label_widget);
-            grid.add(this.enabled);
+            grid.add(this.enabled_toggle);
             add(grid);
 
             show_all();
@@ -71,6 +84,8 @@ public class Components.InspectorLogView : Gtk.Grid {
     private Gtk.CellRendererText log_renderer;
 
     private Gtk.ListStore logs_store = new Gtk.ListStore.newv({
+            typeof(string),
+            typeof(string),
             typeof(string)
     });
 
@@ -84,6 +99,7 @@ public class Components.InspectorLogView : Gtk.Grid {
     private bool autoscroll = true;
 
     private Gee.Set<string> seen_accounts = new Gee.HashSet<string>();
+    private Gee.Set<string> suppressed_accounts = new Gee.HashSet<string>();
 
     private Gee.Set<string> seen_domains = new Gee.HashSet<string>();
 
@@ -123,34 +139,41 @@ public class Components.InspectorLogView : Gtk.Grid {
         Geary.Logging.Record? logs = first;
         int index = 0;
         while (logs != last) {
-            if (should_append(logs)) {
-                string message = logs.format();
-                Gtk.TreeIter iter;
-                logs_store.insert(out iter, index++);
-                logs_store.set_value(iter, COL_MESSAGE, message);
-            }
+            update_record(logs, logs_store, index++);
             logs = logs.next;
         }
 
-        this.logs_filter = new Gtk.TreeModelFilter(logs_store, null);
+        this.logs_filter = new Gtk.TreeModelFilter(this.logs_store, null);
         this.logs_filter.set_visible_func((model, iter) => {
-                bool ret = true;
-                if (this.logs_filter_terms.length > 0) {
-                    ret = true;
-                    Value value;
+                GLib.Value value;
+                model.get_value(iter, COL_ACCOUNT, out value);
+                var account = (string) value;
+                var show_row = (
+                    account == "" ||
+                    !(account in this.suppressed_accounts)
+                );
+
+                if (show_row) {
+                    model.get_value(iter, COL_DOMAIN, out value);
+                    var domain = (string) value;
+                    show_row = !Geary.Logging.is_suppressed_domain(domain);
+                }
+
+                if (show_row && this.logs_filter_terms.length > 0) {
                     model.get_value(iter, COL_MESSAGE, out value);
                     string? message = (string) value;
                     if (message != null) {
                         message = message.casefold();
                         foreach (string term in this.logs_filter_terms) {
                             if (!message.contains(term)) {
-                                ret = false;
+                                show_row = false;
                                 break;
                             }
                         }
                     }
                 }
-                return ret;
+
+                return show_row;
             });
 
         this.logs_view.set_model(this.logs_filter);
@@ -185,7 +208,7 @@ public class Components.InspectorLogView : Gtk.Grid {
         if (enabled) {
             Geary.Logging.Record? logs = this.first_pending;
             while (logs != null) {
-                append_record(logs);
+                update_record(logs, this.logs_store, -1);
                 logs = logs.next;
             }
             this.first_pending = null;
@@ -252,6 +275,11 @@ public class Components.InspectorLogView : Gtk.Grid {
     private void add_account(Geary.AccountInformation account) {
         if (this.seen_accounts.add(account.id)) {
             var row = new SidebarRow(ACCOUNT, account.display_name, account.id);
+            row.enabled = (
+                this.account_filter == null ||
+                this.account_filter.id == account.id
+            );
+            row.notify["enabled"].connect(this.on_account_enabled_changed);
             for (int i = 0;; i++) {
                 var existing = this.sidebar.get_row_at_index(i) as SidebarRow;
                 if (existing == null ||
@@ -273,6 +301,8 @@ public class Components.InspectorLogView : Gtk.Grid {
                 : SidebarRow.RowType.EXTERNAL_DOMAIN
             );
             var row = new SidebarRow(type, safe_domain, safe_domain);
+            row.enabled = !Geary.Logging.is_suppressed_domain(domain ?? "");
+            row.notify["enabled"].connect(this.on_domain_enabled_changed);
             int i = 0;
             for (;; i++) {
                 var existing = this.sidebar.get_row_at_index(i) as SidebarRow;
@@ -293,19 +323,6 @@ public class Components.InspectorLogView : Gtk.Grid {
         }
     }
 
-    private inline bool should_append(Geary.Logging.Record record) {
-        record.fill_well_known_sources();
-        if (record.account != null) {
-            add_account(record.account.information);
-        }
-        add_domain(record.domain);
-        return (
-            record.account == null ||
-            this.account_filter == null ||
-            record.account.information == this.account_filter
-        );
-    }
-
     private void update_scrollbar() {
         Gtk.Adjustment adj = this.logs_scroller.get_vadjustment();
         adj.set_value(adj.upper - adj.page_size);
@@ -318,12 +335,25 @@ public class Components.InspectorLogView : Gtk.Grid {
         this.logs_filter.refilter();
     }
 
-    private void append_record(Geary.Logging.Record record) {
-        if (should_append(record)) {
-            Gtk.TreeIter inserted_iter;
-            this.logs_store.append(out inserted_iter);
-            this.logs_store.set_value(inserted_iter, COL_MESSAGE, record.format());
+    private inline void update_record(Geary.Logging.Record record,
+                                      Gtk.ListStore store,
+                                      int position) {
+        record.fill_well_known_sources();
+        if (record.account != null) {
+            add_account(record.account.information);
         }
+        add_domain(record.domain);
+
+        assert(record.format() != null);
+
+        var account = record.account;
+        store.insert_with_values(
+            null,
+            position,
+            COL_MESSAGE, record.format(),
+            COL_ACCOUNT, account != null ? account.information.id : "",
+            COL_DOMAIN, record.domain ?? ""
+        );
     }
 
     private void sidebar_header_update(Gtk.ListBoxRow current_row,
@@ -355,14 +385,45 @@ public class Components.InspectorLogView : Gtk.Grid {
         record_selection_changed();
     }
 
+    [GtkCallback]
+    private void on_sidebar_row_activated(Gtk.ListBox list,
+                                          Gtk.ListBoxRow activated) {
+        var row = activated as SidebarRow;
+        if (row != null) {
+            row.enabled = !row.enabled;
+        }
+    }
+
     private void on_log_record(Geary.Logging.Record record) {
         if (this.update_logs) {
             GLib.MainContext.default().invoke(() => {
-                    append_record(record);
+                    update_record(record, this.logs_store, -1);
                     return GLib.Source.REMOVE;
                 });
         } else if (this.first_pending == null) {
             this.first_pending = record;
+        }
+    }
+
+    private void on_account_enabled_changed(GLib.Object object,
+                                            GLib.ParamSpec param) {
+        var row = object as SidebarRow;
+        if (row != null) {
+            if ((row.enabled && this.suppressed_accounts.remove(row.id)) ||
+                (!row.enabled && this.suppressed_accounts.add(row.id))) {
+                update_logs_filter();
+            }
+        }
+    }
+
+    private void on_domain_enabled_changed(GLib.Object object,
+                                           GLib.ParamSpec param) {
+        var row = object as SidebarRow;
+        if (row != null) {
+            if ((row.enabled && Geary.Logging.unsuppress_domain(row.id)) ||
+                (!row.enabled && Geary.Logging.suppress_domain(row.id))) {
+                update_logs_filter();
+            }
         }
     }
 
