@@ -121,6 +121,16 @@ public class Components.InspectorLogView : Gtk.Grid {
             SettingsBindFlags.DEFAULT
         );
 
+        // Prefill well-known engine logging domains
+        add_domain(Geary.App.ConversationMonitor.LOGGING_DOMAIN);
+        add_domain(Geary.Db.Context.LOGGING_DOMAIN);
+        add_domain(Geary.Imap.ClientService.LOGGING_DOMAIN);
+        add_domain(Geary.Imap.ClientService.DESERIALISATION_LOGGING_DOMAIN);
+        add_domain(Geary.Imap.ClientService.PROTOCOL_LOGGING_DOMAIN);
+        add_domain(Geary.Imap.ClientService.REPLAY_QUEUE_LOGGING_DOMAIN);
+        add_domain(Geary.Smtp.ClientService.LOGGING_DOMAIN);
+        add_domain(Geary.Smtp.ClientService.PROTOCOL_LOGGING_DOMAIN);
+
         this.search_bar.connect_entry(this.search_entry);
         this.sidebar.set_header_func(this.sidebar_header_update);
         this.account_filter = filter_by;
