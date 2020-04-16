@@ -69,7 +69,6 @@ public class Application.Client : Gtk.Application {
     private const string OPTION_LOG_REPLAY_QUEUE = "log-replay-queue";
     private const string OPTION_LOG_SMTP = "log-smtp";
     private const string OPTION_LOG_SQL = "log-sql";
-    private const string OPTION_LOG_SQL_RESULTS = "log-sql-results";
     private const string OPTION_HIDDEN = "hidden";
     private const string OPTION_NEW_WINDOW = "new-window";
     private const string OPTION_QUIT = "quit";
@@ -124,10 +123,7 @@ public class Application.Client : Gtk.Application {
           N_("Log SMTP messages"), null },
         { OPTION_LOG_SQL, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
-          N_("Log database queries"), null },
-        { OPTION_LOG_SQL_RESULTS, 0, 0, GLib.OptionArg.NONE, null,
-          /// Command line option
-          N_("Log database query results (generates lots of messages)"), null },
+          N_("Log database queries (generates lots of messages)"), null },
         { OPTION_QUIT, 'q', 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Perform a graceful quit"), null },
@@ -946,12 +942,10 @@ public class Application.Client : Gtk.Application {
                 Geary.Smtp.ClientService.PROTOCOL_LOGGING_DOMAIN
             );
         }
-        if (!options.contains(OPTION_LOG_SQL) &&
-            !options.contains(OPTION_LOG_SQL_RESULTS)) {
+        if (options.contains(OPTION_LOG_SQL)) {
+            Geary.Db.Context.enable_sql_logging = true;
+        } else {
             Geary.Logging.suppress_domain(Geary.Db.Context.LOGGING_DOMAIN);
-        }
-        if (options.contains(OPTION_LOG_SQL_RESULTS)) {
-            Geary.Db.Result.log_results = true;
         }
 
         if (options.contains(OPTION_HIDDEN)) {

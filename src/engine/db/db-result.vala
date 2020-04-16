@@ -8,14 +8,6 @@ public class Geary.Db.Result : Geary.Db.Context {
     public bool finished { get; private set; default = false; }
 
 
-    /**
-     * Determines if results will be logged.
-     *
-     * This will cause extremely verbose logging, so enable with care
-     */
-    public static bool log_results = false;
-
-
     public Statement statement { get; private set; }
 
 
@@ -307,7 +299,7 @@ public class Geary.Db.Result : Geary.Db.Context {
 
     [PrintfFormat]
     private void log_result(string fmt, ...) {
-        if (Result.log_results) {
+        if (Db.Context.enable_sql_logging) {
             Statement? stmt = get_statement();
             if (stmt != null) {
                 debug("%s\n\t<%s>",

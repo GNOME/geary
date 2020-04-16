@@ -106,12 +106,12 @@ public class Geary.Db.Connection : Geary.Db.Context {
      * See [[http://www.sqlite.org/c3ref/exec.html]]
      */
     public void exec(string sql, Cancellable? cancellable = null) throws Error {
+        if (Db.Context.enable_sql_logging) {
+            debug("exec:\n\t%s", sql);
+        }
+
         check_cancelled("Connection.exec", cancellable);
-
         throw_on_error("Connection.exec", db.exec(sql), sql);
-
-        // Don't use Context.log(), which is designed for logging Results and Statements
-        debug("exec:\n\t%s", sql);
     }
 
     /**

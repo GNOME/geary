@@ -123,7 +123,6 @@ public class Components.InspectorLogView : Gtk.Grid {
 
         // Prefill well-known engine logging domains
         add_domain(Geary.App.ConversationMonitor.LOGGING_DOMAIN);
-        add_domain(Geary.Db.Context.LOGGING_DOMAIN);
         add_domain(Geary.Imap.ClientService.LOGGING_DOMAIN);
         add_domain(Geary.Imap.ClientService.DESERIALISATION_LOGGING_DOMAIN);
         add_domain(Geary.Imap.ClientService.PROTOCOL_LOGGING_DOMAIN);

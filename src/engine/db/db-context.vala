@@ -15,6 +15,15 @@
  */
 public abstract class Geary.Db.Context : BaseObject, Logging.Source {
 
+
+    /**
+     * Determines if SQL queries and results will be logged.
+     *
+     * This will cause extremely verbose logging, so enable with care.
+     */
+    public static bool enable_sql_logging = false;
+
+
     /** The GLib logging domain used by this class. */
     public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Db";
 
