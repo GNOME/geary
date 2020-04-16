@@ -57,24 +57,39 @@ namespace Geary.Logging {
     }
 
     /**
-     * Suppresses debug logging for a given logging domain.
+     * Sets a function to be called when a new log record is created.
      *
-     * If a logging domain is suppressed, DEBUG-level logging will not
-     * be sent to the logging system.
+     * For any log records to be created, {@link default_log_writer}
+     * must be set as the GLib structured log writer.
      *
-     * @see unsuppress_domain
+     * @see default_log_writer
      */
-    public void suppress_domain(string domain) {
-        Logging.suppressed_domains.add(domain);
+    public void set_log_listener(LogRecord? new_listener) {
+        Logging.listener = new_listener;
     }
 
     /**
-     * Un-suppresses debug logging for a given logging domain.
+     * Returns the oldest log record in the logging system's buffer.
      *
-     * @see suppress_domain
+     * For any log records to be created, {@link default_log_writer}
+     * must be set as the GLib structured log writer.
+     *
+     * @see default_log_writer
      */
-    public void unsuppress_domain(string domain) {
-        Logging.suppressed_domains.remove(domain);
+    public Record? get_earliest_record() {
+        return Logging.first_record;
+    }
+
+    /**
+     * Returns the most recent log record in the logging system's buffer.
+     *
+     * For any log records to be created, {@link default_log_writer}
+     * must be set as the GLib structured log writer.
+     *
+     * @see default_log_writer
+     */
+    public Record? get_latest_record() {
+        return Logging.last_record;
     }
 
     /**
@@ -110,27 +125,37 @@ namespace Geary.Logging {
         }
     }
 
-    /** Sets a function to be called when a new log record is created. */
-    public void set_log_listener(LogRecord? new_listener) {
-        Logging.listener = new_listener;
-    }
-
-    /** Returns the oldest log record in the logging system's buffer. */
-    public Record? get_earliest_record() {
-        return Logging.first_record;
-    }
-
-    /** Returns the most recent log record in the logging system's buffer. */
-    public Record? get_latest_record() {
-        return Logging.last_record;
+    /**
+     * Suppresses printing of debug logging for a given logging domain.
+     *
+     * If a logging domain is suppressed, DEBUG-level logging will not
+     * be printed by {@link default_log_writer}.
+     *
+     * @see unsuppress_domain
+     */
+    public void suppress_domain(string domain) {
+        Logging.suppressed_domains.add(domain);
     }
 
     /**
-     * Registers a destination for log output from {@link default_log_writer}.
+     * Un-suppresses printing debug logging for a given logging domain.
      *
-     * If stream is null, no logging occurs (the default). If non-null
-     * and the stream was previously null, all pending log records
-     * will be output before proceeding.
+     * Un-suppressing a suppressed logging domain will cause it to be
+     * printed by {@link default_log_writer} again.
+     *
+     * @see suppress_domain
+     */
+    public void unsuppress_domain(string domain) {
+        Logging.suppressed_domains.remove(domain);
+    }
+
+    /**
+     * Registers a stream for log output from {@link default_log_writer}.
+     *
+     * If stream is null, no logging of then DEBUG-level,
+     * INFORMATION-level, and MESSAGE-level structured log messages
+     * occurs (the default). If non-null and the stream was previously
+     * null, all pending log records will be output before proceeding.
      *
      * This only has effect if {@link default_log_writer} has been set
      * as the GLib structured log writer via a call to {@link
@@ -150,11 +175,21 @@ namespace Geary.Logging {
 
 
     /**
-     * A log writer function for printing GLib structured logging.
+     * A GLib structured logging to record structured logging calls.
      *
-     * This only has effect if set as the GLib structured log writer
-     * via a call to {@link GLib.Log.set_writer_func} and a non-null
-     * stream has been passed to {@link log_to}.
+     * Installing this function as the GLib structured log writer by
+     * passing it in a call to {@link GLib.Log.set_writer_func} will
+     * enable the engine's log record keeping and printing services.
+     *
+     * Instances of {@link Record} will be created for each structured
+     * logging message received, and made available to applications
+     * via {@link get_earliest_record}, {@link get_latest_record}, and
+     * {@link set_log_listener}.
+     *
+     * Further if a destination stream has been set via a call to
+     * {@link log_to}, then DEBUG-level, INFORMATION-level, and
+     * MESSAGE-level structured log messages will be printed to the
+     * given stream.
      */
     public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,
                                                    GLib.LogField[] fields) {
@@ -204,22 +239,17 @@ namespace Geary.Logging {
         return HANDLED;
     }
 
-    private bool should_blacklist(Record record) {
-        const string DOMAIN_PREFIX = Logging.DOMAIN + ".";
+    private inline bool should_blacklist(Record record) {
         return (
-            // Don't need to check for the engine's domains, they were
-            // already handled by Source's methods.
-            (record.domain != Logging.DOMAIN &&
-             !record.domain.has_prefix(DOMAIN_PREFIX) &&
-             record.domain in Logging.suppressed_domains) ||
-            // GAction does not support disabling parameterised actions
-            // with specific values, but GTK complains if the parameter is
-            // set to null to achieve the same effect, and they aren't
-            // interested in supporting that: GNOME/gtk!1151
-            (record.levels == GLib.LogLevelFlags.LEVEL_WARNING &&
-             record.domain == "Gtk" &&
-             record.message.has_prefix("actionhelper:") &&
-             record.message.has_suffix("target type NULL)"))
+            // GAction does not support disabling parameterised
+            // actions with specific values, but GTK complains if the
+            // parameter is set to null to achieve the same effect,
+            // and they aren't interested in supporting that:
+            // GNOME/gtk!1151
+            record.levels == GLib.LogLevelFlags.LEVEL_WARNING &&
+            record.domain == "Gtk" &&
+            record.message.has_prefix("actionhelper:") &&
+            record.message.has_suffix("target type NULL)")
         );
     }
 
@@ -228,7 +258,7 @@ namespace Geary.Logging {
         // Print a log message to the stream if configured, or if the
         // priority is high enough.
         unowned FileStream? out = Logging.stream;
-        if (out != null ||
+        if ((out != null && !(record.domain in Logging.suppressed_domains)) ||
             GLib.LogLevelFlags.LEVEL_WARNING in levels ||
             GLib.LogLevelFlags.LEVEL_CRITICAL in levels  ||
             GLib.LogLevelFlags.LEVEL_ERROR in levels) {
@@ -441,9 +471,7 @@ public interface Geary.Logging.Source : GLib.Object {
      */
     [PrintfFormat]
     public inline void debug(string fmt, ...) {
-        if (!(this.logging_domain in Logging.suppressed_domains)) {
-            log_structured(LEVEL_DEBUG, fmt, va_list());
-        }
+        log_structured(LEVEL_DEBUG, fmt, va_list());
     }
 
     /**
