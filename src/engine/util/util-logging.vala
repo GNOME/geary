@@ -131,10 +131,20 @@ namespace Geary.Logging {
      * If a logging domain is suppressed, DEBUG-level logging will not
      * be printed by {@link default_log_writer}.
      *
+     * @return true if the domain was suppressed
      * @see unsuppress_domain
      */
-    public void suppress_domain(string domain) {
-        Logging.suppressed_domains.add(domain);
+    public bool suppress_domain(string domain) {
+        return Logging.suppressed_domains.add(domain);
+    }
+
+    /**
+     * Determines if given logging domain is suppressed.
+     *
+     * @return true if the domain is suppressed
+     */
+    public bool is_suppressed_domain(string domain) {
+        return domain in Logging.suppressed_domains;
     }
 
     /**
@@ -143,10 +153,11 @@ namespace Geary.Logging {
      * Un-suppressing a suppressed logging domain will cause it to be
      * printed by {@link default_log_writer} again.
      *
+     * @return true if the domain was unsuppressed
      * @see suppress_domain
      */
-    public void unsuppress_domain(string domain) {
-        Logging.suppressed_domains.remove(domain);
+    public bool unsuppress_domain(string domain) {
+        return Logging.suppressed_domains.remove(domain);
     }
 
     /**
