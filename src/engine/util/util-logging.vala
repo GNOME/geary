@@ -62,6 +62,9 @@ namespace Geary.Logging {
      * For any log records to be created, {@link default_log_writer}
      * must be set as the GLib structured log writer.
      *
+     * Note that the given function *must* be thread-safe, since
+     * logging can occur on multiple threads at once.
+     *
      * @see default_log_writer
      */
     public void set_log_listener(LogRecord? new_listener) {
@@ -235,13 +238,8 @@ namespace Geary.Logging {
             // records.
             old_record = null;
 
-            // Ensure the listener is updated on the main loop only, since
-            // this could be getting called from other threads.
             if (Logging.listener != null) {
-                GLib.MainContext.default().invoke(() => {
-                        Logging.listener(record);
-                        return GLib.Source.REMOVE;
-                    });
+                Logging.listener(record);
             }
 
             write_record(record, levels);
