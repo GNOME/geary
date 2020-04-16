@@ -189,6 +189,12 @@ public class Components.InspectorLogView : Gtk.Grid {
         this.logs_view.set_model(this.logs_filter);
     }
 
+    /** Clears all log records from the view. */
+    public void clear() {
+        this.logs_store.clear();
+        this.first_pending = null;
+    }
+
     /** {@inheritDoc} */
     public override void destroy() {
         if (this.listener_installed) {

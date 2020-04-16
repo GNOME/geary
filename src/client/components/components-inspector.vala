@@ -61,7 +61,13 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     private Gtk.ToggleButton play_button;
 
     [GtkChild]
+    private Gtk.Button mark_button;
+
+    [GtkChild]
     private Gtk.ToggleButton search_button;
+
+    [GtkChild]
+    private Gtk.Button clear_button;
 
     private InspectorLogView log_pane;
     private InspectorSystemView system_pane;
@@ -169,12 +175,24 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         uint logs_selected = this.log_pane.count_selected_records();
         this.copy_button.set_sensitive(!logs_visible || logs_selected > 0);
         this.play_button.set_visible(logs_visible);
+        this.mark_button.set_visible(logs_visible);
+        this.clear_button.set_visible(logs_visible);
         this.search_button.set_visible(logs_visible);
     }
 
     [GtkCallback]
     private void on_visible_child_changed() {
         update_ui();
+    }
+
+    [GtkCallback]
+    private void on_mark_clicked() {
+        debug("---- 8< ---- %s ---- 8< ----", this.title);
+    }
+
+    [GtkCallback]
+    private void on_clear_clicked() {
+        this.log_pane.clear();
     }
 
     private void on_copy_clicked() {
