@@ -7,7 +7,17 @@
 public class Geary.Db.Result : Geary.Db.Context {
     public bool finished { get; private set; default = false; }
 
+
+    /**
+     * Determines if results will be logged.
+     *
+     * This will cause extremely verbose logging, so enable with care
+     */
+    public static bool log_results = false;
+
+
     public Statement statement { get; private set; }
+
 
     // This results in an automatic first next().
     internal Result(Statement statement, Cancellable? cancellable) throws Error {
@@ -40,7 +50,7 @@ public class Geary.Db.Result : Geary.Db.Context {
             if (timer.elapsed() > 1.0)
                 debug("\n\nDB QUERY STEP \"%s\"\nelapsed=%lf\n\n", statement.sql, timer.elapsed());
 
-            log(finished ? "NO ROW" : "ROW");
+            log_result(finished ? "NO ROW" : "ROW");
         }
 
         return !finished;
@@ -53,7 +63,7 @@ public class Geary.Db.Result : Geary.Db.Context {
         verify_at(column);
 
         bool is_null = statement.stmt.column_type(column) == Sqlite.NULL;
-        log("is_null_at(%d) -> %s", column, is_null.to_string());
+        log_result("is_null_at(%d) -> %s", column, is_null.to_string());
 
         return is_null;
     }
@@ -65,7 +75,7 @@ public class Geary.Db.Result : Geary.Db.Context {
         verify_at(column);
 
         double d = statement.stmt.column_double(column);
-        log("double_at(%d) -> %lf", column, d);
+        log_result("double_at(%d) -> %lf", column, d);
 
         return d;
     }
@@ -77,7 +87,7 @@ public class Geary.Db.Result : Geary.Db.Context {
         verify_at(column);
 
         int i = statement.stmt.column_int(column);
-        log("int_at(%d) -> %d", column, i);
+        log_result("int_at(%d) -> %d", column, i);
 
         return i;
     }
@@ -103,7 +113,7 @@ public class Geary.Db.Result : Geary.Db.Context {
         verify_at(column);
 
         int64 i64 = statement.stmt.column_int64(column);
-        log("int64_at(%d) -> %s", column, i64.to_string());
+        log_result("int64_at(%d) -> %s", column, i64.to_string());
 
         return i64;
     }
@@ -138,7 +148,7 @@ public class Geary.Db.Result : Geary.Db.Context {
         verify_at(column);
 
         unowned string? s = statement.stmt.column_text(column);
-        log("string_at(%d) -> %s", column, (s != null) ? s : "(null)");
+        log_result("string_at(%d) -> %s", column, (s != null) ? s : "(null)");
 
         return s;
     }
@@ -294,5 +304,19 @@ public class Geary.Db.Result : Geary.Db.Context {
     public override Result? get_result() {
         return this;
     }
-}
 
+    [PrintfFormat]
+    private void log_result(string fmt, ...) {
+        if (Result.log_results) {
+            Statement? stmt = get_statement();
+            if (stmt != null) {
+                debug("%s\n\t<%s>",
+                      fmt.vprintf(va_list()),
+                      (stmt != null) ? "%.100s".printf(stmt.sql) : "no sql");
+            } else {
+                debug(fmt.vprintf(va_list()));
+            }
+        }
+    }
+
+}

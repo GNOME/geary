@@ -61,16 +61,4 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
         return Db.throw_on_error(this, method, result, raw);
     }
 
-    [PrintfFormat]
-    protected void log(string fmt, ...) {
-        Statement? stmt = get_statement();
-        if (stmt != null) {
-            debug("%s\n\t<%s>",
-                  fmt.vprintf(va_list()),
-                  (stmt != null) ? "%.100s".printf(stmt.sql) : "no sql");
-        } else {
-            debug(fmt.vprintf(va_list()));
-        }
-    }
-
 }
