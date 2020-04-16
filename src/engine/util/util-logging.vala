@@ -7,6 +7,24 @@
  */
 
 
+/**
+ * Logging infrastructure for the applications and the engine.
+ *
+ * Applications using the engine may register {@link
+ * default_log_writer} as the GLib structured logging writer. Doing so
+ * enables the creation of a {@link Record} class for each log message
+ * received, control over which logging messages are displayed, and
+ * enabling applications to display logging information and include it
+ * in bug reports.
+ *
+ * The engine's logging infrastructure is built with and assumes GLib
+ * structured logging is enabled.
+ *
+ * Engine classes that perform important context-specific debug
+ * logging (i.e in the context of a specific account or folder),
+ * should implement the {@link Source} interface so they can provide
+ * logging context and a custom logging sub-domain (if needed).
+ */
 namespace Geary.Logging {
 
 
@@ -189,7 +207,7 @@ namespace Geary.Logging {
 
 
     /**
-     * A GLib structured logging to record structured logging calls.
+     * A GLib structured logging writer that records logging messages.
      *
      * Installing this function as the GLib structured log writer by
      * passing it in a call to {@link GLib.Log.set_writer_func} will
@@ -200,9 +218,8 @@ namespace Geary.Logging {
      * via {@link get_earliest_record}, {@link get_latest_record}, and
      * {@link set_log_listener}.
      *
-     * Further if a destination stream has been set via a call to
-     * {@link log_to}, then DEBUG-level, INFORMATION-level, and
-     * MESSAGE-level structured log messages will be printed to the
+     * Further, if a destination stream has been set via a call to
+     * {@link log_to}, structured log messages will be printed to the
      * given stream.
      */
     public GLib.LogWriterOutput default_log_writer(GLib.LogLevelFlags levels,

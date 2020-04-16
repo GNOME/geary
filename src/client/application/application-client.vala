@@ -112,7 +112,7 @@ public class Application.Client : Gtk.Application {
           N_("Log folder normalization"), null },
         { OPTION_LOG_IMAP, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
-          N_("Log IMAP messages"), null },
+          N_("Log IMAP network activity"), null },
         { OPTION_LOG_REPLAY_QUEUE, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option. The IMAP replay queue is how changes
           /// on the server are replicated on the client.  It could
@@ -120,7 +120,7 @@ public class Application.Client : Gtk.Application {
           N_("Log IMAP replay queue"), null },
         { OPTION_LOG_SMTP, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
-          N_("Log SMTP messages"), null },
+          N_("Log SMTP network activity"), null },
         { OPTION_LOG_SQL, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Log database queries (generates lots of messages)"), null },
