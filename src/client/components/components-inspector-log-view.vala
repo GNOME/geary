@@ -15,6 +15,37 @@ public class Components.InspectorLogView : Gtk.Grid {
     private const int COL_MESSAGE = 0;
 
 
+    private class SidebarRow : Gtk.ListBoxRow {
+
+        public enum RowType { ACCOUNT, INTERNAL_DOMAIN, EXTERNAL_DOMAIN }
+
+
+        public RowType row_type { get; private set; }
+        public string id  { get; private set; }
+
+        internal Gtk.CheckButton enabled = new Gtk.CheckButton();
+
+
+        public SidebarRow(RowType type, string label, string id) {
+            this.row_type  = type;
+            this.id = id;
+
+            var label_widget = new Gtk.Label(label);
+            label_widget.hexpand = true;
+            label_widget.xalign = 0.0f;
+
+            var grid = new Gtk.Grid();
+            grid.orientation = HORIZONTAL;
+            grid.add(label_widget);
+            grid.add(this.enabled);
+            add(grid);
+
+            show_all();
+        }
+
+    }
+
+
     /** Determines if the log record search user interface is shown. */
     public bool search_mode_enabled {
         get { return this.search_bar.search_mode_enabled; }
@@ -26,6 +57,9 @@ public class Components.InspectorLogView : Gtk.Grid {
 
     [GtkChild]
     private Gtk.SearchEntry search_entry { get; private set; }
+
+    [GtkChild]
+    private Gtk.ListBox sidebar;
 
     [GtkChild]
     private Gtk.ScrolledWindow logs_scroller;
@@ -49,6 +83,10 @@ public class Components.InspectorLogView : Gtk.Grid {
 
     private bool autoscroll = true;
 
+    private Gee.Set<string> seen_accounts = new Gee.HashSet<string>();
+
+    private Gee.Set<string> seen_domains = new Gee.HashSet<string>();
+
     private Geary.AccountInformation? account_filter = null;
 
     private bool listener_installed = false;
@@ -68,6 +106,7 @@ public class Components.InspectorLogView : Gtk.Grid {
         );
 
         this.search_bar.connect_entry(this.search_entry);
+        this.sidebar.set_header_func(this.sidebar_header_update);
         this.account_filter = filter_by;
     }
 
@@ -210,8 +249,56 @@ public class Components.InspectorLogView : Gtk.Grid {
         }
     }
 
+    private void add_account(Geary.AccountInformation account) {
+        if (this.seen_accounts.add(account.id)) {
+            var row = new SidebarRow(ACCOUNT, account.display_name, account.id);
+            for (int i = 0;; i++) {
+                var existing = this.sidebar.get_row_at_index(i) as SidebarRow;
+                if (existing == null ||
+                    existing.row_type != ACCOUNT ||
+                    existing.id.collate(row.id) > 0) {
+                    this.sidebar.insert(row, i);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void add_domain(string? domain) {
+        var safe_domain = domain ?? "(none)";
+        if (this.seen_domains.add(domain)) {
+            var type = (
+                safe_domain.down().has_prefix(Geary.Logging.DOMAIN.down())
+                ? SidebarRow.RowType.INTERNAL_DOMAIN
+                : SidebarRow.RowType.EXTERNAL_DOMAIN
+            );
+            var row = new SidebarRow(type, safe_domain, safe_domain);
+            int i = 0;
+            for (;; i++) {
+                var existing = this.sidebar.get_row_at_index(i) as SidebarRow;
+                if (existing == null ||
+                    existing.row_type == type) {
+                    break;
+                }
+            }
+            for (;; i++) {
+                var existing = this.sidebar.get_row_at_index(i) as SidebarRow;
+                if (existing == null ||
+                    existing.row_type != type ||
+                    existing.id.collate(row.id) > 0) {
+                    this.sidebar.insert(row, i);
+                    break;
+                }
+            }
+        }
+    }
+
     private inline bool should_append(Geary.Logging.Record record) {
         record.fill_well_known_sources();
+        if (record.account != null) {
+            add_account(record.account.information);
+        }
+        add_domain(record.domain);
         return (
             record.account == null ||
             this.account_filter == null ||
@@ -237,6 +324,18 @@ public class Components.InspectorLogView : Gtk.Grid {
             this.logs_store.append(out inserted_iter);
             this.logs_store.set_value(inserted_iter, COL_MESSAGE, record.format());
         }
+    }
+
+    private void sidebar_header_update(Gtk.ListBoxRow current_row,
+                                       Gtk.ListBoxRow? previous_row) {
+        Gtk.Widget? header = null;
+        var current = current_row as SidebarRow;
+        var previous = previous_row as SidebarRow;
+        if (current != null &&
+            (previous == null || current.row_type != previous.row_type)) {
+            header = new Gtk.Separator(HORIZONTAL);
+        }
+        current_row.set_header(header);
     }
 
     [GtkCallback]

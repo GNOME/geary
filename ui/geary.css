@@ -327,3 +327,13 @@ treeview.sidebar:drop(active).into {
   border-top-style: solid;
   border-bottom-style: solid;
 }
+
+/* Inspector */
+
+.geary-inspector-log-viewer .sidebar row > grid {
+  padding: 0 6px;
+}
+
+.geary-inspector-log-viewer .sidebar row > grid * {
+  margin: 4px;
+}
