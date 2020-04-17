@@ -195,14 +195,20 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         added.folders_available.connect(on_folders_available);
         added.folders_unavailable.connect(on_folders_unavailable);
         added.account.folders_use_changed.connect(on_folders_use_changed);
-        add_folders(added, added.get_folders());
+        var folders = added.get_folders();
+        if (!folders.is_empty) {
+            add_folders(added, folders);
+        }
      }
 
     internal void remove_account(AccountContext removed) {
         removed.folders_available.disconnect(on_folders_available);
         removed.folders_unavailable.disconnect(on_folders_unavailable);
         removed.account.folders_use_changed.disconnect(on_folders_use_changed);
-        remove_folders(removed, removed.get_folders());
+        var folders = removed.get_folders();
+        if (!folders.is_empty) {
+            remove_folders(removed, folders);
+        }
     }
 
     internal void main_window_added(MainWindow added) {
@@ -217,11 +223,11 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
                 new FolderImpl(context, this.accounts.get(account))
             );
         }
-        var folder_impls = to_plugin_folders(
-            Geary.traverse(to_add)
-            .map<Geary.Folder>((context => context.folder))
-            .to_linked_list()
-        ).read_only_view;
+        var folder_impls = Geary.traverse(
+            to_add
+        ).map<FolderImpl>(
+            (context => this.folders.get(context.folder))
+        ).to_linked_list().read_only_view;
         foreach (FolderStoreImpl store in this.stores) {
             store.folders_available(folder_impls);
         }
@@ -229,16 +235,16 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
 
     private void remove_folders(AccountContext account,
                                 Gee.Collection<FolderContext> to_remove) {
-        foreach (var context in to_remove) {
-            this.folders.unset(context.folder);
-        }
-        var folder_impls = to_plugin_folders(
-            Geary.traverse(to_remove)
-            .map<Geary.Folder>((context => context.folder))
-            .to_linked_list()
-        ).read_only_view;
+        var folder_impls = Geary.traverse(
+            to_remove
+        ).map<FolderImpl>(
+            (context => this.folders.get(context.folder))
+        ).to_linked_list().read_only_view;
         foreach (FolderStoreImpl store in this.stores) {
             store.folders_unavailable(folder_impls);
+        }
+        foreach (var context in to_remove) {
+            this.folders.unset(context.folder);
         }
     }
 
