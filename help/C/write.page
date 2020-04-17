@@ -14,7 +14,7 @@
     address of the people to receive the message in the <gui
     style="input">To</gui> text field, and a subject line in the <gui
     style="input">Subject</gui> field. You can then type your message
-    in the text area below these. Once the message is read to send,
+    in the text area below these. Once the message is ready to send,
     click <gui style="button">Send</gui> or type
     <keyseq><key>Ctrl</key><key>Enter</key></keyseq> to send the
     message.</p>
@@ -29,14 +29,19 @@
       email, and make more changes to it.</p>
     </note>
 
-    <p>When entering an email address in the <gui
-    style="input">To</gui> and <gui style="input">Cc</gui> fields,
+    <p>To show the <gui style="input">Cc</gui>, <gui style="input">Bcc</gui>,
+    and <gui style="input">Reply-to</gui> fields, click the
+    <gui style="input">More options</gui> button at the end of the
+    <gui style="input">To</gui> field. Cc allows you to send a
+    copy of the email to other, secondary recipients. Bcc is similar, but the
+    Bcc list is hidden from recipients. The Reply-To field specifies an email
+    address to reply to, if recipients should reply to a different email
+    address than the sender's.</p>
+
+    <p>When entering an email address into any of these fields,
     Geary will provide suggestions from your desktop address book and
     from previously sent and received email messages. To choose one of
-    these suggestions, simply click on it. In addition, <gui
-    style="input">Bcc</gui> and <gui style="input">Reply-to</gui>
-    fields can be shown by selecting <gui style="menu">Show extended
-    fields</gui> from the formatting toolbar menu.</p>
+    these suggestions, simply click on it.</p>
 
     <p>To reply to the currently selected conversation, click one of
     the <gui style="button">Reply</gui>, <gui style="button">Reply
@@ -61,9 +66,10 @@
     <title>Text formatting, images and attachments</title>
 
     <p>Geary's email composer lets you use text styles such as
-    <em>bold</em> and <em>italic</em>, indent text to quote it and
+    <em>bold</em> and <em>italic</em>, indent text to quote it, and
     links to web pages. Simply select the text and click the
-    appropriate button on the formatting toolbar.</p>
+    appropriate button on the formatting toolbar at the bottom of the
+    composer area.</p>
 
     <p>Bulleted and numbered lists can be inserted or removed by
     clicking the <gui style="button">Bulleted list</gui> and <gui
@@ -81,7 +87,7 @@
 
     <p>Documents, music, videos, and other files can be attached to
     the email by clicking the <gui style="button">Attach File</gui>
-    button at the top of the composer window and selecting the
+    button at the bottom of the composer window and selecting the
     document to attach, or by dragging a file from the
     <gui>Files</gui> application to the composer window, and dropping
     it either on the text fields at the top of the window or on the
@@ -130,19 +136,18 @@
       <p>If you save or discard a composed email, you can re-open it
       by clicking <gui style="button">Undo</gui> on the pop-up
       notification that appears or by typing
-      <keyseq><key>Ctrl</key><key>Z</key></keyseq>. The ability to
-      restore a saved or discarded composer will be remain for up to
-      30 minutes. After that you will need to re-open the message via
-      the <gui>Drafts</gui> folder, if present.</p>
+      <keyseq><key>Ctrl</key><key>Z</key></keyseq>. Composers can be reopened
+      for up to 30 minutes after they are closed. After that, you will need to
+      re-open the message via the <gui>Drafts</gui> folder, if present.</p>
     </note>
   </section>
 
   <section id="plain-text">
     <title>Plain text messages</title>
 
-    <p>Geary can also send plain text messages. In the drop-down menu,
-    check or uncheck <gui style="menu">Rich Text</gui> to toggle
-    between plain text and rich text mode. Plain text mode is useful
+    <p>Geary can also send plain text messages. Press the
+    <gui style="button">More options</gui> button at the end of the bottom
+    toolbar, then choose "Rich Text" or "Plain Text". Plain text mode is useful
     when sending email to mailing lists that prohibit rich text (HTML)
     messages, or when sending email to people that do no use modern
     clients like Geary.</p>
