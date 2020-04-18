@@ -23,14 +23,19 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     private class EmailStoreImpl : Geary.BaseObject, Plugin.EmailStore {
 
 
-        private Gee.Map<AccountContext,PluginManager.AccountImpl> accounts;
+        private weak EmailStoreFactory factory;
 
 
-        public EmailStoreImpl(
-            Gee.Map<AccountContext,PluginManager.AccountImpl> accounts
-        ) {
-            this.accounts = accounts;
+        public EmailStoreImpl(EmailStoreFactory factory) {
+            this.factory = factory;
         }
+
+        public override GLib.VariantType email_identifier_variant_type {
+            get { return this._email_id_variant_type; }
+        }
+        private GLib.VariantType _email_id_variant_type = new GLib.VariantType(
+            "(sv)"
+        );
 
         public async Gee.Collection<Plugin.Email> get_email(
             Gee.Collection<Plugin.EmailIdentifier> plugin_ids,
@@ -73,13 +78,30 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
                 if (batch != null) {
                     foreach (var email in batch) {
                         emails.add(
-                            new EmailImpl(email, this.accounts.get(context))
+                            new EmailImpl(
+                                email,
+                                this.factory.accounts.get(context))
                         );
                     }
                 }
             }
 
             return emails;
+        }
+
+        public Plugin.EmailIdentifier? get_email_identifier_from_variant(
+            GLib.Variant variant
+        ) {
+            var account = this.factory.get_account_from_variant(variant);
+            var id = this.factory.get_email_identifier_from_variant(variant);
+            IdImpl? plugin_id = null;
+            if (account != null && id != null) {
+                var plugin_account = this.factory.accounts.get(account);
+                if (plugin_account != null) {
+                    plugin_id = new IdImpl(id, plugin_account);
+                }
+            }
+            return plugin_id;
         }
 
         internal void destroy() {
@@ -148,7 +170,10 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         }
 
         public GLib.Variant to_variant() {
-            return this.backing.to_variant();
+            return new GLib.Variant.tuple({
+                    this._account.backing.account.information.id,
+                        new GLib.Variant.variant(this.backing.to_variant())
+            });
         }
 
         public bool equal_to(Plugin.EmailIdentifier other) {
@@ -194,7 +219,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
     /** Constructs a new email store for use by plugin contexts. */
     public Plugin.EmailStore new_email_store() {
-        var store = new EmailStoreImpl(this.accounts);
+        var store = new EmailStoreImpl(this);
         this.stores.add(store);
         return store;
     }
@@ -227,6 +252,37 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     public Plugin.Email to_plugin_email(Geary.Email engine,
                                         AccountContext account) {
         return new EmailImpl(engine, this.accounts.get(account));
+    }
+
+    /** Returns the account context for the given plugin email id. */
+    public AccountContext get_account_from_variant(GLib.Variant target) {
+        AccountContext? account = null;
+        string id = (string) target.get_child_value(0);
+        foreach (var context in this.accounts.keys) {
+            var info = context.account.information;
+            if (info.id == id) {
+                account = context;
+                break;
+            }
+        }
+        return account;
+    }
+
+    /** Returns the engine email id for the given plugin email id. */
+    public Geary.EmailIdentifier?
+        get_email_identifier_from_variant(GLib.Variant target) {
+        Geary.EmailIdentifier? id = null;
+        var context = get_account_from_variant(target);
+        if (context != null) {
+            try {
+                id = context.account.to_email_identifier(
+                    target.get_child_value(1).get_variant()
+                );
+            } catch (GLib.Error err) {
+                debug("Invalid email folder id: %s", err.message);
+            }
+        }
+        return id;
     }
 
 }
