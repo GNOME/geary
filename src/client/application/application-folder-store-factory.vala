@@ -24,15 +24,15 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             "(sv)"
         );
 
-        private Gee.Map<Geary.Folder,FolderImpl> folders;
+        private weak FolderStoreFactory factory;
 
 
-        public FolderStoreImpl(Gee.Map<Geary.Folder,FolderImpl> folders) {
-            this.folders = folders;
+        public FolderStoreImpl(FolderStoreFactory factory) {
+            this.factory = factory;
         }
 
         public Gee.Collection<Plugin.Folder> get_folders() {
-            return this.folders.values.read_only_view;
+            return this.factory.folders.values.read_only_view;
         }
 
         public async Gee.Collection<Plugin.Folder> list_containing_folders(
@@ -51,7 +51,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
                 if (multi_folders != null) {
                     foreach (var path in multi_folders.get(id.backing)) {
                         var folder = context.account.get_folder(path);
-                        folders.add(this.folders.get(folder));
+                        folders.add(this.factory.folders.get(folder));
                     }
                 }
             }
@@ -59,19 +59,12 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         }
 
         public Plugin.Folder? get_folder_from_variant(GLib.Variant variant) {
-            Plugin.Folder? found = null;
-            // XXX this is pretty inefficient
-            foreach (var folder in this.folders.values) {
-                if (folder.to_variant().equal(variant)) {
-                    found = folder;
-                    break;
-                }
-            }
-            return found;
+            var folder = this.factory.get_folder_from_variant(variant);
+            return this.factory.folders.get(folder);
         }
 
         internal void destroy() {
-            this.folders = Gee.Map.empty();
+            // no-op
         }
 
     }
@@ -160,7 +153,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
 
     /** Constructs a new folder store for use by plugin contexts. */
     public Plugin.FolderStore new_folder_store() {
-        var store = new FolderStoreImpl(this.folders);
+        var store = new FolderStoreImpl(this);
         this.stores.add(store);
         return store;
     }
@@ -189,6 +182,30 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     public FolderContext get_folder_context(Plugin.Folder plugin) {
         FolderImpl? impl = plugin as FolderImpl;
         return (impl != null) ? impl.backing : null;
+    }
+
+    /** Returns the folder context for the given plugin folder id. */
+    public Geary.Folder? get_folder_from_variant(GLib.Variant target) {
+        string id = (string) target.get_child_value(0);
+        AccountContext? context = null;
+        foreach (var key in this.accounts.keys) {
+            if (key.account.information.id == id) {
+                context = key;
+                break;
+            }
+        }
+        Geary.Folder? folder = null;
+        if (context != null) {
+            try {
+                Geary.FolderPath? path = context.account.to_folder_path(
+                    target.get_child_value(1).get_variant()
+                );
+                folder = context.account.get_folder(path);
+            } catch (GLib.Error err) {
+                debug("Could not find account/folder %s", err.message);
+            }
+        }
+        return folder;
     }
 
     internal void add_account(AccountContext added) {
