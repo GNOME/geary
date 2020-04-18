@@ -95,7 +95,8 @@ public class Application.PluginManager : GLib.Object {
         public void show_folder(Plugin.Folder folder) {
             Geary.Folder? target = this.folders.get_engine_folder(folder);
             if (target != null) {
-                this.backing.show_folder.begin(target);
+                MainWindow window = this.backing.get_active_main_window();
+                window.select_folder.begin(target, true);
             }
         }
 
@@ -208,6 +209,9 @@ public class Application.PluginManager : GLib.Object {
                                           GLib.Error? error);
 
 
+    internal FolderStoreFactory folders_factory { get; private set; }
+    internal EmailStoreFactory email_factory { get; private set; }
+
     private Client application;
     private Controller controller;
     private Configuration config;
@@ -217,8 +221,6 @@ public class Application.PluginManager : GLib.Object {
 
     private Gee.Map<AccountContext,AccountImpl> plugin_accounts =
         new Gee.HashMap<AccountContext,AccountImpl>();
-    private FolderStoreFactory folders_factory;
-    private EmailStoreFactory email_factory;
 
     private Gee.Map<Peas.PluginInfo,PluginContext> plugin_set =
         new Gee.HashMap<Peas.PluginInfo,PluginContext>();
