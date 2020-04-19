@@ -9,7 +9,7 @@
 /**
  * Collects application state related to a single open account.
  */
-internal class Application.AccountContext : Geary.BaseObject {
+public class Application.AccountContext : Geary.BaseObject {
 
     /** The account for this context. */
     public Geary.Account account { get; private set; }

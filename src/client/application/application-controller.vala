@@ -335,16 +335,22 @@ internal class Application.Controller : Geary.BaseObject {
             }
         }
 
-        var composer = new Composer.Widget(
-            this.application,
-            this.application.get_active_main_window().selected_account
+        var context = this.accounts.get(
+            this.application.get_active_main_window().selected_account.information
         );
-        register_composer(composer);
-        show_composer(composer, null);
-        try {
-            yield composer.load_empty_body(to);
-        } catch (GLib.Error err) {
-            report_problem(new Geary.ProblemReport(err));
+        if (context != null) {
+            var composer = new Composer.Widget(
+                this.application,
+                context,
+                this.accounts.values.read_only_view
+            );
+            register_composer(composer);
+            show_composer(composer, null);
+            try {
+                yield composer.load_empty_body(to);
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
         }
     }
 
@@ -354,16 +360,21 @@ internal class Application.Controller : Geary.BaseObject {
     public async void compose_mailto(string mailto) {
         MainWindow? window = this.application.last_active_main_window;
         if (window != null && window.selected_account != null) {
-            var composer = new Composer.Widget(
-                this.application, window.selected_account
-            );
-            register_composer(composer);
-            show_composer(composer, null);
+            var context = this.accounts.get(window.selected_account.information);
+            if (context != null) {
+                var composer = new Composer.Widget(
+                    this.application,
+                    context,
+                    this.accounts.values.read_only_view
+                );
+                register_composer(composer);
+                show_composer(composer, null);
 
-            try {
-                yield composer.load_mailto(mailto);
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
+                try {
+                    yield composer.load_mailto(mailto);
+                } catch (GLib.Error err) {
+                    report_problem(new Geary.ProblemReport(err));
+                }
             }
         } else {
             // Schedule the send for after we have an account open.
@@ -423,17 +434,23 @@ internal class Application.Controller : Geary.BaseObject {
             }
         }
 
-        var composer = new Composer.Widget(
-            this.application,
-            this.application.get_active_main_window().selected_account
+        var account = this.accounts.get(
+            this.application.get_active_main_window().selected_account.information
         );
-        register_composer(composer);
-        show_composer(composer, Geary.Collection.single(context.id));
+        if (account != null) {
+            var composer = new Composer.Widget(
+                this.application,
+                account,
+                this.accounts.values.read_only_view
+            );
+            register_composer(composer);
+            show_composer(composer, Geary.Collection.single(context.id));
 
-        try {
-            yield composer.load_context(type, context, quote);
-        } catch (GLib.Error err) {
-            report_problem(new Geary.ProblemReport(err));
+            try {
+                yield composer.load_context(type, context, quote);
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
         }
     }
 
@@ -460,13 +477,6 @@ internal class Application.Controller : Geary.BaseObject {
                 _("Email will not be sent until re-connected")
             );
         }
-    }
-
-    /** Returns the contact store for an account, if any. */
-    public Application.ContactStore?
-        get_contact_store_for_account(Geary.Account target) {
-        AccountContext? context = this.accounts.get(target.information);
-        return (context != null) ? context.contacts : null;
     }
 
     /**
@@ -881,18 +891,14 @@ internal class Application.Controller : Geary.BaseObject {
 
     /** Queues the email in a composer for delivery. */
     internal async void send_composed_email(Composer.Widget composer) {
-        AccountContext? context = this.accounts.get(
-            composer.account.information
-        );
-        if (context != null) {
-            try {
-                yield context.commands.execute(
-                    new SendComposerCommand(this.application, context, composer),
-                    context.cancellable
-                );
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
-            }
+        AccountContext context = composer.sender_context;
+        try {
+            yield context.commands.execute(
+                new SendComposerCommand(this.application, context, composer),
+                context.cancellable
+            );
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
         }
     }
 
@@ -902,35 +908,27 @@ internal class Application.Controller : Geary.BaseObject {
         // the composer's draft manager is already saving drafts on
         // the server. Until we get that saving local-only, this will
         // only be around for pushing the composer onto the undo stack
-        AccountContext? context = this.accounts.get(
-            composer.account.information
-        );
-        if (context != null) {
-            try {
-                yield context.commands.execute(
-                    new SaveComposerCommand(this, composer),
-                    context.cancellable
-                );
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
-            }
+        AccountContext context = composer.sender_context;
+        try {
+            yield context.commands.execute(
+                new SaveComposerCommand(this, composer),
+                context.cancellable
+            );
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
         }
     }
 
     /** Queues a composer to be discarded. */
     internal async void discard_composed_email(Composer.Widget composer) {
-        AccountContext? context = this.accounts.get(
-            composer.account.information
-        );
-        if (context != null) {
-            try {
-                yield context.commands.execute(
-                    new DiscardComposerCommand(this, composer),
-                    context.cancellable
-                );
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
-            }
+        AccountContext context = composer.sender_context;
+        try {
+            yield context.commands.execute(
+                new DiscardComposerCommand(this, composer),
+                context.cancellable
+            );
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
         }
     }
 

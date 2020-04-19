@@ -116,11 +116,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
 
     private class FromAddressMap {
-        public Geary.Account account;
+        public Application.AccountContext account;
         public Geary.RFC822.MailboxAddresses from;
-        public FromAddressMap(Geary.Account a, Geary.RFC822.MailboxAddresses f) {
-            account = a;
-            from = f;
+        public FromAddressMap(Application.AccountContext account,
+                              Geary.RFC822.MailboxAddresses from) {
+            this.account = account;
+            this.from = from;
         }
     }
 
@@ -256,7 +257,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
 
     /** The account the email is being sent from. */
-    public Geary.Account account { get; private set; }
+    public Application.AccountContext sender_context { get; private set; }
 
     /** The identifier of the saved email this composer holds, if any. */
     public Geary.EmailIdentifier? saved_id {
@@ -290,7 +291,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         get {
             return (
                 this.accounts.size > 1 ||
-                this.account.information.has_sender_aliases
+                this.sender_context.account.information.has_sender_aliases
             );
         }
     }
@@ -445,7 +446,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private Gee.Collection<Geary.Account> accounts;
+    private Gee.Collection<Application.AccountContext> accounts;
 
     private string? pointer_url = null;
     private string? cursor_url = null;
@@ -502,17 +503,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
 
     public Widget(Application.Client application,
-                  Geary.Account initial_account) {
+                  Application.AccountContext initial_account,
+                  Gee.Collection<Application.AccountContext> all_accounts) {
         components_reflow_box_get_type();
         base_ref();
         this.application = application;
-        this.account = initial_account;
-
-        try {
-            this.accounts = this.application.engine.get_accounts();
-        } catch (GLib.Error e) {
-            warning("Could not fetch account info: %s", e.message);
-        }
+        this.sender_context = initial_account;
+        this.accounts = all_accounts;
 
         this.header = new Headerbar(application.config);
         this.header.expand_composer.connect(on_expand_compact_headers);
@@ -595,7 +592,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         // TODO: also listen for account updates to allow adding identities while writing an email
 
-        this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
+        this.from = new Geary.RFC822.MailboxAddresses.single(
+            this.sender_context.account.information.primary_mailbox
+        );
 
         this.draft_timer = new Geary.TimeoutManager.seconds(
             10, on_draft_timeout
@@ -659,7 +658,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (to != null) {
             this.to = to.to_full_display();
         }
-        yield finish_loading("", "", false, null);
+        yield finish_loading("", "", false);
     }
 
     public async void load_mailto(string mailto)
@@ -716,7 +715,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     attachment_failed(err.message);
                 }
             }
-            yield finish_loading(body, "", false, null);
+            yield finish_loading(body, "", false);
         }
     }
 
@@ -784,7 +783,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             break;
         }
 
-        yield finish_loading(body, complete_quote, (type == EDIT), null);
+        yield finish_loading(body, complete_quote, (type == EDIT));
     }
 
     /**
@@ -942,11 +941,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             }
 
             try {
-                yield close_draft_manager(KEEP, null);
+                yield close_draft_manager(KEEP);
             } catch (GLib.Error error) {
                 this.application.controller.report_problem(
                     new Geary.AccountProblemReport(
-                        this.account.information, error
+                        this.sender_context.account.information, error
                     )
                 );
             }
@@ -1001,10 +1000,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      * Loads and sets contact auto-complete data for the current account.
      */
     private void load_entry_completions() {
-        Application.ContactStore contacts =
-            this.application.controller.get_contact_store_for_account(
-                this.account
-            );
+        Application.ContactStore contacts = this.sender_context.contacts;
         this.to_entry.completion = new ContactEntryCompletion(contacts);
         this.cc_entry.completion = new ContactEntryCompletion(contacts);
         this.bcc_entry.completion = new ContactEntryCompletion(contacts);
@@ -1018,13 +1014,22 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         bool first_email = true;
 
         foreach (Geary.RFC822.MessageID mid in this.in_reply_to) {
-            Gee.MultiMap<Geary.Email, Geary.FolderPath?>? email_map;
+            Gee.MultiMap<Geary.Email, Geary.FolderPath?>? email_map = null;
             try {
-                email_map =
-                    yield this.account.local_search_message_id_async(mid, Geary.Email.Field.ENVELOPE,
-                    true, null, new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT)); // TODO: Folder blacklist
-            } catch (Error error) {
-                continue;
+                // TODO: Folder blacklist
+                email_map = yield this.sender_context.account
+                    .local_search_message_id_async(
+                        mid,
+                        ENVELOPE,
+                        true,
+                        null,
+                        new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT)
+                    );
+            } catch (GLib.Error error) {
+                warning(
+                    "Error restoring edited message state from In-Reply-To: %s",
+                    error.message
+                );
             }
             if (email_map == null)
                 continue;
@@ -1394,7 +1399,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                                         Geary.Email referred,
                                         bool modify_headers = true) {
         Gee.List<Geary.RFC822.MailboxAddress> sender_addresses =
-            account.information.sender_mailboxes;
+            this.sender_context.account.information.sender_mailboxes;
 
         // Set the preferred from address. New messages should retain
         // the account default and drafts should retain the draft's
@@ -1510,8 +1515,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private async void finish_loading(string body,
                                       string quote,
-                                      bool is_body_complete,
-                                      GLib.Cancellable? cancellable) {
+                                      bool is_body_complete) {
         update_attachments_view();
         update_pending_attachments(this.pending_include, true);
 
@@ -1523,7 +1527,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
 
         try {
-            yield open_draft_manager(this.saved_id, cancellable);
+            yield open_draft_manager(this.saved_id);
         } catch (Error e) {
             debug("Could not open draft manager: %s", e.message);
         }
@@ -1581,7 +1585,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         try {
             yield this.editor.clean_content();
             yield this.application.controller.send_composed_email(this);
-            yield close_draft_manager(DISCARD, null);
+            yield close_draft_manager(DISCARD);
 
             if (this.container != null) {
                 this.container.close();
@@ -1589,7 +1593,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         } catch (GLib.Error error) {
             this.application.controller.report_problem(
                 new Geary.AccountProblemReport(
-                    this.account.information, error
+                    this.sender_context.account.information, error
                 )
             );
         }
@@ -1598,10 +1602,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /**
      * Creates and opens the composer's draft manager.
      */
-    private async void open_draft_manager(Geary.EmailIdentifier? editing_draft_id,
-                                          GLib.Cancellable? cancellable)
+    private async void open_draft_manager(Geary.EmailIdentifier? editing_draft_id)
         throws GLib.Error {
-        if (!this.account.information.save_drafts) {
+        if (!this.sender_context.account.information.save_drafts) {
             this.header.show_save_and_close = false;
             return;
         }
@@ -1612,14 +1615,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         GLib.Cancellable internal_cancellable = new GLib.Cancellable();
-        if (cancellable != null) {
-            cancellable.cancelled.connect(
-                () => { internal_cancellable.cancel(); }
-            );
-        }
+        this.sender_context.cancellable.cancelled.connect(
+            () => { internal_cancellable.cancel(); }
+        );
         this.draft_manager_opening = internal_cancellable;
 
-        Geary.App.DraftManager new_manager = new Geary.App.DraftManager(account);
+        Geary.App.DraftManager new_manager = new Geary.App.DraftManager(
+            this.sender_context.account
+        );
         try {
             yield new_manager.open_async(editing_draft_id, internal_cancellable);
             debug("Draft manager opened");
@@ -1645,17 +1648,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /**
      * Closes current draft manager, if any, then opens a new one.
      */
-    private async void reopen_draft_manager(GLib.Cancellable? cancellable)
+    private async void reopen_draft_manager()
         throws GLib.Error {
         // Discard the draft, if any, since it may be on a different
         // account
-        yield close_draft_manager(DISCARD, cancellable);
-        yield open_draft_manager(null, cancellable);
+        yield close_draft_manager(DISCARD);
+        yield open_draft_manager(null);
         yield save_draft();
     }
 
-    private async void close_draft_manager(DraftPolicy draft_policy,
-                                           GLib.Cancellable? cancellable)
+    private async void close_draft_manager(DraftPolicy draft_policy)
         throws GLib.Error {
         var old_manager = this.draft_manager;
         if (old_manager != null) {
@@ -1676,7 +1678,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 yield old_manager.discard(null);
             }
 
-            yield old_manager.close_async(cancellable);
+            yield old_manager.close_async(null);
             debug("Draft manager closed");
         }
     }
@@ -1745,7 +1747,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             } catch (GLib.Error error) {
                 this.application.controller.report_problem(
                     new Geary.AccountProblemReport(
-                        this.account.information, error
+                        this.sender_context.account.information, error
                     )
                 );
             }
@@ -1763,11 +1765,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         set_enabled(false);
 
         try {
-            yield close_draft_manager(DISCARD, null);
+            yield close_draft_manager(DISCARD);
         } catch (GLib.Error error) {
             this.application.controller.report_problem(
                 new Geary.AccountProblemReport(
-                    this.account.information, error
+                    this.sender_context.account.information, error
                 )
             );
         }
@@ -2465,10 +2467,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         return action as SimpleAction;
     }
 
-    private bool add_account_emails_to_from_list(Geary.Account other_account, bool set_active = false) {
+    private bool add_account_emails_to_from_list(
+        Application.AccountContext other_account,
+        bool set_active = false
+    ) {
         bool is_primary = true;
-        foreach (Geary.RFC822.MailboxAddress mailbox in
-                 other_account.information.sender_mailboxes) {
+        Geary.AccountInformation info = other_account.account.information;
+        foreach (Geary.RFC822.MailboxAddress mailbox in info.sender_mailboxes) {
             Geary.RFC822.MailboxAddresses addresses =
                 new Geary.RFC822.MailboxAddresses.single(mailbox);
 
@@ -2479,9 +2484,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 // printf argument will be the alternate email address,
                 // and the second will be the account's primary email
                 // address.
-                display = _("%1$s via %2$s").printf(
-                    display, other_account.information.display_name
-                );
+                display = _("%1$s via %2$s").printf(display, info.display_name);
             }
             is_primary = false;
 
@@ -2527,7 +2530,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // show nothing.
         if (this.accounts.size < 1 ||
             (this.accounts.size == 1 &&
-            !Geary.traverse<Geary.Account>(this.accounts).first().information.has_sender_aliases)) {
+            !Geary.Collection.first(this.accounts)
+             .account.information.has_sender_aliases)) {
             return false;
         }
 
@@ -2541,9 +2545,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // Always add at least the current account. The var set_active
         // is set to true if the current message's from address has
         // been set in the ComboBox.
-        bool set_active = add_account_emails_to_from_list(this.account);
+        bool set_active = add_account_emails_to_from_list(this.sender_context);
         foreach (var account in this.accounts) {
-            if (account != this.account) {
+            if (account != this.sender_context) {
                 set_active = add_account_emails_to_from_list(
                     account, set_active
                 );
@@ -2567,14 +2571,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             FromAddressMap selected = this.from_list.get(index);
             this.from = selected.from;
 
-            if (selected.account != this.account) {
-                this.account = selected.account;
+            if (selected.account != this.sender_context) {
+                this.sender_context = selected.account;
                 this.update_signature.begin(null);
                 load_entry_completions();
 
-                var current_account = this.account;
+                var current_account = this.sender_context.account;
                 this.reopen_draft_manager.begin(
-                    null,
                     (obj, res) => {
                         try {
                             this.reopen_draft_manager.end(res);
@@ -2593,8 +2596,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private async void update_signature(Cancellable? cancellable = null) {
         string sig = "";
-        if (this.account.information.use_signature) {
-            sig = account.information.signature;
+        Geary.AccountInformation account =
+            this.sender_context.account.information;
+        if (account.use_signature) {
+            sig = account.signature;
             if (Geary.String.is_empty_or_whitespace(sig)) {
                 // No signature is specified in the settings, so use
                 // ~/.signature
@@ -2912,7 +2917,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_draft_timeout() {
-        var current_account = this.account;
+        var current_account = this.sender_context.account;
         this.save_draft.begin(
             (obj, res) => {
                 try {
