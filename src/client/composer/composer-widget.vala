@@ -732,10 +732,22 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             );
         }
 
+        var full_context = context;
         if (!context.fields.is_all_set(REQUIRED_FIELDS)) {
-            throw new Geary.EngineError.INCOMPLETE_MESSAGE(
-                "Required fields not met: %s", context.fields.to_string()
-            );
+            Gee.Collection<Geary.Email>? email =
+                yield this.sender_context.emails.list_email_by_sparse_id_async(
+                    Geary.Collection.single(context.id),
+                    REQUIRED_FIELDS,
+                    NONE,
+                    this.sender_context.cancellable
+                );
+            if (email == null || email.is_empty) {
+                throw new Geary.EngineError.INCOMPLETE_MESSAGE(
+                    "Unable to load email fields required for composer: %s",
+                    context.fields.to_string()
+                );
+            }
+            full_context = Geary.Collection.first(email);
         }
 
         this.context_type = type;
@@ -749,10 +761,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         var complete_quote = "";
         switch (type) {
         case EDIT:
-            this.saved_id = context.id;
+            this.saved_id = full_context.id;
             yield restore_reply_to_state();
-            fill_in_from_context(context);
-            Geary.RFC822.Message message = context.get_message();
+            fill_in_from_context(full_context);
+            Geary.RFC822.Message message = full_context.get_message();
             body = (
                 message.has_html_body()
                 ? message.get_html_body(null)
@@ -762,10 +774,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         case REPLY_SENDER:
         case REPLY_ALL:
-            add_recipients_and_ids(this.context_type, context);
-            fill_in_from_context(context);
+            add_recipients_and_ids(this.context_type, full_context);
+            fill_in_from_context(full_context);
             complete_quote = Util.Email.quote_email_for_reply(
-                context, quote, this.application.config.clock_format, HTML
+                full_context, quote, this.application.config.clock_format, HTML
             );
             if (!Geary.String.is_empty(quote)) {
                 this.top_posting = false;
@@ -775,10 +787,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             break;
 
         case FORWARD:
-            add_recipients_and_ids(this.context_type, context);
-            fill_in_from_context(context);
+            add_recipients_and_ids(this.context_type, full_context);
+            fill_in_from_context(full_context);
             complete_quote = Util.Email.quote_email_for_forward(
-                context, quote, HTML
+                full_context, quote, HTML
             );
             break;
         }
