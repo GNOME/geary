@@ -212,16 +212,6 @@ internal class Application.Controller : Geary.BaseObject {
         this.expunge_accounts.begin();
     }
 
-    /** Returns a context for an account, if any. */
-    internal AccountContext? get_context_for_account(Geary.AccountInformation account) {
-        return this.accounts.get(account);
-    }
-
-    /** Returns a read-only collection of contexts each active account. */
-    internal Gee.Collection<AccountContext> get_account_contexts() {
-        return this.accounts.values.read_only_view;
-    }
-
     /** Closes all windows and accounts, releasing held resources. */
     public async void close() {
         // Stop listening for account changes up front so we don't
@@ -333,20 +323,48 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     /**
-     * Opens or queues a new composer addressed to a specific email address.
+     * Opens a composer for writing a new, blank message.
      */
-    public void compose(string? mailto = null) {
+    public async void compose_new_email(Geary.RFC822.MailboxAddress? to = null) {
+        // If there's already an empty composer open, just use that
+        foreach (Composer.Widget existing in this.composer_widgets) {
+            if (existing != null &&
+                existing.current_mode == PANED &&
+                existing.is_blank) {
+                existing.present();
+            }
+        }
+
+        var composer = new Composer.Widget(
+            this.application,
+            this.application.get_active_main_window().selected_account
+        );
+        register_composer(composer);
+        show_composer(composer, null);
+        try {
+            yield composer.load_empty_body(to);
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
+        }
+    }
+
+    /**
+     * Opens a composer with the given `mailto:` URL.
+     */
+    public async void compose_mailto(string mailto) {
         MainWindow? window = this.application.last_active_main_window;
         if (window != null && window.selected_account != null) {
-            create_compose_widget(
-                window,
-                window.selected_account,
-                NEW_MESSAGE,
-                mailto,
-                null,
-                null,
-                false
+            var composer = new Composer.Widget(
+                this.application, window.selected_account
             );
+            register_composer(composer);
+            show_composer(composer, null);
+
+            try {
+                yield composer.load_mailto(mailto);
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
         } else {
             // Schedule the send for after we have an account open.
             this.pending_mailtos.add(mailto);
@@ -355,90 +373,67 @@ internal class Application.Controller : Geary.BaseObject {
 
     /**
      * Opens new composer with an existing message as context.
+     *
+     * If the given type is {@link Composer.Widget.ContextType.EDIT},
+     * the context is loaded to be edited (e.g. for drafts, templates,
+     * sending again. Otherwise the context is treated as the email to
+     * be replied to, etc.
      */
-    public void compose_with_context_email(MainWindow to_show,
-                                           Geary.Account account,
-                                           Composer.Widget.ComposeType type,
-                                           Geary.Email context,
-                                           string? quote,
-                                           bool is_draft) {
-        create_compose_widget(
-            to_show, account, type, null, context, quote, is_draft
-        );
-    }
+    public async void compose_with_context_email(Composer.Widget.ContextType type,
+                                                 Geary.Email context,
+                                                 string? quote) {
+        MainWindow show_on = this.application.get_active_main_window();
+        if (type == EDIT) {
+            // Check all known composers since the context may be open
+            // an existing composer already.
+            foreach (Composer.Widget composer in this.composer_widgets) {
+                if (composer.saved_id != null &&
+                    composer.saved_id.equal_to(context.id)) {
+                    composer.present();
+                    composer.set_focus();
+                    return;
+                }
+            }
+        } else {
+            // See whether there is already an inline message in the
+            // current window that is either a reply/forward for that
+            // message, or there is a quote to insert into it.
+            foreach (Composer.Widget existing in this.composer_widgets) {
+                if (existing.get_toplevel() == show_on &&
+                    (existing.current_mode == INLINE ||
+                     existing.current_mode == INLINE_COMPACT) &&
+                    (context.id in existing.get_referred_ids() ||
+                     quote != null)) {
+                    try {
+                        existing.append_to_email(context, quote, type);
+                        existing.present();
+                        return;
+                    } catch (Geary.EngineError error) {
+                        report_problem(new Geary.ProblemReport(error));
+                    }
+                }
+            }
 
-    /** Adds a new composer to be kept track of. */
-    public void add_composer(Composer.Widget widget) {
-        debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");
-        widget.destroy.connect_after(this.on_composer_widget_destroy);
-        this.composer_widgets.add(widget);
-    }
-
-    /** Returns a read-only collection of currently open composers .*/
-    public Gee.Collection<Composer.Widget> get_composers() {
-        return this.composer_widgets.read_only_view;
-    }
-
-    /** Opens any pending composers. */
-    public void process_pending_composers() {
-        foreach (string? mailto in this.pending_mailtos) {
-            compose(mailto);
-        }
-        this.pending_mailtos.clear();
-    }
-
-    /** Queues the email in a composer for delivery. */
-    public async void send_composed_email(Composer.Widget composer) {
-        AccountContext? context = this.accounts.get(
-            composer.account.information
-        );
-        if (context != null) {
-            try {
-                yield context.commands.execute(
-                    new SendComposerCommand(this.application, context, composer),
-                    context.cancellable
-                );
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
+            // Can't re-use an existing composer, so need to create a
+            // new one. Replies must open inline in the main window,
+            // so we need to ensure there are no composers open there
+            // first.
+            if (!show_on.close_composer(true)) {
+                return;
             }
         }
-    }
 
-    /** Saves the email in a composer as a draft on the server. */
-    public async void save_composed_email(Composer.Widget composer) {
-        // XXX this doesn't actually do what it says on the tin, since
-        // the composer's draft manager is already saving drafts on
-        // the server. Until we get that saving local-only, this will
-        // only be around for pushing the composer onto the undo stack
-        AccountContext? context = this.accounts.get(
-            composer.account.information
+        var composer = new Composer.Widget(
+            this.application,
+            this.application.get_active_main_window().selected_account
         );
-        if (context != null) {
-            try {
-                yield context.commands.execute(
-                    new SaveComposerCommand(this, composer),
-                    context.cancellable
-                );
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
-            }
-        }
-    }
+        register_composer(composer);
+        show_composer(composer, Geary.Collection.single(context.id));
 
-    /** Queues a composer to be discarded. */
-    public async void discard_composed_email(Composer.Widget composer) {
-        AccountContext? context = this.accounts.get(
-            composer.account.information
-        );
-        if (context != null) {
-            try {
-                yield context.commands.execute(
-                    new DiscardComposerCommand(this, composer),
-                    context.cancellable
-                );
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
-            }
+        try {
+            yield composer.load_context(type, context, quote);
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
         }
     }
 
@@ -858,12 +853,85 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** Returns a context for an account, if any. */
+    internal AccountContext? get_context_for_account(Geary.AccountInformation account) {
+        return this.accounts.get(account);
+    }
+
+    /** Returns a read-only collection of contexts each active account. */
+    internal Gee.Collection<AccountContext> get_account_contexts() {
+        return this.accounts.values.read_only_view;
+    }
+
     internal void register_window(MainWindow window) {
         window.retry_service_problem.connect(on_retry_service_problem);
     }
 
     internal void unregister_window(MainWindow window) {
         window.retry_service_problem.disconnect(on_retry_service_problem);
+    }
+
+    /** Opens any pending composers. */
+    internal async void process_pending_composers() {
+        foreach (string? mailto in this.pending_mailtos) {
+            yield compose_mailto(mailto);
+        }
+        this.pending_mailtos.clear();
+    }
+
+    /** Queues the email in a composer for delivery. */
+    internal async void send_composed_email(Composer.Widget composer) {
+        AccountContext? context = this.accounts.get(
+            composer.account.information
+        );
+        if (context != null) {
+            try {
+                yield context.commands.execute(
+                    new SendComposerCommand(this.application, context, composer),
+                    context.cancellable
+                );
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
+        }
+    }
+
+    /** Saves the email in a composer as a draft on the server. */
+    internal async void save_composed_email(Composer.Widget composer) {
+        // XXX this doesn't actually do what it says on the tin, since
+        // the composer's draft manager is already saving drafts on
+        // the server. Until we get that saving local-only, this will
+        // only be around for pushing the composer onto the undo stack
+        AccountContext? context = this.accounts.get(
+            composer.account.information
+        );
+        if (context != null) {
+            try {
+                yield context.commands.execute(
+                    new SaveComposerCommand(this, composer),
+                    context.cancellable
+                );
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
+        }
+    }
+
+    /** Queues a composer to be discarded. */
+    internal async void discard_composed_email(Composer.Widget composer) {
+        AccountContext? context = this.accounts.get(
+            composer.account.information
+        );
+        if (context != null) {
+            try {
+                yield context.commands.execute(
+                    new DiscardComposerCommand(this, composer),
+                    context.cancellable
+                );
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
+        }
     }
 
     /** Expunges removed accounts while the controller remains open. */
@@ -1330,13 +1398,8 @@ internal class Application.Controller : Geary.BaseObject {
 
     /** Displays a composer on the last active main window. */
     internal void show_composer(Composer.Widget composer,
-                                Gee.Collection<Geary.EmailIdentifier>? refers_to,
-                                MainWindow? show_on) {
-        var target = show_on;
-        if (target == null) {
-            target = this.application.get_active_main_window();
-        }
-
+                                Gee.Collection<Geary.EmailIdentifier>? refers_to) {
+        var target = this.application.get_active_main_window();
         target.show_composer(composer, refers_to);
         composer.set_focus();
     }
@@ -1352,135 +1415,17 @@ internal class Application.Controller : Geary.BaseObject {
         return do_quit;
     }
 
-    /**
-     * Creates a composer widget.
-     *
-     * Depending on the arguments, this can be inline in the
-     * conversation or as a new window.
-     *
-     * @param compose_type - Whether it's a new message, a reply, a
-     * forwarded mail, ...
-     * @param referred - The mail of which we should copy the from/to/...
-     * addresses
-     * @param quote - The quote after the mail body
-     * @param mailto - A "mailto:"-link
-     * @param is_draft - Whether we're starting from a draft (true) or
-     * a new mail (false)
-     */
-    private void create_compose_widget(MainWindow show_on,
-                                       Geary.Account account,
-                                       Composer.Widget.ComposeType compose_type,
-                                       string? mailto,
-                                       Geary.Email? referred,
-                                       string? quote,
-                                       bool is_draft) {
-        // There's a few situations where we can re-use an existing
-        // composer, check for these first.
-        if (compose_type == NEW_MESSAGE && !is_draft) {
-            // We're creating a new message that isn't a draft, if
-            // there's already an empty composer open, just use
-            // that
-            foreach (Composer.Widget existing in this.composer_widgets) {
-                if (existing != null &&
-                    existing.current_mode == PANED &&
-                    existing.is_blank) {
-                    existing.present();
-                    return;
-                }
-            }
-        } else if (compose_type != NEW_MESSAGE && referred != null) {
-            // A reply/forward was requested, see whether there is
-            // already an inline message in the target window that is
-            // either a reply/forward for that message, or there is a
-            // quote to insert into it.
-            foreach (Composer.Widget existing in this.composer_widgets) {
-                if (existing.get_toplevel() == show_on &&
-                    (existing.current_mode == INLINE ||
-                     existing.current_mode == INLINE_COMPACT) &&
-                    (referred.id in existing.get_referred_ids() ||
-                     quote != null)) {
-                    try {
-                        existing.append_to_email(referred, quote, compose_type);
-                        existing.present();
-                        return;
-                    } catch (Geary.EngineError error) {
-                        report_problem(new Geary.ProblemReport(error));
-                    }
-                }
-            }
-
-            // Can't re-use an existing composer, so need to create a
-            // new one. Replies must open inline in the main window,
-            // so we need to ensure there are no composers open there
-            // first.
-            if (!show_on.close_composer(true)) {
-                return;
-            }
-        }
-
-        Composer.Widget widget;
-        if (mailto != null) {
-            widget = new Composer.Widget.from_mailto(
-                this.application, account, mailto
-            );
-        } else {
-            widget = new Composer.Widget(
-                this.application, account, compose_type
-            );
-        }
-
-        add_composer(widget);
-        show_composer(
-            widget,
-            referred != null ? Geary.Collection.single(referred.id) : null,
-            show_on
-        );
-
-        this.load_composer.begin(
-            account,
-            widget,
-            referred,
-            is_draft,
-            quote
-        );
-    }
-
-    private async void load_composer(Geary.Account account,
-                                     Composer.Widget widget,
-                                     Geary.Email? referred = null,
-                                     bool is_draft,
-                                     string? quote = null) {
-        Geary.Email? full = null;
-        GLib.Cancellable? cancellable = null;
-        if (referred != null) {
-            AccountContext? context = this.accounts.get(account.information);
-            if (context != null) {
-                cancellable = context.cancellable;
-                try {
-                    full = yield context.emails.fetch_email_async(
-                        referred.id,
-                        Geary.ComposedEmail.REQUIRED_REPLY_FIELDS |
-                        Composer.Widget.REQUIRED_FIELDS,
-                        NONE,
-                        cancellable
-                    );
-                } catch (Error e) {
-                    message("Could not load full message: %s", e.message);
-                }
-            }
-        }
-        try {
-            yield widget.load(full, is_draft, quote, cancellable);
-        } catch (GLib.Error err) {
-            report_problem(new Geary.ProblemReport(err));
-        }
+    internal void register_composer(Composer.Widget widget) {
+        debug(@"Registered composer of type $(widget.context_type); $(this.composer_widgets.size) composers total");
+        widget.destroy.connect_after(this.on_composer_widget_destroy);
+        this.composer_widgets.add(widget);
     }
 
     private void on_composer_widget_destroy(Gtk.Widget sender) {
         Composer.Widget? composer = sender as Composer.Widget;
         if (composer != null) {
             composer_widgets.remove((Composer.Widget) sender);
-            debug(@"Composer type $(composer.compose_type) destroyed; " +
+            debug(@"Composer type $(composer.context_type) destroyed; " +
                   @"$(this.composer_widgets.size) composers remaining");
         }
     }
@@ -2485,7 +2430,6 @@ private class Application.SendComposerCommand : ComposerCommand {
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
         Geary.ComposedEmail email = yield this.composer.get_composed_email();
-        
         if (this.can_undo) {
             /// Translators: The label for an in-app notification. The
             /// string substitution is a list of recipients of the email.
@@ -2510,7 +2454,9 @@ private class Application.SendComposerCommand : ComposerCommand {
         this.saved = null;
 
         this.composer.set_enabled(true);
-        this.application.controller.show_composer(this.composer, null, null);
+        this.application.controller.show_composer(
+            this.composer, this.composer.get_referred_ids()
+        );
         clear_composer();
     }
 
@@ -2564,7 +2510,9 @@ private class Application.SaveComposerCommand : ComposerCommand {
         if (this.composer != null) {
             this.destroy_timer.reset();
             this.composer.set_enabled(true);
-            this.controller.show_composer(this.composer, null, null);
+            this.controller.show_composer(
+                this.composer, this.composer.get_referred_ids()
+            );
             clear_composer();
         } else {
             /// Translators: A label for an in-app notification.
@@ -2622,7 +2570,9 @@ private class Application.DiscardComposerCommand : ComposerCommand {
         if (this.composer != null) {
             this.destroy_timer.reset();
             this.composer.set_enabled(true);
-            this.controller.show_composer(this.composer, null, null);
+            this.controller.show_composer(
+                this.composer, this.composer.get_referred_ids()
+            );
             clear_composer();
         } else {
             /// Translators: A label for an in-app notification.

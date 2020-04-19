@@ -891,8 +891,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         add(row);
         this.current_composer = row;
 
-        embed.composer.notify["current-draft-id"].connect(
-            (id) => { this.draft_id = embed.composer.current_draft_id; }
+        embed.composer.notify["saved-id"].connect(
+            (id) => { this.draft_id = embed.composer.saved_id; }
         );
         embed.vanished.connect(() => {
                 this.current_composer = null;

@@ -766,7 +766,7 @@ public class Application.MainWindow :
                 );
 
                 yield open_conversation_monitor(this.conversations, cancellable);
-                this.controller.process_pending_composers();
+                yield this.controller.process_pending_composers();
             }
         }
 
@@ -864,16 +864,6 @@ public class Application.MainWindow :
         }
     }
 
-    /** Displays a composer addressed to a specific email address. */
-    public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
-        var composer = new Composer.Widget.from_mailbox(
-            this.application, this.selected_folder.account, to
-        );
-        this.controller.add_composer(composer);
-        show_composer(composer, null);
-        composer.load.begin(null, false, null, null);
-    }
-
     /**
      * Displays a composer in the window if possible, else in a new window.
      *
@@ -883,8 +873,8 @@ public class Application.MainWindow :
      * the composer's {@link Composer.Widget.get_referred_ids} will be
      * used.
      */
-    public void show_composer(Composer.Widget composer,
-                              Gee.Collection<Geary.EmailIdentifier>? refers_to) {
+    internal void show_composer(Composer.Widget composer,
+                                Gee.Collection<Geary.EmailIdentifier>? refers_to) {
         if (this.has_composer) {
             composer.detach();
         } else {
@@ -923,7 +913,7 @@ public class Application.MainWindow :
      * Returns true if none were open or the user approved closing
      * them.
      */
-    public bool close_composer(bool should_prompt, bool is_shutdown = false) {
+    internal bool close_composer(bool should_prompt, bool is_shutdown = false) {
         bool closed = true;
         Composer.Widget? composer = this.conversation_viewer.current_composer;
         if (composer != null &&
@@ -1547,7 +1537,7 @@ public class Application.MainWindow :
         );
     }
 
-    private void create_composer_from_viewer(Composer.Widget.ComposeType compose_type) {
+    private void create_composer_from_viewer(Composer.Widget.ContextType type) {
         Geary.Account? account = this.selected_account;
         ConversationEmail? email_view = null;
         ConversationListBox? list_view = this.conversation_viewer.current_list;
@@ -1557,13 +1547,8 @@ public class Application.MainWindow :
         if (account != null && email_view != null) {
             email_view.get_selection_for_quoting.begin((obj, res) => {
                     string? quote = email_view.get_selection_for_quoting.end(res);
-                    this.controller.compose_with_context_email(
-                        this,
-                        account,
-                        compose_type,
-                        email_view.email,
-                        quote,
-                        false
+                    this.controller.compose_with_context_email.begin(
+                        type, email_view.email, quote ?? ""
                     );
                 });
         }
@@ -2043,7 +2028,6 @@ public class Application.MainWindow :
         list.reply_to_all_email.connect(on_email_reply_to_all);
         list.reply_to_sender_email.connect(on_email_reply_to_sender);
         list.forward_email.connect(on_email_forward);
-        list.edit_email.connect(on_email_edit);
         list.trash_email.connect(on_email_trash);
         list.delete_email.connect(on_email_delete);
     }
@@ -2102,31 +2086,9 @@ public class Application.MainWindow :
                 // TODO: Determine how to map between conversations
                 // and drafts correctly.
                 Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
-
-                // Check all known composers since the draft may be
-                // open in a detached composer
-                bool already_open = false;
-                foreach (Composer.Widget composer
-                         in this.controller.get_composers()) {
-                    if (composer.current_draft_id != null &&
-                        composer.current_draft_id.equal_to(draft.id)) {
-                        already_open = true;
-                        composer.present();
-                        composer.set_focus();
-                        break;
-                    }
-                }
-
-                if (!already_open) {
-                    this.controller.compose_with_context_email(
-                        this,
-                        activated.base_folder.account,
-                        NEW_MESSAGE,
-                        draft,
-                        null,
-                        true
-                    );
-                }
+                this.controller.compose_with_context_email.begin(
+                    EDIT, draft, null
+                );
             }
         }
     }
@@ -2153,7 +2115,7 @@ public class Application.MainWindow :
     }
 
     private void on_reply_conversation() {
-        create_composer_from_viewer(REPLY);
+        create_composer_from_viewer(REPLY_SENDER);
     }
 
     private void on_reply_all_conversation() {
@@ -2476,37 +2438,25 @@ public class Application.MainWindow :
     }
 
     private void on_email_reply_to_sender(Geary.Email target, string? quote) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            this.controller.compose_with_context_email(
-                this, account, REPLY, target, quote, false
+        if (this.selected_account != null) {
+            this.controller.compose_with_context_email.begin(
+                REPLY_SENDER, target, quote
             );
         }
     }
 
     private void on_email_reply_to_all(Geary.Email target, string? quote) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            this.controller.compose_with_context_email(
-                this, account, REPLY_ALL, target, quote, false
+        if (this.selected_account != null) {
+            this.controller.compose_with_context_email.begin(
+                REPLY_ALL, target, quote
             );
         }
     }
 
     private void on_email_forward(Geary.Email target, string? quote) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            this.controller.compose_with_context_email(
-                this, account, FORWARD, target, quote, false
-            );
-        }
-    }
-
-    private void on_email_edit(Geary.Email target) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            this.controller.compose_with_context_email(
-                this, account, NEW_MESSAGE, target, null, true
+        if (this.selected_account != null) {
+            this.controller.compose_with_context_email.begin(
+                FORWARD, target, quote
             );
         }
     }

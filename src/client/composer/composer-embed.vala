@@ -43,7 +43,7 @@ public class Composer.Embed : Gtk.EventBox, Container {
         this.composer.embed_header();
 
         Widget.PresentationMode mode = INLINE_COMPACT;
-        if (composer.compose_type == FORWARD ||
+        if (composer.context_type == FORWARD ||
             composer.has_multiple_from_addresses) {
             mode = INLINE;
         }

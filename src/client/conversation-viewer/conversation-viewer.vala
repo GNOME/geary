@@ -187,7 +187,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         if (this.current_list != null) {
             this.current_list.add_embedded_composer(
                 embed,
-                composer.current_draft_id != null
+                composer.saved_id != null
             );
             composer.update_window_title();
         }

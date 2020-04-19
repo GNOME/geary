@@ -513,7 +513,7 @@ public class Application.Client : Gtk.Application {
                         mailto.substring(B0RKED_GLIB_MAILTO_PREFIX.length)
                     );
                 }
-                this.new_composer.begin(mailto);
+                this.new_composer_mailto.begin(mailto);
             }
         }
     }
@@ -725,10 +725,14 @@ public class Application.Client : Gtk.Application {
         prefs.show();
     }
 
-    public async void new_composer(string? mailto) {
+    public async void new_composer(Geary.RFC822.MailboxAddress? to = null) {
         yield this.present();
+        yield this.controller.compose_new_email(to);
+    }
 
-        this.controller.compose(mailto);
+    public async void new_composer_mailto(string? mailto) {
+        yield this.present();
+        yield this.controller.compose_mailto(mailto);
     }
 
     public async void new_window(Geary.Folder? select_folder,
@@ -824,7 +828,7 @@ public class Application.Client : Gtk.Application {
         yield create_controller();
 
         if (uri.down().has_prefix(MAILTO_URI_SCHEME_PREFIX)) {
-            yield this.new_composer(uri);
+            yield this.new_composer_mailto(uri);
         } else {
             string uri_ = uri;
             // Support web URLs that omit the protocol.
@@ -1146,7 +1150,7 @@ public class Application.Client : Gtk.Application {
     }
 
     private void on_activate_compose() {
-        this.new_composer.begin(null);
+        this.new_composer.begin();
     }
 
     private void on_activate_inspect() {
@@ -1155,7 +1159,7 @@ public class Application.Client : Gtk.Application {
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
         if (param != null) {
-            this.new_composer.begin(param.get_string());
+            this.new_composer_mailto.begin(param.get_string());
         }
     }
 

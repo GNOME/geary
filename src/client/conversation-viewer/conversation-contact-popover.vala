@@ -240,7 +240,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     private void on_new_conversation() {
         var main = this.get_toplevel() as Application.MainWindow;
         if (main != null) {
-            main.open_composer_for_mailbox(this.mailbox);
+            main.application.new_composer.begin(this.mailbox);
         }
     }
 

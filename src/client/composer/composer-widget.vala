@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017-2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2017-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -25,15 +25,31 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
 
     /** The email fields the composer requires for referred email. */
-    public const Geary.Email.Field REQUIRED_FIELDS = ENVELOPE | BODY;
+    public const Geary.Email.Field REQUIRED_FIELDS = ENVELOPE | HEADER | BODY;
 
     /// Translators: Title for an empty composer window
     private const string DEFAULT_TITLE = _("New Message");
+    
+    /**
+     * Determines the type of the context email passed to the composer
+     *
+     * @see context_type
+     * @see load_context
+     */
+    public enum ContextType {
+        /** No context mail was provided. */
+        NONE,
 
-    public enum ComposeType {
-        NEW_MESSAGE,
-        REPLY,
+        /** Context is an email to edited, for example a draft or template. */
+        EDIT,
+
+        /** Context is an email being replied to the sender only. */
+        REPLY_SENDER,
+
+        /** Context is an email being replied to all recipients. */
         REPLY_ALL,
+
+        /** Context is an email being forwarded. */
         FORWARD
     }
 
@@ -242,16 +258,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** The account the email is being sent from. */
     public Geary.Account account { get; private set; }
 
-    /** The identifier of the draft this composer holds, if any. */
-    public Geary.EmailIdentifier? current_draft_id {
+    /** The identifier of the saved email this composer holds, if any. */
+    public Geary.EmailIdentifier? saved_id {
         get; private set; default = null;
     }
 
+    /** Determines the type of the context email. */
+    public ContextType context_type { get; private set; default = NONE; }
+
     /** Determines the composer's current presentation mode. */
     public PresentationMode current_mode { get; set; default = NONE; }
-
-    /** Determines the type of email being composed. */
-    public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
 
     /** Determines if the composer is completely empty. */
     public bool is_blank {
@@ -431,17 +447,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private Gee.Collection<Geary.Account> accounts;
 
-    private string body_html = "";
-
     private string? pointer_url = null;
     private string? cursor_url = null;
     private bool is_attachment_overlay_visible = false;
     private Geary.RFC822.MailboxAddresses reply_to_addresses;
     private Geary.RFC822.MailboxAddresses reply_cc_addresses;
-    private string reply_subject = "";
-    private string forward_subject = "";
     private bool top_posting = true;
-    private string? last_quote = null;
 
     // The message(s) this email is in reply to/forwarded from
     private Gee.Set<Geary.EmailIdentifier> referred_ids =
@@ -491,8 +502,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
 
     public Widget(Application.Client application,
-                          Geary.Account initial_account,
-                          ComposeType compose_type) {
+                  Geary.Account initial_account) {
         components_reflow_box_get_type();
         base_ref();
         this.application = application;
@@ -503,8 +513,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         } catch (GLib.Error e) {
             warning("Could not fetch account info: %s", e.message);
         }
-
-        this.compose_type = compose_type;
 
         this.header = new Headerbar(application.config);
         this.header.expand_composer.connect(on_expand_compact_headers);
@@ -642,18 +650,20 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         update_color_icon.begin(Util.Gtk.rgba(0, 0, 0, 0));
     }
 
-    public Widget.from_mailbox(Application.Client application,
-                               Geary.Account initial_account,
-                               Geary.RFC822.MailboxAddress to) {
-        this(application, initial_account, ComposeType.NEW_MESSAGE);
-        this.to = to.to_full_display();
+    ~Widget() {
+        base_unref();
     }
 
-    public Widget.from_mailto(Application.Client application,
-                              Geary.Account initial_account,
-                              string mailto) {
-        this(application, initial_account, ComposeType.NEW_MESSAGE);
+    public async void load_empty_body(Geary.RFC822.MailboxAddress? to = null)
+        throws GLib.Error {
+        if (to != null) {
+            this.to = to.to_full_display();
+        }
+        yield finish_loading("", "", false, null);
+    }
 
+    public async void load_mailto(string mailto)
+        throws GLib.Error {
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.has_prefix(MAILTO_URI_PREFIX)) {
             // Parse the mailto link.
@@ -687,9 +697,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             if (headers.contains("subject"))
                 this.subject = Geary.Collection.first(headers.get("subject"));
 
-            if (headers.contains("body"))
-                this.body_html = Geary.HTML.preserve_whitespace(Geary.HTML.escape_markup(
-                    Geary.Collection.first(headers.get("body"))));
+            var body = "";
+            if (headers.contains("body")) {
+                body = Geary.HTML.preserve_whitespace(
+                    Geary.HTML.escape_markup(
+                        Geary.Collection.first(headers.get("body"))
+                    )
+                );
+            }
 
             Gee.List<string> attachments = new Gee.LinkedList<string>();
             attachments.add_all(headers.get("attach"));
@@ -701,11 +716,75 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     attachment_failed(err.message);
                 }
             }
+            yield finish_loading(body, "", false, null);
         }
     }
 
-    ~Widget() {
-        base_unref();
+    /**
+     * Loads the message into the composer editor.
+     */
+    public async void load_context(ContextType type,
+                                   Geary.Email context,
+                                   string? quote)
+        throws GLib.Error {
+        if (type == NONE) {
+            throw new Geary.EngineError.BAD_PARAMETERS(
+                "Invalid context type: %s", type.to_string()
+            );
+        }
+
+        if (!context.fields.is_all_set(REQUIRED_FIELDS)) {
+            throw new Geary.EngineError.INCOMPLETE_MESSAGE(
+                "Required fields not met: %s", context.fields.to_string()
+            );
+        }
+
+        this.context_type = type;
+
+        if (type == EDIT ||
+            type == FORWARD) {
+            this.pending_include = AttachPending.ALL;
+        }
+
+        var body = "";
+        var complete_quote = "";
+        switch (type) {
+        case EDIT:
+            this.saved_id = context.id;
+            yield restore_reply_to_state();
+            fill_in_from_context(context);
+            Geary.RFC822.Message message = context.get_message();
+            body = (
+                message.has_html_body()
+                ? message.get_html_body(null)
+                : message.get_plain_body(true, null)
+            );
+            break;
+
+        case REPLY_SENDER:
+        case REPLY_ALL:
+            add_recipients_and_ids(this.context_type, context);
+            fill_in_from_context(context);
+            complete_quote = Util.Email.quote_email_for_reply(
+                context, quote, this.application.config.clock_format, HTML
+            );
+            if (!Geary.String.is_empty(quote)) {
+                this.top_posting = false;
+            } else {
+                this.can_delete_quote = true;
+            }
+            break;
+
+        case FORWARD:
+            add_recipients_and_ids(this.context_type, context);
+            fill_in_from_context(context);
+            complete_quote = Util.Email.quote_email_for_forward(
+                context, quote, HTML
+            );
+            break;
+        }
+
+        yield finish_loading(body, complete_quote, (type == EDIT), null);
     }
 
     /**
@@ -717,51 +796,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      */
     public Gee.Set<Geary.EmailIdentifier> get_referred_ids() {
         return this.referred_ids.read_only_view;
-    }
-
-    /**
-     * Loads the message into the composer editor.
-     */
-    public async void load(Geary.Email? referred = null,
-                           bool is_draft,
-                           string? quote = null,
-                           GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        if (referred != null &&
-            !referred.fields.is_all_set(REQUIRED_FIELDS)) {
-            throw new Geary.EngineError.INCOMPLETE_MESSAGE(
-                "Required fields not met: %s", referred.fields.to_string()
-            );
-        }
-        string referred_quote = "";
-        this.last_quote = quote;
-        if (referred != null) {
-            referred_quote = fill_in_from_referred(referred, quote);
-            if (is_draft ||
-                compose_type == ComposeType.NEW_MESSAGE ||
-                compose_type == ComposeType.FORWARD) {
-                this.pending_include = AttachPending.ALL;
-            }
-            if (is_draft) {
-                yield restore_reply_to_state();
-            }
-        }
-
-        update_attachments_view();
-        update_pending_attachments(this.pending_include, true);
-
-        this.editor.load_html(
-            this.body_html,
-            referred_quote,
-            this.top_posting,
-            is_draft
-        );
-
-        try {
-            yield open_draft_manager(is_draft ? referred.id : null, cancellable);
-        } catch (Error e) {
-            debug("Could not open draft manager: %s", e.message);
-        }
     }
 
     /** Detaches the composer and opens it in a new window. */
@@ -954,7 +988,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.header.set_sensitive(enabled);
 
         if (enabled) {
-            this.open_draft_manager.begin(this.current_draft_id, null);
+            this.open_draft_manager.begin(this.saved_id, null);
         } else {
             if (this.container != null) {
                 this.container.close();
@@ -1006,25 +1040,18 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             if (email == null)
                 continue;
 
-            // XXX pretty sure we are calling this only to update the
-            // composer's internal set of ids - we really shouldn't be
-            // messing around with the draft's recipients since the
-            // user may have already updated them.
-            add_recipients_and_ids(this.compose_type, email, false);
+            add_recipients_and_ids(this.context_type, email, false);
 
-            if (first_email) {
-                this.reply_subject = Geary.RFC822.Utils.create_subject_for_reply(email);
-                this.forward_subject = Geary.RFC822.Utils.create_subject_for_forward(email);
-                first_email = false;
-            }
+            first_email = false;
         }
         if (first_email)  // Either no referenced emails, or we don't have them.  Treat as new.
             return;
 
-        if (this.cc == "")
-            this.compose_type = ComposeType.REPLY;
-        else
-            this.compose_type = ComposeType.REPLY_ALL;
+        if (this.cc == "") {
+            this.context_type = REPLY_SENDER;
+        } else {
+            this.context_type = REPLY_ALL;
+        }
 
         if (!to_entry.addresses.equal_to(reply_to_addresses))
             this.to_entry.set_modified();
@@ -1054,18 +1081,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    // Copies the addresses (e.g. From/To/CC) and content from referred into this one
-    private string fill_in_from_referred(Geary.Email referred, string? quote) {
-        string referred_quote = "";
-        if (this.compose_type != ComposeType.NEW_MESSAGE) {
-            add_recipients_and_ids(this.compose_type, referred);
-            this.reply_subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
-            this.forward_subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
-        }
+    // Copies the addresses (e.g. From/To/CC) and content from
+    // referred into this one
+    private void fill_in_from_context(Geary.Email referred) {
         this.pending_attachments = referred.attachments;
-        switch (this.compose_type) {
-            // Restoring a draft
-            case ComposeType.NEW_MESSAGE:
+        switch (this.context_type) {
+            case EDIT:
                 if (referred.from != null)
                     this.from = referred.from;
                 if (referred.to != null)
@@ -1084,41 +1105,26 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     this.references = referred.references.to_rfc822_string();
                 if (referred.subject != null)
                     this.subject = referred.subject.value ?? "";
-                try {
-                    Geary.RFC822.Message message = referred.get_message();
-                    if (message.has_html_body()) {
-                        referred_quote = message.get_html_body(null);
-                    } else {
-                        referred_quote = message.get_plain_body(true, null);
-                    }
-                } catch (Error error) {
-                    debug("Error getting draft message body: %s", error.message);
-                }
             break;
 
-            case ComposeType.REPLY:
-            case ComposeType.REPLY_ALL:
-                this.subject = reply_subject;
-                this.references = Geary.RFC822.Utils.reply_references(referred);
-                referred_quote = Util.Email.quote_email_for_reply(referred, quote,
-                    this.application.config.clock_format,
-                    Geary.RFC822.TextFormat.HTML);
-                if (!Geary.String.is_empty(quote)) {
-                    this.top_posting = false;
-                } else {
-                    this.can_delete_quote = true;
-                }
+            case REPLY_SENDER:
+            case REPLY_ALL:
+                this.subject = Geary.RFC822.Utils.create_subject_for_reply(
+                    referred
+                );
+                this.references = Geary.RFC822.Utils.reply_references(
+                    referred
+                );
             break;
 
-            case ComposeType.FORWARD:
-                this.subject = forward_subject;
-                referred_quote = Util.Email.quote_email_for_forward(referred, quote,
-                    Geary.RFC822.TextFormat.HTML);
+            case FORWARD:
+                this.subject = Geary.RFC822.Utils.create_subject_for_forward(
+                    referred
+                );
             break;
         }
 
         update_extended_headers();
-        return referred_quote;
     }
 
     public void present() {
@@ -1319,7 +1325,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.subject
         );
 
-        if ((this.compose_type == ComposeType.REPLY || this.compose_type == ComposeType.REPLY_ALL) &&
+        if ((this.context_type == REPLY_SENDER ||
+             this.context_type == REPLY_ALL) &&
             !this.in_reply_to.is_empty)
             email.set_in_reply_to(
                 new Geary.RFC822.MessageIDList.from_collection(this.in_reply_to)
@@ -1359,7 +1366,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** Appends an email or fragment quoted into the composer. */
     public void append_to_email(Geary.Email referred,
                                 string? to_quote,
-                                ComposeType type)
+                                ContextType type)
         throws Geary.EngineError {
         if (!referred.fields.is_all_set(REQUIRED_FIELDS)) {
             throw new Geary.EngineError.INCOMPLETE_MESSAGE(
@@ -1371,30 +1378,29 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             add_recipients_and_ids(type, referred);
         }
 
-        if (this.last_quote != to_quote) {
-            this.last_quote = to_quote;
-            // Always use reply styling, since forward styling doesn't
-            // work for inline quotes
-            this.editor.insert_html(
-                Util.Email.quote_email_for_reply(
-                    referred,
-                    to_quote,
-                    this.application.config.clock_format,
-                    Geary.RFC822.TextFormat.HTML
-                )
-            );
-        }
+        // Always use reply styling, since forward styling doesn't
+        // work for inline quotes
+        this.editor.insert_html(
+            Util.Email.quote_email_for_reply(
+                referred,
+                to_quote,
+                this.application.config.clock_format,
+                Geary.RFC822.TextFormat.HTML
+            )
+        );
     }
 
-    private void add_recipients_and_ids(ComposeType type, Geary.Email referred,
-        bool modify_headers = true) {
+    private void add_recipients_and_ids(ContextType type,
+                                        Geary.Email referred,
+                                        bool modify_headers = true) {
         Gee.List<Geary.RFC822.MailboxAddress> sender_addresses =
             account.information.sender_mailboxes;
 
         // Set the preferred from address. New messages should retain
         // the account default and drafts should retain the draft's
         // from addresses, so don't update them here
-        if (this.compose_type != ComposeType.NEW_MESSAGE) {
+        if (this.context_type != NONE &&
+            this.context_type != EDIT) {
             if (!check_preferred_from_address(sender_addresses, referred.to)) {
                 if (!check_preferred_from_address(sender_addresses, referred.cc))
                     if (!check_preferred_from_address(sender_addresses, referred.bcc))
@@ -1417,16 +1423,25 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         bool recipients_modified = this.to_entry.is_modified || this.cc_entry.is_modified || this.bcc_entry.is_modified;
         if (!recipients_modified) {
-            if (type == ComposeType.REPLY || type == ComposeType.REPLY_ALL)
-                this.to_entry.addresses = Geary.RFC822.Utils.merge_addresses(to_entry.addresses,
-                    to_addresses);
-            if (type == ComposeType.REPLY_ALL)
+            if (type == REPLY_SENDER || type == REPLY_ALL) {
+                this.to_entry.addresses = Geary.RFC822.Utils.merge_addresses(
+                    to_entry.addresses,
+                    to_addresses
+                );
+            }
+            if (type == REPLY_ALL) {
                 this.cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(
-                    Geary.RFC822.Utils.merge_addresses(this.cc_entry.addresses, cc_addresses),
-                    this.to_entry.addresses);
-            else
-                this.cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(this.cc_entry.addresses,
-                    this.to_entry.addresses);
+                    Geary.RFC822.Utils.merge_addresses(
+                        this.cc_entry.addresses, cc_addresses
+                    ),
+                    this.to_entry.addresses
+                );
+            } else {
+                this.cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(
+                    this.cc_entry.addresses,
+                    this.to_entry.addresses
+                );
+            }
         }
 
         if (referred.message_id != null) {
@@ -1490,6 +1505,27 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     internal void free_header() {
         if (this.header.parent != null) {
             this.header.parent.remove(this.header);
+        }
+    }
+
+    private async void finish_loading(string body,
+                                      string quote,
+                                      bool is_body_complete,
+                                      GLib.Cancellable? cancellable) {
+        update_attachments_view();
+        update_pending_attachments(this.pending_include, true);
+
+        this.editor.load_html(
+            body,
+            quote,
+            this.top_posting,
+            is_body_complete
+        );
+
+        try {
+            yield open_draft_manager(this.saved_id, cancellable);
+        } catch (Error e) {
+            debug("Could not open draft manager: %s", e.message);
         }
     }
 
@@ -1626,8 +1662,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.draft_timer.reset();
 
             this.draft_manager = null;
+            this.saved_id = null;
             this.draft_status_text = "";
-            this.current_draft_id = null;
 
             old_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
                 .disconnect(on_draft_state_changed);
@@ -2666,7 +2702,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_draft_id_changed() {
-        this.current_draft_id = this.draft_manager.current_draft_id;
+        this.saved_id = this.draft_manager.current_draft_id;
     }
 
     private void on_draft_manager_fatal(Error err) {

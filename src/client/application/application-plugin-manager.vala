@@ -183,12 +183,7 @@ public class Application.PluginManager : GLib.Object {
         }
 
         public void show() {
-            var composer = new Composer.Widget(
-                this.application, this.account.account, NEW_MESSAGE
-            );
-            var main_window = this.application.get_active_main_window();
-            main_window.show_composer(composer, null);
-            composer.load.begin(null, false, null, null);
+            this.application.controller.compose_new_email.begin();
         }
 
     }
