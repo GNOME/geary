@@ -33,7 +33,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     internal const string EMAIL_ACTION_GROUP_NAME = "eml";
 
     internal const string ACTION_DELETE = "delete";
-    internal const string ACTION_EDIT = "edit";
     internal const string ACTION_FORWARD = "forward";
     internal const string ACTION_MARK_LOAD_REMOTE = "mark-load-remote";
     internal const string ACTION_MARK_READ = "mark-read";
@@ -70,7 +69,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     );
     private const ActionEntry[] email_action_entries = {
         { ACTION_DELETE, on_email_delete, ACTION_TARGET_TYPE },
-        { ACTION_EDIT, on_email_edit, ACTION_TARGET_TYPE },
         { ACTION_FORWARD, on_email_forward, ACTION_TARGET_TYPE },
         { ACTION_MARK_LOAD_REMOTE, on_email_load_remote, ACTION_TARGET_TYPE },
         { ACTION_MARK_READ, on_email_mark_read, ACTION_TARGET_TYPE },
@@ -639,9 +637,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     /** Fired when the user clicks "delete" in the message menu. */
     public signal void delete_email(Geary.Email email);
-
-    /** Fired the edit draft button is clicked. */
-    public signal void edit_email(Geary.Email email);
 
 
     /**
@@ -1480,14 +1475,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 Geary.EmailFlags.LOAD_REMOTE_IMAGES,
                 null
             );
-        }
-    }
-
-    private void on_email_edit(GLib.SimpleAction action,
-                               GLib.Variant? param) {
-        ConversationEmail? view = action_target_to_view(param);
-        if (view != null) {
-            edit_email(view.email);
         }
     }
 
