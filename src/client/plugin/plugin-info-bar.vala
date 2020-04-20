@@ -44,6 +44,21 @@ public class Plugin.InfoBar : Geary.BaseObject {
      */
     public Button? primary_button { get; set; default = null; }
 
+    /**
+     * Optional secondary buttons for the info bar.
+     *
+     * Secondary buttons are either placed before the primary button,
+     * or on a drop-down menu under it, depending on available space.
+     *
+     * The info bar is not automatically dismissed when a button is
+     * clicked. If it should be hidden then the action's handler
+     * should explicitly do so by calling the appropriate context
+     * object's method, such as {@link
+     * FolderContext.remove_folder_info_bar}.
+     */
+    public Gee.BidirList<Button> secondary_buttons {
+        get; private set; default = new Gee.LinkedList<Button>();
+    }
 
     /** Constructs a new info bar with the given status. */
     public InfoBar(string status,
