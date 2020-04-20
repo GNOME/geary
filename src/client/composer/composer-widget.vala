@@ -29,7 +29,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     /// Translators: Title for an empty composer window
     private const string DEFAULT_TITLE = _("New Message");
-    
+
     /**
      * Determines the type of the context email passed to the composer
      *
@@ -466,6 +466,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gee.Map<string,Geary.Memory.Buffer> inline_files = new Gee.HashMap<string,Geary.Memory.Buffer>();
     private Gee.Map<string,Geary.Memory.Buffer> cid_files = new Gee.HashMap<string,Geary.Memory.Buffer>();
 
+    private Geary.Folder? save_to;
     private Geary.App.DraftManager? draft_manager = null;
     private GLib.Cancellable? draft_manager_opening = null;
     private Geary.TimeoutManager draft_timer;
@@ -503,12 +504,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     public Widget(Application.Client application,
                   Application.AccountContext initial_account,
-                  Gee.Collection<Application.AccountContext> all_accounts) {
+                  Gee.Collection<Application.AccountContext> all_accounts,
+                  Geary.Folder? save_to = null) {
         components_reflow_box_get_type();
         base_ref();
         this.application = application;
         this.sender_context = initial_account;
         this.accounts = all_accounts;
+        this.save_to = save_to;
 
         this.header = new Headerbar(application.config);
         this.header.expand_composer.connect(on_expand_compact_headers);
@@ -1631,9 +1634,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.draft_manager_opening = internal_cancellable;
 
-        Geary.Folder? target = yield this.sender_context.account.get_required_special_folder_async(
-            DRAFTS, internal_cancellable
-        );
+        Geary.Folder? target = this.save_to;
+        if (target == null) {
+            this.sender_context.account.get_required_special_folder_async(
+                DRAFTS, internal_cancellable
+            );
+        }
 
         Geary.EmailFlags? flags = (
             target.used_as == DRAFTS

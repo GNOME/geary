@@ -325,7 +325,8 @@ internal class Application.Controller : Geary.BaseObject {
     /**
      * Opens a composer for writing a new, blank message.
      */
-    public async void compose_new_email(Geary.RFC822.MailboxAddress? to = null) {
+    public async Composer.Widget? compose_new_email(Geary.RFC822.MailboxAddress? to = null,
+                                                    Geary.Folder? save_to = null) {
         // If there's already an empty composer open, just use that
         MainWindow main = this.application.get_active_main_window();
         Composer.Widget existing = main.conversation_viewer.current_composer;
@@ -334,17 +335,19 @@ internal class Application.Controller : Geary.BaseObject {
             existing.is_blank) {
             existing.present();
             existing.set_focus();
-            return;
+            return existing;
         }
 
         var context = this.accounts.get(
             this.application.get_active_main_window().selected_account.information
         );
+        Composer.Widget? composer = null;
         if (context != null) {
-            var composer = new Composer.Widget(
+            composer = new Composer.Widget(
                 this.application,
                 context,
-                this.accounts.values.read_only_view
+                this.accounts.values.read_only_view,
+                save_to
             );
             register_composer(composer);
             show_composer(composer);
@@ -354,6 +357,85 @@ internal class Application.Controller : Geary.BaseObject {
                 report_problem(new Geary.ProblemReport(err));
             }
         }
+        return composer;
+    }
+
+    /**
+     * Opens new composer with an existing message as context.
+     *
+     * If the given type is {@link Composer.Widget.ContextType.EDIT},
+     * the context is loaded to be edited (e.g. for drafts, templates,
+     * sending again. Otherwise the context is treated as the email to
+     * be replied to, etc.
+     */
+    public async Composer.Widget? compose_with_context_email(Composer.Widget.ContextType type,
+                                                             Geary.Email context,
+                                                             string? quote,
+                                                             Geary.Folder? save_to = null) {
+        MainWindow show_on = this.application.get_active_main_window();
+        if (type == EDIT) {
+            // Check all known composers since the context may be open
+            // an existing composer already.
+            foreach (Composer.Widget composer in this.composer_widgets) {
+                if (composer.current_mode != NONE &&
+                    composer.current_mode != CLOSED &&
+                    composer.saved_id != null &&
+                    composer.saved_id.equal_to(context.id)) {
+                    composer.present();
+                    composer.set_focus();
+                    return composer;
+                }
+            }
+        } else {
+            // See whether there is already an inline message in the
+            // current window that is either a reply/forward for that
+            // message, or there is a quote to insert into it.
+            foreach (Composer.Widget existing in this.composer_widgets) {
+                if (existing.get_toplevel() == show_on &&
+                    (existing.current_mode == INLINE ||
+                     existing.current_mode == INLINE_COMPACT) &&
+                    (context.id in existing.get_referred_ids() ||
+                     quote != null)) {
+                    try {
+                        existing.append_to_email(context, quote, type);
+                        existing.present();
+                        return existing;
+                    } catch (Geary.EngineError error) {
+                        report_problem(new Geary.ProblemReport(error));
+                    }
+                }
+            }
+
+            // Can't re-use an existing composer, so need to create a
+            // new one. Replies must open inline in the main window,
+            // so we need to ensure there are no composers open there
+            // first.
+            if (!show_on.close_composer(true)) {
+                return null;
+            }
+        }
+
+        var account = this.accounts.get(
+            this.application.get_active_main_window().selected_account.information
+        );
+        Composer.Widget? composer = null;
+        if (account != null) {
+            composer = new Composer.Widget(
+                this.application,
+                account,
+                this.accounts.values.read_only_view,
+                save_to
+            );
+            register_composer(composer);
+            show_composer(composer);
+
+            try {
+                yield composer.load_context(type, context, quote);
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
+        }
+        return composer;
     }
 
     /**
@@ -381,80 +463,6 @@ internal class Application.Controller : Geary.BaseObject {
         } else {
             // Schedule the send for after we have an account open.
             this.pending_mailtos.add(mailto);
-        }
-    }
-
-    /**
-     * Opens new composer with an existing message as context.
-     *
-     * If the given type is {@link Composer.Widget.ContextType.EDIT},
-     * the context is loaded to be edited (e.g. for drafts, templates,
-     * sending again. Otherwise the context is treated as the email to
-     * be replied to, etc.
-     */
-    public async void compose_with_context_email(Composer.Widget.ContextType type,
-                                                 Geary.Email context,
-                                                 string? quote) {
-        MainWindow show_on = this.application.get_active_main_window();
-        if (type == EDIT) {
-            // Check all known composers since the context may be open
-            // an existing composer already.
-            foreach (Composer.Widget composer in this.composer_widgets) {
-                if (composer.current_mode != NONE &&
-                    composer.current_mode != CLOSED &&
-                    composer.saved_id != null &&
-                    composer.saved_id.equal_to(context.id)) {
-                    composer.present();
-                    composer.set_focus();
-                    return;
-                }
-            }
-        } else {
-            // See whether there is already an inline message in the
-            // current window that is either a reply/forward for that
-            // message, or there is a quote to insert into it.
-            foreach (Composer.Widget existing in this.composer_widgets) {
-                if (existing.get_toplevel() == show_on &&
-                    (existing.current_mode == INLINE ||
-                     existing.current_mode == INLINE_COMPACT) &&
-                    (context.id in existing.get_referred_ids() ||
-                     quote != null)) {
-                    try {
-                        existing.append_to_email(context, quote, type);
-                        existing.present();
-                        return;
-                    } catch (Geary.EngineError error) {
-                        report_problem(new Geary.ProblemReport(error));
-                    }
-                }
-            }
-
-            // Can't re-use an existing composer, so need to create a
-            // new one. Replies must open inline in the main window,
-            // so we need to ensure there are no composers open there
-            // first.
-            if (!show_on.close_composer(true)) {
-                return;
-            }
-        }
-
-        var account = this.accounts.get(
-            this.application.get_active_main_window().selected_account.information
-        );
-        if (account != null) {
-            var composer = new Composer.Widget(
-                this.application,
-                account,
-                this.accounts.values.read_only_view
-            );
-            register_composer(composer);
-            show_composer(composer);
-
-            try {
-                yield composer.load_context(type, context, quote);
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
-            }
         }
     }
 
