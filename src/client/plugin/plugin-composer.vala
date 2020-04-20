@@ -32,4 +32,14 @@ public interface Plugin.Composer : Geary.BaseObject {
     public async abstract void edit_email(EmailIdentifier to_load)
         throws GLib.Error;
 
+    /**
+     * Sets the folder used to save the message being composed.
+     *
+     * Ensures email for both automatic and manual saving of the email
+     * in the composer is saved to the given folder. This must be
+     * called before calling {@link show}, and has no effect if called
+     * afterwards.
+     */
+    public abstract void save_to_folder(Plugin.Folder? location);
+
 }

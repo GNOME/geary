@@ -73,7 +73,9 @@ public class Application.PluginManager : GLib.Object {
             if (impl == null) {
                 throw new Plugin.Error.NOT_SUPPORTED("Not a valid account");
             }
-            return new ComposerImpl(this.backing, impl.backing, this.email);
+            return new ComposerImpl(
+                this.backing, impl.backing, this.folders, this.email
+            );
         }
 
         public void register_action(GLib.Action action) {
@@ -178,26 +180,24 @@ public class Application.PluginManager : GLib.Object {
 
         private Client application;
         private AccountContext account;
+        private FolderStoreFactory folders;
         private EmailStoreFactory email;
         private Geary.Email? to_load = null;
+        private Geary.Folder? save_location = null;
 
 
         public ComposerImpl(Client application,
                             AccountContext account,
+                            FolderStoreFactory folders,
                             EmailStoreFactory email) {
             this.application = application;
             this.account = account;
+            this.folders = folders;
             this.email = email;
         }
 
         public void show() {
-            if (this.to_load == null) {
-                this.application.controller.compose_new_email.begin();
-            } else {
-                this.application.controller.compose_with_context_email.begin(
-                    EDIT, this.to_load, null
-                );
-            }
+            this.show_impl.begin();
         }
 
         public async void edit_email(Plugin.EmailIdentifier to_load)
@@ -217,6 +217,33 @@ public class Application.PluginManager : GLib.Object {
                 this.to_load = Geary.Collection.first(email);
             }
         }
+
+        public void save_to_folder(Plugin.Folder? location) {
+            var folder = this.folders.get_engine_folder(location);
+            if (folder != null && folder.account == this.account.account) {
+                this.save_location = folder;
+            }
+        }
+
+        private async void show_impl() {
+            var controller = this.application.controller;
+            Composer.Widget? composer = null;
+            if (this.to_load == null) {
+                composer = yield controller.compose_new_email(
+                    null,
+                    this.save_location
+                );
+            } else {
+                composer = yield controller.compose_with_context_email(
+                    EDIT,
+                    this.to_load,
+                    null,
+                    this.save_location
+                );
+            }
+            //composer.can_send = this.can_send;
+        }
+
     }
 
 
