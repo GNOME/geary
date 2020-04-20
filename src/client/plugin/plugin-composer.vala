@@ -10,6 +10,7 @@
  */
 public interface Plugin.Composer : Geary.BaseObject {
 
+
     /**
      * Causes the composer to be made visible.
      *
@@ -20,5 +21,15 @@ public interface Plugin.Composer : Geary.BaseObject {
      * composer being displayed.
      */
     public abstract void show();
+
+    /**
+     * Loads an email into the composer to be edited.
+     *
+     * Loads the given email, and sets it as the email to be edited in
+     * this composer. This must be called before calling {@link show},
+     * and has no effect if called afterwards.
+     */
+    public async abstract void edit_email(EmailIdentifier to_load)
+        throws GLib.Error;
 
 }

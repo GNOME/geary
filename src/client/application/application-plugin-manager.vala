@@ -52,15 +52,18 @@ public class Application.PluginManager : GLib.Object {
         private Peas.PluginInfo plugin;
         private Client backing;
         private FolderStoreFactory folders;
+        private EmailStoreFactory email;
         private GLib.SimpleActionGroup? action_group = null;
 
 
         public ApplicationImpl(Peas.PluginInfo plugin,
                                Client backing,
-                               FolderStoreFactory folders) {
+                               FolderStoreFactory folders,
+                               EmailStoreFactory email) {
             this.plugin = plugin;
             this.backing = backing;
             this.folders = folders;
+            this.email = email;
             this.action_group_name = plugin.get_module_name().replace(".", "_");
         }
 
@@ -70,7 +73,7 @@ public class Application.PluginManager : GLib.Object {
             if (impl == null) {
                 throw new Plugin.Error.NOT_SUPPORTED("Not a valid account");
             }
-            return new ComposerImpl(this.backing, impl.backing);
+            return new ComposerImpl(this.backing, impl.backing, this.email);
         }
 
         public void register_action(GLib.Action action) {
@@ -175,17 +178,45 @@ public class Application.PluginManager : GLib.Object {
 
         private Client application;
         private AccountContext account;
+        private EmailStoreFactory email;
+        private Geary.Email? to_load = null;
 
 
-        public ComposerImpl(Client application, AccountContext account) {
+        public ComposerImpl(Client application,
+                            AccountContext account,
+                            EmailStoreFactory email) {
             this.application = application;
             this.account = account;
+            this.email = email;
         }
 
         public void show() {
-            this.application.controller.compose_new_email.begin();
+            if (this.to_load == null) {
+                this.application.controller.compose_new_email.begin();
+            } else {
+                this.application.controller.compose_with_context_email.begin(
+                    EDIT, this.to_load, null
+                );
+            }
         }
 
+        public async void edit_email(Plugin.EmailIdentifier to_load)
+            throws Error {
+            Geary.EmailIdentifier? id = this.email.to_engine_id(to_load);
+            if (id == null) {
+                throw new Plugin.Error.NOT_FOUND("Email id not found");
+            }
+            Gee.Collection<Geary.Email>? email =
+                yield this.account.emails.list_email_by_sparse_id_async(
+                    Geary.Collection.single(id),
+                    Composer.Widget.REQUIRED_FIELDS,
+                    NONE,
+                    this.account.cancellable
+                );
+            if (email != null && !email.is_empty) {
+                this.to_load = Geary.Collection.first(email);
+            }
+        }
     }
 
 
@@ -381,7 +412,7 @@ public class Application.PluginManager : GLib.Object {
 
     private void on_load_plugin(Peas.PluginInfo info) {
         var plugin_application = new ApplicationImpl(
-            info, this.application, this.folders_factory
+            info, this.application, this.folders_factory, this.email_factory
         );
         var plugin = this.plugins.create_extension(
             info,
