@@ -1466,6 +1466,22 @@ public class Application.MainWindow :
                             context.contacts,
                             start_mark_timer
                         );
+                    } catch (Geary.EngineError.NOT_FOUND err) {
+                        // The first interesting email from the
+                        // conversation wasn't found. If the
+                        // conversation has completely evaporated by
+                        // now then fine, otherwise throw the
+                        // error. This happens e.g. in the drafts
+                        // folder, there is a race between the
+                        // composer being discarded and the draft
+                        // itself disappearing
+                        if (convo.get_count() == 0) {
+                            debug("Ignoring not found error: %s", err.message);
+                        } else {
+                            handle_error(
+                                convo.base_folder.account.information, err
+                            );
+                        }
                     } catch (GLib.IOError.CANCELLED err) {
                         // All good
                     } catch (GLib.Error err) {
