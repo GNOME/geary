@@ -866,15 +866,8 @@ public class Application.MainWindow :
 
     /**
      * Displays a composer in the window if possible, else in a new window.
-     *
-     * If the given collection of identifiers is not null and any are
-     * contained in the current conversation then the composer will be
-     * displayed inline under the latest matching message. If null,
-     * the composer's {@link Composer.Widget.get_referred_ids} will be
-     * used.
      */
-    internal void show_composer(Composer.Widget composer,
-                                Gee.Collection<Geary.EmailIdentifier>? refers_to) {
+    internal void show_composer(Composer.Widget composer) {
         if (this.has_composer) {
             composer.detach();
         } else {
@@ -884,10 +877,8 @@ public class Application.MainWindow :
             // paned.
             Geary.Email? latest_referred = null;
             if (this.conversation_viewer.current_list != null) {
-                Gee.Collection<Geary.EmailIdentifier>? referrants = refers_to;
-                if (referrants == null) {
-                    referrants = composer.get_referred_ids();
-                }
+                Gee.Collection<Geary.EmailIdentifier>? referrants =
+                    composer.get_referred_ids();
                 Geary.App.Conversation selected =
                     this.conversation_viewer.current_list.conversation;
                 latest_referred = selected.get_emails(

@@ -327,12 +327,14 @@ internal class Application.Controller : Geary.BaseObject {
      */
     public async void compose_new_email(Geary.RFC822.MailboxAddress? to = null) {
         // If there's already an empty composer open, just use that
-        foreach (Composer.Widget existing in this.composer_widgets) {
-            if (existing != null &&
-                existing.current_mode == PANED &&
-                existing.is_blank) {
-                existing.present();
-            }
+        MainWindow main = this.application.get_active_main_window();
+        Composer.Widget existing = main.conversation_viewer.current_composer;
+        if (existing != null &&
+            existing.current_mode == PANED &&
+            existing.is_blank) {
+            existing.present();
+            existing.set_focus();
+            return;
         }
 
         var context = this.accounts.get(
@@ -345,7 +347,7 @@ internal class Application.Controller : Geary.BaseObject {
                 this.accounts.values.read_only_view
             );
             register_composer(composer);
-            show_composer(composer, null);
+            show_composer(composer);
             try {
                 yield composer.load_empty_body(to);
             } catch (GLib.Error err) {
@@ -368,7 +370,7 @@ internal class Application.Controller : Geary.BaseObject {
                     this.accounts.values.read_only_view
                 );
                 register_composer(composer);
-                show_composer(composer, null);
+                show_composer(composer);
 
                 try {
                     yield composer.load_mailto(mailto);
@@ -398,7 +400,9 @@ internal class Application.Controller : Geary.BaseObject {
             // Check all known composers since the context may be open
             // an existing composer already.
             foreach (Composer.Widget composer in this.composer_widgets) {
-                if (composer.saved_id != null &&
+                if (composer.current_mode != NONE &&
+                    composer.current_mode != CLOSED &&
+                    composer.saved_id != null &&
                     composer.saved_id.equal_to(context.id)) {
                     composer.present();
                     composer.set_focus();
@@ -444,7 +448,7 @@ internal class Application.Controller : Geary.BaseObject {
                 this.accounts.values.read_only_view
             );
             register_composer(composer);
-            show_composer(composer, Geary.Collection.single(context.id));
+            show_composer(composer);
 
             try {
                 yield composer.load_context(type, context, quote);
@@ -1395,10 +1399,9 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     /** Displays a composer on the last active main window. */
-    internal void show_composer(Composer.Widget composer,
-                                Gee.Collection<Geary.EmailIdentifier>? refers_to) {
+    internal void show_composer(Composer.Widget composer) {
         var target = this.application.get_active_main_window();
-        target.show_composer(composer, refers_to);
+        target.show_composer(composer);
         composer.set_focus();
     }
 
@@ -2452,9 +2455,7 @@ private class Application.SendComposerCommand : ComposerCommand {
         this.saved = null;
 
         this.composer.set_enabled(true);
-        this.application.controller.show_composer(
-            this.composer, this.composer.get_referred_ids()
-        );
+        this.application.controller.show_composer(this.composer);
         clear_composer();
     }
 
@@ -2508,9 +2509,7 @@ private class Application.SaveComposerCommand : ComposerCommand {
         if (this.composer != null) {
             this.destroy_timer.reset();
             this.composer.set_enabled(true);
-            this.controller.show_composer(
-                this.composer, this.composer.get_referred_ids()
-            );
+            this.controller.show_composer(this.composer);
             clear_composer();
         } else {
             /// Translators: A label for an in-app notification.
@@ -2568,9 +2567,7 @@ private class Application.DiscardComposerCommand : ComposerCommand {
         if (this.composer != null) {
             this.destroy_timer.reset();
             this.composer.set_enabled(true);
-            this.controller.show_composer(
-                this.composer, this.composer.get_referred_ids()
-            );
+            this.controller.show_composer(this.composer);
             clear_composer();
         } else {
             /// Translators: A label for an in-app notification.
