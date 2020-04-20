@@ -468,7 +468,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private Geary.App.DraftManager? draft_manager = null;
     private GLib.Cancellable? draft_manager_opening = null;
-    private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private Geary.TimeoutManager draft_timer;
     private bool is_draft_saved = false;
     private string draft_status_text {
@@ -1632,11 +1631,31 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.draft_manager_opening = internal_cancellable;
 
-        Geary.App.DraftManager new_manager = new Geary.App.DraftManager(
-            this.sender_context.account
+        Geary.Folder? target = yield this.sender_context.account.get_required_special_folder_async(
+            DRAFTS, internal_cancellable
         );
+
+        Geary.EmailFlags? flags = (
+            target.used_as == DRAFTS
+            ? new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT)
+            : new Geary.EmailFlags()
+        );
+
         try {
-            yield new_manager.open_async(editing_draft_id, internal_cancellable);
+            var new_manager = yield new Geary.App.DraftManager(
+                this.sender_context.account,
+                target,
+                flags,
+                editing_draft_id,
+                internal_cancellable
+            );
+            new_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+                .connect(on_draft_state_changed);
+            new_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+                .connect(on_draft_id_changed);
+            new_manager.fatal
+                .connect(on_draft_manager_fatal);
+            this.draft_manager = new_manager;
             debug("Draft manager opened");
         } catch (GLib.Error err) {
             this.header.show_save_and_close = false;
@@ -1644,14 +1663,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         } finally {
             this.draft_manager_opening = null;
         }
-
-        new_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
-            .connect(on_draft_state_changed);
-        new_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
-            .connect(on_draft_id_changed);
-        new_manager.fatal.connect(on_draft_manager_fatal);
-
-        this.draft_manager = new_manager;
 
         update_draft_state();
         this.header.show_save_and_close = true;
@@ -1743,7 +1754,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             Geary.ComposedEmail draft = yield get_composed_email(null, true);
             yield this.draft_manager.update(
                 yield draft.to_rfc822_message(null, null),
-                this.draft_flags,
                 null,
                 null
             );
