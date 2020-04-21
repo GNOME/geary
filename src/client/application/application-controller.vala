@@ -982,6 +982,8 @@ internal class Application.Controller : Geary.BaseObject {
             smtp.email_sent.connect(on_sent);
             smtp.sending_monitor.start.connect(on_sending_started);
             smtp.sending_monitor.finish.connect(on_sending_finished);
+            var outbox_context = new FolderContext(smtp.outbox);
+            context.add_folders(Geary.Collection.single(outbox_context));
         }
 
         // Notify before opening so that listeners have a chance to
