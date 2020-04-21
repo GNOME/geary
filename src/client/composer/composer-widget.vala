@@ -283,7 +283,19 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    public WebView editor { get; private set; }
+    /** Determines if the composer can send the message. */
+    public bool can_send {
+        get {
+            return this._can_send;
+        }
+        set {
+            this._can_send = value;
+            validate_send_button();
+        }
+    }
+    private bool _can_send = true;
+
+    internal WebView editor { get; private set; }
 
     internal Headerbar header { get; private set; }
 
@@ -1636,7 +1648,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         Geary.Folder? target = this.save_to;
         if (target == null) {
-            this.sender_context.account.get_required_special_folder_async(
+            target = yield this.sender_context.account.get_required_special_folder_async(
                 DRAFTS, internal_cancellable
             );
         }
@@ -2037,11 +2049,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // To must be valid (and hence non-empty), the other email
         // fields must be either empty or valid.
         get_action(ACTION_SEND).set_enabled(
+            this.can_send &&
             this.to_entry.is_valid &&
             (this.cc_entry.is_empty || this.cc_entry.is_valid) &&
             (this.bcc_entry.is_empty || this.bcc_entry.is_valid) &&
             (this.reply_to_entry.is_empty || this.reply_to_entry.is_valid)
         );
+
+        this.header.show_send = this.can_send;
     }
 
     private void set_compact_header_recipients() {

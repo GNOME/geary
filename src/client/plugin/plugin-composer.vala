@@ -12,6 +12,11 @@ public interface Plugin.Composer : Geary.BaseObject {
 
 
     /**
+     * Determines if the email in the composer can be sent.
+     */
+    public abstract bool can_send { get; set; }
+
+    /**
      * Causes the composer to be made visible.
      *
      * The composer will be shown as either full-pane and in-window if

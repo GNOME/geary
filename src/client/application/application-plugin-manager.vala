@@ -178,6 +178,8 @@ public class Application.PluginManager : GLib.Object {
     private class ComposerImpl : Geary.BaseObject, Plugin.Composer {
 
 
+        public override bool can_send { get; set; default = true; }
+
         private Client application;
         private AccountContext account;
         private FolderStoreFactory folders;
@@ -241,7 +243,7 @@ public class Application.PluginManager : GLib.Object {
                     this.save_location
                 );
             }
-            //composer.can_send = this.can_send;
+            composer.can_send = this.can_send;
         }
 
     }
