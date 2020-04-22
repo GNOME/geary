@@ -40,14 +40,8 @@ class Accounts.ManagerTest : TestCase {
         // engine without creating all of these dirs.
 
         this.tmp = GLib.File.new_for_path(
-            GLib.DirUtils.make_tmp("geary-engine-test-XXXXXX")
+            GLib.DirUtils.make_tmp("accounts-manager-test-XXXXXX")
         );
-
-        GLib.File config = this.tmp.get_child("config");
-        config.make_directory();
-
-        GLib.File data = this.tmp.get_child("data");
-        data.make_directory();
 
         this.primary_mailbox = new Geary.RFC822.MailboxAddress(
             null, "test1@example.com"
@@ -60,7 +54,7 @@ class Accounts.ManagerTest : TestCase {
             this.mediator,
             this.primary_mailbox
         );
-        this.test = new Manager(this.mediator, config, data);
+        this.test = new Manager(this.mediator, this.tmp, this.tmp);
     }
 
     public override void tear_down() throws GLib.Error {
@@ -169,12 +163,13 @@ class Accounts.ManagerTest : TestCase {
         this.account.save_sent = false;
         this.account.signature = "blarg";
         this.account.use_signature = false;
-        Accounts.AccountConfigV1 config = new Accounts.AccountConfigV1(false);
 
         Geary.ConfigFile file =
-            new Geary.ConfigFile(this.tmp.get_child("config"));
+            new Geary.ConfigFile(this.tmp.get_child("config.ini"));
 
+        Accounts.AccountConfigV1 config = new Accounts.AccountConfigV1(false);
         config.save(this.account, file);
+
         Geary.AccountInformation copy = config.load(
             file, TEST_ID, this.mediator, null, null
         );
@@ -194,7 +189,7 @@ class Accounts.ManagerTest : TestCase {
             new Accounts.AccountConfigLegacy();
 
         Geary.ConfigFile file =
-            new Geary.ConfigFile(this.tmp.get_child("config"));
+            new Geary.ConfigFile(this.tmp.get_child("config.ini"));
 
         config.save(this.account, file);
         Geary.AccountInformation copy = config.load(
@@ -221,7 +216,7 @@ class Accounts.ManagerTest : TestCase {
             Geary.Credentials.Requirement.NONE;
         Accounts.ServiceConfigV1 config = new Accounts.ServiceConfigV1();
         Geary.ConfigFile file =
-            new Geary.ConfigFile(this.tmp.get_child("config"));
+            new Geary.ConfigFile(this.tmp.get_child("config.ini"));
 
         config.save(this.account, this.account.outgoing, file);
         config.load(file, copy, copy.outgoing);
@@ -246,7 +241,7 @@ class Accounts.ManagerTest : TestCase {
             Geary.Credentials.Requirement.NONE;
         Accounts.ServiceConfigLegacy config = new Accounts.ServiceConfigLegacy();
         Geary.ConfigFile file =
-            new Geary.ConfigFile(this.tmp.get_child("config"));
+            new Geary.ConfigFile(this.tmp.get_child("config.ini"));
 
         config.save(this.account, this.account.outgoing, file);
         config.load(file, copy, copy.outgoing);

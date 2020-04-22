@@ -654,18 +654,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         throws GLib.Error {
         Folder? special = get_special_folder(use);
         if (special == null) {
-            FolderPath? path = information.get_special_folder_path(use);
-            if (path != null) {
-                if (!remote.is_folder_path_valid(path)) {
-                    warning(
-                        "Ignoring bad special folder path '%s' for type %s",
-                        path.to_string(),
-                        use.to_string()
-                    );
-                    path = null;
-                } else {
-                    path = this.local.imap_folder_root.copy(path);
-                }
+            FolderPath? path = information.new_folder_path_for_use(
+                this.local.imap_folder_root, use
+            );
+            if (path != null && !remote.is_folder_path_valid(path)) {
+                warning(
+                    "Ignoring bad special folder path '%s' for type %s",
+                    path.to_string(),
+                    use.to_string()
+                );
+                path = null;
             }
 
             if (path == null) {
@@ -691,7 +689,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 debug("Guessed folder \'%s\' for special_path %s",
                       path.to_string(), use.to_string()
                 );
-                information.set_special_folder_path(use, path);
+                information.set_folder_steps_for_use(
+                    use, new Gee.ArrayList<string>.wrap(path.as_array())
+                );
             }
 
             if (!this.folder_map.has_key(path)) {
