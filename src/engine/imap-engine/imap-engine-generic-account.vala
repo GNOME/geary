@@ -447,6 +447,41 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return folder;
     }
 
+    /** {@inheritDoc} */
+    public override async Folder create_personal_folder(
+        string name,
+        Folder.SpecialUse use = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        check_open();
+        var remote = yield claim_account_session(cancellable);
+        FolderPath root =
+            yield remote.get_default_personal_namespace(cancellable);
+        FolderPath path = root.get_child(name);
+        if (this.folder_map.has_key(path)) {
+            throw new EngineError.ALREADY_EXISTS(
+                "Folder already exists: %s", path.to_string()
+            );
+        }
+        yield remote.create_folder_async(path, use, cancellable);
+
+        Imap.Folder? remote_folder = yield remote.fetch_folder_async(
+            path, cancellable
+        );
+
+        ImapDB.Folder local_folder = yield this.local.clone_folder_async(
+            remote_folder, cancellable
+        );
+        add_folders(Collection.single(local_folder), false);
+        var folder = this.folder_map.get(path);
+        if (use != NONE) {
+            promote_folders(
+                Collection.single_map<Folder.SpecialUse,Folder>(use, folder)
+            );
+        }
+        return folder;
+    }
+
     private ImapDB.EmailIdentifier check_id(Geary.EmailIdentifier id) throws EngineError {
         ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
         if (imapdb_id == null)
@@ -699,50 +734,18 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 );
             }
 
-            if (!this.folder_map.has_key(path)) {
+            if (this.folder_map.has_key(path)) {
+                special = this.folder_map.get(path);
+                promote_folders(
+                    Collection.single_map<Folder.SpecialUse,Folder>(use, special)
+                );
+            } else {
                 debug("Creating \"%s\" to use as special folder %s",
                       path.to_string(), use.to_string());
-
-                GLib.Error? created_err = null;
-                try {
-                    yield remote.create_folder_async(path, use, cancellable);
-                } catch (GLib.Error err) {
-                    // Hang on to the error since the folder might exist
-                    // on the remote, so try fetching it anyway.
-                    created_err = err;
-                }
-
-                Imap.Folder? remote_folder = null;
-                try {
-                    remote_folder = yield remote.fetch_folder_async(
-                        path, cancellable
-                    );
-                } catch (GLib.Error err) {
-                    // If we couldn't fetch it after also failing to
-                    // create it, it's probably due to the problem
-                    // creating it, so throw that error instead.
-                    if (created_err != null) {
-                        throw created_err;
-                    } else {
-                        throw err;
-                    }
-                }
-
-                ImapDB.Folder local_folder =
-                    yield this.local.clone_folder_async(
-                        remote_folder, cancellable
-                    );
-                add_folders(
-                    Collection.single(local_folder), created_err != null
+                special = yield create_personal_folder(
+                    path.name, use, cancellable
                 );
             }
-
-            special= this.folder_map.get(path);
-            promote_folders(
-                Collection.single_map<Folder.SpecialUse,Folder>(
-                    use, special
-                )
-            );
         }
 
         return special;

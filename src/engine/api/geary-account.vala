@@ -407,6 +407,18 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     ) throws GLib.Error;
 
     /**
+     * Creates a new folder in the root of the personal name space.
+     *
+     * If this account is backed by a remote server, calling this
+     * causes the folder to be created on the remote.
+     */
+    public abstract async Folder create_personal_folder(
+        string name,
+        Folder.SpecialUse use = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
+
+    /**
      * Search the local account for emails referencing a Message-ID value
      * (which can appear in the Message-ID header itself, as well as the
      * In-Reply-To header, and maybe more places).  Fetch the requested fields,
