@@ -138,9 +138,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.open = true;
         notify_opened();
 
-        this.queue_operation(
-            new LoadFolders(this, this.local, get_supported_special_folders())
-        );
+        this.queue_operation(new LoadFolders(this, this.local));
 
         // Start the mail services. Start incoming directly, but queue
         // outgoing so local folders can be loaded first in case
@@ -439,7 +437,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         Geary.Folder? folder = get_special_folder(special);
         if (folder == null) {
-            Imap.AccountSession account = yield claim_account_session();
+            var account = yield claim_account_session(cancellable);
             try {
                 folder = yield ensure_special_folder_async(account, special, cancellable);
             } finally {
@@ -544,9 +542,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             Account.folder_path_comparator
         );
         foreach(ImapDB.Folder db_folder in db_folders) {
-            if (!this.folder_map.has_key(db_folder.get_path())) {
+            FolderPath path = db_folder.get_path();
+            if (!this.folder_map.has_key(path)) {
                 MinimalFolder folder = new_folder(db_folder);
                 folder.report_problem.connect(notify_report_problem);
+                if (folder.used_as == NONE) {
+                    var use = this.information.get_folder_use_for_path(path);
+                    if (use != NONE) {
+                        folder.set_use(use);
+                    }
+                }
                 built_folders.add(folder);
                 this.folder_map.set(folder.path, folder);
             }
@@ -971,37 +976,27 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
 
 
     private weak ImapDB.Account local;
-    private Folder.SpecialUse[] specials;
+    private Gee.List<ImapDB.Folder> folders = new Gee.LinkedList<ImapDB.Folder>();
 
 
-    internal LoadFolders(GenericAccount account,
-                         ImapDB.Account local,
-                         Folder.SpecialUse[] specials) {
+    internal LoadFolders(GenericAccount account, ImapDB.Account local) {
         base(account);
         this.local = local;
-        this.specials = specials;
     }
 
-    public override async void execute(Cancellable cancellable) throws Error {
+    public override async void execute(GLib.Cancellable cancellable)
+        throws GLib.Error {
         GenericAccount generic = (GenericAccount) this.account;
-        Gee.List<ImapDB.Folder> folders = new Gee.LinkedList<ImapDB.Folder>();
 
         yield enumerate_local_folders_async(
-            folders, generic.local.imap_folder_root, cancellable
+            generic.local.imap_folder_root, cancellable
         );
-        generic.add_folders(folders, true);
-        if (!folders.is_empty) {
-            // If we have some folders to load, then this isn't the
-            // first run, and hence the special folders should already
-            // exist
-            yield check_special_folders(cancellable);
-        }
+        generic.add_folders(this.folders, true);
     }
 
-    private async void enumerate_local_folders_async(Gee.List<ImapDB.Folder> folders,
-                                                     Geary.FolderPath parent,
-                                                     Cancellable? cancellable)
-        throws Error {
+    private async void enumerate_local_folders_async(FolderPath parent,
+                                                     GLib.Cancellable? cancellable)
+        throws GLib.Error {
         Gee.Collection<ImapDB.Folder>? children = null;
         try {
             children = yield this.local.list_folders_async(parent, cancellable);
@@ -1014,48 +1009,12 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
 
         if (children != null) {
             foreach (ImapDB.Folder child in children) {
-                folders.add(child);
+                this.folders.add(child);
                 yield enumerate_local_folders_async(
-                    folders, child.get_path(), cancellable
+                    child.get_path(), cancellable
                 );
             }
         }
-    }
-
-    private async void check_special_folders(GLib.Cancellable cancellable)
-        throws GLib.Error {
-        // Local folders loaded that have the SPECIAL-USE flags set
-        // will have been promoted already via derived account type's
-        // new_child overrides or some other means. However for those
-        // that do not have the flag, check here against the local
-        // config and promote ASAP.
-        //
-        // Can't just use ensure_special_folder_async however since
-        // that will attempt to create the folders if missing, which
-        // is bad if offline.
-        GenericAccount generic = (GenericAccount) this.account;
-        var added_specials = new Gee.HashMap<Folder.SpecialUse,Folder>();
-        foreach (var type in this.specials) {
-            if (generic.get_special_folder(type) == null) {
-                Geary.FolderPath? path =
-                    generic.information.get_special_folder_path(type);
-                path = this.local.imap_folder_root.copy(path);
-                if (path != null) {
-                    try {
-                        Geary.Folder target = generic.get_folder(path);
-                        added_specials.set(type, target);
-                    } catch (Error err) {
-                        debug(
-                            "Previously used special folder %s not loaded: %s",
-                            type.to_string(),
-                            err.message
-                        );
-                    }
-                }
-            }
-        }
-
-        generic.promote_folders(added_specials);
     }
 
 }
