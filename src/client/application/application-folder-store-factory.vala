@@ -58,6 +58,27 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             return folders;
         }
 
+        public async Plugin.Folder create_personal_folder(
+            Plugin.Account target,
+            string name,
+            GLib.Cancellable? cancellable
+        ) throws GLib.Error {
+            var account = target as PluginManager.AccountImpl;
+            if (account == null) {
+                throw new Plugin.Error.NOT_SUPPORTED("Invalid account object");
+            }
+            Geary.Folder engine = yield account.backing.account.create_personal_folder(
+                name, NONE, cancellable
+            );
+            var folder = this.factory.get_plugin_folder(engine);
+            if (folder == null) {
+                throw new Geary.EngineError.NOT_FOUND(
+                    "No plugin folder found for the created folder"
+                );
+            }
+            return folder;
+        }
+
         public Plugin.Folder? get_folder_from_variant(GLib.Variant variant) {
             var folder = this.factory.get_folder_from_variant(variant);
             return this.factory.folders.get(folder);

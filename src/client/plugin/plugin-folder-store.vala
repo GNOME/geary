@@ -47,6 +47,15 @@ public interface Plugin.FolderStore : Geary.BaseObject {
     ) throws GLib.Error;
 
     /**
+     * Creates a folder in the root of an account's personal name space.
+     */
+    public abstract async Folder create_personal_folder(
+        Account target,
+        string name,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error;
+
+    /**
      * Returns the folder specified by the given variant, if any.
      *
      * @see Folder.to_variant
