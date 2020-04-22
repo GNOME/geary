@@ -66,10 +66,12 @@ public class Plugin.EmailTemplates :
 
 
     public override async void activate() throws GLib.Error {
-        Geary.iterate_array(UNLOC_NAMES.split("|")).map<string>(
+        // Add localised first, so if we need to create a folder it
+        // will be created localised.
+        Geary.iterate_array(LOC_NAMES.split("|")).map<string>(
             (name) => name.strip()
         ).add_all_to(this.folder_names);
-        Geary.iterate_array(LOC_NAMES.split("|")).map<string>(
+        Geary.iterate_array(UNLOC_NAMES.split("|")).map<string>(
             (name) => name.strip()
         ).add_all_to(this.folder_names);
 
@@ -100,14 +102,12 @@ public class Plugin.EmailTemplates :
         this.send_action.activate.connect(on_send_activated);
         this.plugin_application.register_action(this.send_action);
 
-        foreach (var folder in this.folder_store.get_folders()) {
-            if (folder.display_name in this.folder_names) {
-                register_folder(folder);
-            }
-        }
+        add_folders(this.folder_store.get_folders());
     }
 
     public override async void deactivate(bool is_shutdown) throws GLib.Error {
+        this.cancellable.cancel();
+
         // Take a copy of the keys so the collection doesn't asplode
         // as it is being modified.
         foreach (var folder in this.info_bars.keys.to_array()) {
@@ -133,8 +133,6 @@ public class Plugin.EmailTemplates :
 
         this.email_store.email_displayed.disconnect(on_email_displayed);
         this.email_store = null;
-
-        this.cancellable.cancel();
     }
 
     private async void edit_email(Folder? target, EmailIdentifier? id, bool send) {
@@ -161,6 +159,30 @@ public class Plugin.EmailTemplates :
             composer.show();
         } catch (GLib.Error err) {
             warning("Unable to construct composer: %s", err.message);
+        }
+    }
+
+    private void add_folders(Gee.Collection<Folder> to_add) {
+        Folder? inbox = null;
+        var found_templates = false;
+        foreach (var folder in to_add) {
+            if (folder.used_as == INBOX) {
+                inbox = folder;
+            } else if (folder.display_name in this.folder_names) {
+                register_folder(folder);
+                found_templates = true;
+            }
+        }
+
+        // XXX There is no way at the moment to determine when all
+        // local folders have been loaded, but since they are all done
+        // in once batch, it's a safe bet that if we've seen the
+        // Inbox, then the local folder set should contain a templates
+        // folder, if one is available. If there isn't, we need to
+        // create it.
+        if (!found_templates && inbox != null) {
+            debug("Creating templates folder");
+            this.create_folder.begin(inbox.account);
         }
     }
 
@@ -200,6 +222,20 @@ public class Plugin.EmailTemplates :
             }
             this.folders.remove_folder_info_bar(target, info_bar);
             this.info_bars.unset(target);
+        }
+    }
+
+    private async void create_folder(Account account) {
+        try {
+            yield this.folder_store.create_personal_folder(
+                account,
+                this.folder_names[0],
+                this.cancellable
+            );
+            // Don't need to explicitly register the folder here, it
+            // will get picked up via the available signal
+        } catch (GLib.Error err) {
+            warning("Failed to create templates folder: %s", err.message);
         }
     }
 
@@ -269,11 +305,7 @@ public class Plugin.EmailTemplates :
     }
 
     private void on_folders_available(Gee.Collection<Folder> available) {
-        foreach (var folder in available) {
-            if (folder.display_name in this.folder_names) {
-                register_folder(folder);
-            }
-        }
+        add_folders(available);
     }
 
     private void on_folders_unavailable(Gee.Collection<Folder> unavailable) {
