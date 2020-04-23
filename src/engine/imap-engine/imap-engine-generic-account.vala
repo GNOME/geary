@@ -1116,11 +1116,20 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
     }
 
     public override async void execute(Cancellable cancellable) throws Error {
-        Gee.Map<FolderPath, Geary.Folder> existing_folders =
-            Geary.traverse<Geary.Folder>(this.account.list_folders())
-            .to_hash_map<FolderPath>(f => f.path);
-        Gee.Map<FolderPath, Imap.Folder> remote_folders =
-            new Gee.HashMap<FolderPath, Imap.Folder>();
+        // Use sorted maps here to a) aid debugging, and b) ensure
+        // that parent folders are processed before child folders
+        var existing_folders = new Gee.TreeMap<FolderPath,Folder>(
+            (a,b) => a.compare_to(b)
+        );
+        var remote_folders = new Gee.TreeMap<FolderPath,Imap.Folder>(
+            (a,b) => a.compare_to(b)
+        );
+
+        Geary.traverse<Geary.Folder>(
+            this.account.list_folders()
+        ).add_all_to_map<FolderPath>(
+            existing_folders, f => f.path
+        );
 
         GenericAccount account = (GenericAccount) this.account;
         Imap.AccountSession remote = yield account.claim_account_session(
