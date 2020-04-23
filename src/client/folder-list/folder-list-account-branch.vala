@@ -6,6 +6,26 @@
 
 // A branch that holds all the folders for a particular account.
 public class FolderList.AccountBranch : Sidebar.Branch {
+
+    // Defines the ordering that special-use folders appear in the
+    // folder list
+    private const Geary.Folder.SpecialUse[] SPECIAL_USE_ORDERING = {
+        INBOX,
+        SEARCH,
+        FLAGGED,
+        IMPORTANT,
+        DRAFTS,
+        CUSTOM,
+        NONE,
+        OUTBOX,
+        SENT,
+        ARCHIVE,
+        ALL_MAIL,
+        TRASH,
+        JUNK
+    };
+
+
     public Geary.Account account { get; private set; }
     public SpecialGrouping user_folder_group { get; private set; }
     public Gee.HashMap<Geary.FolderPath, FolderEntry> folder_entries { get; private set; }
@@ -61,8 +81,25 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         Geary.Folder.SpecialUse type_a = entry_a.folder.used_as;
         Geary.Folder.SpecialUse type_b = entry_b.folder.used_as;
 
-        // Special folders are ordered by their enum value.
-        return (int) type_a - (int) type_b;
+        if (type_a == type_b) return 0;
+        if (type_a == INBOX) return -1;
+        if (type_b == INBOX) return 1;
+
+        int ordering_a = 0;
+        for (; ordering_a < SPECIAL_USE_ORDERING.length; ordering_a++) {
+            if (type_a == SPECIAL_USE_ORDERING[ordering_a]) {
+                break;
+            }
+        }
+        int ordering_b = 0;
+        for (; ordering_b < SPECIAL_USE_ORDERING.length; ordering_b++) {
+            if (type_b == SPECIAL_USE_ORDERING[ordering_b]) {
+                break;
+            }
+        }
+
+        if (ordering_a == ordering_b) return normal_folder_comparator(a, b);
+        return ordering_a - ordering_b;
     }
 
     private static int normal_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
