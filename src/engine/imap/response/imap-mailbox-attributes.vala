@@ -61,23 +61,35 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
      * Geary.Folder.SpecialUse.NONE}.
      */
     public Geary.Folder.SpecialUse get_special_use() {
-        if (contains(MailboxAttribute.XLIST_INBOX))
-            return INBOX;
-
-        if (contains(MailboxAttribute.XLIST_ALL_MAIL))
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_ALL))
             return ALL_MAIL;
 
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_TRASH))
-            return TRASH;
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_ARCHIVE))
+            return ARCHIVE;
 
         if (contains(MailboxAttribute.SPECIAL_FOLDER_DRAFTS))
             return DRAFTS;
 
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_SENT))
-            return SENT;
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_FLAGGED))
+            return FLAGGED;
+
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_IMPORTANT))
+            return IMPORTANT;
 
         if (contains(MailboxAttribute.SPECIAL_FOLDER_JUNK))
             return JUNK;
+
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_SENT))
+            return SENT;
+
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_TRASH))
+            return TRASH;
+
+        if (contains(MailboxAttribute.XLIST_ALL_MAIL))
+            return ALL_MAIL;
+
+        if (contains(MailboxAttribute.XLIST_INBOX))
+            return INBOX;
 
         if (contains(MailboxAttribute.XLIST_SPAM))
             return JUNK;
@@ -85,16 +97,7 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
         if (contains(MailboxAttribute.XLIST_STARRED))
             return FLAGGED;
 
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_IMPORTANT))
-            return IMPORTANT;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_ARCHIVE))
-            return ARCHIVE;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_FLAGGED))
-            return FLAGGED;
-
         return NONE;
     }
-}
 
+}
