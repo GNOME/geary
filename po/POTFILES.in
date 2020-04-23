@@ -109,6 +109,8 @@ src/client/plugin/plugin-plugin-base.vala
 src/client/plugin/plugin-trusted-extension.vala
 src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in
 src/client/plugin/desktop-notifications/desktop-notifications.vala
+src/client/plugin/email-templates/email-templates.plugin.desktop.in
+src/client/plugin/email-templates/email-templates.vala
 src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in
 src/client/plugin/folder-highlight/folder-highlight.vala
 src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in
