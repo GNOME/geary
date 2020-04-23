@@ -5,80 +5,63 @@
  */
 
 // A folder of any type in the folder list.
-public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.InternalDropTargetEntry,
+public class FolderList.FolderEntry :
+    FolderList.AbstractFolderEntry,
+    Sidebar.InternalDropTargetEntry,
     Sidebar.EmphasizableEntry {
+
+
+    private Application.FolderContext context;
     private bool has_new;
 
-    public FolderEntry(Geary.Folder folder) {
-        base(folder);
-        has_new = false;
-        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].connect(on_counts_changed);
-        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].connect(on_counts_changed);
+
+    public FolderEntry(Application.FolderContext context) {
+        base(context.folder);
+        this.context = context;
+        this.context.notify.connect(on_context_changed);
+        this.has_new = false;
+        this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].connect(on_counts_changed);
+        this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].connect(on_counts_changed);
     }
 
     ~FolderEntry() {
-        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].disconnect(on_counts_changed);
-        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].disconnect(on_counts_changed);
+        this.context.notify.disconnect(on_context_changed);
+        this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].disconnect(on_counts_changed);
+        this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].disconnect(on_counts_changed);
     }
 
     public override string get_sidebar_name() {
-        return Util.I18n.to_folder_display_name(this.folder);
+        return this.context.display_name;
     }
 
     public override string? get_sidebar_tooltip() {
-        // Label displaying total number of email messages in a folder
-        string total_msg = ngettext("%d message", "%d messages", folder.properties.email_total).
-            printf(folder.properties.email_total);
+        // Translators: Label displaying total number of email
+        // messages in a folder. String substitution is the actual
+        // number.
+        string total_msg = ngettext(
+            "%d message", "%d messages", folder.properties.email_total
+        ).printf(folder.properties.email_total);
 
         if (folder.properties.email_unread == 0)
             return total_msg;
 
-        /// Label displaying number of unread email messages in a folder
-        string unread_msg = ngettext("%d unread", "%d unread", folder.properties.email_unread).
-            printf(folder.properties.email_unread);
+        // Translators: Label displaying number of unread email
+        // messages in a folder. String substitution is the actual
+        // number.
+        string unread_msg = ngettext(
+            "%d unread", "%d unread", folder.properties.email_unread
+        ).printf(folder.properties.email_unread);
 
-        /// This string represents the divider between two messages: "n messages" and "n unread",
-        /// shown in the folder list as a tooltip.  Please use your languages conventions for
-        /// combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
+        // Translators: This string represents the divider between two
+        // messages: "n messages" and "n unread", shown in the folder
+        // list as a tooltip.  Please use your languages conventions
+        // for combining the two, i.e. a comma (",") for English; "6
+        // messages, 3 unread"
         return _("%s, %s").printf(total_msg, unread_msg);
     }
 
     public override string? get_sidebar_icon() {
-        switch (folder.used_as) {
-            case NONE:
-                return "tag-symbolic";
-
-            case INBOX:
-                return "mail-inbox-symbolic";
-
-            case DRAFTS:
-                return "mail-drafts-symbolic";
-
-            case SENT:
-                return "mail-sent-symbolic";
-
-            case FLAGGED:
-                return "starred-symbolic";
-
-            case IMPORTANT:
-                return "task-due-symbolic";
-
-            case ALL_MAIL:
-            case ARCHIVE:
-                return "mail-archive-symbolic";
-
-            case JUNK:
-                return "dialog-warning-symbolic";
-
-            case TRASH:
-                return "user-trash-symbolic";
-
-            case OUTBOX:
-                return "mail-outbox-symbolic";
-
-            default:
-                assert_not_reached();
-        }
+        return this.context.icon_name;
     }
 
     public override string to_string() {
@@ -94,7 +77,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
             return;
 
         this.has_new = has_new;
-        is_emphasized_changed(has_new);
+        entry_changed();
     }
 
     public bool internal_drop_received(Application.MainWindow main_window,
@@ -113,27 +96,25 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
         return true;
     }
 
-    private void on_counts_changed() {
-        sidebar_count_changed(get_count());
-        sidebar_tooltip_changed(get_sidebar_tooltip());
-    }
-
     public override int get_count() {
-        switch (folder.used_as) {
-            // for Drafts and Outbox, interested in showing total count, not unread count
-            case DRAFTS:
-            case OUTBOX:
-                return folder.properties.email_total;
+        switch (this.context.displayed_count) {
+        case TOTAL:
+            return folder.properties.email_total;
 
-            // only show counts for Inbox, Junk, and user folders
-            case INBOX:
-            case JUNK:
-            case NONE:
-                return folder.properties.email_unread;
+        case UNREAD:
+            return folder.properties.email_unread;
 
-            // otherwise, to avoid clutter, no counts displayed (but are available in tooltip)
-            default:
-                return 0;
+        default:
+            return 0;
         }
     }
+
+    private void on_counts_changed() {
+        entry_changed();
+    }
+
+    private void on_context_changed() {
+        entry_changed();
+    }
+
 }

@@ -74,17 +74,17 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         return folder_entries.get(folder_path);
     }
 
-    public void add_folder(Geary.Folder folder) {
+    public void add_folder(Application.FolderContext context) {
         Sidebar.Entry? graft_point = null;
-        FolderEntry folder_entry = new FolderEntry(folder);
-        Geary.Folder.SpecialUse used_as = folder.used_as;
+        FolderEntry folder_entry = new FolderEntry(context);
+        Geary.Folder.SpecialUse used_as = context.folder.used_as;
         if (used_as != NONE) {
             if (used_as == SEARCH)
                 return; // Don't show search folder under the account.
 
             // Special folders go in the root of the account.
             graft_point = get_root();
-        } else if (folder.path.is_top_level) {
+        } else if (context.folder.path.is_top_level) {
             // Top-level folders get put in our special user folders group.
             graft_point = user_folder_group;
 
@@ -92,7 +92,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
                 graft(get_root(), user_folder_group);
             }
         } else {
-            Sidebar.Entry? entry = folder_entries.get(folder.path.parent);
+            var entry = folder_entries.get(context.folder.path.parent);
             if (entry != null)
                 graft_point = entry;
         }
@@ -111,22 +111,25 @@ public class FolderList.AccountBranch : Sidebar.Branch {
 
         if (graft_point != null) {
             graft(graft_point, folder_entry);
-            folder_entries.set(folder.path, folder_entry);
+            folder_entries.set(context.folder.path, folder_entry);
         } else {
-            debug("Could not add folder %s of type %s to folder list", folder.to_string(),
-                  used_as.to_string());
+            debug(
+                "Could not add folder %s of type %s to folder list",
+                context.folder.to_string(),
+                used_as.to_string()
+            );
         }
     }
 
-    public void remove_folder(Geary.Folder folder) {
-        Sidebar.Entry? entry = folder_entries.get(folder.path);
-        if(entry == null) {
-            debug("Could not remove folder %s", folder.to_string());
+    public void remove_folder(Geary.FolderPath path) {
+        Sidebar.Entry? entry = this.folder_entries.get(path);
+        if (entry == null) {
+            debug("Could not remove folder %s", path.to_string());
             return;
         }
 
         prune(entry);
-        folder_entries.unset(folder.path);
+        this.folder_entries.unset(path);
     }
 
     private void on_entry_removed(Sidebar.Entry entry) {

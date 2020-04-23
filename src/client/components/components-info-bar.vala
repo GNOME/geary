@@ -77,18 +77,14 @@ public class Components.InfoBar : Gtk.InfoBar {
         this(plugin.status, plugin.description);
         this.show_close_button = plugin.show_close_button;
 
-        var plugin_primary = plugin.primary_button;
-        if (plugin_primary != null) {
-            var gtk_primary = new Gtk.Button.with_label(plugin_primary.label);
-            gtk_primary.set_action_name(
-                action_group_name + "." + plugin_primary.action.name
-            );
-            if (plugin_primary.action_target != null) {
-                gtk_primary.set_action_target_value(
-                    plugin_primary.action_target
-                );
-            }
-            get_action_area().add(gtk_primary);
+        var secondaries = plugin.secondary_buttons.bidir_list_iterator();
+        bool has_prev = secondaries.last();
+        while (has_prev) {
+            add_plugin_button(secondaries.get(), action_group_name);
+            has_prev = secondaries.previous();
+        }
+        if (plugin.primary_button != null) {
+            add_plugin_button(plugin.primary_button, action_group_name);
         }
 
         show_all();
@@ -98,6 +94,15 @@ public class Components.InfoBar : Gtk.InfoBar {
     // change has yet to trickle down to common distros like F31
     public new Gtk.Box get_action_area() {
         return (Gtk.Box) base.get_action_area();
+    }
+
+    private void add_plugin_button(Plugin.Button plugin, string action_group_name) {
+        var gtk = new Gtk.Button.with_label(plugin.label);
+        gtk.set_action_name(action_group_name + "." + plugin.action.name);
+        if (plugin.action_target != null) {
+            gtk.set_action_target_value(plugin.action_target);
+        }
+        get_action_area().add(gtk);
     }
 
 }

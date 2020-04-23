@@ -28,6 +28,7 @@ plugin_data_src_suffix = '.desktop.in'
 plugin_data_suffix = '.plugin'
 
 subdir('desktop-notifications')
+subdir('email-templates')
 subdir('folder-highlight')
 subdir('messaging-menu')
 subdir('notification-badge')

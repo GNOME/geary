@@ -92,36 +92,39 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
             account_branches.get(account).user_folder_group.rename(name);
     }
 
-    public void add_folder(Geary.Folder folder) {
+    public void add_folder(Application.FolderContext context) {
+        Geary.Folder folder = context.folder;
         Geary.Account account = folder.account;
+
         if (!account_branches.has_key(account)) {
             this.account_branches.set(account, new AccountBranch(account));
             account.information.notify["ordinal"].connect(on_ordinal_changed);
         }
 
-        AccountBranch account_branch = account_branches.get(folder.account);
+        var account_branch = this.account_branches.get(account);
         if (!has_branch(account_branch))
-            graft(account_branch, folder.account.information.ordinal);
+            graft(account_branch, account.information.ordinal);
 
         if (account_branches.size > 1 && !has_branch(inboxes_branch))
             graft(inboxes_branch, INBOX_ORDINAL); // The Inboxes branch comes first.
         if (folder.used_as == INBOX)
-            inboxes_branch.add_inbox(folder);
+            inboxes_branch.add_inbox(context);
 
-        account_branch.add_folder(folder);
+        account_branch.add_folder(context);
     }
 
-    public void remove_folder(Geary.Folder folder) {
-        AccountBranch? account_branch = account_branches.get(folder.account);
-        assert(account_branch != null);
-        assert(has_branch(account_branch));
+    public void remove_folder(Application.FolderContext context) {
+        Geary.Folder folder = context.folder;
+        Geary.Account account = folder.account;
+
+        var account_branch = this.account_branches.get(account);
 
         // If this is the current folder, unselect it.
-        Sidebar.Entry? entry = account_branch.get_entry_for_path(folder.path);
+        var entry = account_branch.get_entry_for_path(folder.path);
 
         // if not found or found but not selected, see if the folder is in the Inboxes branch
-        if (has_branch(inboxes_branch) && (entry == null || !is_selected(entry))) {
-            InboxFolderEntry? inbox_entry = inboxes_branch.get_entry_for_account(folder.account);
+        if (has_branch(this.inboxes_branch) && (entry == null || !is_selected(entry))) {
+            var inbox_entry = this.inboxes_branch.get_entry_for_account(account);
             if (inbox_entry != null && inbox_entry.folder == folder)
                 entry = inbox_entry;
         }
@@ -133,9 +136,9 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
         // if Inbox, remove from inboxes branch, selected or not
         if (folder.used_as == INBOX)
-            inboxes_branch.remove_inbox(folder.account);
+            inboxes_branch.remove_inbox(account);
 
-        account_branch.remove_folder(folder);
+        account_branch.remove_folder(folder.path);
     }
 
     public void remove_account(Geary.Account account) {

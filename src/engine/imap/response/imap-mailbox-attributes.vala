@@ -55,7 +55,10 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
     }
 
     /**
-     * Returns the special use specified for the mailbox, if any.
+     * Returns the special use specified for the mailbox.
+     *
+     * If no special use is set, returns {@link
+     * Geary.Folder.SpecialUse.NONE}.
      */
     public Geary.Folder.SpecialUse get_special_use() {
         if (contains(MailboxAttribute.XLIST_INBOX))

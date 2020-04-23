@@ -52,16 +52,30 @@ public class Application.PluginManager : GLib.Object {
         private Peas.PluginInfo plugin;
         private Client backing;
         private FolderStoreFactory folders;
+        private EmailStoreFactory email;
         private GLib.SimpleActionGroup? action_group = null;
 
 
         public ApplicationImpl(Peas.PluginInfo plugin,
                                Client backing,
-                               FolderStoreFactory folders) {
+                               FolderStoreFactory folders,
+                               EmailStoreFactory email) {
             this.plugin = plugin;
             this.backing = backing;
             this.folders = folders;
+            this.email = email;
             this.action_group_name = plugin.get_module_name().replace(".", "_");
+        }
+
+        public Plugin.Composer new_composer(Plugin.Account source)
+            throws Plugin.Error {
+            var impl = source as AccountImpl;
+            if (impl == null) {
+                throw new Plugin.Error.NOT_SUPPORTED("Not a valid account");
+            }
+            return new ComposerImpl(
+                this.backing, impl.backing, this.folders, this.email
+            );
         }
 
         public void register_action(GLib.Action action) {
@@ -86,7 +100,8 @@ public class Application.PluginManager : GLib.Object {
         public void show_folder(Plugin.Folder folder) {
             Geary.Folder? target = this.folders.get_engine_folder(folder);
             if (target != null) {
-                this.backing.show_folder.begin(target);
+                MainWindow window = this.backing.get_active_main_window();
+                window.select_folder.begin(target, true);
             }
         }
 
@@ -141,6 +156,99 @@ public class Application.PluginManager : GLib.Object {
     }
 
 
+    internal class AccountImpl : Geary.BaseObject, Plugin.Account {
+
+
+        public string display_name {
+            get { return this.backing.account.information.display_name; }
+        }
+
+
+        /** The underlying backing account context for this account. */
+        internal AccountContext backing { get; private set; }
+
+
+        public AccountImpl(AccountContext backing) {
+            this.backing = backing;
+        }
+
+    }
+
+
+    private class ComposerImpl : Geary.BaseObject, Plugin.Composer {
+
+
+        public override bool can_send { get; set; default = true; }
+
+        private Client application;
+        private AccountContext account;
+        private FolderStoreFactory folders;
+        private EmailStoreFactory email;
+        private Geary.Email? to_load = null;
+        private Geary.Folder? save_location = null;
+
+
+        public ComposerImpl(Client application,
+                            AccountContext account,
+                            FolderStoreFactory folders,
+                            EmailStoreFactory email) {
+            this.application = application;
+            this.account = account;
+            this.folders = folders;
+            this.email = email;
+        }
+
+        public void show() {
+            this.show_impl.begin();
+        }
+
+        public async void edit_email(Plugin.EmailIdentifier to_load)
+            throws Error {
+            Geary.EmailIdentifier? id = this.email.to_engine_id(to_load);
+            if (id == null) {
+                throw new Plugin.Error.NOT_FOUND("Email id not found");
+            }
+            Gee.Collection<Geary.Email>? email =
+                yield this.account.emails.list_email_by_sparse_id_async(
+                    Geary.Collection.single(id),
+                    Composer.Widget.REQUIRED_FIELDS,
+                    NONE,
+                    this.account.cancellable
+                );
+            if (email != null && !email.is_empty) {
+                this.to_load = Geary.Collection.first(email);
+            }
+        }
+
+        public void save_to_folder(Plugin.Folder? location) {
+            var folder = this.folders.get_engine_folder(location);
+            if (folder != null && folder.account == this.account.account) {
+                this.save_location = folder;
+            }
+        }
+
+        private async void show_impl() {
+            var controller = this.application.controller;
+            Composer.Widget? composer = null;
+            if (this.to_load == null) {
+                composer = yield controller.compose_new_email(
+                    null,
+                    this.save_location
+                );
+            } else {
+                composer = yield controller.compose_with_context_email(
+                    EDIT,
+                    this.to_load,
+                    null,
+                    this.save_location
+                );
+            }
+            composer.can_send = this.can_send;
+        }
+
+    }
+
+
     /** Emitted when a plugin is successfully loaded and activated. */
     public signal void plugin_activated(Peas.PluginInfo info);
 
@@ -156,35 +264,49 @@ public class Application.PluginManager : GLib.Object {
                                           GLib.Error? error);
 
 
+    internal FolderStoreFactory folders_factory { get; private set; }
+    internal EmailStoreFactory email_factory { get; private set; }
+
     private Client application;
+    private Controller controller;
+    private Configuration config;
     private Peas.Engine plugins;
     private bool is_shutdown = false;
     private string trusted_path;
 
-    private FolderStoreFactory folders_factory;
-    private EmailStoreFactory email_factory;
+    private Gee.Map<AccountContext,AccountImpl> plugin_accounts =
+        new Gee.HashMap<AccountContext,AccountImpl>();
 
     private Gee.Map<Peas.PluginInfo,PluginContext> plugin_set =
         new Gee.HashMap<Peas.PluginInfo,PluginContext>();
-    private Gee.Map<Peas.PluginInfo,NotificationContext> notification_contexts =
-        new Gee.HashMap<Peas.PluginInfo,NotificationContext>();
-    private Gee.Map<Peas.PluginInfo,EmailContext> email_contexts =
-        new Gee.HashMap<Peas.PluginInfo,EmailContext>();
+    private Gee.Map<Peas.PluginInfo,NotificationPluginContext> notification_contexts =
+        new Gee.HashMap<Peas.PluginInfo,NotificationPluginContext>();
+    private Gee.Map<Peas.PluginInfo,EmailPluginContext> email_contexts =
+        new Gee.HashMap<Peas.PluginInfo,EmailPluginContext>();
 
 
-    public PluginManager(Client application) throws GLib.Error {
+    internal PluginManager(Client application,
+                           Controller controller,
+                           Configuration config,
+                           GLib.File trusted_plugin_path) throws GLib.Error {
         this.application = application;
+        this.controller = controller;
+        this.config = config;
         this.plugins = Peas.Engine.get_default();
-        this.folders_factory = new FolderStoreFactory(application);
-        this.email_factory = new EmailStoreFactory(application);
+        this.folders_factory = new FolderStoreFactory(
+            this.plugin_accounts.read_only_view
+        );
+        this.email_factory = new EmailStoreFactory(
+            this.plugin_accounts.read_only_view
+        );
 
-        this.trusted_path = application.get_app_plugins_dir().get_path();
-        this.plugins.add_search_path(trusted_path, null);
+        this.trusted_path = trusted_plugin_path.get_path();
+        this.plugins.add_search_path(this.trusted_path, null);
 
         this.plugins.load_plugin.connect_after(on_load_plugin);
         this.plugins.unload_plugin.connect(on_unload_plugin);
 
-        string[] optional_names = application.config.get_optional_plugins();
+        string[] optional_names = this.config.get_optional_plugins();
         foreach (Peas.PluginInfo info in this.plugins.get_plugin_list()) {
             string name = info.get_module_name();
             try {
@@ -200,6 +322,21 @@ public class Application.PluginManager : GLib.Object {
             } catch (GLib.Error err) {
                 warning("Plugin %s not available: %s", name, err.message);
             }
+        }
+
+        this.application.window_added.connect(on_window_added);
+        foreach (MainWindow main in this.application.get_main_windows()) {
+            this.folders_factory.main_window_added(main);
+        }
+
+        this.controller.account_available.connect(
+            on_account_available
+        );
+        this.controller.account_unavailable.connect(
+            on_account_unavailable
+        );
+        foreach (var context in this.controller.get_account_contexts()) {
+            add_account(context);
         }
     }
 
@@ -234,11 +371,10 @@ public class Application.PluginManager : GLib.Object {
             this.plugins.load_plugin(plugin);
             loaded = true;
             string name = plugin.get_module_name();
-            string[] optional_names =
-                this.application.config.get_optional_plugins();
+            string[] optional_names = this.config.get_optional_plugins();
             if (!(name in optional_names)) {
                 optional_names += name;
-                this.application.config.set_optional_plugins(optional_names);
+                this.config.set_optional_plugins(optional_names);
             }
         }
         return loaded;
@@ -252,21 +388,29 @@ public class Application.PluginManager : GLib.Object {
             this.plugins.unload_plugin(plugin);
             unloaded = true;
             string name = plugin.get_module_name();
-            string[] old_names =
-                this.application.config.get_optional_plugins();
+            string[] old_names = this.config.get_optional_plugins();
             string[] new_names = new string[0];
             for (int i = 0; i < old_names.length; i++) {
                 if (old_names[i] != name) {
                     new_names += old_names[i];
                 }
             }
-            this.application.config.set_optional_plugins(new_names);
+            this.config.set_optional_plugins(new_names);
         }
         return unloaded;
     }
 
     internal void close() throws GLib.Error {
         this.is_shutdown = true;
+
+        this.application.window_added.disconnect(on_window_added);
+
+        this.controller.account_unavailable.disconnect(on_account_unavailable);
+        this.controller.account_available.disconnect(on_account_available);
+        foreach (var context in this.controller.get_account_contexts()) {
+            remove_account(context);
+        }
+
         this.plugins.set_loaded_plugins(null);
         this.plugins.garbage_collect();
         this.folders_factory.destroy();
@@ -277,17 +421,27 @@ public class Application.PluginManager : GLib.Object {
         return info.get_module_name() in AUTOLOAD_MODULES;
     }
 
-    internal Gee.Collection<NotificationContext> get_notification_contexts() {
+    internal Gee.Collection<NotificationPluginContext> get_notification_contexts() {
         return this.notification_contexts.values.read_only_view;
     }
 
-    internal Gee.Collection<EmailContext> get_email_contexts() {
+    internal Gee.Collection<EmailPluginContext> get_email_contexts() {
         return this.email_contexts.values.read_only_view;
+    }
+
+    internal void add_account(AccountContext added) {
+        this.plugin_accounts.set(added, new AccountImpl(added));
+        this.folders_factory.add_account(added);
+    }
+
+    internal void remove_account(AccountContext removed) {
+        this.folders_factory.remove_account(removed);
+        this.plugin_accounts.unset(removed);
     }
 
     private void on_load_plugin(Peas.PluginInfo info) {
         var plugin_application = new ApplicationImpl(
-            info, this.application, this.folders_factory
+            info, this.application, this.folders_factory, this.email_factory
         );
         var plugin = this.plugins.create_extension(
             info,
@@ -310,7 +464,7 @@ public class Application.PluginManager : GLib.Object {
 
             var notification = plugin as Plugin.NotificationExtension;
             if (notification != null) {
-                var context = new NotificationContext(
+                var context = new NotificationPluginContext(
                     this.application,
                     this.folders_factory,
                     this.email_factory
@@ -321,7 +475,7 @@ public class Application.PluginManager : GLib.Object {
 
             var email = plugin as Plugin.EmailExtension;
             if (email != null) {
-                var context = new EmailContext(
+                var context = new EmailPluginContext(
                     this.application,
                     this.email_factory,
                     plugin_application.action_group_name
@@ -332,8 +486,8 @@ public class Application.PluginManager : GLib.Object {
 
             var folder = plugin as Plugin.FolderExtension;
             if (folder != null) {
-                folder.folders = new FolderContext(
-                    this.application,
+                folder.folders = new FolderPluginContext(
+                    this.controller.application,
                     this.folders_factory,
                     plugin_application.action_group_name
                 );
@@ -406,7 +560,7 @@ public class Application.PluginManager : GLib.Object {
 
         var folder = context.plugin as Plugin.FolderExtension;
         if (folder != null) {
-            var folder_context = folder.folders as FolderContext;
+            var folder_context = folder.folders as FolderPluginContext;
             if (folder_context != null) {
                 folder_context.destroy();
             }
@@ -414,7 +568,7 @@ public class Application.PluginManager : GLib.Object {
 
         var email = context.plugin as Plugin.EmailExtension;
         if (email != null) {
-            var email_context = email.email as Application.EmailContext;
+            var email_context = email.email as EmailPluginContext;
             if (email_context != null) {
                 this.email_contexts.unset(context.info);
                 email_context.destroy();
@@ -423,6 +577,21 @@ public class Application.PluginManager : GLib.Object {
 
         plugin_deactivated(context.info, error);
         this.plugin_set.unset(context.info);
+    }
+
+    private void on_window_added(Gtk.Window window) {
+        var main = window as MainWindow;
+        if (main != null) {
+            this.folders_factory.main_window_added(main);
+        }
+    }
+
+    private void on_account_available(AccountContext available) {
+        add_account(available);
+    }
+
+    private void on_account_unavailable(AccountContext unavailable) {
+        remove_account(unavailable);
     }
 
 }

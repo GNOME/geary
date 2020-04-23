@@ -766,7 +766,7 @@ public class Application.MainWindow :
                 );
 
                 yield open_conversation_monitor(this.conversations, cancellable);
-                this.controller.process_pending_composers();
+                yield this.controller.process_pending_composers();
             }
         }
 
@@ -864,27 +864,10 @@ public class Application.MainWindow :
         }
     }
 
-    /** Displays a composer addressed to a specific email address. */
-    public void open_composer_for_mailbox(Geary.RFC822.MailboxAddress to) {
-        var composer = new Composer.Widget.from_mailbox(
-            this.application, this.selected_folder.account, to
-        );
-        this.controller.add_composer(composer);
-        show_composer(composer, null);
-        composer.load.begin(null, false, null, null);
-    }
-
     /**
      * Displays a composer in the window if possible, else in a new window.
-     *
-     * If the given collection of identifiers is not null and any are
-     * contained in the current conversation then the composer will be
-     * displayed inline under the latest matching message. If null,
-     * the composer's {@link Composer.Widget.get_referred_ids} will be
-     * used.
      */
-    public void show_composer(Composer.Widget composer,
-                              Gee.Collection<Geary.EmailIdentifier>? refers_to) {
+    internal void show_composer(Composer.Widget composer) {
         if (this.has_composer) {
             composer.detach();
         } else {
@@ -894,10 +877,8 @@ public class Application.MainWindow :
             // paned.
             Geary.Email? latest_referred = null;
             if (this.conversation_viewer.current_list != null) {
-                Gee.Collection<Geary.EmailIdentifier>? referrants = refers_to;
-                if (referrants == null) {
-                    referrants = composer.get_referred_ids();
-                }
+                Gee.Collection<Geary.EmailIdentifier>? referrants =
+                    composer.get_referred_ids();
                 Geary.App.Conversation selected =
                     this.conversation_viewer.current_list.conversation;
                 latest_referred = selected.get_emails(
@@ -923,7 +904,7 @@ public class Application.MainWindow :
      * Returns true if none were open or the user approved closing
      * them.
      */
-    public bool close_composer(bool should_prompt, bool is_shutdown = false) {
+    internal bool close_composer(bool should_prompt, bool is_shutdown = false) {
         bool closed = true;
         Composer.Widget? composer = this.conversation_viewer.current_composer;
         if (composer != null &&
@@ -999,23 +980,13 @@ public class Application.MainWindow :
                 this.progress_monitor.add(smtp.sending_monitor);
             }
 
+            to_add.folders_available.connect(on_folders_available);
+            to_add.folders_unavailable.connect(on_folders_unavailable);
             to_add.commands.executed.connect(on_command_execute);
             to_add.commands.undone.connect(on_command_undo);
             to_add.commands.redone.connect(on_command_redo);
 
-            to_add.account.folders_available_unavailable.connect(
-                on_folders_available_unavailable
-            );
-
-            folders_available(
-                to_add.account,
-                Geary.Account.sort_by_path(to_add.account.list_folders())
-            );
-
-            add_folder(
-                ((Geary.Smtp.ClientService) to_add.account.outgoing).outbox
-            );
-
+            add_folders(to_add.get_folders());
             this.accounts.add(to_add);
         }
     }
@@ -1047,13 +1018,11 @@ public class Application.MainWindow :
                 }
             }
 
-            to_remove.account.folders_available_unavailable.disconnect(
-                on_folders_available_unavailable
-            );
-
             to_remove.commands.executed.disconnect(on_command_execute);
             to_remove.commands.undone.disconnect(on_command_undo);
             to_remove.commands.redone.disconnect(on_command_redo);
+            to_remove.folders_available.disconnect(on_folders_available);
+            to_remove.folders_available.disconnect(on_folders_unavailable);
 
             this.progress_monitor.remove(to_remove.account.background_progress);
             Geary.Smtp.ClientService? smtp = (
@@ -1064,33 +1033,35 @@ public class Application.MainWindow :
             }
 
             // Finally, remove the account and its folders
+            remove_folders(to_remove.get_folders());
             this.folder_list.remove_account(to_remove.account);
             this.accounts.remove(to_remove);
         }
     }
 
     /** Adds a folder to the window. */
-    private void add_folder(Geary.Folder to_add) {
-        this.folder_list.add_folder(to_add);
-        if (to_add.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.add_folder(to_add);
-            this.main_toolbar.move_folder_menu.add_folder(to_add);
+    private void add_folders(Gee.Collection<FolderContext> to_add) {
+        foreach (var context in to_add) {
+            this.folder_list.add_folder(context);
+            if (context.folder.account == this.selected_account) {
+                this.main_toolbar.copy_folder_menu.add_folder(context.folder);
+                this.main_toolbar.move_folder_menu.add_folder(context.folder);
+            }
+            context.folder.use_changed.connect(on_use_changed);
         }
-        to_add.use_changed.connect(
-            on_use_changed
-        );
     }
 
     /** Removes a folder from the window. */
-    private void remove_folder(Geary.Folder to_remove) {
-        to_remove.use_changed.disconnect(
-            on_use_changed
-        );
-        if (to_remove.account == this.selected_account) {
-            this.main_toolbar.copy_folder_menu.remove_folder(to_remove);
-            this.main_toolbar.move_folder_menu.remove_folder(to_remove);
+    private void remove_folders(Gee.Collection<FolderContext> to_remove) {
+        foreach (var context in to_remove) {
+            Geary.Folder folder = context.folder;
+            folder.use_changed.disconnect(on_use_changed);
+            if (folder.account == this.selected_account) {
+                this.main_toolbar.copy_folder_menu.remove_folder(folder);
+                this.main_toolbar.move_folder_menu.remove_folder(folder);
+            }
+            this.folder_list.remove_folder(context);
         }
-        this.folder_list.remove_folder(to_remove);
     }
 
     private AccountContext? get_selected_account_context() {
@@ -1495,6 +1466,22 @@ public class Application.MainWindow :
                             context.contacts,
                             start_mark_timer
                         );
+                    } catch (Geary.EngineError.NOT_FOUND err) {
+                        // The first interesting email from the
+                        // conversation wasn't found. If the
+                        // conversation has completely evaporated by
+                        // now then fine, otherwise throw the
+                        // error. This happens e.g. in the drafts
+                        // folder, there is a race between the
+                        // composer being discarded and the draft
+                        // itself disappearing
+                        if (convo.get_count() == 0) {
+                            debug("Ignoring not found error: %s", err.message);
+                        } else {
+                            handle_error(
+                                convo.base_folder.account.information, err
+                            );
+                        }
                     } catch (GLib.IOError.CANCELLED err) {
                         // All good
                     } catch (GLib.Error err) {
@@ -1508,27 +1495,6 @@ public class Application.MainWindow :
                 this.conversation_viewer.show_multiple_selected();
                 break;
             }
-        }
-    }
-
-    private void folders_available(Geary.Account account,
-                                   Gee.BidirSortedSet<Geary.Folder> available) {
-        foreach (Geary.Folder folder in available) {
-            if (Controller.should_add_folder(available, folder)) {
-                add_folder(folder);
-            }
-        }
-    }
-
-    private void folders_unavailable(Geary.Account account,
-                                     Gee.BidirSortedSet<Geary.Folder> unavailable) {
-        var unavailable_iterator = unavailable.bidir_iterator();
-        bool has_prev = unavailable_iterator.last();
-        while (has_prev) {
-            Geary.Folder folder = unavailable_iterator.get();
-            remove_folder(folder);
-
-            has_prev = unavailable_iterator.previous();
         }
     }
 
@@ -1578,7 +1544,7 @@ public class Application.MainWindow :
         );
     }
 
-    private void create_composer_from_viewer(Composer.Widget.ComposeType compose_type) {
+    private void create_composer_from_viewer(Composer.Widget.ContextType type) {
         Geary.Account? account = this.selected_account;
         ConversationEmail? email_view = null;
         ConversationListBox? list_view = this.conversation_viewer.current_list;
@@ -1588,13 +1554,8 @@ public class Application.MainWindow :
         if (account != null && email_view != null) {
             email_view.get_selection_for_quoting.begin((obj, res) => {
                     string? quote = email_view.get_selection_for_quoting.end(res);
-                    this.controller.compose_with_context_email(
-                        this,
-                        account,
-                        compose_type,
-                        email_view.email,
-                        quote,
-                        false
+                    this.controller.compose_with_context_email.begin(
+                        type, email_view.email, quote ?? ""
                     );
                 });
         }
@@ -1978,36 +1939,42 @@ public class Application.MainWindow :
         this.remove_account.begin(account, to_select);
     }
 
-    private void on_folders_available_unavailable(
-        Geary.Account account,
-        Gee.BidirSortedSet<Geary.Folder>? available,
-        Gee.BidirSortedSet<Geary.Folder>? unavailable
-    ) {
-        if (available != null) {
-            folders_available(account, available);
-        }
-        if (unavailable != null) {
-            folders_unavailable(account, unavailable);
-        }
+    private void on_folders_available(Gee.Collection<FolderContext> available) {
+        add_folders(available);
+    }
+
+    private void on_folders_unavailable(Gee.Collection<FolderContext> unavailable) {
+        remove_folders(unavailable);
     }
 
     private void on_use_changed(Geary.Folder folder,
                                 Geary.Folder.SpecialUse old_type,
                                 Geary.Folder.SpecialUse new_type) {
         // Update the main window
-        this.folder_list.remove_folder(folder);
-        this.folder_list.add_folder(folder);
+        AccountContext? context = this.controller.get_context_for_account(
+            folder.account.information
+        );
+        if (context != null) {
+            FolderContext? folder_context = context.get_folder(folder);
+            if (folder_context != null) {
+                this.folder_list.remove_folder(folder_context);
+                this.folder_list.add_folder(folder_context);
 
-        // Since removing the folder will also remove its children
-        // from the folder list, we need to check for any and re-add
-        // them. See issue #11.
-        try {
-            foreach (Geary.Folder child in
-                     folder.account.list_matching_folders(folder.path)) {
-                this.folder_list.add_folder(child);
+                // Since removing the folder will also remove its children
+                // from the folder list, we need to check for any and re-add
+                // them. See issue #11.
+                try {
+                    foreach (Geary.Folder child in
+                             folder.account.list_matching_folders(folder.path)) {
+                        FolderContext? child_context = context.get_folder(child);
+                        if (child_context != null) {
+                            this.folder_list.add_folder(child_context);
+                        }
+                    }
+                } catch (Error err) {
+                    // Oh well
+                }
             }
-        } catch (Error err) {
-            // Oh well
         }
     }
 
@@ -2068,7 +2035,6 @@ public class Application.MainWindow :
         list.reply_to_all_email.connect(on_email_reply_to_all);
         list.reply_to_sender_email.connect(on_email_reply_to_sender);
         list.forward_email.connect(on_email_forward);
-        list.edit_email.connect(on_email_edit);
         list.trash_email.connect(on_email_trash);
         list.delete_email.connect(on_email_delete);
     }
@@ -2127,31 +2093,9 @@ public class Application.MainWindow :
                 // TODO: Determine how to map between conversations
                 // and drafts correctly.
                 Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
-
-                // Check all known composers since the draft may be
-                // open in a detached composer
-                bool already_open = false;
-                foreach (Composer.Widget composer
-                         in this.controller.get_composers()) {
-                    if (composer.current_draft_id != null &&
-                        composer.current_draft_id.equal_to(draft.id)) {
-                        already_open = true;
-                        composer.present();
-                        composer.set_focus();
-                        break;
-                    }
-                }
-
-                if (!already_open) {
-                    this.controller.compose_with_context_email(
-                        this,
-                        activated.base_folder.account,
-                        NEW_MESSAGE,
-                        draft,
-                        null,
-                        true
-                    );
-                }
+                this.controller.compose_with_context_email.begin(
+                    EDIT, draft, null
+                );
             }
         }
     }
@@ -2178,7 +2122,7 @@ public class Application.MainWindow :
     }
 
     private void on_reply_conversation() {
-        create_composer_from_viewer(REPLY);
+        create_composer_from_viewer(REPLY_SENDER);
     }
 
     private void on_reply_all_conversation() {
@@ -2501,37 +2445,25 @@ public class Application.MainWindow :
     }
 
     private void on_email_reply_to_sender(Geary.Email target, string? quote) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            this.controller.compose_with_context_email(
-                this, account, REPLY, target, quote, false
+        if (this.selected_account != null) {
+            this.controller.compose_with_context_email.begin(
+                REPLY_SENDER, target, quote
             );
         }
     }
 
     private void on_email_reply_to_all(Geary.Email target, string? quote) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            this.controller.compose_with_context_email(
-                this, account, REPLY_ALL, target, quote, false
+        if (this.selected_account != null) {
+            this.controller.compose_with_context_email.begin(
+                REPLY_ALL, target, quote
             );
         }
     }
 
     private void on_email_forward(Geary.Email target, string? quote) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            this.controller.compose_with_context_email(
-                this, account, FORWARD, target, quote, false
-            );
-        }
-    }
-
-    private void on_email_edit(Geary.Email target) {
-        Geary.Account? account = this.selected_account;
-        if (account != null) {
-            this.controller.compose_with_context_email(
-                this, account, NEW_MESSAGE, target, null, true
+        if (this.selected_account != null) {
+            this.controller.compose_with_context_email.begin(
+                FORWARD, target, quote
             );
         }
     }

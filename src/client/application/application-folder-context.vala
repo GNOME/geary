@@ -5,67 +5,104 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+
 /**
- * Implementation of the folder extension context.
+ * Collects application state related to a single folder.
  */
-internal class Application.FolderContext :
-    Geary.BaseObject, Plugin.FolderContext {
+public class Application.FolderContext : Geary.BaseObject {
 
 
-    private unowned Client application;
-    private FolderStoreFactory folders_factory;
-    private Plugin.FolderStore folders;
-    private string action_group_name;
-
-
-    internal FolderContext(Client application,
-                           FolderStoreFactory folders_factory,
-                           string action_group_name) {
-        this.application = application;
-        this.folders_factory = folders_factory;
-        this.folders = folders_factory.new_folder_store();
-        this.action_group_name = action_group_name;
+    /** Specifies different kinds of displayable email counts. */
+    public enum EmailCount {
+        /** No email count should be displayed. */
+        NONE,
+        /** The unread email count should be displayed. */
+        UNREAD,
+        /** The total email count should be displayed. */
+        TOTAL;
     }
 
-    public async Plugin.FolderStore get_folder_store()
-        throws Plugin.Error.PERMISSION_DENIED {
-        return this.folders;
+    /** The account for this context. */
+    public Geary.Folder folder { get; private set; }
+
+    /** Returns the human-readable name of the folder */
+    public string display_name { get; set; }
+
+    /** The icon to use for the folder */
+    public string icon_name { get; set; }
+
+    /** The count to be displayed for the folder. */
+    public EmailCount displayed_count { get; set; }
+
+
+    public FolderContext(Geary.Folder folder) {
+        this.folder = folder;
+        this.folder.use_changed.connect(() => update());
+        update();
     }
 
-    public void add_folder_info_bar(Plugin.Folder selected,
-                                    Plugin.InfoBar info_bar,
-                                    uint priority) {
-        Geary.Folder? folder = this.folders_factory.get_engine_folder(selected);
-        if (folder != null) {
-            foreach (MainWindow main in this.application.get_main_windows()) {
-                if (main.selected_folder == folder) {
-                    main.conversation_list_info_bars.add(
-                        new Components.InfoBar.for_plugin(
-                            info_bar, this.action_group_name
-                        )
-                    );
-                }
-            }
+    private void update() {
+        this.display_name = Util.I18n.to_folder_display_name(this.folder);
+
+        switch (this.folder.used_as) {
+        case INBOX:
+            this.icon_name = "mail-inbox-symbolic";
+            break;
+
+        case DRAFTS:
+            this.icon_name = "mail-drafts-symbolic";
+            break;
+
+        case SENT:
+            this.icon_name = "mail-sent-symbolic";
+            break;
+
+        case FLAGGED:
+            this.icon_name = "starred-symbolic";
+            break;
+
+        case IMPORTANT:
+            this.icon_name = "task-due-symbolic";
+            break;
+
+        case ALL_MAIL:
+        case ARCHIVE:
+            this.icon_name = "mail-archive-symbolic";
+            break;
+
+        case JUNK:
+            this.icon_name = "dialog-warning-symbolic";
+            break;
+
+        case TRASH:
+            this.icon_name = "user-trash-symbolic";
+            break;
+
+        case OUTBOX:
+            this.icon_name = "mail-outbox-symbolic";
+            break;
+
+        default:
+            this.icon_name = "tag-symbolic";
+            break;
         }
-    }
 
-    public void remove_folder_info_bar(Plugin.Folder selected,
-                                       Plugin.InfoBar info_bar) {
-        Geary.Folder? folder = this.folders_factory.get_engine_folder(selected);
-        if (folder != null) {
-            foreach (MainWindow main in this.application.get_main_windows()) {
-                if (main.selected_folder == folder) {
-                    // XXX implement this
-                    //main.conversation_list_info_bars.remove(
-                    //    XXX
-                    //);
-                }
-            }
+        switch (this.folder.used_as) {
+        case DRAFTS:
+        case OUTBOX:
+            this.displayed_count = TOTAL;
+            break;
+
+        case INBOX:
+        case JUNK:
+        case NONE:
+            this.displayed_count = UNREAD;
+            break;
+
+        default:
+            this.displayed_count = NONE;
+            break;
         }
-    }
-
-    internal void destroy() {
-        this.folders_factory.destroy_folder_store(this.folders);
     }
 
 }

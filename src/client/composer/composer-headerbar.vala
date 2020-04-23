@@ -13,6 +13,11 @@ public class Composer.Headerbar : Gtk.HeaderBar {
         set { this.save_and_close_button.visible = value; }
     }
 
+    public bool show_send {
+        get { return this.send_button.visible; }
+        set { this.send_button.visible = value; }
+    }
+
     private Application.Configuration config;
 
     private bool is_attached = true;
@@ -28,6 +33,8 @@ public class Composer.Headerbar : Gtk.HeaderBar {
     [GtkChild]
     private Gtk.Button save_and_close_button;
 
+    [GtkChild]
+    private Gtk.Button send_button;
 
     /** Fired when the user wants to expand a compact composer. */
     public signal void expand_composer();

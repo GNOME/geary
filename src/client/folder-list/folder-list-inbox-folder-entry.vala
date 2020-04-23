@@ -11,10 +11,10 @@ public class FolderList.InboxFolderEntry : FolderList.FolderEntry {
     private string display_name = "";
 
 
-    public InboxFolderEntry(Geary.Folder folder) {
-        base(folder);
-        this.display_name = folder.account.information.display_name;
-        folder.account.information.changed.connect(on_information_changed);
+    public InboxFolderEntry(Application.FolderContext context) {
+        base(context);
+        this.display_name = context.folder.account.information.display_name;
+        context.folder.account.information.changed.connect(on_information_changed);
     }
 
     ~InboxFolderEntry() {
@@ -32,7 +32,7 @@ public class FolderList.InboxFolderEntry : FolderList.FolderEntry {
     private void on_information_changed(Geary.AccountInformation config) {
         if (this.display_name != config.display_name) {
             this.display_name = config.display_name;
-            sidebar_name_changed(this.display_name);
+            entry_changed();
         }
     }
 }

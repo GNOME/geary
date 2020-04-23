@@ -11,6 +11,7 @@ geary_client_package = '@0@-@1@'.format(
 )
 
 geary_client_vala_sources = files(
+  'application/application-account-context.vala',
   'application/application-attachment-manager.vala',
   'application/application-avatar-store.vala',
   'application/application-certificate-manager.vala',
@@ -20,12 +21,13 @@ geary_client_vala_sources = files(
   'application/application-contact-store.vala',
   'application/application-contact.vala',
   'application/application-controller.vala',
-  'application/application-email-context.vala',
+  'application/application-email-plugin-context.vala',
   'application/application-email-store-factory.vala',
   'application/application-folder-context.vala',
+  'application/application-folder-plugin-context.vala',
   'application/application-folder-store-factory.vala',
   'application/application-main-window.vala',
-  'application/application-notification-context.vala',
+  'application/application-notification-plugin-context.vala',
   'application/application-plugin-manager.vala',
   'application/application-startup-manager.vala',
   'application/goa-mediator.vala',
@@ -111,6 +113,7 @@ geary_client_vala_sources = files(
   'plugin/plugin-account.vala',
   'plugin/plugin-application.vala',
   'plugin/plugin-button.vala',
+  'plugin/plugin-composer.vala',
   'plugin/plugin-contact-store.vala',
   'plugin/plugin-email-extension.vala',
   'plugin/plugin-email-store.vala',

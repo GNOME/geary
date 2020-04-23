@@ -107,6 +107,18 @@ public class Geary.MockAccount : Account, MockObject {
         }
     }
 
+    public override async Folder create_personal_folder(
+        string name,
+        Folder.SpecialUse use = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return object_call<Folder>(
+            "create_personal_folder",
+            { box_arg(name), box_arg(use), cancellable },
+            new MockFolder(null, null, null, use, null)
+        );
+    }
+
     public override EmailIdentifier to_email_identifier(GLib.Variant serialised)
         throws EngineError.BAD_PARAMETERS {
         try {

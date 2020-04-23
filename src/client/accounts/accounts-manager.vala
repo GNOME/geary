@@ -1108,17 +1108,29 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
 
         Geary.ConfigFile.Group folder_config =
             config.get_group(GROUP_FOLDERS);
-        account.archive_folder_path = load_folder(folder_config, FOLDER_ARCHIVE);
-        account.drafts_folder_path = load_folder(folder_config, FOLDER_DRAFTS);
-        account.sent_folder_path = load_folder(folder_config, FOLDER_SENT);
+        account.set_folder_steps_for_use(
+            ARCHIVE, folder_config.get_string_list(FOLDER_ARCHIVE)
+        );
+        account.set_folder_steps_for_use(
+            DRAFTS, folder_config.get_string_list(FOLDER_DRAFTS)
+        );
+        account.set_folder_steps_for_use(
+            SENT, folder_config.get_string_list(FOLDER_SENT)
+        );
         // v3.32-3.36 used spam instead of junk
         if (folder_config.has_key(FOLDER_SPAM)) {
-            account.junk_folder_path = load_folder(folder_config, FOLDER_SPAM);
+            account.set_folder_steps_for_use(
+                JUNK, folder_config.get_string_list(FOLDER_SPAM)
+            );
         }
         if (folder_config.has_key(FOLDER_JUNK)) {
-            account.junk_folder_path = load_folder(folder_config, FOLDER_JUNK);
+            account.set_folder_steps_for_use(
+                JUNK, folder_config.get_string_list(FOLDER_JUNK)
+            );
         }
-        account.trash_folder_path = load_folder(folder_config, FOLDER_TRASH);
+        account.set_folder_steps_for_use(
+            TRASH, folder_config.get_string_list(FOLDER_TRASH)
+        );
 
         return account;
     }
@@ -1150,31 +1162,39 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
 
         Geary.ConfigFile.Group folder_config =
             config.get_group(GROUP_FOLDERS);
-        save_folder(folder_config, FOLDER_ARCHIVE, account.archive_folder_path);
-        save_folder(folder_config, FOLDER_DRAFTS, account.drafts_folder_path);
-        save_folder(folder_config, FOLDER_SENT, account.sent_folder_path);
-        save_folder(folder_config, FOLDER_JUNK, account.junk_folder_path);
-        save_folder(folder_config, FOLDER_TRASH, account.trash_folder_path);
+        save_folder(
+            folder_config,
+            FOLDER_ARCHIVE,
+            account.get_folder_steps_for_use(ARCHIVE)
+        );
+        save_folder(
+            folder_config,
+            FOLDER_DRAFTS,
+            account.get_folder_steps_for_use(DRAFTS)
+        );
+        save_folder(
+            folder_config,
+            FOLDER_SENT,
+            account.get_folder_steps_for_use(SENT)
+        );
+        save_folder(
+            folder_config,
+            FOLDER_JUNK,
+            account.get_folder_steps_for_use(JUNK)
+        );
+        save_folder(
+            folder_config,
+            FOLDER_TRASH,
+            account.get_folder_steps_for_use(TRASH)
+        );
     }
 
-    private void save_folder(Geary.ConfigFile.Group config,
-                             string key,
-                             Geary.FolderPath? path) {
-        if (path != null) {
-            config.set_string_list(
-                key, new Gee.ArrayList<string>.wrap(path.as_array())
-            );
+    private inline void save_folder(Geary.ConfigFile.Group config,
+                                    string key,
+                                    Gee.List<string>? steps) {
+        if (steps != null) {
+            config.set_string_list(key, steps);
         }
-    }
-
-    private Geary.FolderPath? load_folder(Geary.ConfigFile.Group config,
-                                          string key) {
-        Geary.FolderPath? path = null;
-        Gee.List<string> parts = config.get_string_list(key);
-        if (!parts.is_empty) {
-            path = Geary.AccountInformation.build_folder_path(parts);
-        }
-        return path;
     }
 
 }
@@ -1274,20 +1294,20 @@ public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
             EMAIL_SIGNATURE_KEY, info.signature
         );
 
-        info.drafts_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(DRAFTS_FOLDER_KEY)
+        info.set_folder_steps_for_use(
+            DRAFTS, config.get_string_list(DRAFTS_FOLDER_KEY)
         );
-        info.sent_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(SENT_MAIL_FOLDER_KEY)
+        info.set_folder_steps_for_use(
+            SENT, config.get_string_list(SENT_MAIL_FOLDER_KEY)
         );
-        info.junk_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(SPAM_FOLDER_KEY)
+        info.set_folder_steps_for_use(
+            JUNK, config.get_string_list(SPAM_FOLDER_KEY)
         );
-        info.trash_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(TRASH_FOLDER_KEY)
+        info.set_folder_steps_for_use(
+            TRASH, config.get_string_list(TRASH_FOLDER_KEY)
         );
-        info.archive_folder_path = Geary.AccountInformation.build_folder_path(
-            config.get_string_list(ARCHIVE_FOLDER_KEY)
+        info.set_folder_steps_for_use(
+            ARCHIVE, config.get_string_list(ARCHIVE_FOLDER_KEY)
         );
 
         info.save_drafts = config.get_bool(SAVE_DRAFTS_KEY, true);
@@ -1322,36 +1342,34 @@ public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
             );
         }
 
-        Gee.ArrayList<string> empty = new Gee.ArrayList<string>();
+        Gee.List<string> empty = new Gee.ArrayList<string>();
+        Gee.List<string>? steps = null;
+
+        steps = info.get_folder_steps_for_use(DRAFTS);
         config.set_string_list(
             DRAFTS_FOLDER_KEY,
-            (info.drafts_folder_path != null
-             ? new Gee.ArrayList<string>.wrap(info.drafts_folder_path.as_array())
-             : empty)
+            steps != null ? steps : empty
         );
+
+        steps = info.get_folder_steps_for_use(SENT);
         config.set_string_list(
             SENT_MAIL_FOLDER_KEY,
-            (info.sent_folder_path != null
-             ? new Gee.ArrayList<string>.wrap(info.sent_folder_path.as_array())
-             : empty)
+            steps != null ? steps : empty
         );
+        steps = info.get_folder_steps_for_use(JUNK);
         config.set_string_list(
             SPAM_FOLDER_KEY,
-            (info.junk_folder_path != null
-             ? new Gee.ArrayList<string>.wrap(info.junk_folder_path.as_array())
-             : empty)
+            steps != null ? steps : empty
         );
+        steps = info.get_folder_steps_for_use(TRASH);
         config.set_string_list(
             TRASH_FOLDER_KEY,
-            (info.trash_folder_path != null
-             ? new Gee.ArrayList<string>.wrap(info.trash_folder_path.as_array())
-             : empty)
+            steps != null ? steps : empty
         );
+        steps = info.get_folder_steps_for_use(ARCHIVE);
         config.set_string_list(
             ARCHIVE_FOLDER_KEY,
-            (info.archive_folder_path != null
-             ? new Gee.ArrayList<string>.wrap(info.archive_folder_path.as_array())
-             : empty)
+            steps != null ? steps : empty
         );
 
         config.set_bool(SAVE_DRAFTS_KEY, info.save_drafts);

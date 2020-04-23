@@ -9,7 +9,7 @@
 /**
  * Implementation of the notification plugin extension context.
  */
-internal class Application.NotificationContext :
+internal class Application.NotificationPluginContext :
     Geary.BaseObject, Plugin.NotificationContext {
 
 
@@ -70,9 +70,9 @@ internal class Application.NotificationContext :
     private EmailStoreFactory email_factory;
 
 
-    internal NotificationContext(Client application,
-                                 FolderStoreFactory folders_factory,
-                                 EmailStoreFactory email_factory) {
+    internal NotificationPluginContext(Client application,
+                                       FolderStoreFactory folders_factory,
+                                       EmailStoreFactory email_factory) {
         this.application = application;
         this.folders_factory = folders_factory;
         this.email_factory = email_factory;
@@ -244,14 +244,16 @@ internal class Application.NotificationContext :
                               Gee.Collection<Geary.EmailIdentifier> delta) {
         Plugin.Folder folder =
             this.folders_factory.get_plugin_folder(info.folder);
-        if (arrived) {
+        AccountContext? context =
+            this.application.controller.get_context_for_account(
+                info.folder.account.information
+            );
+        if (arrived && context != null) {
             this._total_new_messages += delta.size;
             new_messages_arrived(
                 folder,
                 info.recent_ids.size,
-                this.email_factory.to_plugin_ids(
-                    delta, info.folder.account.information
-                )
+                this.email_factory.to_plugin_ids(delta, context)
             );
         } else {
             this._total_new_messages -= delta.size;

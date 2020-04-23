@@ -22,6 +22,9 @@ public errordomain Plugin.Error {
     PERMISSION_DENIED,
 
     /** Raised when a requested resource was not found. */
-    NOT_FOUND;
+    NOT_FOUND,
+
+    /** Raised when a requested operation could not be carried out. */
+    NOT_SUPPORTED;
 
 }

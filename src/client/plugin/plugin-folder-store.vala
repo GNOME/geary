@@ -17,7 +17,7 @@ public interface Plugin.FolderStore : Geary.BaseObject {
 
 
     /**
-     * The type of the folder identifiers
+     * The type of variant folder identifiers.
      *
      * @see Folder.to_variant
      * @see get_folder_from_variant
@@ -47,7 +47,16 @@ public interface Plugin.FolderStore : Geary.BaseObject {
     ) throws GLib.Error;
 
     /**
-     * Returns the folder specified by the given identifier, if any.
+     * Creates a folder in the root of an account's personal name space.
+     */
+    public abstract async Folder create_personal_folder(
+        Account target,
+        string name,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error;
+
+    /**
+     * Returns the folder specified by the given variant, if any.
      *
      * @see Folder.to_variant
      * @see folder_variant_type

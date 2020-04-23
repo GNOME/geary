@@ -23,12 +23,19 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     private class EmailStoreImpl : Geary.BaseObject, Plugin.EmailStore {
 
 
-        private Client backing;
+        private weak EmailStoreFactory factory;
 
 
-        public EmailStoreImpl(Client backing) {
-            this.backing = backing;
+        public EmailStoreImpl(EmailStoreFactory factory) {
+            this.factory = factory;
         }
+
+        public override GLib.VariantType email_identifier_variant_type {
+            get { return this._email_id_variant_type; }
+        }
+        private GLib.VariantType _email_id_variant_type = new GLib.VariantType(
+            "(sv)"
+        );
 
         public async Gee.Collection<Plugin.Email> get_email(
             Gee.Collection<Plugin.EmailIdentifier> plugin_ids,
@@ -40,45 +47,61 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             // group them by account up front. The common case will be
             // only a single account, so optimise for that a bit.
 
-            var accounts = new Gee.HashMap<
-                Geary.AccountInformation,
-                    Gee.Set<Geary.EmailIdentifier>
+            var found_accounts = new Gee.HashMap<
+                AccountContext, Gee.Set<Geary.EmailIdentifier>
             >();
-            Geary.AccountInformation? current_account = null;
+            AccountContext? current_account = null;
             Gee.Set<Geary.EmailIdentifier>? engine_ids = null;
             foreach (Plugin.EmailIdentifier plugin_id in plugin_ids) {
                 IdImpl? id_impl = plugin_id as IdImpl;
                 if (id_impl != null) {
-                    if (id_impl.account != current_account) {
-                        current_account = id_impl.account;
-                        engine_ids = accounts.get(current_account);
+                    if (id_impl._account.backing != current_account) {
+                        current_account = id_impl._account.backing;
+                        engine_ids = found_accounts.get(current_account);
                         if (engine_ids == null) {
                             engine_ids = new Gee.HashSet<Geary.EmailIdentifier>();
-                            accounts.set(current_account, engine_ids);
+                            found_accounts.set(current_account, engine_ids);
                         }
                     }
                     engine_ids.add(id_impl.backing);
                 }
             }
 
-            foreach (var account in accounts.keys) {
-                AccountContext context =
-                    this.backing.controller.get_context_for_account(account);
+            foreach (var context in found_accounts.keys) {
                 Gee.Collection<Geary.Email> batch =
                     yield context.emails.list_email_by_sparse_id_async(
-                        accounts.get(account),
+                        found_accounts.get(context),
                         REQUIRED_FIELDS,
                         NONE,
                         context.cancellable
                     );
                 if (batch != null) {
                     foreach (var email in batch) {
-                        emails.add(new EmailImpl(email, account));
+                        emails.add(
+                            new EmailImpl(
+                                email,
+                                this.factory.accounts.get(context))
+                        );
                     }
                 }
             }
 
             return emails;
+        }
+
+        public Plugin.EmailIdentifier? get_email_identifier_from_variant(
+            GLib.Variant variant
+        ) {
+            var account = this.factory.get_account_from_variant(variant);
+            var id = this.factory.get_email_identifier_from_variant(variant);
+            IdImpl? plugin_id = null;
+            if (account != null && id != null) {
+                var plugin_account = this.factory.accounts.get(account);
+                if (plugin_account != null) {
+                    plugin_id = new IdImpl(id, plugin_account);
+                }
+            }
+            return plugin_id;
         }
 
         internal void destroy() {
@@ -111,14 +134,12 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         }
         string _subject;
 
-        internal Geary.Email backing;
-        // Remove this when EmailIdentifier is updated to include
-        // the account
-        internal Geary.AccountInformation account { get; private set; }
+        internal Geary.Email backing { get; private set; }
+        internal PluginManager.AccountImpl account { get; private set; }
 
 
         internal EmailImpl(Geary.Email backing,
-                         Geary.AccountInformation account) {
+                           PluginManager.AccountImpl account) {
             this.backing = backing;
             this.account = account;
             Geary.RFC822.Subject? subject = this.backing.subject;
@@ -136,31 +157,34 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         Gee.Hashable<Plugin.EmailIdentifier>, Plugin.EmailIdentifier {
 
 
+        public Plugin.Account account { get { return this._account; } }
+        internal PluginManager.AccountImpl _account { get; private set; }
+
         internal Geary.EmailIdentifier backing { get; private set; }
-        // Remove this when EmailIdentifier is updated to include
-        // the account
-        internal Geary.AccountInformation account { get; private set; }
 
 
         internal IdImpl(Geary.EmailIdentifier backing,
-                        Geary.AccountInformation account) {
+                        PluginManager.AccountImpl account) {
             this.backing = backing;
-            this.account = account;
+            this._account = account;
         }
 
         public GLib.Variant to_variant() {
-            return this.backing.to_variant();
+            return new GLib.Variant.tuple({
+                    this._account.backing.account.information.id,
+                        new GLib.Variant.variant(this.backing.to_variant())
+            });
         }
 
         public bool equal_to(Plugin.EmailIdentifier other) {
             if (this == other) {
                 return true;
             }
-            IdImpl? impl = other as IdImpl;
+            var impl = other as IdImpl;
             return (
                 impl != null &&
                 this.backing.equal_to(impl.backing) &&
-                this.account.equal_to(impl.account)
+                this._account.backing == impl._account.backing
             );
         }
 
@@ -171,7 +195,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
 
-    private Client application;
+    private Gee.Map<AccountContext,PluginManager.AccountImpl> accounts;
     private Gee.Set<EmailStoreImpl> stores =
         new Gee.HashSet<EmailStoreImpl>();
 
@@ -179,8 +203,10 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     /**
      * Constructs a new factory instance.
      */
-    public EmailStoreFactory(Client application) throws GLib.Error {
-        this.application = application;
+    public EmailStoreFactory(
+        Gee.Map<AccountContext,PluginManager.AccountImpl> accounts
+    ) {
+        this.accounts = accounts;
     }
 
     /** Clearing all state of the store. */
@@ -193,7 +219,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
     /** Constructs a new email store for use by plugin contexts. */
     public Plugin.EmailStore new_email_store() {
-        var store = new EmailStoreImpl(this.application);
+        var store = new EmailStoreImpl(this);
         this.stores.add(store);
         return store;
     }
@@ -209,11 +235,11 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
     public Gee.Collection<Plugin.EmailIdentifier> to_plugin_ids(
         Gee.Collection<Geary.EmailIdentifier> engine_ids,
-        Geary.AccountInformation account
+        AccountContext account
     ) {
         var plugin_ids = new Gee.HashSet<Plugin.EmailIdentifier>();
         foreach (var id in engine_ids) {
-            plugin_ids.add(new IdImpl(id, account));
+            plugin_ids.add(new IdImpl(id, this.accounts.get(account)));
         }
         return plugin_ids;
     }
@@ -224,8 +250,39 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
     public Plugin.Email to_plugin_email(Geary.Email engine,
-                                        Geary.AccountInformation account) {
-        return new EmailImpl(engine, account);
+                                        AccountContext account) {
+        return new EmailImpl(engine, this.accounts.get(account));
+    }
+
+    /** Returns the account context for the given plugin email id. */
+    public AccountContext get_account_from_variant(GLib.Variant target) {
+        AccountContext? account = null;
+        string id = (string) target.get_child_value(0);
+        foreach (var context in this.accounts.keys) {
+            var info = context.account.information;
+            if (info.id == id) {
+                account = context;
+                break;
+            }
+        }
+        return account;
+    }
+
+    /** Returns the engine email id for the given plugin email id. */
+    public Geary.EmailIdentifier?
+        get_email_identifier_from_variant(GLib.Variant target) {
+        Geary.EmailIdentifier? id = null;
+        var context = get_account_from_variant(target);
+        if (context != null) {
+            try {
+                id = context.account.to_email_identifier(
+                    target.get_child_value(1).get_variant()
+                );
+            } catch (GLib.Error err) {
+                debug("Invalid email folder id: %s", err.message);
+            }
+        }
+        return id;
     }
 
 }

@@ -84,8 +84,8 @@ public class Application.Client : Gtk.Application {
         { Action.Application.NEW_WINDOW, on_activate_new_window },
         { Action.Application.PREFERENCES, on_activate_preferences},
         { Action.Application.QUIT, on_activate_quit},
-        { Action.Application.SHOW_EMAIL, on_activate_show_email, "(vv)"},
-        { Action.Application.SHOW_FOLDER, on_activate_show_folder, "(v)"}
+        { Action.Application.SHOW_EMAIL, on_activate_show_email, "(sv)"},
+        { Action.Application.SHOW_FOLDER, on_activate_show_folder, "(sv)"}
     };
 
     // This is also the order in which they are presented to the user,
@@ -513,7 +513,7 @@ public class Application.Client : Gtk.Application {
                         mailto.substring(B0RKED_GLIB_MAILTO_PREFIX.length)
                     );
                 }
-                this.new_composer.begin(mailto);
+                this.new_composer_mailto.begin(mailto);
             }
         }
     }
@@ -600,15 +600,105 @@ public class Application.Client : Gtk.Application {
         this.controller.expunge_accounts.begin();
     }
 
-    public async void show_email(Geary.Folder folder,
-                                 Geary.EmailIdentifier id) {
+    /**
+     * Displays a specific email in a main window.
+     *
+     * This method is invoked by the application `show-email`
+     * action. A folder containing the email will be selected if the
+     * current folder does not select it.
+     *
+     * The email is identified by the given variant, which can be
+     * obtained by calling {@link Plugin.EmailIdentifier.to_variant}.
+     */
+    public async void show_email(GLib.Variant? id) {
         MainWindow main = yield this.present();
-        main.show_email.begin(folder, Geary.Collection.single(id), true);
+        if (id != null) {
+            EmailStoreFactory email = this.controller.plugins.email_factory;
+            AccountContext? context = email.get_account_from_variant(id);
+            Geary.EmailIdentifier? email_id =
+                email.get_email_identifier_from_variant(id);
+            if (context != null && email_id != null) {
+                // Determine what folders the email is in
+                Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? folders = null;
+                try {
+                    folders = yield context.account.get_containing_folders_async(
+                        Geary.Collection.single(email_id),
+                        context.cancellable
+                    );
+                } catch (GLib.Error err) {
+                    warning("Error listing folders for email: %s", err.message);
+                }
+                if (folders != null) {
+                    // Determine what folder containing the email
+                    // should be selected. If the current folder
+                    // contains the email then use that, else use the
+                    // inbox if that contains it, else use the first
+                    // path found
+                    var paths = folders.get(email_id);
+                    Geary.Folder? selected = main.selected_folder;
+                    if (selected == null ||
+                        selected.account != context.account ||
+                        !(selected.path in paths)) {
+                        selected = null;
+                        foreach (var path in paths) {
+                            try {
+                                Geary.Folder folder =
+                                    context.account.get_folder(path);
+                                if (folder.used_as == INBOX) {
+                                    selected = folder;
+                                    break;
+                                }
+                            } catch (GLib.Error err) {
+                                warning(
+                                    "Error getting folder for email: %s",
+                                    err.message
+                                );
+                            }
+                        }
+
+                        if (selected == null && !paths.is_empty) {
+                            try {
+                                selected = context.account.get_folder(
+                                    Geary.Collection.first(paths)
+                                );
+                            } catch (GLib.Error err) {
+                                warning(
+                                    "Error getting folder for email: %s",
+                                    err.message
+                                );
+                            }
+                        }
+                    }
+
+                    if (selected != null) {
+                        yield main.show_email(
+                            selected,
+                            Geary.Collection.single(email_id),
+                            true
+                        );
+                    }
+                }
+            }
+        }
     }
 
-    public async void show_folder(Geary.Folder folder) {
+    /**
+     * Selects a specific folder in a main window.
+     *
+     * This method is invoked by the application `show-folder` action.
+     *
+     * The folder is identified by the given variant, which can be
+     * obtained by calling {@link Plugin.Folder.to_variant}.
+     */
+    public async void show_folder(GLib.Variant? id) {
         MainWindow main = yield this.present();
-        yield main.select_folder(folder, true);
+        if (id != null) {
+            Geary.Folder? folder =
+                this.controller.plugins.folders_factory.get_folder_from_variant(id);
+            if (folder != null) {
+                yield main.select_folder(folder, true);
+            }
+        }
     }
 
     public async void show_inspector() {
@@ -635,10 +725,14 @@ public class Application.Client : Gtk.Application {
         prefs.show();
     }
 
-    public async void new_composer(string? mailto) {
+    public async void new_composer(Geary.RFC822.MailboxAddress? to = null) {
         yield this.present();
+        yield this.controller.compose_new_email(to);
+    }
 
-        this.controller.compose(mailto);
+    public async void new_composer_mailto(string? mailto) {
+        yield this.present();
+        yield this.controller.compose_mailto(mailto);
     }
 
     public async void new_window(Geary.Folder? select_folder,
@@ -734,7 +828,7 @@ public class Application.Client : Gtk.Application {
         yield create_controller();
 
         if (uri.down().has_prefix(MAILTO_URI_SCHEME_PREFIX)) {
-            yield this.new_composer(uri);
+            yield this.new_composer_mailto(uri);
         } else {
             string uri_ = uri;
             // Support web URLs that omit the protocol.
@@ -1037,23 +1131,6 @@ public class Application.Client : Gtk.Application {
         }
     }
 
-    private Geary.Folder? get_folder_from_action_target(GLib.Variant target) {
-        Geary.Folder? folder = null;
-        GLib.Variant param = target.get_child_value(0).get_variant();
-        string id = (string) param.get_child_value(0);
-        try {
-            Geary.Account account = this.engine.get_account_for_id(id);
-            Geary.FolderPath? path =
-                account.to_folder_path(
-                    param.get_child_value(1).get_variant()
-                );
-            folder = account.get_folder(path);
-        } catch (GLib.Error err) {
-            debug("Could not find account/folder %s", err.message);
-        }
-        return folder;
-    }
-
     private void load_css(Gtk.CssProvider provider, string resource_uri) {
         provider.parsing_error.connect(on_css_parse_error);
         try {
@@ -1073,7 +1150,7 @@ public class Application.Client : Gtk.Application {
     }
 
     private void on_activate_compose() {
-        this.new_composer.begin(null);
+        this.new_composer.begin();
     }
 
     private void on_activate_inspect() {
@@ -1082,7 +1159,7 @@ public class Application.Client : Gtk.Application {
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
         if (param != null) {
-            this.new_composer.begin(param.get_string());
+            this.new_composer_mailto.begin(param.get_string());
         }
     }
 
@@ -1106,33 +1183,12 @@ public class Application.Client : Gtk.Application {
 
     private void on_activate_show_email(GLib.SimpleAction action,
                                         GLib.Variant? target) {
-        if (target != null) {
-            Geary.Folder? folder = get_folder_from_action_target(target);
-            Geary.EmailIdentifier? email_id = null;
-            if (folder != null) {
-                try {
-                    email_id = folder.account.to_email_identifier(
-                        target.get_child_value(1).get_variant()
-                    );
-                } catch (GLib.Error err) {
-                    debug("Could not find email id: %s", err.message);
-                }
-
-                if (email_id != null) {
-                    this.show_email.begin(folder, email_id);
-                }
-            }
-        }
+        this.show_email.begin(target);
     }
 
     private void on_activate_show_folder(GLib.SimpleAction action,
-                                        GLib.Variant? target) {
-        if (target != null) {
-            Geary.Folder? folder = get_folder_from_action_target(target);
-            if (folder != null) {
-                this.show_folder.begin(folder);
-            }
-        }
+                                         GLib.Variant? target) {
+        this.show_folder.begin(target);
     }
 
     private void on_activate_help() {

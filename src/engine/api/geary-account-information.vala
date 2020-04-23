@@ -25,17 +25,6 @@ public class Geary.AccountInformation : BaseObject {
         return a.display_name.collate(b.display_name);
     }
 
-    public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
-        if (parts == null || parts.size == 0)
-            return null;
-
-        Geary.FolderPath path = new Imap.FolderRoot("#geary-config");
-        foreach (string basename in parts) {
-            path = path.get_child(basename);
-        }
-        return path;
-    }
-
 
     /** A unique (engine-wide), opaque identifier for the account. */
     public string id { get; private set; }
@@ -174,21 +163,6 @@ public class Geary.AccountInformation : BaseObject {
     /** Specifies the email sig to be appended to new messages. */
     public string signature { get; set; default = ""; }
 
-    /** Draft special folder path. */
-    public Geary.FolderPath? drafts_folder_path { get; set; default = null; }
-
-    /** Sent special folder path. */
-    public Geary.FolderPath? sent_folder_path { get; set; default = null; }
-
-    /** Junk special folder path. */
-    public Geary.FolderPath? junk_folder_path { get; set; default = null; }
-
-    /** Trash special folder path. */
-    public Geary.FolderPath? trash_folder_path { get; set; default = null; }
-
-    /** Archive special folder path. */
-    public Geary.FolderPath? archive_folder_path { get; set; default = null; }
-
     /**
      * Location of the account's config directory.
      *
@@ -204,6 +178,9 @@ public class Geary.AccountInformation : BaseObject {
      * such as the account database.
      */
     public File? data_dir { get; private set; default = null; }
+
+    private Gee.Map<Folder.SpecialUse?,Gee.List<string>> special_use_paths =
+        new Gee.HashMap<Folder.SpecialUse?,Gee.List<string>>();
 
     private Gee.List<Geary.RFC822.MailboxAddress> mailboxes {
         get; private set;
@@ -287,11 +264,7 @@ public class Geary.AccountInformation : BaseObject {
         this.incoming = new ServiceInformation.copy(other.incoming);
         this.outgoing = new ServiceInformation.copy(other.outgoing);
 
-        this.drafts_folder_path = other.drafts_folder_path;
-        this.sent_folder_path = other.sent_folder_path;
-        this.junk_folder_path = other.junk_folder_path;
-        this.trash_folder_path = other.trash_folder_path;
-        this.archive_folder_path = other.archive_folder_path;
+        this.special_use_paths.set_all(other.special_use_paths);
 
         this.config_dir = other.config_dir;
         this.data_dir = other.data_dir;
@@ -368,80 +341,79 @@ public class Geary.AccountInformation : BaseObject {
         this.mailboxes.set(index, mailbox);
     }
 
-     /**
-     * Returns the configured path for a special folder use.
-     *
-     * This is used when Geary has found or created a special folder
-     * for this account. The path will be null if Geary has always
-     * been told about the special folders by the server, and hasn't
-     * had to go looking for them.  Only the ARCHIVE, DRAFTS, SENT,
-     * JUNK, and TRASH special folder types are valid to pass to this
-     * function.
+    /**
+     * Returns the folder path steps configured for a specific use.
      */
-    public Geary.FolderPath? get_special_folder_path(Folder.SpecialUse special) {
-        switch (special) {
-        case DRAFTS:
-            return this.drafts_folder_path;
-
-        case SENT:
-            return this.sent_folder_path;
-
-        case JUNK:
-            return this.junk_folder_path;
-
-        case TRASH:
-            return this.trash_folder_path;
-
-        case ARCHIVE:
-            return this.archive_folder_path;
+    public Gee.List<string> get_folder_steps_for_use(Folder.SpecialUse use) {
+        var steps = this.special_use_paths.get(use);
+        if (steps != null) {
+            steps = steps.read_only_view;
+        } else {
+            steps = Gee.List.empty();
         }
-
-        return null;
+        return steps;
     }
 
     /**
-     * Sets the configured path for a special folder type.
-     *
-     * This is only obeyed if the server doesn't tell Geary which
-     * folders are special. Only the DRAFTS, SENT, JUNK, TRASH and
-     * ARCHIVE special folder types are valid to pass to this
-     * function.
+     * Sets the configured folder path steps for a specific use.
      */
-    public void set_special_folder_path(Folder.SpecialUse special,
-                                        FolderPath? new_path) {
-        Geary.FolderPath? old_path = null;
-        switch (special) {
-        case DRAFTS:
-            old_path = this.drafts_folder_path;
-            this.drafts_folder_path = new_path;
-            break;
-
-        case SENT:
-            old_path = this.sent_folder_path;
-            this.sent_folder_path = new_path;
-            break;
-
-        case JUNK:
-            old_path = this.junk_folder_path;
-            this.junk_folder_path = new_path;
-            break;
-
-        case TRASH:
-            old_path = this.trash_folder_path;
-            this.trash_folder_path = new_path;
-            break;
-
-        case ARCHIVE:
-            old_path = this.archive_folder_path;
-            this.archive_folder_path = new_path;
-            break;
+    public void set_folder_steps_for_use(Folder.SpecialUse special,
+                                         Gee.List<string>? new_path) {
+        var existing = this.special_use_paths.get(special);
+        if (new_path != null && !new_path.is_empty) {
+            this.special_use_paths.set(special, new_path);
+        } else {
+            this.special_use_paths.unset(special);
         }
-
-        if ((old_path == null && new_path != null) ||
-            (old_path != null && new_path == null) ||
-            (old_path != null && !old_path.equal_to(new_path))) {
+        if ((existing == null && new_path != null) ||
+            (existing != null && new_path == null) ||
+            (existing != null &&
+             (existing.size != new_path.size ||
+              existing.contains_all(new_path)))) {
             changed();
         }
+    }
+
+    /**
+     * Returns a folder path based on the configured steps for a use.
+     */
+    public FolderPath? new_folder_path_for_use(FolderRoot root,
+                                               Folder.SpecialUse use) {
+        FolderPath? path = null;
+        var steps = this.special_use_paths.get(use);
+        if (steps != null) {
+            path = root;
+            foreach (string step in steps) {
+                path = path.get_child(step);
+            }
+        }
+        return path;
+    }
+
+    /**
+     * Returns the configured special folder use for a given path.
+     */
+    public Folder.SpecialUse get_folder_use_for_path(FolderPath path) {
+        var path_steps = path.as_array();
+        var use = Folder.SpecialUse.NONE;
+        foreach (var entry in this.special_use_paths.entries) {
+            var use_steps = entry.value;
+            var found = false;
+            if (path_steps.length == use_steps.size) {
+                found = true;
+                for (int i = path_steps.length - 1; i >= 0; i--) {
+                    if (path_steps[i] != use_steps[i]) {
+                        found = false;
+                        break;
+                    }
+                }
+            }
+            if (found) {
+                use = entry.key;
+                break;
+            }
+        }
+        return use;
     }
 
     /**
@@ -539,11 +511,8 @@ public class Geary.AccountInformation : BaseObject {
                 this.signature == other.signature &&
                 this.incoming.equal_to(other.incoming) &&
                 this.outgoing.equal_to(other.outgoing) &&
-                this.drafts_folder_path == other.drafts_folder_path &&
-                this.sent_folder_path == other.sent_folder_path &&
-                this.junk_folder_path == other.junk_folder_path &&
-                this.trash_folder_path == other.trash_folder_path &&
-                this.archive_folder_path == other.archive_folder_path &&
+                this.special_use_paths.size == other.special_use_paths.size &&
+                this.special_use_paths.has_all(other.special_use_paths) &&
                 this.config_dir == other.config_dir &&
                 this.data_dir == other.data_dir
             )

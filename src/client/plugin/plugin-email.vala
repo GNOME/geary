@@ -44,6 +44,11 @@ public interface Plugin.Email : Geary.BaseObject {
 public interface Plugin.EmailIdentifier :
     Geary.BaseObject, Gee.Hashable<EmailIdentifier> {
 
+
+    /** Returns the account that the email belongs to. */
+    public abstract Account account { get; }
+
+
     /**
      * Returns a variant version of this identifier.
      *
@@ -51,6 +56,5 @@ public interface Plugin.EmailIdentifier :
      * application action parameter.
      */
     public abstract GLib.Variant to_variant();
-
 
 }

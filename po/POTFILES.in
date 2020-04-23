@@ -14,6 +14,7 @@ src/client/accounts/accounts-editor-row.vala
 src/client/accounts/accounts-editor-servers-pane.vala
 src/client/accounts/accounts-manager.vala
 src/client/accounts/accounts-signature-web-view.vala
+src/client/application/application-account-context.vala
 src/client/application/application-attachment-manager.vala
 src/client/application/application-avatar-store.vala
 src/client/application/application-certificate-manager.vala
@@ -23,12 +24,13 @@ src/client/application/application-configuration.vala
 src/client/application/application-contact-store.vala
 src/client/application/application-contact.vala
 src/client/application/application-controller.vala
-src/client/application/application-email-context.vala
+src/client/application/application-email-plugin-context.vala
 src/client/application/application-email-store-factory.vala
 src/client/application/application-folder-context.vala
+src/client/application/application-folder-plugin-context.vala
 src/client/application/application-folder-store-factory.vala
 src/client/application/application-main-window.vala
-src/client/application/application-notification-context.vala
+src/client/application/application-notification-plugin-context.vala
 src/client/application/application-plugin-manager.vala
 src/client/application/application-startup-manager.vala
 src/client/application/goa-mediator.vala
@@ -92,6 +94,7 @@ src/client/folder-list/folder-list-tree.vala
 src/client/plugin/plugin-account.vala
 src/client/plugin/plugin-application.vala
 src/client/plugin/plugin-button.vala
+src/client/plugin/plugin-composer.vala
 src/client/plugin/plugin-contact-store.vala
 src/client/plugin/plugin-email-extension.vala
 src/client/plugin/plugin-email-store.vala

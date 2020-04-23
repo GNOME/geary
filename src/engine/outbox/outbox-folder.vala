@@ -350,6 +350,11 @@ public class Geary.Outbox.Folder :
         return row_to_email(row);
     }
 
+    public override void set_used_as_custom(bool enabled)
+        throws EngineError.UNSUPPORTED {
+        throw new EngineError.UNSUPPORTED("Folder special use cannot be changed");
+    }
+
     internal async void
         add_to_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
                                         Gee.MultiMap<Geary.EmailIdentifier,FolderPath> map,

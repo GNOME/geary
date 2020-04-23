@@ -182,15 +182,13 @@ public class Plugin.DesktopNotifications :
         clear_arrived_notification();
 
         string? action = null;
-        GLib.Variant[] target_param = new GLib.Variant[] {
-            new GLib.Variant.variant(folder.to_variant())
-        };
-
+        GLib.Variant? target_param = null;
         if (id == null) {
             action = Action.Application.SHOW_FOLDER;
+            target_param = folder.to_variant();
         } else {
             action = Action.Application.SHOW_EMAIL;
-            target_param += new GLib.Variant.variant(id.to_variant());
+            target_param = id.to_variant();
         }
 
         this.arrived_notification = issue_notification(
@@ -199,7 +197,7 @@ public class Plugin.DesktopNotifications :
             body,
             icon,
             Action.Application.prefix(action),
-            new GLib.Variant.tuple(target_param)
+            target_param
         );
     }
 

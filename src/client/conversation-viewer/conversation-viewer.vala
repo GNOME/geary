@@ -179,20 +179,21 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         );
         embed.vanished.connect(on_composer_closed);
 
-        // We need to disable kinetic scrolling so that if it still
-        // has some momentum when the composer is inserted and
-        // scrolled to, it won't jump away again. See Bug 778027.
-        conversation_scroller.kinetic_scrolling = false;
+        // We need to temporarily disable kinetic scrolling so that if
+        // it still has some momentum when the composer is inserted
+        // and scrolled to, it won't jump away again. See Bug 778027.
+        var kinetic = this.conversation_scroller.kinetic_scrolling;
+        if (kinetic) this.conversation_scroller.kinetic_scrolling = false;
 
         if (this.current_list != null) {
             this.current_list.add_embedded_composer(
                 embed,
-                composer.current_draft_id != null
+                composer.saved_id != null
             );
             composer.update_window_title();
         }
 
-        conversation_scroller.kinetic_scrolling = true;
+        if (kinetic) this.conversation_scroller.kinetic_scrolling = true;
     }
 
     /**

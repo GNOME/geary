@@ -75,4 +75,23 @@ public interface Plugin.FolderContext : Geary.BaseObject {
     public abstract void remove_folder_info_bar(Folder selected,
                                                 InfoBar infobar);
 
+    /**
+     * Registers a folder for a well-known use.
+     *
+     * This promotes a folder from a label to a special-use folder,
+     * causing it to appear with other special-use folders with the
+     * given name and icon.
+     */
+    public abstract void register_folder_used_as(Folder target,
+                                                 string name,
+                                                 string icon_name) throws Error;
+
+    /**
+     * Unregisters a folder for a well-known use.
+     *
+     * This demotes the folder from a special-use to an ordinary
+     * label.
+     */
+    public abstract void unregister_folder_used_as(Folder target) throws Error;
+
 }

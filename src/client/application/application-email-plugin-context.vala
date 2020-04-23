@@ -8,7 +8,7 @@
 /**
  * Implementation of the email plugin extension context.
  */
-internal class Application.EmailContext :
+internal class Application.EmailPluginContext :
     Geary.BaseObject, Plugin.EmailContext {
 
 
@@ -18,9 +18,9 @@ internal class Application.EmailContext :
     private string action_group_name;
 
 
-    internal EmailContext(Client application,
-                          EmailStoreFactory email_factory,
-                          string action_group_name) {
+    internal EmailPluginContext(Client application,
+                                EmailStoreFactory email_factory,
+                                string action_group_name) {
         this.application = application;
         this.email_factory = email_factory;
         this.email = email_factory.new_email_store();
@@ -68,16 +68,24 @@ internal class Application.EmailContext :
 
     internal void email_displayed(Geary.AccountInformation account,
                                   Geary.Email email) {
-        this.email.email_displayed(
-            this.email_factory.to_plugin_email(email, account)
-        );
+        AccountContext? context =
+            this.application.controller.get_context_for_account(account);
+        if (context != null) {
+            this.email.email_displayed(
+                this.email_factory.to_plugin_email(email, context)
+            );
+        }
     }
 
     internal void email_sent(Geary.AccountInformation account,
                              Geary.Email email) {
-        this.email.email_sent(
-            this.email_factory.to_plugin_email(email, account)
-        );
+        AccountContext? context =
+            this.application.controller.get_context_for_account(account);
+        if (context != null) {
+            this.email.email_sent(
+                this.email_factory.to_plugin_email(email, context)
+            );
+        }
     }
 
     internal void destroy() {
