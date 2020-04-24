@@ -166,7 +166,7 @@ public class Geary.ConnectivityManager : BaseObject {
                 // needlessly hassle the user with expected error
                 // messages.
                 GLib.NetworkConnectivity connectivity = this.monitor.connectivity;
-                if (connectivity == FULL ||
+                if ((this.monitor.network_available && connectivity == FULL) ||
                     (connectivity == LOCAL && is_local_address())) {
                     debug("Error checking %s [%s] reachable, treating unreachable: %s",
                           endpoint, connectivity.to_string(), err.message);

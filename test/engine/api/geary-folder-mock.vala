@@ -58,8 +58,8 @@ public class Geary.MockFolder : Folder, MockObject {
 
     public override async bool open_async(Folder.OpenFlags open_flags,
                                  Cancellable? cancellable = null)
-        throws Error {
-        return boolean_call(
+        throws GLib.Error {
+        return yield boolean_call_async(
             "open_async",
             { int_arg(open_flags), cancellable },
             false
@@ -67,14 +67,14 @@ public class Geary.MockFolder : Folder, MockObject {
     }
 
     public override async bool close_async(Cancellable? cancellable = null)
-    throws Error {
-        return boolean_call(
+        throws GLib.Error {
+        return yield boolean_call_async(
             "close_async", { cancellable }, false
         );
     }
 
     public override async void wait_for_close_async(Cancellable? cancellable = null)
-    throws Error {
+    throws GLib.Error {
         throw new EngineError.UNSUPPORTED("Mock method");
     }
 
@@ -89,8 +89,8 @@ public class Geary.MockFolder : Folder, MockObject {
                                Geary.Email.Field required_fields,
                                Folder.ListFlags flags,
                                Cancellable? cancellable = null)
-        throws Error {
-        return object_call<Gee.List<Email>?>(
+        throws GLib.Error {
+        return yield object_call_async<Gee.List<Email>?>(
             "list_email_by_id_async",
             {initial_id, int_arg(count), box_arg(required_fields), box_arg(flags), cancellable},
             null
@@ -102,8 +102,8 @@ public class Geary.MockFolder : Folder, MockObject {
                                       Geary.Email.Field required_fields,
                                       Folder.ListFlags flags,
                                       Cancellable? cancellable = null)
-        throws Error {
-        return object_call<Gee.List<Email>?>(
+        throws GLib.Error {
+        return yield object_call_async<Gee.List<Email>?>(
             "list_email_by_sparse_id_async",
             {ids, box_arg(required_fields), box_arg(flags), cancellable},
             null
@@ -115,7 +115,7 @@ public class Geary.MockFolder : Folder, MockObject {
                           Geary.Email.Field required_fields,
                           Folder.ListFlags flags,
                           Cancellable? cancellable = null)
-    throws Error {
+    throws GLib.Error {
         throw new EngineError.UNSUPPORTED("Mock method");
     }
 
