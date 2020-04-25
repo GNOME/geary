@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2020-03-14 23:28+0000\n"
-"PO-Revision-Date: 2020-03-16 12:19+0100\n"
+"PO-Revision-Date: 2020-04-25 08:20+0200\n"
 "Last-Translator: Carles Ferrando Garcia <carles.ferrando@gmail.com>\n"
 "Language-Team: Catalan (http://www.transifex.com/projects/p/geary/language/"
 "ca/)\n"
@@ -23,7 +23,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.4\n"
+"X-Generator: Poedit 2.3\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -198,7 +198,7 @@ msgstr "Mostra o amaga la barra de format"
 
 #: desktop/org.gnome.Geary.gschema.xml:51
 msgid "True if the formatting toolbar in the composer is shown."
-msgstr ""
+msgstr "Cert si es mostra la barra d'eines de formatació a l'editor"
 
 #: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Position of message list pane"
@@ -234,6 +234,8 @@ msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
 msgstr ""
+"Habilita les dreceres per a les accions de correu electrònic que no "
+"requereixen prémer <Ctrl> per emular les utilitzades per Gmail."
 
 #: desktop/org.gnome.Geary.gschema.xml:82
 msgid "Languages that shall be used in the spell checker"
@@ -244,6 +246,8 @@ msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and the "
 "null list using desktop languages by default."
 msgstr ""
+"Una llista de locales POSIX, amb la llista buida desactivant la verificació "
+"ortogràfica i la llista nul·la utilitzant llengües d'escriptori per defecte. "
 
 #: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Languages that are displayed in the spell checker popover"
@@ -319,6 +323,8 @@ msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less to "
 "disable."
 msgstr ""
+"El nombre de segons a esperar abans d'enviar un correu electrònic. Establiu-"
+"ho a zero o menys per a inhabilitar-ho. "
 
 #: desktop/org.gnome.Geary.gschema.xml:139
 msgid "Brief notification display time"
@@ -329,6 +335,7 @@ msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr ""
+"El temps en segons durant el qual s'han de mostrar les notificacions breus. "
 
 #: desktop/org.gnome.Geary.gschema.xml:146
 msgid "Whether we migrated the old settings"
@@ -974,7 +981,7 @@ msgstr ""
 #. / command line option is used.
 #: src/client/application/application-client.vala:937
 msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr ""
+msgstr "L'opció `-hidden` està en desús i s'eliminarà en el futur. "
 
 #. / Command line warning, string substitution
 #. / is the given argument
@@ -1164,7 +1171,7 @@ msgstr "Corre a %s desat"
 #: src/client/application/application-controller.vala:2735
 #: src/client/application/application-controller.vala:2793
 msgid "Composer could not be restored"
-msgstr ""
+msgstr "No s'ha pogut restaurar l'editor "
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
@@ -1219,9 +1226,9 @@ msgstr ""
 msgid "This cannot be undone."
 msgstr "Això no es pot desfer."
 
+#. N.T.: Buida com a verb. Buida "paperera"
 #: src/client/application/application-main-window.vala:1339
 #, c-format
-#. N.T.: Buida com a verb. Buida "paperera"
 msgid "Empty %s"
 msgstr "Buida %s"
 
@@ -1316,6 +1323,8 @@ msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
 msgstr ""
+"Habilita les dreceres de teclat per a les accions de correu electrònic que no "
+"requereixen prémer <Ctrl> "
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:86
@@ -2484,6 +2493,7 @@ msgstr "No s'ha pogut determinar el tipus mime per a «%s»."
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
+"No s'ha pogut determinar el tipus de contingut per al tipus MIME «%s» a «%s». "
 
 #: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:126
 msgid "Add an account"
