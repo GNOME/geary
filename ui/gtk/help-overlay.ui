@@ -329,7 +329,7 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property name="title" translatable="yes" context="shortcut window">Find in current conversations</property>
+                                <property name="title" translatable="yes" context="shortcut window">Find in current conversation</property>
                                 <property name="accelerator">slash</property>
                             </object>
                         </child>
