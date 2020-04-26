@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-04-16 23:34+0000\n"
-"PO-Revision-Date: 2020-04-19 10:30+0200\n"
+"POT-Creation-Date: 2020-04-25 12:36+0000\n"
+"PO-Revision-Date: 2020-04-26 11:40+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -628,12 +628,12 @@ msgstr[1] "ostatnie %d dni"
 msgstr[2] "ostatnie %d dni"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2060
+#: src/client/application/application-main-window.vala:2027
 msgid "Undo"
 msgstr "Cofnij"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
-#: src/client/application/application-main-window.vala:2043
+#: src/client/application/application-main-window.vala:2010
 msgid "Redo"
 msgstr "Ponów"
 
@@ -986,30 +986,30 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:955
+#: src/client/application/application-client.vala:1049
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "Opcja „--hidden” jest przestarzała i zostanie usunięta w przyszłości."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:988
+#: src/client/application/application-client.vala:1082
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Nieznany parametr programu: „%s”"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:455
+#: src/client/application/application-controller.vala:485
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "Wystąpił problem podczas wysyłania wiadomości z konta %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:459
+#: src/client/application/application-controller.vala:489
 msgid "Email will not be sent until re-connected"
 msgstr "Wiadomości nie będą wysyłane do czasu ponownego połączenia"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:565
+#: src/client/application/application-controller.vala:588
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "Oznaczono wątek"
@@ -1017,7 +1017,7 @@ msgstr[1] "Oznaczono wątki"
 msgstr[2] "Oznaczono wątki"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:571
+#: src/client/application/application-controller.vala:594
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "Usunięto oznaczenie wątku"
@@ -1027,8 +1027,8 @@ msgstr[2] "Usunięto oznaczenie wątków"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:597
-#: src/client/application/application-controller.vala:681
+#: src/client/application/application-controller.vala:620
+#: src/client/application/application-controller.vala:704
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -1041,8 +1041,8 @@ msgstr[2] "Przeniesiono wątki do „%s”"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:605
-#: src/client/application/application-controller.vala:627
+#: src/client/application/application-controller.vala:628
+#: src/client/application/application-controller.vala:650
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
@@ -1051,7 +1051,7 @@ msgstr[1] "Przywrócono wątki do „%s”"
 msgstr[2] "Przywrócono wątki do „%s”"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:648
+#: src/client/application/application-controller.vala:671
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "Przeniesiono wątek do archiwum"
@@ -1060,7 +1060,7 @@ msgstr[2] "Przeniesiono wątki do archiwum"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:704
+#: src/client/application/application-controller.vala:727
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
@@ -1069,7 +1069,7 @@ msgstr[1] "Przywrócono wiadomości do „%s”"
 msgstr[2] "Przywrócono wiadomości do „%s”"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:725
+#: src/client/application/application-controller.vala:748
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "Przeniesiono wiadomość do archiwum"
@@ -1079,7 +1079,7 @@ msgstr[2] "Przeniesiono wiadomości do archiwum"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:760
+#: src/client/application/application-controller.vala:783
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1090,7 +1090,7 @@ msgstr[2] "Przeniesiono wiadomości do „%s”"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:788
+#: src/client/application/application-controller.vala:811
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1101,7 +1101,7 @@ msgstr[2] "Dodano etykietę „%s”"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:796
+#: src/client/application/application-controller.vala:819
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
@@ -1109,12 +1109,12 @@ msgstr[0] "Usunięto etykietę „%s”"
 msgstr[1] "Usunięto etykietę „%s”"
 msgstr[2] "Usunięto etykietę „%s”"
 
-#: src/client/application/application-controller.vala:1215
+#: src/client/application/application-controller.vala:1305
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nie można otworzyć bazy danych dla %s"
 
-#: src/client/application/application-controller.vala:1216
+#: src/client/application/application-controller.vala:1306
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1139,20 +1139,20 @@ msgstr ""
 "Przebudowanie bazy danych usunie wszystkie lokalne wiadomości e-mail i ich "
 "załączniki. <b>Poczta na serwerze nie zostanie usunięta.</b>"
 
-#: src/client/application/application-controller.vala:1218
+#: src/client/application/application-controller.vala:1308
 msgid "_Rebuild"
 msgstr "P_rzebuduj"
 
-#: src/client/application/application-controller.vala:1218
+#: src/client/application/application-controller.vala:1308
 msgid "E_xit"
 msgstr "Za_kończ"
 
-#: src/client/application/application-controller.vala:1228
+#: src/client/application/application-controller.vala:1318
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Nie można przebudować bazy danych dla „%s”"
 
-#: src/client/application/application-controller.vala:1229
+#: src/client/application/application-controller.vala:1319
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1165,34 +1165,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1468
+#: src/client/application/application-controller.vala:1449
 #, c-format
 msgid "Email sent to %s"
 msgstr "Wysłano wiadomość do %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2564
+#: src/client/application/application-controller.vala:2448
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Wiadomość do %s została dodana do kolejki do wysłania"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2628
+#: src/client/application/application-controller.vala:2512
 #, c-format
 msgid "Email to %s saved"
 msgstr "Zapisano wiadomość do %s"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2643
-#: src/client/application/application-controller.vala:2701
+#: src/client/application/application-controller.vala:2527
+#: src/client/application/application-controller.vala:2585
 msgid "Composer could not be restored"
 msgstr "Nie można przywrócić okna tworzenia wiadomości"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2686
+#: src/client/application/application-controller.vala:2570
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Odrzucono wiadomość do %s"
@@ -1252,50 +1252,50 @@ msgstr "Sprawdza poprawność informacji o zabezpieczeniach połączenia"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:991
+#: src/client/application/application-main-window.vala:972
 msgid "Labels"
 msgstr "Etykiety"
 
-#: src/client/application/application-main-window.vala:1290
+#: src/client/application/application-main-window.vala:1261
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Usunąć wszystkie wiadomości z katalogu %s?"
 
-#: src/client/application/application-main-window.vala:1291
+#: src/client/application/application-main-window.vala:1262
 msgid "This removes the email from Geary and your email server."
 msgstr "Spowoduje to usunięcie wiadomości z programu Geary i serwera poczty."
 
-#: src/client/application/application-main-window.vala:1292
+#: src/client/application/application-main-window.vala:1263
 msgid "This cannot be undone."
 msgstr "Tego nie można cofnąć."
 
-#: src/client/application/application-main-window.vala:1293
+#: src/client/application/application-main-window.vala:1264
 #, c-format
 msgid "Empty %s"
 msgstr "Opróżnij %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1350
+#: src/client/application/application-main-window.vala:1321
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Trwale usunąć ten wątek?"
 msgstr[1] "Trwale usunąć te wątki?"
 msgstr[2] "Trwale usunąć te wątki?"
 
-#: src/client/application/application-main-window.vala:1355
-#: src/client/application/application-main-window.vala:1370
+#: src/client/application/application-main-window.vala:1326
+#: src/client/application/application-main-window.vala:1341
 msgid "Delete"
 msgstr "Usuń"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1365
+#: src/client/application/application-main-window.vala:1336
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Trwale usunąć tę wiadomość?"
 msgstr[1] "Trwale usunąć te wiadomości?"
 msgstr[2] "Trwale usunąć te wiadomości?"
 
-#: src/client/application/application-main-window.vala:1698
+#: src/client/application/application-main-window.vala:1659
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1306,7 +1306,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1840
+#: src/client/composer/composer-widget.vala:1918
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1658,19 +1658,19 @@ msgstr "Nieprawidłowy adres e-mail"
 msgid "New Message"
 msgstr "Nowa wiadomość"
 
-#: src/client/composer/composer-widget.vala:218
+#: src/client/composer/composer-widget.vala:235
 msgid "Saved"
 msgstr "Zapisano"
 
-#: src/client/composer/composer-widget.vala:219
+#: src/client/composer/composer-widget.vala:236
 msgid "Saving"
 msgstr "Zapisywanie"
 
-#: src/client/composer/composer-widget.vala:220
+#: src/client/composer/composer-widget.vala:237
 msgid "Error saving"
 msgstr "Błąd podczas zapisywania"
 
-#: src/client/composer/composer-widget.vala:221
+#: src/client/composer/composer-widget.vala:238
 msgid "Press Backspace to delete quote"
 msgstr "Naciśnięcie klawisza Backspace usunie cytat"
 
@@ -1679,7 +1679,7 @@ msgstr "Naciśnięcie klawisza Backspace usunie cytat"
 #. checking, include all variants of each word. No spaces are
 #. allowed. The words will be converted to lower case based on
 #. locale and English versions included automatically.
-#: src/client/composer/composer-widget.vala:237
+#: src/client/composer/composer-widget.vala:254
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1691,90 +1691,90 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:844
+#: src/client/composer/composer-widget.vala:903
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Zachować lub odrzucić ten szkic?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:870
+#: src/client/composer/composer-widget.vala:929
 msgid "Do you want to discard this draft message?"
 msgstr "Odrzucić ten szkic?"
 
-#: src/client/composer/composer-widget.vala:1509
+#: src/client/composer/composer-widget.vala:1575
 msgid "Send message with an empty subject and body?"
 msgstr "Wysłać wiadomość niezawierającą tematu i treści?"
 
-#: src/client/composer/composer-widget.vala:1511
+#: src/client/composer/composer-widget.vala:1577
 msgid "Send message with an empty subject?"
 msgstr "Wysłać wiadomość niezawierającą tematu?"
 
-#: src/client/composer/composer-widget.vala:1513
+#: src/client/composer/composer-widget.vala:1579
 msgid "Send message with an empty body?"
 msgstr "Wysłać wiadomość niezawierającą treści?"
 
-#: src/client/composer/composer-widget.vala:1522
+#: src/client/composer/composer-widget.vala:1588
 msgid "Send message without an attachment?"
 msgstr "Wysłać wiadomość niezawierającą załączników?"
 
-#: src/client/composer/composer-widget.vala:1826
+#: src/client/composer/composer-widget.vala:1904
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Do wiadomości już załączono „%s”."
 
-#: src/client/composer/composer-widget.vala:1862
-#: src/client/composer/composer-widget.vala:1912
+#: src/client/composer/composer-widget.vala:1940
+#: src/client/composer/composer-widget.vala:1990
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "„%s” jest pustym plikiem."
 
-#: src/client/composer/composer-widget.vala:1900
+#: src/client/composer/composer-widget.vala:1978
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Nie można odnaleźć „%s”."
 
-#: src/client/composer/composer-widget.vala:1906
+#: src/client/composer/composer-widget.vala:1984
 #, c-format
 msgid "“%s” is a folder."
 msgstr "„%s” jest katalogiem."
 
-#: src/client/composer/composer-widget.vala:1925
+#: src/client/composer/composer-widget.vala:2003
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Nie można otworzyć „%s” do odczytania."
 
-#: src/client/composer/composer-widget.vala:1933
+#: src/client/composer/composer-widget.vala:2011
 msgid "Cannot add attachment"
 msgstr "Nie można dodać załącznika"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1990
+#: src/client/composer/composer-widget.vala:2071
 #: src/client/conversation-viewer/conversation-email.vala:542
 #: src/client/util/util-email.vala:236 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Do:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1996
+#: src/client/composer/composer-widget.vala:2077
 #: src/client/conversation-viewer/conversation-email.vala:547
 #: src/client/util/util-email.vala:241 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "DW:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2002
+#: src/client/composer/composer-widget.vala:2083
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "UDW:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2008
+#: src/client/composer/composer-widget.vala:2089
 msgid "Reply-To: "
 msgstr "Odpowiedź do: "
 
-#: src/client/composer/composer-widget.vala:2260
+#: src/client/composer/composer-widget.vala:2341
 msgid "Select Color"
 msgstr "Wybór koloru"
 
@@ -1783,14 +1783,14 @@ msgstr "Wybór koloru"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2446
+#: src/client/composer/composer-widget.vala:2530
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s przez %2$s"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2803
+#: src/client/composer/composer-widget.vala:2887
 msgid "Images"
 msgstr "Obrazy"
 
@@ -2085,8 +2085,10 @@ msgstr "Informacje"
 msgid "Geary requires your email password to continue"
 msgstr "Program Geary wymaga hasła do poczty, aby kontynuować"
 
-#. Label displaying total number of email messages in a folder
-#: src/client/folder-list/folder-list-folder-entry.vala:30
+#. Translators: Label displaying total number of email
+#. messages in a folder. String substitution is the actual
+#. number.
+#: src/client/folder-list/folder-list-folder-entry.vala:42
 #, c-format
 msgid "%d message"
 msgid_plural "%d messages"
@@ -2094,8 +2096,10 @@ msgstr[0] "%d wiadomość"
 msgstr[1] "%d wiadomości"
 msgstr[2] "%d wiadomości"
 
-#. / Label displaying number of unread email messages in a folder
-#: src/client/folder-list/folder-list-folder-entry.vala:37
+#. Translators: Label displaying number of unread email
+#. messages in a folder. String substitution is the actual
+#. number.
+#: src/client/folder-list/folder-list-folder-entry.vala:52
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
@@ -2103,10 +2107,12 @@ msgstr[0] "%d nieprzeczytana"
 msgstr[1] "%d nieprzeczytane"
 msgstr[2] "%d nieprzeczytanych"
 
-#. / This string represents the divider between two messages: "n messages" and "n unread",
-#. / shown in the folder list as a tooltip.  Please use your languages conventions for
-#. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
-#: src/client/folder-list/folder-list-folder-entry.vala:43
+#. Translators: This string represents the divider between two
+#. messages: "n messages" and "n unread", shown in the folder
+#. list as a tooltip.  Please use your languages conventions
+#. for combining the two, i.e. a comma (",") for English; "6
+#. messages, 3 unread"
+#: src/client/folder-list/folder-list-folder-entry.vala:60
 #, c-format
 msgid "%s, %s"
 msgstr "%s, %s"
@@ -2182,12 +2188,61 @@ msgstr[2] "%s, łącznie %d nowych wiadomości"
 
 #. / Notification title when new messages have been
 #. / received
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:284
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:282
 msgid "New message"
 msgid_plural "New messages"
 msgstr[0] "Nowa wiadomość"
 msgstr[1] "Nowe wiadomości"
 msgstr[2] "Nowe wiadomości"
+
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+msgid "Email Templates"
+msgstr "Szablony wiadomości"
+
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+msgid "Create reusable templates for sending email"
+msgstr ""
+"Umożliwia tworzenie szablonów wielokrotnego użytku do wysyłania wiadomości"
+
+#. Translators: Templates folder name alternatives. Separate names
+#. using a vertical bar and put the most common localized name to
+#. the front for the default. English names do not need to be
+#. included.
+#: src/client/plugin/email-templates/email-templates.vala:29
+msgid "Templates | Template Mail | Template Email | Template E-Mail"
+msgstr "Szablony | Szablony wiadomości"
+
+#. Translators: The name of the folder used to
+#. store email templates
+#: src/client/plugin/email-templates/email-templates.vala:195
+msgid "Templates"
+msgstr "Szablony"
+
+#. Translators: Info bar button label for creating a
+#. new email template
+#: src/client/plugin/email-templates/email-templates.vala:276
+msgid "New"
+msgstr "Nowy"
+
+#. Translators: Infobar status label for an email template
+#: src/client/plugin/email-templates/email-templates.vala:287
+msgid "Message template"
+msgstr "Szablon wiadomości"
+
+#. Translators: Info bar button label for sending an
+#. email template
+#: src/client/plugin/email-templates/email-templates.vala:291
+msgid "Send"
+msgstr "Wyślij"
+
+#. Translators: Info bar button label for editing an
+#. existing email template
+#. Translators: Info bar button label for editing a draft
+#. email
+#: src/client/plugin/email-templates/email-templates.vala:299
+#: src/client/plugin/special-folders/special-folders.vala:180
+msgid "Edit"
+msgstr "Modyfikuj"
 
 #: src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in:4
 msgid "Folder Highlight"
@@ -2233,36 +2288,30 @@ msgstr "Katalogi specjalne"
 
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
-#: src/client/plugin/special-folders/special-folders.vala:140
+#: src/client/plugin/special-folders/special-folders.vala:160
 msgid "Empty"
 msgstr "Opróżnij"
 
 #. Translators: Info bar status message for a draft email
-#: src/client/plugin/special-folders/special-folders.vala:152
+#: src/client/plugin/special-folders/special-folders.vala:172
 msgid "Draft message"
 msgstr "Szkic wiadomości"
 
 #. Translators: Info bar status description for a draft
 #. email
-#: src/client/plugin/special-folders/special-folders.vala:155
+#: src/client/plugin/special-folders/special-folders.vala:175
 msgid "This message has not yet been sent."
 msgstr "Ta wiadomość nie została jeszcze wysłana."
 
-#. Translators: Info bar button label for editing a draft
-#. email
-#: src/client/plugin/special-folders/special-folders.vala:160
-msgid "Edit"
-msgstr "Modyfikuj"
-
 #. Translators: Info bar status message for an sent but
 #. unsaved email
-#: src/client/plugin/special-folders/special-folders.vala:171
+#: src/client/plugin/special-folders/special-folders.vala:191
 msgid "Message not saved"
 msgstr "Niezapisana wiadomość"
 
 #. Translators: Info bar status description for a sent but
 #. unsaved email
-#: src/client/plugin/special-folders/special-folders.vala:174
+#: src/client/plugin/special-folders/special-folders.vala:194
 msgid "This message was sent, but has not been saved to your account."
 msgstr "Wysłano tę wiadomość, ale nie zapisano jej na koncie."
 
@@ -2640,7 +2689,7 @@ msgstr "nieprzeczytane"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:884
+#: src/engine/imap-engine/imap-engine-generic-account.vala:892
 msgid "Drafts | Draft"
 msgstr "Szkice | Szkic"
 
@@ -2648,13 +2697,13 @@ msgstr "Szkice | Szkic"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:893
+#: src/engine/imap-engine/imap-engine-generic-account.vala:901
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Wysłane | Wysłana poczta | Wysłane wiadomości | Skrzynka nadawcza"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:898
+#: src/engine/imap-engine/imap-engine-generic-account.vala:906
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Elementy wysłane"
@@ -2663,7 +2712,7 @@ msgstr "Elementy wysłane"
 #. Junk/Spam mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:908
+#: src/engine/imap-engine/imap-engine-generic-account.vala:916
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2673,13 +2722,13 @@ msgstr "Niechciane | Niechciana poczta | Niechciane wiadomości | Spam"
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:918
+#: src/engine/imap-engine/imap-engine-generic-account.vala:926
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Kosz | Śmietnik | Usunięta poczta | Usunięte wiadomości"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:923
+#: src/engine/imap-engine/imap-engine-generic-account.vala:931
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Elementy usunięte"
@@ -2688,7 +2737,7 @@ msgstr "Elementy usunięte"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:933
+#: src/engine/imap-engine/imap-engine-generic-account.vala:941
 msgid "Archive | Archives"
 msgstr "Archiwum | Archiwa"
 
