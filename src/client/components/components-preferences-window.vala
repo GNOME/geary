@@ -115,6 +115,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         var page = new Hdy.PreferencesPage();
         /// Translators: Preferences page title
         page.title = _("Preferences");
+        page.icon_name = "preferences-other-symbolic";
         page.propagate_natural_height = true;
         page.propagate_natural_width = true;
         page.add(group);
@@ -177,6 +178,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         var page = new Hdy.PreferencesPage();
         /// Translators: Preferences page title
         page.title = _("Plugins");
+        page.icon_name = "application-x-addon-symbolic";
         page.propagate_natural_width = true;
         page.add(group);
         page.show_all();
