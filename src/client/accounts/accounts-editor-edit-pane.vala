@@ -376,7 +376,9 @@ private class Accounts.MailboxRow : AccountRow<EditorEditPane,Gtk.Label> {
 
     public MailboxRow(Geary.AccountInformation account,
                       Geary.RFC822.MailboxAddress mailbox) {
-        base(account, "", new Gtk.Label(""));
+        var label = new Gtk.Label("");
+        label.ellipsize = Pango.EllipsizeMode.END;
+        base(account, "", label);
         this.mailbox = mailbox;
         enable_drag();
 
