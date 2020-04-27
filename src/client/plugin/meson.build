@@ -30,6 +30,7 @@ plugin_data_suffix = '.plugin'
 subdir('desktop-notifications')
 subdir('email-templates')
 subdir('folder-highlight')
+subdir('mail-merge')
 subdir('messaging-menu')
 subdir('notification-badge')
 subdir('sent-sound')
