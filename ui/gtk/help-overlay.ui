@@ -257,12 +257,17 @@
             <object class="GtkShortcutsSection">
                 <property name="visible">True</property>
                 <property name="section-name">single-key</property>
-                <property name="title" translatable="yes">Single-key Shortcuts</property>
+                <property name="title" translatable="yes">Single-key Conversation Shortcuts</property>
                 <child>
                     <object class="GtkShortcutsGroup">
                         <property name="visible">True</property>
                         <property name="title" translatable="yes"
-                                  context="shortcut window">Single-key conversation shortcuts (if enabled in Preferences)</property>
+                                  context="shortcut window">Single-key shortcuts (if enabled in Preferences)</property>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                            </object>
+                        </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
@@ -310,6 +315,11 @@
                 <child>
                     <object class="GtkShortcutsGroup">
                         <property name="visible">True</property>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                            </object>
+                        </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
