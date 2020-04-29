@@ -377,12 +377,6 @@ public class Application.PluginManager : GLib.Object {
             !is_autoload(plugin)) {
             this.plugins.load_plugin(plugin);
             loaded = true;
-            string name = plugin.get_module_name();
-            string[] optional_names = this.config.get_optional_plugins();
-            if (!(name in optional_names)) {
-                optional_names += name;
-                this.config.set_optional_plugins(optional_names);
-            }
         }
         return loaded;
     }
@@ -394,15 +388,6 @@ public class Application.PluginManager : GLib.Object {
             !is_autoload(plugin)) {
             this.plugins.unload_plugin(plugin);
             unloaded = true;
-            string name = plugin.get_module_name();
-            string[] old_names = this.config.get_optional_plugins();
-            string[] new_names = new string[0];
-            for (int i = 0; i < old_names.length; i++) {
-                if (old_names[i] != name) {
-                    new_names += old_names[i];
-                }
-            }
-            this.config.set_optional_plugins(new_names);
         }
         return unloaded;
     }
@@ -532,6 +517,17 @@ public class Application.PluginManager : GLib.Object {
             context.activate.end(result);
             this.plugin_set.set(context.info, context);
             plugin_activated(context.info);
+
+            // Update config here for optional plugins so we catch
+            // and add dependencies being loaded
+            if (!is_autoload(context.info)) {
+                string name = context.info.get_module_name();
+                string[] optional = this.config.get_optional_plugins();
+                if (!(name in optional)) {
+                    optional += name;
+                    this.config.set_optional_plugins(optional);
+                }
+            }
         } catch (GLib.Error err) {
             plugin_error(context.info, err);
             warning(
@@ -545,6 +541,20 @@ public class Application.PluginManager : GLib.Object {
 
     private void on_plugin_deactivated(PluginContext context,
                                        GLib.AsyncResult result) {
+        if (!is_autoload(context.info) && !this.is_shutdown) {
+            // Update config here for optional plugins so we catch
+            // and remove dependencies being unloaded, too
+            string name = context.info.get_module_name();
+            string[] old_names = this.config.get_optional_plugins();
+            string[] new_names = new string[0];
+            for (int i = 0; i < old_names.length; i++) {
+                if (old_names[i] != name) {
+                    new_names += old_names[i];
+                }
+            }
+            this.config.set_optional_plugins(new_names);
+        }
+
         GLib.Error? error = null;
         try {
             context.deactivate.end(result);
