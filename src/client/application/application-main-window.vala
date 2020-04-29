@@ -283,7 +283,7 @@ public class Application.MainWindow :
     public ConversationViewer conversation_viewer { get; private set; }
 
     public Components.InfoBarStack conversation_list_info_bars {
-        get; private set; default = new Components.InfoBarStack();
+        get; private set; default = new Components.InfoBarStack(SINGLE);
     }
 
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
@@ -333,7 +333,8 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.Overlay overlay;
 
-    private Components.InfoBarStack info_bars = new Components.InfoBarStack();
+    private Components.InfoBarStack info_bars =
+        new Components.InfoBarStack(SINGLE);
 
     private Components.InfoBar offline_infobar;
 
