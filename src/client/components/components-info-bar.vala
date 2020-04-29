@@ -73,7 +73,8 @@ public class Components.InfoBar : Gtk.InfoBar {
     }
 
     public InfoBar.for_plugin(Plugin.InfoBar plugin,
-                              string action_group_name) {
+                              string action_group_name,
+                              int priority) {
         this(plugin.status, plugin.description);
         this.show_close_button = plugin.show_close_button;
 
@@ -86,6 +87,8 @@ public class Components.InfoBar : Gtk.InfoBar {
         if (plugin.primary_button != null) {
             add_plugin_button(plugin.primary_button, action_group_name);
         }
+
+        set_data<int>(InfoBarStack.PRIORITY_QUEUE_KEY, priority);
 
         show_all();
     }

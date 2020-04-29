@@ -283,7 +283,7 @@ public class Application.MainWindow :
     public ConversationViewer conversation_viewer { get; private set; }
 
     public Components.InfoBarStack conversation_list_info_bars {
-        get; private set; default = new Components.InfoBarStack(SINGLE);
+        get; private set; default = new Components.InfoBarStack(PRIORITY_QUEUE);
     }
 
     public StatusBar status_bar { get; private set; default = new StatusBar(); }

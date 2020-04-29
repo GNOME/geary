@@ -41,7 +41,7 @@ internal class Application.FolderPluginContext :
                 if (main.selected_folder == folder) {
                     main.conversation_list_info_bars.add(
                         new Components.InfoBar.for_plugin(
-                            info_bar, this.action_group_name
+                            info_bar, this.action_group_name, (int) priority
                         )
                     );
                 }

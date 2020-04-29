@@ -42,7 +42,7 @@ internal class Application.EmailPluginContext :
                     main.conversation_viewer.current_list.add_email_info_bar(
                         id,
                         new Components.InfoBar.for_plugin(
-                            info_bar, this.action_group_name
+                            info_bar, this.action_group_name, (int) priority
                         )
                     );
                 }
