@@ -15,7 +15,7 @@ public void peas_register_types(TypeModule module) {
 }
 
 /**
- * Manages UI for special folders.
+ * Enables editing and sending email templates.
  */
 public class Plugin.EmailTemplates :
     PluginBase, FolderExtension, EmailExtension {
