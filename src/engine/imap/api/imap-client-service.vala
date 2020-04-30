@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017-2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2017-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -19,12 +19,25 @@
  *
  * This class is not thread-safe.
  */
-internal class Geary.Imap.ClientService : Geary.ClientService {
+public class Geary.Imap.ClientService : Geary.ClientService {
 
+
+    /** The GLib logging domain used for IMAP sub-system logging. */
+    public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Imap";
+
+    /** The GLib logging domain used for IMAP protocol logging. */
+    public const string PROTOCOL_LOGGING_DOMAIN = Logging.DOMAIN + ".Imap.Net";
+
+    /** The GLib logging domain used for IMAP de-serialisation logging. */
+    public const string DESERIALISATION_LOGGING_DOMAIN = Logging.DOMAIN + ".Imap.Deser";
+
+    /** The GLib logging domain used for IMAP replay-queue logging. */
+    public const string REPLAY_QUEUE_LOGGING_DOMAIN = Logging.DOMAIN + ".Imap.Replay";
 
     private const int DEFAULT_MIN_POOL_SIZE = 1;
     private const int DEFAULT_MAX_FREE_SIZE = 1;
     private const int CHECK_NOOP_THRESHOLD_SEC = 5;
+
 
     /**
      * Set to zero or negative value if keepalives should be disabled when a connection has not
@@ -82,6 +95,11 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
      * Determines if returned sessions should be kept or discarded.
      */
     public bool discard_returned_sessions = false;
+
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return LOGGING_DOMAIN; }
+    }
 
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.Set<ClientSession> all_sessions =
@@ -222,14 +240,17 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
             this.all_sessions.size > this.min_pool_size
         );
 
-        if (!this.is_running || this.discard_returned_sessions || too_many_free) {
-            yield disconnect_session(session);
-        } else if (yield check_session(session, false)) {
-            bool free = true;
-            MailboxSpecifier? mailbox = null;
-            ClientSession.ProtocolState proto = session.get_protocol_state(out mailbox);
+        bool disconnect = (
+            too_many_free ||
+            this.discard_returned_sessions ||
+            !this.is_running ||
+            !yield check_session(session, false)
+        );
+
+        if (!disconnect) {
             // If the session has a mailbox selected, close it before
             // adding it back to the pool
+            ClientSession.ProtocolState proto = session.get_protocol_state();
             if (proto == ClientSession.ProtocolState.SELECTED ||
                 proto == ClientSession.ProtocolState.SELECTING) {
                 // always close mailbox to return to authorized state
@@ -238,32 +259,20 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                 } catch (ImapError imap_error) {
                     debug("Error attempting to close released session %s: %s",
                           session.to_string(), imap_error.message);
-                    free = false;
+                    disconnect = true;
                 }
-
-                // Double check the session after closing it
-                switch (session.get_protocol_state(null)) {
-                case AUTHORIZED:
-                    // This is the desired state, so all good
-                    break;
-
-                case NOT_CONNECTED:
-                    // No longer connected, so just drop it
-                    free = false;
-                    break;
-
-                default:
+                if (session.get_protocol_state() != AUTHORIZED) {
                     // Closing it didn't leave it in the desired
-                    // state, so log out and drop it
-                    yield disconnect_session(session);
-                    free = false;
-                    break;
+                    // state, so drop it
+                    disconnect = true;
                 }
             }
 
-            if (free) {
+            if (!disconnect) {
                 debug("Unreserving session %s", session.to_string());
                 this.free_queue.send(session);
+            } else {
+                yield disconnect_session(session);
             }
         }
     }
@@ -381,7 +390,7 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     /** Determines if a session is valid, disposing of it if not. */
     private async bool check_session(ClientSession target, bool claiming) {
         bool valid = false;
-        switch (target.get_protocol_state(null)) {
+        switch (target.get_protocol_state()) {
         case ClientSession.ProtocolState.AUTHORIZED:
         case ClientSession.ProtocolState.CLOSING_MAILBOX:
             valid = true;
@@ -393,15 +402,6 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
                 yield disconnect_session(target);
             } else {
                 valid = true;
-            }
-            break;
-
-        case ClientSession.ProtocolState.NOT_CONNECTED:
-            // Already disconnected, so drop it on the floor
-            try {
-                yield remove_session_async(target);
-            } catch (Error err) {
-                debug("Error removing unconnected session: %s", err.message);
             }
             break;
 
@@ -447,11 +447,13 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
 
         ClientSession new_session = new ClientSession(remote);
         new_session.set_logging_parent(this);
-        yield new_session.connect_async(cancellable);
+        yield new_session.connect_async(
+            ClientSession.DEFAULT_GREETING_TIMEOUT_SEC, cancellable
+        );
 
         try {
             yield new_session.initiate_session_async(login, cancellable);
-        } catch (Error err) {
+        } catch (GLib.Error err) {
             // need to disconnect before throwing error ... don't
             // honor Cancellable here, it's important to disconnect
             // the client before dropping the ref
@@ -504,44 +506,43 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
     }
 
     private async void disconnect_session(ClientSession session) {
-        debug("Logging out session: %s", session.to_string());
-
-        // Log out before removing the session since close() only
-        // hangs around until all sessions have been removed before
-        // exiting.
-        try {
-            yield session.logout_async(this.close_cancellable);
+        if (session.get_protocol_state() != NOT_CONNECTED) {
+            debug("Logging out session: %s", session.to_string());
+            // No need to remove it after logging out, the
+            // disconnected handler will do that for us.
+            try {
+                yield session.logout_async(this.close_cancellable);
+            } catch (GLib.Error err) {
+                debug("Error logging out of session: %s", err.message);
+                yield force_disconnect_session(session);
+                }
+        } else {
             yield remove_session_async(session);
-        } catch (GLib.Error err) {
-            debug("Error logging out of session: %s", err.message);
-            yield force_disconnect_session(session);
         }
-
     }
 
     private async void force_disconnect_session(ClientSession session) {
         debug("Dropping session: %s", session.to_string());
-
-        try {
-            yield remove_session_async(session);
-        } catch (Error err) {
-            debug("Error removing session: %s", err.message);
-        }
+        yield remove_session_async(session);
 
         // Don't wait for this to finish because we don't want to
         // block claiming a new session, shutdown, etc.
         session.disconnect_async.begin(null);
     }
 
-    private async bool remove_session_async(ClientSession session) throws Error {
+    private async bool remove_session_async(ClientSession session) {
         // Ensure the session isn't held on to, anywhere
 
         this.free_queue.revoke(session);
 
         bool removed = false;
-        yield this.sessions_mutex.execute_locked(() => {
-                removed = this.all_sessions.remove(session);
-            });
+        try {
+            yield this.sessions_mutex.execute_locked(() => {
+                    removed = this.all_sessions.remove(session);
+                });
+        } catch (GLib.Error err) {
+            debug("Error removing session: %s", err.message);
+        }
 
         if (removed) {
             session.disconnected.disconnect(on_disconnected);
@@ -549,21 +550,15 @@ internal class Geary.Imap.ClientService : Geary.ClientService {
         return removed;
     }
 
-    private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
+    private void on_disconnected(ClientSession session,
+                                 ClientSession.DisconnectReason reason) {
         debug(
-            "Session unexpected disconnect: %s: %s",
+            "Session disconnected: %s: %s",
             session.to_string(), reason.to_string()
         );
         this.remove_session_async.begin(
             session,
-            (obj, res) => {
-                try {
-                    this.remove_session_async.end(res);
-                } catch (Error err) {
-                    debug("Error removing disconnected session: %s",
-                          err.message);
-                }
-            }
+            (obj, res) => { this.remove_session_async.end(res); }
         );
     }
 

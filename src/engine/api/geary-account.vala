@@ -234,9 +234,9 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
 
     /**
-     * Fired when a Folder's type is detected having changed.
+     * Fired when a Folder's special use is detected having changed.
      */
-    public signal void folders_special_type(Gee.Collection<Geary.Folder> altered);
+    public signal void folders_use_changed(Gee.Collection<Geary.Folder> altered);
 
     /**
      * Fired when emails are appended to a folder in this account.
@@ -283,11 +283,6 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * Fired when last_storage_cleanup changes.
      */
     public signal void last_storage_cleanup_changed(GLib.DateTime? new_value);
-
-    /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
-    }
 
     /** {@inheritDoc} */
     public Logging.Source? logging_parent { get { return null; } }
@@ -424,19 +419,33 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     /**
      * Returns a folder for the given special folder type, it is exists.
      */
-    public virtual Geary.Folder? get_special_folder(Geary.SpecialFolderType type){
+    public virtual Geary.Folder? get_special_folder(Folder.SpecialUse use) {
         return traverse<Folder>(list_folders())
-            .first_matching(f => f.special_folder_type == type);
+            .first_matching(f => f.used_as == use);
     }
 
     /**
      * Returns the Folder object with the given special folder type.  The folder will be
      * created on the server if it doesn't already exist.  An error will be thrown if the
      * folder doesn't exist and can't be created.  The only valid special folder types that
-     * can be required are: DRAFTS, SENT, SPAM, and TRASH.
+     * can be required are: DRAFTS, SENT, JUNK, and TRASH.
      */
-    public abstract async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
-        Cancellable? cancellable = null) throws Error;
+    public abstract async Geary.Folder get_required_special_folder_async(
+        Folder.SpecialUse special,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
+
+    /**
+     * Creates a new folder in the root of the personal name space.
+     *
+     * If this account is backed by a remote server, calling this
+     * causes the folder to be created on the remote.
+     */
+    public abstract async Folder create_personal_folder(
+        string name,
+        Folder.SpecialUse use = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
 
     /**
      * Search the local account for emails referencing a Message-ID value

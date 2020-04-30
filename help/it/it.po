@@ -1,26 +1,26 @@
 # Italian translation for geary.
 # Copyright (C) 2014 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
-# Federico Bruni <fede@inventati.org>, 2014, 2015, 2016, 2017, 2018, 2019.
+# Federico Bruni <fede@inventati.org>, 2014-2020.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary help master\n"
-"POT-Creation-Date: 2019-06-19 10:27+0000\n"
-"PO-Revision-Date: 2019-08-23 18:11+0200\n"
+"POT-Creation-Date: 2019-11-20 23:26+0000\n"
+"PO-Revision-Date: 2020-03-10 14:34+0100\n"
 "Last-Translator: Federico Bruni <fede@inventati.org>\n"
-"Language-Team: Italiano <gnome-it-list@gnome.org>\n"
+"Language-Team: Italian <gnome-it-list@gnome.org>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.3\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"X-Generator: Gtranslator 3.34.0\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 msgctxt "_"
 msgid "translator-credits"
-msgstr "Federico Bruni <fede@inventati.org>, 2015, 2016, 2017, 2018, 2019"
+msgstr "Federico Bruni <fede@inventati.org>, 2014-2020"
 
 #. (itstool) path: page/title
 #: C/accounts.page:10
@@ -209,54 +209,88 @@ msgstr ""
 "oppure con la scorciatoia <keyseq><key>Ctrl</key><key>U</key></keyseq>."
 
 #. (itstool) path: page/title
+#: C/archive.page:8
+msgid "Archive, trash and delete messages"
+msgstr "Archivia, cestina e elimina messaggi"
+
+#. (itstool) path: page/p
 #: C/archive.page:10
-msgid "Delete or archive a message"
-msgstr "Eliminare o archiviare un messaggio"
+msgid ""
+"Geary lets you archive messages if your server supports it. Clicking the "
+"<gui style=\"button\">Archive</gui> toolbar button moves the conversation "
+"from the current folder to the <gui>Archive</gui> folder for most email "
+"services, or to <gui>All Mail</gui> for GMail. Archiving helps keep your "
+"email organised by moving old and replied-to email out of the way."
+msgstr ""
+"Geary permette di archiviare i messaggi, se il server lo consente. Facendo "
+"clic sul pulsante <gui style=\"button\">Archivia</gui> della barra degli "
+"strumenti la conversazione viene spostata dalla cartella corrente alla "
+"cartella <gui>Archivio</gui> per la maggior parte dei servizi di email, "
+"oppure in <gui>Tutti i messaggi</gui> per GMail. L'archiviazione aiuta a "
+"tenere la posta in ordine togliendo di torno le email vecchie."
 
 #. (itstool) path: page/p
-#: C/archive.page:12
+#: C/archive.page:17
+#| msgid ""
+#| "With other mail servers, you can trash or delete, but not archive, "
+#| "messages. To move one or more conversations to the <gui>Trash</gui> "
+#| "folder, select them and press the <gui>Trash</gui> button on the toolbar. "
+#| "To permanently delete the conversations, hold down <key>Shift</key> and "
+#| "press the <gui>Delete</gui> button that appears in place of the "
+#| "<gui>Trash</gui> button."
 msgid ""
-"When you use Geary with a Gmail account, Geary lets you <em>archive</em> "
-"messages. The <gui>Archive</gui> toolbar button archives the selected "
-"conversation(s). Archived messages appear in the <gui>All Mail</gui> folder."
+"To move conversations to the <gui>Trash</gui> folder, select them and click "
+"the <gui style=\"button\">Trash</gui> toolbar button. To permanently delete "
+"conversations, hold down <key>Shift</key> and click the <gui style=\"button"
+"\">Delete</gui> button that appears in place of the <gui>Trash</gui> button, "
+"or open the conversation in the <gui>Trash</gui> folder and click <gui style="
+"\"button\">Delete</gui> there."
 msgstr ""
-"Se si usa Geary con un account Gmail, Geary permette di <em>archiviare</em> "
-"i messaggi. Il pulsante <gui>Archivia</gui> della barra degli strumenti "
-"archivia le conversazioni selezionate. I messaggi archiviati appaiono nella "
-"cartella <gui>Tutta la posta</gui>."
+"Per spostare le conversazioni nella cartella <gui>Cestino</gui>, "
+"selezionarle e premere il pulsante <gui style=\"button\">Cestina</gui> della "
+"barra degli strumenti. Per eliminare permanentemente le conversazioni, "
+"tenere premuto <key>Maiusc</key> e premere il pulsante <gui style=\"button"
+"\">Elimina</gui> che appare al posto del pulsante <gui>Cestina</gui>; oppure "
+"aprire la conversazione nella cartella <gui>Cestino</gui> e fare clic su "
+"<gui style=\"button\">Elimina</gui> lì."
+
+#. (itstool) path: note/title
+#: C/archive.page:26
+msgid "Undoing changes"
+msgstr "Annullare modifiche"
+
+#. (itstool) path: note/p
+#: C/archive.page:27
+msgid ""
+"Note that you can always undo archiving or trashing a message if you change "
+"your mind. Click <gui style=\"button\">Undo</gui> on the pop-up notification "
+"that appears, or type <keyseq><key>Ctrl</key><key>Z</key></keyseq>, or open "
+"the folder, find the message, then move it back to your <gui>Inbox</gui>"
+msgstr ""
+"È sempre possibile annullare l'archiviazione o lo spostamento nel cestino di "
+"un messaggio, nel caso si cambi idea. Basta fare clic su <gui style=\"button"
+"\">Annulla</gui> nella notifica a comparsa che appare, oppure digitare "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq>, oppure aprire la cartella, "
+"trovare il messaggio e rimetterlo nella <gui>Posta in arrivo</gui>"
 
 #. (itstool) path: page/p
-#: C/archive.page:16
+#: C/archive.page:34
 msgid ""
-"With other mail servers, you can trash or delete, but not archive, messages. "
-"To move one or more conversations to the <gui>Trash</gui> folder, select "
-"them and press the <gui>Trash</gui> button on the toolbar. To permanently "
-"delete the conversations, hold down <key>Shift</key> and press the "
-"<gui>Delete</gui> button that appears in place of the <gui>Trash</gui> "
-"button."
+"While both <gui style=\"button\">Archive</gui> and <gui style=\"button"
+"\">Trash</gui> removes conversations from your <gui>Inbox</gui> folder, "
+"there is an important difference. Clicking <gui style=\"button\">Archive</"
+"gui> will ensure your conversations are kept so you can find them again "
+"later. Clicking <gui style=\"button\">Trash</gui> will cause conversations "
+"to be hidden from <link xref=\"search\"/>, and they will likely be deleted "
+"in the future."
 msgstr ""
-"Se si usano altri server mail, è possibile spostare nel cestino o eliminare "
-"i messaggi, ma non archiviarli. Per spostare una o più conversazioni nella "
-"cartella <gui>Cestino</gui>, selezionarle e premere il pulsante "
-"<gui>Cestina</gui> della barra degli strumenti. Per eliminare "
-"permanentemente le conversazioni, tenere premuto <key>Maiusc</key> e premere "
-"il pulsante <gui>Elimina</gui> che appare al posto del pulsante "
-"<gui>Cestina</gui>."
-
-#. (itstool) path: page/p
-#: C/archive.page:21
-msgid ""
-"Delete is not available from every folder, such as Search. Delete is also "
-"unavailable for Gmail. For Gmail, <gui>Trash</gui> will move messages to the "
-"Trash folder on the server, where the user can then manually delete them. "
-"The server will automatically remove trashed messages after 30 days."
-msgstr ""
-"Il pulsante Elimina non è disponibile in tutte le cartelle, come ad esempio "
-"nella ricerca. È del tutto assente negli account Gmail. Questi hanno a "
-"disposizione solo il pulsante <gui>Cestina</gui>, che sposta i messaggi "
-"nella cartella Cestino sul server, dove l'utente può poi eliminarli "
-"manualmente. Il server eliminerà automaticamente i messaggi cestinati dopo "
-"30 giorni."
+"Sia <gui style=\"button\">Archivia</gui> sia <gui style=\"button\">Cestina</"
+"gui> tolgono le conversazioni dalla cartella <gui>Posta in arrivo</gui>, ma "
+"c'è una differenza importante. Infatti facendo clic su <gui style=\"button"
+"\">Archivia</gui> le conversazioni sono mantenute, consentendo di ritrovarle "
+"in seguito. Facendo clic su <gui style=\"button\">Cestina</gui> invece le "
+"conversazioni vengono nascoste dalla <link xref=\"search\"/> e probabilmente "
+"verranno eliminate in futuro."
 
 #. (itstool) path: page/title
 #: C/bugs.page:10
@@ -397,9 +431,6 @@ msgstr "Grazie per aiutarci a rendere Geary migliore!"
 #. update your localized copy. The msgstr is not used at all. Set it to
 #. whatever you like once you have updated your copy of the file.
 #: C/index.page:6
-#| msgctxt "_"
-#| msgid ""
-#| "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
 msgctxt "_"
 msgid "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
 msgstr ""
@@ -407,7 +438,6 @@ msgstr ""
 
 #. (itstool) path: page/title
 #: C/index.page:5
-#| msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
 msgid ""
 "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
 "<span>Geary</span>"
@@ -752,31 +782,26 @@ msgid "Preferences"
 msgstr "Preferenze"
 
 #. (itstool) path: page/p
-#: C/preferences.page:11
+#: C/preferences.page:12
 msgid ""
-"The <gui>Preferences</gui> option is available in either Geary's application "
-"menu or the gear menu in the upper-right of the toolbar. (The location "
-"depends on the install desktop shell. For GNOME Shell and Unity, the "
-"application menu is available near the top-left corner of the screen.)"
+"Geary allows you to customise how it works via its <gui style=\"group"
+"\">Preferences</gui> window. To open the window, select <gui style=\"menuitem"
+"\">Preferences</gui> from the application menu on the main window's toolbar. "
+"You can change the following options:"
 msgstr ""
-"L'opzione <gui>Preferenze</gui> è disponibile nel menù dell'applicazione o "
-"nel menù dell'icona con la ruota dentata in alto a destra (la posizione "
-"dipende dall'ambiente grafico utilizzato: in GNOME Shell e Unity il menù "
-"dell'applicazione si trova vicino all'angolo superiore sinistro dello "
-"schermo)."
-
-#. (itstool) path: section/title
-#: C/preferences.page:17
-msgid "Reading"
-msgstr "Lettura"
+"Geary permette di personalizzare il suo funzionamento attraverso la finestra "
+"delle <gui style=\"group\">Preferenze</gui>. Per aprire la finestra, "
+"selezionare <gui style=\"menuitem\">Preferenze</gui> dal menù "
+"dell'applicazione nella barra degli strumenti della finestra principale. Si "
+"possono cambiare le seguenti opzioni:"
 
 #. (itstool) path: item/title
-#: C/preferences.page:20
+#: C/preferences.page:19
 msgid "<gui>Automatically select next message</gui>"
 msgstr "<gui>Seleziona automaticamente il messaggio successivo</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:21
+#: C/preferences.page:20
 msgid ""
 "When this option is enabled, Geary automatically selects the latest message "
 "in a folder when you enter the folder. In addition, after archiving a "
@@ -818,48 +843,32 @@ msgstr ""
 "cartelle e quello delle conversazioni saranno impilati verticalmente in un "
 "unico riquadro."
 
-#. (itstool) path: section/title
-#: C/preferences.page:40
-msgid "Notifications"
-msgstr "Notifiche"
-
 #. (itstool) path: item/title
-#: C/preferences.page:43
-msgid "<gui>Play notification sounds</gui>"
-msgstr "<gui>Attiva avvisi sonori</gui>"
+#: C/preferences.page:38
+msgid "<gui>Use single key email shortcuts</gui>"
+msgstr "<gui>Usa le scorciatoie email a tasto singolo</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:44
-msgid "When set, Geary plays a sound whenever a new message arrives."
-msgstr "Se impostato, Geary emette un suono quando arriva un nuovo messaggio."
-
-#. (itstool) path: item/title
-#: C/preferences.page:47
-msgid "<gui>Show notifications for new mail</gui>"
-msgstr "<gui>Mostra notifiche per i nuovi messaggi</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:48
+#: C/preferences.page:39
+#| msgid ""
+#| "A number of keyboard shortcuts are available in the composer; see <link "
+#| "xref=\"shortcuts\"/> for details."
 msgid ""
-"When set, Geary displays a <em>notification</em> each time a new message "
-"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
-"Shell, notifications appear at the bottom of the display (older versions) or "
-"centered just below the top bar (newer versions). In Ubuntu Unity, "
-"notifications appear at the upper right of the display."
+"Enable keyboard shortcuts for email actions that do not require pressing "
+"<key>Ctrl</key>. These match the shortcuts used by GMail. See <link xref="
+"\"shortcuts\"/> for details."
 msgstr ""
-"Se impostato, Geary mostra una <em>notifica</em> ogni volta che arriva un "
-"nuovo messaggio. Il modo in cui le notifiche appaiono dipende dal sistema. "
-"In GNOME Shell le notifiche appaiono in fondo allo schermo (nelle versioni "
-"più vecchie) o centrate proprio sotto la barra superiore (nelle versioni "
-"recenti). In Ubuntu Unity appaiono in alto a destra."
+"Abilita le scorciatoie da tastiera per le azioni email che non richiedono "
+"l'uso di <key>Ctrl</key>. Corrispondono alle scorciatoie usate da GMail. "
+"Maggiori dettagli in <link xref=\"shortcuts\"/>."
 
 #. (itstool) path: item/title
-#: C/preferences.page:54
+#: C/preferences.page:44
 msgid "<gui>Watch for new mail when closed</gui>"
 msgstr "<gui>Controllare la nuova posta dopo la chiusura</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:55
+#: C/preferences.page:45
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
@@ -1050,22 +1059,27 @@ msgstr ""
 msgid "Keyboard shortcuts"
 msgstr "Scorciatoie da tastiera"
 
-#. (itstool) path: page/p
-#: C/shortcuts.page:12
+#. (itstool) path: section/p
+#: C/shortcuts.page:13
+#| msgid ""
+#| "Geary has keyboard shortcuts for most common operations. Use the built-in "
+#| "keyboard shortcuts help in Geary to discover the full list. This can be "
+#| "accessed via the application menu: <guiseq><gui>Geary</gui><gui>Keyboard "
+#| "Shortcuts</gui></guiseq> or using the keyboard shortcuts listed below."
 msgid ""
 "Geary has keyboard shortcuts for most common operations. Use the built-in "
-"keyboard shortcuts help in Geary to discover the full list. This can be "
-"accessed via the application menu: <guiseq><gui>Geary</gui><gui>Keyboard "
-"Shortcuts</gui></guiseq> or using the keyboard shortcuts listed below."
+"help to discover the full list. To open the shortcuts help, select <gui "
+"style=\"menuitem\">Keyboard Shortcuts</gui> from the application menu on the "
+"main window's toolbar, or using the keyboard shortcuts listed below."
 msgstr ""
 "Geary ha scorciatoie da tastiera per le operazioni più comuni. Usa l'aiuto "
-"integrato delle scorciatoie da tastiera per scoprire l'elenco completo. Si "
-"può accedervi dal menu dell'applicazione: <guiseq><gui>Geary</"
-"gui><gui>Scorciatoie da tastiera</gui></guiseq> oppure usando le scorciatoie "
-"elencate sotto."
+"integrato per scoprire l'elenco completo. Per aprirlo, selezionare <gui "
+"style=\"menuitem\">Scorciatoie da tastiera</gui> dal menù dell'applicazione "
+"sulla barra degli strumenti della finestra principale, oppure usando le "
+"scorciatoie elencate sotto."
 
-#. (itstool) path: page/p
-#: C/shortcuts.page:18
+#. (itstool) path: section/p
+#: C/shortcuts.page:19
 msgid ""
 "The following keyboard shortcuts can be used to access on-line help from "
 "Geary:"
@@ -1074,28 +1088,52 @@ msgstr ""
 "in linea dall'applicazione:"
 
 #. (itstool) path: td/p
-#: C/shortcuts.page:22
-msgid "Display this User Manual"
-msgstr "Mostra questo manuale utente"
+#: C/shortcuts.page:23
+#| msgid "Display this User Manual"
+msgid "Display this online help manual"
+msgstr "Mostra questo manuale utente in linea"
 
 #. (itstool) path: td/p
-#: C/shortcuts.page:23
+#: C/shortcuts.page:24
 msgid "<keyseq><key>F1</key></keyseq>"
 msgstr "<keyseq><key>F1</key></keyseq>"
 
 #. (itstool) path: td/p
-#: C/shortcuts.page:26
+#: C/shortcuts.page:27
 msgid "Display all keyboard shortcuts"
 msgstr "Mostra tutte le scorciatoie da tastiera"
 
 #. (itstool) path: td/p
-#: C/shortcuts.page:27
+#: C/shortcuts.page:28
+#| msgid "<keyseq><key>F1</key></keyseq>"
+msgid "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+msgstr "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+
+#. (itstool) path: section/title
+#: C/shortcuts.page:36
+#| msgid "Display all keyboard shortcuts"
+msgid "Single key shortcuts"
+msgstr "Scorciatoie a tasto singolo"
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:38
 msgid ""
-"<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
-"key><key>F1</key></keyseq>"
+"You can enable keyboard shortcuts for email actions that do not require "
+"pressing <key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
+"xref=\"preferences\"/> for details."
 msgstr ""
-"<keyseq><key>Ctrl</key><key>?</key></keyseq> o <keyseq><key>Ctrl</"
-"key><key>F1</key></keyseq>"
+"Si possono abilitare le scorciatoie da tastiera per le azioni email che non "
+"richiedono l'uso di <key>Ctrl</key>. Corrispondono alle scorciatoie usate da "
+"GMail. Maggiori dettagli in <link xref=\"preferences\"/>."
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:42
+msgid ""
+"The full list of single key shortcuts enabled by this preference can be "
+"found via the keyboard shortcuts help, above."
+msgstr ""
+"L'elenco completo delle scorciatoie a tasto singolo abilitate da questa "
+"preferenza si trovano nella finestra delle scorciatoie da tastiera, sopra."
 
 #. (itstool) path: page/title
 #: C/star.page:10
@@ -1167,93 +1205,191 @@ msgstr ""
 "come letto</gui> dal menù a discesa."
 
 #. (itstool) path: page/title
-#: C/write.page:9
-msgid "Write a message"
-msgstr "Scrivere un messaggio"
+#: C/write.page:7
+#| msgid "Composing and replying"
+msgid "Writing new email and replying"
+msgstr "Composizione di una nuova email e risposta"
 
 #. (itstool) path: section/title
-#: C/write.page:12
+#: C/write.page:10
 msgid "Composing and replying"
 msgstr "Composizione e risposta"
 
 #. (itstool) path: section/p
-#: C/write.page:13
+#: C/write.page:12
 msgid ""
-"To compose a new message in Geary, press the <gui>New Message</gui> button "
-"on the toolbar."
+"To start a new email conversation, click the <gui style=\"button\">Compose</"
+"gui> button on the toolbar. Type the email address of the people to receive "
+"the message in the <gui style=\"input\">To</gui> text field, and a subject "
+"line in the <gui style=\"input\">Subject</gui> field. You can then type your "
+"message in the text area below these. Once the message is read to send, "
+"click <gui style=\"button\">Send</gui> or type <keyseq><key>Ctrl</"
+"key><key>Enter</key></keyseq> to send the message."
 msgstr ""
-"Per comporre un nuovo messaggio in Geary, premere il pulsante <gui>Nuovo "
-"messaggio</gui> della barra degli strumenti."
+"Per iniziare una nuova conversazione email, fare clic sul pulsante <gui "
+"style=\"button\">Componi</gui> della barra degli strumenti. Comporre "
+"l'indirizzo email delle persone a cui è destinato il messaggio nel campo "
+"<gui style=\"input\">A</gui> e una linea di oggetto nel campo <gui style="
+"\"input\">Oggetto</gui>. Si può quindi scrivere il proprio messaggio "
+"nell'area di testo sottostante. Quando il messaggio è pronto per essere "
+"inviato, fare clic su <gui style=\"button\">Invia</gui> o digitare "
+"<keyseq><key>Ctrl</key><key>Invio</key></keyseq> per inviare il messaggio."
 
-#. (itstool) path: section/p
-#: C/write.page:16
-msgid ""
-"To reply to a message, open the message menu in the upper right corner of "
-"the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
-"<gui>Forward</gui>. You can also reply to the last message in a conversation "
-"via the <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui> buttons "
-"on the toolbar."
-msgstr ""
-"Per rispondere a un messaggio, aprire il menù dei messaggi nell'angolo "
-"superiore destro del messaggio e scegliere <gui>Rispondi</gui>, "
-"<gui>Rispondi a tutti</gui> o <gui>Inoltra</gui>. È possibile anche "
-"rispondere all'ultimo messaggio di una conversazione tramite i pulsanti "
-"<gui>Rispondi</gui>, <gui>Rispondi a tutti</gui> o <gui>Inoltra</gui> della "
-"barra degli strumenti."
-
-#. (itstool) path: section/title
-#: C/write.page:21
-msgid "Features"
-msgstr "Funzionalità"
-
-#. (itstool) path: section/p
+#. (itstool) path: note/title
 #: C/write.page:23
+msgid "Undoing sending"
+msgstr "Annullamento invio"
+
+#. (itstool) path: note/p
+#: C/write.page:24
 msgid ""
-"Geary's email composer lets you adjust the font, size and color of text. You "
-"can also insert hyperlinks into messages."
+"When sending an email, Geary will wait 5 seconds before delivering the "
+"message. During this time, you will be able to click <gui style=\"button"
+"\">Undo</gui> on the pop-up notification that appears or type "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the email, and make "
+"more changes to it."
 msgstr ""
-"Il compositore email di Geary permette di regolare il tipo di carattere, la "
-"dimensione e il colore del testo. Si possono anche inserire dei collegamenti "
-"ipertestuali all'interno dei messaggi."
+"Quando si invia un'email, Geary aspetterà 5 secondi prima di consegnare il "
+"messaggio. Nel corso di questo tempo, è possibile fare clic su <gui style="
+"\"button\">Annulla</gui> sulla notifica a comparsa che appare oppure "
+"digitare <keyseq><key>Ctrl</key><key>Z</key></keyseq> per riaprire l'email e "
+"aggiungere delle modifiche."
 
 #. (itstool) path: section/p
-#: C/write.page:25
-msgid ""
-"Geary can also send plain text messages. In the drop-down menu, check or "
-"uncheck \"Rich Text\" to toggle between plain text and rich text mode."
-msgstr ""
-"Geary può anche inviare messaggi di testo semplice. Nel menù a discesa, "
-"aggiungere o togliere la spunta a \"Testo formattato\" per scegliere tra le "
-"modalità testo semplice e testo formattato."
-
-#. (itstool) path: section/p
-#: C/write.page:28
-msgid ""
-"You can attach a file to a message you're writing in either of these ways:"
-msgstr "È possibile allegare un file a un messaggio in uno di questi modi:"
-
-#. (itstool) path: item/p
-#: C/write.page:30
-msgid ""
-"Press the <gui>Attach File</gui> button at the lower left of the composer "
-"window, then select a file to attach."
-msgstr ""
-"Premere il pulsante <gui>File allegato</gui> in basso a sinistra della "
-"finestra di composizione, quindi selezionare un file da allegare."
-
-#. (itstool) path: item/p
 #: C/write.page:32
 msgid ""
-"Drag the file from the Nautilus file manager to the composer window, and "
-"drop it either on the text fields at the top of the window or on the toolbar "
-"at the bottom."
+"When entering an email address in the <gui style=\"input\">To</gui> and <gui "
+"style=\"input\">Cc</gui> fields, Geary will provide suggestions from your "
+"desktop address book and from previously sent and received email messages. "
+"To choose one of these suggestions, simply click on it. In addition, <gui "
+"style=\"input\">Bcc</gui> and <gui style=\"input\">Reply-to</gui> fields can "
+"be shown by selecting <gui style=\"menu\">Show extended fields</gui> from "
+"the formatting toolbar menu."
 msgstr ""
-"Trascinare il file dal gestore file Nautilus alla finestra di composizione e "
-"rilasciarlo sui campi testuali in cima alla finestra o sulla barra degli "
-"strumenti in basso."
+"Quando si inserisce un indirizzo email nei campi <gui style=\"input\">A</"
+"gui> e <gui style=\"input\">Cc</gui>, Geary fornirà suggerimenti presi dalla "
+"rubrica del desktop e dai messaggi email precedentemente inviati e ricevuti. "
+"Per scegliere uno di questi suggerimenti, basta fare clic su di esso. È "
+"inoltre possibile mostrare i campi <gui style=\"input\">Ccn</gui> e <gui "
+"style=\"input\">Rispondi a</gui> selezionando <gui style=\"menu\">Mostra i "
+"campi estesi</gui> dal menù della barra degli strumenti di formattazione."
 
 #. (itstool) path: section/p
-#: C/write.page:36
+#: C/write.page:41
+msgid ""
+"To reply to the currently selected conversation, click one of the <gui style="
+"\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui style="
+"\"button\">Forward</gui> toolbar buttons. This will open a new reply or "
+"forwarded email composer for the latest message in the conversation."
+msgstr ""
+"Per rispondere alla conversazione attualmente selezionata, fare clic su uno "
+"dei pulsanti <gui style=\"button\">Rispondi</gui>, <gui style=\"button"
+"\">Rispondi a tutti</gui> o <gui style=\"button\">Inoltra</gui> nella barra "
+"degli strumenti. Così si aprirà una nuovo compositore di risposta o di "
+"inoltro email per l'ultimo messaggio della conversazione."
+
+#. (itstool) path: section/p
+#: C/write.page:47
+msgid ""
+"When replying, the message being replied to will be quoted and copied into "
+"the footer of the new reply. This can be deleted before typing a reply by "
+"pressing <key>Backspace</key>. Alternatively, text can be selectively quoted "
+"by selecting the desired text in a message and clicking <gui style=\"button"
+"\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only the selected "
+"text will be quoted."
+msgstr ""
+"In risposta, il messaggio a cui si risponde viene citato e copiato in fondo "
+"alla nuova risposta. Per eliminarlo basta premere <key>Backspace</key> prima "
+"di scrivere la risposta. Altrimenti, si può citare il testo in modo "
+"selettivo selezionando il testo desiderato in un messaggio e facendo clic su "
+"<gui style=\"button\">Rispondi</gui> o <gui style=\"button\">Rispondi a "
+"tutti</gui>, così che sia citato solo il testo selezionato."
+
+#. (itstool) path: section/p
+#: C/write.page:55
+#| msgid ""
+#| "To reply to a message, open the message menu in the upper right corner of "
+#| "the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
+#| "<gui>Forward</gui>. You can also reply to the last message in a "
+#| "conversation via the <gui>Reply</gui>, <gui>Reply All</gui> or "
+#| "<gui>Forward</gui> buttons on the toolbar."
+msgid ""
+"To reply to a specific email message, open the message menu in the top "
+"corner of the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
+"<gui>Forward</gui>."
+msgstr ""
+"Per rispondere a un messaggio in particolare, aprire il menù dei messaggi "
+"nell'angolo superiore del messaggio e scegliere <gui>Rispondi</gui>, "
+"<gui>Rispondi a tutti</gui> o <gui>Inoltra</gui>."
+
+#. (itstool) path: section/title
+#: C/write.page:61
+msgid "Text formatting, images and attachments"
+msgstr "Formattazione del testo, immagini e allegati"
+
+#. (itstool) path: section/p
+#: C/write.page:63
+msgid ""
+"Geary's email composer lets you use text styles such as <em>bold</em> and "
+"<em>italic</em>, indent text to quote it and links to web pages. Simply "
+"select the text and click the appropriate button on the formatting toolbar."
+msgstr ""
+"Il compositore email di Geary permette di usare stili di testo come "
+"<em>grassetto</em> e <em>corsivo/em>, indentazione del testo per la "
+"citazione e collegamenti a pagine web. Basta selezionare il testo e fare "
+"clic sul pulsante apposito nella barra degli strumenti di formattazione."
+
+#. (itstool) path: section/p
+#: C/write.page:68
+msgid ""
+"Bulleted and numbered lists can be inserted or removed by clicking the <gui "
+"style=\"button\">Bulleted list</gui> and <gui style=\"button\">Numbered "
+"list</gui> buttons on the formatting toolbar. The level of indentation of "
+"list items can be adjusted using the <gui style=\"button\">Indent</gui> and "
+"<gui style=\"button\">Un-indent</gui> formatting toolbar buttons."
+msgstr ""
+"Gli elenchi puntati e numerati si inseriscono o si tolgono facendo clic sui "
+"pulsanti <gui style=\"button\">Elenco puntato</gui> e <gui style=\"button"
+"\">Elenco numerato</gui> della barra degli strumenti di formattazione. Il "
+"livello di indentazione degli elementi dell'elenco può essere modificato "
+"usando i pulsanti <gui style=\"button\">Indenta</gui> e <gui style=\"button"
+"\">Rimuovi indentazione</gui> della barra degli strumenti di formattazione."
+
+#. (itstool) path: section/p
+#: C/write.page:75
+msgid ""
+"Images can be inserted into rich text messages by clicking the <gui style="
+"\"button\">Insert Image</gui> button on the formatting toolbar and selecting "
+"the image to attach, by dragging an image from the <gui>Files</gui> "
+"application into the email body and then dropping it, or by pasting an image "
+"that has been copied to the clipboard from another application."
+msgstr ""
+"Le immagini possono essere inserite nei messaggi formattati facendo clic sul "
+"pulsante <gui style=\"button\">Inserisci immagine</gui> della barra degli "
+"strumenti di formattazione e selezionando l'immagine da allegare, oppure "
+"trascinando un'immagine dall'applicazione <gui>File</gui> dentro al corpo "
+"dell'email e poi rilasciarla, oppure incollando un'immagine copiata negli "
+"appunti da un'altra applicazione."
+
+#. (itstool) path: section/p
+#: C/write.page:82
+msgid ""
+"Documents, music, videos, and other files can be attached to the email by "
+"clicking the <gui style=\"button\">Attach File</gui> button at the top of "
+"the composer window and selecting the document to attach, or by dragging a "
+"file from the <gui>Files</gui> application to the composer window, and "
+"dropping it either on the text fields at the top of the window or on the "
+"toolbar at the bottom."
+msgstr ""
+"Documenti, musica, video e altri file possono essere allegati all'email "
+"facendo clic sul pulsante <gui style=\"button\">Allega file</gui> in cima "
+"alla finestra del compositore e selezionando il documento da allegare, "
+"oppure trascinando un file dall'applicazione <gui>File</gui> alla finestra "
+"del compositore e rilasciandolo sui campi testuali in cima alla finestra o "
+"sulla barra degli strumenti in basso."
+
+#. (itstool) path: section/p
+#: C/write.page:90
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
 "\"shortcuts\"/> for details."
@@ -1262,41 +1398,142 @@ msgstr ""
 "composizione, come è spiegato dettagliatamente in <link xref=\"shortcuts\"/>."
 
 #. (itstool) path: section/p
-#: C/write.page:38
+#: C/write.page:93
+#| msgid ""
+#| "You may specify a signature to be inserted into the composer in the <link "
+#| "xref=\"accounts\"/> dialog."
 msgid ""
-"You may specify a signature to be inserted into the composer in the <link "
-"xref=\"accounts\"/> dialog."
+"You may specify a signature to be inserted into the footer of email in the "
+"composer via the <link xref=\"accounts\"/> dialog."
 msgstr ""
-"Si può indicare una firma da inserire nella finestra di composizione nelle "
-"opzioni <link xref=\"accounts\"/>."
+"Si può indicare nelle opzioni <link xref=\"accounts\"/> una firma da "
+"inserire in fondo all'email nella finestra di composizione."
 
 #. (itstool) path: section/title
-#: C/write.page:43
-msgid "Drafts"
-msgstr "Bozze"
+#: C/write.page:98
+msgid "Checking spelling"
+msgstr "Controllo ortografico"
 
 #. (itstool) path: section/p
-#: C/write.page:45
+#: C/write.page:100
+msgid ""
+"Geary supports spell-checking your composed email in one or more languages, "
+"as you type. To enable spell-checking, first ensure your computer has spell-"
+"check dictionaries installed for the desired languages. Consult your "
+"computer's help to determine how to install dictionaries if not present."
+msgstr ""
+"Geary fornisce il controllo ortografico in una o più lingue mentre si digita "
+"il testo nella finestra di composizione dell'email. Per abilitarlo, "
+"assicurarsi di avere installati i dizionari del controllo ortografico per le "
+"lingue desiderate. Consultare il manuale del proprio computer per sapere "
+"come installare dizionari se non presenti."
+
+#. (itstool) path: section/p
+#: C/write.page:106
+msgid ""
+"To select languages for spell-checking, click the <gui style=\"button"
+"\">Spell check</gui> button on the formatting toolbar, and the language "
+"selection popover will appear. Click on a language in the list to toggle it "
+"on or off, and click the <gui style=\"button\">-</gui> button to remove it "
+"from the list. If a language does not appear in the list, search for it by "
+"typing its name in the search box, then click the <gui style=\"button\">+</"
+"gui> button to add it."
+msgstr ""
+"Per selezionare le lingue per il controllo ortografico, fare clic sul "
+"pulsante <gui style=\"button\">Controllo ortografico</gui> della barra degli "
+"strumenti di formattazione, e apparirà la finestra a comparsa per la scelta "
+"della lingua. Fare clic su una lingua dell'elenco per attivarla o "
+"disattivarla, e fare clic sul pulsante <gui style=\"button\">-</gui> per "
+"toglierla dall'elenco. Se una lingua non appare nell'elenco, cercarla "
+"scrivendo il suo nome nella casella di ricerca, quindi fare clic sul "
+"pulsante <gui style=\"button\">+</gui> per aggiungerla."
+
+#. (itstool) path: section/title
+#: C/write.page:117
+msgid "Saving drafts and restoring discarded messages"
+msgstr "Salvataggio bozze e ripristino messaggi scartati"
+
+#. (itstool) path: section/p
+#: C/write.page:119
+#| msgid ""
+#| "For mail servers that support drafts, Geary will automatically save the "
+#| "message as you type. If you close the composer without sending, Geary "
+#| "will prompt you to keep the draft or to discard it."
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
-"message as you type. If you close the composer without sending, Geary will "
-"prompt you to keep the draft or to discard it."
+"message as you type on the server after a short delay."
 msgstr ""
-"Se si usa un server mail che supporta le bozze, Geary salverà "
-"automaticamente il messaggio mentre lo si scrive. Se si chiude il "
-"compositore senza inviare, Geary chiede se conservare la bozza o scartarla."
+"Se si usa un server mail che supporta le bozze, Geary salverà il messaggio "
+"sul server automaticamente dopo un breve ritardo, mentre lo si scrive."
 
 #. (itstool) path: section/p
-#: C/write.page:48
+#: C/write.page:123
+#| msgid ""
+#| "To edit an existing draft, select the Drafts folder in the folder list, "
+#| "select the message, and click \"Edit Draft\" in the message viewer."
 msgid ""
-"To edit an existing draft, select the Drafts folder in the folder list, "
-"select the message, and click \"Edit Draft\" in the message viewer."
+"To edit an existing draft, select the <gui>Drafts</gui> folder in the folder "
+"list, select the message, and click \"Edit Draft\" in the conversation "
+"viewer."
 msgstr ""
-"Per modificare una bozza esistente, entrare nella cartella Bozze nell'elenco "
-"delle cartelle, selezionare il messaggio e fare clic su \"Modifica bozza\" "
-"nel visualizzatore del messaggio."
+"Per modificare una bozza esistente, entrare nella cartella <gui>Bozze</gui> "
+"dell'elenco cartelle, selezionare il messaggio e fare clic su \"Modifica "
+"bozza\" nel visualizzatore della conversazione."
 
 #. (itstool) path: section/p
-#: C/write.page:51
-msgid "Geary deletes the draft when you send the message."
+#: C/write.page:127
+#| msgid "Geary deletes the draft when you send the message."
+msgid "Geary will delete the draft when you send the message."
 msgstr "Geary elimina la bozza quando il messaggio viene inviato."
+
+#. (itstool) path: note/p
+#: C/write.page:130
+msgid ""
+"If you save or discard a composed email, you can re-open it by clicking <gui "
+"style=\"button\">Undo</gui> on the pop-up notification that appears or by "
+"typing <keyseq><key>Ctrl</key><key>Z</key></keyseq>. The ability to restore "
+"a saved or discarded composer will be remain for up to 30 minutes. After "
+"that you will need to re-open the message via the <gui>Drafts</gui> folder, "
+"if present."
+msgstr ""
+"Se si salva o si scarta un'email appena composta, la si può riaprire facendo "
+"clic su <gui style=\"button\">Annulla</gui> nella notifica che appare oppure "
+"digitando <keyseq><key>Ctrl</key><key>Z</key></keyseq>. La capacità di "
+"ripristinare una finestra di composizione salvata o scartata resterà "
+"disponibile per 30 minuti. Al termine di questo periodo occorre riaprire il "
+"messaggio dalla cartella <gui>Bozze</gui>, se presente."
+
+#. (itstool) path: section/title
+#: C/write.page:141
+#| msgid "Write a message"
+msgid "Plain text messages"
+msgstr "Messaggi di testo semplice"
+
+#. (itstool) path: section/p
+#: C/write.page:143
+msgid ""
+"Geary can also send plain text messages. In the drop-down menu, check or "
+"uncheck <gui style=\"menu\">Rich Text</gui> to toggle between plain text and "
+"rich text mode. Plain text mode is useful when sending email to mailing "
+"lists that prohibit rich text (HTML) messages, or when sending email to "
+"people that do no use modern clients like Geary."
+msgstr ""
+"Geary può inviare anche messaggi di testo semplice. Nel menù a tendina, "
+"aggiungere o togliere la spunta a <gui style=\"menu\">Testo formattato</gui> "
+"per passare dal testo semplice a quello formattato e viceversa. La modalità "
+"a testo semplice è utile per inviare email alle mailing list che proibiscono "
+"i messaggi con testo formattato (HTML) o per inviare email a persone che non "
+"usano client di posta moderni come Geary."
+
+#. (itstool) path: section/p
+#: C/write.page:150
+msgid ""
+"In plain text mode, text will be automatically wrapped using soft line "
+"breaks so that it is no longer than 74 characters wide, and indented text "
+"will be wrapped and quoted using a “&gt;” character for each level of "
+"quoting."
+msgstr ""
+"In modalità testo semplice, il testo tornerà a capo automaticamente usando "
+"interruzioni di linea leggere in modo che non sia più largo di 74 caratteri, "
+"mentre il testo citato sarà avvolto usando un carattere “&gt;” per ciascun "
+"livello di citazione."

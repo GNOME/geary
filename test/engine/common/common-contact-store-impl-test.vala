@@ -42,7 +42,7 @@ class Geary.ContactStoreImplTest : TestCase {
         );
         this.db.open.begin(
             Geary.Db.DatabaseFlags.CREATE_FILE, null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.db.open.end(async_result());
 
@@ -79,7 +79,7 @@ class Geary.ContactStoreImplTest : TestCase {
         test_article.get_by_rfc822.begin(
             new RFC822.MailboxAddress(null, "Test@example.com"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Contact? existing = test_article.get_by_rfc822.end(async_result());
         assert_non_null(existing, "Existing contact");
@@ -92,7 +92,7 @@ class Geary.ContactStoreImplTest : TestCase {
         test_article.get_by_rfc822.begin(
             new RFC822.MailboxAddress(null, "test@example.com"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Contact? missing = test_article.get_by_rfc822.end(async_result());
         assert_null(missing, "Missing contact");
@@ -104,7 +104,7 @@ class Geary.ContactStoreImplTest : TestCase {
             0,
             10,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
@@ -118,7 +118,7 @@ class Geary.ContactStoreImplTest : TestCase {
             0,
             10,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
@@ -139,7 +139,7 @@ class Geary.ContactStoreImplTest : TestCase {
             0,
             10,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
@@ -173,7 +173,7 @@ class Geary.ContactStoreImplTest : TestCase {
             0,
             10,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
@@ -204,7 +204,7 @@ class Geary.ContactStoreImplTest : TestCase {
             0,
             10,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
@@ -226,14 +226,14 @@ class Geary.ContactStoreImplTest : TestCase {
         test_article.update_contacts.begin(
             Collection.single(not_persisted),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         test_article.update_contacts.end(async_result());
 
         test_article.get_by_rfc822.begin(
             new RFC822.MailboxAddress(null, "New@example.com"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Contact? persisted = test_article.get_by_rfc822.end(async_result());
         assert_non_null(persisted, "persisted");
@@ -255,13 +255,13 @@ class Geary.ContactStoreImplTest : TestCase {
         test_article.update_contacts.begin(
             Collection.single(not_updated),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         test_article.update_contacts.end(async_result());
         test_article.get_by_rfc822.begin(
             new RFC822.MailboxAddress(null, "Test@example.com"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Contact? updated = test_article.get_by_rfc822.end(async_result());
         assert_non_null(updated, "updated");
@@ -276,13 +276,13 @@ class Geary.ContactStoreImplTest : TestCase {
         test_article.update_contacts.begin(
             Collection.single(not_updated),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         test_article.update_contacts.end(async_result());
         test_article.get_by_rfc822.begin(
             new RFC822.MailboxAddress(null, "Test@example.com"),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Contact? updated_again = test_article.get_by_rfc822.end(async_result());
         assert_false(updated_again.flags.always_load_remote_images(), "Removed flags");

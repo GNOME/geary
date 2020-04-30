@@ -40,13 +40,13 @@
   <url type="faq">https://wiki.gnome.org/Apps/Geary/FAQ</url>
   <url type="bugtracker">https://wiki.gnome.org/Apps/Geary/ReportingABug</url>
   <url type="translate">https://wiki.gnome.org/Apps/Geary/Translating</url>
-  <url type="donation">https://www.gnome.org/friends/</url>
-  
+  <url type="donation">https://wiki.gnome.org/Apps/Geary/Donate</url>
+
   <screenshots>
     <screenshot>
       <!-- Translators: A screenshot description. -->
       <caption>Geary displaying a conversation</caption>
-      <image type="default" width="1200" height="675">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-main-window.png</image>
+      <image type="default" width="1600" height="900">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-36-main-window.png</image>
     </screenshot>
     <screenshot>
       <image type="source" width="642" height="361">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-avatars.png</image>
@@ -57,7 +57,7 @@
     <screenshot>
       <!-- Translators: A screenshot description. -->
       <caption>Geary showing the rich text composer</caption>
-      <image type="source" width="913" height="513">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-composer.png</image>
+      <image type="source" width="1108" height="900">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-36-composer.png</image>
     </screenshot>
     <screenshot>
       <image type="source" width="635" height="357">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-add-account.png</image>
@@ -89,22 +89,34 @@
   <translation type="gettext">geary</translation>
 
   <releases>
-    <release version="3.36" date="">
+    <release version="3.38" date="">
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
-          <li>Using single key shortcuts for email action is now optional</li>
-          <li>Single key shortcuts have been brought up to date with Gmail</li>
+          <li>New mail notifications now show contact photos</li>
+          <li>New preferences pane for managing plugins</li>
+        </ul>
+      </description>
+    </release>
+    <release version="3.36" date="2020-03-13">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>New and improved responsive composer interface</li>
           <li>Drag and drop image files into rich text messages</li>
           <li>Paste images from the clipboard into rich text messages</li>
-          <li>Open more than one main window</li>
+          <li>Improved composer missing attachment detection</li>
+          <li>Access emoji chooser in composer via shortcut or context menu</li>
           <li>Extend undo for email actions such as archiving, marking</li>
           <li>Undo sending, saving and discarding composed email</li>
           <li>Undo editing in text fields, including in the composer</li>
-          <li>Conversation loading performance improvements</li>
+          <li>Open more than one main window</li>
+          <li>New and improved responsive preferences interface</li>
+          <li>Using single key shortcuts for email actions is now optional</li>
+          <li>Single key shortcuts have been brought up to date with Gmail</li>
           <li>App-wide notification preferences now handled by desktop</li>
-          <li>Improved missing attachment detection in composer</li>
-          <li>Initial plugin system</li>
+          <li>Numerous bug fixes and user interface improvements</li>
+          <li>Numerous user interface translation updates</li>
         </ul>
       </description>
     </release>

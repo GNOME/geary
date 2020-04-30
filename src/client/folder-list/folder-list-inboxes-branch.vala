@@ -29,14 +29,12 @@ public class FolderList.InboxesBranch : Sidebar.Branch {
         return folder_entries.get(account);
     }
 
-    public void add_inbox(Geary.Folder inbox) {
-        assert(inbox.special_folder_type == Geary.SpecialFolderType.INBOX);
-
+    public void add_inbox(Application.FolderContext inbox) {
         InboxFolderEntry folder_entry = new InboxFolderEntry(inbox);
         graft(get_root(), folder_entry);
 
-        folder_entries.set(inbox.account, folder_entry);
-        inbox.account.information.notify["ordinal"].connect(on_ordinal_changed);
+        folder_entries.set(inbox.folder.account, folder_entry);
+        inbox.folder.account.information.notify["ordinal"].connect(on_ordinal_changed);
     }
 
     public void remove_inbox(Geary.Account account) {

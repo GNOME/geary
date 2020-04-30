@@ -1,0 +1,1512 @@
+# Translators:
+# Jaume Jorba <jaume.jorba@gmail.com>, 2020
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2020-02-19 00:44+0000\n"
+"PO-Revision-Date: 2020-02-20 06:31+0000\n"
+"Last-Translator: Jaume Jorba <jaume.jorba@gmail.com>, 2020\n"
+"Language-Team: Catalan (https://www.transifex.com/softcatala/teams/62837/ca/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ca\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+msgctxt "_"
+msgid "translator-credits"
+msgstr "Jaume Jorba <jaume.jorba@gmail.com>, 2020"
+
+#. (itstool) path: page/title
+#: C/accounts.page:10
+msgid "Accounts"
+msgstr "Comptes"
+
+#. (itstool) path: section/title
+#: C/accounts.page:13
+msgid "Accounts Editor"
+msgstr "Editor de comptes"
+
+#. (itstool) path: section/p
+#: C/accounts.page:15
+msgid ""
+"Your email accounts can be added, updated, and removed using the "
+"<em>accounts editor</em>. To open it, click Geary’s application menu button "
+"in the main window above the folder list, then click <gui>Accounts</gui> in "
+"the pop-up menu."
+msgstr ""
+"Els vostres comptes de correu es poden afegir, actualitzar, i esborrar "
+"utilitzant l'<em>editor de comptes</em>. Per a obrir-lo, feu clic al botó de "
+"menú de l'aplicació Geary a la finestra principal sobre la llista de "
+"carpetes i, a continuació, feu clic al menú emergent <gui>Comptes</gui>."
+
+#. (itstool) path: section/p
+#: C/accounts.page:20
+msgid ""
+"To change the order that accounts are displayed in the folder list, click "
+"and drag the handle for an account in the accounts editor, or focus an "
+"account with <key>Tab</key>, then use "
+"<keyseq><key>Ctrl</key><key>↑</key></keyseq> and "
+"<keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the currently "
+"selected account."
+msgstr ""
+"Per a canviar l'ordre en el qual es mostren els comptes a la llista de "
+"carpetes, feu clic i arrossegueu el compte l'editor de comptes, o "
+"seleccioneu un compte mitjançant la tecla <key>Tab</key>, aleshores premeu "
+"les tecles <keyseq><key>Ctrl</key><key>↑</key></keyseq> i "
+"<keyseq><key>Ctrl</key><key>↓</key></keyseq> per a reposicionar el compte a la"
+" posició seleccionada."
+
+#. (itstool) path: section/title
+#: C/accounts.page:29
+msgid "Adding accounts"
+msgstr "Afegeix comptes"
+
+#. (itstool) path: section/p
+#: C/accounts.page:31
+msgid ""
+"Geary will automatically use any email accounts you have added via the "
+"<app>Online Accounts</app> panel of <app>GNOME Settings</app>. If you do not"
+" have any accounts added to <app>Online Accounts</app>, you will be prompted"
+" to add an account the first time you run Geary."
+msgstr ""
+"Geary automàticament utilitzarà qualsevol compte de correu electrònic que "
+"hàgeu afegit des del panell <app>Comptes en línia</app> de la "
+"<app>Configuració de GNOME</app>. Si no teniu comptes a <app>Comptes en "
+"línia</app>, se us demanarà que afegiu un compte la primera vegada que "
+"executeu Geary."
+
+#. (itstool) path: section/p
+#: C/accounts.page:37
+msgid ""
+"To add additional accounts, open the accounts editor, then choose the "
+"appropriate email provider from the list at the bottom of the window. For "
+"providers supported by <app>Online Accounts</app>, <app>GNOME Settings</app>"
+" will be opened and you will be asked for your account information there. "
+"For other email providers, you will be asked for your account information by"
+" Geary. Once entered, click <gui>Create</gui> and the account information "
+"will be checked and then added."
+msgstr ""
+"Per a afegir comptes addicionals, obriu l'editor de comptes i, a continuació, "
+"trieu el proveïdor de correu electrònic adequat de la llista que hi ha a la "
+"part inferior de la finestra. En el cas dels proveïdors suportats pels "
+"<app>Comptes en línia</app>, s'obrirà la <app>Configuració de GNOME</app> i "
+"se us demanarà la informació de configuració. En el cas d'altres proveïdors "
+", Geary us demanarà informació del compte. Un cop introduïda, feu clic a "
+"<gui>Crea</gui> i un cop comprovada la informació del compte, s'afegirà."
+
+#. (itstool) path: section/title
+#: C/accounts.page:48
+msgid "Updating existing accounts"
+msgstr "Actualitzar els comptes existents"
+
+#. (itstool) path: section/p
+#: C/accounts.page:50
+msgid ""
+"To update existing accounts, open the accounts editor and choose the account"
+" you wish to update. Geary will display settings for the account. From "
+"there, you can add and remove additional sender email addresses, edit your "
+"email signature, and various other settings."
+msgstr ""
+"Per a actualitzar els comptes existents, obriu l'editor de comptes i trieu el "
+"compte que voleu actualitzar. Geary mostrarà la configuració del compte, des"
+" d'on podreu afegir i eliminar adreces de correu electrònic del remitent, "
+"editar la vostra signatura de correu electrònic i diversos altres "
+"paràmetres."
+
+#. (itstool) path: section/p
+#: C/accounts.page:56
+msgid ""
+"The <gui>Download mail</gui> setting allows you to configure how much mail "
+"Geary will download and store locally. Geary can only use locally available "
+"mail when displaying and searching for conversations."
+msgstr ""
+"Les opcions de <gui>Baixa els missatges</gui> us permet configurar quant "
+"correu es descarregarà i emmagatzemarà localment. Geary només pot utilitzar "
+"el correu electrònic local quan es mostren i cerquen converses."
+
+#. (itstool) path: section/p
+#: C/accounts.page:61
+msgid ""
+"To edit the server settings for the account, scroll to the bottom of the "
+"window and click <gui>Server Settings</gui>. The server settings will be "
+"displayed and you can click to edit them. Once done, click <gui>Apply</gui> "
+"and Geary will check the settings, then update the account. Note that "
+"accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> cannot have their server name, security, login, or password "
+"settings changed."
+msgstr ""
+"Per a editar la configuració del servidor del compte, desplaceu-vos fins a la "
+"part inferior de la finestra i feu clic a <gui>Configuració del "
+"servidor</gui>. Es mostrarà la configuració del servidor i podreu editar-"
+"les. Un cop modificades, feu clic a <gui>Aplica</gui> i Geary validarà la "
+"configuració, i aleshores s'actualitzarà el compte. Noteu que els comptes "
+"afegits via el panell <app>Comptes en línia</app> de la <app> Configuració "
+"de GNOME</app> no poden tenir canviat el nom, la seguretat, el registre o la"
+" contrasenya."
+
+#. (itstool) path: section/p
+#: C/accounts.page:70
+msgid ""
+"The <gui>Save draft email on server</gui> checkbox controls whether the "
+"composer will save copies of email messages being written in the "
+"<gui>Drafts</gui> folder. If de-selected, you will not be able to save draft"
+" messages when closing the composer."
+msgstr ""
+"La casella de selecció <gui>Desa els missatges enviats al servidor "
+"</gui> controla si l'editor desarà còpies dels missatges de correu "
+"electrònic escrits a la carpeta <gui>Esborranys</gui>. Si es desactiva, no "
+"podreu desar els esborranys dels missatges quan es tanqui l'editor."
+
+#. (itstool) path: section/p
+#: C/accounts.page:75
+msgid ""
+"The <gui>Save sent email on server</gui> checkbox controls whether Geary "
+"will save copies of email that have been sent to the <gui>Sent</gui> folder."
+" If de-selected, you will no be able to see any email messages you have "
+"sent, unless your server automatically saves them for you."
+msgstr ""
+" La casella de selecció <gui>Desa els missatges enviats al servidor "
+"</gui> controla si Geary desarà les còpies de correu electrònic "
+"enviades a la carpeta <gui>Enviats</gui>. Si es desactiva, no podreu veure "
+"cap dels missatges de correu electrònic que hàgiu enviat, tret que el "
+"servidor els desi automàticament."
+
+#. (itstool) path: section/title
+#: C/accounts.page:83
+msgid "Removing accounts"
+msgstr "Suprimir comptes"
+
+#. (itstool) path: section/p
+#: C/accounts.page:85
+msgid ""
+"Accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> must also be removed from there. To do so, open <app>Online "
+"Accounts</app>, select the account, and click <gui>Remove</gui>."
+msgstr ""
+"Els comptes afegits mitjançant el panell <app>Comptes en línia</app> de la "
+"<app>Configuració de GNOME</app> s'han d'eliminar des d'allà. Per a fer-ho, "
+"obriu <app>Comptes en línia</app>, seleccioneu el compte, i feu clic a "
+"<gui>Suprimeix</gui>."
+
+#. (itstool) path: section/p
+#: C/accounts.page:90
+msgid ""
+"To remove an account added via Geary, open the accounts editor and choose "
+"the account you wish to remove. Geary will display settings for the account."
+" Scroll to the bottom of the window and click <gui>Remove Account</gui>. You"
+" will be prompted to confirm removing the account. Once confirmed, if you "
+"change your mind you can still undo removing the account by clicking "
+"<gui>Undo</gui> in the popup notification, or by typing "
+"<keyseq><key>Ctrl</key><key>U</key></keyseq>."
+msgstr ""
+"Per a eliminar un compte afegit a través de Geary, obriu l'editor de comptes i"
+" trieu el compte que voleu suprimir. Geary us mostrarà la configuració del "
+"compte. Desplaceu-vos fins a la part inferior de la finestra i feu clic a "
+"<gui>Suprimeix el compte</gui>. Se us demanarà que confirmeu que elimineu el "
+"compte. Un cop confirmat, si canvieu d'opinió, encara podeu recuperar el "
+"compte fent clic a <gui>Desfés</gui> a la finestra emergent de notificació, "
+"o teclejant <keyseq><key>Ctrl</key><key>U</key></keyseq>."
+
+#. (itstool) path: page/title
+#: C/archive.page:8
+msgid "Archive, trash and delete messages"
+msgstr "Arxivar, esborrar i eliminar missatges"
+
+#. (itstool) path: page/p
+#: C/archive.page:10
+msgid ""
+"Geary lets you archive messages if your server supports it. Clicking the "
+"<gui style=\"button\">Archive</gui> toolbar button moves the conversation "
+"from the current folder to the <gui>Archive</gui> folder for most email "
+"services, or to <gui>All Mail</gui> for GMail. Archiving helps keep your "
+"email organised by moving old and replied-to email out of the way."
+msgstr ""
+"Geary us permet arxivar missatges si el vostre servidor ho permet. Fent clic"
+" al botó de la barra d'eines <gui style=\"button\">Arxiva</gui> es mouen les "
+"converses des de la carpeta actual a la carpeta <gui>Arxivats</gui> en la "
+"majoria de serveis de correu, o a <gui>Tot el correu electrònic</gui> a "
+"GMail. Arxivar ajuda a mantenir el vostre correu electrònic organitzat, "
+"movent fora de la vostra vista les respostes i els missatges antics."
+
+#. (itstool) path: page/p
+#: C/archive.page:17
+msgid ""
+"To move conversations to the <gui>Trash</gui> folder, select them and click "
+"the <gui style=\"button\">Trash</gui> toolbar button. To permanently delete "
+"conversations, hold down <key>Shift</key> and click the <gui "
+"style=\"button\">Delete</gui> button that appears in place of the "
+"<gui>Trash</gui> button, or open the conversation in the <gui>Trash</gui> "
+"folder and click <gui style=\"button\">Delete</gui> there."
+msgstr ""
+"Per a moure converses a la carpeta <gui>Paperera</gui>, seleccioneu-les i feu "
+"clic al botó de la barra d'eines <gui style=\"button\">Paperera</gui>. Per a "
+"esborrar les converses definitivament, mantingueu premuda la tecla "
+"<key>Majúscules</key> i feu clic al botó <gui "
+"style=\"button\">Suprimeix</gui> que apareix en el lloc del botó "
+"<gui>Paperera</gui>, o obriu la conversa a la carpeta <gui>Paperera</gui> i "
+"feu clic a <gui style=\"button\">Suprimeix</gui>."
+
+#. (itstool) path: note/title
+#: C/archive.page:26
+msgid "Undoing changes"
+msgstr "Desfer els canvis"
+
+#. (itstool) path: note/p
+#: C/archive.page:27
+msgid ""
+"Note that you can always undo archiving or trashing a message if you change "
+"your mind. Click <gui style=\"button\">Undo</gui> on the pop-up notification"
+" that appears, or type <keyseq><key>Ctrl</key><key>Z</key></keyseq>, or open"
+" the folder, find the message, then move it back to your <gui>Inbox</gui>"
+msgstr ""
+"Tingueu en compte que sempre podeu desfer arxivar o esborrar un missatge si "
+"canvieu d'opinió. Feu clic a <gui style=\"button\">Desfés</gui> a la "
+"notificació emergent que apareix, o teclegeu "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq>, o obriu la carpeta trobeu el "
+"missatge, aleshores desplaceu-vos a la <gui>Safata d'entrada</gui>"
+
+#. (itstool) path: page/p
+#: C/archive.page:34
+msgid ""
+"While both <gui style=\"button\">Archive</gui> and <gui "
+"style=\"button\">Trash</gui> removes conversations from your "
+"<gui>Inbox</gui> folder, there is an important difference. Clicking <gui "
+"style=\"button\">Archive</gui> will ensure your conversations are kept so "
+"you can find them again later. Clicking <gui style=\"button\">Trash</gui> "
+"will cause conversations to be hidden from <link xref=\"search\"/>, and they"
+" will likely be deleted in the future."
+msgstr ""
+"Mentre que tant <gui style=\"button\">Arxiva</gui> com <gui "
+"style=\"button\">Paperera</gui> eliminen les converses de la "
+"<gui>Safata d'entrada</gui>, hi ha una diferència important. Fent clic a <gui "
+"style=\"button\">Arxiva</gui> es garanteix que les converses es mantindran "
+"per a poder-les recuperar més endavant. Fent clic a <gui "
+"style=\"button\">Paperera</gui> es provoca que les converses s'ocultin de "
+"<link xref=\"search\"/>, i probablement s'eliminaran en el futur."
+
+#. (itstool) path: page/title
+#: C/bugs.page:10
+msgid "Found a bug?"
+msgstr "Heu trobat un error?"
+
+#. (itstool) path: page/p
+#: C/bugs.page:12
+msgid ""
+"If you suspect you've found a bug in Geary, please <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">get in touch</link> about"
+" it so it can be fixed."
+msgstr ""
+"Si sospiteu haver trobat un error a Geary, si us plau <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">poseu-vos en "
+"contacte</link> de forma que es pugui resoldre."
+
+#. (itstool) path: page/p
+#: C/bugs.page:16
+msgid ""
+"To help diagnose the problem as fast as possible, please include the "
+"following information:"
+msgstr ""
+"Per a ajudar a diagnosticar el problema el més ràpid possible, si us plau, "
+"incloeu la següent informació:"
+
+#. (itstool) path: item/p
+#: C/bugs.page:20
+msgid "Geary version and installation method (Package? Flathub? Source code?)"
+msgstr "Versió de Geary i mètode d'instal·lació (Paquet? Flathub? Codi font?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:22
+msgid "Your desktop (GNOME? KDE? Something else?)"
+msgstr "El vostre escriptori (GNOME? KDE? Alguna cosa més?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:23
+msgid ""
+"Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your "
+"own?)"
+msgstr ""
+"El sistema i versió del vostre sistema operatiu (Ubuntu 16.04? Fedora 28? El"
+" vostre propi?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:25
+msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
+msgstr ""
+"Proveïdor del correu electrònic (Google, Yahoo!, Outlook.com, o algun "
+"altre?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:27
+msgid "Steps to reproduce the bug"
+msgstr "Passos per a reproduir l'error"
+
+#. (itstool) path: item/p
+#: C/bugs.page:28
+msgid "What happened?"
+msgstr "Què ha passat?"
+
+#. (itstool) path: item/p
+#: C/bugs.page:29
+msgid "What did you expect to happen?"
+msgstr "Què esperàveu que passés?"
+
+#. (itstool) path: page/p
+#: C/bugs.page:32
+msgid "Thanks for your help!"
+msgstr "Gràcies per la vostra ajuda!"
+
+#. (itstool) path: page/title
+#: C/contributing.page:10
+msgid "Contribute to Geary"
+msgstr "Contribuir a Geary"
+
+#. (itstool) path: page/p
+#: C/contributing.page:12
+msgid ""
+"Want to help improve Geary? There are a number of ways you can contribute:"
+msgstr ""
+"Vol ajudar a millorar Geary? Hi ha diferents maneres de contribuir-hi:"
+
+#. (itstool) path: item/p
+#: C/contributing.page:16
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
+"reporting</link>—report new bugs or request new features"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Informa d'un "
+"error</link>—informa de nous errors o sol·licita noves funcionalitats"
+
+#. (itstool) path: item/p
+#: C/contributing.page:19
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">User Experience "
+"Design</link>—research and develop Geary’s user experience"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">Disseny de "
+"l'experiència d'usuari</link>— recerca i desenvolupa l'experiència d'usuari "
+"de Geary"
+
+#. (itstool) path: item/p
+#: C/contributing.page:20
+msgid ""
+"<link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Development\">Development</link>—fix"
+" bugs and add new features"
+msgstr ""
+"<link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Development\">Desenvolupament</link>—fixar"
+" errors i afegir noves funcionalitats"
+
+#. (itstool) path: item/p
+#: C/contributing.page:21
+msgid ""
+"<link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</link>—translate"
+" Geary’s user interface and user manual into new languages"
+msgstr ""
+"<link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Traducció</link>—traducció"
+" de la interfície i manual d'usuari de Geary a nous llenguatges"
+
+#. (itstool) path: item/p
+#: C/contributing.page:22
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Join the "
+"discussion</link>—on the mailing list or IRC channel"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Unir-se a la "
+"discussió</link>— a llistes de correu electrònic o canals d'IRC"
+
+#. (itstool) path: page/p
+#: C/contributing.page:25
+msgid "Thanks for your help making Geary better!"
+msgstr "Gràcies per a ajudar-nos a fer Geary millor!"
+
+#. (itstool) path: title/media
+#. This is a reference to an external file such as an image or video. When
+#. the file changes, the md5 hash will change to let you know you need to
+#. update your localized copy. The msgstr is not used at all. Set it to
+#. whatever you like once you have updated your copy of the file.
+#: C/index.page:6
+msgctxt "_"
+msgid ""
+"external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
+msgstr ""
+"external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
+
+#. (itstool) path: page/title
+#: C/index.page:5
+msgid ""
+"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/>"
+" <span>Geary</span>"
+msgstr ""
+"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/>"
+" <span>Geary</span>"
+
+#. (itstool) path: section/title
+#: C/index.page:11
+msgid "Introduction"
+msgstr "Introducció"
+
+#. (itstool) path: section/title
+#: C/index.page:15
+msgid "Using Geary"
+msgstr "Utilitzar Geary"
+
+#. (itstool) path: section/title
+#: C/index.page:19
+msgid "Contributing and bug reporting"
+msgstr "Contribuir i reportar errors"
+
+#. (itstool) path: page/title
+#: C/label.page:10
+msgid "Label or move a conversation"
+msgstr "Etiquetar o moure una conversa"
+
+#. (itstool) path: section/title
+#: C/label.page:12
+msgid "Label a conversation"
+msgstr "Etiquetar una conversa"
+
+#. (itstool) path: section/p
+#: C/label.page:13
+msgid ""
+"Geary lets you apply one or more <em>labels</em> to each conversation. Geary"
+" labels correspond to labels in Gmail, or ordinary folders in other mail "
+"services."
+msgstr ""
+"Geary us permet aplicar una o més <em>etiquetes</em> a cada conversa. Les "
+"etiquetes de Geary es corresponen amb les etiquetes a Gmail, o a carpetes en"
+" altres serveis de correu."
+
+#. (itstool) path: section/p
+#: C/label.page:15
+msgid ""
+"To label one or more conversations, first select the conversation(s), then "
+"do either of the following:"
+msgstr ""
+"Per a etiquetar una o més converses, primer seleccioneu la conversa(es), "
+"aleshores feu qualsevol de les següents coses:"
+
+#. (itstool) path: item/p
+#: C/label.page:18
+msgid ""
+"Click the <gui>Label</gui> button on the toolbar and select a label from the"
+" resulting drop-down menu."
+msgstr ""
+"Feu clic al botó <gui>Etiqueta</gui> a la barra d'eines i seleccioneu una "
+"etiqueta al menú desplegable."
+
+#. (itstool) path: item/p
+#: C/label.page:20
+msgid ""
+"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
+"conversation list to the label in the sidebar."
+msgstr ""
+"Mantingueu premuda la tecla <key>Ctrl</key> i arrossegueu la conversa(es) de"
+" la llista de converses a l'etiqueta de la barra lateral."
+
+#. (itstool) path: section/title
+#: C/label.page:25
+msgid "Move a conversation to a folder or label"
+msgstr "Moure una conversa a una carpeta o etiqueta"
+
+#. (itstool) path: section/p
+#: C/label.page:26
+msgid ""
+"To move one or more conversations to a folder or label, first select the "
+"conversation(s), then do either of the following:"
+msgstr ""
+"Per a moure una o més converses a una carpeta o etiqueta, primer seleccioneu "
+"la(es) conversa(es), aleshores feu qualsevol de les següents coses:"
+
+#. (itstool) path: item/p
+#: C/label.page:29
+msgid ""
+"Click the <gui>Move</gui> button on the toolbar and select a folder or label"
+" from the resulting drop-down menu."
+msgstr ""
+"Feu clic al botó <gui>Moure</gui> a la barra d'eines i seleccioneu una "
+"carpeta o etiqueta del menú desplegable."
+
+#. (itstool) path: item/p
+#: C/label.page:31
+msgid ""
+"Drag the conversation(s) from the conversation list to the folder or label "
+"in the sidebar."
+msgstr ""
+"Arrossegueu la(es) conversa(es) de la llista de converses a la carpeta o "
+"etiqueta de la barra lateral."
+
+#. (itstool) path: page/title
+#: C/limits.page:9
+msgid "Limitations"
+msgstr "Limitacions"
+
+#. (itstool) path: page/p
+#: C/limits.page:11
+msgid ""
+"Geary is still in early development. Geary supports IMAP and has been tested"
+" with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
+"for Outlook.com is provided. Geary may not yet work well with some IMAP "
+"servers. At this time Geary is still missing numerous features including "
+"offline mode."
+msgstr ""
+"Geary està en desenvolupament. És compatible amb IMAP i s'ha provat amb "
+"Gmail, Yahoo i el servidor de correu gratuït de Dovecot. També es "
+"proporciona suport experimental per a Outlook.com. Encara pot no funcionar "
+"bé amb alguns servidors IMAP. En aquests moments a Geary encara li falten "
+"nombroses funcionalitats, inclòs el mode fora de línia."
+
+#. (itstool) path: page/p
+#: C/limits.page:17
+msgid ""
+"To learn more about the features we're working on and the future of Geary, "
+"please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
+"page</link>."
+msgstr ""
+"Per a obtenir més informació sobre les funcions en què treballem i en el futur"
+" de Geary, si us plau visiteu la <link "
+"href=\"https://wiki.gnome.org/Apps/Geary\">pàgina wiki</link> de  Geary."
+
+#. (itstool) path: page/title
+#. (itstool) path: section/title
+#: C/overview.page:9 C/shortcuts.page:13
+msgid "Overview"
+msgstr "Visió general"
+
+#. (itstool) path: page/p
+#: C/overview.page:11
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary és una aplicació de correu electrònic creada al voltant de  converses,"
+" per a l'escriptori del GNOME 3. Permet llegir, trobar i enviar correu "
+"electrònic amb una interfície moderna i senzilla."
+
+#. (itstool) path: page/p
+#: C/overview.page:15
+msgid ""
+"Conversations allow you to read a complete discussion without having to find"
+" and click from message to message."
+msgstr ""
+"Les converses us permeten llegir una discussió completa sense haver de "
+"cercar i fer clic de missatge a missatge."
+
+#. (itstool) path: page/p
+#: C/overview.page:18
+msgid ""
+"The main Geary window is divided into several areas: The folder list, the "
+"conversation list, and the conversation viewer."
+msgstr ""
+"La finestra principal de Geary es divideix en diverses àrees: la llista de "
+"carpetes, la llista de converses i el visualitzador de converses."
+
+#. (itstool) path: section/title
+#: C/overview.page:22
+msgid "Folder list"
+msgstr "Llista de carpetes"
+
+#. (itstool) path: section/p
+#: C/overview.page:24
+msgid ""
+"The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
+"for your email accounts. Geary uses the term <em>label</em> for any folder "
+"that you have created to organize your email messages."
+msgstr ""
+"La <em>llista de carpetes</em> mostra totes les <em>carpetes</em> i "
+"<em>etiquetes</em> dels vostres comptes de correu electrònic. Geary utilitza"
+" el terme <em>etiqueta</em> per qualsevol carpeta que hàgiu creat per a "
+"organitzar els vostres missatges de correu."
+
+#. (itstool) path: section/p
+#: C/overview.page:29
+msgid ""
+"Select a folder or label to display the conversations it contains in the "
+"conversation list."
+msgstr ""
+"Seleccioneu una carpeta o etiqueta per a mostrar les converses que conté en "
+"forma de llista."
+
+#. (itstool) path: section/title
+#: C/overview.page:34
+msgid "Conversation list"
+msgstr "Llista de converses"
+
+#. (itstool) path: section/p
+#: C/overview.page:36
+msgid ""
+"The <em>conversation list</em> displays a list of conversations in the "
+"selected folder. Newer conversations appear at the top."
+msgstr ""
+"La <em>llista de converses</em> mostra la llista de converses de la carpeta "
+"seleccionada. Les converses més noves apareixen a la part superior."
+
+#. (itstool) path: section/p
+#: C/overview.page:40
+msgid ""
+"Each sender’s name appears bold if there are unread messages from that "
+"sender. If a conversation has more than one message, Geary displays a count "
+"of messages in the conversation."
+msgstr ""
+"El nom de cada remitent apareix en negreta si hi ha missatges sense llegir "
+"d'aquest. Si una conversa té més d'un missatge, Geary mostra el nombre de "
+"missatges a la conversa."
+
+#. (itstool) path: section/p
+#: C/overview.page:44
+msgid ""
+"Geary does not automatically download all messages in all of your mail "
+"folders. When you first visit your Inbox or any other folder, Geary "
+"downloads the most recent messages in that folder. To see more messages, "
+"simply scroll down the conversation list and Geary will fetch more messages "
+"automatically."
+msgstr ""
+"Geary no descarrega automàticament tots els missatges a totes les carpetes "
+"de correu. Quan visiteu la vostra safata d'entrada o qualsevol altra "
+"carpeta, Geary descarrega els missatges més recents de la carpeta. Per a veure"
+" més missatges, simplement desplaceu-vos cap avall per la llista de "
+"converses i Geary buscarà més missatges automàticament."
+
+#. (itstool) path: section/p
+#: C/overview.page:50
+msgid ""
+"Some commands in Geary can act on a group of conversations. To select "
+"multiple conversations, hold down the <key>Ctrl</key> key and click each "
+"conversation in turn in the conversation list. Alternatively, click the "
+"first conversation in a range, then hold down <key>Shift</key> and click the"
+" last conversation."
+msgstr ""
+"Algunes ordres de Geary poden actuar sobre un grup de converses. Per a "
+"seleccionar diverses converses, mantingueu premuda la tecla <key>Ctrl</key> "
+"i feu clic a cada conversa de la llista de converses que vulgueu "
+"seleccionar. Alternativament, podeu fer clic al primer element de la "
+"conversa, mantenir premuda la tecla <key>Maj</key> i fer clic a la darrera "
+"conversa que vulgueu seleccionar."
+
+#. (itstool) path: section/title
+#: C/overview.page:58
+msgid "Conversation viewer"
+msgstr "Visor de converses"
+
+#. (itstool) path: section/p
+#: C/overview.page:60
+msgid ""
+"The <em>conversation viewer</em> displays all email messages in the selected"
+" conversation, with the oldest message at the top."
+msgstr ""
+"El <em>visor de converses</em> mostra tots els missatges de correu de la "
+"conversa seleccionada, amb els missatges més antics a la part superior."
+
+#. (itstool) path: section/p
+#: C/overview.page:63
+msgid ""
+"When you view a conversation, Geary collapses messages that you’ve already "
+"read. Click collapsed messages to expand them. Click an expanded message’s "
+"header to collapse it."
+msgstr ""
+"Quan visualitzeu una conversa, Geary col·lapsa els missatges llegits. Feu "
+"clic als missatges col·lapsats per a expandir-los. Feu clic a l'encapçalament "
+"d'un missatge expandit per a col·lapsar-lo."
+
+#. (itstool) path: section/p
+#: C/overview.page:67
+msgid ""
+"Click on any of the sender’s or receiver’s names or email address for a "
+"message to open the <em>contact menu</em>, which displays additional "
+"information and options for the email address. You can to start a new "
+"conversation, copy the email address to the clipboard, and search for "
+"related conversations. If the email address is present in your desktop "
+"address book, it will show the contact’s photo, preferred name, and whether "
+"they are a favourite contact. You can also open the contact in the address "
+"book. If the email address is not already present, you can choose to add "
+"them to the address book, and update the remote image loading preference for"
+" that address."
+msgstr ""
+"Feu clic a qualsevol nom d'emissor, destinatari, o a qualsevol adreça de "
+"correu electrònic d'un missatge per a obrir el <em>menú de contactes</em>, el "
+"qual mostra informació i opcions addicionals per a l'adreça de correu "
+"electrònic seleccionada. Podeu iniciar una nova conversa, copiar l'adreça de"
+" correu electrònic al porta-retalls i buscar converses relacionades. Si "
+"l’adreça de correu electrònic existeix a la llibreta d'adreces, es mostrarà "
+"la foto del contacte, el nom preferit i si és un contacte favorit. També "
+"podeu obrir el contacte a la llibreta d'adreces. Si l'adreça de correu "
+"electrònic encara no és a la llibreta d'adreces, podeu triar afegir-la i "
+"actualitzar la imatge remota per l'adreça."
+
+#. (itstool) path: section/p
+#: C/overview.page:79
+msgid ""
+"Click the star button present on each message to mark or un-mark a message "
+"as being starred. Staring a message will mark the whole conversation as "
+"starred, and Geary will display the first starred message in a conversation "
+"when returning to it."
+msgstr ""
+"Feu clic a l'estrella present a cada missatge per a marcar o desmarcar el "
+"missatge com a destacat. Destacar un missatge destacarà tota la conversa i "
+"Geary mostrarà el primer missatge destacat de la conversa en tornar."
+
+#. (itstool) path: section/p
+#: C/overview.page:84
+msgid ""
+"Click the menu button present on each message to open the <em>message "
+"menu</em>, which allows you to reply and forward to a specific message, "
+"update which messages have been marked as read or unread, print a message, "
+"and so on."
+msgstr ""
+"Feu clic al botó menú present a cada missatge per a obrir el <em>menú de "
+"missatges</em>, que permet respondre i reenviar un missatge específic, "
+"actualitzar els missatges marcats com a llegits o sense llegir, imprimir un "
+"missatge, etc."
+
+#. (itstool) path: section/p
+#: C/overview.page:89
+msgid ""
+"Any attachments in a message appear at the bottom of the message. Double "
+"click an attachment to open it, or use the Open and Save buttons to open and"
+" save selected attachments."
+msgstr ""
+"Qualsevol fitxer adjunt apareix a la part inferior del missatge. Feu doble "
+"clic en un fitxer adjunt per a obrir-lo, o utilitzeu els botons Obre i Desa "
+"per a obrir i desar els fitxers adjunts seleccionats."
+
+#. (itstool) path: page/title
+#: C/preferences.page:10
+msgid "Preferences"
+msgstr "Preferències"
+
+#. (itstool) path: page/p
+#: C/preferences.page:12
+msgid ""
+"Geary allows you to customise how it works via its <gui "
+"style=\"group\">Preferences</gui> window. To open the window, select <gui "
+"style=\"menuitem\">Preferences</gui> from the application menu on the main "
+"window's toolbar. You can change the following options:"
+msgstr ""
+"Geary us permet personalitzar el seu funcionament utilitzant la finestra "
+"<gui style=\"group\">Preferències</gui>. Per a obrir la finestra, seleccioneu "
+"<gui style=\"menuitem\">Preferències</gui> al menú de l'aplicació a la barra"
+" d'eines de la finestra principal. Podeu canviar les opcions següents:"
+
+#. (itstool) path: item/title
+#: C/preferences.page:19
+msgid "<gui>Automatically select next message</gui>"
+msgstr "<gui>Automàticament seleccionar el següent missatge</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:20
+msgid ""
+"When this option is enabled, Geary automatically selects the latest message "
+"in a folder when you enter the folder. In addition, after archiving a "
+"message, Geary automatically selects an adjacent message."
+msgstr ""
+"Quan aquesta opció està activada, Geary selecciona automàticament l'últim "
+"missatge de la carpeta quan hi entreu. A més, després d'arxivar un missatge,"
+" Geary selecciona automàticament un missatge adjacent."
+
+#. (itstool) path: item/title
+#: C/preferences.page:26
+msgid "<gui>Display conversation preview</gui>"
+msgstr "<gui>Mostrar la previsualització de la conversa</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:27
+msgid ""
+"Enables message previews in the conversation list. Previews show the first "
+"few lines of each message."
+msgstr ""
+"Activa la previsualització de missatges a la llista de converses. Les "
+"previsualitzacions mostren les primeres línies de cada missatge."
+
+#. (itstool) path: item/title
+#: C/preferences.page:31
+msgid "<gui>Use three pane view</gui>"
+msgstr "<gui>Utilitzeu la vista en tres panells</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:32
+msgid ""
+"Show the folder list, the conversation list, and the messages side-by-side-"
+"by-side in three panes. If not selected, the folder list and conversation "
+"list will be stacked vertically in a single pane."
+msgstr ""
+"Mostra la llista de carpetes, la de converses i, els missatges costat per "
+"costat en tres panells. Si no està seleccionat, la llista de carpetes i la "
+"llista de converses s'apilen verticalment en un sol panell."
+
+#. (itstool) path: item/title
+#: C/preferences.page:38
+msgid "<gui>Use single key email shortcuts</gui>"
+msgstr "<gui>Utilitzeu dreceres de correu electrònic amb una sola tecla</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:39
+msgid ""
+"Enable keyboard shortcuts for email actions that do not require pressing "
+"<key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
+"xref=\"shortcuts\"/> for details."
+msgstr ""
+"Activa les dreceres de teclat per a accions de correu electrònic que no "
+"necessiten prémer <key>Ctrl</key>. Aquestes coincideixen amb les dreceres "
+"utilitzades per GMail. Veure <link xref=\"shortcuts\"/> per detalls."
+
+#. (itstool) path: item/title
+#: C/preferences.page:44
+msgid "<gui>Watch for new mail when closed</gui>"
+msgstr "<gui>Trobar nou correu quan es tanqui</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:45
+msgid ""
+"Geary will watch your accounts for new mail even when the main window is not"
+" open. To do this, it will silently start when you log in to your computer, "
+"and it will continue to run after you close all windows."
+msgstr ""
+"Geary vigilarà els vostres comptes per a trobar un correu nou, fins i tot quan"
+" la finestra principal no estigui oberta. Per a fer-ho, s'iniciarà "
+"silenciosament quan inicieu la sessió al vostre ordinador i seguirà "
+"funcionant després de tancar totes les finestres."
+
+#. (itstool) path: page/title
+#: C/search.page:10
+msgid "Search"
+msgstr "Cercar"
+
+#. (itstool) path: page/p
+#: C/search.page:12
+msgid ""
+"Geary supports a per-account full text search. To start a search, select a "
+"folder associated with the account you'd like to search against. Then click "
+"the search box in the toolbar (or press "
+"<keyseq><key>Ctrl</key><key>S</key></keyseq>) and start typing. Results will"
+" appear after a brief delay."
+msgstr ""
+"Geary admet una cerca de text completa per compte. Per a iniciar una cerca, "
+"seleccioneu una carpeta associada al compte què voleu cercar. A continuació,"
+" feu clic al quadre de cerca a la barra d'eines (o premeu "
+"<keyseq><key>Ctrl</key><key>S</key></keyseq>) i comenceu a teclejar. Els "
+"resultats apareixeran després d'un breu retard."
+
+#. (itstool) path: page/p
+#: C/search.page:16
+msgid ""
+"The full text search includes email text, email addresses (to, from, and "
+"cc), subject lines and attachment filenames."
+msgstr ""
+"La cerca de text completa, inclou el text del correu electrònic, les adreces"
+" (a, des de i cc), els assumptes i els noms dels fitxers adjunts."
+
+#. (itstool) path: page/p
+#: C/search.page:19
+msgid ""
+"Keywords that match your search are highlighted in the message view. Geary "
+"will match different forms of the same word, for example searching for "
+"\"walk\" will also match \"walking\" and \"walked.\""
+msgstr ""
+"Les paraules clau que coincideixen amb la vostra cerca es destaquen a la "
+"vista de missatges. Geary cerca diferents formes d'una mateixa paraula, per "
+"exemple la cerca \"caminar\" també coincidirà amb \"caminant\" i "
+"\"caminat\"."
+
+#. (itstool) path: section/title
+#: C/search.page:23
+msgid "Search operators"
+msgstr "Cerca operadors"
+
+#. (itstool) path: section/p
+#: C/search.page:24
+msgid "Geary supports the following operators to limit the scope of searches:"
+msgstr ""
+"Geary admet els operadors següents per a limitar l'abast de les cerques:"
+
+#. (itstool) path: td/p
+#: C/search.page:27
+msgid "<input>attachment:<var>filename</var></input>"
+msgstr "<input>adjunt:<var>nom del fitxer</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:28
+msgid ""
+"Finds messages with attachments whose name matches <var>filename</var>."
+msgstr ""
+"Cerca els missatges amb fitxers adjunts en els quals nom coincideix amb "
+"<var>nom del fitxer</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:31
+msgid "<input>bcc:<var>recipient</var></input>"
+msgstr "<input>Cco:<var>destinatari</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:32
+msgid "Finds messages where <var>recipient</var> matches email BCC fields."
+msgstr ""
+"Cerca els missatges en els quals <var>destinatari</var> coincideix amb els "
+"camps correu BCC."
+
+#. (itstool) path: td/p
+#: C/search.page:35
+msgid "<input>body:<var>text</var></input>"
+msgstr "<input>cos:<var>text</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:36
+msgid "Finds messages whose body contains <var>text</var>."
+msgstr "Cerca els missatges en els quals cos conté <var>text</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:39
+msgid "<input>cc:<var>recipient</var></input>"
+msgstr "<input>cc:<var>destinatari</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:40
+msgid "Finds messages where <var>recipient</var> matches email CC fields."
+msgstr ""
+"Troba els missatges en els quals el <var>destinatari</var> coincideix amb el"
+" camp CC del correu."
+
+#. (itstool) path: td/p
+#: C/search.page:43
+msgid "<input>from:<var>sender</var></input>"
+msgstr "<input>de:<var>remitent</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:44
+msgid "Finds messages where <var>sender</var> matches email From fields."
+msgstr ""
+"Troba els missatges en els quals el <var>remitent</var> coincideix amb el "
+"camp CC del correu."
+
+#. (itstool) path: td/p
+#: C/search.page:47
+msgid "<input>is:read</input>"
+msgstr "<input>és:llegit</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:48
+msgid "Finds messages that have been marked as read."
+msgstr "Troba missatges que s'hagin marcat com a llegits."
+
+#. (itstool) path: td/p
+#: C/search.page:51
+msgid "<input>is:starred</input>"
+msgstr "<input>és:destacat</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:52
+msgid "Finds messages that have been marked as starred."
+msgstr "Troba missatges que s'hagin marcat com a destacats."
+
+#. (itstool) path: td/p
+#: C/search.page:55
+msgid "<input>is:unread</input>"
+msgstr "<input>és:no llegit</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:56
+msgid "Finds messages that have been marked as not read."
+msgstr "Troba missatges que s'hagin marcat com a no llegits."
+
+#. (itstool) path: td/p
+#: C/search.page:59
+msgid "<input>subject:<var>text</var></input>"
+msgstr "<input>assumpte:<var>text</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:60
+msgid "Finds messages whose subject contains <var>text</var>."
+msgstr "Troba missatges que a assumpte continguin <var>text</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:63
+msgid "<input>to:<var>recipient</var></input>"
+msgstr "<input>Per a:<var>destinatari</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:64
+msgid ""
+"Finds messages where <var>recipient</var> matches email To, CC, or BCC "
+"fields."
+msgstr ""
+"Troba els missatges en els quals el camp <var>destinatari</var> coincideix "
+"amb els camps Per a, Cc o Cco."
+
+#. (itstool) path: section/p
+#: C/search.page:68
+msgid ""
+"As a special case, the <input>bcc</input>, <input>cc</input>, "
+"<input>from</input>, and <input>to</input> operators support "
+"<input>me</input> as their argument, which searches for the account's email "
+"address in the appropriate context."
+msgstr ""
+"Com a casos especials, els operadors <input>Cco</input>, <input>cc</input>, "
+"<input>de</input>, i <input>per a</input> suporten com a argument "
+"<input>me</input>, que cerca l'adreça de correu electrònic del compte en el "
+"context apropiat."
+
+#. (itstool) path: page/title
+#: C/shortcuts.page:10
+msgid "Keyboard shortcuts"
+msgstr "Dreceres de teclat"
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:14
+msgid ""
+"Geary has keyboard shortcuts for most common operations. Use the built-in "
+"help to discover the full list. To open the shortcuts help, select <gui "
+"style=\"menuitem\">Keyboard Shortcuts</gui> from the application menu on the"
+" main window's toolbar, or using the keyboard shortcuts listed below."
+msgstr ""
+"Geary té dreceres de teclat per a les operacions més habituals. Utilitzeu "
+"l'ajuda integrada per a conèixer la llista completa. Per a obrir l'ajuda de les "
+"dreceres, seleccioneu <gui style=\"menuitem\">Dreceres de teclat</gui> al "
+"menú de l'aplicació de la barra d'eines de la finestra principal, o bé "
+"utilitzeu les dreceres de teclat a la llista següent."
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:20
+msgid ""
+"The following keyboard shortcuts can be used to access on-line help from "
+"Geary:"
+msgstr ""
+"Les següents dreceres de teclat es poden utilitzar per a accedir a l'ajuda en "
+"línia de Geary:"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:24
+msgid "Display this online help manual"
+msgstr "Mostrar el manual d'ajuda en línia"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:25
+msgid "<keyseq><key>F1</key></keyseq>"
+msgstr "<keyseq><key>F1</key></keyseq>"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:28
+msgid "Display all keyboard shortcuts"
+msgstr "Mostra totes les dreceres de teclat"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:29
+msgid "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+msgstr "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+
+#. (itstool) path: section/title
+#: C/shortcuts.page:37
+msgid "Single key shortcuts"
+msgstr "Dreceres d'una sola tecla"
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:39
+msgid ""
+"You can enable keyboard shortcuts for email actions that do not require "
+"pressing <key>Ctrl</key>. These match the shortcuts used by GMail. See <link"
+" xref=\"preferences\"/> for details."
+msgstr ""
+"Podeu habilitar les dreceres de teclat per a accions de correu electrònic "
+"que no necessiten prémer <key>Ctrl</key>. Aquestes coincideixen amb les "
+"dreceres utilitzades per GMail. Veure  <link xref=\"preferences\"/> per "
+"detalls."
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:43
+msgid ""
+"The full list of single key shortcuts enabled by this preference can be "
+"found via the keyboard shortcuts help, above."
+msgstr ""
+"La llista completa de les dreceres d'una sola tecla habilitades per aquesta "
+"preferència es poden trobar a l'ajuda de les dreceres de teclat."
+
+#. (itstool) path: page/title
+#: C/star.page:10
+msgid "Star a message or mark it as read/unread"
+msgstr "Destacar un missatge o marcar-lo com a llegit/no llegit"
+
+#. (itstool) path: section/title
+#: C/star.page:12
+msgid "Star messages"
+msgstr "Missatges destacats"
+
+#. (itstool) path: section/p
+#: C/star.page:13
+msgid ""
+"You can star messages to indicate that they're important to you. To mark a "
+"conversation with a star, click its star icon in the conversation list. You "
+"can star an individual message by clicking the star at the upper right of "
+"the message itself."
+msgstr ""
+"Podeu assenyalar els missatges importants amb una estrella. Per a marcar una "
+"conversa amb una estrella, feu clic a la icona estrella de la llista de "
+"converses. Podeu destacar un missatge individual fent clic a l'estrella "
+"situada a la part superior dreta del missatge."
+
+#. (itstool) path: section/p
+#: C/star.page:15
+msgid ""
+"With Gmail accounts, starred messages appear in the Starred folder in the "
+"folder list."
+msgstr ""
+"Als comptes Gmail, els missatges destacats apareixen a la carpeta Destacats"
+"  de la llista de carpetes."
+
+#. (itstool) path: section/title
+#: C/star.page:18
+msgid "Mark messages as read or unread"
+msgstr "Marcar missatges com a llegits o no llegits"
+
+#. (itstool) path: section/p
+#: C/star.page:19
+msgid ""
+"Geary marks messages as read automatically as you read them. To manually "
+"toggle a conversation as read or unread, click the circle icon in the "
+"conversation list."
+msgstr ""
+"Geary marca els missatges de forma automàtica mentre els llegiu. Per a "
+"commutar manualment una conversa entre llegida i no llegida, feu clic a la "
+"icona amb un cercle a la llista de converses."
+
+#. (itstool) path: section/p
+#: C/star.page:22
+msgid ""
+"Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
+"the toolbar can be used to toggle the read status of the selected "
+"conversation(s)."
+msgstr ""
+"Alternativament la <gui>Marca de no llegit</gui> al menú <gui>Marca</gui> a "
+"la barra d'eines es pot fer servir per a commutar l'estat de lectura de les "
+"converses seleccionades."
+
+#. (itstool) path: section/p
+#: C/star.page:25
+msgid ""
+"To mark an individual message as read, select <gui>Mark as Read</gui> from "
+"the dropdown menu."
+msgstr ""
+"Per a marcar un missatge com a llegit, seleccioneu <gui>Marca com a "
+"llegit</gui> al menú desplegable."
+
+#. (itstool) path: page/title
+#: C/write.page:7
+msgid "Writing new email and replying"
+msgstr "Escriure un nou correu electrònic i respondre"
+
+#. (itstool) path: section/title
+#: C/write.page:10
+msgid "Composing and replying"
+msgstr "Redacció i resposta"
+
+#. (itstool) path: section/p
+#: C/write.page:12
+msgid ""
+"To start a new email conversation, click the <gui "
+"style=\"button\">Compose</gui> button on the toolbar. Type the email address"
+" of the people to receive the message in the <gui style=\"input\">To</gui> "
+"text field, and a subject line in the <gui style=\"input\">Subject</gui> "
+"field. You can then type your message in the text area below these. Once the"
+" message is read to send, click <gui style=\"button\">Send</gui> or type "
+"<keyseq><key>Ctrl</key><key>Enter</key></keyseq> to send the message."
+msgstr ""
+"Per a iniciar una nova conversa per correu electrònic, feu clic al botó <gui "
+"style=\"button\">Edita</gui> a la barra d'eines. Escriviu l'adreça de la "
+"gent que ha de rebre el correu al camp text <gui style=\"input\">Per "
+"a</gui>, i l'assumpte  al camp <gui style=\"input\">Assumpte</gui>. A "
+"continuació, podeu escriure el vostre missatge a l'àrea de text que hi ha a "
+"sota. Un cop a punt per a enviar, feu clic a <gui style=\"button\">Envia</gui>"
+" o teclegeu <keyseq><key>Ctrl</key><key>Retorn</key></keyseq> per a enviar el "
+"missatge."
+
+#. (itstool) path: note/title
+#: C/write.page:23
+msgid "Undoing sending"
+msgstr "Desfer l'enviament"
+
+#. (itstool) path: note/p
+#: C/write.page:24
+msgid ""
+"When sending an email, Geary will wait 5 seconds before delivering the "
+"message. During this time, you will be able to click <gui "
+"style=\"button\">Undo</gui> on the pop-up notification that appears or type "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the email, and make "
+"more changes to it."
+msgstr ""
+"Quan s'envia un correu electrònic, Geary espera 5 segons abans d'enviar-lo. "
+"Durant aquest temps, podreu fer clic a <gui style=\"button\">Desfés</gui> a "
+"la finestra emergent que apareix, o teclegeu "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq> per a reobrir el correu i fer-hi "
+"canvis."
+
+#. (itstool) path: section/p
+#: C/write.page:32
+msgid ""
+"When entering an email address in the <gui style=\"input\">To</gui> and <gui"
+" style=\"input\">Cc</gui> fields, Geary will provide suggestions from your "
+"desktop address book and from previously sent and received email messages. "
+"To choose one of these suggestions, simply click on it. In addition, <gui "
+"style=\"input\">Bcc</gui> and <gui style=\"input\">Reply-to</gui> fields can"
+" be shown by selecting <gui style=\"menu\">Show extended fields</gui> from "
+"the formatting toolbar menu."
+msgstr ""
+"Quan s'introdueix una adreça de correu electrònic als camps <gui "
+"style=\"input\">Per a</gui> i <gui style=\"input\">Cc</gui>, Geary "
+"proporciona suggeriments de la vostra llibreta d'adreces i dels missatges de"
+" correu electrònic enviats i rebuts anteriorment. Per a seleccionar un "
+"d'aquests suggeriments, només cal que hi feu clic. A més, els camps <gui "
+"style=\"input\">Cco</gui> i <gui style=\"input\">Respondre a</gui> es poden "
+"mostrar seleccionant <gui style=\"menu\">Mostra camps estesos "
+"</gui> al menú de la barra d'eines de format ."
+
+#. (itstool) path: section/p
+#: C/write.page:41
+msgid ""
+"To reply to the currently selected conversation, click one of the <gui "
+"style=\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui "
+"style=\"button\">Forward</gui> toolbar buttons. This will open a new reply "
+"or forwarded email composer for the latest message in the conversation."
+msgstr ""
+"Per a respondre a la conversa seleccionada, feu clic als botons de la barra "
+"d'eines <gui style=\"button\">Respondre</gui>, <gui "
+"style=\"button\">Respondre a tots</gui> o <gui "
+"style=\"button\">Reenvia</gui>. D'aquesta manera, s'obrirà un editor de "
+"correu electrònic per a la resposta o reenviament del darrer missatge de la "
+"conversa."
+
+#. (itstool) path: section/p
+#: C/write.page:47
+msgid ""
+"When replying, the message being replied to will be quoted and copied into "
+"the footer of the new reply. This can be deleted before typing a reply by "
+"pressing <key>Backspace</key>. Alternatively, text can be selectively quoted"
+" by selecting the desired text in a message and clicking <gui "
+"style=\"button\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only "
+"the selected text will be quoted."
+msgstr ""
+"Quan es respon, el missatge al qual es respon se cita i copia al peu de "
+"pàgina de la nova resposta. Es pot suprimir abans d'escriure una resposta "
+"prement <key>Retrocés</key>. Alternativament, el text es pot citar "
+"selectivament seleccionant el text desitjat en el missatge i fent clic a "
+"<gui style=\"button\">Respondre</gui> o <gui style=\"button\">Respondre a "
+"tots</gui>, tan sols se citarà el text seleccionat."
+
+#. (itstool) path: section/p
+#: C/write.page:55
+msgid ""
+"To reply to a specific email message, open the message menu in the top "
+"corner of the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
+"<gui>Forward</gui>."
+msgstr ""
+"Per a respondre un missatge específic, obriu el menú de missatges a la "
+"cantonada superior del missatge i trieu <gui>Respondre</gui>, <gui>Respondre"
+" a tots</gui> o <gui>Reenvia</gui>."
+
+#. (itstool) path: section/title
+#: C/write.page:61
+msgid "Text formatting, images and attachments"
+msgstr "Formata el text, les imatges i els adjunts"
+
+#. (itstool) path: section/p
+#: C/write.page:63
+msgid ""
+"Geary's email composer lets you use text styles such as <em>bold</em> and "
+"<em>italic</em>, indent text to quote it and links to web pages. Simply "
+"select the text and click the appropriate button on the formatting toolbar."
+msgstr ""
+"L'editor de correu electrònic de Geary's us permet utilitzar estils com "
+"<em>negreta</em> i <em>itàlic</em>, indentar el text per a citar-lo i enllaçar"
+" a pàgines web. Simplement seleccioneu el text i feu clic al botó adequat a "
+"la barra d'eines de format."
+
+#. (itstool) path: section/p
+#: C/write.page:68
+msgid ""
+"Bulleted and numbered lists can be inserted or removed by clicking the <gui "
+"style=\"button\">Bulleted list</gui> and <gui style=\"button\">Numbered "
+"list</gui> buttons on the formatting toolbar. The level of indentation of "
+"list items can be adjusted using the <gui style=\"button\">Indent</gui> and "
+"<gui style=\"button\">Un-indent</gui> formatting toolbar buttons."
+msgstr ""
+"Es poden inserir o eliminar llistes numerades o amb pics fent clic als "
+"botons <gui style=\"button\">Llista numerada</gui> i <gui "
+"style=\"button\">Llista amb pics</gui> a la barra d'eines de format. Es pot "
+"ajustar el nivell de sagnat d'elements de la llista mitjançant els botons de"
+" la barra de format <gui style=\"button\">Sagna</gui> i <gui "
+"style=\"button\">Desfés el sagnat</gui>."
+
+#. (itstool) path: section/p
+#: C/write.page:75
+msgid ""
+"Images can be inserted into rich text messages by clicking the <gui "
+"style=\"button\">Insert Image</gui> button on the formatting toolbar and "
+"selecting the image to attach, by dragging an image from the "
+"<gui>Files</gui> application into the email body and then dropping it, or by"
+" pasting an image that has been copied to the clipboard from another "
+"application."
+msgstr ""
+"Les imatges es poden inserir en missatges en text enriquits fent clic al "
+"botó <gui style=\"button\">Insereix una imatge</gui> a la barra d'eines de format"
+" i seleccionant la imatge a adjuntar, arrossegant una imatge des de "
+"l'aplicació <gui>Fitxers</gui> al cos de correu electrònic i aleshores "
+"deixant-lo anar, o enganxant una imatge que s'ha copiat al porta-retalls des"
+" d'una altra aplicació."
+
+#. (itstool) path: section/p
+#: C/write.page:82
+msgid ""
+"Documents, music, videos, and other files can be attached to the email by "
+"clicking the <gui style=\"button\">Attach File</gui> button at the top of "
+"the composer window and selecting the document to attach, or by dragging a "
+"file from the <gui>Files</gui> application to the composer window, and "
+"dropping it either on the text fields at the top of the window or on the "
+"toolbar at the bottom."
+msgstr ""
+"A un correu electrònic s'hi poden adjuntar documents, música, vídeos, i "
+"altres tipus de fitxers fent clic al botó <gui style=\"button\">Adjunta "
+"fitxer</gui> a la part superior de la finestra d'edició i seleccionat el "
+"fitxer a adjuntar, o arrossegant un fitxer des de l'aplicació "
+"<gui>Fitxers</gui> a la finestra d'edició, i deixant-lo anar en qualsevol "
+"camp de text de la part superior de la finestra o a la barra d'eines de la "
+"part inferior."
+
+#. (itstool) path: section/p
+#: C/write.page:90
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link "
+"xref=\"shortcuts\"/> for details."
+msgstr ""
+"Hi ha moltes dreceres de teclat disponibles per al compositor; Veure <link "
+"xref=\"shortcuts\"/> per a més detalls."
+
+#. (itstool) path: section/p
+#: C/write.page:93
+msgid ""
+"You may specify a signature to be inserted into the footer of email in the "
+"composer via the <link xref=\"accounts\"/> dialog."
+msgstr ""
+"A l'editor, podeu especificar una signatura per a inserir-la com a peu del "
+"correu electrònic utilitzant el <link xref=\"accounts\"/> diàleg."
+
+#. (itstool) path: section/title
+#: C/write.page:98
+msgid "Checking spelling"
+msgstr "Comprovar l'ortografia"
+
+#. (itstool) path: section/p
+#: C/write.page:100
+msgid ""
+"Geary supports spell-checking your composed email in one or more languages, "
+"as you type. To enable spell-checking, first ensure your computer has spell-"
+"check dictionaries installed for the desired languages. Consult your "
+"computer's help to determine how to install dictionaries if not present."
+msgstr ""
+"Geary admet la revisió ortogràfica del vostre correu electrònic en un o "
+"diversos idiomes, mentre escriviu. Per a habilitar la correcció ortogràfica, "
+"primer assegureu-vos que l'ordinador tingui instal·lats els diccionaris de "
+"correcció ortogràfica dels idiomes desitjats. Consulteu l'ajuda de "
+"l'ordinador per a determinar com instal·lar diccionaris si no hi són presents."
+
+#. (itstool) path: section/p
+#: C/write.page:106
+msgid ""
+"To select languages for spell-checking, click the <gui "
+"style=\"button\">Spell check</gui> button on the formatting toolbar, and the"
+" language selection popover will appear. Click on a language in the list to "
+"toggle it on or off, and click the <gui style=\"button\">-</gui> button to "
+"remove it from the list. If a language does not appear in the list, search "
+"for it by typing its name in the search box, then click the <gui "
+"style=\"button\">+</gui> button to add it."
+msgstr ""
+"Per a seleccionar idiomes per a les correccions ortogràfiques, feu clic al "
+"botó <gui style=\"button\">Corrector ortogràfic</gui> a la barra d'eines de "
+"format i apareixerà el menú emergent de selecció d'idioma. Feu clic a un "
+"idioma de la llista per a activar-lo o desactivar-lo, i feu clic al botó <gui "
+"style=\"button\">-</gui> per a eliminar-lo de la llista. Si no apareix un "
+"idioma a la llista, busqueu-lo escrivint-ne el nom al quadre de cerca, "
+"aleshores feu clic al botó <gui style=\"button\">+</gui> per a afegir-lo."
+
+#. (itstool) path: section/title
+#: C/write.page:117
+msgid "Saving drafts and restoring discarded messages"
+msgstr "Desar esborranys i recuperar missatges descartats"
+
+#. (itstool) path: section/p
+#: C/write.page:119
+msgid ""
+"For mail servers that support drafts, Geary will automatically save the "
+"message as you type on the server after a short delay."
+msgstr ""
+"Per als servidors de correu que admeten esborranys, Geary desarà "
+"automàticament el missatge mentre escriviu al servidor després d'un cert "
+"temps."
+
+#. (itstool) path: section/p
+#: C/write.page:123
+msgid ""
+"To edit an existing draft, select the <gui>Drafts</gui> folder in the folder"
+" list, select the message, and click \"Edit Draft\" in the conversation "
+"viewer."
+msgstr ""
+"Per a editar un esborrany existent, seleccioneu la carpeta "
+"<gui>Esborranys</gui> a la llista de carpetes, seleccioneu el missatge i, "
+"feu clic a \"Edita l'esborrany\" al visualitzador de converses."
+
+#. (itstool) path: section/p
+#: C/write.page:127
+msgid "Geary will delete the draft when you send the message."
+msgstr "Geary esborrarà l'esborrany quan envieu el missatge."
+
+#. (itstool) path: note/p
+#: C/write.page:130
+msgid ""
+"If you save or discard a composed email, you can re-open it by clicking <gui"
+" style=\"button\">Undo</gui> on the pop-up notification that appears or by "
+"typing <keyseq><key>Ctrl</key><key>Z</key></keyseq>. The ability to restore "
+"a saved or discarded composer will be remain for up to 30 minutes. After "
+"that you will need to re-open the message via the <gui>Drafts</gui> folder, "
+"if present."
+msgstr ""
+"Si deseu o rebutgeu un correu electrònic, podeu tornar-lo a obrir fent clic "
+"a <gui style=\"button\">Desfés</gui> a la notificació emergent que apareix o"
+" teclejant <keyseq><key>Ctrl</key><key>Z</key></keyseq>. La capacitat de "
+"restaurar un missatge desat o descartat es manté activa 30 minuts. Després, "
+"haureu de tornar a obrir el missatge accedint a la "
+"carpeta <gui>Esborranys</gui>, si existeix."
+
+#. (itstool) path: section/title
+#: C/write.page:141
+msgid "Plain text messages"
+msgstr "Missatges en text pla"
+
+#. (itstool) path: section/p
+#: C/write.page:143
+msgid ""
+"Geary can also send plain text messages. In the drop-down menu, check or "
+"uncheck <gui style=\"menu\">Rich Text</gui> to toggle between plain text and"
+" rich text mode. Plain text mode is useful when sending email to mailing "
+"lists that prohibit rich text (HTML) messages, or when sending email to "
+"people that do no use modern clients like Geary."
+msgstr ""
+"Geary també pot enviar missatges de text pla. Al menú desplegable, marqueu o"
+" desmarqueu <gui style=\"menu\">Text enriquit</gui> per a canviar entre el "
+"text de text pla i el mode de text enriquit. El mode text pla és útil per a "
+"enviar missatges de correu electrònic a llistes de distribució que "
+"prohibeixen els missatges de text enriquit (HTML) o per a enviar a correu "
+"electrònic a persones que no utilitzen clients moderns com Geary."
+
+#. (itstool) path: section/p
+#: C/write.page:150
+msgid ""
+"In plain text mode, text will be automatically wrapped using soft line "
+"breaks so that it is no longer than 74 characters wide, and indented text "
+"will be wrapped and quoted using a “&gt;” character for each level of "
+"quoting."
+msgstr ""
+"En el mode text pla, el text es justificarà automàticament mitjançant salts "
+"de línies de manera que no tinguin més de 74 caràcters d'ample i, el text "
+"sagnat es justificarà i se citarà utilitzant el caràcter \"&gt,\" per a cada"
+" nivell de cita."

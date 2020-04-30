@@ -69,9 +69,7 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
 
     private void on_accounts_changed(Geary.Engine engine,
                                      Geary.AccountInformation config) {
-        sidebar_name_changed(get_sidebar_name());
-        sidebar_tooltip_changed(get_sidebar_tooltip());
-
+        entry_changed();
         try {
             this.account_count = engine.get_accounts().size;
         } catch (GLib.Error error) {
@@ -80,7 +78,7 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     }
 
     private void on_email_total_changed() {
-        sidebar_tooltip_changed(get_sidebar_tooltip());
+        entry_changed();
     }
 
     public override int get_count() {

@@ -1,32 +1,35 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2018, 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * Writes IMAP protocol strings to a supplied output stream.
+ * Writes IMAP protocol strings to the supplied output stream.
  *
- * This class uses a {@link GLib.DataOutputStream} for writing strings
- * to the given stream. Since that does not support asynchronous
- * writes, it is highly desirable that the stream passed to this class
- * is a {@link GLib.BufferedOutputStream}, or some other type that
- * uses a memory buffer large enough to write a typical command
- * completely without causing disk or network I/O.
+ * Since most IMAP commands are small (with the exception of literal
+ * data) this class writes directly, synchronously to the given
+ * stream. Thus it is highly desirable that the stream passed to the
+ * constructor is buffered, either a {@link
+ * GLib.BufferedOutputStream}, or some other type that uses a memory
+ * buffer large enough to write a typical command completely without
+ * causing disk or network I/O.
  *
  * @see Deserializer
  */
 public class Geary.Imap.Serializer : BaseObject {
 
-    private string identifier;
-    private GLib.DataOutputStream output;
 
-    public Serializer(string identifier, GLib.OutputStream output) {
-        this.identifier = identifier;
-        this.output = new GLib.DataOutputStream(output);
-        this.output.set_close_base_stream(false);
+    private const string EOL = "\r\n";
+    private const string SPACE = " ";
+
+    private GLib.OutputStream output;
+
+
+    public Serializer(GLib.OutputStream output) {
+        this.output = output;
     }
 
     /**
@@ -39,7 +42,7 @@ public class Geary.Imap.Serializer : BaseObject {
     public void push_unquoted_string(string str,
                                      GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        this.output.put_string(str, cancellable);
+        this.output.write_all(str.data, null, cancellable);
     }
 
     /**
@@ -52,17 +55,19 @@ public class Geary.Imap.Serializer : BaseObject {
     public void push_quoted_string(string str,
                                    GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        this.output.put_byte('"');
+        StringBuilder buf = new StringBuilder.sized(str.length + 2);
+        buf.append_c('"');
         int index = 0;
         char ch = str[index];
         while (ch != String.EOS) {
             if (ch == '"' || ch == '\\') {
-                this.output.put_byte('\\');
+                buf.append_c('\\');
             }
-            this.output.put_byte(ch);
+            buf.append_c(ch);
             ch = str[++index];
         }
-        this.output.put_byte('"');
+        buf.append_c('"');
+        this.output.write_all(buf.data, null, cancellable);
     }
 
     /**
@@ -73,15 +78,17 @@ public class Geary.Imap.Serializer : BaseObject {
      */
     public void push_ascii(char ch, GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        this.output.put_byte(ch, cancellable);
+        // allocate array on the stack to avoid mem alloc overhead
+        uint8 buf[1] = { ch };
+        this.output.write_all(buf, null, cancellable);
     }
 
     /**
-     * Writes a single ASCII space character.
+     * Writes a ASCII space character.
      */
     public void push_space(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        this.output.put_byte(' ', cancellable);
+        this.output.write_all(SPACE.data, null, cancellable);
     }
 
     /**
@@ -89,7 +96,7 @@ public class Geary.Imap.Serializer : BaseObject {
      */
     public void push_nil(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        this.output.put_string(NilParameter.VALUE, cancellable);
+        this.output.write_all(NilParameter.VALUE.data, null, cancellable);
     }
 
     /**
@@ -97,7 +104,7 @@ public class Geary.Imap.Serializer : BaseObject {
      */
     public void push_eol(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        this.output.put_string("\r\n", cancellable);
+        this.output.write_all(EOL.data, null, cancellable);
     }
 
     /**
@@ -106,12 +113,14 @@ public class Geary.Imap.Serializer : BaseObject {
     public async void push_literal_data(uint8[] buffer,
                                         GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        yield this.output.write_all_async(
-            buffer,
-            Priority.DEFAULT,
-            cancellable,
-            null
-        );
+        if (buffer.length > 0) {
+            yield this.output.write_all_async(
+                buffer,
+                Priority.DEFAULT,
+                cancellable,
+                null
+            );
+        }
     }
 
     /**
@@ -119,14 +128,15 @@ public class Geary.Imap.Serializer : BaseObject {
      */
     public async void flush_stream(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        yield this.output.flush_async(Priority.DEFAULT, cancellable);
+        yield this.output.flush_async(GLib.Priority.DEFAULT, cancellable);
     }
 
     /**
-     * Returns a string representation for debugging.
+     * Closes the stream, ensuring a command has been sent.
      */
-    public string to_string() {
-        return "ser:%s".printf(identifier);
+    public async void close_stream(GLib.Cancellable? cancellable)
+        throws GLib.IOError {
+        yield this.output.close_async(GLib.Priority.DEFAULT, cancellable);
     }
 
 }

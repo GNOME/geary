@@ -23,18 +23,27 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
 
 
     /** Returns the window's associated client application instance. */
-    public new Application.Client application {
+    public new Application.Client? application {
         get { return (Application.Client) base.get_application(); }
         set { base.set_application(value); }
     }
 
+    private Application.PluginManager plugins;
 
-    public PreferencesWindow(Application.MainWindow parent) {
+
+    public PreferencesWindow(Application.MainWindow parent,
+                             Application.PluginManager plugins) {
         Object(
             application: parent.application,
             transient_for: parent
         );
+        this.plugins = plugins;
 
+        add_general_pane();
+        add_plugin_pane();
+    }
+
+    private void add_general_pane() {
         var autoselect = new Gtk.Switch();
         autoselect.valign = CENTER;
 
@@ -104,7 +113,11 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         group.add(startup_notifications_row);
 
         var page = new Hdy.PreferencesPage();
+        /// Translators: Preferences page title
+        page.title = _("Preferences");
+        page.icon_name = "preferences-other-symbolic";
         page.propagate_natural_height = true;
+        page.propagate_natural_width = true;
         page.add(group);
         page.show_all();
 
@@ -114,35 +127,112 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         window_actions.add_action_entries(WINDOW_ACTIONS, this);
         insert_action_group(Action.Window.GROUP_NAME, window_actions);
 
-        Application.Configuration config = this.application.config;
-        config.bind(
-            Application.Configuration.AUTOSELECT_KEY,
-            autoselect,
-            "state"
-        );
-        config.bind(
-            Application.Configuration.DISPLAY_PREVIEW_KEY,
-            display_preview,
-            "state"
-        );
-        config.bind(
-            Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY,
-            three_pane_view,
-            "state"
-        );
-        config.bind(
-            Application.Configuration.SINGLE_KEY_SHORTCUTS,
-            single_key_shortucts,
-            "state"
-        );
-        config.bind(
-            Application.Configuration.STARTUP_NOTIFICATIONS_KEY,
-            startup_notifications,
-            "state"
-        );
+        Application.Client? application = this.application;
+        if (application != null) {
+            Application.Configuration config = application.config;
+            config.bind(
+                Application.Configuration.AUTOSELECT_KEY,
+                autoselect,
+                "state"
+            );
+            config.bind(
+                Application.Configuration.DISPLAY_PREVIEW_KEY,
+                display_preview,
+                "state"
+            );
+            config.bind(
+                Application.Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY,
+                three_pane_view,
+                "state"
+            );
+            config.bind(
+                Application.Configuration.SINGLE_KEY_SHORTCUTS,
+                single_key_shortucts,
+                "state"
+            );
+            config.bind(
+                Application.Configuration.STARTUP_NOTIFICATIONS_KEY,
+                startup_notifications,
+                "state"
+            );
+        }
 
         this.delete_event.connect(on_delete);
     }
+
+    private void add_plugin_pane() {
+        var group = new Hdy.PreferencesGroup();
+        /// Translators: Preferences group title
+        //group.title = _("Plugins");
+        /// Translators: Preferences group description
+        //group.description = _("Optional features for Geary");
+
+        Application.Client? application = this.application;
+        if (application != null) {
+            foreach (Peas.PluginInfo plugin in
+                     this.plugins.get_optional_plugins()) {
+                group.add(new_plugin_row(plugin));
+            }
+        }
+
+        var page = new Hdy.PreferencesPage();
+        /// Translators: Preferences page title
+        page.title = _("Plugins");
+        page.icon_name = "application-x-addon-symbolic";
+        page.propagate_natural_width = true;
+        page.add(group);
+        page.show_all();
+
+        add(page);
+    }
+
+    private Hdy.ActionRow new_plugin_row(Peas.PluginInfo plugin) {
+        var @switch = new Gtk.Switch();
+        @switch.active = plugin.is_loaded();
+        @switch.notify["active"].connect_after(
+            () => enable_plugin(plugin, switch)
+        );
+        @switch.valign = CENTER;
+
+        var row = new Hdy.ActionRow();
+        row.title = plugin.get_name();
+        row.subtitle = plugin.get_description();
+        row.activatable_widget = @switch;
+        row.add_action(@switch);
+
+        return row;
+    }
+
+    private void enable_plugin(Peas.PluginInfo plugin, Gtk.Switch @switch) {
+        if (@switch.active && !plugin.is_loaded()) {
+            bool loaded = false;
+            try {
+                loaded = this.plugins.load_optional(plugin);
+            } catch (GLib.Error err) {
+                warning(
+                    "Plugin %s not able to be loaded: %s",
+                    plugin.get_name(), err.message
+                );
+            }
+            if (!loaded) {
+                @switch.active = false;
+            }
+        } else if (!@switch.active && plugin.is_loaded()) {
+            bool unloaded = false;
+            try {
+                unloaded = this.plugins.unload_optional(plugin);
+            } catch (GLib.Error err) {
+                warning(
+                    "Plugin %s not able to be loaded: %s",
+                    plugin.get_name(), err.message
+                );
+            }
+            if (!unloaded) {
+                @switch.active = true;
+            }
+        }
+    }
+
 
     private void on_close() {
         close();
@@ -150,7 +240,10 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
 
     private bool on_delete() {
         // Sync startup notification option with file state
-        this.application.autostart.sync_with_config();
+        Application.Client? application = this.application;
+        if (application != null) {
+            application.autostart.sync_with_config();
+        }
         return Gdk.EVENT_PROPAGATE;
     }
 

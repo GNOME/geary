@@ -25,6 +25,7 @@ public class Application.Configuration : Geary.BaseObject {
     public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
     public const string FORMATTING_TOOLBAR_VISIBLE = "formatting-toolbar-visible";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
+    public const string OPTIONAL_PLUGINS = "optional-plugins";
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string SINGLE_KEY_SHORTCUTS = "single-key-shortcuts";
     public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
@@ -205,13 +206,27 @@ public class Application.Configuration : Geary.BaseObject {
     }
 
     /**
+     * Returns list of optional plugins to load by default
+     */
+    public string[] get_optional_plugins() {
+        return this.settings.get_strv(OPTIONAL_PLUGINS);
+    }
+
+    /**
+     * Sets the list of optional plugins to load by default
+     */
+    public void set_optional_plugins(string[] value) {
+        this.settings.set_strv(OPTIONAL_PLUGINS, value);
+    }
+
+    /**
      * Returns enabled spell checker languages.
      *
      * This specifies the languages used for spell checking by the
      * client. By default, the set will contain languages based on
      * environment variables.
      *
-     * @see Util.International.get_user_preferred_languages
+     * @see Util.I18n.get_user_preferred_languages
      */
     public string[] get_spell_check_languages() {
         GLib.Variant? value = this.settings.get_value(
@@ -219,7 +234,7 @@ public class Application.Configuration : Geary.BaseObject {
         ).get_maybe();
         string[] langs = (value != null)
             ? value.get_strv()
-            : Util.International.get_user_preferred_languages();
+            : Util.I18n.get_user_preferred_languages();
         return langs;
     }
 
@@ -230,7 +245,7 @@ public class Application.Configuration : Geary.BaseObject {
      * client. By default, the set will contain languages based on
      * environment variables.
      *
-     * @see Util.International.get_user_preferred_languages
+     * @see Util.I18n.get_user_preferred_languages
      */
     public void set_spell_check_languages(string[] value) {
         this.settings.set_value(

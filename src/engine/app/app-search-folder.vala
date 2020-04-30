@@ -23,11 +23,11 @@ public class Geary.App.SearchFolder :
     /** The canonical name of the search folder. */
     public const string MAGIC_BASENAME = "$GearyAccountSearchFolder$";
 
-    private const SpecialFolderType[] EXCLUDE_TYPES = {
-        SpecialFolderType.SPAM,
-        SpecialFolderType.TRASH,
-        SpecialFolderType.DRAFTS,
-        // Orphan emails (without a folder) are also excluded; see ct or.
+    private const Folder.SpecialUse[] EXCLUDE_TYPES = {
+        DRAFTS,
+        JUNK,
+        TRASH,
+        // Orphan emails (without a folder) are also excluded; see ctor.
     };
 
 
@@ -96,10 +96,10 @@ public class Geary.App.SearchFolder :
     /**
      * {@inheritDoc}
      *
-     * Always returns {@link SpecialFolderType.SEARCH}.
+     * Always returns {@link Folder.SpecialUse.SEARCH}.
      */
-    public override SpecialFolderType special_folder_type {
-        get { return SpecialFolderType.SEARCH; }
+    public override Folder.SpecialUse used_as {
+        get { return SEARCH; }
     }
 
     /** The query being evaluated by this folder, if any. */
@@ -126,7 +126,7 @@ public class Geary.App.SearchFolder :
         this._path = root.get_child(MAGIC_BASENAME, Trillian.TRUE);
 
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
-        account.folders_special_type.connect(on_folders_special_type);
+        account.folders_use_changed.connect(on_folders_use_changed);
         account.email_locally_complete.connect(on_email_locally_complete);
         account.email_removed.connect(on_account_email_removed);
         account.email_locally_removed.connect(on_account_email_removed);
@@ -140,7 +140,7 @@ public class Geary.App.SearchFolder :
 
     ~SearchFolder() {
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
-        account.folders_special_type.disconnect(on_folders_special_type);
+        account.folders_use_changed.disconnect(on_folders_use_changed);
         account.email_locally_complete.disconnect(on_email_locally_complete);
         account.email_removed.disconnect(on_account_email_removed);
         account.email_locally_removed.disconnect(on_account_email_removed);
@@ -371,6 +371,11 @@ public class Geary.App.SearchFolder :
         }
     }
 
+    public override void set_used_as_custom(bool enabled)
+        throws EngineError.UNSUPPORTED {
+        throw new EngineError.UNSUPPORTED("Folder special use cannot be changed");
+    }
+
     private void require_id(EmailIdentifier id)
         throws EngineError.NOT_FOUND {
         if (!this.id_map.has_key(id)) {
@@ -575,15 +580,15 @@ public class Geary.App.SearchFolder :
     ) {
         if (available != null) {
             // Exclude it from searching if it's got the right special type.
-            foreach(Folder folder in traverse<Folder>(available)
-                .filter(f => f.special_folder_type in EXCLUDE_TYPES))
+            foreach(var folder in traverse<Folder>(available)
+                .filter(f => f.used_as in EXCLUDE_TYPES))
                 exclude_folder(folder);
         }
     }
 
-    private void on_folders_special_type(Gee.Collection<Folder> folders) {
+    private void on_folders_use_changed(Gee.Collection<Folder> folders) {
         foreach (Folder folder in folders) {
-            if (folder.special_folder_type in EXCLUDE_TYPES) {
+            if (folder.used_as in EXCLUDE_TYPES) {
                 exclude_folder(folder);
             } else {
                 include_folder(folder);

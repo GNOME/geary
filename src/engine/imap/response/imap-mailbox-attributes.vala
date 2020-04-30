@@ -55,44 +55,49 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
     }
 
     /**
-     * Search the {@link MailboxAttributes} looking for an XLIST-style
-     * {@link Geary.SpecialFolderType}.
+     * Returns the special use specified for the mailbox.
+     *
+     * If no special use is set, returns {@link
+     * Geary.Folder.SpecialUse.NONE}.
      */
-    public Geary.SpecialFolderType get_special_folder_type() {
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_INBOX))
-            return Geary.SpecialFolderType.INBOX;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_ALL_MAIL))
-            return Geary.SpecialFolderType.ALL_MAIL;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_TRASH))
-            return Geary.SpecialFolderType.TRASH;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_DRAFTS))
-            return Geary.SpecialFolderType.DRAFTS;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_SENT))
-            return Geary.SpecialFolderType.SENT;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_JUNK))
-            return Geary.SpecialFolderType.SPAM;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_SPAM))
-            return Geary.SpecialFolderType.SPAM;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_STARRED))
-            return Geary.SpecialFolderType.FLAGGED;
-
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_IMPORTANT))
-            return Geary.SpecialFolderType.IMPORTANT;
+    public Geary.Folder.SpecialUse get_special_use() {
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_ALL))
+            return ALL_MAIL;
 
         if (contains(MailboxAttribute.SPECIAL_FOLDER_ARCHIVE))
-            return Geary.SpecialFolderType.ARCHIVE;
+            return ARCHIVE;
+
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_DRAFTS))
+            return DRAFTS;
 
         if (contains(MailboxAttribute.SPECIAL_FOLDER_FLAGGED))
-            return Geary.SpecialFolderType.FLAGGED;
+            return FLAGGED;
 
-        return Geary.SpecialFolderType.NONE;
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_IMPORTANT))
+            return IMPORTANT;
+
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_JUNK))
+            return JUNK;
+
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_SENT))
+            return SENT;
+
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_TRASH))
+            return TRASH;
+
+        if (contains(MailboxAttribute.XLIST_ALL_MAIL))
+            return ALL_MAIL;
+
+        if (contains(MailboxAttribute.XLIST_INBOX))
+            return INBOX;
+
+        if (contains(MailboxAttribute.XLIST_SPAM))
+            return JUNK;
+
+        if (contains(MailboxAttribute.XLIST_STARRED))
+            return FLAGGED;
+
+        return NONE;
     }
-}
 
+}

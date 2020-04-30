@@ -37,11 +37,6 @@ public abstract class Geary.ImapEngine.AccountOperation : BaseObject, Logging.So
 
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
-    }
-
-    /** {@inheritDoc} */
     public Logging.Source? logging_parent { get { return account; } }
 
     /** The account this operation applies to. */

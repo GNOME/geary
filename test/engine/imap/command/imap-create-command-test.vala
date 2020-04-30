@@ -26,7 +26,7 @@ class Geary.Imap.CreateCommandTest : TestCase {
             "---- create Everything (use (\\All))",
             new CreateCommand.special_use(
                 new MailboxSpecifier("Everything"),
-                SpecialFolderType.ALL_MAIL
+                ALL_MAIL
             ).to_string()
         );
     }

@@ -24,11 +24,6 @@ public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
     public bool is_valid { get { return this.session != null; } }
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
-    }
-
-    /** {@inheritDoc} */
     public Logging.Source? logging_parent { get { return _logging_parent; } }
     private weak Logging.Source? _logging_parent = null;
 
@@ -103,7 +98,7 @@ public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
     }
 
     private void on_disconnected(ClientSession.DisconnectReason reason) {
-        debug("DISCONNECTED %s", reason.to_string());
+        debug("Disconnected %s", reason.to_string());
 
         close();
         disconnected(reason);

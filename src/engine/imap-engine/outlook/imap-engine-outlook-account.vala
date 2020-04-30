@@ -39,21 +39,21 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
 
     protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {
         FolderPath path = local_folder.get_path();
-        SpecialFolderType type;
+        Folder.SpecialUse use = NONE;
         if (Imap.MailboxSpecifier.folder_path_is_inbox(path)) {
-            type = SpecialFolderType.INBOX;
+            use = INBOX;
         } else {
-            type = local_folder.get_properties().attrs.get_special_folder_type();
+            use = local_folder.get_properties().attrs.get_special_use();
             // There can be only one Inbox
-            if (type == SpecialFolderType.INBOX) {
-                type = SpecialFolderType.NONE;
+            if (use == INBOX) {
+                use = NONE;
             }
         }
 
-        if (type == Geary.SpecialFolderType.DRAFTS)
-            return new OutlookDraftsFolder(this, local_folder, type);
+        if (use == DRAFTS)
+            return new OutlookDraftsFolder(this, local_folder);
 
-        return new OutlookFolder(this, local_folder, type);
+        return new OutlookFolder(this, local_folder, use);
     }
 
 }

@@ -54,7 +54,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void whitelisted_folder_type() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.INBOX,
+            INBOX,
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
@@ -64,9 +64,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();
@@ -84,7 +82,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void blacklisted_folder_type() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.SPAM,
+            JUNK,
             this.senders
         );
         this.email.set_receivers(
@@ -92,9 +90,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();
@@ -103,7 +99,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void seen_priority() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.INBOX,
+            INBOX,
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
@@ -113,9 +109,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();
@@ -132,7 +126,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void sent_priority() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.SENT,
+            SENT,
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
@@ -142,9 +136,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();
@@ -161,7 +153,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     public void received_priority() throws GLib.Error {
         ContactHarvesterImpl whitelisted = new ContactHarvesterImpl(
             this.store,
-            SpecialFolderType.SENT,
+            SENT,
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
@@ -171,9 +163,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
         );
 
         whitelisted.harvest_from_email.begin(
-            Collection.single(this.email), null,
-            (obj, ret) => { async_complete(ret); }
-        );
+            Collection.single(this.email), null, this.async_completion);
         whitelisted.harvest_from_email.end(async_result());
 
         this.store.assert_expectations();

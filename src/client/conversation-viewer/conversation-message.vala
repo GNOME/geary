@@ -158,6 +158,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.displayed = new Geary.RFC822.MailboxAddress(
                     this.contact.display_name, this.source.address
                 );
+                this.tooltip_text = this.source.address;
             } else {
                 // Display both the display name and the email address
                 // so that the user has the full information at hand
@@ -199,6 +200,97 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     }
 
+    /**
+     * A FlowBox that limits its contents to 12 items until a link is
+     * clicked to expand it. Used for to, cc, and bcc fields.
+     */
+    public class ContactList : Gtk.FlowBox, Geary.BaseInterface {
+        /**
+         * The number of results that will be displayed when not expanded.
+         * Note this is actually one less than the cutoff, which is 12; we
+         * don't want the show more label to be visible when we could just
+         * put the last item.
+         */
+        private const int SHORT_RESULTS = 11;
+
+
+        private Gtk.Label show_more;
+        private Gtk.Label show_less;
+        private bool expanded = false;
+        private int children = 0;
+
+
+        construct {
+            this.show_more = this.create_label();
+            this.show_more.activate_link.connect(() => {
+                this.set_expanded(true);
+            });
+            base.add(this.show_more);
+
+            this.show_less = this.create_label();
+            // Translators: Label text displayed when there are too
+            // many email addresses to be shown by default in an
+            // email's header, but they are all being shown anyway.
+            this.show_less.label = "<a href=''>%s</a>".printf(_("Show less"));
+            this.show_less.activate_link.connect(() => {
+                this.set_expanded(false);
+            });
+            base.add(this.show_less);
+
+            this.set_filter_func(this.filter_func);
+        }
+
+
+        public override void add(Gtk.Widget child) {
+            // insert before the show_more and show_less labels
+            int length = (int) this.get_children().length();
+            base.insert(child, length - 2);
+
+            this.children ++;
+
+            if (this.children >= SHORT_RESULTS && this.children <= SHORT_RESULTS + 2) {
+                this.invalidate_filter();
+            }
+
+            this.show_more.label = "<a href=''>%s</a>".printf(
+                // Translators: Label text displayed when there are
+                // too many email addresses to be shown by default in
+                // an email's header. The string substitution is the
+                // number of extra email to be shown.
+                _("%d more…").printf(this.children - SHORT_RESULTS)
+            );
+        }
+
+
+        private Gtk.Label create_label() {
+            var label = new Gtk.Label("");
+            label.visible = true;
+            label.use_markup = true;
+            label.track_visited_links = false;
+            label.halign = START;
+            return label;
+        }
+
+        private void set_expanded(bool expanded) {
+            this.expanded = expanded;
+            this.invalidate_filter();
+        }
+
+        private bool filter_func(Gtk.FlowBoxChild child) {
+            bool is_expandable = this.children > SHORT_RESULTS + 1;
+
+            if (child.get_child() == this.show_more) {
+                return !this.expanded && is_expandable;
+            } else if (child.get_child() == this.show_less) {
+                return this.expanded;
+            } else if (!this.expanded && is_expandable) {
+                return child.get_index() < SHORT_RESULTS;
+            } else {
+                return true;
+            }
+        }
+    }
+
 
     /** Contact for the primary originator, if any. */
     internal Application.Contact? primary_contact {
@@ -216,21 +308,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     /** Box that InfoBar widgets should be added to. */
     [GtkChild]
-    internal Gtk.Grid infobars;
-
-    /**
-     * Emitted when web_view's content has finished loaded.
-     *
-     * See {@link Components.WebView.is_content_loaded} for details.
-     */
-    internal bool is_content_loaded {
-        get {
-            return this.web_view != null && this.web_view.is_content_loaded;
-        }
-    }
+    internal Components.InfoBarStack info_bars;
 
     /** HTML view that displays the message body. */
-    private ConversationWebView? web_view { get; private set; }
+    internal ConversationWebView web_view { get; private set; }
 
     // The message headers represented by this view
     private Geary.EmailHeaderSet headers;
@@ -288,8 +369,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     [GtkChild]
     private Gtk.ProgressBar body_progress;
 
-    [GtkChild]
-    private Gtk.InfoBar remote_images_infobar;
+    private Gtk.InfoBar? remote_images_info_bar = null;
 
     private Gtk.Widget? body_placeholder = null;
 
@@ -346,19 +426,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         string uri, string? alt_text, Geary.Memory.Buffer? buffer
     );
 
-    /** Emitted when web_view has loaded a resource added to it. */
-    public signal void internal_resource_loaded(string name);
-
-    /** Emitted when web_view's selection has changed. */
-    public signal void selection_changed(bool has_selection);
-
-    /**
-     * Emitted when web_view's content has finished loaded.
-     *
-     * See {@link Components.WebView.is_content_loaded} for details.
-     */
-    public signal void content_loaded();
-
 
     /**
      * Constructs a new view from an email's headers and body.
@@ -400,18 +467,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         );
     }
 
-    private void trigger_internal_resource_loaded(string name) {
-        internal_resource_loaded(name);
-    }
-
-    private void trigger_content_loaded() {
-        content_loaded();
-    }
-
-    private void trigger_selection_changed(bool has_selection) {
-        selection_changed(has_selection);
-    }
-
     private ConversationMessage(Geary.EmailHeaderSet headers,
                                 string? preview,
                                 bool load_remote_resources,
@@ -432,10 +487,19 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             .activate.connect(on_copy_email_address);
         add_action(ACTION_COPY_LINK, true, VariantType.STRING)
             .activate.connect(on_copy_link);
+        add_action(ACTION_COPY_SELECTION, false).activate.connect(() => {
+                web_view.copy_clipboard();
+            });
+        add_action(ACTION_OPEN_INSPECTOR, config.enable_inspector).activate.connect(() => {
+                this.web_view.get_inspector().show();
+            });
         add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
             .activate.connect(on_link_activated);
         add_action(ACTION_SAVE_IMAGE, true, new VariantType("(sms)"))
             .activate.connect(on_save_image);
+        add_action(ACTION_SELECT_ALL, true).activate.connect(() => {
+                web_view.select_all();
+            });
         insert_action_group("msg", message_actions);
 
         // Context menu
@@ -488,7 +552,25 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             this.subject_searchable = headers.subject.value.casefold();
         }
 
+        // Web view
+
+        this.web_view = new ConversationWebView(config);
+        this.web_view.context_menu.connect(on_context_menu);
+        this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
+        this.web_view.link_activated.connect((link) => {
+                on_link_activated(new GLib.Variant("s", link));
+            });
+        this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
+        this.web_view.notify["is-loading"].connect(on_is_loading_notify);
+        this.web_view.resource_load_started.connect(on_resource_load_started);
+        this.web_view.remote_image_load_blocked.connect(on_remote_images_blocked);
+        this.web_view.selection_changed.connect(on_selection_changed);
+        this.web_view.set_hexpand(true);
+        this.web_view.set_vexpand(true);
+        this.web_view.show();
+
         this.body_container.set_has_tooltip(true); // Used to show link URLs
+        this.body_container.add(this.web_view);
         this.show_progress_timeout = new Geary.TimeoutManager.milliseconds(
             Util.Gtk.SHOW_PROGRESS_TIMEOUT_MSEC, this.on_show_progress_timeout
         );
@@ -500,53 +582,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             Util.Gtk.PROGRESS_PULSE_TIMEOUT_MSEC, this.body_progress.pulse
         );
         this.progress_pulse.repetition = FOREVER;
-    }
-
-    private void initialize_web_view() {
-        var viewer = get_ancestor(typeof(ConversationViewer)) as ConversationViewer;
-
-        // Ensure we share the same WebProcess with the last one
-        // constructed if possible.
-        if (viewer != null && viewer.previous_web_view != null) {
-            this.web_view = new ConversationWebView.with_related_view(
-                this.config,
-                viewer.previous_web_view
-            );
-        } else {
-            this.web_view = new ConversationWebView(this.config);
-        }
-        if (viewer != null) {
-            viewer.previous_web_view = this.web_view;
-        }
-
-        this.web_view.context_menu.connect(on_context_menu);
-        this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
-        this.web_view.link_activated.connect((link) => {
-                on_link_activated(new GLib.Variant("s", link));
-            });
-        this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
-        this.web_view.notify["is-loading"].connect(on_is_loading_notify);
-        this.web_view.resource_load_started.connect(on_resource_load_started);
-        this.web_view.remote_image_load_blocked.connect(() => {
-                this.remote_images_infobar.show();
-            });
-        this.web_view.selection_changed.connect(on_selection_changed);
-        this.web_view.internal_resource_loaded.connect(trigger_internal_resource_loaded);
-        this.web_view.content_loaded.connect(trigger_content_loaded);
-        this.web_view.selection_changed.connect(trigger_selection_changed);
-        this.web_view.set_hexpand(true);
-        this.web_view.set_vexpand(true);
-        this.web_view.show();
-        this.body_container.add(this.web_view);
-        add_action(ACTION_COPY_SELECTION, false).activate.connect(() => {
-                web_view.copy_clipboard();
-            });
-        add_action(ACTION_OPEN_INSPECTOR, config.enable_inspector).activate.connect(() => {
-                this.web_view.get_inspector().show();
-            });
-        add_action(ACTION_SELECT_ALL, true).activate.connect(() => {
-                web_view.select_all();
-            });
     }
 
     ~ConversationMessage() {
@@ -562,77 +597,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         base.destroy();
     }
 
-    public async string? get_selection_for_quoting() throws Error {
-        if (this.web_view == null)
-            initialize_web_view();
-        return yield web_view.get_selection_for_quoting();
-    }
-
-    public async string? get_selection_for_find() throws Error {
-        if (this.web_view == null)
-            initialize_web_view();
-        return yield web_view.get_selection_for_find();
-    }
-
-    /**
-     * Adds a set of internal resources to web_view.
-     *
-     * @see add_internal_resource
-     */
-    public void add_internal_resources(Gee.Map<string,Geary.Memory.Buffer> res) {
-        if (this.web_view == null)
-            initialize_web_view();
-        web_view.add_internal_resources(res);
-    }
-
-    public WebKit.PrintOperation new_print_operation() {
-        if (this.web_view == null)
-            initialize_web_view();
-        return new WebKit.PrintOperation(web_view);
-    }
-
-    public async void run_javascript (string script, Cancellable? cancellable) throws Error {
-        if (this.web_view == null)
-            initialize_web_view();
-        yield web_view.run_javascript(script, cancellable);
-    }
-
-    public void zoom_in() {
-        if (this.web_view == null)
-            initialize_web_view();
-        web_view.zoom_in();
-    }
-
-    public void zoom_out() {
-        if (this.web_view == null)
-            initialize_web_view();
-        web_view.zoom_out();
-    }
-
-    public void zoom_reset() {
-        if (this.web_view == null)
-            initialize_web_view();
-        web_view.zoom_reset();
-    }
-
-    public void web_view_translate_coordinates(Gtk.Widget widget, int x, int anchor_y, out int x1, out int y1) {
-        if (this.web_view == null)
-            initialize_web_view();
-        web_view.translate_coordinates(widget, x, anchor_y, out x1, out y1);
-    }
-
-    public int web_view_get_allocated_height() {
-        if (this.web_view == null)
-            initialize_web_view();
-        return web_view.get_allocated_height();
-    }
-
     /**
      * Shows the complete message and hides the compact headers.
      */
     public void show_message_body(bool include_transitions=true) {
-        if (this.web_view == null)
-            initialize_web_view();
         set_revealer(this.compact_revealer, false, include_transitions);
         set_revealer(this.header_revealer, true, include_transitions);
         set_revealer(this.body_revealer, true, include_transitions);
@@ -757,11 +725,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     this.primary_originator, cancellable
                 );
 
-                Application.AvatarStore loader = main.application.controller.avatars;
                 int window_scale = get_scale_factor();
-                int pixel_size = Application.AvatarStore.PIXEL_SIZE * window_scale;
-                Gdk.Pixbuf? avatar_buf = yield loader.load(
-                    this.primary_contact,
+                int pixel_size =
+                    Application.Client.AVATAR_SIZE_PIXELS * window_scale;
+                Gdk.Pixbuf? avatar_buf = yield this.primary_contact.load_avatar(
                     this.primary_originator,
                     pixel_size,
                     cancellable
@@ -777,7 +744,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 this.avatar.set_from_icon_name(
                     "avatar-default-symbolic", Gtk.IconSize.DIALOG
                 );
-                this.avatar.set_pixel_size(Application.AvatarStore.PIXEL_SIZE);
+                this.avatar.set_pixel_size(
+                    Application.Client.AVATAR_SIZE_PIXELS
+                );
             }
 
 
@@ -814,10 +783,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         throws GLib.Error {
         if (load_cancelled.is_cancelled()) {
             throw new GLib.IOError.CANCELLED("Conversation load cancelled");
-        }
-
-        if (this.web_view == null) {
-            initialize_web_view();
         }
 
         bool contact_load_images = (
@@ -870,8 +835,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
         }
 
-        if (this.web_view == null)
-            initialize_web_view();
         uint webkit_found = yield this.web_view.highlight_search_terms(
             search_matches, cancellable
         );
@@ -885,9 +848,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         foreach (ContactFlowBoxChild address in this.searchable_addresses) {
             address.unmark_search_terms();
         }
-
-        if (this.web_view != null)
-            this.web_view.unmark_search_terms();
+        this.web_view.unmark_search_terms();
     }
 
     /**
@@ -1027,7 +988,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                              GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (addresses != null && addresses.size > 0) {
-            Gtk.FlowBox box = header.get_children().nth(0).data as Gtk.FlowBox;
+            ContactList box = header.get_children().nth(0).data as ContactList;
             if (box != null) {
                 foreach (Geary.RFC822.MailboxAddress address in addresses) {
                     ContactFlowBoxChild child = new ContactFlowBoxChild(
@@ -1050,8 +1011,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     // returns HTML that is placed into the document in the position
     // where the MIME part was found
     private string? inline_image_replacer(Geary.RFC822.Part part) {
-        if (this.web_view == null)
-            initialize_web_view();
         Geary.Mime.ContentType content_type = part.content_type;
         if (content_type.media_type != "image" ||
             !this.web_view.can_show_mime_type(content_type.to_string())) {
@@ -1086,20 +1045,21 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         return "<img alt=\"%s\" class=\"%s\" src=\"%s%s\" />".printf(
             clean_filename,
             REPLACED_IMAGE_CLASS,
-            Components.WebView.CID_URL_PREFIX,
+            ClientWebView.CID_URL_PREFIX,
             Geary.HTML.escape_markup(id)
         );
     }
 
     private void show_images(bool update_email_flag) {
         start_progress_loading();
-        this.remote_images_infobar.hide();
+        if (this.remote_images_info_bar != null) {
+            this.info_bars.remove(this.remote_images_info_bar);
+            this.remote_images_info_bar = null;
+        }
         this.load_remote_resources = true;
         this.remote_resources_requested = 0;
         this.remote_resources_loaded = 0;
-        if (this.web_view != null) {
-            this.web_view.load_remote_images();
-        }
+        this.web_view.load_remote_images();
         if (update_email_flag) {
             flag_remote_images();
         }
@@ -1114,13 +1074,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         if (placeholder != null) {
             this.body_placeholder = placeholder;
-            if (this.web_view != null)
-                this.web_view.hide();
+            this.web_view.hide();
             this.body_container.add(placeholder);
             show_message_body(true);
         } else {
-            if (this.web_view != null)
-                this.web_view.show();
+            this.web_view.show();
         }
     }
 
@@ -1148,12 +1106,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void on_is_loading_notify() {
-        if (this.web_view != null) {
-            if (this.web_view.is_loading) {
-                start_progress_loading();
-            } else {
-                stop_progress_loading();
-            }
+        if (this.web_view.is_loading) {
+            start_progress_loading();
+        } else {
+            stop_progress_loading();
         }
     }
 
@@ -1342,7 +1298,31 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         set_action_enabled(ACTION_COPY_SELECTION, has_selection);
     }
 
-    [GtkCallback]
+    private void on_remote_images_blocked() {
+        if (this.remote_images_info_bar == null) {
+            this.remote_images_info_bar = new Components.InfoBar(
+                // Translators: Info bar status message
+                _("Remote images not shown"),
+                // Translators: Info bar description
+                _("Only show remote images from senders you trust.")
+            );
+            var show = this.remote_images_info_bar.add_button(
+                // Translators: Info bar button label
+                _("Show"), 1
+            );
+            this.remote_images_info_bar.add_button(
+                // Translators: Info bar button label
+                _("Always show from sender"), 2
+            );
+            this.remote_images_info_bar.response.connect(on_remote_images_response);
+            var buttons = this.remote_images_info_bar.get_action_area() as Gtk.ButtonBox;
+            if (buttons != null) {
+                buttons.set_child_non_homogeneous(show, true);
+            }
+            this.info_bars.add(this.remote_images_info_bar);
+        }
+    }
+
     private void on_remote_images_response(Gtk.InfoBar info_bar, int response_id) {
         switch (response_id) {
         case 1:
@@ -1359,7 +1339,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
             break;
         default:
-            this.remote_images_infobar.hide();
+            this.info_bars.remove(this.remote_images_info_bar);
+            this.remote_images_info_bar = null;
             break;
         }
     }
@@ -1388,7 +1369,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             alt_text = (string) alt_maybe;
         }
 
-        if (uri.has_prefix(Components.WebView.CID_URL_PREFIX)) {
+        if (uri.has_prefix(ClientWebView.CID_URL_PREFIX)) {
             // We can get the data directly from the attachment, so
             // don't bother getting it from the web view
             save_image(uri, alt_text, null);

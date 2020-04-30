@@ -11,6 +11,7 @@ icon_files = files(
   'format-ordered-list-symbolic.svg',
   'format-ordered-list-symbolic-rtl.svg',
   'format-text-remove-symbolic.svg',
+  'format-toolbar-toggle-symbolic.svg',
   'format-unordered-list-symbolic.svg',
   'format-unordered-list-symbolic-rtl.svg',
   'mail-drafts-symbolic.svg',

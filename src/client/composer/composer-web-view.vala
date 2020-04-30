@@ -9,7 +9,7 @@
 /**
  * A WebView for editing messages in the composer.
  */
-public class Composer.WebView : Components.WebView {
+public class Composer.WebView : ClientWebView {
 
 
     // WebKit message handler names
@@ -92,10 +92,10 @@ public class Composer.WebView : Components.WebView {
 
     public static new void load_resources()
         throws Error {
-        WebView.app_style = Components.WebView.load_app_stylesheet(
+        WebView.app_style = ClientWebView.load_app_stylesheet(
             "composer-web-view.css"
         );
-        WebView.app_script = Components.WebView.load_app_script(
+        WebView.app_script = ClientWebView.load_app_script(
             "composer-web-view.js"
         );
     }
@@ -148,7 +148,7 @@ public class Composer.WebView : Components.WebView {
     public new void load_html(string body,
                               string quote,
                               bool top_posting,
-                              bool is_draft) {
+                              bool body_complete) {
         const string HTML_PRE = """<html><body class="%s">""";
         const string HTML_POST = """</body></html>""";
         const string BODY_PRE = """
@@ -165,7 +165,7 @@ public class Composer.WebView : Components.WebView {
         StringBuilder html = new StringBuilder();
         string body_class = (this.is_rich_text) ? "" : "plain";
         html.append(HTML_PRE.printf(body_class));
-        if (!is_draft) {
+        if (!body_complete) {
             html.append(BODY_PRE);
             bool have_body = !Geary.String.is_empty(body);
             if (have_body) {
@@ -185,7 +185,7 @@ public class Composer.WebView : Components.WebView {
                 html.append_printf(QUOTE, quote);
             }
         } else {
-            html.append(quote);
+            html.append(body);
         }
         html.append(HTML_POST);
         base.load_html((string) html.data);

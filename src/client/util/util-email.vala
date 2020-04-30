@@ -35,7 +35,7 @@ namespace Util.Email {
     /** Returns the stripped subject line, or a placeholder if none. */
     public string strip_subject_prefixes(Geary.Email email) {
         string? cleaned = (email.subject != null) ? email.subject.strip_prefixes() : null;
-        return !Geary.String.is_empty(cleaned) ? cleaned : _("(no subject)");
+        return !Geary.String.is_empty(cleaned) ? cleaned : _("(No subject)");
     }
 
     /**
@@ -104,8 +104,9 @@ namespace Util.Email {
      * is little room for the display.
      *
      * @return a string containing at least the first mailbox
-     * serialised by {@link MailboxAddress.to_short_display}, if the
-     * list contains more mailboxes then an indication of how many
+     * serialised by {@link
+     * Geary.RFC822.MailboxAddress.to_short_display}, if the list
+     * contains more mailboxes then an indication of how many
      * additional are present.
      */
     public string to_short_recipient_display(Geary.EmailHeaderSet headers) {

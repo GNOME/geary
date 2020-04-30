@@ -1,28 +1,29 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 © Software Freedom Conservancy Inc.
+ * Copyright 2020 © Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * Manage saving, replacing, and deleting the various versions of a draft message while the user is
- * editing it.
+ * Manage saving, replacing, and deleting an email being edited.
  *
- * Each composer should create a single DraftManager object for the lifetime of the compose
- * session.  The DraftManager interface offers "fire-and-forget" nonblocking (but not
- * asynchronous) methods for the composer to schedule remote operations without worrying about
- * synchronization, operation ordering, error-handling, and so forth.
+ * Each composer should create a single DraftManager object for the
+ * lifetime of the compose session.  The DraftManager interface offers
+ * "fire-and-forget" nonblocking methods for the composer to schedule
+ * remote operations without worrying about synchronization, operation
+ * ordering, error-handling, and so forth.
  *
- * If successive drafts are submitted for storage, drafts waiting in the queue (i.e. not yet sent
- * to the server) are dropped without further consideration.  This prevents needless I/O with the
- * server saving drafts that are only to be replaced by later versions.
+ * If successive drafts are submitted for storage, drafts waiting in
+ * the queue (i.e. not yet sent to the server) are dropped without
+ * further consideration.  This prevents needless I/O with the server
+ * saving drafts that are only to be replaced by later versions.
  *
- * Important: This object should be used ''per'' composed email and not to manage multiple emails
- * being composed to the same {@link Account}.  DraftManager's internal state is solely for managing
- * the lifecycle of a single email being composed by the user.
- *
- * The only async calls for DraftManager is {@link open_async} and {@link close_async}, which give
- * it a chance to initialize and tear-down in an orderly manner.
+ * Important: This object should be used ''per'' composed email and
+ * not to manage multiple emails being composed to the same {@link
+ * Account}.  DraftManager's internal state is solely for managing the
+ * lifecycle of a single email being composed by the user.
  */
 
 public class Geary.App.DraftManager : BaseObject {
@@ -81,10 +82,10 @@ public class Geary.App.DraftManager : BaseObject {
     /**
      * Indicates the {@link DraftManager} is open and ready for service.
      *
-     * Although this property can be monitored, the object is considered "open" when
-     * {@link open_async} completes, not when this property changes to true.
+     * The object is considered "open" from when it has been
+     * constructed until {@link close_async} is called.
      */
-    public bool is_open { get; private set; default = false; }
+    public bool is_open { get; private set; default = true; }
 
     /**
      * The current saved state of the draft.
@@ -99,7 +100,7 @@ public class Geary.App.DraftManager : BaseObject {
     /**
      * The version number of the most recently saved draft.
      *
-     * Even if an initial draft is supplied (with {@link open_async}, this always starts at zero.
+     * Even if an initial draft is supplied, this always starts at zero.
      * It merely represents the number of times a draft was successfully saved.
      *
      * A {@link discard} operation will reset this counter to zero.
@@ -114,12 +115,12 @@ public class Geary.App.DraftManager : BaseObject {
     public int versions_dropped { get; private set; default = 0; }
 
     private Account account;
-    private Folder? drafts_folder = null;
-    private FolderSupport.Create? create_support = null;
-    private FolderSupport.Remove? remove_support = null;
+    private Geary.EmailFlags flags = null;
+    private Folder drafts_folder;
+    private FolderSupport.Create create_support;
+    private FolderSupport.Remove remove_support;
     private Nonblocking.Queue<Operation?> mailbox =
         new Nonblocking.Queue<Operation?>.fifo();
-    private bool was_opened = false;
     private Error? fatal_err = null;
 
 
@@ -163,10 +164,6 @@ public class Geary.App.DraftManager : BaseObject {
         debug("%s: Irrecoverable failure: %s", to_string(), err.message);
     }
 
-    public DraftManager(Geary.Account account) {
-        this.account = account;
-    }
-
     protected virtual void notify_stored(Geary.RFC822.Message draft) {
         versions_saved++;
         stored(draft);
@@ -192,32 +189,33 @@ public class Geary.App.DraftManager : BaseObject {
      *
      * @see is_open
      */
-    public async void open_async(Geary.EmailIdentifier? initial_draft_id, Cancellable? cancellable = null)
-        throws Error {
-        if (is_open)
-            throw new EngineError.ALREADY_OPEN("%s is already open", to_string());
-        else if (was_opened)
-            throw new EngineError.UNSUPPORTED("%s cannot be re-opened", to_string());
+    public async DraftManager(Account account,
+                              Folder save_to,
+                              EmailFlags flags,
+                              EmailIdentifier? initial_draft_id,
+                              GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        this.account = account;
+        this.drafts_folder = save_to;
+        this.flags = flags;
 
-        was_opened = true;
-
-        current_draft_id = initial_draft_id;
-        if (current_draft_id != null)
+        this.current_draft_id = initial_draft_id;
+        if (this.current_draft_id != null) {
             draft_state = DraftState.STORED;
-
-        drafts_folder = account.get_special_folder(SpecialFolderType.DRAFTS);
-        if (drafts_folder == null)
-            throw new EngineError.NOT_FOUND("%s: No drafts folder found", to_string());
-
-        // if drafts folder doesn't support create and remove, call it quits
-        create_support = drafts_folder as Geary.FolderSupport.Create;
-        remove_support = drafts_folder as Geary.FolderSupport.Remove;
-        if (create_support == null || remove_support == null) {
-            throw new EngineError.UNSUPPORTED("%s: Drafts folder %s does not support create and remove",
-                to_string(), drafts_folder.to_string());
         }
 
-        drafts_folder.closed.connect(on_folder_closed);
+        // if drafts folder doesn't support create and remove, call it quits
+        if (!(save_to is FolderSupport.Create &&
+              save_to is FolderSupport.Remove)) {
+            throw new EngineError.UNSUPPORTED(
+                "%s: Drafts folder %s does not support create and remove",
+                to_string(), drafts_folder.to_string()
+            );
+        }
+        this.create_support =  (FolderSupport.Create) save_to;
+        this.remove_support = (FolderSupport.Remove) save_to;
+
+        this.drafts_folder.closed.connect(on_folder_closed);
 
         yield drafts_folder.open_async(Folder.OpenFlags.NO_DELAY, cancellable);
 
@@ -236,9 +234,6 @@ public class Geary.App.DraftManager : BaseObject {
 
         // start the operation message loop, which ensures commands are handled in orderly fashion
         operation_loop_async.begin();
-
-        // done
-        is_open = true;
     }
 
     private void on_folder_closed(Folder.CloseReason reason) {
@@ -253,7 +248,6 @@ public class Geary.App.DraftManager : BaseObject {
      *
      * Once closed, the object cannot be opened again.  Create a new object in that case.
      *
-     * @see open_async
      * @see is_open
      */
     public async void close_async(Cancellable? cancellable = null) throws Error {
@@ -283,13 +277,7 @@ public class Geary.App.DraftManager : BaseObject {
         // Disconnect before closing, as signal handler is for unexpected closes
         drafts_folder.closed.disconnect(on_folder_closed);
 
-        try {
-            yield drafts_folder.close_async(cancellable);
-        } finally {
-            drafts_folder = null;
-            create_support = null;
-            remove_support = null;
-        }
+        yield drafts_folder.close_async(cancellable);
     }
 
     private void check_open() throws EngineError {
@@ -304,7 +292,6 @@ public class Geary.App.DraftManager : BaseObject {
      * date_received arguments.
      */
     public async void update(Geary.RFC822.Message draft,
-                             Geary.EmailFlags? flags,
                              DateTime? date_received,
                              GLib.Cancellable? cancellable) throws GLib.Error {
         check_open();

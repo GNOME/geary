@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016-2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2016-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -10,8 +10,8 @@
 /**
  * Primary controller for an application instance.
  *
- * A single instance of this class is constructed by {@link
- * GearyAplication} when the primary application instance is started.
+ * A single instance of this class is constructed by {@link Client}
+ * when the primary application instance is started.
  */
 internal class Application.Controller : Geary.BaseObject {
 
@@ -24,25 +24,26 @@ internal class Application.Controller : Geary.BaseObject {
     public static bool does_folder_support_trash(Geary.Folder? target) {
         return (
             target != null &&
-            target.special_folder_type != TRASH &&
+            target.used_as != TRASH &&
             !target.properties.is_local_only &&
             (target as Geary.FolderSupport.Move) != null
         );
     }
 
     /** Determines if folders should be added to main windows. */
-    public static bool should_add_folder(Gee.Collection<Geary.Folder>? all,
-                                         Geary.Folder folder) {
+    private static bool should_add_folder(Gee.Collection<Geary.Folder>? all,
+                                          Geary.Folder folder) {
         // if folder is openable, add it
         if (folder.properties.is_openable != Geary.Trillian.FALSE)
             return true;
         else if (folder.properties.has_children == Geary.Trillian.FALSE)
             return false;
 
-        // if folder contains children, we must ensure that there is at least one of the same type
-        Geary.SpecialFolderType type = folder.special_folder_type;
+        // if folder contains children, we must ensure that there is
+        // at least one of the same type
+        Geary.Folder.SpecialUse type = folder.used_as;
         foreach (Geary.Folder other in all) {
-            if (other.special_folder_type == type && other.path.parent == folder.path)
+            if (other.used_as == type && other.path.parent == folder.path)
                 return true;
         }
 
@@ -63,15 +64,16 @@ internal class Application.Controller : Geary.BaseObject {
     /** Account management for the application. */
     public Accounts.Manager account_manager { get; private set; }
 
+    /** Plugin manager for the application. */
+    public PluginManager plugins { get; private set; }
+
     /** Certificate management for the application. */
     public Application.CertificateManager certificate_manager {
         get; private set;
     }
 
-    /** Avatar store for the application. */
-    public Application.AvatarStore avatars {
-        get; private set; default = new Application.AvatarStore();
-    }
+    // Avatar store for the application.
+    private Application.AvatarStore avatars = new Application.AvatarStore();
 
     // Primary collection of the application's open accounts
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
@@ -82,8 +84,6 @@ internal class Application.Controller : Geary.BaseObject {
 
     private UpgradeDialog upgrade_dialog;
     private Folks.IndividualAggregator folks;
-
-    private PluginManager plugin_manager;
 
     // List composers that have not yet been closed
     private Gee.Collection<Composer.Widget> composer_widgets =
@@ -144,12 +144,13 @@ internal class Application.Controller : Geary.BaseObject {
         this.upgrade_dialog = new UpgradeDialog(application);
 
         // Initialise WebKit and WebViews
-        Components.WebView.init_web_context(
+        ClientWebView.init_web_context(
             this.application.config,
             this.application.get_web_extensions_dir(),
             this.application.get_user_cache_directory().get_child("web-resources")
         );
-        Components.WebView.load_resources(
+
+        ClientWebView.load_resources(
             this.application.get_user_config_directory()
         );
         Composer.WebView.load_resources();
@@ -173,13 +174,12 @@ internal class Application.Controller : Geary.BaseObject {
 
         }
 
-        this.plugin_manager = new PluginManager(application);
-        this.plugin_manager.notifications = new NotificationContext(
-            this.avatars,
-            this.get_contact_store_for_account,
-            this.should_notify_new_messages
+        this.plugins = new PluginManager(
+            this.application,
+            this,
+            this.application.config,
+            this.application.get_app_plugins_dir()
         );
-        this.plugin_manager.load();
 
         // Migrate configuration if necessary.
         Migrate.xdg_config_dir(this.application.get_user_data_directory(),
@@ -222,16 +222,6 @@ internal class Application.Controller : Geary.BaseObject {
         // Expunge any deleted accounts in the background, so we're
         // not blocking the app continuing to open.
         this.expunge_accounts.begin();
-    }
-
-    /** Returns a context for an account, if any. */
-    internal AccountContext? get_context_for_account(Geary.AccountInformation account) {
-        return this.accounts.get(account);
-    }
-
-    /** Returns a read-only collection of contexts each active account. */
-    internal Gee.Collection<AccountContext> get_account_contexts() {
-        return this.accounts.values.read_only_view;
     }
 
     /** Closes all windows and accounts, releasing held resources. */
@@ -278,7 +268,7 @@ internal class Application.Controller : Geary.BaseObject {
         try {
             yield composer_barrier.wait_async();
         } catch (GLib.Error err) {
-            debug("Error waiting at composer barrier: %s", err.message);
+            warning("Error waiting at composer barrier: %s", err.message);
         }
 
         // Now that all composers are closed, we can shut down the
@@ -306,11 +296,15 @@ internal class Application.Controller : Geary.BaseObject {
         try {
             yield window_barrier.wait_async();
         } catch (GLib.Error err) {
-            debug("Error waiting at window barrier: %s", err.message);
+            warning("Error waiting at window barrier: %s", err.message);
         }
 
         // Release general resources now there's no more UI
-        this.plugin_manager.notifications.clear_folders();
+        try {
+            this.plugins.close();
+        } catch (GLib.Error err) {
+            warning("Error closing plugin manager: %s", err.message);
+        }
         this.avatars.close();
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
@@ -334,119 +328,153 @@ internal class Application.Controller : Geary.BaseObject {
         try {
             yield account_barrier.wait_async();
         } catch (GLib.Error err) {
-            debug("Error waiting at account barrier: %s", err.message);
+            warning("Error waiting at account barrier: %s", err.message);
         }
 
-        debug("Closed Application.Controller");
+        info("Closed Application.Controller");
     }
 
     /**
-     * Opens or queues a new composer addressed to a specific email address.
+     * Opens a composer for writing a new, blank message.
      */
-    public void compose(string? mailto = null) {
-        MainWindow? window = this.application.last_active_main_window;
-        if (window != null && window.selected_account != null) {
-            create_compose_widget(
-                window,
-                window.selected_account,
-                NEW_MESSAGE,
-                mailto,
-                null,
-                null,
-                false
-            );
-        } else {
-            // Schedule the send for after we have an account open.
-            this.pending_mailtos.add(mailto);
+    public async Composer.Widget? compose_new_email(Geary.RFC822.MailboxAddress? to = null,
+                                                    Geary.Folder? save_to = null) {
+        // If there's already an empty composer open, just use that
+        MainWindow main = this.application.get_active_main_window();
+        Composer.Widget existing = main.conversation_viewer.current_composer;
+        if (existing != null &&
+            existing.current_mode == PANED &&
+            existing.is_blank) {
+            existing.present();
+            existing.set_focus();
+            return existing;
         }
+
+        var context = this.accounts.get(
+            this.application.get_active_main_window().selected_account.information
+        );
+        Composer.Widget? composer = null;
+        if (context != null) {
+            composer = new Composer.Widget(
+                this.application,
+                context,
+                this.accounts.values.read_only_view,
+                save_to
+            );
+            register_composer(composer);
+            show_composer(composer);
+            try {
+                yield composer.load_empty_body(to);
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
+        }
+        return composer;
     }
 
     /**
      * Opens new composer with an existing message as context.
+     *
+     * If the given type is {@link Composer.Widget.ContextType.EDIT},
+     * the context is loaded to be edited (e.g. for drafts, templates,
+     * sending again. Otherwise the context is treated as the email to
+     * be replied to, etc.
      */
-    public void compose_with_context_email(MainWindow to_show,
-                                           Geary.Account account,
-                                           Composer.Widget.ComposeType type,
-                                           Geary.Email context,
-                                           string? quote,
-                                           bool is_draft) {
-        create_compose_widget(
-            to_show, account, type, null, context, quote, is_draft
-        );
-    }
+    public async Composer.Widget? compose_with_context_email(Composer.Widget.ContextType type,
+                                                             Geary.Email context,
+                                                             string? quote,
+                                                             Geary.Folder? save_to = null) {
+        MainWindow show_on = this.application.get_active_main_window();
+        if (type == EDIT) {
+            // Check all known composers since the context may be open
+            // an existing composer already.
+            foreach (Composer.Widget composer in this.composer_widgets) {
+                if (composer.current_mode != NONE &&
+                    composer.current_mode != CLOSED &&
+                    composer.saved_id != null &&
+                    composer.saved_id.equal_to(context.id)) {
+                    composer.present();
+                    composer.set_focus();
+                    return composer;
+                }
+            }
+        } else {
+            // See whether there is already an inline message in the
+            // current window that is either a reply/forward for that
+            // message, or there is a quote to insert into it.
+            foreach (Composer.Widget existing in this.composer_widgets) {
+                if (existing.get_toplevel() == show_on &&
+                    (existing.current_mode == INLINE ||
+                     existing.current_mode == INLINE_COMPACT) &&
+                    (context.id in existing.get_referred_ids() ||
+                     quote != null)) {
+                    try {
+                        existing.append_to_email(context, quote, type);
+                        existing.present();
+                        return existing;
+                    } catch (Geary.EngineError error) {
+                        report_problem(new Geary.ProblemReport(error));
+                    }
+                }
+            }
 
-    /** Adds a new composer to be kept track of. */
-    public void add_composer(Composer.Widget widget) {
-        debug(@"Added composer of type $(widget.compose_type); $(this.composer_widgets.size) composers total");
-        widget.destroy.connect_after(this.on_composer_widget_destroy);
-        this.composer_widgets.add(widget);
-    }
-
-    /** Returns a read-only collection of currently open composers .*/
-    public Gee.Collection<Composer.Widget> get_composers() {
-        return this.composer_widgets.read_only_view;
-    }
-
-    /** Opens any pending composers. */
-    public void process_pending_composers() {
-        foreach (string? mailto in this.pending_mailtos) {
-            compose(mailto);
+            // Can't re-use an existing composer, so need to create a
+            // new one. Replies must open inline in the main window,
+            // so we need to ensure there are no composers open there
+            // first.
+            if (!show_on.close_composer(true)) {
+                return null;
+            }
         }
-        this.pending_mailtos.clear();
-    }
 
-    /** Queues the email in a composer for delivery. */
-    public async void send_composed_email(Composer.Widget composer) {
-        AccountContext? context = this.accounts.get(
-            composer.account.information
+        var account = this.accounts.get(
+            this.application.get_active_main_window().selected_account.information
         );
-        if (context != null) {
+        Composer.Widget? composer = null;
+        if (account != null) {
+            composer = new Composer.Widget(
+                this.application,
+                account,
+                this.accounts.values.read_only_view,
+                save_to
+            );
+            register_composer(composer);
+            show_composer(composer);
+
             try {
-                yield context.commands.execute(
-                    new SendComposerCommand(this.application, context, composer),
-                    context.cancellable
-                );
+                yield composer.load_context(type, context, quote);
             } catch (GLib.Error err) {
                 report_problem(new Geary.ProblemReport(err));
             }
         }
+        return composer;
     }
 
-    /** Saves the email in a composer as a draft on the server. */
-    public async void save_composed_email(Composer.Widget composer) {
-        // XXX this doesn't actually do what it says on the tin, since
-        // the composer's draft manager is already saving drafts on
-        // the server. Until we get that saving local-only, this will
-        // only be around for pushing the composer onto the undo stack
-        AccountContext? context = this.accounts.get(
-            composer.account.information
-        );
-        if (context != null) {
-            try {
-                yield context.commands.execute(
-                    new SaveComposerCommand(this, composer),
-                    context.cancellable
+    /**
+     * Opens a composer with the given `mailto:` URL.
+     */
+    public async void compose_mailto(string mailto) {
+        MainWindow? window = this.application.last_active_main_window;
+        if (window != null && window.selected_account != null) {
+            var context = this.accounts.get(window.selected_account.information);
+            if (context != null) {
+                var composer = new Composer.Widget(
+                    this.application,
+                    context,
+                    this.accounts.values.read_only_view
                 );
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
-            }
-        }
-    }
+                register_composer(composer);
+                show_composer(composer);
 
-    /** Queues a composer to be discarded. */
-    public async void discard_composed_email(Composer.Widget composer) {
-        AccountContext? context = this.accounts.get(
-            composer.account.information
-        );
-        if (context != null) {
-            try {
-                yield context.commands.execute(
-                    new DiscardComposerCommand(this, composer),
-                    context.cancellable
-                );
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
+                try {
+                    yield composer.load_mailto(mailto);
+                } catch (GLib.Error err) {
+                    report_problem(new Geary.ProblemReport(err));
+                }
             }
+        } else {
+            // Schedule the send for after we have an account open.
+            this.pending_mailtos.add(mailto);
         }
     }
 
@@ -456,9 +484,9 @@ internal class Application.Controller : Geary.BaseObject {
 
         if (report.error == null ||
             !(report.error.thrown is IOError.CANCELLED)) {
-            MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
+            var info_bar = new Components.ProblemReportInfoBar(report);
             info_bar.retry.connect(on_retry_problem);
-            this.application.get_active_main_window().show_infobar(info_bar);
+            this.application.get_active_main_window().show_info_bar(info_bar);
         }
 
         Geary.ServiceProblemReport? service_report =
@@ -473,13 +501,6 @@ internal class Application.Controller : Geary.BaseObject {
                 _("Email will not be sent until re-connected")
             );
         }
-    }
-
-    /** Returns the contact store for an account, if any. */
-    public Application.ContactStore?
-        get_contact_store_for_account(Geary.Account target) {
-        AccountContext? context = this.accounts.get(target.information);
-        return (context != null) ? context.contacts : null;
     }
 
     /**
@@ -611,7 +632,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation moved to %s",
                         "Conversations moved to %s",
                         conversations.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(destination)),
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the source folder.
@@ -619,7 +640,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation restored to %s",
                         "Conversations restored to %s",
                         conversations.size
-                    ).printf(source.get_display_name())
+                    ).printf(Util.I18n.to_folder_display_name(source))
                 ),
                 context.cancellable
             );
@@ -627,7 +648,7 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     public async void move_conversations_special(Geary.Folder source,
-                                                 Geary.SpecialFolderType destination,
+                                                 Geary.Folder.SpecialUse destination,
                                                  Gee.Collection<Geary.App.Conversation> conversations)
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
@@ -641,7 +662,7 @@ internal class Application.Controller : Geary.BaseObject {
                 "Conversation restored to %s",
                 "Conversations restored to %s",
                 messages.size
-            ).printf(source.get_display_name());
+            ).printf(Util.I18n.to_folder_display_name(source));
 
             if (destination == ARCHIVE) {
                 Geary.FolderSupport.Archive? archive_source = (
@@ -695,7 +716,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation moved to %s",
                         "Conversations moved to %s",
                         messages.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(dest)),
                     undone_tooltip
                 );
             }
@@ -705,7 +726,7 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     public async void move_messages_special(Geary.Folder source,
-                                            Geary.SpecialFolderType destination,
+                                            Geary.Folder.SpecialUse destination,
                                             Gee.Collection<Geary.App.Conversation> conversations,
                                             Gee.Collection<Geary.EmailIdentifier> messages)
         throws GLib.Error {
@@ -718,7 +739,7 @@ internal class Application.Controller : Geary.BaseObject {
                 "Message restored to %s",
                 "Messages restored to %s",
                 messages.size
-            ).printf(source.get_display_name());
+            ).printf(Util.I18n.to_folder_display_name(source));
 
             if (destination == ARCHIVE) {
                 Geary.FolderSupport.Archive? archive_source = (
@@ -774,7 +795,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Message moved to %s",
                         "Messages moved to %s",
                         messages.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(dest)),
                     undone_tooltip
                 );
             }
@@ -802,7 +823,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation labelled as %s",
                         "Conversations labelled as %s",
                         conversations.size
-                    ).printf(destination.get_display_name()),
+                    ).printf(Util.I18n.to_folder_display_name(destination)),
                     /// Translators: Label for in-app
                     /// notification. String substitution is the name
                     /// of the destination folder.
@@ -810,7 +831,7 @@ internal class Application.Controller : Geary.BaseObject {
                         "Conversation un-labelled as %s",
                         "Conversations un-labelled as %s",
                         conversations.size
-                    ).printf(destination.get_display_name())
+                    ).printf(Util.I18n.to_folder_display_name(destination))
                 ),
                 context.cancellable
             );
@@ -820,9 +841,10 @@ internal class Application.Controller : Geary.BaseObject {
     public async void delete_conversations(Geary.FolderSupport.Remove target,
                                            Gee.Collection<Geary.App.Conversation> conversations)
         throws GLib.Error {
-        yield delete_messages(
-            target, conversations, to_in_folder_email_ids(conversations)
-        );
+        var messages = target.properties.is_virtual
+            ? to_all_email_ids(conversations)
+            : to_in_folder_email_ids(conversations);
+        yield delete_messages(target, conversations, messages);
     }
 
     public async void delete_messages(Geary.FolderSupport.Remove target,
@@ -841,18 +863,16 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
-    public async void empty_folder_special(Geary.Account source,
-                                           Geary.SpecialFolderType type)
+    public async void empty_folder(Geary.Folder target)
         throws GLib.Error {
-        AccountContext? context = this.accounts.get(source.information);
+        AccountContext? context = this.accounts.get(target.account.information);
         if (context != null) {
             Geary.FolderSupport.Empty? emptyable = (
-                source.get_special_folder(type)
-                as Geary.FolderSupport.Empty
+                target as Geary.FolderSupport.Empty
             );
             if (emptyable == null) {
                 throw new Geary.EngineError.UNSUPPORTED(
-                    "Special folder type not supported %s", type.to_string()
+                    "Emptying folder not supported %s", target.path.to_string()
                 );
             }
 
@@ -867,15 +887,73 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /** Returns a context for an account, if any. */
+    internal AccountContext? get_context_for_account(Geary.AccountInformation account) {
+        return this.accounts.get(account);
+    }
+
+    /** Returns a read-only collection of contexts each active account. */
+    internal Gee.Collection<AccountContext> get_account_contexts() {
+        return this.accounts.values.read_only_view;
+    }
+
     internal void register_window(MainWindow window) {
         window.retry_service_problem.connect(on_retry_service_problem);
-        window.folder_list.set_new_messages_monitor(
-            this.plugin_manager.notifications
-        );
     }
 
     internal void unregister_window(MainWindow window) {
         window.retry_service_problem.disconnect(on_retry_service_problem);
+    }
+
+    /** Opens any pending composers. */
+    internal async void process_pending_composers() {
+        foreach (string? mailto in this.pending_mailtos) {
+            yield compose_mailto(mailto);
+        }
+        this.pending_mailtos.clear();
+    }
+
+    /** Queues the email in a composer for delivery. */
+    internal async void send_composed_email(Composer.Widget composer) {
+        AccountContext context = composer.sender_context;
+        try {
+            yield context.commands.execute(
+                new SendComposerCommand(this.application, context, composer),
+                context.cancellable
+            );
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
+        }
+    }
+
+    /** Saves the email in a composer as a draft on the server. */
+    internal async void save_composed_email(Composer.Widget composer) {
+        // XXX this doesn't actually do what it says on the tin, since
+        // the composer's draft manager is already saving drafts on
+        // the server. Until we get that saving local-only, this will
+        // only be around for pushing the composer onto the undo stack
+        AccountContext context = composer.sender_context;
+        try {
+            yield context.commands.execute(
+                new SaveComposerCommand(this, composer),
+                context.cancellable
+            );
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
+        }
+    }
+
+    /** Queues a composer to be discarded. */
+    internal async void discard_composed_email(Composer.Widget composer) {
+        AccountContext context = composer.sender_context;
+        try {
+            yield context.commands.execute(
+                new DiscardComposerCommand(this, composer),
+                context.cancellable
+            );
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
+        }
     }
 
     /** Expunges removed accounts while the controller remains open. */
@@ -892,7 +970,7 @@ internal class Application.Controller : Geary.BaseObject {
             account,
             new Geary.App.SearchFolder(account, account.local_folder_root),
             new Geary.App.EmailStore(account),
-            new Application.ContactStore(account, this.folks)
+            new Application.ContactStore(account, this.folks, this.avatars)
         );
         this.accounts.set(account.information, context);
 
@@ -916,7 +994,14 @@ internal class Application.Controller : Geary.BaseObject {
             smtp.email_sent.connect(on_sent);
             smtp.sending_monitor.start.connect(on_sending_started);
             smtp.sending_monitor.finish.connect(on_sending_finished);
+            var outbox_context = new FolderContext(smtp.outbox);
+            context.add_folders(Geary.Collection.single(outbox_context));
         }
+
+        // Notify before opening so that listeners have a chance to
+        // hook into it before signals start getting fired by folders
+        // becoming available, etc.
+        account_available(context);
 
         bool retry = false;
         do {
@@ -944,7 +1029,6 @@ internal class Application.Controller : Geary.BaseObject {
             }
         } while (retry);
 
-        account_available(context);
         update_account_status();
     }
 
@@ -954,6 +1038,8 @@ internal class Application.Controller : Geary.BaseObject {
         if (context != null) {
             debug("Closing account: %s", context.account.information.id);
             Geary.Account account = context.account;
+
+            account_unavailable(context, is_shutdown);
 
             // Guard against trying to close the account twice
             this.accounts.unset(account.information);
@@ -986,8 +1072,6 @@ internal class Application.Controller : Geary.BaseObject {
             // Now the account is not in the accounts map, reset any
             // status notifications for it
             update_account_status();
-
-            account_unavailable(context, is_shutdown);
 
             // Stop any background processes
             context.search.clear();
@@ -1201,7 +1285,7 @@ internal class Application.Controller : Geary.BaseObject {
 
     private void on_account_email_removed(Geary.Folder folder,
                                           Gee.Collection<Geary.EmailIdentifier> ids) {
-        if (folder.special_folder_type == OUTBOX) {
+        if (folder.used_as == OUTBOX) {
             foreach (MainWindow window in this.application.get_main_windows()) {
                 window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
                 window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
@@ -1259,72 +1343,31 @@ internal class Application.Controller : Geary.BaseObject {
         return retry;
     }
 
-    private bool is_inbox_descendant(Geary.Folder target) {
-        bool is_descendent = false;
-
-        Geary.Account account = target.account;
-        Geary.Folder? inbox = account.get_special_folder(Geary.SpecialFolderType.INBOX);
-
-        if (inbox != null) {
-            is_descendent = inbox.path.is_descendant(target.path);
-        }
-        return is_descendent;
-    }
-
-    private void on_special_folder_type_changed(Geary.Folder folder,
-                                                Geary.SpecialFolderType old_type,
-                                                Geary.SpecialFolderType new_type) {
-        // Update notifications
-        this.plugin_manager.notifications.remove_folder(folder);
-        if (folder.special_folder_type == Geary.SpecialFolderType.INBOX ||
-            (folder.special_folder_type == Geary.SpecialFolderType.NONE &&
-             is_inbox_descendant(folder))) {
-            Geary.AccountInformation info = folder.account.information;
-            this.plugin_manager.notifications.add_folder(
-                folder, this.accounts.get(info).cancellable
-            );
-        }
-    }
-
     private void on_folders_available_unavailable(
         Geary.Account account,
         Gee.BidirSortedSet<Geary.Folder>? available,
         Gee.BidirSortedSet<Geary.Folder>? unavailable) {
-        AccountContext context = this.accounts.get(account.information);
+        var account_context = this.accounts.get(account.information);
 
         if (available != null && available.size > 0) {
-            foreach (Geary.Folder folder in available) {
-                if (!Controller.should_add_folder(available, folder)) {
-                    continue;
-                }
-                folder.special_folder_type_changed.connect(
-                    on_special_folder_type_changed
-                );
-
-                GLib.Cancellable cancellable = context.cancellable;
-                switch (folder.special_folder_type) {
-                case Geary.SpecialFolderType.INBOX:
-                    if (context.inbox == null) {
-                        context.inbox = folder;
-                    }
-                    folder.open_async.begin(NO_DELAY, cancellable);
-
-                    // Always notify for new messages in the Inbox
-                    this.plugin_manager.notifications.add_folder(
-                        folder, cancellable
-                    );
-                    break;
-
-                case Geary.SpecialFolderType.NONE:
-                    // Only notify for new messages in non-special
-                    // descendants of the Inbox
-                    if (is_inbox_descendant(folder)) {
-                        this.plugin_manager.notifications.add_folder(
-                            folder, cancellable
+            var added_contexts = new Gee.LinkedList<FolderContext>();
+            foreach (var folder in available) {
+                if (Controller.should_add_folder(available, folder)) {
+                    if (folder.used_as == INBOX) {
+                        if (account_context.inbox == null) {
+                            account_context.inbox = folder;
+                        }
+                        folder.open_async.begin(
+                            NO_DELAY, account_context.cancellable
                         );
                     }
-                    break;
+
+                    var folder_context = new FolderContext(folder);
+                    added_contexts.add(folder_context);
                 }
+            }
+            if (!added_contexts.is_empty) {
+                account_context.add_folders(added_contexts);
             }
         }
 
@@ -1332,76 +1375,48 @@ internal class Application.Controller : Geary.BaseObject {
             Gee.BidirIterator<Geary.Folder> unavailable_iterator =
                 unavailable.bidir_iterator();
             bool has_prev = unavailable_iterator.last();
+            var removed_contexts = new Gee.LinkedList<FolderContext>();
             while (has_prev) {
                 Geary.Folder folder = unavailable_iterator.get();
-                folder.special_folder_type_changed.disconnect(
-                    on_special_folder_type_changed
-                );
 
-                switch (folder.special_folder_type) {
-                case Geary.SpecialFolderType.INBOX:
-                    context.inbox = null;
-                    this.plugin_manager.notifications.remove_folder(folder);
-                    break;
+                if (folder.used_as == INBOX) {
+                    account_context.inbox = null;
+                }
 
-                case Geary.SpecialFolderType.NONE:
-                    // Only notify for new messages in non-special
-                    // descendants of the Inbox
-                    if (is_inbox_descendant(folder)) {
-                        this.plugin_manager.notifications.remove_folder(folder);
-                    }
-                    break;
+                var folder_context = account_context.get_folder(folder);
+                if (folder_context != null) {
+                    removed_contexts.add(folder_context);
                 }
 
                 has_prev = unavailable_iterator.previous();
             }
+            if (!removed_contexts.is_empty) {
+                account_context.remove_folders(removed_contexts);
+            }
 
             // Notify the command stack that folders have gone away
-            context.controller_stack.folders_removed(unavailable);
+            account_context.controller_stack.folders_removed(unavailable);
         }
     }
 
-    private bool should_notify_new_messages(Geary.Folder folder) {
-        // A monitored folder must be selected to squelch notifications;
-        // if conversation list is at top of display, don't display
-        // and don't display if main window has top-level focus
-        MainWindow? window = this.application.last_active_main_window;
-        return (
-            window != null &&
-            (folder != window.selected_folder ||
-             window.conversation_list_view.vadjustment.value != 0.0 ||
-             !window.has_toplevel_focus)
-        );
+    /** Clears new message counts in notification plugin contexts. */
+    internal void clear_new_messages(Geary.Folder source,
+                                   Gee.Set<Geary.App.Conversation> visible) {
+        foreach (MainWindow window in this.application.get_main_windows()) {
+            window.folder_list.set_has_new(source, false);
+        }
+        foreach (NotificationPluginContext context in
+                 this.plugins.get_notification_contexts()) {
+            context.clear_new_messages(source, visible);
+        }
     }
 
-    // Clears messages if conditions are true: anything in should_notify_new_messages() is
-    // false and the supplied visible messages are visible in the conversation list view
-    public void clear_new_messages(string caller,
-                                   Gee.Set<Geary.App.Conversation>? supplied) {
-        MainWindow? window = this.application.last_active_main_window;
-        Geary.Folder? selected = (
-            (window != null) ? window.selected_folder : null
-        );
-        NotificationContext notifications = this.plugin_manager.notifications;
-        if (selected != null && (
-                !notifications.get_folders().contains(selected) ||
-                should_notify_new_messages(selected))) {
-
-            Gee.Set<Geary.App.Conversation> visible =
-                supplied ?? window.conversation_list_view.get_visible_conversations();
-
-            foreach (Geary.App.Conversation conversation in visible) {
-                try {
-                    if (notifications.are_any_new_messages(selected,
-                                                           conversation.get_email_ids())) {
-                        debug("Clearing new messages: %s", caller);
-                        notifications.clear_new_messages(selected);
-                        break;
-                    }
-                } catch (Geary.EngineError.NOT_FOUND err) {
-                    // all good
-                }
-            }
+    /** Notifies plugins of new email being displayed. */
+    internal void email_loaded(Geary.AccountInformation account,
+                               Geary.Email loaded) {
+        foreach (EmailPluginContext plugin in
+                 this.plugins.get_email_contexts()) {
+            plugin.email_displayed(account, loaded);
         }
     }
 
@@ -1435,15 +1450,9 @@ internal class Application.Controller : Geary.BaseObject {
     }
 
     /** Displays a composer on the last active main window. */
-    internal void show_composer(Composer.Widget composer,
-                                Gee.Collection<Geary.EmailIdentifier>? refers_to,
-                                MainWindow? show_on) {
-        var target = show_on;
-        if (target == null) {
-            target = this.application.get_active_main_window();
-        }
-
-        target.show_composer(composer, refers_to);
+    internal void show_composer(Composer.Widget composer) {
+        var target = this.application.get_active_main_window();
+        target.show_composer(composer);
         composer.set_focus();
     }
 
@@ -1458,141 +1467,23 @@ internal class Application.Controller : Geary.BaseObject {
         return do_quit;
     }
 
-    /**
-     * Creates a composer widget.
-     *
-     * Depending on the arguments, this can be inline in the
-     * conversation or as a new window.
-     *
-     * @param compose_type - Whether it's a new message, a reply, a
-     * forwarded mail, ...
-     * @param referred - The mail of which we should copy the from/to/...
-     * addresses
-     * @param quote - The quote after the mail body
-     * @param mailto - A "mailto:"-link
-     * @param is_draft - Whether we're starting from a draft (true) or
-     * a new mail (false)
-     */
-    private void create_compose_widget(MainWindow show_on,
-                                       Geary.Account account,
-                                       Composer.Widget.ComposeType compose_type,
-                                       string? mailto,
-                                       Geary.Email? referred,
-                                       string? quote,
-                                       bool is_draft) {
-        // There's a few situations where we can re-use an existing
-        // composer, check for these first.
-        if (compose_type == NEW_MESSAGE && !is_draft) {
-            // We're creating a new message that isn't a draft, if
-            // there's already an empty composer open, just use
-            // that
-            foreach (Composer.Widget existing in this.composer_widgets) {
-                if (existing != null &&
-                    existing.current_mode == PANED &&
-                    existing.is_blank) {
-                    existing.present();
-                    return;
-                }
-            }
-        } else if (compose_type != NEW_MESSAGE && referred != null) {
-            // A reply/forward was requested, see whether there is
-            // already an inline message in the target window that is
-            // either a reply/forward for that message, or there is a
-            // quote to insert into it.
-            foreach (Composer.Widget existing in this.composer_widgets) {
-                if (existing.get_toplevel() == show_on &&
-                    (existing.current_mode == INLINE ||
-                     existing.current_mode == INLINE_COMPACT) &&
-                    (referred.id in existing.get_referred_ids() ||
-                     quote != null)) {
-                    try {
-                        existing.append_to_email(referred, quote, compose_type);
-                        existing.present();
-                        return;
-                    } catch (Geary.EngineError error) {
-                        report_problem(new Geary.ProblemReport(error));
-                    }
-                }
-            }
-
-            // Can't re-use an existing composer, so need to create a
-            // new one. Replies must open inline in the main window,
-            // so we need to ensure there are no composers open there
-            // first.
-            if (!show_on.close_composer(true)) {
-                return;
-            }
-        }
-
-        Composer.Widget widget;
-        if (mailto != null) {
-            widget = new Composer.Widget.from_mailto(
-                this.application, account, mailto
-            );
-        } else {
-            widget = new Composer.Widget(
-                this.application, account, compose_type
-            );
-        }
-
-        add_composer(widget);
-        show_composer(
-            widget,
-            referred != null ? Geary.Collection.single(referred.id) : null,
-            show_on
-        );
-
-        this.load_composer.begin(
-            account,
-            widget,
-            referred,
-            is_draft,
-            quote
-        );
-    }
-
-    private async void load_composer(Geary.Account account,
-                                     Composer.Widget widget,
-                                     Geary.Email? referred = null,
-                                     bool is_draft,
-                                     string? quote = null) {
-        Geary.Email? full = null;
-        GLib.Cancellable? cancellable = null;
-        if (referred != null) {
-            AccountContext? context = this.accounts.get(account.information);
-            if (context != null) {
-                cancellable = context.cancellable;
-                try {
-                    full = yield context.emails.fetch_email_async(
-                        referred.id,
-                        Geary.ComposedEmail.REQUIRED_REPLY_FIELDS |
-                        Composer.Widget.REQUIRED_FIELDS,
-                        NONE,
-                        cancellable
-                    );
-                } catch (Error e) {
-                    message("Could not load full message: %s", e.message);
-                }
-            }
-        }
-        try {
-            yield widget.load(full, is_draft, quote, cancellable);
-        } catch (GLib.Error err) {
-            report_problem(new Geary.ProblemReport(err));
-        }
+    internal void register_composer(Composer.Widget widget) {
+        debug(@"Registered composer of type $(widget.context_type); $(this.composer_widgets.size) composers total");
+        widget.destroy.connect_after(this.on_composer_widget_destroy);
+        this.composer_widgets.add(widget);
     }
 
     private void on_composer_widget_destroy(Gtk.Widget sender) {
         Composer.Widget? composer = sender as Composer.Widget;
         if (composer != null) {
             composer_widgets.remove((Composer.Widget) sender);
-            debug(@"Composer type $(composer.compose_type) destroyed; " +
+            debug(@"Composer type $(composer.context_type) destroyed; " +
                   @"$(this.composer_widgets.size) composers remaining");
         }
     }
 
     private void on_sent(Geary.Smtp.ClientService service,
-                         Geary.RFC822.Message sent) {
+                         Geary.Email sent) {
         /// Translators: The label for an in-app notification. The
         /// string substitution is a list of recipients of the email.
         string message = _(
@@ -1608,7 +1499,10 @@ internal class Application.Controller : Geary.BaseObject {
 
         AccountContext? context = this.accounts.get(service.account);
         if (context != null) {
-            this.plugin_manager.notifications.email_sent(context.account, sent);
+            foreach (EmailPluginContext plugin in
+                     this.plugins.get_email_contexts()) {
+                plugin.email_sent(context.account.information, sent);
+            }
         }
     }
 
@@ -1619,6 +1513,18 @@ internal class Application.Controller : Geary.BaseObject {
         foreach (Geary.App.Conversation conversation in conversations) {
             foreach (Geary.Email email in
                      conversation.get_emails(RECV_DATE_ASCENDING, IN_FOLDER)) {
+                messages.add(email.id);
+            }
+        }
+        return messages;
+    }
+
+    private Gee.Collection<Geary.EmailIdentifier>
+        to_all_email_ids(Gee.Collection<Geary.App.Conversation> conversations) {
+        Gee.Collection<Geary.EmailIdentifier> messages =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        foreach (Geary.App.Conversation conversation in conversations) {
+            foreach (Geary.Email email in conversation.get_emails(NONE)) {
                 messages.add(email.id);
             }
         }
@@ -1713,7 +1619,7 @@ internal class Application.Controller : Geary.BaseObject {
         report_problem(problem);
     }
 
-    private void on_retry_problem(MainWindowInfoBar info_bar) {
+    private void on_retry_problem(Components.ProblemReportInfoBar info_bar) {
         Geary.ServiceProblemReport? service_report =
             info_bar.report as Geary.ServiceProblemReport;
         if (service_report != null) {
@@ -1825,104 +1731,6 @@ internal class Application.Controller : Geary.BaseObject {
             context.cancellable.cancelled.disconnect(this.storage_cleanup_cancellable.cancel);
         }
         storage_cleanup_running = false;
-    }
-
-}
-
-
-/**
- * Collects application state related to a single open account.
- */
-internal class Application.AccountContext : Geary.BaseObject {
-
-    /** The account for this context. */
-    public Geary.Account account { get; private set; }
-
-    /** The account's Inbox folder */
-    public Geary.Folder? inbox = null;
-
-    /** The account's search folder */
-    public Geary.App.SearchFolder search = null;
-
-    /** The account's email store */
-    public Geary.App.EmailStore emails { get; private set; }
-
-    /** The account's contact store */
-    public ContactStore contacts { get; private set; }
-
-    /** The account's application command stack. */
-    public CommandStack commands {
-        get { return this.controller_stack; }
-    }
-
-    /** A cancellable tied to the life-cycle of the account. */
-    public Cancellable cancellable {
-        get; private set; default = new Cancellable();
-    }
-
-    /** The account's application command stack. */
-    internal ControllerCommandStack controller_stack {
-        get; protected set; default = new ControllerCommandStack();
-    }
-
-    /** Determines if the account has an authentication problem. */
-    internal bool authentication_failed {
-        get; private set; default = false;
-    }
-
-    /** Determines if the account is prompting for a pasword. */
-    internal bool authentication_prompting {
-        get; private set; default = false;
-    }
-
-    /** Determines if currently prompting for a password. */
-    internal uint authentication_attempts {
-        get; private set; default = 0;
-    }
-
-    /** Determines if any TLS certificate errors have been seen. */
-    internal bool tls_validation_failed {
-        get; private set; default = false;
-    }
-
-    /** Determines if currently prompting about TLS certificate errors. */
-    internal bool tls_validation_prompting {
-        get; private set; default = false;
-    }
-
-
-    public AccountContext(Geary.Account account,
-                          Geary.App.SearchFolder search,
-                          Geary.App.EmailStore emails,
-                          Application.ContactStore contacts) {
-        this.account = account;
-        this.search = search;
-        this.emails = emails;
-        this.contacts = contacts;
-    }
-
-    /** Returns the current effective status for the account. */
-    public Geary.Account.Status get_effective_status() {
-        Geary.Account.Status current = this.account.current_status;
-        Geary.Account.Status effective = 0;
-        if (current.is_online()) {
-            effective |= ONLINE;
-        }
-        if (current.has_service_problem()) {
-            // Only retain this flag if the problem isn't auth or
-            // cert related, that is handled elsewhere.
-            Geary.ClientService.Status incoming =
-            account.incoming.current_status;
-            Geary.ClientService.Status outgoing =
-            account.outgoing.current_status;
-            if (incoming != AUTHENTICATION_FAILED &&
-                incoming != TLS_VALIDATION_FAILED &&
-                outgoing != AUTHENTICATION_FAILED &&
-                outgoing != TLS_VALIDATION_FAILED) {
-                effective |= SERVICE_PROBLEM;
-            }
-        }
-        return effective;
     }
 
 }
@@ -2406,7 +2214,7 @@ private class Application.ArchiveEmailCommand : RevokableCommand {
             // affected, so if the dest is the location, just assume
             // they are for now.
             foreach (var folder in removed) {
-                if (folder.special_folder_type == ARCHIVE) {
+                if (folder.used_as == ARCHIVE) {
                     ret = REMOVE;
                     break;
                 }
@@ -2424,7 +2232,7 @@ private class Application.ArchiveEmailCommand : RevokableCommand {
         // affected, so if the dest is the location, just assume they
         // are for now.
         return (
-            location.special_folder_type == ARCHIVE
+            location.used_as == ARCHIVE
             ? EmailCommand.StateChangePolicy.REMOVE
             : base.email_removed(location, targets)
         );
@@ -2699,7 +2507,6 @@ private class Application.SendComposerCommand : ComposerCommand {
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
         Geary.ComposedEmail email = yield this.composer.get_composed_email();
-        
         if (this.can_undo) {
             /// Translators: The label for an in-app notification. The
             /// string substitution is a list of recipients of the email.
@@ -2724,7 +2531,7 @@ private class Application.SendComposerCommand : ComposerCommand {
         this.saved = null;
 
         this.composer.set_enabled(true);
-        this.application.controller.show_composer(this.composer, null, null);
+        this.application.controller.show_composer(this.composer);
         clear_composer();
     }
 
@@ -2778,7 +2585,7 @@ private class Application.SaveComposerCommand : ComposerCommand {
         if (this.composer != null) {
             this.destroy_timer.reset();
             this.composer.set_enabled(true);
-            this.controller.show_composer(this.composer, null, null);
+            this.controller.show_composer(this.composer);
             clear_composer();
         } else {
             /// Translators: A label for an in-app notification.
@@ -2836,7 +2643,7 @@ private class Application.DiscardComposerCommand : ComposerCommand {
         if (this.composer != null) {
             this.destroy_timer.reset();
             this.composer.set_enabled(true);
-            this.controller.show_composer(this.composer, null, null);
+            this.controller.show_composer(this.composer);
             clear_composer();
         } else {
             /// Translators: A label for an in-app notification.

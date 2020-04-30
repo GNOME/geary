@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2019-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -23,7 +25,9 @@
  * is buffered, there's no need to buffer the InputStream passed to Deserializer's constructor.
  */
 
-public class Geary.Imap.Deserializer : BaseObject {
+public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
+
+
     private const size_t MAX_BLOCK_READ_SIZE = 4096;
 
     private enum Mode {
@@ -71,8 +75,17 @@ public class Geary.Imap.Deserializer : BaseObject {
         "Geary.Imap.Deserializer", State.TAG, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
 
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return ClientService.DESERIALISATION_LOGGING_DOMAIN; }
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent { get { return _logging_parent; } }
+    private weak Logging.Source? _logging_parent = null;
+
     private string identifier;
-    private DataInputStream dins;
+    private DataInputStream input;
     private Geary.State.Machine fsm;
 
     private ListParameter context;
@@ -81,7 +94,6 @@ public class Geary.Imap.Deserializer : BaseObject {
 
     private Cancellable? cancellable = null;
     private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
-    private Geary.Stream.MidstreamConverter midstream = new Geary.Stream.MidstreamConverter("Deserializer");
     private StringBuilder? current_string = null;
     private size_t literal_length_remaining = 0;
     private Geary.Memory.GrowableBuffer? block_buffer = null;
@@ -117,36 +129,36 @@ public class Geary.Imap.Deserializer : BaseObject {
     public signal void bytes_received(size_t bytes);
 
     /**
-     * Fired when the underlying InputStream is closed, whether due to normal EOS or input error.
-     *
-     * @see receive_failure
-     */
-    public signal void eos();
-
-    /**
      * Fired when a syntax error has occurred.
      *
-     * This generally means the data looks like garbage and further deserialization is unlikely
-     * or impossible.
+     * This generally means the data looks like garbage and further
+     * deserialization is unlikely or impossible.
      */
     public signal void deserialize_failure();
 
     /**
      * Fired when an Error is trapped on the input stream.
      *
-     * This is nonrecoverable and means the stream should be closed and this Deserializer destroyed.
+     * This is nonrecoverable and means the stream should be closed
+     * and this Deserializer destroyed.
      */
-    public signal void receive_failure(Error err);
+    public signal void receive_failure(GLib.Error err);
+
+    /**
+     * Fired when the underlying InputStream is closed.
+     *
+     * This is nonrecoverable and means the stream should be closed
+     * and this Deserializer destroyed.
+     */
+    public signal void end_of_stream();
 
 
-    public Deserializer(string identifier, InputStream ins) {
+    public Deserializer(string identifier, GLib.InputStream input) {
         this.identifier = identifier;
 
-        ConverterInputStream cins = new ConverterInputStream(ins, midstream);
-        cins.set_close_base_stream(false);
-        dins = new DataInputStream(cins);
-        dins.set_newline_type(DataStreamNewlineType.CR_LF);
-        dins.set_close_base_stream(false);
+        this.input = new GLib.DataInputStream(input);
+        this.input.set_close_base_stream(false);
+        this.input.set_newline_type(CR_LF);
 
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_char),
@@ -211,15 +223,6 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
 
     /**
-     * Install a custom Converter into the input stream.
-     *
-     * Can be used for decompression, decryption, and so on.
-     */
-    public bool install_converter(Converter converter) {
-        return midstream.install(converter);
-    }
-
-    /**
      * Begin deserializing IMAP responses from the input stream.
      *
      * Subscribe to the various signals before starting to ensure that all responses are trapped.
@@ -252,7 +255,8 @@ public class Geary.Imap.Deserializer : BaseObject {
 
         // wait for outstanding I/O to exit
         yield closed_semaphore.wait_async();
-        Logging.debug(Logging.Flag.DESERIALIZER, "[%s] Deserializer closed", to_string());
+        yield this.input.close_async(GLib.Priority.DEFAULT, null);
+        debug("Deserializer closed");
     }
 
     /**
@@ -269,17 +273,22 @@ public class Geary.Imap.Deserializer : BaseObject {
         }
     }
 
-    /**
-     * Returns a string representation of this object for debugging.
-     */
-    public string to_string() {
-        return "des:%s/%s".printf(identifier, fsm.get_state_string(fsm.get_state()));
+    /** {@inheritDoc} */
+    public Logging.State to_logging_state() {
+        return new Logging.State(this, fsm.get_state_string(fsm.get_state()));
+    }
+
+    /** Sets the connection's logging parent. */
+    internal void set_logging_parent(Logging.Source parent) {
+        this._logging_parent = parent;
     }
 
     private void next_deserialize_step() {
         switch (get_mode()) {
             case Mode.LINE:
-                dins.read_line_async.begin(ins_priority, cancellable, on_read_line);
+                this.input.read_line_async.begin(
+                    ins_priority, cancellable, on_read_line
+                );
             break;
 
             case Mode.BLOCK:
@@ -293,7 +302,9 @@ public class Geary.Imap.Deserializer : BaseObject {
                 current_buffer = block_buffer.allocate(
                     size_t.min(MAX_BLOCK_READ_SIZE, literal_length_remaining));
 
-                dins.read_async.begin(current_buffer, ins_priority, cancellable, on_read_block);
+                this.input.read_async.begin(
+                    current_buffer, ins_priority, cancellable, on_read_block
+                );
             break;
 
             case Mode.FAILED:
@@ -309,16 +320,16 @@ public class Geary.Imap.Deserializer : BaseObject {
     private void on_read_line(Object? source, AsyncResult result) {
         try {
             size_t bytes_read;
-            string? line = dins.read_line_async.end(result, out bytes_read);
+            string? line = this.input.read_line_async.end(
+                result, out bytes_read
+            );
             if (line == null) {
-                Logging.debug(Logging.Flag.DESERIALIZER, "[%s] line EOS", to_string());
-
+                debug("Line EOS");
                 push_eos();
-
                 return;
             }
 
-            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] line: %s", to_string(), line);
+            debug("Line: %s", line);
             bytes_received(bytes_read);
             push_line(line, bytes_read);
         } catch (Error err) {
@@ -333,16 +344,16 @@ public class Geary.Imap.Deserializer : BaseObject {
         try {
             // Zero-byte literals are legal (see note in next_deserialize_step()), so EOS only
             // happens when actually pulling data
-            size_t bytes_read = dins.read_async.end(result);
+            size_t bytes_read = this.input.read_async.end(result);
             if (bytes_read == 0 && literal_length_remaining > 0) {
-                Logging.debug(Logging.Flag.DESERIALIZER, "[%s] block EOS", to_string());
+                debug("Block EOS");
 
                 push_eos();
 
                 return;
             }
 
-            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] block %lub", to_string(), bytes_read);
+            debug("Block %lub", bytes_read);
             bytes_received(bytes_read);
 
             // adjust the current buffer's size to the amount that was actually read in
@@ -487,19 +498,15 @@ public class Geary.Imap.Deserializer : BaseObject {
     private void flush_params() {
         bool okay = true;
         if (this.context_stack.size > 1) {
-            Logging.debug(
-                Logging.Flag.DESERIALIZER,
-                "[%s] Unclosed list in parameters",
-                to_string()
-            );
+            debug("Unclosed list in parameters");
             okay = false;
         }
 
         if (!is_current_string_empty() || this.literal_length_remaining > 0) {
-            Logging.debug(
-                Logging.Flag.DESERIALIZER,
+            debug(
                 "Unfinished parameter: string=%s literal remaining=%lu",
-                (!is_current_string_empty()).to_string(), this.literal_length_remaining
+                (!is_current_string_empty()).to_string(),
+                this.literal_length_remaining
             );
             okay = false;
         }
@@ -678,9 +685,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         // We don't go into the error state on syntax error, merely
         // reset, cross our fingers and hope for the best. Maybe
         // there's a better strategy though?
-        Logging.debug(
-            Logging.Flag.DESERIALIZER, "[%s] Syntax error, dropping", to_string()
-        );
+        debug("Syntax error, dropping");
         deserialize_failure();
         reset_params();
         return State.TAG;
@@ -808,7 +813,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
 
     private uint on_eos() {
-        Logging.debug(Logging.Flag.DESERIALIZER, "[%s] EOS", to_string());
+        debug("EOS");
 
         // Per RFC 3501 7.1.5, we may get a EOS immediately after a
         // BYE, so flush any message being processed.
@@ -816,8 +821,8 @@ public class Geary.Imap.Deserializer : BaseObject {
         flush_params();
 
         // always signal as closed and notify subscribers
-        closed_semaphore.blind_notify();
-        eos();
+        this.closed_semaphore.blind_notify();
+        end_of_stream();
 
         return State.CLOSED;
     }
@@ -828,14 +833,12 @@ public class Geary.Imap.Deserializer : BaseObject {
         // only Cancellable allowed is internal used to notify when closed; all other errors should
         // be reported
         if (!(err is IOError.CANCELLED)) {
-            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] input error: %s", to_string(), err.message);
+            debug("Input error: %s", err.message);
             receive_failure(err);
         }
 
         // always signal as closed and notify
-        closed_semaphore.blind_notify();
-        eos();
-
+        this.closed_semaphore.blind_notify();
         return State.CLOSED;
     }
 

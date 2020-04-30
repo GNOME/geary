@@ -1,0 +1,4 @@
+[Plugin]
+Module=notification-badge
+Name=Notification Badge
+Description=Displays a dock badge showing the number of new messages

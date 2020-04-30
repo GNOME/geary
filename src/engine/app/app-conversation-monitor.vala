@@ -1,9 +1,9 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2018, 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -38,7 +38,7 @@
  * removed account-wide, so that known conversations can be updated as
  * needed.
  */
-public class Geary.App.ConversationMonitor : BaseObject {
+public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
     /**
      * The fields Conversations require to thread emails together.
@@ -51,6 +51,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.Email.Field.FLAGS |
         Geary.Email.Field.DATE
     );
+
+    /** The GLib logging domain used by this class. */
+    public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Conv";
 
 
     private struct ProcessJobContext {
@@ -120,6 +123,16 @@ public class Geary.App.ConversationMonitor : BaseObject {
         get; private set; default = new SimpleProgressMonitor(ProgressType.ACTIVITY);
     }
 
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return LOGGING_DOMAIN; }
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent {
+        get { return this.base_folder; }
+    }
+
     /** The set of all conversations loaded by the monitor. */
     internal ConversationSet conversations { get; private set; }
 
@@ -139,6 +152,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
     /** Determines if the fill operation can load more messages. */
     internal bool fill_complete { get; set; default = false; }
+
+    // Determines if the base folder was actually opened or not
+    private bool base_was_opened = false;
 
     private Geary.Email.Field required_fields;
     private ConversationOperationQueue queue;
@@ -169,9 +185,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * have finished.
      */
     public virtual signal void scan_started() {
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::scan_started",
-                      this.base_folder.to_string());
+        debug("scan_started");
     }
 
     /**
@@ -180,18 +194,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * @see scan_started
      */
     public virtual signal void scan_completed() {
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::scan_completed",
-                      this.base_folder.to_string());
+        debug("scan_completed");
     }
 
     /**
      * Fired when an error was encountered while loading messages.
      */
     public virtual signal void scan_error(Error err) {
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::scan_error %s",
-                      this.base_folder.to_string(), err.message);
+        debug("scan_error: %s", err.message);
     }
 
     /**
@@ -201,9 +211,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * to background monitoring.
      */
     public virtual signal void conversations_added(Gee.Collection<Conversation> conversations) {
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::conversations_added %d",
-                      this.base_folder.to_string(), conversations.size);
+        debug("conversations_added: %d", conversations.size);
     }
 
     /**
@@ -218,9 +226,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * to background monitoring.
      */
     public virtual signal void conversations_removed(Gee.Collection<Conversation> conversations) {
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::conversations_removed %d",
-                      this.base_folder.to_string(), conversations.size);
+        debug("conversations_removed: %d", conversations.size);
     }
 
     /**
@@ -231,9 +237,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
      */
     public virtual signal void conversation_appended(Conversation conversation,
                                                      Gee.Collection<Email> email) {
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::conversation_appended",
-                      this.base_folder.to_string());
+        debug("conversation_appended");
     }
 
     /**
@@ -251,9 +255,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
      */
     public virtual signal void conversation_trimmed(Conversation conversation,
                                                     Gee.Collection<Email> email) {
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::conversation_trimmed",
-                      this.base_folder.to_string());
+        debug("conversation_trimmed");
     }
 
     /**
@@ -269,9 +271,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
      */
     public virtual signal void email_flags_changed(Conversation conversation,
                                                    Email email) {
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::email_flag_changed",
-                      this.base_folder.to_string());
+        debug("email_flag_changed");
     }
 
     /**
@@ -315,6 +315,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
         // Set early yield to guard against reentrancy
         this.is_monitoring = true;
+        this.base_was_opened = false;
 
         this.base_folder.email_appended.connect(on_folder_email_appended);
         this.base_folder.email_inserted.connect(on_folder_email_inserted);
@@ -342,20 +343,28 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
         try {
             yield this.base_folder.open_async(open_flags, opening);
-        } catch (Error err) {
+            this.base_was_opened = true;
+        } catch (GLib.Error err) {
+            // This check is needed since ::stop_monitoring may have
+            // been called while this call is waiting for the folder
+            // to finish opening. If so, we're already disconnected
+            // and don't need to do it again.
             if (this.is_monitoring) {
                 try {
-                    yield stop_monitoring_internal(false, null);
-                } catch (Error stop_error) {
+                    yield stop_monitoring_internal(null);
+                } catch (GLib.Error stop_error) {
                     warning(
                         "Error cleaning up after folder open error: %s", err.message
                     );
                 }
-                throw err;
             }
+
+            this.is_monitoring = false;
+            throw err;
         }
 
-        // Now the folder is open, start the queue running
+        // Now the folder is open, start the queue running. The here
+        // is needed for the same reason as the one immediately above.
         if (this.is_monitoring) {
             this.queue.run_process_async.begin();
         }
@@ -377,7 +386,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
         throws GLib.Error {
         bool is_closing = false;
         if (this.is_monitoring) {
-            is_closing = yield stop_monitoring_internal(true, cancellable);
+            // Set now to prevent reentrancy during yield or signal
+            this.is_monitoring = false;
+            is_closing = yield stop_monitoring_internal(cancellable);
         }
         return is_closing;
     }
@@ -411,6 +422,18 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return this.conversations.get_by_email_identifier(email_id);
     }
 
+    /** {@inheritDoc} */
+    public Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "size=%d, min_window_count=%u, can_load_more=%s, should_load_more=%s",
+            this.size,
+            this.min_window_count,
+            this.can_load_more.to_string(),
+            this.should_load_more.to_string()
+        );
+    }
+
     /** Ensures enough conversations are present, otherwise loads more. */
     internal void check_window_count() {
         if (this.is_monitoring &&
@@ -424,14 +447,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * Returns the list of folders that disqualify emails from conversations.
      */
     internal Gee.Collection<Geary.FolderPath> get_search_folder_blacklist() {
-        Geary.SpecialFolderType[] blacklisted_folder_types = {
-            Geary.SpecialFolderType.SPAM,
-            Geary.SpecialFolderType.TRASH,
-            Geary.SpecialFolderType.DRAFTS,
+        Folder.SpecialUse[] blacklisted_folder_types = {
+            JUNK,
+            TRASH,
+            DRAFTS,
         };
 
-        Gee.ArrayList<Geary.FolderPath?> blacklist = new Gee.ArrayList<Geary.FolderPath?>();
-        foreach (Geary.SpecialFolderType type in blacklisted_folder_types) {
+        var blacklist = new Gee.ArrayList<Geary.FolderPath?>();
+        foreach (var type in blacklisted_folder_types) {
             Geary.Folder? blacklist_folder = this.base_folder.account.get_special_folder(type);
             if (blacklist_folder != null) {
                 blacklist.add(blacklist_folder.path);
@@ -584,10 +607,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
 
         if (emails != null && !emails.is_empty) {
-            Logging.debug(
-                Logging.Flag.CONVERSATIONS,
-                "Fetched %d relevant emails locally", emails.size
-            );
+            debug("Fetched %d relevant emails locally", emails.size);
             yield process_email_async(emails, ProcessJobContext());
         }
     }
@@ -644,12 +664,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         email_flags_changed(conversation, email);
     }
 
-    private async bool stop_monitoring_internal(bool folder_was_opened,
-                                                Cancellable? cancellable)
+    private async bool stop_monitoring_internal(GLib.Cancellable? cancellable)
         throws Error {
-        // set now to prevent reentrancy during yield or signal
-        is_monitoring = false;
-
         this.base_folder.email_appended.disconnect(on_folder_email_appended);
         this.base_folder.email_inserted.disconnect(on_folder_email_inserted);
         this.base_folder.email_locally_complete.disconnect(on_folder_email_complete);
@@ -675,13 +691,18 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
 
         bool closing = false;
-        if (folder_was_opened) {
+        if (this.base_was_opened) {
             try {
-                // Always close the folder to prevent open leaks
                 closing = yield this.base_folder.close_async(null);
-            } catch (Error err) {
-                warning("Unable to close monitored folder %s: %s",
-                        this.base_folder.to_string(), err.message);
+            } catch (GLib.Error err) {
+                if (close_err == null) {
+                    close_err = err;
+                } else {
+                    warning(
+                        "Unable to close monitored folder %s: %s",
+                        this.base_folder.to_string(), err.message
+                    );
+                }
             }
         }
 
@@ -699,9 +720,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             return;
         }
 
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::process_email: %d emails",
-                      this.base_folder.to_string(), emails.size);
+        debug("process_email: %d emails", emails.size);
 
         Gee.HashSet<RFC822.MessageID> new_message_ids = new Gee.HashSet<RFC822.MessageID>();
         foreach (Geary.Email email in emails) {
@@ -726,9 +745,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // and may have on disk, but aren't in the folder.
         yield expand_conversations_async(new_message_ids, job);
 
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::process_email completed: %d emails",
-                      this.base_folder.to_string(), emails.size);
+        debug("process_email completed: %d emails", emails.size);
     }
 
     private async void process_email_complete_async(ProcessJobContext job) {
@@ -778,9 +795,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             return;
         }
 
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::expand_conversations: %d email ids",
-                      this.base_folder.to_string(), needed_message_ids.size);
+        debug("expand_conversations: %d email ids", needed_message_ids.size);
 
         Gee.Collection<Geary.FolderPath> folder_blacklist = get_search_folder_blacklist();
         Geary.EmailFlags flag_blacklist = get_search_flag_blacklist();
@@ -810,9 +825,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // require more local searching of email
         yield process_email_async(needed_messages.values, job);
 
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-                      "[%s] ConversationMonitor::expand_conversations completed: %d email ids (%d found)",
-                      this.base_folder.to_string(), needed_message_ids.size, needed_messages.size);
+        debug("expand_conversations completed: %d email ids (%d found)",
+              needed_message_ids.size, needed_messages.size);
     }
 
     private void on_folder_opened(Geary.Folder.OpenState state, int count) {
@@ -886,15 +900,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     Geary.EmailIdentifier? lowest = this.window_lowest;
                     if (lowest != null) {
                         if (lowest.natural_sort_comparator(id) < 0) {
-                            Logging.debug(
-                                Logging.Flag.CONVERSATIONS,
+                            debug(
                                 "Unflagging email %s for deletion resurrects conversation",
                                 id.to_string()
                             );
                             inserted_ids.add(id);
                         } else {
-                            Logging.debug(
-                                Logging.Flag.CONVERSATIONS,
+                            debug(
                                 "Not resurrecting undeleted email %s outside of window",
                                 id.to_string()
                             );
@@ -915,8 +927,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // Remove conversation if get_emails yields an empty collection -- this probably means
             // the conversation was deleted.
             if (conversation.get_emails(Geary.App.Conversation.Ordering.NONE).size == 0) {
-                Logging.debug(
-                    Logging.Flag.CONVERSATIONS,
+                debug(
                     "Flagging email %s for deletion evaporates conversation %s",
                     id.to_string(), conversation.to_string()
                 );

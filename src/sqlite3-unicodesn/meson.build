@@ -3,8 +3,8 @@ sqlite3_unicodesn_sources = [
  'fts3_unicodesn.c',
  'static.c',
 
- join_paths('libstemmer_c', 'runtime', 'api_sq3.c'),
- join_paths('libstemmer_c', 'runtime', 'utilities_sq3.c'),
+ 'libstemmer_c' / 'runtime' / 'api_sq3.c',
+ 'libstemmer_c' / 'runtime' / 'utilities_sq3.c',
 ]
 
 sqlite3_unicodesn_c_flags = [

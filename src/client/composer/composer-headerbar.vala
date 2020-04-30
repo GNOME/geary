@@ -13,6 +13,11 @@ public class Composer.Headerbar : Gtk.HeaderBar {
         set { this.save_and_close_button.visible = value; }
     }
 
+    public bool show_send {
+        get { return this.send_button.visible; }
+        set { this.send_button.visible = value; }
+    }
+
     private Application.Configuration config;
 
     private bool is_attached = true;
@@ -28,6 +33,8 @@ public class Composer.Headerbar : Gtk.HeaderBar {
     [GtkChild]
     private Gtk.Button save_and_close_button;
 
+    [GtkChild]
+    private Gtk.Button send_button;
 
     /** Fired when the user wants to expand a compact composer. */
     public signal void expand_composer();
@@ -38,7 +45,6 @@ public class Composer.Headerbar : Gtk.HeaderBar {
         Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(
             on_gtk_decoration_layout_changed
         );
-        this.show_close_button = this.config.desktop_environment != UNITY;
     }
 
     public override void destroy() {
@@ -71,6 +77,9 @@ public class Composer.Headerbar : Gtk.HeaderBar {
             this.set_attached(true);
             break;
         }
+
+        this.show_close_button = (mode == Widget.PresentationMode.PANED
+                                  && this.config.desktop_environment != UNITY);
     }
 
     private void set_attached(bool is_attached) {

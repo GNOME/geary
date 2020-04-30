@@ -48,7 +48,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         );
         this.account.open_async.begin(
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.account.open_async.end(async_result());
 
@@ -59,7 +59,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.account.list_folders_async.begin(
             this.account.imap_folder_root,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.folder = traverse<Folder>(
             this.account.list_folders_async.end(async_result())
@@ -70,7 +70,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder = null;
         this.account.close_async.begin(
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.account.close_async.end(async_result());
         this.account = null;
@@ -88,7 +88,7 @@ class Geary.ImapDB.FolderTest : TestCase {
             true,
             new MockContactHarvester(),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
@@ -108,7 +108,7 @@ class Geary.ImapDB.FolderTest : TestCase {
             true,
             new MockContactHarvester(),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
@@ -128,7 +128,7 @@ class Geary.ImapDB.FolderTest : TestCase {
             false,
             new MockContactHarvester(),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
@@ -158,7 +158,7 @@ class Geary.ImapDB.FolderTest : TestCase {
             true,
             new MockContactHarvester(),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
@@ -173,7 +173,7 @@ class Geary.ImapDB.FolderTest : TestCase {
             fixture_fields | mock.fields,
             Folder.ListFlags.NONE,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Email? merged = null;
         try {
@@ -209,7 +209,7 @@ class Geary.ImapDB.FolderTest : TestCase {
             true,
             new MockContactHarvester(),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
@@ -243,7 +243,7 @@ class Geary.ImapDB.FolderTest : TestCase {
             true,
             new MockContactHarvester(),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
@@ -281,7 +281,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.set_email_flags_async.begin(
             Collection.single_map(test, test_flags),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.folder.set_email_flags_async.end(async_result());
 
@@ -317,7 +317,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.set_email_flags_async.begin(
             Collection.single_map(test, test_flags),
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.folder.set_email_flags_async.end(async_result());
 
@@ -369,7 +369,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.detach_emails_before_timestamp.begin(
             threshold,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         this.folder.detach_emails_before_timestamp.end(async_result());
 
@@ -412,7 +412,7 @@ class Geary.ImapDB.FolderTest : TestCase {
             Email.Field.FLAGS,
             Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE,
             null,
-            (obj, ret) => { async_complete(ret); }
+            this.async_completion
         );
         Email? merged = null;
         try {

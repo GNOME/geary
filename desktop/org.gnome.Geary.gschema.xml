@@ -141,6 +141,12 @@
         be displayed.</description>
     </key>
 
+    <key name="optional-plugins" type="as">
+      <default>[]</default>
+      <summary>List of optional plugins</summary>
+      <description>Plugins listed here will be loaded on startup.</description>
+    </key>
+
     <key name="migrated-config" type="b">
         <default>false</default>
         <summary>Whether we migrated the old settings</summary>

@@ -1,5 +1,5 @@
 project('geary', [ 'vala', 'c' ],
-  version: '3.35.2',
+  version: '3.37.0',
   license: 'LGPL2.1+',
   meson_version: '>= 0.50',
 )
@@ -9,7 +9,6 @@ enable_valadoc = get_option('valadoc')
 install_contractor_file = get_option('contractor')
 iso_3166_xml = get_option('iso_3166_xml')
 iso_639_xml = get_option('iso_639_xml')
-poodle = get_option('poodle')
 reference_tracking = get_option('ref_tracking')
 
 # Build type
@@ -26,15 +25,15 @@ endif
 
 # Configurable install dirs
 geary_prefix = get_option('prefix')
-bin_dir = join_paths(geary_prefix, get_option('bindir'))
-data_dir = join_paths(geary_prefix, get_option('datadir'))
-lib_dir = join_paths(geary_prefix, get_option('libdir'))
-locale_dir = join_paths(geary_prefix, get_option('localedir'))
+bin_dir = geary_prefix / get_option('bindir')
+data_dir = geary_prefix / get_option('datadir')
+lib_dir = geary_prefix / get_option('libdir')
+locale_dir = geary_prefix / get_option('localedir')
 
 # Source dirs
-metadata_dir = join_paths(meson.source_root(), 'bindings', 'metadata')
-po_dir = join_paths(meson.source_root(), 'po')
-vapi_dir = join_paths(meson.source_root(), 'bindings', 'vapi')
+metadata_dir = meson.source_root() / 'bindings'/ 'metadata'
+po_dir = meson.source_root() / 'po'
+vapi_dir = meson.source_root() / 'bindings' / 'vapi'
 
 # Compiler configuration
 add_project_arguments([
@@ -51,9 +50,14 @@ valac = meson.get_compiler('vala')
 # Required libraries and other dependencies
 #
 
+target_vala = '0.42'
 target_glib = '2.60.4'
 target_gtk = '3.24.7'
-target_webkit = '2.24'
+target_webkit = '2.26'
+
+if not valac.version().version_compare('>=' + target_vala)
+  error('Vala does not meet minimum required version: ' + target_vala)
+endif
 
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
@@ -66,7 +70,8 @@ webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 # We need appdata.its from appstream-glib:
 # https://gitlab.gnome.org/GNOME/geary/issues/439
 appstream_glib = dependency('appstream-glib', version: '>=0.7.10')
-enchant = dependency('enchant-2', version: '>=2.1', required: false) # see below
+cairo = dependency('cairo')
+enchant = dependency('enchant-2', version: '>=2.1')
 folks = dependency('folks', version: '>=0.11')
 gck = dependency('gck-1')
 gcr = dependency('gcr-3', version: '>= 3.10.1')
@@ -74,6 +79,7 @@ gdk = dependency('gdk-3.0', version: '>=' + target_gtk)
 gee = dependency('gee-0.8', version: '>= 0.8.5')
 gio = dependency('gio-2.0', version: '>=' + target_glib)
 goa = dependency('goa-1.0')
+gsound = dependency('gsound')
 gspell = dependency('gspell-1')
 gthread = dependency('gthread-2.0', version: '>=' + target_glib)
 iso_codes = dependency('iso-codes')
@@ -82,6 +88,7 @@ json_glib = dependency('json-glib-1.0', version: '>= 1.0')
 libhandy = dependency('libhandy-0.0', version: '>= 0.0.10')
 libmath = cc.find_library('m')
 libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
+libpeas_gtk = dependency('libpeas-gtk-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
 libsoup = dependency('libsoup-2.4', version: '>= 2.48')
 libunwind_dep = dependency(
@@ -94,11 +101,6 @@ libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tnef-support'))
 posix = valac.find_library('posix')
 webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
-
-# Can currently use either Enchant 1 or 2
-if not enchant.found()
-  enchant = dependency('enchant', version: '>=1.6')
-endif
 
 # Libunwind system dependencies above ensures appropriate versions,
 # but this declared depencency is what we actually build against so we
@@ -127,15 +129,19 @@ libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', require
 # Build variables
 geary_id = 'org.gnome.Geary@0@'.format(profile)
 geary_version = meson.project_version()
-revno = run_command('build-aux/git_version.py').stdout().strip()
+revno = get_option('revno')
+if revno == ''
+  revno = run_command('build-aux/git_version.py').stdout().strip()
+endif
 
 gnome = import('gnome')
 i18n = import('i18n')
 
 # Static install dirs
-dbus_services_dir = join_paths(data_dir, 'dbus-1', 'services')
-plugins_dir = join_paths(lib_dir, 'geary', 'plugins')
-web_extensions_dir = join_paths(lib_dir, 'geary', 'web-extensions')
+dbus_services_dir = data_dir / 'dbus-1' / 'services'
+client_lib_dir = lib_dir / 'geary'
+plugins_dir = client_lib_dir / 'plugins'
+web_extensions_dir = client_lib_dir / 'web-extensions'
 
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
@@ -152,17 +158,17 @@ if enable_valadoc
 endif
 
 # Language detection
-iso_codes_dir = join_paths(iso_codes.get_pkgconfig_variable('prefix'), 'share', 'xml', 'iso-codes')
+iso_codes_dir = iso_codes.get_pkgconfig_variable('prefix')/'share'/'xml'/'iso-codes'
 if iso_639_xml == ''
-  iso_639_xml = join_paths(iso_codes_dir, 'iso_639.xml')
+  iso_639_xml = iso_codes_dir / 'iso_639.xml'
 endif
 if iso_3166_xml == ''
-  iso_3166_xml = join_paths(iso_codes_dir, 'iso_3166.xml')
+  iso_3166_xml = iso_codes_dir / 'iso_3166.xml'
 endif
 files(iso_639_xml, iso_3166_xml) # Check to make sure these exist
 
 # Post-install scripts
-meson.add_install_script(join_paths('build-aux', 'post_install.py'))
+meson.add_install_script('build-aux' / 'post_install.py')
 
 # GNOME Builder doesn't support YAML manifests, so generate a JSON
 # version from the YAML and commit it. :( GNOME/gnome-builder#520
@@ -171,7 +177,7 @@ custom_target(
   'org.gnome.Geary.json',
   build_by_default: true,
   command: [yaml_to_json, '@INPUT@', meson.source_root(), '@OUTPUT@'],
-  input: files('org.gnome.Geary.yml'),
+  input: files('org.gnome.Geary.yaml'),
   output: 'org.gnome.Geary.json'
 )
 

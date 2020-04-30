@@ -8,14 +8,14 @@
 /**
  * A class for editing signatures in the accounts editor.
  */
-public class Accounts.SignatureWebView : Components.WebView {
+public class Accounts.SignatureWebView : ClientWebView {
 
 
     private static WebKit.UserScript? app_script = null;
 
     public static new void load_resources()
         throws GLib.Error {
-        SignatureWebView.app_script = Components.WebView.load_app_script(
+        SignatureWebView.app_script = ClientWebView.load_app_script(
             "signature-web-view.js"
         );
     }

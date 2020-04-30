@@ -1,0 +1,4 @@
+[Plugin]
+Module=folder-highlight
+Name=Folder Highlight
+Description=Highlights folders that have newly delivered mail

@@ -17,8 +17,13 @@
 public abstract class Geary.ClientService : BaseObject, Logging.Source {
 
 
-    private const int BECAME_REACHABLE_TIMEOUT_SEC = 1;
-    private const int BECAME_UNREACHABLE_TIMEOUT_SEC = 3;
+    // Keep the unreachable timeout short so that when the connection
+    // actually goes down connections get pulled down ASAP. Keep the
+    // reachable timeout higher to avoid trying to reconnect
+    // immediately on notification of being reachable, which can be a
+    // bit bouncy
+    private const int BECAME_REACHABLE_TIMEOUT_SEC = 3;
+    private const int BECAME_UNREACHABLE_TIMEOUT_SEC = 1;
 
 
     /**
@@ -198,8 +203,9 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
     public ErrorContext? last_error { get; private set; default = null; }
 
     /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
+    // XXX see GNOME/vala#119 for why this is necessary
+    public virtual string logging_domain {
+        get { return Logging.DOMAIN; }
     }
 
     /** {@inheritDoc} */
@@ -450,6 +456,9 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
         if (this.is_running) {
             this.became_reachable_timer.reset();
             this.became_unreachable_timer.reset();
+            // Since there was an error determining if the service was
+            // reachable, assume it is no longer reachable.
+            became_unreachable();
             notify_connection_failed(new ErrorContext(error));
         }
     }
@@ -460,6 +469,8 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
             this.current_status = TLS_VALIDATION_FAILED;
             this.became_reachable_timer.reset();
             this.became_unreachable_timer.reset();
+            // Since the host is not trusted, it should not be
+            // considered reachable.
             became_unreachable();
             this.account.untrusted_host(this.configuration, remote, cx);
         }

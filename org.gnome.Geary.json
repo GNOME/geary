@@ -1,4 +1,4 @@
-/* Automatically generated from org.gnome.Geary.yml, do not modify. */
+/* Automatically generated from org.gnome.Geary.yaml, do not modify. */
 {
     "app-id": "org.gnome.Geary.Devel",
     "branch": "master",
@@ -15,6 +15,7 @@
         "--socket=x11",
         "--socket=wayland",
         "--device=dri",
+        "--socket=pulseaudio",
         "--share=network",
         "--talk-name=org.freedesktop.secrets",
         "--talk-name=org.gnome.Contacts",
@@ -116,25 +117,24 @@
             "buildsystem": "cmake-ninja",
             "config-opts": [
                 "-DCMAKE_BUILD_TYPE=Release",
-                "-DENABLE_GTK=ON",
+                "-DENABLE_CANBERRA=OFF",
+                "-DENABLE_EXAMPLES=OFF",
                 "-DENABLE_GOA=ON",
-                "-DENABLE_UOA=OFF",
-                "-DENABLE_GOOGLE_AUTH=OFF",
                 "-DENABLE_GOOGLE=OFF",
-                "-DENABLE_WITH_PHONENUMBER=OFF",
+                "-DENABLE_GTK=ON",
+                "-DENABLE_GTK_DOC=OFF",
+                "-DENABLE_INSTALLED_TESTS=OFF",
+                "-DENABLE_INTROSPECTION=ON",
                 "-DENABLE_VALA_BINDINGS=ON",
                 "-DENABLE_WEATHER=OFF",
-                "-DWITH_OPENLDAP=OFF",
                 "-DWITH_LIBDB=OFF",
-                "-DENABLE_INTROSPECTION=ON",
-                "-DENABLE_INSTALLED_TESTS=OFF",
-                "-DENABLE_GTK_DOC=OFF",
-                "-DENABLE_EXAMPLES=OFF"
+                "-DWITH_OPENLDAP=OFF"
             ],
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git"
+                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git",
+                    "branch": "master"
                 }
             ],
             "cleanup": [
@@ -156,7 +156,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/folks.git"
+                    "url": "https://gitlab.gnome.org/GNOME/folks.git",
+                    "branch": "master"
                 }
             ],
             "cleanup": [
@@ -164,11 +165,37 @@
             ]
         },
         {
+            "name": "libcanberra",
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "http://0pointer.de/lennart/projects/libcanberra/libcanberra-0.30.tar.xz",
+                    "sha256": "c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72"
+                }
+            ],
+            "config-opts": [
+                "--disable-alsa",
+                "--disable-null",
+                "--disable-oss"
+            ]
+        },
+        {
+            "name": "gsound",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/gsound.git",
+                    "branch": "master"
+                }
+            ]
+        },
+        {
             "name": "gmime",
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://github.com/jstedfast/gmime.git"
+                    "url": "https://github.com/jstedfast/gmime.git",
+                    "branch": "master"
                 }
             ]
         },
@@ -192,7 +219,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libpeas.git"
+                    "url": "https://gitlab.gnome.org/GNOME/libpeas.git",
+                    "branch": "master"
                 }
             ]
         },
@@ -203,6 +231,16 @@
                     "type": "git",
                     "url": "https://github.com/Yeraze/ytnef.git",
                     "branch": "master"
+                }
+            ]
+        },
+        {
+            "name": "sound-theme-freedesktop",
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "http://people.freedesktop.org/~mccann/dist/sound-theme-freedesktop-0.8.tar.bz2",
+                    "sha256": "cb518b20eef05ec2e82dda1fa89a292c1760dc023aba91b8aa69bafac85e8a14"
                 }
             ]
         },

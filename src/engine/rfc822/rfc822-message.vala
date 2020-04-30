@@ -130,19 +130,17 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         this.message = new GMime.Message(true);
 
         // Required headers
-        assert(email.from.size > 0);
-        this.sender = email.sender;
-        this.from = email.from;
-        this.date = email.date;
 
-        this.message.set_date(this.date.value);
-        
-        if (email.from != null) {
-            foreach (RFC822.MailboxAddress mailbox in email.from)
-                this.message.add_mailbox(FROM, mailbox.name, mailbox.address);
+        this.from = email.from;
+        foreach (RFC822.MailboxAddress mailbox in email.from) {
+            this.message.add_mailbox(FROM, mailbox.name, mailbox.address);
         }
 
+        this.date = email.date;
+        this.message.set_date(this.date.value);
+
         // Optional headers
+
         if (email.to != null) {
             this.to = email.to;
             foreach (RFC822.MailboxAddress mailbox in email.to)
@@ -162,6 +160,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
 
         if (email.sender != null) {
+            this.sender = email.sender;
             this.message.add_mailbox(SENDER, this.sender.name, this.sender.address);
         }
 
@@ -169,6 +168,11 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             this.reply_to = email.reply_to;
             foreach (RFC822.MailboxAddress mailbox in email.reply_to)
                 this.message.add_mailbox(REPLY_TO, mailbox.name, mailbox.address);
+        }
+
+        if (message_id != null) {
+            this.message_id = new MessageID(message_id);
+            this.message.set_message_id(message_id);
         }
 
         if (email.in_reply_to != null) {
@@ -206,10 +210,12 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
         Gee.List<GMime.Object> body_parts = new Gee.LinkedList<GMime.Object>();
 
-        // Share the body charset and encoding between plain and HTML
-        // parts, so we don't need to work it out twice.
+        // Share the body charset between plain and HTML parts, so we
+        // don't need to work it out twice. This doesn't work for the
+        // content encoding however since the HTML encoding may need
+        // to be different, e.g. if it contains lines longer than
+        // allowed by RFC822/SMTP.
         string? body_charset = null;
-        GMime.ContentEncoding? body_encoding = null;
 
         // Body: text format (optional)
         if (email.body_text != null) {
@@ -217,7 +223,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             try {
                 body_text = yield body_data_to_part(
                     email.body_text.data,
-                    null,
                     null,
                     "text/plain",
                     true,
@@ -230,7 +235,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                 body_charset = body_text.get_content_type().get_parameter(
                     "charset"
                 );
-                body_encoding = body_text.get_content_encoding();
                 body_parts.add(body_text);
             }
         }
@@ -320,7 +324,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                 body_html = yield body_data_to_part(
                     email.body_html.data,
                     body_charset,
-                    body_encoding,
                     "text/html",
                     false,
                     cancellable
@@ -1142,7 +1145,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      */
     private async GMime.Part body_data_to_part(uint8[] content,
                                                string? charset,
-                                               GMime.ContentEncoding? encoding,
                                                string content_type,
                                                bool is_flowed,
                                                GLib.Cancellable? cancellable)
@@ -1153,13 +1155,13 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
         GMime.StreamFilter filter_stream = new GMime.StreamFilter(content_stream);
         filter_stream.add(new GMime.FilterCharset(UTF8_CHARSET, charset));
-        if (encoding == null) {
-            encoding = yield Utils.get_best_encoding(
-                filter_stream,
-                GMime.EncodingConstraint.7BIT,
-                cancellable
-            );
-        }
+
+        GMime.ContentEncoding encoding = yield Utils.get_best_encoding(
+            filter_stream,
+            GMime.EncodingConstraint.7BIT,
+            cancellable
+        );
+
         if (is_flowed && encoding == GMime.ContentEncoding.BASE64) {
             // Base64-encoded text needs to have CR's added after LF's
             // before encoding, otherwise it breaks format=flowed. See

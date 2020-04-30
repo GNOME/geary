@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView> {
+public class Composer.WebViewTest : ClientWebViewTestCase<Composer.WebView> {
 
 
     public WebViewTest() {
@@ -54,7 +54,7 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
     public void get_html() throws GLib.Error {
         string BODY = "<p>para</p>";
         load_body_fixture(BODY);
-        this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_html.begin(this.async_completion);
         string html = this.test_view.get_html.end(async_result());
         assert_string(PageStateTest.CLEAN_BODY_TEMPLATE.printf(BODY), html);
     }
@@ -62,14 +62,14 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
     public void get_html_for_draft() throws GLib.Error {
         string BODY = "<p>para</p>";
         load_body_fixture(BODY);
-        this.test_view.get_html_for_draft.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_html_for_draft.begin(this.async_completion);
         string html = this.test_view.get_html.end(async_result());
         assert_string(PageStateTest.COMPLETE_BODY_TEMPLATE.printf(BODY), html);
     }
 
     public void get_text() throws Error {
         load_body_fixture("<p>para</p>");
-        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) == "para\n\n\n\n\n");
         } catch (Error err) {
@@ -80,7 +80,7 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
 
     public void get_text_with_quote() throws Error {
         load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
-        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
                    "pre\n\n> quote\n> \npost\n\n\n\n\n");
@@ -92,7 +92,7 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
 
     public void get_text_with_nested_quote() throws Error {
         load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
-        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
                    "pre\n\n> quote1\n> \n>> quote2\n>> \npost\n\n\n\n\n");
@@ -107,7 +107,7 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
 <p>A long, long, long, long, long, long para. Well, longer than MAX_BREAKABLE_LEN
 at least. Really long, long, long, long, long long, long long, long long, long.</p>
 """);
-        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
 """A long, long, long, long, long, long para. Well, longer than 
@@ -130,7 +130,7 @@ long long, long long, long.
 
 <p>A long, long, long, long, long, long para. Well, longer than MAX_BREAKABLE_LEN
 at least. Really long, long, long, long, long long, long long, long long, long.</p>""");
-        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
 """> A long, long, long, long, long, long line. Well, longer than 
@@ -157,7 +157,7 @@ long long, long long, long.
 </div>
 
 """);
-        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
 """On Sun, Jan 1, 2017 at 9:55 PM, Michael Gratton <mike@vee.net> wrote:
@@ -185,7 +185,7 @@ long, long, long, long, long, long, long, long, long, long,
 
     public void get_text_with_named_link() throws Error {
         load_body_fixture("Check out <a href=\"https://wiki.gnome.org/Apps/Geary\">Geary</a>!");
-        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
                    "Check out Geary <https://wiki.gnome.org/Apps/Geary>!\n\n\n\n");
@@ -197,7 +197,7 @@ long, long, long, long, long, long, long, long, long, long,
 
     public void get_text_with_url_link() throws Error {
         load_body_fixture("Check out <a href=\"https://wiki.gnome.org/Apps/Geary\">https://wiki.gnome.org/Apps/Geary</a>!");
-        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
                    "Check out <https://wiki.gnome.org/Apps/Geary>!\n\n\n\n");
@@ -209,7 +209,7 @@ long, long, long, long, long, long, long, long, long, long,
 
     public void get_text_with_surrounding_nbsps() throws Error {
         load_body_fixture("&nbsp;&nbsp;I like my space&nbsp;&nbsp;");
-        this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
                    "  I like my space\n\n\n\n");
@@ -226,21 +226,21 @@ long, long, long, long, long, long, long, long, long, long,
 
         const string SIG1 = "signature text 1";
         this.test_view.update_signature(SIG1);
-        this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_html.begin(this.async_completion);
         html = this.test_view.get_html.end(async_result());
         assert_true(BODY in html, "Body not present");
         assert_true(SIG1 in html, "Signature 1 not present");
 
         const string SIG2 = "signature text 2";
         this.test_view.update_signature(SIG2);
-        this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_html.begin(this.async_completion);
         html = this.test_view.get_html.end(async_result());
         assert_true(BODY in html, "Body not present");
         assert_false(SIG1 in html, "Signature 1 still present");
         assert_true(SIG2 in html, "Signature 2 not present");
 
         this.test_view.update_signature("");
-        this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
+        this.test_view.get_html.begin(this.async_completion);
         html = this.test_view.get_html.end(async_result());
         assert_true(BODY in html, "Body not present");
         assert_false(SIG1 in html, "Signature 1 still present");

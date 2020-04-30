@@ -20,6 +20,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
         base("Geary.App.ConversationMonitorTest");
         add_test("start_stop_monitoring", start_stop_monitoring);
         add_test("open_error", open_error);
+        add_test("close_during_open_error", close_during_open_error);
+        add_test("close_after_open_error", close_after_open_error);
         add_test("load_single_message", load_single_message);
         add_test("load_multiple_messages", load_multiple_messages);
         add_test("load_related_message", load_related_message);
@@ -42,14 +44,14 @@ class Geary.App.ConversationMonitorTest : TestCase {
             this.account,
             null,
             this.folder_root.get_child("base"),
-            SpecialFolderType.NONE,
+            NONE,
             null
         );
         this.other_folder = new MockFolder(
             this.account,
             null,
             this.folder_root.get_child("other"),
-            SpecialFolderType.NONE,
+            NONE,
             null
         );
     }
@@ -78,7 +80,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         this.base_folder.expect_call("close_async");
 
         monitor.start_monitoring.begin(
-            NONE, test_cancellable, (obj, res) => { async_complete(res); }
+            NONE, test_cancellable, this.async_completion
         );
         monitor.start_monitoring.end(async_result());
 
@@ -88,7 +90,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         }
 
         monitor.stop_monitoring.begin(
-            test_cancellable, (obj, res) => { async_complete(res); }
+            test_cancellable, this.async_completion
         );
         monitor.stop_monitoring.end(async_result());
 
@@ -108,7 +110,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             .throws(new EngineError.SERVER_UNAVAILABLE("Mock error"));
 
         monitor.start_monitoring.begin(
-            NONE, null, (obj, res) => { async_complete(res); }
+            NONE, null, this.async_completion
         );
         try {
             monitor.start_monitoring.end(async_result());
@@ -117,7 +119,67 @@ class Geary.App.ConversationMonitorTest : TestCase {
             assert_error(open.throw_error, err);
         }
 
+        assert_false(monitor.is_monitoring, "is monitoring");
+
         this.base_folder.assert_expectations();
+    }
+
+    public void close_during_open_error() throws GLib.Error {
+        ConversationMonitor monitor = new ConversationMonitor(
+            this.base_folder, Email.Field.NONE, 10
+        );
+
+        ExpectedCall open = this.base_folder
+            .expect_call("open_async")
+            .async_call(PAUSE)
+            .throws(new GLib.IOError.CANCELLED("Mock error"));
+        this.base_folder
+            .expect_call("close_async")
+            .throws(new EngineError.ALREADY_CLOSED("Mock error"));
+
+        var start_waiter = new AsyncResultWaiter(this.main_loop);
+        monitor.start_monitoring.begin(NONE, null, start_waiter.async_completion);
+
+        var stop_waiter = new AsyncResultWaiter(this.main_loop);
+        monitor.stop_monitoring.begin(null, stop_waiter.async_completion);
+
+        open.async_resume();
+        try {
+            monitor.start_monitoring.end(start_waiter.async_result());
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            assert_error(open.throw_error, err);
+        }
+
+        // base_folder.close_async should not be called, so should not
+        // throw an error
+        monitor.stop_monitoring.end(stop_waiter.async_result());
+    }
+
+    public void close_after_open_error() throws GLib.Error {
+        ConversationMonitor monitor = new ConversationMonitor(
+            this.base_folder, Email.Field.NONE, 10
+        );
+
+        ExpectedCall open = this.base_folder
+            .expect_call("open_async")
+            .throws(new EngineError.SERVER_UNAVAILABLE("Mock error"));
+        this.base_folder
+            .expect_call("close_async")
+            .throws(new EngineError.ALREADY_CLOSED("Mock error"));
+
+        monitor.start_monitoring.begin(NONE, null, this.async_completion);
+        try {
+            monitor.start_monitoring.end(async_result());
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            assert_error(open.throw_error, err);
+        }
+
+        // base_folder.close_async should not be called, so should not
+        // throw an error
+        monitor.stop_monitoring.begin(null, this.async_completion);
+        monitor.stop_monitoring.end(async_result());
     }
 
     public void load_single_message() throws Error {
@@ -246,7 +308,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         // error out during later tests
         this.base_folder.expect_call("close_async");
         monitor.stop_monitoring.begin(
-            null, (obj, res) => { async_complete(res); }
+            null, this.async_completion
         );
         monitor.stop_monitoring.end(async_result());
     }
@@ -477,7 +539,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         }
 
         monitor.start_monitoring.begin(
-            NONE, test_cancellable, (obj, res) => { async_complete(res); }
+            NONE, test_cancellable, this.async_completion
         );
         monitor.start_monitoring.end(async_result());
 

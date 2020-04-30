@@ -1,10 +1,23 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.Smtp.ClientSession {
+/** A client connection to a SMTP service. */
+public class Geary.Smtp.ClientSession : BaseObject, Logging.Source {
+
+    /** {@inheritDoc} */
+    public override string logging_domain {
+        get { return ClientService.LOGGING_DOMAIN; }
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent { get { return _logging_parent; } }
+    private weak Logging.Source? _logging_parent = null;
+
     private ClientConnection cx;
     private bool rset_required = false;
 
@@ -18,7 +31,8 @@ public class Geary.Smtp.ClientSession {
     }
 
     public ClientSession(Geary.Endpoint endpoint) {
-        cx = new ClientConnection(endpoint);
+        this.cx = new ClientConnection(endpoint);
+        this.cx.set_logging_parent(this);
     }
 
     protected virtual void notify_connected(Greeting greeting) {
@@ -230,8 +244,14 @@ public class Geary.Smtp.ClientSession {
         }
     }
 
-    public string to_string() {
-        return cx.to_string();
+    /** {@inheritDoc} */
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(this, this.cx.to_string());
     }
-}
 
+    /** Sets the service's logging parent. */
+    internal void set_logging_parent(Logging.Source parent) {
+        this._logging_parent = parent;
+    }
+
+}

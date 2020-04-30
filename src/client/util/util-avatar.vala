@@ -72,7 +72,7 @@ namespace Util.Avatar {
     }
 
     public string? extract_initials_from_name(string name) {
-        string normalized = name.strip().up().normalize();
+        string normalized = name.strip().normalize(-1, DEFAULT_COMPOSE);
         string? initials = null;
         if (normalized != "") {
             GLib.StringBuilder buf = new GLib.StringBuilder();
@@ -82,17 +82,19 @@ namespace Util.Avatar {
             // Get the first alphanumeric char of the string
             for (int i = 0; normalized.get_next_char(ref index, out c); i++) {
                 if (c.isalnum()) {
-                    buf.append_unichar(c);
+                    buf.append_unichar(c.toupper());
                     break;
                 }
             }
 
             // Get the first alphanumeric char of the last word of the string
             index = normalized.last_index_of_char(' ');
-            for (int i = 0; normalized.get_next_char(ref index, out c); i++) {
-                if (c.isalnum()) {
-                    buf.append_unichar(c);
-                    break;
+            if (index >= 0) {
+                for (int i = 0; normalized.get_next_char(ref index, out c); i++) {
+                    if (c.isalnum()) {
+                        buf.append_unichar(c.toupper());
+                        break;
+                    }
                 }
             }
 

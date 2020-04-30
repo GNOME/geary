@@ -57,18 +57,12 @@ public class Geary.ImapEngine.GenericAccountTest : TestCase {
             this.tmp_dir,
             GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql")
         );
-        this.local_account.open_async.begin(
-            null,
-            (obj, ret) => { async_complete(ret); }
-        );
+        this.local_account.open_async.begin(null, this.async_completion);
         this.local_account.open_async.end(async_result());
     }
 
     public override void tear_down() throws GLib.Error {
-        this.local_account.close_async.begin(
-            null,
-            (obj, ret) => { async_complete(ret); }
-        );
+        this.local_account.close_async.begin(null, this.async_completion);
         this.local_account.close_async.end(async_result());
         this.local_account = null;
         this.config = null;

@@ -107,12 +107,12 @@ public class Conversation.ContactPopover : Gtk.Popover {
     public async void load_avatar() {
         var main = this.get_toplevel() as Application.MainWindow;
         if (main != null) {
-            Application.AvatarStore loader = main.application.controller.avatars;
             int window_scale = get_scale_factor();
-            int pixel_size = Application.AvatarStore.PIXEL_SIZE * window_scale;
+            int pixel_size = (
+                Application.Client.AVATAR_SIZE_PIXELS * window_scale
+            );
             try {
-                Gdk.Pixbuf? avatar_buf = yield loader.load(
-                    this.contact,
+                Gdk.Pixbuf? avatar_buf = yield contact.load_avatar(
                     this.mailbox,
                     pixel_size,
                     this.load_cancellable
@@ -240,7 +240,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     private void on_new_conversation() {
         var main = this.get_toplevel() as Application.MainWindow;
         if (main != null) {
-            main.open_composer_for_mailbox(this.mailbox);
+            main.application.new_composer.begin(this.mailbox);
         }
     }
 

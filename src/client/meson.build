@@ -1,5 +1,17 @@
 # Geary client
+
+geary_client_package_name = 'geary-client'
+geary_client_api_version = '.'.join([
+  geary_version.split('.')[0],
+  geary_version.split('.')[1]
+])
+geary_client_package = '@0@-@1@'.format(
+  geary_client_package_name,
+  geary_client_api_version
+)
+
 geary_client_vala_sources = files(
+  'application/application-account-context.vala',
   'application/application-attachment-manager.vala',
   'application/application-avatar-store.vala',
   'application/application-certificate-manager.vala',
@@ -9,8 +21,13 @@ geary_client_vala_sources = files(
   'application/application-contact-store.vala',
   'application/application-contact.vala',
   'application/application-controller.vala',
+  'application/application-email-plugin-context.vala',
+  'application/application-email-store-factory.vala',
+  'application/application-folder-context.vala',
+  'application/application-folder-plugin-context.vala',
+  'application/application-folder-store-factory.vala',
   'application/application-main-window.vala',
-  'application/application-notification-context.vala',
+  'application/application-notification-plugin-context.vala',
   'application/application-plugin-manager.vala',
   'application/application-startup-manager.vala',
   'application/goa-mediator.vala',
@@ -28,8 +45,11 @@ geary_client_vala_sources = files(
 
   'client-action.vala',
 
+  'components/client-web-view.vala',
   'components/components-attachment-pane.vala',
   'components/components-entry-undo.vala',
+  'components/components-info-bar-stack.vala',
+  'components/components-info-bar.vala',
   'components/components-inspector.vala',
   'components/components-in-app-notification.vala',
   'components/components-inspector-error-view.vala',
@@ -37,15 +57,14 @@ geary_client_vala_sources = files(
   'components/components-inspector-system-view.vala',
   'components/components-placeholder-pane.vala',
   'components/components-preferences-window.vala',
+  'components/components-problem-report-info-bar.vala',
   'components/components-reflow-box.c',
   'components/components-search-bar.vala',
   'components/components-validator.vala',
-  'components/components-web-view.vala',
   'components/count-badge.vala',
   'components/folder-popover.vala',
   'components/icon-factory.vala',
   'components/main-toolbar.vala',
-  'components/main-window-info-bar.vala',
   'components/monitored-progress-bar.vala',
   'components/monitored-spinner.vala',
   'components/status-bar.vala',
@@ -91,7 +110,22 @@ geary_client_vala_sources = files(
   'folder-list/folder-list-search-branch.vala',
   'folder-list/folder-list-special-grouping.vala',
 
-  'plugin/plugin-notification.vala',
+  'plugin/plugin-account.vala',
+  'plugin/plugin-application.vala',
+  'plugin/plugin-button.vala',
+  'plugin/plugin-composer.vala',
+  'plugin/plugin-contact-store.vala',
+  'plugin/plugin-email-extension.vala',
+  'plugin/plugin-email-store.vala',
+  'plugin/plugin-email.vala',
+  'plugin/plugin-error.vala',
+  'plugin/plugin-folder-extension.vala',
+  'plugin/plugin-folder-store.vala',
+  'plugin/plugin-folder.vala',
+  'plugin/plugin-info-bar.vala',
+  'plugin/plugin-notification-extension.vala',
+  'plugin/plugin-plugin-base.vala',
+  'plugin/plugin-trusted-extension.vala',
 
   'sidebar/sidebar-branch.vala',
   'sidebar/sidebar-common.vala',
@@ -106,15 +140,10 @@ geary_client_vala_sources = files(
   'util/util-files.vala',
   'util/util-gio.vala',
   'util/util-gtk.vala',
-  'util/util-international.vala',
+  'util/util-i18n.vala',
   'util/util-js.vala',
   'util/util-migrate.vala',
 )
-
-geary_client_sources = [
-  geary_client_vala_sources,
-  geary_resources # Included here so valac can check them
-]
 
 geary_client_dependencies = [
   enchant,
@@ -133,6 +162,7 @@ geary_client_dependencies = [
   libhandy,
   libmath,
   libpeas,
+  libpeas_gtk,
   libsecret,
   libsoup,
   libxml,
@@ -142,13 +172,26 @@ geary_client_dependencies = [
 
 geary_client_vala_args = geary_vala_args
 
+# Enable shared shecondary process if available.
+# See issues #558 and #559
+webkit_version = webkit2gtk.version().split('.')
+if webkit_version[0].to_int() <= 2 and webkit_version[1].to_int() <= 24
+  message('Enabling WebKitGTK shared process model')
+  geary_client_vala_args += [
+    '-D', 'HAS_WEBKIT_SHARED_PROC'
+  ]
+endif
+
 # Main client application library
-geary_client_lib = static_library('geary-client',
-  geary_client_sources,
+geary_client_lib = shared_library(
+  geary_client_package,
+  geary_client_vala_sources + geary_resources,
   dependencies: geary_client_dependencies,
   include_directories: config_h_dir,
   vala_args: geary_client_vala_args,
   c_args: geary_c_args,
+  install: true,
+  install_dir: client_lib_dir,
 )
 
 geary_client_dep = declare_dependency(

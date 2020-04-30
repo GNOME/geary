@@ -1,3 +1,118 @@
+Version 3.36
+~~~~~~~~~~~~
+Released: 2020-03-13
+
+Enhancements included in this release:
+ * New and improved responsive composer interface
+ * Drag and drop image files into rich text messages
+ * Paste images from the clipboard into rich text messages
+ * Improved composer missing attachment detection
+ * Access emoji chooser in composer via shortcut or context menu
+ * Extend undo for email actions such as archiving, marking
+ * Undo sending, saving and discarding composed email
+ * Undo editing in text fields, including in the composer
+ * Open more than one main window
+ * New and improved responsive preferences interface
+ * Using single key shortcuts for email actions is now optional
+ * Single key shortcuts have been brought up to date with Gmail
+ * App-wide notification preferences now handled by desktop
+ * Numerous bug fixes and user interface improvements
+ * Numerous user interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Adam Dingle
+ * Adrien Plazas
+ * Alex Henrie
+ * Bilal Elmoussaoui
+ * Chris Heywood
+ * Daniel Kahn Gillmor
+ * James Westman
+ * João Loureiro
+ * Konstantin Kharlamov
+ * Mario Ravalli
+ * Mart Raudsepp
+ * Niels De Graef
+ * Tobias Sette
+ * Torben
+ * Алексей Шилин
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Alexandre Franke (fr)
+ * Anders Jonsson (sv)
+ * Andika Triwidada (id)
+ * Asier Sarasua Garmendia (eu)
+ * Balázs Meskó (hu)
+ * Cheng-Chia Tseng (zh_TW)
+ * Daniel Mustieles (es)
+ * Emin Tufan Çetin (tr)
+ * Enrico Nicoletto (pt_BR)
+ * Federico Bruni (it)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Kukuh Syafaat (id)
+ * Marek Černocký (cs)
+ * Nathan Follens (nl)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * sicklylife (ja)
+ * Tim Sabsch (de)
+
+And for the user manual:
+ * Daniel Mustieles (es)
+ * Emin Tufan Çetin (tr)
+ * Federico Bruni (it)
+ * Marek Černocký (cs)
+ * Piotr Drąg (pl)
+
+Version 3.35.90
+~~~~~~~~~~~~~~~
+Released: 2020-03-01
+
+Changes:
+
+ * Support drag and drop and copy and paste images in composer
+ * Updated composer UI to new responsive design
+ * Updated preferences UI to use Handy widgets
+ * Add hidden prefs for minimising in-app notifications
+ * Ported engine to to GMime 3.x
+ * Update WebKitGTK minimum version to 2.26
+ * Drop libunity dependency in favour of internal implementation
+ * Several bug fixes and code cleanups
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Adam Dingle
+ * Adrien Plazas
+ * Chris Heywood
+ * James Westman
+ * Konstantin Kharlamov
+ * Mart Raudsepp
+ * Niels De Graef
+ * Tobias Sette
+ * Алексей Шилин
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Alexandre Franke (fr)
+ * Anders Jonsson (sv)
+ * Andika Triwidada (id)
+ * Daniel Mustieles (es)
+ * Emin Tufan Çetin (tr)
+ * Enrico Nicoletto (pt_BR)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Kukuh Syafaat (id)
+ * Nathan Follens (nl)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * sicklylife (ja)
+
+And for the user manual:
+ * Daniel Mustieles (es)
+ * Piotr Drąg (pl)
+
 Version 3.35.2
 ~~~~~~~~~~~~~~~
 Released: 2019-10-11

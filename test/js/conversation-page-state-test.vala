@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class ConversationPageStateTest : Components.WebViewTestCase<ConversationWebView> {
+class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
 
     public ConversationPageStateTest() {
         base("ConversationPageStateTest");

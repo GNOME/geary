@@ -33,7 +33,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     internal const string EMAIL_ACTION_GROUP_NAME = "eml";
 
     internal const string ACTION_DELETE = "delete";
-    internal const string ACTION_EDIT = "edit";
     internal const string ACTION_FORWARD = "forward";
     internal const string ACTION_MARK_LOAD_REMOTE = "mark-load-remote";
     internal const string ACTION_MARK_READ = "mark-read";
@@ -70,7 +69,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     );
     private const ActionEntry[] email_action_entries = {
         { ACTION_DELETE, on_email_delete, ACTION_TARGET_TYPE },
-        { ACTION_EDIT, on_email_edit, ACTION_TARGET_TYPE },
         { ACTION_FORWARD, on_email_forward, ACTION_TARGET_TYPE },
         { ACTION_MARK_LOAD_REMOTE, on_email_load_remote, ACTION_TARGET_TYPE },
         { ACTION_MARK_READ, on_email_mark_read, ACTION_TARGET_TYPE },
@@ -296,6 +294,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // to appropriate times to try to do that scroll.
         public signal void should_scroll();
 
+        // Emitted when an email is loaded for the first time
+        public signal void email_loaded(Geary.Email email);
+
 
         protected ConversationRow(Geary.Email? email) {
             base_ref();
@@ -379,6 +380,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             update_row_expansion();
             if (this.view.message_body_state == NOT_STARTED) {
                 yield this.view.load_body();
+                email_loaded(this.view.email);
             }
         }
 
@@ -506,7 +508,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     public SearchManager search { get; private set; }
 
     /** Specifies if this list box currently has an embedded composer. */
-    public bool has_composer { get; private set; default = false; }
+    public bool has_composer {
+        get { return this.current_composer != null; }
+    }
 
     // Used to load messages in conversation.
     private Geary.App.EmailStore email_store;
@@ -527,6 +531,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     private Gee.Map<Geary.EmailIdentifier,EmailRow> email_rows =
         new Gee.HashMap<Geary.EmailIdentifier,EmailRow>();
 
+    // The current composer, if any
+    private ComposerRow? current_composer = null;
+
     // The id of the draft referred to by the current composer.
     private Geary.EmailIdentifier? draft_id = null;
 
@@ -539,30 +546,59 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /** Keyboard action to scroll the conversation. */
     [Signal (action=true)]
     public virtual signal void scroll(Gtk.ScrollType type) {
-        Gtk.Adjustment adj = get_adjustment();
-        double value = adj.get_value();
-        switch (type) {
-        case Gtk.ScrollType.STEP_UP:
-            value -= adj.get_step_increment();
-            break;
-        case Gtk.ScrollType.STEP_DOWN:
-            value += adj.get_step_increment();
-            break;
-        case Gtk.ScrollType.PAGE_UP:
-            value -= adj.get_page_increment();
-            break;
-        case Gtk.ScrollType.PAGE_DOWN:
-            value += adj.get_page_increment();
-            break;
-        case Gtk.ScrollType.START:
-            value = 0.0;
-            break;
-        case Gtk.ScrollType.END:
-            value = adj.get_upper();
-            break;
+
+        // If there is an embedded composer, check to see if one of
+        // its non-web view widgets is focused and give the key press
+        // to that instead. If not, then standard nav
+        var handled = false;
+        var composer = this.current_composer;
+        if (composer != null) {
+            var window = get_toplevel() as Gtk.Window;
+            if (window != null) {
+                var focused = window.get_focus();
+                if (focused != null &&
+                    focused.is_ancestor(composer) &&
+                    !(focused is Composer.WebView)) {
+                    switch (type) {
+                    case Gtk.ScrollType.STEP_UP:
+                        composer.focus(UP);
+                        handled = true;
+                        break;
+                    case Gtk.ScrollType.STEP_DOWN:
+                        composer.focus(DOWN);
+                        handled = true;
+                        break;
+                    }
+                }
+            }
         }
-        adj.set_value(value);
-        this.mark_read_timer.start();
+
+        if (!handled) {
+            Gtk.Adjustment adj = get_adjustment();
+            double value = adj.get_value();
+            switch (type) {
+            case Gtk.ScrollType.STEP_UP:
+                value -= adj.get_step_increment();
+                break;
+            case Gtk.ScrollType.STEP_DOWN:
+                value += adj.get_step_increment();
+                break;
+            case Gtk.ScrollType.PAGE_UP:
+                value -= adj.get_page_increment();
+                break;
+            case Gtk.ScrollType.PAGE_DOWN:
+                value += adj.get_page_increment();
+                break;
+            case Gtk.ScrollType.START:
+                value = 0.0;
+                break;
+            case Gtk.ScrollType.END:
+                value = adj.get_upper();
+                break;
+            }
+            adj.set_value(value);
+            this.mark_read_timer.start();
+        }
     }
 
     /** Keyboard action to shift focus to the next message, if any. */
@@ -578,6 +614,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, -1);
         this.mark_read_timer.start();
     }
+
+    /** Fired when an email is fully loaded in the list box. */
+    public signal void email_loaded(Geary.Email email);
 
     /** Fired when the user clicks "reply" in the message menu. */
     public signal void reply_to_sender_email(Geary.Email email, string? quote);
@@ -598,9 +637,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     /** Fired when the user clicks "delete" in the message menu. */
     public signal void delete_email(Geary.Email email);
-
-    /** Fired the edit draft button is clicked. */
-    public signal void edit_email(Geary.Email email);
 
 
     /**
@@ -773,7 +809,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                          Geary.Email.compare_sent_date_ascending(
                              target.email, best.email
                          ) < 0)) {
-                        debug("XXX have new best row....");
                         closest_distance = distance;
                         best = target;
                     }
@@ -849,13 +884,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // circular ref.
         row.should_scroll.connect((row) => { scroll_to_row(row); });
         add(row);
-        this.has_composer = true;
+        this.current_composer = row;
 
-        embed.composer.notify["current-draft-id"].connect(
-            (id) => { this.draft_id = embed.composer.current_draft_id; }
+        embed.composer.notify["saved-id"].connect(
+            (id) => { this.draft_id = embed.composer.saved_id; }
         );
         embed.vanished.connect(() => {
-                this.has_composer = false;
+                this.current_composer = null;
                 this.draft_id = null;
                 remove(row);
                 if (is_draft &&
@@ -893,12 +928,30 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
     }
 
+    /** Adds an info bar to the given email, if any. */
+    public void add_email_info_bar(Geary.EmailIdentifier id,
+                                   Gtk.InfoBar info_bar) {
+        var row = this.email_rows.get(id);
+        if (row != null) {
+            row.view.primary_message.info_bars.add(info_bar);
+        }
+    }
+
+    /** Adds an info bar to the given email, if any. */
+    public void remove_email_info_bar(Geary.EmailIdentifier id,
+                                      Gtk.InfoBar info_bar) {
+        var row = this.email_rows.get(id);
+        if (row != null) {
+            row.view.primary_message.info_bars.remove(info_bar);
+        }
+    }
+
     /**
      * Increases the magnification level used for displaying messages.
      */
     public void zoom_in() {
         message_view_iterator().foreach((msg_view) => {
-                msg_view.zoom_in();
+                msg_view.web_view.zoom_in();
                 return true;
             });
     }
@@ -908,7 +961,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      */
     public void zoom_out() {
         message_view_iterator().foreach((msg_view) => {
-                msg_view.zoom_out();
+                msg_view.web_view.zoom_out();
                 return true;
             });
     }
@@ -918,7 +971,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      */
     public void zoom_reset() {
         message_view_iterator().foreach((msg_view) => {
-                msg_view.zoom_reset();
+                msg_view.web_view.zoom_reset();
                 return true;
             });
     }
@@ -1085,6 +1138,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             });
 
         EmailRow row = new EmailRow(view);
+        row.email_loaded.connect((e) => { email_loaded(e); });
         this.email_rows.set(email.id, row);
 
         if (append_row) {
@@ -1122,7 +1176,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         row.get_allocation(out alloc);
 
         int x = 0, y = 0;
-        row.view.primary_message.web_view_translate_coordinates(row, x, anchor_y, out x, out y);
+        ConversationWebView web_view = row.view.primary_message.web_view;
+        web_view.translate_coordinates(row, x, anchor_y, out x, out y);
 
         Gtk.Adjustment adj = get_adjustment();
         y = alloc.y + y;
@@ -1155,13 +1210,14 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 ConversationMessage conversation_message = view.primary_message;
                  int body_top = 0;
                  int body_left = 0;
-                 conversation_message.web_view_translate_coordinates(
+                 ConversationWebView web_view = conversation_message.web_view;
+                 web_view.translate_coordinates(
                      this,
                      0, 0,
                      out body_left, out body_top
                  );
 
-                 int body_height = conversation_message.web_view_get_allocated_height();
+                 int body_height = web_view.get_allocated_height();
                  int body_bottom = body_top + body_height;
 
                  // Only mark the email as read if it's actually visible
@@ -1217,12 +1273,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // XXX should be able to edit draft emails from any
         // conversation. This test should be more like "is in drafts
         // folder"
-        Geary.SpecialFolderType type =
-            this.conversation.base_folder.special_folder_type;
+        Geary.Folder.SpecialUse use = this.conversation.base_folder.used_as;
         bool is_in_folder = this.conversation.is_in_base_folder(email.id);
 
         return (
-            is_in_folder && type == Geary.SpecialFolderType.DRAFTS // ||
+            is_in_folder && use == DRAFTS // ||
             //email.flags.is_draft()
         );
     }
@@ -1234,9 +1289,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         } catch (Geary.EngineError err) {
             debug("Failed to get email id for action target: %s", err.message);
         }
-        debug("XXX have id? %s", (id != null).to_string());
         EmailRow? row = (id != null) ? this.email_rows[id] : null;
-        debug("XXX have row? %s", (row != null).to_string());
         return (row != null) ? row.view : null;
     }
 
@@ -1425,14 +1478,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
     }
 
-    private void on_email_edit(GLib.SimpleAction action,
-                               GLib.Variant? param) {
-        ConversationEmail? view = action_target_to_view(param);
-        if (view != null) {
-            edit_email(view.email);
-        }
-    }
-
     private void on_email_trash(GLib.SimpleAction action,
                                 GLib.Variant? param) {
         ConversationEmail? view = action_target_to_view(param);
@@ -1451,10 +1496,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     private void on_email_save_all_attachments(GLib.SimpleAction action,
                                                GLib.Variant? param) {
-        debug("XXX save all: %s", param.print(true));
         ConversationEmail? view = action_target_to_view(param);
         if (view != null && view.attachments_pane != null) {
-            debug("XXX really save all");
             view.attachments_pane.save_all();
         }
     }

@@ -67,19 +67,62 @@ private class UintArgument : Object, Argument {
  * expectations, such that the mock method should throw a specific
  * error or return a specific value or object.
  */
-public class ExpectedCall : Object {
+public class ExpectedCall : GLib.Object {
 
 
+    /** Options for handling async calls. */
+    public enum AsyncCallOptions {
+
+        /** Check and return from the expected call immediately. */
+        CONTINUE,
+
+        /**
+         * Check and return from the expected call when idle.
+         *
+         * This will yield when the call is made, being resuming when
+         * idle.
+         */
+        CONTINUE_AT_IDLE,
+
+        /**
+         * Check and return from the expected call when requested.
+         *
+         * This will yield when the call is made, resuming when {@link
+         * ExpectedCall.async_resume} is called.
+         */
+        PAUSE;
+
+    }
+
+
+    /** The name of the expected call. */
     public string name { get; private set; }
-    public Error? throw_error { get; private set; default = null; }
-    public Object? return_object { get; private set; default = null; }
-    public Variant? return_value { get; private set; default = null; }
 
+    /** Determines how async calls are handled. */
+    public AsyncCallOptions async_behaviour {
+        get; private set; default = CONTINUE;
+    }
+
+    /** The error to be thrown by the call, if any. */
+    public GLib.Error? throw_error { get; private set; default = null; }
+
+    /** An object to be returned by the call, if any. */
+    public GLib.Object? return_object { get; private set; default = null; }
+
+    /** A value to be returned by the call, if any. */
+    public GLib.Variant? return_value { get; private set; default = null; }
+
+    /** Determines if the call has been made or not. */
     public bool was_called { get; private set; default = false; }
 
+    /** Determines if an async call has been resumed or not. */
+    public bool async_resumed { get; private set; default = false; }
+
     // XXX Arrays can't be GObject properties :(
-    internal Object[]? expected_args = null;
-    private Object[]? called_args = null;
+    internal GLib.Object[]? expected_args = null;
+    private GLib.Object[]? called_args = null;
+
+    internal unowned GLib.SourceFunc? async_callback = null;
 
 
     internal ExpectedCall(string name, Object[]? args) {
@@ -87,21 +130,50 @@ public class ExpectedCall : Object {
         this.expected_args = args;
     }
 
+    /** Sets the behaviour for an async call. */
+    public ExpectedCall async_call(AsyncCallOptions behaviour) {
+        this.async_behaviour = behaviour;
+        return this;
+    }
+
+    /** Sets an object that the call should return. */
     public ExpectedCall returns_object(Object value) {
         this.return_object = value;
         return this;
     }
 
+    /** Sets a bool value that the call should return. */
     public ExpectedCall returns_boolean(bool value) {
         this.return_value = new GLib.Variant.boolean(value);
         return this;
     }
 
-    public ExpectedCall @throws(Error err) {
+    /** Sets an error that the cal should throw. */
+    public ExpectedCall @throws(GLib.Error err) {
         this.throw_error = err;
         return this;
     }
 
+    /**
+     * Resumes an async call that has been paused.
+     *
+     * Throws an assertion error if the call has not yet been called
+     * or has not been paused.
+     */
+    public void async_resume() throws GLib.Error {
+        assert_true(
+            this.async_callback != null,
+            "Async call not called, could not resume"
+        );
+        assert_false(
+            this.async_resumed,
+            "Async call already resumed"
+        );
+        this.async_resumed = true;
+        this.async_callback();
+    }
+
+    /** Determines if an argument was given in the specific position. */
     public T called_arg<T>(int pos) throws GLib.Error {
         assert_true(
             this.called_args != null && this.called_args.length >= (pos + 1),
@@ -149,7 +221,7 @@ public class ExpectedCall : Object {
  * assert_expectations} to ensure that the actual calls made matched
  * those expected.
  */
-public interface MockObject {
+public interface MockObject : GLib.Object {
 
 
     public static Object box_arg<T>(T value) {
@@ -184,39 +256,70 @@ public interface MockObject {
     }
 
     protected bool boolean_call(string name, Object[] args, bool default_return)
-        throws Error {
+        throws GLib.Error {
         ExpectedCall? expected = call_made(name, args);
+        return check_boolean_call(expected, default_return);
+    }
 
-        bool return_value = default_return;
-        if (expected.return_value != null) {
-            return_value = expected.return_value.get_boolean();
+    protected async bool boolean_call_async(string name,
+                                            Object[] args,
+                                            bool default_return)
+        throws GLib.Error {
+        ExpectedCall? expected = call_made(name, args);
+        if (async_call_yield(expected, this.boolean_call_async.callback)) {
+            yield;
         }
-        return return_value;
+        return check_boolean_call(expected, default_return);
     }
 
     protected R object_call<R>(string name, Object[] args, R default_return)
-        throws Error {
-        ExpectedCall? expected = call_made(name, args);
-
-        R? return_object = default_return;
-        if (expected.return_object != null) {
-            return_object = (R) expected.return_object;
-        }
-        return return_object;
-    }
-
-    protected R object_or_throw_call<R>(string name, Object[] args, GLib.Error default_error)
         throws GLib.Error {
         ExpectedCall? expected = call_made(name, args);
-
-        if (expected.return_object == null) {
-            throw default_error;
-        }
-        return expected.return_object;
+        return check_object_call(expected, default_return);
     }
 
-    protected void void_call(string name, Object[] args) throws Error {
-        call_made(name, args);
+    protected async R object_call_async<R>(string name,
+                                           Object[] args,
+                                           R default_return)
+        throws GLib.Error {
+        ExpectedCall? expected = call_made(name, args);
+        if (async_call_yield(expected, this.object_call_async.callback)) {
+            yield;
+        }
+        return check_object_call(expected, default_return);
+    }
+
+    protected R object_or_throw_call<R>(string name,
+                                        Object[] args,
+                                        GLib.Error default_error)
+        throws GLib.Error {
+        ExpectedCall? expected = call_made(name, args);
+        return check_object_or_throw_call(expected, default_error);
+    }
+
+    protected async R object_or_throw_call_async<R>(string name,
+                                                    Object[] args,
+                                                    GLib.Error default_error)
+        throws GLib.Error {
+        ExpectedCall? expected = call_made(name, args);
+        if (async_call_yield(expected, this.object_or_throw_call_async.callback)) {
+            yield;
+        }
+        return check_object_or_throw_call(expected, default_error);
+    }
+
+    protected void void_call(string name, Object[] args) throws GLib.Error {
+        ExpectedCall? expected = call_made(name, args);
+        check_for_exception(expected);
+    }
+
+    protected async void void_call_async(string name, Object[] args)
+        throws GLib.Error {
+        ExpectedCall? expected = call_made(name, args);
+        if (async_call_yield(expected, this.void_call_async.callback)) {
+            yield;
+        }
+        check_for_exception(expected);
     }
 
     private ExpectedCall? call_made(string name, Object[] args) throws Error {
@@ -229,11 +332,6 @@ public interface MockObject {
         }
 
         expected.called(args);
-
-        if (expected.throw_error != null) {
-            throw expected.throw_error;
-        }
-
         return expected;
     }
 
@@ -278,6 +376,67 @@ public interface MockObject {
             expected_args.length, actual_args.length,
             "%s: argument list length".printf(context)
         );
+    }
+
+    private bool async_call_yield(ExpectedCall expected,
+                                  GLib.SourceFunc @callback) {
+        var @yield = false;
+        if (expected.async_behaviour != CONTINUE) {
+            expected.async_callback = @callback;
+            if (expected.async_behaviour == CONTINUE_AT_IDLE) {
+                GLib.Idle.add(() => {
+                        try {
+                            expected.async_resume();
+                        } catch (GLib.Error err) {
+                            critical(
+                                "Async call already resumed: %s", err.message
+                            );
+                        }
+                        return GLib.Source.REMOVE;
+                    });
+            }
+            @yield = true;
+        }
+        return @yield;
+    }
+
+    private inline bool check_boolean_call(ExpectedCall expected,
+                                           bool default_return)
+        throws GLib.Error {
+        check_for_exception(expected);
+        bool return_value = default_return;
+        if (expected.return_value != null) {
+            return_value = expected.return_value.get_boolean();
+        }
+        return return_value;
+    }
+
+    private inline R check_object_call<R>(ExpectedCall expected,
+                                          R default_return)
+        throws GLib.Error {
+        check_for_exception(expected);
+        R? return_object = default_return;
+        if (expected.return_object != null) {
+            return_object = (R) expected.return_object;
+        }
+        return return_object;
+    }
+
+    private inline R check_object_or_throw_call<R>(ExpectedCall expected,
+                                                   GLib.Error default_error)
+        throws GLib.Error {
+        check_for_exception(expected);
+        if (expected.return_object == null) {
+            throw default_error;
+        }
+        return expected.return_object;
+    }
+
+    private inline void check_for_exception(ExpectedCall expected)
+        throws GLib.Error {
+        if (expected.throw_error != null) {
+            throw expected.throw_error;
+        }
     }
 
 }

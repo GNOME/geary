@@ -33,18 +33,18 @@ class Integration.Imap.ClientSession : TestCase {
     }
 
     public override void tear_down() throws GLib.Error {
-        if (this.session.get_protocol_state(null) != NOT_CONNECTED) {
-            this.session.disconnect_async.begin(null, async_complete_full);
+        if (this.session.get_protocol_state() != NOT_CONNECTED) {
+            this.session.disconnect_async.begin(null, this.async_completion);
             this.session.disconnect_async.end(async_result());
         }
         this.session = null;
     }
 
     public void session_connect() throws GLib.Error {
-        this.session.connect_async.begin(null, async_complete_full);
+        this.session.connect_async.begin(2, null, this.async_completion);
         this.session.connect_async.end(async_result());
 
-        this.session.disconnect_async.begin(null, async_complete_full);
+        this.session.disconnect_async.begin(null, this.async_completion);
         this.session.disconnect_async.end(async_result());
     }
 
@@ -55,7 +55,7 @@ class Integration.Imap.ClientSession : TestCase {
             PASSWORD, "automated-integration-test", "password"
         );
         this.session.login_async.begin(
-            password_creds, null, async_complete_full
+            password_creds, null, this.async_completion
         );
         try {
             this.session.login_async.end(async_result());
@@ -78,7 +78,7 @@ class Integration.Imap.ClientSession : TestCase {
             OAUTH2, "automated-integration-test", "password"
         );
         this.session.login_async.begin(
-            oauth2_creds, null, async_complete_full
+            oauth2_creds, null, this.async_completion
         );
         try {
             this.session.login_async.end(async_result());
@@ -92,13 +92,13 @@ class Integration.Imap.ClientSession : TestCase {
         do_connect();
 
         this.session.initiate_session_async.begin(
-            this.config.credentials, null, async_complete_full
+            this.config.credentials, null, this.async_completion
         );
         this.session.initiate_session_async.end(async_result());
     }
 
     private void do_connect() throws GLib.Error {
-        this.session.connect_async.begin(null, async_complete_full);
+        this.session.connect_async.begin(5, null, this.async_completion);
         this.session.connect_async.end(async_result());
     }
 

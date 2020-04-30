@@ -38,7 +38,7 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
         Gtk.EventBox drag_box = new Gtk.EventBox();
         drag_box.add(
             new Gtk.Image.from_icon_name(
-                "open-menu-symbolic", Gtk.IconSize.BUTTON
+                "list-drag-handle-symbolic", Gtk.IconSize.BUTTON
             )
         );
         this.drag_handle = new Gtk.Grid();
@@ -417,7 +417,8 @@ internal interface Accounts.ValidatingRow : EditorRow {
      *
      * This is only called when the row's value has changed, is
      * valid, and the user has activated or changed to a different
-     * row. */
+     * row.
+     */
     protected virtual void commit() {
         // noop
     }
@@ -590,7 +591,7 @@ internal class Accounts.EditorPopover : Gtk.Popover {
         this.closed.disconnect(on_closed);
     }
 
-    /** {@inheritdoc} */
+    /** {@inheritDoc} */
     public new void popup() {
         // Work-around GTK+ issue #1138
         Gtk.Widget target = get_relative_to();

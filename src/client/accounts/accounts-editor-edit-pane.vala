@@ -718,7 +718,7 @@ internal class Accounts.RemoveMailboxCommand : Application.Command {
 internal class Accounts.SignatureChangedCommand : Application.Command {
 
 
-    private Components.WebView signature_view;
+    private ClientWebView signature_view;
     private Geary.AccountInformation account;
 
     private string old_value;
@@ -728,7 +728,7 @@ internal class Accounts.SignatureChangedCommand : Application.Command {
     private bool new_enabled = false;
 
 
-    public SignatureChangedCommand(Components.WebView signature_view,
+    public SignatureChangedCommand(ClientWebView signature_view,
                                    Geary.AccountInformation account) {
         this.signature_view = signature_view;
         this.account = account;

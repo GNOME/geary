@@ -32,14 +32,22 @@ public class GearyWebExtension : Object {
 
     private const string[] ALLOWED_SCHEMES = { "cid", "geary", "data", "blob" };
 
-    private const string REMOTE_LOAD_VAR = "_gearyAllowRemoteResourceLoads";
-
     private WebKit.WebExtension extension;
 
 
     public GearyWebExtension(WebKit.WebExtension extension) {
         this.extension = extension;
-        extension.page_created.connect(on_page_created);
+        extension.page_created.connect((extension, web_page) => {
+                web_page.console_message_sent.connect(on_console_message);
+                web_page.send_request.connect(on_send_request);
+                // XXX investigate whether the earliest supported
+                // version of WK supports the DOM "selectionchanged"
+                // event, and if so use that rather that doing it in
+                // here in the extension
+                web_page.get_editor().selection_changed.connect(() => {
+                    selection_changed(web_page);
+                });
+            });
     }
 
     // XXX Conditionally enable while we still depend on WK2 <2.12
@@ -81,7 +89,14 @@ public class GearyWebExtension : Object {
         WebKit.Frame frame = page.get_main_frame();
         JSC.Context context = frame.get_js_context();
         try {
-            should_load = Util.JS.to_bool(context.get_value(REMOTE_LOAD_VAR));
+            JSC.Value ret = execute_script(
+                context,
+                "geary.allowRemoteImages",
+                GLib.Log.FILE,
+                GLib.Log.METHOD,
+                GLib.Log.LINE
+            );
+            should_load = Util.JS.to_bool(ret);
         } catch (GLib.Error err) {
             debug(
                 "Error checking PageState::allowRemoteImages: %s",
@@ -137,26 +152,6 @@ public class GearyWebExtension : Object {
         );
         Util.JS.check_exception(context);
         return ret;
-    }
-
-    private void on_page_created(WebKit.WebExtension extension,
-                                 WebKit.WebPage page) {
-        WebKit.Frame frame = page.get_main_frame();
-        JSC.Context context = frame.get_js_context();
-        context.set_value(
-            REMOTE_LOAD_VAR,
-            new JSC.Value.boolean(context, false)
-        );
-
-        page.console_message_sent.connect(on_console_message);
-        page.send_request.connect(on_send_request);
-        // XXX investigate whether the earliest supported
-        // version of WK supports the DOM "selectionchanged"
-        // event, and if so use that rather that doing it in
-        // here in the extension
-        page.get_editor().selection_changed.connect(() => {
-                selection_changed(page);
-            });
     }
 
 }

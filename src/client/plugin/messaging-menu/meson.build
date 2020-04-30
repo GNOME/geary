@@ -18,14 +18,14 @@ if libmessagingmenu_dep.found()
     ]
   )
 
-  plugin_src = join_paths(plugin_name + '.vala')
-  plugin_data = join_paths(plugin_name + '.plugin')
-  plugin_dest = join_paths(plugins_dir, plugin_name)
+  plugin_src = files(plugin_name + '.vala')
+  plugin_data = plugin_name + plugin_data_suffix
+  plugin_dest = plugins_dir / plugin_name
 
   shared_module(
     # Use a non-standard name for the lib since the standard one
     # conflicts with libmessagingmenu and causes linking to fail
-    plugin_name + '-geary',
+    'unity-' + plugin_name,
     sources: plugin_src,
     dependencies: messaging_menu_dependencies,
     include_directories: config_h_dir,
@@ -36,7 +36,7 @@ if libmessagingmenu_dep.found()
   )
 
   i18n.merge_file(
-    input: plugin_data + '.in',
+    input: files(plugin_data + plugin_data_src_suffix),
     output: plugin_data,
     type: 'desktop',
     po_dir: po_dir,

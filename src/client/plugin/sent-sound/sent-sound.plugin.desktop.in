@@ -1,0 +1,4 @@
+[Plugin]
+Module=sent-sound
+Name=Sent Sound
+Description=Plays the desktop sent-mail sound when an email is sent

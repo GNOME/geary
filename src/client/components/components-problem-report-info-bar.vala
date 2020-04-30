@@ -1,34 +1,26 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright © 2017,2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * Displays application-wide or important account-related messages.
+ * Displays a Geary problem report as an info bar.
  */
-[GtkTemplate (ui = "/org/gnome/Geary/main-window-info-bar.ui")]
-public class MainWindowInfoBar : Gtk.InfoBar {
+public class Components.ProblemReportInfoBar : InfoBar {
 
 
     private enum ResponseType { DETAILS, RETRY; }
 
     /** If reporting a problem, returns the problem report else null. */
-    public Geary.ProblemReport? report { get; private set; default = null; }
+    public Geary.ProblemReport report { get; private set; }
 
     /** Emitted when the user clicks the Retry button, if any. */
     public signal void retry();
 
 
-    [GtkChild]
-    private Gtk.Label title;
-
-    [GtkChild]
-    private Gtk.Label description;
-
-
-    public MainWindowInfoBar.for_problem(Geary.ProblemReport report) {
+    public ProblemReportInfoBar(Geary.ProblemReport report) {
         Gtk.MessageType type = Gtk.MessageType.WARNING;
         string title = "";
         string descr = "";
@@ -89,9 +81,12 @@ public class MainWindowInfoBar : Gtk.InfoBar {
             );
         }
 
-        // Only show a close button if retrying not possible
-        this(type, title, descr, (retry == null));
+        base(title, descr);
+        this.message_type = type;
         this.report = report;
+        this.show_close_button = (retry == null);
+
+        this.response.connect(on_info_bar_response);
 
         if (this.report.error != null) {
             // Translators: Button label for viewing technical details
@@ -110,21 +105,6 @@ public class MainWindowInfoBar : Gtk.InfoBar {
         }
     }
 
-    protected MainWindowInfoBar(Gtk.MessageType type,
-                                string title,
-                                string description,
-                                bool show_close) {
-        this.message_type = type;
-        this.title.label = title;
-
-        // Set the label and tooltip for the description in case it is
-        // long enough to be ellipsized
-        this.description.label = description;
-        this.description.tooltip_text = description;
-
-        this.show_close_button = show_close;
-    }
-
     private void show_details() {
         var main = get_toplevel() as Application.MainWindow;
         if (main != null) {
@@ -138,7 +118,6 @@ public class MainWindowInfoBar : Gtk.InfoBar {
         }
     }
 
-    [GtkCallback]
     private void on_info_bar_response(int response) {
         switch(response) {
         case ResponseType.DETAILS:
@@ -147,18 +126,13 @@ public class MainWindowInfoBar : Gtk.InfoBar {
 
         case ResponseType.RETRY:
             retry();
-            this.hide();
+            this.revealed = false;
             break;
 
         default:
-            this.hide();
+            this.revealed = false;
             break;
         }
-    }
-
-    [GtkCallback]
-    private void on_hide() {
-        this.parent.remove(this);
     }
 
 }

@@ -159,10 +159,9 @@ int main(string[] args) {
     }
 
     stdout.printf("Enabling debug: %s\n", arg_debug.to_string());
+    Geary.Logging.init();
     if (arg_debug) {
-        Geary.Logging.init();
         Geary.Logging.log_to(stdout);
-        Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
         GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
     }
 

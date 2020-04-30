@@ -39,6 +39,10 @@ int main(string[] args) {
     Geary.RFC822.init();
     Geary.HTML.init();
     Geary.Logging.init();
+    if (GLib.Test.verbose()) {
+        GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
+        Geary.Logging.log_to(GLib.stdout);
+    }
 
     /*
      * Hook up all tests into appropriate suites
@@ -51,9 +55,9 @@ int main(string[] args) {
     client.add_suite(new Accounts.ManagerTest().get_suite());
     client.add_suite(new Application.ClientTest().get_suite());
     client.add_suite(new Application.ConfigurationTest().get_suite());
-    client.add_suite(new Components.ValidatorTest().get_suite());
-    client.add_suite(new Components.WebViewTest().get_suite());
+    client.add_suite(new ClientWebViewTest().get_suite());
     client.add_suite(new Composer.WebViewTest().get_suite());
+    client.add_suite(new Components.ValidatorTest().get_suite());
     client.add_suite(new Util.Avatar.Test().get_suite());
     client.add_suite(new Util.Cache.Test().get_suite());
     client.add_suite(new Util.Email.Test().get_suite());
@@ -61,7 +65,7 @@ int main(string[] args) {
 
     TestSuite js = new TestSuite("js");
 
-    js.add_suite(new Components.PageStateTest().get_suite());
+    js.add_suite(new ClientPageStateTest().get_suite());
     js.add_suite(new Composer.PageStateTest().get_suite());
     js.add_suite(new ConversationPageStateTest().get_suite());
 

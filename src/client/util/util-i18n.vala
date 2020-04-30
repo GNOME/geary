@@ -1,14 +1,19 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 extern const string _LANGUAGE_SUPPORT_DIRECTORY;
 extern const string _ISO_CODE_639_XML;
 extern const string _ISO_CODE_3166_XML;
 
-namespace Util.International {
+/**
+ * Internationalisation support functions.
+ */
+namespace Util.I18n {
 
     private GLib.HashTable<string, string> language_names = null;
     private GLib.HashTable<string, string> country_names = null;
@@ -240,6 +245,65 @@ namespace Util.International {
         string country_name  = GLib.dgettext("iso_3166", country_names.get(locale.substring(pos+1)));
 
         return country_name;
+    }
+
+    /**
+     * Returns the localised display name name for specific folder.
+     *
+     * If the folder has a special type, the result of {@link
+     * to_folder_type_display_name} is returned, otherwise the last
+     * folder path step is returned.
+     */
+    public string? to_folder_display_name(Geary.Folder folder) {
+        var name = to_folder_type_display_name(folder.used_as);
+        if (Geary.String.is_empty_or_whitespace(name)) {
+            name = folder.path.name;
+        }
+        return name;
+    }
+
+    /**
+     * Returns the localised name for a specific folder type, if any.
+     */
+    public unowned string? to_folder_type_display_name(Geary.Folder.SpecialUse use) {
+        switch (use) {
+            case INBOX:
+                return _("Inbox");
+
+            case DRAFTS:
+                return _("Drafts");
+
+            case SENT:
+                return _("Sent");
+
+            case FLAGGED:
+                return _("Starred");
+
+            case IMPORTANT:
+                return _("Important");
+
+            case ALL_MAIL:
+                return _("All Mail");
+
+            case JUNK:
+                return _("Junk");
+
+            case TRASH:
+                return _("Trash");
+
+            case OUTBOX:
+                return _("Outbox");
+
+            case SEARCH:
+                return _("Search");
+
+            case ARCHIVE:
+                return _("Archive");
+
+            case NONE:
+            default:
+                return null;
+        }
     }
 
 }

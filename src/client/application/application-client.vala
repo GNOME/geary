@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2019-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -31,7 +31,7 @@ public class Application.Client : Gtk.Application {
     public const string SCHEMA_ID = "org.gnome.Geary";
     public const string DESCRIPTION = _("Send and receive email");
     public const string COPYRIGHT_1 = _("Copyright 2016 Software Freedom Conservancy Inc.");
-    public const string COPYRIGHT_2 = _("Copyright 2016-2019 Geary Development Team.");
+    public const string COPYRIGHT_2 = _("Copyright 2016-2020 Geary Development Team.");
     public const string WEBSITE = "https://wiki.gnome.org/Apps/Geary";
     public const string WEBSITE_LABEL = _("Visit the Geary web site");
     public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
@@ -53,6 +53,9 @@ public class Application.Client : Gtk.Application {
         null
     };
 
+    /** Default size of avatar images, in virtual pixels */
+    public const int AVATAR_SIZE_PIXELS = 48;
+
     // Local-only command line options
     private const string OPTION_VERSION = "version";
 
@@ -62,10 +65,9 @@ public class Application.Client : Gtk.Application {
     private const string OPTION_LOG_CONVERSATIONS = "log-conversations";
     private const string OPTION_LOG_DESERIALIZER = "log-deserializer";
     private const string OPTION_LOG_FOLDER_NORM = "log-folder-normalization";
-    private const string OPTION_LOG_NETWORK = "log-network";
-    private const string OPTION_LOG_PERIODIC = "log-periodic";
+    private const string OPTION_LOG_IMAP = "log-imap";
     private const string OPTION_LOG_REPLAY_QUEUE = "log-replay-queue";
-    private const string OPTION_LOG_SERIALIZER = "log-serializer";
+    private const string OPTION_LOG_SMTP = "log-smtp";
     private const string OPTION_LOG_SQL = "log-sql";
     private const string OPTION_HIDDEN = "hidden";
     private const string OPTION_NEW_WINDOW = "new-window";
@@ -82,7 +84,7 @@ public class Application.Client : Gtk.Application {
         { Action.Application.NEW_WINDOW, on_activate_new_window },
         { Action.Application.PREFERENCES, on_activate_preferences},
         { Action.Application.QUIT, on_activate_quit},
-        { Action.Application.SHOW_EMAIL, on_activate_show_email, "(svv)"},
+        { Action.Application.SHOW_EMAIL, on_activate_show_email, "(sv)"},
         { Action.Application.SHOW_FOLDER, on_activate_show_folder, "(sv)"}
     };
 
@@ -108,22 +110,17 @@ public class Application.Client : Gtk.Application {
           /// Command line option. "Normalization" can also be called
           /// "synchronization".
           N_("Log folder normalization"), null },
-        { OPTION_LOG_NETWORK, 0, 0, GLib.OptionArg.NONE, null,
+        { OPTION_LOG_IMAP, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
-          N_("Log network activity"), null },
-        { OPTION_LOG_PERIODIC, 0, 0, GLib.OptionArg.NONE, null,
-          /// Command line option
-          N_("Log periodic activity"), null },
+          N_("Log IMAP network activity"), null },
         { OPTION_LOG_REPLAY_QUEUE, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option. The IMAP replay queue is how changes
           /// on the server are replicated on the client.  It could
           /// also be called the IMAP events queue.
           N_("Log IMAP replay queue"), null },
-        { OPTION_LOG_SERIALIZER, 0, 0, GLib.OptionArg.NONE, null,
-          /// Command line option. Serialization is how commands and
-          /// responses are converted into a stream of bytes for
-          /// network transmission
-          N_("Log IMAP network serialization"), null },
+        { OPTION_LOG_SMTP, 0, 0, GLib.OptionArg.NONE, null,
+          /// Command line option
+          N_("Log SMTP network activity"), null },
         { OPTION_LOG_SQL, 0, 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Log database queries (generates lots of messages)"), null },
@@ -381,7 +378,7 @@ public class Application.Client : Gtk.Application {
 
     public override void startup() {
         Environment.set_application_name(NAME);
-        Util.International.init(GETTEXT_PACKAGE, this.binary);
+        Util.I18n.init(GETTEXT_PACKAGE, this.binary);
         Util.Date.init();
 
         Configuration.init(this.is_installed, GSETTINGS_DIR);
@@ -516,7 +513,7 @@ public class Application.Client : Gtk.Application {
                         mailto.substring(B0RKED_GLIB_MAILTO_PREFIX.length)
                     );
                 }
-                this.new_composer.begin(mailto);
+                this.new_composer_mailto.begin(mailto);
             }
         }
     }
@@ -603,15 +600,105 @@ public class Application.Client : Gtk.Application {
         this.controller.expunge_accounts.begin();
     }
 
-    public async void show_email(Geary.Folder? folder,
-                                 Geary.EmailIdentifier id) {
+    /**
+     * Displays a specific email in a main window.
+     *
+     * This method is invoked by the application `show-email`
+     * action. A folder containing the email will be selected if the
+     * current folder does not select it.
+     *
+     * The email is identified by the given variant, which can be
+     * obtained by calling {@link Plugin.EmailIdentifier.to_variant}.
+     */
+    public async void show_email(GLib.Variant? id) {
         MainWindow main = yield this.present();
-        main.show_email.begin(folder, Geary.Collection.single(id), true);
+        if (id != null) {
+            EmailStoreFactory email = this.controller.plugins.email_factory;
+            AccountContext? context = email.get_account_from_variant(id);
+            Geary.EmailIdentifier? email_id =
+                email.get_email_identifier_from_variant(id);
+            if (context != null && email_id != null) {
+                // Determine what folders the email is in
+                Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? folders = null;
+                try {
+                    folders = yield context.account.get_containing_folders_async(
+                        Geary.Collection.single(email_id),
+                        context.cancellable
+                    );
+                } catch (GLib.Error err) {
+                    warning("Error listing folders for email: %s", err.message);
+                }
+                if (folders != null) {
+                    // Determine what folder containing the email
+                    // should be selected. If the current folder
+                    // contains the email then use that, else use the
+                    // inbox if that contains it, else use the first
+                    // path found
+                    var paths = folders.get(email_id);
+                    Geary.Folder? selected = main.selected_folder;
+                    if (selected == null ||
+                        selected.account != context.account ||
+                        !(selected.path in paths)) {
+                        selected = null;
+                        foreach (var path in paths) {
+                            try {
+                                Geary.Folder folder =
+                                    context.account.get_folder(path);
+                                if (folder.used_as == INBOX) {
+                                    selected = folder;
+                                    break;
+                                }
+                            } catch (GLib.Error err) {
+                                warning(
+                                    "Error getting folder for email: %s",
+                                    err.message
+                                );
+                            }
+                        }
+
+                        if (selected == null && !paths.is_empty) {
+                            try {
+                                selected = context.account.get_folder(
+                                    Geary.Collection.first(paths)
+                                );
+                            } catch (GLib.Error err) {
+                                warning(
+                                    "Error getting folder for email: %s",
+                                    err.message
+                                );
+                            }
+                        }
+                    }
+
+                    if (selected != null) {
+                        yield main.show_email(
+                            selected,
+                            Geary.Collection.single(email_id),
+                            true
+                        );
+                    }
+                }
+            }
+        }
     }
 
-    public async void show_folder(Geary.Folder? folder) {
+    /**
+     * Selects a specific folder in a main window.
+     *
+     * This method is invoked by the application `show-folder` action.
+     *
+     * The folder is identified by the given variant, which can be
+     * obtained by calling {@link Plugin.Folder.to_variant}.
+     */
+    public async void show_folder(GLib.Variant? id) {
         MainWindow main = yield this.present();
-        yield main.select_folder(folder, true);
+        if (id != null) {
+            Geary.Folder? folder =
+                this.controller.plugins.folders_factory.get_folder_from_variant(id);
+            if (folder != null) {
+                yield main.select_folder(folder, true);
+            }
+        }
     }
 
     public async void show_inspector() {
@@ -632,15 +719,20 @@ public class Application.Client : Gtk.Application {
         yield this.present();
 
         Components.PreferencesWindow prefs = new Components.PreferencesWindow(
-            get_active_main_window()
+            get_active_main_window(),
+            this.controller.plugins
         );
         prefs.show();
     }
 
-    public async void new_composer(string? mailto) {
+    public async void new_composer(Geary.RFC822.MailboxAddress? to = null) {
         yield this.present();
+        yield this.controller.compose_new_email(to);
+    }
 
-        this.controller.compose(mailto);
+    public async void new_composer_mailto(string? mailto) {
+        yield this.present();
+        yield this.controller.compose_mailto(mailto);
     }
 
     public async void new_window(Geary.Folder? select_folder,
@@ -736,7 +828,7 @@ public class Application.Client : Gtk.Application {
         yield create_controller();
 
         if (uri.down().has_prefix(MAILTO_URI_SCHEME_PREFIX)) {
-            yield this.new_composer(uri);
+            yield this.new_composer_mailto(uri);
         } else {
             string uri_ = uri;
             // Support web URLs that omit the protocol.
@@ -913,23 +1005,43 @@ public class Application.Client : Gtk.Application {
 
         bool activated = false;
 
-        // Logging flags
-        if (options.contains(OPTION_LOG_NETWORK))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
-        if (options.contains(OPTION_LOG_SERIALIZER))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
-        if (options.contains(OPTION_LOG_REPLAY_QUEUE))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.REPLAY);
-        if (options.contains(OPTION_LOG_CONVERSATIONS))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.CONVERSATIONS);
-        if (options.contains(OPTION_LOG_PERIODIC))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.PERIODIC);
-        if (options.contains(OPTION_LOG_SQL))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.SQL);
-        if (options.contains(OPTION_LOG_FOLDER_NORM))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.FOLDER_NORMALIZATION);
-        if (options.contains(OPTION_LOG_DESERIALIZER))
-            Geary.Logging.enable_flags(Geary.Logging.Flag.DESERIALIZER);
+        // Suppress some noisy domains from third-party libraries
+        Geary.Logging.suppress_domain("GdkPixbuf");
+        Geary.Logging.suppress_domain("GLib-Net");
+
+        // Suppress the engine's sub-domains that are extremely
+        // verbose by default unless requested not to do so
+        if (!options.contains(OPTION_LOG_CONVERSATIONS)) {
+            Geary.Logging.suppress_domain(
+                Geary.App.ConversationMonitor.LOGGING_DOMAIN
+            );
+        }
+        if (!options.contains(OPTION_LOG_DESERIALIZER)) {
+            Geary.Logging.suppress_domain(
+                Geary.Imap.ClientService.DESERIALISATION_LOGGING_DOMAIN
+            );
+        }
+        if (!options.contains(OPTION_LOG_IMAP)) {
+            Geary.Logging.suppress_domain(
+                Geary.Imap.ClientService.PROTOCOL_LOGGING_DOMAIN
+            );
+        }
+        if (!options.contains(OPTION_LOG_REPLAY_QUEUE)) {
+            Geary.Logging.suppress_domain(
+                Geary.Imap.ClientService.REPLAY_QUEUE_LOGGING_DOMAIN
+            );
+        }
+        if (!options.contains(OPTION_LOG_SMTP)) {
+            Geary.Logging.suppress_domain(
+                Geary.Smtp.ClientService.PROTOCOL_LOGGING_DOMAIN
+            );
+        }
+        if (options.contains(OPTION_LOG_SQL)) {
+            Geary.Db.Context.enable_sql_logging = true;
+        } else {
+            Geary.Logging.suppress_domain(Geary.Db.Context.LOGGING_DOMAIN);
+        }
+
         if (options.contains(OPTION_HIDDEN)) {
             warning(
                 /// Warning printed to the console when a deprecated
@@ -1019,22 +1131,6 @@ public class Application.Client : Gtk.Application {
         }
     }
 
-    private Geary.Folder? get_folder_from_action_target(GLib.Variant target) {
-        Geary.Folder? folder = null;
-        string id = (string) target.get_child_value(0);
-        try {
-            Geary.Account account = this.engine.get_account_for_id(id);
-            Geary.FolderPath? path =
-                account.to_folder_path(
-                    target.get_child_value(1).get_variant()
-                );
-            folder = account.get_folder(path);
-        } catch (GLib.Error err) {
-            debug("Could not find account/folder %s", err.message);
-        }
-        return folder;
-    }
-
     private void load_css(Gtk.CssProvider provider, string resource_uri) {
         provider.parsing_error.connect(on_css_parse_error);
         try {
@@ -1054,7 +1150,7 @@ public class Application.Client : Gtk.Application {
     }
 
     private void on_activate_compose() {
-        this.new_composer.begin(null);
+        this.new_composer.begin();
     }
 
     private void on_activate_inspect() {
@@ -1063,7 +1159,7 @@ public class Application.Client : Gtk.Application {
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
         if (param != null) {
-            this.new_composer.begin(param.get_string());
+            this.new_composer_mailto.begin(param.get_string());
         }
     }
 
@@ -1087,35 +1183,12 @@ public class Application.Client : Gtk.Application {
 
     private void on_activate_show_email(GLib.SimpleAction action,
                                         GLib.Variant? target) {
-        if (target != null) {
-            // Target is a (account_id,folder_path,email_id) tuple
-            Geary.Folder? folder = get_folder_from_action_target(target);
-            Geary.EmailIdentifier? email_id = null;
-            if (folder != null) {
-                try {
-                    email_id = folder.account.to_email_identifier(
-                        target.get_child_value(2).get_variant()
-                    );
-                } catch (GLib.Error err) {
-                    debug("Could not find email id: %s", err.message);
-                }
-
-                if (email_id != null) {
-                    this.show_email.begin(folder, email_id);
-                }
-            }
-        }
+        this.show_email.begin(target);
     }
 
     private void on_activate_show_folder(GLib.SimpleAction action,
-                                        GLib.Variant? target) {
-        if (target != null) {
-            // Target is a (account_id,folder_path) tuple
-            Geary.Folder? folder = get_folder_from_action_target(target);
-            if (folder != null) {
-                this.show_folder.begin(folder);
-            }
-        }
+                                         GLib.Variant? target) {
+        this.show_folder.begin(target);
     }
 
     private void on_activate_help() {

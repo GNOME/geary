@@ -5,11 +5,10 @@
  */
 
 public interface Sidebar.Entry : Object {
-    public signal void sidebar_name_changed(string name);
 
-    public signal void sidebar_tooltip_changed(string? tooltip);
 
-    public signal void sidebar_count_changed(int count);
+    public signal void entry_changed();
+
 
     public abstract string get_sidebar_name();
 
@@ -36,8 +35,6 @@ public interface Sidebar.SelectableEntry : Sidebar.Entry {
 }
 
 public interface Sidebar.RenameableEntry : Sidebar.Entry {
-    public signal void sidebar_name_changed(string name);
-
     public abstract void rename(string new_name);
 
     // Return true to allow the user to rename the sidebar entry in the UI.
@@ -45,8 +42,6 @@ public interface Sidebar.RenameableEntry : Sidebar.Entry {
 }
 
 public interface Sidebar.EmphasizableEntry : Sidebar.Entry {
-    public signal void is_emphasized_changed(bool emphasized);
-
     public abstract bool is_emphasized();
 }
 

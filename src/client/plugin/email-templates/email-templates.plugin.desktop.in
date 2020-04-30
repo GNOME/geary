@@ -1,0 +1,4 @@
+[Plugin]
+Module=email-templates
+Name=Email Templates
+Description=Create reusable templates for sending email

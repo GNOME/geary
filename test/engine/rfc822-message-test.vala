@@ -57,8 +57,11 @@ This is the second line.
         add_test("get_recipients", get_recipients);
         add_test("get_searchable_body", get_searchable_body);
         add_test("get_searchable_recipients", get_searchable_recipients);
-        add_test("get_network_buffer", get_network_buffer);
+        add_test("from_composed_email", from_composed_email);
         add_test("from_composed_email_inline_attachments", from_composed_email_inline_attachments);
+        add_test("get_network_buffer", get_network_buffer);
+        add_test("get_network_buffer_dot_stuff", get_network_buffer_dot_stuff);
+        add_test("get_network_buffer_long_ascii_line", get_network_buffer_long_ascii_line);
     }
 
     public void basic_message_from_buffer() throws Error {
@@ -209,8 +212,110 @@ This is the second line.
 
     public void get_network_buffer() throws Error {
         Message test = resource_to_message(BASIC_TEXT_PLAIN);
-        Memory.Buffer buffer =  test.get_network_buffer(true);
+        Memory.Buffer buffer = test.get_network_buffer(true);
         assert_true(buffer.to_string() == NETWORK_BUFFER_EXPECTED, "Network buffer differs");
+    }
+
+    public void get_network_buffer_dot_stuff() throws GLib.Error {
+        RFC822.MailboxAddress to = new RFC822.MailboxAddress(
+            "Test", "test@example.com"
+        );
+        RFC822.MailboxAddress from = new RFC822.MailboxAddress(
+            "Sender", "sender@example.com"
+        );
+        Geary.ComposedEmail composed = new Geary.ComposedEmail(
+            new GLib.DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.single(from)
+        ).set_to(new Geary.RFC822.MailboxAddresses.single(to));
+        composed.body_text = ".newline\n.\n";
+
+        this.message_from_composed_email.begin(
+            composed,
+            this.async_completion
+        );
+        Geary.RFC822.Message message = message_from_composed_email.end(async_result());
+
+        string message_data = message.get_network_buffer(true).to_string();
+        assert_true(message_data.has_suffix("..newline\r\n..\r\n"));
+    }
+
+    public void get_network_buffer_long_ascii_line() throws GLib.Error {
+        RFC822.MailboxAddress to = new RFC822.MailboxAddress(
+            "Test", "test@example.com"
+        );
+        RFC822.MailboxAddress from = new RFC822.MailboxAddress(
+            "Sender", "sender@example.com"
+        );
+        Geary.ComposedEmail composed = new Geary.ComposedEmail(
+            new GLib.DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.single(from)
+        ).set_to(new Geary.RFC822.MailboxAddresses.single(to));
+
+        GLib.StringBuilder buf = new GLib.StringBuilder();
+        for (int i = 0; i < 2000; i++) {
+            buf.append("long ");
+        }
+
+        //composed.body_text = buf.str;
+        composed.body_html = "<p>%s<p>".printf(buf.str);
+
+        this.message_from_composed_email.begin(
+            composed,
+            this.async_completion
+        );
+        Geary.RFC822.Message message = message_from_composed_email.end(async_result());
+
+        string message_data = message.get_network_buffer(true).to_string();
+        foreach (var line in message_data.split("\n")) {
+            assert_true(line.length < 1000, line);
+        }
+    }
+
+    public void from_composed_email() throws GLib.Error {
+        RFC822.MailboxAddress to = new RFC822.MailboxAddress(
+            "Test", "test@example.com"
+        );
+        RFC822.MailboxAddress from = new RFC822.MailboxAddress(
+            "Sender", "sender@example.com"
+        );
+       Geary.ComposedEmail composed = new Geary.ComposedEmail(
+            new GLib.DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.single(from)
+       ).set_to(new Geary.RFC822.MailboxAddresses.single(to));
+       composed.body_text = "hello";
+
+        this.message_from_composed_email.begin(
+            composed,
+            this.async_completion
+        );
+        Geary.RFC822.Message message = message_from_composed_email.end(async_result());
+
+        assert_non_null(message.to, "to");
+        assert_non_null(message.from, "from");
+        assert_non_null(message.date, "date");
+        assert_non_null(message.message_id, "message_id");
+
+        string message_data = message.to_string();
+        assert_true(
+            message_data.contains("To: Test <test@example.com>\n"),
+            "to data"
+        );
+        assert_true(
+            message_data.contains("From: Sender <sender@example.com>\n"),
+            "from data"
+        );
+        assert_true(
+            message_data.contains("Message-Id: "),
+            "message-id data"
+        );
+        assert_true(
+            message_data.contains("Date: "),
+            "date data"
+        );
+        assert_true(
+            message_data.contains("hello\n"),
+            "body data"
+        );
     }
 
     public void from_composed_email_inline_attachments() throws Error {
@@ -238,7 +343,7 @@ This is the second line.
 
         this.message_from_composed_email.begin(
             composed,
-            async_complete_full
+            this.async_completion
         );
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 

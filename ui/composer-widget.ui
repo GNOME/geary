@@ -57,7 +57,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="halign">end</property>
-                            <property name="label" translatable="yes" comments="Geary account mail will be sent from">From</property>
+                            <property name="label" translatable="yes" comments="Geary account mail will be sent from">_From</property>
                             <property name="use_underline">True</property>
                             <property name="justify">right</property>
                             <property name="mnemonic_widget">to_box</property>
@@ -1153,18 +1153,18 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkMenuButton" id="text_format_button">
+                  <object class="GtkMenuButton" id="more_options_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
-                    <property name="menu_model">rich_text_menu</property>
-                    <property name="tooltip_text" translatable="yes">Enable or disable rich text mode</property>
+                    <property name="menu_model">more_options_menu</property>
+                    <property name="tooltip_text" translatable="yes">More options</property>
                     <property name="direction">up</property>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
-                        <property name="icon_name">format-text-bold-symbolic</property>
+                        <property name="icon_name">view-more-symbolic</property>
                       </object>
                     </child>
                   </object>
@@ -1183,7 +1183,7 @@
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
-                        <property name="icon_name">format-text-italic-symbolic</property>
+                        <property name="icon_name">format-toolbar-toggle-symbolic</property>
                       </object>
                     </child>
                   </object>
@@ -1192,7 +1192,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="select_dictionary_button">
+                  <object class="GtkMenuButton" id="select_dictionary_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
@@ -1230,10 +1230,9 @@
             <property name="margin_right">6</property>
             <property name="margin_start">6</property>
             <property name="margin_end">6</property>
-            <property name="margin_top">6</property>
-            <property name="margin_bottom">6</property>
+            <property name="margin_top">0</property>
+            <property name="margin_bottom">3</property>
             <property name="orientation">vertical</property>
-            <property name="spacing">6</property>
             <child>
               <placeholder/>
             </child>
@@ -1298,7 +1297,7 @@
     </section>
   </menu>
 
-  <menu id="rich_text_menu">
+  <menu id="more_options_menu">
     <section>
       <item>
         <attribute name="label" translatable="yes">_Rich Text</attribute>

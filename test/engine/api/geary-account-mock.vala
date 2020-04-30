@@ -107,6 +107,18 @@ public class Geary.MockAccount : Account, MockObject {
         }
     }
 
+    public override async Folder create_personal_folder(
+        string name,
+        Folder.SpecialUse use = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return object_call<Folder>(
+            "create_personal_folder",
+            { box_arg(name), box_arg(use), cancellable },
+            new MockFolder(null, null, null, use, null)
+        );
+    }
+
     public override EmailIdentifier to_email_identifier(GLib.Variant serialised)
         throws EngineError.BAD_PARAMETERS {
         try {
@@ -148,7 +160,7 @@ public class Geary.MockAccount : Account, MockObject {
         } catch (EngineError.NOT_FOUND err) {
             throw err;
         } catch (GLib.Error err) {
-            return new MockFolder(null, null, null, SpecialFolderType.NONE, null);
+            return new MockFolder(null, null, null, NONE, null);
         }
     }
 
@@ -162,7 +174,7 @@ public class Geary.MockAccount : Account, MockObject {
         }
     }
 
-    public override Folder? get_special_folder(SpecialFolderType special) {
+    public override Folder? get_special_folder(Folder.SpecialUse special) {
         try {
             return object_call<Folder?>(
                 "get_special_folder", {box_arg(special)}, null
@@ -172,7 +184,7 @@ public class Geary.MockAccount : Account, MockObject {
         }
     }
 
-    public override async Folder get_required_special_folder_async(SpecialFolderType special,
+    public override async Folder get_required_special_folder_async(Folder.SpecialUse special,
                                                                    Cancellable? cancellable = null)
     throws Error {
         return object_or_throw_call<Folder>(

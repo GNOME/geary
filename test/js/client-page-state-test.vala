@@ -5,24 +5,24 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Components.PageStateTest : WebViewTestCase<WebView> {
+class ClientPageStateTest : ClientWebViewTestCase<ClientWebView> {
 
 
-    private class TestWebView : Components.WebView {
+    private class TestClientWebView : ClientWebView {
 
-        public TestWebView(Application.Configuration config) {
+        public TestClientWebView(Application.Configuration config) {
             base(config);
         }
 
     }
 
 
-    public PageStateTest() {
-        base("Components.PageStateTest");
+    public ClientPageStateTest() {
+        base("ClientPageStateTest");
         add_test("content_loaded", content_loaded);
 
         try {
-            WebView.load_resources(GLib.File.new_for_path("/tmp"));
+            ClientWebView.load_resources(GLib.File.new_for_path("/tmp"));
         } catch (GLib.Error err) {
             assert_not_reached();
         }
@@ -45,7 +45,7 @@ class Components.PageStateTest : WebViewTestCase<WebView> {
         assert(content_loaded_triggered);
     }
 
-    protected override WebView set_up_test_view() {
+    protected override ClientWebView set_up_test_view() {
         WebKit.UserScript test_script;
         test_script = new WebKit.UserScript(
             "var geary = new PageState()",
@@ -55,7 +55,7 @@ class Components.PageStateTest : WebViewTestCase<WebView> {
             null
         );
 
-        WebView view = new TestWebView(this.config);
+        ClientWebView view = new TestClientWebView(this.config);
         view.get_user_content_manager().add_script(test_script);
         return view;
     }

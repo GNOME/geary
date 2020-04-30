@@ -58,10 +58,68 @@
  * Email}).  Additional functionality for Folders is indicated by the
  * presence of {@link FolderSupport} interfaces, include {@link
  * FolderSupport.Remove}, {@link FolderSupport.Copy}, and so forth.
- *
- * @see Geary.SpecialFolderType
  */
 public abstract class Geary.Folder : BaseObject, Logging.Source {
+
+
+    /**
+     * Specifies the use of a specific folder.
+     *
+     * These are populated from a number of sources, including mailbox
+     * names, protocol hints, and special folder implementations.
+     */
+    public enum SpecialUse {
+
+        /** No special type, likely user-created. */
+        NONE,
+
+        // Well-known concrete folders
+
+        /** Denotes the inbox for the account. */
+        INBOX,
+
+        /** Stores email to be kept. */
+        ARCHIVE,
+
+        /** Stores email that has not yet been sent. */
+        DRAFTS,
+
+        /** Stores spam, malware and other kinds of unwanted email. */
+        JUNK,
+
+        /** Stores email that is waiting to be sent. */
+        OUTBOX,
+
+        /** Stores email that has been sent. */
+        SENT,
+
+        /** Stores email that is to be deleted. */
+        TRASH,
+
+        // Virtual folders
+
+        /** A view of all email in an account. */
+        ALL_MAIL,
+
+        /** A view of all flagged/starred email in an account. */
+        FLAGGED,
+
+        /** A view of email the server thinks is important. */
+        IMPORTANT,
+
+        /** A view of email matching some kind of search criteria. */
+        SEARCH,
+
+        /** A folder with an application-defined use. */
+        CUSTOM;
+
+
+        public bool is_outgoing() {
+            return this == SENT || this == OUTBOX;
+        }
+
+    }
+
 
     /**
      * Indicates if a folder has been opened, and if so in which way.
@@ -232,16 +290,19 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     /** The folder path represented by this object. */
     public abstract Geary.FolderPath path { get; }
 
-    /** Determines the type of this folder. */
-    public abstract Geary.SpecialFolderType special_folder_type { get; }
+    /**
+     * Determines the special use of this folder.
+     *
+     * This will be set by the engine and updated as information about
+     * a folders use is discovered and changed.
+     *
+     * @see use_changed
+     * @see set_used_as_custom
+     */
+    public abstract SpecialUse used_as { get; }
 
     /** Monitor for notifying of progress when opening the folder. */
     public abstract Geary.ProgressMonitor opening_monitor { get; }
-
-    /** {@inheritDoc} */
-    public Logging.Flag logging_flags {
-        get; protected set; default = Logging.Flag.ALL;
-    }
 
     /** {@inheritDoc} */
     public Logging.Source? logging_parent {
@@ -390,23 +451,13 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     public signal void email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
 
     /**
-    * Fired when the {@link SpecialFolderType} has changed.
+    * Fired when the folder's special use has changed.
     *
-    * This will usually happen when the local object has been updated with data discovered from the
-    * remote account.
+    * This will usually happen when the local object has been updated
+    * with data discovered from the remote account.
     */
-    public signal void special_folder_type_changed(Geary.SpecialFolderType old_type,
-        Geary.SpecialFolderType new_type);
+    public signal void use_changed(SpecialUse old_use, SpecialUse new_use);
 
-    /**
-     * Fired when the Folder's display name has changed.
-     *
-     * @see get_display_name
-     */
-    public signal void display_name_changed();
-
-    protected Folder() {
-    }
 
     protected virtual void notify_opened(Geary.Folder.OpenState state, int count) {
         opened(state, count);
@@ -453,32 +504,9 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
         email_locally_complete(ids);
     }
 
-    /**
-     * In its default implementation, this will also call {@link notify_display_name_changed} since
-     * that's often the case; if not, subclasses should override.
-     */
-    protected virtual void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
-        Geary.SpecialFolderType new_type) {
-        special_folder_type_changed(old_type, new_type);
-
-        // in default implementation, this may also mean the display name changed; subclasses may
-        // override this behavior, but no way to detect this, so notify
-        notify_display_name_changed();
-    }
-
-    protected virtual void notify_display_name_changed() {
-        display_name_changed();
-    }
-
-    /**
-     * Returns a name suitable for displaying to the user.
-     *
-     * Default is to display the name of the Folder's path, unless it's a special folder,
-     * in which case {@link SpecialFolderType.get_display_name} is returned.
-     */
-    public virtual string get_display_name() {
-        return (special_folder_type == Geary.SpecialFolderType.NONE)
-            ? path.name : special_folder_type.get_display_name();
+    protected virtual void notify_use_changed(SpecialUse old_use,
+                                              SpecialUse new_use) {
+        use_changed(old_use, new_use);
     }
 
     /** Determines if a folder has been opened, and if so in which way. */
@@ -686,6 +714,29 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
      */
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null) throws Error;
+
+    /**
+     * Sets whether this folder has a custom special use.
+     *
+     * If `true`, this set a folder's {@link used_as} property so that
+     * it returns {@link SpecialUse.CUSTOM}. If the folder's existing
+     * special use is not currently set to {@link SpecialUse.NONE}
+     * then {@link EngineError.UNSUPPORTED} is thrown.
+     *
+     * If `false` and the folder's use is currently {@link
+     * SpecialUse.CUSTOM} then it is reset to be {@link
+     * SpecialUse.NONE}, otherwise if the folder's use is something
+     * other than {@link SpecialUse.NONE} then {@link
+     * EngineError.UNSUPPORTED} is thrown.
+     *
+     * If some other engine process causes this folder's use to be
+     * something other than {@link SpecialUse.NONE}, this will
+     * override the custom use.
+     *
+     * @see used_as
+     */
+    public abstract void set_used_as_custom(bool enabled)
+        throws EngineError.UNSUPPORTED;
 
     /** {@inheritDoc} */
     public virtual Logging.State to_logging_state() {

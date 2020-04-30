@@ -66,11 +66,11 @@ public class Geary.Outbox.Folder :
     /**
      * Returns the type of this folder.
      *
-     * This is always {@link Geary.SpecialFolderType.OUTBOX}
+     * This is always {@link Folder.SpecialUse.OUTBOX}
      */
-    public override SpecialFolderType special_folder_type {
+    public override Geary.Folder.SpecialUse used_as {
         get {
-            return Geary.SpecialFolderType.OUTBOX;
+            return OUTBOX;
         }
     }
 
@@ -348,6 +348,11 @@ public class Geary.Outbox.Folder :
             throw new EngineError.NOT_FOUND("No message with ID %s in outbox", id.to_string());
 
         return row_to_email(row);
+    }
+
+    public override void set_used_as_custom(bool enabled)
+        throws EngineError.UNSUPPORTED {
+        throw new EngineError.UNSUPPORTED("Folder special use cannot be changed");
     }
 
     internal async void
