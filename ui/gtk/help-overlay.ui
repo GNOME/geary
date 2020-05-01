@@ -257,7 +257,7 @@
             <object class="GtkShortcutsSection">
                 <property name="visible">True</property>
                 <property name="section-name">single-key</property>
-                <property name="title" translatable="yes">Single-key Conversation Shortcuts</property>
+                <property name="title" translatable="yes">Single-key Shortcuts</property>
                 <child>
                     <object class="GtkShortcutsGroup">
                         <property name="visible">True</property>
