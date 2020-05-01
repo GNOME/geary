@@ -315,7 +315,8 @@ class ImapConsole : Gtk.Window {
                 new GLib.NetworkAddress(args[0], Geary.Imap.IMAP_TLS_PORT),
                 method,
                 IMAP_TIMEOUT_SEC
-            )
+            ),
+            new Geary.Imap.Quirks()
         );
 
         cx.sent_command.connect(on_sent_command);

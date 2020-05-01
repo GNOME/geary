@@ -47,7 +47,7 @@ class Geary.Imap.DeserializerTest : TestCase {
 
     public override void set_up() {
         this.stream = new MemoryInputStream();
-        this.deser = new Deserializer(ID, this.stream);
+        this.deser = new Deserializer(ID, this.stream, new Quirks());
     }
 
     public override void tear_down() {

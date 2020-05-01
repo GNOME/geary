@@ -85,6 +85,7 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
     private weak Logging.Source? _logging_parent = null;
 
     private string identifier;
+    private Quirks quirks;
     private DataInputStream input;
     private Geary.State.Machine fsm;
 
@@ -153,12 +154,16 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
     public signal void end_of_stream();
 
 
-    public Deserializer(string identifier, GLib.InputStream input) {
+    public Deserializer(string identifier,
+                        GLib.InputStream input,
+                        Quirks quirks) {
         this.identifier = identifier;
 
         this.input = new GLib.DataInputStream(input);
         this.input.set_close_base_stream(false);
         this.input.set_newline_type(CR_LF);
+
+        this.quirks = quirks;
 
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_char),
