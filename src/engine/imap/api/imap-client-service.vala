@@ -41,6 +41,18 @@ public class Geary.Imap.ClientService : Geary.ClientService {
 
     public static Quirks new_quirks_for_provider(ServiceProvider provider) {
         var quirks = new Quirks();
+        switch (provider) {
+        case GMAIL:
+            // As of 2020-05-02, GMail doesn't seem to quote flag
+            // atoms containing reserved characters, and at least one
+            // use of both `]` and ` ` have been found. This works
+            // around the former. See #746
+            quirks.flag_atom_exceptions = "]";
+            break;
+        default:
+            // noop
+            break;
+        }
         return quirks;
     }
 
