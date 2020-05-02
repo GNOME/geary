@@ -433,23 +433,28 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
         }
     }
 
-    private bool is_current_string_empty() {
-        return (current_string == null) || String.is_empty(current_string.str);
+    private inline  bool is_current_string_empty() {
+        return (
+            this.current_string == null || this.current_string.len == 0
+        );
     }
 
     // Case-insensitive compare
-    private bool is_current_string_ci(string cmp) {
-        if (current_string == null || String.is_empty(current_string.str))
+    private inline bool is_current_string_ci(string cmp) {
+        if (this.current_string == null ||
+            this.current_string.len != cmp.length) {
             return false;
+        }
 
-        return Ascii.stri_equal(current_string.str, cmp);
+        return Ascii.stri_equal(this.current_string.str, cmp);
     }
 
-    private void append_to_string(char ch) {
-        if (current_string == null)
-            current_string = new StringBuilder();
+    private inline void append_to_string(char ch) {
+        if (this.current_string == null) {
+            this.current_string = new StringBuilder();
+        }
 
-        current_string.append_c(ch);
+        this.current_string.append_c(ch);
     }
 
     private void save_string_parameter(bool quoted) {
