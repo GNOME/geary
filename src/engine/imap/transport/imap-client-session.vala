@@ -1290,7 +1290,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         // the endpoint's max pipeline size is positive, if so use
         // multiple batches with a maximum size of that.
 
-        uint max_batch_size = this.imap_endpoint.max_pipeline_batch_size;
+        uint max_batch_size = this.quirks.max_pipeline_batch_size;
         if (max_batch_size < 1) {
             max_batch_size = cmds.size;
         }

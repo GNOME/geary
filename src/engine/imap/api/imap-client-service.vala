@@ -49,6 +49,18 @@ public class Geary.Imap.ClientService : Geary.ClientService {
             // around the former. See #746
             quirks.flag_atom_exceptions = "]";
             break;
+
+        case ServiceProvider.OUTLOOK:
+            // As of June 2016, outlook.com's IMAP servers have a bug
+            // where a large number (~50) of pipelined STATUS commands
+            // on mailboxes with many messages will eventually cause
+            // it to break command parsing and return a BAD response,
+            // causing us to drop the connection. Limit the number of
+            // pipelined commands per batch to work around this.  See
+            // b.g.o Bug 766552
+            quirks.max_pipeline_batch_size = 25;
+            break;
+
         default:
             // noop
             break;

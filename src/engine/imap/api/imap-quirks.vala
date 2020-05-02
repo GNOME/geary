@@ -14,5 +14,13 @@ public class Geary.Imap.Quirks : BaseObject {
     /** The set of additional characters allowed in an IMAP flag. */
     public string? flag_atom_exceptions { get; set; }
 
+    /**
+     * The maximum number of commands that will be pipelined at once.
+     *
+     * If 0 (the default), there is no limit on the number of
+     * pipelined commands sent to this endpoint.
+     */
+    public uint max_pipeline_batch_size { get; set; default = 0; }
+
 
 }

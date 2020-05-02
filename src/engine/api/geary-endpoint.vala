@@ -72,14 +72,6 @@ public class Geary.Endpoint : BaseObject {
     }
 
     /**
-     * The maximum number of commands that will be pipelined at once.
-     *
-     * If 0 (the default), there is no limit on the number of
-     * pipelined commands sent to this endpoint.
-     */
-    public uint max_pipeline_batch_size = 0;
-
-    /**
      * When set, TLS has reported certificate issues.
      *
      * @see untrusted_host
