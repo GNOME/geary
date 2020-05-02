@@ -30,6 +30,10 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
 
     private const size_t MAX_BLOCK_READ_SIZE = 4096;
 
+    private const string[] RESPONSE_ATOMS = {
+        "OK", "NO", "BAD", "BYE", "PREAUTH"
+    };
+
     private enum Mode {
         LINE,
         BLOCK,
@@ -49,6 +53,7 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
         LITERAL,
         LITERAL_DATA_BEGIN,
         LITERAL_DATA,
+        RESPONSE_TEXT,
         FAILED,
         CLOSED,
         COUNT
@@ -102,6 +107,7 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
     private Geary.Memory.GrowableBuffer? block_buffer = null;
     private unowned uint8[]? current_buffer = null;
     private int ins_priority = Priority.DEFAULT;
+
     private bool is_parsing_flags = false;
 
 
@@ -179,12 +185,12 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
             new Geary.State.Mapping(State.START_PARAM, Event.ERROR, on_error),
 
             new Geary.State.Mapping(State.ATOM, Event.CHAR, on_atom_char),
-            new Geary.State.Mapping(State.ATOM, Event.EOL, on_atom_eol),
+            new Geary.State.Mapping(State.ATOM, Event.EOL, on_param_eol),
             new Geary.State.Mapping(State.ATOM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.ATOM, Event.ERROR, on_error),
 
             new Geary.State.Mapping(State.FLAG, Event.CHAR, on_flag_char),
-            new Geary.State.Mapping(State.FLAG, Event.EOL, on_atom_eol),
+            new Geary.State.Mapping(State.FLAG, Event.EOL, on_param_eol),
             new Geary.State.Mapping(State.FLAG, Event.EOS, on_eos),
             new Geary.State.Mapping(State.FLAG, Event.ERROR, on_error),
 
@@ -216,6 +222,11 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
             new Geary.State.Mapping(State.LITERAL_DATA, Event.DATA, on_literal_data),
             new Geary.State.Mapping(State.LITERAL_DATA, Event.EOS, on_eos),
             new Geary.State.Mapping(State.LITERAL_DATA, Event.ERROR, on_error),
+
+            new Geary.State.Mapping(State.RESPONSE_TEXT, Event.CHAR, on_response_text_char),
+            new Geary.State.Mapping(State.RESPONSE_TEXT, Event.EOL, on_param_eol),
+            new Geary.State.Mapping(State.RESPONSE_TEXT, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.RESPONSE_TEXT, Event.ERROR, on_error),
 
             new Geary.State.Mapping(State.FAILED, Event.EOL, on_failed_eol),
             new Geary.State.Mapping(State.FAILED, Event.EOS, Geary.State.nop),
@@ -590,7 +601,12 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
                 return State.START_PARAM;
 
             default:
-                if (!this.is_parsing_flags) {
+                if (this.context_stack.size == 1 &&
+                    this.context.size >= 2 &&
+                    this.context.get(1).to_string().ascii_up() in RESPONSE_ATOMS) {
+                    append_to_string(ch);
+                    return State.RESPONSE_TEXT;
+                } else if (!this.is_parsing_flags) {
                     if (DataFormat.is_atom_special(ch)) {
                         warning("Received an invalid atom-char: %c", ch);
                         return State.FAILED;
@@ -697,7 +713,7 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
         return State.TAG;
     }
 
-    private uint on_atom_eol(uint state, uint event, void *user) {
+    private uint on_param_eol(uint state, uint event, void *user) {
         // clean up final atom
         save_string_parameter(false);
         flush_params();
@@ -835,6 +851,12 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
         save_literal_parameter();
 
         return State.START_PARAM;
+    }
+
+    private uint on_response_text_char(uint state, uint event, void *user) {
+        char ch = *((char *) user);
+        append_to_string(ch);
+        return State.RESPONSE_TEXT;
     }
 
     private uint on_eos() {
