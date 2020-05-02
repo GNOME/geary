@@ -589,20 +589,22 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
     private uint on_tag_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
 
-        // drop if not allowed for tags (allowing for continuations and watching for spaces, which
-        // indicate a change of state)
-        if (DataFormat.is_tag_special(ch, " +"))
+        if (is_current_string_empty() &&
+            (ch == '*' || ch == '+')) {
+            // At first tag character. Allow a single `*` to indicate
+            // an untagged response or a `+` here for continuations
+            append_to_string(ch);
             return State.TAG;
+        }
 
-        // space indicates end of tag
-        if (ch == ' ') {
+        // Any tag special here indicates end-of-tag, so save and work
+        // out where to go next
+        if (DataFormat.is_tag_special(ch)) {
             save_string_parameter(false);
-
-            return State.START_PARAM;
+            return on_first_param_char(state, event, user);
         }
 
         append_to_string(ch);
-
         return State.TAG;
     }
 
