@@ -38,13 +38,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     /** Determines if this folder accepts custom IMAP flags. */
     public Trillian accepts_user_flags { get; private set; default = Trillian.UNKNOWN; }
 
-    /**
-     * Set to true when it's detected that the server doesn't allow a
-     * space between "header.fields" and the list of email headers to
-     * be requested via FETCH; see:
-     * [[https://bugzilla.gnome.org/show_bug.cgi?id=714902|Bug * 714902]]
-     */
-    public bool imap_header_fields_hack { get; private set; default = false; }
+    private Quirks quirks;
 
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.HashMap<SequenceNumber, FetchedData>? fetch_accumulator = null;
@@ -93,6 +87,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         throws Error {
         base(session);
         this.folder = folder;
+        this.quirks = session.quirks;
 
         if (folder.properties.attrs.is_no_select) {
             throw new ImapError.NOT_SUPPORTED(
@@ -388,7 +383,8 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             //
             // See <https://gitlab.gnome.org/GNOME/geary/issues/571>
             if (!header_fields.is_empty) {
-                if (!this.imap_header_fields_hack || header_fields.size == 1) {
+                if (!this.quirks.fetch_header_part_no_space ||
+                    header_fields.size == 1) {
                     header_specifiers = new FetchBodyDataSpecifier[1];
                     header_specifiers[0] = new FetchBodyDataSpecifier.peek(
                         FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS,
@@ -412,7 +408,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 }
 
                 foreach (FetchBodyDataSpecifier header in header_specifiers) {
-                    if (this.imap_header_fields_hack) {
+                    if (this.quirks.fetch_header_part_no_space) {
                         header.omit_request_header_fields_space();
                     }
                     cmds.add(new FetchCommand.body_data_type(msg_set, header));
@@ -1119,7 +1115,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                         // property was enabled after sending command but
                         // before response returned
                         if (specifier.request_header_fields_space) {
-                            this.imap_header_fields_hack = true;
+                            this.quirks.fetch_header_part_no_space = true;
                             return true;
                         }
                     }
