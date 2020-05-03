@@ -50,11 +50,12 @@
         </child>
         <child>
           <object class="GtkButton" id="create_button">
-            <property name="label" translatable="yes">Create</property>
+            <property name="label" translatable="yes">_Create</property>
             <property name="visible">True</property>
             <property name="sensitive">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="use_underline">True</property>
             <signal name="clicked" handler="on_create_button_clicked" swapped="no"/>
             <style>
               <class name="suggested-action"/>
