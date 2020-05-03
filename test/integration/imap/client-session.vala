@@ -33,7 +33,7 @@ class Integration.Imap.ClientSession : TestCase {
     }
 
     public override void tear_down() throws GLib.Error {
-        if (this.session.get_protocol_state(null) != NOT_CONNECTED) {
+        if (this.session.get_protocol_state() != NOT_CONNECTED) {
             this.session.disconnect_async.begin(null, async_complete_full);
             this.session.disconnect_async.end(async_result());
         }
@@ -41,7 +41,7 @@ class Integration.Imap.ClientSession : TestCase {
     }
 
     public void session_connect() throws GLib.Error {
-        this.session.connect_async.begin(null, async_complete_full);
+        this.session.connect_async.begin(2, null, async_complete_full);
         this.session.connect_async.end(async_result());
 
         this.session.disconnect_async.begin(null, async_complete_full);
@@ -98,7 +98,7 @@ class Integration.Imap.ClientSession : TestCase {
     }
 
     private void do_connect() throws GLib.Error {
-        this.session.connect_async.begin(null, async_complete_full);
+        this.session.connect_async.begin(5, null, async_complete_full);
         this.session.connect_async.end(async_result());
     }
 

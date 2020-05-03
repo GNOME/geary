@@ -770,7 +770,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             this.remote_wait_semaphore.reset();
         }
 
-        Imap.FolderSession session = this.remote_session;
+        Imap.FolderSession? session = this.remote_session;
         this.remote_session = null;
         if (session != null) {
             session.appended.disconnect(on_remote_appended);

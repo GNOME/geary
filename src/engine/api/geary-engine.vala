@@ -284,10 +284,12 @@ public class Geary.Engine : BaseObject {
             (security, cx) => account.untrusted_host(service, security, cx)
         );
 
-        Geary.Imap.ClientSession client = new Imap.ClientSession(endpoint);
+        var client = new Imap.ClientSession(endpoint);
         GLib.Error? imap_err = null;
         try {
-            yield client.connect_async(cancellable);
+            yield client.connect_async(
+                Imap.ClientSession.DEFAULT_GREETING_TIMEOUT_SEC, cancellable
+            );
         } catch (GLib.Error err) {
             imap_err = err;
         }

@@ -69,24 +69,22 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     /**
      * Parses the {@link ResponseCode} into {@link Capabilities}, if possible.
      *
-     * Since Capabilities are revised with various {@link ClientSession} states, this method accepts
-     * a ref to an int that will be incremented after handed to the Capabilities constructor.  This
-     * can be used to track the revision of capabilities seen on the connection.
-     *
      * @throws ImapError.INVALID if Capability was not specified.
      */
-    public Capabilities get_capabilities(ref int next_revision) throws ImapError {
+    public Capabilities get_capabilities(int revision) throws ImapError {
         if (!get_response_code_type().is_value(ResponseCodeType.CAPABILITY))
             throw new ImapError.INVALID("Not CAPABILITY response code: %s", to_string());
 
-        Capabilities capabilities = new Capabilities(next_revision++);
+        var params = new StringParameter[this.size];
+        int count = 0;
         for (int ctr = 1; ctr < size; ctr++) {
             StringParameter? param = get_if_string(ctr);
-            if (param != null)
-                capabilities.add_parameter(param);
+            if (param != null) {
+                params[count++] = param;
+            }
         }
 
-        return capabilities;
+        return new Capabilities(params[0:count], revision);
     }
 
     /**
