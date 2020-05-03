@@ -128,7 +128,10 @@ public class ConversationWebView : ClientWebView {
                 callback();
             });
         ulong cancelled_handler = cancellable.cancelled.connect(() => {
-                callback();
+                // Do this at idle since per the docs for
+                // GLib.Cancellable.disconnect, disconnecting a
+                // handler from within a handler causes a deadlock.
+                GLib.Idle.add(() => callback());
             });
 
         controller.search(
