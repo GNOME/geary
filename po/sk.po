@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-05-02 09:27+0000\n"
-"PO-Revision-Date: 2020-05-02 15:55+0200\n"
+"POT-Creation-Date: 2020-05-02 13:58+0000\n"
+"PO-Revision-Date: 2020-05-03 09:27+0200\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak <gnome-sk-list@gnome.org>\n"
 "Language: sk\n"
@@ -305,7 +305,6 @@ msgid "The last recorded size of the detached composer window."
 msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:132
-#| msgid "Error sending email"
 msgid "Undo sending email delay"
 msgstr "Oneskorenie vrátenia späť odosielania emailu"
 
@@ -347,7 +346,7 @@ msgstr ""
 #. account for a generic IMAP service provider.
 #: src/client/accounts/accounts-editor-add-pane.vala:108
 msgid "All others"
-msgstr ""
+msgstr "Všetci ostatní"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:195
@@ -602,13 +601,12 @@ msgstr "starú 4 roky"
 #, c-format
 msgid "%d day back"
 msgid_plural "%d days back"
-msgstr[0] "starú %d deň"
-msgstr[1] "starú %d dni"
-msgstr[2] "starú %d dní"
+msgstr[0] "starú %d dní"
+msgstr[1] "starú %d deň"
+msgstr[2] "starú %d dni"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
 #: src/client/application/application-main-window.vala:2053
-#| msgid "_Undo"
 msgid "Undo"
 msgstr "Vrátiť späť"
 
@@ -645,7 +643,6 @@ msgstr "Tento účet bol zakázaný"
 #. loaded but because of some error are not able to be
 #. used.
 #: src/client/accounts/accounts-editor-list-pane.vala:393
-#| msgid "Geary has encountered a problem"
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Tento účet narazil na problém a nie je dostupný"
 
@@ -713,7 +710,7 @@ msgstr "TLS"
 #: src/client/accounts/accounts-editor-row.vala:534
 #: ui/application-main-window.ui:346
 msgid "Login"
-msgstr ""
+msgstr "Prihlasovacie meno"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
@@ -774,7 +771,7 @@ msgstr "Uložiť odoslanú poštu na serveri"
 #: src/client/accounts/accounts-editor-servers-pane.vala:956
 #, c-format
 msgid "%s using OAuth2"
-msgstr ""
+msgstr "%s s použitím OAuth2"
 
 #: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "Use receiving server login"
@@ -827,7 +824,6 @@ msgstr "Vypíše ladiaci záznam"
 # cmd line desc
 #. / Command line option
 #: src/client/application/application-client.vala:97
-#| msgid "Start Geary with hidden main window"
 msgid "Start with the main window hidden (deprecated)"
 msgstr "Spustí aplikáciu Geary so skrytým hlavným oknom (zastarané)"
 
@@ -982,7 +978,6 @@ msgstr ""
 #. / is the given argument
 #: src/client/application/application-client.vala:970
 #, c-format
-#| msgid "Unrecognized command line option “%s”\n"
 msgid "Unrecognised program argument: “%s”"
 msgstr "Nerozpoznaný parameter programu: „%s“"
 
@@ -1054,7 +1049,6 @@ msgstr[2] "Rozhovory boli archivované"
 #. / substitution is the name of the destination folder.
 #: src/client/application/application-controller.vala:707
 #, c-format
-#| msgid "Message not saved"
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
 msgstr[0] "Správa bola obnovená do priečinka %s"
@@ -1063,7 +1057,6 @@ msgstr[2] "Správy boli obnovené do priečinka %s"
 
 #. / Translators: Label for in-app notification.
 #: src/client/application/application-controller.vala:728
-#| msgid "Message not saved"
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "Správa bola archivovaná"
@@ -1075,7 +1068,6 @@ msgstr[2] "Správy boli archivované"
 #. / of the destination folder.
 #: src/client/application/application-controller.vala:763
 #, c-format
-#| msgid "Message not saved"
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
 msgstr[0] "Správa bola presunutá do priečinka %s"
@@ -1278,7 +1270,6 @@ msgid "Don’t _ask me again"
 msgstr "Nepýtať s_a znovu"
 
 #: src/client/components/components-inspector.vala:72
-#| msgid "_Inspect"
 msgid "Inspector"
 msgstr "Inšpektor"
 
@@ -1303,7 +1294,6 @@ msgstr "Systém"
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:221
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:224
 #: ui/problem-details-dialog.ui:42
-#| msgid "_Save As..."
 msgid "Save As"
 msgstr "Uložiť ako"
 
@@ -1358,7 +1348,6 @@ msgstr "Vyhľadať"
 
 #. / Translators: Search entry tooltip
 #: src/client/components/components-search-bar.vala:32
-#| msgid "Search all mail in account for keywords (Ctrl+S)"
 msgid "Search all mail in account for keywords"
 msgstr "Vyhľadá kľúčové slová v celej pošte účtu"
 
@@ -1373,7 +1362,6 @@ msgstr "Prehľadať účet %s"
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but one is not provided.
 #: src/client/components/components-validator.vala:390
-#| msgid "Invalid email address"
 msgid "An email address is required"
 msgstr "Vyžaduje sa emailová adresa"
 
@@ -1398,7 +1386,6 @@ msgid "Could not look up server name"
 msgstr "Nepodarilo sa nájsť názov serveru"
 
 #: src/client/components/main-toolbar.vala:116
-#| msgid "Mark conversation"
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Označí rozhovor"
@@ -1406,7 +1393,6 @@ msgstr[1] "Označí rozhovory"
 msgstr[2] "Označí rozhovory"
 
 #: src/client/components/main-toolbar.vala:121
-#| msgid "Add label to conversation"
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Pridá menovku rozhovoru"
@@ -2007,18 +1993,18 @@ msgstr "Aplikácia Geary vyžaduje pre pokračovanie heslo k vášmu emailu"
 #, c-format
 msgid "%d message"
 msgid_plural "%d messages"
-msgstr[0] "%d správa"
-msgstr[1] "%d správy"
-msgstr[2] "%d správ"
+msgstr[0] "%d správ"
+msgstr[1] "%d správa"
+msgstr[2] "%d správy"
 
 #. / Label displaying number of unread email messages in a folder
 #: src/client/folder-list/folder-list-folder-entry.vala:39
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
-msgstr[0] "%d neprečítaná"
-msgstr[1] "%d neprečítané"
-msgstr[2] "%d neprečítaných"
+msgstr[0] "%d neprečítaných"
+msgstr[1] "%d neprečítaná"
+msgstr[2] "%d neprečítané"
 
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
@@ -2036,9 +2022,9 @@ msgstr "Priečinky s doručenou poštou"
 #, c-format
 msgid "%d result"
 msgid_plural "%d results"
-msgstr[0] "%d výsledok"
-msgstr[1] "%d výsledky"
-msgstr[2] "%d výsledkov"
+msgstr[0] "%d výsledkov"
+msgstr[1] "%d výsledok"
+msgstr[2] "%d výsledky"
 
 #. / Notification body text for new email when no other
 #. / new messages are already awaiting.
@@ -2046,9 +2032,9 @@ msgstr[2] "%d výsledkov"
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
-msgstr[0] "%d nová správa"
-msgstr[1] "%d nové správy"
-msgstr[2] "%d nových správ"
+msgstr[0] "%d nových správ"
+msgstr[1] "%d nová správa"
+msgstr[2] "%d nové správy"
 
 #. / Notification body text for new email when
 #. / other new messages have already been notified
@@ -2057,9 +2043,9 @@ msgstr[2] "%d nových správ"
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
-msgstr[0] "%s, celkom %d nová správa"
-msgstr[1] "%s, celkom %d nové správy"
-msgstr[2] "%s, celkom %d nových správ"
+msgstr[0] "%s, celkom %d nových správ"
+msgstr[1] "%s, celkom %d nová správa"
+msgstr[2] "%s, celkom %d nové správy"
 
 #: src/client/plugin/desktop-notifications/desktop-notifications.vala:118
 #, c-format
@@ -2071,13 +2057,13 @@ msgid_plural ""
 "(%d other new messages for %s)"
 msgstr[0] ""
 "%s\n"
-"(%d iná nová správa na účte %s)"
+"(%d iných nových správ na účte %s)"
 msgstr[1] ""
 "%s\n"
-"(%d iné nové správy na účte %s)"
+"(%d iná nová správa na účte %s)"
 msgstr[2] ""
 "%s\n"
-"(%d iných nových správ na účte %s)"
+"(%d iné nové správy na účte %s)"
 
 #: src/client/plugin/messaging-menu/messaging-menu.vala:90
 #, c-format
@@ -2193,9 +2179,9 @@ msgstr "(Žiadni príjemcovia)"
 #, c-format
 msgid "%s and %d other"
 msgid_plural "%s and %d others"
-msgstr[0] "%s a %d ďalší"
+msgstr[0] "%s a %d ďalších"
 msgstr[1] "%s a %d ďalší"
-msgstr[2] "%s a %d ďalších"
+msgstr[2] "%s a %d ďalší"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
@@ -2527,11 +2513,11 @@ msgstr "Pridanie účtu"
 
 #: ui/accounts_editor_add_pane.ui:53
 msgid "Create"
-msgstr ""
+msgstr "Vytvoriť"
 
 #: ui/accounts_editor_add_pane.ui:130 ui/accounts_editor_servers_pane.ui:125
 msgid "Receiving"
-msgstr ""
+msgstr "Prijíma sa"
 
 #: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
 msgid "Sending"
@@ -2551,7 +2537,7 @@ msgstr "Emailové adresy"
 
 #: ui/accounts_editor_edit_pane.ui:164
 msgid "Signature"
-msgstr ""
+msgstr "Podpis"
 
 #: ui/accounts_editor_edit_pane.ui:201
 msgid "Settings"
@@ -2577,7 +2563,7 @@ msgstr "Účty"
 
 #: ui/accounts_editor_list_pane.ui:62
 msgid "To get started, select an email provider below."
-msgstr ""
+msgstr "Začnite vybraním poskytovateľa emailu nižšie."
 
 #: ui/accounts_editor_list_pane.ui:75
 msgid "Welcome to Geary"
@@ -2587,7 +2573,7 @@ msgstr "Vitajte v aplikácii Geary"
 #: ui/accounts_editor_remove_pane.ui:73
 #, c-format
 msgid "Confirm removing: %s"
-msgstr ""
+msgstr "Potvrďte odstránenie: %s"
 
 #: ui/accounts_editor_remove_pane.ui:91
 msgid ""
@@ -2606,7 +2592,7 @@ msgstr "Použiť"
 #. Infobar title when one or more accounts are offline
 #: ui/application-main-window.ui:185
 msgid "Working offline"
-msgstr ""
+msgstr "Práca bez pripojenia"
 
 #. Label and tooltip for offline infobar
 #: ui/application-main-window.ui:199
@@ -2782,7 +2768,7 @@ msgstr "_Pre"
 
 #: ui/composer-widget.ui:158
 msgid "Show Cc, Bcc, and Reply-To fields"
-msgstr ""
+msgstr "Zobrazí polia Kópia, Skrytá kópia a Komu odpovedať"
 
 #: ui/composer-widget.ui:219
 msgid "_Cc"
@@ -2813,25 +2799,22 @@ msgid "Bold text"
 msgstr "Tučný text"
 
 #: ui/composer-widget.ui:626
-#, fuzzy
 #| msgctxt "shortcut window"
 #| msgid "Italicize text"
 msgid "Italic text"
 msgstr "Kurzíva textu"
 
 #: ui/composer-widget.ui:650
-#, fuzzy
 #| msgctxt "shortcut window"
 #| msgid "Underline text"
 msgid "Underline text"
-msgstr "Podčiarknutie textu"
+msgstr "Podčiarknutý text"
 
 #: ui/composer-widget.ui:674
-#, fuzzy
 #| msgctxt "shortcut window"
 #| msgid "Strike text"
 msgid "Strikethrough text"
-msgstr "Preškrtnutie textu"
+msgstr "Preškrtnutý text"
 
 # tooltip
 #: ui/composer-widget.ui:707
@@ -2893,7 +2876,6 @@ msgstr "Zmení veľkosť písma"
 
 # tooltip
 #: ui/composer-widget.ui:949
-#| msgid "Insert or update selection link (Ctrl+L)"
 msgid "Insert or update text link"
 msgstr "Vloží alebo aktualizuje textový odkaz"
 
@@ -2917,7 +2899,6 @@ msgid "Attach a file"
 msgstr "Priloží súbor"
 
 #: ui/composer-widget.ui:1117
-#| msgid "Include Original Attachments"
 msgid "Add original attachments"
 msgstr "Pridá pôvodné prílohy"
 
@@ -3043,7 +3024,6 @@ msgstr "Skopírovať emailovú adresu"
 
 # tooltip
 #: ui/conversation-contact-popover.ui:182
-#| msgid "Save and Close"
 msgid "Save in Contacts…"
 msgstr "Uložiť do kontaktov…"
 
@@ -3305,8 +3285,6 @@ msgid "Forward"
 msgstr "Preposlanie"
 
 #: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:283
-#| msgctxt "shortcut window"
-#| msgid "Mark read"
 msgctxt "shortcut window"
 msgid "Un-mark/mark read"
 msgstr "Označenie ako prečítané/neprečítané"
@@ -3327,20 +3305,16 @@ msgid "Move conversations"
 msgstr "Presun rozhovorov"
 
 #: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:311
-#| msgctxt "shortcut window"
-#| msgid "Label the conversation"
 msgctxt "shortcut window"
 msgid "Label conversations"
 msgstr "Pridanie menovky rozhovorom"
 
 #: ui/gtk/help-overlay.ui:80
-#| msgid "Mark conversations"
 msgctxt "shortcut window"
 msgid "Trash conversations"
 msgstr "Presunutie rozhovorov do Koša"
 
 #: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:318
-#| msgid "Mark conversations"
 msgctxt "shortcut window"
 msgid "Junk conversations"
 msgstr "Presunutie rozhovorov do Nevyžiadanej pošty"
@@ -3356,7 +3330,6 @@ msgid "Search"
 msgstr "Vyhľadávanie"
 
 #: ui/gtk/help-overlay.ui:108
-#| msgid "Mark conversations"
 msgctxt "shortcut window"
 msgid "Search for conversations"
 msgstr "Vyhľadanie rozhovorov"
@@ -3367,7 +3340,6 @@ msgid "Find in current conversation"
 msgstr "Nájdenie v aktuálnom rozhovore"
 
 #: ui/gtk/help-overlay.ui:141
-#| msgid "_Undo"
 msgctxt "shortcut window"
 msgid "Undo"
 msgstr "Vrátenie späť"
@@ -3474,12 +3446,11 @@ msgid "Find in current conversations"
 msgstr "Nájdenie v aktuálnych rozhovoroch"
 
 #: ui/gtk/help-overlay.ui:339
-#, fuzzy
 #| msgctxt "shortcut window"
 #| msgid "Find next/previous in current conversation"
 msgctxt "shortcut window"
 msgid "Select next/previous conversations"
-msgstr "Nájdenie ďalšieho/predošlého výrazu v aktuálnom rozhovore"
+msgstr "Výber ďalších/predošlých rozhovorov"
 
 #: ui/gtk/help-overlay.ui:351
 msgid "Composer Shortcuts"
