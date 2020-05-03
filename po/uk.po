@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-04-23 04:13+0000\n"
-"PO-Revision-Date: 2020-04-23 08:54+0300\n"
+"POT-Creation-Date: 2020-05-03 07:37+0000\n"
+"PO-Revision-Date: 2020-05-03 14:57+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -1270,7 +1270,11 @@ msgstr "Перевірте параметри захисту з'єднання"
 msgid "%s — %s"
 msgstr "%s — %s"
 
+#. Translators: The name of the folder group containing
+#. folders created by people (as opposed to special-use
+#. folders)
 #: src/client/application/application-main-window.vala:972
+#: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Мітки"
 
@@ -1425,7 +1429,7 @@ msgid "Preferences"
 msgstr "Параметри"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:179
+#: src/client/components/components-preferences-window.vala:180
 msgid "Plugins"
 msgstr "Додатки"
 
@@ -2234,7 +2238,6 @@ msgstr[2] "Нові повідомлення"
 msgstr[3] "Нове повідомлення"
 
 #: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
-#| msgid "Email address"
 msgid "Email Templates"
 msgstr "Шаблони поштових повідомлень"
 
@@ -2247,7 +2250,6 @@ msgstr "Створити шаблони повторного використа�
 #. the front for the default. English names do not need to be
 #. included.
 #: src/client/plugin/email-templates/email-templates.vala:29
-#| msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgid "Templates | Template Mail | Template Email | Template E-Mail"
 msgstr "Шаблони | Шаблон пошти | Шаблон повідомлення | Поштовий шаблон"
 
@@ -2260,21 +2262,17 @@ msgstr "Шаблони"
 #. Translators: Info bar button label for creating a
 #. new email template
 #: src/client/plugin/email-templates/email-templates.vala:276
-#| msgid "Now"
 msgid "New"
 msgstr "Створити"
 
 #. Translators: Infobar status label for an email template
 #: src/client/plugin/email-templates/email-templates.vala:287
-#| msgid "Message not saved"
 msgid "Message template"
 msgstr "Шаблон повідомлення"
 
 #. Translators: Info bar button label for sending an
 #. email template
 #: src/client/plugin/email-templates/email-templates.vala:291
-#| msgctxt "shortcut window"
-#| msgid "Send"
 msgid "Send"
 msgstr "Надіслати"
 
@@ -2813,14 +2811,15 @@ msgid "Add an account"
 msgstr "Додати обліковий запис"
 
 #: ui/accounts_editor_add_pane.ui:53
-msgid "Create"
-msgstr "Створити"
+#| msgid "Create"
+msgid "_Create"
+msgstr "С_творити"
 
-#: ui/accounts_editor_add_pane.ui:130 ui/accounts_editor_servers_pane.ui:125
+#: ui/accounts_editor_add_pane.ui:131 ui/accounts_editor_servers_pane.ui:125
 msgid "Receiving"
 msgstr "Отримання"
 
-#: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
+#: ui/accounts_editor_add_pane.ui:179 ui/accounts_editor_servers_pane.ui:165
 msgid "Sending"
 msgstr "Надсилання"
 
