@@ -1,3 +1,53 @@
+Version 3.37.1
+~~~~~~~~~~~~~~
+Released: 2020-05-03
+
+Notable changes included in this release:
+
+ * Add support for email and folder plugins
+ * Add preferences for loading optional plugins
+ * Add new Sent Sound and Email Template optional plugins
+ * Convert Unity Messaging Menu plugin to be optional
+ * Convert more non-core code to internal plugins
+ * Reduce and limit the number of problem reports displayed
+ * Fix ordering of folders in the folder list
+ * Rename Spam folder to Junk
+ * Use info bars for emptying Trash and Junk folders
+ * Allow enabling/disabling logging domains from the Inspector
+ * Improvements to IMAP stack reliability
+ * Prefer IMAP SPECIAL USE extenion over XLIST
+ * Numerous client and engine bug fixes and code clean up
+ * Added a build dependency for the GSOund library
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Björn Daase
+ * Daniel Kahn Gillmor
+ * James Westman
+ * Jonatan Pålsson
+ * Rico Tzschichholz
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Anders Jonsson (sv)
+ * Andika Triwidada (id)
+ * Asier Sarasua Garmendia (eu)
+ * Ask Hjorth Larsen (da)
+ * Daniel Mustieles (es)
+ * Dušan Kazik (sk)
+ * Efstathios Iosifidis (el)
+ * Emin Tufan Çetin (tr)
+ * Goran Vidović (hr)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * sicklylife (ja)
+ * Yuri Chornoivan (uk)
+
+And for the user manual:
+ * Jordi Mas (ca)
+
 Version 3.36
 ~~~~~~~~~~~~
 Released: 2020-03-13
