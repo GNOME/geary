@@ -115,8 +115,8 @@ modules:
       - "-DICAL_BUILD_DOCS=false"
     sources:
       - type: archive
-        url: https://github.com/libical/libical/releases/download/v3.0.7/libical-3.0.7.tar.gz
-        sha256: 0abe66df1ea826e57db7f281c704ede834c84139012e6c686ea7adafd4e763fc
+        url: https://github.com/libical/libical/releases/download/v3.0.8/libical-3.0.8.tar.gz
+        sha512: ce015e6d4c1c7cb4af7b45748ce8251c663f80f6a4357ddff6a97796642619abe882f4cadeca10cabeb1b25577869f436da15bca882e032eb3ff0475f6010d8b
     cleanup:
       - /lib/cmake
 
@@ -199,9 +199,9 @@ modules:
   # Geary dependency
   - name: "libytnef"
     sources:
-      - type: git
-        url: https://github.com/Yeraze/ytnef.git
-        branch: master
+      - type: archive
+        url: https://github.com/Yeraze/ytnef/archive/v1.9.3.tar.gz
+        sha256: 41a0033bde33c86a7e4aa4e14bb822dd03084098638e7d6557263e47e80b4f4f
 
   - name: geary
     buildsystem: meson
