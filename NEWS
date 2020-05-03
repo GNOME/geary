@@ -1,3 +1,29 @@
+Version 3.36.2
+~~~~~~~~~~~~~~
+Released: 2020-05-03
+
+Enhancements included in this release:
+ * Client library now installed to private lib sub-directory
+ * Allow downstream packagers set their package's version nuber
+ * Numerous bug fixes and user interface improvements
+ * Numerous user interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Daniel Kahn Gillmor
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Asier Sarasua Garmendia (eu)
+ * Dušan Kazik (sk)
+ * Efstathios Iosifidis (el)
+ * Goran Vidović (hr)
+ * Jordi Mas (ca)
+ * Yuri Chornoivan (uk)
+
+And for the user manual:
+ * Jordi Mas (ca)
+
 Version 3.36.1
 ~~~~~~~~~~~~~~
 Released: 2020-03-29
