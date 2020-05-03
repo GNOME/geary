@@ -230,7 +230,7 @@
                 {
                     "type": "git",
                     "url": "https://github.com/Yeraze/ytnef.git",
-                    "branch": "master"
+                    "branch": "v1.9.3"
                 }
             ]
         },

@@ -222,7 +222,9 @@ modules:
     sources:
       - type: git
         url: https://github.com/Yeraze/ytnef.git
-        branch: master
+        # Pin to last known good version while
+        # https://github.com/Yeraze/ytnef/issues/81 remains an issue
+        branch: v1.9.3
 
   # Geary dependency
   - name: sound-theme-freedesktop
