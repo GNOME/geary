@@ -98,9 +98,9 @@ modules:
       - "--disable-gtk-doc"
       - "--disable-gtk-doc-html"
     sources:
-      - type: archive
-        url: https://download.gnome.org/sources/gspell/1.8/gspell-1.8.1.tar.xz
-        sha256: 819a1d23c7603000e73f5e738bdd284342e0cd345fb0c7650999c31ec741bbe5
+      - type: git
+        url: "https://gitlab.gnome.org/GNOME/gspell.git"
+        branch: master
     cleanup:
       - /bin
       - /share
@@ -109,17 +109,17 @@ modules:
   - name: libical
     buildsystem: cmake-ninja
     config-opts:
+      - "-DBUILD_SHARED_LIBS:BOOL=ON"
       - "-DCMAKE_BUILD_TYPE=Release"
       - "-DCMAKE_INSTALL_LIBDIR=lib"
-      - "-DBUILD_SHARED_LIBS:BOOL=ON"
-      - "-DICAL_GLIB=true"
       - "-DGOBJECT_INTROSPECTION=true"
-      - "-DICAL_GLIB_VAPI=true"
       - "-DICAL_BUILD_DOCS=false"
+      - "-DICAL_GLIB=true"
+      - "-DICAL_GLIB_VAPI=true"
     sources:
       - type: archive
-        url: https://github.com/libical/libical/releases/download/v3.0.7/libical-3.0.7.tar.gz
-        sha256: 0abe66df1ea826e57db7f281c704ede834c84139012e6c686ea7adafd4e763fc
+        url: https://github.com/libical/libical/releases/download/v3.0.8/libical-3.0.8.tar.gz
+        sha256: 09fecacaf75ba5a242159e3a9758a5446b5ce4d0ab684f98a7040864e1d1286f
     cleanup:
       - /lib/cmake
 
@@ -222,7 +222,9 @@ modules:
     sources:
       - type: git
         url: https://github.com/Yeraze/ytnef.git
-        branch: master
+        # Pin to last known good version while
+        # https://github.com/Yeraze/ytnef/issues/81 remains an issue
+        branch: v1.9.3
 
   # Geary dependency
   - name: sound-theme-freedesktop

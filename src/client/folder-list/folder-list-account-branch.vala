@@ -37,7 +37,10 @@ public class FolderList.AccountBranch : Sidebar.Branch {
              Sidebar.Branch.Options.AUTO_OPEN_ON_NEW_CHILD, normal_folder_comparator, special_folder_comparator);
 
         this.account = account;
-        user_folder_group = new SpecialGrouping(2, "", "tag-symbolic");
+        // Translators: The name of the folder group containing
+        // folders created by people (as opposed to special-use
+        // folders)
+        user_folder_group = new SpecialGrouping(2, _("Labels"), "tag-symbolic");
         folder_entries = new Gee.HashMap<Geary.FolderPath, FolderEntry>();
 
         this.display_name = account.information.display_name;
