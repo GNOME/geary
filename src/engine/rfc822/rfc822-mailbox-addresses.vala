@@ -1,8 +1,9 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -52,6 +53,7 @@ public class Geary.RFC822.MailboxAddresses :
     /** Signature for "to_string" implementation for {@link list_to_string}. */
     private delegate string ListToStringDelegate(MailboxAddress address);
 
+
     /** Returns the number of addresses in this list. */
     public int size {
         get { return this.addrs.size; }
@@ -80,28 +82,34 @@ public class Geary.RFC822.MailboxAddresses :
 
     public MailboxAddresses.from_rfc822_string(string rfc822)
         throws RFC822Error {
-        var addrlist = GMime.InternetAddressList.parse(null, rfc822);
-        if (addrlist == null) {
+        var list = GMime.InternetAddressList.parse(null, rfc822);
+        if (list == null) {
             throw new RFC822Error.INVALID("Not a RFC822 mailbox address list");
         }
+        this.from_gmime(list);
+    }
 
-        int length = addrlist.length();
-        for (int ctr = 0; ctr < length; ctr++) {
-            GMime.InternetAddress? addr = addrlist.get_address(ctr);
-
-            GMime.InternetAddressMailbox? mbox_addr = addr as GMime.InternetAddressMailbox;
+    public MailboxAddresses.from_gmime(GMime.InternetAddressList list)
+        throws RFC822Error {
+        int length = list.length();
+        if (length == 0) {
+            throw new RFC822Error.INVALID("No addresses in list");
+        }
+        for (int i = 0; i < length; i++) {
+            var addr = list.get_address(i);
+            var mbox_addr = addr as GMime.InternetAddressMailbox;
             if (mbox_addr != null) {
                 this.addrs.add(new MailboxAddress.gmime(mbox_addr));
             } else {
                 // XXX this is pretty bad - we just flatten the
                 // group's addresses into this list, merging lists and
                 // losing the group names.
-                GMime.InternetAddressGroup? mbox_group = addr as GMime.InternetAddressGroup;
+                var mbox_group = addr as GMime.InternetAddressGroup;
                 if (mbox_group != null) {
-                    GMime.InternetAddressList group_list = mbox_group.get_members();
-                    for (int i = 0; i < group_list.length(); i++) {
-                        GMime.InternetAddressMailbox? group_addr =
-                            addrlist.get_address(i) as GMime.InternetAddressMailbox;
+                    var group_list = mbox_group.get_members();
+                    for (int j = 0; j < group_list.length(); j++) {
+                        var group_addr =
+                           group_list.get_address(j) as GMime.InternetAddressMailbox;
                         if (group_addr != null) {
                             this.addrs.add(new MailboxAddress.gmime(group_addr));
                         }
@@ -111,16 +119,19 @@ public class Geary.RFC822.MailboxAddresses :
         }
     }
 
+    /** Returns the address at the given index, if it exists. */
     public new MailboxAddress? get(int index) {
-        return addrs.get(index);
+        return this.addrs.get(index);
     }
 
+    /** Returns a read-only iterator of the addresses in this list. */
     public Gee.Iterator<MailboxAddress> iterator() {
-        return addrs.iterator();
+        return this.addrs.read_only_view.iterator();
     }
 
+    /** Returns a read-only collection of the addresses in this list. */
     public Gee.List<MailboxAddress> get_all() {
-        return addrs.read_only_view;
+        return this.addrs.read_only_view;
     }
 
     public bool contains_normalized(string address) {
