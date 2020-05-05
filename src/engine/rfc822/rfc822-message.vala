@@ -1090,18 +1090,20 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
     }
 
-    private Memory.Buffer message_to_memory_buffer(bool encoded, bool dotstuffed) throws RFC822Error {
+    private Memory.Buffer message_to_memory_buffer(bool encode_lf,
+                                                   bool stuff_smtp)
+        throws RFC822Error {
         ByteArray byte_array = new ByteArray();
         GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
         stream.set_owner(false);
 
         GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
-        if (encoded) {
+        if (encode_lf) {
             stream_filter.add(new GMime.FilterUnix2Dos(false));
         } else {
             stream_filter.add(new GMime.FilterDos2Unix(false));
         }
-        if (dotstuffed) {
+        if (stuff_smtp) {
             stream_filter.add(new GMime.FilterSmtpData());
         }
 
