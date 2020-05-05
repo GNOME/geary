@@ -477,7 +477,7 @@ public class Geary.RFC822.MailboxAddress :
                 GMime.utils_header_encode_phrase(
                     Geary.RFC822.get_format_options(),
                     this.name,
-                    "iso-8859-1"
+                    null
                 ),
                 to_rfc822_address()
             )
