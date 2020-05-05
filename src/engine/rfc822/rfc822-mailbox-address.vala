@@ -124,9 +124,11 @@ public class Geary.RFC822.MailboxAddress :
         // _internet_address_decode_name() function.
 
         // see if a broken mailer has sent raw 8-bit information
-        string text = GMime.utils_text_is_8bit(part.data)
-            ? part : GMime.utils_decode_8bit(Geary.RFC822.get_parser_options(),
-                                            part.data);
+        string text = (
+            !GMime.utils_text_is_8bit(part.data)
+            ? part
+            : GMime.utils_decode_8bit(get_parser_options(), part.data)
+        );
 
         // unquote the string then decode the text
         GMime.utils_unquote_string(text);
