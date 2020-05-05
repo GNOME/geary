@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-04-23 04:13+0000\n"
-"PO-Revision-Date: 2020-04-25 15:34+0300\n"
+"POT-Creation-Date: 2020-05-04 09:30+0000\n"
+"PO-Revision-Date: 2020-05-05 16:49+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -1218,7 +1218,11 @@ msgstr "Bağlantı güvenlik ayrıntılarını gözden geçirin"
 msgid "%s — %s"
 msgstr "%s — %s"
 
+#. Translators: The name of the folder group containing
+#. folders created by people (as opposed to special-use
+#. folders)
 #: src/client/application/application-main-window.vala:972
+#: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Etiketler"
 
@@ -1367,7 +1371,7 @@ msgid "Preferences"
 msgstr "Tercihler"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:179
+#: src/client/components/components-preferences-window.vala:180
 msgid "Plugins"
 msgstr "Eklentiler"
 
@@ -2679,14 +2683,14 @@ msgid "Add an account"
 msgstr "Hesap ekle"
 
 #: ui/accounts_editor_add_pane.ui:53
-msgid "Create"
-msgstr "Oluştur"
+msgid "_Create"
+msgstr "_Oluştur"
 
-#: ui/accounts_editor_add_pane.ui:130 ui/accounts_editor_servers_pane.ui:125
+#: ui/accounts_editor_add_pane.ui:131 ui/accounts_editor_servers_pane.ui:125
 msgid "Receiving"
 msgstr "Alım"
 
-#: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
+#: ui/accounts_editor_add_pane.ui:179 ui/accounts_editor_servers_pane.ui:165
 msgid "Sending"
 msgstr "Gönderiliyor"
 
