@@ -6,6 +6,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+
 /**
  * An RFC-822 style email message.
  *
@@ -99,16 +100,19 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         stock_from_gmime();
     }
 
-    public Message.from_gmime_message(GMime.Message message) {
+    public Message.from_gmime_message(GMime.Message message)
+        throws RFC822Error {
         this.message = message;
         stock_from_gmime();
     }
 
-    public Message.from_buffer(Memory.Buffer full_email) throws RFC822Error {
+    public Message.from_buffer(Memory.Buffer full_email)
+        throws RFC822Error {
         this(new Geary.RFC822.Full(full_email));
     }
 
-    public Message.from_parts(Header header, Text body) throws RFC822Error {
+    public Message.from_parts(Header header, Text body)
+        throws RFC822Error {
         GMime.StreamCat stream_cat = new GMime.StreamCat();
         stream_cat.add_source(new GMime.StreamMem.with_buffer(header.buffer.get_bytes().get_data()));
         stream_cat.add_source(new GMime.StreamMem.with_buffer(body.buffer.get_bytes().get_data()));
@@ -126,9 +130,11 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
     public async Message.from_composed_email(Geary.ComposedEmail email,
                                              string? message_id,
-                                             GLib.Cancellable? cancellable) {
+                                             GLib.Cancellable? cancellable)
+        throws RFC822Error {
         this.message = new GMime.Message(true);
 
+        //
         // Required headers
 
         this.from = email.from;
@@ -802,7 +808,8 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      * disabled by passing false in include_sub_messages).  Note that values
      * that come out of this function are persisted.
      */
-    public string? get_searchable_body(bool include_sub_messages = true) {
+    public string? get_searchable_body(bool include_sub_messages = true)
+        throws RFC822Error {
         string? body = null;
         bool html = false;
         try {
@@ -880,81 +887,70 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         return attachments;
     }
 
-    private void stock_from_gmime() {
-        GMime.HeaderList headers = this.message.get_header_list();
+    private void stock_from_gmime() throws RFC822Error {
+        GMime.HeaderList headers = this.message.headers;
         for (int i = 0; i < headers.get_count(); i++) {
             GMime.Header header = headers.get_header_at(i);
-            string name = header.get_name();
-            // We should not parse the raw-value here, but use GMime's parsing
-            // functionality instead.
-            // See: https://gitlab.gnome.org/GNOME/geary/merge_requests/382#note_669699
-            string value = GMime.utils_header_unfold(header.get_raw_value());
-            switch (name.down()) {
-              case "from":
-                  this.from = append_address(this.from, value);
-              break;
+            string value = header.get_value();
+            switch (header.get_name().down()) {
+            case "from":
+                this.from = append_address(this.from, value);
+                break;
 
-              case "sender":
-                  try {
-                      this.sender = new RFC822.MailboxAddress.from_rfc822_string(value);
-                  } catch (Error err) {
-                      debug("Could parse subject: %s", err.message);
-                  }
-              break;
+            case "sender":
+                this.sender = new MailboxAddress.from_rfc822_string(value);
+                break;
 
-              case "reply-to":
-                  this.reply_to = append_address(this.reply_to, value);
-              break;
+            case "reply-to":
+                this.reply_to = append_address(this.reply_to, value);
+                break;
 
-              case "to":
-                  this.to = append_address(this.to, value);
-              break;
+            case "to":
+                this.to = append_address(this.to, value);
+                break;
 
-              case "cc":
-                  this.cc = append_address(this.cc, value);
-              break;
+            case "cc":
+                this.cc = append_address(this.cc, value);
+                break;
 
-              case "bcc":
-                  this.bcc = append_address(this.bcc, value);
-              break;
+            case "bcc":
+                this.bcc = append_address(this.bcc, value);
+                break;
 
-              case "subject":
-                  this.subject = new RFC822.Subject.decode(value);
-              break;
+            case "subject":
+                this.subject = new Subject.decode(value);
+                break;
 
-              case "date":
-                  try {
-                      this.date = new Geary.RFC822.Date(value);
-                  } catch (Error err) {
-                      debug("Could not parse date: %s", err.message);
-                  }
-              break;
+            case "date":
+                this.date = new Date(value);
+                break;
 
-              case "message-id":
-                  this.message_id = new MessageID(value);
-              break;
+            case "message-id":
+                this.message_id = new MessageID(value);
+                break;
 
-              case "in-reply-to":
-                  this.in_reply_to = append_message_id(this.in_reply_to, value);
-              break;
+            case "in-reply-to":
+                this.in_reply_to = append_message_id(this.in_reply_to, value);
+                break;
 
-              case "references":
-                  this.references = append_message_id(this.references, value);
-              break;
+            case "references":
+                this.references = append_message_id(this.references, value);
+                break;
 
-              case "x-mailer":
-                  this.mailer = GMime.utils_header_decode_text(Geary.RFC822.get_parser_options(), value);
-              break;
+            case "x-mailer":
+                this.mailer = GMime.utils_header_decode_text(null, value);
+                break;
 
-              default:
-                // do nothing
-              break;
+            default:
+                // Ignore anything else not
+                break;
             }
-        };
+        }
     }
 
     private MailboxAddresses append_address(MailboxAddresses? existing,
-                                            string header_value) {
+                                            string header_value)
+        throws RFC822Error {
         MailboxAddresses addresses = new MailboxAddresses.from_rfc822_string(header_value);
         if (existing != null) {
             addresses = existing.append(addresses);
@@ -1063,13 +1059,16 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     }
 #endif
 
-    public Gee.List<Geary.RFC822.Message> get_sub_messages() {
+    public Gee.List<Geary.RFC822.Message> get_sub_messages()
+        throws RFC822Error {
         Gee.List<Geary.RFC822.Message> messages = new Gee.ArrayList<Geary.RFC822.Message>();
         find_sub_messages(messages, message.get_mime_part());
         return messages;
     }
 
-    private void find_sub_messages(Gee.List<Geary.RFC822.Message> messages, GMime.Object root) {
+    private void find_sub_messages(Gee.List<Message> messages,
+                                   GMime.Object root)
+        throws RFC822Error {
         // If this is a multipart container, check each of its children.
         GMime.Multipart? multipart = root as GMime.Multipart;
         if (multipart != null) {
@@ -1084,7 +1083,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         if (messagepart != null) {
             GMime.Message sub_message = messagepart.get_message();
             if (sub_message != null) {
-                messages.add(new Geary.RFC822.Message.from_gmime_message(sub_message));
+                messages.add(new Message.from_gmime_message(sub_message));
             } else {
                 warning("Corrupt message, possibly bug 769697");
             }

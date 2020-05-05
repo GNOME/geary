@@ -78,13 +78,12 @@ public class Geary.RFC822.MailboxAddresses :
         this.addrs.add(addr);
     }
 
-    public MailboxAddresses.from_rfc822_string(string rfc822) {
-        GMime.InternetAddressList addrlist = GMime.InternetAddressList.parse(
-            Geary.RFC822.get_parser_options(),
-            rfc822
-        );
-        if (addrlist == null)
-            return;
+    public MailboxAddresses.from_rfc822_string(string rfc822)
+        throws RFC822Error {
+        var addrlist = GMime.InternetAddressList.parse(null, rfc822);
+        if (addrlist == null) {
+            throw new RFC822Error.INVALID("Not a RFC822 mailbox address list");
+        }
 
         int length = addrlist.length();
         for (int ctr = 0; ctr < length; ctr++) {

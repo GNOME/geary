@@ -371,7 +371,8 @@ This is the second line.
         assert_true(out_buffer.size > (buffer.size+buffer2.size), "Expected sizeable message");
     }
 
-    private async Geary.RFC822.Message message_from_composed_email(Geary.ComposedEmail composed) {
+    private async Message message_from_composed_email(ComposedEmail composed)
+        throws RFC822Error {
         return yield new Geary.RFC822.Message.from_composed_email(
             composed,
             GMime.utils_generate_message_id(composed.from.get(0).domain),

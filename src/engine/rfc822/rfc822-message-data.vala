@@ -169,17 +169,15 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
 public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.AbstractMessageData,
     Gee.Hashable<Geary.RFC822.Date> {
 
-    public string? original { get; private set; }
+    public string original { get; private set; }
     public DateTime value { get; private set; }
 
-    public Date(string rfc822) throws ImapError {
-        DateTime? value = GMime.utils_header_decode_date(rfc822);
-        if (value == null) {
-            throw new ImapError.PARSE_ERROR(
-                "Unable to parse \"%s\": Outside supported range", rfc822
-            );
+    public Date(string rfc822) throws RFC822Error {
+        var date = GMime.utils_header_decode_date(rfc822);
+        if (date == null) {
+            throw new RFC822Error.INVALID("Not ISO-8601 date: %s", rfc822);
         }
-        this.value = value;
+        this.value = date;
         this.original = rfc822;
     }
 
@@ -302,42 +300,38 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
     private GMime.Message? message = null;
     private string[]? names = null;
 
-    public Header(Memory.Buffer buffer) {
+    public Header(Memory.Buffer buffer) throws RFC822Error {
         base("RFC822.Header", buffer);
-    }
 
-    private unowned GMime.HeaderList get_headers() throws RFC822Error {
-        if (message != null)
-            return message.get_header_list();
-
-        GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(buffer));
+        var parser = new GMime.Parser.with_stream(
+            Utils.create_stream_mem(buffer)
+        );
         parser.set_respect_content_length(false);
+        parser.set_format(MESSAGE);
 
-        message = parser.construct_message(Geary.RFC822.get_parser_options());
-        if (message == null)
+        this.message = parser.construct_message(null);
+        if (this.message == null) {
             throw new RFC822Error.INVALID("Unable to parse RFC 822 headers");
-
-        return message.get_header_list();
+        }
     }
 
-    public string? get_header(string name) throws RFC822Error {
-        GMime.Header header = get_headers().get_header(name);
-        if (header != null)
-            // We should not parse the raw-value here, but use GMime's parsing
-            // functionality instead.
-            // See: https://gitlab.gnome.org/GNOME/geary/merge_requests/382#note_669699
-            return GMime.utils_header_unfold(header.get_raw_value());
-        else
-            return null;
+    public string? get_header(string name) {
+        string? value = null;
+        var header = this.message.get_header_list().get_header(name);
+        if (header != null) {
+            value = header.get_value();
+        }
+        return value;
     }
 
-    public string[] get_header_names() throws RFC822Error {
+    public string[] get_header_names() {
         if (this.names == null) {
-            this.names = new string[0];
-            GMime.HeaderList headers = get_headers();
-            for (int i = 0; i < headers.get_count(); i++) {
-                names += headers.get_header_at(i).get_name();
+            GMime.HeaderList headers = this.message.get_header_list();
+            var names = new string[headers.get_count()];
+            for (int i = 0; i < names.length; i++) {
+                names[i] = headers.get_header_at(i).get_name();
             }
+            this.names = names;
         }
         return this.names;
     }

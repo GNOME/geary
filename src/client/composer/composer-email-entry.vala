@@ -81,9 +81,14 @@ public class Composer.EmailEntry : Gtk.Entry {
             this._addresses = new Geary.RFC822.MailboxAddresses();
             this.is_valid = false;
         } else {
-            this._addresses =
-                new Geary.RFC822.MailboxAddresses.from_rfc822_string(text);
-            this.is_valid = true;
+            try {
+                this._addresses =
+                    new Geary.RFC822.MailboxAddresses.from_rfc822_string(text);
+                this.is_valid = true;
+            } catch (Geary.RFC822Error err) {
+                this._addresses = new Geary.RFC822.MailboxAddresses();
+                this.is_valid = false;
+            }
         }
     }
 

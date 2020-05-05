@@ -233,21 +233,27 @@ public class Geary.RFC822.MailboxAddress :
             Geary.RFC822.get_parser_options(),
             rfc822
         );
-        if (addrlist == null)
-            return;
-
-        int length = addrlist.length();
-        for (int ctr = 0; ctr < length; ctr++) {
-            GMime.InternetAddress? addr = addrlist.get_address(ctr);
-
-            // TODO: Handle group lists
-            GMime.InternetAddressMailbox? mbox_addr = addr as GMime.InternetAddressMailbox;
-            if (mbox_addr != null) {
-                this.gmime(mbox_addr);
-                return;
-            }
+        if (addrlist == null) {
+            throw new RFC822Error.INVALID(
+                "Not a RFC822 mailbox address: %s", rfc822
+            );
         }
-        throw new RFC822Error.INVALID("Could not parse RFC822 address: %s", rfc822);
+        if (addrlist.length() != 1) {
+            throw new RFC822Error.INVALID(
+                "Not a single RFC822 mailbox address: %s", rfc822
+            );
+        }
+
+        GMime.InternetAddress? addr = addrlist.get_address(0);
+        // TODO: Handle group lists
+        var mbox_addr = addr as GMime.InternetAddressMailbox;
+        if (mbox_addr == null) {
+            throw new RFC822Error.INVALID(
+                "Group lists not currently supported: %s", rfc822
+            );
+        }
+
+        this.gmime(mbox_addr);
     }
 
     public MailboxAddress.gmime(GMime.InternetAddressMailbox mailbox) {

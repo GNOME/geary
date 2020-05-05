@@ -272,20 +272,22 @@ private class Geary.ImapDB.MessageRow {
         return (addrs == null || addrs.size == 0) ? null : addrs.to_rfc822_string();
     }
 
-    private RFC822.MailboxAddress? unflatten_address(string? str) {
-        RFC822.MailboxAddress? addr = null;
-        if (str != null) {
-            try {
-                addr = new RFC822.MailboxAddress.from_rfc822_string(str);
-            } catch (RFC822Error e) {
-                // oh well
-            }
-        }
-        return addr;
+    private RFC822.MailboxAddress? unflatten_address(string? str)
+        throws RFC822Error {
+        return (
+            String.is_empty_or_whitespace(str)
+            ? null
+            : new RFC822.MailboxAddress.from_rfc822_string(str)
+        );
     }
 
-    private RFC822.MailboxAddresses? unflatten_addresses(string? str) {
-        return String.is_empty(str) ? null : new RFC822.MailboxAddresses.from_rfc822_string(str);
+    private RFC822.MailboxAddresses? unflatten_addresses(string? str)
+        throws RFC822Error {
+        return (
+            String.is_empty_or_whitespace(str)
+            ? null
+            : new RFC822.MailboxAddresses.from_rfc822_string(str)
+        );
     }
+
 }
-
