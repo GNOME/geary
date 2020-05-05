@@ -1771,7 +1771,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (this.draft_manager != null) {
             Geary.ComposedEmail draft = yield get_composed_email(null, true);
             yield this.draft_manager.update(
-                yield draft.to_rfc822_message(null, null),
+                yield new Geary.RFC822.Message.from_composed_email(
+                    draft, null, null
+                ),
                 null,
                 null
             );

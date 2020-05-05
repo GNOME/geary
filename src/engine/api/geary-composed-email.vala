@@ -123,13 +123,6 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
         return this;
     }
 
-    public async Geary.RFC822.Message to_rfc822_message(string? message_id,
-                                                        GLib.Cancellable? cancellable) {
-        return yield new RFC822.Message.from_composed_email(
-            this, message_id, cancellable
-        );
-    }
-
     /**
      * Determines if an IMG SRC value is present in the HTML part.
      *
