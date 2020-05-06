@@ -262,7 +262,7 @@
                     <object class="GtkShortcutsGroup">
                         <property name="visible">True</property>
                         <property name="title" translatable="yes"
-                                  context="shortcut window">Single-key shortcuts (if enabled in Preferences)</property>
+                                  context="shortcut window">Single-key shortcuts (if enabled)</property>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
