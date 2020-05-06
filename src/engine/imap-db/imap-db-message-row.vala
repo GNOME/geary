@@ -275,7 +275,7 @@ private class Geary.ImapDB.MessageRow {
     }
 
     private RFC822.MailboxAddress? unflatten_address(string? str)
-        throws RFC822Error {
+        throws RFC822.Error {
         return (
             String.is_empty_or_whitespace(str)
             ? null
@@ -284,7 +284,7 @@ private class Geary.ImapDB.MessageRow {
     }
 
     private RFC822.MailboxAddresses? unflatten_addresses(string? str)
-        throws RFC822Error {
+        throws RFC822.Error {
         return (
             String.is_empty_or_whitespace(str)
             ? null

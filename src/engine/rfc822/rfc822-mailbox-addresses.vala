@@ -82,19 +82,19 @@ public class Geary.RFC822.MailboxAddresses :
     }
 
     public MailboxAddresses.from_rfc822_string(string rfc822)
-        throws RFC822Error {
+        throws Error {
         var list = GMime.InternetAddressList.parse(null, rfc822);
         if (list == null) {
-            throw new RFC822Error.INVALID("Not a RFC822 mailbox address list");
+            throw new Error.INVALID("Not a RFC822 mailbox address list");
         }
         this.from_gmime(list);
     }
 
     public MailboxAddresses.from_gmime(GMime.InternetAddressList list)
-        throws RFC822Error {
+        throws Error {
         int length = list.length();
         if (length == 0) {
-            throw new RFC822Error.INVALID("No addresses in list");
+            throw new Error.INVALID("No addresses in list");
         }
         for (int i = 0; i < length; i++) {
             var addr = list.get_address(i);

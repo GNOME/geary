@@ -231,18 +231,16 @@ public class Geary.RFC822.MailboxAddress :
         this.address = "%s@%s".printf(mailbox, domain);
     }
 
-    public MailboxAddress.from_rfc822_string(string rfc822) throws RFC822Error {
+    public MailboxAddress.from_rfc822_string(string rfc822) throws Error {
         GMime.InternetAddressList addrlist = GMime.InternetAddressList.parse(
             Geary.RFC822.get_parser_options(),
             rfc822
         );
         if (addrlist == null) {
-            throw new RFC822Error.INVALID(
-                "Not a RFC822 mailbox address: %s", rfc822
-            );
+            throw new Error.INVALID("Not a RFC822 mailbox address: %s", rfc822);
         }
         if (addrlist.length() != 1) {
-            throw new RFC822Error.INVALID(
+            throw new Error.INVALID(
                 "Not a single RFC822 mailbox address: %s", rfc822
             );
         }
@@ -251,7 +249,7 @@ public class Geary.RFC822.MailboxAddress :
         // TODO: Handle group lists
         var mbox_addr = addr as GMime.InternetAddressMailbox;
         if (mbox_addr == null) {
-            throw new RFC822Error.INVALID(
+            throw new Error.INVALID(
                 "Group lists not currently supported: %s", rfc822
             );
         }

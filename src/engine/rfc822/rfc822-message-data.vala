@@ -234,10 +234,10 @@ public class Geary.RFC822.Date :
         this.rfc822 = null;
     }
 
-    public Date.from_rfc822_string(string rfc822) throws RFC822Error {
+    public Date.from_rfc822_string(string rfc822) throws Error {
         var date = GMime.utils_header_decode_date(rfc822);
         if (date == null) {
-            throw new RFC822Error.INVALID("Not ISO-8601 date: %s", rfc822);
+            throw new Error.INVALID("Not ISO-8601 date: %s", rfc822);
         }
         this.rfc822 = rfc822;
         this.value = date;
@@ -367,7 +367,7 @@ public class Geary.RFC822.Header :
     private GMime.Message? message = null;
     private string[]? names = null;
 
-    public Header(Memory.Buffer buffer) throws RFC822Error {
+    public Header(Memory.Buffer buffer) throws Error {
         base("RFC822.Header", buffer);
 
         var parser = new GMime.Parser.with_stream(
@@ -378,7 +378,7 @@ public class Geary.RFC822.Header :
 
         this.message = parser.construct_message(null);
         if (this.message == null) {
-            throw new RFC822Error.INVALID("Unable to parse RFC 822 headers");
+            throw new Error.INVALID("Unable to parse RFC 822 headers");
         }
     }
 
@@ -460,7 +460,7 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
                         preview_buffer.get_valid_utf8(),
                         is_html ? TextFormat.HTML : TextFormat.PLAIN
                     );
-                } catch (RFC822Error err) {
+                } catch (Error err) {
                     debug("Failed to parse preview body: %s", err.message);
                 }
             }

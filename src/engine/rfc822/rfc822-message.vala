@@ -84,13 +84,13 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     private size_t? body_offset = null;
 
 
-    public Message(Full full) throws RFC822Error {
+    public Message(Full full) throws Error {
         GMime.Parser parser = new GMime.Parser.with_stream(
             Utils.create_stream_mem(full.buffer)
         );
         var message = parser.construct_message(get_parser_options());
         if (message == null) {
-            throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
+            throw new Error.INVALID("Unable to parse RFC 822 message");
         }
 
         this.from_gmime_message(message);
@@ -101,7 +101,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     }
 
     public Message.from_gmime_message(GMime.Message message)
-        throws RFC822Error {
+        throws Error {
         this.message = message;
 
         this.from = to_addresses(message.get_from());
@@ -160,12 +160,12 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     }
 
     public Message.from_buffer(Memory.Buffer full_email)
-        throws RFC822Error {
+        throws Error {
         this(new Geary.RFC822.Full(full_email));
     }
 
     public Message.from_parts(Header header, Text body)
-        throws RFC822Error {
+        throws Error {
         GMime.StreamCat stream_cat = new GMime.StreamCat();
         stream_cat.add_source(new GMime.StreamMem.with_buffer(header.buffer.get_bytes().get_data()));
         stream_cat.add_source(new GMime.StreamMem.with_buffer(body.buffer.get_bytes().get_data()));
@@ -173,7 +173,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         GMime.Parser parser = new GMime.Parser.with_stream(stream_cat);
         var message = parser.construct_message(Geary.RFC822.get_parser_options());
         if (message == null) {
-            throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
+            throw new Error.INVALID("Unable to parse RFC 822 message");
         }
 
         this.from_gmime_message(message);
@@ -186,7 +186,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     public async Message.from_composed_email(Geary.ComposedEmail email,
                                              string? message_id,
                                              GLib.Cancellable? cancellable)
-        throws RFC822Error {
+        throws Error {
         this.message = new GMime.Message(true);
 
         //
@@ -510,15 +510,14 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                                               string basename,
                                               Geary.Mime.DispositionType disposition,
                                               GLib.Cancellable cancellable)
-        throws Error {
-
+        throws GLib.Error {
         Mime.ContentType? mime_type = Mime.ContentType.guess_type(
             basename,
             buffer
         );
 
         if (mime_type == null) {
-            throw new RFC822Error.INVALID(
+            throw new Error.INVALID(
                 _("Could not determine mime type for “%s”.").printf(basename)
                 );
         }
@@ -529,7 +528,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         );
 
         if (content_type == null) {
-            throw new RFC822Error.INVALID(
+            throw new Error.INVALID(
                 _("Could not determine content type for mime type “%s” on “%s”.").printf(mime_type.to_string(), basename)
                 );
         }
@@ -551,7 +550,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                                                       GMime.Part part,
                                                       GMime.ContentType content_type,
                                                       GLib.Cancellable cancellable)
-        throws Error {
+        throws GLib.Error {
 
         // Text parts should be scanned fully to determine best
         // (i.e. most compact) transport encoding to use, but
@@ -587,7 +586,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      * out.  See the various constructors for details.  (Otherwise, we don't have a way
      * to get the body part directly, because of GMime's shortcomings.)
      */
-    public Geary.Email get_email(Geary.EmailIdentifier id) throws Error {
+    public Geary.Email get_email(Geary.EmailIdentifier id) throws GLib.Error {
         assert(body_buffer != null);
         assert(body_offset != null);
 
@@ -653,7 +652,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      * Returns the {@link Message} as a {@link Memory.Buffer} suitable for in-memory use (i.e.
      * with native linefeed characters).
      */
-    public Memory.Buffer get_native_buffer() throws RFC822Error {
+    public Memory.Buffer get_native_buffer() throws Error {
         return message_to_memory_buffer(false, false);
     }
 
@@ -664,7 +663,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      * The buffer can also be dot-stuffed if required.  See
      * [[http://tools.ietf.org/html/rfc2821#section-4.5.2]]
      */
-    public Memory.Buffer get_network_buffer(bool dotstuffed) throws RFC822Error {
+    public Memory.Buffer get_network_buffer(bool dotstuffed) throws Error {
         return message_to_memory_buffer(true, dotstuffed);
     }
 
@@ -740,7 +739,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                                                 bool to_html,
                                                 InlinePartReplacer? replacer,
                                                 ref string? body)
-        throws RFC822Error {
+        throws Error {
         Part part = new Part(node);
         Mime.ContentType content_type = part.content_type;
 
@@ -807,11 +806,11 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      * something that front-facing methods want to return.
      */
     private string? internal_get_body(string text_subtype, bool to_html, InlinePartReplacer? replacer)
-        throws RFC822Error {
+        throws Error {
         string? body = null;
         if (!construct_body_from_mime_parts(message.get_mime_part(), Mime.MultipartSubtype.UNSPECIFIED,
             text_subtype, to_html, replacer, ref body)) {
-            throw new RFC822Error.NOT_FOUND("Could not find any \"text/%s\" parts", text_subtype);
+            throw new Error.NOT_FOUND("Could not find any \"text/%s\" parts", text_subtype);
         }
 
         return body;
@@ -828,9 +827,9 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      * lieu of the MIME part into the final document.  All other MIME
      * parts are ignored.
      *
-     * @throws RFC822Error.NOT_FOUND if an HTML body is not present.
+     * @throws Error.NOT_FOUND if an HTML body is not present.
      */
-    public string? get_html_body(InlinePartReplacer? replacer) throws RFC822Error {
+    public string? get_html_body(InlinePartReplacer? replacer) throws Error {
         return internal_get_body("html", false, replacer);
     }
 
@@ -850,9 +849,10 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      * output is not converted; it's up to the caller to know what
      * format to return when invoked.
      *
-     * @throws RFC822Error.NOT_FOUND if a plaintext body is not present.
+     * @throws Error.NOT_FOUND if a plaintext body is not present.
      */
-    public string? get_plain_body(bool convert_to_html, InlinePartReplacer? replacer) throws RFC822Error {
+    public string? get_plain_body(bool convert_to_html, InlinePartReplacer? replacer)
+        throws Error {
         return internal_get_body("plain", convert_to_html, replacer);
     }
 
@@ -864,7 +864,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      * that come out of this function are persisted.
      */
     public string? get_searchable_body(bool include_sub_messages = true)
-        throws RFC822Error {
+        throws Error {
         string? body = null;
         bool html = false;
         try {
@@ -936,14 +936,15 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
     // UNSPECIFIED disposition means "return all Mime parts"
     internal Gee.List<Part> get_attachments(
-        Mime.DispositionType disposition = Mime.DispositionType.UNSPECIFIED) throws RFC822Error {
+        Mime.DispositionType disposition = Mime.DispositionType.UNSPECIFIED)
+        throws Error {
         Gee.List<Part> attachments = new Gee.LinkedList<Part>();
         get_attachments_recursively(attachments, message.get_mime_part(), disposition);
         return attachments;
     }
 
     private MailboxAddresses? to_addresses(GMime.InternetAddressList? list)
-        throws RFC822Error {
+        throws Error {
         MailboxAddresses? addresses = null;
         if (list != null && list.length() > 0) {
             addresses = new MailboxAddresses.from_gmime(list);
@@ -963,7 +964,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     private void get_attachments_recursively(Gee.List<Part> attachments,
                                              GMime.Object root,
                                              Mime.DispositionType requested_disposition)
-        throws RFC822Error {
+        throws Error {
         if (root is GMime.Multipart) {
             GMime.Multipart multipart = (GMime.Multipart) root;
             int count = multipart.get_count();
@@ -1052,7 +1053,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 #endif
 
     public Gee.List<Geary.RFC822.Message> get_sub_messages()
-        throws RFC822Error {
+        throws Error {
         Gee.List<Geary.RFC822.Message> messages = new Gee.ArrayList<Geary.RFC822.Message>();
         find_sub_messages(messages, message.get_mime_part());
         return messages;
@@ -1060,7 +1061,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
     private void find_sub_messages(Gee.List<Message> messages,
                                    GMime.Object root)
-        throws RFC822Error {
+        throws Error {
         // If this is a multipart container, check each of its children.
         GMime.Multipart? multipart = root as GMime.Multipart;
         if (multipart != null) {
@@ -1084,7 +1085,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
     private Memory.Buffer message_to_memory_buffer(bool encode_lf,
                                                    bool stuff_smtp)
-        throws RFC822Error {
+        throws Error {
         ByteArray byte_array = new ByteArray();
         GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
         stream.set_owner(false);
@@ -1100,13 +1101,13 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
 
         if (message.write_to_stream(Geary.RFC822.get_format_options(), stream_filter) < 0)
-            throw new RFC822Error.FAILED("Unable to write RFC822 message to filter stream");
+            throw new Error.FAILED("Unable to write RFC822 message to filter stream");
 
         if (stream_filter.flush() != 0)
-            throw new RFC822Error.FAILED("Unable to flush RFC822 message to memory stream");
+            throw new Error.FAILED("Unable to flush RFC822 message to memory stream");
 
         if (stream.flush() != 0)
-            throw new RFC822Error.FAILED("Unable to flush RFC822 message to memory buffer");
+            throw new Error.FAILED("Unable to flush RFC822 message to memory buffer");
 
         return new Memory.ByteBuffer.from_byte_array(byte_array);
     }

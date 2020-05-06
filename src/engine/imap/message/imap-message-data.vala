@@ -30,7 +30,7 @@ public class Geary.Imap.RFC822Header : Geary.RFC822.Header, Geary.Imap.MessageDa
         throws ImapError {
         try {
             base(buffer);
-        } catch (RFC822Error error) {
+        } catch (RFC822.Error error) {
             throw new ImapError.INVALID(error.message);
         }
     }

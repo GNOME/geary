@@ -381,7 +381,7 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
     public void set_originators(Geary.RFC822.MailboxAddresses? from,
                                 Geary.RFC822.MailboxAddress? sender,
                                 Geary.RFC822.MailboxAddresses? reply_to)
-        throws RFC822Error {
+        throws Error {
         // XXX Should be throwing an error here if from is empty or
         // sender is same as from
         this.from = from;
@@ -477,7 +477,7 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
      * present. If not, {@link EngineError.INCOMPLETE_MESSAGE} is
      * thrown.
      */
-    public Geary.RFC822.Message get_message() throws EngineError, RFC822Error {
+    public Geary.RFC822.Message get_message() throws EngineError, Error {
         if (message != null)
             return message;
 

@@ -16,7 +16,7 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
         add_test("hash", hash);
     }
 
-    public void from_rfc822_string_encoded() throws Error {
+    public void from_rfc822_string_encoded() throws GLib.Error {
         MailboxAddresses addrs = new MailboxAddresses.from_rfc822_string("test@example.com");
         assert(addrs.size == 1);
 
@@ -43,7 +43,7 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
         assert_string("\"Surname, Name\" <mail@example.com>", addrs.to_rfc822_string());
     }
 
-    public void to_rfc822_string() throws Error {
+    public void to_rfc822_string() throws GLib.Error {
         assert(new MailboxAddresses().to_rfc822_string() == "");
         assert(new_addreses({ "test1@example.com" })
                .to_rfc822_string() == "test1@example.com");
@@ -51,7 +51,7 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
                .to_rfc822_string() == "test1@example.com, test2@example.com");
     }
 
-    public void equal_to() throws Error {
+    public void equal_to() throws GLib.Error {
         var mailboxes_a = new_addreses({ "test1@example.com" });
         var mailboxes_b = new_addreses({ "test1@example.com" });
         var mailboxes_c = new_addreses({ "test2@example.com" });
@@ -83,7 +83,7 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
         );
     }
 
-    public void hash() throws Error {
+    public void hash() throws GLib.Error {
         var mailboxes_a = new_addreses({ "test1@example.com" });
         var mailboxes_b = new_addreses({ "test1@example.com" });
         var mailboxes_c = new_addreses({ "test2@example.com" });
