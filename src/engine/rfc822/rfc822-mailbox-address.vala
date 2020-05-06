@@ -256,10 +256,10 @@ public class Geary.RFC822.MailboxAddress :
             );
         }
 
-        this.gmime(mbox_addr);
+        this.from_gmime(mbox_addr);
     }
 
-    public MailboxAddress.gmime(GMime.InternetAddressMailbox mailbox) {
+    public MailboxAddress.from_gmime(GMime.InternetAddressMailbox mailbox) {
         // GMime strips source route for us, so the address part
         // should only ever contain a single '@'
         string? name = mailbox.get_name();

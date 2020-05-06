@@ -36,15 +36,13 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     private const string HEADER_BCC = "Bcc";
 
     // Internal note: If a header field is added here, it *must* be
-    // set in stock_from_gmime().
-
-    /** {@inheritDoc} */
-
-    /** {@inheritDoc} */
-    public RFC822.MailboxAddress? sender { get; protected set; default = null; }
+    // set in Message.from_gmime_message(), below.
 
     /** {@inheritDoc} */
     public RFC822.MailboxAddresses? from { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public RFC822.MailboxAddress? sender { get; protected set; default = null; }
 
     /** {@inheritDoc} */
     public RFC822.MailboxAddresses? to { get; protected set; default = null; }
@@ -87,23 +85,78 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
 
     public Message(Full full) throws RFC822Error {
-        GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(full.buffer));
-
-        message = parser.construct_message(Geary.RFC822.get_parser_options());
-        if (message == null)
+        GMime.Parser parser = new GMime.Parser.with_stream(
+            Utils.create_stream_mem(full.buffer)
+        );
+        var message = parser.construct_message(get_parser_options());
+        if (message == null) {
             throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
+        }
+
+        this.from_gmime_message(message);
 
         // See the declaration of these fields for why we do this.
-        body_buffer = full.buffer;
-        body_offset = (size_t) parser.get_headers_end();
-
-        stock_from_gmime();
+        this.body_buffer = full.buffer;
+        this.body_offset = (size_t) parser.get_headers_end();
     }
 
     public Message.from_gmime_message(GMime.Message message)
         throws RFC822Error {
         this.message = message;
-        stock_from_gmime();
+
+        this.from = to_addresses(message.get_from());
+        this.to = to_addresses(message.get_to());
+        this.cc = to_addresses(message.get_cc());
+        this.bcc = to_addresses(message.get_bcc());
+        this.reply_to = to_addresses(message.get_reply_to());
+
+        var sender = (
+            message.get_sender().get_address(0) as GMime.InternetAddressMailbox
+        );
+        if (sender != null) {
+            this.sender = new MailboxAddress.from_gmime(sender);
+        }
+
+        var subject = message.get_subject();
+        if (subject != null) {
+            this.subject = new Subject(subject);
+        }
+
+        // Use a pointer here to work around GNOME/vala#986
+        GLib.DateTime* date = message.get_date();
+        if (date != null) {
+            this.date = new Date(date);
+        }
+
+        var message_id = message.get_message_id();
+        if (message_id != null) {
+            this.message_id = new MessageID(message_id);
+        }
+
+        // Since these headers may be specified multiple times, we
+        // need to iterate over all of them to find them.
+        var headers = message.get_header_list();
+        for (int i = 0; i < headers.get_count(); i++) {
+            var header = headers.get_header_at(i);
+            switch (header.get_name().down()) {
+            case "in-reply-to":
+                this.in_reply_to = append_message_id(
+                    this.in_reply_to, header.get_raw_value()
+                );
+                break;
+
+            case "references":
+                this.references = append_message_id(
+                    this.references, header.get_raw_value()
+                );
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        this.mailer = message.get_header("X-Mailer");
     }
 
     public Message.from_buffer(Memory.Buffer full_email)
@@ -118,14 +171,16 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         stream_cat.add_source(new GMime.StreamMem.with_buffer(body.buffer.get_bytes().get_data()));
 
         GMime.Parser parser = new GMime.Parser.with_stream(stream_cat);
-        message = parser.construct_message(Geary.RFC822.get_parser_options());
-        if (message == null)
+        var message = parser.construct_message(Geary.RFC822.get_parser_options());
+        if (message == null) {
             throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
+        }
 
-        body_buffer = body.buffer;
-        body_offset = 0;
+        this.from_gmime_message(message);
 
-        stock_from_gmime();
+        // See the declaration of these fields for why we do this.
+        this.body_buffer = body.buffer;
+        this.body_offset = 0;
     }
 
     public async Message.from_composed_email(Geary.ComposedEmail email,
@@ -887,73 +942,11 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         return attachments;
     }
 
-    private void stock_from_gmime() throws RFC822Error {
-        GMime.HeaderList headers = this.message.headers;
-        for (int i = 0; i < headers.get_count(); i++) {
-            GMime.Header header = headers.get_header_at(i);
-            string value = header.get_value();
-            switch (header.get_name().down()) {
-            case "from":
-                this.from = append_address(this.from, value);
-                break;
-
-            case "sender":
-                this.sender = new MailboxAddress.from_rfc822_string(value);
-                break;
-
-            case "reply-to":
-                this.reply_to = append_address(this.reply_to, value);
-                break;
-
-            case "to":
-                this.to = append_address(this.to, value);
-                break;
-
-            case "cc":
-                this.cc = append_address(this.cc, value);
-                break;
-
-            case "bcc":
-                this.bcc = append_address(this.bcc, value);
-                break;
-
-            case "subject":
-                this.subject = new Subject.decode(value);
-                break;
-
-            case "date":
-                this.date = new Date(value);
-                break;
-
-            case "message-id":
-                this.message_id = new MessageID(value);
-                break;
-
-            case "in-reply-to":
-                this.in_reply_to = append_message_id(this.in_reply_to, value);
-                break;
-
-            case "references":
-                this.references = append_message_id(this.references, value);
-                break;
-
-            case "x-mailer":
-                this.mailer = GMime.utils_header_decode_text(null, value);
-                break;
-
-            default:
-                // Ignore anything else not
-                break;
-            }
-        }
-    }
-
-    private MailboxAddresses append_address(MailboxAddresses? existing,
-                                            string header_value)
+    private MailboxAddresses? to_addresses(GMime.InternetAddressList? list)
         throws RFC822Error {
-        MailboxAddresses addresses = new MailboxAddresses.from_rfc822_string(header_value);
-        if (existing != null) {
-            addresses = existing.append(addresses);
+        MailboxAddresses? addresses = null;
+        if (list != null && list.length() > 0) {
+            addresses = new MailboxAddresses.from_gmime(list);
         }
         return addresses;
     }
@@ -971,7 +964,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                                              GMime.Object root,
                                              Mime.DispositionType requested_disposition)
         throws RFC822Error {
-
         if (root is GMime.Multipart) {
             GMime.Multipart multipart = (GMime.Multipart) root;
             int count = multipart.get_count();

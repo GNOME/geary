@@ -74,10 +74,10 @@ This is the second line.
         assert_addresses(basic.to, "Charlie <charlie@example.net>");
         assert_addresses(basic.cc, "Dave <dave@example.net>");
         assert_addresses(basic.bcc, "Eve <eve@example.net>");
-        //assert_data(basic.message_id, "<3456@example.net>");
+        assert_data(basic.message_id, "3456@example.net");
         assert_message_id_list(basic.in_reply_to, "<1234@local.machine.example>");
         assert_message_id_list(basic.references, "<1234@local.machine.example>");
-        assert_data(basic.date, "Fri, 21 Nov 1997 10:01:10 -0600");
+        assert_data(basic.date, "1997-11-21T10:01:10-0600");
         assert(basic.mailer == "Geary Test Suite 1.0");
     }
 
@@ -85,7 +85,7 @@ This is the second line.
         Message enc = string_to_message(ENCODED_TO);
 
         // Courtesy Mailsploit https://www.mailsploit.com
-        assert(enc.to[0].name == "potus@whitehouse.gov <test>");
+        assert_string("potus@whitehouse.gov <test>", enc.to[0].name);
     }
 
     public void duplicate_mailbox() throws Error {
@@ -432,9 +432,9 @@ This is the second line.
 
     private void assert_message_id_list(Geary.RFC822.MessageIDList? ids,
                                         string expected)
-        throws Error {
-        assert_non_null(ids, expected);
-        assert(ids.to_rfc822_string() == expected);
+        throws GLib.Error {
+        assert_non_null(ids, "ids are null");
+        assert_string(expected, ids.to_rfc822_string());
     }
 
     // Courtesy Mailsploit https://www.mailsploit.com

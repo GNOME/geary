@@ -100,7 +100,7 @@ public class Geary.RFC822.MailboxAddresses :
             var addr = list.get_address(i);
             var mbox_addr = addr as GMime.InternetAddressMailbox;
             if (mbox_addr != null) {
-                this.addrs.add(new MailboxAddress.gmime(mbox_addr));
+                this.addrs.add(new MailboxAddress.from_gmime(mbox_addr));
             } else {
                 // XXX this is pretty bad - we just flatten the
                 // group's addresses into this list, merging lists and
@@ -112,7 +112,9 @@ public class Geary.RFC822.MailboxAddresses :
                         var group_addr =
                            group_list.get_address(j) as GMime.InternetAddressMailbox;
                         if (group_addr != null) {
-                            this.addrs.add(new MailboxAddress.gmime(group_addr));
+                            this.addrs.add(
+                                new MailboxAddress.from_gmime(group_addr)
+                            );
                         }
                     }
                 }
