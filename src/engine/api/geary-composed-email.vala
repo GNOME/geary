@@ -70,7 +70,7 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
     public string img_src_prefix { get; set; default = ""; }
 
     public ComposedEmail(DateTime date, RFC822.MailboxAddresses from) {
-        this.date = new RFC822.Date.from_date_time(date);
+        this.date = new RFC822.Date(date);
         this.from = from;
     }
 
@@ -165,7 +165,7 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
             ret = null;
         } else {
             RFC822.MessageIDList? ids = list as RFC822.MessageIDList;
-            if (ids != null && ids.list.size == 0) {
+            if (ids != null && ids.size == 0) {
                 ret = null;
             }
         }

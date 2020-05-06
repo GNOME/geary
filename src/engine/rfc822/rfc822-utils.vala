@@ -101,13 +101,13 @@ namespace Geary.RFC822.Utils {
         var list = new Gee.ArrayList<MessageID>();
 
         // 1. Start with the source's References list
-        if (source.references != null && source.references.list.size > 0) {
-            list.add_all(source.references.list);
+        if (source.references != null) {
+            list.add_all(source.references.get_all());
         }
 
         // 2. If there are In-Reply-To Message-IDs and they're not in the References list, append them
         if (source.in_reply_to != null) {
-            foreach (var reply_id in source.in_reply_to.list) {
+            foreach (var reply_id in source.in_reply_to.get_all()) {
                 if (!list.contains(reply_id)) {
                     list.add(reply_id);
                 }

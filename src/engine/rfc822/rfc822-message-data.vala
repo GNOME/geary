@@ -37,30 +37,38 @@ public class Geary.RFC822.MessageID : Geary.MessageData.StringMessageData, Geary
 }
 
 /**
- * A Message-ID list stores its IDs from earliest to latest.
+ * A immutable list of RFC822 Message-ID values.
  */
 public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData, Geary.RFC822.MessageData {
     public Gee.List<MessageID> list { get; private set; }
 
-    public MessageIDList() {
-        list = new Gee.ArrayList<MessageID>();
+
+    /** Returns the number of ids in this list. */
+    public int size {
+        get { return this.list.size; }
     }
 
-    public MessageIDList.from_collection(Gee.Collection<MessageID> collection) {
-        this ();
+    /** Determines if there are no ids in the list. */
+    public bool is_empty {
+        get { return this.list.is_empty; }
+    }
 
-        foreach(MessageID msg_id in collection)
-            this.list.add(msg_id);
+    private Gee.List<MessageID> list = new Gee.ArrayList<MessageID>();
+
+
+    public MessageIDList(Gee.Collection<MessageID>? collection = null) {
+        if (collection != null) {
+            this.list.add_all(collection);
+        }
     }
 
     public MessageIDList.single(MessageID msg_id) {
-        this ();
-
+        this();
         list.add(msg_id);
     }
 
     public MessageIDList.from_rfc822_string(string value) {
-        this ();
+        this();
 
         // Have seen some mailers use commas between Message-IDs and whitespace inside Message-IDs,
         // meaning that the standard whitespace tokenizer is not sufficient.  The only guarantee
@@ -143,12 +151,26 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
         // from any non-empty string, an empty Message-ID (i.e. "<>") won't.
     }
 
+    /** Returns the id at the given index, if it exists. */
+    public new MessageID? get(int index) {
+        return this.list.get(index);
+    }
+
+    /** Returns a read-only iterator of the ids in this list. */
+    public Gee.Iterator<MessageID> iterator() {
+        return this.list.read_only_view.iterator();
+    }
+
+    /** Returns a read-only collection of the ids in this list. */
+    public Gee.List<MessageID> get_all() {
+        return this.list.read_only_view;
+    }
+
     /**
      * Returns a new list with the given messages ids appended to this list's.
      */
     public MessageIDList append(MessageIDList others) {
-        MessageIDList new_ids = new MessageIDList();
-        new_ids.list.add_all(this.list);
+        MessageIDList new_ids = new MessageIDList(this.list);
         new_ids.list.add_all(others.list);
         return new_ids;
     }
@@ -157,13 +179,14 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
         return "MessageIDList (%d)".printf(list.size);
     }
 
-    public virtual string to_rfc822_string() {
+    public string to_rfc822_string() {
         string[] strings = new string[list.size];
-        for(int i = 0; i < list.size; ++i)
-            strings[i] = list[i].value;
+        for(int i = 0; i < this.list.size; ++i)
+            strings[i] = this.list[i].to_rfc822_string();
 
         return string.joinv(" ", strings);
     }
+
 }
 
 public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.AbstractMessageData,

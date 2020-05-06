@@ -100,7 +100,7 @@ This is the second line.
     public void duplicate_message_id() throws Error {
         Message dup = string_to_message(DUPLICATE_REFERENCES);
 
-        assert(dup.references.list.size == 2);
+        assert(dup.references.size == 2);
         assert_message_id_list(
             dup.references, "<1234@local.machine.example> <5678@local.machine.example>"
         );

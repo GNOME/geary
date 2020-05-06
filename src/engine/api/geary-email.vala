@@ -523,12 +523,12 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
 
         // References list the email trail back to its source
         if (references != null)
-            ancestors.add_all(references.list);
+            ancestors.add_all(references.get_all());
 
         // RFC822 requires the In-Reply-To Message-ID be prepended to the References list, but
         // this ensures that's the case
         if (in_reply_to != null)
-           ancestors.add_all(in_reply_to.list);
+           ancestors.add_all(in_reply_to.get_all());
 
        return (ancestors.size > 0) ? ancestors : null;
     }
