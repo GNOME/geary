@@ -5,12 +5,14 @@
  */
 
 public class Geary.Imap.EmailProperties : Geary.EmailProperties, Gee.Hashable<Geary.Imap.EmailProperties> {
+
+
     public InternalDate? internaldate { get; private set; }
-    public RFC822.Size? rfc822_size { get; private set; }
+    public RFC822Size? rfc822_size { get; private set; }
 
-    public EmailProperties(InternalDate? internaldate, RFC822.Size? rfc822_size) {
+    public EmailProperties(InternalDate internaldate,
+                           RFC822Size rfc822_size) {
         base (internaldate.value, rfc822_size.value);
-
         this.internaldate = internaldate;
         this.rfc822_size = rfc822_size;
     }

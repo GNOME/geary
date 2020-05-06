@@ -808,7 +808,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         // accumulate these to submit Imap.EmailProperties all at once
         InternalDate? internaldate = null;
-        RFC822.Size? rfc822_size = null;
+        RFC822Size? rfc822_size = null;
 
         // accumulate these to submit References all at once
         RFC822.MessageID? message_id = null;
@@ -848,7 +848,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 break;
 
                 case FetchDataSpecifier.RFC822_SIZE:
-                    rfc822_size = (RFC822.Size) data;
+                    rfc822_size = (RFC822Size) data;
                 break;
 
                 case FetchDataSpecifier.FLAGS:

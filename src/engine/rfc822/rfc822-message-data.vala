@@ -213,12 +213,7 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
     public override string to_string() {
         return original ?? value.to_string();
     }
-}
 
-public class Geary.RFC822.Size : Geary.MessageData.Int64MessageData, Geary.RFC822.MessageData {
-    public Size(int64 value) {
-        base (value);
-    }
 }
 
 public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,

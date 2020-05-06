@@ -171,7 +171,9 @@ private class Geary.ImapDB.MessageRow {
             return null;
         }
 
-        return new Geary.Imap.EmailProperties(constructed, new RFC822.Size(rfc822_size));
+        return new Imap.EmailProperties(
+            constructed, new Imap.RFC822Size(this.rfc822_size)
+        );
     }
 
     public Geary.EmailFlags? get_generic_email_flags() {
