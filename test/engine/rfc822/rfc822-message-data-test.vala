@@ -61,7 +61,7 @@ class Geary.RFC822.MessageDataTest : TestCase {
 
     public void date_from_rfc822() throws GLib.Error {
         const string FULL_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -0100";
-        Date full_hour_tz = new Date(FULL_HOUR_TZ);
+        Date full_hour_tz = new Date.from_rfc822_string(FULL_HOUR_TZ);
         assert_int64(
             ((int64) (-1 * 3600)) * 1000 * 1000,
             full_hour_tz.value.get_utc_offset(),
@@ -81,7 +81,7 @@ class Geary.RFC822.MessageDataTest : TestCase {
         );
 
         const string HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 +1030";
-        Date half_hour_tz = new Date(HALF_HOUR_TZ);
+        Date half_hour_tz = new Date.from_rfc822_string(HALF_HOUR_TZ);
         assert_int64(
             ((int64) (10.5 * 3600)) * 1000 * 1000,
             half_hour_tz.value.get_utc_offset()
@@ -96,15 +96,15 @@ class Geary.RFC822.MessageDataTest : TestCase {
 
     public void date_to_rfc822() throws GLib.Error {
         const string FULL_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -0100";
-        Date full_hour_tz = new Date(FULL_HOUR_TZ);
+        Date full_hour_tz = new Date.from_rfc822_string(FULL_HOUR_TZ);
         assert_string(FULL_HOUR_TZ, full_hour_tz.to_rfc822_string());
 
         const string HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 +1030";
-        Date half_hour_tz = new Date(HALF_HOUR_TZ);
+        Date half_hour_tz = new Date.from_rfc822_string(HALF_HOUR_TZ);
         assert_string(HALF_HOUR_TZ, half_hour_tz.to_rfc822_string());
 
         const string NEG_HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -1030";
-        Date neg_half_hour_tz = new Date(NEG_HALF_HOUR_TZ);
+        Date neg_half_hour_tz = new Date.from_rfc822_string(NEG_HALF_HOUR_TZ);
         assert_string(NEG_HALF_HOUR_TZ, neg_half_hour_tz.to_rfc822_string());
     }
 

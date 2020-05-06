@@ -106,7 +106,7 @@ private class Geary.ImapDB.MessageRow {
         if (fields.is_all_set(Geary.Email.Field.DATE)) {
             try {
                 email.set_send_date(
-                    !String.is_empty(date) ? new RFC822.Date(date) : null
+                    !String.is_empty(date) ? new RFC822.Date.from_rfc822_string(date) : null
                 );
             } catch (GLib.Error err) {
                 debug("Error loading message date from db: %s", err.message);
@@ -133,7 +133,7 @@ private class Geary.ImapDB.MessageRow {
         }
 
         if (fields.is_all_set(Geary.Email.Field.SUBJECT))
-            email.set_message_subject(new RFC822.Subject.decode(subject ?? ""));
+            email.set_message_subject(new RFC822.Subject.from_rfc822_string(subject ?? ""));
 
         if (fields.is_all_set(Geary.Email.Field.HEADER))
             email.set_message_header(new RFC822.Header(header ?? Memory.EmptyBuffer.instance));
@@ -191,7 +191,7 @@ private class Geary.ImapDB.MessageRow {
         // null if empty
 
         if (email.fields.is_all_set(Geary.Email.Field.DATE)) {
-            date = (email.date != null) ? email.date.original : null;
+            date = (email.date != null) ? email.date.to_rfc822_string() : null;
             date_time_t = (email.date != null) ? email.date.value.to_unix() : -1;
 
             fields = fields.set(Geary.Email.Field.DATE);
@@ -222,7 +222,7 @@ private class Geary.ImapDB.MessageRow {
         }
 
         if (email.fields.is_all_set(Geary.Email.Field.SUBJECT)) {
-            subject = (email.subject != null) ? email.subject.original : null;
+            subject = (email.subject != null) ? email.subject.to_rfc822_string() : null;
 
             fields = fields.set(Geary.Email.Field.SUBJECT);
         }

@@ -17,7 +17,8 @@
 public class Geary.RFC822.MailboxAddresses :
     Geary.MessageData.AbstractMessageData,
     Geary.MessageData.SearchableMessageData,
-    Geary.RFC822.MessageData, Gee.Hashable<MailboxAddresses> {
+    Gee.Hashable<MailboxAddresses>,
+    DecodedMessageData {
 
 
     /**

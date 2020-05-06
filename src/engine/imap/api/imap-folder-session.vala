@@ -901,7 +901,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 RFC822.Date? date = null;
                 if (!String.is_empty(value)) {
                     try {
-                        date = new RFC822.Date(value);
+                        date = new RFC822.Date.from_rfc822_string(value);
                     } catch (GLib.Error err) {
                         warning(
                             "Error parsing date from FETCH response: %s",
@@ -979,7 +979,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             if (required_but_not_set(Geary.Email.Field.SUBJECT, required_fields, email)) {
                 string? value = headers.get("Subject");
                 if (value != null)
-                    email.set_message_subject(new RFC822.Subject.decode(value));
+                    email.set_message_subject(new RFC822.Subject.from_rfc822_string(value));
                 else
                     email.set_message_subject(null);
             }

@@ -17,9 +17,10 @@
  * See [[https://tools.ietf.org/html/rfc5322#section-3.4]]
  */
 public class Geary.RFC822.MailboxAddress :
+    Geary.MessageData.AbstractMessageData,
     Geary.MessageData.SearchableMessageData,
     Gee.Hashable<MailboxAddress>,
-    BaseObject {
+    DecodedMessageData {
 
     private static unichar[] ATEXT = {
         '!', '#', '$', '%', '&', '\'', '*', '+', '-',
@@ -551,7 +552,7 @@ public class Geary.RFC822.MailboxAddress :
      *
      * @see to_rfc822_string
      */
-    public string to_string() {
+    public override string to_string() {
         return to_rfc822_string();
     }
 

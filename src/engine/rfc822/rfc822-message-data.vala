@@ -1,46 +1,75 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * RFC822.MessageData represents a base class for all the various elements that may be present in
- * an RFC822 message header.  Note that some common elements (such as MailAccount) are not
- * MessageData because they exist in an RFC822 header in list (i.e. multiple email addresses) form.
+ * A base interface for objects that represent decoded RFC822 headers.
+ *
+ * The value of these objects is the decoded form of the header
+ * data. Encoded forms can be obtained via {@link to_rfc822_string}.
  */
+public interface Geary.RFC822.DecodedMessageData :
+    Geary.MessageData.AbstractMessageData {
 
-public interface Geary.RFC822.MessageData : Geary.MessageData.AbstractMessageData {
+    /** Returns an RFC822-safe string representation of the data. */
+    public abstract string to_rfc822_string();
+
 }
 
 /**
- * An RFC822 Message-ID.
+ * A base interface for objects that represent encoded RFC822 header data.
  *
- * MessageID will normalize all strings so that they begin and end with the proper brackets ("<" and
- * ">").
+ * The value of these objects is the RFC822 encoded form of the header
+ * data. Decoded forms can be obtained via means specific to
+ * implementations of this interface.
  */
-public class Geary.RFC822.MessageID : Geary.MessageData.StringMessageData, Geary.RFC822.MessageData {
+public interface Geary.RFC822.EncodedMessageData :
+    Geary.MessageData.BlockMessageData {
+
+}
+
+/**
+ * A RFC822 Message-ID.
+ *
+ * The decoded form of the id is the `addr-spec` portion, that is,
+ * without the leading `<` and tailing `>`.
+ */
+public class Geary.RFC822.MessageID :
+    Geary.MessageData.StringMessageData, DecodedMessageData {
+
+    private string rfc822;
+
     public MessageID(string value) {
-        string? normalized = normalize(value);
-        base (normalized ?? value);
+        base(value);
     }
 
-    // Adds brackets if required, null if no change required
-    private static string? normalize(string value) {
-        bool needs_prefix = !value.has_prefix("<");
-        bool needs_suffix = !value.has_suffix(">");
-        if (!needs_prefix && !needs_suffix)
-            return null;
-
-        return "%s%s%s".printf(needs_prefix ? "<" : "", value, needs_suffix ? ">" : "");
+    public MessageID.from_rfc822_string(string rfc822) {
+        base(GMime.utils_decode_message_id(rfc822));
+        this.rfc822 = rfc822;
     }
+
+    /**
+     * Returns the {@link Date} in RFC 822 format.
+     */
+    public string to_rfc822_string() {
+        if (this.rfc822 == null) {
+            this.rfc822 = "<%s>".printf(this.value);
+        }
+        return this.rfc822;
+    }
+
 }
 
 /**
  * A immutable list of RFC822 Message-ID values.
  */
-public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData, Geary.RFC822.MessageData {
-    public Gee.List<MessageID> list { get; private set; }
+public class Geary.RFC822.MessageIDList :
+    Geary.MessageData.AbstractMessageData,
+    DecodedMessageData {
 
 
     /** Returns the number of ids in this list. */
@@ -189,71 +218,87 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
 
 }
 
-public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.AbstractMessageData,
-    Gee.Hashable<Geary.RFC822.Date> {
+public class Geary.RFC822.Date :
+    Geary.MessageData.AbstractMessageData,
+    Gee.Hashable<Geary.RFC822.Date>,
+    DecodedMessageData {
 
-    public string original { get; private set; }
-    public DateTime value { get; private set; }
 
-    public Date(string rfc822) throws RFC822Error {
+    public GLib.DateTime value { get; private set; }
+
+    private string? rfc822;
+
+
+    public Date(GLib.DateTime datetime) {
+        this.value = datetime;
+        this.rfc822 = null;
+    }
+
+    public Date.from_rfc822_string(string rfc822) throws RFC822Error {
         var date = GMime.utils_header_decode_date(rfc822);
         if (date == null) {
             throw new RFC822Error.INVALID("Not ISO-8601 date: %s", rfc822);
         }
+        this.rfc822 = rfc822;
         this.value = date;
-        this.original = rfc822;
-    }
-
-    public Date.from_date_time(DateTime datetime) {
-        this.original = null;
-        this.value = datetime;
     }
 
     /**
      * Returns the {@link Date} in RFC 822 format.
      */
     public string to_rfc822_string() {
-        return GMime.utils_header_format_date(this.value);
-    }
-
-    /**
-     * Returns {@link Date} for transmission.
-     *
-     * @see to_rfc822_string
-     */
-    public virtual string serialize() {
-        return to_rfc822_string();
+        if (this.rfc822 == null) {
+            this.rfc822 = GMime.utils_header_format_date(this.value);
+        }
+        return this.rfc822;
     }
 
     public virtual bool equal_to(Geary.RFC822.Date other) {
-        return (this != other) ? value.equal(other.value) : true;
+        return this == other || this.value.equal(other.value);
     }
 
     public virtual uint hash() {
-        return value.hash();
+        return this.value.hash();
     }
 
     public override string to_string() {
-        return original ?? value.to_string();
+        return this.value.to_string();
     }
 
 }
 
-public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
-    Geary.MessageData.SearchableMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Subject :
+    Geary.MessageData.StringMessageData,
+    Geary.MessageData.SearchableMessageData,
+    DecodedMessageData {
+
     public const string REPLY_PREFACE = "Re:";
     public const string FORWARD_PREFACE = "Fwd:";
 
-    public string original { get; private set; }
+
+    private string rfc822;
+
 
     public Subject(string value) {
-        base (value);
-        original = value;
+        base(value);
+        this.rfc822 = null;
     }
 
-    public Subject.decode(string value) {
-        base (GMime.utils_header_decode_text(Geary.RFC822.get_parser_options(), value));
-        original = value;
+    public Subject.from_rfc822_string(string rfc822) {
+        base(GMime.utils_header_decode_text(get_parser_options(), rfc822));
+        this.rfc822 = rfc822;
+    }
+
+    /**
+     * Returns the subject line encoded for an RFC 822 message.
+     */
+    public string to_rfc822_string() {
+        if (this.rfc822 == null) {
+            this.rfc822 = GMime.utils_header_encode_text(
+                get_format_options(), this.value, null
+            );
+        }
+        return this.rfc822;
     }
 
     public bool is_reply() {
@@ -312,9 +357,13 @@ public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
     public string to_searchable_string() {
         return value;
     }
+
 }
 
-public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Header :
+    Geary.MessageData.BlockMessageData, EncodedMessageData {
+
+
     private GMime.Message? message = null;
     private string[]? names = null;
 
@@ -353,22 +402,30 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
         }
         return this.names;
     }
+
 }
 
-public class Geary.RFC822.Text : Geary.MessageData.BlockMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Text :
+    Geary.MessageData.BlockMessageData, EncodedMessageData {
+
     public Text(Memory.Buffer buffer) {
-        base ("RFC822.Text", buffer);
+        base("RFC822.Text", buffer);
     }
+
 }
 
-public class Geary.RFC822.Full : Geary.MessageData.BlockMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Full :
+    Geary.MessageData.BlockMessageData, EncodedMessageData {
+
     public Full(Memory.Buffer buffer) {
-        base ("RFC822.Full", buffer);
+        base("RFC822.Full", buffer);
     }
+
 }
 
-// Used for decoding preview text.
+/** Represents text providing a preview of an email's body. */
 public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
+
     public PreviewText(Memory.Buffer _buffer) {
         base (_buffer);
     }
@@ -415,4 +472,5 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
     public PreviewText.from_string(string preview) {
         base (new Geary.Memory.StringBuffer(preview));
     }
+
 }
