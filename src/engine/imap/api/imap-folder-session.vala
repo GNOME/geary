@@ -1069,7 +1069,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         MailboxSpecifier mailbox = session.get_mailbox_for_path(this.folder.path);
         AppendCommand cmd = new AppendCommand(
-            mailbox, msg_flags, internaldate, message.get_network_buffer(false)
+            mailbox, msg_flags, internaldate, message.get_rfc822_buffer()
         );
 
         Gee.Map<Command, StatusResponse> responses = yield exec_commands_async(

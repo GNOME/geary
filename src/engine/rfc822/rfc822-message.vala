@@ -16,6 +16,7 @@
  */
 public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
+
     /**
      * Callback for including non-text MIME entities in message bodies.
      *
@@ -30,10 +31,35 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
      */
     public delegate string? InlinePartReplacer(Part part);
 
+
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";
     private const string HEADER_REFERENCES = "References";
     private const string HEADER_MAILER = "X-Mailer";
     private const string HEADER_BCC = "Bcc";
+
+    /** Options to use when serialising a message in RFC 822 format. */
+    [Flags]
+    public enum RFC822FormatOptions {
+
+        /** Format for RFC 822 in general. */
+        NONE,
+
+        /**
+         * The message should be serialised for transmission via SMTP.
+         *
+         * SMTP imposes both operational and data-format requirements
+         * on RFC 822 style messages. In particular, BCC headers
+         * should not be included since they will expose BCC
+         * recipients, and lines must be dot-stuffed so as to avoid
+         * terminating the message early if a line starting with a `.`
+         * is encountered.
+         *
+         * See [[http://tools.ietf.org/html/rfc5321#section-4.5.2]]
+         */
+        SMTP_FORMAT;
+
+    }
+
 
     // Internal note: If a header field is added here, it *must* be
     // set in Message.from_gmime_message(), below.
@@ -440,22 +466,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         this.message.set_mime_part(main_part);
     }
 
-    // Makes a copy of the given message without the BCC fields. This is used for sending the email
-    // without sending the BCC headers to all recipients.
-    public Message.without_bcc(Message email) throws GLib.Error {
-        // GMime doesn't make it easy to get a copy of the body of a message.  It's easy to
-        // make a new message and add in all the headers, but calling set_mime_part() with
-        // the existing one's get_mime_part() result yields a double Content-Type header in
-        // the *original* message.  Clearly the objects aren't meant to be used like that.
-        // Barring any better way to clone a message, which I couldn't find by looking at
-        // the docs, we just dump out the old message to a buffer and read it back in to
-        // create the new object.  Kinda sucks, but our hands are tied.
-        this.from_buffer(email.message_to_memory_buffer(false, false));
-
-        this.message.remove_header(HEADER_BCC);
-        this.bcc = null;
-    }
-
     private GMime.Object? coalesce_related(Gee.List<GMime.Object> parts,
                                            string type) {
         GMime.Object? part = coalesce_parts(parts, "related");
@@ -649,22 +659,21 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     }
 
     /**
-     * Returns the {@link Message} as a {@link Memory.Buffer} suitable for in-memory use (i.e.
-     * with native linefeed characters).
+     * Serialises the message using native (i.e. LF) line endings.
      */
     public Memory.Buffer get_native_buffer() throws Error {
-        return message_to_memory_buffer(false, false);
+        return message_to_memory_buffer(false, NONE);
     }
 
     /**
-     * Returns the {@link Message} as a {@link Memory.Buffer} suitable for transmission or
-     * storage (i.e. using protocol-specific linefeeds).
+     * Serialises the message using RFC 822 (i.e. CRLF) line endings.
      *
-     * The buffer can also be dot-stuffed if required.  See
-     * [[http://tools.ietf.org/html/rfc2821#section-4.5.2]]
+     * Returns the message as a memory buffer suitable for network
+     * transmission and interoperability with other RFC 822 consumers.
      */
-    public Memory.Buffer get_network_buffer(bool dotstuffed) throws Error {
-        return message_to_memory_buffer(true, dotstuffed);
+    public Memory.Buffer get_rfc822_buffer(RFC822FormatOptions options = NONE)
+        throws Error {
+        return message_to_memory_buffer(true, options);
     }
 
     /**
@@ -1084,7 +1093,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     }
 
     private Memory.Buffer message_to_memory_buffer(bool encode_lf,
-                                                   bool stuff_smtp)
+                                                   RFC822FormatOptions options)
         throws Error {
         ByteArray byte_array = new ByteArray();
         GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
@@ -1096,18 +1105,33 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         } else {
             stream_filter.add(new GMime.FilterDos2Unix(false));
         }
-        if (stuff_smtp) {
+        if (RFC822FormatOptions.SMTP_FORMAT in options) {
             stream_filter.add(new GMime.FilterSmtpData());
         }
 
-        if (message.write_to_stream(Geary.RFC822.get_format_options(), stream_filter) < 0)
-            throw new Error.FAILED("Unable to write RFC822 message to filter stream");
+        var format = Geary.RFC822.get_format_options();
+        if (RFC822FormatOptions.SMTP_FORMAT in options) {
+            format = format.clone();
+            format.add_hidden_header("Bcc");
+        }
 
-        if (stream_filter.flush() != 0)
-            throw new Error.FAILED("Unable to flush RFC822 message to memory stream");
+        if (message.write_to_stream(format, stream_filter) < 0) {
+            throw new Error.FAILED(
+                "Unable to write RFC822 message to filter stream"
+            );
+        }
 
-        if (stream.flush() != 0)
-            throw new Error.FAILED("Unable to flush RFC822 message to memory buffer");
+        if (stream_filter.flush() != 0) {
+            throw new Error.FAILED(
+                "Unable to flush RFC822 message to memory stream"
+            );
+        }
+
+        if (stream.flush() != 0) {
+            throw new Error.FAILED(
+                "Unable to flush RFC822 message to memory buffer"
+            );
+        }
 
         return new Memory.ByteBuffer.from_byte_array(byte_array);
     }

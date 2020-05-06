@@ -59,9 +59,10 @@ This is the second line.
         add_test("get_searchable_recipients", get_searchable_recipients);
         add_test("from_composed_email", from_composed_email);
         add_test("from_composed_email_inline_attachments", from_composed_email_inline_attachments);
-        add_test("get_network_buffer", get_network_buffer);
-        add_test("get_network_buffer_dot_stuff", get_network_buffer_dot_stuff);
-        add_test("get_network_buffer_long_ascii_line", get_network_buffer_long_ascii_line);
+        add_test("get_rfc822_buffer", get_rfc822_buffer);
+        add_test("get_rfc822_buffer_dot_stuff", get_rfc822_buffer_dot_stuff);
+        add_test("get_rfc822_buffer_no_bcc", get_rfc822_buffer_no_bcc);
+        add_test("get_rfc822_buffer_long_ascii_line", get_rfc822_buffer_long_ascii_line);
     }
 
     public void basic_message_from_buffer() throws GLib.Error {
@@ -210,13 +211,13 @@ This is the second line.
         assert_true(searchable.contains("Jane Doe BCC <jdoe_bcc@somewhere.tld>"), "Expected bcc address");
     }
 
-    public void get_network_buffer() throws GLib.Error {
+    public void get_rfc822_buffer() throws GLib.Error {
         Message test = resource_to_message(BASIC_TEXT_PLAIN);
-        Memory.Buffer buffer = test.get_network_buffer(true);
+        Memory.Buffer buffer = test.get_rfc822_buffer(NONE);
         assert_true(buffer.to_string() == NETWORK_BUFFER_EXPECTED, "Network buffer differs");
     }
 
-    public void get_network_buffer_dot_stuff() throws GLib.Error {
+    public void get_rfc822_buffer_dot_stuff() throws GLib.Error {
         RFC822.MailboxAddress to = new RFC822.MailboxAddress(
             "Test", "test@example.com"
         );
@@ -235,11 +236,42 @@ This is the second line.
         );
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 
-        string message_data = message.get_network_buffer(true).to_string();
+        string message_data = message.get_rfc822_buffer(SMTP_FORMAT).to_string();
         assert_true(message_data.has_suffix("..newline\r\n..\r\n"));
     }
 
-    public void get_network_buffer_long_ascii_line() throws GLib.Error {
+    public void get_rfc822_buffer_no_bcc() throws GLib.Error {
+        RFC822.MailboxAddress to = new RFC822.MailboxAddress(
+            "Test", "test@example.com"
+        );
+        RFC822.MailboxAddress bcc = new RFC822.MailboxAddress(
+            "BCC", "bcc@example.com"
+        );
+        RFC822.MailboxAddress from = new RFC822.MailboxAddress(
+            "Sender", "sender@example.com"
+        );
+        Geary.ComposedEmail composed = new Geary.ComposedEmail(
+            new GLib.DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.single(from)
+        ).set_to(
+            new Geary.RFC822.MailboxAddresses.single(to)
+        ).set_bcc(
+            new Geary.RFC822.MailboxAddresses.single(bcc)
+        );
+        composed.body_text = "\nbody\n";
+
+        this.message_from_composed_email.begin(
+            composed,
+            this.async_completion
+        );
+        Geary.RFC822.Message message = message_from_composed_email.end(async_result());
+
+        string message_data = message.get_rfc822_buffer(SMTP_FORMAT).to_string();
+        assert_true("To: Test <test@example.com>\r\n" in message_data);
+        assert_false("bcc" in message_data.down());
+    }
+
+    public void get_rfc822_buffer_long_ascii_line() throws GLib.Error {
         RFC822.MailboxAddress to = new RFC822.MailboxAddress(
             "Test", "test@example.com"
         );
@@ -265,7 +297,7 @@ This is the second line.
         );
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 
-        string message_data = message.get_network_buffer(true).to_string();
+        string message_data = message.get_rfc822_buffer(SMTP_FORMAT).to_string();
         foreach (var line in message_data.split("\n")) {
             assert_true(line.length < 1000, line);
         }
