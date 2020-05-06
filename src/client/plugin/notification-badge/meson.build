@@ -16,7 +16,8 @@ shared_module(
   vala_args: geary_vala_args,
   c_args: plugin_c_args,
   install: true,
-  install_dir: plugin_dest
+  install_dir: plugin_dest,
+  install_rpath: client_lib_dir,
 )
 
 i18n.merge_file(
