@@ -21,6 +21,10 @@ public class Plugin.MailMerge :
     PluginBase, FolderExtension, EmailExtension {
 
 
+    private const string FIELD_START = "{{";
+    private const string FIELD_END = "}}";
+
+
     // Translators: Templates folder name alternatives. Separate names
     // using a vertical bar and put the most common localized name to
     // the front for the default. English names do not need to be
@@ -105,6 +109,33 @@ public class Plugin.MailMerge :
         this.folder_names.clear();
     }
 
+    private async bool is_mail_merge_template(Email email) {
+        var found = (
+            (email.subject != null &&
+             contains_field(email.subject.to_rfc822_string())) ||
+            (email.to != null &&
+             contains_field(email.to.to_rfc822_string())) ||
+            (email.cc != null &&
+             contains_field(email.cc.to_rfc822_string())) ||
+            (email.bcc != null &&
+             contains_field(email.bcc.to_rfc822_string())) ||
+            (email.reply_to != null &&
+             contains_field(email.bcc.to_rfc822_string())) ||
+            (email.sender != null &&
+             contains_field(email.sender.to_rfc822_string()))
+        );
+        if (!found) {
+            string body = "";
+            try {
+                body = yield email.load_body_as(PLAIN, true, this.cancellable);
+            } catch (GLib.Error err) {
+                debug("Failed to load template body: %s", err.message);
+            }
+            found = contains_field(body);
+        }
+        return found;
+    }
+
     private async void edit_email(EmailIdentifier id) {
         try {
             var composer = this.plugin_application.new_composer(id.account);
@@ -137,7 +168,8 @@ public class Plugin.MailMerge :
         } catch (GLib.Error err) {
             warning("Could not load folders for email: %s", err.message);
         }
-        if (containing.any_match((f) => f.display_name in this.folder_names)) {
+        if (containing.any_match((f) => f.display_name in this.folder_names) &&
+            yield is_mail_merge_template(target)) {
             this.email.add_email_info_bar(
                 target.identifier,
                 new_template_email_info_bar(target.identifier),
@@ -167,6 +199,32 @@ public class Plugin.MailMerge :
             )
         );
         return bar;
+    }
+
+    private bool contains_field(string value) {
+        var found = false;
+        var index = 0;
+        while (!found) {
+            var field_start = value.index_of(FIELD_START, index);
+            if (field_start < 0) {
+                break;
+            }
+            found = parse_field((string) value.data[field_start:-1]) != null;
+            index = field_start + 1;
+        }
+        return found;
+    }
+
+    private string? parse_field(string value) {
+        string? field = null;
+        if (value.has_prefix(FIELD_START)) {
+            int start = FIELD_START.length;
+            int end = value.index_of(FIELD_END, start);
+            if (end >= 0) {
+                field = value.substring(start, end - FIELD_END.length).strip();
+            }
+        }
+        return field;
     }
 
     private void on_edit_activated(GLib.Action action, GLib.Variant? target) {
