@@ -65,37 +65,48 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     // set in Message.from_gmime_message(), below.
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? from { get; protected set; default = null; }
+    public MailboxAddresses? from { get { return this._from; } }
+    private MailboxAddresses? _from  = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddress? sender { get; protected set; default = null; }
+    public MailboxAddress? sender { get { return this._sender; } }
+    private MailboxAddress? _sender = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? to { get; protected set; default = null; }
+    public MailboxAddresses? reply_to { get { return this._reply_to; } }
+    private MailboxAddresses? _reply_to = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? cc { get; protected set; default = null; }
+    public MailboxAddresses? to { get { return this._to; } }
+    private MailboxAddresses? _to = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? bcc { get; protected set; default = null; }
+    public MailboxAddresses? cc { get { return this._cc; } }
+    private MailboxAddresses? _cc = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? reply_to { get; protected set; default = null; }
+    public MailboxAddresses? bcc { get { return this._bcc; } }
+    private MailboxAddresses? _bcc = null;
 
     /** {@inheritDoc} */
-    public RFC822.MessageID? message_id { get; protected set; default = null; }
+    public MessageID? message_id { get { return this._message_id; } }
+    private MessageID? _message_id = null;
 
     /** {@inheritDoc} */
-    public RFC822.MessageIDList? in_reply_to { get; protected set; default = null; }
+    public MessageIDList? in_reply_to { get { return this._in_reply_to; } }
+    private MessageIDList? _in_reply_to = null;
 
     /** {@inheritDoc} */
-    public RFC822.MessageIDList? references { get; protected set; default = null; }
+    public MessageIDList? references { get { return this._references; } }
+    private MessageIDList? _references = null;
 
     /** {@inheritDoc} */
-    public RFC822.Subject? subject { get; protected set; default = null; }
+    public Subject? subject { get { return this._subject; } }
+    private Subject? _subject = null;
 
     /** {@inheritDoc} */
-    public Geary.RFC822.Date? date { get; protected set; default = null; }
+    public Date? date { get { return this._date; } }
+    private Date? _date = null;
 
     /** Value of the X-Mailer header. */
     public string? mailer { get; protected set; default = null; }
@@ -120,33 +131,33 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         throws Error {
         this.message = message;
 
-        this.from = to_addresses(message.get_from());
-        this.to = to_addresses(message.get_to());
-        this.cc = to_addresses(message.get_cc());
-        this.bcc = to_addresses(message.get_bcc());
-        this.reply_to = to_addresses(message.get_reply_to());
+        this._from = to_addresses(message.get_from());
+        this._to = to_addresses(message.get_to());
+        this._cc = to_addresses(message.get_cc());
+        this._bcc = to_addresses(message.get_bcc());
+        this._reply_to = to_addresses(message.get_reply_to());
 
         var sender = (
             message.get_sender().get_address(0) as GMime.InternetAddressMailbox
         );
         if (sender != null) {
-            this.sender = new MailboxAddress.from_gmime(sender);
+            this._sender = new MailboxAddress.from_gmime(sender);
         }
 
         var subject = message.get_subject();
         if (subject != null) {
-            this.subject = new Subject(subject);
+            this._subject = new Subject(subject);
         }
 
         // Use a pointer here to work around GNOME/vala#986
         GLib.DateTime* date = message.get_date();
         if (date != null) {
-            this.date = new Date(date);
+            this._date = new Date(date);
         }
 
         var message_id = message.get_message_id();
         if (message_id != null) {
-            this.message_id = new MessageID(message_id);
+            this._message_id = new MessageID(message_id);
         }
 
         // Since these headers may be specified multiple times, we
@@ -156,14 +167,14 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             var header = headers.get_header_at(i);
             switch (header.get_name().down()) {
             case "in-reply-to":
-                this.in_reply_to = append_message_id(
-                    this.in_reply_to, header.get_raw_value()
+                this._in_reply_to = append_message_id(
+                    this._in_reply_to, header.get_raw_value()
                 );
                 break;
 
             case "references":
-                this.references = append_message_id(
-                    this.references, header.get_raw_value()
+                this._references = append_message_id(
+                    this._references, header.get_raw_value()
                 );
                 break;
 
@@ -204,52 +215,52 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         //
         // Required headers
 
-        this.from = email.from;
+        this._from = email.from;
         foreach (RFC822.MailboxAddress mailbox in email.from) {
             this.message.add_mailbox(FROM, mailbox.name, mailbox.address);
         }
 
-        this.date = email.date;
+        this._date = email.date;
         this.message.set_date(this.date.value);
 
         // Optional headers
 
         if (email.to != null) {
-            this.to = email.to;
+            this._to = email.to;
             foreach (RFC822.MailboxAddress mailbox in email.to)
                 this.message.add_mailbox(TO, mailbox.name, mailbox.address);
         }
 
         if (email.cc != null) {
-            this.cc = email.cc;
+            this._cc = email.cc;
             foreach (RFC822.MailboxAddress mailbox in email.cc)
                 this.message.add_mailbox(CC, mailbox.name, mailbox.address);
         }
 
         if (email.bcc != null) {
-            this.bcc = email.bcc;
+            this._bcc = email.bcc;
             foreach (RFC822.MailboxAddress mailbox in email.bcc)
                 this.message.add_mailbox(BCC, mailbox.name, mailbox.address);
         }
 
         if (email.sender != null) {
-            this.sender = email.sender;
+            this._sender = email.sender;
             this.message.add_mailbox(SENDER, this.sender.name, this.sender.address);
         }
 
         if (email.reply_to != null) {
-            this.reply_to = email.reply_to;
+            this._reply_to = email.reply_to;
             foreach (RFC822.MailboxAddress mailbox in email.reply_to)
                 this.message.add_mailbox(REPLY_TO, mailbox.name, mailbox.address);
         }
 
         if (message_id != null) {
-            this.message_id = new MessageID(message_id);
+            this._message_id = new MessageID(message_id);
             this.message.set_message_id(message_id);
         }
 
         if (email.in_reply_to != null) {
-            this.in_reply_to = email.in_reply_to;
+            this._in_reply_to = email.in_reply_to;
             // We could use `this.message.add_mailbox()` in a similar way like
             // we did for the other headers, but this would require to change
             // the type of `email.in_reply_to` and `this.in_reply_to` from
@@ -260,14 +271,14 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
 
         if (email.references != null) {
-            this.references = email.references;
+            this._references = email.references;
             this.message.set_header(HEADER_REFERENCES,
                                     email.references.to_rfc822_string(),
                                     Geary.RFC822.get_charset());
         }
 
         if (email.subject != null) {
-            this.subject = email.subject;
+            this._subject = email.subject;
             this.message.set_subject(email.subject.value,
                                      Geary.RFC822.get_charset());
         }

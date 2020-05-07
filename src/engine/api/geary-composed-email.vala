@@ -22,37 +22,48 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
     );
 
     /** {@inheritDoc} */
-    public RFC822.Date? date { get; protected set; }
+    public RFC822.MailboxAddresses? from { get { return this._from; } }
+    private RFC822.MailboxAddresses? _from  = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? from { get; protected set; }
+    public RFC822.MailboxAddress? sender { get { return this._sender; } }
+    private RFC822.MailboxAddress? _sender = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddress? sender { get; protected set; default = null; }
+    public RFC822.MailboxAddresses? reply_to { get { return this._reply_to; } }
+    private RFC822.MailboxAddresses? _reply_to = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? to { get; protected set; default = null; }
+    public RFC822.MailboxAddresses? to { get { return this._to; } }
+    private RFC822.MailboxAddresses? _to = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? cc { get; protected set; default = null; }
+    public RFC822.MailboxAddresses? cc { get { return this._cc; } }
+    private RFC822.MailboxAddresses? _cc = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? bcc { get; protected set; default = null; }
+    public RFC822.MailboxAddresses? bcc { get { return this._bcc; } }
+    private RFC822.MailboxAddresses? _bcc = null;
 
     /** {@inheritDoc} */
-    public RFC822.MailboxAddresses? reply_to { get; protected set; default = null; }
+    public RFC822.MessageID? message_id { get { return this._message_id; } }
+    private RFC822.MessageID? _message_id = null;
 
     /** {@inheritDoc} */
-    public RFC822.MessageID? message_id { get; protected set; default = null; }
+    public RFC822.MessageIDList? in_reply_to { get { return this._in_reply_to; } }
+    private RFC822.MessageIDList? _in_reply_to = null;
 
     /** {@inheritDoc} */
-    public RFC822.MessageIDList? in_reply_to { get; protected set; default = null; }
+    public RFC822.MessageIDList? references { get { return this._references; } }
+    private RFC822.MessageIDList? _references = null;
 
     /** {@inheritDoc} */
-    public RFC822.MessageIDList? references { get; protected set; default = null; }
+    public RFC822.Subject? subject { get { return this._subject; } }
+    private RFC822.Subject? _subject = null;
 
     /** {@inheritDoc} */
-    public RFC822.Subject? subject { get; protected set; default = null; }
+    public RFC822.Date? date { get { return this._date; } }
+    private RFC822.Date? _date = null;
 
     public string? body_text { get; set; default = null; }
     public string? body_html { get; set; default = null; }
@@ -70,52 +81,52 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
     public string img_src_prefix { get; set; default = ""; }
 
     public ComposedEmail(DateTime date, RFC822.MailboxAddresses from) {
-        this.date = new RFC822.Date(date);
-        this.from = from;
+        this._date = new RFC822.Date(date);
+        this._from = from;
     }
 
     public ComposedEmail set_sender(RFC822.MailboxAddress? sender) {
-        this.sender = sender;
+        this._sender = sender;
         return this;
     }
 
     public ComposedEmail set_to(RFC822.MailboxAddresses? recipients) {
-        this.to = empty_to_null(recipients);
+        this._to = empty_to_null(recipients);
         return this;
     }
 
     public ComposedEmail set_cc(RFC822.MailboxAddresses? recipients) {
-        this.cc = empty_to_null(recipients);
+        this._cc = empty_to_null(recipients);
         return this;
     }
 
     public ComposedEmail set_bcc(RFC822.MailboxAddresses? recipients) {
-        this.bcc = empty_to_null(recipients);
+        this._bcc = empty_to_null(recipients);
         return this;
     }
 
     public ComposedEmail set_reply_to(RFC822.MailboxAddresses? recipients) {
-        this.reply_to = empty_to_null(recipients);
+        this._reply_to = empty_to_null(recipients);
         return this;
     }
 
     public ComposedEmail set_message_id(RFC822.MessageID? id) {
-        this.message_id = id;
+        this._message_id = id;
         return this;
     }
 
     public ComposedEmail set_in_reply_to(RFC822.MessageIDList? messages) {
-        this.in_reply_to = empty_to_null(messages);
+        this._in_reply_to = empty_to_null(messages);
         return this;
     }
 
     public ComposedEmail set_references(RFC822.MessageIDList? messages) {
-        this.references = empty_to_null(messages);
+        this._references = empty_to_null(messages);
         return this;
     }
 
     public ComposedEmail set_subject(string? subject) {
-        this.subject = (
+        this._subject = (
             String.is_empty_or_whitespace(subject)
             ? null
             : new RFC822.Subject(subject)
