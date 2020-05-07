@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2020-05-07 01:10+0000\n"
-"PO-Revision-Date: 2020-04-01 02:58+0900\n"
+"PO-Revision-Date: 2020-05-07 20:10+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -852,10 +852,8 @@ msgstr "フォルダーの同期を記録する"
 
 #. / Command line option
 #: src/client/application/application-client.vala:115
-#, fuzzy
-#| msgid "Log network activity"
 msgid "Log IMAP network activity"
-msgstr "ネットワークのアクティビティを記録する"
+msgstr "IMAP ネットワークのアクティビティを記録する"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
@@ -866,10 +864,8 @@ msgstr "IMAP のイベントキューを記録する"
 
 #. / Command line option
 #: src/client/application/application-client.vala:123
-#, fuzzy
-#| msgid "Log network activity"
 msgid "Log SMTP network activity"
-msgstr "ネットワークのアクティビティを記録する"
+msgstr "SMTP ネットワークのアクティビティを記録する"
 
 #. / Command line option
 #: src/client/application/application-client.vala:126
@@ -940,12 +936,12 @@ msgstr "ディストリビューション名"
 #. / Application runtime information label
 #: src/client/application/application-client.vala:323
 msgid "Distribution release"
-msgstr ""
+msgstr "ディストリビューションリリース"
 
 #. / Application runtime information label
 #: src/client/application/application-client.vala:331
 msgid "Installation prefix"
-msgstr ""
+msgstr "インストールプレフィックス"
 
 #: src/client/application/application-client.vala:584
 #, c-format
@@ -2112,54 +2108,44 @@ msgid_plural "New messages"
 msgstr[0] "新着メッセージ"
 
 #: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
-#, fuzzy
-#| msgid "Email address"
 msgid "Email Templates"
-msgstr "メールアドレス"
+msgstr "メールテンプレート"
 
 #: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
 msgid "Create reusable templates for sending email"
 msgstr ""
+"送信メール用の使い回し可能なテンプレートを作成します"
 
 #. Translators: Templates folder name alternatives. Separate names
 #. using a vertical bar and put the most common localized name to
 #. the front for the default. English names do not need to be
 #. included.
 #: src/client/plugin/email-templates/email-templates.vala:29
-#, fuzzy
-#| msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgid "Templates | Template Mail | Template Email | Template E-Mail"
-msgstr "送信済み | 送信 | 送信メール | 送信済みメール | 送信済メール"
+msgstr "テンプレート | テンプレートメール | メールテンプレート"
 
 #. Translators: The name of the folder used to
 #. store email templates
 #: src/client/plugin/email-templates/email-templates.vala:195
 msgid "Templates"
-msgstr ""
+msgstr "テンプレート"
 
 #. Translators: Info bar button label for creating a
 #. new email template
 #: src/client/plugin/email-templates/email-templates.vala:276
-#, fuzzy
-#| msgid "Now"
 msgid "New"
-msgstr "今"
+msgstr "新規"
 
 #. Translators: Infobar status label for an email template
 #: src/client/plugin/email-templates/email-templates.vala:287
-#, fuzzy
-#| msgid "Message not saved"
 msgid "Message template"
-msgstr "メッセージが保存されませんでした"
+msgstr ""
 
 #. Translators: Info bar button label for sending an
 #. email template
 #: src/client/plugin/email-templates/email-templates.vala:291
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Send"
 msgid "Send"
-msgstr "送信する"
+msgstr "送信"
 
 #. Translators: Info bar button label for editing an
 #. existing email template
@@ -2197,7 +2183,7 @@ msgstr "通知バッジ"
 
 #: src/client/plugin/notification-badge/notification-badge.plugin.desktop.in:5
 msgid "Displays a dock badge showing the number of new messages"
-msgstr ""
+msgstr "Dock に新着メッセージ数を示すバッジを表示します"
 
 #: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Sent Sound"
@@ -2680,10 +2666,8 @@ msgid "Add an account"
 msgstr "アカウントを追加"
 
 #: ui/accounts_editor_add_pane.ui:53
-#, fuzzy
-#| msgid "Create"
 msgid "_Create"
-msgstr "作成"
+msgstr "作成(_C)"
 
 #: ui/accounts_editor_add_pane.ui:131 ui/accounts_editor_servers_pane.ui:125
 msgid "Receiving"
@@ -3065,7 +3049,7 @@ msgstr ""
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:55
 msgid "Add a marker entry to the log"
-msgstr ""
+msgstr "ログにマーカーエントリーを追加"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
@@ -3081,10 +3065,8 @@ msgstr "クリップボードにコピー"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:121
-#, fuzzy
-#| msgid "Search for matching log entries"
 msgid "Clears all log entries"
-msgstr "一致するログエントリーを検索"
+msgstr "すべてのログエントリーを消去"
 
 #: ui/conversation-contact-popover.ui:146
 msgid "New Conversation…"
@@ -3452,19 +3434,13 @@ msgid "Focus next/previous message"
 msgstr "フォーカスを次/前のメッセージに移動する"
 
 #: ui/gtk/help-overlay.ui:260
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Single-key shortcuts"
 msgid "Single-key Shortcuts"
 msgstr "シングルキーショートカット"
 
 #: ui/gtk/help-overlay.ui:265
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Single-key shortcuts"
 msgctxt "shortcut window"
 msgid "Single-key shortcuts (if enabled)"
-msgstr "シングルキーショートカット"
+msgstr "シングルキーショートカット (有効な場合)"
 
 #: ui/gtk/help-overlay.ui:274
 msgctxt "shortcut window"
