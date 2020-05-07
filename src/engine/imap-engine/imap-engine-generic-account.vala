@@ -141,9 +141,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
 
         this.last_storage_cleanup = yield this.local.fetch_last_cleanup_async(cancellable);
-        this.last_storage_cleanup_changed.connect ((dt) => {
-            this.local.set_last_cleanup_async.begin(dt, cancellable);
-        });
+        this.notify["last_storage_cleanup"].connect(on_last_storage_cleanup_notify);
 
         this.open = true;
         notify_opened();
@@ -1002,6 +1000,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 this.refresh_folder_timer.reset();
             }
         }
+    }
+
+    private void on_last_storage_cleanup_notify() {
+        this.local.set_last_cleanup_async.begin(
+            this.last_storage_cleanup,
+            this.open_cancellable
+        );
     }
 
 }
