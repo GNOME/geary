@@ -189,6 +189,40 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             return Util.Email.get_primary_originator(this.backing);
         }
 
+        public async string load_body_as(Plugin.Email.BodyType type,
+                                         bool convert,
+                                         GLib.Cancellable? cancellable)
+            throws GLib.Error {
+            if (!(Geary.Email.REQUIRED_FOR_MESSAGE in this.backing.fields)) {
+                Geary.Account account = this.account.backing.account;
+                this.backing = yield account.local_fetch_email_async(
+                    this.backing.id,
+                    Geary.Email.REQUIRED_FOR_MESSAGE | this.backing.fields,
+                    cancellable
+                );
+            }
+
+            Geary.RFC822.Message message = this.backing.get_message();
+            string body = "";
+            switch (type) {
+            case PLAIN:
+                if (message.has_plain_body()) {
+                    body = message.get_plain_body(false, null) ?? "";
+                } else {
+                    body = message.get_searchable_body(false) ?? "";
+                }
+                break;
+
+            case HTML:
+                if (message.has_html_body()) {
+                    body = message.get_html_body(null) ?? "";
+                } else {
+                    body = message.get_plain_body(true, null) ?? "";
+                }
+                break;
+            }
+            return body;
+        }
     }
 
 

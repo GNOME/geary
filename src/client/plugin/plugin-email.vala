@@ -15,6 +15,15 @@ public interface Plugin.Email :
     Geary.EmailHeaderSet {
 
 
+    /** Defines the formats that email body text can be loaded as. */
+    public enum BodyType {
+        /** Specifies `text/plain` body parts. */
+        PLAIN,
+        /** Specifies `text/html` body parts. */
+        HTML;
+    }
+
+
     /** Returns a unique identifier for this email. */
     public abstract EmailIdentifier identifier { get; }
 
@@ -30,6 +39,33 @@ public interface Plugin.Email :
      * @see Util.Email.get_primary_originator
      */
     public abstract Geary.RFC822.MailboxAddress? get_primary_originator();
+
+    /**
+     * Load the text of the email body as the given type.
+     *
+     * This method traverses the MIME multipart structure of the email
+     * body finding inline text parts and assembles them into a
+     * complete email body, as would be displayed to a person reading
+     * the email. If multiple matching parts are found, they will be
+     * concatenated.
+     *
+     * If no alternative parts for the requested type exist and
+     * `convert` is true, if alternatives for other supported types
+     * are present, an attempt will be made to convert to the
+     * requested type. For example, requesting HTML for an email with
+     * plain text only will attempt to reformat the plain text by
+     * inserting HTML tags. Otherwise an {@link Error.NOT_SUPPORTED}
+     * error is thrown.
+     *
+     * An error will be thrown if no body parts could be found, for
+     * example if an email has not completely been downloaded from the
+     * server.
+     */
+    public abstract async string load_body_as(
+        BodyType type,
+        bool convert,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error;
 
 }
 
