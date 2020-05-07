@@ -127,7 +127,7 @@ public class Plugin.DesktopNotifications :
             );
         }
 
-        string body = email.subject;
+        string body = Util.Email.strip_subject_prefixes(email);
         if (total > 1) {
             body = ngettext(
                 /// Notification body when a message as been received

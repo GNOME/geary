@@ -112,7 +112,9 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
 
     /** Implementation of the plugin email interface. */
-    internal class EmailImpl : Geary.BaseObject, Plugin.Email {
+    internal class EmailImpl : Geary.BaseObject,
+        Geary.EmailHeaderSet,
+        Plugin.Email {
 
 
         public Plugin.EmailIdentifier identifier {
@@ -125,14 +127,53 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         }
         private IdImpl? _id = null;
 
+        public Geary.RFC822.MailboxAddresses? from {
+            get { return this.backing.from; }
+        }
+
+        public Geary.RFC822.MailboxAddress? sender {
+            get { return this.backing.sender; }
+        }
+
+        public Geary.RFC822.MailboxAddresses? reply_to {
+            get { return this.backing.reply_to; }
+        }
+
+        public Geary.RFC822.MailboxAddresses? to {
+            get { return this.backing.to; }
+        }
+
+        public Geary.RFC822.MailboxAddresses? cc {
+            get { return this.backing.cc; }
+        }
+
+        public Geary.RFC822.MailboxAddresses? bcc {
+            get { return this.backing.bcc; }
+        }
+
+        public Geary.RFC822.MessageID? message_id {
+            get { return this.backing.message_id; }
+        }
+
+        public Geary.RFC822.MessageIDList? in_reply_to {
+            get { return this.backing.in_reply_to; }
+        }
+
+        public Geary.RFC822.MessageIDList? references {
+            get { return this.backing.references; }
+        }
+
+        public Geary.RFC822.Subject? subject {
+            get { return this.backing.subject; }
+        }
+
+        public Geary.RFC822.Date? date {
+            get { return this.backing.date; }
+        }
+
         public Geary.EmailFlags flags {
             get { return this.backing.email_flags; }
         }
-
-        public string subject {
-            get { return this._subject; }
-        }
-        string _subject;
 
         internal Geary.Email backing { get; private set; }
         internal PluginManager.AccountImpl account { get; private set; }
@@ -142,8 +183,6 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
                            PluginManager.AccountImpl account) {
             this.backing = backing;
             this.account = account;
-            Geary.RFC822.Subject? subject = this.backing.subject;
-            this._subject = subject != null ? subject.to_string() : "";
         }
 
         public Geary.RFC822.MailboxAddress? get_primary_originator() {

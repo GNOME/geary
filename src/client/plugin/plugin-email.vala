@@ -10,7 +10,9 @@
  *
  * Instances of these may be obtained from {@link EmailStore}.
  */
-public interface Plugin.Email : Geary.BaseObject {
+public interface Plugin.Email :
+    Geary.BaseObject,
+    Geary.EmailHeaderSet {
 
 
     /** Returns a unique identifier for this email. */
@@ -18,9 +20,6 @@ public interface Plugin.Email : Geary.BaseObject {
 
     /** Returns the set of mutable flags for the email. */
     public abstract Geary.EmailFlags flags { get; }
-
-    /** Returns the subject header value for the this email. */
-    public abstract string subject { get; }
 
     /**
      * Returns the email's primary originator.
