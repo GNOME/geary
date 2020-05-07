@@ -109,11 +109,13 @@ private class Geary.ImapEngine.AccountSynchronizer :
 
                 // Run GC. Reap is forced if messages were detached. Vacuum
                 // is allowed as we're running in the background.
-                account.local.db.run_gc.begin(cancellable,
-                                              messages_detached,
-                                              true,
-                                              account.imap,
-                                              account.smtp);
+                Geary.ImapDB.Database.GarbageCollectionOptions options = ALLOW_VACUUM;
+                if (messages_detached) {
+                    options |= FORCE_REAP;
+                }
+                account.local.db.run_gc.begin(options,
+                                              {account.imap, account.smtp},
+                                              cancellable);
             });
         }
     }
@@ -448,7 +450,8 @@ private class Geary.ImapEngine.GarbageCollectPostMessageDetach: AccountOperation
 
         // Run basic GC
         GenericAccount generic_account = (GenericAccount) account;
-        yield generic_account.local.db.run_gc(cancellable);
+        Geary.ClientService services_to_pause[] = {};
+        yield generic_account.local.db.run_gc(NONE, services_to_pause, cancellable);
     }
 
     public override bool equal_to(AccountOperation op) {

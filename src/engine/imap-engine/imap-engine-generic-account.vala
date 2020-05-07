@@ -583,7 +583,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             this.old_messages_background_cleanup_request(cancellable);
         } else if (local.db.want_background_vacuum) {
             // Vacuum has been flagged as needed, run it
-            local.db.run_gc.begin(cancellable, false, true, this.imap, this.smtp);
+            local.db.run_gc.begin(ALLOW_VACUUM, {this.imap, this.smtp}, cancellable);
         }
     }
 

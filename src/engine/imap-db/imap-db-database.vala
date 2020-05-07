@@ -18,6 +18,26 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     /** SQLite UTF-8 collation name. */
     public const string UTF8_COLLATE = "UTF8COLL";
 
+    /** Options to use when running garbage collection. */
+    [Flags]
+    public enum GarbageCollectionOptions {
+
+        /** Reaping will not be forced and vacuuming not permitted. */
+        NONE,
+
+        /**
+         * Reaping will be performed, regardless of recommendation.
+         */
+        FORCE_REAP,
+
+        /**
+         * Whether to permit database vacuum.
+         *
+         * Vacuuming is performed in the foreground.
+         */
+        ALLOW_VACUUM;
+    }
+
     public bool want_background_vacuum { get; set; default = false; }
 
 
@@ -57,6 +77,9 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private GC? gc = null;
     private Cancellable gc_cancellable = new Cancellable();
 
+
+
+
     public Database(GLib.File db_file,
                     GLib.File schema_dir,
                     GLib.File attachments_path,
@@ -75,7 +98,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         throws Error {
         yield base.open(flags, cancellable);
 
-        yield run_gc(cancellable);
+        Geary.ClientService services_to_pause[] = {};
+        yield run_gc(NONE, services_to_pause, cancellable);
     }
 
     /**
@@ -83,16 +107,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      *
      * Reap should only be forced when there is known cleanup to perform and
      * the interval based recommendation should be bypassed.
-     *
-     * TODO Passing of the services is a WIP hack. It is currently used to both
-     *      signify that it's an appropriate time to run a vacuum (ie. we're
-     *      idle in the background) and provide access for stopping IMAP.
      */
-    public async void run_gc(GLib.Cancellable? cancellable,
-                             bool force_reap = false,
-                             bool allow_vacuum = false,
-                             Geary.Imap.ClientService? imap_service = null,
-                             Geary.Smtp.ClientService? smtp_service = null)
+    public async void run_gc(GarbageCollectionOptions options,
+                             Geary.ClientService[] services_to_pause,
+                             GLib.Cancellable? cancellable)
                                  throws Error {
 
         if (this.gc != null) {
@@ -116,12 +134,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         // VACUUM needs to execute in the foreground with the user given a busy prompt (and cannot
         // be run at the same time as REAP)
         if ((recommended & GC.RecommendedOperation.VACUUM) != 0) {
-            if (allow_vacuum) {
+            if (GarbageCollectionOptions.ALLOW_VACUUM in options) {
                 this.want_background_vacuum = false;
-                if (imap_service != null)
-                    yield imap_service.stop(gc_cancellable);
-                if (smtp_service != null)
-                    yield smtp_service.stop(gc_cancellable);
+                foreach (ClientService service in services_to_pause) {
+                    yield service.stop(gc_cancellable);
+                }
 
                 if (!vacuum_monitor.is_in_progress)
                     vacuum_monitor.notify_start();
@@ -138,10 +155,9 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         vacuum_monitor.notify_finish();
                 }
 
-                if (imap_service != null)
-                    yield imap_service.start(gc_cancellable);
-                if (smtp_service != null)
-                    yield smtp_service.start(gc_cancellable);
+                foreach (ClientService service in services_to_pause) {
+                    yield service.start(gc_cancellable);
+                }
             } else {
                 // Flag a vacuum to run later when we've been idle in the background
                 debug("Flagging desire to GC vacuum");
@@ -156,7 +172,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         }
 
         // REAP can run in the background while the application is executing
-        if (force_reap || (recommended & GC.RecommendedOperation.REAP) != 0) {
+        if (GarbageCollectionOptions.FORCE_REAP in options || (recommended & GC.RecommendedOperation.REAP) != 0) {
             // run in the background and allow application to continue running
             this.gc.reap_async.begin(gc_cancellable, on_reap_async_completed);
         } else {
