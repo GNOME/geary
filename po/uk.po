@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-05-03 07:37+0000\n"
-"PO-Revision-Date: 2020-05-03 14:57+0300\n"
+"POT-Creation-Date: 2020-05-07 01:10+0000\n"
+"PO-Revision-Date: 2020-05-07 08:50+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -2811,7 +2811,6 @@ msgid "Add an account"
 msgstr "Додати обліковий запис"
 
 #: ui/accounts_editor_add_pane.ui:53
-#| msgid "Create"
 msgid "_Create"
 msgstr "С_творити"
 
@@ -3421,7 +3420,7 @@ msgstr "мітка"
 msgid "Conversation Shortcuts"
 msgstr "Скорочення панелі спілкування"
 
-#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:355
+#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:377
 msgctxt "shortcut window"
 msgid "Actions"
 msgstr "Дії"
@@ -3436,37 +3435,37 @@ msgctxt "shortcut window"
 msgid "Reply to sender"
 msgstr "Відповісти відправнику"
 
-#: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:269
+#: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:281
 msgctxt "shortcut window"
 msgid "Reply to all"
 msgstr "Відповісти всім"
 
-#: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:276
+#: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:288
 msgctxt "shortcut window"
 msgid "Forward"
 msgstr "Переслати"
 
-#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:283
+#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:295
 msgctxt "shortcut window"
 msgid "Un-mark/mark read"
 msgstr "Позначити або зняти позначення як прочитаного"
 
-#: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:290
+#: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:302
 msgctxt "shortcut window"
 msgid "Mark/un-mark starred"
 msgstr "Позначити або зняти позначення зірками"
 
-#: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:297
+#: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:309
 msgctxt "shortcut window"
 msgid "Archive conversations"
 msgstr "Архівувати спілкування"
 
-#: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:304
+#: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:326
 msgctxt "shortcut window"
 msgid "Move conversations"
 msgstr "Пересунути спілкування"
 
-#: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:311
+#: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:333
 msgctxt "shortcut window"
 msgid "Label conversations"
 msgstr "Позначити спілкування"
@@ -3476,12 +3475,12 @@ msgctxt "shortcut window"
 msgid "Trash conversations"
 msgstr "Пересунути спілкування до смітника"
 
-#: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:318
+#: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:340
 msgctxt "shortcut window"
 msgid "Junk conversations"
 msgstr "Пересунути спілкування до спаму"
 
-#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:325
+#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:347
 msgctxt "shortcut window"
 msgid "Delete conversations"
 msgstr "Вилучити спілкування"
@@ -3496,7 +3495,7 @@ msgctxt "shortcut window"
 msgid "Search for conversations"
 msgstr "Шукати спілкування"
 
-#: ui/gtk/help-overlay.ui:115
+#: ui/gtk/help-overlay.ui:115 ui/gtk/help-overlay.ui:354
 msgctxt "shortcut window"
 msgid "Find in current conversation"
 msgstr "Знайти у поточному спілкуванні"
@@ -3536,7 +3535,7 @@ msgctxt "shortcut window"
 msgid "Reset zoom"
 msgstr "Відновити масштаб"
 
-#: ui/gtk/help-overlay.ui:188 ui/gtk/help-overlay.ui:375
+#: ui/gtk/help-overlay.ui:188 ui/gtk/help-overlay.ui:397
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Загальні"
@@ -3586,121 +3585,124 @@ msgctxt "shortcut window"
 msgid "Focus next/previous message"
 msgstr "Фокусувати наступне або попереднє повідомлення"
 
-#: ui/gtk/help-overlay.ui:258
-msgctxt "shortcut window"
-msgid "Single-key shortcuts"
+#: ui/gtk/help-overlay.ui:260
+#| msgctxt "shortcut window"
+#| msgid "Single-key shortcuts"
+msgid "Single-key Shortcuts"
 msgstr "Одноклавішні скорочення"
 
-#: ui/gtk/help-overlay.ui:262
+#: ui/gtk/help-overlay.ui:265
+#| msgctxt "shortcut window"
+#| msgid "Single-key shortcuts"
+msgctxt "shortcut window"
+msgid "Single-key shortcuts (if enabled)"
+msgstr "Одноклавішні скорочення (якщо увімкнено)"
+
+#: ui/gtk/help-overlay.ui:274
 msgctxt "shortcut window"
 msgid "Reply to sender "
 msgstr "Відповісти відправнику"
 
-#: ui/gtk/help-overlay.ui:332
-msgctxt "shortcut window"
-msgid "Find in current conversations"
-msgstr "Знайти у поточних спілкуваннях"
-
-#: ui/gtk/help-overlay.ui:339
+#: ui/gtk/help-overlay.ui:361
 msgctxt "shortcut window"
 msgid "Select next/previous conversations"
 msgstr "Вибрати наступні або попередні спілкування"
 
-#: ui/gtk/help-overlay.ui:351
+#: ui/gtk/help-overlay.ui:373
 msgid "Composer Shortcuts"
 msgstr "Скорочення вікна редактора"
 
-#: ui/gtk/help-overlay.ui:359
+#: ui/gtk/help-overlay.ui:381
 msgctxt "shortcut window"
 msgid "Send"
 msgstr "Надіслати"
 
-#: ui/gtk/help-overlay.ui:366
+#: ui/gtk/help-overlay.ui:388
 msgctxt "shortcut window"
 msgid "Add attachment"
 msgstr "Додати долучення"
 
-#: ui/gtk/help-overlay.ui:379
+#: ui/gtk/help-overlay.ui:401
 msgctxt "shortcut window"
 msgid "Close composer window"
 msgstr "Закрити вікно редактора"
 
-#: ui/gtk/help-overlay.ui:386
+#: ui/gtk/help-overlay.ui:408
 msgctxt "shortcut window"
 msgid "Detach composer window"
 msgstr "Від'єднати вікно редактора"
 
-#: ui/gtk/help-overlay.ui:393
+#: ui/gtk/help-overlay.ui:415
 msgctxt "shortcut window"
 msgid "Editing"
 msgstr "Редагування"
 
-#: ui/gtk/help-overlay.ui:398
+#: ui/gtk/help-overlay.ui:420
 msgctxt "shortcut window"
 msgid "Move selection to the clipboard"
 msgstr "Пересунути позначене до буфера обміну даними"
 
-#: ui/gtk/help-overlay.ui:405
+#: ui/gtk/help-overlay.ui:427
 msgctxt "shortcut window"
 msgid "Copy selection to clipboard"
 msgstr "Копіювати позначений фрагмент до буфера обміну даними"
 
-#: ui/gtk/help-overlay.ui:412
+#: ui/gtk/help-overlay.ui:434
 msgctxt "shortcut window"
 msgid "Paste from the clipboard"
 msgstr "Вставити з буфера обміну даними"
 
-#: ui/gtk/help-overlay.ui:419
+#: ui/gtk/help-overlay.ui:441
 msgctxt "shortcut window"
 msgid "Quote text"
 msgstr "Цитувати текст"
 
-#: ui/gtk/help-overlay.ui:426
+#: ui/gtk/help-overlay.ui:448
 msgctxt "shortcut window"
 msgid "Unquote text"
 msgstr "Скасувати цитування тексту"
 
-#: ui/gtk/help-overlay.ui:435
+#: ui/gtk/help-overlay.ui:457
 msgctxt "shortcut window"
 msgid "Rich text editing"
 msgstr "Редагування з форматуванням"
 
-#: ui/gtk/help-overlay.ui:439
+#: ui/gtk/help-overlay.ui:461
 msgctxt "shortcut window"
 msgid "Paste without formatting"
 msgstr "Вставити без форматування"
 
-#: ui/gtk/help-overlay.ui:446
+#: ui/gtk/help-overlay.ui:468
 msgctxt "shortcut window"
 msgid "Bold text"
 msgstr "Зробити текст напівжирним"
 
-#: ui/gtk/help-overlay.ui:453
+#: ui/gtk/help-overlay.ui:475
 msgctxt "shortcut window"
 msgid "Italicize text"
 msgstr "Зробити текст курсивним"
 
-#: ui/gtk/help-overlay.ui:460
+#: ui/gtk/help-overlay.ui:482
 msgctxt "shortcut window"
 msgid "Underline text"
 msgstr "Підкреслити текст"
 
-#: ui/gtk/help-overlay.ui:467
+#: ui/gtk/help-overlay.ui:489
 msgctxt "shortcut window"
 msgid "Strike text"
 msgstr "Закреслити текст"
 
-#: ui/gtk/help-overlay.ui:474
+#: ui/gtk/help-overlay.ui:496
 msgctxt "shortcut window"
 msgid "Remove formatting"
 msgstr "Вилучити форматування"
 
-#: ui/gtk/help-overlay.ui:481
+#: ui/gtk/help-overlay.ui:503
 msgctxt "shortcut window"
 msgid "Insert an image"
 msgstr "Вставити зображення"
 
-#: ui/gtk/help-overlay.ui:488
+#: ui/gtk/help-overlay.ui:510
 msgctxt "shortcut window"
 msgid "Insert a link"
 msgstr "Вставити посилання"
@@ -3769,3 +3771,7 @@ msgstr "_Засвідчення"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Виконується оновлення…"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Find in current conversations"
+#~ msgstr "Знайти у поточних спілкуваннях"
