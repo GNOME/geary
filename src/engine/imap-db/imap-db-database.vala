@@ -66,7 +66,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         this.attachments_path = attachments_path;
         this.upgrade_monitor = upgrade_monitor;
         this.vacuum_monitor = vacuum_monitor;
-   }
+    }
 
     /**
      * Prepares the ImapDB database for use.
