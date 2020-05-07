@@ -96,7 +96,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                                  throws Error {
 
         if (this.gc != null) {
-            message("GC abandoned, possibly already running");
+            debug("GC abandoned, possibly already running");
             return;
         }
 
