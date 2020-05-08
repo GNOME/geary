@@ -24,7 +24,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         add_test("equal_to", equal_to);
     }
 
-    public void is_valid_address() throws Error {
+    public void is_valid_address() throws GLib.Error {
         assert(Geary.RFC822.MailboxAddress.is_valid_address("john@dep.aol.museum") == true);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("test@example.com") == true);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("test.other@example.com") == true);
@@ -44,7 +44,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(Geary.RFC822.MailboxAddress.is_valid_address("\"Surname, Name\" <mail@example.com>") == true);
     }
 
-    public void unescaped_constructor() throws Error {
+    public void unescaped_constructor() throws GLib.Error {
         MailboxAddress addr1 = new MailboxAddress("test1", "test2@example.com");
         assert(addr1.name == "test1");
         assert(addr1.address == "test2@example.com");
@@ -72,7 +72,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(addr5.domain == "");
     }
 
-    public void from_rfc822_string_encoded() throws Error {
+    public void from_rfc822_string_encoded() throws GLib.Error {
         try {
             MailboxAddress addr = new MailboxAddress.from_rfc822_string("test@example.com");
             assert(addr.name == null);
@@ -172,7 +172,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(addr.name == "Firstname ¯_(ツ)_/¯ Lastname via=?UTF-8?Q?_Vendor=22_");
     }
 
-    public void has_distinct_name() throws Error {
+    public void has_distinct_name() throws GLib.Error {
         assert(new MailboxAddress("example", "example@example.com").has_distinct_name() == true);
 
         assert(new MailboxAddress("", "example@example.com").has_distinct_name() == false);
@@ -185,7 +185,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(new MailboxAddress("'prefix-example@example.com'", "example@example.com").has_distinct_name() == true);
     }
 
-    public void is_spoofed() throws Error {
+    public void is_spoofed() throws GLib.Error {
         assert(new MailboxAddress(null, "example@example.com").is_spoofed() == false);
         assert(new MailboxAddress("", "example@example.com").is_spoofed() == false);
         assert(new MailboxAddress("", "example@example.com").is_spoofed() == false);
@@ -213,7 +213,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         }
     }
 
-    public void to_full_display() throws Error {
+    public void to_full_display() throws GLib.Error {
         assert(new MailboxAddress("", "example@example.com").to_full_display() ==
                "example@example.com");
         assert(new MailboxAddress("Test", "example@example.com").to_full_display() ==
@@ -229,7 +229,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         );
     }
 
-    public void to_short_display() throws Error {
+    public void to_short_display() throws GLib.Error {
         assert(new MailboxAddress("", "example@example.com").to_short_display() ==
                "example@example.com");
         assert(new MailboxAddress("Test", "example@example.com").to_short_display() ==
@@ -288,7 +288,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
 
     }
 
-    public void to_rfc822_string() throws Error {
+    public void to_rfc822_string() throws GLib.Error {
         assert(new MailboxAddress("", "example@example.com").to_rfc822_string() ==
                "example@example.com");
         assert(new MailboxAddress(" ", "example@example.com").to_rfc822_string() ==

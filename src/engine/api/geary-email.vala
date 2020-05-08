@@ -381,7 +381,7 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
     public void set_originators(Geary.RFC822.MailboxAddresses? from,
                                 Geary.RFC822.MailboxAddress? sender,
                                 Geary.RFC822.MailboxAddresses? reply_to)
-        throws RFC822Error {
+        throws Error {
         // XXX Should be throwing an error here if from is empty or
         // sender is same as from
         this.from = from;
@@ -477,7 +477,7 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
      * present. If not, {@link EngineError.INCOMPLETE_MESSAGE} is
      * thrown.
      */
-    public Geary.RFC822.Message get_message() throws EngineError, RFC822Error {
+    public Geary.RFC822.Message get_message() throws EngineError, Error {
         if (message != null)
             return message;
 
@@ -523,12 +523,12 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
 
         // References list the email trail back to its source
         if (references != null)
-            ancestors.add_all(references.list);
+            ancestors.add_all(references.get_all());
 
         // RFC822 requires the In-Reply-To Message-ID be prepended to the References list, but
         // this ensures that's the case
         if (in_reply_to != null)
-           ancestors.add_all(in_reply_to.list);
+           ancestors.add_all(in_reply_to.get_all());
 
        return (ancestors.size > 0) ? ancestors : null;
     }

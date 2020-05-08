@@ -71,7 +71,7 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
 
         this(
             result.rowid_for("message_id"),
-            Mime.ContentType.deserialize(result.nonnull_string_for("mime_type")),
+            Mime.ContentType.parse(result.nonnull_string_for("mime_type")),
             result.string_for("content_id"),
             result.string_for("description"),
             disposition,

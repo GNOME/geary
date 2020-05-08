@@ -1131,7 +1131,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     this.reply_to_entry.addresses = referred.reply_to;
                 }
                 if (referred.in_reply_to != null)
-                    this.in_reply_to.add_all(referred.in_reply_to.list);
+                    this.in_reply_to.add_all(referred.in_reply_to.get_all());
                 if (referred.references != null)
                     this.references = referred.references.to_rfc822_string();
                 if (referred.subject != null)
@@ -1360,7 +1360,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
              this.context_type == REPLY_ALL) &&
             !this.in_reply_to.is_empty)
             email.set_in_reply_to(
-                new Geary.RFC822.MessageIDList.from_collection(this.in_reply_to)
+                new Geary.RFC822.MessageIDList(this.in_reply_to)
             );
 
         if (!Geary.String.is_empty(this.references)) {
@@ -1771,7 +1771,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (this.draft_manager != null) {
             Geary.ComposedEmail draft = yield get_composed_email(null, true);
             yield this.draft_manager.update(
-                yield draft.to_rfc822_message(null, null),
+                yield new Geary.RFC822.Message.from_composed_email(
+                    draft, null, null
+                ),
                 null,
                 null
             );

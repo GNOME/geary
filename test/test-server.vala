@@ -132,6 +132,10 @@ public class TestServer : GLib.Object {
         foreach (var line in this.script) {
             result.line = line;
             switch (line.action) {
+            case CONNECTED:
+                // no-op
+                break;
+
             case SEND_LINE:
                 debug("Sending: %s", line.value);
                 try {

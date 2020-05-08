@@ -1029,7 +1029,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 id,
                 part.write_to_buffer(Geary.RFC822.Part.EncodingConversion.UTF8)
             );
-        } catch (Geary.RFC822Error err) {
+        } catch (Geary.RFC822.Error err) {
             debug("Failed to get inline buffer: %s", err.message);
             return null;
         }

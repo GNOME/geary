@@ -19,15 +19,20 @@
 public interface Geary.Imap.MessageData : Geary.MessageData.AbstractMessageData {
 }
 
-public class Geary.Imap.RFC822Size : Geary.RFC822.Size, Geary.Imap.MessageData {
+public class Geary.Imap.RFC822Size : Geary.MessageData.Int64MessageData, Geary.Imap.MessageData {
     public RFC822Size(int64 value) {
         base (value);
     }
 }
 
 public class Geary.Imap.RFC822Header : Geary.RFC822.Header, Geary.Imap.MessageData {
-    public RFC822Header(Memory.Buffer buffer) {
-        base (buffer);
+    public RFC822Header(Memory.Buffer buffer)
+        throws ImapError {
+        try {
+            base(buffer);
+        } catch (RFC822.Error error) {
+            throw new ImapError.INVALID(error.message);
+        }
     }
 }
 
@@ -42,4 +47,3 @@ public class Geary.Imap.RFC822Full : Geary.RFC822.Full, Geary.Imap.MessageData {
         base (buffer);
     }
 }
-

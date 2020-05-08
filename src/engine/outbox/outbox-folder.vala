@@ -122,7 +122,7 @@ public class Geary.Outbox.Folder :
             // save in database ready for SMTP, but without dot-stuffing
             Db.Statement stmt = cx.prepare(
                 "INSERT INTO SmtpOutboxTable (message, ordering) VALUES (?, ?)");
-            stmt.bind_string_buffer(0, rfc822.get_network_buffer(false));
+            stmt.bind_string_buffer(0, rfc822.get_rfc822_buffer());
             stmt.bind_int64(1, ordering);
 
             int64 new_id = stmt.exec_insert(cancellable);

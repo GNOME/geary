@@ -65,9 +65,9 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
         TYPES_TO_EXTENSIONS["image/x-bmp"] = ".bmp";
     }
 
-    public static ContentType deserialize(string str) throws MimeError {
-        // perform a little sanity checking here, as it doesn't appear the GMime constructor has
-        // any error-reporting at all
+    public static ContentType parse(string str) throws MimeError {
+        // perform a little sanity checking here, as it doesn't appear
+        // the GMime constructor has any error-reporting at all
         if (String.is_empty(str))
             throw new MimeError.PARSE("Empty MIME Content-Type");
 
@@ -113,7 +113,11 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
             mime_type = GLib.ContentType.get_mime_type(glib_type);
         }
 
-        return !Geary.String.is_empty(mime_type) ? deserialize(mime_type) : null;
+        return (
+            !Geary.String.is_empty_or_whitespace(mime_type)
+            ? ContentType.parse(mime_type)
+            : null
+        );
     }
 
 

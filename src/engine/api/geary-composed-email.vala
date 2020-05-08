@@ -70,7 +70,7 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
     public string img_src_prefix { get; set; default = ""; }
 
     public ComposedEmail(DateTime date, RFC822.MailboxAddresses from) {
-        this.date = new RFC822.Date.from_date_time(date);
+        this.date = new RFC822.Date(date);
         this.from = from;
     }
 
@@ -123,13 +123,6 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
         return this;
     }
 
-    public async Geary.RFC822.Message to_rfc822_message(string? message_id,
-                                                        GLib.Cancellable? cancellable) {
-        return yield new RFC822.Message.from_composed_email(
-            this, message_id, cancellable
-        );
-    }
-
     /**
      * Determines if an IMG SRC value is present in the HTML part.
      *
@@ -172,7 +165,7 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
             ret = null;
         } else {
             RFC822.MessageIDList? ids = list as RFC822.MessageIDList;
-            if (ids != null && ids.list.size == 0) {
+            if (ids != null && ids.size == 0) {
                 ret = null;
             }
         }

@@ -148,7 +148,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         Geary.RFC822.Date? sent_date = null;
         if (sent != null) {
             try {
-                sent_date = new RFC822.Date(sent.ascii);
+                sent_date = new RFC822.Date.from_rfc822_string(sent.ascii);
             } catch (GLib.Error err) {
                 debug(
                     "Error parsing sent date from FETCH envelope: %s",
@@ -159,7 +159,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
 
         return new Envelope(
             sent_date,
-            new Geary.RFC822.Subject.decode(subject.ascii),
+            new Geary.RFC822.Subject.from_rfc822_string(subject.ascii),
             parse_addresses(from), parse_addresses(sender), parse_addresses(reply_to),
             (to != null) ? parse_addresses(to) : null,
             (cc != null) ? parse_addresses(cc) : null,
