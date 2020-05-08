@@ -1,0 +1,12 @@
+option(
+  'install',
+  type: 'boolean',
+  value: true,
+  description: 'Whether to install the library\'s files'
+)
+option(
+  'valadoc',
+  type: 'boolean',
+  value: true,
+  description: 'Whether to build the documentaton (requires valadoc).'
+)

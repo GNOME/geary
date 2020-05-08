@@ -1,13 +1,8 @@
 subdir('data')
 
-geary_test_lib_sources = [
-  'mock-object.vala',
-  'test-case.vala',
-  'test-server.vala',
-]
-
 geary_test_engine_sources = [
   'test-engine.vala',
+  'test-server.vala',
 
   # These should be included in the test lib sources, but we can't
   # since that would make the test lib depend on geary-engine.vapi,
@@ -109,25 +104,11 @@ geary_test_integration_sources = [
   'integration/smtp/client-session.vala',
 ]
 
-# Test library
-
-geary_test_lib_dependencies = [
-  gee,
-  gio
-]
-
-geary_test_lib = static_library('test-lib',
-  geary_test_lib_sources,
-  dependencies: geary_test_lib_dependencies,
-  include_directories: config_h_dir,
-  vala_args: geary_vala_args,
-  c_args: geary_c_args,
-)
-
 # Engine tests
 
 geary_test_engine_dependencies = [
-  geary_engine_internal_dep
+  geary_engine_internal_dep,
+  vala_unit_dep,
 ]
 geary_test_engine_dependencies += geary_engine_dependencies
 
@@ -142,7 +123,6 @@ endif
 
 geary_test_engine_bin = executable('test-engine',
   geary_test_engine_sources,
-  link_with: geary_test_lib,
   dependencies: geary_test_engine_dependencies,
   include_directories: config_h_dir,
   vala_args: geary_test_engine_vala_args,
@@ -152,14 +132,14 @@ geary_test_engine_bin = executable('test-engine',
 # Client tests
 
 geary_test_client_dependencies = [
-  geary_client_dep
+  geary_client_dep,
+  vala_unit_dep,
 ]
 geary_test_client_dependencies += geary_client_dependencies
 
 geary_test_client_bin = executable('test-client',
   geary_test_client_sources,
   dependencies: geary_test_client_dependencies,
-  link_with: geary_test_lib,
   include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
@@ -174,9 +154,9 @@ geary_test_integration_bin = executable('test-integration',
     gee,
     gio,
     gmime,
+    vala_unit_dep,
     webkit2gtk,
   ],
-  link_with: geary_test_lib,
   include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
