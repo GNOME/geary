@@ -290,7 +290,6 @@ public class ConversationListStore : Gtk.ListStore {
             this.config,
             conversation,
             preview,
-            this.conversations.base_folder,
             this.conversations.base_folder.account.information.sender_mailboxes
         );
 
